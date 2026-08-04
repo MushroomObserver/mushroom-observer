@@ -823,7 +823,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     get(:show, params: params.merge({ id: o_id, flow: "next" }))
     assert_redirected_to(action: :show, id: o_id, params:)
-    assert_flash_text(/can.*t find.*results.*index/i)
+    assert_flash(:runtime_object_not_in_index, id: o_id, type: :observation)
     get(:show, params: params.merge({ id: o1.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o2.id, params:)
     get(:show, params: params.merge({ id: o2.id, flow: "next" }))
@@ -832,7 +832,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: o4.id, params:)
     get(:show, params: params.merge({ id: o4.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o4.id, params:)
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :observation)
 
     get(:show, params: params.merge({ id: o4.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o3.id, params:)
@@ -842,10 +842,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: o1.id, params:)
     get(:show, params: params.merge({ id: o1.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o1.id, params:)
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :observation)
     get(:show, params: params.merge({ id: o_id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o_id, params:)
-    assert_flash_text(/can.*t find.*results.*index/i)
+    assert_flash(:runtime_object_not_in_index, id: o_id, type: :observation)
   end
   # ----------------------------
   #  Interest.

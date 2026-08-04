@@ -34,7 +34,6 @@ module Views::Controllers::Observations
     prop :error_checked_projects, _Array(::Project), default: -> { [] }
     prop :suspect_checked_projects, _Array(::Project), default: -> { [] }
     prop :field_code, _Nilable(String), default: nil
-    prop :field_code_locked, _Boolean, default: false
 
     def view_template
       add_new_title(:create_object, :observation)
@@ -74,8 +73,7 @@ module Views::Controllers::Observations
         submitted_list_ids: @submitted_list_ids,
         error_checked_projects: @error_checked_projects,
         suspect_checked_projects: @suspect_checked_projects,
-        field_code: @field_code,
-        field_code_locked: @field_code_locked
+        field_code: @field_code
       }
     end
   end

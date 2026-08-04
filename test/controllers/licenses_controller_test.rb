@@ -28,7 +28,7 @@ class LicensesControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:redirect)
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
   end
 
   def test_show
@@ -96,7 +96,7 @@ class LicensesControllerTest < FunctionalTestCase
     get(:show, params: { id: license.id })
 
     assert_response(:redirect)
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
   end
 
   def test_show_non_existent_license
@@ -108,9 +108,7 @@ class LicensesControllerTest < FunctionalTestCase
     get(:show, params: { id: license_id })
 
     assert_response(:redirect)
-    assert_flash_text(
-      :runtime_object_not_found.l(type: :license.l, id: license_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :license, id: license_id)
   end
 
   def test_new
@@ -264,7 +262,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
 
-    assert_flash_text(:runtime_edit_name_no_change.l)
+    assert_flash(:runtime_edit_name_no_change)
     assert_form_action({ action: :update }, "Failed to re-render edit")
   end
 
@@ -295,7 +293,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     put(:update, params: params)
 
-    assert_flash_text(:runtime_license_duplicate_attributed.l)
+    assert_flash(:runtime_license_duplicate_attributed)
     assert_form_action({ action: :update }, "Failed to re-render edit")
   end
 

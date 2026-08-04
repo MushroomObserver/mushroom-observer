@@ -103,15 +103,15 @@ class LookupsControllerTest < FunctionalTestCase
     # Prove that when there are no hits and exactly one spelling suggestion,
     # it gives a flash warning and shows the page for the suggestion.
     get(:lookup_name, params: { id: "Fungia" })
-    assert_flash_text(:runtime_suggest_one_alternate.t(type: :name,
-                                                       match: "Fungia"))
+    assert_flash(:runtime_suggest_one_alternate, type: :name,
+                                                 match: "Fungia")
     assert_redirected_to(name_path(names(:fungi).id))
 
     # Prove that when there are no hits and >1 spelling suggestion,
     # it flashes a warning and shows the name index
     get(:lookup_name, params: { id: "Verpab" })
-    assert_flash_text(:runtime_suggest_multiple_alternates.t(type: :name,
-                                                             match: "Verpab"))
+    assert_flash(:runtime_suggest_multiple_alternates, type: :name,
+                                                       match: "Verpab")
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/names})
   end

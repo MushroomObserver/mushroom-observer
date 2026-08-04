@@ -41,7 +41,7 @@ module InatImportsController::Validators
     modes = [importing_all?, listing_ids?, listing_url?].count(true)
     return true if modes == 1
 
-    flash_warning(:inat_list_xor_all.l)
+    flash_warning(:inat_list_xor_all.t)
     false
   end
 

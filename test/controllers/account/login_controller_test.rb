@@ -19,7 +19,7 @@ module Account
       post(:create,
            params: { user: { login: "rolf", password: "testpassword" } })
       assert_response("http://localhost/bogus/location")
-      assert_flash_text(:runtime_login_success.t)
+      assert_flash(:runtime_login_success)
       assert(@request.session[:user_id],
              "Didn't store user in session after successful login!")
       assert_equal(rolf.id, @request.session[:user_id],
@@ -143,7 +143,8 @@ module Account
              name: "brand new name"
            } })
       assert_flash_error(
-        "email_new_password should flash error if user doesn't already exist"
+        on_fail: "email_new_password should flash error if user doesn't " \
+                 "already exist"
       )
 
       user = users(:roy)

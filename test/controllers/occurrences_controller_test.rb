@@ -56,7 +56,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_success
-    login("rolf")
+    login("mary") # bolete member
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
     params[:occurrence_projects] = { resolution: "add_all" }
@@ -175,7 +175,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_no_warning_if_locations_match
-    login("rolf")
+    login("mary") # bolete member
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
     params[:occurrence_projects] = { resolution: "add_all" }
@@ -221,7 +221,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_with_project_resolution_add_all
-    login("rolf")
+    login("mary") # bolete member
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, @obs3])
     params[:occurrence_projects] = { resolution: "add_all" }
@@ -296,8 +296,25 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_select("[name='occurrence_projects[resolution]']", count: 2)
   end
 
+  # Nothing exists yet at the confirmation point, so backing out is
+  # simply not creating the occurrence. See #4932.
+  def test_create_with_cancel_creates_nothing
+    login("mary") # bolete member
+    obs3 = observations(:detailed_unknown_obs) # in bolete_project
+    params = create_params(@obs1, [@obs1, obs3])
+    params[:occurrence_projects] = { resolution: "cancel" }
+
+    assert_no_difference("Occurrence.count") do
+      post(:create, params: params)
+    end
+
+    assert_redirected_to(permanent_observation_path(@obs1.id))
+    assert_not_includes(@obs1.reload.projects, projects(:bolete_project),
+                        "cancel must not spread project membership either")
+  end
+
   def test_create_with_add_all_adds_to_projects
-    login("rolf")
+    login("mary") # bolete member
     obs3 = observations(:detailed_unknown_obs) # in bolete_project
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, obs3])
@@ -895,7 +912,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_equal(1, occ.observations.count)
     # redirect_after_dissolve field_slip path
     assert_redirected_to(occurrence_path(occ))
-    assert_flash(/updated/i)
+    assert_flash(:occurrence_updated)
   end
 
   def test_destroy_missing_occurrence

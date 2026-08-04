@@ -54,7 +54,7 @@ class SupportControllerTest < FunctionalTestCase
     params = donation_params(amount, rolf, false)
     params[:donation][:other_amount] = amount
     post(:confirm, params: params)
-    assert_flash_text(:confirm_positive_number_error.t)
+    assert_flash(:confirm_positive_number_error)
   end
 
   # Anonymous donation — covers the `donate_anonymous` branch in

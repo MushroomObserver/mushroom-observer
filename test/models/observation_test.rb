@@ -1068,6 +1068,40 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  # `extra:` headings (the field-slip headings on the observation form)
+  # land after the template, before "Other", and never duplicate a
+  # heading an earlier part already claims. See #4932.
+  def test_form_notes_parts_with_extra_headings
+    user = users(:rolf)
+    obs = observations(:minimal_unknown_obs)
+    extra = FieldSlip::NOTE_HEADINGS.map(&:to_s)
+
+    user.update!(notes_template: "")
+    assert_equal(["Odor/Taste", "Trees/Shrubs", "Substrate", "Habit", "Other"],
+                 obs.form_notes_parts(user, extra: extra),
+                 "Other must appear once, last")
+
+    user.update!(notes_template: "Cap, Substrate")
+    assert_equal(["Cap", "Substrate", "Odor/Taste", "Trees/Shrubs",
+                  "Habit", "Other"],
+                 obs.form_notes_parts(user, extra: extra),
+                 "a templated heading keeps its own position")
+  end
+
+  # Heading comparison ignores case, so a differently-cased template
+  # heading still claims the field-slip one rather than doubling it.
+  def test_form_notes_parts_extra_dedup_ignores_case
+    user = users(:rolf)
+    obs = observations(:minimal_unknown_obs)
+    user.update!(notes_template: "substrate, odor/taste")
+
+    parts = obs.form_notes_parts(user,
+                                 extra: FieldSlip::NOTE_HEADINGS.map(&:to_s))
+
+    assert_equal(["substrate", "odor/taste", "Trees/Shrubs", "Habit", "Other"],
+                 parts)
+  end
+
   # Prove that notes parts for Views are assembled in this order
   #   - notes_template parts, in order listed in notes_template
   #   - orphaned parts, in order that they appear in Observation
@@ -1137,6 +1171,20 @@ class ObservationTest < UnitTestCase
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     assert_equal("red", obs.notes_part_value("Cap"))
     assert_equal("pine", obs.notes_part_value("Nearby trees"))
+  end
+
+  # A template heading that differs from the stored key only in case
+  # owns that key (notes_orphaned_parts dedups case-insensitively), so
+  # it must render the stored value rather than blank.
+  def test_notes_part_value_matches_stored_key_case_insensitively
+    user = users(:rolf)
+    user.update!(notes_template: "odor/taste")
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(notes: { "Odor/Taste": "farinaceous" })
+
+    assert_equal(["odor/taste", "Other"], obs.form_notes_parts(user),
+                 "template heading should own the stored key, not duplicate it")
+    assert_equal("farinaceous", obs.notes_part_value("odor/taste"))
   end
 
   # nil notes were seen in the wild

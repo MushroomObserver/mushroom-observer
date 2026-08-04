@@ -336,6 +336,45 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(expected, files)
   end
 
+  # A link identified by `external_id` stores no `url` -- the model's
+  # `normalize_external_id_and_url` deliberately drops it, and
+  # `ExternalSite#observation_url` is "the single source of truth for an
+  # ExternalLink's URL" (#4299/#4565). Serializing the raw `url` attribute
+  # therefore emitted "" for every materialized link, leaving API clients no
+  # way to learn what the link points to. Render `link_url` instead, and
+  # expose `external_id` so clients need not reverse-parse the URL.
+  def test_get_external_link_url_derived_from_external_id
+    link = ExternalLink.create!(
+      user: users(:rolf),
+      observation: observations(:agaricus_campestris_obs),
+      external_site: external_sites(:inaturalist),
+      relationship: :copy,
+      external_id: "4675274"
+    )
+    assert_nil(link.reload.url,
+               "an external_id-backed link must not store a url")
+
+    get(:external_links, params: { id: link.id, detail: :high, format: :json })
+
+    assert_no_api_errors
+    result = response.parsed_body["results"][0]
+    assert_equal("https://www.inaturalist.org/observations/4675274",
+                 result["url"])
+    assert_equal("4675274", result["external_id"])
+  end
+
+  # The url-column form must keep serializing exactly as before.
+  def test_get_external_link_url_from_url_column
+    link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+    get(:external_links, params: { id: link.id, detail: :high, format: :json })
+
+    assert_no_api_errors
+    result = response.parsed_body["results"][0]
+    assert_equal(link.url, result["url"])
+    assert_nil(result["external_id"])
+  end
+
   def test_post_corrupt_image
     setup_image_dirs
     count = Image.count

@@ -37,7 +37,7 @@ module Observations
       login("rolf")
       get(:new, params: { advanced_retired: 1 })
       assert_select("#observations_search_form")
-      assert_flash_text(:search_advanced_retired_notice.t)
+      assert_flash(:search_advanced_retired_notice)
     end
 
     def test_new_observations_search_form_prefilled_from_existing_query

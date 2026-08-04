@@ -70,7 +70,7 @@ module GlossaryTerms
         image.log_reuse_for(@object)
         redirect_to(glossary_term_path(@object.id))
       else
-        flash_error(:runtime_no_save.t(:glossary_term)) if image
+        flash_error(:runtime_no_save.t(type: :glossary_term)) if image
         render_reuse_page
       end
     end
@@ -131,7 +131,7 @@ module GlossaryTerms
     end
 
     def rerender_remove_form_with_no_save_error
-      flash_error(:runtime_no_save.t(:glossary_term))
+      flash_error(:runtime_no_save.t(type: :glossary_term))
       render(
         Views::Controllers::GlossaryTerms::Images::Remove.new(object: @object),
         location: remove_images_from_glossary_term_path(params[:id])

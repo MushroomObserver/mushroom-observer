@@ -136,7 +136,7 @@ module Projects
              })
       end
 
-      assert_flash_text(:project_alias_no_match.t(target_type: "User", term:))
+      assert_flash(:project_alias_no_match, target_type: "User", term:)
     end
 
     def test_create_renders_new_template_with_invalid_params

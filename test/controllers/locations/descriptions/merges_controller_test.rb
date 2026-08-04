@@ -43,7 +43,7 @@ module Locations::Descriptions
         description_move_or_merge: { target: private_desc.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/You have not been given permission/)
+      assert_flash(:runtime_edit_description_denied)
     end
 
     def test_merge_descriptions_notes_conflict
@@ -56,12 +56,14 @@ module Locations::Descriptions
         }
       }
       post(:create, params: params)
-      assert_flash_text(/Please merge the two descriptions/)
+      assert_flash(:runtime_description_merge_conflict)
 
       # Clear notes on source to remove conflict
       public_desc.update(notes: nil)
       post(:create, params: params)
-      assert_flash_text(/Successfully merged the descriptions/)
+      assert_flash(:runtime_description_merge_success,
+                   old: public_desc.format_name,
+                   new: other_private_desc.format_name)
     end
 
     def test_merge_with_nonexistant_description
@@ -71,8 +73,10 @@ module Locations::Descriptions
         description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(
-        /Sorry, the location description you tried to display/
+      assert_flash(
+        [[:runtime_object_not_found,
+          { id: "bogus", type: :location_description }],
+         [:runtime_invalid, { type: '"target"', value: "bogus" }]]
       )
     end
 
@@ -84,7 +88,7 @@ module Locations::Descriptions
         description_move_or_merge: { target: public_desc.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_description_private.t)
+      assert_flash_error(:runtime_description_private)
       assert_redirected_to(location_path(private_desc.parent_id))
     end
 
@@ -131,9 +135,16 @@ module Locations::Descriptions
         id: src_desc.id,
         description_move_or_merge: { target: dest_desc.id, delete: "1" }
       }
+      old_format_name = src_desc.format_name
+      new_format_name = dest_desc.format_name
+      old_unique_partial_name = src_desc.unique_partial_format_name
       post(:create, params: params)
 
-      assert_flash(/Successfully merged/)
+      assert_flash(
+        [[:runtime_description_merge_deleted, { old: old_unique_partial_name }],
+         [:runtime_description_merge_success,
+          { old: old_format_name, new: new_format_name }]]
+      )
       # Source should be deleted
       assert_nil(LocationDescription.safe_find(src_desc.id))
       # Destination should be the new default

@@ -45,7 +45,7 @@ module Admin
 
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
-        flash_error("Couldn't find \"#{@id}\".  Play again?")
+        flash_error(:runtime_admin_switch_users_not_found.t(id: @id))
         redirect_to(action: :edit)
       # Allow non-admin that's already in "switch user mode" to switch to
       # another user. This is a weird case which only comes up if you switch to
@@ -65,7 +65,7 @@ module Admin
       if new_user.verified
         switch_to_user(new_user)
       else
-        flash_error("This user is not verified yet!")
+        flash_error(:runtime_admin_switch_users_not_verified.t)
       end
     end
 

@@ -34,6 +34,20 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     end
   end
 
+  # AddDispatchController's "Add" button sends an explicit ?project=
+  # precisely so the page the user pressed it on overrides the project
+  # the field slip code's prefix would imply.
+  def test_explicit_project_param_overrides_field_slip_project
+    login("katrina")
+    slip = field_slips(:field_slip_no_obs)
+    other = katrina.projects_member.find { |p| p != slip.project && p.current? }
+    assert_not_nil(other, "Test needs a second current project for katrina")
+
+    get(:new, params: { field_code: slip.code, project: other.id })
+
+    assert_project_checks(other.id => :checked)
+  end
+
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 

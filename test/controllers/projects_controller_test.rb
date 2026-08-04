@@ -366,7 +366,9 @@ class ProjectsControllerTest < FunctionalTestCase
       post_requires_login(:create, params)
     end
 
-    assert_flash_error("Missing flash error when Project ends before it starts")
+    assert_flash_error(
+      on_fail: "Missing flash error when Project ends before it starts"
+    )
     assert_nil(
       Project.find_by(title: title),
       "It chould not create a Project which ends before ti starts"
@@ -457,7 +459,9 @@ class ProjectsControllerTest < FunctionalTestCase
     login(proj.user.login)
     patch(:update, params: params)
 
-    assert_flash_error("Missing flash error when Project ends before it starts")
+    assert_flash_error(
+      on_fail: "Missing flash error when Project ends before it starts"
+    )
     # On validation failure the Admin/Details page is re-rendered so
     # the user can correct the dates without leaving the Admin tab.
     assert_select("input[name='project[title]']", true,

@@ -30,7 +30,7 @@ module Admin
           ask_webmaster_test(
             "rolf@mushroomobserver.org",
             response: :redirect,
-            flash: :runtime_ask_webmaster_success.t
+            flash_tag: :runtime_ask_webmaster_success
           )
         end
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
@@ -45,7 +45,7 @@ module Admin
             "anonymous@example.com",
             message: "I noticed something odd",
             response: :redirect,
-            flash: :runtime_ask_webmaster_success.t
+            flash_tag: :runtime_ask_webmaster_success
           )
         end
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
@@ -54,30 +54,31 @@ module Admin
       end
 
       def test_send_webmaster_question_need_address
-        ask_webmaster_test("", flash: :runtime_ask_webmaster_need_address.t)
+        ask_webmaster_test("",
+                           flash_tag: :runtime_ask_webmaster_need_address)
       end
 
       def test_send_webmaster_question_spammer
         ask_webmaster_test(
           "spammer",
-          flash: :runtime_ask_webmaster_need_address.t
+          flash_tag: :runtime_ask_webmaster_need_address
         )
       end
 
       def test_send_webmaster_question_need_content
         ask_webmaster_test("bogus@email.com",
                            message: "",
-                           flash: :runtime_ask_webmaster_need_content.t)
+                           flash_tag: :runtime_ask_webmaster_need_content)
       end
 
       def test_send_webmaster_question_antispam
         disable_unsafe_html_filter
         ask_webmaster_test("bogus@email.com",
                            message: "Buy <a href='http://junk'>Me!</a>",
-                           flash: :runtime_ask_webmaster_antispam.t)
+                           flash_tag: :runtime_ask_webmaster_antispam)
         ask_webmaster_test("okay_user@email.com",
                            message: "iwxobjUzvkhmaCt",
-                           flash: :runtime_ask_webmaster_antispam.t)
+                           flash_tag: :runtime_ask_webmaster_antispam)
       end
 
       def test_send_webmaster_question_antispam_logged_in
@@ -90,7 +91,7 @@ module Admin
             user.email,
             message: "https://mushroomobserver.org/123 has an error",
             response: :redirect,
-            flash: :runtime_ask_webmaster_success.t
+            flash_tag: :runtime_ask_webmaster_success
           )
         end
         assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
@@ -105,7 +106,7 @@ module Admin
 
       def ask_webmaster_test(email, args)
         response = args[:response] || :success
-        flash = args[:flash]
+        flash_tag = args[:flash_tag]
         post(:create,
              params: {
                email: {
@@ -114,7 +115,7 @@ module Admin
                }
              })
         assert_response(response)
-        assert_flash_text(flash) if flash
+        assert_flash(flash_tag) if flash_tag
       end
     end
   end

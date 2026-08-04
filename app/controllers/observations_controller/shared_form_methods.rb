@@ -320,10 +320,22 @@ module ObservationsController::SharedFormMethods
         project.add_observation(@observation)
         name_flash_for_project(@observation.name, project)
       else
-        project.remove_observation(@observation)
-        flash_notice(:removed_from_project.t(object: :observation,
-                                             project: project.title))
+        flash_project_removal(project, project.remove_observation(@observation))
       end
+    end
+  end
+
+  # Unchecking one box can move up to Occurrence::MAX_OBSERVATIONS
+  # observations, since an occurrence's members share one project
+  # membership. Say how many rather than letting the rest go unmentioned.
+  def flash_project_removal(project, removed)
+    if removed.size > 1
+      flash_notice(:removed_from_project_with_siblings.t(
+                     count: removed.size, project: project.title
+                   ))
+    else
+      flash_notice(:removed_from_project.t(object: :observation,
+                                           project: project.title))
     end
   end
 

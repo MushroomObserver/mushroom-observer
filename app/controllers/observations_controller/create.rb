@@ -38,6 +38,9 @@ module ObservationsController::Create
     init_new_image_var(Time.zone.now)
 
     rough_cut
+    # Before create_location_object_if_new, which would otherwise offer to
+    # create a Location named after the alias, and before validate_place_name.
+    resolve_project_aliases
     create_location_object_if_new(@observation) # may set @location
 
     @any_errors = false
@@ -45,6 +48,7 @@ module ObservationsController::Create
     validate_place_name
     validate_observation
     validate_projects
+    validate_field_slip
     validate_naming if @name
     validate_vote if @name
     validate_images
@@ -248,8 +252,7 @@ module ObservationsController::Create
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @field_code        = params[:field_code]
-    @field_code_locked = params[:field_code_locked] == "1"
+    @field_code = params[:field_code]
     init_location_var_for_reload
     init_specimen_vars_for_reload
     init_project_vars
@@ -260,11 +263,17 @@ module ObservationsController::Create
   end
 
   # The observation is already saved by the time the field slip is applied,
-  # so an invalid code can't abort creation — warn and keep the observation.
+  # so a code we can't use can't abort creation — warn and keep the
+  # observation.
   def update_field_slip_or_warn
-    return unless update_field_slip == :invalid
-
-    flash_warning(:create_observation_field_slip_invalid.t(code: field_code))
+    case update_field_slip
+    when :invalid
+      flash_warning(:create_observation_field_slip_invalid.t(code: field_code))
+    when :too_many
+      flash_warning(:create_observation_field_slip_full.t(
+                      code: field_code, max: Occurrence::MAX_OBSERVATIONS
+                    ))
+    end
   end
 
   def init_location_var_for_reload

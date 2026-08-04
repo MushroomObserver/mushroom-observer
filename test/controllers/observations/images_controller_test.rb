@@ -66,9 +66,9 @@ module Observations
 
       put_requires_login(:update, params)
 
-      assert_flash_text(:runtime_no_changes.l,
-                        "Flash should say no changes " \
-                        "if no changes made when editing image")
+      assert_flash(:runtime_no_changes,
+                   on_fail: "Flash should say no changes " \
+                            "if no changes made when editing image")
     end
 
     # Prove that user can remove image from project
@@ -299,7 +299,7 @@ module Observations
       login(obs.user.login)
       post(:attach, params: params)
 
-      assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+      assert_flash(:runtime_image_reuse_invalid_id, id: params[:img_id])
     end
 
     def test_reuse_image_strip_gps_failed

@@ -182,9 +182,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert_redirected_to(species_lists_path)
     assert_displayed_title("")
-    assert_flash_text(
-      :runtime_object_not_found.l(type: :user, id: user.id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: user.id)
   end
 
   def test_index_for_project
@@ -210,7 +208,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:species_lists.ti)
-    assert_flash_text(:runtime_no_matches.l(types: :species_lists))
+    assert_flash(:runtime_no_matches, type: :species_list)
   end
 
   def test_index_for_project_that_does_not_exist
@@ -221,9 +219,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)
-    assert_flash_text(
-      :runtime_object_not_found.l(type: :project, id: project.id)
-    )
+    assert_flash(:runtime_object_not_found, type: :project, id: project.id)
   end
 
   def test_show_species_list_non_owner_logged_in

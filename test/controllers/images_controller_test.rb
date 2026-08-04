@@ -41,9 +41,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(images_path)
   end
 
@@ -101,7 +99,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_flash(:runtime_no_matches, type: :image)
     assert_select("body.images__index")
   end
 
@@ -132,7 +130,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     # Zero matching Observations → zero matching Images → "no matches"
     # flash, not a silent fall-back to the unfiltered Image index.
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_flash(:runtime_no_matches, type: :image)
     assert_select("body.images__index")
   end
 
@@ -150,6 +148,43 @@ class ImagesControllerTest < FunctionalTestCase
       get(:show, params: { id: image.id, size: size })
       assert_select("body.images__show")
     end
+  end
+
+  # The Read Field Slip button is offered on every image with an
+  # observation -- a plausibility test that guessed wrong would hide it
+  # on exactly the slips someone wants to read -- but only to people
+  # who may press it (FieldSlipExtract.permitted?).
+  def test_show_hides_field_slip_button_from_ordinary_users
+    image = images(:in_situ_image)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]",
+                  image_field_slip_extract_path(image.id), count: 0)
+  end
+
+  def test_show_offers_field_slip_button_to_site_admin
+    image = images(:in_situ_image)
+    login("rolf")
+    make_admin
+
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]", image_field_slip_extract_path(image.id))
+  end
+
+  def test_show_offers_field_slip_button_to_project_admin
+    image = images(:in_situ_image)
+    obs = image.observations.first
+    project = projects(:eol_project)
+    project.observations << obs unless project.observations.include?(obs)
+    login(mary.login)
+
+    assert(project.is_admin?(mary), "premise: mary administers it")
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]", image_field_slip_extract_path(image.id))
   end
 
   def test_show_image_info_panel_heading

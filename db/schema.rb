@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_28_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_31_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -104,6 +104,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_28_120000) do
     t.text "description"
     t.datetime "last_successful_sync_at"
     t.string "url_template"
+  end
+
+  create_table "field_slip_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "image_id", null: false
+    t.integer "user_id", null: false
+    t.string "provider", null: false
+    t.string "model", null: false
+    t.string "prompt_version"
+    t.json "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["image_id"], name: "index_field_slip_extracts_on_image_id", unique: true
+    t.index ["user_id"], name: "index_field_slip_extracts_on_user_id"
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
