@@ -4,7 +4,7 @@ require "test_helper"
 
 class FormErrorsTest < ComponentTestCase
   def test_renders_nothing_when_no_errors
-    html = render(Components::Form::Errors.new(model: GlossaryTerm.new))
+    html = render_errors(model: GlossaryTerm.new)
 
     assert_equal("", html)
   end
@@ -12,7 +12,7 @@ class FormErrorsTest < ComponentTestCase
   def test_renders_error_count_and_messages
     term = GlossaryTerm.new
     term.errors.add(:name, :blank)
-    html = render(Components::Form::Errors.new(model: term))
+    html = render_errors(model: term)
 
     assert_html(html, "#error_explanation.alert-danger")
     assert_html(html, "#error_explanation h2")
@@ -29,9 +29,15 @@ class FormErrorsTest < ComponentTestCase
     term = GlossaryTerm.new
     term.errors.add(:name, :blank)
     term.errors.add(:base, :invalid)
-    html = render(Components::Form::Errors.new(model: term))
+    html = render_errors(model: term)
 
     error_text = Nokogiri::HTML(html).at_css("#error_explanation").text
     assert_includes(error_text, "2 #{:errors.t}")
+  end
+
+  private
+
+  def render_errors(model:)
+    render(Components::Form::Errors.new(model: model))
   end
 end
