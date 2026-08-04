@@ -353,13 +353,9 @@ class MatrixBoxTest < ComponentTestCase
   # in app/components/matrix/box.rb#render_source_credit_inner.
   # mo_website specifically is excluded by source_noteworthy? (it's
   # the default, not worth calling out), so this needs a fixture with
-  # a different source. mo_iphone_app is a dead enum value (no
-  # observation uses it, no translation left for it) -- mo_api is the
-  # one other live, translated source, set directly since no fixture
-  # has it by default.
+  # a different source -- amateur_obs has mo_api.
   def test_enum_source_credit_renders_credit_text
     obs = observations(:amateur_obs)
-    obs.source = "mo_api"
     assert(obs.source_noteworthy?)
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
