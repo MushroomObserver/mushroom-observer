@@ -25,6 +25,11 @@
       position: absolute;
       bottom: 0;
       left: 0;
+      // Bootstrap's own .carousel-caption base rule sets right: 15%.
+      // left/width alone already win it out under CSS's over-
+      // constrained resolution, but pin it explicitly rather than
+      // rely on that.
+      right: 0;
       width: 100%;
       height: auto;
       // Bootstrap's own .carousel-caption base rule sets 20-30px of

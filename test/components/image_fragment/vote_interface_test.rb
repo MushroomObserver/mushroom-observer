@@ -25,8 +25,7 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
 
   # :matrix (default) -- the absolutely-positioned, hover-revealed
   # thumbnail treatment, plain (unprefixed) element ids, tooltips
-  # below the button (room below a matrix-box overlay; nothing to
-  # collide with).
+  # above the button.
   def test_matrix_context_is_the_default
     html = render_component
 
@@ -34,16 +33,16 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
     assert_no_html(html, ".vote-section-lightbox")
     assert_html(html, "#vote_meter_bar_#{@image.id}")
     assert_html(html, "#image_vote_links_#{@image.id}")
-    assert_html(html, "button[data-placement='bottom']" \
+    assert_html(html, "button[data-placement='top']" \
                       "[data-tooltip-container='.vote-section']")
   end
 
-  # :carousel -- same overlay styling and unprefixed ids as :matrix
-  # (both are legitimately "overlay" treatments, see the `context`
-  # prop doc), but tooltips point up at the full-width `.carousel-
-  # caption` instead of down at the narrower, auto-width `.vote-
-  # section` -- a downward tooltip there gets painted over by the
-  # show-page thumbnail-indicator strip below it.
+  # :carousel -- same overlay styling, unprefixed ids, and upward
+  # tooltip as :matrix (both are legitimately "overlay" treatments,
+  # see the `context` prop doc), but the tooltip container is the
+  # full-width `.carousel-caption` instead of the narrower, auto-width
+  # `.vote-section` -- room for a wide tooltip without crowding at
+  # the carousel's edges.
   def test_carousel_context_points_tooltip_up_at_carousel_caption
     html = render_component(context: :carousel)
 

@@ -27,13 +27,16 @@ class Components::ImageFragment::VoteInterface < Components::Base
   prop :image, ::Image
   prop :votes, _Boolean, default: true
   # Which surface this renders on -- governs styling class, tooltip
-  # direction, and id prefixing. `:matrix`/`:carousel` are both
-  # overlay-styled (`.vote-section`) but `:carousel` points tooltips
-  # up: a carousel's tooltip opens right above the show-page's
-  # thumbnail-indicator strip, which paints over a downward one.
-  # `:lightbox` gets `.vote-section-lightbox` and is the only context
-  # whose ids get `lightbox_`-prefixed, since it's the only one where
-  # a second live copy can coexist in the DOM.
+  # container, and id prefixing. `:matrix`/`:carousel` are both
+  # overlay-styled (`.vote-section`) and both point tooltips up; only
+  # the container differs -- `:carousel` targets the full-width
+  # `.carousel-caption` instead of `.vote-section` itself, since a
+  # carousel's `.vote-section` is narrower (auto-width, centered) and
+  # would crowd a wide tooltip at the edges. `:lightbox` gets
+  # `.vote-section-lightbox`, keeps the downward tooltip (nothing
+  # below it to collide with), and is the only context whose ids get
+  # `lightbox_`-prefixed, since it's the only one where a second live
+  # copy can coexist in the DOM.
   prop :context, Symbol, default: :matrix
 
   # The root element's own id -- also what a lazy-loading Turbo Frame
@@ -161,10 +164,11 @@ class Components::ImageFragment::VoteInterface < Components::Base
       icon: (:x if vote.zero?),
       name: vote.zero? ? :clear.ti : image_vote_as_short_string(vote),
       class: "image-vote-link",
-      target: image_vote_path(image_id: @image.id, value: vote),
+      target: image_vote_path(image_id: @image.id, value: vote,
+                              context: @context),
       title: image_vote_as_help_string(vote),
       data: { image_id: @image.id, value: vote,
-              placement: @context == :carousel ? "top" : "bottom",
+              placement: @context == :lightbox ? "bottom" : "top",
               tooltip_container: tooltip_container }
     )
   end
