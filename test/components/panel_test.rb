@@ -5,12 +5,10 @@ require("test_helper")
 class PanelTest < ComponentTestCase
   def test_panel_with_heading_and_collapsible_content
     edit_link = view_context.link_to("Edit", "/edit", class: "btn btn-sm")
-    html = render(Components::Panel.new(
-                    collapsible: true,
-                    collapse_target: "#collapsing_panel",
-                    expanded: false,
-                    collapse_message: "Show details"
-                  )) do |panel|
+    html = render_panel(collapsible: true,
+                        collapse_target: "#collapsing_panel",
+                        expanded: false,
+                        collapse_message: "Show details") do |panel|
       panel.with_heading { "Test Heading" }
       panel.with_heading_links { edit_link }
 
@@ -61,7 +59,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_footer
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Test Heading" }
       panel.with_body { "Panel content" }
       panel.with_footer { "Footer text" }
@@ -72,7 +70,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_custom_class
-    html = render(Components::Panel.new(panel_class: "custom-class")) do |panel|
+    html = render_panel(panel_class: "custom-class") do |panel|
       panel.with_heading { "Test" }
       panel.with_body { "Content" }
     end
@@ -81,7 +79,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_multiple_bodies
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Test" }
       panel.with_body { "First body" }
       panel.with_body { "Second body" }
@@ -92,7 +90,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_body_id_and_data
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Test" }
       panel.with_body(classes: "p-0", id: "my_section",
                       data: { controller: "section-update",
@@ -108,7 +106,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_thumbnail
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Test" }
       panel.with_thumbnail { "Thumbnail content" }
       panel.with_body { "Body content" }
@@ -119,7 +117,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_carousel_for_thumbnail
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Test" }
       panel.with_thumbnail(classes: "carousel") { "Carousel content" }
       panel.with_body { "Body content" }
@@ -131,7 +129,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_multiple_footers
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Test" }
       panel.with_body { "Content" }
       panel.with_footer { "First footer" }
@@ -150,7 +148,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_sizing_enabled
-    html = render(Components::Panel.new(sizing: true)) do |panel|
+    html = render_panel(sizing: true) do |panel|
       panel.with_heading { "Test" }
       panel.with_thumbnail { "Thumbnail" }
       panel.with_body { "Body content" }
@@ -171,7 +169,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_without_sizing
-    html = render(Components::Panel.new(sizing: false)) do |panel|
+    html = render_panel(sizing: false) do |panel|
       panel.with_heading { "Test" }
       panel.with_thumbnail { "Thumbnail" }
       panel.with_body { "Body content" }
@@ -192,8 +190,7 @@ class PanelTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     image = obs.thumb_image
 
-    component = Components::Panel.new
-    html = render(component) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Observation" }
       panel.with_thumbnail do
         render(Components::InteractiveImage.new(
@@ -222,8 +219,7 @@ class PanelTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     image = obs.thumb_image
 
-    component = Components::Panel.new(sizing: true)
-    html = render(component) do |panel|
+    html = render_panel(sizing: true) do |panel|
       panel.with_heading { "Observation" }
       panel.with_thumbnail do
         render(Components::InteractiveImage.new(
@@ -252,7 +248,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_unwrapped_body_for_list_group
-    html = render(Components::Panel.new) do |panel|
+    html = render_panel do |panel|
       panel.with_heading { "Comments" }
       panel.with_body(wrapper: false) do
         view_context.tag.ul(class: "list-group") do
@@ -267,5 +263,11 @@ class PanelTest < ComponentTestCase
     assert_no_html(html, ".panel-body ul.list-group")
     # ul.list-group should be a (descendant) child of .panel.panel-default
     assert_html(html, ".panel.panel-default > ul.list-group")
+  end
+
+  private
+
+  def render_panel(**, &block)
+    render(Components::Panel.new(**), &block)
   end
 end
