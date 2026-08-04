@@ -23,22 +23,41 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
     assert_equal("", html)
   end
 
-  # :overlay (default) -- the absolutely-positioned, hover-revealed
-  # thumbnail treatment, plain (unprefixed) element ids.
-  def test_overlay_context_is_the_default
+  # :matrix (default) -- the absolutely-positioned, hover-revealed
+  # thumbnail treatment, plain (unprefixed) element ids, tooltips
+  # below the button (room below a matrix-box overlay; nothing to
+  # collide with).
+  def test_matrix_context_is_the_default
     html = render_component
 
     assert_html(html, ".vote-section#image_vote_#{@image.id}")
     assert_no_html(html, ".vote-section-lightbox")
     assert_html(html, "#vote_meter_bar_#{@image.id}")
     assert_html(html, "#image_vote_links_#{@image.id}")
+    assert_html(html, "button[data-placement='bottom']" \
+                      "[data-tooltip-container='.vote-section']")
   end
 
-  # :lightbox -- same dark background/link treatment as :overlay,
+  # :carousel -- same overlay styling and unprefixed ids as :matrix
+  # (both are legitimately "overlay" treatments, see the `context`
+  # prop doc), but tooltips point up at the full-width `.carousel-
+  # caption` instead of down at the narrower, auto-width `.vote-
+  # section` -- a downward tooltip there gets painted over by the
+  # show-page thumbnail-indicator strip below it.
+  def test_carousel_context_points_tooltip_up_at_carousel_caption
+    html = render_component(context: :carousel)
+
+    assert_html(html, ".vote-section#image_vote_#{@image.id}")
+    assert_no_html(html, ".vote-section-lightbox")
+    assert_html(html, "button[data-placement='top']" \
+                      "[data-tooltip-container='.carousel-caption']")
+  end
+
+  # :lightbox -- same dark background/link treatment as :matrix,
   # minus the absolute positioning; always visible. Every id is
-  # prefixed so a live in-page :overlay copy and this :lightbox copy
-  # of the same image's vote UI can coexist in the DOM without
-  # colliding.
+  # prefixed so a live in-page :matrix/:carousel copy and this
+  # :lightbox copy of the same image's vote UI can coexist in the DOM
+  # without colliding.
   def test_lightbox_context_uses_lightbox_styling_and_prefixed_ids
     html = render_component(context: :lightbox)
 
@@ -47,6 +66,8 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
     assert_no_html(html, ".vote-section")
     assert_html(html, "#lightbox_vote_meter_bar_#{@image.id}")
     assert_html(html, "#lightbox_image_vote_links_#{@image.id}")
+    assert_html(html, "button[data-placement='bottom']" \
+                      "[data-tooltip-container='.vote-section-lightbox']")
   end
 
   # `.frame_id` is the single source of truth `LazyVoteInterface`'s
@@ -54,20 +75,20 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
   # and swap it -- pins it against the id `#view_template` actually
   # renders (via `#vote_html_id`).
   def test_frame_id_matches_rendered_root_id
-    overlay_id = Components::ImageFragment::VoteInterface.frame_id(
+    matrix_id = Components::ImageFragment::VoteInterface.frame_id(
       image_id: @image.id
     )
     lightbox_id = Components::ImageFragment::VoteInterface.frame_id(
       image_id: @image.id, context: :lightbox
     )
 
-    assert_html(render_component, "##{overlay_id}")
+    assert_html(render_component, "##{matrix_id}")
     assert_html(render_component(context: :lightbox), "##{lightbox_id}")
   end
 
   private
 
-  def render_component(votes: true, context: :overlay)
+  def render_component(votes: true, context: :matrix)
     render(Components::ImageFragment::VoteInterface.new(
              user: @user,
              image: @image,

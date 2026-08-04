@@ -22,7 +22,7 @@ module Images
       @image = Image.find_by(id: params[:image_id])
       return head(:not_found) unless @image
 
-      @context = params[:context]&.to_sym || :overlay
+      @context = params[:context]&.to_sym || :matrix
       render(Views::Controllers::Images::Votes::Show.new(
                image: @image, user: @user, context: @context
              ), layout: false)
@@ -88,7 +88,7 @@ module Images
       ]
     end
 
-    def vote_interface(context: :overlay)
+    def vote_interface(context: :matrix)
       ::Components::ImageFragment.new(
         type: :vote_interface,
         user: @user, image: @image, votes: true, context: context
