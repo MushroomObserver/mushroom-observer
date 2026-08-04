@@ -68,6 +68,23 @@ class ImageTest < UnitTestCase
     assert_nil(img.users_vote(rolf))
   end
 
+  # updated_at feeds the cache-busting URL token: a vote must not flip
+  # it, or every browser's cached renditions of the image die.
+  def test_change_vote_does_not_bump_updated_at
+    img = images(:in_situ_image)
+    img.update_columns(updated_at: 1.week.ago)
+    original = img.reload.updated_at
+
+    img.change_vote(mary, 3)
+
+    assert_equal(3, img.reload.users_vote(mary))
+    assert_equal(original.to_i, img.updated_at.to_i)
+    assert(img.record_timestamps,
+           "instance record_timestamps must be restored after the vote")
+    assert(Image.record_timestamps,
+           "class-level record_timestamps must never be touched")
+  end
+
   def test_copyright_logging
     license_one = licenses(:ccnc25)
     license_two = licenses(:ccwiki30)

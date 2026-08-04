@@ -1144,10 +1144,19 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # Save changes unless there were already pending changes to be saved
     # (meaning the caller is presumably about to save the changes anyway so
-    # we don't need to do it twice).  No need to update +updated_at+ or do any
-    # of the other callbacks, either, since this doesn't result in emails,
-    # contribution changes, or rss log entries.
-    save_without_our_callbacks if save_changes
+    # we don't need to do it twice).  vote_cache is derived data: keep
+    # updated_at (and the cache-busting URL token derived from it, which
+    # would invalidate every browser's cached renditions) stable.
+    # Suppressed on this instance only -- the class-level flag is shared
+    # across threads and would leak into unrelated concurrent saves.
+    if save_changes
+      begin
+        self.record_timestamps = false
+        save_without_our_callbacks
+      ensure
+        self.record_timestamps = true
+      end
+    end
     # update +updated_at+ for any associated observations, in order to update
     # the cached interactive_image in the matrix_box (contrast with the above)
     observations&.touch_all

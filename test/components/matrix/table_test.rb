@@ -279,6 +279,47 @@ class MatrixTableTest < ComponentTestCase
     assert_includes(html, "Custom content")
   end
 
+  # The boxes' cached fragments hold only empty vote-interface frames;
+  # the table must follow them with viewer-specific replace streams so
+  # the whole page needs zero per-frame fetches.
+  def test_renders_vote_interface_streams_after_boxes
+    obs = observations(:coprinus_comatus_obs)
+    html = render(Components::Matrix::Table.new(
+                    objects: [obs], user: @user, cached: false
+                  ))
+
+    image_id = obs.thumb_image.id
+    assert_html(
+      html,
+      "turbo-stream[action='replace'][target='image_vote_#{image_id}']"
+    )
+    assert_html(
+      html,
+      "turbo-stream[target='lightbox_image_vote_#{image_id}']"
+    )
+  end
+
+  def test_no_vote_interface_streams_for_objects_without_thumb_images
+    obs = observations(:coprinus_comatus_obs)
+    obs.stub(:thumb_image, nil) do
+      html = render(Components::Matrix::Table.new(
+                      objects: [obs], user: @user, cached: false
+                    ))
+
+      assert_no_html(html, "turbo-stream")
+    end
+  end
+
+  def test_no_vote_interface_streams_in_block_form
+    html = render(Components::Matrix::Table.new) do |table|
+      table.render(Components::Matrix::Box.new(id: 456) do
+        view_context.tag.div { "Block content" }
+      end)
+    end
+
+    assert_no_html(html, "turbo-stream")
+  end
+
   def test_cache_key_includes_locale
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.stub(:transferred, true) do
