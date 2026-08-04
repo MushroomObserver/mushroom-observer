@@ -130,7 +130,6 @@ module Views::Controllers::Observations
     def render_namings_and_comments
       render_namings if @user
       render_comments
-      render_source_credit if show_source_credit?
     end
 
     def render_namings
@@ -143,17 +142,6 @@ module Views::Controllers::Observations
                object: @observation, comments: @comments.to_a, user: @user,
                editable: @user.present?, limit: nil
              ))
-    end
-
-    def show_source_credit?
-      @observation.source_noteworthy? && !@observation.import_link
-    end
-
-    # show_source_credit? (above) guarantees no import_link, so
-    # @observation.source is guaranteed present here (source_noteworthy?
-    # requires import_link.present? || source.present?).
-    def render_source_credit
-      trusted_html(:"source_credit_#{@observation.source}".l.tpl)
     end
 
     def render_footer

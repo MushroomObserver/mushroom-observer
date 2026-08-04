@@ -12,7 +12,7 @@ module Views::Layouts
     # views / rss chunks.
     def test_minimal_renders_dates_only
       obj = collection_numbers(:coprinus_comatus_coll_num)
-      html = render(ObjectFooter.new(obj: obj, minimal: true))
+      html = footer_for(obj, minimal: true)
 
       # `Created at: <date>` / `Updated at: <date>` inside the
       # padded wrapper.
@@ -35,6 +35,8 @@ module Views::Layouts
 
       def respond_to?(method, *)
         instance_variable_defined?("@#{method}") || super
+      rescue NameError
+        false
       end
 
       def old_last_viewed_by(_user)
@@ -57,11 +59,7 @@ module Views::Layouts
         updated_at: Time.zone.parse("2024-01-20 15:30:00")
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: nil,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj)
 
       assert_includes(html, "footer-view-stats")
       assert_includes(html, "2024-01-15")
@@ -75,11 +73,7 @@ module Views::Layouts
         user: creator
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: users(:mary),
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj, user: users(:mary))
 
       assert_includes(html, creator.unique_text_name)
       assert_includes(html, "2024-01-15")
@@ -88,11 +82,7 @@ module Views::Layouts
     def test_non_versioned_object_without_timestamps
       obj = TestObject.new(created_at: nil, updated_at: nil)
 
-      html = render_component(ObjectFooter.new(
-                                user: nil,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj)
 
       assert_includes(html, "footer-view-stats")
       # Should render the container but without dates
@@ -113,11 +103,7 @@ module Views::Layouts
       version3 = TestVersion.new(user_id: users(:katrina).id)
       versions = [version1, version2, version3]
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: versions
-                              ))
+      html = footer_for(obj, user: user, versions: versions)
 
       assert_includes(html, "footer-view-stats")
       # Should show created by original user
@@ -140,11 +126,7 @@ module Views::Layouts
       version2 = TestVersion.new(user_id: nil) # No user_id
       versions = [version1, version2]
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: versions
-                              ))
+      html = footer_for(obj, user: user, versions: versions)
 
       assert_includes(html, "footer-view-stats")
       # Should show created by
@@ -170,11 +152,7 @@ module Views::Layouts
       version3 = TestVersion.new(user_id: katrina.id)
       versions = [version1, version2, version3]
 
-      html = render_component(ObjectFooter.new(
-                                user: rolf,
-                                obj: obj,
-                                versions: versions
-                              ))
+      html = footer_for(obj, user: rolf, versions: versions)
 
       assert_includes(html, "footer-view-stats")
       # Should show version number
@@ -198,11 +176,7 @@ module Views::Layouts
         TestVersion.new(user_id: users(:dick).id)
       ]
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: versions
-                              ))
+      html = footer_for(obj, user: user, versions: versions)
 
       assert_includes(html, "footer-view-stats")
       # Should show version number
@@ -221,11 +195,7 @@ module Views::Layouts
         num_views: 1
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj, user: user)
 
       assert_includes(html, "footer-view-stats")
       # Should show "once" for single view
@@ -243,11 +213,7 @@ module Views::Layouts
         num_views: 42
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj, user: user)
 
       assert_includes(html, "footer-view-stats")
       # Should show count for multiple views
@@ -262,11 +228,7 @@ module Views::Layouts
         last_viewed_by_time: Time.zone.parse("2024-01-18 12:00:00")
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj, user: user)
 
       assert_includes(html, "footer-view-stats")
       # Should show when user last viewed
@@ -281,11 +243,7 @@ module Views::Layouts
         last_viewed_by_time: nil
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj, user: user)
 
       assert_includes(html, "footer-view-stats")
       # Should show "never" when user hasn't viewed
@@ -298,11 +256,7 @@ module Views::Layouts
         rss_log_id: 123
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: nil,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj)
 
       assert_includes(html, "footer-view-stats")
       # Should include link to activity log
@@ -316,11 +270,7 @@ module Views::Layouts
         rss_log_id: nil
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: nil,
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj)
 
       assert_includes(html, "footer-view-stats")
       # Should not include activity log link
@@ -331,11 +281,7 @@ module Views::Layouts
       name = names(:fungi)
       versions = name.versions.to_a
 
-      html = render_component(ObjectFooter.new(
-                                user: users(:rolf),
-                                obj: name,
-                                versions: versions
-                              ))
+      html = footer_for(name, user: users(:rolf), versions: versions)
 
       assert_includes(html, "footer-view-stats")
       # Should render without errors
@@ -346,11 +292,7 @@ module Views::Layouts
       location = locations(:albion)
       versions = location.versions.to_a
 
-      html = render_component(ObjectFooter.new(
-                                user: users(:rolf),
-                                obj: location,
-                                versions: versions
-                              ))
+      html = footer_for(location, user: users(:rolf), versions: versions)
 
       assert_includes(html, "footer-view-stats")
       assert_not_nil(html)
@@ -362,11 +304,7 @@ module Views::Layouts
         user: users(:rolf)
       )
 
-      html = render_component(ObjectFooter.new(
-                                user: users(:rolf),
-                                obj: obj,
-                                versions: []
-                              ))
+      html = footer_for(obj, user: users(:rolf))
 
       assert_includes(html, "footer-view-stats")
       # Should treat as non-versioned object
@@ -383,11 +321,7 @@ module Views::Layouts
       version1 = TestVersion.new(user_id: user.id)
       versions = [version1]
 
-      html = render_component(ObjectFooter.new(
-                                user: user,
-                                obj: obj,
-                                versions: versions
-                              ))
+      html = footer_for(obj, user: user, versions: versions)
 
       # Verify that "Created:" appears before the username
       # This is a regression test for the issue where user_link
@@ -399,6 +333,57 @@ module Views::Layouts
       assert_not_nil(user_index, "Should contain username")
       assert(created_index < user_index,
              "Created should appear before username, but got:\n#{html}")
+    end
+
+    def test_source_credit_shown_for_noteworthy_source
+      obs = observations(:detailed_unknown_obs)
+      obs.source = "mo_api"
+
+      html = footer_for(obs, user: users(:rolf))
+
+      assert_html(html, "span.source-credit")
+    end
+
+    def test_source_credit_hidden_for_website_source
+      obs = observations(:detailed_unknown_obs)
+      obs.source = "mo_website"
+
+      html = footer_for(obs, user: users(:rolf))
+
+      assert_no_html(html, "span.source-credit")
+    end
+
+    # Import-linked observations (e.g. iNat imports) have their own
+    # provenance UI elsewhere -- the footer must not also show a
+    # source credit for them, even though import provenance makes
+    # `source_noteworthy?` true on its own.
+    def test_source_credit_hidden_for_import_linked_observation
+      obs = observations(:imported_inat_obs)
+      assert(obs.import_link, "fixture should have an import link")
+
+      html = footer_for(obs, user: users(:rolf))
+
+      assert_no_html(html, "span.source-credit")
+    end
+
+    # TestObject has no concept of "source" at all -- confirms the
+    # duck-typed gate skips cleanly for models that don't implement
+    # source_noteworthy?, rather than raising NoMethodError.
+    def test_source_credit_skipped_for_object_without_source_concept
+      obj = TestObject.new(created_at: Time.zone.parse("2024-01-15 10:00:00"))
+
+      html = footer_for(obj)
+
+      assert_no_html(html, "span.source-credit")
+    end
+
+    private
+
+    def footer_for(obj, user: nil, versions: [], minimal: false)
+      render_component(ObjectFooter.new(
+                         user: user, obj: obj,
+                         versions: versions, minimal: minimal
+                       ))
     end
   end
 end

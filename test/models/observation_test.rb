@@ -2151,7 +2151,7 @@ class ObservationTest < UnitTestCase
     assert_equal("mo_website", obs.source)
 
     obs = observations(:amateur_obs)
-    assert_equal("mo_iphone_app", obs.source)
+    assert_equal("mo_api", obs.source)
     assert(obs.source_noteworthy?)
 
     obs = observations(:imported_inat_obs)
