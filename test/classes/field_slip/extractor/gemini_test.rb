@@ -88,12 +88,42 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
     assert_equal(false, result.slip_present)
   end
 
+  # A model that stringifies its booleans must still be understood --
+  # reading "false" as unknown would quietly merge a specimen photo's
+  # invented values (Copilot review on PR #4993).
+  def test_a_stringified_flag_is_still_understood
+    stub_gemini(json_payload(fields: {}, slip_present: "false"))
+
+    result = extract
+
+    assert(result.no_slip?)
+    assert_equal(false, result.slip_present)
+  end
+
+  def test_a_flag_that_is_neither_true_nor_false_reads_as_unreported
+    stub_gemini(json_payload(fields: {}, slip_present: "maybe"))
+
+    result = extract
+
+    assert_not(result.no_slip?)
+    assert_nil(result.slip_present)
+  end
+
   def test_a_read_that_saw_a_slip_is_not_flagged
     stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" },
                              confidence: { "Collector" => "high" },
                              slip_present: true))
 
     assert_not(extract.no_slip?)
+  end
+
+  def test_a_stringified_true_is_understood_too
+    stub_gemini(json_payload(fields: {}, slip_present: "TRUE"))
+
+    result = extract
+
+    assert_not(result.no_slip?)
+    assert_equal(true, result.slip_present)
   end
 
   # A provider (or prompt version) that never reported the flag must not

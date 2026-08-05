@@ -75,13 +75,26 @@ class FieldSlip
 
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
+    # A model answering JSON may stringify its booleans, and `"false"`
+    # has to mean false: read as unknown it would restore the very
+    # behavior the slip_present flag exists to stop. Anything absent
+    # from this table -- missing, "maybe", 1 -- normalizes to nil,
+    # which means unreported rather than "no slip".
+    SLIP_PRESENT_VALUES = { true => true, false => false,
+                            "true" => true, "false" => false }.freeze
+
     # What one provider run produced: the raw response (stored verbatim
     # for provenance), the per-field values, the per-field confidence
     # the model reported, and whether it saw a slip at all.
     Result = Data.define(:provider, :model, :raw, :fields, :confidence,
                          :slip_present) do
       def initialize(slip_present: nil, **)
-        super
+        super(slip_present: SLIP_PRESENT_VALUES[normalize_flag(slip_present)],
+              **)
+      end
+
+      def normalize_flag(value)
+        value.is_a?(String) ? value.strip.downcase : value
       end
 
       def value_for(slip_field) = fields[slip_field]
