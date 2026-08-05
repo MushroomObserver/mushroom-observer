@@ -188,7 +188,7 @@ class Components::Image::Base < Components::Base
 
     div(
       href: lightbox_data[:url],
-      class: "theater-btn",
+      class: "theater-btn btn btn-overlay",
       role: "button",
       tabindex: "0",
       data: { sub_html: ".lightbox-caption" }
