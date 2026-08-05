@@ -10,9 +10,7 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
     desc.add_author(rolf)
     desc.reload
 
-    html = render(Views::Controllers::Descriptions::Authors::Show.new(
-                    object: desc, authors: desc.authors.to_a
-                  ))
+    html = render_show(object: desc, authors: desc.authors.to_a)
 
     # Each author row has a remove-author destroy button posting to
     # description_authors_path with the user id in `remove=…`.
@@ -24,9 +22,7 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
   def test_renders_add_author_form_for_other_users_pool
     desc = location_descriptions(:albion_desc)
 
-    html = render(Views::Controllers::Descriptions::Authors::Show.new(
-                    object: desc, authors: []
-                  ))
+    html = render_show(object: desc, authors: [])
 
     # User autocompleter input — the field name is namespaced under
     # the `AddAuthor` FormObject (`add_author[user]`). The controller's
@@ -46,16 +42,18 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
     name_desc = name_descriptions(:peltigera_user_desc)
     location_desc = location_descriptions(:albion_desc)
 
-    name_html = render(Views::Controllers::Descriptions::Authors::Show.new(
-                         object: name_desc, authors: []
-                       ))
-    loc_html = render(Views::Controllers::Descriptions::Authors::Show.new(
-                        object: location_desc, authors: []
-                      ))
+    name_html = render_show(object: name_desc, authors: [])
+    loc_html = render_show(object: location_desc, authors: [])
 
     note_text = :review_authors_note.t.strip_html
     sanitize = ActionView::Base.full_sanitizer.method(:sanitize)
     assert_includes(sanitize.call(name_html), note_text)
     assert_not_includes(sanitize.call(loc_html), note_text)
+  end
+
+  private
+
+  def render_show(**)
+    render(Views::Controllers::Descriptions::Authors::Show.new(**))
   end
 end
