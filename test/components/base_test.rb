@@ -47,14 +47,6 @@ class BaseTest < ComponentTestCase
     end
   end
 
-  def render_current_user
-    render(CurrentUserReader.new)
-  end
-
-  def render_current_query
-    render(CurrentQueryReader.new)
-  end
-
   def test_trusted_html_with_plain_string
     html = render_component(TestComponent.new)
     doc = Nokogiri::HTML(html)
@@ -119,13 +111,13 @@ class BaseTest < ComponentTestCase
     user = users(:rolf)
     controller.instance_variable_set(:@user, user)
 
-    assert_equal(user.login, render_current_user)
+    assert_equal(user.login, render(CurrentUserReader.new))
   end
 
   def test_current_user_is_nil_when_no_one_logged_in
     controller.instance_variable_set(:@user, nil)
 
-    assert_equal("nobody", render_current_user)
+    assert_equal("nobody", render(CurrentUserReader.new))
   end
 
   # `current_query` is a `register_value_helper`'d alias for
@@ -136,13 +128,13 @@ class BaseTest < ComponentTestCase
     query = ::Query.lookup_and_save(:Observation)
     controller.instance_variable_set(:@query, query)
 
-    assert_equal(query.id.to_s, render_current_query)
+    assert_equal(query.id.to_s, render(CurrentQueryReader.new))
   end
 
   def test_current_query_is_nil_when_no_query_on_controller
     controller.instance_variable_set(:@query, nil)
 
-    assert_equal("no-query", render_current_query)
+    assert_equal("no-query", render(CurrentQueryReader.new))
   end
 
   # `viewer_aware_unique_format_name` passes the viewer straight

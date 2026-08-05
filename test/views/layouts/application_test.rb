@@ -35,7 +35,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   # ---- Doctype / html / body skeleton --------------------------------
 
   def test_doctype_and_html_skeleton
-    html = render_page
+    html = render(FakePage.new)
 
     assert_match(/\A<!doctype html><html\b/, html)
     assert_html(html, "html[class='']")
@@ -46,7 +46,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   # ---- Head ----------------------------------------------------------
 
   def test_head_renders_app_head_subcomponent
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "head > meta[name='viewport']")
     assert_html(html, "head > meta[name='turbo-prefetch']")
@@ -57,14 +57,14 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   def test_canonical_link_emitted_when_controller_sets_ivar
     controller.instance_variable_set(:@canonical_url,
                                      "https://test.example/foo")
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html,
                 "head > link[rel='canonical'][href='https://test.example/foo']")
   end
 
   def test_canonical_link_absent_when_no_ivar
-    html = render_page
+    html = render(FakePage.new)
 
     assert_no_html(html, "head > link[rel='canonical']")
   end
@@ -72,7 +72,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   # ---- Body class ----------------------------------------------------
 
   def test_body_class_combines_controller_action_theme_format_login_state
-    html = render_page
+    html = render(FakePage.new)
     body = Nokogiri::HTML5.parse(html).at_css("body")
     classes = body["class"].split
 
@@ -84,7 +84,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   def test_body_class_uses_no_user_when_anonymous
     controller.instance_variable_set(:@user, nil)
-    html = render_page
+    html = render(FakePage.new)
     body = Nokogiri::HTML5.parse(html).at_css("body")
     classes = body["class"].split
 
@@ -94,20 +94,20 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   def test_body_class_collapses_create_into_new
     stub_controller_state!("observations", "create")
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "body.observations__new")
   end
 
   def test_body_class_collapses_update_into_edit
     stub_controller_state!("observations", "update")
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "body.observations__edit")
   end
 
   def test_body_carries_lazyload_tooltip_stimulus_controller
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "body[data-controller='lazyload tooltip']")
   end
@@ -115,21 +115,21 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   # ---- Main container + chrome anchors --------------------------------
 
   def test_main_container_present
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "#main_container[data-controller='nav links']")
     assert_html(html, "#main_container[data-nav-target='container']")
   end
 
   def test_main_emits_action_block_inside
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "main#content #fake-action-content",
                 text: "HELLO_INNER")
   end
 
   def test_bottom_singletons_present
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "#modal_progress_spinner")
     assert_html(html, "#mo_confirm")
@@ -140,7 +140,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   def test_page_flash_renders_empty_when_no_notice
     stub_session!(notice: nil, layout: "")
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "#page_flash")
     # No flash content — Nokogiri text on #page_flash strips whitespace.
@@ -154,7 +154,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
     # MO's flash notice encoding: leading digit is the level
     # (0=notice, 1=warning, 2=error), rest is the message.
     stub_session!(notice: "0Hello flash", layout: "")
-    html = render_page
+    html = render(FakePage.new)
 
     flash = Nokogiri::HTML5.parse(html).at_css("#page_flash")
     assert_includes(flash.text, "Hello flash",
@@ -163,7 +163,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   def test_page_flash_renders_warning_at_warning_level
     stub_session!(notice: "1Watch out", layout: "")
-    html = render_page
+    html = render(FakePage.new)
 
     flash = Nokogiri::HTML5.parse(html).at_css("#page_flash")
     assert_includes(flash.text, "Watch out")
@@ -171,7 +171,7 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   def test_page_flash_renders_error_at_error_level
     stub_session!(notice: "2It broke", layout: "")
-    html = render_page
+    html = render(FakePage.new)
 
     flash = Nokogiri::HTML5.parse(html).at_css("#page_flash")
     assert_includes(flash.text, "It broke")
@@ -180,10 +180,6 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   # ---- Helpers --------------------------------------------------------
 
   private
-
-  def render_page
-    render(FakePage.new)
-  end
 
   def stub_request_context!
     langs = Language.where.not(beta: true).to_a

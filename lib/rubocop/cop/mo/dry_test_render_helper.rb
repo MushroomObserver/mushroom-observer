@@ -9,12 +9,18 @@ module RuboCop
       # DRY Render Helper" in .claude/rules/testing.md.
       #
       # Only counts direct `render(<Const>.new(...))` calls where the
-      # receiver of `.new` is a constant. A call already routed through a
-      # local helper (`render_form(...)`, `render(build_table(...))`,
+      # receiver of `.new` is a constant AND `.new` takes at least one
+      # argument. A call already routed through a local helper
+      # (`render_form(...)`, `render(build_table(...))`,
       # `render(klass.new(...))` with `klass` a variable) never matches
       # this pattern, so files that already extracted a helper are silent
       # by construction -- this cop only needs to catch the case where no
-      # helper exists yet.
+      # helper exists yet. A bare `render(Page.new)` with no arguments is
+      # excluded even when repeated: the whole point of extracting a
+      # helper is to stop an argument list from drifting out of sync
+      # across call sites, and a zero-argument constructor has no
+      # argument list to drift -- extracting one there trades a
+      # single-line duplicate for a 3-line method that saves nothing.
       #
       # @example
       #   # bad
@@ -90,9 +96,14 @@ module RuboCop
 
         def render_new_call?(node)
           node.method?(:render) && node.receiver.nil? &&
-            node.arguments.size == 1 && node.first_argument.send_type? &&
-            node.first_argument.method?(:new) &&
-            node.first_argument.receiver&.const_type?
+            node.arguments.size == 1 && new_call_with_args?(node.first_argument)
+        end
+
+        # `SomeClass.new(...)` with a constant receiver and at least one
+        # argument -- a bare `SomeClass.new` has nothing to consolidate.
+        def new_call_with_args?(node)
+          node.send_type? && node.method?(:new) &&
+            node.receiver&.const_type? && node.arguments.any?
         end
 
         def message_for(node)

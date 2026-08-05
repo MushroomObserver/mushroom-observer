@@ -26,7 +26,7 @@ class Views::Layouts::PrintableTest < ComponentTestCase
   end
 
   def test_renders_basic_document_skeleton
-    html = render_page
+    html = render(FakePage.new)
 
     assert_match(/\A<!doctype html><html\b/, html)
     assert_html(html, "html[lang='en']")
@@ -35,7 +35,7 @@ class Views::Layouts::PrintableTest < ComponentTestCase
   end
 
   def test_head_contains_charset_and_print_metadata
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "head > meta[charset='utf-8']")
     assert_html(html, "head > link[rel='SHORTCUT ICON']")
@@ -45,14 +45,14 @@ class Views::Layouts::PrintableTest < ComponentTestCase
   end
 
   def test_head_contains_rss_discovery_link
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html,
                 "head > link[rel='alternate'][type='application/rss+xml']")
   end
 
   def test_head_contains_document_title_from_content_for
-    html = render_page
+    html = render(FakePage.new)
 
     # `:app_title.l` may contain HTML entities; route through
     # `as_displayed` so Nokogiri's text comparison matches the
@@ -62,7 +62,7 @@ class Views::Layouts::PrintableTest < ComponentTestCase
   end
 
   def test_head_contains_inline_print_style
-    html = render_page
+    html = render(FakePage.new)
 
     style = Nokogiri::HTML5.parse(html).at_css("head > style")&.text.to_s
     assert_match(/page-break-before:\s*always/, style)
@@ -70,13 +70,13 @@ class Views::Layouts::PrintableTest < ComponentTestCase
   end
 
   def test_body_renders_inner_action_content
-    html = render_page
+    html = render(FakePage.new)
 
     assert_html(html, "body > #inner-page", text: "INNER")
   end
 
   def test_no_application_chrome
-    html = render_page
+    html = render(FakePage.new)
 
     assert_no_html(html, "#main_container")
     assert_no_html(html, "#sidebar")
@@ -87,10 +87,6 @@ class Views::Layouts::PrintableTest < ComponentTestCase
   end
 
   private
-
-  def render_page
-    render(FakePage.new)
-  end
 
   # Sessions are disabled in `ComponentTestCase`; stub the read of
   # `session[:layout]` that `FullPageBase#layout_class` does.
