@@ -113,7 +113,7 @@ root> reboot
 # puma/solidqueue via bin/run, which sources chruby.sh/auto.sh when
 # RUBY_MANAGER=chruby (see config/etc/puma.service,
 # config/etc/solidqueue.service) -- same install recipe as
-# script/ubuntu_setup_root uses for dev boxes.
+# script/dev_setup_ubuntu_root uses for dev boxes.
 root> mkdir -p /tmp/build && cd /tmp/build
 root> wget https://github.com/postmodern/chruby/archive/master.tar.gz
 root> tar -xzvf master.tar.gz && cd chruby-master
