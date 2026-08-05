@@ -1,0 +1,51 @@
+#!/usr/bin/bash
+# Run as mo user with sudo power
+
+cd /var/web || exit 1
+
+if [ -f script/dev_setup/clone_repo.sh ]; then
+    source script/dev_setup/clone_repo.sh
+else
+    source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+fi
+mo_ensure_repo
+
+# shellcheck source=script/dev_setup/common.sh
+source script/dev_setup/common.sh
+
+ruby-install ruby "$(cat .ruby-version)"
+
+# Requires access to ruby
+source /usr/local/share/chruby/chruby.sh
+source /usr/local/share/chruby/auto.sh
+
+EXPECTED_RUBY=$(cat .ruby-version)
+ACTUAL_RUBY=$(ruby --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+if [ "$ACTUAL_RUBY" != "$EXPECTED_RUBY" ]; then
+    echo "ERROR: Ruby version mismatch"
+    echo "Required: $EXPECTED_RUBY"
+    echo "Installed: $ACTUAL_RUBY"
+    echo "Please install the correct Ruby version using ruby-install"
+    exit 1
+fi
+
+echo "Ruby version check passed: $ACTUAL_RUBY"
+
+mo_create_image_dirs
+mo_build_image_helpers ""
+mo_copy_config_template db/vagrant/database.yml config/database.yml
+mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
+mo_require_master_key
+
+# Install Rails gems
+bundle install
+
+mo_init_or_migrate_db "sudo mysql -u root"
+
+bin/rails lang:update
+
+mo_install_precommit_hook
+
+# Rock and Roll!
+bin/rails test

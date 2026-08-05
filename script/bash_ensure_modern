@@ -1,0 +1,42 @@
+# Source this at the very top of any script that needs Bash >= 4.
+#
+# macOS ships only Bash 3.2 from 2007 (Apple won't ship GPLv3), so
+# scripts using Bash >= 4 syntax (declare -A, etc.) need a modern
+# bash. This does NOT rely on $PATH already prioritizing one -- not
+# every dev's shell rc runs `brew shellenv` -- it looks for a
+# Homebrew-installed bash directly by absolute path, installs one via
+# Homebrew if none is found, and re-execs the CALLING script under it.
+#
+# This does NOT change your login/interactive shell -- zsh, old bash,
+# whatever you use day to day is untouched. It only ensures a modern
+# `bash` binary exists on disk and runs the rest of THIS script under
+# it, the same way any script's shebang picks an interpreter.
+#
+# No-ops instantly wherever Bash >= 4 is already the default (e.g.
+# production, which runs Ubuntu).
+#
+# When curl-piped, $0 is just "bash" -- there's no on-disk path to
+# re-exec. Callers that might be curl-piped must cd into a real,
+# on-disk copy of themselves (e.g. right after cloning the repo) and
+# set MO_REEXEC_SCRIPT to that path before sourcing this file.
+
+if [ -z "${BASH_VERSINFO:-}" ] || [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+    modern_bash=""
+    for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+        [ -x "$candidate" ] && { modern_bash="$candidate"; break; }
+    done
+
+    if [ -z "$modern_bash" ] && command -v brew >/dev/null 2>&1; then
+        echo "Installing a modern Bash via Homebrew (this script needs >= 4.0)..." >&2
+        brew install bash >/dev/null
+        modern_bash="$(brew --prefix bash)/bin/bash"
+    fi
+
+    if [ -z "$modern_bash" ]; then
+        echo "Bash >= 4 is required, and no way to find or install one automatically." >&2
+        echo "Install Homebrew (https://brew.sh/) and re-run, or 'brew install bash'." >&2
+        exit 1
+    fi
+
+    exec "$modern_bash" "${MO_REEXEC_SCRIPT:-$0}" "$@"
+fi

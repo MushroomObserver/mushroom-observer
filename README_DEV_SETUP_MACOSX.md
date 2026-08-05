@@ -6,6 +6,7 @@ It includes notes later added by @nimmolo, and by
 @JoeCohen for his local Apple Intel with MacOS Ventura 13.6
 though Sequoia 15.2.
 
+- [Quick Start: Run the Setup Script](#quick-start-run-the-setup-script)
 - [Install Needed Tools](#install-needed-tools)
   - [Xcode](#xcode)
   - [Xcode Command Line Tools](#xcode-command-line-tools)
@@ -32,6 +33,33 @@ though Sequoia 15.2.
 - [Footnotes](#footnotes)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+# Quick Start: Run the Setup Script
+
+`script/dev_setup_macos` automates everything below it in this document --
+Homebrew packages, MySQL, Ruby, database setup, config files -- ending by
+running the test suite.
+
+Fresh machine, nothing cloned yet:
+
+```sh
+curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_macos | bash
+```
+
+Existing checkout:
+
+```sh
+script/dev_setup_macos
+```
+
+It still expects Xcode Command Line Tools and Homebrew to already be
+installed (see [Xcode](#xcode) and [homebrew](#homebrew) below), and it
+stops with instructions any time it hits something it can't safely
+automate on its own -- setting the MySQL root password, or a missing
+`config/master.key`.
+
+**If the script breaks, or you want to understand what it's actually
+doing, the rest of this document walks through every step by hand.**
 
 # Install Needed Tools
 
