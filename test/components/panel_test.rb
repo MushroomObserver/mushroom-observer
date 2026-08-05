@@ -192,14 +192,7 @@ class PanelTest < ComponentTestCase
 
     html = render_panel do |panel|
       panel.with_heading { "Observation" }
-      panel.with_thumbnail do
-        render(Components::InteractiveImage.new(
-                 user: user,
-                 image: image,
-                 size: :thumbnail,
-                 votes: false
-               ))
-      end
+      panel.with_thumbnail { render_interactive_image(user:, image:) }
       panel.with_body { "Observation details" }
     end
 
@@ -221,14 +214,7 @@ class PanelTest < ComponentTestCase
 
     html = render_panel(sizing: true) do |panel|
       panel.with_heading { "Observation" }
-      panel.with_thumbnail do
-        render(Components::InteractiveImage.new(
-                 user: user,
-                 image: image,
-                 size: :thumbnail,
-                 votes: false
-               ))
-      end
+      panel.with_thumbnail { render_interactive_image(user:, image:) }
       panel.with_body { "Details" }
     end
 
@@ -269,5 +255,11 @@ class PanelTest < ComponentTestCase
 
   def render_panel(**, &block)
     render(Components::Panel.new(**), &block)
+  end
+
+  def render_interactive_image(user:, image:)
+    render(Components::InteractiveImage.new(
+             user: user, image: image, size: :thumbnail, votes: false
+           ))
   end
 end

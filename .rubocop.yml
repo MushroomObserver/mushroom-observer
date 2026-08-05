@@ -13,6 +13,7 @@ plugins:
   - rubocop-rails
 
 require:
+  - ./lib/rubocop/cop/mo/dry_test_render_helper
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
@@ -40,6 +41,17 @@ AllCops:
 # ------------------------------------------------------------------------------
 
 ########### Individual cops for which MO uses a non-default configuration
+
+MO/DryTestRenderHelper:
+  Description: >-
+    render(SomeClass.new(...)) repeated inline across sibling test_*
+    methods must go through a private render_x helper instead -- see
+    lib/rubocop/cop/mo/dry_test_render_helper.rb and "Extract DRY
+    Render Helper" in .claude/rules/testing.md.
+  Enabled: true
+  Include:
+    - "test/components/**/*_test.rb"
+    - "test/views/**/*_test.rb"
 
 MO/LowercaseTranslationTag:
   Description: >-

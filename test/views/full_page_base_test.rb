@@ -76,7 +76,7 @@ class Views::FullPageBaseTest < ComponentTestCase
 
   def test_default_layout_is_application
     stub_session!(layout: "")
-    html = render(Page.new)
+    html = render_page
 
     assert_html(html, "div.stub-app")
     assert_no_html(html, "div.stub-printable")
@@ -84,7 +84,7 @@ class Views::FullPageBaseTest < ComponentTestCase
 
   def test_printable_session_picks_printable_layout
     stub_session!(layout: "printable")
-    html = render(Page.new)
+    html = render_page
 
     assert_html(html, "div.stub-printable")
     assert_no_html(html, "div.stub-app")
@@ -93,14 +93,14 @@ class Views::FullPageBaseTest < ComponentTestCase
 
   def test_unknown_session_layout_falls_back_to_application
     stub_session!(layout: "BOGUS_LAYOUT")
-    html = render(Page.new)
+    html = render_page
 
     assert_html(html, "div.stub-app")
   end
 
   def test_capture_emits_action_content_inside_layout
     stub_session!(layout: "")
-    html = render(Page.new)
+    html = render_page
 
     # The page's `<div id="page-inner">` is captured, then emitted
     # inside the stub layout's wrapper.
@@ -110,7 +110,7 @@ class Views::FullPageBaseTest < ComponentTestCase
   def test_canonical_url_forwarded_from_controller_ivar
     stub_session!(layout: "")
     controller.instance_variable_set(:@canonical_url, "https://test.example/x")
-    render(Page.new)
+    render_page
 
     assert_equal("https://test.example/x",
                  RecordingApplication::CAPTURED[:props][:canonical_url])
@@ -119,7 +119,7 @@ class Views::FullPageBaseTest < ComponentTestCase
   def test_any_content_filters_applied_forwarded_from_controller_ivar
     stub_session!(layout: "")
     controller.instance_variable_set(:@any_content_filters_applied, true)
-    render(Page.new)
+    render_page
 
     assert_equal(true,
                  RecordingApplication::CAPTURED[:props][:any_content_filters_applied])
@@ -127,7 +127,7 @@ class Views::FullPageBaseTest < ComponentTestCase
 
   def test_ivars_unset_pass_nil
     stub_session!(layout: "")
-    render(Page.new)
+    render_page
 
     assert_nil(RecordingApplication::CAPTURED[:props][:canonical_url])
     assert_nil(RecordingApplication::CAPTURED[:props][:any_content_filters_applied])
@@ -142,12 +142,16 @@ class Views::FullPageBaseTest < ComponentTestCase
     stub_session!(layout: "printable")
     controller.instance_variable_set(:@canonical_url, "https://test.example/x")
 
-    render(Page.new) # must not raise
+    render_page # must not raise
 
     assert(RecordingPrintable::CAPTURED[:invoked])
   end
 
   private
+
+  def render_page
+    render(Page.new)
+  end
 
   def stub_session!(layout:)
     s = { layout: layout }
