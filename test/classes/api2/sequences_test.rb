@@ -14,9 +14,7 @@ class API2::SequencesTest < UnitTestCase
   #  :section: Sequence Requests
   # ------------------------------
 
-  def params_get(**)
-    { method: :get, action: :sequence }.merge(**)
-  end
+  def api2_model = Sequence
 
   def seq_sample
     @seq_sample ||= Sequence.all.sample
@@ -317,17 +315,14 @@ class API2::SequencesTest < UnitTestCase
     @accession = "NY123456"
     @notes     = "these are notes"
     @user      = rolf
-    params = {
-      method: :post,
-      action: :sequence,
-      api_key: @api_key.key,
+    params = params_post(
       observation: rolfs_obs.id,
       locus: @locus,
       bases: @bases,
       archive: @archive,
       accession: @accession,
       notes: @notes
-    }
+    )
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:observation))
     assert_api_fail(params.except(:locus))
@@ -352,12 +347,7 @@ class API2::SequencesTest < UnitTestCase
     @archive   = nil
     @accession = nil
     @notes     = nil
-    params = {
-      method: :post,
-      action: :sequence,
-      api_key: @api_key.key,
-      observation: rolfs_obs.id
-    }
+    params = params_post(observation: rolfs_obs.id)
     assert_api_fail(params)
     assert_api_fail(params.merge(locus: @locus))
     assert_api_pass(params.merge(locus: @locus, bases: @bases))
@@ -368,12 +358,7 @@ class API2::SequencesTest < UnitTestCase
     @archive   = "GenBank"
     @accession = "AR09876"
     @notes     = nil
-    params = {
-      method: :post,
-      action: :sequence,
-      api_key: @api_key.key,
-      observation: rolfs_obs.id
-    }
+    params = params_post(observation: rolfs_obs.id)
     assert_api_fail(params)
     assert_api_fail(params.merge(locus: @locus))
     assert_api_fail(params.merge(locus: @locus, archive: @archive))
@@ -391,17 +376,14 @@ class API2::SequencesTest < UnitTestCase
     @archive   = "GenBank"
     @accession = "XX123456"
     @notes     = "new notes"
-    params = {
-      method: :patch,
-      action: :sequence,
-      api_key: @api_key.key,
+    params = params_patch(
       id: seq.id,
       set_locus: @locus,
       set_bases: @bases,
       set_archive: @archive,
       set_accession: @accession,
       set_notes: @notes
-    }
+    )
     assert_api_fail(params)
     @api_key.update!(user: dick)
     assert_api_fail(params.merge(set_locus: ""))
@@ -414,12 +396,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_deleting_sequences
     seq = dick.sequences.sample
-    params = {
-      method: :delete,
-      action: :sequence,
-      api_key: @api_key.key,
-      id: seq.id
-    }
+    params = params_delete(id: seq.id)
     assert_api_fail(params)
     assert_not_nil(Sequence.safe_find(seq.id))
     @api_key.update!(user: dick)

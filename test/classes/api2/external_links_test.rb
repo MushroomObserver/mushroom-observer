@@ -14,6 +14,8 @@ class API2::ExternalLinksTest < UnitTestCase
   #  :section: ExternalLink Requests
   # ----------------------------------
 
+  def api2_model = ExternalLink
+
   def test_getting_external_links
     other_obs = observations(:agaricus_campestris_obs)
     link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
@@ -21,7 +23,7 @@ class API2::ExternalLinksTest < UnitTestCase
     link3 = ExternalLink.create!(user: rolf, observation: other_obs,
                                  external_site: link1.external_site,
                                  url: "#{link1.external_site.base_url}876876")
-    params = { method: :get, action: :external_link }
+    params = params_get
 
     assert_api_pass(params.merge(id: link2.id))
     assert_api_results([link2])
@@ -55,14 +57,8 @@ class API2::ExternalLinksTest < UnitTestCase
     rolfs_key = api_keys(:rolfs_api_key)
     site = external_sites(:mycoportal)
     base_url = site.base_url
-    params = {
-      method: :post,
-      action: :external_link,
-      api_key: rolfs_key.key,
-      observation: rolfs_obs.id,
-      external_site: site.id,
-      url: "#{base_url}blah"
-    }
+    params = params_post(api_key: rolfs_key.key, observation: rolfs_obs.id,
+                         external_site: site.id, url: "#{base_url}blah")
     assert_api_pass(params)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:observation))
@@ -89,13 +85,7 @@ class API2::ExternalLinksTest < UnitTestCase
     site = external_sites(:mycoportal)
     base_url = site.base_url
     new_url = "#{base_url}something_else"
-    params = {
-      method: :patch,
-      action: :external_link,
-      api_key: @api_key.key,
-      id: link.id,
-      set_url: new_url
-    }
+    params = params_patch(id: link.id, set_url: new_url)
     @api_key.update!(user: dick)
     assert_api_fail(params)
     @api_key.update!(user: rolf)
@@ -118,12 +108,7 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_users_equal(rolf, link.observation.user)
     assert_false(link.external_site&.project&.member?(dick))
     site = link.external_site
-    params = {
-      method: :delete,
-      action: :external_link,
-      api_key: @api_key.key,
-      id: link.id
-    }
+    params = params_delete(id: link.id)
     recreate_params = {
       user: mary,
       observation: link.observation,
