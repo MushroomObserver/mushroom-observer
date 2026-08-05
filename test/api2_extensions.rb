@@ -23,7 +23,9 @@ module API2Extensions
   # from `api2_model.type_tag` -- the same mechanism `do_basic_get_test`
   # already relies on -- so it doesn't need repeating at every call site.
   def api2_model
-    raise("Define api2_model in #{self.class} before calling params_*")
+    raise(NotImplementedError.new(
+            "Define api2_model in #{self.class} before calling params_*"
+          ))
   end
 
   # GET is unauthenticated by design -- ModelAPI#get never calls
