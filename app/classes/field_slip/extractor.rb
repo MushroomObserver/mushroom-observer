@@ -15,8 +15,20 @@ class FieldSlip
     PROVIDERS = { gemini: "FieldSlip::Extractor::Gemini" }.freeze
 
     # Bump when the prompt changes in a way that could change results.
-    # Stored on the extract so a stale read is identifiable later.
-    PROMPT_VERSION = "1"
+    # Stored on the extract so a stale read is identifiable later --
+    # which only works if this actually moves, so treat editing
+    # `Prompt` and bumping this as one act.
+    #
+    #   1  initial
+    #   2  user aliases transcribed rather than expanded, so "dcs" stays
+    #      resolvable to a User (extracts at v1 may hold an expanded
+    #      display name that resolves to nobody)
+    #   3  an image with no slip in it answers slip_present false and
+    #      all-null fields (extracts at v2 or earlier may hold values
+    #      invented from the prompt's own alias tables); a null that
+    #      was written but could not be read is listed in `unreadable`,
+    #      separating it from a box the collector left empty
+    PROMPT_VERSION = "3"
 
     # The slip's fields, in the order they appear on the printed form,
     # mapped to where each one lands on the Observation. `nil` means the
@@ -65,16 +77,50 @@ class FieldSlip
 
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
+    # A model answering JSON may stringify its booleans, and `"false"`
+    # has to mean false: read as unknown it would restore the very
+    # behavior the slip_present flag exists to stop. Anything absent
+    # from this table -- missing, "maybe", 1 -- normalizes to nil,
+    # which means unreported rather than "no slip".
+    SLIP_PRESENT_VALUES = { true => true, false => false,
+                            "true" => true, "false" => false }.freeze
+
     # What one provider run produced: the raw response (stored verbatim
-    # for provenance), the per-field values, and the per-field
-    # confidence the model reported.
-    Result = Data.define(:provider, :model, :raw, :fields, :confidence) do
+    # for provenance), the per-field values, the per-field confidence
+    # the model reported, and whether it saw a slip at all.
+    Result = Data.define(:provider, :model, :raw, :fields, :confidence,
+                         :slip_present, :unreadable) do
+      def initialize(slip_present: nil, unreadable: nil, **)
+        super(slip_present: SLIP_PRESENT_VALUES[normalize_flag(slip_present)],
+              unreadable: known_fields(unreadable), **)
+      end
+
+      def normalize_flag(value)
+        value.is_a?(String) ? value.strip.downcase : value
+      end
+
+      # Names the model invented, or a bare string where a list was
+      # asked for, must not travel any further than this.
+      def known_fields(value)
+        Array(value).map(&:to_s) & FIELDS.keys
+      end
+
       def value_for(slip_field) = fields[slip_field]
 
       def confidence_for(slip_field)
         level = confidence[slip_field].to_s.downcase
         CONFIDENCE_LEVELS.include?(level) ? level : "low"
       end
+
+      # Nil for a read from a provider (or a prompt version) that never
+      # reported it -- only an explicit false means "no slip here".
+      def no_slip? = slip_present == false
+
+      # Written on the slip but not recovered from this image, so
+      # another photo of the same slip may still have it. Distinct
+      # from a null whose box the collector left empty, which no
+      # further photo will fill.
+      def unreadable?(slip_field) = unreadable.include?(slip_field)
     end
 
     def self.for(provider)

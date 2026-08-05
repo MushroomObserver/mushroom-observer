@@ -55,20 +55,22 @@ class FieldSlip::Extractor::NameProposerTest < UnitTestCase
     assert_equal(Vote::MAXIMUM_VOTE, vote.value)
   end
 
-  # Relaying what a slip says is not asserting a determination, so the
-  # weakest positive value is the default.
-  def test_vote_defaults_to_the_weakest_positive_value
+  # "Promising": a slip's ID is the collector's determination, worth
+  # more than a guess and less than the reviewer's own certainty.
+  def test_vote_defaults_to_promising
     outcome = propose("Coprinus comatus")
     vote = Vote.find_by(naming: outcome.naming, user: rolf)
 
-    assert_equal(Vote::MIN_POS_VOTE, vote.value)
+    assert_equal(FieldSlip::Extractor::NameProposer::DEFAULT_VOTE,
+                 vote.value)
   end
 
   def test_unusable_vote_falls_back_to_the_default
     outcome = propose("Coprinus comatus", vote: "not a number")
     vote = Vote.find_by(naming: outcome.naming, user: rolf)
 
-    assert_equal(Vote::MIN_POS_VOTE, vote.value)
+    assert_equal(FieldSlip::Extractor::NameProposer::DEFAULT_VOTE,
+                 vote.value)
   end
 
   # ---------- a name MO does not hold ----------

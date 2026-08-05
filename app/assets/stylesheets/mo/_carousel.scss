@@ -22,16 +22,36 @@
     margin-right: -100%;
 
     .carousel-caption {
-      @extend .bg-legible, .py-2;
       position: absolute;
       bottom: 0;
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%);
-      width: auto;
+      left: 0;
+      // Bootstrap's own .carousel-caption base rule sets right: 15%.
+      // left/width alone already win it out under CSS's over-
+      // constrained resolution, but pin it explicitly rather than
+      // rely on that.
+      right: 0;
+      width: 100%;
       height: auto;
+      // Bootstrap's own .carousel-caption base rule sets 20-30px of
+      // padding-top/bottom -- MO's .py-2 used to live here and
+      // override it as a side effect; now that it moved to
+      // .caption-content below, this needs to cancel Bootstrap's
+      // default explicitly or the caption floats well above bottom:0.
+      padding: 0;
+      text-align: center;
       opacity: 0;
       transition: opacity 0.2s ease;
+
+      // Full-width so the vote-button tooltip container
+      // (VoteInterface#context == :carousel) has the whole image's
+      // width to lay out in, not just the caption's own content
+      // width. The visible dark backdrop moved to .caption-content
+      // (shrink-wrapped, centered by the text-align above) so it
+      // doesn't stretch full-width along with the positioning box.
+      .caption-content {
+        @extend .bg-legible, .py-2;
+        display: inline-block;
+      }
 
       .vote-section {
         background: transparent;

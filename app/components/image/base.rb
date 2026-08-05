@@ -229,7 +229,16 @@ class Components::Image::Base < Components::Base
   def render_image_vote_section
     return unless @votes && @img_instance
 
-    ImageFragment(type: :lazy_vote_interface, image: @img_instance)
+    ImageFragment(type: :lazy_vote_interface, image: @img_instance,
+                  context: vote_context)
+  end
+
+  # Which VoteInterface surface this is -- :matrix by default (a
+  # single-image hover overlay, InteractiveImage); Carousel::Item
+  # overrides to :carousel (per-slide caption, different tooltip
+  # placement/container needs -- see VoteInterface#context doc).
+  def vote_context
+    :matrix
   end
 
   # Render original filename if applicable

@@ -61,6 +61,30 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     assert_equal("Scott Shapiro", @obs.collector)
   end
 
+  # "Id by" names a person, and MO stores that as a textile user link,
+  # not bare text -- the same shape the observation form writes, so an
+  # observation reads back the same whichever route entered it.
+  def test_id_by_resolves_a_project_alias_to_a_user_link
+    fixture = project_aliases(:one) # "RS" -> rolf
+
+    apply_fields({ "ID By" => fixture.name })
+
+    assert_equal(rolf.textile_name, @obs.notes[:Field_Slip_ID_By])
+  end
+
+  def test_id_by_resolves_a_login
+    apply_fields({ "ID By" => rolf.login })
+
+    assert_equal(rolf.textile_name, @obs.notes[:Field_Slip_ID_By])
+  end
+
+  # Whoever identified a collection is not always an MO user.
+  def test_id_by_keeps_unmatched_text_verbatim
+    apply_fields({ "ID By" => "Some Visiting Expert" })
+
+    assert_equal("Some Visiting Expert", @obs.notes[:Field_Slip_ID_By])
+  end
+
   # A collector naming a project alias resolves to that user, so the
   # observation gets the link rather than initials as free text.
   def test_collector_resolves_through_a_project_alias
@@ -141,7 +165,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     was = @obs.collector
     apply_fields({ "Collector" => "   " })
 
-    assert_equal(was, @obs.collector)
+    assert_equal_even_if_nil(was, @obs.collector)
   end
 
   # The two review-only fields have no target, so they can never be
@@ -153,7 +177,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     apply_fields({ "Field Slip Code" => "NEMF-99999",
                    FieldSlip::Extractor::NAME_FIELD => "Coprinus comatus" })
 
-    assert_equal(slip_before, @obs.field_slip&.code)
+    assert_equal_even_if_nil(slip_before, @obs.field_slip&.code)
     assert_equal(namings_before, @obs.namings.count,
                  "the ID is proposed elsewhere, never applied here")
   end
@@ -162,7 +186,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     before = @obs.attributes.dup
     apply_fields({})
 
-    assert_equal(before["collector"], @obs.collector)
+    assert_equal_even_if_nil(before["collector"], @obs.collector)
     assert_equal(before["when"], @obs.when)
   end
 end

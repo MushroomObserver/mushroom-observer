@@ -68,6 +68,23 @@ class ImageTest < UnitTestCase
     assert_nil(img.users_vote(rolf))
   end
 
+  # updated_at feeds the cache-busting URL token: a vote must not flip
+  # it, or every browser's cached renditions of the image die.
+  def test_change_vote_does_not_bump_updated_at
+    img = images(:in_situ_image)
+    img.update_columns(updated_at: 1.week.ago)
+    original = img.reload.updated_at
+
+    img.change_vote(mary, 3)
+
+    assert_equal(3, img.reload.users_vote(mary))
+    assert_equal(original.to_i, img.updated_at.to_i)
+    assert(img.record_timestamps,
+           "instance record_timestamps must be restored after the vote")
+    assert(Image.record_timestamps,
+           "class-level record_timestamps must never be touched")
+  end
+
   def test_copyright_logging
     license_one = licenses(:ccnc25)
     license_two = licenses(:ccwiki30)
@@ -437,11 +454,19 @@ class ImageTest < UnitTestCase
     # looking like a real failure. Capturing also pins the logging
     # contract itself, which the old passthrough never asserted.
     logged = nil
+    notified = []
     img.stub(:move_original, true) do
       Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
           Rails.logger.stub(:error, ->(msg) { logged = msg }) do
-            assert_not(img.process_image)
+            ExceptionNotifier.stub(:notifiers, [:slack]) do
+              ExceptionNotifier.stub(
+                :notify_exception,
+                ->(exception, **_o) { notified << exception }
+              ) do
+                assert_not(img.process_image)
+              end
+            end
           end
         end
       end
@@ -449,6 +474,10 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
     assert_includes(logged, "Image::Processor failed for image #{img.id}")
     assert_includes(logged, "boom")
+    # A processing failure happens while a user is watching, yet used to
+    # alert nobody (#4974) -- it must reach the same pipeline job
+    # failures do.
+    assert_equal(["boom"], notified.map(&:message))
   end
 
   # Transfer-to-image-server is no longer part of Image::Processor#process

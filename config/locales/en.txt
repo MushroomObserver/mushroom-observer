@@ -1126,13 +1126,11 @@
   log_object_updated: "[:log_object_updated_by_user]"
   log_object_updated_at: "[:log_object_updated_by_user]"
 
-  source_credit_mo_website: Created via the Mushroom Observer website
-  source_credit_mo_android_app: Created via the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34
-  source_credit_mo_iphone_app: Created via the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34
-  source_credit_mo_api: Created via the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
-  source_credit_external: '"Imported from [name]":[url]'
+  source_credit_mo_website: MO Web
+  source_credit_mo_api: '"MO API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md'
   source_credit_external_text: Imported from [name]
   source_credit_help_link: About imported observations
+  via: via
   observation_reflection_read_only_note: Read-only reflection of its imported source. To change it, edit it at the source and resync.
   observation_resync_confirm: If you recently edited at the source, those changes may take up to 10 seconds to appear there. Ready to sync now, or would you rather wait?
   observation_resync_started: Syncing imported data from the source. This may take a moment.
@@ -2079,8 +2077,6 @@
   show_observation_manage_species_lists: Manage Observation Lists
   show_observation_add_to_species_list: Add to an Observation List
   show_observation_send_question: Send Observer a Question
-  show_observation_hide_map: Hide thumbnail map.
-  show_observation_thumbnail_map_hidden: Thumbnail map hidden. To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   remove_object_confirm: Remove [type] from this [association]?
   show_observation_archive_link: Show Archive Record
@@ -2583,6 +2579,7 @@
   field_slip_extract_current: Currently on observation
   field_slip_extract_use: Save
   field_slip_extract_empty: (empty)
+  field_slip_extract_replacing: will be replaced
   field_slip_extract_check_only: cross-check only
   field_slip_extract_vote: Confidence for the proposed name
   field_slip_extract_id: ID written on the slip

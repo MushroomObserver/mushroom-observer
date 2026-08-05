@@ -24,11 +24,23 @@ class FieldSlip
 
       private
 
+      # The image may be a specimen photo rather than a slip: an
+      # observation carries several photos and only some show one.
+      # Without the escape hatch below, an image with no slip in it is
+      # still answered field by field, and the tables further down --
+      # there to help read handwriting -- become the source of the
+      # answer: a run has already returned a full location name lifted
+      # verbatim out of the location table for a photo containing no
+      # slip at all.
       def preamble
         "Extract the data written on this mushroom field slip. The slip " \
           "is a printed form; most values are handwritten. Ignore the " \
           "specimen photographed beside it -- do not identify the " \
-          "mushroom yourself, only transcribe what the slip says."
+          "mushroom yourself, only transcribe what the slip says.\n\n" \
+          "If this image does not show a field slip, set \"slip_present\" " \
+          "to false and every field to null. Do not infer any value from " \
+          "the tables below -- they are reading aids for handwriting that " \
+          "is actually in the image, never a source of answers."
       end
 
       def field_rules
@@ -39,7 +51,15 @@ class FieldSlip
           Rules:
           - Transcribe what is written. Do not correct spelling or
             expand a name you are unsure of.
-          - Use null for a field that is blank or unreadable.
+          - Use null for a field you cannot give a value for, whether
+            its box is empty or its writing cannot be made out. Most
+            slips leave several boxes empty; some fill in only one.
+          - List in "unreadable" only those fields that DO have
+            writing you could not recover -- cut off by the edge of
+            the photo, blurred, obscured, or washed out by glare. A
+            box the collector left empty is not unreadable. Getting
+            this right decides whether another photo is worth
+            consulting for that field.
           - "Field Slip Code" is printed, not handwritten, and looks
             like #{code_example}. It also appears in the QR code.
           - "ID" is the name written by the collector. It may be a
@@ -73,14 +93,20 @@ class FieldSlip
       # Initials for Collector / ID By. Same reasoning: return the
       # abbreviation verbatim when it is not in the table, so the
       # reviewer sees an unknown one rather than a plausible wrong name.
+      # The table is a reading aid, not a substitution rule. Expanding
+      # "dcs" to "Dorothy Smullen" destroys the value: the initials
+      # resolve to a User two ways (this alias table, and a login
+      # lookup) while the expanded display name resolves neither, so MO
+      # can no longer link the note to the person. Transcribe; MO
+      # expands.
       def user_table
         rows = alias_rows("User")
         return nil if rows.empty?
 
         "\"Collector\" and \"ID By\" are often initials. This project " \
           "uses:\n#{rows}\n" \
-          "Expand an entry that appears in the table. Return anything " \
-          "else verbatim."
+          "Use the table only to read the handwriting. Return what is " \
+          "WRITTEN -- the initials, not the expanded name."
       end
 
       def alias_rows(target_type)
@@ -106,8 +132,10 @@ class FieldSlip
           Return ONLY a JSON object, with no markdown fence, of the form:
 
           {
+            "slip_present": true | false,
             "fields": { <each key above>: <string or null> },
             "confidence": { <each key above>: "high" | "medium" | "low" },
+            "unreadable": [ <keys written on the slip but not recoverable> ],
             "notes": "anything about readability worth a reviewer knowing"
           }
         FORMAT

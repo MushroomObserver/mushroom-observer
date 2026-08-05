@@ -81,15 +81,6 @@ module Tab::Observation
                    tab.path)
     end
 
-    def test_hide_thumbnail_map
-      tab = Tab::Observation::HideThumbnailMap.new(observation: @obs)
-
-      assert_equal(:show_observation_hide_map.l, tab.title)
-      assert_equal(routes.javascript_hide_thumbnail_map_path(id: @obs.id),
-                   tab.path)
-      assert_equal(:hide, tab.html_options[:icon])
-    end
-
     def test_reuse_images
       tab = Tab::Observation::ReuseImages.new(observation: @obs)
 

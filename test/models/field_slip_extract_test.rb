@@ -9,10 +9,12 @@ class FieldSlipExtractTest < UnitTestCase
     @obs.images << @image unless @obs.images.include?(@image)
   end
 
-  def result(fields: {}, confidence: {}, provider: "gemini", model: "m")
+  DEFAULT_RESULT = { provider: "gemini", model: "m",
+                     raw: { "ok" => true } }.freeze
+
+  def result(fields: {}, confidence: {}, **overrides)
     FieldSlip::Extractor::Result.new(
-      provider: provider, model: model, raw: { "ok" => true },
-      fields: fields, confidence: confidence
+      **DEFAULT_RESULT, fields: fields, confidence: confidence, **overrides
     )
   end
 
@@ -23,6 +25,25 @@ class FieldSlipExtractTest < UnitTestCase
 
   # One row per image: pressing the button again replaces the previous
   # read rather than accumulating versions nobody reviews.
+  # A read of a specimen photo is stored like any other, but marked, so
+  # a consumer can tell "nothing on this slip" from "no slip here".
+  def test_record_stores_the_no_slip_flag
+    assert(record(slip_present: false).no_slip?)
+    assert_not(record(slip_present: true).no_slip?)
+    assert_not(record.no_slip?, "an unreported flag is not evidence")
+  end
+
+  # Both boxes come back null; only one is worth another photo.
+  def test_record_stores_which_fields_were_unreadable
+    extract = record(fields: { "Substrate" => nil, "Habit" => nil },
+                     unreadable: ["Substrate"])
+
+    assert_equal(["Substrate"], extract.unreadable)
+    assert(extract.unreadable?("Substrate"))
+    assert_not(extract.unreadable?("Habit"))
+    assert_empty(record.unreadable, "nothing reported means nothing missing")
+  end
+
   def test_record_replaces_rather_than_accumulates
     first = record(fields: { "Collector" => "A" })
     second = record(fields: { "Collector" => "B" })
