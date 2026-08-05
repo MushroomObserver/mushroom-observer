@@ -19,18 +19,18 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     FAKE_INAT_ID = 87_654_321
 
     def initialize(name:, quality_grade: "needs_id", collector: "A Collector",
-                   owner_login: "danmorton", owner_name: "Daniel Morton")
+                   owner: { login: "danmorton", name: "Daniel Morton" },
+                   lead_overrides: {})
       @name = name
       @quality_grade = quality_grade
       @collector = collector
-      @owner_login = owner_login
-      @owner_name = owner_name
+      @owner_login = owner[:login]
+      @owner_name = owner[:name]
+      @provisional_name = lead_overrides[:provisional_name]
+      @name_override = lead_overrides[:name_override]
     end
 
-    attr_reader :name, :collector
-
-    def provisional_name = nil
-    def name_override = nil
+    attr_reader :name, :collector, :provisional_name, :name_override
 
     def when = Date.new(2024, 4, 29)
     def location = ::Location.find_by(name: "Albion, California, USA")
@@ -57,10 +57,13 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     assert_equal("Albion, California, USA", obs.where, "Wrong location")
     assert_equal("A Collector", obs.collector, "Wrong collector")
     assert(obs.placeholder?, "Skeleton obs should be flagged placeholder")
+    assert(obs.reflection?,
+           "Skeleton obs should be a reflection, so it's Sync-eligible")
     assert_equal(0, obs.images.length, "Skeleton should have no images")
     assert_equal(1, obs.namings.length, "Skeleton should have 1 naming")
     assert_equal(users(:rolf), obs.namings.first.user,
                  "Skeleton's naming should always be attributed to importer")
+    assert_naming_reason(obs)
     assert_placeholder_notes(obs)
     assert(
       ExternalLink.exists?(target: obs, external_site: ExternalSite.inaturalist,
@@ -73,6 +76,42 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     assert_equal([], builder.created_image_ids)
   end
 
+  # Regression: a skeleton must track the pure Leading ID (the community
+  # taxon) even when the iNat obs also carries a "Species Name Override"
+  # or "Provisional Species Name" observation field -- unlike a full
+  # import, a skeleton has exactly one, un-attributed Naming, so honoring
+  # either field would silently substitute a name nobody asked MO to
+  # track.
+  def test_mo_observation_ignores_name_override
+    fake = FakeInatObs.new(name: names(:peltigera),
+                           lead_overrides: { name_override: "Coprinus" })
+    builder = Inat::SkeletonObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf),
+      external_site: ExternalSite.inaturalist
+    )
+
+    obs = builder.mo_observation
+
+    assert_equal(names(:peltigera), obs.name,
+                 "Skeleton should track the community taxon, not an " \
+                 "iNat 'Species Name Override' field")
+  end
+
+  def test_mo_observation_ignores_provisional_name
+    fake = FakeInatObs.new(name: names(:peltigera),
+                           lead_overrides: { provisional_name: "Coprinus" })
+    builder = Inat::SkeletonObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf),
+      external_site: ExternalSite.inaturalist
+    )
+
+    obs = builder.mo_observation
+
+    assert_equal(names(:peltigera), obs.name,
+                 "Skeleton should track the community taxon, not an " \
+                 "iNat 'Provisional Species Name' field")
+  end
+
   def test_mo_observation_destroys_persisted_observation_on_later_failure
     builder = builder_for(name: names(:peltigera))
 
@@ -82,6 +121,18 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
         assert_raises(RuntimeError) { builder.mo_observation }
       end
     end
+  end
+
+  def assert_naming_reason(obs)
+    reason = obs.namings.first.reasons[2]
+    today = Time.zone.today.strftime("%Y-%m-%d")
+    assert_equal(
+      "<a href=\"#{Inat::Constants::SITE}/observations/" \
+      "#{FakeInatObs::FAKE_INAT_ID}\">iNat #{FakeInatObs::FAKE_INAT_ID}</a>, " \
+      "#{:inat_leading_id.l} #{today}",
+      reason,
+      "Wrong 'Used references' reason text on the skeleton's naming"
+    )
   end
 
   def assert_placeholder_notes(obs)

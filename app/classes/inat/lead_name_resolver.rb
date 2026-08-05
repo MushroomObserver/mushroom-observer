@@ -58,6 +58,31 @@ class Inat
       @lead_name ||= preferred(override_name || prov_name || community_name)
     end
 
+    # The pure "Leading ID" (iNat's community/Observation Taxon), ignoring
+    # "Species Name Override" and "Provisional Species Name"
+    # field entirely -- unlike #lead_name.
+    # A skeleton counterpart (#4828)
+    # always tracks this, both at initial import
+    # (Inat::SkeletonObservationBuilder) and at every later resync (#4215):
+    # unlike a full import, it has exactly one, un-attributed Naming, so
+    # honoring an override/provisional field there would silently
+    # substitute a name nobody asked MO to track, in place of the taxon
+    # iNat itself is actually leading with.
+    def leading_id_name
+      @leading_id_name ||= preferred(community_name)
+    end
+
+    # Citation text for the single, un-attributed "Used references" reason
+    # a skeleton counterpart's Naming carries -- shared by the initial
+    # import (Inat::SkeletonObservationBuilder) and any later resync that
+    # revises the naming when iNat's own lead taxon has changed (#4828,
+    # #4215).
+    def reason_text
+      link = "<a href=\"#{Inat::Constants::SITE}/observations/" \
+             "#{inat_obs[:id]}\">iNat #{inat_obs[:id]}</a>"
+      "#{link}, #{:inat_leading_id.l} #{Time.zone.today.strftime("%Y-%m-%d")}"
+    end
+
     # A deprecated name's best preferred synonym, else the name itself
     # (falling back to itself when a deprecated name has no approved synonym).
     def preferred(name)

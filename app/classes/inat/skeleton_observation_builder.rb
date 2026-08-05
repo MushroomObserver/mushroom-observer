@@ -39,13 +39,20 @@ class Inat
 
     def create_observation
       @observation = Observation.create(new_obs_params)
-      add_naming_with_vote(name: name_resolver.lead_name, value: naming_vote)
+      add_naming_with_vote(name: name_resolver.leading_id_name,
+                           value: naming_vote)
       @observation.log(:log_observation_created, user: user)
     end
 
     def new_obs_params
       { user: user, notes: placeholder_notes, placeholder: true,
-        inat_import_id: @inat_import&.id }.
+        inat_import_id: @inat_import&.id,
+        # A skeleton is a minimal, one-time counterpart, but the fields it
+        # does carry (date/location/leading ID) still come from iNat and
+        # can drift -- mark it reflected so it's Sync-eligible like a full
+        # import (#4215). Inat::ObservationResyncer narrows what it
+        # actually touches for a placeholder (see its own comments).
+        reflected_at: Time.zone.now }.
         merge(location_attrs).merge(name_attrs).merge(collector_attrs)
     end
 
@@ -55,9 +62,12 @@ class Inat
         gps_hidden: inat_obs.gps_hidden }
     end
 
+    # Always the pure Leading ID (Inat::LeadNameResolver#leading_id_name),
+    # never an override/provisional-name observation field -- a skeleton
+    # tracks iNat's own taxon, not a curator's aside (#4828).
     def name_attrs
-      lead_name = name_resolver.lead_name
-      { name_id: lead_name.id, text_name: lead_name.text_name }
+      name = name_resolver.leading_id_name
+      { name_id: name.id, text_name: name.text_name }
     end
 
     # Link the collector to an MO user when the iNat collector (a custom
@@ -141,11 +151,11 @@ class Inat
 
     # A single citation, not differentiated by override/provisional/
     # community (unlike Inat::MoObservationBuilder::NamingReasons) since
-    # there's only ever one, un-attributed lead naming here.
+    # there's only ever one, un-attributed lead naming here. Shared text
+    # format with a later resync's naming revision -- see
+    # Inat::LeadNameResolver#reason_text.
     def naming_reason
-      inat_link = "<a href=\"#{inat_obs_url}\">iNat #{inat_obs[:id]}</a>"
-      "#{inat_link}, #{:inat_leading_id.l} " \
-        "#{Time.zone.today.strftime("%Y-%m-%d")}"
+      name_resolver.reason_text
     end
 
     # Confidence weight, matching Inat::MoObservationBuilder#naming_vote's
