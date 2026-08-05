@@ -88,6 +88,32 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
     assert_equal(false, result.slip_present)
   end
 
+  # A null means "no value from this image" either way, but only a
+  # field listed unreadable is worth looking for in another photo.
+  def test_separates_unreadable_fields_from_empty_boxes
+    stub_gemini(json_payload(fields: { "Substrate" => nil, "Habit" => nil },
+                             unreadable: ["Substrate"]))
+
+    result = extract
+
+    assert_equal(["Substrate"], result.unreadable)
+    assert(result.unreadable?("Substrate"))
+    assert_not(result.unreadable?("Habit"), "an empty box is not unreadable")
+  end
+
+  def test_unreadable_drops_names_that_are_not_slip_fields
+    stub_gemini(json_payload(fields: {},
+                             unreadable: ["Substrate", "Invented Field"]))
+
+    assert_equal(["Substrate"], extract.unreadable)
+  end
+
+  def test_unreadable_defaults_to_empty_when_not_reported
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" }))
+
+    assert_empty(extract.unreadable)
+  end
+
   # A model that stringifies its booleans must still be understood --
   # reading "false" as unknown would quietly merge a specimen photo's
   # invented values (Copilot review on PR #4993).

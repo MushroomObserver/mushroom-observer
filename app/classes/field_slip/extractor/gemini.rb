@@ -39,7 +39,8 @@ class FieldSlip
                    model: raw["modelVersion"].presence || @model, raw: raw,
                    fields: payload["fields"] || {},
                    confidence: payload["confidence"] || {},
-                   slip_present: payload["slip_present"])
+                   slip_present: payload["slip_present"],
+                   unreadable: payload["unreadable"])
       end
 
       class MissingKey < StandardError

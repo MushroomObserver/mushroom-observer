@@ -51,7 +51,15 @@ class FieldSlip
           Rules:
           - Transcribe what is written. Do not correct spelling or
             expand a name you are unsure of.
-          - Use null for a field that is blank or unreadable.
+          - Use null for a field you cannot give a value for, whether
+            its box is empty or its writing cannot be made out. Most
+            slips leave several boxes empty; some fill in only one.
+          - List in "unreadable" only those fields that DO have
+            writing you could not recover -- cut off by the edge of
+            the photo, blurred, obscured, or washed out by glare. A
+            box the collector left empty is not unreadable. Getting
+            this right decides whether another photo is worth
+            consulting for that field.
           - "Field Slip Code" is printed, not handwritten, and looks
             like #{code_example}. It also appears in the QR code.
           - "ID" is the name written by the collector. It may be a
@@ -127,6 +135,7 @@ class FieldSlip
             "slip_present": true | false,
             "fields": { <each key above>: <string or null> },
             "confidence": { <each key above>: "high" | "medium" | "low" },
+            "unreadable": [ <keys written on the slip but not recoverable> ],
             "notes": "anything about readability worth a reviewer knowing"
           }
         FORMAT

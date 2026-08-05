@@ -40,6 +40,16 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     assert_includes(text, "never a source of answers")
   end
 
+  # Most slips leave several boxes empty and some fill in only one, so
+  # a null is only worth chasing into another photo when the box had
+  # writing the camera missed.
+  def test_asks_which_nulls_were_written_but_unreadable
+    text = prompt
+
+    assert_includes(text, "unreadable")
+    assert_includes(text, "left empty is not unreadable")
+  end
+
   # The whole point of building the prompt from the database: the walk
   # numbers a foray actually uses, not a list written into the code.
   def test_includes_the_projects_location_aliases

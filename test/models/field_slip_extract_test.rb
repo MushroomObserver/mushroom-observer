@@ -9,11 +9,12 @@ class FieldSlipExtractTest < UnitTestCase
     @obs.images << @image unless @obs.images.include?(@image)
   end
 
-  def result(fields: {}, confidence: {}, provider: "gemini", model: "m",
-             slip_present: nil)
+  DEFAULT_RESULT = { provider: "gemini", model: "m",
+                     raw: { "ok" => true } }.freeze
+
+  def result(fields: {}, confidence: {}, **overrides)
     FieldSlip::Extractor::Result.new(
-      provider: provider, model: model, raw: { "ok" => true },
-      fields: fields, confidence: confidence, slip_present: slip_present
+      **DEFAULT_RESULT, fields: fields, confidence: confidence, **overrides
     )
   end
 
@@ -30,6 +31,17 @@ class FieldSlipExtractTest < UnitTestCase
     assert(record(slip_present: false).no_slip?)
     assert_not(record(slip_present: true).no_slip?)
     assert_not(record.no_slip?, "an unreported flag is not evidence")
+  end
+
+  # Both boxes come back null; only one is worth another photo.
+  def test_record_stores_which_fields_were_unreadable
+    extract = record(fields: { "Substrate" => nil, "Habit" => nil },
+                     unreadable: ["Substrate"])
+
+    assert_equal(["Substrate"], extract.unreadable)
+    assert(extract.unreadable?("Substrate"))
+    assert_not(extract.unreadable?("Habit"))
+    assert_empty(record.unreadable, "nothing reported means nothing missing")
   end
 
   def test_record_replaces_rather_than_accumulates
