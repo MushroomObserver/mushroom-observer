@@ -79,19 +79,28 @@ module RuboCop
         end
 
         def each_duplicate_render_group(test_defs)
-          renders_by_class = Hash.new { |h, k| h[k] = [] }
+          renders_by_class(test_defs).each_value do |pairs|
+            # Only a repeat across sibling test methods counts -- two
+            # calls to the same class within ONE test method (e.g.
+            # comparing two renders side by side) aren't the pattern
+            # this cop targets.
+            next if pairs.map(&:first).uniq.size < 2
+
+            yield(pairs.map(&:last))
+          end
+        end
+
+        def renders_by_class(test_defs)
+          grouped = Hash.new { |h, k| h[k] = [] }
           test_defs.each do |def_node|
             def_node.each_descendant(:send) do |send_node|
               next unless render_new_call?(send_node)
 
               key = send_node.first_argument.receiver.source
-              renders_by_class[key] << send_node
+              grouped[key] << [def_node, send_node]
             end
           end
-
-          renders_by_class.each_value do |nodes|
-            yield(nodes) if nodes.size > 1
-          end
+          grouped
         end
 
         def render_new_call?(node)
