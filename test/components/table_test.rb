@@ -12,7 +12,7 @@ class TableTest < ComponentTestCase
       TestRow.new(name: "Bob", age: 25)
     ]
 
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.column("Name", &:name)
       t.column("Age", &:age)
     end
@@ -36,7 +36,7 @@ class TableTest < ComponentTestCase
   def test_renders_empty_table_with_no_rows
     rows = []
 
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.column("Name", &:name)
     end
 
@@ -51,8 +51,7 @@ class TableTest < ComponentTestCase
   def test_accepts_custom_class
     rows = [TestRow.new(name: "Test")]
 
-    html = render(Components::Table.new(rows,
-                                        class: "table-sm w-100")) do |t|
+    html = render_table(rows, class: "table-sm w-100") do |t|
       t.column("Name", &:name)
     end
 
@@ -62,7 +61,7 @@ class TableTest < ComponentTestCase
   def test_variant_kwarg_adds_bootstrap_modifier_class
     rows = [TestRow.new(name: "Test")]
 
-    html = render(Components::Table.new(rows, variant: :striped)) do |t|
+    html = render_table(rows, variant: :striped) do |t|
       t.column("Name", &:name)
     end
 
@@ -72,8 +71,7 @@ class TableTest < ComponentTestCase
   def test_variant_kwarg_accepts_array_for_multiple_modifiers
     rows = [TestRow.new(name: "Test")]
 
-    html = render(Components::Table.new(rows,
-                                        variant: [:striped, :hover])) do |t|
+    html = render_table(rows, variant: [:striped, :hover]) do |t|
       t.column("Name", &:name)
     end
 
@@ -83,7 +81,7 @@ class TableTest < ComponentTestCase
   def test_identifier_kwarg_adds_table_identifier_class
     rows = [TestRow.new(name: "Test")]
 
-    html = render(Components::Table.new(rows, identifier: "my-widget")) do |t|
+    html = render_table(rows, identifier: "my-widget") do |t|
       t.column("Name", &:name)
     end
 
@@ -93,7 +91,7 @@ class TableTest < ComponentTestCase
   def test_accepts_custom_id
     rows = [TestRow.new(name: "Test")]
 
-    html = render(Components::Table.new(rows, id: "my-table")) do |t|
+    html = render_table(rows, id: "my-table") do |t|
       t.column("Name", &:name)
     end
 
@@ -112,7 +110,7 @@ class TableTest < ComponentTestCase
   def test_works_with_activerecord_objects
     user_list = [users(:rolf), users(:mary)]
 
-    html = render(Components::Table.new(user_list)) do |t|
+    html = render_table(user_list) do |t|
       t.column("Login", &:login)
     end
 
@@ -125,7 +123,7 @@ class TableTest < ComponentTestCase
   def test_column_content_can_include_html
     rows = [TestRow.new(name: "Alice", url: "/users/1")]
 
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.column("Name") do |row|
         view_context.link_to(row.name, row.url)
       end
@@ -137,7 +135,7 @@ class TableTest < ComponentTestCase
   def test_per_column_class_lands_on_both_th_and_td
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.column("Name", class: "text-right", &:name)
     end
 
@@ -148,7 +146,7 @@ class TableTest < ComponentTestCase
   def test_per_column_arbitrary_attrs_forwarded_to_th_and_td
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.column("Name", width: "33%", data: { x: "v" }, &:name)
     end
 
@@ -160,8 +158,7 @@ class TableTest < ComponentTestCase
   def test_tbody_id_for_turbo_stream_targeting
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(rows,
-                                        tbody_id: "users_tbody")) do |t|
+    html = render_table(rows, tbody_id: "users_tbody") do |t|
       t.column("Name", &:name)
     end
 
@@ -171,11 +168,9 @@ class TableTest < ComponentTestCase
   def test_table_attributes_hash_lands_on_table_element
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(
-                    rows,
-                    attributes: { cols: "1",
-                                  data: { controller: "name-list" } }
-                  )) do |t|
+    html = render_table(
+      rows, attributes: { cols: "1", data: { controller: "name-list" } }
+    ) do |t|
       t.column("Name", &:name)
     end
 
@@ -218,7 +213,7 @@ class TableTest < ComponentTestCase
   def test_headers_false_skips_thead
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(rows, show_headers: false)) do |t|
+    html = render_table(rows, show_headers: false) do |t|
       t.column("Name", &:name)
     end
 
@@ -238,7 +233,7 @@ class TableTest < ComponentTestCase
     # Block return values become the cell content — production
     # callers use Phlex `plain` / `trusted_html` etc. inside the
     # block because the block runs in Phlex view context there.
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.heading { "Section label:" }
       t.column("Name", &:name)
       t.column("Age", &:age)
@@ -257,7 +252,7 @@ class TableTest < ComponentTestCase
   def test_heading_forwards_attributes_to_th
     rows = []
 
-    html = render(Components::Table.new(rows)) do |t|
+    html = render_table(rows) do |t|
       t.heading(class: "text-center", data: { foo: "bar" }) { "Curators:" }
       t.column("a", &:name)
       t.column("b", &:name)
@@ -271,7 +266,7 @@ class TableTest < ComponentTestCase
   def test_heading_with_show_headers_false_renders_no_thead
     rows = [TestRow.new(name: "Alice")]
 
-    html = render(Components::Table.new(rows, show_headers: false)) do |t|
+    html = render_table(rows, show_headers: false) do |t|
       t.heading { "Suppressed:" }
       t.column("Name", &:name)
     end
@@ -290,6 +285,12 @@ class TableTest < ComponentTestCase
     assert_html(html, "table tbody:first-child tr td", text: "A")
     assert_html(html, "table tbody#collapse-1.collapse tr td", text: "B")
     assert_html(html, "table tbody#collapse-2.collapse tr td", text: "C")
+  end
+
+  private
+
+  def render_table(rows, **, &block)
+    render(Components::Table.new(rows, **), &block)
   end
 end
 
