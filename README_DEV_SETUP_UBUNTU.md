@@ -23,7 +23,7 @@ MacBook Pro) they take under 3 minutes.
 
 Shortly after I was able to access the web-based console from the DO UI
 
-# Run ubuntu_setup_root
+# Run dev_setup_ubuntu_root
 I don't recommend running straight from a web console due to
 potential timeouts.  Better to run screen.  Note that the -L option
 puts all the output in a file in the root home directory which can be
@@ -32,7 +32,7 @@ reviewed for errors.  From the web-based console run `screen -L`.
 On any freshly built Ubuntu box, you should be able to run:
 
 ```sh
-  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/ubuntu_setup_root | bash
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu_root | bash
 ```
 
 This has only actually been tested on a DO droplet as described
@@ -61,12 +61,12 @@ using the IP address of the droplet.
   ssh mo@<ip>
 ```
 
-# Run ubuntu_setup_mo as the mo user
+# Run dev_setup_ubuntu as the mo user
 Again, I recomend running this inside `screen -L` if you aren't already
 doing that.
 
 ```sh
-  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/ubuntu_setup_mo | bash
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
 ```
 
 at the end of this script it runs the entire test suite which should
