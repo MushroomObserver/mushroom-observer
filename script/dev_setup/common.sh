@@ -118,6 +118,39 @@ mo_init_or_migrate_db() {
     fi
 }
 
+# Clones (or updates) the private, licensed icon-library repo into
+# vendor/assets/images/icons/. Best-effort: not every dev has access
+# yet, and nothing in the app references these assets yet, so a
+# failure here is a warning, not a reason to abort the rest of setup.
+mo_sync_icon_library() {
+    icons_dir="vendor/assets/images/icons"
+
+    if [ -d "$icons_dir/.git" ]; then
+        origin=$(git -C "$icons_dir" remote get-url origin 2>/dev/null)
+        case "$origin" in
+            *MushroomObserver/icon-library*)
+                git -C "$icons_dir" pull --quiet
+                echo "Updated $icons_dir"
+                ;;
+            *)
+                echo "$icons_dir exists but isn't a MushroomObserver/icon-library"
+                echo "checkout -- leaving it alone."
+                ;;
+        esac
+    elif [ -d "$icons_dir" ]; then
+        echo "$icons_dir exists but isn't a git checkout -- leaving it alone."
+    elif git clone --quiet git@github.com:MushroomObserver/icon-library.git \
+        "$icons_dir" 2>/dev/null ||
+        git clone --quiet https://github.com/MushroomObserver/icon-library.git \
+            "$icons_dir" 2>/dev/null; then
+        echo "Cloned $icons_dir"
+    else
+        echo "Could not clone MushroomObserver/icon-library (no access yet?) --"
+        echo "skipping. Ask an MO admin for access if you need it; the rest of"
+        echo "setup doesn't depend on it."
+    fi
+}
+
 # Installs the pre-commit hook that blocks direct commits to main.
 # Uses `git rev-parse --git-path hooks` rather than a hardcoded
 # .git/hooks -- that path is wrong in worktrees (.git is a file

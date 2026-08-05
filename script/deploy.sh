@@ -15,6 +15,45 @@ if [ "$RAILS_ENV" != "production" ]; then
     exit 1
 fi
 
+# Manual, opt-in icon-library refresh -- deliberately NOT part of a
+# standard deploy (the icon-library repo has its own release cadence,
+# unrelated to app code). Exits here rather than falling through to
+# the code-deploy flow below, since none of that (git branch check,
+# maintenance page, puma/solidqueue stop, db:migrate, lang:update)
+# applies to a licensed-asset-only refresh.
+if [ "$1" = "--icons-only" ]; then
+    icons_dir="vendor/assets/images/icons"
+
+    if [ -d "$icons_dir/.git" ]; then
+        echo Pulling latest icon-library... && git -C "$icons_dir" pull
+    else
+        echo "$icons_dir isn't a checkout yet -- cloning..."
+        git clone git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
+            git clone https://github.com/MushroomObserver/icon-library.git "$icons_dir"
+    fi
+    if [ $? -ne 0 ]; then
+        echo Updating the icon library failed.
+        exit 1
+    fi
+
+    # Assets are precompiled (config.assets.compile = false in
+    # production) and fingerprinted, so new icon files aren't live
+    # until recompiled. `service puma reload` sends SIGUSR2 (see
+    # config/etc/puma.service's ExecReload) -- Puma's hot restart,
+    # which re-execs and picks up the new manifest while keeping the
+    # listening socket, so this needs neither the maintenance page
+    # nor a full stop/start.
+    echo Precompiling assets... && rake assets:precompile
+    if [ $? -ne 0 ]; then
+        echo assets:precompile failed.
+        exit 1
+    fi
+
+    echo Reloading puma... && sudo service puma reload
+    echo SUCCESS\!
+    exit 0
+fi
+
 if [ "$(git branch | grep '^\*')" != "* main" ]; then
     echo Please switch to main branch.
     exit 1

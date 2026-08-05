@@ -45,6 +45,13 @@ mo_ensure_repo
 source script/dev_setup/common.sh
 # shellcheck source=script/dev_setup/finish_app_setup.sh
 source script/dev_setup/finish_app_setup.sh
+# shellcheck source=script/dev_setup/sync_mo_icon_library.sh
+source script/dev_setup/sync_mo_icon_library.sh
+
+if [ "$1" = "--icons-only" ]; then
+    mo_sync_icon_library
+    exit 0
+fi
 
 ruby-install ruby "$(cat .ruby-version)"
 
@@ -66,6 +73,7 @@ fi
 echo "Ruby version check passed: $ACTUAL_RUBY"
 
 mo_finish_app_setup "ubuntu"
+mo_sync_icon_library
 
 # Rock and Roll!
 bin/rails test

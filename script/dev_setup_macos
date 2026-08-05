@@ -9,6 +9,8 @@
 #   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_macos | bash
 # Usage (from an existing checkout):
 #   script/dev_setup_macos
+# Usage (just (re)sync the private icon-library repo, skip everything else):
+#   script/dev_setup_macos --icons-only
 
 # Make sure Xcode Command Line Tools is installed
 if ! xcode-select -p >/dev/null 2>&1; then
@@ -48,6 +50,13 @@ MO_REEXEC_SCRIPT="$PWD/script/dev_setup_macos" source script/bash_ensure_modern
 source script/dev_setup/common.sh
 # shellcheck source=script/dev_setup/finish_app_setup.sh
 source script/dev_setup/finish_app_setup.sh
+# shellcheck source=script/dev_setup/sync_mo_icon_library.sh
+source script/dev_setup/sync_mo_icon_library.sh
+
+if [ "$1" = "--icons-only" ]; then
+    mo_sync_icon_library
+    exit 0
+fi
 
 # Check MySQL install
 if command -v mysql >/dev/null 2>&1; then
@@ -120,6 +129,7 @@ else
 fi
 
 mo_finish_app_setup "macos"
+mo_sync_icon_library
 
 # ---------------------------------------------------------------------
 # Rock and roll
