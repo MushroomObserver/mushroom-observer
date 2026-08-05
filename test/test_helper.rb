@@ -217,6 +217,20 @@ module ActiveSupport
       UserGroup.reset_request_cache
     end
 
+    # Otherwise WebMock accumulates every request made anywhere in this
+    # worker process, so `assert_requested`/`assert_not_requested`
+    # answer "did ANY test make that call?" rather than "did this
+    # one?" -- passing or failing on test order. Clears the request log
+    # only, not stubs a test registered in `setup`.
+    #
+    # A `teardown do` callback rather than the `def teardown` below,
+    # for the same reason `setup do` is used above: several classes
+    # override `def teardown` without calling `super`
+    # (application_system_test_case, image_loader_job_test,
+    # images/originals_controller_test among them), and those are
+    # exactly the WebMock-using tests this needs to cover.
+    teardown { WebMock.reset_executed_requests! }
+
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
     def teardown
