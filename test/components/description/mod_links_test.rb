@@ -6,9 +6,7 @@ class DescriptionModLinksTest < ComponentTestCase
   def test_renders_nothing_for_anonymous_viewer
     desc = name_descriptions(:peltigera_user_desc)
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: nil
-                  )).strip
+    html = render_mod_links(description: desc, user: nil).strip
 
     # No user → no writer → no admin → Clone is the only icon that
     # always shows (state-agnostic), so the strip renders just the
@@ -21,9 +19,7 @@ class DescriptionModLinksTest < ComponentTestCase
   def test_renders_edit_for_writer
     desc = name_descriptions(:peltigera_user_desc)
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: desc.user
-                  ))
+    html = render_mod_links(description: desc, user: desc.user)
 
     assert_html(html, ".edit_name_description_link_#{desc.id}")
   end
@@ -33,9 +29,7 @@ class DescriptionModLinksTest < ComponentTestCase
     admin = users(:rolf)
     stub_admin_mode!
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: admin
-                  ))
+    html = render_mod_links(description: desc, user: admin)
 
     # Admin-only icons (Move, Merge, AdjustPermissions for name desc)
     assert_html(html, ".move_this_description_name_description_link")
@@ -47,9 +41,7 @@ class DescriptionModLinksTest < ComponentTestCase
     desc = location_descriptions(:albion_desc)
     stub_admin_mode!
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: users(:rolf)
-                  ))
+    html = render_mod_links(description: desc, user: users(:rolf))
 
     assert_no_html(html,
                    ".adjust_permissions_location_description_link")
@@ -63,9 +55,7 @@ class DescriptionModLinksTest < ComponentTestCase
       desc.source_type == :public
     stub_admin_mode!
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: users(:rolf)
-                  ))
+    html = render_mod_links(description: desc, user: users(:rolf))
 
     path = routes.publish_name_description_path(desc.id)
     assert_html(html, "form[action='#{path}']")
@@ -77,9 +67,7 @@ class DescriptionModLinksTest < ComponentTestCase
     skip("Need a project-sourced description") if
       desc.source_type != "project" || desc.source_object.nil?
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: users(:rolf)
-                  ))
+    html = render_mod_links(description: desc, user: users(:rolf))
 
     # Project icon points at the project's show page.
     assert_html(html,
@@ -93,12 +81,16 @@ class DescriptionModLinksTest < ComponentTestCase
     skip("Need a public, non-default name desc") unless
       desc.public && desc.parent.description_id != desc.id
 
-    html = render(Components::Description::ModLinks.new(
-                    description: desc, user: users(:rolf)
-                  ))
+    html = render_mod_links(description: desc, user: users(:rolf))
 
     path = routes.make_default_name_description_path(desc.id)
     assert_html(html, "form[action='#{path}']")
     assert_html(html, "input[name='_method'][value='put']")
+  end
+
+  private
+
+  def render_mod_links(**)
+    render(Components::Description::ModLinks.new(**))
   end
 end

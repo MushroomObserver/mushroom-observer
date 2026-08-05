@@ -10,7 +10,7 @@ module Views::Controllers::Observations::Namings::Votes
     end
 
     def test_renders_table_with_header_value_rows_and_totals
-      html = render(Table.new(naming: @naming))
+      html = render_table
 
       assert_html(html, "table.table-naming-votes")
       # Five column headers — five separate `assert_includes` since
@@ -27,7 +27,7 @@ module Views::Controllers::Observations::Namings::Votes
     # (U+00A0) so the column keeps its width even when empty. A
     # regular space would let some browsers collapse the cell.
     def test_spacer_cells_contain_non_breaking_space
-      html = render(Table.new(naming: @naming))
+      html = render_table
       doc = Nokogiri::HTML(html)
 
       header_rows = doc.css("table.table-naming-votes tr")
@@ -49,7 +49,7 @@ module Views::Controllers::Observations::Namings::Votes
     # displayed label actually matches that resolution (not, say, a
     # leftover pre-resolved string from before the refactor).
     def test_renders_resolved_confidence_label_per_row
-      html = render(Table.new(naming: @naming))
+      html = render_table
 
       @naming.votes.map(&:value).uniq.each do |val|
         next if val.zero?
@@ -60,7 +60,7 @@ module Views::Controllers::Observations::Namings::Votes
     end
 
     def test_renders_voter_user_links_for_non_anonymous_votes
-      html = render(Table.new(naming: @naming))
+      html = render_table
 
       assert_html(html, "table.table-naming-votes a[href*='/users/']")
     end
@@ -76,9 +76,15 @@ module Views::Controllers::Observations::Namings::Votes
                      user: u, value: val, favorite: false)
       end
 
-      html = render(Table.new(naming: @naming.reload))
+      html = render_table(naming: @naming.reload)
 
       assert_html(html, "td small", text: "...")
+    end
+
+    private
+
+    def render_table(naming: @naming)
+      render(Table.new(naming: naming))
     end
   end
 end

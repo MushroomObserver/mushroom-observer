@@ -11,7 +11,7 @@ module Views::Controllers::Projects
 
     def test_renders_project
       project = projects(:eol_project)
-      html = render(ListItem.new(project: project))
+      html = render_item(project: project)
 
       # No `.list-group-item` wrapper — supplied by the caller.
       assert_no_html(html, "div.list-group-item")
@@ -27,7 +27,7 @@ module Views::Controllers::Projects
     def test_open_membership_badge
       project = projects(:eol_project)
       project.open_membership = true
-      html = render(ListItem.new(project: project))
+      html = render_item(project: project)
 
       assert_html(html, "span.ml-4")
       assert_includes(html, :open.ti)
@@ -36,9 +36,15 @@ module Views::Controllers::Projects
     def test_closed_membership_no_badge
       project = projects(:eol_project)
       project.open_membership = false
-      html = render(ListItem.new(project: project))
+      html = render_item(project: project)
 
       assert_no_html(html, "span.ml-4")
+    end
+
+    private
+
+    def render_item(**)
+      render(ListItem.new(**))
     end
   end
 end

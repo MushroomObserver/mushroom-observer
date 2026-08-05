@@ -18,17 +18,20 @@ module Views::Controllers::Info
     def test_renders_with_observations
       observations = Observation.where.not(thumb_image_id: nil).
                      limit(6).to_a
-      site_data = ::SiteData.new.get_site_data
-      html = render(SiteStats.new(site_data: site_data,
-                                  observations: observations))
+      html = render_stats(observations: observations)
       assert_html(html, "table.table tr td")
     end
 
     def test_renders_without_observations
-      site_data = ::SiteData.new.get_site_data
-      html = render(SiteStats.new(site_data: site_data,
-                                  observations: nil))
+      html = render_stats(observations: nil)
       assert_html(html, "table.table")
+    end
+
+    private
+
+    def render_stats(**)
+      site_data = ::SiteData.new.get_site_data
+      render(SiteStats.new(site_data: site_data, **))
     end
   end
 end

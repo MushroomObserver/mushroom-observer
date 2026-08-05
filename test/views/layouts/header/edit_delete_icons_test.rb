@@ -14,26 +14,26 @@ module Views::Layouts
     end
 
     def test_always_renders_ul
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @non_owner))
+      html = render_icons(user: @non_owner)
 
       assert_html(html, "ul.object_edit")
     end
 
     def test_renders_empty_ul_when_cannot_edit
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @non_owner))
+      html = render_icons(user: @non_owner)
 
       assert_no_html(html, "ul.object_edit li")
     end
 
     def test_renders_empty_ul_with_nil_user
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: nil))
+      html = render_icons(user: nil)
 
       assert_html(html, "ul.object_edit")
       assert_no_html(html, "ul.object_edit li")
     end
 
     def test_renders_edit_and_delete_li_when_owner
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @owner))
+      html = render_icons(user: @owner)
 
       assert_html(html, "ul.object_edit li", count: 2)
     end
@@ -42,11 +42,17 @@ module Views::Layouts
     # can't be edited on MO) but keeps delete — a separate lifecycle.
     def test_reflection_suppresses_edit_icon_but_keeps_delete
       @obs.update_column(:reflected_at, Time.zone.now)
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @owner))
+      html = render_icons(user: @owner)
 
       assert_html(html, "ul.object_edit li", count: 1)
       assert_no_html(html, "a[href$='/edit']",
                      "a reflection should have no edit-form link")
+    end
+
+    private
+
+    def render_icons(**)
+      render(Header::EditDeleteIcons.new(object: @obs, **))
     end
   end
 end

@@ -17,7 +17,7 @@ class MapTest < ComponentTestCase
   end
 
   def test_renders_map_with_default_attributes
-    html = render(Components::Map.new(objects: [@location]))
+    html = render_map(objects: [@location])
 
     # All default attributes on one element
     assert_html(
@@ -33,20 +33,20 @@ class MapTest < ComponentTestCase
   end
 
   def test_renders_map_without_controller_when_nil
-    html = render(Components::Map.new(objects: [@location], controller: nil))
+    html = render_map(objects: [@location], controller: nil)
 
     assert_no_html(html, "#map_div[data-controller]")
   end
 
   def test_renders_map_with_custom_options
-    html = render(Components::Map.new(
-                    objects: [@location],
-                    map_type: "location",
-                    editable: true,
-                    map_open: false,
-                    need_elevations_value: false,
-                    map_div: "custom_map"
-                  ))
+    html = render_map(
+      objects: [@location],
+      map_type: "location",
+      editable: true,
+      map_open: false,
+      need_elevations_value: false,
+      map_div: "custom_map"
+    )
 
     assert_html(
       html,
@@ -59,7 +59,7 @@ class MapTest < ComponentTestCase
   end
 
   def test_renders_json_data_attributes
-    html = render(Components::Map.new(objects: [@location]))
+    html = render_map(objects: [@location])
     doc = Nokogiri::HTML(html)
     map_div = doc.at_css("#map_div")
 
@@ -82,23 +82,22 @@ class MapTest < ComponentTestCase
 
   def test_renders_nothing_to_map_when_no_mappable_objects
     # Empty objects
-    html = render(Components::Map.new(objects: []))
+    html = render_map(objects: [])
     assert_html(html, "body", text: :runtime_map_nothing_to_map.t)
 
     # Unknown location (no coordinates)
     unknown = Location.new(name: "Earth")
-    html = render(Components::Map.new(objects: [unknown]))
+    html = render_map(objects: [unknown])
     assert_html(html, "body", text: :runtime_map_nothing_to_map.t)
 
     # Custom message
-    html = render(Components::Map.new(objects: [],
-                                      nothing_to_map: "Custom message"))
+    html = render_map(objects: [], nothing_to_map: "Custom message")
     assert_html(html, "body", text: "Custom message")
   end
 
   def test_renders_with_observation
     observation = observations(:detailed_unknown_obs)
-    html = render(Components::Map.new(objects: [observation]))
+    html = render_map(objects: [observation])
 
     assert_html(html, "#map_div")
   end
@@ -237,7 +236,7 @@ class MapTest < ComponentTestCase
   def test_clustering_under_cap_emits_clustering_data_attr
     obs = build_min_obs(lat: 1, lng: 1, vote_cache: 3.0,
                         text_name: "Sp.", observed_on: Date.new(2024, 1, 1))
-    html = render(Components::Map.new(objects: [obs], clustering: true))
+    html = render_map(objects: [obs], clustering: true)
 
     assert_html(html, "#map_div[data-clustering='true']")
     doc = Nokogiri::HTML(html)
@@ -256,7 +255,7 @@ class MapTest < ComponentTestCase
                     text_name: "Sp #{i}",
                     observed_on: Date.new(2024, 1, i + 1))
     end
-    html = render(Components::Map.new(objects: obs, clustering: true))
+    html = render_map(objects: obs, clustering: true)
 
     assert_no_html(html, "#map_div[data-clustering]")
   ensure
@@ -269,10 +268,10 @@ class MapTest < ComponentTestCase
   def test_capped_with_clustering_renders_visible_cap_banner
     obs = build_min_obs(lat: 1, lng: 1, vote_cache: 3.0,
                         text_name: "Sp.", observed_on: Date.new(2024, 1, 1))
-    html = render(Components::Map.new(objects: [obs], clustering: true,
-                                      capped: true,
-                                      observations_loaded_count: 10_000,
-                                      observations_total_count: 12_345))
+    html = render_map(objects: [obs], clustering: true,
+                      capped: true,
+                      observations_loaded_count: 10_000,
+                      observations_total_count: 12_345)
 
     assert_html(html, "#map_cap_banner.alert.alert-warning")
     doc = Nokogiri::HTML(html)
@@ -286,10 +285,10 @@ class MapTest < ComponentTestCase
   def test_uncapped_with_clustering_renders_hidden_cap_banner
     obs = build_min_obs(lat: 1, lng: 1, vote_cache: 3.0,
                         text_name: "Sp.", observed_on: Date.new(2024, 1, 1))
-    html = render(Components::Map.new(objects: [obs], clustering: true,
-                                      capped: false,
-                                      observations_loaded_count: 100,
-                                      observations_total_count: 100))
+    html = render_map(objects: [obs], clustering: true,
+                      capped: false,
+                      observations_loaded_count: 100,
+                      observations_total_count: 100)
 
     assert_html(html, "#map_cap_banner[style*='display:none']")
   end
@@ -297,20 +296,19 @@ class MapTest < ComponentTestCase
   def test_no_cap_banner_without_clustering
     obs = build_min_obs(lat: 1, lng: 1, vote_cache: 3.0,
                         text_name: "Sp.", observed_on: Date.new(2024, 1, 1))
-    html = render(Components::Map.new(objects: [obs]))
+    html = render_map(objects: [obs])
 
     assert_no_html(html, "#map_cap_banner")
   end
 
   def test_zoom_forwarded_as_data_zoom
-    html = render(Components::Map.new(objects: [@location], zoom: 4))
+    html = render_map(objects: [@location], zoom: 4)
 
     assert_html(html, "#map_div[data-zoom='4']")
   end
 
   def test_cluster_query_string_forwarded_when_present
-    html = render(Components::Map.new(objects: [@location],
-                                      cluster_query_string: "q=ABC"))
+    html = render_map(objects: [@location], cluster_query_string: "q=ABC")
 
     assert_html(html, "#map_div[data-cluster-query-string='q=ABC']")
   end
@@ -322,31 +320,29 @@ class MapTest < ComponentTestCase
 
   def test_location_format_prop_wins_over_user_prop_and_current_user
     controller.instance_variable_set(:@user, users(:roy)) # scientific
-    html = render(Components::Map.new(objects: [@location],
-                                      user: users(:roy),
-                                      location_format: "postal"))
+    html = render_map(objects: [@location], user: users(:roy),
+                      location_format: "postal")
 
     assert_html(html, "#map_div[data-location-format='postal']")
   end
 
   def test_location_format_falls_back_to_user_prop
     controller.instance_variable_set(:@user, users(:rolf)) # postal
-    html = render(Components::Map.new(objects: [@location],
-                                      user: users(:roy)))
+    html = render_map(objects: [@location], user: users(:roy))
 
     assert_html(html, "#map_div[data-location-format='scientific']")
   end
 
   def test_location_format_falls_back_to_current_user_without_user_prop
     controller.instance_variable_set(:@user, users(:roy)) # scientific
-    html = render(Components::Map.new(objects: [@location]))
+    html = render_map(objects: [@location])
 
     assert_html(html, "#map_div[data-location-format='scientific']")
   end
 
   def test_location_format_defaults_to_postal_without_any_user
     controller.instance_variable_set(:@user, nil)
-    html = render(Components::Map.new(objects: [@location]))
+    html = render_map(objects: [@location])
 
     assert_html(html, "#map_div[data-location-format='postal']")
   end
@@ -358,7 +354,7 @@ class MapTest < ComponentTestCase
   def test_legend_renders_when_objects_include_observations
     obs = build_min_obs(lat: 1, lng: 1, vote_cache: 3.0,
                         text_name: "Sp.", observed_on: Date.new(2024, 1, 1))
-    html = render(Components::Map.new(objects: [obs]))
+    html = render_map(objects: [obs])
 
     assert_html(html, ".map-legend")
     # Confirmed/tentative/disputed/mixed band labels.
@@ -369,7 +365,7 @@ class MapTest < ComponentTestCase
   end
 
   def test_legend_suppressed_on_location_only_map
-    html = render(Components::Map.new(objects: [@location]))
+    html = render_map(objects: [@location])
 
     assert_no_html(html, ".map-legend")
   end
@@ -400,8 +396,12 @@ class MapTest < ComponentTestCase
     )
   end
 
+  def render_map(**)
+    render(Components::Map.new(**))
+  end
+
   def render_map_json(objects)
-    html = render(Components::Map.new(objects: objects))
+    html = render_map(objects: objects)
     doc = Nokogiri::HTML(html)
     JSON.parse(doc.at_css("#map_div")["data-collection"])
   end
