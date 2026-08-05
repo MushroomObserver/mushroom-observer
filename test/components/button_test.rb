@@ -127,11 +127,10 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   # ---- type: :post / :put / :patch / :delete -------------------------
 
   def test_type_post_emits_post_form_with_submit
-    html = render(Components::Button.new(
-                    type: :post,
-                    name: "Join",
-                    target: routes.herbarium_path(id: @herbarium.id)
-                  ))
+    html = render_dispatch(
+      type: :post, name: "Join",
+      target: routes.herbarium_path(id: @herbarium.id)
+    )
 
     assert_html(html, "form[method='post']")
     assert_html(html, "button[type='submit']", text: "Join")
@@ -139,32 +138,27 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   end
 
   def test_type_put_emits_hidden_method_put
-    html = render(Components::Button.new(
-                    type: :put,
-                    name: "Save",
-                    target: routes.herbarium_path(id: @herbarium.id)
-                  ))
+    html = render_dispatch(
+      type: :put, name: "Save",
+      target: routes.herbarium_path(id: @herbarium.id)
+    )
 
     assert_html(html, "input[name='_method'][value='put']")
     assert_html(html, "button[type='submit']", text: "Save")
   end
 
   def test_type_patch_emits_hidden_method_patch
-    html = render(Components::Button.new(
-                    type: :patch,
-                    name: "Update",
-                    target: routes.herbarium_path(id: @herbarium.id)
-                  ))
+    html = render_dispatch(
+      type: :patch, name: "Update",
+      target: routes.herbarium_path(id: @herbarium.id)
+    )
 
     assert_html(html, "input[name='_method'][value='patch']")
     assert_html(html, "button[type='submit']", text: "Update")
   end
 
   def test_type_delete_emits_hidden_method_delete
-    html = render(Components::Button.new(
-                    type: :delete,
-                    target: @herbarium
-                  ))
+    html = render_dispatch(type: :delete, target: @herbarium)
 
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, "button[type='submit']")
@@ -174,18 +168,14 @@ class Components::ButtonDispatcherTest < ComponentTestCase
 
   def test_type_get_renders_anchor_to_target
     path = routes.herbarium_path(id: @herbarium.id)
-    html = render(Components::Button.new(
-                    type: :get, name: "Show", target: path
-                  ))
+    html = render_dispatch(type: :get, name: "Show", target: path)
 
     assert_html(html, "a[href='#{path}']", text: "Show")
     assert_no_html(html, "form")
   end
 
   def test_type_edit_links_to_edit_path_with_edit_icon
-    html = render(Components::Button.new(
-                    type: :edit, target: @herbarium
-                  ))
+    html = render_dispatch(type: :edit, target: @herbarium)
 
     expected = routes.edit_herbarium_path(id: @herbarium.id)
     assert_html(html, "a[href='#{expected}']")
@@ -194,11 +184,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
 
   def test_type_new_links_to_provided_path_with_add_icon
     path = routes.new_herbarium_path
-    html = render(Components::Button.new(
-                    type: :new,
-                    target: path,
-                    name: "New herbarium"
-                  ))
+    html = render_dispatch(type: :new, target: path, name: "New herbarium")
 
     assert_html(html, "a[href='#{path}']", text: "New herbarium")
     assert_html(html, "a span.glyphicon")
@@ -208,9 +194,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     path = routes.new_download_species_list_path(
       id: species_lists(:first_species_list).id
     )
-    html = render(Components::Button.new(
-                    type: :download, target: path
-                  ))
+    html = render_dispatch(type: :download, target: path)
 
     assert_html(html, "a[href='#{path}']")
     assert_html(html, "a span.glyphicon")
@@ -219,18 +203,15 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   # ---- type: :submit ---------------------------------------------------
 
   def test_type_submit_renders_button_with_submit_type
-    html = render(Components::Button.new(type: :submit, name: "Go"))
+    html = render_dispatch(type: :submit, name: "Go")
 
     assert_html(html, "button[type='submit']", text: "Go")
     assert_no_html(html, "form")
   end
 
   def test_type_submit_passes_submits_with_kwarg
-    html = render(Components::Button.new(
-                    type: :submit,
-                    name: "Save",
-                    submits_with: "Saving…"
-                  ))
+    html = render_dispatch(type: :submit, name: "Save",
+                           submits_with: "Saving…")
 
     assert_html(html,
                 "button[type='submit']" \
@@ -241,9 +222,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
 
   def test_type_external_opens_in_new_tab_with_noopener
     url = "https://blast.ncbi.nlm.nih.gov"
-    html = render(Components::Button.new(
-                    type: :external, name: "BLAST", url: url
-                  ))
+    html = render_dispatch(type: :external, name: "BLAST", url: url)
 
     assert_html(html,
                 "a[href='#{url}']" \
@@ -259,12 +238,8 @@ class Components::ButtonDispatcherTest < ComponentTestCase
       project_id: @project.id,
       candidate: users(:rolf).id
     )
-    html = render(Components::Button.new(
-                    type: :modal,
-                    name: "Trust settings",
-                    target: path,
-                    modal_id: "trust_settings"
-                  ))
+    html = render_dispatch(type: :modal, name: "Trust settings",
+                           target: path, modal_id: "trust_settings")
 
     assert_html(html, "a[href='#{path}']", text: "Trust settings")
     assert_html(html, "a[data-modal='modal_trust_settings']")
@@ -276,13 +251,9 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   # ---- type: :collapse_toggle ------------------------------------------
 
   def test_type_collapse_toggle_renders_two_state_spans
-    html = render(Components::Button.new(
-                    type: :collapse_toggle,
-                    target_id: "map_div",
-                    open_text: "Hide map",
-                    closed_text: "Open map",
-                    collapsed: true
-                  ))
+    html = render_dispatch(type: :collapse_toggle, target_id: "map_div",
+                           open_text: "Hide map", closed_text: "Open map",
+                           collapsed: true)
 
     assert_html(html, "button[type='button'][data-toggle='collapse']" \
                       "[data-target='#map_div']")
@@ -297,27 +268,18 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   # Components::IconWithText's own render_icon_text, never in
   # CollapseContent's spans).
   def test_type_collapse_toggle_with_icon_has_text_gap
-    html = render(Components::Button.new(
-                    type: :collapse_toggle,
-                    target_id: "map_div",
-                    open_text: "Hide map",
-                    closed_text: "Show map",
-                    icon: :globe,
-                    collapsed: true
-                  ))
+    html = render_dispatch(type: :collapse_toggle, target_id: "map_div",
+                           open_text: "Hide map", closed_text: "Show map",
+                           icon: :globe, collapsed: true)
 
     assert_html(html, "button span.collapse-toggle-open.icon-text-gap")
     assert_html(html, "button span.collapse-toggle-closed.icon-text-gap")
   end
 
   def test_type_collapse_toggle_without_icon_has_no_text_gap
-    html = render(Components::Button.new(
-                    type: :collapse_toggle,
-                    target_id: "map_div",
-                    open_text: "Hide map",
-                    closed_text: "Show map",
-                    collapsed: true
-                  ))
+    html = render_dispatch(type: :collapse_toggle, target_id: "map_div",
+                           open_text: "Hide map", closed_text: "Show map",
+                           collapsed: true)
 
     assert_no_html(html, ".icon-text-gap")
   end
@@ -326,11 +288,8 @@ class Components::ButtonDispatcherTest < ComponentTestCase
 
   def test_type_project_dispatches_to_project_with_lg_size
     path = routes.checklist_path(project_id: @project.id)
-    html = render(Components::Button.new(
-                    type: :project,
-                    name: "View checklist",
-                    target: path
-                  ))
+    html = render_dispatch(type: :project, name: "View checklist",
+                           target: path)
 
     assert_html(html, "a[href='#{path}']", text: "View checklist")
     assert_html(html, "a.btn-lg")
@@ -347,10 +306,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   # ---- plain button (no dispatch) --------------------------------------
 
   def test_no_type_renders_plain_button_element
-    html = render(Components::Button.new(
-                    name: "Cancel",
-                    data: { dismiss: "modal" }
-                  ))
+    html = render_dispatch(name: "Cancel", data: { dismiss: "modal" })
 
     assert_html(html, "button[type='button'][data-dismiss='modal']",
                 text: "Cancel")
@@ -360,32 +316,23 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   # ---- variant/size flow through dispatcher ----------------------------
 
   def test_delete_with_string_target_uses_destroy_label
-    html = render(Components::Button.new(type: :delete,
-                                         target: "/items/1/delete",
-                                         name: nil))
+    html = render_dispatch(type: :delete, target: "/items/1/delete",
+                           name: nil)
 
     assert_html(html, "form[action='/items/1/delete']")
     assert_html(html, "button[type='submit']", text: :destroy.ti)
   end
 
   def test_variant_passes_through_mutation_dispatch
-    html = render(Components::Button.new(
-                    type: :delete,
-                    target: @herbarium,
-                    variant: :danger
-                  ))
+    html = render_dispatch(type: :delete, target: @herbarium,
+                           variant: :danger)
 
     assert_html(html, "button[type='submit'].btn-danger")
   end
 
   def test_size_passes_through_get_dispatch
     path = routes.herbarium_path(id: @herbarium.id)
-    html = render(Components::Button.new(
-                    type: :get,
-                    name: "Show",
-                    target: path,
-                    size: :sm
-                  ))
+    html = render_dispatch(type: :get, name: "Show", target: path, size: :sm)
 
     assert_html(html, "a.btn-sm[href='#{path}']")
   end
@@ -413,5 +360,11 @@ class Components::ButtonDispatcherTest < ComponentTestCase
         span(class: "block-sentinel") { plain("from block") }
       end
     end
+  end
+
+  private
+
+  def render_dispatch(**, &block)
+    render(Components::Button.new(**), &block)
   end
 end

@@ -27,15 +27,14 @@ module Views::Controllers::Translations
         ::TranslationsController::TranslationsUIComment.new("a comment"),
         ::TranslationsController::TranslationsUITagField.new(tag_with_string)
       ]
-      html = render(Index.new(
-                      lang: @lang,
-                      tag: tag_with_string,
-                      index: index,
-                      strings: strings,
-                      edit_tags: [tag_with_string],
-                      official_records: records,
-                      translated_records: records
-                    ))
+      html = render_index(
+        tag: tag_with_string,
+        index: index,
+        strings: strings,
+        edit_tags: [tag_with_string],
+        official_records: records,
+        translated_records: records
+      )
       assert_html(html, "p.major_header")
       assert_html(html, "p.minor_header")
       assert_html(html, "p.comment")
@@ -50,16 +49,18 @@ module Views::Controllers::Translations
     # construction, before `render_item` ever runs.
     def test_render_item_raises_for_unrecognized_type
       error = assert_raises(RuntimeError) do
-        render(Index.new(
-                 lang: @lang, index: [UnknownItemType.new("x")],
-                 official_records: {}, translated_records: {}
-               ))
+        render_index(index: [UnknownItemType.new("x")],
+                     official_records: {}, translated_records: {})
       end
       assert_match(/Unexpected form item type: .*UnknownItemType/,
                    error.message)
     end
 
     private
+
+    def render_index(**)
+      render(Index.new(lang: @lang, **))
+    end
 
     def build_records(lang, tag, text)
       return {} unless lang.translation_strings.first

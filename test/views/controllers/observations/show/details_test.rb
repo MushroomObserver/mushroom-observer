@@ -63,9 +63,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     sites = ::ExternalSite.all.to_a
     skip("Need at least one ExternalSite fixture") if sites.empty?
 
-    html = render(Views::Controllers::Observations::Show::Details.new(
-                    obs: obs, user: nil, sites: sites, siblings: []
-                  ))
+    html = render(panel_with(obs, nil, sites: sites))
 
     assert_no_html(html, "#observation_external_links")
   end
@@ -79,9 +77,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     sites = ::ExternalSite.all.to_a
     skip("Need at least one ExternalSite fixture") if sites.empty?
 
-    html = render(Views::Controllers::Observations::Show::Details.new(
-                    obs: obs, user: @user, sites: sites, siblings: []
-                  ))
+    html = render(panel_with(obs, sites: sites))
 
     bodies = Nokogiri::HTML5.fragment(html).css(
       "#observation_details > .panel-body"
@@ -207,9 +203,9 @@ class Views::Controllers::Observations::Show::DetailsTest <
     Nokogiri::HTML.fragment(html).at_css(".obs-who").text
   end
 
-  def panel_with(obs, user = @user)
+  def panel_with(obs, user = @user, sites: [])
     Views::Controllers::Observations::Show::Details.new(
-      obs: obs, user: user, sites: [], siblings: []
+      obs: obs, user: user, sites: sites, siblings: []
     )
   end
 end

@@ -10,16 +10,22 @@ module Views::Layouts::App
     # This fails if the entity gets double-escaped (an earlier bug).
     def test_renders_trusted_message_not_double_escaped
       message = :observation_resync_failed.t
-      html = render(MessageAlert.new(message: message, level: :danger))
+      html = render_alert(message: message, level: :danger)
 
       assert_html(html, "div.alert.alert-danger#flash_notices",
                   text: message.as_displayed)
     end
 
     def test_level_drives_alert_class
-      html = render(MessageAlert.new(message: "Done", level: :success))
+      html = render_alert(message: "Done", level: :success)
 
       assert_html(html, "div.alert.alert-success", text: "Done")
+    end
+
+    private
+
+    def render_alert(**)
+      render(MessageAlert.new(**))
     end
   end
 end

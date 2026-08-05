@@ -14,9 +14,7 @@ class API2::ProjectsTest < UnitTestCase
   #  :section: Project Requests
   # -----------------------------
 
-  def params_get(**)
-    { method: :get, action: :project }.merge(**)
-  end
+  def api2_model = Project
 
   def prj_sample
     @prj_sample ||= Project.all.sample
@@ -113,12 +111,7 @@ class API2::ProjectsTest < UnitTestCase
     @admins  = [rolf]
     @members = [rolf]
     @user    = rolf
-    params = {
-      method: :post,
-      action: :project,
-      api_key: @api_key.key,
-      title: @title
-    }
+    params = params_post(title: @title)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:title))
     assert_api_pass(params)
@@ -128,15 +121,8 @@ class API2::ProjectsTest < UnitTestCase
     @summary = "to do things"
     @admins  = [rolf, mary]
     @members = [rolf, mary, dick]
-    params = {
-      method: :post,
-      action: :project,
-      api_key: @api_key.key,
-      title: @title,
-      summary: @summary,
-      admins: "mary",
-      members: "dick"
-    }
+    params = params_post(title: @title, summary: @summary,
+                         admins: "mary", members: "dick")
     assert_api_pass(params)
     assert_last_project_correct
   end
@@ -148,12 +134,7 @@ class API2::ProjectsTest < UnitTestCase
     # assert_empty(proj.images)
     # assert_empty(proj.observations)
     # assert_empty(proj.species_lists)
-    params = {
-      method: :patch,
-      action: :project,
-      api_key: @api_key.key,
-      id: proj.id
-    }
+    params = params_patch(id: proj.id)
 
     assert_api_fail(params)
     assert_api_fail(params.except(:api_key))
@@ -217,12 +198,7 @@ class API2::ProjectsTest < UnitTestCase
 
   def test_deleting_projects
     proj = projects(:eol_project)
-    params = {
-      method: :delete,
-      action: :project,
-      api_key: @api_key.key,
-      id: proj.id
-    }
+    params = params_delete(id: proj.id)
     # No DELETE requests should be allowed at all.
     assert_api_fail(params)
   end

@@ -10,13 +10,11 @@ class API2::ImagesTest < UnitTestCase
     do_basic_get_test(Image)
   end
 
+  def api2_model = Image
+
   # ---------------------------
   #  :section: Image Requests
   # ---------------------------
-
-  def params_get(**)
-    { method: :get, action: :image }.merge(**)
-  end
 
   def in_situ_img
     @in_situ_img ||= images(:in_situ_image)
@@ -272,13 +270,10 @@ class API2::ImagesTest < UnitTestCase
     @height = 500
     @vote   = nil
     @obs    = nil
-    params  = {
-      method: :post,
-      action: :image,
-      api_key: @api_key.key,
+    params  = params_post(
       upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: "strip_this"
-    }
+    )
     assert_equal("toss", @user.keep_filenames)
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
@@ -307,10 +302,7 @@ class API2::ImagesTest < UnitTestCase
     @height = 500
     @vote   = 3
     @obs    = @user.observations.last
-    params  = {
-      method: :post,
-      action: :image,
-      api_key: @api_key.key,
+    params  = params_post(
       date: "20120626",
       notes: @notes,
       copyright_holder: " My Friend ",
@@ -320,7 +312,7 @@ class API2::ImagesTest < UnitTestCase
       projects: @proj.id,
       upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: @orig
-    }
+    )
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
         api = API2.execute(params)
@@ -348,12 +340,7 @@ class API2::ImagesTest < UnitTestCase
     url = "https://mushroomobserver.org/images/thumb/459340.jpg"
     stub_request(:any, url).
       to_return(Rails.root.join("test/images/test_image.curl").read)
-    params = {
-      method: :post,
-      action: :image,
-      api_key: @api_key.key,
-      upload_url: url
-    }
+    params = params_post(upload_url: url)
     File.stub(:rename, false) do
       api = API2.execute(params)
       assert_no_errors(api, "Errors while posting image")
@@ -374,16 +361,13 @@ class API2::ImagesTest < UnitTestCase
     pd = licenses(:publicdomain)
     assert(rolfs_img.can_edit?(rolf))
     assert_not(marys_img.can_edit?(rolf))
-    params = {
-      method: :patch,
-      action: :image,
-      api_key: @api_key.key,
+    params = params_patch(
       set_date: "2012-3-4",
       set_notes: "new notes",
       set_copyright_holder: "new person",
       set_license: pd.id,
       set_original_name: "new name"
-    }
+    )
     assert_api_fail(params.merge(id: marys_img.id))
     assert_api_fail(params.merge(set_date: ""))
     assert_api_fail(params.merge(set_license: ""))
@@ -416,9 +400,7 @@ class API2::ImagesTest < UnitTestCase
                                verified: Time.zone.now)
     img = images(:in_situ_image)
     assert_nil(img.dhash)
-    params = {
-      method: :patch, action: :image, id: img.id, set_dhash: 12_345
-    }
+    params = params_patch(id: img.id, set_dhash: 12_345)
 
     # A regular user's key is rejected, even for their own image.
     assert_api_fail(params.merge(api_key: @api_key.key,
@@ -449,9 +431,7 @@ class API2::ImagesTest < UnitTestCase
                                verified: Time.zone.now)
     img = images(:in_situ_image)
     max = (2**64) - 1
-    params = {
-      method: :patch, action: :image, id: img.id, api_key: admin_key.key
-    }
+    params = params_patch(id: img.id, api_key: admin_key.key)
 
     assert_api_fail(params.merge(set_dhash: -1))
     assert_api_fail(params.merge(set_dhash: 2**64))
@@ -462,11 +442,7 @@ class API2::ImagesTest < UnitTestCase
   def test_deleting_images
     rolfs_img = rolf.images.sample
     marys_img = mary.images.sample
-    params = {
-      method: :delete,
-      action: :image,
-      api_key: @api_key.key
-    }
+    params = params_delete
     assert_api_fail(params.merge(id: marys_img.id))
     assert_api_pass(params.merge(id: rolfs_img.id))
     assert_not_nil(Image.safe_find(marys_img.id))

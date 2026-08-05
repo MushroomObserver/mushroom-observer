@@ -15,9 +15,7 @@ class API2::FieldSlipsTest < UnitTestCase
   #  :section: Field Slip Requests
   # ---------------------------------------
 
-  def params_get(**)
-    { method: :get, action: :field_slip }.merge(**)
-  end
+  def api2_model = FieldSlip
 
   def test_getting_field_slips_by_code
     slip = field_slips(:field_slip_one)
@@ -61,13 +59,7 @@ class API2::FieldSlipsTest < UnitTestCase
   def test_posting_field_slip
     obs = observations(:detailed_unknown_obs)
     code = "NEMF-#{rand(100_000)}"
-    params = {
-      method: :post,
-      action: :field_slip,
-      api_key: @api_key.key,
-      code: code,
-      observation: obs.id
-    }
+    params = params_post(code: code, observation: obs.id)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:code))
     assert_api_pass(params)
@@ -79,12 +71,7 @@ class API2::FieldSlipsTest < UnitTestCase
 
   def test_posting_field_slip_duplicate_code
     slip = field_slips(:field_slip_one)
-    params = {
-      method: :post,
-      action: :field_slip,
-      api_key: @api_key.key,
-      code: slip.code
-    }
+    params = params_post(code: slip.code)
     # Should fail because code already exists
     assert_api_fail(params)
   end
@@ -92,13 +79,7 @@ class API2::FieldSlipsTest < UnitTestCase
   def test_patching_field_slip
     slip = field_slips(:field_slip_one)
     new_code = "UPDATED-#{rand(100_000)}"
-    params = {
-      method: :patch,
-      action: :field_slip,
-      api_key: @api_key.key,
-      id: slip.id,
-      set_code: new_code
-    }
+    params = params_patch(id: slip.id, set_code: new_code)
     assert_api_pass(params)
     slip.reload
     assert_equal(new_code.upcase, slip.code)
@@ -107,13 +88,7 @@ class API2::FieldSlipsTest < UnitTestCase
   def test_patching_field_slip_observation
     slip = field_slips(:field_slip_one)
     obs = observations(:detailed_unknown_obs)
-    params = {
-      method: :patch,
-      action: :field_slip,
-      api_key: @api_key.key,
-      id: slip.id,
-      set_observation: obs.id
-    }
+    params = params_patch(id: slip.id, set_observation: obs.id)
     assert_api_pass(params)
     obs.reload
     assert_equal(slip.id, obs.field_slip_id)
@@ -132,12 +107,7 @@ class API2::FieldSlipsTest < UnitTestCase
 
   def test_field_slip_renders_json
     slip = field_slips(:field_slip_one)
-    params = {
-      method: :get,
-      action: :field_slip,
-      id: slip.id,
-      detail: :high
-    }
+    params = params_get(id: slip.id, detail: :high)
     assert_api_pass(params)
 
     # Verify the API returns the slip without errors
@@ -147,12 +117,7 @@ class API2::FieldSlipsTest < UnitTestCase
 
   def test_field_slip_renders_xml
     slip = field_slips(:field_slip_one)
-    params = {
-      method: :get,
-      action: :field_slip,
-      id: slip.id,
-      detail: :low
-    }
+    params = params_get(id: slip.id, detail: :low)
     assert_api_pass(params)
 
     # Verify the API returns the slip without errors
@@ -181,12 +146,7 @@ class API2::FieldSlipsTest < UnitTestCase
 
   def test_patching_field_slip_without_params
     slip = field_slips(:field_slip_one)
-    params = {
-      method: :patch,
-      action: :field_slip,
-      api_key: @api_key.key,
-      id: slip.id
-    }
+    params = params_patch(id: slip.id)
     # Should fail because no set_* parameters provided
     assert_api_fail(params)
   end
@@ -199,13 +159,8 @@ class API2::FieldSlipsTest < UnitTestCase
       notes: "Test API key for permission check"
     )
 
-    params = {
-      method: :patch,
-      action: :field_slip,
-      api_key: other_key.key,
-      id: slip.id,
-      set_code: "NEW-CODE"
-    }
+    params = params_patch(api_key: other_key.key, id: slip.id,
+                          set_code: "NEW-CODE")
     # Should fail because user doesn't have edit permission
     assert_api_fail(params)
   end
