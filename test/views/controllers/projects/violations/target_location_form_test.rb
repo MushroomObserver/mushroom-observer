@@ -189,10 +189,7 @@ module Views::Controllers::Projects::Violations
         name: Name.unknown
       )
 
-      html = render(TargetLocationForm.new(
-                      obs: obs, project: @project,
-                      existing_locations: existing_for(obs)
-                    ))
+      html = render_form(obs: obs)
 
       assert_html(html, "input[type='radio'][disabled]")
 
@@ -225,10 +222,7 @@ module Views::Controllers::Projects::Violations
         name: Name.unknown
       )
 
-      html = render(TargetLocationForm.new(
-                      obs: obs, project: @project,
-                      existing_locations: existing_for(obs)
-                    ))
+      html = render_form(obs: obs)
 
       encoded = "Unique+County+X42%2C+California%2C+USA"
       assert_html(html,
@@ -250,10 +244,7 @@ module Views::Controllers::Projects::Violations
       original_stderr = $stderr
       $stderr = stderr_io
       begin
-        render(TargetLocationForm.new(
-                 obs: obs, project: @project,
-                 existing_locations: existing_for(obs)
-               ))
+        render_form(obs: obs)
       ensure
         $stderr = original_stderr
       end
@@ -262,10 +253,10 @@ module Views::Controllers::Projects::Violations
 
     private
 
-    def render_form
+    def render_form(obs: @obs)
       render(TargetLocationForm.new(
-               obs: @obs, project: @project,
-               existing_locations: existing_for(@obs)
+               obs: obs, project: @project,
+               existing_locations: existing_for(obs)
              ))
     end
 

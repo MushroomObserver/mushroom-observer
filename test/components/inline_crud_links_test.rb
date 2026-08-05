@@ -17,9 +17,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     stranger = users(:lone_wolf)
     cn = collection_numbers(:detailed_unknown_coll_num_one)
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: cn, observation: @obs, user: stranger
-                  ))
+    html = render_links(target: cn, observation: @obs, user: stranger)
 
     assert_no_html(html, "span.text-nowrap")
     assert_equal("", html.strip)
@@ -29,9 +27,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     cn = collection_numbers(:detailed_unknown_coll_num_one)
     obs = cn.observations.first
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: cn, observation: obs, user: cn.user
-                  ))
+    html = render_links(target: cn, observation: obs, user: cn.user)
 
     # Edit → ModalLink, modal_identifier carries the record's id
     assert_html(html,
@@ -60,9 +56,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     obs = seq.observation
 
     # No `observation:` -- Sequence derives it from `@target.observation`.
-    html = render(Components::InlineCRUDLinks.new(
-                    target: seq, user: seq.user
-                  ))
+    html = render_links(target: seq, user: seq.user)
 
     assert_html(html,
                 "a[data-modal='modal_sequence_#{seq.id}']")
@@ -78,9 +72,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
     # No `observation:` -- ExternalLink's handlers never read it.
-    html = render(Components::InlineCRUDLinks.new(
-                    target: link, user: link.user
-                  ))
+    html = render_links(target: link, user: link.user)
 
     assert_html(html,
                 "a[data-modal='modal_external_link_#{link.id}']")
@@ -91,9 +83,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     record = herbarium_records(:coprinus_comatus_rolf_spec)
     obs = record.observations.first
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: record, observation: obs, user: record.user
-                  ))
+    html = render_links(target: record, observation: obs, user: record.user)
 
     assert_html(html,
                 "a[data-modal='modal_herbarium_record_#{record.id}']")
@@ -113,9 +103,7 @@ class InlineCRUDLinksTest < ComponentTestCase
   def test_naming_edit_and_destroy_links
     naming = namings(:detailed_unknown_naming)
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: naming, user: naming.user
-                  ))
+    html = render_links(target: naming, user: naming.user)
 
     assert_html(html, "a[data-modal='modal_obs_#{naming.observation_id}" \
                       "_naming_#{naming.id}']")
@@ -129,9 +117,7 @@ class InlineCRUDLinksTest < ComponentTestCase
   def test_comment_edit_and_destroy_links
     comment = comments(:minimal_unknown_obs_comment_1)
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: comment, user: comment.user
-                  ))
+    html = render_links(target: comment, user: comment.user)
 
     assert_html(html, "a[data-modal='modal_comment_#{comment.id}']")
     expected_path = routes.comment_path(comment.id)
@@ -141,9 +127,7 @@ class InlineCRUDLinksTest < ComponentTestCase
   def test_name_description_uses_icon_link_edit
     desc = name_descriptions(:peltigera_user_desc)
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: desc, user: desc.user
-                  ))
+    html = render_links(target: desc, user: desc.user)
 
     # NameDescription edit is an IconLink, NOT a ModalLink
     assert_html(html, "a.edit_name_description_link_#{desc.id}")
@@ -154,9 +138,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     seq = sequences(:deposited_sequence)
     extra_html = '<a href="/archive">archive</a>'.html_safe
 
-    html = render(Components::InlineCRUDLinks.new(
-                    target: seq, user: seq.user, extras: [extra_html]
-                  ))
+    html = render_links(target: seq, user: seq.user, extras: [extra_html])
 
     assert_html(html, "a[href='/archive']")
     assert_html(html,
@@ -174,9 +156,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     obs = observations(:detailed_unknown_obs)
     tab = ::Tab::CollectionNumber::New.new(observation: obs)
 
-    html = render(Components::InlineCRUDLinks.new(
-                    modal_id: "collection_number", tab: tab
-                  ))
+    html = render_links(modal_id: "collection_number", tab: tab)
 
     assert_html(html, "a[data-modal='modal_collection_number'] " \
                       "span.glyphicon-plus")
@@ -185,5 +165,11 @@ class InlineCRUDLinksTest < ComponentTestCase
     assert_html(html, "a[title='#{tab.title}']")
     assert_html(html, "a span.sr-only", text: tab.title)
     assert_no_html(html, "a span.d-sm-inline")
+  end
+
+  private
+
+  def render_links(**)
+    render(Components::InlineCRUDLinks.new(**))
   end
 end

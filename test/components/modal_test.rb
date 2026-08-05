@@ -4,9 +4,7 @@ require("test_helper")
 
 class ModalTest < ComponentTestCase
   def test_renders_chrome_with_body_and_footer_slots
-    html = render(Components::Modal.new(
-                    id: "modal_thing", title: "Pick a thing"
-                  )) do |m|
+    html = render_modal(id: "modal_thing", title: "Pick a thing") do |m|
       m.with_body { "<p>body content</p>".html_safe }
       m.with_footer { "<button>OK</button>".html_safe }
     end
@@ -41,16 +39,14 @@ class ModalTest < ComponentTestCase
     # taxon names showed literal `<b><i>Xylaria</i></b>` instead of
     # italicized bold text.
     title = "Add Comment to <b><i>Xylaria polymorpha</i></b>".html_safe
-    html = render(Components::Modal.new(id: "modal_html", title: title))
+    html = render_modal(id: "modal_html", title: title)
 
     assert_html(html, ".modal-title > b > i", text: "Xylaria polymorpha")
     assert_not_includes(html, "&lt;b&gt;")
   end
 
   def test_auto_open_adds_backdrop_and_display_block
-    html = render(Components::Modal.new(
-                    id: "modal_auto", title: "Auto", auto_open: true
-                  ))
+    html = render_modal(id: "modal_auto", title: "Auto", auto_open: true)
 
     assert_html(html, ".modal-backdrop.fade.in")
     assert_includes(html, "class=\"modal fade in\"")
@@ -58,13 +54,11 @@ class ModalTest < ComponentTestCase
   end
 
   def test_extras_class_data_and_id_overrides
-    html = render(Components::Modal.new(
-                    id: "modal_x", title: "T",
-                    extra_class: "modal-form",
-                    extra_data: { identifier: "x", foo: "bar" },
-                    title_id: "modal_x_header",
-                    body_id: "modal_x_body"
-                  )) do |m|
+    html = render_modal(id: "modal_x", title: "T",
+                        extra_class: "modal-form",
+                        extra_data: { identifier: "x", foo: "bar" },
+                        title_id: "modal_x_header",
+                        body_id: "modal_x_body") do |m|
       m.with_body { "b".html_safe }
     end
 
@@ -76,9 +70,7 @@ class ModalTest < ComponentTestCase
   end
 
   def test_title_content_slot_overrides_title_prop
-    html = render(Components::Modal.new(
-                    id: "modal_slot", title: "ignored"
-                  )) do |m|
+    html = render_modal(id: "modal_slot", title: "ignored") do |m|
       m.with_title_content { "<strong>custom</strong>".html_safe }
     end
 
@@ -90,10 +82,8 @@ class ModalTest < ComponentTestCase
     # Singleton layout modals (e.g. ModalConfirm) need their own
     # Stimulus controller, not the default `modal`. Passing
     # `controller: "confirm-modal"` replaces the data-controller attr.
-    html = render(Components::Modal.new(
-                    id: "modal_c", title: "t",
-                    controller: "confirm-modal"
-                  ))
+    html = render_modal(id: "modal_c", title: "t",
+                        controller: "confirm-modal")
 
     assert_html(html, ".modal[data-controller='confirm-modal']")
     # Default `modal` controller is NOT present alongside.
@@ -104,9 +94,8 @@ class ModalTest < ComponentTestCase
     # Headerless modals (ModalConfirm renders its title in the body for
     # Stimulus targeting; ModalProgressSpinner has no title at all)
     # need to suppress the entire `.modal-header` div.
-    html = render(Components::Modal.new(
-                    id: "modal_h", title: "ignored", header: false
-                  )) do |m|
+    html = render_modal(id: "modal_h", title: "ignored",
+                        header: false) do |m|
       m.with_body { "<p>just body</p>".html_safe }
     end
 
@@ -122,9 +111,8 @@ class ModalTest < ComponentTestCase
     # `body_class:` adds extra CSS classes to `.modal-body` while
     # keeping the base `modal-body` class. Used by ModalConfirm
     # (`py-4`) and ModalProgressSpinner (`text-center`).
-    html = render(Components::Modal.new(
-                    id: "modal_b", title: "t", body_class: "py-4 text-center"
-                  )) do |m|
+    html = render_modal(id: "modal_b", title: "t",
+                        body_class: "py-4 text-center") do |m|
       m.with_body { "x".html_safe }
     end
 
@@ -138,9 +126,7 @@ class ModalTest < ComponentTestCase
     # (typically a form) that emits its own `.modal-body` and
     # `.modal-footer`, so a single `<form>` tag wraps both — keeping
     # the submit button (in `.modal-footer`) naturally inside the form.
-    html = render(Components::Modal.new(
-                    id: "modal_form", title: "Edit"
-                  )) do |m|
+    html = render_modal(id: "modal_form", title: "Edit") do |m|
       m.with_form_content do
         '<form action="/x" method="post">' \
           '<div class="modal-body"><input name="foo"></div>' \
@@ -171,9 +157,7 @@ class ModalTest < ComponentTestCase
     # `with_form_content` wins. (Callers shouldn't mix them; this just
     # documents the precedence so a stray `with_body` call doesn't
     # silently double-render.)
-    html = render(Components::Modal.new(
-                    id: "modal_either", title: "T"
-                  )) do |m|
+    html = render_modal(id: "modal_either", title: "T") do |m|
       m.with_body { "<p>should-not-appear</p>".html_safe }
       m.with_footer { "<button>also-not</button>".html_safe }
       m.with_form_content { "<form><p>wins</p></form>".html_safe }
@@ -182,5 +166,11 @@ class ModalTest < ComponentTestCase
     assert_html(html, ".modal-content > form > p", text: "wins")
     assert_no_html(html, ".modal-body")
     assert_no_html(html, ".modal-footer")
+  end
+
+  private
+
+  def render_modal(**, &block)
+    render(Components::Modal.new(**), &block)
   end
 end

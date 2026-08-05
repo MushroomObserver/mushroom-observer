@@ -63,8 +63,7 @@ class LinkGetTest < ComponentTestCase
     controller.define_singleton_method(:controller_name) { "herbarium_records" }
     controller.define_singleton_method(:action_name) { "show" }
 
-    html = render(Components::Link::Get.new(name: "Edit", target: record,
-                                            action: :edit))
+    html = render_link(name: "Edit", target: record, action: :edit)
 
     expected = routes.edit_herbarium_record_path(id: record.id, back: :show)
     assert_html(html, "a[href='#{expected}']")
@@ -75,8 +74,7 @@ class LinkGetTest < ComponentTestCase
     controller.define_singleton_method(:controller_name) { "herbarium_records" }
     controller.define_singleton_method(:action_name) { "index" }
 
-    html = render(Components::Link::Get.new(name: "Edit", target: record,
-                                            action: :edit))
+    html = render_link(name: "Edit", target: record, action: :edit)
 
     expected = routes.edit_herbarium_record_path(id: record.id, back: :index)
     assert_html(html, "a[href='#{expected}']")
@@ -87,8 +85,7 @@ class LinkGetTest < ComponentTestCase
     controller.define_singleton_method(:controller_name) { "observations" }
     controller.define_singleton_method(:action_name) { "show" }
 
-    html = render(Components::Link::Get.new(name: "Edit", target: record,
-                                            action: :edit))
+    html = render_link(name: "Edit", target: record, action: :edit)
 
     expected = routes.edit_herbarium_record_path(id: record.id)
     assert_html(html, "a[href='#{expected}']")
