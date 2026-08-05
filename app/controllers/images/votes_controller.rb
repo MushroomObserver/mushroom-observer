@@ -22,7 +22,7 @@ module Images
       @image = Image.find_by(id: params[:image_id])
       return head(:not_found) unless @image
 
-      @context = params[:context]&.to_sym || :overlay
+      @context = normalized_context
       render(Views::Controllers::Images::Votes::Show.new(
                image: @image, user: @user, context: @context
              ), layout: false)
@@ -39,6 +39,7 @@ module Images
       @value = value == "0" ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == "yes")
       @image.change_vote(@user, @value, anon: anon)
+      @context = normalized_context
 
       respond_to do |format|
         # Change user's vote (on anyone's image) and go to next image.
@@ -82,17 +83,27 @@ module Images
     def vote_interface_streams
       [
         turbo_stream.replace("image_vote_#{@image.id}",
-                             vote_interface),
+                             vote_interface(context: @context)),
         turbo_stream.replace("lightbox_image_vote_#{@image.id}",
                              vote_interface(context: :lightbox))
       ]
     end
 
-    def vote_interface(context: :overlay)
+    def vote_interface(context: :matrix)
       ::Components::ImageFragment.new(
         type: :vote_interface,
         user: @user, image: @image, votes: true, context: context
       )
+    end
+
+    # `:overlay` was VoteInterface's context name before it was
+    # renamed to `:matrix` -- mapped here so an old cached
+    # LazyVoteInterface turbo-frame (whose src= URL still has
+    # `context=overlay` baked in) doesn't 404 or fall into the
+    # unstyled `vote-section-inline` branch.
+    def normalized_context
+      value = params[:context]&.to_sym
+      value == :overlay ? :matrix : (value || :matrix)
     end
   end
 end

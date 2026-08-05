@@ -353,15 +353,13 @@ class MatrixBoxTest < ComponentTestCase
   # in app/components/matrix/box.rb#render_source_credit_inner.
   # mo_website specifically is excluded by source_noteworthy? (it's
   # the default, not worth calling out), so this needs a fixture with
-  # a different source -- mo_iphone_app.
+  # a different source -- amateur_obs has mo_api.
   def test_enum_source_credit_renders_credit_text
     obs = observations(:amateur_obs)
-    assert_equal("mo_iphone_app", obs.source)
     assert(obs.source_noteworthy?)
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_html(html, ".source-credit",
-                text: :source_credit_mo_iphone_app.l.tpl.as_displayed)
+    assert_html(html, ".source-credit", text: "#{:via.l} MO API")
   end
 end
