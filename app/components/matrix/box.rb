@@ -244,7 +244,8 @@ class Components::Matrix::Box < Components::Base
 
   # External imports get a Phlex-rendered link so we can set
   # target="_blank" / rel="noopener" — textile has no syntax for
-  # those attributes. Enum credits keep going through .tpl.
+  # those attributes. Enum credits go through .tl (inline, no <div>
+  # wrapper -- needed to sit next to the bold "via" on one line).
   # `source_noteworthy?` (the caller's guard) guarantees `source` is
   # present whenever `import_link` isn't, so the enum branch is safe
   # without its own presence check.
@@ -252,7 +253,8 @@ class Components::Matrix::Box < Components::Base
     if (link = target.import_link)
       render_external_credit_link(link)
     else
-      :"source_credit_#{target.source}".l.tpl
+      b { plain("#{:via.l} ") }
+      trusted_html(:"source_credit_#{target.source}".l.tl)
     end
   end
 

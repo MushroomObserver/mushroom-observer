@@ -139,6 +139,31 @@ module Views::Layouts
 
       render_user_dated_line(:footer_created_by,
                              user: @obj.user, date: @obj.created_at)
+      render_source_credit if show_source_credit?
+    end
+
+    # Observation-only: which client created it (API, mobile app, ...),
+    # when noteworthy (i.e. not the website) and not already covered by
+    # its own import-provenance UI (Observation#source_noteworthy?,
+    # #import_link). Duck-typed since most models ObjectFooter renders
+    # for have no concept of "source" at all.
+    #
+    # Checks import_link before source_noteworthy? (which also reads
+    # import_link internally) so an imported observation short-circuits
+    # on one import_link lookup instead of two.
+    def show_source_credit?
+      return false if @obj.respond_to?(:import_link) && @obj.import_link
+
+      @obj.respond_to?(:source_noteworthy?) && @obj.source_noteworthy?
+    end
+
+    def render_source_credit
+      span(class: "source-credit") do
+        plain(" ")
+        b { plain(:via.l) }
+        plain(" ")
+        trusted_html(:"source_credit_#{@obj.source}".l.tl)
+      end
     end
 
     # Renders creation and update info for non-versioned objects
