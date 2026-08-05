@@ -187,9 +187,20 @@ tbody.collapse.in {
 // top: 3px is a .btn-specific baseline correction, not a general
 // glyphicon offset -- scoped here instead of on the bare .glyphicon
 // selector above so it doesn't push every non-button icon (inline
-// links, standalone icons, etc.) down by 3px too.
-.btn > .glyphicon {
+// links, standalone icons, etc.) down by 3px too. Two exclusions:
+// .carousel-control's .btn wrapper, since Bootstrap positions those
+// chevron icons itself (top: 50%, centered) and this nudge would
+// fight that default; and .btn-overlay, an icon-only overlay button
+// with no adjacent visible text to baseline-align against.
+.btn:not(.carousel-control .btn):not(.btn-overlay) > .glyphicon {
   top: 3px;
+}
+
+// `.theater-btn`'s icon needs its own baseline nudge -- not the
+// button-text +3px above (no adjacent visible text to align to
+// here), and not flush like a bare icon either.
+.theater-btn > .glyphicon {
+  top: 2px;
 }
 
 .spinner-right {
