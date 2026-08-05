@@ -14,9 +14,7 @@ class API2::HerbariumRecordsTest < UnitTestCase
   #  :section: Herbarium Record Requests
   # --------------------------------------
 
-  def params_get(**)
-    { method: :get, action: :herbarium_record }.merge(**)
-  end
+  def api2_model = HerbariumRecord
 
   def test_getting_herbarium_records_created_at
     recs = HerbariumRecord.where(HerbariumRecord[:created_at].year.eq(2012))
@@ -117,16 +115,10 @@ class API2::HerbariumRecordsTest < UnitTestCase
     @accession_number = "13579a"
     @notes            = "i make good specimen"
     @user             = rolf
-    params = {
-      method: :post,
-      action: :herbarium_record,
-      api_key: @api_key.key,
-      observation: @obs.id,
-      herbarium: @herbarium.id,
-      initial_det: @initial_det,
-      accession_number: @accession_number,
-      notes: @notes
-    }
+    params = params_post(observation: @obs.id, herbarium: @herbarium.id,
+                         initial_det: @initial_det,
+                         accession_number: @accession_number,
+                         notes: @notes)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:observation))
     assert_api_fail(params.except(:herbarium))
@@ -189,16 +181,11 @@ class API2::HerbariumRecordsTest < UnitTestCase
     nybgs_rec = herbarium_records(:interesting_unknown)
     marys_rec = herbarium_records(:fundis_record)
     fundis = herbaria(:fundis_herbarium)
-    params = {
-      method: :patch,
-      action: :herbarium_record,
-      api_key: @api_key.key,
-      id: rolfs_rec.id,
-      set_herbarium: "Fungal Diversity Survey",
-      set_initial_det: " New name ",
-      set_accession_number: " 1234 ",
-      set_notes: " new notes "
-    }
+    params = params_patch(id: rolfs_rec.id,
+                          set_herbarium: "Fungal Diversity Survey",
+                          set_initial_det: " New name ",
+                          set_accession_number: " 1234 ",
+                          set_notes: " new notes ")
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_rec.id))
     assert_api_fail(params.merge(set_herbarium: ""))
@@ -221,12 +208,7 @@ class API2::HerbariumRecordsTest < UnitTestCase
     old_obs   = rolfs_rec.observations.reorder(id: :asc).first
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:minimal_unknown_obs)
-    params = {
-      method: :patch,
-      action: :herbarium_record,
-      api_key: @api_key.key,
-      id: rolfs_rec.id
-    }
+    params = params_patch(id: rolfs_rec.id)
     assert_api_fail(params.merge(add_observation: marys_obs.id))
     assert_api_pass(params.merge(add_observation: rolfs_obs.id))
     assert_obj_arrays_equal([old_obs, rolfs_obs], rolfs_rec.reload.observations,
@@ -243,11 +225,7 @@ class API2::HerbariumRecordsTest < UnitTestCase
     rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
     nybgs_rec = herbarium_records(:interesting_unknown)
     marys_rec = herbarium_records(:fundis_record)
-    params = {
-      method: :delete,
-      action: :herbarium_record,
-      api_key: @api_key.key
-    }
+    params = params_delete
     assert_api_fail(params.except(:api_key))
     assert_api_pass(params.merge(id: rolfs_rec.id))
     assert_api_pass(params.merge(id: nybgs_rec.id))
