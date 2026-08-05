@@ -14,8 +14,8 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    # Omit (rather than collapse) specimen panelfor Placeholder obss
-    # because panel caption (No specimen available) can be misleading because
+    # Omit (rather than collapse) the specimen panel for placeholder obs --
+    # the panel caption ("No specimen available") can be misleading, since
     # a counterpart external record may have specimen info.
     return if @obs.placeholder? && !specimen_records?
 

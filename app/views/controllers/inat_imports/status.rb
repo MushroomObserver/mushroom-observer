@@ -263,7 +263,7 @@ module Views::Controllers::InatImports
     end
 
     def errors?
-      @inat_import.response_errors.present?
+      response_error_lines.any?
     end
 
     def response_error_lines

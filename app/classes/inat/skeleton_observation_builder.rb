@@ -29,10 +29,10 @@ class Inat
       create_observation
       add_external_link
       @observation
-    rescue StandardError => e
+    rescue StandardError
       # Remove incomplete Observation from the db
       @observation&.destroy
-      raise(e)
+      raise
     end
 
     private

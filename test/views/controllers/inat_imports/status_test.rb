@@ -81,6 +81,19 @@ module Views::Controllers::InatImports
       assert_html(html, "#inat_import_final_alert.alert-warning")
     end
 
+    def test_final_alert_not_warning_when_response_errors_only_whitespace
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 3,
+        response_errors: "\n\n"
+      )
+      html = render_status
+
+      assert_html(html, "#inat_import_final_alert.alert-success")
+      assert_no_html(html, "#inat_import_final_alert.alert-warning")
+    end
+
     def test_no_errors_caption_or_warning_when_only_skeletons_imported
       @import.update_columns(
         state: InatImport.states[:Done],
