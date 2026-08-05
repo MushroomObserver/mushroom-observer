@@ -14,21 +14,7 @@ class API2::NamesTest < UnitTestCase
   #  :section: Name Requests
   # --------------------------
 
-  def params_get(**)
-    { method: :get, action: :name }.merge(**)
-  end
-
-  def params_post(**)
-    { method: :post, action: :name, api_key: @api_key.key }.merge(**)
-  end
-
-  def params_patch(**)
-    { method: :patch, action: :name, api_key: @api_key.key }.merge(**)
-  end
-
-  def params_delete(**)
-    { method: :delete, action: :name, api_key: @api_key.key }.merge(**)
-  end
+  def api2_model = Name
 
   def test_getting_names
     name = Name.with_correct_spelling.sample

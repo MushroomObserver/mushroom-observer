@@ -17,6 +17,38 @@ module API2Extensions
     API2::OrderedRange.new(*)
   end
 
+  # Each test class overrides this with its own model class (e.g.
+  # `def api2_model = Name`), matching how ModelAPI subclasses declare
+  # `def model`. The four `params_*` helpers below derive `action:`
+  # from `api2_model.type_tag` -- the same mechanism `do_basic_get_test`
+  # already relies on -- so it doesn't need repeating at every call site.
+  def api2_model
+    raise(NotImplementedError.new(
+            "Define api2_model in #{self.class} before calling params_*"
+          ))
+  end
+
+  # GET is unauthenticated by design -- ModelAPI#get never calls
+  # must_authenticate!, unlike post/patch/delete -- so no api_key here.
+  def params_get(**opts)
+    { method: :get, action: api2_model.type_tag }.merge(opts)
+  end
+
+  def params_post(**opts)
+    { method: :post, action: api2_model.type_tag, api_key: @api_key.key }.
+      merge(opts)
+  end
+
+  def params_patch(**opts)
+    { method: :patch, action: api2_model.type_tag, api_key: @api_key.key }.
+      merge(opts)
+  end
+
+  def params_delete(**opts)
+    { method: :delete, action: api2_model.type_tag, api_key: @api_key.key }.
+      merge(opts)
+  end
+
   def date(str)
     Date.parse(str)
   end
