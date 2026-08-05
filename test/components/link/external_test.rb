@@ -12,9 +12,7 @@ class Components::Link::ExternalTest < ComponentTestCase
   # ---- Generic (content, path) form ----
 
   def test_renders_link_with_target_blank_and_noopener
-    html = render(Components::Link::External.new(
-                    content: "GBIF", path: "https://gbif.org"
-                  ))
+    html = render_link(content: "GBIF", path: "https://gbif.org")
 
     assert_html(html, "a[href='https://gbif.org']" \
                       "[target='_blank']" \
@@ -23,21 +21,15 @@ class Components::Link::ExternalTest < ComponentTestCase
   end
 
   def test_passes_extra_opts_through
-    html = render(
-      Components::Link::External.new(
-        content: "GBIF", path: "https://gbif.org", id: "gbif_link"
-      )
-    )
+    html = render_link(content: "GBIF", path: "https://gbif.org",
+                       id: "gbif_link")
 
     assert_html(html, "a[id='gbif_link'][target='_blank']")
   end
 
   def test_does_not_override_caller_class
-    html = render(
-      Components::Link::External.new(
-        content: "EOL", path: "https://eol.org", class: "my-class"
-      )
-    )
+    html = render_link(content: "EOL", path: "https://eol.org",
+                       class: "my-class")
 
     assert_html(html, "a.my-class[target='_blank']")
   end
@@ -46,7 +38,7 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   def test_tab_form_uses_tab_title_path_and_html_options
     tab = FakeTab.new
-    html = render(Components::Link::External.new(tab: tab))
+    html = render_link(tab: tab)
 
     assert_html(html, "a[href='https://example.com']" \
                       "[target='_blank'][rel='noopener noreferrer']",
@@ -58,7 +50,7 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   def test_inat_link_renders_relationship_date_and_id_badge
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
-    html = render(Components::Link::External.new(link: link))
+    html = render_link(link: link)
 
     assert_html(html, "a[href='#{link.url}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
@@ -82,7 +74,7 @@ class Components::Link::ExternalTest < ComponentTestCase
                             external_id: "372490529")
     assert_nil(link.url, "Import links store external_id, not url")
 
-    html = render(Components::Link::External.new(link: link))
+    html = render_link(link: link)
 
     assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
@@ -92,7 +84,7 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   def test_mycoportal_link_renders_relationship_date_and_id_badge
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
-    html = render(Components::Link::External.new(link: link))
+    html = render_link(link: link)
 
     assert_html(html,
                 "a[href='#{link.url}']" \
@@ -111,8 +103,14 @@ class Components::Link::ExternalTest < ComponentTestCase
     link = ExternalLink.new(external_site: site,
                             url: "https://genbank.example/123")
 
-    html = render(Components::Link::External.new(link: link))
+    html = render_link(link: link)
 
     assert_no_html(html, "button.badge-id")
+  end
+
+  private
+
+  def render_link(**)
+    render(Components::Link::External.new(**))
   end
 end
