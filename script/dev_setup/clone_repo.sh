@@ -14,7 +14,20 @@ mo_ensure_repo() {
         return 0 # already inside an existing checkout
     fi
     if [ ! -d mushroom-observer/app ]; then
-        [ -d mushroom-observer ] && rm -rf mushroom-observer # must be clean or clone fails
+        if [ -d mushroom-observer ]; then
+            origin=$(git -C mushroom-observer remote get-url origin 2>/dev/null)
+            case "$origin" in
+                *MushroomObserver/mushroom-observer*)
+                    rm -rf mushroom-observer # partial/stale clone of this repo -- safe to redo
+                    ;;
+                *)
+                    echo "A 'mushroom-observer' directory already exists here and doesn't"
+                    echo "look like a mushroom-observer checkout (or is a partial one)."
+                    echo "Move or remove it yourself, then re-run this script."
+                    exit 1
+                    ;;
+            esac
+        fi
         echo "Cloning mushroom-observer..."
         git clone git@github.com:MushroomObserver/mushroom-observer.git ||
             git clone https://github.com/MushroomObserver/mushroom-observer.git

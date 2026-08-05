@@ -119,9 +119,16 @@ mo_init_or_migrate_db() {
 }
 
 # Installs the pre-commit hook that blocks direct commits to main.
+# Uses `git rev-parse --git-path hooks` rather than a hardcoded
+# .git/hooks -- that path is wrong in worktrees (.git is a file
+# there, not a directory) and shared-gitdir setups.
 mo_install_precommit_hook() {
-    if [ ! -f .git/hooks/pre-commit ]; then
-        cat >.git/hooks/pre-commit <<'EOF'
+    hooks_dir=$(git rev-parse --git-path hooks)
+    hook_path="$hooks_dir/pre-commit"
+
+    if [ ! -f "$hook_path" ]; then
+        mkdir -p "$hooks_dir"
+        cat >"$hook_path" <<'EOF'
 #!/bin/sh
 branch=$(git rev-parse --abbrev-ref HEAD)
 if [ "$branch" = "main" ]
@@ -130,9 +137,9 @@ then
   exit 1
 fi
 EOF
-        chmod +x .git/hooks/pre-commit
+        chmod +x "$hook_path"
         echo "Installed pre-commit hook"
     else
-        echo ".git/hooks/pre-commit exists"
+        echo "$hook_path exists"
     fi
 }
