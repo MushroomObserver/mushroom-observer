@@ -29,6 +29,27 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     assert_includes(text, "JSON")
   end
 
+  # An observation's other photos go through the same prompt, and the
+  # alias tables below are a standing invitation to answer from them
+  # rather than from the image.
+  def test_tells_the_model_how_to_report_an_image_with_no_slip
+    text = prompt
+
+    assert_includes(text, "slip_present")
+    assert_includes(text, "does not show a field slip")
+    assert_includes(text, "never a source of answers")
+  end
+
+  # Most slips leave several boxes empty and some fill in only one, so
+  # a null is only worth chasing into another photo when the box had
+  # writing the camera missed.
+  def test_asks_which_nulls_were_written_but_unreadable
+    text = prompt
+
+    assert_includes(text, "unreadable")
+    assert_includes(text, "left empty is not unreadable")
+  end
+
   # The whole point of building the prompt from the database: the walk
   # numbers a foray actually uses, not a list written into the code.
   def test_includes_the_projects_location_aliases
