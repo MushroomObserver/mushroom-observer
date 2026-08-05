@@ -34,13 +34,13 @@ class CarouselTest < ComponentTestCase
   # Slides are rendered inside `.carousel-inner`; thumbs inside the
   # indicator `<ol>`. First registration of each gets `.active`.
   def test_renders_slides_and_thumbs_in_their_wrappers
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "test_carousel" },
-                    slides: [{ id: "slide_1", content: "SLIDE_ONE" },
-                             { id: "slide_2", content: "SLIDE_TWO" }],
-                    thumbs: [{ id: "thumb_1", content: "THUMB_ONE" },
-                             { id: "thumb_2", content: "THUMB_TWO" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "test_carousel" },
+      slides: [{ id: "slide_1", content: "SLIDE_ONE" },
+               { id: "slide_2", content: "SLIDE_TWO" }],
+      thumbs: [{ id: "thumb_1", content: "THUMB_ONE" },
+               { id: "thumb_2", content: "THUMB_TWO" }]
+    )
 
     assert_html(html, "div.carousel.slide[id='test_carousel']" \
                       "[data-ride='false'][data-interval='false']")
@@ -59,11 +59,11 @@ class CarouselTest < ComponentTestCase
 
   # `class:` on item / thumb is composed onto the wrapper's class list.
   def test_item_and_thumb_classes_are_composed
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "c" },
-                    slides: [{ class: "carousel-item", content: "S" }],
-                    thumbs: [{ class: "mr-2", content: "T" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "c" },
+      slides: [{ class: "carousel-item", content: "S" }],
+      thumbs: [{ class: "mr-2", content: "T" }]
+    )
 
     assert_html(html, "div.item.carousel-item.active", text: "S")
     assert_html(html, "li.carousel-indicator.mx-1.mr-2.active", text: "T")
@@ -72,12 +72,12 @@ class CarouselTest < ComponentTestCase
   # Caller-supplied `data:` merges with the primitive's auto-filled
   # `data-target` / `data-slide-to`.
   def test_thumb_data_merges_with_auto_target_and_slide_to
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "c" },
-                    thumbs: [{ data: { form_images_target: "thumbnail",
-                                       image_uuid: "42" },
-                               content: "T" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "c" },
+      thumbs: [{ data: { form_images_target: "thumbnail",
+                         image_uuid: "42" },
+                 content: "T" }]
+    )
 
     assert_html(html, "li.carousel-indicator[data-target='#c']" \
                       "[data-slide-to='0']" \
@@ -89,18 +89,18 @@ class CarouselTest < ComponentTestCase
   # `inner_class_extra` decorate the `.carousel-inner` div. `indicators_id`
   # / `indicators_class_extra` decorate the indicator `<ol>`.
   def test_id_and_class_extras_are_applied
-    html = render(Harness.new(
-                    carousel_args: {
-                      carousel_id: "obs_carousel",
-                      wrapper_class: "image-form-carousel",
-                      inner_id: "added_images",
-                      inner_class_extra: "form-inner",
-                      indicators_id: "added_thumbnails",
-                      indicators_class_extra: "d-none"
-                    },
-                    slides: [{ content: "s" }],
-                    thumbs: [{ content: "t" }]
-                  ))
+    html = render_carousel(
+      carousel_args: {
+        carousel_id: "obs_carousel",
+        wrapper_class: "image-form-carousel",
+        inner_id: "added_images",
+        inner_class_extra: "form-inner",
+        indicators_id: "added_thumbnails",
+        indicators_class_extra: "d-none"
+      },
+      slides: [{ content: "s" }],
+      thumbs: [{ content: "t" }]
+    )
 
     assert_html(html, "div.carousel.slide.image-form-carousel")
     assert_html(html, "div.carousel-inner.bg-light.form-inner" \
@@ -112,13 +112,13 @@ class CarouselTest < ComponentTestCase
   # `extra_data` merges into the outer div's `data-*` attributes,
   # alongside the always-emitted `data-ride` / `data-interval` pair.
   def test_extra_data_merges_into_outer_data_attributes
-    html = render(Harness.new(
-                    carousel_args: {
-                      carousel_id: "wire_test",
-                      extra_data: { form_images_target: "carousel" }
-                    },
-                    slides: [{ content: "s" }]
-                  ))
+    html = render_carousel(
+      carousel_args: {
+        carousel_id: "wire_test",
+        extra_data: { form_images_target: "carousel" }
+      },
+      slides: [{ content: "s" }]
+    )
 
     assert_html(html, "div.carousel[data-form-images-target='carousel']")
   end
@@ -128,8 +128,8 @@ class CarouselTest < ComponentTestCase
   # `controls_wrap_class` prop, when set, wraps Controls in a div with
   # that class (Form::UploadGallery uses `carousel-control-wrap row`).
   def test_controls_render_inline_by_default
-    html = render(Harness.new(carousel_args: { carousel_id: "c" },
-                              slides: [{ content: "s" }]))
+    html = render_carousel(carousel_args: { carousel_id: "c" },
+                           slides: [{ content: "s" }])
 
     assert_html(html, "div.carousel-inner a.left.carousel-control")
     assert_html(html, "div.carousel-inner a.right.carousel-control")
@@ -137,13 +137,13 @@ class CarouselTest < ComponentTestCase
   end
 
   def test_controls_can_be_wrapped_in_a_named_div
-    html = render(Harness.new(
-                    carousel_args: {
-                      carousel_id: "c",
-                      controls_wrap_class: "carousel-control-wrap row"
-                    },
-                    slides: [{ content: "s" }]
-                  ))
+    html = render_carousel(
+      carousel_args: {
+        carousel_id: "c",
+        controls_wrap_class: "carousel-control-wrap row"
+      },
+      slides: [{ content: "s" }]
+    )
 
     assert_html(html, "div.carousel-inner " \
                       "div.carousel-control-wrap.row " \
@@ -153,10 +153,10 @@ class CarouselTest < ComponentTestCase
   # `show_controls: false` suppresses the prev/next strip entirely
   # (`ImageGallery` passes this when there's only one image).
   def test_show_controls_false_suppresses_controls
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "c", show_controls: false },
-                    slides: [{ content: "s" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "c", show_controls: false },
+      slides: [{ content: "s" }]
+    )
 
     assert_no_html(html, "a.carousel-control")
   end
@@ -166,12 +166,12 @@ class CarouselTest < ComponentTestCase
   # (and the first slide stops being active). `Matrix::Carousel` uses
   # this for its `top_img` semantics.
   def test_explicit_active_kwarg_overrides_default_first_active
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "c" },
-                    slides: [{ id: "s1", content: "first" },
-                             { id: "s2", active: true, content: "second" },
-                             { id: "s3", content: "third" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "c" },
+      slides: [{ id: "s1", content: "first" },
+               { id: "s2", active: true, content: "second" },
+               { id: "s3", content: "third" }]
+    )
 
     assert_html(html, "div.item.active[id='s2']", text: "second")
     assert_no_html(html, "div.item.active[id='s1']")
@@ -180,12 +180,12 @@ class CarouselTest < ComponentTestCase
 
   # `active:` works the same on thumbs.
   def test_explicit_active_kwarg_overrides_first_active_thumb
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "c" },
-                    slides: [{ content: "s" }],
-                    thumbs: [{ id: "t1", content: "first" },
-                             { id: "t2", active: true, content: "second" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "c" },
+      slides: [{ content: "s" }],
+      thumbs: [{ id: "t1", content: "first" },
+               { id: "t2", active: true, content: "second" }]
+    )
 
     assert_html(html, "li.carousel-indicator.active[id='t2']")
     assert_no_html(html, "li.carousel-indicator.active[id='t1']")
@@ -195,14 +195,20 @@ class CarouselTest < ComponentTestCase
   # Registered thumbs are silently dropped (the matrix-box carousel
   # uses this — no thumbnail strip per-box).
   def test_show_indicators_false_suppresses_indicator_strip
-    html = render(Harness.new(
-                    carousel_args: { carousel_id: "c",
-                                     show_indicators: false },
-                    slides: [{ content: "s" }],
-                    thumbs: [{ content: "ignored" }]
-                  ))
+    html = render_carousel(
+      carousel_args: { carousel_id: "c", show_indicators: false },
+      slides: [{ content: "s" }],
+      thumbs: [{ content: "ignored" }]
+    )
 
     assert_no_html(html, "ol.carousel-indicators")
     assert_not_includes(html, "ignored")
+  end
+
+  private
+
+  def render_carousel(carousel_args:, slides: [], thumbs: [])
+    render(Harness.new(carousel_args: carousel_args,
+                       slides: slides, thumbs: thumbs))
   end
 end

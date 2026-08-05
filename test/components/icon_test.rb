@@ -4,7 +4,7 @@ require("test_helper")
 
 class LinkIconTest < ComponentTestCase
   def test_glyph_only
-    html = render(Components::Icon.new(type: :globe))
+    html = render_icon(type: :globe)
 
     assert_html(html, "span.glyphicon.glyphicon-globe.link-icon")
     # No sr-only inner span when title is absent — just the bare glyph.
@@ -12,7 +12,7 @@ class LinkIconTest < ComponentTestCase
   end
 
   def test_unknown_type_renders_nothing
-    html = render(Components::Icon.new(type: :bogus_not_a_real_icon))
+    html = render_icon(type: :bogus_not_a_real_icon)
 
     # Unknown icon type silently emits nothing — matches the legacy
     # `link_icon` helper's `return "" unless LINK_ICON_INDEX[type]`.
@@ -20,10 +20,7 @@ class LinkIconTest < ComponentTestCase
   end
 
   def test_title_adds_tooltip_and_sr_only_label
-    html = render(Components::Icon.new(
-                    type: :edit, title: :edit.ti,
-                    class: "text-primary"
-                  ))
+    html = render_icon(type: :edit, title: :edit.ti, class: "text-primary")
 
     assert_html(html,
                 "span.glyphicon-edit.link-icon.text-primary" \
@@ -33,20 +30,22 @@ class LinkIconTest < ComponentTestCase
   end
 
   def test_caller_data_attrs_merge_with_tooltip_data
-    html = render(Components::Icon.new(
-                    type: :globe, title: "Tooltip text",
-                    data: { other: "v" }
-                  ))
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       data: { other: "v" })
 
     # Tooltip target still present alongside caller's custom data attr.
     assert_html(html, "span[data-tooltip-target='tip'][data-other='v']")
   end
 
   def test_extra_attrs_passed_through
-    html = render(Components::Icon.new(
-                    type: :globe, id: "my_icon"
-                  ))
+    html = render_icon(type: :globe, id: "my_icon")
 
     assert_html(html, "span#my_icon.glyphicon-globe")
+  end
+
+  private
+
+  def render_icon(**)
+    render(Components::Icon.new(**))
   end
 end

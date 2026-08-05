@@ -17,9 +17,7 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
     name = names_with_descriptions
     description_count = list_descriptions_for(name)
 
-    html = render(Views::Controllers::Descriptions::List.new(
-                    user: @user, object: name, type: :name
-                  ))
+    html = render_list(object: name, type: :name)
     doc = Nokogiri::HTML.fragment(html)
 
     assert_operator(description_count, :>, 0,
@@ -31,9 +29,7 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
   def test_readable_descriptions_render_as_links
     name = names_with_descriptions
 
-    html = render(Views::Controllers::Descriptions::List.new(
-                    user: @user, object: name, type: :name
-                  ))
+    html = render_list(object: name, type: :name)
 
     readable, unreadable = name.descriptions.partition do |desc|
       desc.is_reader?(@user)
@@ -53,9 +49,7 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
            where(name_descriptions: { id: nil }).first
     assert_empty(name.descriptions)
 
-    html = render(Views::Controllers::Descriptions::List.new(
-                    user: @user, object: name, type: :name
-                  ))
+    html = render_list(object: name, type: :name)
 
     assert_equal("", html.strip)
   end
@@ -63,15 +57,17 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
   def test_emits_empty_text_when_no_descriptions
     name = Name.left_joins(:descriptions).
            where(name_descriptions: { id: nil }).first
-    html = render(Views::Controllers::Descriptions::List.new(
-                    user: @user, object: name, type: :name,
-                    empty_text: "No descriptions here."
-                  ))
+    html = render_list(object: name, type: :name,
+                       empty_text: "No descriptions here.")
 
     assert_includes(html, "No descriptions here.")
   end
 
   private
+
+  def render_list(**)
+    render(Views::Controllers::Descriptions::List.new(user: @user, **))
+  end
 
   def names_with_descriptions
     Name.joins(:descriptions).group("names.id").

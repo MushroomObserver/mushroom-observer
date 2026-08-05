@@ -80,7 +80,7 @@ class ApplicationFormHelperParityTest < ComponentTestCase
   # --- AutocompleterField: no outer `id` unless caller asks for one ------
 
   def test_autocompleter_field_omits_outer_id_by_default
-    html = render(AutocompleterNoIdForm.new(Comment.new, action: "/t"))
+    html = render_autocompleter_no_id_form
 
     wrap = Nokogiri::HTML5.fragment(html).at_css("div.autocompleter")
     assert_nil(wrap["id"],
@@ -137,7 +137,7 @@ class ApplicationFormHelperParityTest < ComponentTestCase
   # --- AutocompleterField: no d-flex when label_end is empty -------------
 
   def test_autocompleter_field_no_d_flex_when_no_create_text
-    html = render(AutocompleterNoIdForm.new(Comment.new, action: "/t"))
+    html = render_autocompleter_no_id_form
 
     # With no `create_text:`, AutocompleterField must not register an
     # empty `label_end` slot — otherwise FieldLabelRow forces the
@@ -248,6 +248,12 @@ class ApplicationFormHelperParityTest < ComponentTestCase
     assert_html(html,
                 "input[type='radio'][name='comment[target_id]']" \
                 "[value='1']:not([checked])")
+  end
+
+  private
+
+  def render_autocompleter_no_id_form
+    render(AutocompleterNoIdForm.new(Comment.new, action: "/t"))
   end
 end
 

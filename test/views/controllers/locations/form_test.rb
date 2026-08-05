@@ -74,12 +74,9 @@ module Views::Controllers::Locations
 
     def test_renders_existing_location_form
       location = locations(:burbank)
-      html = render(Form.new(
-                      location,
-                      display_name: location.display_name,
-                      original_name: location.display_name,
-                      local: true
-                    ))
+      html = render_form(location,
+                         display_name: location.display_name,
+                         original_name: location.display_name)
 
       assert_html(html, "form[action*='/locations/#{location.id}']")
       assert_html(html, "button[type='submit']", text: :update.ti)
@@ -94,13 +91,9 @@ module Views::Controllers::Locations
 
     def test_renders_dubious_location_warning_container_when_provided
       reasons = [[:location_dubious_empty, {}], [:location_dubious_commas, {}]]
-      html = render(Form.new(
-                      @location,
-                      display_name: "test",
-                      original_name: "test",
-                      dubious_where_reasons: reasons,
-                      local: true
-                    ))
+      html = render_form(@location,
+                         display_name: "test", original_name: "test",
+                         dubious_where_reasons: reasons)
 
       assert_html(html, "#dubious_location_messages.alert-warning")
       reasons.each do |tag, args|
@@ -113,12 +106,9 @@ module Views::Controllers::Locations
       location = locations(:burbank)
       location.update!(locked: true)
 
-      html = render(Form.new(
-                      location,
-                      display_name: location.display_name,
-                      original_name: location.display_name,
-                      local: true
-                    ))
+      html = render_form(location,
+                         display_name: location.display_name,
+                         original_name: location.display_name)
 
       # Locked-display style: the explanatory text lives in a
       # `.help-block` div next to the read-only fields.
@@ -126,24 +116,21 @@ module Views::Controllers::Locations
     end
 
     def test_enables_turbo_for_modal_rendering
-      html = render(Form.new(
-                      @location,
-                      display_name: "test",
-                      original_name: "test",
-                      local: false
-                    ))
+      html = render_form(@location, display_name: "test",
+                                    original_name: "test", local: false)
 
       assert_html(html, "form[data-turbo='true']")
     end
 
     private
 
-    def render_form
+    def render_form(location = @location, local: true, **)
       render(Form.new(
-               @location,
+               location,
                display_name: "test location",
                original_name: "test location",
-               local: true
+               local: local,
+               **
              ))
     end
   end

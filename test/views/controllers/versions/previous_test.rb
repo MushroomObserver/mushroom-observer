@@ -6,11 +6,7 @@ class Views::Controllers::Versions::PreviousTest < ComponentTestCase
   def test_renders_panel_with_type_tagged_id
     name = names(:peltigera)
 
-    html = render(
-      Views::Controllers::Versions::Previous.new(
-        obj: name, versions: name.versions.to_a
-      )
-    )
+    html = render_previous(obj: name, versions: name.versions.to_a)
 
     # Panel id is `<type_tag>_versions` — e.g. `name_versions`.
     assert_html(html, "##{name.type_tag}_versions")
@@ -19,11 +15,7 @@ class Views::Controllers::Versions::PreviousTest < ComponentTestCase
   def test_renders_one_row_per_version_in_reverse_order
     name = names(:peltigera)
 
-    html = render(
-      Views::Controllers::Versions::Previous.new(
-        obj: name, versions: name.versions.to_a
-      )
-    )
+    html = render_previous(obj: name, versions: name.versions.to_a)
 
     # The latest version's anchor carries `latest_version_link`; the
     # remaining anchors carry `initial_version_link`.
@@ -37,13 +29,15 @@ class Views::Controllers::Versions::PreviousTest < ComponentTestCase
     name = names(:peltigera)
     versions = name.versions.to_a
 
-    html = render(
-      Views::Controllers::Versions::Previous.new(
-        obj: name, versions: versions,
-        args: { bold: ->(_v) { true } }
-      )
-    )
+    html = render_previous(obj: name, versions: versions,
+                           args: { bold: ->(_v) { true } })
 
     assert_html(html, "a strong")
+  end
+
+  private
+
+  def render_previous(**)
+    render(Views::Controllers::Versions::Previous.new(**))
   end
 end

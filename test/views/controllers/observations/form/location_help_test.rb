@@ -6,7 +6,7 @@ module Views::Controllers::Observations
   class Form::LocationHelpTest < ComponentTestCase
     def test_renders_two_paragraphs_with_postal_examples_by_default
       controller.instance_variable_set(:@user, users(:rolf))
-      html = render(Form::LocationHelp.new)
+      html = render_help
 
       # Postal: postal-format example city appears as written.
       assert_includes(html, Form::LocationHelp::POSTAL_LOC1)
@@ -17,13 +17,19 @@ module Views::Controllers::Observations
 
     def test_scientific_format_flips_example_locations
       controller.instance_variable_set(:@user, users(:roy))
-      html = render(Form::LocationHelp.new)
+      html = render_help
 
       # Scientific: reverse-name flip on the example cities.
       assert_includes(html,
                       Location.reverse_name(Form::LocationHelp::POSTAL_LOC1))
       assert_includes(html,
                       Location.reverse_name(Form::LocationHelp::POSTAL_LOC2))
+    end
+
+    private
+
+    def render_help
+      render(Form::LocationHelp.new)
     end
   end
 end

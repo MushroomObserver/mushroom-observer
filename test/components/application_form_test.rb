@@ -1075,10 +1075,8 @@ class ApplicationFormTest < ComponentTestCase
     proxy = Components::ApplicationForm::FieldProxy.new(
       "chosen_name", :name_id
     )
-    html = render(Components::ApplicationForm::RadioField.new(
-                    proxy, [10, "Alpha"], [20, "Beta"],
-                    wrapper_options: { wrap_class: "ml-4" }
-                  ))
+    html = render_radio_field(proxy, [10, "Alpha"], [20, "Beta"],
+                              wrapper_options: { wrap_class: "ml-4" })
 
     assert_html(html, "div.radio.ml-4", count: 2)
     assert_html(html,
@@ -1094,9 +1092,7 @@ class ApplicationFormTest < ComponentTestCase
     proxy = Components::ApplicationForm::FieldProxy.new(
       "chosen_name", :name_id, "20"
     )
-    html = render(Components::ApplicationForm::RadioField.new(
-                    proxy, [10, "Alpha"], [20, "Beta"]
-                  ))
+    html = render_radio_field(proxy, [10, "Alpha"], [20, "Beta"])
 
     assert_html(html, "input[value='10']:not([checked])")
     assert_html(html, "input[value='20'][checked]")
@@ -1107,9 +1103,8 @@ class ApplicationFormTest < ComponentTestCase
     proxy = Components::ApplicationForm::FieldProxy.new(
       "chosen_name", :status, :active
     )
-    html = render(Components::ApplicationForm::RadioField.new(
-                    proxy, [:active, "Active"], [:inactive, "Inactive"]
-                  ))
+    html = render_radio_field(proxy, [:active, "Active"],
+                              [:inactive, "Inactive"])
 
     # Symbol values should be rendered as strings
     assert_html(html, "input[value='active']")
@@ -1265,6 +1260,12 @@ class ApplicationFormTest < ComponentTestCase
     form.field_block = block
 
     render(form)
+  end
+
+  def render_radio_field(proxy, *options, **field_opts)
+    render(Components::ApplicationForm::RadioField.new(
+             proxy, *options, **field_opts
+           ))
   end
 
   # Single reusable test form class to avoid duplicate view_template methods

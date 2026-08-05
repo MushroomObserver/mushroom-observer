@@ -9,7 +9,7 @@ class MatrixTableTest < ComponentTestCase
   end
 
   def test_renders_empty_table_when_no_objects
-    component = Components::Matrix::Table.new
+    component = build_table
     html = render(component)
 
     assert_includes(html, "list-unstyled")
@@ -21,11 +21,7 @@ class MatrixTableTest < ComponentTestCase
       observations(:coprinus_comatus_obs),
       observations(:agaricus_campestris_obs)
     ]
-    component = Components::Matrix::Table.new(
-      objects: observations,
-      user: @user,
-      cached: false
-    )
+    component = build_table(objects: observations, cached: false)
     html = render(component)
 
     assert_includes(html, "box_#{observations.first.id}")
@@ -36,11 +32,7 @@ class MatrixTableTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     # Stub transferred to return true
     obs.thumb_image.stub(:transferred, true) do
-      component = Components::Matrix::Table.new(
-        objects: [obs],
-        user: @user,
-        cached: true
-      )
+      component = build_table(objects: [obs], cached: true)
 
       # Expect cache to be called
       cache_called = false
@@ -59,11 +51,7 @@ class MatrixTableTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     # Stub transferred to return false
     obs.thumb_image.stub(:transferred, false) do
-      component = Components::Matrix::Table.new(
-        objects: [obs],
-        user: @user,
-        cached: true
-      )
+      component = build_table(objects: [obs], cached: true)
 
       # Expect cache NOT to be called
       cache_called = false
@@ -85,11 +73,7 @@ class MatrixTableTest < ComponentTestCase
 
   def test_caches_objects_without_thumb_image
     user = users(:katrina)
-    component = Components::Matrix::Table.new(
-      objects: [user],
-      user: @user,
-      cached: true
-    )
+    component = build_table(objects: [user], cached: true)
 
     # Expect cache to be called for user objects
     cache_called = false
@@ -114,9 +98,7 @@ class MatrixTableTest < ComponentTestCase
   def test_caches_image_objects_with_transferred_true
     image = images(:connected_coprinus_comatus_image)
     image.stub(:transferred, true) do
-      component = Components::Matrix::Table.new(
-        objects: [image], user: @user, cached: true
-      )
+      component = build_table(objects: [image], cached: true)
 
       cache_called = false
       component.stub(:low_level_cache, lambda { |_key, &block|
@@ -134,9 +116,7 @@ class MatrixTableTest < ComponentTestCase
   def test_does_not_cache_image_objects_with_transferred_false
     image = images(:connected_coprinus_comatus_image)
     image.stub(:transferred, false) do
-      component = Components::Matrix::Table.new(
-        objects: [image], user: @user, cached: true
-      )
+      component = build_table(objects: [image], cached: true)
 
       cache_called = false
       component.stub(:low_level_cache, lambda { |_key, &block|
@@ -201,11 +181,7 @@ class MatrixTableTest < ComponentTestCase
     assert_nil(obs.thumb_image,
                "Test requires observation with nil thumb_image")
 
-    component = Components::Matrix::Table.new(
-      objects: [obs],
-      user: @user,
-      cached: true
-    )
+    component = build_table(objects: [obs], cached: true)
 
     # Expect cache to be called when thumb_image is nil
     cache_called = false
@@ -224,11 +200,7 @@ class MatrixTableTest < ComponentTestCase
 
   def test_does_not_render_identify_ui_and_footer_when_identify_is_false
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Table.new(
-      objects: [obs],
-      user: @user,
-      identify: false
-    )
+    component = build_table(objects: [obs], identify: false)
     html = render(component)
 
     # Should not have identify UI or footer
@@ -242,11 +214,7 @@ class MatrixTableTest < ComponentTestCase
     # Must eager-load observation_views for identify footer to render
     obs = Observation.includes(:observation_views).
           find(observations(:coprinus_comatus_obs).id)
-    component = Components::Matrix::Table.new(
-      objects: [obs],
-      user: @user,
-      identify: true
-    )
+    component = build_table(objects: [obs], identify: true)
     html = render(component)
 
     # Should have identify UI and footer
@@ -260,7 +228,7 @@ class MatrixTableTest < ComponentTestCase
   end
 
   def test_renders_with_block
-    component = Components::Matrix::Table.new
+    component = build_table
     html = render(component) do |table|
       table.render(
         Components::Matrix::Box.new(
@@ -284,9 +252,7 @@ class MatrixTableTest < ComponentTestCase
   # the whole page needs zero per-frame fetches.
   def test_renders_vote_interface_streams_after_boxes
     obs = observations(:coprinus_comatus_obs)
-    html = render(Components::Matrix::Table.new(
-                    objects: [obs], user: @user, cached: false
-                  ))
+    html = render(build_table(objects: [obs], cached: false))
 
     image_id = obs.thumb_image.id
     assert_html(
@@ -302,16 +268,14 @@ class MatrixTableTest < ComponentTestCase
   def test_no_vote_interface_streams_for_objects_without_thumb_images
     obs = observations(:coprinus_comatus_obs)
     obs.stub(:thumb_image, nil) do
-      html = render(Components::Matrix::Table.new(
-                      objects: [obs], user: @user, cached: false
-                    ))
+      html = render(build_table(objects: [obs], cached: false))
 
       assert_no_html(html, "turbo-stream")
     end
   end
 
   def test_no_vote_interface_streams_in_block_form
-    html = render(Components::Matrix::Table.new) do |table|
+    html = render(build_table) do |table|
       table.render(Components::Matrix::Box.new(id: 456) do
         view_context.tag.div { "Block content" }
       end)
@@ -323,11 +287,7 @@ class MatrixTableTest < ComponentTestCase
   def test_cache_key_includes_locale
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.stub(:transferred, true) do
-      component = Components::Matrix::Table.new(
-        objects: [obs],
-        user: @user,
-        cached: true
-      )
+      component = build_table(objects: [obs], cached: true)
 
       # Capture the cache key that gets passed to low_level_cache
       captured_key = nil
@@ -349,12 +309,7 @@ class MatrixTableTest < ComponentTestCase
   def test_does_not_cache_when_identify_is_true
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.stub(:transferred, true) do
-      component = Components::Matrix::Table.new(
-        objects: [obs],
-        user: @user,
-        cached: true,
-        identify: true
-      )
+      component = build_table(objects: [obs], cached: true, identify: true)
 
       cache_called = false
       component.stub(:low_level_cache, lambda { |_key, &block|
@@ -378,9 +333,7 @@ class MatrixTableTest < ComponentTestCase
       keys = []
 
       # Render with English locale
-      component_en = Components::Matrix::Table.new(
-        objects: [obs], user: @user, cached: true
-      )
+      component_en = build_table(objects: [obs], cached: true)
       component_en.stub(:low_level_cache, lambda { |key, &block|
         keys << key
         block.call
@@ -389,9 +342,7 @@ class MatrixTableTest < ComponentTestCase
       end
 
       # Render with Spanish locale (new component instance)
-      component_es = Components::Matrix::Table.new(
-        objects: [obs], user: @user, cached: true
-      )
+      component_es = build_table(objects: [obs], cached: true)
       component_es.stub(:low_level_cache, lambda { |key, &block|
         keys << key
         block.call
@@ -451,9 +402,7 @@ class MatrixTableTest < ComponentTestCase
     real_store.write(first_key, ["<li>already cached</li>", {}])
     spy = CountingCacheStore.new(real_store)
 
-    component = Components::Matrix::Table.new(
-      objects: observations, user: @user, cached: true
-    )
+    component = build_table(objects: observations, cached: true)
 
     # Phlex-rails' low_level_cache gates on perform_caching (unset,
     # so falsy, in the test env by default) -- without this, it always
@@ -496,9 +445,7 @@ class MatrixTableTest < ComponentTestCase
   def test_batched_store_is_cleared_after_render_completes
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.update_column(:transferred, true)
-    component = Components::Matrix::Table.new(
-      objects: [obs], user: @user, cached: true
-    )
+    component = build_table(objects: [obs], cached: true)
 
     original_perform_caching =
       Rails.application.config.action_controller.perform_caching
@@ -520,9 +467,7 @@ class MatrixTableTest < ComponentTestCase
   def test_render_cached_boxes_skips_the_batched_read_when_caching_is_off
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.update_column(:transferred, true)
-    component = Components::Matrix::Table.new(
-      objects: [obs], user: @user, cached: true
-    )
+    component = build_table(objects: [obs], cached: true)
     spy = CountingCacheStore.new(ActiveSupport::Cache::MemoryStore.new)
 
     original_cache = Rails.cache
@@ -545,5 +490,11 @@ class MatrixTableTest < ComponentTestCase
       "wasted read_multi on every render"
     )
     assert_equal(0, spy.write_multi_calls)
+  end
+
+  private
+
+  def build_table(**)
+    Components::Matrix::Table.new(user: @user, **)
   end
 end
