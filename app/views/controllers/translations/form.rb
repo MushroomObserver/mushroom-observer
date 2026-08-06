@@ -161,25 +161,15 @@ module Views::Controllers::Translations
     end
 
     def build_notes(ttag)
-      [plurality_note(ttag), case_note(ttag)].compact
+      [plurality_note(ttag)].compact
     end
 
     def plurality_note(ttag)
       if ttag.match(/s$/i) &&
          @edit_tags.include?(ttag.sub(/.$/, ""))
         :edit_translations_plural.t
-      elsif @edit_tags.intersect?(["#{ttag}s", "#{ttag}S"])
+      elsif @edit_tags.include?("#{ttag}s")
         :edit_translations_singular.t
-      end
-    end
-
-    def case_note(ttag)
-      if ttag == ttag.upcase &&
-         @edit_tags.include?(ttag.downcase)
-        :edit_translations_uppercase.t
-      elsif ttag == ttag.downcase &&
-            @edit_tags.include?(ttag.upcase)
-        :edit_translations_lowercase.t
       end
     end
 

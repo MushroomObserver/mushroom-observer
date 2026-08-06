@@ -89,10 +89,7 @@ class TranslationsControllerTest < FunctionalTestCase
     assert(strings.length >= 8)
     assert_equal("one", @controller.primary_tag("one", strings))
     assert_equal("two", @controller.primary_tag("two", strings))
-    assert_equal("two", @controller.primary_tag("Two", strings))
-    assert_equal("two", @controller.primary_tag("TWOS", strings))
-    assert_equal("two", @controller.primary_tag("tWoS", strings))
-    assert_equal("four", @controller.primary_tag("FoUr", strings))
+    assert_equal("two", @controller.primary_tag("twos", strings))
   end
 
   def test_build_index
@@ -243,8 +240,6 @@ class TranslationsControllerTest < FunctionalTestCase
     edit_tags = assigns(:edit_tags)
     assert_includes(edit_tags, "two")
     assert_includes(edit_tags, "twos")
-    assert_includes(edit_tags, "TWO")
-    assert_includes(edit_tags, "TWOS")
   end
 
   # ----------------------------
@@ -348,8 +343,6 @@ class TranslationsControllerTest < FunctionalTestCase
     result = @controller.send(:tags_to_edit, "two", strings)
     assert_includes(result, "two")
     assert_includes(result, "twos")
-    assert_includes(result, "TWO")
-    assert_includes(result, "TWOS")
   end
 
   def test_tags_to_edit_with_no_match
@@ -551,5 +544,63 @@ class TranslationsControllerTest < FunctionalTestCase
       :set_language_and_authorize_user
     )
     assert_equal(I18n.locale.to_s, lang.locale)
+  end
+
+  def test_error_message_includes_backtrace_in_development
+    lang = languages(:english)
+    @controller.instance_variable_set(:@lang, lang)
+    error = begin
+              raise("dev error")
+            rescue StandardError => e
+              e
+            end
+    result = Rails.env.stub(:development?, true) do
+      @controller.send(:error_message, error)
+    end
+    assert_equal("dev error", result.first)
+    assert_operator(result.length, :>, 1,
+                    "Expected backtrace lines to be included")
+  end
+
+  def test_update_translations_rescues_bad_param_access
+    use_test_locales do
+      str = translation_strings(:english_one)
+      old_text = str.text
+      lang = languages(:english)
+      @controller.instance_variable_set(:@lang, lang)
+      @controller.instance_variable_set(:@strings, lang.localization_strings)
+      @controller.send(:build_record_maps, lang)
+      params = ActionController::Parameters.new(id: "one", locale: "en")
+      @controller.params = params
+
+      params.stub(:[], ->(_key) { raise("boom") }) do
+        @controller.send(:update_translations, ["one"])
+      end
+
+      str.reload
+      assert_equal("", str.text)
+    ensure
+      str&.update!(text: old_text)
+    end
+  end
+
+  def test_update_rescues_error_and_renders_edit
+    use_test_locales do
+      login("rolf")
+      str = translation_strings(:english_one)
+      old_text = str.text
+
+      @controller.stub(:preview_string, ->(*) { raise("boom") }) do
+        patch(
+          :update,
+          params: { id: "one", locale: "en", tag_one: "temp value" },
+          format: :turbo_stream
+        )
+      end
+      assert_response(:success)
+      assert_match(/boom/, assigns(:msg))
+    ensure
+      str&.update!(text: old_text)
+    end
   end
 end

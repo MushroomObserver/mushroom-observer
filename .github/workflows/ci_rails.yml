@@ -71,9 +71,14 @@ jobs:
       - name: Create parallel test databases from main
         run: |
           mysqldump -u root -proot mo_test > /tmp/mo_test.sql
+          # cache_test: the Solid Cache-backed I18n backend's db (#4807).
+          # Schema only, no fixture data needed -- a cache starts empty.
+          mysqldump -u root -proot --no-data cache_test > /tmp/cache_test.sql
           for i in $(seq 0 $((PARALLEL_WORKERS - 1))); do
             mysql -u root -proot -e "DROP DATABASE IF EXISTS \`mo_test-$i\`; CREATE DATABASE \`mo_test-$i\` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
             mysql -u root -proot "mo_test-$i" < /tmp/mo_test.sql
+            mysql -u root -proot -e "DROP DATABASE IF EXISTS \`cache_test-$i\`; CREATE DATABASE \`cache_test-$i\` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;"
+            mysql -u root -proot "cache_test-$i" < /tmp/cache_test.sql
           done
 
       - name: Update translation files

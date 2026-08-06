@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+#
+# One-time (or safely re-runnable) local setup for #4807's Solid-Cache-
+# backed I18n backend: creates and schema-loads the cache database for
+# development and every parallel test worker. Idempotent -- safe to
+# re-run any time; only ever touches cache_* databases, never
+# mo_development/mo_test or their data.
+#
+# Prerequisite: config/database.yml's development: AND test: blocks
+# must both be multi-db (primary:/cache: sub-keys), matching
+# db/macos/database.yml (or db/vagrant/database.yml, db/docker/
+# database.yml) -- `db:create:cache`/`db:schema:load:cache` are Rails'
+# own auto-namespaced per-database tasks, they don't exist without that
+# structure. This script does NOT edit config/database.yml itself --
+# it's gitignored/local and often hand-tuned (e.g. a previously-bumped
+# connection pool size), so blindly rewriting it risks silently
+# dropping that tuning. If a step below fails because a block is
+# missing the multi-db shape, this script explains which block and
+# points at the template to copy from, rather than guessing at an edit.
+#
+# The cache_test / `cache_test-%` MySQL grants this PR added to
+# db/initialize.sql, however, ARE safe to apply automatically --
+# they're deterministic, idempotent, and don't touch a hand-tuned
+# file. This script attempts them as MySQL root before anything else;
+# if root needs a password (or isn't reachable non-interactively),
+# it prints the exact statements to run yourself and continues (the
+# later db:create:cache/schema:load:cache steps fail with a clear
+# error of their own if the grants are genuinely still missing).
+set -euo pipefail
+
+echo "Applying cache_test / \`cache_test-%\` MySQL grants (as root," \
+     "harmless to re-run if already applied)..."
+GRANT_SQL="grant all privileges on cache_test.* to 'mo'@'localhost' with grant option; grant all privileges on \`cache_test-%\`.* to 'mo'@'localhost';"
+if mysql -u root -e "$GRANT_SQL" 2>/dev/null; then
+  echo "Grants applied (or already were)."
+else
+  echo ""
+  echo "Could not apply the grants automatically as MySQL root (expected" \
+       "if root needs a password locally). Run this yourself as MySQL" \
+       "root, then re-run this script:"
+  echo ""
+  echo "  mysql -u root -e \"$GRANT_SQL\""
+  echo ""
+  echo "Continuing -- the steps below will fail with a clear error if" \
+       "the grants are genuinely still missing."
+fi
+
+if [ ! -f config/database.yml ]; then
+  echo "config/database.yml not found. Copy from db/macos/database.yml," \
+       "db/vagrant/database.yml, or db/docker/database.yml first."
+  exit 1
+fi
+
+echo "Fixing ar_internal_metadata's environment stamp (prophylactic --" \
+     "restoring a production checkpoint via db/download_checkpoint" \
+     "stamps mo_development as 'production', which falsely trips" \
+     "ActiveRecord's protected-environment check on any later" \
+     "destructive db task, e.g. this script's own steps below)..."
+RAILS_ENV=development bin/rails db:environment:set
+RAILS_ENV=test bin/rails db:environment:set
+
+# Wraps a `db:create:cache db:schema:load:cache` call; on the specific
+# "no cache: block configured" failure, points at what's missing and
+# where to copy the fix from, instead of surfacing a raw Rails
+# backtrace that doesn't say which config/database.yml block is wrong.
+run_cache_db_setup() {
+  local env_label=$1
+  shift
+  local err_file
+  err_file=$(mktemp)
+  if ! "$@" 2>"$err_file"; then
+    if grep -q "cache' database is not configured" "$err_file"; then
+      echo ""
+      echo "config/database.yml's ${env_label}: block doesn't have a" \
+           "multi-db primary:/cache: shape yet. Add a cache: sub-block" \
+           "to ${env_label}: -- see db/macos/database.yml (or" \
+           "db/vagrant/database.yml, db/docker/database.yml)'s" \
+           "${env_label}: block for the exact shape to copy."
+      echo ""
+    fi
+    cat "$err_file" >&2
+    rm -f "$err_file"
+    exit 1
+  fi
+  rm -f "$err_file"
+}
+
+echo ""
+echo "Setting up cache_development..."
+run_cache_db_setup development \
+  bash -c "RAILS_ENV=development bin/rails db:create:cache db:schema:load:cache"
+
+echo ""
+echo "Setting up cache_test (base, non-parallel)..."
+run_cache_db_setup test \
+  bash -c "RAILS_ENV=test bin/rails db:create:cache db:schema:load:cache"
+
+worker_count=$(ruby -e 'require "etc"; puts ENV.fetch("PARALLEL_WORKERS", Etc.nprocessors)')
+echo ""
+echo "Setting up cache_test-0 through cache_test-$((worker_count - 1))" \
+     "(PARALLEL_WORKERS=$worker_count, matching ParallelTestConfigService)..."
+for i in $(seq 0 $((worker_count - 1))); do
+  echo "  worker $i..."
+  run_cache_db_setup test \
+    bash -c "TEST_ENV_NUMBER=$i RAILS_ENV=test bin/rails db:create:cache db:schema:load:cache"
+done
+
+echo ""
+echo "Done. Cache databases ready: cache_development, cache_test," \
+     "cache_test-0..cache_test-$((worker_count - 1))"

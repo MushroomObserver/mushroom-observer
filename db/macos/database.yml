@@ -39,12 +39,37 @@ development:
 # Warning: The database defined as 'test' will be erased and
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
+#
+# Multi-db (primary/cache) like development/production, not a flat db:,
+# so Solid Cache (#4807's I18n backend) has a real solid_cache_entries
+# table in test instead of raising when it's actually touched -- see
+# config/environments/test.rb's solid_cache.connects_to.
+<%
+  test_db = ENV.fetch("MO_TEST_DATABASE", "mo_test")
+  # "cache_test", matching cache_development/cache_production -- not
+  # <primary>_cache. MO_TEST_DATABASE is a full manual override with no
+  # tied cache-naming convention, so just suffix it in that one case.
+  cache_test_db = ENV["MO_TEST_DATABASE"] ? "#{test_db}_cache" : "cache_test"
+%>
 test:
   # Support worker-specific databases in parallel testing
   # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
-  database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
-  username: mo
-  password: mo
+  primary:
+    database: <%= test_db %>
+    username: mo
+    password: mo
+    # Must exceed Solid Queue's own estimated thread need -- see
+    # test/jobs/queue_config_test.rb. Without this, ActiveRecord's
+    # default pool (5) is one short of what config/queue.yml currently
+    # needs (6), and SolidQueue::Configuration#valid? fails every time
+    # something asks it to validate (e.g. this test, or the real
+    # supervisor on boot -- see the incident this test guards against).
+    pool: 10
+  cache:
+    database: <%= cache_test_db %>
+    username: mo
+    password: mo
+    migrations_paths: "db/cache/migrate"
 
 production:
   database: mo_development

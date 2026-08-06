@@ -63,8 +63,11 @@ MushroomObserver::Application.configure do
   # Use a different cache store in test.
   config.cache_store = :null_store
 
-  # Use primary database for SolidCache (avoids needing separate cache db)
-  config.solid_cache.connects_to = { database: { writing: :primary } }
+  # Test now has a real cache: database (db/vagrant/database.yml et al,
+  # #4807) so the I18n backend's dedicated SolidCache::Store works the
+  # same way it does in development/production -- not routed to
+  # :primary anymore now that a real cache db exists for test.
+  config.solid_cache.connects_to = { database: { writing: :cache } }
 
   # Render exception templates for rescuable exceptions and raise for other
   # exceptions.

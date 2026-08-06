@@ -42,10 +42,10 @@ module MushroomObserver
     # Default is UTC.
     # config.time_zone = 'Central Time (US & Canada)'
 
-    # The default locale is :en and all translations from
-    # config/locales/*.rb, yml are auto loaded.
-    # config.i18n.load_path +=
-    #  Dir[Rails.root.join("my", "locales", "*.{rb,yml}").to_s]
+    # The default locale is :en. MO's own translations are DB/Solid-Cache-
+    # backed (#4807), not file-loaded -- see config/initializers/
+    # i18n_backend.rb. Gem-provided translations (ActiveRecord/ActiveModel/
+    # etc) still auto-load normally from each engine's own config/locales.
     # config.i18n.default_locale = :de
     config.i18n.enforce_available_locales = true
 
