@@ -32,12 +32,10 @@ mo_finish_app_setup() {
 
     case "$platform" in
         macos)
-            database_template_dir="macos"
             gcc_flags="-I$(brew --prefix libjpeg)/include -L$(brew --prefix libjpeg)/lib"
             root_mysql_cmd="mysql -u root -proot"
             ;;
         ubuntu)
-            database_template_dir="vagrant"
             gcc_flags=""
             root_mysql_cmd="sudo mysql -u root"
             ;;
@@ -47,7 +45,9 @@ mo_finish_app_setup() {
             ;;
     esac
 
-    mo_copy_config_template "db/$database_template_dir/database.yml" config/database.yml
+    # db/$platform/database.yml -- the directory is named to match
+    # (db/macos/, db/ubuntu/), so no separate lookup is needed here.
+    mo_copy_config_template "db/$platform/database.yml" config/database.yml
     mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
     mo_require_master_key
     mo_create_image_dirs
