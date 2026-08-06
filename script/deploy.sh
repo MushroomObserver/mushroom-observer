@@ -41,9 +41,20 @@ if [ "$1" = "--icons-only" ]; then
         echo "than cloning into a non-empty directory."
         exit 1
     else
+        # Sparse-checkout: that repo's sources/ (the full GLYPHICONS
+        # 2.0 sprites/fonts the curated sprite is built from) is much
+        # larger than what production actually needs, which is just
+        # mo-icons.svg. `--sparse` alone (no further `sparse-checkout
+        # set` needed) defaults to cone mode's top-level-files-only
+        # checkout, which already excludes sources/ -- confirmed via
+        # a real clone that sources/ never lands on disk AND its
+        # blobs are never fetched (--filter=blob:none), not just
+        # hidden by the working-tree filter.
         echo "$icons_dir isn't a checkout yet -- cloning..."
-        git clone git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
-            git clone https://github.com/MushroomObserver/icon-library.git "$icons_dir"
+        git clone --filter=blob:none --sparse \
+            git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
+            git clone --filter=blob:none --sparse \
+                https://github.com/MushroomObserver/icon-library.git "$icons_dir"
     fi
     if [ $? -ne 0 ]; then
         echo Updating the icon library failed.

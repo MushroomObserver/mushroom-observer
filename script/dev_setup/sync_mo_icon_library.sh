@@ -3,6 +3,15 @@
 # yet, and nothing in the app references these assets yet, so a
 # failure here is a warning, not a reason to abort the rest of setup.
 #
+# Sparse-checkout, not a full clone: that repo's sources/ (the full
+# GLYPHICONS 2.0 sprites + fonts the curated sprite gets built from)
+# is much larger than what MO actually needs at runtime, which is
+# just mo-icons.svg. `--sparse` alone (no further `sparse-checkout
+# set` needed) defaults to cone mode's top-level-files-only checkout,
+# which already excludes sources/ -- confirmed via a real clone that
+# sources/ never lands on disk AND its blobs are never fetched
+# (--filter=blob:none), not just hidden by the working-tree filter.
+#
 # Callable standalone via `script/dev_setup_macos --icons-only` or
 # `script/dev_setup_ubuntu --icons-only`, without running the rest of
 # either setup script.
@@ -27,9 +36,11 @@ mo_sync_icon_library() {
         esac
     elif [ -d "$icons_dir" ]; then
         echo "$icons_dir exists but isn't a git checkout -- leaving it alone."
-    elif git clone --quiet git@github.com:MushroomObserver/icon-library.git \
+    elif git clone --quiet --filter=blob:none --sparse \
+        git@github.com:MushroomObserver/icon-library.git \
         "$icons_dir" 2>/dev/null ||
-        git clone --quiet https://github.com/MushroomObserver/icon-library.git \
+        git clone --quiet --filter=blob:none --sparse \
+            https://github.com/MushroomObserver/icon-library.git \
             "$icons_dir" 2>/dev/null; then
         echo "Cloned $icons_dir"
     else
