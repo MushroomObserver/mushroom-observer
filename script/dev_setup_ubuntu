@@ -1,17 +1,50 @@
 #!/usr/bin/bash
-# Run as mo user with sudo power
+#
+# Run on a fresh Ubuntu box (as root) or an already-provisioned one
+# (as mo) -- detects which and does the right thing either way.
+#
+# As root: runs the one-time system prep (create the mo user, /var/web,
+# apt packages, chruby, ruby-install -- see script/dev_setup/ubuntu_root.sh),
+# then hands off to mo to finish. Interactive: may prompt for a `mo`
+# password if one isn't set yet (needed for `mo` to sudo later) --
+# works fine run from a local/downloaded file; if piped straight
+# through `curl | bash`, that one prompt may not work cleanly, since
+# it'd be reading from the same stdin bash is still consuming as
+# script source. Re-run it as mo directly (see below) if that happens.
+#
+# As mo: clones the repo if needed, sets up Ruby/gems/the database,
+# and runs the test suite.
+#
+# Usage (fresh box, as root):
+#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+# Usage (already-provisioned box, as mo, from an existing checkout):
+#   cd /var/web/mushroom-observer && script/dev_setup_ubuntu
+
+if [ "$(id -u)" -eq 0 ]; then
+    if [ -f script/dev_setup/ubuntu_root.sh ]; then
+        source script/dev_setup/ubuntu_root.sh
+    else
+        source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/ubuntu_root.sh")
+    fi
+    mo_ubuntu_root_setup
+
+    echo "Continuing as mo..."
+    exec su - mo -c "curl -fsSL https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
+fi
 
 cd /var/web || exit 1
 
 if [ -f script/dev_setup/clone_repo.sh ]; then
     source script/dev_setup/clone_repo.sh
 else
-    source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
 fi
 mo_ensure_repo
 
 # shellcheck source=script/dev_setup/common.sh
 source script/dev_setup/common.sh
+# shellcheck source=script/dev_setup/finish_app_setup.sh
+source script/dev_setup/finish_app_setup.sh
 
 ruby-install ruby "$(cat .ruby-version)"
 
@@ -32,20 +65,7 @@ fi
 
 echo "Ruby version check passed: $ACTUAL_RUBY"
 
-mo_create_image_dirs
-mo_build_image_helpers ""
-mo_copy_config_template db/vagrant/database.yml config/database.yml
-mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
-mo_require_master_key
-
-# Install Rails gems
-bundle install
-
-mo_init_or_migrate_db "sudo mysql -u root"
-
-bin/rails lang:update
-
-mo_install_precommit_hook
+mo_finish_app_setup "ubuntu"
 
 # Rock and Roll!
 bin/rails test

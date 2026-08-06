@@ -23,7 +23,7 @@ Before running parallel tests for the first time, you need to:
      password: mo
    ```
 
-   If you copied from `db/macos/database.yml` or `db/vagrant/database.yml`, this should already be configured.
+   If you copied from `db/macos/database.yml` or `db/ubuntu/database.yml`, this should already be configured.
 
 2. **Generate MySQL configuration files for each worker**
 
@@ -451,7 +451,7 @@ rails test test/classes/image_script_test.rb
 Key files that support parallel testing:
 
 - `test/test_helper.rb`: Configures parallel execution threshold
-- `config/database.yml` / `db/vagrant/database.yml`: Database configuration with `MO_TEST_DATABASE` support for worker-specific databases
+- `config/database.yml` / `db/ubuntu/database.yml`: Database configuration with `MO_TEST_DATABASE` support for worker-specific databases
 - `config/consts.rb`: Worker-specific path configuration
 - `lib/extensions/general_extensions.rb`: `database_worker_number` helper
 - `test/classes/script_test.rb`: `script_env` helper for passing worker config to bash/Ruby scripts

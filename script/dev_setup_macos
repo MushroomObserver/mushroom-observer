@@ -10,6 +10,7 @@
 # Usage (from an existing checkout):
 #   script/dev_setup_macos
 
+# Make sure Xcode Command Line Tools is installed
 if ! xcode-select -p >/dev/null 2>&1; then
     echo "Xcode Command Line Tools not found."
     echo "Run: xcode-select --install"
@@ -17,23 +18,24 @@ if ! xcode-select -p >/dev/null 2>&1; then
     exit 1
 fi
 
+# Make sure Homebrew is installed
 if ! command -v brew >/dev/null 2>&1; then
     echo "Homebrew not found. Install it from https://brew.sh/ and re-run this script."
     exit 1
 fi
 
 # ---------------------------------------------------------------------
-# Get a real, on-disk checkout before doing anything else. This runs
-# under whatever bash is already here (no Bash >= 4 features used) --
-# it's what guarantees script/bash_ensure_modern and
-# script/dev_setup/common.sh exist locally to source, whether this
-# script was curl-piped (no repo yet) or run from an existing clone.
+# Clone the app repo before doing anything else. This can run under
+# whatever version of bash is already here (no Bash 4+ features used).
+# Ensuring we have the repo guarantees that `script/bash_ensure_modern`
+# and `script/dev_setup/common.sh` exist locally, whether this script
+# was curl-piped (no repo yet) or run from an existing clone.
 # ---------------------------------------------------------------------
 
 if [ -f script/dev_setup/clone_repo.sh ]; then
     source script/dev_setup/clone_repo.sh
 else
-    source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
 fi
 mo_ensure_repo
 
@@ -44,7 +46,10 @@ MO_REEXEC_SCRIPT="$PWD/script/dev_setup_macos" source script/bash_ensure_modern
 
 # shellcheck source=script/dev_setup/common.sh
 source script/dev_setup/common.sh
+# shellcheck source=script/dev_setup/finish_app_setup.sh
+source script/dev_setup/finish_app_setup.sh
 
+# Check MySQL install
 if command -v mysql >/dev/null 2>&1; then
     installed_mysql=$(mysql --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
     if [ -n "$installed_mysql" ] && [ "${installed_mysql%%.*}" -lt 9 ]; then
@@ -114,23 +119,7 @@ else
     rbenv global "$RUBY_VERSION"
 fi
 
-mo_copy_config_template db/macos/database.yml config/database.yml
-mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
-mo_require_master_key
-mo_create_image_dirs
-mo_build_image_helpers "-I$(brew --prefix libjpeg)/include -L$(brew --prefix libjpeg)/lib"
-
-echo "Ensure we have the latest bundler"
-gem install bundler
-gem install trilogy
-
-bundle install
-
-mo_init_or_migrate_db "mysql -u root -proot"
-
-bin/rails lang:update
-
-mo_install_precommit_hook
+mo_finish_app_setup "macos"
 
 # ---------------------------------------------------------------------
 # Rock and roll

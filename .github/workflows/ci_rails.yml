@@ -46,7 +46,7 @@ jobs:
       - name: Create and configure db
         run: |
           mysql -u root -proot < db/initialize.sql
-          cp db/vagrant/database.yml config
+          cp db/ubuntu/database.yml config
 
       - name: Create test image directories
         run: |
