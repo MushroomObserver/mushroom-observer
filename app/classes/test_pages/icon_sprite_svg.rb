@@ -49,18 +49,33 @@ module TestPages::IconSpriteSvg
   # 2% padding, not the original 8%: confirmed via real screenshot
   # pixel measurements (not browser-side ink measurement, which
   # proved unreliable) that 8% was needlessly eating into the same
-  # budget the 2.8rem height fix (see sprite_icon.rb) was trying to
-  # recover -- font glyphs render close to edge-to-edge in their box.
+  # budget the 2.8rem sizing (below) was trying to recover -- font
+  # glyphs render close to edge-to-edge in their box.
+  #
+  # object-fit: contain into a 2.8rem square -- cap whichever
+  # dimension the icon's own aspect ratio makes larger at 2.8rem, let
+  # the other follow proportionally. A single fixed dimension (e.g.
+  # always height: 2.8rem, width: auto) let the two widest icons
+  # (envelope, chevron-down/up) render oversized since nothing capped
+  # their free-scaling width; always-square "meet" fitting (the
+  # original approach) letterboxed every other non-square icon
+  # instead. This is the one rule both size cleanly.
   def self.bbox_fit_script
     <<~JS.html_safe
       document.querySelectorAll(".sprite-icon-fit").forEach((svg) => {
         const path = svg.querySelector("path");
         const box = path.getBBox();
         const pad = Math.max(box.width, box.height) * 0.02;
-        svg.setAttribute(
-          "viewBox",
-          [box.x - pad, box.y - pad, box.width + 2 * pad, box.height + 2 * pad].join(" ")
-        );
+        const w = box.width + 2 * pad;
+        const h = box.height + 2 * pad;
+        svg.setAttribute("viewBox", [box.x - pad, box.y - pad, w, h].join(" "));
+        if (w >= h) {
+          svg.style.width = "2.8rem";
+          svg.style.height = "auto";
+        } else {
+          svg.style.height = "2.8rem";
+          svg.style.width = "auto";
+        }
       });
     JS
   end

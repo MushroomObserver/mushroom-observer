@@ -14,20 +14,12 @@ class Views::Controllers::TestPages::IconSpriteComparison::Show::
   end
 
   def view_template
-    # height only, width auto -- forcing an exact-square box (the
-    # earlier width+height: 2.5rem) letterboxed every non-square icon
-    # under the SVG's default "meet" scaling, wasting real width/height
-    # that a font glyph's own advance-width never has to give up.
-    #
-    # 2.8rem, not 2.5rem: MO's own .glyphicon { font-size: 112%; }
-    # (_icons.scss) already boosts the Current column's font glyph
-    # 12% past the 2.5rem the wrapping div sets -- confirmed via
-    # getComputedStyle (28px rendered vs. a 25px wrapper). Matching
-    # that here, plus dropping the fit padding below from 8% to 2%,
-    # closed the remaining gap on square/circular icons (circle-plus,
-    # circle-question, alert) that the width:auto change alone
-    # couldn't touch, since their aspect ratio is already ~1.
-    svg(class: "sprite-icon-fit", style: "height: 2.8rem; width: auto;",
+    # Initial size is a placeholder -- TestPages::IconSpriteSvg's
+    # bbox-fit script overrides both width and height per icon once it
+    # knows the icon's own aspect ratio (object-fit: contain into a
+    # 2.8rem square; see that file for why a single fixed dimension
+    # doesn't work for every icon).
+    svg(class: "sprite-icon-fit", style: "height: 2.8rem; width: 2.8rem;",
         xmlns: "http://www.w3.org/2000/svg") do
       path(d: @path_data, fill: "#262626")
     end
