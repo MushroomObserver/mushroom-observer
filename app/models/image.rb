@@ -1203,6 +1203,21 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.can_edit?(self, user)
   end
 
+  # Rotate/mirror controls (#4989): permitted in Admin mode, or for
+  # anyone who could edit this image directly (owner, or admin of a
+  # project the image itself is attached to, if the image's owner
+  # trusts that project at "editing" level), or anyone who can edit
+  # an Observation this image belongs to (owner/collector, or admin
+  # of a project the *observation* belongs to, again gated on the
+  # observation owner's trust). Deliberately broader than `can_edit?`
+  # alone, which only looks at the image's own project attachments.
+  def can_transform?(user, site_admin: false)
+    return true if site_admin
+    return false unless user
+
+    can_edit?(user) || observations.any? { |obs| obs.can_edit?(user) }
+  end
+
   ##############################################################################
   #
   #  :section: Callbacks and Logging

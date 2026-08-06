@@ -150,6 +150,59 @@ class ImageTest < UnitTestCase
     assert_true(img.can_edit?(dick))
   end
 
+  def test_can_transform_site_admin_bypasses_everything
+    img = images(:commercial_inquiry_image)
+
+    assert_true(img.can_transform?(katrina, site_admin: true),
+                "Site admin mode should permit transforming any image")
+  end
+
+  def test_can_transform_own_image
+    img = images(:commercial_inquiry_image)
+    assert_equal(rolf, img.user, "Fixture expectation: rolf owns this image")
+
+    assert_true(img.can_transform?(rolf),
+                "Image owner should be able to transform their own image")
+  end
+
+  def test_can_transform_via_project_admin_of_image_itself
+    img = images(:in_situ_image)
+    assert_equal(mary, img.user, "Fixture expectation: mary owns this image")
+
+    # Dick is bolete_admins, and this image is directly attached to
+    # bolete_project (fixture-level, not via its observation).
+    assert_true(img.can_transform?(dick),
+                "Project admin of a project the image is directly " \
+                "attached to should be able to transform it")
+  end
+
+  def test_can_transform_via_project_admin_of_observation
+    img = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    assert_equal(mary, obs.user,
+                 "Fixture expectation: mary owns this observation")
+    img.observations << obs
+
+    # Dick is bolete_admins; bolete_project contains `obs` (not `img`
+    # directly), and `obs`'s owner (mary) trusts bolete_project with
+    # "editing" trust. Dick should therefore be able to transform an
+    # image attached only to that observation, per #4989.
+    assert_true(img.can_transform?(dick),
+                "Admin of a project the image's observation belongs to " \
+                "should be able to transform the image")
+  end
+
+  def test_can_transform_denies_unrelated_user
+    img = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    img.observations << obs
+
+    assert_false(img.can_transform?(katrina),
+                 "A user with no ownership/admin/collector tie to the " \
+                 "image or its observations should not be able to " \
+                 "transform it")
+  end
+
   def test_validation
     img = Image.new
     assert_false(img.valid?)
