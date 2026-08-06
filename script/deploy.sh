@@ -36,6 +36,10 @@ if [ "$1" = "--icons-only" ]; then
                 exit 1
                 ;;
         esac
+    elif [ -d "$icons_dir" ]; then
+        echo "$icons_dir exists but isn't a git checkout -- aborting rather"
+        echo "than cloning into a non-empty directory."
+        exit 1
     else
         echo "$icons_dir isn't a checkout yet -- cloning..."
         git clone git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
