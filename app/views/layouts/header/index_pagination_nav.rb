@@ -108,6 +108,7 @@ module Views::Layouts
       )
       url = pagination_link_url(page)
 
+      # direction (Icon type) is :prev | :next
       Link(type: :icon, content: direction.to_s.to_sym.ti, path: url,
            icon: direction, button: :link, size: :lg, class: classes)
     end

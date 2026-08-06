@@ -28,6 +28,7 @@ class Components::Carousel::Controls < Components::Base
          role: "button",
          data: { slide: direction.to_s }) do
       div(class: "btn") do
+        # icon_type is :chevron_left | :chevron_right
         Icon(type: icon_type, aria: { hidden: "true" })
         span(class: "sr-only") { label.l }
       end

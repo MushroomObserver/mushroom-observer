@@ -30,6 +30,7 @@ module Views::Layouts
       adjacent_id = @query.send(:"#{dir}_id")
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
+      # dir (Icon type) is :prev | :next
       Link(type: :icon, content: adjacent_title(dir), path: href,
            icon: dir, button: :link, size: :lg, class: classes)
     end
@@ -37,6 +38,7 @@ module Views::Layouts
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
 
+      # index_icon (Icon type) is :grid | :list
       Link(type: :icon, content: index_title, path: index_path,
            icon: index_icon, button: :link, size: :lg, class: classes)
     end
