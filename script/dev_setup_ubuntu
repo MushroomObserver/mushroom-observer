@@ -17,8 +17,8 @@
 #
 # Usage (fresh box, as root):
 #   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
-# Usage (already-provisioned box, as mo):
-#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+# Usage (already-provisioned box, as mo, from an existing checkout):
+#   cd /var/web/mushroom-observer && script/dev_setup_ubuntu
 
 if [ "$(id -u)" -eq 0 ]; then
     if [ -f script/dev_setup/ubuntu_root.sh ]; then

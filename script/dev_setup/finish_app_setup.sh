@@ -9,9 +9,14 @@ mo_gem_install_locked() {
     locked_version="$2"
 
     if [ -n "$locked_version" ]; then
-        gem install "$gem_name" -v "$locked_version"
+        gem_install_cmd=(gem install "$gem_name" -v "$locked_version")
     else
-        gem install "$gem_name"
+        gem_install_cmd=(gem install "$gem_name")
+    fi
+
+    if ! "${gem_install_cmd[@]}"; then
+        echo "WARNING: 'gem install $gem_name' failed -- bundle install below" >&2
+        echo "may end up resolving and compiling a different version instead." >&2
     fi
 }
 

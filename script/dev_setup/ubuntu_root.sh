@@ -109,6 +109,16 @@ EOF
         echo ""
         echo "Set a password for the '$username' user -- needed for sudo to"
         echo "work as '$username' in the next phase:"
-        passwd "$username"
+        if ! passwd "$username"; then
+            echo ""
+            echo "ERROR: could not set a password for '$username'. If this ran"
+            echo "via 'curl | bash', that prompt reads from the same stdin bash"
+            echo "is still consuming as script source and can't be answered --"
+            echo "set it yourself and re-run as $username:"
+            echo "  passwd $username"
+            echo "  sudo su - $username"
+            echo "  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
+            exit 1
+        fi
     fi
 }
