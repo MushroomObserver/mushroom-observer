@@ -18,9 +18,16 @@ class Views::Controllers::TestPages::IconSpriteComparison::Show::
     # earlier width+height: 2.5rem) letterboxed every non-square icon
     # under the SVG's default "meet" scaling, wasting real width/height
     # that a font glyph's own advance-width never has to give up.
-    # Confirmed live: this alone closed most of the "SVG looks smaller
-    # than the font glyph" gap across eye/bin/chevron-last-left.
-    svg(class: "sprite-icon-fit", style: "height: 2.5rem; width: auto;",
+    #
+    # 2.8rem, not 2.5rem: MO's own .glyphicon { font-size: 112%; }
+    # (_icons.scss) already boosts the Current column's font glyph
+    # 12% past the 2.5rem the wrapping div sets -- confirmed via
+    # getComputedStyle (28px rendered vs. a 25px wrapper). Matching
+    # that here, plus dropping the fit padding below from 8% to 2%,
+    # closed the remaining gap on square/circular icons (circle-plus,
+    # circle-question, alert) that the width:auto change alone
+    # couldn't touch, since their aspect ratio is already ~1.
+    svg(class: "sprite-icon-fit", style: "height: 2.8rem; width: auto;",
         xmlns: "http://www.w3.org/2000/svg") do
       path(d: @path_data, fill: "#262626")
     end

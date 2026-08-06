@@ -55,7 +55,7 @@ class Views::Controllers::TestPages::IconSpriteComparison::Show <
     [:synonyms, "random", "random", "random_1_"],
     [:adjust, "resize-vertical", "resize-vertical", nil],
     [:make_default, "star", "star", "star_1_"],
-    [:publish, "upload", "circle-up", "circle-up"],
+    [:publish, "upload", "circle-empty-up", nil],
     [:check, "ok-circle", "circle-empty-check", nil],
     [:deprecate, "ok-circle", "circle-empty-check", nil],
     [:approve, "exclamation-sign", "circle-alert", "circle-alert_1_"],

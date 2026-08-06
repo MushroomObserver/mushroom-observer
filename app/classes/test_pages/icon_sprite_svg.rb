@@ -45,12 +45,18 @@ module TestPages::IconSpriteSvg
   # reliable than reimplementing path-bounds math server-side for a
   # throwaway page. No untrusted interpolation -- a static script, so
   # a plain SafeBuffer wrap is enough (see Phlex::TrustedHtml).
+  #
+  # 2% padding, not the original 8%: confirmed via real screenshot
+  # pixel measurements (not browser-side ink measurement, which
+  # proved unreliable) that 8% was needlessly eating into the same
+  # budget the 2.8rem height fix (see sprite_icon.rb) was trying to
+  # recover -- font glyphs render close to edge-to-edge in their box.
   def self.bbox_fit_script
     <<~JS.html_safe
       document.querySelectorAll(".sprite-icon-fit").forEach((svg) => {
         const path = svg.querySelector("path");
         const box = path.getBBox();
-        const pad = Math.max(box.width, box.height) * 0.08;
+        const pad = Math.max(box.width, box.height) * 0.02;
         svg.setAttribute(
           "viewBox",
           [box.x - pad, box.y - pad, box.width + 2 * pad, box.height + 2 * pad].join(" ")
