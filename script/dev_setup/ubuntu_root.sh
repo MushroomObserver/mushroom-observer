@@ -6,6 +6,7 @@
 # Called automatically by script/dev_setup_ubuntu when it detects it's
 # running as root -- see that file for the root -> mo handoff.
 mo_ubuntu_root_setup() {
+    apt update
     DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y install zsh
 
     username=mo
@@ -44,8 +45,11 @@ EOF
     ssh_dir="$user_home/.ssh"
     if [ ! -e "$ssh_dir" ]; then
         mkdir "$ssh_dir"
-        cat ~/.ssh/authorized_keys >>"$ssh_dir/authorized_keys"
         chmod 700 "$ssh_dir"
+        if [ -f ~/.ssh/authorized_keys ]; then
+            cat ~/.ssh/authorized_keys >>"$ssh_dir/authorized_keys"
+            chmod 600 "$ssh_dir/authorized_keys"
+        fi
         chown -R "$username:$username" "$ssh_dir"
         echo "Successfully setup SSH for user '$username'"
     else
@@ -54,13 +58,19 @@ EOF
 
     if [ ! -e /var/web ]; then
         mkdir /var/web
-        chmod 777 /var/web
         echo Created /var/web
     else
         echo /var/web already exists
     fi
+    # Was chmod 777 (world-writable). Tightened to owner-only write since
+    # only mo ever needs to write here (it clones/runs the app as itself)
+    # -- revert to 777 if some other flow turns out to need broader write
+    # access. Applied unconditionally, not just on fresh creation, so a
+    # re-run also fixes a pre-existing dir left over from before this
+    # change.
+    chown "$username:$username" /var/web
+    chmod 755 /var/web
 
-    apt update
     DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y upgrade
     DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y install \
         tcsh zsh man vim lynx telnet emacs wget build-essential \
@@ -81,14 +91,19 @@ EOF
         tar -xzvf master.tar.gz
         rm master.tar.gz
         cd chruby-master || exit 1
-        sudo make install
+        make install
         cd ../.. || exit 1
-        echo "source /usr/local/share/chruby/chruby.sh" >>~mo/.zshrc
-        echo "source /usr/local/share/chruby/auto.sh" >>~mo/.zshrc
         echo Installed chruby
     else
         echo "chruby install skipped: /usr/local/share/chruby/chruby.sh exists"
     fi
+
+    for chruby_source_line in \
+        "source /usr/local/share/chruby/chruby.sh" \
+        "source /usr/local/share/chruby/auto.sh"; do
+        grep -qxF "$chruby_source_line" ~mo/.zshrc 2>/dev/null ||
+            echo "$chruby_source_line" >>~mo/.zshrc
+    done
 
     if command -v ruby-install >/dev/null 2>&1; then
         echo "ruby-install already installed, skipping"
@@ -98,7 +113,7 @@ EOF
         wget https://github.com/postmodern/ruby-install/archive/master.tar.gz
         tar -xzvf master.tar.gz
         cd ruby-install-master || exit 1
-        sudo make install
+        make install
         cd ../.. || exit 1
         echo Installed ruby-install
     fi
@@ -116,7 +131,7 @@ EOF
             echo "is still consuming as script source and can't be answered --"
             echo "set it yourself and re-run as $username:"
             echo "  passwd $username"
-            echo "  sudo su - $username"
+            echo "  su - $username"
             echo "  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
             exit 1
         fi

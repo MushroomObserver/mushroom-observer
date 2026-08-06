@@ -53,7 +53,7 @@ yourself and re-run as `mo`:
 
 ```sh
   passwd mo
-  sudo su - mo
+  su - mo
   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
 ```
 

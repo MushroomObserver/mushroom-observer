@@ -24,12 +24,12 @@ if [ "$(id -u)" -eq 0 ]; then
     if [ -f script/dev_setup/ubuntu_root.sh ]; then
         source script/dev_setup/ubuntu_root.sh
     else
-        source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/ubuntu_root.sh")
+        source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/ubuntu_root.sh")
     fi
     mo_ubuntu_root_setup
 
     echo "Continuing as mo..."
-    exec su - mo -c "curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
+    exec su - mo -c "curl -fsSL https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
 fi
 
 cd /var/web || exit 1
@@ -37,7 +37,7 @@ cd /var/web || exit 1
 if [ -f script/dev_setup/clone_repo.sh ]; then
     source script/dev_setup/clone_repo.sh
 else
-    source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
 fi
 mo_ensure_repo
 

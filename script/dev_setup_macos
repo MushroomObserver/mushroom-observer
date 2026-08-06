@@ -35,7 +35,7 @@ fi
 if [ -f script/dev_setup/clone_repo.sh ]; then
     source script/dev_setup/clone_repo.sh
 else
-    source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
 fi
 mo_ensure_repo
 
