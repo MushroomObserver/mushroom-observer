@@ -25,7 +25,17 @@ if [ "$1" = "--icons-only" ]; then
     icons_dir="vendor/assets/images/icons"
 
     if [ -d "$icons_dir/.git" ]; then
-        echo Pulling latest icon-library... && git -C "$icons_dir" pull
+        origin=$(git -C "$icons_dir" remote get-url origin 2>/dev/null)
+        case "$origin" in
+            *MushroomObserver/icon-library*)
+                echo Pulling latest icon-library... && git -C "$icons_dir" pull
+                ;;
+            *)
+                echo "$icons_dir exists but isn't a MushroomObserver/icon-library"
+                echo "checkout -- aborting rather than updating the wrong repo."
+                exit 1
+                ;;
+        esac
     else
         echo "$icons_dir isn't a checkout yet -- cloning..."
         git clone git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
@@ -50,6 +60,11 @@ if [ "$1" = "--icons-only" ]; then
     fi
 
     echo Reloading puma... && sudo service puma reload
+    if [ $? -ne 0 ]; then
+        echo Puma reload failed.
+        exit 1
+    fi
+
     echo SUCCESS\!
     exit 0
 fi

@@ -13,8 +13,12 @@ mo_sync_icon_library() {
         origin=$(git -C "$icons_dir" remote get-url origin 2>/dev/null)
         case "$origin" in
             *MushroomObserver/icon-library*)
-                git -C "$icons_dir" pull --quiet
-                echo "Updated $icons_dir"
+                if git -C "$icons_dir" pull --quiet; then
+                    echo "Updated $icons_dir"
+                else
+                    echo "WARNING: failed to update $icons_dir (network issue?)"
+                    echo "-- leaving the existing checkout as-is."
+                fi
                 ;;
             *)
                 echo "$icons_dir exists but isn't a MushroomObserver/icon-library"
