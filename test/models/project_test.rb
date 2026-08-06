@@ -970,6 +970,23 @@ class ProjectTest < UnitTestCase
     assert_not(Project.admin_power?(obs, nil))
   end
 
+  # Adding your observations to a project is largely the point of
+  # joining it, so the admins should be able to work on them -- the
+  # same trust the web join button and a field slip scan already
+  # grant. This path is API2's.
+  def test_join_trusts_the_project_with_editing
+    project = projects(:open_membership_project)
+    user = users(:mary)
+    assert(project.can_join?(user), "fixture must allow self-enrollment")
+
+    project.join(user)
+
+    member = ProjectMember.find_by(project: project, user: user)
+    assert_not_nil(member, "Cannot find ProjectMember")
+    assert_equal("editing", member.trust_level)
+    assert_includes(project.user_group.users, user)
+  end
+
   private
 
   # An observation owned by an eol member (mary), added to eol_project
