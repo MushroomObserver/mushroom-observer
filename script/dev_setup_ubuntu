@@ -12,6 +12,8 @@ mo_ensure_repo
 
 # shellcheck source=script/dev_setup/common.sh
 source script/dev_setup/common.sh
+# shellcheck source=script/dev_setup/finish_app_setup.sh
+source script/dev_setup/finish_app_setup.sh
 
 ruby-install ruby "$(cat .ruby-version)"
 
@@ -32,20 +34,7 @@ fi
 
 echo "Ruby version check passed: $ACTUAL_RUBY"
 
-mo_create_image_dirs
-mo_build_image_helpers ""
-mo_copy_config_template db/vagrant/database.yml config/database.yml
-mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
-mo_require_master_key
-
-# Install Rails gems
-bundle install
-
-mo_init_or_migrate_db "sudo mysql -u root"
-
-bin/rails lang:update
-
-mo_install_precommit_hook
+mo_finish_app_setup "db/vagrant/database.yml" "" "sudo mysql -u root"
 
 # Rock and Roll!
 bin/rails test

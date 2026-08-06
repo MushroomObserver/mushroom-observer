@@ -44,6 +44,8 @@ MO_REEXEC_SCRIPT="$PWD/script/dev_setup_macos" source script/bash_ensure_modern
 
 # shellcheck source=script/dev_setup/common.sh
 source script/dev_setup/common.sh
+# shellcheck source=script/dev_setup/finish_app_setup.sh
+source script/dev_setup/finish_app_setup.sh
 
 if command -v mysql >/dev/null 2>&1; then
     installed_mysql=$(mysql --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
@@ -114,23 +116,9 @@ else
     rbenv global "$RUBY_VERSION"
 fi
 
-mo_copy_config_template db/macos/database.yml config/database.yml
-mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
-mo_require_master_key
-mo_create_image_dirs
-mo_build_image_helpers "-I$(brew --prefix libjpeg)/include -L$(brew --prefix libjpeg)/lib"
-
-echo "Ensure we have the latest bundler"
-gem install bundler
-gem install trilogy
-
-bundle install
-
-mo_init_or_migrate_db "mysql -u root -proot"
-
-bin/rails lang:update
-
-mo_install_precommit_hook
+mo_finish_app_setup "db/macos/database.yml" \
+    "-I$(brew --prefix libjpeg)/include -L$(brew --prefix libjpeg)/lib" \
+    "mysql -u root -proot"
 
 # ---------------------------------------------------------------------
 # Rock and roll
