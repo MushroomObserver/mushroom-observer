@@ -45,8 +45,6 @@ mo_finish_app_setup() {
             ;;
     esac
 
-    # db/$platform/database.yml -- the directory is named to match
-    # (db/macos/, db/ubuntu/), so no separate lookup is needed here.
     mo_copy_config_template "db/$platform/database.yml" config/database.yml
     mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
     mo_require_master_key

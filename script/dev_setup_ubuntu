@@ -1,5 +1,36 @@
 #!/usr/bin/bash
-# Run as mo user with sudo power
+#
+# Run on a fresh Ubuntu box (as root) or an already-provisioned one
+# (as mo) -- detects which and does the right thing either way.
+#
+# As root: runs the one-time system prep (create the mo user, /var/web,
+# apt packages, chruby, ruby-install -- see script/dev_setup/ubuntu_root.sh),
+# then hands off to mo to finish. Interactive: may prompt for a `mo`
+# password if one isn't set yet (needed for `mo` to sudo later) --
+# works fine run from a local/downloaded file; if piped straight
+# through `curl | bash`, that one prompt may not work cleanly, since
+# it'd be reading from the same stdin bash is still consuming as
+# script source. Re-run it as mo directly (see below) if that happens.
+#
+# As mo: clones the repo if needed, sets up Ruby/gems/the database,
+# and runs the test suite.
+#
+# Usage (fresh box, as root):
+#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+# Usage (already-provisioned box, as mo):
+#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+
+if [ "$(id -u)" -eq 0 ]; then
+    if [ -f script/dev_setup/ubuntu_root.sh ]; then
+        source script/dev_setup/ubuntu_root.sh
+    else
+        source <(curl -s "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/ubuntu_root.sh")
+    fi
+    mo_ubuntu_root_setup
+
+    echo "Continuing as mo..."
+    exec su - mo -c "curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
+fi
 
 cd /var/web || exit 1
 

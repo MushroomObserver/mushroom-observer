@@ -23,16 +23,46 @@ MacBook Pro) they take under 3 minutes.
 
 Shortly after I was able to access the web-based console from the DO UI
 
-# Run dev_setup_ubuntu_root
+# Run dev_setup_ubuntu
 I don't recommend running straight from a web console due to
 potential timeouts.  Better to run screen.  Note that the -L option
 puts all the output in a file in the root home directory which can be
 reviewed for errors.  From the web-based console run `screen -L`.
 
-On any freshly built Ubuntu box, you should be able to run:
+On any freshly built Ubuntu box, logged in as root, you should be able
+to run:
 
 ```sh
-  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu_root | bash
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+```
+
+This does the one-time root-level system prep (creates the `mo` user,
+installs system packages, chruby, ruby-install), then automatically
+continues as `mo` to clone the repo, set up Ruby/gems/the database,
+and run the test suite -- one command instead of two.
+
+It may prompt you to set a password for `mo` partway through (needed
+for `mo` to `sudo` in the steps after that) if one isn't set yet.
+That prompt works fine if you downloaded the script to a file first
+(`curl -o dev_setup_ubuntu ... && bash dev_setup_ubuntu`); if you ran
+the one-liner above via a raw pipe, the prompt may not read your input
+correctly (a well-known limitation of interactive prompts inside a
+`curl | bash` pipe -- the prompt reads from the same stdin bash is
+still consuming as script source). If that happens, set the password
+yourself and re-run as `mo`:
+
+```sh
+  passwd mo
+  sudo su - mo
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+```
+
+Or ssh in as the mo user from any system that has the key for any
+public key installed when the droplet was created, using the IP
+address of the droplet:
+
+```sh
+  ssh mo@<ip>
 ```
 
 This has only actually been tested on a DO droplet as described
@@ -40,37 +70,8 @@ above. Open a GitHub issue if you run into issues with recent Ubuntu
 systems.  It is also very conceivable that this will "just work" on
 other Linux distro that support `apt`.
 
-# Set mo password
-As root, set the mo user password so that account can sudo in the next phase:
-
-```sh
-  passwd mo
-```
-
-From the current shell you should now be able to run:
-
-```sh
-  sudo su - mo
-```
-
-Or you should be able to ssh in as the mo user from any system that
-has the key for any public key installed when the droplet was created
-using the IP address of the droplet.
-
-```sh
-  ssh mo@<ip>
-```
-
-# Run dev_setup_ubuntu as the mo user
-Again, I recomend running this inside `screen -L` if you aren't already
-doing that.
-
-```sh
-  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
-```
-
-at the end of this script it runs the entire test suite which should
-pass with no errors or failures.
+At the end of the mo phase, it runs the entire test suite, which
+should pass with no errors or failures.
 
 # Fragment caching in development
 
