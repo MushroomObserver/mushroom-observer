@@ -14,7 +14,13 @@ class Views::Controllers::TestPages::IconSpriteComparison::Show::
   end
 
   def view_template
-    svg(class: "sprite-icon-fit", style: "width: 2.5rem; height: 2.5rem;",
+    # height only, width auto -- forcing an exact-square box (the
+    # earlier width+height: 2.5rem) letterboxed every non-square icon
+    # under the SVG's default "meet" scaling, wasting real width/height
+    # that a font glyph's own advance-width never has to give up.
+    # Confirmed live: this alone closed most of the "SVG looks smaller
+    # than the font glyph" gap across eye/bin/chevron-last-left.
+    svg(class: "sprite-icon-fit", style: "height: 2.5rem; width: auto;",
         xmlns: "http://www.w3.org/2000/svg") do
       path(d: @path_data, fill: "#262626")
     end
