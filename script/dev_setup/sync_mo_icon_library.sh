@@ -18,6 +18,17 @@
 mo_sync_icon_library() {
     icons_dir="vendor/assets/images/icons"
 
+    # Local dev machine, gitignored, documented as only ever holding
+    # this sync target -- unlike deploy.sh's equivalent check (which
+    # aborts instead), auto-removing stale/non-git content here and
+    # replacing it with a fresh clone is safe enough to not need a
+    # human to intervene first, as long as it's logged, not silent.
+    if [ -d "$icons_dir" ] && [ ! -d "$icons_dir/.git" ]; then
+        echo "$icons_dir exists but isn't a git checkout -- removing it so a"
+        echo "fresh clone can take its place."
+        rm -rf "$icons_dir"
+    fi
+
     if [ -d "$icons_dir/.git" ]; then
         origin=$(git -C "$icons_dir" remote get-url origin 2>/dev/null)
         case "$origin" in
@@ -34,8 +45,6 @@ mo_sync_icon_library() {
                 echo "checkout -- leaving it alone."
                 ;;
         esac
-    elif [ -d "$icons_dir" ]; then
-        echo "$icons_dir exists but isn't a git checkout -- leaving it alone."
     elif git clone --quiet --filter=blob:none --sparse \
         git@github.com:MushroomObserver/icon-library.git \
         "$icons_dir" 2>/dev/null ||
