@@ -63,7 +63,11 @@ mo_finish_app_setup() {
     mo_gem_install_locked bundler "$bundler_version"
     mo_gem_install_locked trilogy "$trilogy_version"
 
-    bundle install
+    if [ -n "$bundler_version" ]; then
+        bundle "_${bundler_version}_" install
+    else
+        bundle install
+    fi
 
     mo_init_or_migrate_db "$root_mysql_cmd"
 
