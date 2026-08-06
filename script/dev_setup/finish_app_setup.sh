@@ -15,26 +15,39 @@ mo_gem_install_locked() {
     fi
 }
 
-# The shared tail sequence for both platform setup scripts, once the
-# repo is cloned, Bash/Ruby are sorted, and system packages are
-# installed. Run from inside the mushroom-observer directory, after
+# The shared tail sequence for both platform setup scripts. Before this:
+# - the repo has been cloned
+# - Bash/Ruby are sorted
+# - system packages are installed
+#
+# Run from inside the mushroom-observer directory, after
 # sourcing common.sh (this calls straight into its functions).
 #
-# Pass the three things that genuinely differ by platform:
-#   database_template  -- db/macos/database.yml or db/vagrant/database.yml
-#   gcc_flags           -- extra -I/-L flags jpegresize.c needs to find
-#                           libjpeg (Homebrew's paths on macOS; empty on
-#                           Ubuntu, where apt puts headers on the default
-#                           search path)
-#   root_mysql_cmd       -- "mysql -u root -proot" (macOS, explicit root
-#                           password) or "sudo mysql -u root" (Ubuntu,
-#                           passwordless sudo/unix-socket auth)
+# Pass the platform ("macos" or "ubuntu"). Three things differ between them:
+# - the database.yml template directory
+# - jpegresize's gcc flags
+# - the root-mysql invocation
 mo_finish_app_setup() {
-    database_template="$1"
-    gcc_flags="$2"
-    root_mysql_cmd="$3"
+    platform="$1"
 
-    mo_copy_config_template "$database_template" config/database.yml
+    case "$platform" in
+        macos)
+            database_template_dir="macos"
+            gcc_flags="-I$(brew --prefix libjpeg)/include -L$(brew --prefix libjpeg)/lib"
+            root_mysql_cmd="mysql -u root -proot"
+            ;;
+        ubuntu)
+            database_template_dir="vagrant"
+            gcc_flags=""
+            root_mysql_cmd="sudo mysql -u root"
+            ;;
+        *)
+            echo "mo_finish_app_setup: unknown platform '$platform' (expected macos or ubuntu)" >&2
+            exit 1
+            ;;
+    esac
+
+    mo_copy_config_template "db/$database_template_dir/database.yml" config/database.yml
     mo_copy_config_template config/gmaps_api_key.yml-template config/gmaps_api_key.yml
     mo_require_master_key
     mo_create_image_dirs

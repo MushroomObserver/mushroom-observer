@@ -34,7 +34,7 @@ fi
 
 echo "Ruby version check passed: $ACTUAL_RUBY"
 
-mo_finish_app_setup "db/vagrant/database.yml" "" "sudo mysql -u root"
+mo_finish_app_setup "ubuntu"
 
 # Rock and Roll!
 bin/rails test
