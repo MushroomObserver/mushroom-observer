@@ -68,10 +68,16 @@ module ProjectsController::Creation
   end
 
   def finalize_saved_project
+    # Same trust the add-member and field-slip paths grant, and said out
+    # loud for the same reason: someone setting a project up almost
+    # always wants its admins able to work on the observations they put
+    # in it, and being the creator should not make them the one admin
+    # whose observations nobody else can touch.
     ProjectMember.create!(project: @project, user: @user,
-                          trust_level: "hidden_gps")
+                          trust_level: "editing")
     @project.log_create
     flash_notice(:add_project_success.t)
+    flash_notice(:add_members_with_editing.l)
     redirect_to(project_path(@project.id))
   end
 
