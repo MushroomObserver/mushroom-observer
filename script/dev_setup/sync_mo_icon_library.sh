@@ -2,20 +2,26 @@
 # tmp/icon-library/, then copies its mo-icons.svg into
 # vendor/assets/images/icons/ -- part of the regular dev-setup flow
 # (called from mo_finish_app_setup) since every dev needs working
-# icons. Best-effort: not every dev has icon-library access yet, so a
-# failure here is a warning, not a reason to abort the rest of setup
-# -- whatever mo-icons.svg is already committed keeps working either
-# way. After a successful sync, `git add
-# vendor/assets/images/icons/mo-icons.svg` and commit to actually
-# update the tracked copy.
+# icons once Components::Icon actually renders them. Best-effort: not
+# every dev has icon-library access yet, so a failure here is a
+# warning, not a reason to abort the rest of setup -- nothing in the
+# app requires the sprite yet either way.
+#
+# mo-icons.svg is never committed here -- vendor/assets/images/icons/
+# is gitignored wholesale, since this repo is public/MIT-licensed and
+# stays free of any copyrighted material, even a curated derivative.
+# CI and production each fetch their own copy independently (see
+# .github/workflows/ci_rails.yml and deploy.sh --icons-only) rather
+# than relying on a committed file.
 #
 # Clones to tmp/ (already gitignored wholesale), not straight into
-# vendor/assets/images/icons/: that directory tracks mo-icons.svg
-# itself, and a `git clone` target ends up containing its own nested
-# .git -- git treats a tracked path holding a nested repo as an
-# "embedded repository" boundary and refuses to let individual files
-# inside it be added to the outer repo normally. Keeping the clone
-# separate from the tracked file's location sidesteps that entirely.
+# vendor/assets/images/icons/, even though nothing there is tracked
+# today: a `git clone` target ends up containing its own nested .git,
+# which git treats as an "embedded repository" boundary and refuses
+# to let individual files inside it be added to the outer repo
+# normally. Keeping the clone separate from where the file actually
+# lands means that's never a problem, including if this directory
+# ever does start tracking something.
 #
 # Sparse-checkout, not a full clone: that repo's sources/ (the full
 # GLYPHICONS 2.0 sprites + fonts the curated sprite gets built from)
