@@ -155,6 +155,32 @@ export default class extends GeocodeController {
       .catch((e) => {
         this.showGoogleMapsError("Google Maps failed to load", e)
       })
+
+    this.announceExistingPoint()
+  }
+
+  // An observation being edited already has its coordinates in the
+  // inputs, but nothing had told the locality autocompleter about them:
+  // the swap to "locations containing this point" only ever fired from
+  // bufferInputs (the lat/lng input action) or a map click. So a form
+  // loaded with saved coordinates offered no locality dropdown until the
+  // values were cleared, saved, and typed in again. Announce the point
+  // we already have, once, on connect.
+  //
+  // Only when the coordinates are saved on the record (announcePoint).
+  // A new observation's form prefills lat/lng from the user's last one,
+  // and those are a default the user has not chosen for this record --
+  // announcing them would pre-empt the EXIF of the photo they are about
+  // to attach.
+  announceExistingPoint() {
+    if (this.mapDivTarget.dataset.announcePoint !== "true") return
+    if (!["observation", "hybrid"].includes(this.map_type)) return
+    if (!this.hasLatInputTarget || !this.hasLngInputTarget) return
+
+    const center = this.validateLatLngInputs(false)
+    if (!center) return
+
+    this.sendPointChanged(center)
   }
 
   // Lock rectangle so it's not editable, and show this state in the icon link
