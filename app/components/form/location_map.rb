@@ -13,6 +13,10 @@ class Components::Form::LocationMap < Components::Base
   prop :id, String, default: ""
   prop :map_type, String, default: "location"
   prop :user, _Nilable(User), default: nil
+  # Coordinates already saved on the record, as opposed to
+  # prefilled defaults on a new form. Only the former should be
+  # announced to the locality autocompleter on connect.
+  prop :announce_point, _Boolean, default: false
 
   def view_template
     render_map_div
@@ -35,7 +39,8 @@ class Components::Form::LocationMap < Components::Base
       location_format: location_format,
       map_target: "mapDiv",
       editable: "true",
-      map_type: @map_type
+      map_type: @map_type,
+      announce_point: @announce_point.to_s
     }
   end
 
