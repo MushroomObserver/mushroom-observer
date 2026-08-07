@@ -227,7 +227,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_map
     render(Components::Form::LocationMap.new(
-             id: "observation_form_map", map_type: "observation"
+             id: "observation_form_map", map_type: "observation",
+             announce_point: update? && @observation.lat.present?
            ))
   end
 

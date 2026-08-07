@@ -74,6 +74,26 @@ module Name::Resolve
       end
     end
 
+    # Names written entirely in one case -- "russula compacta" off a
+    # field slip, "RUSSULA COMPACTA" off another -- never reach a
+    # lookup, because `parse_name` wants a capitalized genus and
+    # returns nil first. The row is right there: the columns are
+    # case-insensitive, so the string as written matches it. Hand back
+    # what the database actually holds.
+    #
+    # `search_name` first, to keep an author the writer supplied
+    # rather than dropping it and asking them to choose between
+    # authors afterwards. Returns the string unchanged when nothing
+    # matches, so the caller can tell whether anything was gained.
+    def canonical_name_string(str)
+      return str if str.blank?
+
+      by_search = Name.find_by(search_name: str)
+      return by_search.search_name if by_search
+
+      Name.find_by(text_name: str)&.text_name || str
+    end
+
     # A common mistake is capitalizing the species epithet. If the second word
     # is capitalized, and the name isn't recognized if the second word is
     # interpreted as an author, and it *is* recognized if changed to lowercase,

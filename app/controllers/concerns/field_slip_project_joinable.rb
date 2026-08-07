@@ -3,9 +3,8 @@
 # Joining a project by using one of its field slips.
 #
 # A slip's code prefix is an invitation: scanning a slip for an
-# open-membership project enrolls you in it. That is why the trust level
-# here is "editing" rather than the "hidden_gps" a plain self-service
-# `Project#join` grants — someone handed you a printed slip.
+# open-membership project enrolls you in it, at the "editing" trust
+# every other enrollment path grants.
 #
 # Shared by the field slip form and the observation form so the rule has
 # one definition; before #4932 only the field slip form did this, and

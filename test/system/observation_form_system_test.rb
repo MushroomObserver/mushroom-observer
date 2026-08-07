@@ -1157,6 +1157,25 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_date_is_now
 
+  # Editing an observation that already has coordinates: the Geolocation
+  # box must be checked, and the locality autocompleter must already be
+  # offering the localities containing that point. Neither happened --
+  # the box was bound to a non-attribute, and the swap to
+  # "location_containing" only ever fired from typing in the lat/lng
+  # inputs, so the form had to be cleared, saved and re-typed (#5002).
+  def test_edit_form_with_coordinates_is_ready_to_use
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login!(obs.user)
+
+    visit("/observations/#{obs.id}/edit")
+    assert_selector("#observation_form")
+
+    assert_checked_field("observation_has_geolocation", visible: :all)
+    assert_selector("#observation_location_autocompleter" \
+                    "[data-type='location_containing']", wait: 6)
+  end
+
   def assert_geolocation_is_empty
     assert_field("observation_lat", with: "", visible: :all)
     assert_field("observation_lng", with: "", visible: :all)

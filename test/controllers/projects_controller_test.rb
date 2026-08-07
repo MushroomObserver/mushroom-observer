@@ -337,6 +337,23 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal([rolf], admin_group.users)
   end
 
+  # The creator is a project admin by definition, and every other way
+  # of becoming one grants "editing". Leaving the creator lower made
+  # them the one admin whose observations their co-admins could not
+  # edit -- in a project they set up so those people could work on it.
+  def test_create_project_trusts_the_creator_with_editing
+    title = "Trusting Project"
+
+    post_requires_login(:create, build_params(title, "summary"))
+
+    project = Project.find_by(title: title)
+    assert_not_nil(project, "Cannot find Project")
+    member = ProjectMember.find_by(project: project, user: rolf)
+    assert_not_nil(member, "Cannot find ProjectMember")
+    assert_equal("editing", member.trust_level)
+    assert_flash_success([:add_project_success, :add_members_with_editing])
+  end
+
   def test_create_project_with_any_dates
     title = "Project without start or end"
     start = Time.zone.today

@@ -46,6 +46,32 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # The Geolocation section opens when the observation has coordinates,
+  # so its checkbox has to agree -- it rendered unchecked over an open
+  # section full of coordinates, and clicking it to "fix" that collapsed
+  # the section instead (#5002).
+  def test_edit_checks_geolocation_when_the_observation_has_coordinates
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[type=checkbox][name='observation[has_geolocation]']" \
+                  "[checked]")
+  end
+
+  def test_edit_leaves_geolocation_unchecked_without_coordinates
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(lat: nil, lng: nil)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[type=checkbox][name='observation[has_geolocation]']" \
+                  "[checked]", count: 0)
+  end
+
   # Editing the primary of a multi-member occurrence, a sibling key it
   # doesn't store is an :inherit row -- a disabled textarea plus buttons
   # with Inherit active and the sibling value as an adopt button.
