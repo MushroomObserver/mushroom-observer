@@ -34,11 +34,11 @@
 #
 # Callable standalone via `script/dev_setup_macos --icons-only` or
 # `script/dev_setup_ubuntu --icons-only`, without running the rest of
-# either setup script -- e.g. to pull a fresh mo-icons.svg and commit
-# it after updating icon-library.
+# either setup script -- e.g. to pick up a fresh mo-icons.svg locally
+# after icon-library updates.
 mo_sync_icon_library() {
     clone_dir="tmp/icon-library"
-    tracked_svg="vendor/assets/images/icons/mo-icons.svg"
+    dest_svg="vendor/assets/images/icons/mo-icons.svg"
 
     # Scratch clone location under tmp/, gitignored wholesale --
     # auto-removing stale/non-git content here and replacing it with
@@ -82,9 +82,9 @@ mo_sync_icon_library() {
     fi
 
     if [ -f "$clone_dir/mo-icons.svg" ]; then
-        mkdir -p "$(dirname "$tracked_svg")"
-        cp "$clone_dir/mo-icons.svg" "$tracked_svg"
-        echo "Copied mo-icons.svg to $tracked_svg -- commit it to update."
+        mkdir -p "$(dirname "$dest_svg")"
+        cp "$clone_dir/mo-icons.svg" "$dest_svg"
+        echo "Copied mo-icons.svg to $dest_svg."
     else
         echo "WARNING: $clone_dir/mo-icons.svg not found -- nothing copied."
     fi
