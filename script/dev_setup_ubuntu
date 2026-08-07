@@ -75,7 +75,6 @@ fi
 echo "Ruby version check passed: $ACTUAL_RUBY"
 
 mo_finish_app_setup "ubuntu"
-mo_sync_icon_library
 
 # Rock and Roll!
 bin/rails test

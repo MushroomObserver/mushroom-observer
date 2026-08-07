@@ -129,7 +129,6 @@ else
 fi
 
 mo_finish_app_setup "macos"
-mo_sync_icon_library
 
 # ---------------------------------------------------------------------
 # Rock and roll
