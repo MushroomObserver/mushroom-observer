@@ -122,13 +122,13 @@ class CollapseToggleLinkTest < ComponentTestCase
   def test_icon_title_forwarded_to_icon
     html = render_it(icon: :info, icon_title: "Help content")
 
-    assert_html(html, "a svg > title", text: "Help content")
+    assert_html(html, "a svg[aria-label='Help content']")
   end
 
   def test_icon_title_defaults_to_closed_text
     html = render_it(icon: :plus, closed_text: "Show more")
 
-    assert_html(html, "a svg > title", text: "Show more")
+    assert_html(html, "a svg[aria-label='Show more']")
   end
 
   def test_open_text_renders_collapse_toggle_open_span

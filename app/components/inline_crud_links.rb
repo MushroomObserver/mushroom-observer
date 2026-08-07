@@ -186,7 +186,7 @@ class Components::InlineCRUDLinks < Components::Base
       target: send(handler[:destroy_path] || :path_target),
       name: send(handler[:destroy_name] || :name_destroy_object),
       icon: :remove,
-      # Match `Components::Link::Icon`'s `px-2` icon padding so the
+      # Match `Components::Link::Get`'s `px-2` icon padding so the
       # destroy icon doesn't hug the neighboring edit link.
       icon_class: "px-2",
       variant: :strip,
@@ -231,7 +231,7 @@ class Components::InlineCRUDLinks < Components::Base
 
   def icon_link_edit
     tab = send(handler[:tab])
-    Components::Link::Icon.new(
+    Components::Link::Get.new(
       tab: tab,
       class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
     )

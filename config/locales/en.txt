@@ -1153,6 +1153,7 @@
   banner_update: Update Banner
   banner_update_failure: Failed to update banner.
   banner_update_success: Banner updated successfully.
+  banner_show_tooltip: Show current announcements
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction

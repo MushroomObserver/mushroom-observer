@@ -113,6 +113,26 @@
     // color: rgba($white, 1);
     opacity: 1;
   }
+
+  // Replaces Bootstrap's own .glyphicon-chevron-left/-right centering,
+  // which no longer matches now that Icon renders <svg class="mo-icon
+  // mo-icon-chevron-left">.
+  .mo-icon-chevron-left,
+  .mo-icon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+  }
+
+  .mo-icon-chevron-left {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .mo-icon-chevron-right {
+    right: 50%;
+    transform: translate(50%, -50%);
+  }
 }
 
 .carousel-heading {

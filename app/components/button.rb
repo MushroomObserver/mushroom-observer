@@ -107,9 +107,7 @@ class Components::Button < Components::Base
     @tag = html_attrs.delete(:tag) || :button
     @type = html_attrs.delete(:type) || :button
     @icon = icon
-    @icon_class = html_attrs.delete(:icon_class)
-    @icon_title = html_attrs.delete(:icon_title)
-    @label = html_attrs.delete(:label)
+    assign_icon_opts(html_attrs)
     onclick = html_attrs.delete(:onclick)
     @html_attrs = html_attrs
     # Phlex blocks `onclick` by name; wrap in SafeValue to opt in.
@@ -128,6 +126,14 @@ class Components::Button < Components::Base
 
   private
 
+  def assign_icon_opts(html_attrs)
+    @icon_class = html_attrs.delete(:icon_class)
+    @icon_title = html_attrs.delete(:icon_title)
+    @active_icon = html_attrs.delete(:active_icon)
+    @active_content = html_attrs.delete(:active_content)
+    @label = html_attrs.delete(:label)
+  end
+
   def btn_styling
     return nil if @variant == :strip
 
@@ -135,7 +141,8 @@ class Components::Button < Components::Base
   end
 
   def merged_class
-    class_names(btn_styling, size_class(@size), @html_attrs[:class])
+    class_names(stateful_class, btn_styling, size_class(@size),
+                @html_attrs[:class])
   end
 
   def extra_attrs

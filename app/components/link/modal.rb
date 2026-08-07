@@ -23,9 +23,7 @@ class Components::Link::Modal < Components::Link
 
   def view_template
     if @icon
-      render(Components::Link::Icon.new(
-               content: @name, path: @path, **icon_link_args
-             ))
+      Link(type: :get, name: @name, target: @path, **icon_link_args)
     else
       link_to(@name, @path, **plain_link_args)
     end
@@ -40,7 +38,7 @@ class Components::Link::Modal < Components::Link
   end
 
   def icon_link_args
-    { icon: @icon, icon_class: @icon_class, show_text: @show_text,
+    { icon: @icon, icon_class: @icon_class, label: @show_text,
       class: merged_class }.
       merge(@html_attrs.except(:class)).
       deep_merge(data: modal_data)

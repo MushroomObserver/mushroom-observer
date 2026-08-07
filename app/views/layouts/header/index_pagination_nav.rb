@@ -108,7 +108,7 @@ module Views::Layouts
       )
       url = pagination_link_url(page)
 
-      Link(type: :icon, content: direction.to_s.to_sym.ti, path: url,
+      Link(type: :get, name: direction.to_s.to_sym.ti, target: url,
            icon: direction, button: :link, size: :lg, class: classes)
     end
 

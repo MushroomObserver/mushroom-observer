@@ -225,11 +225,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_find_button
       return unless find_text
 
-      Link(type: :icon,
-           content: find_text, path: "#",
-           icon: :find_on_map, show_text: false,
+      Link(type: :get,
+           name: find_text, target: "#",
+           icon: :find_on_map, label: false,
            icon_class: "text-primary",
-           name: "find_#{autocompleter_type}",
            class: "ml-3 find-btn d-none",
            data: { map_target: "showBoxBtn",
                    action: "map#showBox:prevent" })
@@ -238,11 +237,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_keep_box_button
       return unless keep_text
 
-      Link(type: :icon,
-           content: keep_text, path: "#",
-           icon: :apply, show_text: false,
+      Link(type: :get,
+           name: keep_text, target: "#",
+           icon: :apply, label: false,
            icon_class: "text-primary",
-           name: "keep_#{autocompleter_type}",
            class: "ml-3 keep-btn d-none",
            data: { target_attr_key => "keepBtn",
                    map_target: "lockBoxBtn",
@@ -253,11 +251,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_edit_box_button
       return unless keep_text
 
-      Link(type: :icon,
-           content: edit_text, path: "#",
-           icon: :edit, show_text: false,
+      Link(type: :get,
+           name: edit_text, target: "#",
+           icon: :edit, label: false,
            icon_class: "text-primary",
-           name: "edit_#{autocompleter_type}",
            class: "ml-3 edit-btn d-none",
            data: { target_attr_key => "editBtn",
                    map_target: "editBoxBtn",
@@ -268,13 +265,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_create_button
       return if !create_text || create.present?
 
-      Link(type: :icon,
-           content: create_text, path: "#",
+      Link(type: :get,
+           name: create_text, target: "#",
            id: "create_#{autocompleter_type}_btn",
            class: "ml-3 create-button",
-           icon: :plus, show_text: true,
+           icon: :plus, label: true,
            icon_class: "text-primary",
-           name: "create_#{autocompleter_type}",
            data: { target_attr_key => "createBtn",
                    action: "#{stimulus_controller_name}" \
                            "#swapCreate:prevent" })

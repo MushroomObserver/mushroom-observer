@@ -183,7 +183,7 @@ class AutocompleterFieldTest < ComponentTestCase
     html = render(form)
 
     # Should have find button with correct attributes
-    assert_html(html, "a.find-btn[name='find_location']")
+    assert_html(html, "a.find-btn")
     assert_html(html, "a[data-map-target='showBoxBtn']")
     assert_html(html, "a[data-action='map#showBox:prevent']")
   end
@@ -195,11 +195,11 @@ class AutocompleterFieldTest < ComponentTestCase
     html = render(form)
 
     # Should have keep button
-    assert_html(html, "a.keep-btn[name='keep_location']")
+    assert_html(html, "a.keep-btn")
     assert_html(html, "a[data-map-target='lockBoxBtn']")
 
     # Should have edit button
-    assert_html(html, "a.edit-btn[name='edit_location']")
+    assert_html(html, "a.edit-btn")
     assert_html(html, "a[data-map-target='editBoxBtn']")
   end
 
@@ -208,7 +208,7 @@ class AutocompleterFieldTest < ComponentTestCase
     form = TestCreateTextAutocompleterForm.new(comment, action: "/test")
     html = render(form)
 
-    assert_html(html, "a.create-button[name='create_location']")
+    assert_html(html, "a.create-button")
     assert_html(html, "a#create_location_btn")
   end
 

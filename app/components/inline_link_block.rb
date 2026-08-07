@@ -26,7 +26,7 @@
 # responsible for adding the class itself, via the same `item_class`
 # helper -- one shared place for the class name + merge logic, even
 # though the underlying renderers differ (`Button::ModalToggle`,
-# `Button::Delete`, `Link::Icon`, `Link::External` all take a plain
+# `Button::Delete`, `Link::Get`, `Link::External` all take a plain
 # `class:` kwarg already; nothing about calling them is "hand-rolled").
 #
 # This component intentionally can't apply that class FOR a caller --

@@ -135,18 +135,21 @@
 }
 
 // Icon-to-text gap for Components::IconWithText's visible-label span
-// (Button / Link::Icon families). Deliberately em-based, not one of
+// (Button / Link::Get families). Deliberately em-based, not one of
 // _utilities.scss's rem-based .pl-* scale -- this gap sits right
 // after an icon glyph inline with the label text, so it needs to
 // scale WITH that text's own font-size (e.g. noticeably more gap in
 // a bold .panel-title heading than in small body text) rather than
 // stay a fixed absolute size regardless of context.
 .icon-text-gap {
-  padding-left: 0.5em !important;
+  padding-left: 0.75em !important;
 }
 
-// This is for the stateful icon_link_to helper
-.icon-link,
+// `.stateful-link` is added by `Link::Get` only when it renders an
+// active_icon:/active_content: swap pair. Shows/hides each pair based
+// on an `.active`/`.collapsed` class toggled on the trigger by JS
+// (not yet written -- no real caller uses this yet).
+.stateful-link,
 .panel-collapse-trigger {
   text-decoration: none;
 
@@ -162,6 +165,18 @@
     .active-icon, .active-label {
       display: inline-block;
     }
+  }
+}
+
+// Icon-only buttons: only the glyph (via .mo-icon's fill: currentColor
+// tracking .btn-link's :hover color) should change on hover, not the
+// button background.
+.stateful-link.btn-link {
+  &:hover,
+  &:focus,
+  &:active,
+  &.active {
+    background-color: transparent;
   }
 }
 
@@ -183,25 +198,40 @@ tbody.collapse.in {
   width: 1.12em;
   height: 1.12em;
   fill: currentColor;
+
+  // Pass `icon_class: "small"` at the call site rather than targeting
+  // a specific icon type or context selector.
+  &.small {
+    width: 0.75em;
+    height: 0.75em;
+  }
 }
 
-// top: 3px is a .btn-specific baseline correction, not a general
-// icon offset -- scoped here instead of on the bare .mo-icon
-// selector above so it doesn't push every non-button icon (inline
-// links, standalone icons, etc.) down by 3px too. Two exclusions:
-// .carousel-control's .btn wrapper, since Bootstrap positions those
-// chevron icons itself (top: 50%, centered) and this nudge would
-// fight that default; and .btn-overlay, an icon-only overlay button
-// with no adjacent visible text to baseline-align against.
-.btn:not(.carousel-control .btn):not(.btn-overlay) > .mo-icon {
+// .btn-specific baseline correction. Excludes .carousel-control,
+// styled in _carousel.scss, and .btn-overlay/.input-group-btn, each
+// needing a different nudge below.
+.btn:not(.carousel-control .btn):not(.btn-overlay):not(.input-group-btn .btn)
+  > .mo-icon {
   top: 3px;
 }
 
-// `.theater-btn`'s icon needs its own baseline nudge -- not the
-// button-text +3px above (no adjacent visible text to align to
-// here), and not flush like a bare icon either.
 .theater-btn > .mo-icon {
   top: 2px;
+}
+
+// Baseline correction for icon+text links that aren't framed as a
+// .btn (plain Link::Get, including its stateful .stateful-link swap
+// variant) -- excludes .inline-icon-link, which sets its own top: 0.
+a:not(.btn):not(.inline-icon-link) > .mo-icon {
+  top: 2px;
+}
+
+// vertical-align: middle avoids the SVG's default baseline gap,
+// which otherwise makes this addon taller than its sibling
+// .form-control.
+.input-group-btn .btn .mo-icon {
+  top: 1px;
+  vertical-align: middle;
 }
 
 .spinner-right {

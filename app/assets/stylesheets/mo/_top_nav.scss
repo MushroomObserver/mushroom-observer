@@ -98,7 +98,7 @@
 
   a:not(.clear-button, .btn, .dropdown-item),
   a:visited:not(.clear-button, .btn, .dropdown-item),
-  .btn-link:not(.dropdown-item) {
+  .btn-link:not(.dropdown-item, .stateful-link) {
     color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;
 
@@ -220,14 +220,27 @@
   }
 }
 
-// `.mo-icon { top: 3px }` (mo/_icons.scss) is calibrated for
-// icons sitting inline with body text, but it leaves the `+` in
-// the green nav_create button (#3930) visibly below center —
-// noticeable both in the icon-only mobile view and alongside the
-// "Add" text on tablet/desktop. Pin the `+` to the button's
-// natural baseline here.
-#top_nav .btn-success.top_nav_button .mo-icon {
+// Pins the `+` to the nav_create button's natural baseline.
+// Identified by `.new_object_button`, not `.btn-success` — a style
+// class shouldn't double as the target selector.
+#top_nav .new_object_button .mo-icon {
+  top: 2px;
+}
+
+// search-toggle / QR-scan buttons are icon-only at every breakpoint;
+// the default .mo-icon size reads too small inside their .btn.
+#top_nav .top_nav_icon_button .mo-icon {
   top: 1px;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+// The announcements toggle is .btn-link -- shouldn't read as a button
+// or a normal underlined text link, just a plain icon control.
+#top_nav .top_nav_icon_button.btn-link,
+#top_nav .top_nav_icon_button.btn-link:hover,
+#top_nav .top_nav_icon_button.btn-link:focus {
+  text-decoration: none;
 }
 
 #index_bar {

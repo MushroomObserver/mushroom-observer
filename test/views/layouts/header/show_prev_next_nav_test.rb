@@ -150,7 +150,7 @@ module Views::Layouts
 
       html = render_nav(object: @middle_obs, query: @query)
 
-      # Framed as buttons via Link::Icon's button:/size: kwargs, not
+      # Framed as buttons via Link::Get's button:/size: kwargs, not
       # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
       # (not :default) removes the background/border while keeping
       # button padding — plain icon-only nav buttons, not filled

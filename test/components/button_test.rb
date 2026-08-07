@@ -36,6 +36,22 @@ class ButtonTest < ComponentTestCase
     assert_html(html, "button svg.mo-icon-x")
   end
 
+  def test_active_icon_and_content_render_second_pair_with_stateful_link
+    html = render_button(name: "Subscribe", icon: :tracking,
+                         active_icon: :check, active_content: "Subscribed")
+
+    assert_html(html, "button.stateful-link svg.mo-icon-tracking")
+    assert_html(html, "button.stateful-link svg.mo-icon-check.active-icon")
+    assert_html(html, "button span.sr-only", text: "Subscribe")
+    assert_html(html, "button span.sr-only.active-label", text: "Subscribed")
+  end
+
+  def test_icon_without_active_pair_omits_stateful_link_class
+    html = render_button(name: "View", icon: :edit)
+
+    assert_no_html(html, "button.stateful-link")
+  end
+
   def test_raises_on_btn_class_in_class_kwarg
     assert_raises(ArgumentError) do
       render_button(name: "Bad", class: "btn btn-primary")
@@ -89,7 +105,7 @@ end
 # Tests for the Components::Button::Styling concern's raise paths.
 class Components::Button::StylingTest < ComponentTestCase
   def test_default_variant_matches_nil
-    # :default is an explicit synonym for nil/omitted -- Link/Link::Icon
+    # :default is an explicit synonym for nil/omitted -- Link/Link::Stateful
     # need to distinguish "no button framing" (nil) from "framed as the
     # default button" (:default) at their own layer, so btn_class treats
     # both the same rather than making every such caller translate.

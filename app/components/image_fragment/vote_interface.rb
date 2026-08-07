@@ -162,6 +162,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
       type: :put,
       variant: :strip,
       icon: (:x if vote.zero?),
+      icon_class: ("small" if vote.zero?),
       name: vote.zero? ? :clear.ti : image_vote_as_short_string(vote),
       class: "image-vote-link",
       target: image_vote_path(image_id: @image.id, value: vote,

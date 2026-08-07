@@ -7,7 +7,8 @@ class LinkIconTest < ComponentTestCase
     html = render_icon(type: :globe)
 
     assert_html(html, "svg.mo-icon.mo-icon-globe")
-    # No <title> element when title is absent — just the bare glyph.
+    # No aria-label / <title> when title is absent — just the bare glyph.
+    assert_no_html(html, "svg[aria-label]")
     assert_no_html(html, "svg > title")
   end
 
@@ -35,15 +36,18 @@ class LinkIconTest < ComponentTestCase
     Components::Icon.const_set(:SPRITE_AVAILABLE, true)
   end
 
-  def test_title_adds_tooltip_and_accessible_title_element
+  def test_title_adds_tooltip_and_accessible_name
     html = render_icon(type: :edit, title: :edit.ti, class: "text-primary")
 
     assert_html(html,
                 "svg.mo-icon.mo-icon-edit.text-primary" \
-                "[title='#{:edit.ti}'][data-tooltip-target='tip']")
-    # Native SVG <title> child so the icon-only link has an
-    # accessible name for screen readers.
-    assert_html(html, "svg > title", text: :edit.ti)
+                "[title='#{:edit.ti}'][data-tooltip-target='tip']" \
+                "[aria-label='#{:edit.ti}']")
+    # No <title> child -- browsers render it as a second, native
+    # tooltip alongside the Bootstrap one triggered by
+    # data-tooltip-target. aria-label carries the accessible name
+    # instead without triggering any native tooltip.
+    assert_no_html(html, "svg > title")
   end
 
   def test_caller_data_attrs_merge_with_tooltip_data
@@ -52,6 +56,13 @@ class LinkIconTest < ComponentTestCase
 
     # Tooltip target still present alongside caller's custom data attr.
     assert_html(html, "svg[data-tooltip-target='tip'][data-other='v']")
+  end
+
+  def test_caller_aria_attrs_merge_with_accessible_name
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       aria: { hidden: "false" })
+
+    assert_html(html, "svg[aria-label='Tooltip text'][aria-hidden='false']")
   end
 
   def test_extra_attrs_passed_through

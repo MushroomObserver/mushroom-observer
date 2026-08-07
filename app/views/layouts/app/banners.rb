@@ -15,11 +15,15 @@ module Views::Layouts::App
 
     ADMIN_BANNER_CLASSES = "h3 text-center font-weight-bold p-2"
 
+    # The current site banner, if any -- computed once by
+    # `Views::Layouts::Application` and shared with `TopNav`, which
+    # renders the "show announcements" button for this same banner.
+    prop :banner, _Nilable(::Banner), default: nil
+
     def view_template
-      banner = ::Banner.current
       div(id: "banners", class: "hidden-print") do
         render_admin_banner
-        render_site_banner(banner) if banner
+        render_site_banner(@banner) if @banner
       end
     end
 
@@ -39,14 +43,11 @@ module Views::Layouts::App
     end
 
     def render_site_banner(banner)
-      div(data: { controller: "banner" }) do
-        Alert(
-          level: :success,
-          class: "message-banner",
-          data: { banner_target: "banner" }
-        ) { render_alert_contents(banner) }
-        render_show_button_row
-      end
+      Alert(
+        level: :success,
+        class: "message-banner",
+        data: { banner_target: "banner" }
+      ) { render_alert_contents(banner) }
     end
 
     def render_alert_contents(banner)
@@ -61,16 +62,6 @@ module Views::Layouts::App
         Icon(type: :chevron_up, title: :close.ti)
       end
       p { trusted_html(banner.message.t) }
-    end
-
-    def render_show_button_row
-      div(class: "position-relative w-100 py-2 text-right",
-          data: { banner_target: "container" }) do
-        div(class: "show_banner_icon text-green d-block",
-            data: { banner_target: "showButton" }) do
-          Icon(type: :chevron_down, title: :show.ti)
-        end
-      end
     end
   end
 end

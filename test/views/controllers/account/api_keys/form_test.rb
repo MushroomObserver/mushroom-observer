@@ -30,8 +30,7 @@ module Views::Controllers::Account::APIKeys
       assert_html(html, ".input-group-btn")
       assert_html(html, "#api_key_notes")
       assert_html(html, "a[data-toggle='collapse']")
-      assert_html(html, "a svg.mo-icon-cancel")
-      assert_html(html, "a svg > title", text: :cancel.ti.as_displayed)
+      assert_html(html, "a svg.mo-icon-cancel[aria-label='#{:cancel.ti}']")
     end
 
     def test_cancel_button_has_correct_data_attributes

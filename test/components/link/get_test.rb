@@ -91,6 +91,65 @@ class LinkGetTest < ComponentTestCase
     assert_html(html, "a[href='#{expected}']")
   end
 
+  # ---- tab: shortcut ---------------------------------------------------
+
+  def test_tab_shortcut_pulls_name_target_and_icon_from_tab
+    name = names(:fungi)
+    html = render_tab_link(tab: ::Tab::Name::Edit.new(name: name))
+
+    assert_html(html, "a[href='#{routes.edit_name_path(name.id)}']",
+                text: :show_name_edit_name.l.as_displayed)
+    assert_html(html, "a svg.mo-icon-edit")
+  end
+
+  def test_explicit_name_and_target_override_tab
+    name = names(:fungi)
+    html = render_tab_link(tab: ::Tab::Name::Edit.new(name: name),
+                           name: "Custom", target: @path)
+
+    assert_html(html, "a[href='#{@path}']", text: "Custom")
+  end
+
+  def test_missing_tab_and_name_or_target_raises
+    assert_raises(ArgumentError) { Components::Link::Get.new(name: "Only") }
+    assert_raises(ArgumentError) { Components::Link::Get.new(target: @path) }
+  end
+
+  # ---- stateful icon+label swap -----------------------------------------
+
+  def test_active_icon_and_content_render_second_pair_with_stateful_link
+    html = render_link(name: "Subscribe", target: @path, icon: :tracking,
+                       active_icon: :check, active_content: "Subscribed")
+
+    assert_html(html, "a.stateful-link svg.mo-icon-tracking")
+    assert_html(html, "a.stateful-link svg.mo-icon-check.active-icon")
+    assert_html(html, "a span.sr-only", text: "Subscribe")
+    assert_html(html, "a span.sr-only.active-label", text: "Subscribed")
+    assert_html(html, "a[data-active-title='Subscribed']")
+  end
+
+  def test_icon_without_active_pair_omits_stateful_link_class
+    html = render_link(name: "View", target: @path, icon: :edit)
+
+    assert_no_html(html, "a.stateful-link")
+  end
+
+  # ---- button_to: / confirm: ---------------------------------------------
+
+  def test_button_to_renders_form_with_button
+    html = render_link(name: "Delete", target: @path, icon: :delete,
+                       button_to: true)
+
+    assert_html(html, "form[action='#{@path}'] button")
+    assert_html(html, "form button svg.mo-icon-delete")
+  end
+
+  def test_confirm_wires_turbo_confirm_data_attr_on_link
+    html = render_link(name: "Delete", target: @path, confirm: "Sure?")
+
+    assert_html(html, "a[data-turbo-confirm='Sure?']")
+  end
+
   private
 
   # Wrapper component so the block runs inside a Phlex render context.
@@ -113,5 +172,9 @@ class LinkGetTest < ComponentTestCase
 
   def render_link(name:, target:, **)
     render(Components::Link::Get.new(name: name, target: target, **))
+  end
+
+  def render_tab_link(**)
+    render(Components::Link::Get.new(**))
   end
 end

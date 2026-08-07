@@ -7,7 +7,7 @@
 # -- tests and CSS should target the type class, not the `<use>`
 # `href`: it asserts "this is the icon picked for :chevron_down",
 # not which underlying sprite symbol currently backs that pick.
-# Optionally adds a tooltip + screen-reader-accessible title.
+# Optionally adds a Bootstrap tooltip + an `aria-label` accessible name.
 #
 # @example Just the glyph
 #   Icon(type: :globe)
@@ -15,7 +15,7 @@
 #   #      <use href="...mo-icons-HASH.svg#globe"/>
 #   #    </svg>
 #
-# @example With tooltip + screen-reader title + extra CSS
+# @example With tooltip + accessible name + extra CSS
 #   Icon(type: :edit, title: :edit.ti, class: "text-primary")
 class Components::Icon < Components::Base
   # Valid icon keys. The sprite's own `<symbol id="...">` already
@@ -61,9 +61,14 @@ class Components::Icon < Components::Base
     return unless SPRITE_AVAILABLE && GLYPHS.include?(@type)
 
     svg(class: svg_class, title: @title.presence, data: svg_data,
-        **@attributes.except(:class, :data)) do |s|
-      s.title { plain(@title) } if @title.present?
-      s.use(href: "#{asset_path("icons/mo-icons.svg")}##{@type}")
+        aria: svg_aria,
+        **@attributes.except(:class, :data, :aria)) do |s|
+      # width/height: "100%" -- without it, browsers inconsistently
+      # default <use>'s size against an em-sized (not pixel-sized)
+      # parent <svg>, so CSS width/height changes on .mo-icon don't
+      # reliably scale the referenced <symbol>.
+      s.use(href: "#{asset_path("icons/mo-icons.svg")}##{@type}",
+            width: "100%", height: "100%")
     end
   end
 
@@ -77,5 +82,17 @@ class Components::Icon < Components::Base
   def svg_data
     data = @attributes[:data] || {}
     @title.present? ? { tooltip_target: "tip" }.merge(data) : data
+  end
+
+  # No `<title>` child -- browsers render an SVG's own `<title>` as a
+  # native hover tooltip independently of Bootstrap's JS tooltip
+  # (`svg_data`'s `tooltip_target`), which duplicated it. `title:` (the
+  # HTML attribute above) stays for Bootstrap's tooltip text source --
+  # its `fixTitle()` neutralizes that attribute as a native tooltip on
+  # init. `aria-label` carries the persistent accessible name instead;
+  # unlike `<title>` or `title=`, it never triggers a native tooltip.
+  def svg_aria
+    aria = @attributes[:aria] || {}
+    @title.present? ? { label: @title }.merge(aria) : aria
   end
 end
