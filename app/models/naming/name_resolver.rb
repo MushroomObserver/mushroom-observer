@@ -70,8 +70,7 @@ class Naming
         # Look up name: can return zero (unrecognized), one
         # (unambiguous match), or many (multiple authors match).
         @names = Name.find_names_filling_in_authors(user, corrected)
-        corrected, @names = retry_in_canonical_case(user, corrected) if
-          @names.empty?
+        corrected, @names = retry_relaxed(user, corrected) if @names.empty?
         # end
       else
         @names = [Name.find(chosen_name)]
@@ -139,18 +138,24 @@ class Naming
     end
     # rubocop:enable Metrics/MethodLength
 
-    # A name written in one case throughout -- "russula compacta" or
-    # "RUSSULA COMPACTA", as field slips are often filled in -- fails
-    # to parse and so never reaches a lookup, even though the row is
-    # sitting there under a case-insensitive collation. Only after the
-    # ordinary lookup has come up empty, so a name that resolves today
-    # cannot start resolving differently, and the extra queries fall
-    # on the path that was about to fail anyway.
-    def retry_in_canonical_case(user, corrected)
-      recased = Name.canonical_name_string(corrected)
-      return [corrected, @names] if recased == corrected
+    # Field slips are written by hand, and two habits keep an otherwise
+    # findable name from ever reaching a lookup: one case throughout
+    # ("russula compacta", "RUSSULA COMPACTA"), and a question mark
+    # marking the recorder's doubt ("russula?"). Both fail to parse.
+    # Only after the ordinary lookup has come up empty, so a name that
+    # resolves today cannot start resolving differently, and the extra
+    # queries fall on the path that was about to fail anyway.
+    def retry_relaxed(user, corrected)
+      relaxed = Name.canonical_name_string(strip_uncertainty(corrected))
+      return [corrected, @names] if relaxed == corrected
 
-      [recased, Name.find_names_filling_in_authors(user, recased)]
+      [relaxed, Name.find_names_filling_in_authors(user, relaxed)]
+    end
+
+    # No name in MO contains a question mark, so dropping it can never
+    # steal a match from a real name.
+    def strip_uncertainty(str)
+      str.tr("?", " ").strip_squeeze
     end
 
     # Convenience method returning a hash for mass ivar assignment
