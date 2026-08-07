@@ -67,6 +67,38 @@ class Naming::NameResolverTest < UnitTestCase
     assert_nil(resolver.name)
   end
 
+  # A slip reading "coprinus comatus?" records the writer's doubt about
+  # the name, not a different name. No name in MO holds a question
+  # mark, so the mark only ever blocks a match.
+  def test_resolves_a_name_written_with_a_question_mark
+    resolver = resolve("#{@name.text_name}?")
+
+    assert(resolver.success)
+    assert_equal(@name, resolver.name)
+  end
+
+  def test_resolves_a_name_written_with_a_detached_question_mark
+    resolver = resolve("#{@name.text_name} ?")
+
+    assert(resolver.success)
+    assert_equal(@name, resolver.name)
+  end
+
+  # Both hand-writing habits at once -- the common field-slip case.
+  def test_resolves_a_lower_case_name_written_with_a_question_mark
+    resolver = resolve("#{@name.text_name.downcase}?")
+
+    assert(resolver.success)
+    assert_equal(@name, resolver.name)
+  end
+
+  def test_leaves_an_unknown_name_with_a_question_mark_unresolved
+    resolver = resolve("xyzzy plughia?")
+
+    assert_not(resolver.success)
+    assert_nil(resolver.name)
+  end
+
   # Only reached once the ordinary lookup comes up empty, so a name
   # that already resolves cannot start resolving to something else.
   def test_canonical_case_lookup_is_skipped_when_the_name_resolves
