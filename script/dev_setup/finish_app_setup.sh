@@ -25,8 +25,9 @@ mo_gem_install_locked() {
 # - Bash/Ruby are sorted
 # - system packages are installed
 #
-# Run from inside the mushroom-observer directory, after
-# sourcing common.sh (this calls straight into its functions).
+# Run from inside the mushroom-observer directory, after sourcing
+# common.sh and sync_mo_icon_library.sh (this calls straight into
+# their functions).
 #
 # Pass the platform ("macos" or "ubuntu"). Three things differ between them:
 # - the database.yml template directory
@@ -74,4 +75,5 @@ mo_finish_app_setup() {
     bin/rails lang:update
 
     mo_install_precommit_hook
+    mo_sync_icon_library
 }
