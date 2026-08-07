@@ -21,6 +21,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      # MushroomObserver/icon-library is private (licensed Glyphicons
+      # source material), so mo-icons.svg -- the curated derivative
+      # sprite -- isn't committed to this (public, MIT-licensed) repo.
+      # ICON_LIBRARY_PAT is a fine-grained PAT scoped to read-only
+      # Contents access on icon-library only. Not available on
+      # pull_request runs from forks (GitHub doesn't expose repo
+      # secrets there) -- skips rather than fails, matching the
+      # best-effort stance script/dev_setup/sync_mo_icon_library.sh
+      # already takes for devs without icon-library access.
+      - name: Fetch icon-library sprite
+        env:
+          ICON_LIBRARY_PAT: ${{ secrets.ICON_LIBRARY_PAT }}
+        run: |
+          if [ -n "$ICON_LIBRARY_PAT" ]; then
+            git clone --quiet --filter=blob:none --sparse \
+              "https://x-access-token:${ICON_LIBRARY_PAT}@github.com/MushroomObserver/icon-library.git" \
+              vendor/assets/images/icons
+          else
+            echo "ICON_LIBRARY_PAT not set -- skipping icon sprite fetch."
+          fi
+
       # https://github.com/ruby/setup-ruby
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
