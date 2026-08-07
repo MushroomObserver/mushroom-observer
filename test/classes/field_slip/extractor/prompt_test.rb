@@ -37,14 +37,25 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
 
     assert_includes(text, "MycoMap Voucher Number")
     assert_includes(text, "printed or handwritten")
-    assert_includes(text, "top-right corner")
+    assert_includes(text, "upper-right")
+  end
+
+  # The corner already holds a logo, and the hand-written numbers were
+  # fitted around it -- above or to the left as often as beside it.
+  def test_looks_past_the_logo_in_the_voucher_corner
+    text = prompt
+
+    assert_includes(text, "logo")
+    assert_includes(text.squish, "read the whole upper-right area")
   end
 
   # A bare number must come back bare. The prefix belongs to a
   # particular event, so inventing one here would put an unverifiable
   # value into the notes of every slip that was written by hand.
   def test_does_not_ask_the_model_to_invent_a_voucher_prefix
-    assert_includes(prompt, "add a prefix a bare number does not carry")
+    # squish so a rewrap of the prompt does not fail the assertion
+    assert_includes(prompt.squish,
+                    "do not add a prefix a bare number does not carry")
   end
 
   # An observation's other photos go through the same prompt, and the

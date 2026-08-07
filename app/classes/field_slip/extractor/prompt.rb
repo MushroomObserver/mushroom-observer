@@ -73,16 +73,19 @@ class FieldSlip
             verbatim.
           - Substrate and Habit are often circled from a printed list
             rather than written. Report the circled word(s).
-          - "MycoMap Voucher Number" is whatever occupies the slip's
-            top-right corner, printed or handwritten. It is usually a
-            printed sticker like N26-0290, but when the stickers ran
-            out it was written in by hand, often as a bare number with
-            the prefix left off. Give it exactly as written -- do not
-            add a prefix a bare number does not carry. It is not the
-            field slip code. Identify it by that corner, not by
-            whether it is printed: anything written in another box
-            belongs to that box's field, and "Other Codes" is only
-            what a person wrote in the Other Codes box.
+          - "MycoMap Voucher Number" sits in the slip's upper-right
+            region, printed or handwritten. It is usually a printed
+            sticker like N26-0290; when the stickers ran out it was
+            written in by hand, often as a bare number with the prefix
+            left off. A logo usually occupies that corner, and a
+            handwritten number may be above it or to its left rather
+            than beside it, so read the whole upper-right area. Give
+            it exactly as written -- do not add a prefix a bare number
+            does not carry. It is not the field slip code. Identify it
+            by that region, not by whether it is printed: anything
+            written in another box belongs to that box's field, and
+            "Other Codes" is only what a person wrote in the Other
+            Codes box.
         RULES
       end
 
