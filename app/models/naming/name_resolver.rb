@@ -70,6 +70,8 @@ class Naming
         # Look up name: can return zero (unrecognized), one
         # (unambiguous match), or many (multiple authors match).
         @names = Name.find_names_filling_in_authors(user, corrected)
+        corrected, @names = retry_in_canonical_case(user, corrected) if
+          @names.empty?
         # end
       else
         @names = [Name.find(chosen_name)]
@@ -136,6 +138,20 @@ class Naming
       end
     end
     # rubocop:enable Metrics/MethodLength
+
+    # A name written in one case throughout -- "russula compacta" or
+    # "RUSSULA COMPACTA", as field slips are often filled in -- fails
+    # to parse and so never reaches a lookup, even though the row is
+    # sitting there under a case-insensitive collation. Only after the
+    # ordinary lookup has come up empty, so a name that resolves today
+    # cannot start resolving differently, and the extra queries fall
+    # on the path that was about to fail anyway.
+    def retry_in_canonical_case(user, corrected)
+      recased = Name.canonical_name_string(corrected)
+      return [corrected, @names] if recased == corrected
+
+      [recased, Name.find_names_filling_in_authors(user, recased)]
+    end
 
     # Convenience method returning a hash for mass ivar assignment
     def results
