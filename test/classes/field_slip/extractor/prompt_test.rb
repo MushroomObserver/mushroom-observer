@@ -29,6 +29,24 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     assert_includes(text, "JSON")
   end
 
+  # NEMF 2026 ran out of printed voucher stickers partway through and
+  # wrote the rest by hand, often as a bare number. Identifying the
+  # field by "printed" dropped every one of those.
+  def test_accepts_a_handwritten_voucher_number
+    text = prompt
+
+    assert_includes(text, "MycoMap Voucher Number")
+    assert_includes(text, "printed or handwritten")
+    assert_includes(text, "top-right corner")
+  end
+
+  # A bare number must come back bare. The prefix belongs to a
+  # particular event, so inventing one here would put an unverifiable
+  # value into the notes of every slip that was written by hand.
+  def test_does_not_ask_the_model_to_invent_a_voucher_prefix
+    assert_includes(prompt, "add a prefix a bare number does not carry")
+  end
+
   # An observation's other photos go through the same prompt, and the
   # alias tables below are a standing invitation to answer from them
   # rather than from the image.
