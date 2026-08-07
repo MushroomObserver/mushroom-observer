@@ -1176,6 +1176,31 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                     "[data-type='location_containing']", wait: 6)
   end
 
+  # Unchecking Geolocation has to release the locality autocompleter from
+  # "localities containing this point". Otherwise correcting a bad point
+  # offers only the localities containing the very point being replaced,
+  # and the coordinates have to be cleared by hand first.
+  def test_unchecking_geolocation_releases_the_locality_autocompleter
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login!(obs.user)
+
+    visit("/observations/#{obs.id}/edit")
+    assert_selector("#observation_form")
+    assert_selector("#observation_location_autocompleter" \
+                    "[data-type='location_containing']", wait: 6)
+
+    uncheck("observation_has_geolocation", allow_label_click: true)
+
+    assert_selector("#observation_location_autocompleter" \
+                    "[data-type='location']", wait: 6)
+
+    check("observation_has_geolocation", allow_label_click: true)
+
+    assert_selector("#observation_location_autocompleter" \
+                    "[data-type='location_containing']", wait: 6)
+  end
+
   def assert_geolocation_is_empty
     assert_field("observation_lat", with: "", visible: :all)
     assert_field("observation_lng", with: "", visible: :all)
