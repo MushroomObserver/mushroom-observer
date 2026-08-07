@@ -46,6 +46,89 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # The Geolocation section opens when the observation has coordinates,
+  # so its checkbox has to agree -- it rendered unchecked over an open
+  # section full of coordinates, and clicking it to "fix" that collapsed
+  # the section instead (#5002).
+  def test_edit_checks_geolocation_when_the_observation_has_coordinates
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[type=checkbox][name='observation[has_geolocation]']" \
+                  "[checked]")
+  end
+
+  def test_edit_leaves_geolocation_unchecked_without_coordinates
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(lat: nil, lng: nil)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[type=checkbox][name='observation[has_geolocation]']" \
+                  "[checked]", count: 0)
+  end
+
+  # Unchecking the box has to release the locality autocompleter from
+  # "localities containing this point", so the box carries a map action
+  # as well as the EXIF one.
+  def test_edit_wires_the_geolocation_checkbox_to_the_map
+    obs = observations(:unknown_with_lat_lng)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[name='observation[has_geolocation]']" \
+                  "[data-map-target='geolocationCheck']" \
+                  "[data-action~='map#geolocationToggled']")
+    assert_select("#observation_geolocation" \
+                  "[data-map-target='geolocationFields']")
+  end
+
+  # Unchecking Geolocation is the user saying the observation has no
+  # coordinates. The map sits outside the section the box collapses, so
+  # the inputs can still hold the very point being discarded.
+  def test_update_drops_coordinates_when_geolocation_is_unchecked
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login(obs.user.login)
+
+    put(:update, params: geolocation_params(obs, has_geolocation: "0"))
+
+    obs.reload
+    assert_nil(obs.lat)
+    assert_nil(obs.lng)
+    assert_nil(obs.alt)
+  end
+
+  def test_update_keeps_coordinates_when_geolocation_is_checked
+    obs = observations(:unknown_with_lat_lng)
+    login(obs.user.login)
+
+    put(:update, params: geolocation_params(obs, has_geolocation: "1"))
+
+    obs.reload
+    assert_in_delta(34.1622, obs.lat.to_f)
+    assert_in_delta(-118.3521, obs.lng.to_f)
+    assert_equal(123, obs.alt, "the update itself should have gone through")
+  end
+
+  # A caller with no such checkbox -- the API -- must be left alone.
+  def test_update_keeps_coordinates_when_geolocation_is_not_submitted
+    obs = observations(:unknown_with_lat_lng)
+    login(obs.user.login)
+
+    put(:update, params: geolocation_params(obs))
+
+    obs.reload
+    assert_in_delta(34.1622, obs.lat.to_f)
+    assert_in_delta(-118.3521, obs.lng.to_f)
+    assert_equal(123, obs.alt)
+  end
+
   # Editing the primary of a multi-member occurrence, a sibling key it
   # doesn't store is an :inherit row -- a disabled textarea plus buttons
   # with Inherit active and the sibling value as an adopt button.
@@ -1043,5 +1126,16 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       thumb_image_id: obs.thumb_image_id.to_s,
       good_image_ids: obs.image_ids.join(" ")
     }
+  end
+
+  # Resubmits the observation's own coordinates, so a kept lat/lng is
+  # unchanged rather than merely plausible. The altitude is new, which
+  # is what proves the update went through at all.
+  def geolocation_params(obs, has_geolocation: nil)
+    args = obs_params(obs).merge(
+      lat: obs.lat.to_s, lng: obs.lng.to_s, alt: "123"
+    )
+    args[:has_geolocation] = has_geolocation unless has_geolocation.nil?
+    { id: obs.id, observation: args }
   end
 end

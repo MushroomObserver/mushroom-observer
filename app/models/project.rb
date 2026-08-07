@@ -279,7 +279,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless can_join?(user)
 
     ProjectMember.create!(project: self, user:,
-                          trust_level: "hidden_gps")
+                          trust_level: "editing")
     user_group.users << user unless user_group.users.member?(user)
   end
 

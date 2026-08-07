@@ -13,7 +13,7 @@ export default class extends GeocodeController {
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
     "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
     "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn",
-    "editBoxBtn", "autocompleter"]
+    "editBoxBtn", "autocompleter", "geolocationCheck", "geolocationFields"]
 
   connect() {
     this.element.dataset.map = "connected"
@@ -155,6 +155,67 @@ export default class extends GeocodeController {
       .catch((e) => {
         this.showGoogleMapsError("Google Maps failed to load", e)
       })
+
+    this.announceExistingPoint()
+  }
+
+  // An observation being edited already has its coordinates in the
+  // inputs, but nothing had told the locality autocompleter about them:
+  // the swap to "locations containing this point" only ever fired from
+  // bufferInputs (the lat/lng input action) or a map click. So a form
+  // loaded with saved coordinates offered no locality dropdown until the
+  // values were cleared, saved, and typed in again. Announce the point
+  // we already have, once, on connect.
+  //
+  // Only when the coordinates are saved on the record (announcePoint).
+  // A new observation's form prefills lat/lng from the user's last one,
+  // and those are a default the user has not chosen for this record --
+  // announcing them would pre-empt the EXIF of the photo they are about
+  // to attach.
+  announceExistingPoint() {
+    if (this.mapDivTarget.dataset.announcePoint !== "true") return
+    if (!["observation", "hybrid"].includes(this.map_type)) return
+    if (!this.hasLatInputTarget || !this.hasLngInputTarget) return
+
+    const center = this.validateLatLngInputs(false)
+    if (!center) return
+
+    this.sendPointChanged(center)
+  }
+
+  // The Geolocation checkbox is the observation's statement about whether
+  // it has coordinates at all, so unchecking it has to release the
+  // locality autocompleter from "localities containing this point" --
+  // otherwise the only localities on offer are the ones containing the
+  // point the user unchecked the box to get rid of.
+  geolocationToggled({ target }) {
+    if (!["observation", "hybrid"].includes(this.map_type)) return
+
+    if (!target.checked) {
+      this.sendPointChanged({ lat: null, lng: null })
+      return
+    }
+
+    const center = this.validateLatLngInputs(false)
+    if (center) this.sendPointChanged(center)
+  }
+
+  // Clicking the map or dragging the marker is the user asserting the
+  // observation has coordinates, so the checkbox has to agree: the
+  // server drops lat/lng when it is unchecked, and the map sits outside
+  // the section the box collapses, so a point set here would otherwise
+  // be discarded on save without ever having been visible.
+  //
+  // Deliberately hung off those two gestures rather than the inputs
+  // themselves -- writing lat/lng also happens programmatically, while
+  // EXIF is mid-way through opening the section itself.
+  assertGeolocation() {
+    if (!this.hasGeolocationCheckTarget) return
+    if (this.geolocationCheckTarget.checked) return
+
+    this.geolocationCheckTarget.checked = true
+    if (this.hasGeolocationFieldsTarget)
+      $(this.geolocationFieldsTarget).collapse('show')
   }
 
   // Lock rectangle so it's not editable, and show this state in the icon link
@@ -848,6 +909,7 @@ export default class extends GeocodeController {
           this.updateLatLngInputs(newPosition) // dispatches pointChanged
           // Moving the marker means we're no longer on the image lat/lng
           this.dispatch("reenableBtns")
+          if (eventName === "dragend") this.assertGeolocation()
         }
         // this.sampleElevationCenterOf(newPosition)
         this.getElevations([newPosition], "point")
@@ -1382,6 +1444,7 @@ export default class extends GeocodeController {
       this.map.panTo(location)
       // if (zoom < 15) { this.map.setZoom(zoom + 2) } // for incremental zoom
       this.updateFields(null, null, location)
+      this.assertGeolocation()
     });
   }
 

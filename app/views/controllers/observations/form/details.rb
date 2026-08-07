@@ -160,7 +160,11 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              attributes: {
                help: :form_observations_lat_long_help.t,
                help_collapse: true,
-               data: { form_exif_target: "collapseCheck" }
+               data: {
+                 form_exif_target: "collapseCheck",
+                 map_target: "geolocationCheck",
+                 action: "map#geolocationToggled"
+               }
              }
            ))
   end
@@ -169,7 +173,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     Collapsible(
       id: "observation_geolocation",
       expanded: @observation.lat.present?,
-      data: { form_exif_target: "collapseFields" }
+      data: { form_exif_target: "collapseFields",
+              map_target: "geolocationFields" }
     ) do
       p { :form_observations_click_point.l }
       render_lat_lng_alt_row
@@ -227,7 +232,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_map
     render(Components::Form::LocationMap.new(
-             id: "observation_form_map", map_type: "observation"
+             id: "observation_form_map", map_type: "observation",
+             announce_point: update? && @observation.lat.present?
            ))
   end
 
