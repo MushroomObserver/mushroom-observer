@@ -60,6 +60,12 @@ class FieldSlip
             box the collector left empty is not unreadable. Getting
             this right decides whether another photo is worth
             consulting for that field.
+          #{per_field_rules}
+        RULES
+      end
+
+      def per_field_rules
+        <<~RULES.strip
           - "Field Slip Code" is printed, not handwritten, and looks
             like #{code_example}. It also appears in the QR code.
           - "ID" is the name written by the collector. It may be a
@@ -67,10 +73,19 @@ class FieldSlip
             verbatim.
           - Substrate and Habit are often circled from a printed list
             rather than written. Report the circled word(s).
-          - "MycoMap Voucher Number" is the PRINTED code in the slip's
-            top-right corner, like N26-0290. It is not handwritten and
-            is not the field slip code. Do not put it in "Other Codes";
-            "Other Codes" is only what a person wrote in that box.
+          - "MycoMap Voucher Number" sits in the slip's upper-right
+            region, printed or handwritten. It is usually a printed
+            sticker like N26-0290; when the stickers ran out it was
+            written in by hand, often as a bare number with the prefix
+            left off. A logo usually occupies that corner, and a
+            handwritten number may be above it or to its left rather
+            than beside it, so read the whole upper-right area. Give
+            it exactly as written -- do not add a prefix a bare number
+            does not carry. It is not the field slip code. Identify it
+            by that region, not by whether it is printed: anything
+            written in another box belongs to that box's field, and
+            "Other Codes" is only what a person wrote in the Other
+            Codes box.
         RULES
       end
 
