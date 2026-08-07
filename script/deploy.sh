@@ -41,15 +41,6 @@ if [ "$1" = "--icons-only" ]; then
         echo "than cloning into a non-empty directory."
         exit 1
     else
-        # Sparse-checkout: that repo's sources/ (the full GLYPHICONS
-        # 2.0 sprites/fonts the curated sprite is built from) is much
-        # larger than what production actually needs, which is just
-        # mo-icons.svg. `--sparse` alone (no further `sparse-checkout
-        # set` needed) defaults to cone mode's top-level-files-only
-        # checkout, which already excludes sources/ -- confirmed via
-        # a real clone that sources/ never lands on disk AND its
-        # blobs are never fetched (--filter=blob:none), not just
-        # hidden by the working-tree filter.
         echo "$icons_dir isn't a checkout yet -- cloning..."
         git clone --filter=blob:none --sparse \
             git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
@@ -58,6 +49,26 @@ if [ "$1" = "--icons-only" ]; then
     fi
     if [ $? -ne 0 ]; then
         echo Updating the icon library failed.
+        exit 1
+    fi
+
+    source script/icon_library_narrow_checkout.sh
+    icon_library_narrow_checkout "$icons_dir"
+    if [ $? -ne 0 ]; then
+        echo Narrowing the icon-library checkout to mo-icons.svg failed.
+        exit 1
+    fi
+
+    # A successful clone/pull doesn't guarantee mo-icons.svg itself is
+    # there -- verify explicitly rather than trusting the command's
+    # exit status alone. Production without icons is a real
+    # regression (illegible site), not a tolerable degraded state
+    # (contrast with the best-effort skip elsewhere for CI/dev), so
+    # this is a hard failure.
+    if [ ! -f "$icons_dir/mo-icons.svg" ]; then
+        echo "$icons_dir/mo-icons.svg is missing after the clone/pull --"
+        echo "check icon-library's main branch. Aborting rather than"
+        echo "precompiling and reloading without a working icon sprite."
         exit 1
     fi
 

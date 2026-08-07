@@ -23,14 +23,9 @@
 # lands means that's never a problem, including if this directory
 # ever does start tracking something.
 #
-# Sparse-checkout, not a full clone: that repo's sources/ (the full
-# GLYPHICONS 2.0 sprites + fonts the curated sprite gets built from)
-# is much larger than what this needs, which is just the top-level
-# files. `--sparse` alone (no further `sparse-checkout set` needed)
-# defaults to cone mode's top-level-files-only checkout, which
-# already excludes sources/ -- confirmed via a real clone that
-# sources/ never lands on disk AND its blobs are never fetched
-# (--filter=blob:none), not just hidden by the working-tree filter.
+# Sparse-checkout, not a full clone -- see
+# script/icon_library_narrow_checkout.sh for why it's narrowed further
+# to just mo-icons.svg.
 #
 # Callable standalone via `script/dev_setup_macos --icons-only` or
 # `script/dev_setup_ubuntu --icons-only`, without running the rest of
@@ -80,6 +75,9 @@ mo_sync_icon_library() {
         echo "setup doesn't depend on it."
         return
     fi
+
+    source script/icon_library_narrow_checkout.sh
+    icon_library_narrow_checkout "$clone_dir"
 
     if [ -f "$clone_dir/mo-icons.svg" ]; then
         mkdir -p "$(dirname "$dest_svg")"
