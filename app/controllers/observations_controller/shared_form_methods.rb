@@ -5,6 +5,7 @@
 #    permitted_observation_args
 #    update_permitted_observation_attributes
 #    permitted_observation_params
+#    drop_unwanted_geolocation
 #    notes_to_sym_and_compact
 #    notes_param_present?
 #
@@ -51,7 +52,21 @@ module ObservationsController::SharedFormMethods
   def permitted_observation_params
     return unless params[:observation]
 
-    params[:observation].permit(permitted_observation_args).to_h
+    drop_unwanted_geolocation(
+      params[:observation].permit(permitted_observation_args).to_h
+    )
+  end
+
+  # The Geolocation checkbox is the observation's own statement about
+  # whether it has coordinates, but the map sits outside the section the
+  # checkbox collapses, so the inputs can still hold a point the user has
+  # said the observation does not have. Absent key means a caller that
+  # has no such checkbox (the API), which is left alone.
+  def drop_unwanted_geolocation(args)
+    return args unless params[:observation].key?(:has_geolocation)
+    return args if params[:observation][:has_geolocation].to_s == "1"
+
+    args.merge("lat" => nil, "lng" => nil, "alt" => nil)
   end
 
   # Symbolize keys and drop blank values -- except a blank on a key some
