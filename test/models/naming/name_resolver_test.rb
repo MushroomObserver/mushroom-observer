@@ -99,6 +99,34 @@ class Naming::NameResolverTest < UnitTestCase
     assert_nil(resolver.name)
   end
 
+  # Dropping the mark has to land on the *deprecated* branch -- offering
+  # the accepted synonym -- rather than resolving the deprecated name
+  # silently or falling through as an unknown name.
+  def test_deprecated_name_with_a_question_mark_still_offers_its_synonyms
+    deprecated = names(:petigera)
+    assert(deprecated.deprecated, "fixture must be deprecated")
+    approved = deprecated.approved_synonyms.map(&:text_name)
+    assert(approved.any?, "fixture must have an approved synonym")
+
+    resolver = resolve("#{deprecated.text_name.downcase}?")
+
+    assert_not(resolver.success)
+    assert_nil(resolver.name)
+    assert_equal(approved, resolver.valid_names.map(&:text_name))
+  end
+
+  # The mark changes nothing about the outcome, which is the whole claim.
+  def test_a_question_mark_does_not_change_a_deprecated_name_outcome
+    deprecated = names(:petigera)
+
+    plain = resolve(deprecated.text_name)
+    marked = resolve("#{deprecated.text_name}?")
+
+    assert_equal(plain.success, marked.success)
+    assert_equal(plain.valid_names.map(&:text_name),
+                 marked.valid_names.map(&:text_name))
+  end
+
   # Only reached once the ordinary lookup comes up empty, so a name
   # that already resolves cannot start resolving to something else.
   def test_canonical_case_lookup_is_skipped_when_the_name_resolves
