@@ -84,13 +84,7 @@ inat_import_audit*.csv
 # committed dev credentials file would be undecryptable for everyone else.
 /config/credentials/development.yml.enc
 
-# mo-icons.svg (built by the private MushroomObserver/icon-library
-# repo) is the only tracked file here -- a maintainer's sync pulls
-# other files alongside it that stay untracked.
-#
-# The `!.../icons/` re-include is required: "icons" matches the
-# macOS `Icon?` pattern above case-insensitively, so without it the
-# whole directory, negations included, is ignored.
-!/vendor/assets/images/icons/
-/vendor/assets/images/icons/*
-!/vendor/assets/images/icons/mo-icons.svg
+# Licensed Glyphicons SVGs, cloned separately from the private
+# MushroomObserver/icon-library repo (requires its own access) --
+# never checked into this public repo.
+/vendor/assets/images/icons/
