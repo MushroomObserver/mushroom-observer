@@ -29,15 +29,31 @@ jobs:
       # pull_request runs from forks (GitHub doesn't expose repo
       # secrets there) -- skips rather than fails, matching the
       # best-effort stance script/dev_setup/sync_mo_icon_library.sh
-      # already takes for devs without icon-library access.
+      # already takes for devs without icon-library access. An
+      # expired (rather than missing) token is NOT covered by this
+      # skip -- git clone fails with a bad-credentials error, which
+      # fails the step loudly, since $ICON_LIBRARY_PAT is still
+      # non-empty in that case.
+      #
+      # Auth via a request header (-c http.extraHeader), not a
+      # token-in-the-URL -- the latter gets persisted verbatim into
+      # the clone's own .git/config, leaving the PAT sitting in
+      # plaintext on disk for the rest of the job.
       - name: Fetch icon-library sprite
         env:
           ICON_LIBRARY_PAT: ${{ secrets.ICON_LIBRARY_PAT }}
         run: |
           if [ -n "$ICON_LIBRARY_PAT" ]; then
-            git clone --quiet --filter=blob:none --sparse \
-              "https://x-access-token:${ICON_LIBRARY_PAT}@github.com/MushroomObserver/icon-library.git" \
+            auth=$(printf 'x-access-token:%s' "$ICON_LIBRARY_PAT" | base64 -w 0)
+            git -c http.extraHeader="AUTHORIZATION: basic $auth" \
+              clone --quiet --filter=blob:none --sparse \
+              https://github.com/MushroomObserver/icon-library.git \
               vendor/assets/images/icons
+            if [ -f vendor/assets/images/icons/mo-icons.svg ]; then
+              echo "Cloned icon-library -- mo-icons.svg present."
+            else
+              echo "::warning::Cloned icon-library but mo-icons.svg is missing -- check its main branch."
+            fi
           else
             echo "ICON_LIBRARY_PAT not set -- skipping icon sprite fetch."
           fi

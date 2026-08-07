@@ -12,18 +12,24 @@ Token, stored as a repository secret on `mushroom-observer`, scoped to
 **read-only** access on `icon-library` alone. `.github/workflows/
 ci_rails.yml`'s `test` job uses it to sparse-clone `icon-library` into
 `vendor/assets/images/icons/` at the start of each run. If the secret
-is ever missing (expired and not yet renewed, or a `pull_request` run
-from a fork, which GitHub doesn't expose repo secrets to), that step
-skips instead of failing -- see its comment in `ci_rails.yml`.
+is ever entirely *missing* (deleted, or a `pull_request` run from a
+fork, which GitHub doesn't expose repo secrets to), that step skips
+instead of failing -- see its comment in `ci_rails.yml`.
+
+An *expired* token is a different case, and does **not** hit that
+skip path: the secret variable is still non-empty, just carrying a
+token GitHub no longer accepts, so `git clone` fails with a
+bad-credentials error -- which fails the step, and the whole `test`
+job, loudly, on every run. That's arguably the better failure mode
+(you can't miss it), but it does mean expiration shows up as a hard
+CI break, not a quiet skip -- worth knowing so it doesn't look like an
+unrelated regression when it happens.
 
 Fine-grained tokens require an expiration date (GitHub doesn't allow
 one that never expires), so this **will** need to be regenerated
-periodically -- likely once a year. When it expires, the fetch step
-starts silently skipping (CI stays green, but any test relying on the
-real sprite will start failing or -- worse -- silently not verifying
-anything, if that test also has a skip-when-absent fallback). Renew
-it in advance if you can; regenerate it right away if a test that
-depends on the sprite starts failing for no apparent reason.
+periodically -- likely once a year. Renew it in advance if you can;
+if CI starts failing at the "Fetch icon-library sprite" step for no
+apparent code-related reason, this is the first thing to check.
 
 ## To create or renew it
 
@@ -58,6 +64,13 @@ needs to exist in GitHub's own secret-storage form.
 ## Verifying it worked
 
 Push anything to a branch with an open PR (or open a new one) and
-check the "Fetch icon-library sprite" step's log in the `test` job --
-it should show a successful `git clone`, not the "ICON_LIBRARY_PAT not
-set" skip message.
+check the "Fetch icon-library sprite" step in the `test` job. The
+clone itself is silent on success (`--quiet`), so don't look for a
+"cloned successfully" message from git -- instead check:
+
+- The step's own log ends with `Cloned icon-library -- mo-icons.svg
+  present.`, not the `ICON_LIBRARY_PAT not set` skip message.
+- The step is marked passed, with no `::warning::` annotation about a
+  missing `mo-icons.svg` (that would mean the clone worked but
+  icon-library's `main` branch doesn't have the file -- a different
+  problem, on the icon-library side, not the PAT).
