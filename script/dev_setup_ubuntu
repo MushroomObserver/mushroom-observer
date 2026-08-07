@@ -19,6 +19,8 @@
 #   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
 # Usage (already-provisioned box, as mo, from an existing checkout):
 #   cd /var/web/mushroom-observer && script/dev_setup_ubuntu
+# Usage (just (re)sync the private icon-library repo, skip everything else):
+#   script/dev_setup_ubuntu --icons-only
 
 if [ "$(id -u)" -eq 0 ]; then
     if [ -f script/dev_setup/ubuntu_root.sh ]; then
@@ -45,6 +47,13 @@ mo_ensure_repo
 source script/dev_setup/common.sh
 # shellcheck source=script/dev_setup/finish_app_setup.sh
 source script/dev_setup/finish_app_setup.sh
+# shellcheck source=script/dev_setup/sync_mo_icon_library.sh
+source script/dev_setup/sync_mo_icon_library.sh
+
+if [ "$1" = "--icons-only" ]; then
+    mo_sync_icon_library
+    exit 0
+fi
 
 ruby-install ruby "$(cat .ruby-version)"
 

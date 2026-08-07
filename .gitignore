@@ -83,3 +83,8 @@ inat_import_audit*.csv
 # Each developer keeps their own; the dev key is not shared, so a
 # committed dev credentials file would be undecryptable for everyone else.
 /config/credentials/development.yml.enc
+
+# Licensed Glyphicons SVGs, cloned separately from the private
+# MushroomObserver/icon-library repo (requires its own access) --
+# never checked into this public repo.
+/vendor/assets/images/icons/
