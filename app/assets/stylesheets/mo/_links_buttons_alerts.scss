@@ -134,8 +134,8 @@
 // each defaulting to its own baseline (which put visible text below
 // the icon).
 //
-// .glyphicon's `top: 3px` (see _icons.scss) is a relative offset
-// tuned for glyphicons in their usual (untethered) contexts; inside
+// .mo-icon's `top: 3px` (see _icons.scss) is a relative offset
+// tuned for icons in their usual (untethered) contexts; inside
 // this tight a box it just pushes the icon toward the bottom, so
 // it's undone here specifically.
 .inline-icon-link {
@@ -151,18 +151,10 @@
     text-decoration: none;
   }
 
-  .glyphicon {
+  .mo-icon {
     top: 0;
     vertical-align: middle;
   }
-
-  // The plus glyph reads visually heavier/bigger than other
-  // glyphicons at the same font-size (bold, symmetric shape) --
-  // scoped down specifically here, not globally, since it looks
-  // fine at full size elsewhere.
-  // .glyphicon-plus {
-  //   font-size: 90%;
-  // }
 }
 
 //
@@ -192,7 +184,7 @@
     color: darkgreen;      /* Change color on hover */
   }
 
-  .glyphicon-chevron-down {
+  .mo-icon {
      display: block;
    }
 }

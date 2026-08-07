@@ -33,7 +33,7 @@ class ButtonTest < ComponentTestCase
                          class: "p-0")
 
     assert_html(html, "button span.sr-only", text: "Remove")
-    assert_html(html, "button span.glyphicon")
+    assert_html(html, "button svg.mo-icon-x")
   end
 
   def test_raises_on_btn_class_in_class_kwarg
@@ -179,7 +179,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
 
     expected = routes.edit_herbarium_path(id: @herbarium.id)
     assert_html(html, "a[href='#{expected}']")
-    assert_html(html, "a span.glyphicon")
+    assert_html(html, "a svg.mo-icon-edit")
   end
 
   def test_type_new_links_to_provided_path_with_add_icon
@@ -187,7 +187,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     html = render_dispatch(type: :new, target: path, name: "New herbarium")
 
     assert_html(html, "a[href='#{path}']", text: "New herbarium")
-    assert_html(html, "a span.glyphicon")
+    assert_html(html, "a svg.mo-icon-add")
   end
 
   def test_type_download_links_with_download_icon
@@ -197,7 +197,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     html = render_dispatch(type: :download, target: path)
 
     assert_html(html, "a[href='#{path}']")
-    assert_html(html, "a span.glyphicon")
+    assert_html(html, "a svg.mo-icon-download")
   end
 
   # ---- type: :submit ---------------------------------------------------

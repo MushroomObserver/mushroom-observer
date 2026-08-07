@@ -13,7 +13,7 @@ class IconLinkTest < ComponentTestCase
     assert_html(html, "a[href='/foo'][title='Edit'].icon-link" \
                       "[data-tooltip-target='tip'][data-title='Edit']")
     # Icon glyph + screen-reader-only label inside the anchor.
-    assert_html(html, "a span.glyphicon-edit")
+    assert_html(html, "a svg.mo-icon-edit")
     assert_html(html, "a span.sr-only", text: "Edit")
   end
 
@@ -30,7 +30,7 @@ class IconLinkTest < ComponentTestCase
     # Without an `:icon`, render as a plain link with the text.
     assert_html(html, "a[href='/x']", text: "Label")
     # No icon span when no icon was passed.
-    assert_no_html(html, "a span.glyphicon")
+    assert_no_html(html, "a svg.mo-icon")
   end
 
   def test_show_text_replaces_sr_only_with_visible_label
@@ -49,8 +49,8 @@ class IconLinkTest < ComponentTestCase
     # Both icons + both labels render; the active pair carries the
     # `active-icon` / `active-label` modifier classes the JS toggles
     # on/off via the bootstrap tooltip's data-active-title swap.
-    assert_html(html, "a span.glyphicon-bullhorn")
-    assert_html(html, "a span.glyphicon-ok-circle.active-icon")
+    assert_html(html, "a svg.mo-icon-tracking")
+    assert_html(html, "a svg.mo-icon-check.active-icon")
     assert_html(html, "a span.sr-only", text: "Subscribe")
     assert_html(html, "a span.sr-only.active-label", text: "Subscribed")
     # data-active-title flips to the active text on toggle.
@@ -64,7 +64,7 @@ class IconLinkTest < ComponentTestCase
     # button_to wraps a button in a form; `role='button'` is added so
     # the form-styled `<button>` is announced as a button by AT.
     assert_html(html, "form[action='/d'] button[role='button']")
-    assert_html(html, "form button span.glyphicon-remove-circle")
+    assert_html(html, "form button svg.mo-icon-delete")
   end
 
   def test_extra_class_appends_to_icon_link

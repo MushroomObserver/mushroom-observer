@@ -61,6 +61,19 @@ if [ "$1" = "--icons-only" ]; then
         exit 1
     fi
 
+    # A successful clone/pull doesn't guarantee mo-icons.svg itself is
+    # there -- verify explicitly rather than trusting the command's
+    # exit status alone. Production without icons is a real
+    # regression (illegible site), not a tolerable degraded state
+    # (contrast with the best-effort skip elsewhere for CI/dev), so
+    # this is a hard failure.
+    if [ ! -f "$icons_dir/mo-icons.svg" ]; then
+        echo "$icons_dir/mo-icons.svg is missing after the clone/pull --"
+        echo "check icon-library's main branch. Aborting rather than"
+        echo "precompiling and reloading without a working icon sprite."
+        exit 1
+    fi
+
     # Assets are precompiled (config.assets.compile = false in
     # production) and fingerprinted, so new icon files aren't live
     # until recompiled. `service puma reload` sends SIGUSR2 (see

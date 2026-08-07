@@ -125,7 +125,7 @@ module Views::Layouts
       assert_nested(
         html,
         parent_selector: "a.index_object_link",
-        child_selector: "span.glyphicon-th"
+        child_selector: "svg.mo-icon-grid"
       )
     end
 
@@ -141,7 +141,7 @@ module Views::Layouts
       assert_nested(
         html,
         parent_selector: "a.index_object_link",
-        child_selector: "span.glyphicon-list"
+        child_selector: "svg.mo-icon-list"
       )
     end
 
@@ -190,7 +190,7 @@ module Views::Layouts
       assert_nested(
         html,
         parent_selector: "a.prev_object_link",
-        child_selector: "span.glyphicon"
+        child_selector: "svg.mo-icon-prev"
       )
 
       # SR-only text should be in link

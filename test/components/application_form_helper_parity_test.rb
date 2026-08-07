@@ -146,7 +146,7 @@ class ApplicationFormHelperParityTest < ComponentTestCase
                     "label row must not use d-flex when label_end is empty")
     # The hasIdIndicator (label_after content) still renders inline
     # with the label.
-    assert_html(html, "span.has-id-indicator")
+    assert_html(html, "svg.has-id-indicator")
   end
 
   def test_autocompleter_field_uses_d_flex_when_create_text_set

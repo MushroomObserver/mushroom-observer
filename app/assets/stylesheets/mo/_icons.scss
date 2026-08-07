@@ -54,8 +54,8 @@
   clear: both;
 }
 
-.icon-addon.addon-md .glyphicon,
-.icon-addon .glyphicon,
+.icon-addon.addon-md .mo-icon,
+.icon-addon .mo-icon,
 .icon-addon.addon-md .fa,
 .icon-addon .fa {
   position: absolute;
@@ -83,7 +83,7 @@
 }
 
 .icon-addon.addon-lg .fa,
-.icon-addon.addon-lg .glyphicon {
+.icon-addon.addon-lg .mo-icon {
   font-size: 18px;
   margin-left: 0;
   left: 11px;
@@ -98,15 +98,15 @@
 }
 
 .icon-addon.addon-sm .fa,
-.icon-addon.addon-sm .glyphicon {
+.icon-addon.addon-sm .mo-icon {
   margin-left: 0;
   font-size: 12px;
   left: 5px;
   top: 1px
 }
 
-.icon-addon .form-control:focus + .glyphicon,
-.icon-addon:hover .glyphicon,
+.icon-addon .form-control:focus + .mo-icon,
+.icon-addon:hover .mo-icon,
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
   color: $input-color;
@@ -155,7 +155,7 @@
   }
   &.active,
   &.collapsed {
-    .link-icon:not(.active-icon),
+    .mo-icon:not(.active-icon),
     .sr-only:not(.active-label) {
       display: none;
     }
@@ -172,40 +172,39 @@ tbody.collapse.in {
   display: table-row-group;
 }
 
-.glyphicon {
-  // Cancels Bootstrap's own .glyphicon { top: 1px; } base rule --
-  // MO's default (outside a .btn, see below) is flush, not offset.
-  top: 0;
-  font-size: 112%;
-
-  // &.link-icon {
-  //   background-color: white;
-  //   border-radius: 50%;
-  // }
+.mo-icon {
+  // SVG icon (see Components::Icon) sized relative to the
+  // surrounding font-size, same scale factor the old font-glyph's
+  // font-size: 112% used, so existing font-size-based overrides
+  // throughout this file (.icon-addon's size variants, etc.) keep
+  // working unchanged.
+  display: inline-block;
+  position: relative;
+  width: 1.12em;
+  height: 1.12em;
+  fill: currentColor;
 }
 
 // top: 3px is a .btn-specific baseline correction, not a general
-// glyphicon offset -- scoped here instead of on the bare .glyphicon
+// icon offset -- scoped here instead of on the bare .mo-icon
 // selector above so it doesn't push every non-button icon (inline
 // links, standalone icons, etc.) down by 3px too. Two exclusions:
 // .carousel-control's .btn wrapper, since Bootstrap positions those
 // chevron icons itself (top: 50%, centered) and this nudge would
 // fight that default; and .btn-overlay, an icon-only overlay button
 // with no adjacent visible text to baseline-align against.
-.btn:not(.carousel-control .btn):not(.btn-overlay) > .glyphicon {
+.btn:not(.carousel-control .btn):not(.btn-overlay) > .mo-icon {
   top: 3px;
 }
 
 // `.theater-btn`'s icon needs its own baseline nudge -- not the
 // button-text +3px above (no adjacent visible text to align to
 // here), and not flush like a bare icon either.
-.theater-btn > .glyphicon {
+.theater-btn > .mo-icon {
   top: 2px;
 }
 
 .spinner-right {
-  @extend .glyphicon, .glyphicon-repeat;
-
   line-height: 1.1 !important;
   animation: spin-r 1s infinite linear;
 }

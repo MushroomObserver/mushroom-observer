@@ -89,9 +89,10 @@ class SearchFormTest < ComponentTestCase
                 "[aria-controls='search_bar_elements']" \
                 "[aria-expanded='true']" \
                 "[data-search-type-target='barToggle']")
-    assert_html(html, "a[data-search-type-target='barToggle'] span.glyphicon")
     assert_html(html,
-                "a[data-search-type-target='barToggle'] span.sr-only",
+                "a[data-search-type-target='barToggle'] svg.mo-icon-minus")
+    assert_html(html,
+                "a[data-search-type-target='barToggle'] svg > title",
                 text: :search_bar_fewer_options.l.as_displayed)
     # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
     # literal.

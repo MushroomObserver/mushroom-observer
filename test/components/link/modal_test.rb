@@ -35,7 +35,7 @@ class ModalLinkTest < ComponentTestCase
                       "[data-modal='modal_comment']" \
                       "[data-controller='modal-toggle']" \
                       "[data-action='modal-toggle#showModal:prevent']")
-    assert_html(html, "a span.glyphicon-edit")
+    assert_html(html, "a svg.mo-icon-edit")
     assert_html(html, "a span.sr-only", text: "Edit")
   end
 

@@ -34,8 +34,9 @@ class Views::Layouts::Sidebar
       # convention (CSS flips visibility via the `.collapsed` class).
       assert_html(html,
                   "##{Languages::TOGGLE_ID} " \
-                  ".glyphicon-chevron-down.active-icon")
-      assert_html(html, "##{Languages::TOGGLE_ID} .glyphicon-chevron-up")
+                  "svg.mo-icon-chevron-down.active-icon")
+      assert_html(html,
+                  "##{Languages::TOGGLE_ID} svg.mo-icon-chevron-up")
 
       # Order: "Languages:" label, then the flag, then the caret —
       # not flag-first. Walk the toggle's child nodes (not a raw
@@ -48,7 +49,7 @@ class Views::Layouts::Sidebar
         node.name == "span" && node[:class]&.include?("lang-flag-emoji")
       end
       caret_index = children.index do |node|
-        node[:class]&.include?("glyphicon-chevron-down")
+        node.name == "svg" && node[:class]&.include?("mo-icon-chevron-down")
       end
       assert_operator(label_index, :<, flag_index)
       assert_operator(flag_index, :<, caret_index)

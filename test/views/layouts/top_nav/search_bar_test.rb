@@ -29,9 +29,9 @@ class Views::Layouts::TopNav
                   "[aria-controls='search_bar_help']" \
                   "[aria-expanded='false']")
       assert_html(html,
-                  "a[data-search-type-target='helpToggle'] span.glyphicon")
+                  "a[data-search-type-target='helpToggle'] svg.mo-icon-info")
       assert_html(html,
-                  "a[data-search-type-target='helpToggle'] span.sr-only",
+                  "a[data-search-type-target='helpToggle'] svg > title",
                   text: :search_bar_help.t.as_displayed)
       assert_no_html(html,
                      "a[data-search-type-target='helpToggle'].d-none")
@@ -59,9 +59,9 @@ class Views::Layouts::TopNav
                   "[aria-controls='search_nav_form']" \
                   "[aria-expanded='false']")
       assert_html(html,
-                  "a[data-search-type-target='formToggle'] span.glyphicon")
+                  "a[data-search-type-target='formToggle'] svg.mo-icon-plus")
       assert_html(html,
-                  "a[data-search-type-target='formToggle'] span.sr-only",
+                  "a[data-search-type-target='formToggle'] svg > title",
                   text: :search_bar_more_options.l.as_displayed)
       assert_no_html(html,
                      "a[data-search-type-target='formToggle'].d-none")

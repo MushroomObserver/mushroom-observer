@@ -19,7 +19,7 @@ class LinkGetTest < ComponentTestCase
   def test_icon_kwarg_renders_icon_inside_anchor
     html = render_link(name: :edit.ti, target: @path, icon: :edit)
 
-    assert_html(html, "a span.glyphicon")
+    assert_html(html, "a svg.mo-icon-edit")
     assert_html(html, "a span.sr-only", text: :edit.ti)
   end
 
@@ -33,8 +33,8 @@ class LinkGetTest < ComponentTestCase
   def test_block_supersedes_button_content
     html = render(block_wrapper)
 
-    # icon: was not passed to the wrapper — confirm no stray glyphicon
-    assert_no_html(html, "a span.glyphicon")
+    # icon: was not passed to the wrapper — confirm no stray icon
+    assert_no_html(html, "a svg.mo-icon")
   end
 
   def test_no_block_falls_back_to_button_content
