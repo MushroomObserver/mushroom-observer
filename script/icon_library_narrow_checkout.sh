@@ -3,5 +3,9 @@
 # README.md, etc). Shared by deploy.sh, ci_rails.yml, and
 # sync_mo_icon_library.sh. $1: the checkout directory.
 icon_library_narrow_checkout() {
+    if [ -z "$1" ]; then
+        echo "icon_library_narrow_checkout: missing directory argument" >&2
+        return 1
+    fi
     git -C "$1" sparse-checkout set --no-cone '/mo-icons.svg'
 }

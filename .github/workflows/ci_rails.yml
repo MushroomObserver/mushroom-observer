@@ -50,7 +50,8 @@ jobs:
               https://github.com/MushroomObserver/icon-library.git \
               vendor/assets/images/icons
             source script/icon_library_narrow_checkout.sh
-            icon_library_narrow_checkout vendor/assets/images/icons
+            icon_library_narrow_checkout vendor/assets/images/icons ||
+              echo "::warning::Narrowing the icon-library checkout failed -- continuing with whatever was cloned."
             if [ -f vendor/assets/images/icons/mo-icons.svg ]; then
               echo "Cloned icon-library -- mo-icons.svg present."
             else

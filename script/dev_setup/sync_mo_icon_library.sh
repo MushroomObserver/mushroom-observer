@@ -77,7 +77,10 @@ mo_sync_icon_library() {
     fi
 
     source script/icon_library_narrow_checkout.sh
-    icon_library_narrow_checkout "$clone_dir"
+    if ! icon_library_narrow_checkout "$clone_dir"; then
+        echo "WARNING: narrowing $clone_dir to mo-icons.svg failed -- extra"
+        echo "root files (Gemfile, README.md, etc.) may still be present."
+    fi
 
     if [ -f "$clone_dir/mo-icons.svg" ]; then
         mkdir -p "$(dirname "$dest_svg")"
