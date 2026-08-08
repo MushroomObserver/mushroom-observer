@@ -139,12 +139,11 @@ class Components::InlineCRUDLinks < Components::Base
   # shown visibly (no `show_text:`), matching the pre-consolidation
   # `Components::Link::InlineAdd` behavior.
   def add_component
-    Components::Button.new(
+    Components::Link.new(
       type: :modal,
       name: @tab.title,
       target: @tab.path,
       modal_id: @modal_id,
-      variant: :strip,
       icon: :add,
       **tab_html_options(@tab)
     )

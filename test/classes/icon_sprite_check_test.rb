@@ -73,4 +73,24 @@ class IconSpriteCheckTest < UnitTestCase
       end
     end
   end
+
+  def test_fetch_sprite_calls_system_with_sync_script
+    called_with = nil
+    stub_system = lambda do |*args, **kwargs|
+      called_with = [args, kwargs]
+      true
+    end
+
+    IconSpriteCheck.stub(:system, stub_system) do
+      IconSpriteCheck.fetch_sprite
+    end
+
+    assert_equal(
+      [["bash", "-c",
+        "source script/dev_setup/sync_mo_icon_library.sh && " \
+        "mo_sync_icon_library"],
+       { chdir: Rails.root.to_s }],
+      called_with
+    )
+  end
 end
