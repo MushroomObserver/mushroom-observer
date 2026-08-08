@@ -208,9 +208,13 @@ tbody.collapse.in {
 }
 
 // .btn-specific baseline correction. Excludes .carousel-control,
-// styled in _carousel.scss, and .btn-overlay/.input-group-btn, each
-// needing a different nudge below.
-.btn:not(.carousel-control .btn):not(.btn-overlay):not(.input-group-btn .btn)
+// styled in _carousel.scss, .btn-overlay/.input-group-btn, each
+// needing a different nudge below, and .inline-icon-link, which sets
+// its own top: 0 -- without this exclusion, a .btn that's ALSO
+// .inline-icon-link (e.g. Button::Clipboard) gets this rule's higher
+// specificity (chained :not()s) instead of .inline-icon-link's,
+// undoing its correction and pushing the icon low again.
+.btn:not(.carousel-control .btn):not(.btn-overlay):not(.input-group-btn .btn):not(.inline-icon-link)
   > .mo-icon {
   top: 3px;
 }
