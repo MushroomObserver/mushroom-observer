@@ -64,6 +64,18 @@ MO/InitializeWithoutProp:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+  Exclude:
+    # Every field class here takes a Superform::Field or FieldProxy --
+    # both are duck-typed, so the only prop type available is a vague
+    # _Interface(:dom, :value), not a concrete class; `wrapper_options`/
+    # `attributes` are already-generic Hash catch-alls. Converting
+    # doesn't buy real type safety here the way it does elsewhere, and
+    # several files subclass Superform's own component classes
+    # directly (third-party initialize signatures, positional `field`
+    # args, no dedicated test coverage). Not worth the risk/reward;
+    # left as manual initialize.
+    - "app/components/application_form.rb"
+    - "app/components/application_form/**/*.rb"
 
 MO/LowercaseTranslationTag:
   Description: >-

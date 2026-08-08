@@ -46,7 +46,24 @@ module RuboCop
               "class declares no `prop` of its own -- use Literal props " \
               "instead (see .claude/rules/phlex_reference.md)."
 
+        # Literal type-builder methods (`prop`, `_Nilable`, `_Union`,
+        # etc.) only exist on a class whose ancestry runs through
+        # `Phlex::HTML` -- MO's own hierarchy roots are
+        # `Components::*`/`Views::*` (both ultimately `Phlex::HTML`
+        # subclasses), so checking the literal superclass name against
+        # those prefixes is a cheap, reliable proxy for "this class
+        # can actually use props" without needing to load the app.
+        # This is a static, lexical check (RuboCop has no runtime
+        # class table) -- a class that renames its superclass to
+        # something outside these prefixes while still ultimately
+        # being Phlex-based would be missed, but that's not a pattern
+        # this codebase uses.
+        PHLEX_SUPERCLASS_PREFIXES = ["Components::", "Views::"].freeze
+        PHLEX_SUPERCLASSES = ["Phlex::HTML", "Phlex::SGML"].freeze
+
         def on_class(class_node)
+          return unless phlex_subclass?(class_node)
+
           init_def = direct_initialize(class_node)
           return unless init_def
           return unless assigns_own_ivar?(init_def)
@@ -56,6 +73,15 @@ module RuboCop
         end
 
         private
+
+        def phlex_subclass?(class_node)
+          superclass = class_node.children[1]
+          return false unless superclass
+
+          name = superclass.source.delete_prefix("::")
+          PHLEX_SUPERCLASSES.include?(name) ||
+            PHLEX_SUPERCLASS_PREFIXES.any? { |prefix| name.start_with?(prefix) }
+        end
 
         def direct_initialize(class_node)
           class_node.each_descendant(:def).find do |def_node|
