@@ -281,7 +281,7 @@ class Views::Layouts::TopNav < Views::Base
     return unless @banner
 
     Button(
-      variant: :link, size: :sm,
+      variant: :success, size: :sm,
       class: "mr-0 ml-0 ml-sm-2 top_nav_button top_nav_icon_button " \
              "d-none hidden-xs",
       data: { banner_target: "showButton" }
