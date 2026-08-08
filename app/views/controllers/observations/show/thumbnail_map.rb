@@ -21,7 +21,7 @@ class Views::Controllers::Observations::Show::ThumbnailMap < Views::Base
     return unless @user&.thumbnail_maps
 
     li(id: "observation_thumbnail_map",
-       class: "obs-thumbnail-map",
+       class: "obs-thumbnail-map mt-2 mb-3",
        data: { controller: "thumbnail-map",
                coordinates: { x: x, y: y }.to_json,
                map_url: map_observation_path(id: @obs.id) }) do
