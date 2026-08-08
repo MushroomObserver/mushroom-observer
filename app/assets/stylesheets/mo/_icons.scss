@@ -220,6 +220,20 @@ a:not(.btn):not(.inline-icon-link) > .mo-icon {
   top: 2px;
 }
 
+// A real "filled/bordered" .btn's icon reads small next to the
+// button's bold label text (e.g. the location-map "Show map"
+// toggle), and -- lacking any vertical-align override -- sits on
+// the default `baseline`, which reserves descender space the icon
+// doesn't have and pushes the button's visible text down relative
+// to a no-icon sibling in the same .btn-group. .btn-link buttons
+// look like plain links, not framed buttons, so they're excluded
+// and keep the default 1.12em size.
+.btn:not(.btn-link) .mo-icon {
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: middle;
+}
+
 // vertical-align: middle avoids the SVG's default baseline gap,
 // which otherwise makes this addon taller than its sibling
 // .form-control.
