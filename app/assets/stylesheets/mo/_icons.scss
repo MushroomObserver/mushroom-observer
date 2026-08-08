@@ -170,14 +170,35 @@
 
 // Icon-only buttons: only the glyph (via .mo-icon's fill: currentColor
 // tracking .btn-link's :hover color) should change on hover, not the
-// button background.
-.stateful-link.btn-link {
+// button background. Excludes .dropdown-item -- those need their
+// normal Bootstrap hover-highlight background, which is the whole
+// point of that rule.
+.btn-link:not(.dropdown-item) {
   &:hover,
   &:focus,
   &:active,
   &.active {
     background-color: transparent;
   }
+}
+
+// Bootstrap's own dropdown-item hover styling
+// (`.dropdown-menu > li > a:hover`) only ever matches <a> tags.
+// Components::Dropdown applies the `.dropdown-item` class to
+// <button> elements too, which never matched that selector and so
+// got no hover treatment at all. Matches Bootstrap's own <a> hover
+// styling exactly, same variables.
+//
+// !important on both properties: _form_elements.scss's
+// `form.button_to button[type=submit]:not(.btn)` (browser-chrome
+// reset for button_to submit buttons) and its own nested
+// `:not(.text-danger):hover` color rule both out-specificity this
+// selector otherwise -- matches this same file family's existing
+// !important usage for the identical problem (`.dropdown > a`).
+button.dropdown-item:hover {
+  color: $dropdown-link-hover-color !important;
+  background-color: $dropdown-link-hover-bg !important;
+  text-decoration: none;
 }
 
 // Bootstrap collapse sets display:block, which breaks
@@ -205,18 +226,6 @@ tbody.collapse.in {
     width: 0.75em;
     height: 0.75em;
   }
-}
-
-// .btn-specific baseline correction. Excludes .carousel-control,
-// styled in _carousel.scss, .btn-overlay/.input-group-btn, each
-// needing a different nudge below, and .inline-icon-link, which sets
-// its own top: 0 -- without this exclusion, a .btn that's ALSO
-// .inline-icon-link (e.g. Button::Clipboard) gets this rule's higher
-// specificity (chained :not()s) instead of .inline-icon-link's,
-// undoing its correction and pushing the icon low again.
-.btn:not(.carousel-control .btn):not(.btn-overlay):not(.input-group-btn .btn):not(.inline-icon-link)
-  > .mo-icon {
-  top: 3px;
 }
 
 .theater-btn > .mo-icon {

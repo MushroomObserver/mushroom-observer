@@ -153,13 +153,30 @@ class Components::Dropdown < Components::Base
   # Tooltip data attrs are meaningful on icon links in the top-nav
   # but are redundant and noisy inside a dropdown menu — the item
   # label is already visible, and Bootstrap's tooltip JS can
-  # interfere with dropdown click handling.
+  # interfere with dropdown click handling. Also strips a top-level
+  # `title:` (Tab::Base::ALLOWED_HTML_OPTION_KEYS allows one) --
+  # `merge_context_nav_link_args` doesn't exclude it since it's
+  # shared with ContextNav/Profile, which don't have this problem,
+  # but a bare `title=` attribute alone still triggers the browser's
+  # native tooltip even with no Bootstrap JS wiring.
+  #
+  # Explicit `nil`s rather than just omitting the keys:
+  # Button::Post/Put/Patch/Delete (Button::CRUDBase) compute their
+  # own `data: { tooltip_target: "tip", placement: "top",
+  # title: @name }` internally in `button_html_options`, independent
+  # of anything passed in here -- merely removing the keys from these
+  # kwargs does nothing, since CRUDBase's own defaults were never in
+  # them to begin with. Explicit `nil`s deep_merge over those
+  # defaults and actually suppress them. Must be `nil`, not `false`
+  # -- Phlex omits a `nil` data value's attribute entirely, but
+  # renders `false` as the literal string "false", which is still a
+  # present attribute a presence-only JS check would treat as "has a
+  # tooltip target".
   def strip_tooltip_data(kwargs)
-    data = kwargs[:data]
-    return kwargs unless data.is_a?(Hash) && data[:tooltip_target] == "tip"
-
-    stripped = data.except(:tooltip_target, :title, :placement)
-    stripped.empty? ? kwargs.except(:data) : kwargs.merge(data: stripped)
+    kwargs = kwargs.except(:title)
+    data = (kwargs[:data] || {}).except(:tooltip_target, :title, :placement)
+    kwargs.merge(data: data.merge(tooltip_target: nil, placement: nil,
+                                  title: nil))
   end
 
   def normalize_section(section)

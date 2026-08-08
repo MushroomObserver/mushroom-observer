@@ -163,7 +163,7 @@ class Views::Layouts::TopNav < Views::Base
         variant: :outline, size: :sm,
         class: "top_nav_button top_nav_icon_button",
         aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :search.ti) }
+      ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
     end
   end
 
@@ -244,7 +244,7 @@ class Views::Layouts::TopNav < Views::Base
       class: "ml-1 mr-0 mx-sm-3 top_nav_button new_object_button",
       title: full_label,
       aria: { label: full_label },
-      data: { tooltip_target: "tip" } }
+      data: { tooltip_target: "tip", placement: :bottom } }
   end
 
   def nav_create_label
@@ -266,7 +266,8 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "mx-0 mx-sm-2 top_nav_button top_nav_icon_button"
+      class: "mx-0 mx-sm-2 top_nav_button top_nav_icon_button",
+      data: { placement: :bottom }
     )
   end
 

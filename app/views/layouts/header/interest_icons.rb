@@ -85,7 +85,8 @@ module Views::Layouts
       alt = alt_key.l(object: type.l)
       suffix = size == :big ? "2" : "3"
       img(src: asset_path("#{kind}#{suffix}.png"),
-          alt: alt, class: "interest_#{size}", title: alt)
+          alt: alt, class: "interest_#{size}", title: alt,
+          data: { tooltip_target: "tip", placement: :bottom })
     end
   end
 end
