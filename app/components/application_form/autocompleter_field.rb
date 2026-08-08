@@ -283,7 +283,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            modal_id: create,
            name: create_text,
            target: create_path,
-           icon: :plus, show_text: true,
+           icon: :plus, label: true,
            icon_class: "text-primary",
            class: "ml-3 create-link",
            data: { target_attr_key => "createBtn" })

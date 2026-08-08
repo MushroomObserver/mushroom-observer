@@ -37,7 +37,7 @@ class Components::Link < Components::Base
   include Components::Button::Styling
   include Components::Button::Content
 
-  prop :button, _Nilable(Symbol), default: nil
+  prop :button, _Nilable(_Union(*Components::Button::VARIANTS)), default: nil
 
   DISPATCH = {
     active: :Active,

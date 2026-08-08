@@ -47,7 +47,7 @@ class Components::Icon < Components::Base
   SPRITE_PATH = Rails.root.join("vendor/assets/images/icons/mo-icons.svg")
   SPRITE_AVAILABLE = File.exist?(SPRITE_PATH)
 
-  prop :type, _Nilable(Symbol), default: nil
+  prop :type, _Nilable(_Union(*GLYPHS.to_a)), default: nil
   prop :title, _Nilable(String), default: nil
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar/Collapsible's pattern (plain `class:`/
@@ -58,7 +58,7 @@ class Components::Icon < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    return unless SPRITE_AVAILABLE && GLYPHS.include?(@type)
+    return unless SPRITE_AVAILABLE && @type
 
     svg(class: svg_class, title: @title.presence, data: svg_data,
         aria: svg_aria,

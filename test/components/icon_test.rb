@@ -18,22 +18,21 @@ class LinkIconTest < ComponentTestCase
     assert_html(html, "svg.mo-icon.mo-icon-chevron-down")
   end
 
-  def test_unknown_type_renders_nothing
-    html = render_icon(type: :bogus_not_a_real_icon)
-
-    # Unknown icon type silently emits nothing — matches the legacy
-    # `link_icon` helper's `return "" unless LINK_ICON_INDEX[type]`.
-    assert_equal("", html)
+  def test_unknown_type_raises_at_construction
+    assert_raises(Literal::TypeError) do
+      Components::Icon.new(type: :bogus_not_a_real_icon)
+    end
   end
 
   def test_renders_nothing_when_sprite_unavailable
+    original = Components::Icon::SPRITE_AVAILABLE
     Components::Icon.send(:remove_const, :SPRITE_AVAILABLE)
     Components::Icon.const_set(:SPRITE_AVAILABLE, false)
 
     assert_equal("", render_icon(type: :globe))
   ensure
     Components::Icon.send(:remove_const, :SPRITE_AVAILABLE)
-    Components::Icon.const_set(:SPRITE_AVAILABLE, true)
+    Components::Icon.const_set(:SPRITE_AVAILABLE, original)
   end
 
   def test_title_adds_tooltip_and_accessible_name

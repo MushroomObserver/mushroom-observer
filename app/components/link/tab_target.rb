@@ -15,8 +15,8 @@ module Components::Link::TabTarget
       [title, path, opts]
     else
       raise(ArgumentError.new(
-              "#{self.class} requires either tab: or both a title and " \
-              "a path"
+              "#{self.class} requires either tab: or both name: and " \
+              "target:"
             ))
     end
   end
