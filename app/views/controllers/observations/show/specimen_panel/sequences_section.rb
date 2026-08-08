@@ -100,6 +100,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
       Components::Button::Clipboard.new(
         text: sequence.bases, name: :copy_this_sequence.ti,
+        variant: :strip,
         class: Components::InlineLinkBlock.item_class
       )
     end
