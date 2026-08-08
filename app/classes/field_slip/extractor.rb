@@ -28,7 +28,12 @@ class FieldSlip
     #      invented from the prompt's own alias tables); a null that
     #      was written but could not be read is listed in `unreadable`,
     #      separating it from a box the collector left empty
-    PROMPT_VERSION = "3"
+    #   4  the voucher number is identified by where it sits -- the
+    #      upper-right region, around the logo rather than beside it --
+    #      instead of by being printed, so a handwritten one is read
+    #      too (extracts at v3 or earlier hold no voucher number for
+    #      any slip filled in after the printed stickers ran out)
+    PROMPT_VERSION = "4"
 
     # The slip's fields, in the order they appear on the printed form,
     # mapped to where each one lands on the Observation. `nil` means the
