@@ -135,6 +135,17 @@
   }
 }
 
+// Bootstrap's own .carousel-control scales its glyph 1.5x here
+// ($carousel-control-font-size 20px -> 30px). .mo-icon inherits
+// .carousel-control's font-size (via .btn { font-size: inherit }
+// above) and sizes itself in em, so bumping font-size here scales
+// the icon the same way without a separate .mo-icon override.
+@media screen and (min-width: $screen-sm-min) {
+  .carousel-control {
+    font-size: 3rem;
+  }
+}
+
 .carousel-heading {
   // border-top: 1px solid $panel-inner-border;
   border-bottom: 1px solid $panel-inner-border;
