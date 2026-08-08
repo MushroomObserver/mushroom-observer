@@ -9,30 +9,6 @@
   }
 }
 
-.navbar-nav {
-  li {
-    form.button_to {
-      display: block;
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
-  }
-}
-
-#title_bar .nav {
-  li {
-    a,
-    form.button_to {
-      display: block;
-      padding: 1rem 0.5rem;
-
-      @media screen and (min-width: $screen-lg-min) {
-        padding: 1rem 0.75rem;
-      }
-    }
-  }
-}
-
 // Plain single-row flex-bar alias: a horizontal bar of items with
 // space distributed between them (sorter, search bar, pagination,
 // interest icons, prev/next nav, etc). Unrelated to the `.navbar`
@@ -130,7 +106,12 @@
         padding: 3px 20px;
       }
 
-      // extend styling of links to "button_to" elements
+      // Reproduces Bootstrap's `.dropdown-menu > li > a` treatment
+      // (display, padding, colors, hover fill) for button_to's <form>
+      // wrapper -- that Bootstrap rule only ever matches <a> tags, so
+      // a button-shaped dropdown item needs it spelled out by hand.
+      // Same $dropdown-link-* variables Bootstrap's own <a> rule uses,
+      // so button-shaped and link-shaped items match.
       form.button_to {
         display: block;
         padding: 3px 20px;
@@ -138,14 +119,19 @@
         font-weight: 400;
         line-height: 1.428571429;
         white-space: nowrap;
+        color: $dropdown-link-color;
 
-        // ultra specificity annoying here
+        &:hover {
+          color: $dropdown-link-hover-color;
+          background-color: $dropdown-link-hover-bg;
+          text-decoration: none;
+        }
+
+        // Browser-chrome-reset button underneath just tracks the
+        // form's own color -- the form is what has the row's padding
+        // and hover background now, not the button.
         button[type=submit]:not(.btn):not(.text-danger) {
-          color: $navbar-default-color !important;
-
-          &:hover {
-            color: $navbar-default-link-hover-color !important;
-          }
+          color: inherit;
         }
       }
     }
@@ -154,13 +140,6 @@
   .navbar_right {
     >ul.navbar-right>li {
       @extend .ml-4;
-    }
-  }
-
-  // The button_to form, not the button, needs to display: block
-  #context_nav {
-    .button_to {
-      display: block;
     }
   }
 }

@@ -139,13 +139,27 @@ class Components::Dropdown < Components::Base
     render_crud_button_or_link(str, url, args, kwargs.compact_blank)
   end
 
+  # A `button_to` form's `class:` html_options land on the inner
+  # <button>, not the <form> -- so for button-type items,
+  # "dropdown-item" goes on the form itself (via `form:`) instead of
+  # the button's own class, letting the row's hover/padding treatment
+  # apply to the same element that has the row's padding.
   def build_link_kwargs(args, active:)
     kwargs = merge_context_nav_link_args(args, {})
     kwargs = mix(kwargs, class: "active") if active
     kwargs[:disabled] = true if active
-    kwargs = mix(kwargs, class: "dropdown-item")
-    if args[:button].present? && kwargs[:class].present?
-      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
+    if args[:button].present?
+      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip if
+        kwargs[:class].present?
+      # Rails' `button_to` only falls back to its default "button_to"
+      # form class when `form: { class: }` is absent (`||=`) -- passing
+      # our own class here means we must include "button_to" ourselves
+      # or the form silently loses it, along with every selector
+      # (including _form_elements.scss's browser-chrome reset) keyed
+      # on `form.button_to`.
+      kwargs[:form] = { class: "button_to dropdown-item" }
+    else
+      kwargs = mix(kwargs, class: "dropdown-item")
     end
     strip_tooltip_data(kwargs)
   end

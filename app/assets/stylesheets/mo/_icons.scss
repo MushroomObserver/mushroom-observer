@@ -182,25 +182,6 @@
   }
 }
 
-// Bootstrap's own dropdown-item hover styling
-// (`.dropdown-menu > li > a:hover`) only ever matches <a> tags.
-// Components::Dropdown applies the `.dropdown-item` class to
-// <button> elements too, which never matched that selector and so
-// got no hover treatment at all. Matches Bootstrap's own <a> hover
-// styling exactly, same variables.
-//
-// !important on both properties: _form_elements.scss's
-// `form.button_to button[type=submit]:not(.btn)` (browser-chrome
-// reset for button_to submit buttons) and its own nested
-// `:not(.text-danger):hover` color rule both out-specificity this
-// selector otherwise -- matches this same file family's existing
-// !important usage for the identical problem (`.dropdown > a`).
-button.dropdown-item:hover {
-  color: $dropdown-link-hover-color !important;
-  background-color: $dropdown-link-hover-bg !important;
-  text-decoration: none;
-}
-
 // Bootstrap collapse sets display:block, which breaks
 // table-row-group semantics on <tbody>. Override so
 // collapsed tbody rows render correctly when expanded.
