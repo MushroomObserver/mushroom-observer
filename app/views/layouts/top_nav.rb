@@ -282,7 +282,7 @@ class Views::Layouts::TopNav < Views::Base
 
     Button(
       variant: :link, size: :sm,
-      class: "mr-0 mx-0 mx-sm-2 top_nav_button top_nav_icon_button " \
+      class: "mr-0 ml-0 ml-sm-2 top_nav_button top_nav_icon_button " \
              "d-none hidden-xs",
       data: { banner_target: "showButton" }
     ) do
