@@ -48,26 +48,33 @@ class Components::Button::CRUDBase < Components::Button
   # `validate_no_btn_classes!` is a plain instance method (from the
   # included `Button::Styling` concern, independent of Button's
   # initialize), so calling it directly here works regardless.
-  def initialize(name:, target:, method: :post, **options, &block)
+  def initialize(name:, target:, method: :post, **options)
     confirm = options.delete(:confirm)
     action  = options.delete(:action)
     back    = options.delete(:back)
-    @block  = block
     validate_no_btn_classes!(options[:class])
     super(name: name, target: target, confirm: confirm, action: action,
           back: back, **options)
     @method = method
   end
 
-  def view_template
-    @block&.call
-    render_form_button
+  # `&block` lives here, not on `initialize` -- Phlex delivers a
+  # caller's `render(...) { ... }` block to `view_template` at render
+  # time, not to the constructor. A block attached to `.new(...) {
+  # ... }` instead never arrives: Literal::Properties' generated
+  # `self.new` doesn't forward blocks to `initialize` at all (verified
+  # empirically -- this silently dropped any block content passed to
+  # a CRUD button before this fix, with no error).
+  def view_template(&block)
+    render_form_button(&block)
   end
 
   private
 
-  def render_form_button
-    button_to(path, button_html_options) { button_content }
+  def render_form_button(&block)
+    button_to(path, button_html_options) do
+      block ? capture(&block) : button_content
+    end
   end
 
   # Wrap in `capture` so Rails' `button_to` receives an HTML string

@@ -198,17 +198,13 @@
   }
 }
 
-// Pins the `+` to the nav_create button's natural baseline.
-// Identified by `.new_object_button`, not `.btn-success` — a style
-// class shouldn't double as the target selector.
-#top_nav .new_object_button .mo-icon {
-  top: 2px;
-}
-
 // search-toggle / QR-scan buttons are icon-only at every breakpoint;
 // the default .mo-icon size reads too small inside their .btn.
+// No `top` offset -- at this size the icon already fills the
+// button's line box, so `vertical-align: middle` (from _icons.scss's
+// `.btn:not(.btn-link) .mo-icon`) centers it correctly on its own;
+// an extra offset here just pushes it into the bottom padding.
 #top_nav .top_nav_icon_button .mo-icon {
-  top: 3px;
   width: 1.5em;
   height: 1.5em;
 }

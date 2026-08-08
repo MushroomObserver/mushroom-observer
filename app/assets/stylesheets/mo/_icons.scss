@@ -234,12 +234,11 @@ a:not(.btn):not(.inline-icon-link) > .mo-icon {
   vertical-align: middle;
 }
 
-// vertical-align: middle avoids the SVG's default baseline gap,
-// which otherwise makes this addon taller than its sibling
-// .form-control.
+// vertical-align: middle already comes from `.btn:not(.btn-link)
+// .mo-icon` above -- this just nudges the icon up 1px so it doesn't
+// read taller than its sibling .form-control.
 .input-group-btn .btn .mo-icon {
   top: 1px;
-  vertical-align: middle;
 }
 
 .spinner-right {
