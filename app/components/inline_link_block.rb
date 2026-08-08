@@ -2,7 +2,7 @@
 
 # Renders a group of inline mod/add links -- the observation-show
 # sub-panel edit/destroy pairs, the send-question link, sibling
-# records, etc. Pure layout glue: a Bootstrap `.ml-2` on the wrapper
+# records, etc. Pure layout glue: a Bootstrap `.ml-1` on the wrapper
 # (visibly wider than `.inline-icon-link`'s own `margin-right:
 # 0.25rem`, so the gap before the first item reads clearly, not just
 # technically, ahead of the internal item-to-item gaps) PLUS a

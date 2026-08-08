@@ -138,6 +138,9 @@
 // tuned for icons in their usual (untethered) contexts; inside
 // this tight a box it just pushes the icon toward the bottom, so
 // it's undone here specifically.
+//
+// width/height: 1em -- .mo-icon's default 1.12em reads oversized
+// next to the plain body text these links usually sit beside.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -153,6 +156,8 @@
 
   .mo-icon {
     top: 0;
+    width: 1em;
+    height: 1em;
     vertical-align: middle;
   }
 }
