@@ -91,13 +91,15 @@ class FieldSlip
         Base64.strict_encode64(image_bytes(image))
       end
 
+      # Recognizing the on-disk shapes matters here: RestClient raises
+      # on anything that isn't an HTTP URI.
       def image_bytes(image)
         url = image.image_url(IMAGE_SIZE)
-        path = local_path(url)
+        path = Image::LocalFile.path_from_url(url)
         return File.binread(path) if path
 
         resolved = url.url
-        # A file:// URL that got past `local_path` means the file MO
+        # A file:// URL with no file behind it means the file MO
         # expects is not there. Say so, rather than handing RestClient
         # something it rejects with a bare "not an HTTP URI".
         raise(MissingImage.new(resolved)) unless resolved.start_with?("http")
@@ -105,34 +107,6 @@ class FieldSlip
         RestClient::Request.execute(method: :get, url: resolved,
                                     timeout: TIMEOUT,
                                     raw_response: true).file.read
-      end
-
-      # A resolved image URL is on disk in two different shapes, and
-      # both have to be recognized or RestClient is handed something
-      # that isn't an HTTP URI and raises.
-      #
-      #   "/images/1280/42.jpg?v"   the local source's `read` spec is a
-      #                             WEB path, not a filesystem one, so
-      #                             it maps onto MO.local_image_files.
-      #   "file:///…/42.jpg?v"      other sources (the test env's
-      #                             `remote1`) do use a file:// URL.
-      def local_path(url)
-        resolved = url.url.sub(/\?\d+\z/, "")
-        path = file_url_path(resolved) || web_path_on_disk(resolved)
-        path if path && File.exist?(path)
-      end
-
-      def file_url_path(resolved)
-        return nil unless resolved.start_with?("file://")
-
-        resolved.delete_prefix("file://")
-      end
-
-      def web_path_on_disk(resolved)
-        prefix = MO.image_sources.dig(:local, :read).to_s
-        return nil if prefix.blank? || !resolved.start_with?("#{prefix}/")
-
-        File.join(MO.local_image_files, resolved.delete_prefix("#{prefix}/"))
       end
 
       # The model is asked for JSON and told not to fence it, but a

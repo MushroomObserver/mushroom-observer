@@ -1,0 +1,86 @@
+# frozen_string_literal: true
+
+require("open3")
+
+class FieldSlip
+  # Reads a field slip code out of a photo's QR code, using the zbar
+  # command-line tool (`zbarimg`). DBG-style voucher slips encode the
+  # bare code ("2026-CMS-0219"); MO's own slips encode a /qr/ URL. Both
+  # forms are recognized.
+  #
+  # Inert when zbarimg is not installed (`brew install zbar` /
+  # `apt-get install zbar-tools`): callers check `available?` first, so
+  # an environment without the binary simply has no QR detection.
+  module QRDecoder
+    # Full size first: the QR occupies a small corner of the photo, and
+    # downscaling can cost it the resolution it needs to decode.
+    SIZES = [:full_size, :huge].freeze
+
+    MO_QR_URL = %r{\Ahttps?://(?:www\.)?mushroomobserver\.org/qr/(\S+)\z}i
+
+    # The general shape of a printed slip code ("2026-CMS-0219",
+    # "NEMF-10222"): one token, letters somewhere (FieldSlip's own
+    # validation requires a non-digit character), bounded length.
+    CODE_SHAPE = /\A[A-Z0-9][A-Z0-9._-]{3,30}\z/
+
+    def self.available?
+      MO.field_slip_qr_detection && zbarimg?
+    end
+
+    def self.zbarimg?
+      return @zbarimg unless @zbarimg.nil?
+
+      @zbarimg = system("which", "zbarimg", out: File::NULL,
+                                            err: File::NULL) || false
+    end
+
+    # The slip code in the image's QR code, or nil: no local file, no
+    # QR, or QR content that isn't a slip code.
+    def self.slip_code_in(image)
+      raw_codes(image).filter_map { |text| slip_code_from(text) }.first
+    end
+
+    # A bare code is only believed when its prefix names a project --
+    # photos contain all kinds of QR codes (product labels, wifi
+    # passes), and the project prefix is what separates a slip from
+    # noise. An MO /qr/ URL is explicit enough on its own.
+    def self.slip_code_from(text)
+      text = text.to_s.strip
+      url_code = text[MO_QR_URL, 1]
+      return url_code.upcase if url_code
+
+      code = text.upcase
+      return nil unless code.match?(CODE_SHAPE) && code.match?(/[^\d.-]/)
+
+      prefix = FieldSlip.prefix_for_code(code)
+      code if prefix && Project.exists?(field_slip_prefix: prefix)
+    end
+
+    # Every QR payload zbar finds, largest available file first,
+    # stopping at the first size that decodes anything.
+    def self.raw_codes(image)
+      return [] unless available?
+
+      SIZES.each do |size|
+        path = Image::LocalFile.path(image, size)
+        next unless path
+
+        codes = scan(path)
+        return codes if codes.any?
+      end
+      []
+    end
+
+    # -Sdisable -Sqrcode.enable: QR only, so a stray barcode elsewhere
+    # in the photo can't answer.
+    def self.scan(path)
+      out, _err, status = Open3.capture3(
+        "zbarimg", "--quiet", "--raw", "-Sdisable", "-Sqrcode.enable", path
+      )
+      # zbarimg exits 4 when it finds nothing -- not an error here.
+      return [] unless status.success?
+
+      out.split("\n").map(&:strip).compact_blank
+    end
+  end
+end

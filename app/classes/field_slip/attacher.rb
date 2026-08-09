@@ -1,0 +1,86 @@
+# frozen_string_literal: true
+
+class FieldSlip
+  # Attaches a slip-less observation to the field slip a code names --
+  # the silent counterpart of the observation form's field_code path
+  # (ObservationsController::FieldSlips#assign_field_slip), for
+  # photo-first observations where the code arrives as pixels in an
+  # uploaded photo rather than as a scan or a typed field.
+  #
+  # Deliberately narrower than the interactive path, because nobody is
+  # watching: it acts only when the observation has no occurrence and
+  # the code's slip is unused, so it can never move an observation,
+  # join one to somebody else's collection, or override a choice a
+  # person made on a form.
+  class Attacher
+    def self.attach(observation:, code:, user:)
+      new(observation: observation, code: code, user: user).attach
+    end
+
+    def initialize(observation:, code:, user:)
+      @observation = observation
+      @code = code.to_s.strip.upcase
+      @user = user
+    end
+
+    # Returns what happened, for the caller's log line.
+    def attach
+      return :already_linked if @observation.occurrence_id
+
+      existing = FieldSlip.find_by(code: @code)
+      return :in_use if existing&.occurrence
+      return :closed_project if barred?(existing)
+
+      slip = existing || FieldSlip.find_or_create_by_code(@code, @user)
+      return :invalid unless slip
+
+      link(slip)
+      :attached
+    end
+
+    private
+
+    # An existing slip already in a project the user can neither join
+    # nor is a member of: attaching would put the observation in that
+    # project against invariant 4 (see #4932). A NEW code never lands
+    # here -- `FieldSlip#update_project` declines to set a project the
+    # user can't add to, so the slip just comes out project-less.
+    def barred?(slip)
+      project = slip&.project
+      project && !project.member?(@user) && !project.can_join?(@user)
+    end
+
+    def link(slip)
+      @observation.field_slip = slip
+      @observation.save!
+      slip.adopt_user_from(@observation)
+      refresh_occurrence
+      apply_project(slip.project)
+    end
+
+    # The bookkeeping every attach path owes the occurrence. No
+    # activity-log entry: the occurrence is freshly created for this
+    # one observation, whose own creation entry already says it all.
+    def refresh_occurrence
+      occ = @observation.occurrence
+      occ.reload
+      occ.recompute_has_specimen!
+      occ.recalculate_consensus!(@user)
+    end
+
+    # Using a slip for an open-membership project enrolls the user, the
+    # way scanning one always has -- that is what a printed prefix
+    # means. The observation then joins the project too, unless it
+    # violates the project's constraints, in which case the slip is
+    # being used as a spare and the observation stays out.
+    def apply_project(project)
+      return unless project
+
+      project.join(@user)
+      return unless project.member?(@user)
+      return if project.violates_constraints?(@observation)
+
+      project.add_observation(@observation)
+    end
+  end
+end
