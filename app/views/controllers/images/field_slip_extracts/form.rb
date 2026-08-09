@@ -62,12 +62,26 @@ module Views::Controllers::Images::FieldSlipExtracts
     # correcting it is the whole point of the step.
     def render_extracted_cell(row)
       if row.editable
-        text_field("value[#{row.field}]", value: row.extracted, label: false)
+        render_extracted_input(row)
       else
         plain(row.extracted.to_s)
       end
       render_inat_flag(row)
       render_confidence(row)
+    end
+
+    # A slip's Notes box is often several lines, and a single-line
+    # input silently drops the newlines from its value -- the browser
+    # strips them, gluing "Phenolic odor\nYellow staining" into
+    # "Phenolic odorYellow staining" on save. A textarea keeps them.
+    def render_extracted_input(row)
+      value = row.extracted.to_s
+      unless value.include?("\n")
+        return text_field("value[#{row.field}]", value: value, label: false)
+      end
+
+      textarea_field("value[#{row.field}]", value: value, label: false,
+                                            rows: value.count("\n") + 1)
     end
 
     # A value holding an iNaturalist observation id ticks itself and
