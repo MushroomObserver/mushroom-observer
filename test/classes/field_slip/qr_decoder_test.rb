@@ -76,6 +76,28 @@ class FieldSlip::QRDecoderTest < UnitTestCase
     end
   end
 
+  # Production resolves a transferred image's URL to the image server,
+  # so the URL-based lookup goes nil within a second of upload -- but
+  # the file is still on this machine's disk, and the direct path
+  # finds it.
+  def test_falls_back_to_the_direct_disk_path_when_the_url_goes_remote
+    image = images(:in_situ_image)
+    path = image.full_filepath(:full_size)
+    FileUtils.mkdir_p(File.dirname(path))
+    File.binwrite(path, "jpegbytes")
+
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      Image::LocalFile.stub(:path, nil) do
+        FieldSlip::QRDecoder.stub(:scan, ["OPEN-0219"]) do
+          assert_equal("OPEN-0219",
+                       FieldSlip::QRDecoder.slip_code_in(image))
+        end
+      end
+    end
+  ensure
+    FileUtils.rm_f(path)
+  end
+
   # ---------- zbarimg plumbing ----------
 
   def test_scan_parses_zbar_output
