@@ -240,7 +240,7 @@ module ObservationsController::Create
   end
 
   def redirect_to_next_page
-    return if redirected_to_field_slip_review?
+    attach_photographed_field_slip
 
     if @observation.location_id.nil?
       redirect_to(new_location_path(where: @observation.place_name(@user),
@@ -250,62 +250,36 @@ module ObservationsController::Create
     end
   end
 
-  # After Create, a slip reviewer lands straight on the review of the
-  # photographed slip: the extraction is usually already running by
-  # then (the QR jobs chain it on attach -- see DetectFieldSlipQRJob),
-  # and the review page shows its progress until the read is done.
-  # Decode-only here -- attaching the slip is the QR jobs' business --
-  # so this adds no writes to the request.
-  def redirected_to_field_slip_review?
-    image = field_slip_review_image
-    return false unless image
-
-    redirect_to(edit_image_field_slip_extract_path(image.id, await: 1))
-    true
-  end
-
-  # The first new photo whose QR names a slip this user reviews.
-  # Gated to admins of the code's own prefix project, so ordinary
-  # uploads never pay for the scan or get detoured. When the
-  # observation already HAS the matching slip -- created by scanning
-  # or typing the code, which makes the QR jobs skip it -- the read is
-  # started from here instead.
-  def field_slip_review_image
-    return nil unless FieldSlip::QRDecoder.available?
-    return nil unless reviews_field_slips?
+  # A new photo whose QR names a slip this user reviews attaches it
+  # right here -- code -> slip -> project, same as typing the code into
+  # the form -- so the observation comes back already filed. Reading
+  # the slip is deliberately NOT started: that stays the reviewer's
+  # explicit act, the Read Field Slip button on the image.
+  def attach_photographed_field_slip
+    return unless FieldSlip::QRDecoder.available?
+    return unless @observation.occurrence_id.nil?
+    return unless reviews_field_slips?
 
     @observation.images.each do |image|
       code = FieldSlip::QRDecoder.slip_code_in(image)
       next unless code && reviewable_slip_code?(code)
 
-      start_extraction_for_linked_slip(image, code)
-      return image
+      return attach_slip_by_code(code)
     end
-    nil
   end
 
-  # A slip already linked to the observation only counts when the
-  # photographed code IS that slip's -- reviewing some other slip's
-  # photo into this observation is never an automatic act.
+  def attach_slip_by_code(code)
+    result = FieldSlip::Attacher.attach(observation: @observation,
+                                        code: code, user: @user)
+    flash_notice(:field_slip_created.t(code: code)) if result == :attached
+  end
+
   def reviewable_slip_code?(code)
-    slip = @observation.field_slip
-    return false if slip && slip.code != code
     return true if in_admin_mode?
 
     prefix = FieldSlip.prefix_for_code(code)
     project = prefix && Project.find_by(field_slip_prefix: prefix)
     project.present? && project.is_admin?(@user)
-  end
-
-  # The QR jobs only read slips they themselves attach; a slip that
-  # was already linked during this create gets its read started here.
-  # Never when an extract exists -- re-photographing a slip must not
-  # silently re-read one somebody may have reviewed.
-  def start_extraction_for_linked_slip(image, code)
-    return unless @observation.field_slip&.code == code
-    return if FieldSlipExtract.exists?(image_id: image.id)
-
-    ExtractFieldSlipJob.request(image: image, user: @user)
   end
 
   # Cheap gate so ordinary uploads never run the QR scan at all: only

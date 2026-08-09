@@ -25,11 +25,8 @@ module Images
       redirect_to(edit_image_field_slip_extract_path(@image.id))
     end
 
-    # Three states: a completed extract renders the review form; a
-    # pending or failed one renders the self-refreshing Status page;
-    # no extract at all is only worth waiting on when the caller said
-    # so (`await=1`, set by the observation-create redirect while the
-    # QR jobs are still attaching the slip and starting the read).
+    # A completed extract renders the review form; a pending or failed
+    # one renders the self-refreshing Status page.
     def edit
       @extract = FieldSlipExtract.find_by(image_id: @image.id)
       return render_status unless @extract&.complete?
@@ -68,23 +65,9 @@ module Images
       return unless @image
       return if FieldSlipExtract.permitted?(image: @image, user: @user,
                                             site_admin: in_admin_mode?)
-      return if awaiting_own_upload?
 
       flash_error(:permission_denied.t)
       redirect_to(image_path(@image.id))
-    end
-
-    # The observation-create redirect can land here BEFORE the QR jobs
-    # have filed the observation into its project -- at which point
-    # `permitted?` has no project to check against. Waiting on your own
-    # freshly uploaded photo shows nothing but a status panel, so it
-    # only needs ownership; the review form itself stays behind
-    # `permitted?`, which holds by the time the extract completes.
-    def awaiting_own_upload?
-      return false unless request.get?
-      return false if FieldSlipExtract.find_by(image_id: @image.id)&.complete?
-
-      @image.observations.any? { |obs| obs.user_id == @user.id }
     end
 
     def find_image!
@@ -97,12 +80,10 @@ module Images
       nil
     end
 
-    # A pending or failed extract always shows its status; a missing
-    # one only does while the create redirect said to wait for the QR
-    # jobs -- otherwise a bare visit keeps today's "nothing to review"
-    # behavior.
+    # A pending or failed extract shows its status; a missing one has
+    # nothing to review.
     def render_status
-      if @extract.nil? && params[:await].blank?
+      if @extract.nil?
         flash_error(:field_slip_extract_missing.t)
         return redirect_to(image_path(@image.id))
       end

@@ -18,7 +18,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       @obs.images << @image unless @obs.images.include?(@image)
     end
 
-    def render_status(extract: nil)
+    def render_status(extract:)
       render(Status.new(image: @image, extract: extract, user: @user))
     end
 
@@ -38,14 +38,6 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(
         html, "a[href='#{routes.permanent_observation_path(linked.id)}']"
       )
-    end
-
-    # No extract yet -- the QR jobs are still attaching -- looks the
-    # same as pending: something is happening, keep refreshing.
-    def test_awaiting_detection_self_refreshes_too
-      html = render_status
-
-      assert_html(html, "[data-controller='reload-poll']")
     end
 
     def test_failed_read_shows_the_error_and_a_retry_button

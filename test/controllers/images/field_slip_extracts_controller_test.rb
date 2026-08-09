@@ -146,40 +146,7 @@ module Images
       assert_select("[data-controller='reload-poll']", count: 0)
     end
 
-    # The observation-create redirect arrives before the QR jobs have
-    # attached anything; `await=1` is what makes an extract-less page
-    # wait instead of bouncing.
-    def test_edit_awaits_detection_when_asked
-      login_as_site_admin
-
-      get(:edit, params: { image_id: @image.id, await: 1 })
-
-      assert_response(:success)
-      assert_select("[data-controller='reload-poll']")
-    end
-
-    # ...and can land before the observation is even in its project,
-    # when `permitted?` has nothing to check against. Waiting on your
-    # own upload needs only ownership; the review form still needs
-    # project admin-ship.
-    def test_owner_may_wait_on_their_own_upload_before_project_filing
-      owner = @obs.user
-      login(owner.login)
-
-      assert_not(
-        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
-        "premise: ownership alone, no project admin-ship"
-      )
-
-      FieldSlipExtract.start!(image: @image, user: owner)
-
-      get(:edit, params: { image_id: @image.id })
-
-      assert_response(:success)
-      assert_select("[data-controller='reload-poll']")
-    end
-
-    def test_owner_alone_may_not_review_a_completed_extract
+    def test_owner_alone_may_not_review
       owner = @obs.user
       login(owner.login)
 

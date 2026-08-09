@@ -2,19 +2,19 @@
 
 # Where the review page waits for a background extraction (see
 # ExtractFieldSlipJob): a self-refreshing "reading..." panel while the
-# job runs (or is about to -- the QR jobs may still be attaching the
-# slip), and the error with a retry button when the provider failed.
-# Once the extract completes, the reload lands on the review form.
+# job runs, and the error with a retry button when the provider
+# failed. Once the extract completes, the reload lands on the review
+# form.
 module Views::Controllers::Images::FieldSlipExtracts
   class Status < Views::FullPageBase
     prop :image, ::Image
-    prop :extract, _Nilable(::FieldSlipExtract), default: nil
+    prop :extract, ::FieldSlipExtract
     prop :user, ::User
 
     def view_template
       add_page_title(:field_slip_extract_status_title.t)
 
-      if @extract&.failed?
+      if @extract.failed?
         render_failed
       else
         render_pending

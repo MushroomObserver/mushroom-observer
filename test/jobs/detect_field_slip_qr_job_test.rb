@@ -26,28 +26,14 @@ class DetectFieldSlipQRJobTest < ActiveJob::TestCase
                     @obs)
   end
 
-  # The image just proved itself to be a slip photo, so the read
-  # starts right away -- by the time a reviewer arrives, the extract
-  # is usually waiting.
-  def test_a_fresh_attach_chains_the_extraction
-    assert_enqueued_with(job: ExtractFieldSlipJob,
-                         args: [@image.id, @obs.user.id]) do
-      perform_with_code("OPEN-0219")
-    end
-
-    assert(FieldSlipExtract.find_by(image_id: @image.id).pending?)
-  end
-
-  # Adding photos to an already-linked observation never re-reads a
-  # slip somebody may have reviewed.
-  def test_no_extraction_chained_when_nothing_was_attached
-    slip = FieldSlip.find_or_create_by_code("OPEN-0800", @obs.user)
-    @obs.field_slip = slip
-    @obs.save!
-
+  # Reading the slip is the reviewer's explicit act (the Read Field
+  # Slip button), never a side effect of attaching it.
+  def test_attaching_starts_no_extraction
     assert_no_enqueued_jobs(only: ExtractFieldSlipJob) do
       perform_with_code("OPEN-0219")
     end
+
+    assert_nil(FieldSlipExtract.find_by(image_id: @image.id))
   end
 
   def test_leaves_the_observation_alone_when_the_photo_has_no_code

@@ -1903,12 +1903,14 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   # --------------------------------------------------------------------
-  #  Landing on the slip review straight from Create (#5024)
+  #  Attaching a photographed field slip at Create (#5024)
   # --------------------------------------------------------------------
 
-  # A reviewer whose new photo is a slip lands on the review page,
-  # which waits out the QR jobs and the background read.
-  def test_create_redirects_a_slip_reviewer_to_the_review_page
+  # A reviewer whose new photo is a slip gets it attached right in the
+  # create request -- slip, project, and enrollment -- and lands on the
+  # normal next page. Reading the slip stays the reviewer's explicit
+  # act (the Read Field Slip button), so no extract is started.
+  def test_create_attaches_a_photographed_slip_inline
     image = images(:in_situ_image)
     make_slip_project_admin(rolf)
     login("rolf")
@@ -1917,14 +1919,20 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       post(:create, params: slip_photo_params(image))
     end
 
-    assert_redirected_to(
-      edit_image_field_slip_extract_path(image.id, await: 1)
-    )
+    assert_response(:redirect)
+    assert_no_match(/field_slip_extract/, @response.location.to_s)
+    obs = FieldSlip.find_by(code: "OPEN-0219").observation
+
+    assert_not_nil(obs, "the slip attaches during the create request")
+    assert_includes(projects(:open_membership_project).observations.reload,
+                    obs)
+    assert_nil(FieldSlipExtract.find_by(image_id: image.id),
+               "no automatic read")
   end
 
-  # A slip attached during this create (typed or scanned code -- the
-  # QR jobs skip linked observations) gets its read started here.
-  def test_create_with_matching_field_code_starts_the_read
+  # A slip attached during this create by a typed or scanned code needs
+  # nothing from the photo scan -- and still gets no automatic read.
+  def test_create_with_field_code_starts_no_read
     image = images(:in_situ_image)
     make_slip_project_admin(rolf)
     login("rolf")
@@ -1934,33 +1942,14 @@ class ObservationsControllerCreateTest < FunctionalTestCase
            params: slip_photo_params(image).merge(field_code: "OPEN-0777"))
     end
 
-    assert_redirected_to(
-      edit_image_field_slip_extract_path(image.id, await: 1)
-    )
-    assert(FieldSlipExtract.find_by(image_id: image.id).pending?,
-           "the read starts here; the QR jobs skip linked observations")
-  end
-
-  # A photographed code for some OTHER slip than the attached one is
-  # never auto-reviewed into this observation.
-  def test_create_ignores_a_code_that_mismatches_the_attached_slip
-    image = images(:in_situ_image)
-    make_slip_project_admin(rolf)
-    login("rolf")
-
-    with_decoded_slip_code("OPEN-0219") do
-      post(:create,
-           params: slip_photo_params(image).merge(field_code: "OPEN-0777"))
-    end
-
     assert_response(:redirect)
     assert_no_match(/field_slip_extract/, @response.location.to_s)
     assert_nil(FieldSlipExtract.find_by(image_id: image.id))
   end
 
-  # Ordinary uploads never pay for the scan or get detoured: the gate
-  # is admin-ship of a project with a field-slip prefix.
-  def test_create_does_not_detour_ordinary_uploads
+  # Ordinary uploads never pay for the scan: the gate is admin-ship of
+  # a project with a field-slip prefix.
+  def test_create_does_not_scan_ordinary_uploads
     login("katrina")
 
     assert_not(
@@ -1975,7 +1964,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     end
 
     assert_response(:redirect)
-    assert_no_match(/field_slip_extract/, @response.location.to_s)
+    assert_nil(FieldSlip.find_by(code: "OPEN-0219"))
   end
 
   private
