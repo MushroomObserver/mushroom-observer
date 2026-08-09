@@ -229,6 +229,37 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     assert_nil(@obs.lng)
   end
 
+  # A half-pair against existing coordinates would silently mix a slip
+  # coordinate with one from another source (photo EXIF, the form), so
+  # both keep their old values.
+  def test_dbg_one_chosen_coordinate_never_mixes_with_existing_ones
+    @obs.update!(lat: 40.0, lng: -100.0)
+    apply_fields({ "Latitude" => "38.8703",
+                   "Collector" => "A. W. Wilson" }, template: :dbg)
+
+    assert_in_delta(40.0, @obs.lat)
+    assert_in_delta(-100.0, @obs.lng)
+    assert_equal("A. W. Wilson", @obs.collector, "other fields still save")
+  end
+
+  def test_dbg_a_failed_parse_reverts_the_whole_pair
+    @obs.update!(lat: 40.0, lng: -100.0)
+    apply_fields({ "Latitude" => "38.8703",
+                   "Longitude" => "unreadable" }, template: :dbg)
+
+    assert_in_delta(40.0, @obs.lat)
+    assert_in_delta(-100.0, @obs.lng)
+  end
+
+  def test_dbg_a_full_pair_replaces_existing_coordinates
+    @obs.update!(lat: 40.0, lng: -100.0)
+    apply_fields({ "Latitude" => "38.8703",
+                   "Longitude" => "-105.0442" }, template: :dbg)
+
+    assert_in_delta(38.8703, @obs.lat)
+    assert_in_delta(-105.0442, @obs.lng)
+  end
+
   # The iNaturalist box often holds a timestamp beside the id ("10:29
   # 388879492"); the id becomes the link and the rest is kept beside
   # it as a checksum against the iNat record.

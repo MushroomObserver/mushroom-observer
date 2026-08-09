@@ -12,6 +12,7 @@ class FieldSlip
     # name-creation and voting rules, so it is left to the caller.
     class Applier
       ID_BY_KEY = :Field_Slip_ID_By
+      COORD_TARGETS = [:lat, :lng].freeze
 
       # `chosen` is {slip field => edited value} for the ticked fields.
       # `template` maps each field to its Observation target.
@@ -30,7 +31,7 @@ class FieldSlip
       def apply
         assign_columns
         assign_notes
-        drop_unpaired_coordinate
+        enforce_coordinate_pair
         @observation.save!
         @observation
       end
@@ -125,21 +126,36 @@ class FieldSlip
       # reasoning as `assign_when`).
       def assign_lat(value)
         parsed = Location.parse_latitude(value)
-        @observation.lat = parsed if parsed
+        return unless parsed
+
+        @observation.lat = parsed
+        applied_coords << :lat
       end
 
       def assign_lng(value)
         parsed = Location.parse_longitude(value)
-        @observation.lng = parsed if parsed
+        return unless parsed
+
+        @observation.lng = parsed
+        applied_coords << :lng
       end
 
-      # Observation validates lat/lng as a pair, so a slip with only
-      # one coordinate recovered would fail the whole save. Better to
-      # save everything else than nothing: the half-pair reverts.
-      def drop_unpaired_coordinate
-        return if @observation.lat.present? == @observation.lng.present?
+      def applied_coords
+        @applied_coords ||= []
+      end
 
-        @observation.restore_attributes([:lat, :lng])
+      # Coordinates land as a pair or not at all: half a pair would
+      # fail Observation's own validation when the observation had
+      # none, and would silently mix a slip coordinate with one from
+      # another source when it did. Unless both were chosen and both
+      # parsed, whatever was assigned reverts -- the other fields
+      # still save.
+      def enforce_coordinate_pair
+        chosen = targets.count { |target, _| COORD_TARGETS.include?(target) }
+        return if chosen.zero?
+        return if chosen == 2 && applied_coords.size == 2
+
+        @observation.restore_attributes(COORD_TARGETS)
       end
 
       # A location the project aliases (or MO itself) know becomes a real
