@@ -3,9 +3,110 @@
 require "test_helper"
 
 class AutocompleterFieldTest < ComponentTestCase
+  include ApplicationFormFieldTestHelpers
+
   def setup
     super
     @herbarium_record = HerbariumRecord.new
+  end
+
+  def test_autocompleter_field_renders_structure
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Species Name")
+    end
+
+    assert_html(form, "div.form-group")
+    assert_includes(form, "Species Name")
+    assert_html(form, "[data-controller*='autocompleter']")
+  end
+
+  def test_autocompleter_field_with_textarea
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, textarea: true,
+                                    label: "Name")
+    end
+
+    assert_html(form, "textarea")
+  end
+
+  # Regression: AutocompleterField must not register an empty
+  # label_end slot when create_text: is absent -- otherwise
+  # FieldLabelRow forces the d-flex layout for nothing. The
+  # has-id-indicator (label_after content) still renders inline with
+  # the label -- a wrapping span, not a bare svg (padding on a
+  # replaced element like svg eats into its own rendered content
+  # instead of adding space around it).
+  def test_autocompleter_field_no_d_flex_when_no_create_text
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_no_match(/d-flex justify-content-between/, form,
+                    "label row must not use d-flex when label_end is empty")
+    assert_html(form, "span.has-id-indicator svg")
+  end
+
+  # Regression: an outer .autocompleter must not carry an auto-derived
+  # id when the caller didn't pass controller_id: -- but does carry it
+  # when the caller does.
+  def test_autocompleter_field_omits_outer_id_by_default
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, wrapper_options: { label: "Name" }
+             ))
+    end
+
+    wrap = Nokogiri::HTML5.fragment(form).at_css("div.autocompleter")
+    assert_nil(wrap["id"],
+               "outer .autocompleter must not carry an auto-derived id " \
+               "when caller didn't pass controller_id:")
+  end
+
+  def test_autocompleter_field_emits_outer_id_when_requested
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, controller_id: "my_autocompleter_id",
+               wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_html(form, "div.autocompleter#my_autocompleter_id")
+  end
+
+  # Regression: create_text: populates the label_end slot, so the
+  # d-flex wrap is justified: label area left, create button right.
+  def test_autocompleter_field_uses_d_flex_when_create_text_set
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, create_text: "Create new",
+               wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_html(form, "div.d-flex.justify-content-between")
+  end
+
+  # Regression: the hidden-id input for a String field name must
+  # derive its name from the namespace correctly -- `<namespace>
+  # [<key>_id]`, not `<namespace>[<key>]` or anything else. (Earlier
+  # implementations used `field.dom.name.sub(/\[#{field.key}\]$/, …)`
+  # which silently fell through when `field.key` was a String
+  # containing brackets, leaving the hidden input with the same name
+  # as the visible input.)
+  def test_autocompleter_field_accepts_string_name_textarea
+    form = render_comment_form do
+      autocompleter_field("list[members]", type: :name, textarea: true,
+                                           value: "alpha", label: "Names:")
+    end
+
+    assert_html(form, "textarea[name='list[members]']", text: "alpha")
+    assert_html(form,
+                "div.autocompleter[data-controller='autocompleter--name']")
+    assert_html(form,
+                "input[type='hidden'][name='list[members_id]']" \
+                "[id='list_members_id']")
   end
 
   def test_component_has_correct_html_structure
