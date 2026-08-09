@@ -301,7 +301,7 @@ class NamesController < ApplicationController
     # Third query (maybe combine with second)
     @obss = Name::Observations.new(@name)
     # This initiates a query for the images of only the most confident obs
-    @best_images = @obss.best_images
+    @best_images = @obss.best_images.to_a
 
     # Save a lookup in comments_for_object
     @comments = @name.comments&.sort_by(&:created_at)&.reverse

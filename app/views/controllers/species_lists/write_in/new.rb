@@ -14,8 +14,7 @@ module Views::Controllers::SpeciesLists::WriteIn
     # touches them, so they're nil there.
     prop :new_names, _Nilable(_Array(String))
     prop :deprecated_names, _Nilable(_Array(::Name))
-    prop :multiple_names,
-         _Nilable(_Array(_Tuple(::Name, ::ActiveRecord::Relation)))
+    prop :multiple_names, _Nilable(_Array(_Tuple(::Name, _Array(::Name))))
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash)))
     prop :list_members, _Nilable(String)
     prop :place_name, _Nilable(String)

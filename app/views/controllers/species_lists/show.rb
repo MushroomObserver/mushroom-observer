@@ -13,7 +13,10 @@ module Views::Controllers::SpeciesLists
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Observation)
     prop :comments, _Array(::Comment)
-    prop :object_names, ::ActiveRecord::Relation
+    # Despite selecting Name[:text_name]/Name[:id], the base relation
+    # is `@species_list.observations` -- these are Observation
+    # records (with those Name columns attached), not Name instances.
+    prop :object_names, _Array(::Observation)
     prop :project, _Nilable(::Project), default: nil
 
     def view_template
