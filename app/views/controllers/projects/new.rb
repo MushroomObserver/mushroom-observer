@@ -3,12 +3,9 @@
 module Views::Controllers::Projects
   # Phlex view for the new project form page.
   class New < Views::FullPageBase
-    def initialize(project:, dates_any:, upload_params:)
-      super()
-      @project = project
-      @dates_any = dates_any
-      @upload_params = upload_params
-    end
+    prop :project, ::Project
+    prop :dates_any, _Boolean
+    prop :upload_params, Hash
 
     def view_template
       add_new_title(:create_object, :project)

@@ -14,7 +14,7 @@ module Projects
     def index
       @project = Project.find(params[:project_id])
       @project_aliases = ProjectAlias.index_includes.
-                         where(project: @project).order(name: :asc)
+                         where(project: @project).order(name: :asc).to_a
       respond_to do |format|
         format.html do
           render(Views::Controllers::Projects::Aliases::Index.new(
@@ -59,6 +59,7 @@ module Projects
 
     def create
       @project_alias = ProjectAlias.new(project_alias_params)
+      @project = @project_alias.project
       err = resolve_verify_target_error(
         @project_alias.verify_target(params[:project_alias][:term])
       )
@@ -96,6 +97,7 @@ module Projects
     end
 
     def update
+      @project = @project_alias.project
       respond_to do |format|
         if @project_alias.update(project_alias_params)
           format.turbo_stream do
@@ -153,7 +155,8 @@ module Projects
     # `projects/aliases/_target_update.erb` partial. Emits four
     # turbo_stream actions.
     def render_project_alias_target_change(project)
-      project_aliases = project.aliases.includes(:target).order(name: :asc)
+      project_aliases = project.aliases.includes(:target).order(name: :asc).
+                        to_a
       render(turbo_stream: [
                replace_target_alias_widget,
                replace_aliases_table(project_aliases),
