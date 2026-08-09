@@ -4,13 +4,10 @@
 # chrome plus the inline `Form`.
 module Views::Controllers::SpeciesLists::Projects
   class Edit < Views::FullPageBase
-    def initialize(list:, projects:, object_states:, project_states:)
-      super()
-      @list = list
-      @projects = projects
-      @object_states = object_states
-      @project_states = project_states
-    end
+    prop :list, ::SpeciesList
+    prop :projects, _Array(::Project)
+    prop :object_states, _Hash(Symbol, _Boolean)
+    prop :project_states, _Hash(Integer, _Boolean)
 
     def view_template
       add_page_title(:species_list_projects_title.t(list: @list.title))

@@ -8,22 +8,12 @@
 # pre-populates from another species_list.
 module Views::Controllers::SpeciesLists
   class New < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
-    # See `Edit#initialize` — action views forward whatever the form
-    # needs; `ParameterLists` isn't on the CLAUDE.md "always refactor"
-    # list and the alternatives (hash collapse, pre-built form) hurt
-    # readability.
-    def initialize(species_list:, projects:, dubious_where_reasons:,
-                   submitted_project_ids:, user:, clone_id: nil)
-      super()
-      @species_list = species_list
-      @projects = projects
-      @dubious_where_reasons = dubious_where_reasons
-      @submitted_project_ids = submitted_project_ids
-      @user = user
-      @clone_id = clone_id
-    end
-    # rubocop:enable Metrics/ParameterLists
+    prop :species_list, ::SpeciesList
+    prop :projects, _Array(::Project)
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash)))
+    prop :submitted_project_ids, _Nilable(_Array(String))
+    prop :user, ::User
+    prop :clone_id, _Nilable(String), default: nil
 
     def view_template
       add_new_title(:create_object, :species_list)

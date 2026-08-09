@@ -4,10 +4,7 @@
 # inline `Form` that posts the file under `species_list[file]`.
 module Views::Controllers::SpeciesLists::Uploads
   class New < Views::FullPageBase
-    def initialize(species_list:)
-      super()
-      @species_list = species_list
-    end
+    prop :species_list, ::SpeciesList
 
     def view_template
       add_page_title(:species_list_upload_title.t)
