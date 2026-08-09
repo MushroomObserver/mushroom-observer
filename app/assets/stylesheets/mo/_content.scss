@@ -30,14 +30,16 @@
 // interest eyes
 // --------------------------------------------------
 
-.interest_big {
-  height: 50px;
-  width: 50px;
-}
-
-.interest_small {
-  height: 23px;
-  width: 23px;
+// Same size for the state indicator and the two clickable icons --
+// matches #top_nav .top_nav_icon_button .mo-icon's 1.5em scale. These
+// use the shared .mo-icon class (see _icons.scss) rather than their
+// own sizing; .btn:not(.btn-link) .mo-icon doesn't apply here since
+// these buttons are .btn-link, so this needs its own explicit rule.
+// Visual weight is the wrapping Button's job now (variant/.disabled),
+// not a bigger raster image.
+.interest-eyes .mo-icon {
+  width: 1.5em;
+  height: 1.5em;
 }
 
 //

@@ -855,31 +855,27 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("rolf")
     minimal_unknown = observations(:minimal_unknown_obs)
 
-    # No interest in this observation yet.
-    #
-    # <img[^>]+watch.*\.png[^>]+>[\w\s]*
+    # No interest in this observation yet -- both are creates (POST).
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /watch.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
-    )
-    assert_image_link_in_html(
-      /ignore.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
-    )
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /halfopen.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete,
+                           path: interest_path(minimal_unknown.id)
     )
-    assert_image_link_in_html(
-      /ignore.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch,
+                         path: interest_path(minimal_unknown.id), state: -1
     )
 
     # Destroy that interest, create new one with interest off.
@@ -887,13 +883,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     Interest.create(target: minimal_unknown, user: rolf, state: false)
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /halfopen.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete,
+                           path: interest_path(minimal_unknown.id)
     )
-    assert_image_link_in_html(
-      /watch.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch,
+                        path: interest_path(minimal_unknown.id), state: 1
     )
   end
 

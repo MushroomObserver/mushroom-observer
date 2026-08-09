@@ -66,12 +66,14 @@ module Views::Layouts
 
     # Inert state indicator, not a control -- `tag: :span` + `.disabled`
     # (not `Button(type: :post/...)`, which are real form-submitting
-    # controls) gives it the same `.btn.btn-link` box as the two real
-    # buttons beside it, so it doesn't render as a bare, oversized,
-    # unpadded image alongside them.
+    # controls) gives it a `.btn` box like the two real buttons beside
+    # it, so it doesn't render as a bare, oversized, unpadded image
+    # alongside them. `variant: :outline` (bordered), not `:link`
+    # (borderless, same as the two real buttons) -- the border is what
+    # visually marks this one as "your current state", not clickable.
     def icon_li(size, kind, alt_key)
       li do
-        Button(tag: :span, variant: :link, class: "disabled") do
+        Button(tag: :span, variant: :outline, class: "disabled") do
           interest_icon(size, kind, alt_key)
         end
       end
@@ -132,11 +134,21 @@ module Views::Layouts
     # visibly, one above the button and one below). The filename is
     # `<kind>2.png` for big, `<kind>3.png` for small — matches the
     # asset naming pre-conversion.
+    #
+    # `mo-icon` (see _icons.scss) puts these on the same shared sizing
+    # system as every other icon in the app -- `.interest-eyes
+    # .mo-icon` (_content.scss) sets the actual 1.5em square, matching
+    # #top_nav .top_nav_icon_button .mo-icon's scale, same for the big
+    # indicator and the two small buttons alike. `interest_#{kind}`
+    # (watch/ignore/halfopen) is a stable hook for tests -- asserting
+    # against it instead of the image filename means controller-level
+    # tests don't need to change if this ever moves off .png (e.g. to
+    # the SVG sprite).
     def interest_icon(size, kind, alt_key)
       alt = alt_key.l(object: type.l)
       suffix = size == :big ? "2" : "3"
       attrs = { src: asset_path("#{kind}#{suffix}.png"),
-                alt: alt, class: "interest_#{size}" }
+                alt: alt, class: "mo-icon interest_#{kind}" }
       if size == :big
         attrs[:title] = alt
         attrs[:data] = { tooltip_target: "tip", placement: :bottom,

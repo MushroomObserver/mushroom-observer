@@ -21,10 +21,10 @@ module Views::Layouts
 
       assert_html(html, "ul.interest-eyes")
       # Default: small watch (→ start watching) + small ignore (→ ignore).
-      assert_html(html, "img.interest_small[src*='watch3']")
-      assert_html(html, "img.interest_small[src*='ignore3']")
-      # No big icon in default state.
-      assert_no_html(html, "img.interest_big")
+      assert_html(html, "img.mo-icon[src*='watch3']")
+      assert_html(html, "img.mo-icon[src*='ignore3']")
+      # No big state-indicator icon (disabled span) in default state.
+      assert_no_html(html, "span.disabled img")
     end
 
     def test_default_state_links_are_create_posts_with_id_and_state
@@ -53,9 +53,9 @@ module Views::Layouts
 
       html = render_view
 
-      assert_html(html, "img.interest_big[src*='watch2']")
-      assert_html(html, "img.interest_small[src*='halfopen3']")
-      assert_html(html, "img.interest_small[src*='ignore3']")
+      assert_html(html, "span.disabled img.mo-icon[src*='watch2']")
+      assert_html(html, "img.mo-icon[src*='halfopen3']")
+      assert_html(html, "img.mo-icon[src*='ignore3']")
     end
 
     def test_watching_state_small_icon_states
@@ -92,9 +92,9 @@ module Views::Layouts
 
       html = render_view
 
-      assert_html(html, "img.interest_big[src*='ignore2']")
-      assert_html(html, "img.interest_small[src*='watch3']")
-      assert_html(html, "img.interest_small[src*='halfopen3']")
+      assert_html(html, "span.disabled img.mo-icon[src*='ignore2']")
+      assert_html(html, "img.mo-icon[src*='watch3']")
+      assert_html(html, "img.mo-icon[src*='halfopen3']")
     end
 
     def test_ignoring_state_small_icon_states
@@ -145,6 +145,37 @@ module Views::Layouts
 
       assert_html(html, "ul.interest-eyes > li", count: 3)
       assert_html(html, "ul.interest-eyes li form", count: 2)
+    end
+
+    # ---- kind class -> image mapping --------------------------------
+    #
+    # The single source of truth for "interest_watch/interest_ignore/
+    # interest_halfopen means this image" -- controller-level show-page
+    # tests (observations/names/locations) assert only the class, via
+    # `ControllerExtensions#assert_interest_button_in_html`, so they
+    # don't need to change if this ever moves off .png (e.g. to the
+    # SVG sprite).
+
+    def test_watch_class_matches_watch_images
+      html = render_view
+
+      assert_html(html, "img.interest_watch[src*='watch3']")
+      ::Interest.create!(user: @viewer, target: @obs, state: true)
+      assert_html(render_view, "img.interest_watch[src*='watch2']")
+    end
+
+    def test_ignore_class_matches_ignore_images
+      html = render_view
+
+      assert_html(html, "img.interest_ignore[src*='ignore3']")
+      ::Interest.create!(user: @viewer, target: @obs, state: false)
+      assert_html(render_view, "img.interest_ignore[src*='ignore2']")
+    end
+
+    def test_halfopen_class_matches_halfopen_image
+      ::Interest.create!(user: @viewer, target: @obs, state: true)
+
+      assert_html(render_view, "img.interest_halfopen[src*='halfopen3']")
     end
 
     # ---- Turbo wiring ---------------------------------------------

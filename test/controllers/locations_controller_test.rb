@@ -227,35 +227,37 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 1))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: -1))
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 0))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: -1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(albion.id)
+    )
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch, path: interest_path(albion.id),
+                         state: -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.new(target: albion, user: rolf, state: false).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 0))
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(albion.id)
+    )
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch, path: interest_path(albion.id),
+                        state: 1
+    )
   end
 
   ##############################################################################
