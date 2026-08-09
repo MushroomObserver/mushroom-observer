@@ -23,9 +23,6 @@ module SpeciesLists
 
     private
 
-    # MO doesn't wire `Phlex::Rails::Resolver`, so a bare `render(:new)`
-    # can't resolve the Phlex action view at `species_lists/write_in/new.rb`.
-    # Construct it explicitly with the instance state the ERB used to read.
     def render_new_page
       render(
         Views::Controllers::SpeciesLists::WriteIn::New.new(

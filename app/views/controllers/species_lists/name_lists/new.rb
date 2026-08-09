@@ -14,11 +14,8 @@
 # `attributes:`.
 module Views::Controllers::SpeciesLists::NameLists
   class New < Views::FullPageBase
-    def initialize(name_strings:, user:)
-      super()
-      @name_strings = name_strings
-      @user = user
-    end
+    prop :name_strings, _Array(String)
+    prop :user, ::User
 
     def view_template
       add_page_title(:name_lister_title.t)

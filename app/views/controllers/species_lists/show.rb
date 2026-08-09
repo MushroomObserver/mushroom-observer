@@ -7,23 +7,14 @@
 # search box, observations list, comments, object footer.
 module Views::Controllers::SpeciesLists
   class Show < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
-    # See `Edit#initialize` — action views forward whatever the page
-    # needs; `ParameterLists` isn't on the CLAUDE.md "always refactor"
-    # list.
-    def initialize(species_list:, user:, query:, pagination_data:,
-                   objects:, comments:, object_names:, project: nil)
-      super()
-      @species_list = species_list
-      @user = user
-      @query = query
-      @pagination_data = pagination_data
-      @objects = objects
-      @comments = comments
-      @object_names = object_names
-      @project = project
-    end
-    # rubocop:enable Metrics/ParameterLists
+    prop :species_list, ::SpeciesList
+    prop :user, ::User
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
+    prop :objects, _Array(::Observation)
+    prop :comments, _Array(::Comment)
+    prop :object_names, ::ActiveRecord::Relation
+    prop :project, _Nilable(::Project), default: nil
 
     def view_template
       add_chrome
