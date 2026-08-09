@@ -1,0 +1,83 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+class FieldSlip::TemplateTest < UnitTestCase
+  def test_for_returns_the_named_template
+    assert_instance_of(FieldSlip::Template::Mo, FieldSlip::Template.for(:mo))
+    assert_instance_of(FieldSlip::Template::Dbg,
+                       FieldSlip::Template.for("dbg"))
+  end
+
+  def test_for_rejects_an_unknown_template
+    assert_raises(ArgumentError) { FieldSlip::Template.for(:nemf) }
+  end
+
+  def test_default_is_the_mo_slip
+    assert_instance_of(FieldSlip::Template::Mo, FieldSlip::Template.default)
+  end
+
+  def test_keys_match_the_registry
+    FieldSlip::Template::REGISTRY.each_key do |key|
+      assert_equal(key, FieldSlip::Template.for(key).key)
+    end
+  end
+
+  # Selection is by the project's field_slip_prefix, so it holds in
+  # every environment regardless of ids.
+  def test_for_project_uses_the_prefix
+    project = projects(:bolete_project)
+    project.field_slip_prefix = "2026-CMS"
+
+    assert_instance_of(FieldSlip::Template::Dbg,
+                       FieldSlip::Template.for_project(project))
+  end
+
+  def test_for_project_defaults_to_the_mo_slip
+    assert_instance_of(FieldSlip::Template::Mo,
+                       FieldSlip::Template.for_project(
+                         projects(:bolete_project)
+                       ))
+    assert_instance_of(FieldSlip::Template::Mo,
+                       FieldSlip::Template.for_project(nil))
+  end
+
+  # The special fields every template names must be in its own field
+  # table -- a label typo here would quietly break the review form.
+  def test_special_fields_exist_in_each_template
+    FieldSlip::Template::REGISTRY.each_key do |key|
+      template = FieldSlip::Template.for(key)
+      labels = template.fields.keys
+
+      assert_includes(labels, template.name_field, key)
+      assert_includes(labels, template.location_field, key)
+      assert_includes(labels, template.inat_codes_field, key)
+      assert_includes(labels, template.code_field, key)
+    end
+  end
+
+  # ---------- iNat code detection ----------
+
+  # MO's Other Codes box is free text, so only a purely numeric value
+  # is treated as an iNat id.
+  def test_mo_inat_code_requires_purely_numeric
+    template = FieldSlip::Template.for(:mo)
+
+    assert_equal("12345678", template.inat_code_in(" 12345678 "))
+    assert_nil(template.inat_code_in("DBG-12345"))
+    assert_nil(template.inat_code_in("10:29 388879492"))
+    assert_not(template.inat_code?(nil))
+  end
+
+  # The DBG slip's box is dedicated to iNaturalist, so the id is
+  # recognized even mixed with a username or timestamp; short digit
+  # runs (clock times, dates) don't qualify.
+  def test_dbg_inat_code_found_in_mixed_text
+    template = FieldSlip::Template.for(:dbg)
+
+    assert_equal("388879492", template.inat_code_in("10:29 388879492"))
+    assert_equal("388879863", template.inat_code_in("388879863"))
+    assert_nil(template.inat_code_in("10:29 am"))
+    assert_nil(template.inat_code_in("someuser 8/6"))
+  end
+end

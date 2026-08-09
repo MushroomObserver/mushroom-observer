@@ -12,12 +12,12 @@ module Images
       @project = projects(:eol_project)
     end
 
-    def record_extract(fields: {}, confidence: {})
+    def record_extract(fields: {}, confidence: {}, template: "mo")
       FieldSlipExtract.record(
         image: @image, user: rolf, prompt_version: "1",
         result: FieldSlip::Extractor::Result.new(
           provider: "g", model: "m", raw: {}, fields: fields,
-          confidence: confidence
+          confidence: confidence, template: template
         )
       )
     end
@@ -87,7 +87,8 @@ module Images
       login_as_site_admin
       result = FieldSlip::Extractor::Result.new(
         provider: "gemini", model: "gemini-3.6-flash", raw: { "x" => 1 },
-        fields: { "Collector" => "Scott Shapiro" }, confidence: {}
+        fields: { "Collector" => "Scott Shapiro" }, confidence: {},
+        template: "mo"
       )
 
       FieldSlip::Extractor.stub(:default, fake_extractor(result)) do
@@ -140,7 +141,7 @@ module Images
 
     def test_edit_renders_the_rows_and_the_name_section
       record_extract(fields: { "Collector" => "Scott Shapiro",
-                               FieldSlip::Extractor::NAME_FIELD => "Boletus" })
+                               "ID" => "Boletus" })
       login_as_site_admin
 
       get(:edit, params: { image_id: @image.id })
@@ -219,8 +220,40 @@ module Images
       assert_equal("386717373", @obs.reload.notes[:Other_Codes])
     end
 
+    # A dbg extract reviews and saves through its own field labels --
+    # the name lives in "Species", the iNat id in "iNaturalist", and
+    # the coordinates land as a pair.
+    def test_update_applies_a_dbg_extract
+      record_extract(template: "dbg",
+                     fields: { "Species" => "Coprinus comatus",
+                               "Latitude" => "38.8703",
+                               "Longitude" => "-105.0442",
+                               "iNaturalist" => "10:29 388879492" })
+      before = @obs.namings.count
+      login_as_site_admin
+
+      put(:update,
+          params: { image_id: @image.id, inat: "1",
+                    use: { "Species" => "1", "Latitude" => "1",
+                           "Longitude" => "1", "iNaturalist" => "1" },
+                    value: { "Species" => "Coprinus comatus",
+                             "Latitude" => "38.8703",
+                             "Longitude" => "-105.0442",
+                             "iNaturalist" => "10:29 388879492" } })
+
+      @obs.reload
+
+      assert_equal(before + 1, @obs.namings.count)
+      assert_in_delta(38.8703, @obs.lat)
+      assert_in_delta(-105.0442, @obs.lng)
+      link = FieldSlipNotesBuilder.inat_link("388879492")
+
+      assert_equal("#{link} (10:29)", @obs.notes[:iNaturalist])
+      assert_redirected_to(permanent_observation_path(@obs.id))
+    end
+
     def test_update_proposes_a_ticked_known_name
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Coprinus comatus" })
       before = @obs.namings.count
       login_as_site_admin
@@ -233,7 +266,7 @@ module Images
     end
 
     def test_update_leaves_an_unticked_name_alone
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Coprinus comatus" })
       before = @obs.namings.count
       login_as_site_admin
@@ -247,7 +280,7 @@ module Images
     # An unrecognized name comes back for confirmation rather than being
     # created off a machine reading.
     def test_update_asks_before_creating_an_unknown_name
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Lumpy Bracket" })
       names_before = Name.count
       login_as_site_admin
@@ -264,7 +297,7 @@ module Images
     # does not mean re-doing the rest.
     def test_update_applies_fields_even_when_the_name_needs_approval
       record_extract(fields: { "Collector" => "Scott Shapiro",
-                               FieldSlip::Extractor::NAME_FIELD =>
+                               "ID" =>
                                "Lumpy Bracket" })
       login_as_site_admin
 
@@ -280,7 +313,7 @@ module Images
     # complete rather than bouncing to a confirmation page whose
     # feedback panel would render empty.
     def test_update_completes_when_the_id_is_a_placeholder
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "unknown" })
       login_as_site_admin
 
@@ -291,7 +324,7 @@ module Images
     end
 
     def test_update_creates_the_name_once_approved
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Lumpysomething bracketii" })
       names_before = Name.count
       login_as_site_admin

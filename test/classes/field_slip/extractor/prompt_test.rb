@@ -14,9 +14,14 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     FieldSlip::Extractor::Prompt.new(context).to_s
   end
 
+  def dbg_prompt
+    @project.update!(field_slip_prefix: "2026-CMS")
+    prompt
+  end
+
   def test_asks_for_every_field_by_its_exact_key
     text = prompt
-    FieldSlip::Extractor::FIELDS.each_key do |field|
+    FieldSlip::Template.for(:mo).fields.each_key do |field|
       assert_includes(text, field, "prompt must name #{field}")
     end
   end
@@ -145,6 +150,37 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
 
   def test_tells_the_model_not_to_identify_the_mushroom
     assert_match(/do not identify/i, prompt)
+  end
+
+  # A slip printed on another event's form must be reported, not
+  # force-fit onto this template's field list.
+  def test_tells_the_model_how_to_report_a_template_mismatch
+    text = prompt
+
+    assert_includes(text, "template_matched")
+    assert_includes(text, "DIFFERENT form")
+  end
+
+  # The project's prefix picks the layout, and the whole field list
+  # follows it.
+  def test_dbg_project_gets_the_dbg_field_list
+    text = dbg_prompt
+    FieldSlip::Template.for(:dbg).fields.each_key do |field|
+      assert_includes(text, field, "prompt must name #{field}")
+    end
+
+    assert_not_includes(text, "MycoMap Voucher Number")
+    assert_includes(text, "Location/Foray")
+    assert_includes(text, "iNaturalist")
+  end
+
+  # The alias-table instructions have to name the template's own
+  # location field, or the model maps the wrong box through the table.
+  def test_dbg_location_table_names_the_location_foray_field
+    ProjectAlias.create!(project: @project, name: "EB2",
+                         target: locations(:albion))
+
+    assert_includes(dbg_prompt, "\"Location/Foray\" is usually")
   end
 
   # No project, no aliases: the prompt still has to be usable.

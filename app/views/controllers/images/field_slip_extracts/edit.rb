@@ -31,8 +31,21 @@ module Views::Controllers::Images::FieldSlipExtracts
     # The strongest signal that this image is not this observation's
     # slip: the printed code the model read is not the code attached.
     def render_flags
+      render_template_mismatch
       render_code_mismatch
       render_unknown_alias
+    end
+
+    # A slip was seen, but printed on a layout this project's slips
+    # don't use, so nothing was read off it. If the project should
+    # accept the layout, its entry in FieldSlip::Template needs
+    # updating -- then re-extract.
+    def render_template_mismatch
+      return unless @extract.template_mismatch?
+
+      Alert(level: :danger) do
+        plain(:field_slip_extract_template_mismatch.t)
+      end
     end
 
     def render_code_mismatch
@@ -111,6 +124,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       small do
         plain(:field_slip_extract_provenance.t(
                 provider: @extract.provider, model: @extract.model,
+                template: @extract.template.key,
                 version: @extract.prompt_version.to_s,
                 time: @extract.updated_at.web_time
               ))

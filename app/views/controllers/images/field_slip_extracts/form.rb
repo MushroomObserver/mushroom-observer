@@ -70,12 +70,12 @@ module Views::Controllers::Images::FieldSlipExtracts
       render_confidence(row)
     end
 
-    # A purely numeric "Other Codes" is an iNaturalist observation id in
-    # practice, so it ticks itself and gets stored as a link. Visible
-    # and overridable rather than silent, since the box is free text and
-    # someone will eventually write a herbarium number in it.
+    # A value holding an iNaturalist observation id ticks itself and
+    # gets stored as a link. Visible and overridable rather than
+    # silent, since the box is free text and someone will eventually
+    # write a herbarium number in it.
     def render_inat_flag(row)
-      return unless row.field == ::FieldSlip::Extractor::OTHER_CODES_FIELD
+      return unless row.inat_row?
 
       checkbox_field("inat", checked: @review.inat_code,
                              label: :field_slip_extract_inat.l)

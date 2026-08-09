@@ -34,13 +34,7 @@ class FieldSlip
         raise(MissingKey) if @api_key.blank?
 
         raw = post(Prompt.new(context).to_s, image_data(image))
-        payload = parse(raw)
-        Result.new(provider: "gemini",
-                   model: raw["modelVersion"].presence || @model, raw: raw,
-                   fields: payload["fields"] || {},
-                   confidence: payload["confidence"] || {},
-                   slip_present: payload["slip_present"],
-                   unreadable: payload["unreadable"])
+        build_result(raw, parse(raw), context)
       end
 
       class MissingKey < StandardError
@@ -57,6 +51,17 @@ class FieldSlip
       end
 
       private
+
+      def build_result(raw, payload, context)
+        Result.new(provider: "gemini",
+                   model: raw["modelVersion"].presence || @model, raw: raw,
+                   fields: payload["fields"] || {},
+                   confidence: payload["confidence"] || {},
+                   template: context.template.key,
+                   slip_present: payload["slip_present"],
+                   template_matched: payload["template_matched"],
+                   unreadable: payload["unreadable"])
+      end
 
       def credentials
         Rails.application.credentials.gemini || {}
