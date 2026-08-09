@@ -18,6 +18,6 @@ class ObservationImage < ApplicationRecord
     return unless FieldSlip::QRDecoder.available?
     return if observation.nil? || observation.occurrence_id
 
-    DetectFieldSlipQRJob.perform_later(observation.id)
+    DetectFieldSlipQRJob.perform_later(observation.id, image_id)
   end
 end

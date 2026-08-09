@@ -18,7 +18,8 @@ class ObservationImageTest < UnitTestCase
     @obs.update!(occurrence: nil)
 
     FieldSlip::QRDecoder.stub(:available?, true) do
-      assert_enqueued_with(job: DetectFieldSlipQRJob, args: [@obs.id]) do
+      assert_enqueued_with(job: DetectFieldSlipQRJob,
+                           args: [@obs.id, @image.id]) do
         attach_image
       end
     end

@@ -13,7 +13,7 @@ class DetectFieldSlipQRJobTest < ActiveJob::TestCase
   def perform_with_code(code)
     FieldSlip::QRDecoder.stub(:available?, true) do
       FieldSlip::QRDecoder.stub(:slip_code_in, code) do
-        DetectFieldSlipQRJob.perform_now(@obs.id)
+        DetectFieldSlipQRJob.perform_now(@obs.id, @image.id)
       end
     end
   end
@@ -26,7 +26,7 @@ class DetectFieldSlipQRJobTest < ActiveJob::TestCase
                     @obs)
   end
 
-  def test_leaves_the_observation_alone_when_no_photo_decodes
+  def test_leaves_the_observation_alone_when_the_photo_has_no_code
     perform_with_code(nil)
 
     assert_nil(@obs.reload.occurrence)
@@ -44,13 +44,16 @@ class DetectFieldSlipQRJobTest < ActiveJob::TestCase
 
   def test_noop_when_detection_is_unavailable
     FieldSlip::QRDecoder.stub(:available?, false) do
-      DetectFieldSlipQRJob.perform_now(@obs.id)
+      DetectFieldSlipQRJob.perform_now(@obs.id, @image.id)
     end
 
     assert_nil(@obs.reload.occurrence)
   end
 
-  def test_survives_a_vanished_observation
-    DetectFieldSlipQRJob.perform_now(-1)
+  def test_survives_vanished_records
+    DetectFieldSlipQRJob.perform_now(-1, @image.id)
+    DetectFieldSlipQRJob.perform_now(@obs.id, -1)
+
+    assert_nil(@obs.reload.occurrence)
   end
 end

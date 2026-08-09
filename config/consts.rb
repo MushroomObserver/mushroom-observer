@@ -138,7 +138,7 @@ MushroomObserver::Application.configure do
 
   # Scan uploaded photos for field slip QR codes and auto-attach the
   # observation to the slip (and so its project). Also requires the
-  # zbar tool (zbarimg) on the machine -- see FieldSlip::QrDecoder.
+  # zbar tool (zbarimg) on the machine -- see FieldSlip::QRDecoder.
   config.field_slip_qr_detection = true
 
   # I18n namespace all our app-specific translations are kept in

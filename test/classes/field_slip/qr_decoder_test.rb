@@ -27,6 +27,19 @@ class FieldSlip::QRDecoderTest < UnitTestCase
                "someone else's /qr/ URL is not MO's")
   end
 
+  # MO's own /qr/ URLs can carry query params (AddDispatchController
+  # appends ?project=...); the code is the path segment alone.
+  def test_mo_qr_url_query_params_are_not_part_of_the_code
+    assert_equal("OPEN-0219",
+                 FieldSlip::QRDecoder.slip_code_from(
+                   "https://mushroomobserver.org/qr/OPEN-0219?project=405"
+                 ))
+    assert_equal("OPEN-0219",
+                 FieldSlip::QRDecoder.slip_code_from(
+                   "https://mushroomobserver.org/qr/OPEN-0219#top"
+                 ))
+  end
+
   def test_noise_is_rejected
     assert_nil(FieldSlip::QRDecoder.slip_code_from("WIFI:T:WPA;S:cafe;;"))
     assert_nil(FieldSlip::QRDecoder.slip_code_from("12345"),

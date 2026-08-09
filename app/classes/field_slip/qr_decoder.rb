@@ -16,7 +16,9 @@ class FieldSlip
     # downscaling can cost it the resolution it needs to decode.
     SIZES = [:full_size, :huge].freeze
 
-    MO_QR_URL = %r{\Ahttps?://(?:www\.)?mushroomobserver\.org/qr/(\S+)\z}i
+    # The code is the path segment alone -- MO's own /qr/ URLs can
+    # carry query params (e.g. ?project=...), which are not part of it.
+    MO_QR_URL = %r{\Ahttps?://(?:www\.)?mushroomobserver\.org/qr/([^?#/\s]+)}i
 
     # The general shape of a printed slip code ("2026-CMS-0219",
     # "NEMF-10222"): one token, letters somewhere (FieldSlip's own

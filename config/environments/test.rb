@@ -20,7 +20,8 @@ MushroomObserver::Application.configure do
   config.image_fallback_source = :remote1
 
   # Off so suite behavior never depends on whether zbar happens to be
-  # installed; tests that want the pipeline stub QrDecoder.available?.
+  # installed; tests that want the pipeline stub
+  # FieldSlip::QRDecoder.available?.
   config.field_slip_qr_detection = false
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
