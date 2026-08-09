@@ -3,12 +3,9 @@
 module Views::Controllers::Herbaria::Search
   # Action view for the herbaria search form page.
   class New < Views::FullPageBase
-    def initialize(search:, controller:, local:)
-      super()
-      @search = search
-      @controller = controller
-      @local = local
-    end
+    prop :search, ::Query
+    prop :controller, ::Herbaria::SearchController
+    prop :local, _Boolean
 
     def view_template
       add_new_title(:search_object, :herbaria)

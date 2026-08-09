@@ -5,14 +5,10 @@
 # Optionally overlays a project membership confirmation modal.
 module Views::Controllers::Occurrences
   class New < Views::FullPageBase
-    def initialize(source_obs:, recent_observations:, user:,
-                   project_confirm: {})
-      super()
-      @source_obs = source_obs
-      @recent_observations = recent_observations
-      @user = user
-      @project_confirm = project_confirm
-    end
+    prop :source_obs, ::Observation
+    prop :recent_observations, _Array(::Observation)
+    prop :user, ::User
+    prop :project_confirm, Hash, default: -> { {} }
 
     def view_template
       container_class(:full)

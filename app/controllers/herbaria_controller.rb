@@ -197,9 +197,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    return unless in_admin_mode?
+    set_top_users_for_reload
+  end
 
-    @top_users = User.top_users_for_herbarium(@herbarium)
+  # Needed both by the initial edit GET and by #update's
+  # validation-failure re-render (reload_form), so it doesn't silently
+  # drop the top-users list the second time around.
+  def set_top_users_for_reload
+    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
   end
 
   def render_modal_herbarium_form
@@ -258,10 +263,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
     return unless make_sure_can_edit!
 
-    @herbarium.attributes = herbarium_params
-    normalize_parameters
-    create_location_object_if_new(@herbarium)
-    try_to_save_location_if_new(@herbarium)
+    prepare_herbarium_update
     return reload_form(:edit) unless validate_herbarium! && !@any_errors
 
     unless @herbarium.save
@@ -269,6 +271,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
       return reload_form(:edit)
     end
     redirect_to_create_location_or_referrer_or_show_location
+  end
+
+  def prepare_herbarium_update
+    set_top_users_for_reload
+    @herbarium.attributes = herbarium_params
+    normalize_parameters
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
   end
 
   def destroy
