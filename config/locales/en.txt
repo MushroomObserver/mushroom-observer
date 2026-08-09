@@ -2914,9 +2914,6 @@
   list_users_joined: Joined
   list_users_contribution: Contribution
 
-  # species_list/make_report
-  make_report_not_supported: We don't support report filetype *.[type].
-
   # description/merge_descriptions
   merge_descriptions_title: Merge [object]
   merge_descriptions_merge_header: Merge with another description
