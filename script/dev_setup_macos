@@ -70,7 +70,7 @@ if command -v mysql >/dev/null 2>&1; then
 fi
 
 echo "Installing Homebrew packages..."
-brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
+brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils zbar
 
 echo "Starting MySQL..."
 brew services start mysql
