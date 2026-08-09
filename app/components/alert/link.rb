@@ -1,19 +1,17 @@
 # frozen_string_literal: true
 
 class Components::Alert::Link < Components::Base
-  def initialize(text, href, class: nil, **attrs)
-    super()
-    @text = text
-    @href = href
-    @html_class = grab(class:)
-    @attrs = attrs
-  end
+  prop :text, String
+  prop :href, String
+  # Catch-all for class:, data:, aria:, and any other HTML attrs on
+  # the rendered link -- matches Accordion/Icon/Collapsible's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
     Link(type: :get,
          name: @text,
          target: @href,
-         class: class_names("alert-link", @html_class),
-         **@attrs)
+         class: class_names("alert-link", @attributes[:class]),
+         **@attributes.except(:class))
   end
 end
