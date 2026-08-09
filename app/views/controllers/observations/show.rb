@@ -25,9 +25,7 @@ module Views::Controllers::Observations
     prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
     prop :comments, _Array(::Comment), default: -> { [] }
     prop :images, _Array(::Image), default: -> { [] }
-    prop :other_sites,
-         _Nilable(_Union(_Array(::ExternalSite), ::ActiveRecord::Relation)),
-         default: nil
+    prop :other_sites, _Nilable(_Array(::ExternalSite)), default: nil
     prop :sibling_observations, _Array(::Observation)
     prop :occurrence, _Nilable(::Occurrence), default: nil
     prop :owner_name, _Nilable(::Name), default: nil
@@ -96,7 +94,7 @@ module Views::Controllers::Observations
     def render_right_column
       render(Details.new(
                obs: @observation, consensus: @consensus, user: @user,
-               sites: @other_sites&.to_a, siblings: @sibling_observations
+               sites: @other_sites, siblings: @sibling_observations
              ))
       return unless @user
 
