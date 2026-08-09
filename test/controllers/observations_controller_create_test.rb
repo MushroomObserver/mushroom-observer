@@ -1902,7 +1902,101 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
+  # --------------------------------------------------------------------
+  #  Landing on the slip review straight from Create (#5024)
+  # --------------------------------------------------------------------
+
+  # A reviewer whose new photo is a slip lands on the review page,
+  # which waits out the QR jobs and the background read.
+  def test_create_redirects_a_slip_reviewer_to_the_review_page
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0219") do
+      post(:create, params: slip_photo_params(image))
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+  end
+
+  # A slip attached during this create (typed or scanned code -- the
+  # QR jobs skip linked observations) gets its read started here.
+  def test_create_with_matching_field_code_starts_the_read
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0777") do
+      post(:create,
+           params: slip_photo_params(image).merge(field_code: "OPEN-0777"))
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+    assert(FieldSlipExtract.find_by(image_id: image.id).pending?,
+           "the read starts here; the QR jobs skip linked observations")
+  end
+
+  # A photographed code for some OTHER slip than the attached one is
+  # never auto-reviewed into this observation.
+  def test_create_ignores_a_code_that_mismatches_the_attached_slip
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0219") do
+      post(:create,
+           params: slip_photo_params(image).merge(field_code: "OPEN-0777"))
+    end
+
+    assert_response(:redirect)
+    assert_no_match(/field_slip_extract/, @response.location.to_s)
+    assert_nil(FieldSlipExtract.find_by(image_id: image.id))
+  end
+
+  # Ordinary uploads never pay for the scan or get detoured: the gate
+  # is admin-ship of a project with a field-slip prefix.
+  def test_create_does_not_detour_ordinary_uploads
+    login("katrina")
+
+    assert_not(
+      Project.where.not(field_slip_prefix: nil).
+        exists?(admin_group_id: katrina.user_group_ids),
+      "premise: katrina reviews no slip projects"
+    )
+
+    with_decoded_slip_code("OPEN-0219") do
+      post(:create,
+           params: modified_generic_params({ naming: { vote: {} } }, katrina))
+    end
+
+    assert_response(:redirect)
+    assert_no_match(/field_slip_extract/, @response.location.to_s)
+  end
+
   private
+
+  def make_slip_project_admin(user)
+    project = projects(:open_membership_project)
+    project.admin_group.users << user unless project.is_admin?(user)
+  end
+
+  def slip_photo_params(image)
+    modified_generic_params(
+      { observation: { good_image_ids: image.id.to_s },
+        naming: { vote: {} } }, rolf
+    )
+  end
+
+  def with_decoded_slip_code(code, &block)
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, code, &block)
+    end
+  end
 
   def stub_update_field_slip(status)
     @controller.define_singleton_method(:update_field_slip) { |*| status }

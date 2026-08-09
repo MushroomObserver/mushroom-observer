@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_31_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_09_164716) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -115,6 +115,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_31_120000) do
     t.json "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "status", default: "complete", null: false
     t.index ["image_id"], name: "index_field_slip_extracts_on_image_id", unique: true
     t.index ["user_id"], name: "index_field_slip_extracts_on_user_id"
   end

@@ -4,6 +4,8 @@ require("test_helper")
 
 module Images
   class FieldSlipExtractsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def setup
       super
       @obs = observations(:minimal_unknown_obs)
@@ -83,40 +85,21 @@ module Images
 
     # ---------- create ----------
 
-    def test_create_records_the_extract_and_redirects_to_review
+    # The provider call runs in a job now (see ExtractFieldSlipJob);
+    # the button's request just queues it and lands on the review page,
+    # which shows the pending state.
+    def test_create_enqueues_the_read_and_redirects_to_review
       login_as_site_admin
-      result = FieldSlip::Extractor::Result.new(
-        provider: "gemini", model: "gemini-3.6-flash", raw: { "x" => 1 },
-        fields: { "Collector" => "Scott Shapiro" }, confidence: {},
-        template: "mo"
-      )
 
-      FieldSlip::Extractor.stub(:default, fake_extractor(result)) do
+      assert_enqueued_with(job: ExtractFieldSlipJob,
+                           args: [@image.id, rolf.id]) do
         post(:create, params: { image_id: @image.id })
       end
 
       assert_redirected_to(edit_image_field_slip_extract_path(@image.id))
       extract = FieldSlipExtract.find_by(image_id: @image.id)
 
-      assert_equal("Scott Shapiro", extract.value_for("Collector"))
-      assert_equal("gemini-3.6-flash", extract.model)
-      # Stamped from the constant, not a literal: a read is only
-      # attributable to the prompt that produced it if these agree.
-      assert_equal(FieldSlip::Extractor::PROMPT_VERSION,
-                   extract.prompt_version)
-    end
-
-    # A provider failure has to land as a flash, not a 500 -- the button
-    # is one click and the network is not reliable.
-    def test_create_reports_a_provider_failure
-      login_as_site_admin
-
-      FieldSlip::Extractor.stub(:default, failing_extractor) do
-        post(:create, params: { image_id: @image.id })
-      end
-
-      assert_redirected_to(image_path(@image.id))
-      assert_flash_error
+      assert(extract.pending?, "the review page needs a status to show")
     end
 
     def test_create_with_an_unknown_image_redirects
@@ -132,6 +115,80 @@ module Images
 
     def test_edit_without_an_extract_redirects
       login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_redirected_to(image_path(@image.id))
+      assert_flash_error
+    end
+
+    def test_edit_shows_a_pending_read_with_self_refresh
+      FieldSlipExtract.start!(image: @image, user: rolf)
+      login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_response(:success)
+      assert_select("[data-controller='reload-poll']")
+    end
+
+    def test_edit_shows_a_failed_read_with_a_retry_button
+      FieldSlipExtract.fail!(image: @image, user: rolf, error: "quota")
+      login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_response(:success)
+      assert_select(".alert-danger", text: /quota/)
+      assert_select(
+        "form[action='#{image_field_slip_extract_path(@image.id)}']"
+      )
+      assert_select("[data-controller='reload-poll']", count: 0)
+    end
+
+    # The observation-create redirect arrives before the QR jobs have
+    # attached anything; `await=1` is what makes an extract-less page
+    # wait instead of bouncing.
+    def test_edit_awaits_detection_when_asked
+      login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id, await: 1 })
+
+      assert_response(:success)
+      assert_select("[data-controller='reload-poll']")
+    end
+
+    # ...and can land before the observation is even in its project,
+    # when `permitted?` has nothing to check against. Waiting on your
+    # own upload needs only ownership; the review form still needs
+    # project admin-ship.
+    def test_owner_may_wait_on_their_own_upload_before_project_filing
+      owner = @obs.user
+      login(owner.login)
+
+      assert_not(
+        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
+        "premise: ownership alone, no project admin-ship"
+      )
+
+      FieldSlipExtract.start!(image: @image, user: owner)
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_response(:success)
+      assert_select("[data-controller='reload-poll']")
+    end
+
+    def test_owner_alone_may_not_review_a_completed_extract
+      owner = @obs.user
+      login(owner.login)
+
+      assert_not(
+        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
+        "premise: ownership alone, no project admin-ship"
+      )
+
+      record_extract(fields: { "Collector" => "A" })
 
       get(:edit, params: { image_id: @image.id })
 
@@ -343,22 +400,6 @@ module Images
       put(:update, params: { image_id: @image.id })
 
       assert_redirected_to(image_path(@image.id))
-    end
-
-    private
-
-    def fake_extractor(result)
-      extractor = Object.new
-      extractor.define_singleton_method(:extract) { |_image, **| result }
-      extractor
-    end
-
-    def failing_extractor
-      extractor = Object.new
-      extractor.define_singleton_method(:extract) do |_image, **|
-        raise(FieldSlip::Extractor::Gemini::BadResponse.new("nope"))
-      end
-      extractor
     end
   end
 end
