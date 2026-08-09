@@ -115,7 +115,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_09_175755) do
     t.json "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "status", default: "complete", null: false
     t.index ["image_id"], name: "index_field_slip_extracts_on_image_id", unique: true
     t.index ["user_id"], name: "index_field_slip_extracts_on_user_id"
   end
