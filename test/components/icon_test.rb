@@ -70,6 +70,24 @@ class LinkIconTest < ComponentTestCase
     assert_html(html, "svg#my_icon.mo-icon-globe")
   end
 
+  def test_padding_class_raises
+    %w[p-2 pl-2 pr-2 pt-2 pb-2 px-2 py-2].each do |cls|
+      assert_raises(ArgumentError) { render_icon(type: :globe, class: cls) }
+    end
+  end
+
+  def test_padding_class_combined_with_other_classes_raises
+    assert_raises(ArgumentError) do
+      render_icon(type: :globe, class: "text-primary px-2")
+    end
+  end
+
+  def test_non_padding_class_does_not_raise
+    html = render_icon(type: :globe, class: "text-primary")
+
+    assert_html(html, "svg.mo-icon-globe.text-primary")
+  end
+
   private
 
   def render_icon(**)

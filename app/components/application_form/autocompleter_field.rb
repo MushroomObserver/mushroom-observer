@@ -213,13 +213,24 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
+    # A bare <svg> can't take padding -- on a replaced element like
+    # svg, padding eats into the element's own rendered content area
+    # instead of adding space around it, so the checkmark artwork
+    # itself was rendering smaller than its width/height implied.
+    # The spacing (and the has-id/has-id-indicator show/hide toggle,
+    # see _autocomplete.scss) belongs on a wrapping span instead --
+    # every icon needs a wrap, never printed bare in the page.
+    #
+    # The tooltip lives on that same wrapping span, not on `Icon(...)`
+    # itself -- passing `title:` to Icon does not give a bare svg a
+    # working tooltip on its own.
     def render_has_id_indicator
-      Icon(
-        type: :check,
-        title: :autocompleter_has_id.l,
-        class: "px-2 text-success has-id-indicator",
-        data: { target_attr_key => "hasIdIndicator" }
-      )
+      title = :autocompleter_has_id.l
+      span(class: "px-2 has-id-indicator", title: title,
+           data: { target_attr_key => "hasIdIndicator",
+                   tooltip_target: "tip", placement: "top" }) do
+        Icon(type: :check, class: "text-success")
+      end
     end
 
     # These four are plain `Button`s, not `Link`s -- they never had a
@@ -230,6 +241,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Bootstrap's own .btn-link reset (no bare-<button> browser chrome)
     # with zero padding, without the padding being baked in as a
     # site-wide default (see `Components::Button::Styling`).
+    #
+    # `Link::Get` auto-wires a tooltip (data-tooltip-target + title)
+    # whenever `icon:` is present -- plain `Button` doesn't (only
+    # `CRUDBase`, for form-submitting buttons, does that automatically).
+    # Converting away from Link dropped it, so each one adds the same
+    # tooltip_data shape Link::Get used to supply, by hand.
     def render_find_button
       return unless find_text
 
@@ -238,8 +255,11 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 find-btn d-none p-0",
+             title: find_text,
              data: { map_target: "showBoxBtn",
-                     action: "map#showBox" })
+                     action: "map#showBox",
+                     tooltip_target: "tip", placement: "top",
+                     title: find_text })
     end
 
     def render_keep_box_button
@@ -250,10 +270,13 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 keep-btn d-none p-0",
+             title: keep_text,
              data: { target_attr_key => "keepBtn",
                      map_target: "lockBoxBtn",
                      action: "map#toggleBoxLock " \
-                             "form-exif#showFields" })
+                             "form-exif#showFields",
+                     tooltip_target: "tip", placement: "top",
+                     title: keep_text })
     end
 
     def render_edit_box_button
@@ -264,10 +287,13 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 edit-btn d-none p-0",
+             title: edit_text,
              data: { target_attr_key => "editBtn",
                      map_target: "editBoxBtn",
                      action: "map#toggleBoxLock " \
-                             "form-exif#showFields" })
+                             "form-exif#showFields",
+                     tooltip_target: "tip", placement: "top",
+                     title: edit_text })
     end
 
     def render_create_button
@@ -279,8 +305,11 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon: :plus, label: true,
              icon_class: "text-primary",
              variant: :link,
+             title: create_text,
              data: { target_attr_key => "createBtn",
-                     action: "#{stimulus_controller_name}#swapCreate" })
+                     action: "#{stimulus_controller_name}#swapCreate",
+                     tooltip_target: "tip", placement: "top",
+                     title: create_text })
     end
 
     def render_modal_create_link

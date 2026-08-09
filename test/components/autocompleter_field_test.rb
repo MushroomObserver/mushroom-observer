@@ -78,13 +78,16 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(html, "li.dropdown-item", count: 10)
     assert_html(html, "li.dropdown-item a", count: 10)
 
-    # Should have has_id_indicator (green check icon)
+    # Should have has_id_indicator (green check icon) -- a wrapping
+    # span, not a bare svg (padding on a replaced element like svg
+    # eats into its own rendered content instead of adding space
+    # around it).
     assert_html(
       html,
-      "svg.has-id-indicator" \
+      "span.has-id-indicator" \
       "[data-autocompleter--herbarium-target='hasIdIndicator']"
     )
-    assert_html(html, "svg.has-id-indicator.text-success")
+    assert_html(html, "span.has-id-indicator svg.text-success")
   end
 
   def test_component_textarea_mode
@@ -229,7 +232,7 @@ class AutocompleterFieldTest < ComponentTestCase
     # Between slot content should appear after label
     assert_includes(html, "(Login Name)")
     # Has-id indicator should still be present after between content
-    assert_html(html, "svg.has-id-indicator")
+    assert_html(html, "span.has-id-indicator")
   end
 
   private

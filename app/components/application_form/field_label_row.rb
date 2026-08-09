@@ -111,14 +111,21 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
-      div(class: "#{display} justify-content-between") do
+      div(class: "#{display} justify-content-between align-items-center") do
         render_label_with_help(label_text)
         render_label_end_slot
       end
     end
 
+    # d-flex align-items-center -- without it, the label text and any
+    # between/help content (autocompleter's has-id-indicator icon,
+    # find/keep/edit buttons) are just inline siblings with no shared
+    # vertical-alignment context, each at the mercy of its own
+    # baseline/em-sizing quirks (an SVG icon's default vertical-align:
+    # baseline doesn't actually sit on the text baseline the way a
+    # real glyph does -- see autocompleter_field.rb).
     def render_label_with_help(label_text)
-      div do
+      div(class: "d-flex align-items-center") do
         label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
         end

@@ -57,7 +57,12 @@ class Components::Icon < Components::Base
   # key) would otherwise raise a Literal::TypeError.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
+  # `p-*`/`pl-*`/`pr-*`/`pt-*`/`pb-*`/`px-*`/`py-*` -- Bootstrap's
+  # padding utilities.
+  PADDING_CLASS_RE = /\Ap[lrtbxy]?-\d+\z/
+
   def view_template
+    validate_no_padding_classes!
     return unless SPRITE_AVAILABLE && @type
 
     svg(class: svg_class, title: @title.presence, data: svg_data,
@@ -73,6 +78,25 @@ class Components::Icon < Components::Base
   end
 
   private
+
+  # Padding on a bare <svg> (a "replaced element", like <img>) eats
+  # into the element's own rendered content instead of adding space
+  # around it -- the icon artwork renders smaller than its width/
+  # height alone would suggest, silently, no error. Wrap the icon in
+  # a span/div and put the padding class there instead.
+  def validate_no_padding_classes!
+    return if @attributes[:class].blank?
+
+    offenders = @attributes[:class].to_s.split.grep(PADDING_CLASS_RE)
+    return if offenders.empty?
+
+    raise(ArgumentError.new(
+            "Icon can't take padding classes (#{offenders.join(", ")}) " \
+            "-- padding on a bare <svg> shrinks its rendered content " \
+            "instead of adding space around it. Wrap the icon in a " \
+            "span/div and put the padding class there instead."
+          ))
+  end
 
   def svg_class
     class_names("mo-icon", "mo-icon-#{@type.to_s.tr("_", "-")}",

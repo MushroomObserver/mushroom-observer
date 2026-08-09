@@ -5,13 +5,15 @@
 // Label-row icons (has-id-indicator, find/keep/edit/create) read too
 // small at the default 1.12em next to the bold field label beside
 // them -- matches the 1.5em scale used for #top_nav's icon buttons.
-// `.has-id-indicator.mo-icon` (compound, not `.has-id-indicator`
-// alone) -- both classes land on the same <svg>, and the compound
-// form's higher specificity is needed to reliably beat the base
-// `.mo-icon` rule in _icons.scss, which is @import-ed AFTER this
-// file (mushroom_observer.scss) and would otherwise win the tie on
-// source order alone.
-.has-id-indicator.mo-icon,
+// Vertical alignment is the label row's job now (FieldLabelRow's
+// d-flex align-items-center), not a per-icon `top:` guess.
+// `.has-id-indicator` is a wrapping span, not the icon itself (a bare
+// svg can't take padding -- see autocompleter_field.rb), so this is
+// a descendant selector like the other three, and its 2-class
+// specificity beats the base `.mo-icon` rule in _icons.scss on its
+// own merits, regardless of _icons.scss being @import-ed after this
+// file in mushroom_observer.scss.
+.has-id-indicator .mo-icon,
 .find-btn .mo-icon,
 .keep-btn .mo-icon,
 .edit-btn .mo-icon,
@@ -26,7 +28,16 @@
 }
 .has-id {
   .has-id-indicator {
-    display: inline-block;
+    // inline-flex + align-items: center, not inline-block -- the
+    // icon inside is shorter than the span's own content-driven
+    // height (an inline-block SVG taller than the surrounding text's
+    // line-height expands its line box), so even a parent row with
+    // its own align-items: center has nothing left to center against
+    // once this span already fills the row's full height. Centering
+    // the icon within its OWN wrapper first fixes that regardless of
+    // what the row around it does.
+    display: inline-flex;
+    align-items: center;
   }
 }
 
