@@ -9,6 +9,7 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
       libjpeg-dev \
       libjpeg-progs \
       libimage-exiftool-perl \
+      zbar-tools \
       chromium \
       mariadb-client \
       bsdextrautils \

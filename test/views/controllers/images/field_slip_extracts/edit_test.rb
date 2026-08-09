@@ -43,6 +43,22 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "input[name='value[Substrate]']")
     end
 
+    # A single-line input drops the newlines from its value, gluing a
+    # slip's multi-line Notes together on save; a textarea keeps them.
+    def test_multiline_values_render_a_textarea
+      html = render_page(fields: {
+                           "Notes" => "Phenolic odor\nYellow staining",
+                           "Collector" => "Scott Shapiro"
+                         })
+
+      assert_html(html, "textarea[name='value[Notes]']", text: "Phenolic odor")
+      assert_html(html, "textarea[name='value[Notes]']",
+                  text: "Yellow staining")
+      assert_html(html, "input[name='value[Collector]']",
+                  count: 1)
+      assert_no_html(html, "textarea[name='value[Collector]']")
+    end
+
     # The name gets an autocompleter, which only renders its dropdown
     # and hidden id field when it has a real label -- `label: false`
     # silently drops the append slot they live in.

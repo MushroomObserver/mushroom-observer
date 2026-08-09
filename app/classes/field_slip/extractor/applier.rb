@@ -48,8 +48,10 @@ class FieldSlip
       # An iNat id is stored as the link the field slip form writes, so
       # an observation reads back the same whichever route entered it.
       # Already-linked values pass through rather than nesting.
+      # CRLF from a textarea submit normalizes to bare newlines, so a
+      # multi-line Notes value stores the same shape however it arrived.
       def value_for(field, value)
-        text = value.to_s.strip
+        text = value.to_s.gsub("\r\n", "\n").strip
         return text unless field == @template.inat_codes_field
         return text unless @inat_code
         return text if FieldSlipNotesBuilder.inat_link?(text)
