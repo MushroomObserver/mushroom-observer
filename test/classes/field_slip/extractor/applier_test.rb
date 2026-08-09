@@ -33,6 +33,16 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     assert_equal("N26-0290", @obs.notes[:MycoMap_Voucher_Number])
   end
 
+  # A multi-line Notes value keeps its line breaks, with a textarea's
+  # CRLF normalized to bare newlines.
+  def test_multiline_notes_keep_their_line_breaks
+    apply_fields({ "Notes" =>
+                   "Phenolic odor\r\nYellow staining\r\nYellow in KOH" })
+
+    assert_equal("Phenolic odor\nYellow staining\nYellow in KOH",
+                 @obs.notes[:Other])
+  end
+
   # Several notes fields in one pass have to merge, not overwrite each
   # other -- and must not drop notes the observation already had.
   def test_notes_writes_merge_with_existing_notes
