@@ -26,9 +26,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     def render_pending
       div(data: { controller: "reload-poll" }) do
-        render(Components::Panel.new(
-                 panel_id: "field_slip_extract_pending"
-               )) do |p|
+        Panel(panel_id: "field_slip_extract_pending") do |p|
           p.with_body do
             span(class: "spinner-right mx-2")
             plain(:field_slip_extract_pending.t)

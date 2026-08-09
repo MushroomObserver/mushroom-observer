@@ -8,9 +8,7 @@ module Views::Controllers::Locations
       prop :location, ::Location
 
       def view_template
-        render(
-          ::Components::Panel.new(panel_id: "location_coordinates")
-        ) do |panel|
+        Panel(panel_id: "location_coordinates") do |panel|
           panel.with_heading { :coordinates.ti }
           links = heading_links
           panel.with_heading_links { trusted_html(links) } if links.present?
