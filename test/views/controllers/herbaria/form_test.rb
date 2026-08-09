@@ -41,8 +41,7 @@ module Views::Controllers::Herbaria
 
       # Map section
       assert_html(html, "#herbarium_form_map.form-map")
-      assert_html(html, "form#herbarium_form",
-                  attribute: { "data-controller" => "map" })
+      assert_html(html, "form#herbarium_form[data-controller~='map']")
 
       # Personal checkbox for new record
       assert_html(html,

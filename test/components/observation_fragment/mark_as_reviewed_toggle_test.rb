@@ -56,7 +56,8 @@ class ObservationFragmentMarkAsReviewedToggleTest < ComponentTestCase
     html = render_component(observation_view: build_obs_view(444))
 
     assert_includes(html, "data-turbo=\"true\"")
-    assert_includes(html, "data-controller=\"reviewed-toggle\"")
+    # Token match: every ApplicationForm also carries form-feedback.
+    assert_html(html, "form[data-controller~='reviewed-toggle']")
     assert_includes(html, "data-reviewed-toggle-target=\"toggle\"")
     assert_includes(html, "data-action=\"reviewed-toggle#submitForm\"")
   end

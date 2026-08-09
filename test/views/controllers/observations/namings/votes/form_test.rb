@@ -33,7 +33,7 @@ module Views::Controllers::Observations::Namings::Votes
 
       # Stimulus root + Turbo on so the controller can intercept
       # change events and submit via turbo without a full page nav.
-      assert_html(html, "form[data-controller='naming-vote']")
+      assert_html(html, "form[data-controller~='naming-vote']")
       assert_html(html, "form[data-turbo='true']")
       # `naming_id` and `localization` (JSON-encoded) are read by
       # the JS to talk back to the correct row and pick localized

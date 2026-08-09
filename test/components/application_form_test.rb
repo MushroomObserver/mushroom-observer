@@ -10,6 +10,15 @@ class ApplicationFormTest < ComponentTestCase
     # Set up controller request context for form URL generation
   end
 
+  # Every form carries the submit-feedback controller (disables the
+  # buttons once submitted -- see form-feedback_controller.js), and a
+  # form's own controller rides alongside rather than being replaced.
+  def test_form_wires_the_submit_feedback_controller
+    form = render_form { text_field(:name, label: "Name") }
+
+    assert_html(form, "form[data-controller~='form-feedback']")
+  end
+
   # Text field tests
   def test_text_field_renders_with_basic_options
     form = render_form do
