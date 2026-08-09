@@ -42,10 +42,12 @@ module Views::Layouts::App
       end
     end
 
+    # `px-4` -- the message text otherwise runs right up against the
+    # dismiss trigger in the corner.
     def render_site_banner(banner)
       Alert(
         level: :success,
-        class: "message-banner",
+        class: "message-banner px-4",
         data: { banner_target: "banner" }
       ) { render_alert_contents(banner) }
     end
@@ -61,7 +63,7 @@ module Views::Layouts::App
       ) do
         Icon(type: :chevron_up, title: :close.ti)
       end
-      p { trusted_html(banner.message.t) }
+      div(class: "banner-message") { trusted_html(banner.message.t) }
     end
   end
 end

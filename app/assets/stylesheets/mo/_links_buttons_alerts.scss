@@ -175,8 +175,22 @@
   // message banner at top
   // --------------------------------------------------
   &.message-banner {
-    font-size: 150%;
     text-align: center;
+  }
+}
+
+// Responsive message text for .message-banner -- on the message
+// <div> itself, not .message-banner, so the banner's own layout
+// classes (padding, text-align) stay separate from font scaling.
+.banner-message {
+  font-size: 1em;
+
+  @media screen and (min-width: $screen-sm-min) {
+    font-size: 1.2em;
+  }
+
+  @media screen and (min-width: $screen-md-min) {
+    font-size: 1.5em;
   }
 }
 

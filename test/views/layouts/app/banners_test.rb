@@ -35,12 +35,13 @@ module Views::Layouts::App
       html = render_banners(banner: banner)
 
       assert_html(html, "div.alert.message-banner[data-banner-target='banner']")
-      assert_html(html, ".alert p", text: banner.message.t.as_displayed)
+      assert_html(html, ".alert div.banner-message",
+                  text: banner.message.t.as_displayed)
       assert_html(html,
                   "#dismiss-banner[data-banner-target='dismissButton']" \
                   "[data-version='#{banner.version}']" \
                   "[aria-label='#{:close.ti}']")
-      assert_html(html, "#dismiss-banner svg.mo-icon-chevron-up")
+      assert_html(html, "#dismiss-banner svg.mo-icon")
     end
 
     private
