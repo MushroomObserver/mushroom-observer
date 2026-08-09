@@ -36,12 +36,32 @@ class FieldSlipExtract < AbstractModel
     end
   end
 
+  # An extraction has a lifecycle now that it runs in the background:
+  # `start!` writes the pending row (so the review page has something
+  # to show while the provider is thinking), `record` completes it,
+  # `fail!` keeps the error where the reviewer will actually see it --
+  # a failed read used to leave nothing behind but a log line.
+  STATUSES = %w[pending complete failed].freeze
+
+  validates :status, inclusion: { in: STATUSES }
+
+  # Replaces any previous read of this image. The provider/model here
+  # are what will be asked; `record` overwrites them with what actually
+  # answered.
+  def self.start!(image:, user:)
+    extract = find_or_initialize_by(image_id: image.id)
+    extract.update!(user: user, status: "pending", provider: "gemini",
+                    model: FieldSlip::Extractor::Gemini.configured_model,
+                    prompt_version: FieldSlip::Extractor::PROMPT_VERSION)
+    extract
+  end
+
   # Replaces any previous read of this image.
   def self.record(image:, user:, result:, prompt_version:)
     extract = find_or_initialize_by(image_id: image.id)
     extract.update!(
       user: user, provider: result.provider, model: result.model,
-      prompt_version: prompt_version,
+      prompt_version: prompt_version, status: "complete",
       data: { "fields" => result.fields, "confidence" => result.confidence,
               "template" => result.template,
               "slip_present" => result.slip_present,
@@ -50,6 +70,24 @@ class FieldSlipExtract < AbstractModel
     )
     extract
   end
+
+  def self.fail!(image:, user:, error:)
+    extract = find_or_initialize_by(image_id: image.id)
+    extract.user ||= user
+    extract.provider ||= "gemini"
+    extract.model ||= FieldSlip::Extractor::Gemini.configured_model
+    extract.status = "failed"
+    extract.data = extract.data.to_h.merge("error" => error.to_s)
+    extract.save!
+    extract
+  end
+
+  def pending? = status == "pending"
+  def failed? = status == "failed"
+  def complete? = status == "complete"
+
+  # What went wrong, for the review page's failed state.
+  def error = data.to_h["error"]
 
   def fields = data.to_h["fields"] || {}
   def confidence = data.to_h["confidence"] || {}

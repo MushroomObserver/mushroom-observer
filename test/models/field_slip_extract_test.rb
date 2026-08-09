@@ -62,6 +62,47 @@ class FieldSlipExtractTest < UnitTestCase
     assert_equal({ "ok" => true }, extract.data["raw"])
   end
 
+  # ---------- lifecycle ----------
+
+  # Existing rows (and every `record`) read as complete; only the
+  # background-extraction path ever writes the other two.
+  def test_record_is_complete
+    extract = record(fields: { "Collector" => "A" })
+
+    assert(extract.complete?)
+    assert_not(extract.pending?)
+  end
+
+  def test_start_marks_pending_and_record_completes_it
+    started = FieldSlipExtract.start!(image: @image, user: rolf)
+
+    assert(started.pending?)
+
+    completed = record(fields: { "Collector" => "A" })
+
+    assert_equal(started.id, completed.id, "same one-row-per-image slot")
+    assert(completed.complete?)
+  end
+
+  def test_fail_keeps_the_error_for_the_reviewer
+    extract = FieldSlipExtract.fail!(image: @image, user: rolf,
+                                     error: "429 quota exceeded")
+
+    assert(extract.failed?)
+    assert_equal("429 quota exceeded", extract.error)
+  end
+
+  # A failure after a completed read must not orphan the row's
+  # provider provenance (they are NOT NULL columns).
+  def test_fail_over_an_existing_row_keeps_its_provenance
+    record(fields: { "Collector" => "A" })
+    extract = FieldSlipExtract.fail!(image: @image, user: rolf,
+                                     error: "boom")
+
+    assert(extract.failed?)
+    assert_equal("m", extract.model, "provenance of the last real read")
+  end
+
   # ---------- template ----------
 
   def test_record_stores_which_template_was_read

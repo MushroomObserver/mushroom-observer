@@ -2596,6 +2596,10 @@
   field_slip_extract_saved: Saved the selected field slip values.
   field_slip_extract_missing: That image has no field slip data to review yet.
   field_slip_extract_failed: "Could not read the field slip: [error]"
+  field_slip_extract_status_title: Reading Field Slip
+  field_slip_extract_pending: Reading the field slip. This usually takes about 15 seconds; this page refreshes itself and will show the results when they are ready.
+  field_slip_extract_retry: Try Again
+  field_slip_extract_observation_link: Go to the observation
   field_slip_extract_add_alias: Add this abbreviation
   field_slip_extract_code_mismatch: "The slip in this photo reads [read], but the observation is attached to field slip [attached]. Check that this is the right photo before saving."
   field_slip_extract_unknown_alias: "No project abbreviation is defined for [name], so the location was left as written."

@@ -22,11 +22,19 @@ class FieldSlip
       IMAGE_SIZE = :huge
       TIMEOUT = 60
 
+      # The model that will be asked for, credentials override first --
+      # also what a pending/failed extract stamps as provenance before
+      # any response reports the concrete model that answered.
+      def self.configured_model
+        creds = Rails.application.credentials.gemini || {}
+        creds[:model].presence || DEFAULT_MODEL
+      end
+
       # `credentials.gemini` is an OrderedOptions, i.e. a Hash -- so
       # `.key` resolves to `Hash#key` and raises ArgumentError rather
       # than returning the API key. Subscript, not dot.
       def initialize(model: nil, api_key: nil)
-        @model = model || credentials[:model].presence || DEFAULT_MODEL
+        @model = model || self.class.configured_model
         @api_key = api_key || credentials[:key]
       end
 

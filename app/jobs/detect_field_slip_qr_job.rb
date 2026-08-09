@@ -29,5 +29,14 @@ class DetectFieldSlipQRJob < ApplicationJob
       "DetectFieldSlipQRJob: #{code} -> #{result} " \
       "(observation #{observation.id}, image #{image.id})"
     )
+    return unless result == :attached
+
+    # This image just proved itself to be a slip photo, so read it now
+    # -- the ~15s provider call runs while the collector is still
+    # photographing, and the review page finds the extract waiting.
+    # Chained only on a fresh attach: adding more photos to an already-
+    # linked observation never re-reads a slip somebody may have
+    # reviewed (those runs exit above on the occurrence check).
+    ExtractFieldSlipJob.request(image: image, user: observation.user)
   end
 end
