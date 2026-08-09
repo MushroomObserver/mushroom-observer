@@ -16,6 +16,7 @@ require:
   - ./lib/rubocop/cop/mo/dry_test_render_helper
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
+  - ./lib/rubocop/cop/mo/no_active_record_relation_prop
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
 
@@ -83,6 +84,17 @@ MO/LowercaseTranslationTag:
     lowercase -- see lib/rubocop/cop/mo/lowercase_translation_tag.rb
     and GH issue #4843.
   Enabled: true
+
+MO/NoActiveRecordRelationProp:
+  Description: >-
+    Phlex `prop` types must not reference ActiveRecord::Relation --
+    materialize with .to_a at the call site and use _Array(<Model>)
+    instead, so the element type is checked too -- see
+    lib/rubocop/cop/mo/no_active_record_relation_prop.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
 
 MO/NoResolvedErrorsAddType:
   Description: >-
