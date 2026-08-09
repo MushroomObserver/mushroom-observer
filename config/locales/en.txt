@@ -2600,7 +2600,8 @@
   field_slip_extract_code_mismatch: "The slip in this photo reads [read], but the observation is attached to field slip [attached]. Check that this is the right photo before saving."
   field_slip_extract_unknown_alias: "No project abbreviation is defined for [name], so the location was left as written."
   field_slip_extract_id_help: Collectors often write a common name. Look up the scientific name here. Ticking the box proposes it, creating the name first if Mushroom Observer does not have it yet.
-  field_slip_extract_provenance: "Read by [provider] [model], prompt v[version], [time]."
+  field_slip_extract_provenance: "Read by [provider] [model], [template] template, prompt v[version], [time]."
+  field_slip_extract_template_mismatch: This photo shows a field slip, but not one printed on a layout this project's slips use, so no values were read. If the project should accept this slip type, its template needs updating first.
   field_slip_other_example: e.g., iNat ID
   field_slip_other_inat: Check if [:field_slip_other_codes] is an iNat ID
   field_slip_project_success: Field Slip will be associated with the [TITLE] Project

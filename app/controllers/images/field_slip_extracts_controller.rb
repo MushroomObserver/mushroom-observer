@@ -95,11 +95,17 @@ module Images
       nil
     end
 
+    # The extract's template names the fields, so the same review works
+    # whichever layout the slip was printed on.
+    def name_field
+      @extract.template.name_field
+    end
+
     # Only when the reviewer ticked it. Unticked means "the slip says
     # this, don't propose it" -- the box starts clear for a name MO
     # doesn't hold, so creating one is always a deliberate choice.
     def propose_name
-      unless params.dig(:use, FieldSlip::Extractor::NAME_FIELD) == "1"
+      unless params.dig(:use, name_field) == "1"
         return FieldSlip::Extractor::NameProposer::Outcome.new(
           status: :none, naming: nil, feedback: {}
         )
@@ -108,7 +114,7 @@ module Images
       FieldSlip::Extractor::NameProposer.new(
         observation: @observation, user: @user, vote: params[:vote],
         name_params: {
-          given_name: params.dig(:value, FieldSlip::Extractor::NAME_FIELD),
+          given_name: params.dig(:value, name_field),
           approved_name: params[:approved_name],
           chosen_name: params.dig(:chosen_name, :name_id)
         }
@@ -129,15 +135,14 @@ module Images
       render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
                extract: @extract, observation: @observation, user: @user,
                name_feedback: outcome.feedback,
-               given_name: params.dig(:value,
-                                      FieldSlip::Extractor::NAME_FIELD).to_s
+               given_name: params.dig(:value, name_field).to_s
              ))
     end
 
     def apply_chosen_fields
       FieldSlip::Extractor::Applier.new(
         observation: @observation, chosen: chosen_fields, user: @user,
-        inat_code: params[:inat] == "1"
+        template: @extract.template, inat_code: params[:inat] == "1"
       ).apply
     end
 
@@ -147,8 +152,7 @@ module Images
     # a form submitted with nothing ticked arrives without `use` at all.
     def chosen_fields
       ticked = (params[:use]&.to_unsafe_h || {}).
-               select { |_k, v| v == "1" }.keys -
-               [FieldSlip::Extractor::NAME_FIELD]
+               select { |_k, v| v == "1" }.keys - [name_field]
       values = params[:value]&.to_unsafe_h || {}
       ticked.index_with { |field| values[field] }
     end
