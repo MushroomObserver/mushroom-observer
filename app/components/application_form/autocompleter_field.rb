@@ -222,58 +222,65 @@ class Components::ApplicationForm < Superform::Rails::Form
       )
     end
 
+    # These four are plain `Button`s, not `Link`s -- they never had a
+    # real destination (target: "#" was always a fake href relying on
+    # a Stimulus `:prevent` modifier to stop its own no-op navigation)
+    # and are pure client-side toggles (show/hide a map box, swap in
+    # create fields). `variant: :link, class: "... p-0"` gives
+    # Bootstrap's own .btn-link reset (no bare-<button> browser chrome)
+    # with zero padding, without the padding being baked in as a
+    # site-wide default (see `Components::Button::Styling`).
     def render_find_button
       return unless find_text
 
-      Link(type: :get,
-           name: find_text, target: "#",
-           icon: :find_on_map, label: false,
-           icon_class: "text-primary",
-           class: "ml-3 find-btn d-none",
-           data: { map_target: "showBoxBtn",
-                   action: "map#showBox:prevent" })
+      Button(name: find_text,
+             icon: :find_on_map, label: false,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 find-btn d-none p-0",
+             data: { map_target: "showBoxBtn",
+                     action: "map#showBox" })
     end
 
     def render_keep_box_button
       return unless keep_text
 
-      Link(type: :get,
-           name: keep_text, target: "#",
-           icon: :apply, label: false,
-           icon_class: "text-primary",
-           class: "ml-3 keep-btn d-none",
-           data: { target_attr_key => "keepBtn",
-                   map_target: "lockBoxBtn",
-                   action: "map#toggleBoxLock:prevent " \
-                           "form-exif#showFields" })
+      Button(name: keep_text,
+             icon: :apply, label: false,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 keep-btn d-none p-0",
+             data: { target_attr_key => "keepBtn",
+                     map_target: "lockBoxBtn",
+                     action: "map#toggleBoxLock " \
+                             "form-exif#showFields" })
     end
 
     def render_edit_box_button
       return unless keep_text
 
-      Link(type: :get,
-           name: edit_text, target: "#",
-           icon: :edit, label: false,
-           icon_class: "text-primary",
-           class: "ml-3 edit-btn d-none",
-           data: { target_attr_key => "editBtn",
-                   map_target: "editBoxBtn",
-                   action: "map#toggleBoxLock:prevent " \
-                           "form-exif#showFields" })
+      Button(name: edit_text,
+             icon: :edit, label: false,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 edit-btn d-none p-0",
+             data: { target_attr_key => "editBtn",
+                     map_target: "editBoxBtn",
+                     action: "map#toggleBoxLock " \
+                             "form-exif#showFields" })
     end
 
     def render_create_button
       return if !create_text || create.present?
 
-      Link(type: :get,
-           name: create_text, target: "#",
-           id: "create_#{autocompleter_type}_btn",
-           class: "ml-3 create-button",
-           icon: :plus, label: true,
-           icon_class: "text-primary",
-           data: { target_attr_key => "createBtn",
-                   action: "#{stimulus_controller_name}" \
-                           "#swapCreate:prevent" })
+      Button(name: create_text,
+             id: "create_#{autocompleter_type}_btn",
+             class: "ml-3 create-button p-0",
+             icon: :plus, label: true,
+             icon_class: "text-primary",
+             variant: :link,
+             data: { target_attr_key => "createBtn",
+                     action: "#{stimulus_controller_name}#swapCreate" })
     end
 
     def render_modal_create_link

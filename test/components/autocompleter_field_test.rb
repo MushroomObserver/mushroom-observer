@@ -182,10 +182,11 @@ class AutocompleterFieldTest < ComponentTestCase
     form = TestFindTextAutocompleterForm.new(comment, action: "/test")
     html = render(form)
 
-    # Should have find button with correct attributes
-    assert_html(html, "a.find-btn")
-    assert_html(html, "a[data-map-target='showBoxBtn']")
-    assert_html(html, "a[data-action='map#showBox:prevent']")
+    # Should have find button with correct attributes -- a plain
+    # Button (not a Link), since it never had a real destination.
+    assert_html(html, "button.find-btn")
+    assert_html(html, "button[data-map-target='showBoxBtn']")
+    assert_html(html, "button[data-action='map#showBox']")
   end
 
   def test_autocompleter_with_keep_text_option
@@ -195,12 +196,12 @@ class AutocompleterFieldTest < ComponentTestCase
     html = render(form)
 
     # Should have keep button
-    assert_html(html, "a.keep-btn")
-    assert_html(html, "a[data-map-target='lockBoxBtn']")
+    assert_html(html, "button.keep-btn")
+    assert_html(html, "button[data-map-target='lockBoxBtn']")
 
     # Should have edit button
-    assert_html(html, "a.edit-btn")
-    assert_html(html, "a[data-map-target='editBoxBtn']")
+    assert_html(html, "button.edit-btn")
+    assert_html(html, "button[data-map-target='editBoxBtn']")
   end
 
   def test_autocompleter_with_create_text_option
@@ -208,8 +209,8 @@ class AutocompleterFieldTest < ComponentTestCase
     form = TestCreateTextAutocompleterForm.new(comment, action: "/test")
     html = render(form)
 
-    assert_html(html, "a.create-button")
-    assert_html(html, "a#create_location_btn")
+    assert_html(html, "button.create-button")
+    assert_html(html, "button#create_location_btn")
   end
 
   def test_autocompleter_with_modal_create_link

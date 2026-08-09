@@ -2,6 +2,24 @@
 // autocompletion
 // --------------------------------------------------
 
+// Label-row icons (has-id-indicator, find/keep/edit/create) read too
+// small at the default 1.12em next to the bold field label beside
+// them -- matches the 1.5em scale used for #top_nav's icon buttons.
+// `.has-id-indicator.mo-icon` (compound, not `.has-id-indicator`
+// alone) -- both classes land on the same <svg>, and the compound
+// form's higher specificity is needed to reliably beat the base
+// `.mo-icon` rule in _icons.scss, which is @import-ed AFTER this
+// file (mushroom_observer.scss) and would otherwise win the tie on
+// source order alone.
+.has-id-indicator.mo-icon,
+.find-btn .mo-icon,
+.keep-btn .mo-icon,
+.edit-btn .mo-icon,
+.create-button .mo-icon {
+  width: 1.5em;
+  height: 1.5em;
+}
+
 // autocompleter state - do we have a match?
 .has-id-indicator {
   display: none;
