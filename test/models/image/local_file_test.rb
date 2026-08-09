@@ -46,10 +46,25 @@ class Image::LocalFileTest < UnitTestCase
     end
   end
 
+  # Exercises the image_url plumbing end to end. Writes the file it
+  # expects to find rather than asserting on the ambient filesystem --
+  # other tests (image uploads, the Gemini adapter's) leave files
+  # behind the very URL this image resolves to, so "no file there"
+  # depends on test order.
   def test_path_resolves_through_image_url
-    # The test env resolves images to file:// URLs with no files behind
-    # them, so this exercises the image_url plumbing end to end.
-    assert_nil(Image::LocalFile.path(images(:in_situ_image), :huge))
+    image = images(:in_situ_image)
+    resolved = image.image_url(:huge).url.sub(/\?\d+\z/, "")
+    expected = Image::LocalFile.file_url_path(resolved) ||
+               Image::LocalFile.web_path_on_disk(resolved)
+
+    assert(expected.present?, "premise: test env resolves images locally")
+
+    FileUtils.mkdir_p(File.dirname(expected))
+    File.binwrite(expected, "jpegbytes")
+
+    assert_equal(expected, Image::LocalFile.path(image, :huge))
+  ensure
+    FileUtils.rm_f(expected) if expected
   end
 
   private

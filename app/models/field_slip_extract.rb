@@ -51,7 +51,7 @@ class FieldSlipExtract < AbstractModel
   def self.start!(image:, user:)
     extract = find_or_initialize_by(image_id: image.id)
     extract.update!(user: user, status: "pending", provider: "gemini",
-                    model: FieldSlip::Extractor::Gemini::DEFAULT_MODEL,
+                    model: FieldSlip::Extractor::Gemini.configured_model,
                     prompt_version: FieldSlip::Extractor::PROMPT_VERSION)
     extract
   end
@@ -75,7 +75,7 @@ class FieldSlipExtract < AbstractModel
     extract = find_or_initialize_by(image_id: image.id)
     extract.user ||= user
     extract.provider ||= "gemini"
-    extract.model ||= FieldSlip::Extractor::Gemini::DEFAULT_MODEL
+    extract.model ||= FieldSlip::Extractor::Gemini.configured_model
     extract.status = "failed"
     extract.data = extract.data.to_h.merge("error" => error.to_s)
     extract.save!

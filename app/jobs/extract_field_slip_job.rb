@@ -34,6 +34,13 @@ class ExtractFieldSlipJob < ApplicationJob
       prompt_version: FieldSlip::Extractor::PROMPT_VERSION
     )
   rescue StandardError => e
+    # Not re-raised -- the failed extract row IS the retry mechanism
+    # (the review page's Try Again button) -- so the details have to be
+    # logged here or they exist nowhere.
+    Rails.logger.error(
+      "ExtractFieldSlipJob failed on image #{image.id}: " \
+      "#{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}"
+    )
     FieldSlipExtract.fail!(image: image, user: user, error: e.message)
   end
 end

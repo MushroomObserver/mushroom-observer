@@ -30,8 +30,14 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "[data-controller='reload-poll']")
       assert_html(html, "#field_slip_extract_pending",
                   text: :field_slip_extract_pending.t.as_displayed[0, 40])
-      assert_html(html,
-                  "a[href='#{routes.permanent_observation_path(@obs.id)}']")
+      # The view links image.observations.first -- the fixture image
+      # hangs off several observations, so pin whichever IS first
+      # rather than assuming an association order.
+      linked = @image.reload.observations.first
+
+      assert_html(
+        html, "a[href='#{routes.permanent_observation_path(linked.id)}']"
+      )
     end
 
     # No extract yet -- the QR jobs are still attaching -- looks the
