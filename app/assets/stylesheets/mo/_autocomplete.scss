@@ -4,8 +4,7 @@
 
 // Label-row icons (has-id-indicator, find/keep/edit/create) read too
 // small at the default 1.12em next to the bold field label beside
-// them -- matches the 1.5em scale used for #top_nav's icon buttons.
-// Vertical alignment is the label row's job now (FieldLabelRow's
+// them. Vertical alignment is the label row's job now (FieldLabelRow's
 // d-flex align-items-center), not a per-icon `top:` guess.
 // `.has-id-indicator` is a wrapping span, not the icon itself (a bare
 // svg can't take padding -- see autocompleter_field.rb), so this is
@@ -18,8 +17,8 @@
 .keep-btn .mo-icon,
 .edit-btn .mo-icon,
 .create-button .mo-icon {
-  width: 1.5em;
-  height: 1.5em;
+  width: 1.3em;
+  height: 1.3em;
 }
 
 // autocompleter state - do we have a match?
