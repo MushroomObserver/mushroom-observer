@@ -64,13 +64,27 @@ class FieldSlip
       return [] unless available?
 
       SIZES.each do |size|
-        path = Image::LocalFile.path(image, size)
+        path = local_file(image, size)
         next unless path
 
         codes = scan(path)
         return codes if codes.any?
       end
       []
+    end
+
+    # The precedence-resolved URL stops pointing at the local copy the
+    # moment an image transfers (production resolves transferred images
+    # to the image server), but the file itself stays on this machine's
+    # disk until cleanup -- so probe the direct path too, or a fresh
+    # upload becomes unreadable within a second of arriving.
+    def self.local_file(image, size)
+      Image::LocalFile.path(image, size) || direct_path(image, size)
+    end
+
+    def self.direct_path(image, size)
+      path = image.full_filepath(size)
+      path if path && File.exist?(path)
     end
 
     # -Sdisable -Sqrcode.enable: QR only, so a stray barcode elsewhere
