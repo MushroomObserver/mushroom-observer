@@ -101,7 +101,7 @@ class ListGroupTest < ComponentTestCase
 
   def test_container_data_attributes_pass_through
     html = render_list(
-      attributes: { data: { controller: "section-update" } }
+      data: { controller: "section-update" }
     ) do |list|
       list.item { "x" }
     end

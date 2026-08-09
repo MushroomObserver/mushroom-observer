@@ -41,7 +41,7 @@ module Views::Controllers::SpeciesLists::NameLists
     def render_lister_table
       Table(
         class: "name-lister mt-3 w-100",
-        attributes: { cols: "3", data: lister_data }
+        cols: "3", data: lister_data
       ) do |t|
         t.column(:name_lister_genera.t, width: "20%")
         t.column(:name_lister_species.t, width: "40%")

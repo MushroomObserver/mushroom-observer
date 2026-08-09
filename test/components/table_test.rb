@@ -169,13 +169,13 @@ class TableTest < ComponentTestCase
     rows = [TestRow.new(name: "Alice")]
 
     html = render_table(
-      rows, attributes: { cols: "1", data: { controller: "name-list" } }
+      rows, cols: "1", data: { controller: "name-list" }
     ) do |t|
       t.column("Name", &:name)
     end
 
-    # `attributes:` Hash forwards arbitrary HTML attrs to the
-    # `<table>` element (table-level Stimulus root etc.).
+    # Arbitrary kwargs forward to the `<table>` element (table-level
+    # Stimulus root etc.).
     assert_html(html, "table[cols='1'][data-controller='name-list']")
   end
 
