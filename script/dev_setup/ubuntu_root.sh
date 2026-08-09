@@ -78,7 +78,7 @@ EOF
         libmysqlclient-dev libcurl4-openssl-dev libssl-dev libapr1-dev \
         libaprutil1-dev libreadline-dev zlib1g-dev imagemagick \
         libmagickcore-dev libmagickwand-dev libjpeg-dev libjpeg-progs \
-        libimage-exiftool-perl
+        libimage-exiftool-perl zbar-tools
 
     cd /tmp || exit 1
     rm -rf build

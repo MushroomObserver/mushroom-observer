@@ -62,7 +62,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # correcting it is the whole point of the step.
     def render_extracted_cell(row)
       if row.editable
-        text_field("value[#{row.field}]", value: row.extracted, label: false)
+        render_extracted_input(row)
       else
         plain(row.extracted.to_s)
       end
@@ -70,12 +70,26 @@ module Views::Controllers::Images::FieldSlipExtracts
       render_confidence(row)
     end
 
-    # A purely numeric "Other Codes" is an iNaturalist observation id in
-    # practice, so it ticks itself and gets stored as a link. Visible
-    # and overridable rather than silent, since the box is free text and
-    # someone will eventually write a herbarium number in it.
+    # A slip's Notes box is often several lines, and a single-line
+    # input silently drops the newlines from its value -- the browser
+    # strips them, gluing "Phenolic odor\nYellow staining" into
+    # "Phenolic odorYellow staining" on save. A textarea keeps them.
+    def render_extracted_input(row)
+      value = row.extracted.to_s
+      unless value.include?("\n")
+        return text_field("value[#{row.field}]", value: value, label: false)
+      end
+
+      textarea_field("value[#{row.field}]", value: value, label: false,
+                                            rows: value.count("\n") + 1)
+    end
+
+    # A value holding an iNaturalist observation id ticks itself and
+    # gets stored as a link. Visible and overridable rather than
+    # silent, since the box is free text and someone will eventually
+    # write a herbarium number in it.
     def render_inat_flag(row)
-      return unless row.field == ::FieldSlip::Extractor::OTHER_CODES_FIELD
+      return unless row.inat_row?
 
       checkbox_field("inat", checked: @review.inat_code,
                              label: :field_slip_extract_inat.l)

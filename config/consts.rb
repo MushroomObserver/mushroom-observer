@@ -136,6 +136,11 @@ MushroomObserver::Application.configure do
   # Default locale when nothing sets it explicitly.
   config.default_locale = "en"
 
+  # Scan uploaded photos for field slip QR codes and auto-attach the
+  # observation to the slip (and so its project). Also requires the
+  # zbar tool (zbarimg) on the machine -- see FieldSlip::QRDecoder.
+  config.field_slip_qr_detection = true
+
   # I18n namespace all our app-specific translations are kept in
   # inside localization files.
   config.locale_namespace = "mo"

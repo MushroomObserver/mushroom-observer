@@ -36,26 +36,79 @@ class FieldSlipExtract < AbstractModel
     end
   end
 
+  # An extraction has a lifecycle now that it runs in the background:
+  # `start!` writes the pending row (so the review page has something
+  # to show while the provider is thinking), `record` completes it,
+  # `fail!` keeps the error where the reviewer will actually see it --
+  # a failed read used to leave nothing behind but a log line.
+  STATUSES = %w[pending complete failed].freeze
+
+  validates :status, inclusion: { in: STATUSES }
+
+  # Replaces any previous read of this image. The provider/model here
+  # are what will be asked; `record` overwrites them with what actually
+  # answered.
+  def self.start!(image:, user:)
+    extract = find_or_initialize_by(image_id: image.id)
+    extract.update!(user: user, status: "pending", provider: "gemini",
+                    model: FieldSlip::Extractor::Gemini.configured_model,
+                    prompt_version: FieldSlip::Extractor::PROMPT_VERSION)
+    extract
+  end
+
   # Replaces any previous read of this image.
   def self.record(image:, user:, result:, prompt_version:)
     extract = find_or_initialize_by(image_id: image.id)
     extract.update!(
       user: user, provider: result.provider, model: result.model,
-      prompt_version: prompt_version,
+      prompt_version: prompt_version, status: "complete",
       data: { "fields" => result.fields, "confidence" => result.confidence,
+              "template" => result.template,
               "slip_present" => result.slip_present,
+              "template_matched" => result.template_matched,
               "unreadable" => result.unreadable, "raw" => result.raw }
     )
     extract
   end
 
+  def self.fail!(image:, user:, error:)
+    extract = find_or_initialize_by(image_id: image.id)
+    extract.user ||= user
+    extract.provider ||= "gemini"
+    extract.model ||= FieldSlip::Extractor::Gemini.configured_model
+    extract.status = "failed"
+    extract.data = extract.data.to_h.merge("error" => error.to_s)
+    extract.save!
+    extract
+  end
+
+  def pending? = status == "pending"
+  def failed? = status == "failed"
+  def complete? = status == "complete"
+
+  # What went wrong, for the review page's failed state.
+  def error = data.to_h["error"]
+
   def fields = data.to_h["fields"] || {}
   def confidence = data.to_h["confidence"] || {}
+
+  # The layout this photo was read as. Reads stored before templates
+  # existed were all of MO's own slip.
+  def template
+    @template ||= FieldSlip::Template.for(data.to_h["template"] || "mo")
+  end
 
   # True only when the read explicitly reported no slip in the image.
   # Reads stored before the provider reported it answer false, same as
   # a read that did see one -- absence of the flag is not evidence.
   def no_slip? = data.to_h["slip_present"] == false
+
+  # A slip was seen, but printed on a different layout than this
+  # project's slips use, so nothing was read off it. Same only-explicit-
+  # false reasoning as `no_slip?`.
+  def template_mismatch?
+    data.to_h["template_matched"] == false && !no_slip?
+  end
 
   # Fields written on the slip that this image could not recover, so
   # another photo of the same slip is worth consulting for them. A
@@ -80,7 +133,7 @@ class FieldSlipExtract < AbstractModel
   # this image is not the slip for this observation. nil when they
   # agree, when either is missing, or when there is no attached slip.
   def code_mismatch
-    read = value_for("Field Slip Code").to_s.strip
+    read = value_for(template.code_field).to_s.strip
     attached = observation&.field_slip&.code.to_s.strip
     return nil if read.blank? || attached.blank? || read == attached
 
@@ -92,7 +145,7 @@ class FieldSlipExtract < AbstractModel
   # alias fixes this slip and every later one, since the prompt is built
   # from the same table.
   def unknown_location_alias
-    written = value_for("Location").to_s.strip
+    written = value_for(template.location_field).to_s.strip
     return nil if written.blank?
     # A full MO location name is not an unknown abbreviation, whether or
     # not the project happens to alias it -- warning about one and
@@ -115,7 +168,7 @@ class FieldSlipExtract < AbstractModel
   # already uses, and only when exactly one of them matches, so a guess
   # can't quietly pick between two plausible sites.
   def location_suggestion
-    written = value_for("Location").to_s.strip
+    written = value_for(template.location_field).to_s.strip
     return nil if written.blank?
 
     matches = project_locations.select do |location|

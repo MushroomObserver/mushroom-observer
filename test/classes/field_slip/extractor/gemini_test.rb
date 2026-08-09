@@ -143,6 +143,27 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
     assert_not(extract.no_slip?)
   end
 
+  # The result records which layout the prompt asked for, and whether
+  # the model said the photographed slip was that layout at all.
+  def test_reports_the_template_and_a_mismatch
+    stub_gemini(json_payload(fields: {}, slip_present: true,
+                             template_matched: "false"))
+
+    result = extract
+
+    assert_equal(@context.template.key, result.template)
+    assert(result.template_mismatch?)
+  end
+
+  def test_missing_template_matched_is_not_a_mismatch
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" }))
+
+    result = extract
+
+    assert_nil(result.template_matched)
+    assert_not(result.template_mismatch?)
+  end
+
   def test_a_stringified_true_is_understood_too
     stub_gemini(json_payload(fields: {}, slip_present: "TRUE"))
 

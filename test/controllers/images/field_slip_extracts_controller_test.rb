@@ -4,6 +4,8 @@ require("test_helper")
 
 module Images
   class FieldSlipExtractsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def setup
       super
       @obs = observations(:minimal_unknown_obs)
@@ -12,12 +14,12 @@ module Images
       @project = projects(:eol_project)
     end
 
-    def record_extract(fields: {}, confidence: {})
+    def record_extract(fields: {}, confidence: {}, template: "mo")
       FieldSlipExtract.record(
         image: @image, user: rolf, prompt_version: "1",
         result: FieldSlip::Extractor::Result.new(
           provider: "g", model: "m", raw: {}, fields: fields,
-          confidence: confidence
+          confidence: confidence, template: template
         )
       )
     end
@@ -83,39 +85,21 @@ module Images
 
     # ---------- create ----------
 
-    def test_create_records_the_extract_and_redirects_to_review
+    # The provider call runs in a job now (see ExtractFieldSlipJob);
+    # the button's request just queues it and lands on the review page,
+    # which shows the pending state.
+    def test_create_enqueues_the_read_and_redirects_to_review
       login_as_site_admin
-      result = FieldSlip::Extractor::Result.new(
-        provider: "gemini", model: "gemini-3.6-flash", raw: { "x" => 1 },
-        fields: { "Collector" => "Scott Shapiro" }, confidence: {}
-      )
 
-      FieldSlip::Extractor.stub(:default, fake_extractor(result)) do
+      assert_enqueued_with(job: ExtractFieldSlipJob,
+                           args: [@image.id, rolf.id]) do
         post(:create, params: { image_id: @image.id })
       end
 
       assert_redirected_to(edit_image_field_slip_extract_path(@image.id))
       extract = FieldSlipExtract.find_by(image_id: @image.id)
 
-      assert_equal("Scott Shapiro", extract.value_for("Collector"))
-      assert_equal("gemini-3.6-flash", extract.model)
-      # Stamped from the constant, not a literal: a read is only
-      # attributable to the prompt that produced it if these agree.
-      assert_equal(FieldSlip::Extractor::PROMPT_VERSION,
-                   extract.prompt_version)
-    end
-
-    # A provider failure has to land as a flash, not a 500 -- the button
-    # is one click and the network is not reliable.
-    def test_create_reports_a_provider_failure
-      login_as_site_admin
-
-      FieldSlip::Extractor.stub(:default, failing_extractor) do
-        post(:create, params: { image_id: @image.id })
-      end
-
-      assert_redirected_to(image_path(@image.id))
-      assert_flash_error
+      assert(extract.pending?, "the review page needs a status to show")
     end
 
     def test_create_with_an_unknown_image_redirects
@@ -138,9 +122,83 @@ module Images
       assert_flash_error
     end
 
+    def test_edit_shows_a_pending_read_with_self_refresh
+      FieldSlipExtract.start!(image: @image, user: rolf)
+      login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_response(:success)
+      assert_select("[data-controller='reload-poll']")
+    end
+
+    def test_edit_shows_a_failed_read_with_a_retry_button
+      FieldSlipExtract.fail!(image: @image, user: rolf, error: "quota")
+      login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_response(:success)
+      assert_select(".alert-danger", text: /quota/)
+      assert_select(
+        "form[action='#{image_field_slip_extract_path(@image.id)}']"
+      )
+      assert_select("[data-controller='reload-poll']", count: 0)
+    end
+
+    # The observation-create redirect arrives before the QR jobs have
+    # attached anything; `await=1` is what makes an extract-less page
+    # wait instead of bouncing.
+    def test_edit_awaits_detection_when_asked
+      login_as_site_admin
+
+      get(:edit, params: { image_id: @image.id, await: 1 })
+
+      assert_response(:success)
+      assert_select("[data-controller='reload-poll']")
+    end
+
+    # ...and can land before the observation is even in its project,
+    # when `permitted?` has nothing to check against. Waiting on your
+    # own upload needs only ownership; the review form still needs
+    # project admin-ship.
+    def test_owner_may_wait_on_their_own_upload_before_project_filing
+      owner = @obs.user
+      login(owner.login)
+
+      assert_not(
+        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
+        "premise: ownership alone, no project admin-ship"
+      )
+
+      FieldSlipExtract.start!(image: @image, user: owner)
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_response(:success)
+      assert_select("[data-controller='reload-poll']")
+    end
+
+    def test_owner_alone_may_not_review_a_completed_extract
+      owner = @obs.user
+      login(owner.login)
+
+      assert_not(
+        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
+        "premise: ownership alone, no project admin-ship"
+      )
+
+      record_extract(fields: { "Collector" => "A" })
+
+      get(:edit, params: { image_id: @image.id })
+
+      assert_redirected_to(image_path(@image.id))
+      assert_flash_error
+    end
+
     def test_edit_renders_the_rows_and_the_name_section
       record_extract(fields: { "Collector" => "Scott Shapiro",
-                               FieldSlip::Extractor::NAME_FIELD => "Boletus" })
+                               "ID" => "Boletus" })
       login_as_site_admin
 
       get(:edit, params: { image_id: @image.id })
@@ -219,8 +277,40 @@ module Images
       assert_equal("386717373", @obs.reload.notes[:Other_Codes])
     end
 
+    # A dbg extract reviews and saves through its own field labels --
+    # the name lives in "Species", the iNat id in "iNaturalist", and
+    # the coordinates land as a pair.
+    def test_update_applies_a_dbg_extract
+      record_extract(template: "dbg",
+                     fields: { "Species" => "Coprinus comatus",
+                               "Latitude" => "38.8703",
+                               "Longitude" => "-105.0442",
+                               "iNaturalist" => "10:29 388879492" })
+      before = @obs.namings.count
+      login_as_site_admin
+
+      put(:update,
+          params: { image_id: @image.id, inat: "1",
+                    use: { "Species" => "1", "Latitude" => "1",
+                           "Longitude" => "1", "iNaturalist" => "1" },
+                    value: { "Species" => "Coprinus comatus",
+                             "Latitude" => "38.8703",
+                             "Longitude" => "-105.0442",
+                             "iNaturalist" => "10:29 388879492" } })
+
+      @obs.reload
+
+      assert_equal(before + 1, @obs.namings.count)
+      assert_in_delta(38.8703, @obs.lat)
+      assert_in_delta(-105.0442, @obs.lng)
+      link = FieldSlipNotesBuilder.inat_link("388879492")
+
+      assert_equal("#{link} (10:29)", @obs.notes[:iNaturalist])
+      assert_redirected_to(permanent_observation_path(@obs.id))
+    end
+
     def test_update_proposes_a_ticked_known_name
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Coprinus comatus" })
       before = @obs.namings.count
       login_as_site_admin
@@ -233,7 +323,7 @@ module Images
     end
 
     def test_update_leaves_an_unticked_name_alone
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Coprinus comatus" })
       before = @obs.namings.count
       login_as_site_admin
@@ -247,7 +337,7 @@ module Images
     # An unrecognized name comes back for confirmation rather than being
     # created off a machine reading.
     def test_update_asks_before_creating_an_unknown_name
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Lumpy Bracket" })
       names_before = Name.count
       login_as_site_admin
@@ -264,7 +354,7 @@ module Images
     # does not mean re-doing the rest.
     def test_update_applies_fields_even_when_the_name_needs_approval
       record_extract(fields: { "Collector" => "Scott Shapiro",
-                               FieldSlip::Extractor::NAME_FIELD =>
+                               "ID" =>
                                "Lumpy Bracket" })
       login_as_site_admin
 
@@ -280,7 +370,7 @@ module Images
     # complete rather than bouncing to a confirmation page whose
     # feedback panel would render empty.
     def test_update_completes_when_the_id_is_a_placeholder
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "unknown" })
       login_as_site_admin
 
@@ -291,7 +381,7 @@ module Images
     end
 
     def test_update_creates_the_name_once_approved
-      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      record_extract(fields: { "ID" =>
                                "Lumpysomething bracketii" })
       names_before = Name.count
       login_as_site_admin
@@ -310,22 +400,6 @@ module Images
       put(:update, params: { image_id: @image.id })
 
       assert_redirected_to(image_path(@image.id))
-    end
-
-    private
-
-    def fake_extractor(result)
-      extractor = Object.new
-      extractor.define_singleton_method(:extract) { |_image, **| result }
-      extractor
-    end
-
-    def failing_extractor
-      extractor = Object.new
-      extractor.define_singleton_method(:extract) do |_image, **|
-        raise(FieldSlip::Extractor::Gemini::BadResponse.new("nope"))
-      end
-      extractor
     end
   end
 end

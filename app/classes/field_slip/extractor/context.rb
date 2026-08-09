@@ -26,6 +26,11 @@ class FieldSlip
         @project ||= observation&.projects&.first
       end
 
+      # Which printed layout this project's slips use.
+      def template
+        @template ||= FieldSlip::Template.for_project(project)
+      end
+
       def field_slip_code
         observation&.field_slip&.code
       end
