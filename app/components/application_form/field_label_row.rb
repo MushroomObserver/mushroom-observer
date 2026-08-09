@@ -109,10 +109,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_options[:label_sr_only] ? "sr-only" : "mr-3"
     end
 
+    # autocompleter-label-row goes on the OUTER row div only -- when
+    # label_end is present that's this div; render_label_with_help
+    # passes wrap_class: nil since it's nested content here, not the
+    # outer row (see that method for why the class exists at all).
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
-      div(class: "#{display} justify-content-between align-items-center") do
-        render_label_with_help(label_text)
+      div(class: "#{display} justify-content-between align-items-center " \
+                 "autocompleter-label-row") do
+        render_label_with_help(label_text, wrap_class: nil)
         render_label_end_slot
       end
     end
@@ -124,8 +129,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     # baseline/em-sizing quirks (an SVG icon's default vertical-align:
     # baseline doesn't actually sit on the text baseline the way a
     # real glyph does -- see autocompleter_field.rb).
-    def render_label_with_help(label_text)
-      div(class: "d-flex align-items-center") do
+    #
+    # wrap_class defaults to autocompleter-label-row -- Bootstrap's
+    # label carries margin-bottom: 5px with no top margin, which
+    # throws off align-items-center centering against between-content
+    # that has no margin of its own (see _autocomplete.scss). Inside
+    # .autocompleter, the label's own margin is zeroed and the same
+    # bottom spacing moves to this row wrapper instead. render_label_
+    # flex_row passes wrap_class: nil so the class lands once, on
+    # whichever div is actually the outer row.
+    def render_label_with_help(label_text,
+                               wrap_class: "autocompleter-label-row")
+      div(class: class_names("d-flex", "align-items-center", wrap_class)) do
         label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
         end

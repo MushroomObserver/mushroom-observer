@@ -21,6 +21,24 @@
   height: 1.3em;
 }
 
+// Bootstrap's `label { margin-bottom: 5px; }` (bootstrap-sass
+// _forms.scss, not a variable -- it's a hardcoded literal there too)
+// sits on only one side of the label's margin box, so it throws off
+// FieldLabelRow's align-items-center: centering the label's margin
+// box against between-content that carries no margin of its own
+// (the has-id-indicator/find/keep/edit icons) shifts the label text
+// off the icons' visual center. Zero it here and move the same
+// bottom spacing onto the whole label row instead (see
+// FieldLabelRow#render_label_with_help), so only the *source* of the
+// spacing changes, not the total spacing below the row.
+.autocompleter label {
+  margin-bottom: 0;
+}
+
+.autocompleter-label-row {
+  margin-bottom: 5px;
+}
+
 // autocompleter state - do we have a match?
 .has-id-indicator {
   display: none;

@@ -1216,6 +1216,269 @@ class ApplicationFormTest < ComponentTestCase
                                      "application_form")
   end
 
+  # Regression: hidden_field defaults autocomplete="off", same as Rails
+  # hidden_field_tag -- browsers otherwise repopulate hidden fields on
+  # back-button.
+  def test_hidden_field_defaults_autocomplete_off
+    form = render_comment_form { hidden_field(:summary, value: "x") }
+
+    assert_html(form, "input[type='hidden'][name='comment[summary]']" \
+                      "[autocomplete='off']")
+  end
+
+  def test_hidden_field_allows_autocomplete_override
+    form = render_comment_form do
+      hidden_field(:summary, value: "x", autocomplete: "on")
+    end
+
+    assert_html(form, "input[type='hidden'][name='comment[summary]']" \
+                      "[autocomplete='on']")
+  end
+
+  # Regression: date_field's inline: propagates to both the outer
+  # form-group AND the inner date-selects div, so the label sits next
+  # to the day/month/year inputs instead of breaking onto its own line.
+  def test_date_field_inline_adds_form_inline_to_outer_wrap
+    form = render_comment_form do
+      date_field(:created_at, inline: true, label: "When:")
+    end
+
+    assert_html(form, "div.form-group.form-inline")
+    assert_html(form, "div.date-selects.d-inline-block")
+  end
+
+  # Regression: checkbox_field's unchecked-value hidden sidecar carries
+  # autocomplete="off", matching Rails form.check_box -- otherwise
+  # browsers restore "0" on back-button and silently clobber a checked
+  # box.
+  def test_checkbox_field_hidden_sidecar_has_autocomplete_off
+    form = render_comment_form { checkbox_field(:ok, label: "OK?") }
+
+    assert_html(form,
+                "input[type='hidden'][name='comment[ok]']" \
+                "[value='0'][autocomplete='off']")
+    assert_html(form, "input[type='checkbox'][name='comment[ok]']" \
+                      "[value='1']")
+  end
+
+  # Regression: select_field's width: :auto adds w-auto, shrinking the
+  # select to its content width instead of filling the form-group.
+  def test_select_field_width_auto_adds_w_auto_class
+    form = render_comment_form do
+      select_field(:summary, [%w[a A], %w[b B]], width: :auto, label: "S:")
+    end
+
+    assert_html(form, "select.form-control.w-auto[name='comment[summary]']")
+  end
+
+  def test_select_field_without_width_kwarg_omits_w_auto
+    form = render_comment_form do
+      select_field(:summary, [%w[a A], %w[b B]], label: "S:")
+    end
+
+    sel = Nokogiri::HTML5.fragment(form).at_css("select")
+    classes = sel["class"].split
+    assert_includes(classes, "form-control")
+    assert_not_includes(classes, "w-auto",
+                        "w-auto should only be set when width: :auto")
+  end
+
+  # Regression: AutocompleterField must not register an empty
+  # label_end slot when create_text: is absent -- otherwise
+  # FieldLabelRow forces the d-flex layout for nothing. The
+  # has-id-indicator (label_after content) still renders inline with
+  # the label -- a wrapping span, not a bare svg (padding on a
+  # replaced element like svg eats into its own rendered content
+  # instead of adding space around it).
+  def test_autocompleter_field_no_d_flex_when_no_create_text
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_no_match(/d-flex justify-content-between/, form,
+                    "label row must not use d-flex when label_end is empty")
+    assert_html(form, "span.has-id-indicator svg")
+  end
+
+  # Regression: an outer .autocompleter must not carry an auto-derived
+  # id when the caller didn't pass controller_id: -- but does carry it
+  # when the caller does.
+  def test_autocompleter_field_omits_outer_id_by_default
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, wrapper_options: { label: "Name" }
+             ))
+    end
+
+    wrap = Nokogiri::HTML5.fragment(form).at_css("div.autocompleter")
+    assert_nil(wrap["id"],
+               "outer .autocompleter must not carry an auto-derived id " \
+               "when caller didn't pass controller_id:")
+  end
+
+  def test_autocompleter_field_emits_outer_id_when_requested
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, controller_id: "my_autocompleter_id",
+               wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_html(form, "div.autocompleter#my_autocompleter_id")
+  end
+
+  # Regression: create_text: populates the label_end slot, so the
+  # d-flex wrap is justified: label area left, create button right.
+  def test_autocompleter_field_uses_d_flex_when_create_text_set
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, create_text: "Create new",
+               wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_html(form, "div.d-flex.justify-content-between")
+  end
+
+  # Regression: RadioField's append slot is per-group, so it lands
+  # once after the final <div class="radio"> wrap -- not interleaved
+  # with options.
+  def test_radio_field_append_slot_renders_after_last_option
+    form = render_comment_form do
+      radio_field(:summary, [1, "One"], [2, "Two"], [3, "Three"]) do |f|
+        f.with_append { div(class: "after-radios") { "after the group" } }
+      end
+    end
+
+    radios = form.scan('<div class="radio">')
+    assert_equal(3, radios.size, "expected 3 radio option wraps")
+
+    last_radio_end = form.rindex("</div>", form.index("after-radios"))
+    assert(last_radio_end,
+           "append content should be emitted after the radio group")
+    assert_html(form, "div.after-radios", text: "after the group")
+  end
+
+  # Regression: date_field's between: renders inside the label row
+  # (before the date-selects), not as a separate row or a trailing
+  # sibling -- FieldLabelRow handles this via
+  # wrapper_options[:between].
+  def test_date_field_between_renders_inline_with_label
+    form = render_comment_form do
+      date_field(:created_at, label: "When:", between: "(picker note)")
+    end
+
+    assert_includes(form, "(picker note)")
+
+    between_pos = form.index("(picker note)")
+    selects_pos = form.index("date-selects")
+    assert(between_pos && selects_pos,
+           "both between content and date-selects should be present")
+    assert(between_pos < selects_pos,
+           "between content must render in the label row " \
+           "(before the date-selects)")
+  end
+
+  # --- String field_name: raw `name=` (no model binding) -----------------
+  #
+  # Each `*_field` helper accepts the same Symbol/String pair as
+  # `hidden_field`: Symbol → bound to the form's model; String → raw
+  # HTML `name` attribute, value carried via the `value:` option.
+  # Lets non-bound fields (operation state, nested namespaces) go
+  # through the same helpers as model attributes.
+
+  def test_text_field_accepts_string_name
+    form = render_comment_form do
+      text_field("member[lat]", value: "39.2", label: "Lat:")
+    end
+
+    assert_html(form, "input[type='text'][name='member[lat]'][value='39.2']")
+  end
+
+  def test_textarea_field_accepts_string_name
+    form = render_comment_form do
+      textarea_field("member[notes][Cap]", value: "soft", rows: 1)
+    end
+
+    assert_html(form, "textarea[name='member[notes][Cap]']", text: "soft")
+  end
+
+  def test_checkbox_field_accepts_string_name
+    form = render_comment_form do
+      checkbox_field("member[specimen]", value: "1", checked: true,
+                                         label: "Specimen?")
+    end
+
+    assert_html(form,
+                "input[type='checkbox'][name='member[specimen]']" \
+                "[value='1'][checked]")
+  end
+
+  def test_select_field_accepts_string_name
+    form = render_comment_form do
+      select_field("member[value]",
+                   [["One", 1], ["Two", 2], ["Three", 3]],
+                   label: "Confidence:")
+    end
+
+    assert_html(form, "select[name='member[value]']")
+    assert_html(form, "select[name='member[value]'] option[value='2']",
+                text: "Two")
+  end
+
+  # Regression: the hidden-id input for a String field name must
+  # derive its name from the namespace correctly -- `<namespace>
+  # [<key>_id]`, not `<namespace>[<key>]` or anything else. (Earlier
+  # implementations used `field.dom.name.sub(/\[#{field.key}\]$/, …)`
+  # which silently fell through when `field.key` was a String
+  # containing brackets, leaving the hidden input with the same name
+  # as the visible input.)
+  def test_autocompleter_field_accepts_string_name_textarea
+    form = render_comment_form do
+      autocompleter_field("list[members]", type: :name, textarea: true,
+                                           value: "alpha", label: "Names:")
+    end
+
+    assert_html(form, "textarea[name='list[members]']", text: "alpha")
+    assert_html(form,
+                "div.autocompleter[data-controller='autocompleter--name']")
+    assert_html(form,
+                "input[type='hidden'][name='list[members_id]']" \
+                "[id='list_members_id']")
+  end
+
+  # --- Symbol + explicit value: overrides model attribute ---------------
+  #
+  # Matches Rails ERB's `f.text_field :foo, value: "override"` —
+  # explicit `value:` wins over the model. Routes the field through
+  # `FieldProxy` with the Superform-namespaced name so the override
+  # works for radio/select/checkbox-collection mode too (those drive
+  # selection from the field's value, not from a per-input attribute).
+
+  def test_text_field_symbol_with_value_overrides_model
+    form = render_comment_form(Comment.new(summary: "from-model")) do
+      text_field(:summary, value: "from-caller", label: "Summary:")
+    end
+
+    assert_html(form, "input[name='comment[summary]'][value='from-caller']")
+  end
+
+  def test_radio_field_symbol_with_value_selects_non_model_attribute
+    form = render_comment_form do
+      radio_field(:target_id, [1, "One"], [2, "Two"], value: 2,
+                                                      label: "Target:")
+    end
+
+    assert_html(form,
+                "input[type='radio'][name='comment[target_id]']" \
+                "[value='2'][checked]")
+    assert_html(form,
+                "input[type='radio'][name='comment[target_id]']" \
+                "[value='1']:not([checked])")
+  end
+
   private
 
   # Build a stub class registered under
@@ -1257,6 +1520,16 @@ class ApplicationFormTest < ComponentTestCase
 
   def render_upload_form(model, &block)
     form = TestFormClass.new(model, action: "/test_upload_path")
+    form.field_block = block
+
+    render(form)
+  end
+
+  # Comment has summary/comment/target_id/created_at columns, none of
+  # which CollectionNumber (render_form's model) has -- fields that
+  # need one of those go through this instead.
+  def render_comment_form(model = Comment.new, &block)
+    form = TestFormClass.new(model, action: "/test_form_path")
     form.field_block = block
 
     render(form)
