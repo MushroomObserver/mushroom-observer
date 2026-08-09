@@ -13,12 +13,12 @@ module Views::Controllers::Images::FieldSlipExtracts
       @project = projects(:eol_project)
     end
 
-    def extract_with(fields: {}, confidence: {})
+    def extract_with(fields: {}, confidence: {}, template: "mo", **flags)
       FieldSlipExtract.record(
         image: @image, user: @user, prompt_version: "1",
         result: FieldSlip::Extractor::Result.new(
           provider: "gemini", model: "gemini-3.6-flash", raw: {},
-          fields: fields, confidence: confidence
+          fields: fields, confidence: confidence, template: template, **flags
         )
       )
     end
@@ -47,7 +47,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # and hidden id field when it has a real label -- `label: false`
     # silently drops the append slot they live in.
     def test_name_row_renders_a_live_autocompleter
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Coprinus comatus" })
 
       assert_html(html, "[data-controller='autocompleter--name']")
@@ -59,14 +59,14 @@ module Views::Controllers::Images::FieldSlipExtracts
     # Ticked only when the ID already resolves to a name MO holds, so
     # creating a Name is always a deliberate act.
     def test_name_tick_defaults_on_for_a_known_name
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Coprinus comatus" })
 
       assert_html(html, "input[name='use[ID]'][checked]")
     end
 
     def test_name_tick_defaults_off_for_an_unknown_name
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Lumpy Bracket" })
 
       assert_html(html, "input[name='use[ID]']")
@@ -76,7 +76,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # Pins the SELECTED option, not just the menu's presence: a
     # type mismatch once left none selected (see `render_vote_field`).
     def test_name_section_defaults_the_vote_to_promising
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Coprinus comatus" })
 
       assert_html(html, "select[name='vote']")
@@ -194,6 +194,42 @@ module Views::Controllers::Images::FieldSlipExtracts
       html = render_page(fields: { "Collector" => "Scott Shapiro" })
 
       assert_no_html(html, "input[name='inat']")
+    end
+
+    # ---------- template ----------
+
+    # A slip on another event's layout was seen but not read; the page
+    # says so instead of showing an empty table with no explanation.
+    def test_flags_a_template_mismatch
+      html = render_page(slip_present: true, template_matched: false)
+
+      assert_html(html, ".alert-danger",
+                  text: :field_slip_extract_template_mismatch.t.
+                        as_displayed[0, 40])
+    end
+
+    def test_no_mismatch_flag_for_a_matching_read
+      html = render_page(fields: { "Collector" => "A" },
+                         template_matched: true)
+
+      assert_no_html(html, ".alert-danger")
+    end
+
+    # A dbg extract reviews through its own labels: Species gets the
+    # name section, Location/Foray the locality section, iNaturalist
+    # the flag.
+    def test_dbg_extract_renders_its_own_fields
+      html = render_page(template: "dbg",
+                         fields: { "Species" => "Coprinus comatus",
+                                   "Location/Foray" => "Crags Creek",
+                                   "iNaturalist" => "10:29 388879492",
+                                   "Plants" => "Spruce" })
+
+      assert_html(html, "#field_slip_extract_name")
+      assert_html(html, "input[name='use[Species]'][checked]")
+      assert_html(html, "input[name='value[Location/Foray]']")
+      assert_html(html, "input[name='value[Plants]'][value='Spruce']")
+      assert_html(html, "input[name='inat'][checked]")
     end
 
     # ---------- locality ----------

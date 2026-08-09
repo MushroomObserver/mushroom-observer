@@ -9,12 +9,12 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     @obs.images << @image unless @obs.images.include?(@image)
   end
 
-  def build(fields: {}, confidence: {}, user: rolf)
+  def build(fields: {}, confidence: {}, user: rolf, template: "mo")
     extract = FieldSlipExtract.record(
       image: @image, user: rolf, prompt_version: "1",
       result: FieldSlip::Extractor::Result.new(
         provider: "g", model: "m", raw: {}, fields: fields,
-        confidence: confidence
+        confidence: confidence, template: template
       )
     )
     FormObject::FieldSlipReview.build(extract: extract, observation: @obs,
@@ -28,7 +28,8 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
   def test_builds_one_row_per_field
     review = build
 
-    assert_equal(FieldSlip::Extractor::FIELDS.keys, review.rows.map(&:field))
+    assert_equal(FieldSlip::Template.for(:mo).fields.keys,
+                 review.rows.map(&:field))
   end
 
   # Nothing read means nothing to review, so the table stays short.
@@ -41,16 +42,16 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
   # The ID needs a real label to render its autocompleter, which a table
   # cell has no room for, so it is pulled out of the table.
   def test_rows_to_show_excludes_the_name_row
-    review = build(fields: { FieldSlip::Extractor::NAME_FIELD => "Boletus",
+    review = build(fields: { "ID" => "Boletus",
                              "Collector" => "Scott Shapiro" })
 
     assert_not_includes(review.rows_to_show.map(&:field),
-                        FieldSlip::Extractor::NAME_FIELD)
-    assert_equal(FieldSlip::Extractor::NAME_FIELD, review.name_row.field)
+                        "ID")
+    assert_equal("ID", review.name_row.field)
   end
 
   def test_name_row_is_editable_but_not_savable
-    review = build(fields: { FieldSlip::Extractor::NAME_FIELD => "Boletus" })
+    review = build(fields: { "ID" => "Boletus" })
     row = review.name_row
 
     assert(row.editable, "the reviewer looks the real name up here")
@@ -128,14 +129,14 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
   # Ticked by default only when saving would succeed without a
   # create-the-name round-trip.
   def test_name_known_for_a_name_mo_holds
-    review = build(fields: { FieldSlip::Extractor::NAME_FIELD =>
+    review = build(fields: { "ID" =>
                              "Coprinus comatus" })
 
     assert(review.name_known)
   end
 
   def test_name_not_known_for_a_common_name
-    review = build(fields: { FieldSlip::Extractor::NAME_FIELD =>
+    review = build(fields: { "ID" =>
                              "Lumpy Bracket" })
 
     assert_not(review.name_known)
@@ -143,7 +144,7 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
 
   def test_name_not_known_when_blank_or_userless
     assert_not(build(fields: {}).name_known)
-    assert_not(build(fields: { FieldSlip::Extractor::NAME_FIELD => "Boletus" },
+    assert_not(build(fields: { "ID" => "Boletus" },
                      user: nil).name_known,
                "no user means no resolver, so no default tick")
   end
@@ -153,5 +154,43 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
                    confidence: { "Date" => "low" })
 
     assert_equal("low", row_for(review, "Date").confidence)
+  end
+
+  # ---------- iNat flag ----------
+
+  def test_inat_code_detected_in_a_numeric_other_codes
+    assert(build(fields: { "Other Codes" => "386717373" }).inat_code)
+    assert_not(build(fields: { "Other Codes" => "DBG-123" }).inat_code)
+  end
+
+  def test_inat_flag_rides_on_the_templates_own_field
+    assert(row_for(build(fields: { "Other Codes" => "1" }),
+                   "Other Codes").inat_row?)
+  end
+
+  # ---------- DBG template ----------
+
+  # The rows follow the extract's own template, and the special rows
+  # (name, location, iNat) follow its labels.
+  def test_dbg_extract_builds_dbg_rows
+    review = build(template: "dbg",
+                   fields: { "Species" => "Thelephora",
+                             "Location/Foray" => "Crags Creek Trailhead",
+                             "iNaturalist" => "10:29 388879492" })
+
+    assert_equal(FieldSlip::Template.for(:dbg).fields.keys,
+                 review.rows.map(&:field))
+    assert_equal("Species", review.name_row.field)
+    assert_equal("Location/Foray", review.location_row.field)
+    assert(row_for(review, "iNaturalist").inat_row?)
+    assert(review.inat_code,
+           "the id counts even mixed with a timestamp")
+  end
+
+  def test_dbg_name_known_reads_the_species_field
+    review = build(template: "dbg",
+                   fields: { "Species" => "Coprinus comatus" })
+
+    assert(review.name_known)
   end
 end

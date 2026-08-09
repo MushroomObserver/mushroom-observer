@@ -14,19 +14,23 @@ class FieldSlip
       ID_BY_KEY = :Field_Slip_ID_By
 
       # `chosen` is {slip field => edited value} for the ticked fields.
-      # `inat_code` says whether "Other Codes" holds an iNaturalist
-      # observation id, which is stored as a link rather than as the
-      # bare number.
-      def initialize(observation:, chosen:, user:, inat_code: false)
+      # `template` maps each field to its Observation target.
+      # `inat_code` says whether the template's iNat-codes field holds
+      # an iNaturalist observation id, which is stored as a link rather
+      # than as the bare number.
+      def initialize(observation:, chosen:, user:, template:,
+                     inat_code: false)
         @observation = observation
         @chosen = chosen
         @user = user
+        @template = template
         @inat_code = inat_code
       end
 
       def apply
         assign_columns
         assign_notes
+        drop_unpaired_coordinate
         @observation.save!
         @observation
       end
@@ -35,7 +39,7 @@ class FieldSlip
 
       def targets
         @targets ||= @chosen.filter_map do |field, value|
-          target = Extractor::FIELDS[field]
+          target = @template.fields[field]
           [target, value_for(field, value)] if target && value.present?
         end
       end
@@ -45,11 +49,24 @@ class FieldSlip
       # Already-linked values pass through rather than nesting.
       def value_for(field, value)
         text = value.to_s.strip
-        return text unless field == Extractor::OTHER_CODES_FIELD
+        return text unless field == @template.inat_codes_field
         return text unless @inat_code
         return text if FieldSlipNotesBuilder.inat_link?(text)
 
-        FieldSlipNotesBuilder.inat_link(text)
+        inat_link_for(text)
+      end
+
+      # The box may hold more than the id ("10:29 388879492" -- a
+      # timestamp doubling as a checksum against the iNat record). The
+      # id becomes the link; the rest is kept beside it rather than
+      # dropped.
+      def inat_link_for(text)
+        code = @template.inat_code_in(text)
+        return text unless code
+
+        link = FieldSlipNotesBuilder.inat_link(code)
+        rest = text.sub(code, "").squish
+        rest.present? ? "#{link} (#{rest})" : link
       end
 
       def assign_columns
@@ -101,6 +118,28 @@ class FieldSlip
         @observation.when = Date.strptime(value, "%Y-%m-%d")
       rescue Date::Error
         nil
+      end
+
+      # Parsed the way the observation form does, so "39°07'N" works;
+      # a value that doesn't parse is skipped rather than saved (same
+      # reasoning as `assign_when`).
+      def assign_lat(value)
+        parsed = Location.parse_latitude(value)
+        @observation.lat = parsed if parsed
+      end
+
+      def assign_lng(value)
+        parsed = Location.parse_longitude(value)
+        @observation.lng = parsed if parsed
+      end
+
+      # Observation validates lat/lng as a pair, so a slip with only
+      # one coordinate recovered would fail the whole save. Better to
+      # save everything else than nothing: the half-pair reverts.
+      def drop_unpaired_coordinate
+        return if @observation.lat.present? == @observation.lng.present?
+
+        @observation.restore_attributes([:lat, :lng])
       end
 
       # A location the project aliases (or MO itself) know becomes a real
