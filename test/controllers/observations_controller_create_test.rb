@@ -1902,6 +1902,53 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
+  # The soft constraint: a checked project with a DIFFERENT field slip
+  # prefix than the observation's slip is usually the form's remembered
+  # leftover from the last event (2026 CMS fair postmortem: NEMF test
+  # observations quietly joined the SMHF project). Warns everyone; the
+  # ignore-warnings resubmit proceeds, since the deliberate case is
+  # real.
+  def test_create_warns_when_a_checked_project_has_a_different_prefix
+    project = projects(:eol_project)
+    login("rolf")
+
+    assert_equal("EOL", project.field_slip_prefix, "premise")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0903")
+    params[:observation] =
+      params[:observation].merge(project_ids: [project.id.to_s])
+    post(:create, params: params)
+
+    assert_flash_warning
+    assert_nil(FieldSlip.find_by(code: "OPEN-0903"),
+               "nothing created; the form reloaded for confirmation")
+    assert_select("#project_messages li", text: /#{project.title}/)
+
+    params[:observation][:ignore_proj_conflicts] = "1"
+    post(:create, params: params)
+
+    obs = FieldSlip.find_by(code: "OPEN-0903")&.observation
+
+    assert_not_nil(obs, "the confirmed resubmit goes through")
+    assert_includes(project.observations.reload, obs)
+  end
+
+  def test_create_does_not_warn_when_the_prefixes_match
+    project = projects(:open_membership_project)
+    project.join(rolf)
+    login("rolf")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0904")
+    params[:observation] =
+      params[:observation].merge(project_ids: [project.id.to_s])
+    post(:create, params: params)
+
+    obs = FieldSlip.find_by(code: "OPEN-0904")&.observation
+
+    assert_not_nil(obs, "same-event project raises no warning")
+    assert_includes(project.observations.reload, obs)
+  end
+
   # A slip whose project the observation violates keeps the slip but
   # stays out of the project -- and says so, since a silent skip looks
   # exactly like the slip workflow failing (2026 CMS fair postmortem).

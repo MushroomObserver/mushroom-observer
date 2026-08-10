@@ -20,6 +20,7 @@ module Views::Controllers::Observations
     prop :submitted_list_ids, _Nilable(Array), default: nil
     prop :error_checked_projects, _Array(::Project), default: -> { [] }
     prop :suspect_checked_projects, _Array(::Project), default: -> { [] }
+    prop :cross_prefix_projects, _Array(::Project), default: -> { [] }
     prop :field_code, _Nilable(String), default: nil
 
     def view_template
@@ -42,6 +43,7 @@ module Views::Controllers::Observations
                submitted_list_ids: @submitted_list_ids,
                error_checked_projects: @error_checked_projects,
                suspect_checked_projects: @suspect_checked_projects,
+               cross_prefix_projects: @cross_prefix_projects,
                field_code: @field_code
              ))
     end

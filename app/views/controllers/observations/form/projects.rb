@@ -35,6 +35,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }
+  prop :cross_prefix_projects, _Array(Project), default: -> { [] }
 
   def view_template
     render(panel) do |p|
@@ -74,12 +75,14 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
     div(id: "project_messages") do
       render_error_alert if @error_checked_projects.any?
       render_warning_alert if @suspect_checked_projects.any?
+      render_cross_prefix_alert if @cross_prefix_projects.any?
     end
     render_ignore_checkbox
   end
 
   def constraint_issues?
-    @error_checked_projects.any? || @suspect_checked_projects.any?
+    @error_checked_projects.any? || @suspect_checked_projects.any? ||
+      @cross_prefix_projects.any?
   end
 
   def render_error_alert
@@ -93,6 +96,24 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
              button_name: @button_name
            )
     render_constraint_alert(:warning, @suspect_checked_projects, help)
+  end
+
+  # The soft constraint: a slip's prefix marks a project as one
+  # event's own, so a checked project with a DIFFERENT prefix is
+  # usually the form's remembered leftover, occasionally deliberate.
+  # Warned for everyone, blocked for no one.
+  def render_cross_prefix_alert
+    Alert(level: :warning) do
+      div { plain("#{:form_observations_projects_cross_prefix.t}:") }
+      ul do
+        @cross_prefix_projects.each { |proj| li { proj.title } }
+      end
+      help = :form_observations_projects_cross_prefix_help.t +
+             :form_observations_projects_out_of_range_admin_help.t(
+               button_name: @button_name
+             )
+      p { help }
+    end
   end
 
   def render_constraint_alert(level, projects, help_text)

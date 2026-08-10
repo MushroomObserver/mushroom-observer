@@ -46,6 +46,7 @@ module Views::Controllers::Observations
       submitted_list_ids: nil,
       error_checked_projects: [],
       suspect_checked_projects: [],
+      cross_prefix_projects: [],
       field_code: nil
     }.freeze
 
@@ -265,7 +266,7 @@ module Views::Controllers::Observations
 
     def show_projects?
       @projects.any? || @error_checked_projects.any? ||
-        @suspect_checked_projects.any?
+        @suspect_checked_projects.any? || @cross_prefix_projects.any?
     end
 
     def render_projects_panel
@@ -277,7 +278,8 @@ module Views::Controllers::Observations
                projects: @projects,
                submitted_project_ids: @submitted_project_ids,
                error_checked_projects: @error_checked_projects,
-               suspect_checked_projects: @suspect_checked_projects
+               suspect_checked_projects: @suspect_checked_projects,
+               cross_prefix_projects: @cross_prefix_projects
              ))
     end
 

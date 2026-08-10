@@ -133,13 +133,29 @@ module ObservationsController::Validators
     return true if params.dig(:observation, :ignore_proj_conflicts) == "1"
 
     @suspect_checked_projects = conflicting_projects - @error_checked_projects
-    if @suspect_checked_projects.any?
-      flash_warning(:form_observations_there_is_a_problem_with_projects.t)
-    end
-    return true if @suspect_checked_projects.empty?
+    @cross_prefix_projects = cross_prefix_checked_projects
+    return true if @suspect_checked_projects.empty? &&
+                   @cross_prefix_projects.empty?
 
+    flash_warning(:form_observations_there_is_a_problem_with_projects.t)
     @any_errors = true
     false
+  end
+
+  # A field slip prefix marks a project as one event's own. When the
+  # observation's slip code carries a DIFFERENT prefix, a checked
+  # prefix-bearing project is usually the form's remembered leftover
+  # from the last event, not intent. A soft constraint: it warns
+  # everyone and blocks no one -- the ignore-warnings resubmit
+  # proceeds -- because the deliberate case is real (a fair's
+  # observations also collected into the herbarium project behind it).
+  def cross_prefix_checked_projects
+    prefix = FieldSlip.prefix_for_code(params[:field_code].to_s.strip.upcase)
+    return [] unless prefix
+
+    Project.where(id: submitted_project_ids).
+      where.not(field_slip_prefix: [nil, ""]).
+      where.not(field_slip_prefix: prefix).to_a - @observation.projects
   end
 
   def checked_project_conflicts
