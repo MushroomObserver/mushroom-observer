@@ -9,6 +9,9 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="form-feedback" (every ApplicationForm)
 export default class extends Controller {
   connect() {
+    // "Is this thing on?" marker -- same convention as
+    // field-slip-job_controller, for inspecting whether Stimulus
+    // actually connected on a live page.
     this.element.dataset.formFeedback = "connected";
     this.submitted = this.submitted.bind(this)
     this.element.addEventListener("submit", this.submitted)
