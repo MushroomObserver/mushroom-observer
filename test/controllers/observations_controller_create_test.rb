@@ -1902,6 +1902,27 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
+  # A slip whose project the observation violates keeps the slip but
+  # stays out of the project -- and says so, since a silent skip looks
+  # exactly like the slip workflow failing (2026 CMS fair postmortem).
+  def test_create_says_when_constraints_keep_the_obs_out_of_the_project
+    project = projects(:open_membership_project)
+    project.update!(location: locations(:albion))
+    login("rolf")
+
+    # place_name is Massachusetts; the constraint is California.
+    post(:create,
+         params: create_params_with_name.merge(field_code: "OPEN-0902"))
+
+    slip = FieldSlip.find_by(code: "OPEN-0902")
+    obs = slip&.observation
+
+    assert_not_nil(obs, "the slip still attaches")
+    assert_not_includes(project.observations.reload, obs,
+                        "the observation stays out of the project")
+    assert_flash_warning
+  end
+
   # --------------------------------------------------------------------
   #  Landing on the slip review straight from Create (#5024)
   # --------------------------------------------------------------------

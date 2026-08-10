@@ -2555,6 +2555,7 @@
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
+  field_slip_project_constraint_violation: This observation was NOT added to [title] because it violates that project's constraints (location, dates, or species). Field slip [code] stays attached; fix the observation and re-save it, or ask a project admin to add it.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator

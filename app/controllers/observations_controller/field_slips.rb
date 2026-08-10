@@ -146,16 +146,23 @@ module ObservationsController::FieldSlips
   # Using a slip for an open-membership project enrolls the user in it,
   # the way the field slip form has always done — that is what a printed
   # prefix means. The observation then joins the project too, unless it
-  # violates the project's constraints, in which case the slip is being
-  # used as a spare and neither is associated. Mirrors the slip form's
-  # own `assign_project`.
+  # violates the project's constraints, in which case the slip stays
+  # attached but the observation stays out — SAID OUT LOUD, because a
+  # silent skip here looks exactly like the slip workflow failing.
+  # Mirrors the slip form's own `assign_project`.
   def apply_field_slip_project(field_slip)
     project = field_slip.project
     return unless project
 
     join_field_slip_project(project)
     return unless project.member?(@user)
-    return if project.violates_constraints?(@observation)
+
+    if project.violates_constraints?(@observation)
+      flash_warning(:field_slip_project_constraint_violation.t(
+                      code: field_slip.code, title: project.title
+                    ))
+      return
+    end
 
     project.add_observation(@observation)
   end
