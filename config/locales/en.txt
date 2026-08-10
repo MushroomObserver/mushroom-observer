@@ -2602,6 +2602,8 @@
   field_slip_extract_observation_link: Go to the observation
   field_slip_extract_attach_code: attach this field slip
   field_slip_extract_code_matches: matches the attached field slip
+  field_slip_extract_none_yet: This photo has not been scanned for field slip data yet.
+  observation_no_field_slip_detected: 'No field slip code was automatically detected in the photos. If one of them shows a field slip, you can "scan it":[url].'
   field_slip_extract_code_differs: differs from the attached field slip!
   field_slip_extract_attach_failed: "Could not attach field slip [code]: [reason]."
   field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.

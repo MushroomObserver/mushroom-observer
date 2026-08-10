@@ -40,12 +40,21 @@ module Views::Controllers::Images::FieldSlipExtracts
       )
     end
 
-    # No extract yet -- the QR jobs are still attaching -- looks the
-    # same as pending: something is happening, keep refreshing.
-    def test_awaiting_detection_self_refreshes_too
+    # No extract: the not-scanned-yet state offers the scan button and
+    # does NOT poll -- nothing is running until it is pressed. This is
+    # where the no-slip-detected flash lands, and how a zbar-missed
+    # slip photo gets read at all.
+    def test_unscanned_state_offers_the_scan_button
       html = render_status
 
-      assert_html(html, "[data-controller='reload-poll']")
+      assert_html(html, "#field_slip_extract_none",
+                  text: :field_slip_extract_none_yet.t.as_displayed[0, 40])
+      assert_html(
+        html,
+        "form[action='#{routes.image_field_slip_extract_path(@image.id)}'] " \
+        "button[type='submit']"
+      )
+      assert_no_html(html, "[data-controller='reload-poll']")
     end
 
     def test_failed_read_shows_the_error_and_a_retry_button

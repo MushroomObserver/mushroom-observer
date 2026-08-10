@@ -113,13 +113,21 @@ module Images
 
     # ---------- edit ----------
 
-    def test_edit_without_an_extract_redirects
+    # No extract renders the not-scanned-yet page with the scan button
+    # -- the landing spot for the no-slip-detected flash, and how a
+    # zbar-missed slip photo gets read at all. No polling: nothing is
+    # running until the button is pressed.
+    def test_edit_without_an_extract_offers_the_scan
       login_as_site_admin
 
       get(:edit, params: { image_id: @image.id })
 
-      assert_redirected_to(image_path(@image.id))
-      assert_flash_error
+      assert_response(:success)
+      assert_select(
+        "form[action='#{image_field_slip_extract_path(@image.id)}'] " \
+        "button[type='submit']"
+      )
+      assert_select("[data-controller='reload-poll']", count: 0)
     end
 
     def test_edit_shows_a_pending_read_with_self_refresh
@@ -149,13 +157,14 @@ module Images
     # The observation-create redirect arrives before the QR jobs have
     # attached anything; `await=1` is what makes an extract-less page
     # wait instead of bouncing.
-    def test_edit_awaits_detection_when_asked
+    # The create redirect appends await=1; the page renders the same
+    # meaningful state with or without it.
+    def test_edit_with_await_param_renders_the_same_page
       login_as_site_admin
 
       get(:edit, params: { image_id: @image.id, await: 1 })
 
       assert_response(:success)
-      assert_select("[data-controller='reload-poll']")
     end
 
     # ...and can land before the observation is even in its project,

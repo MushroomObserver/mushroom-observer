@@ -99,16 +99,11 @@ module Images
       nil
     end
 
-    # A pending or failed extract always shows its status; a missing
-    # one only does while the create redirect said to wait for the QR
-    # jobs -- otherwise a bare visit keeps today's "nothing to review"
-    # behavior.
+    # A pending or failed extract shows its status; a missing one
+    # renders the same page in its not-scanned-yet state, whose scan
+    # button is how a zbar-missed slip photo gets read at all -- this
+    # is where the no-slip-detected flash on observation create links.
     def render_status
-      if @extract.nil? && params[:await].blank?
-        flash_error(:field_slip_extract_missing.t)
-        return redirect_to(image_path(@image.id))
-      end
-
       render(Views::Controllers::Images::FieldSlipExtracts::Status.new(
                image: @image, extract: @extract, user: @user
              ))
