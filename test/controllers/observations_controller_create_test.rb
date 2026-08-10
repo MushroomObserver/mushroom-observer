@@ -1958,11 +1958,19 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       "premise: katrina reviews no slip projects"
     )
 
-    with_decoded_slip_code("OPEN-0219") do
-      post(:create,
-           params: modified_generic_params({ naming: { vote: {} } }, katrina))
+    scanned = false
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, lambda { |_image|
+        scanned = true
+        "OPEN-0219"
+      }) do
+        post(:create,
+             params: modified_generic_params({ naming: { vote: {} } },
+                                             katrina))
+      end
     end
 
+    assert_not(scanned, "the scan itself is skipped, not just its result")
     assert_response(:redirect)
     assert_nil(FieldSlip.find_by(code: "OPEN-0219"))
   end

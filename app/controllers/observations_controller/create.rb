@@ -268,10 +268,16 @@ module ObservationsController::Create
     end
   end
 
+  # "Created" or "attached", honestly: the slip may have existed as an
+  # unused spare before this observation claimed it.
   def attach_slip_by_code(code)
+    existed = FieldSlip.exists?(code: code.strip.upcase)
     result = FieldSlip::Attacher.attach(observation: @observation,
                                         code: code, user: @user)
-    flash_notice(:field_slip_created.t(code: code)) if result == :attached
+    return unless result == :attached
+
+    key = existed ? :field_slip_attached : :field_slip_created
+    flash_notice(key.t(code: code))
   end
 
   def reviewable_slip_code?(code)
