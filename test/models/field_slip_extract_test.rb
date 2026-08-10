@@ -234,6 +234,23 @@ class FieldSlipExtractTest < UnitTestCase
     assert_nil(record(fields: {}).unknown_location_alias)
   end
 
+  # The applier resolves aliases across every project the observation
+  # is in, so an alias defined in a sibling project (not the slip's
+  # own) must not warn either -- the warning may never contradict what
+  # applying would do.
+  def test_unknown_location_alias_consults_all_the_obs_projects
+    sibling = projects(:eol_project)
+    sibling.observations << @obs unless sibling.observations.include?(@obs)
+    @obs.field_slip.update_columns(
+      project_id: projects(:open_membership_project).id
+    )
+    ProjectAlias.create!(project: sibling, name: "EB2",
+                         target: locations(:albion))
+
+    assert_nil(record(fields: { "Location" => "EB2" }).
+               reload.unknown_location_alias)
+  end
+
   # The reported bug: an observation in two projects warned "no
   # abbreviation defined for EB2" although the slip's own project
   # defined it -- the check consulted `projects.first` instead of the

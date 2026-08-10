@@ -300,6 +300,9 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_html(html,
                   "input[name='value[Location]'][value='#{target.name}']")
+      # The guess message renders its .t markup (the em dash) rather
+      # than a double-escaped "&#8212;" entity.
+      assert_html(html, ".alert-warning", text: "below — check")
     end
 
     def test_locality_keeps_what_was_written_when_nothing_matches
