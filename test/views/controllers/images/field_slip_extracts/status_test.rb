@@ -40,11 +40,35 @@ module Views::Controllers::Images::FieldSlipExtracts
       )
     end
 
-    # No extract: the not-scanned-yet state offers the scan button and
-    # does NOT poll -- nothing is running until it is pressed. This is
-    # where the no-slip-detected flash lands, and how a zbar-missed
-    # slip photo gets read at all.
-    def test_unscanned_state_offers_the_scan_button
+    # No extract: the not-scanned-yet state offers a scan button per
+    # photo -- zbar found no code anywhere, so only the person can say
+    # which photo shows the slip -- and does NOT poll; nothing is
+    # running until a button is pressed. This is where the
+    # no-slip-detected flash lands, and how a zbar-missed slip photo
+    # gets read at all.
+    def test_unscanned_state_offers_a_scan_button_per_photo
+      other = images(:turned_over_image)
+      obs = @image.observations.first
+      obs.images << other unless obs.images.include?(other)
+
+      html = render_status
+
+      assert_html(html, "#field_slip_extract_none",
+                  text: :field_slip_extract_choose_photo.t.as_displayed[0, 40])
+      obs.images.each do |image|
+        assert_html(
+          html,
+          "form[action='#{routes.image_field_slip_extract_path(image.id)}'] " \
+          "button[type='submit']"
+        )
+      end
+      assert_no_html(html, "[data-controller='reload-poll']")
+    end
+
+    def test_unscanned_state_with_one_photo_keeps_the_simple_prompt
+      obs = @image.observations.first
+      (obs.images - [@image]).each { |img| obs.images.delete(img) }
+
       html = render_status
 
       assert_html(html, "#field_slip_extract_none",
@@ -54,7 +78,6 @@ module Views::Controllers::Images::FieldSlipExtracts
         "form[action='#{routes.image_field_slip_extract_path(@image.id)}'] " \
         "button[type='submit']"
       )
-      assert_no_html(html, "[data-controller='reload-poll']")
     end
 
     def test_failed_read_shows_the_error_and_a_retry_button

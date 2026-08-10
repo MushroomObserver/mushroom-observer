@@ -28,17 +28,46 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     private
 
-    # No polling: nothing is running until the button is pressed.
+    # No polling: nothing is running until a button is pressed. The
+    # observation's photos each get their own scan button -- zbar found
+    # no code anywhere, so only the person can say which photo shows
+    # the slip, and "scan the first image" was a coin toss on a
+    # multi-photo observation.
     def render_unscanned
+      images = scan_candidates
       render(Components::Panel.new(
                panel_id: "field_slip_extract_none"
              )) do |p|
         p.with_body do
-          trusted_html(:field_slip_extract_none_yet.t)
+          trusted_html(unscanned_prompt(images.size))
+          div(class: "d-flex flex-wrap mt-3") do
+            images.each { |image| render_scan_candidate(image) }
+          end
         end
       end
-      Button(type: :post, name: :field_slip_extract_button.l,
-             target: image_field_slip_extract_path(@image.id))
+    end
+
+    def scan_candidates
+      observation = @image.observations.first
+      observation ? observation.images.to_a : [@image]
+    end
+
+    def unscanned_prompt(count)
+      key = if count > 1
+              :field_slip_extract_choose_photo
+            else
+              :field_slip_extract_none_yet
+            end
+      key.t
+    end
+
+    def render_scan_candidate(image)
+      div(class: "mr-4 mb-3 text-center") do
+        render(Components::InteractiveImage.new(image: image, user: @user,
+                                                size: :small, votes: false))
+        Button(type: :post, name: :field_slip_extract_button.l,
+               target: image_field_slip_extract_path(image.id))
+      end
     end
 
     def render_pending
