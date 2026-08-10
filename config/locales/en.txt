@@ -2555,6 +2555,7 @@
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
+  field_slip_attached: Field slip [code] was attached to this observation.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator

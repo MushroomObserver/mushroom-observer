@@ -103,10 +103,19 @@ class ExtractFieldSlipJobTest < ActiveJob::TestCase
     )
   end
 
+  # The fixture image hangs off several observations; the attach path
+  # only acts on an unambiguous one, so the attach tests isolate it.
+  def isolate_image_to_obs
+    (@image.observations.to_a - [@obs]).each do |other|
+      other.images.delete(@image)
+    end
+  end
+
   # zbar missed ~27% of the CMS fair's slip photos; the extraction read
   # the printed code off nearly all of them. A successful read now
   # attaches the slip when the observation has none.
   def test_a_read_code_attaches_the_slip_to_a_slipless_observation
+    isolate_image_to_obs
     @obs.update!(occurrence: nil)
 
     FieldSlip::Extractor.stub(:default,
@@ -120,6 +129,7 @@ class ExtractFieldSlipJobTest < ActiveJob::TestCase
   end
 
   def test_a_read_code_never_touches_a_linked_observation
+    isolate_image_to_obs
     @obs.update!(occurrence: nil)
     slip = FieldSlip.find_or_create_by_code("OPEN-0800", @obs.user)
     @obs.field_slip = slip
@@ -133,7 +143,25 @@ class ExtractFieldSlipJobTest < ActiveJob::TestCase
     assert_equal("OPEN-0800", @obs.reload.field_slip.code)
   end
 
+  # An image on several observations makes "whose slip is this?"
+  # ambiguous, and a background guess would consume the slip for the
+  # right one -- only the review's human decides those.
+  def test_an_ambiguous_image_attaches_nothing
+    @obs.update!(occurrence: nil)
+
+    assert_operator(@image.observations.count, :>, 1,
+                    "premise: the fixture image is shared")
+
+    FieldSlip::Extractor.stub(:default,
+                              fake_extractor(result_with_code("OPEN-0219"))) do
+      ExtractFieldSlipJob.perform_now(@image.id, users(:rolf).id)
+    end
+
+    assert_nil(@obs.reload.occurrence)
+  end
+
   def test_a_read_without_a_code_attaches_nothing
+    isolate_image_to_obs
     @obs.update!(occurrence: nil)
 
     FieldSlip::Extractor.stub(:default, fake_extractor(result)) do

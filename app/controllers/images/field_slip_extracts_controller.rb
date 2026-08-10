@@ -211,14 +211,18 @@ module Images
       code = params.dig(:value, code_field).to_s.strip
       return if code.blank?
 
+      existed = FieldSlip.exists?(code: code.upcase)
       result = FieldSlip::Attacher.attach(observation: @observation,
                                           code: code, user: @user)
-      flash_attach_result(code, result)
+      flash_attach_result(code, result, existed)
     end
 
-    def flash_attach_result(code, result)
+    # "Created" or "attached", honestly: the code may have named a
+    # pre-existing spare slip.
+    def flash_attach_result(code, result, existed)
       if result == :attached
-        flash_notice(:field_slip_created.t(code: code))
+        key = existed ? :field_slip_attached : :field_slip_created
+        flash_notice(key.t(code: code))
         @observation.reload
       else
         flash_warning(:field_slip_extract_attach_failed.t(

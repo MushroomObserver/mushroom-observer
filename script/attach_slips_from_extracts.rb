@@ -32,25 +32,28 @@ class SlipExtractRepairer
 
   def run
     puts(@apply ? "APPLYING changes." : "DRY RUN.")
-    candidates.each { |obs, image, extract| repair(obs, image, extract) }
+    # Streamed rather than loaded whole: every completed extract on
+    # the site flows through here.
+    FieldSlipExtract.where(status: "complete").includes(:image).
+      find_each do |extract|
+        obs, image = candidate_for(extract)
+        repair(obs, image, extract) if obs
+      end
     summarize
   end
 
   private
 
-  # Slip-less observations whose images carry a completed extract that
-  # read a code.
-  def candidates
-    FieldSlipExtract.where(status: "complete").includes(:image).
-      filter_map do |extract|
-        obs = extract.observation
-        next unless obs && obs.occurrence_id.nil?
+  # The slip-less observation behind an extract that read a code, or
+  # nil when there is nothing to repair.
+  def candidate_for(extract)
+    obs = extract.observation
+    return nil unless obs && obs.occurrence_id.nil?
 
-        code = extract.value_for(extract.template.code_field).to_s.strip
-        next if code.blank?
+    code = extract.value_for(extract.template.code_field).to_s.strip
+    return nil if code.blank?
 
-        [obs, extract.image, extract]
-      end
+    [obs, extract.image]
   end
 
   def repair(obs, image, extract)

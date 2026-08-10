@@ -53,8 +53,8 @@ class ExtractFieldSlipJob < ApplicationJob
   # keep it safe for a background act: never an observation that has a
   # slip, never somebody else's slip.
   def attach_read_code(image, user, extract)
-    observation = image.observations.first
-    return unless observation && observation.occurrence_id.nil?
+    observation = sole_slipless_observation(image)
+    return unless observation
 
     code = extract.value_for(extract.template.code_field).to_s.strip
     return if code.blank?
@@ -65,5 +65,16 @@ class ExtractFieldSlipJob < ApplicationJob
       "ExtractFieldSlipJob: read code #{code} -> #{result} " \
       "(observation #{observation.id}, image #{image.id})"
     )
+  end
+
+  # An image on several observations makes "whose slip is this?"
+  # ambiguous, and a background guess would consume the slip for the
+  # right one. Only the review's human decides those.
+  def sole_slipless_observation(image)
+    observations = image.observations.to_a
+    return unless observations.one?
+
+    observation = observations.first
+    observation if observation.occurrence_id.nil?
   end
 end
