@@ -47,6 +47,7 @@ module Images
 
       attach_ticked_code
       apply_chosen_fields
+      rejoin_slip_project
       outcome = propose_name
       # An unrecognized or ambiguous name needs the reviewer to confirm
       # before a Name is created, so the page comes back with the
@@ -149,6 +150,32 @@ module Images
           chosen_name: params.dig(:chosen_name, :name_id)
         }
       ).propose
+    end
+
+    # The join decision at slip-attach time ran against the
+    # observation's PRE-review data -- the create form's default date
+    # and leftover locality -- and constraint violations silently kept
+    # it out of the slip's project. The review then applies the slip's
+    # real date and locality: exactly the fields the decision used, so
+    # re-evaluate. (Reported: an NEMF slip's observation stayed out of
+    # the NEMF project while carrying form defaults at attach time.)
+    def rejoin_slip_project
+      @observation.reload
+      project = @observation.field_slip&.project
+      return unless project
+      return if @observation.projects.include?(project)
+      return unless project.member?(@observation.user)
+
+      if project.violates_constraints?(@observation)
+        flash_warning(:field_slip_extract_project_blocked.t(
+                        title: project.title
+                      ))
+      else
+        project.add_observation(@observation)
+        flash_notice(:field_slip_extract_project_joined.t(
+                       title: project.title
+                     ))
+      end
     end
 
     def flash_extract_saved(outcome)

@@ -450,6 +450,61 @@ module Images
       assert_flash_warning
     end
 
+    # The reported bug: the join decision at slip-attach time ran
+    # against the create form's default date and locality, silently
+    # keeping the observation out of its slip's project -- and the
+    # review then fixed exactly those fields. Re-evaluating after the
+    # apply joins the project.
+    def test_update_joins_the_slips_project_once_constraints_are_met
+      project = projects(:open_membership_project)
+      project.update!(location: locations(:albion),
+                      start_date: Date.parse("2026-07-30"),
+                      end_date: Date.parse("2026-08-02"))
+      project.join(@obs.user)
+      @obs.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0950", @obs.user)
+      @obs.field_slip = slip
+      @obs.save!
+
+      assert(project.violates_constraints?(@obs),
+             "premise: pre-review data violates the constraints")
+      assert_not_includes(project.observations, @obs)
+
+      record_extract(fields: { "Date" => "2026-08-01",
+                               "Location" => locations(:albion).name })
+      login_as_site_admin
+
+      put(:update,
+          params: { image_id: @image.id,
+                    use: { "Date" => "1", "Location" => "1" },
+                    value: { "Date" => "2026-08-01",
+                             "Location" => locations(:albion).name } })
+
+      assert_includes(project.observations.reload, @obs.reload)
+      assert_flash_success
+    end
+
+    def test_update_warns_when_the_review_still_violates_constraints
+      project = projects(:open_membership_project)
+      project.update!(location: locations(:albion),
+                      start_date: Date.parse("2026-07-30"),
+                      end_date: Date.parse("2026-08-02"))
+      project.join(@obs.user)
+      @obs.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0951", @obs.user)
+      @obs.field_slip = slip
+      @obs.save!
+      record_extract(fields: { "Collector" => "A. W. Wilson" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Collector" => "1" },
+                             value: { "Collector" => "A. W. Wilson" } })
+
+      assert_not_includes(project.observations.reload, @obs.reload)
+      assert_flash_warning
+    end
+
     def test_update_never_moves_a_linked_observation
       slip = FieldSlip.find_or_create_by_code("OPEN-0800", @obs.user)
       @obs.update!(occurrence: nil)
