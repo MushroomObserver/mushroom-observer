@@ -113,13 +113,21 @@ module Images
 
     # ---------- edit ----------
 
-    def test_edit_without_an_extract_redirects
+    # No extract renders the not-scanned-yet page with the scan button
+    # -- the landing spot for the no-slip-detected flash, and how a
+    # zbar-missed slip photo gets read at all. No polling: nothing is
+    # running until the button is pressed.
+    def test_edit_without_an_extract_offers_the_scan
       login_as_site_admin
 
       get(:edit, params: { image_id: @image.id })
 
-      assert_redirected_to(image_path(@image.id))
-      assert_flash_error
+      assert_response(:success)
+      assert_select(
+        "form[action='#{image_field_slip_extract_path(@image.id)}'] " \
+        "button[type='submit']"
+      )
+      assert_select("[data-controller='reload-poll']", count: 0)
     end
 
     def test_edit_shows_a_pending_read_with_self_refresh
@@ -149,13 +157,14 @@ module Images
     # The observation-create redirect arrives before the QR jobs have
     # attached anything; `await=1` is what makes an extract-less page
     # wait instead of bouncing.
-    def test_edit_awaits_detection_when_asked
+    # The create redirect appends await=1; the page renders the same
+    # meaningful state with or without it.
+    def test_edit_with_await_param_renders_the_same_page
       login_as_site_admin
 
       get(:edit, params: { image_id: @image.id, await: 1 })
 
       assert_response(:success)
-      assert_select("[data-controller='reload-poll']")
     end
 
     # ...and can land before the observation is even in its project,
@@ -400,6 +409,140 @@ module Images
       put(:update, params: { image_id: @image.id })
 
       assert_redirected_to(image_path(@image.id))
+    end
+
+    # ---------- attaching the ticked code ----------
+
+    def test_update_attaches_a_ticked_code_to_a_slipless_observation
+      @obs.update!(occurrence: nil)
+      record_extract(fields: { "Field Slip Code" => "OPEN-0219" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0219" } })
+
+      assert_equal("OPEN-0219", @obs.reload.field_slip.code)
+      assert_includes(projects(:open_membership_project).observations.reload,
+                      @obs)
+    end
+
+    # A pre-existing spare slip gets "attached", not "created".
+    def test_update_attaching_an_existing_spare_slip_says_attached
+      @obs.update!(occurrence: nil)
+      FieldSlip.find_or_create_by_code("OPEN-0219", @obs.user)
+      record_extract(fields: { "Field Slip Code" => "OPEN-0219" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0219" } })
+
+      assert_equal("OPEN-0219", @obs.reload.field_slip.code)
+      assert_flash([[:field_slip_attached, { code: "OPEN-0219" }],
+                    :field_slip_extract_saved])
+    end
+
+    # The reviewer's edit wins here too: a misread code gets corrected
+    # in the box and the corrected one attaches.
+    def test_update_attaches_the_edited_code_not_the_read_one
+      @obs.update!(occurrence: nil)
+      record_extract(fields: { "Field Slip Code" => "OPEN-9999" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0220" } })
+
+      assert_equal("OPEN-0220", @obs.reload.field_slip.code)
+    end
+
+    def test_update_warns_when_the_ticked_code_cannot_attach
+      @obs.update!(occurrence: nil)
+      other = observations(:coprinus_comatus_obs)
+      other.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0500", other.user)
+      other.field_slip = slip
+      other.save!
+      record_extract(fields: { "Field Slip Code" => "OPEN-0500" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0500" } })
+
+      assert_nil(@obs.reload.occurrence)
+      assert_flash_warning
+    end
+
+    # The reported bug: the join decision at slip-attach time ran
+    # against the create form's default date and locality, silently
+    # keeping the observation out of its slip's project -- and the
+    # review then fixed exactly those fields. Re-evaluating after the
+    # apply joins the project.
+    def test_update_joins_the_slips_project_once_constraints_are_met
+      project = projects(:open_membership_project)
+      project.update!(location: locations(:albion),
+                      start_date: Date.parse("2026-07-30"),
+                      end_date: Date.parse("2026-08-02"))
+      project.join(@obs.user)
+      @obs.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0950", @obs.user)
+      @obs.field_slip = slip
+      @obs.save!
+
+      assert(project.violates_constraints?(@obs),
+             "premise: pre-review data violates the constraints")
+      assert_not_includes(project.observations, @obs)
+
+      record_extract(fields: { "Date" => "2026-08-01",
+                               "Location" => locations(:albion).name })
+      login_as_site_admin
+
+      put(:update,
+          params: { image_id: @image.id,
+                    use: { "Date" => "1", "Location" => "1" },
+                    value: { "Date" => "2026-08-01",
+                             "Location" => locations(:albion).name } })
+
+      assert_includes(project.observations.reload, @obs.reload)
+      assert_flash_success
+    end
+
+    def test_update_warns_when_the_review_still_violates_constraints
+      project = projects(:open_membership_project)
+      project.update!(location: locations(:albion),
+                      start_date: Date.parse("2026-07-30"),
+                      end_date: Date.parse("2026-08-02"))
+      project.join(@obs.user)
+      @obs.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0951", @obs.user)
+      @obs.field_slip = slip
+      @obs.save!
+      record_extract(fields: { "Collector" => "A. W. Wilson" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Collector" => "1" },
+                             value: { "Collector" => "A. W. Wilson" } })
+
+      assert_not_includes(project.observations.reload, @obs.reload)
+      assert_flash_warning
+    end
+
+    def test_update_never_moves_a_linked_observation
+      slip = FieldSlip.find_or_create_by_code("OPEN-0800", @obs.user)
+      @obs.update!(occurrence: nil)
+      @obs.field_slip = slip
+      @obs.save!
+      record_extract(fields: { "Field Slip Code" => "OPEN-0219" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0219" } })
+
+      assert_equal("OPEN-0800", @obs.reload.field_slip.code)
     end
   end
 end

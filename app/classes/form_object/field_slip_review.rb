@@ -38,6 +38,7 @@ class FormObject::FieldSlipReview < FormObject::Base
     def name_row? = role == :name
     def location_row? = role == :location
     def inat_row? = role == :inat
+    def code_row? = role == :code
 
     # Both get their own labelled section rather than a table cell: an
     # autocompleter only renders its dropdown and hidden id field when
@@ -68,18 +69,31 @@ class FormObject::FieldSlipReview < FormObject::Base
   end
 
   def self.rows_for(extract, template, observation)
+    attachable = code_attachable?(extract, template, observation)
     template.fields.map do |field, target|
+      code = field == template.code_field
       Row.new(field: field, extracted: extract.value_for(field),
               current: current_value(observation, target),
               confidence: extract.confidence_for(field),
-              savable: !target.nil?,
-              editable: !target.nil? || field == template.name_field,
+              savable: !target.nil? || (code && attachable),
+              editable: !target.nil? || field == template.name_field ||
+                        (code && attachable),
               role: role_for(template, field))
     end
   end
 
+  # The read code can be applied -- ticking it attaches the slip --
+  # exactly when the observation has none. The background job usually
+  # already did this (see ExtractFieldSlipJob#attach_read_code), so
+  # this is the manual path for what it couldn't decide on its own.
+  def self.code_attachable?(extract, template, observation)
+    observation.occurrence_id.nil? &&
+      extract.value_for(template.code_field).present?
+  end
+
   def self.role_for(template, field)
     case field
+    when template.code_field then :code
     when template.name_field then :name
     when template.location_field then :location
     when template.inat_codes_field then :inat
