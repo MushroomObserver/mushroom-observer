@@ -128,9 +128,24 @@ module Views::Controllers::Images::FieldSlipExtracts
       if row.savable
         checkbox_field("use[#{row.field}]", checked: row.default_use?,
                                             label: use_label(row))
+      elsif row.code_row?
+        render_code_check_state
       else
         small { plain(:field_slip_extract_check_only.l) }
       end
+    end
+
+    # A non-attachable code row only renders when the observation
+    # already has its slip (blank rows are dropped, slip-less ones get
+    # the attach tick), so say what the check FOUND rather than the
+    # generic "cross-check only" that read as "nothing was read".
+    def render_code_check_state
+      key = if @extract.code_mismatch
+              :field_slip_extract_code_differs
+            else
+              :field_slip_extract_code_matches
+            end
+      small { plain(key.l) }
     end
 
     def use_label(row)

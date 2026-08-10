@@ -2601,6 +2601,8 @@
   field_slip_extract_retry: Try Again
   field_slip_extract_observation_link: Go to the observation
   field_slip_extract_attach_code: attach this field slip
+  field_slip_extract_code_matches: matches the attached field slip
+  field_slip_extract_code_differs: differs from the attached field slip!
   field_slip_extract_attach_failed: "Could not attach field slip [code]: [reason]."
   field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.
   field_slip_extract_project_blocked: The observation is still not in [title] because it does not satisfy that project's constraints (location, dates, or species).

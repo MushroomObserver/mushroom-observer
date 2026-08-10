@@ -148,12 +148,18 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_includes(html, "NEMF-99999")
       assert_includes(html, @obs.field_slip.code)
+      # The row itself states the check's outcome, not the generic
+      # "cross-check only" that read as "nothing was read".
+      assert_html(html, "td small",
+                  text: :field_slip_extract_code_differs.l)
     end
 
     def test_no_code_flag_when_they_agree
       html = render_page(fields: { "Field Slip Code" => @obs.field_slip.code })
 
       assert_no_html(html, ".alert-danger")
+      assert_html(html, "td small",
+                  text: :field_slip_extract_code_matches.l)
     end
 
     # Naming the undefined abbreviation is what lets an admin add it,
