@@ -45,7 +45,9 @@ module Images
     def update
       return unless extract_or_redirect!
 
+      attach_ticked_code
       apply_chosen_fields
+      rejoin_slip_project
       outcome = propose_name
       # An unrecognized or ambiguous name needs the reviewer to confirm
       # before a Name is created, so the page comes back with the
@@ -97,16 +99,11 @@ module Images
       nil
     end
 
-    # A pending or failed extract always shows its status; a missing
-    # one only does while the create redirect said to wait for the QR
-    # jobs -- otherwise a bare visit keeps today's "nothing to review"
-    # behavior.
+    # A pending or failed extract shows its status; a missing one
+    # renders the same page in its not-scanned-yet state, whose scan
+    # button is how a zbar-missed slip photo gets read at all -- this
+    # is where the no-slip-detected flash on observation create links.
     def render_status
-      if @extract.nil? && params[:await].blank?
-        flash_error(:field_slip_extract_missing.t)
-        return redirect_to(image_path(@image.id))
-      end
-
       render(Views::Controllers::Images::FieldSlipExtracts::Status.new(
                image: @image, extract: @extract, user: @user
              ))
@@ -150,6 +147,32 @@ module Images
       ).propose
     end
 
+    # The join decision at slip-attach time ran against the
+    # observation's PRE-review data -- the create form's default date
+    # and leftover locality -- and constraint violations silently kept
+    # it out of the slip's project. The review then applies the slip's
+    # real date and locality: exactly the fields the decision used, so
+    # re-evaluate. (Reported: an NEMF slip's observation stayed out of
+    # the NEMF project while carrying form defaults at attach time.)
+    def rejoin_slip_project
+      @observation.reload
+      project = @observation.field_slip&.project
+      return unless project
+      return if @observation.projects.include?(project)
+      return unless project.member?(@observation.user)
+
+      if project.violates_constraints?(@observation)
+        flash_warning(:field_slip_extract_project_blocked.t(
+                        title: project.title
+                      ))
+      else
+        project.add_observation(@observation)
+        flash_notice(:field_slip_extract_project_joined.t(
+                       title: project.title
+                     ))
+      end
+    end
+
     def flash_extract_saved(outcome)
       flash_notice(:field_slip_extract_saved.t)
       return unless outcome.proposed?
@@ -173,6 +196,39 @@ module Images
         observation: @observation, chosen: chosen_fields, user: @user,
         template: @extract.template, inat_code: params[:inat] == "1"
       ).apply
+    end
+
+    # A ticked code row attaches the slip -- the manual path for what
+    # ExtractFieldSlipJob#attach_read_code couldn't decide on its own
+    # (an in-use slip resolved by hand, a corrected misread). Runs
+    # before the field writes so the observation joins its project
+    # first and the project's aliases apply to them.
+    def attach_ticked_code
+      code_field = @extract.template.code_field
+      return unless params.dig(:use, code_field) == "1"
+      return unless @observation.occurrence_id.nil?
+
+      code = params.dig(:value, code_field).to_s.strip
+      return if code.blank?
+
+      existed = FieldSlip.exists?(code: code.upcase)
+      result = FieldSlip::Attacher.attach(observation: @observation,
+                                          code: code, user: @user)
+      flash_attach_result(code, result, existed)
+    end
+
+    # "Created" or "attached", honestly: the code may have named a
+    # pre-existing spare slip.
+    def flash_attach_result(code, result, existed)
+      if result == :attached
+        key = existed ? :field_slip_attached : :field_slip_created
+        flash_notice(key.t(code: code))
+        @observation.reload
+      else
+        flash_warning(:field_slip_extract_attach_failed.t(
+                        code: code, reason: result.to_s.tr("_", " ")
+                      ))
+      end
     end
 
     # Only the ticked rows, keyed by slip field, holding whatever text
