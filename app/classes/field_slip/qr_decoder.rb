@@ -12,9 +12,12 @@ class FieldSlip
   # `apt-get install zbar-tools`): callers check `available?` first, so
   # an environment without the binary simply has no QR detection.
   module QRDecoder
-    # Full size first: the QR occupies a small corner of the photo, and
-    # downscaling can cost it the resolution it needs to decode.
-    SIZES = [:full_size, :huge].freeze
+    # The 1280px copy first: it decodes printed slip QRs reliably and
+    # zbar chews through it several times faster than a full-resolution
+    # original -- which matters when the scan runs inline in the
+    # observation-create request. Full size stays as the fallback for a
+    # QR too small or soft to survive the downscale.
+    SIZES = [:huge, :full_size].freeze
 
     # The code is the path segment alone -- MO's own /qr/ URLs can
     # carry query params (e.g. ?project=...), which are not part of it.
