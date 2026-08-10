@@ -45,6 +45,11 @@ class FieldSlip
       # `inat_codes_field`, or nil when the value doesn't hold one.
       def inat_code_in(_value) = nil
 
+      # The span of the value the id was read from, as written --
+      # identical to the id unless a template normalizes separators
+      # out of it.
+      def inat_code_raw(value) = inat_code_in(value)
+
       def inat_code?(value) = inat_code_in(value).present?
     end
   end

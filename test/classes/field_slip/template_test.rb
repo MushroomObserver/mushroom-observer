@@ -80,4 +80,22 @@ class FieldSlip::TemplateTest < UnitTestCase
     assert_nil(template.inat_code_in("10:29 am"))
     assert_nil(template.inat_code_in("someuser 8/6"))
   end
+
+  # Every shape below is a real entry from the 2026 CMS fair scans:
+  # collectors group the digits with spaces or dashes, prefix them, or
+  # write them beside usernames and times.
+  def test_dbg_inat_code_normalizes_separators
+    template = FieldSlip::Template.for(:dbg)
+
+    assert_equal("388596423", template.inat_code_in("388 596 423"))
+    assert_equal("388401241", template.inat_code_in("388-401241"))
+    assert_equal("389207996", template.inat_code_in("389-207-996"))
+    assert_equal("389176438", template.inat_code_in("#389176438"))
+    assert_equal("388891116",
+                 template.inat_code_in("fungus_junkie iNat: 388891116"))
+    assert_equal("389198780",
+                 template.inat_code_in("1:59 pm 389-198-780 (iNat#) see Alex"))
+    assert_nil(template.inat_code_in("gSanchez"))
+    assert_nil(template.inat_code_in("1:58 PM"))
+  end
 end
