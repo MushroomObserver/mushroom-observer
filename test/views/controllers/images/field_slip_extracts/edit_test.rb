@@ -4,6 +4,12 @@ require("test_helper")
 
 module Views::Controllers::Images::FieldSlipExtracts
   class EditTest < ComponentTestCase
+    # A proxy, not an include: including url_helpers makes MiniTest
+    # pick up route helpers named test_* as test methods.
+    def routes
+      Rails.application.routes.url_helpers
+    end
+
     def setup
       super
       @user = users(:rolf)
@@ -159,6 +165,23 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_includes(html, "EB2")
       assert_html(html, "a[href*='aliases/new']")
+    end
+
+    # The reported bug's other half: the Add-abbreviation link went to
+    # whichever other project the observation was in, not the slip's.
+    def test_alias_link_targets_the_slips_project
+      @project.observations << @obs unless @project.observations.include?(@obs)
+      slip_project = projects(:open_membership_project)
+      @obs.field_slip.update_columns(project_id: slip_project.id)
+
+      html = render_page(fields: { "Location" => "EB2" })
+
+      assert_html(
+        html,
+        "a[href='#{routes.new_project_alias_path(
+          project_id: slip_project.id
+        )}']"
+      )
     end
 
     def test_no_alias_flag_for_a_known_abbreviation

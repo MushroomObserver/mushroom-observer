@@ -79,8 +79,12 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
+    # The attached slip's project, so the link defines the alias where
+    # the slip actually lives -- `projects.first` sent it to whichever
+    # other project the observation happened to be in.
     def render_alias_link
-      project = @observation.projects.first
+      project = @observation.field_slip&.project ||
+                @observation.projects.first
       return unless project
 
       Link(type: :get, name: :field_slip_extract_add_alias.l,

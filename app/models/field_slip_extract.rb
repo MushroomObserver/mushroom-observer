@@ -189,7 +189,7 @@ class FieldSlipExtract < AbstractModel
   # its aliases' targets, and its own -- which is a much better
   # candidate set than all of MO.
   def project_locations
-    project = observation&.projects&.first
+    project = slip_project
     return [] unless project
 
     from_observations = Location.joins(:observations).
@@ -204,5 +204,11 @@ class FieldSlipExtract < AbstractModel
     context = FieldSlip::Extractor::Context.new(observation: observation)
     context.aliases("Location").flatten +
       [observation&.location&.name].compact
+  end
+
+  # The attached slip's project wins over `projects.first` -- see
+  # FieldSlip::Extractor::Context#project.
+  def slip_project
+    observation&.field_slip&.project || observation&.projects&.first
   end
 end
