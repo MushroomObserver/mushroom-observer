@@ -17,7 +17,7 @@ module Views::Controllers::Observations::FieldSlipScans
                panel_id: "field_slip_scan_photos"
              )) do |p|
         p.with_body do
-          trusted_html(:field_slip_scan_help.t)
+          plain(:field_slip_scan_help.l)
           div(class: "d-flex flex-wrap mt-3") do
             @observation.images.each { |image| render_photo(image) }
           end

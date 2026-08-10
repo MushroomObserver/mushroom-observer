@@ -2589,7 +2589,7 @@
   field_slip_extract_apply: Save this to the observation
   field_slip_extract_inat: This is an iNaturalist observation id
   field_slip_extract_currently: "Currently: [value]"
-  field_slip_extract_location_guess: "The slip reads [written]. This project already uses [suggestion], which is filled in below -- check it before saving."
+  field_slip_extract_location_guess: "The slip reads [written]. This project already uses [suggestion], which is filled in below — check it before saving."
   field_slip_extract_name_proposed: "Proposed [name] as a name for this observation."
   field_slip_extract_name_needs_approval: The name needs confirming before it can be proposed. The other fields were saved.
   field_slip_extract_confidence: "[level] confidence"

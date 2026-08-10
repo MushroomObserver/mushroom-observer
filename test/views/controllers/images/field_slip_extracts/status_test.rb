@@ -29,7 +29,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_html(html, "[data-controller='reload-poll']")
       assert_html(html, "#field_slip_extract_pending",
-                  text: :field_slip_extract_pending.t.as_displayed[0, 40])
+                  text: :field_slip_extract_pending.l[0, 40])
       # The view links image.observations.first -- the fixture image
       # hangs off several observations, so pin whichever IS first
       # rather than assuming an association order.
@@ -47,7 +47,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       html = render_status
 
       assert_html(html, "#field_slip_extract_none",
-                  text: :field_slip_extract_none_yet.t.as_displayed[0, 40])
+                  text: :field_slip_extract_none_yet.l[0, 40])
       assert_html(
         html,
         "form[action='#{routes.image_field_slip_extract_path(@image.id)}'] " \

@@ -37,7 +37,7 @@ module Views::Controllers::Images::FieldSlipExtracts
                panel_id: "field_slip_extract_none"
              )) do |p|
         p.with_body do
-          trusted_html(:field_slip_extract_none_yet.t)
+          plain(:field_slip_extract_none_yet.l)
         end
       end
       Button(type: :post, name: :field_slip_extract_button.l,
@@ -62,7 +62,7 @@ module Views::Controllers::Images::FieldSlipExtracts
                )) do |p|
           p.with_body do
             span(class: "spinner-right mx-2")
-            trusted_html(:field_slip_extract_pending.t)
+            plain(:field_slip_extract_pending.l)
           end
         end
       end
@@ -70,7 +70,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     def render_failed
       Alert(level: :danger) do
-        trusted_html(:field_slip_extract_failed.t(error: @extract.error.to_s))
+        plain(:field_slip_extract_failed.l(error: @extract.error.to_s))
       end
       Button(type: :post, name: :field_slip_extract_retry.l,
              target: image_field_slip_extract_path(@image.id))

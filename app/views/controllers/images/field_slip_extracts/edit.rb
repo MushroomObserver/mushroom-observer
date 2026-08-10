@@ -44,7 +44,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       return unless @extract.template_mismatch?
 
       Alert(level: :danger) do
-        trusted_html(:field_slip_extract_template_mismatch.t)
+        plain(:field_slip_extract_template_mismatch.l)
       end
     end
 
@@ -53,8 +53,8 @@ module Views::Controllers::Images::FieldSlipExtracts
       return unless read
 
       Alert(level: :danger) do
-        trusted_html(:field_slip_extract_code_mismatch.t(read: read,
-                                                         attached: attached))
+        plain(:field_slip_extract_code_mismatch.l(read: read,
+                                                  attached: attached))
       end
     end
 
@@ -68,11 +68,11 @@ module Views::Controllers::Images::FieldSlipExtracts
       suggestion = @extract.location_suggestion
       Alert(level: :warning) do
         if suggestion
-          trusted_html(:field_slip_extract_location_guess.t(
-                         written: written, suggestion: suggestion.name
-                       ))
+          plain(:field_slip_extract_location_guess.l(
+                  written: written, suggestion: suggestion.name
+                ))
         else
-          trusted_html(:field_slip_extract_unknown_alias.t(name: written))
+          plain(:field_slip_extract_unknown_alias.l(name: written))
           whitespace
           render_alias_link
         end
@@ -126,12 +126,12 @@ module Views::Controllers::Images::FieldSlipExtracts
     # once extraction has moved on.
     def render_provenance
       small do
-        trusted_html(:field_slip_extract_provenance.t(
-                       provider: @extract.provider, model: @extract.model,
-                       template: @extract.template.key,
-                       version: @extract.prompt_version.to_s,
-                       time: @extract.updated_at.web_time
-                     ))
+        plain(:field_slip_extract_provenance.l(
+                provider: @extract.provider, model: @extract.model,
+                template: @extract.template.key,
+                version: @extract.prompt_version.to_s,
+                time: @extract.updated_at.web_time
+              ))
       end
     end
   end

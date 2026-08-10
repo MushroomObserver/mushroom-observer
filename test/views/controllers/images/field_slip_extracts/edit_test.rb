@@ -260,8 +260,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       html = render_page(slip_present: true, template_matched: false)
 
       assert_html(html, ".alert-danger",
-                  text: :field_slip_extract_template_mismatch.t.
-                        as_displayed[0, 40])
+                  text: :field_slip_extract_template_mismatch.l[0, 40])
     end
 
     def test_no_mismatch_flag_for_a_matching_read
