@@ -427,6 +427,22 @@ module Images
                       @obs)
     end
 
+    # A pre-existing spare slip gets "attached", not "created".
+    def test_update_attaching_an_existing_spare_slip_says_attached
+      @obs.update!(occurrence: nil)
+      FieldSlip.find_or_create_by_code("OPEN-0219", @obs.user)
+      record_extract(fields: { "Field Slip Code" => "OPEN-0219" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0219" } })
+
+      assert_equal("OPEN-0219", @obs.reload.field_slip.code)
+      assert_flash([[:field_slip_attached, { code: "OPEN-0219" }],
+                    :field_slip_extract_saved])
+    end
+
     # The reviewer's edit wins here too: a misread code gets corrected
     # in the box and the corrected one attaches.
     def test_update_attaches_the_edited_code_not_the_read_one

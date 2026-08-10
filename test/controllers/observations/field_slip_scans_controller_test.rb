@@ -53,12 +53,42 @@ module Observations
 
       assert_response(:success)
       assert_select(
-        "a[href='#{edit_image_field_slip_extract_path(@image.id)}']"
+        "a[href='#{edit_image_field_slip_extract_path(@image.id)}']",
+        text: :field_slip_scan_reading.l
       )
       assert_select(
         "form[action='#{image_field_slip_extract_path(@image.id)}']",
         count: 0
       )
+    end
+
+    def test_show_labels_failed_and_completed_scans
+      FieldSlipExtract.fail!(image: @image, user: mary, error: "boom")
+      login("mary")
+
+      get(:show, params: { id: @obs.id })
+
+      assert_select("a", text: :field_slip_scan_failed.l)
+
+      FieldSlipExtract.record(
+        image: @image, user: mary, prompt_version: "1",
+        result: FieldSlip::Extractor::Result.new(
+          provider: "g", model: "m", raw: {}, template: "mo",
+          fields: { "Collector" => "A" }, confidence: {}
+        )
+      )
+      get(:show, params: { id: @obs.id })
+
+      assert_select("a", text: :field_slip_scan_review.l)
+    end
+
+    def test_show_allowed_for_a_site_admin
+      login("rolf")
+      make_admin
+
+      get(:show, params: { id: @obs.id })
+
+      assert_response(:success)
     end
 
     def test_show_with_an_unknown_observation_redirects

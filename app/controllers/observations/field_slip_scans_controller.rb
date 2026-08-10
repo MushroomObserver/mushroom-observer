@@ -32,9 +32,9 @@ module Observations
 
     # Same gate as the per-image extract pages: site admins and admins
     # of any project the observation belongs to (each scan costs an
-    # API call). A `before_action` halts the chain when it redirects.
+    # API call). Runs only when `find_observation!` succeeded -- a
+    # `before_action` redirect halts the chain.
     def permission_required
-      return unless @observation
       return if in_admin_mode?
       return if @observation.projects.any? do |project|
         project.is_admin?(@user)

@@ -15,8 +15,11 @@ class FieldSlip
     # The 1280px copy first: it decodes printed slip QRs reliably and
     # zbar chews through it several times faster than a full-resolution
     # original -- which matters when the scan runs inline in the
-    # observation-create request. Full size stays as the fallback for a
-    # QR too small or soft to survive the downscale.
+    # observation-create request. Full size is the fallback for a QR
+    # too small or soft to survive the downscale -- but only when the
+    # original is still on local disk. An archived original is never
+    # downloaded for a scan; it just counts as a miss, and the
+    # no-slip-detected flash points at the manual scan page.
     SIZES = [:huge, :full_size].freeze
 
     # The code is the path segment alone -- MO's own /qr/ URLs can
