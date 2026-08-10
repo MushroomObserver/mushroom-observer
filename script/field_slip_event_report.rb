@@ -28,7 +28,8 @@ class FieldSlipEventReport
   def initialize(project)
     @project = project
     @observations = project.observations.
-                    includes(:location, occurrence: :field_slip).to_a
+                    includes(:location, :projects,
+                             occurrence: :field_slip).to_a
   end
 
   def run
@@ -39,6 +40,7 @@ class FieldSlipEventReport
     report_missing_gps
     report_unlinked_inat_notes
     report_empty_slips
+    report_cross_prefix_observations
   end
 
   private
@@ -94,6 +96,24 @@ class FieldSlipEventReport
            select { |slip| slip.occurrence.nil? }.
            map { |slip| "#{slip.code}  (field slip #{slip.id})" }
     section("slips with no observation", rows)
+  end
+
+  # This project's observations that ALSO sit in other prefix-bearing
+  # projects -- usually a pre-checked leftover from another event,
+  # occasionally deliberate (a fair's observations also collected into
+  # the herbarium project behind it). The form warns on the typed-code
+  # path; the photo-first path only learns its slip's project after
+  # create, so it shows up here instead.
+  def report_cross_prefix_observations
+    rows = @observations.filter_map do |obs|
+      others = obs.projects.select do |proj|
+        proj.id != @project.id && proj.field_slip_prefix.present?
+      end
+      next if others.empty?
+
+      "#{obs_url(obs)}  also in: #{others.map(&:title).join("; ")}"
+    end
+    section("also in other field-slip projects", rows)
   end
 end
 
