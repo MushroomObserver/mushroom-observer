@@ -141,6 +141,17 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "input[name='use[Collector]'][checked]")
     end
 
+    # A field with no observation target and no attach action (dbg's
+    # "State" box) gets the plain check-only cell, not a save checkbox.
+    def test_a_targetless_field_renders_check_only
+      html = render_page(template: "dbg",
+                         fields: { "State" => "Colorado" })
+
+      assert_no_html(html, "input[name='use[State]']")
+      assert_html(html, "td small",
+                  text: :field_slip_extract_check_only.l)
+    end
+
     # ---------- flags ----------
 
     def test_flags_a_code_that_disagrees_with_the_attached_slip
