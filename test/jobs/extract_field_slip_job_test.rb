@@ -93,4 +93,53 @@ class ExtractFieldSlipJobTest < ActiveJob::TestCase
 
     assert_nil(FieldSlipExtract.find_by(image_id: @image.id))
   end
+
+  # ---------- attaching the read code ----------
+
+  def result_with_code(code)
+    FieldSlip::Extractor::Result.new(
+      provider: "gemini", model: "m", raw: {},
+      fields: { "Field Slip Code" => code }, confidence: {}, template: "mo"
+    )
+  end
+
+  # zbar missed ~27% of the CMS fair's slip photos; the extraction read
+  # the printed code off nearly all of them. A successful read now
+  # attaches the slip when the observation has none.
+  def test_a_read_code_attaches_the_slip_to_a_slipless_observation
+    @obs.update!(occurrence: nil)
+
+    FieldSlip::Extractor.stub(:default,
+                              fake_extractor(result_with_code("OPEN-0219"))) do
+      ExtractFieldSlipJob.perform_now(@image.id, users(:rolf).id)
+    end
+
+    assert_equal("OPEN-0219", @obs.reload.field_slip.code)
+    assert_includes(projects(:open_membership_project).observations.reload,
+                    @obs)
+  end
+
+  def test_a_read_code_never_touches_a_linked_observation
+    @obs.update!(occurrence: nil)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0800", @obs.user)
+    @obs.field_slip = slip
+    @obs.save!
+
+    FieldSlip::Extractor.stub(:default,
+                              fake_extractor(result_with_code("OPEN-0219"))) do
+      ExtractFieldSlipJob.perform_now(@image.id, users(:rolf).id)
+    end
+
+    assert_equal("OPEN-0800", @obs.reload.field_slip.code)
+  end
+
+  def test_a_read_without_a_code_attaches_nothing
+    @obs.update!(occurrence: nil)
+
+    FieldSlip::Extractor.stub(:default, fake_extractor(result)) do
+      ExtractFieldSlipJob.perform_now(@image.id, users(:rolf).id)
+    end
+
+    assert_nil(@obs.reload.occurrence)
+  end
 end

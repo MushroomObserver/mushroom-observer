@@ -58,12 +58,39 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_not(row.savable, "it becomes a naming, not an attribute")
   end
 
-  def test_review_only_rows_are_neither_editable_nor_savable
+  # A linked observation has nothing to attach, so the code stays a
+  # cross-check.
+  def test_code_row_is_review_only_when_the_observation_has_a_slip
+    assert_not_nil(@obs.occurrence_id, "premise: fixture is slip-linked")
+
     review = build(fields: { "Field Slip Code" => "NEMF-10222" })
     row = row_for(review, "Field Slip Code")
 
     assert_not(row.editable)
     assert_not(row.savable)
+  end
+
+  # A slip-less observation's code row becomes the attach control: the
+  # background job usually attached already, so reaching review without
+  # a slip means a case needing human judgment.
+  def test_code_row_attaches_when_the_observation_has_no_slip
+    @obs.update!(occurrence: nil)
+
+    review = build(fields: { "Field Slip Code" => "NEMF-10222" })
+    row = row_for(review, "Field Slip Code")
+
+    assert(row.code_row?)
+    assert(row.editable, "a misread code gets corrected here")
+    assert(row.savable)
+    assert(row.default_use?)
+  end
+
+  def test_code_row_stays_review_only_when_nothing_was_read
+    @obs.update!(occurrence: nil)
+
+    review = build(fields: { "Collector" => "A" })
+
+    assert_not(row_for(review, "Field Slip Code").savable)
   end
 
   # ---------- current values ----------

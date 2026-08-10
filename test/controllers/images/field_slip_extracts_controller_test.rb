@@ -401,5 +401,68 @@ module Images
 
       assert_redirected_to(image_path(@image.id))
     end
+
+    # ---------- attaching the ticked code ----------
+
+    def test_update_attaches_a_ticked_code_to_a_slipless_observation
+      @obs.update!(occurrence: nil)
+      record_extract(fields: { "Field Slip Code" => "OPEN-0219" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0219" } })
+
+      assert_equal("OPEN-0219", @obs.reload.field_slip.code)
+      assert_includes(projects(:open_membership_project).observations.reload,
+                      @obs)
+    end
+
+    # The reviewer's edit wins here too: a misread code gets corrected
+    # in the box and the corrected one attaches.
+    def test_update_attaches_the_edited_code_not_the_read_one
+      @obs.update!(occurrence: nil)
+      record_extract(fields: { "Field Slip Code" => "OPEN-9999" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0220" } })
+
+      assert_equal("OPEN-0220", @obs.reload.field_slip.code)
+    end
+
+    def test_update_warns_when_the_ticked_code_cannot_attach
+      @obs.update!(occurrence: nil)
+      other = observations(:coprinus_comatus_obs)
+      other.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0500", other.user)
+      other.field_slip = slip
+      other.save!
+      record_extract(fields: { "Field Slip Code" => "OPEN-0500" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0500" } })
+
+      assert_nil(@obs.reload.occurrence)
+      assert_flash_warning
+    end
+
+    def test_update_never_moves_a_linked_observation
+      slip = FieldSlip.find_or_create_by_code("OPEN-0800", @obs.user)
+      @obs.update!(occurrence: nil)
+      @obs.field_slip = slip
+      @obs.save!
+      record_extract(fields: { "Field Slip Code" => "OPEN-0219" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0219" } })
+
+      assert_equal("OPEN-0800", @obs.reload.field_slip.code)
+    end
   end
 end

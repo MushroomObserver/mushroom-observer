@@ -45,6 +45,7 @@ module Images
     def update
       return unless extract_or_redirect!
 
+      attach_ticked_code
       apply_chosen_fields
       outcome = propose_name
       # An unrecognized or ambiguous name needs the reviewer to confirm
@@ -173,6 +174,35 @@ module Images
         observation: @observation, chosen: chosen_fields, user: @user,
         template: @extract.template, inat_code: params[:inat] == "1"
       ).apply
+    end
+
+    # A ticked code row attaches the slip -- the manual path for what
+    # ExtractFieldSlipJob#attach_read_code couldn't decide on its own
+    # (an in-use slip resolved by hand, a corrected misread). Runs
+    # before the field writes so the observation joins its project
+    # first and the project's aliases apply to them.
+    def attach_ticked_code
+      code_field = @extract.template.code_field
+      return unless params.dig(:use, code_field) == "1"
+      return unless @observation.occurrence_id.nil?
+
+      code = params.dig(:value, code_field).to_s.strip
+      return if code.blank?
+
+      result = FieldSlip::Attacher.attach(observation: @observation,
+                                          code: code, user: @user)
+      flash_attach_result(code, result)
+    end
+
+    def flash_attach_result(code, result)
+      if result == :attached
+        flash_notice(:field_slip_created.t(code: code))
+        @observation.reload
+      else
+        flash_warning(:field_slip_extract_attach_failed.t(
+                        code: code, reason: result.to_s.tr("_", " ")
+                      ))
+      end
     end
 
     # Only the ticked rows, keyed by slip field, holding whatever text

@@ -122,13 +122,19 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
+    # The code row's tick is an attach, not a field write, so it says
+    # so -- everything else gets a bare box under the "Save" header.
     def render_use_cell(row)
       if row.savable
         checkbox_field("use[#{row.field}]", checked: row.default_use?,
-                                            label: false)
+                                            label: use_label(row))
       else
         small { plain(:field_slip_extract_check_only.l) }
       end
+    end
+
+    def use_label(row)
+      row.code_row? ? :field_slip_extract_attach_code.l : false
     end
 
     # Locality, like the ID, is corrected through an autocompleter and

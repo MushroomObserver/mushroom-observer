@@ -29,10 +29,12 @@ class ExtractFieldSlipJob < ApplicationJob
   def extract(image, user)
     context = FieldSlip::Extractor::Context.for_image(image)
     result = FieldSlip::Extractor.default.extract(image, context: context)
-    FieldSlipExtract.record(
+    extract = FieldSlipExtract.record(
       image: image, user: user, result: result,
       prompt_version: FieldSlip::Extractor::PROMPT_VERSION
     )
+    attach_read_code(image, user, extract)
+    extract
   rescue StandardError => e
     # Not re-raised -- the failed extract row IS the retry mechanism
     # (the review page's Try Again button) -- so the details have to be
@@ -42,5 +44,26 @@ class ExtractFieldSlipJob < ApplicationJob
       "#{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}"
     )
     FieldSlipExtract.fail!(image: image, user: user, error: e.message)
+  end
+
+  # The read code is the fallback when the QR path missed: zbar failed
+  # to decode ~27% of the CMS fair's slip photos while the extraction
+  # read the printed code off nearly all of them -- and without this,
+  # the code the extraction knows goes nowhere. Attacher's own guards
+  # keep it safe for a background act: never an observation that has a
+  # slip, never somebody else's slip.
+  def attach_read_code(image, user, extract)
+    observation = image.observations.first
+    return unless observation && observation.occurrence_id.nil?
+
+    code = extract.value_for(extract.template.code_field).to_s.strip
+    return if code.blank?
+
+    result = FieldSlip::Attacher.attach(observation: observation,
+                                        code: code, user: user)
+    Rails.logger.info(
+      "ExtractFieldSlipJob: read code #{code} -> #{result} " \
+      "(observation #{observation.id}, image #{image.id})"
+    )
   end
 end
