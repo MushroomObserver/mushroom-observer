@@ -59,12 +59,15 @@ class ExtractFieldSlipJobTest < ActiveJob::TestCase
 
   # A provider failure used to leave nothing behind but a log line;
   # now the row says what went wrong, where the retry button can see
-  # it.
+  # it. The logger is stubbed because the test env logs errors to
+  # stdout, and this deliberate failure would print into the test run.
   def test_perform_records_a_failure_with_its_error
     ExtractFieldSlipJob.request(image: @image, user: users(:rolf))
 
     FieldSlip::Extractor.stub(:default, failing_extractor) do
-      ExtractFieldSlipJob.perform_now(@image.id, users(:rolf).id)
+      Rails.logger.stub(:error, nil) do
+        ExtractFieldSlipJob.perform_now(@image.id, users(:rolf).id)
+      end
     end
 
     extract = FieldSlipExtract.find_by(image_id: @image.id)

@@ -8,6 +8,7 @@ module Views::Controllers::Observations::FieldSlipScans
   class Show < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, ::User
+    prop :extracts, _Hash(Integer, ::FieldSlipExtract)
 
     def view_template
       add_page_title(:field_slip_scan_title.t(id: @observation.id))
@@ -36,7 +37,7 @@ module Views::Controllers::Observations::FieldSlipScans
     end
 
     def render_photo_state(image)
-      extract = FieldSlipExtract.find_by(image_id: image.id)
+      extract = @extracts[image.id]
       if extract.nil?
         Button(type: :post, name: :field_slip_extract_button.l,
                target: image_field_slip_extract_path(image.id))

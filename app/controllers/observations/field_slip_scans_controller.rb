@@ -13,8 +13,10 @@ module Observations
     before_action :permission_required
 
     def show
+      extracts = FieldSlipExtract.where(image_id: @observation.image_ids).
+                 index_by(&:image_id)
       render(Views::Controllers::Observations::FieldSlipScans::Show.new(
-               observation: @observation, user: @user
+               observation: @observation, user: @user, extracts: extracts
              ))
     end
 
