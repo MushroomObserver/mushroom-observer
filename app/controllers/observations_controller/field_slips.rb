@@ -79,15 +79,13 @@ module ObservationsController::FieldSlips
     return unless FieldSlip::QRDecoder.available?
     return unless @observation.occurrence_id.nil?
     return unless reviews_field_slips?
-
-    image = @observation.images.first
-    return unless image
+    return if @observation.images.none?
     return if @observation.projects.none? do |proj|
       proj.field_slip_prefix.present?
     end
 
     flash_warning(:observation_no_field_slip_detected.t(
-                    url: edit_image_field_slip_extract_path(image.id)
+                    url: field_slip_scan_observation_path(@observation.id)
                   ))
   end
 

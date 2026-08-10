@@ -627,6 +627,7 @@ MushroomObserver::Application.routes.draw do
                 only: [:show, :new, :create, :edit, :update, :destroy],
                 shallow: true, controller: "observations/external_links"
 
+      get("field_slip_scan", to: "observations/field_slip_scans#show")
       get("map", to: "observations/maps#show")
       get("map_popup", to: "observations/maps#popup")
       get("suggestions", to: "observations/namings/suggestions#show",

@@ -2603,7 +2603,12 @@
   field_slip_extract_attach_code: attach this field slip
   field_slip_extract_code_matches: matches the attached field slip
   field_slip_extract_none_yet: This photo has not been scanned for field slip data yet.
-  field_slip_extract_choose_photo: No photo of this observation has been scanned for field slip data yet. Choose the one that shows the field slip and scan it.
+  field_slip_scan_title: "Field Slip Scans for Observation [id]"
+  field_slip_scan_help: Scan the photo that shows the field slip. Photos already scanned link to their results.
+  field_slip_scan_review: review scan results
+  field_slip_scan_reading: reading in progress
+  field_slip_scan_failed: scan failed - view / retry
+  field_slip_scan_all_photos: Choose among all of this observation's photos
   observation_no_field_slip_detected: 'No field slip code was automatically detected in the photos. If one of them shows a field slip, you can "scan it":[url].'
   field_slip_extract_code_differs: differs from the attached field slip!
   field_slip_extract_attach_failed: "Could not attach field slip [code]: [reason]."
