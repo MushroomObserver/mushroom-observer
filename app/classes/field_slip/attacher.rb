@@ -80,7 +80,7 @@ class FieldSlip
       @observation.save!
       slip.adopt_user_from(@observation)
       refresh_occurrence
-      apply_project(slip.project)
+      apply_project(slip)
     end
 
     # The bookkeeping every attach path owes the occurrence. No
@@ -96,14 +96,21 @@ class FieldSlip
     # Using a slip for an open-membership project enrolls the user, the
     # way scanning one always has -- that is what a printed prefix
     # means. The observation then joins the project too, unless it
-    # violates the project's constraints, in which case the slip is
-    # being used as a spare and the observation stays out.
-    def apply_project(project)
+    # violates the project's constraints, in which case the slip goes
+    # spare along with its observation (#4932 invariant 2) -- the
+    # review's reconcile restores both, via the printed prefix, once
+    # the real data lands.
+    def apply_project(slip)
+      project = slip.project
       return unless project
 
       project.join(@user)
       return unless project.member?(@user)
-      return if project.violates_constraints?(@observation)
+
+      if project.violates_constraints?(@observation)
+        slip.update!(project: nil)
+        return
+      end
 
       project.add_observation(@observation)
     end

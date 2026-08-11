@@ -1967,6 +1967,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_not_nil(obs, "the slip still attaches")
     assert_not_includes(project.observations.reload, obs,
                         "the observation stays out of the project")
+    assert_nil(slip.reload.project,
+               "the slip goes spare along with its observation")
     assert_flash_warning
   end
 

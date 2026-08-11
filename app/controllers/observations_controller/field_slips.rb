@@ -259,6 +259,11 @@ module ObservationsController::FieldSlips
     return unless project.member?(@user)
 
     if project.violates_constraints?(@observation)
+      # The slip goes spare rather than asserting a membership its
+      # observation doesn't have (#4932 invariant 2). The review's
+      # reconcile restores both -- via the printed prefix -- once the
+      # observation satisfies the constraints.
+      field_slip.update!(project: nil)
       flash_warning(:field_slip_project_constraint_violation.t(
                       code: field_slip.code, title: project.title
                     ))

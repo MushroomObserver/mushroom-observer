@@ -2558,7 +2558,7 @@
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
-  field_slip_project_constraint_violation: This observation was NOT added to [title] because it violates that project's constraints (location, dates, or species). Field slip [code] stays attached; fix the observation and re-save it, or ask a project admin to add it.
+  field_slip_project_constraint_violation: This observation violates the constraints of [title] (location, dates, or species), so neither it nor field slip [code] is associated with that project. The slip stays attached to this observation; fix the observation and re-save it, or ask a project admin to add it.
   field_slip_attached: Field slip [code] was attached to this observation.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
@@ -2624,7 +2624,7 @@
   field_slip_extract_joined: Field slip [code] was already in use, so this observation was linked to it as another observation of the same collection.
   observation_field_slip_in_use: 'Field slip [code] was detected in a photo, but it is already attached to "another observation":[url], so it was not attached automatically. Use Read Field Slip to review the photo — saving the review will link this observation to the same field slip.'
   field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.
-  field_slip_extract_project_blocked: The observation is still not in [title] because it does not satisfy that project's constraints (location, dates, or species).
+  field_slip_extract_conflict: The saved values violate the constraints of [title], but field slip [code] already belongs to another observation there — a conflict only a person can sort out. The values were kept, and this observation was removed from the field slip and the project.
   field_slip_extract_add_alias: Add this abbreviation
   field_slip_extract_code_mismatch: "The slip in this photo reads [read], but the observation is attached to field slip [attached]. Check that this is the right photo before saving."
   field_slip_extract_unknown_alias: "No project abbreviation is defined for [name], so the location was left as written."
