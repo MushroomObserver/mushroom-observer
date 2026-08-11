@@ -2615,7 +2615,13 @@
   field_slip_scan_all_photos: Choose among all of this observation's photos
   observation_no_field_slip_detected: 'No field slip code was automatically detected in the photos. If one of them shows a field slip, you can "scan it":[url].'
   field_slip_extract_code_differs: differs from the attached field slip!
-  field_slip_extract_attach_failed: "Could not attach field slip [code]: [reason]."
+  field_slip_extract_attach_failed: "This observation could not be associated with field slip [code] ([reason]). The other values were still saved."
+  field_slip_attach_reason_closed_project: its project is not open to you
+  field_slip_attach_reason_occurrence_full: it already has the maximum number of linked observations
+  field_slip_attach_reason_invalid: the code is not valid
+  field_slip_attach_reason_already_linked: this observation already has a field slip
+  field_slip_extract_joined: Field slip [code] was already in use, so this observation was linked to it as another observation of the same collection.
+  observation_field_slip_in_use: 'Field slip [code] was detected in a photo, but it is already attached to "another observation":[url], so it was not attached automatically. Use Read Field Slip to review the photo — saving the review will link this observation to the same field slip.'
   field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.
   field_slip_extract_project_blocked: The observation is still not in [title] because it does not satisfy that project's constraints (location, dates, or species).
   field_slip_extract_add_alias: Add this abbreviation
