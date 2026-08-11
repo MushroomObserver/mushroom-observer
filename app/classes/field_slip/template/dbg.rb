@@ -75,25 +75,6 @@ class FieldSlip
             field slip code. Give it exactly as written.
         RULES
       end
-
-      # The box is dedicated to iNaturalist, so the digits in it are
-      # the observation id -- and collectors write them with separators
-      # ("388 596 423", "388-401-241") or beside a username or
-      # timestamp ("fungus_junkie iNat: 388891116", "10:29 388879492";
-      # all real entries from the 2026 CMS fair). Digits joined across
-      # single spaces/dashes make the id; seven digits minimum keeps
-      # clock times and dates out.
-      RAW_ID = /(?<!\d)\d(?:[\s\-–]?\d){6,9}(?!\d)/
-
-      def inat_code_in(value)
-        inat_code_raw(value)&.gsub(/\D/, "")
-      end
-
-      # The id as actually written, for callers separating it from the
-      # rest of the entry.
-      def inat_code_raw(value)
-        value.to_s[RAW_ID]
-      end
     end
   end
 end

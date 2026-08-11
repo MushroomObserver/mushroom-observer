@@ -58,14 +58,15 @@ class FieldSlip::TemplateTest < UnitTestCase
 
   # ---------- iNat code detection ----------
 
-  # MO's Other Codes box is free text, so only a purely numeric value
-  # is treated as an iNat id.
-  def test_mo_inat_code_requires_purely_numeric
+  # Every template's iNat slot reads ids the same way (see
+  # Template::Base::RAW_ID) -- MO's free-text Other Codes box included.
+  def test_mo_inat_code_normalizes_like_any_other_template
     template = FieldSlip::Template.for(:mo)
 
     assert_equal("12345678", template.inat_code_in(" 12345678 "))
+    assert_equal("388596423", template.inat_code_in("388 596 423"))
+    assert_equal("388879492", template.inat_code_in("10:29 388879492"))
     assert_nil(template.inat_code_in("DBG-12345"))
-    assert_nil(template.inat_code_in("10:29 388879492"))
     assert_not(template.inat_code?(nil))
   end
 

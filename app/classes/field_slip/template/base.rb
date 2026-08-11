@@ -41,14 +41,25 @@ class FieldSlip
       # Extractor::Prompt.
       def field_rules = raise(NotImplementedError)
 
+      # Collectors write iNat observation ids with separators
+      # ("388 596 423", "388-401-241") or beside a username or
+      # timestamp ("fungus_junkie iNat: 388891116", "10:29 388879492";
+      # all real entries from the 2026 CMS fair). Digits joined across
+      # single spaces/dashes make the id; seven digits minimum keeps
+      # clock times, dates, and short accession numbers out.
+      RAW_ID = /(?<!\d)\d(?:[\s\-–]?\d){6,9}(?!\d)/
+
       # The iNaturalist observation id in a value read from
       # `inat_codes_field`, or nil when the value doesn't hold one.
-      def inat_code_in(_value) = nil
+      def inat_code_in(value)
+        inat_code_raw(value)&.gsub(/\D/, "")
+      end
 
-      # The span of the value the id was read from, as written --
-      # identical to the id unless a template normalizes separators
-      # out of it.
-      def inat_code_raw(value) = inat_code_in(value)
+      # The span of the value the id was read from, as written, for
+      # callers separating it from the rest of the entry.
+      def inat_code_raw(value)
+        value.to_s[RAW_ID]
+      end
 
       def inat_code?(value) = inat_code_in(value).present?
     end
