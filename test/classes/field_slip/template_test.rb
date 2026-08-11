@@ -58,14 +58,15 @@ class FieldSlip::TemplateTest < UnitTestCase
 
   # ---------- iNat code detection ----------
 
-  # MO's Other Codes box is free text, so only a purely numeric value
-  # is treated as an iNat id.
-  def test_mo_inat_code_requires_purely_numeric
+  # Every template's iNat slot reads ids the same way (see
+  # Template::Base::RAW_ID) -- MO's free-text Other Codes box included.
+  def test_mo_inat_code_normalizes_like_any_other_template
     template = FieldSlip::Template.for(:mo)
 
     assert_equal("12345678", template.inat_code_in(" 12345678 "))
+    assert_equal("388596423", template.inat_code_in("388 596 423"))
+    assert_equal("388879492", template.inat_code_in("10:29 388879492"))
     assert_nil(template.inat_code_in("DBG-12345"))
-    assert_nil(template.inat_code_in("10:29 388879492"))
     assert_not(template.inat_code?(nil))
   end
 
@@ -79,5 +80,23 @@ class FieldSlip::TemplateTest < UnitTestCase
     assert_equal("388879863", template.inat_code_in("388879863"))
     assert_nil(template.inat_code_in("10:29 am"))
     assert_nil(template.inat_code_in("someuser 8/6"))
+  end
+
+  # Every shape below is a real entry from the 2026 CMS fair scans:
+  # collectors group the digits with spaces or dashes, prefix them, or
+  # write them beside usernames and times.
+  def test_dbg_inat_code_normalizes_separators
+    template = FieldSlip::Template.for(:dbg)
+
+    assert_equal("388596423", template.inat_code_in("388 596 423"))
+    assert_equal("388401241", template.inat_code_in("388-401241"))
+    assert_equal("389207996", template.inat_code_in("389-207-996"))
+    assert_equal("389176438", template.inat_code_in("#389176438"))
+    assert_equal("388891116",
+                 template.inat_code_in("fungus_junkie iNat: 388891116"))
+    assert_equal("389198780",
+                 template.inat_code_in("1:59 pm 389-198-780 (iNat#) see Alex"))
+    assert_nil(template.inat_code_in("gSanchez"))
+    assert_nil(template.inat_code_in("1:58 PM"))
   end
 end
