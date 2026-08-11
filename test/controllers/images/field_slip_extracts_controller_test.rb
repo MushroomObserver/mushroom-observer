@@ -428,6 +428,8 @@ module Images
     end
 
     # A pre-existing spare slip gets "attached", not "created".
+    # Submitted lowercase to pin the canonicalization: the lookup, the
+    # attach, and the flash all speak the upcased code.
     def test_update_attaching_an_existing_spare_slip_says_attached
       @obs.update!(occurrence: nil)
       FieldSlip.find_or_create_by_code("OPEN-0219", @obs.user)
@@ -436,7 +438,7 @@ module Images
 
       put(:update, params: { image_id: @image.id,
                              use: { "Field Slip Code" => "1" },
-                             value: { "Field Slip Code" => "OPEN-0219" } })
+                             value: { "Field Slip Code" => "open-0219" } })
 
       assert_equal("OPEN-0219", @obs.reload.field_slip.code)
       assert_flash([[:field_slip_attached, { code: "OPEN-0219" }],

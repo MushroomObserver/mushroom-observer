@@ -208,10 +208,12 @@ module Images
       return unless params.dig(:use, code_field) == "1"
       return unless @observation.occurrence_id.nil?
 
-      code = params.dig(:value, code_field).to_s.strip
+      # Normalized once, so lookups, the attach, and the flash all
+      # speak the same canonical code.
+      code = params.dig(:value, code_field).to_s.strip.upcase
       return if code.blank?
 
-      existed = FieldSlip.exists?(code: code.upcase)
+      existed = FieldSlip.exists?(code: code)
       result = FieldSlip::Attacher.attach(observation: @observation,
                                           code: code, user: @user,
                                           join_in_use: true)

@@ -1961,7 +1961,14 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_redirected_to(
       edit_image_field_slip_extract_path(image.id, await: 1)
     )
-    assert_flash_warning
+    # The warning names the in-use code and links the observation that
+    # holds the slip -- that explanation IS the behavior under test.
+    assert_flash(
+      [[:runtime_observation_success, { id: assigns(:observation).id }],
+       [:observation_field_slip_in_use,
+        { code: "OPEN-0880",
+          url: permanent_observation_path(other.id) }]]
+    )
   end
 
   # A photographed code for some OTHER slip than the attached one is
