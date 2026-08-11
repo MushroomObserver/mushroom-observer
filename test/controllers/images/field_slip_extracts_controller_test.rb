@@ -428,6 +428,8 @@ module Images
     end
 
     # A pre-existing spare slip gets "attached", not "created".
+    # Submitted lowercase to pin the canonicalization: the lookup, the
+    # attach, and the flash all speak the upcased code.
     def test_update_attaching_an_existing_spare_slip_says_attached
       @obs.update!(occurrence: nil)
       FieldSlip.find_or_create_by_code("OPEN-0219", @obs.user)
@@ -436,7 +438,7 @@ module Images
 
       put(:update, params: { image_id: @image.id,
                              use: { "Field Slip Code" => "1" },
-                             value: { "Field Slip Code" => "OPEN-0219" } })
+                             value: { "Field Slip Code" => "open-0219" } })
 
       assert_equal("OPEN-0219", @obs.reload.field_slip.code)
       assert_flash([[:field_slip_attached, { code: "OPEN-0219" }],
@@ -457,7 +459,11 @@ module Images
       assert_equal("OPEN-0220", @obs.reload.field_slip.code)
     end
 
-    def test_update_warns_when_the_ticked_code_cannot_attach
+    # An in-use code is the "second observation of the same collection"
+    # case (a recorder re-photographing an already-used slip): saving
+    # the review joins the slip's occurrence, and the newly reviewed
+    # observation becomes its primary.
+    def test_update_with_an_in_use_code_joins_the_occurrence
       @obs.update!(occurrence: nil)
       other = observations(:coprinus_comatus_obs)
       other.update!(occurrence: nil)
@@ -471,8 +477,40 @@ module Images
                              use: { "Field Slip Code" => "1" },
                              value: { "Field Slip Code" => "OPEN-0500" } })
 
+      @obs.reload
+
+      assert_equal(slip.reload.occurrence, @obs.occurrence)
+      assert_equal(@obs.id, @obs.occurrence.primary_observation_id)
+    end
+
+    def test_update_warns_when_the_ticked_code_cannot_attach
+      @obs.update!(occurrence: nil)
+      other = observations(:coprinus_comatus_obs)
+      other.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0501", other.user)
+      other.field_slip = slip
+      other.save!
+      record_extract(fields: { "Field Slip Code" => "OPEN-0501",
+                               "Collector" => "A. Recorder" })
+      login_as_site_admin
+
+      original = Occurrence::MAX_OBSERVATIONS
+      Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+      Occurrence.const_set(:MAX_OBSERVATIONS, 1)
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1",
+                                    "Collector" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0501",
+                                      "Collector" => "A. Recorder" } })
+
       assert_nil(@obs.reload.occurrence)
       assert_flash_warning
+      # The failed link never blocks the rest of the save.
+      assert_equal("A. Recorder", @obs.collector)
+    ensure
+      Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+      Occurrence.const_set(:MAX_OBSERVATIONS, original)
     end
 
     # The reported bug: the join decision at slip-attach time ran

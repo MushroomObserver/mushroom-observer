@@ -61,6 +61,52 @@ class FieldSlip::AttacherTest < UnitTestCase
     assert_nil(@obs.reload.occurrence)
   end
 
+  # `join_in_use:` is the review form's human-confirmed resolution of
+  # the in-use case: the observation joins the slip's occurrence and,
+  # carrying the freshly reviewed data, becomes its primary.
+  def test_join_in_use_joins_the_occurrence_and_takes_primary
+    other = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0510", other.user)
+    other.update!(occurrence: nil)
+    other.field_slip = slip
+    other.save!
+
+    result = FieldSlip::Attacher.attach(observation: @obs, code: "OPEN-0510",
+                                        user: @obs.user, join_in_use: true)
+
+    assert_equal(:joined, result)
+    @obs.reload
+
+    assert_equal(slip.reload.occurrence, @obs.occurrence)
+    assert_equal(@obs.id, @obs.occurrence.primary_observation_id)
+    assert_includes(@obs.occurrence.observations, other.reload)
+  end
+
+  def test_join_in_use_refuses_a_full_occurrence
+    other = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0511", other.user)
+    other.update!(occurrence: nil)
+    other.field_slip = slip
+    other.save!
+
+    # Filling a real occurrence to MAX_OBSERVATIONS is heavy; lower the
+    # cap to the one member it already has instead.
+    original = Occurrence::MAX_OBSERVATIONS
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, 1)
+
+    result = FieldSlip::Attacher.attach(
+      observation: @obs, code: "OPEN-0511",
+      user: @obs.user, join_in_use: true
+    )
+
+    assert_equal(:occurrence_full, result)
+    assert_nil(@obs.reload.occurrence)
+  ensure
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, original)
+  end
+
   # An existing slip in a project the user can neither join nor is a
   # member of: attaching would put the observation there against
   # invariant 4 (#4932).

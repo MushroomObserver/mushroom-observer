@@ -41,9 +41,26 @@ module ObservationsController::FieldSlips
       next unless code && reviewable_slip_code?(code)
 
       start_extraction_for_linked_slip(image, code)
+      explain_in_use_slip(code)
       return image
     end
     nil
+  end
+
+  # The QR jobs refuse an in-use slip, so nothing starts the read and
+  # the review page would just sit on its scan button -- say why, and
+  # that saving the review is what links this observation to the slip.
+  def explain_in_use_slip(code)
+    return if @observation.field_slip&.code == code
+
+    slip = FieldSlip.find_by(code: code)
+    primary_id = slip&.occurrence&.primary_observation_id
+    return unless primary_id
+
+    flash_warning(:observation_field_slip_in_use.t(
+                    code: code,
+                    url: permanent_observation_path(primary_id)
+                  ))
   end
 
   # A slip already linked to the observation only counts when the
