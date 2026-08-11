@@ -356,4 +356,58 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
       assert_checkbox_state("observation_species_list_ids_#{id}", state)
     end
   end
+
+  # ---------- cross-prefix soft constraint on update ----------
+  # The create-side twins live in observations_controller_create_test.rb;
+  # the validator runs on both actions, so update gets its own coverage.
+
+  def attach_open_slip(obs, code)
+    obs.update!(occurrence: nil)
+    obs.field_slip = FieldSlip.find_or_create_by_code(code, obs.user)
+    obs.save!
+  end
+
+  def test_update_warns_when_a_checked_project_has_a_different_prefix
+    obs = observations(:coprinus_comatus_obs)
+    attach_open_slip(obs, "OPEN-1001")
+    project = projects(:eol_project)
+
+    assert_equal("EOL", project.field_slip_prefix, "premise")
+
+    login("rolf")
+    params = { id: obs.id,
+               field_code: "OPEN-1001",
+               observation: { place_name: obs.place_name,
+                              project_ids: [project.id.to_s] } }
+    put(:update, params: params)
+
+    assert_flash_warning
+    assert_select("#project_messages li", text: /#{project.title}/)
+    assert_not_includes(project.observations.reload, obs)
+
+    params[:observation][:ignore_proj_conflicts] = "1"
+    put(:update, params: params)
+
+    assert_response(:redirect)
+    assert_includes(project.observations.reload, obs,
+                    "the confirmed resubmit goes through")
+  end
+
+  def test_update_does_not_warn_for_a_cross_prefix_project_already_joined
+    obs = observations(:california_obs)
+    attach_open_slip(obs, "OPEN-1002")
+    project = projects(:eol_project)
+    project.observations << obs
+
+    login("dick")
+    put(:update, params: { id: obs.id,
+                           field_code: "OPEN-1002",
+                           observation: {
+                             place_name: obs.place_name,
+                             project_ids: [project.id.to_s]
+                           } })
+
+    assert_no_flash
+    assert_response(:redirect)
+  end
 end

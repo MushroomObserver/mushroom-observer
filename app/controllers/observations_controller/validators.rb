@@ -137,9 +137,20 @@ module ObservationsController::Validators
     return true if @suspect_checked_projects.empty? &&
                    @cross_prefix_projects.empty?
 
-    flash_warning(:form_observations_there_is_a_problem_with_projects.t)
+    flash_warning(project_problem_flash_tag.t)
     @any_errors = true
     false
+  end
+
+  # "Violates the constraints" would be wrong for a pure prefix
+  # mismatch -- nothing is violated, the checked project just isn't the
+  # slip's event.
+  def project_problem_flash_tag
+    if @suspect_checked_projects.any?
+      :form_observations_there_is_a_problem_with_projects
+    else
+      :form_observations_projects_cross_prefix_flash
+    end
   end
 
   # A field slip prefix marks a project as one event's own. When the
