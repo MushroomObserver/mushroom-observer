@@ -4,6 +4,12 @@ require("test_helper")
 
 module Views::Controllers::Images::FieldSlipExtracts
   class EditTest < ComponentTestCase
+    # A proxy, not an include: including url_helpers makes MiniTest
+    # pick up route helpers named test_* as test methods.
+    def routes
+      Rails.application.routes.url_helpers
+    end
+
     def setup
       super
       @user = users(:rolf)
@@ -135,6 +141,17 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "input[name='use[Collector]'][checked]")
     end
 
+    # A field with no observation target and no attach action (dbg's
+    # "State" box) gets the plain check-only cell, not a save checkbox.
+    def test_a_targetless_field_renders_check_only
+      html = render_page(template: "dbg",
+                         fields: { "State" => "Colorado" })
+
+      assert_no_html(html, "input[name='use[State]']")
+      assert_html(html, "td small",
+                  text: :field_slip_extract_check_only.l)
+    end
+
     # ---------- flags ----------
 
     def test_flags_a_code_that_disagrees_with_the_attached_slip
@@ -142,12 +159,18 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_includes(html, "NEMF-99999")
       assert_includes(html, @obs.field_slip.code)
+      # The row itself states the check's outcome, not the generic
+      # "cross-check only" that read as "nothing was read".
+      assert_html(html, "td small",
+                  text: :field_slip_extract_code_differs.l)
     end
 
     def test_no_code_flag_when_they_agree
       html = render_page(fields: { "Field Slip Code" => @obs.field_slip.code })
 
       assert_no_html(html, ".alert-danger")
+      assert_html(html, "td small",
+                  text: :field_slip_extract_code_matches.l)
     end
 
     # Naming the undefined abbreviation is what lets an admin add it,
@@ -159,6 +182,23 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_includes(html, "EB2")
       assert_html(html, "a[href*='aliases/new']")
+    end
+
+    # The reported bug's other half: the Add-abbreviation link went to
+    # whichever other project the observation was in, not the slip's.
+    def test_alias_link_targets_the_slips_project
+      @project.observations << @obs unless @project.observations.include?(@obs)
+      slip_project = projects(:open_membership_project)
+      @obs.field_slip.update_columns(project_id: slip_project.id)
+
+      html = render_page(fields: { "Location" => "EB2" })
+
+      assert_html(
+        html,
+        "a[href='#{routes.new_project_alias_path(
+          project_id: slip_project.id
+        )}']"
+      )
     end
 
     def test_no_alias_flag_for_a_known_abbreviation
@@ -220,8 +260,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       html = render_page(slip_present: true, template_matched: false)
 
       assert_html(html, ".alert-danger",
-                  text: :field_slip_extract_template_mismatch.t.
-                        as_displayed[0, 40])
+                  text: :field_slip_extract_template_mismatch.l[0, 40])
     end
 
     def test_no_mismatch_flag_for_a_matching_read
@@ -277,6 +316,9 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_html(html,
                   "input[name='value[Location]'][value='#{target.name}']")
+      # The guess message renders its .t markup (the em dash) rather
+      # than a double-escaped "&#8212;" entity.
+      assert_html(html, ".alert-warning", text: "below — check")
     end
 
     def test_locality_keeps_what_was_written_when_nothing_matches

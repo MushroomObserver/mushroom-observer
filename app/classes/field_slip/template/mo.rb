@@ -55,14 +55,6 @@ class FieldSlip
             Codes box.
         RULES
       end
-
-      # "Other Codes" is free text, but in practice a purely numeric
-      # one is an iNaturalist observation id -- that is what collectors
-      # write in that box.
-      def inat_code_in(value)
-        text = value.to_s.strip
-        text if text.match?(/\A\d+\z/)
-      end
     end
   end
 end
