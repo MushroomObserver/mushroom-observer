@@ -1941,6 +1941,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
            "the read starts here; the QR jobs skip linked observations")
   end
 
+  # The QR jobs refuse an in-use slip, so the review page would sit on
+  # its scan button with nothing running -- the redirect explains why,
+  # naming the observation that has the slip.
+  def test_create_explains_a_detected_code_already_in_use
+    image = images(:in_situ_image)
+    other = observations(:coprinus_comatus_obs)
+    other.update!(occurrence: nil)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0880", other.user)
+    other.field_slip = slip
+    other.save!
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0880") do
+      post(:create, params: slip_photo_params(image))
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+    assert_flash_warning
+  end
+
   # A photographed code for some OTHER slip than the attached one is
   # never auto-reviewed into this observation.
   def test_create_ignores_a_code_that_mismatches_the_attached_slip
