@@ -62,14 +62,20 @@ class FieldSlip
       # The box may hold more than the id ("10:29 388879492" -- a
       # timestamp doubling as a checksum against the iNat record). The
       # id becomes the link; the rest is kept beside it rather than
-      # dropped.
+      # dropped. Removing the id uses the span as written, which can
+      # differ from the id itself ("388 596 423").
       def inat_link_for(text)
         code = @template.inat_code_in(text)
         return text unless code
 
         link = FieldSlipNotesBuilder.inat_link(code)
-        rest = text.sub(code, "").squish
+        rest = leftover_around_code(text, @template.inat_code_raw(text))
         rest.present? ? "#{link} (#{rest})" : link
+      end
+
+      def leftover_around_code(text, raw_span)
+        text.sub(raw_span.to_s, " ").squish.
+          sub(/\A[#:\-\s]+/, "").sub(/[#:\-\s]+\z/, "")
       end
 
       def assign_columns

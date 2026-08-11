@@ -29,7 +29,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_html(html, "[data-controller='reload-poll']")
       assert_html(html, "#field_slip_extract_pending",
-                  text: :field_slip_extract_pending.t.as_displayed[0, 40])
+                  text: :field_slip_extract_pending.l[0, 40])
       # The view links image.observations.first -- the fixture image
       # hangs off several observations, so pin whichever IS first
       # rather than assuming an association order.
@@ -40,12 +40,26 @@ module Views::Controllers::Images::FieldSlipExtracts
       )
     end
 
-    # No extract yet -- the QR jobs are still attaching -- looks the
-    # same as pending: something is happening, keep refreshing.
-    def test_awaiting_detection_self_refreshes_too
+    # No extract: the not-scanned-yet state scans THIS photo and does
+    # NOT poll; picking among the observation's photos belongs to the
+    # observation-scoped scan page, linked below the button.
+    def test_unscanned_state_offers_the_scan_and_the_chooser_link
       html = render_status
 
-      assert_html(html, "[data-controller='reload-poll']")
+      assert_html(html, "#field_slip_extract_none",
+                  text: :field_slip_extract_none_yet.l[0, 40])
+      assert_html(
+        html,
+        "form[action='#{routes.image_field_slip_extract_path(@image.id)}'] " \
+        "button[type='submit']"
+      )
+      linked = @image.reload.observations.first
+
+      assert_html(
+        html,
+        "a[href='#{routes.field_slip_scan_observation_path(linked.id)}']"
+      )
+      assert_no_html(html, "[data-controller='reload-poll']")
     end
 
     def test_failed_read_shows_the_error_and_a_retry_button
