@@ -84,11 +84,22 @@ class FieldSlipEventReport
     rows = @observations.filter_map do |obs|
       note = obs.notes.to_h[:iNaturalist]
       next if note.blank? || FieldSlipNotesBuilder.inat_link?(note.to_s)
-      next if note.to_s.include?(FieldSlipNotesBuilder::INAT_OBSERVATION_URL)
+      next if linked_to_inat?(note.to_s)
 
       "#{obs_url(obs)}  #{note.to_s[0, 60].inspect}"
     end
     section("iNaturalist notes without a link", rows)
+  end
+
+  # A hand-pasted iNat URL counts as linked too, not just our canonical
+  # shape. Each URL's host is compared exactly -- a substring test would
+  # accept an unrelated URL that merely embeds iNat's address.
+  def linked_to_inat?(text)
+    text.scan(%r{https?://\S+}).any? do |candidate|
+      URI.parse(candidate).host&.casecmp?("www.inaturalist.org")
+    rescue URI::InvalidURIError
+      false
+    end
   end
 
   def report_empty_slips
