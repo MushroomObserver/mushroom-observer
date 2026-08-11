@@ -208,25 +208,34 @@ module Images
       return unless params.dig(:use, code_field) == "1"
       return unless @observation.occurrence_id.nil?
 
-      code = params.dig(:value, code_field).to_s.strip
+      # Normalized once, so lookups, the attach, and the flash all
+      # speak the same canonical code.
+      code = params.dig(:value, code_field).to_s.strip.upcase
       return if code.blank?
 
-      existed = FieldSlip.exists?(code: code.upcase)
+      existed = FieldSlip.exists?(code: code)
       result = FieldSlip::Attacher.attach(observation: @observation,
-                                          code: code, user: @user)
+                                          code: code, user: @user,
+                                          join_in_use: true)
       flash_attach_result(code, result, existed)
     end
 
-    # "Created" or "attached", honestly: the code may have named a
-    # pre-existing spare slip.
+    # "Created", "attached", or "joined", honestly: the code may have
+    # named a pre-existing spare slip, or one already in use -- joining
+    # its occurrence is this form's resolution of that case.
     def flash_attach_result(code, result, existed)
-      if result == :attached
+      case result
+      when :attached
         key = existed ? :field_slip_attached : :field_slip_created
         flash_notice(key.t(code: code))
         @observation.reload
+      when :joined
+        flash_notice(:field_slip_extract_joined.t(code: code))
+        @observation.reload
       else
         flash_warning(:field_slip_extract_attach_failed.t(
-                        code: code, reason: result.to_s.tr("_", " ")
+                        code: code,
+                        reason: :"field_slip_attach_reason_#{result}".l
                       ))
       end
     end
