@@ -46,7 +46,11 @@ class FieldSlip
       # timestamp ("fungus_junkie iNat: 388891116", "10:29 388879492";
       # all real entries from the 2026 CMS fair). Digits joined across
       # single spaces/dashes make the id; seven digits minimum keeps
-      # clock times, dates, and short accession numbers out.
+      # clock times, dates, and short accession numbers out. Ten digits
+      # maximum is equally deliberate: 16 years in, iNat ids are 9
+      # digits (~400M observations), so a longer run in a handwritten
+      # box is a misread or a stray digit, not an id -- 11+ digits
+      # would mean iNat grew 25-fold.
       RAW_ID = /(?<!\d)\d(?:[\s\-–]?\d){6,9}(?!\d)/
 
       # The iNaturalist observation id in a value read from
