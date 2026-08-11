@@ -189,7 +189,7 @@ class FieldSlipExtract < AbstractModel
   # its aliases' targets, and its own -- which is a much better
   # candidate set than all of MO.
   def project_locations
-    project = observation&.projects&.first
+    project = slip_project
     return [] unless project
 
     from_observations = Location.joins(:observations).
@@ -200,9 +200,25 @@ class FieldSlipExtract < AbstractModel
     (from_observations + aliased + [project.location]).compact.uniq
   end
 
+  # Aliases from the slip's project AND every project the observation
+  # is in -- the same resolution `Extractor::Applier#project_alias`
+  # uses when saving, so the warning can't contradict what applying
+  # would actually do.
   def known_location_names
-    context = FieldSlip::Extractor::Context.new(observation: observation)
-    context.aliases("Location").flatten +
+    ProjectAlias.where(project_id: relevant_project_ids,
+                       target_type: "Location").
+      includes(:target).flat_map { |a| [a.name, a.target&.name] }.compact +
       [observation&.location&.name].compact
+  end
+
+  def relevant_project_ids
+    ([observation&.field_slip&.project_id] +
+     Array(observation&.project_ids)).compact.uniq
+  end
+
+  # The attached slip's project wins over `projects.first` -- see
+  # FieldSlip::Extractor::Context#project.
+  def slip_project
+    observation&.field_slip&.project || observation&.projects&.first
   end
 end

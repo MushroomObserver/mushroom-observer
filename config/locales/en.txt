@@ -2555,6 +2555,7 @@
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
+  field_slip_attached: Field slip [code] was attached to this observation.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator
@@ -2588,7 +2589,7 @@
   field_slip_extract_apply: Save this to the observation
   field_slip_extract_inat: This is an iNaturalist observation id
   field_slip_extract_currently: "Currently: [value]"
-  field_slip_extract_location_guess: "The slip reads [written]. This project already uses [suggestion], which is filled in below -- check it before saving."
+  field_slip_extract_location_guess: "The slip reads [written]. This project already uses [suggestion], which is filled in below — check it before saving."
   field_slip_extract_name_proposed: "Proposed [name] as a name for this observation."
   field_slip_extract_name_needs_approval: The name needs confirming before it can be proposed. The other fields were saved.
   field_slip_extract_confidence: "[level] confidence"
@@ -2600,6 +2601,20 @@
   field_slip_extract_pending: Reading the field slip. This usually takes about 15 seconds; this page refreshes itself and will show the results when they are ready.
   field_slip_extract_retry: Try Again
   field_slip_extract_observation_link: Go to the observation
+  field_slip_extract_attach_code: attach this field slip
+  field_slip_extract_code_matches: matches the attached field slip
+  field_slip_extract_none_yet: This photo has not been scanned for field slip data yet.
+  field_slip_scan_title: "Field Slip Scans for Observation [id]"
+  field_slip_scan_help: Scan the photo that shows the field slip. Photos already scanned link to their results.
+  field_slip_scan_review: review scan results
+  field_slip_scan_reading: reading in progress
+  field_slip_scan_failed: scan failed - view / retry
+  field_slip_scan_all_photos: Choose among all of this observation's photos
+  observation_no_field_slip_detected: 'No field slip code was automatically detected in the photos. If one of them shows a field slip, you can "scan it":[url].'
+  field_slip_extract_code_differs: differs from the attached field slip!
+  field_slip_extract_attach_failed: "Could not attach field slip [code]: [reason]."
+  field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.
+  field_slip_extract_project_blocked: The observation is still not in [title] because it does not satisfy that project's constraints (location, dates, or species).
   field_slip_extract_add_alias: Add this abbreviation
   field_slip_extract_code_mismatch: "The slip in this photo reads [read], but the observation is attached to field slip [attached]. Check that this is the right photo before saving."
   field_slip_extract_unknown_alias: "No project abbreviation is defined for [name], so the location was left as written."

@@ -1958,6 +1958,41 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_nil(FieldSlipExtract.find_by(image_id: image.id))
   end
 
+  # Most observations in a slip-prefix project eventually carry a
+  # slip, so a scan that found no code warns -- with a link to the
+  # scan page -- instead of staying silent (zbar missed ~27% of slip
+  # photos at the 2026 CMS fair).
+  def test_create_warns_when_no_slip_was_detected
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.join(rolf)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    params = slip_photo_params(image)
+    params[:observation] =
+      params[:observation].merge(project_ids: [project.id.to_s])
+    with_decoded_slip_code(nil) do
+      post(:create, params: params)
+    end
+
+    assert_response(:redirect)
+    assert_flash_warning
+  end
+
+  def test_create_does_not_warn_outside_prefix_projects
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code(nil) do
+      post(:create, params: slip_photo_params(image))
+    end
+
+    assert_response(:redirect)
+    assert_flash_success
+  end
+
   # Ordinary uploads never pay for the scan or get detoured: the gate
   # is admin-ship of a project with a field-slip prefix.
   def test_create_does_not_detour_ordinary_uploads

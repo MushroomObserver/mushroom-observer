@@ -290,6 +290,26 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
                  @obs.notes[:iNaturalist])
   end
 
+  # Grouped digits (a real CMS fair entry) normalize into one id, and
+  # removing the id from the entry uses the span as written, so no
+  # digit fragments leak into the leftover.
+  def test_dbg_grouped_inat_digits_link_as_one_id
+    apply_fields({ "iNaturalist" => "388 596 423" },
+                 template: :dbg, inat_code: true)
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("388596423"),
+                 @obs.notes[:iNaturalist])
+  end
+
+  def test_dbg_username_beside_the_id_is_kept
+    apply_fields({ "iNaturalist" => "fungus_junkie iNat: 388891116" },
+                 template: :dbg, inat_code: true)
+
+    link = FieldSlipNotesBuilder.inat_link("388891116")
+
+    assert_equal("#{link} (fungus_junkie iNat)", @obs.notes[:iNaturalist])
+  end
+
   # Flagged but holding no id -- a username and clock time only -- the
   # entry stays as written rather than becoming a broken link.
   def test_dbg_inat_box_without_an_id_left_bare
