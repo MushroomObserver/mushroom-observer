@@ -18,14 +18,24 @@
 #     text: @sequence.bases, name: :copy_this_sequence.ti
 #   ))
 class Components::Button::Clipboard < Components::Button
+  prop :text, String
+
+  # `icon:`/`size:`/`variant:` default to the copy icon/xs/link
+  # styling only when the caller doesn't supply them; `data:` merges
+  # tooltip + clipboard wiring with any caller-supplied data.
+  # `validate_no_btn_classes!` is called explicitly here since
+  # declaring a new prop on this subclass makes Literal's generated
+  # super chain skip Button's own hand-written initialize body (see
+  # Button::CRUDBase for the same gotcha).
   def initialize(text:, name:, **rest)
-    @text = text
     rest[:icon] ||= :copy
     rest[:size] ||= :xs
     rest[:variant] ||= :link
+    validate_no_btn_classes!(rest[:class])
     caller_data = rest.delete(:data) || {}
-    rest[:data] = tooltip_data(name).merge(clipboard_data).merge(caller_data)
-    super(name: name, **rest)
+    rest[:data] = tooltip_data(name).merge(clipboard_data(text)).
+                  merge(caller_data)
+    super
   end
 
   private
@@ -38,10 +48,10 @@ class Components::Button::Clipboard < Components::Button
     { tooltip_target: "tip", placement: "bottom", title: name }
   end
 
-  def clipboard_data
+  def clipboard_data(text)
     {
       controller: "clipboard",
-      clipboard_text_value: @text,
+      clipboard_text_value: text,
       action: "clipboard#copy",
       clipboard_copied_value: :copied.ti
     }
