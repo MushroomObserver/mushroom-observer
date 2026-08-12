@@ -9,7 +9,7 @@ module Views::Controllers::Observations::ExternalLinks
     prop :observation, ::Observation
     prop :site, ::ExternalSite
     prop :back, _Nilable(String), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     def view_template
       container_class(:full)

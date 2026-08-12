@@ -28,7 +28,8 @@ module Views::Controllers::Observations
     prop :herbarium_id, _Nilable(Integer), default: nil
     prop :accession_number, _Nilable(String), default: nil
     prop :projects, _Array(::Project), default: -> { [] }
-    prop :submitted_project_ids, _Nilable(Array), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil, &TO_ID_ARRAY
     prop :lists, _Array(::SpeciesList), default: -> { [] }
     prop :submitted_list_ids, _Nilable(Array), default: nil
     prop :error_checked_projects, _Array(::Project), default: -> { [] }

@@ -8,10 +8,7 @@
 # autocompleter based on the target_type select value.
 module Views::Controllers::Projects::Aliases
   class Form < ::Components::ApplicationForm
-    def initialize(model, user:, **)
-      @user = user
-      super(model, **)
-    end
+    prop :user, ::User
 
     def around_template
       @attributes[:data] ||= {}

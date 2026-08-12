@@ -58,7 +58,7 @@ class InfoController < ApplicationController
     render(Views::Controllers::Info::TextileSandbox.new(
              textile_sandbox: FormObject::TextileSandbox.new(code: code),
              show_result: !code.nil?,
-             submit_type: params[:commit]
+             submit_type: params.permit(:commit)[:commit]
            ))
   end
 

@@ -4,9 +4,10 @@
 # `Projects::FieldSlipsController#new`.
 module Views::Controllers::Projects::FieldSlips
   class Form < ::Components::ApplicationForm
-    def initialize(model, project:, **)
-      @project = project
-      super(model, local: false, **)
+    prop :project, ::Project
+
+    def initialize(model, **attrs)
+      super(model, local: false, **attrs)
     end
 
     def view_template

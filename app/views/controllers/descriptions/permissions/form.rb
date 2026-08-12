@@ -15,9 +15,11 @@ module Views::Controllers::Descriptions::Permissions
 
     WRITEIN_ROWS = 6
 
+    # Only a NameDescription path exists — see `form_action` below.
+    prop :description, ::NameDescription
+    prop :groups, _Array(::UserGroup)
+
     def initialize(description:, groups:, data:)
-      @description = description
-      @groups = groups
       form_object = FormObject::DescriptionPermissions.new(
         group_reader: description.reader_group_ids,
         group_writer: description.writer_group_ids,
@@ -25,7 +27,8 @@ module Views::Controllers::Descriptions::Permissions
       )
       form_object.load_writein_data(data) if data
       # Keep the explicit DOM id — integration tests reference it.
-      super(form_object, id: "description_permissions_form", method: :put)
+      super(form_object, description: description, groups: groups,
+                         id: "description_permissions_form", method: :put)
     end
 
     def view_template

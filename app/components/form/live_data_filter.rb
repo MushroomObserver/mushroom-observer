@@ -13,27 +13,16 @@
 #       )) %>
 #
 class Components::Form::LiveDataFilter < Components::ApplicationForm
-  # @param filter [FormObject::TextFilter] the filter form object
-  # @param turbo_frame [String] the turbo frame ID to target
-  # @param page [Integer] current page number
-  # @param total_pages [Integer] total number of pages
-  # @param filter_path [String] path for form submission and pagination
-  # @param placeholder [String] placeholder text for the filter input
-  # @param page_param [String] param name for page number (default: "page")
-  # @param filter_param [String] param namespace for filter
-  #   (default: "text_filter")
-  def initialize(filter, turbo_frame:, page:, total_pages:, filter_path:, # rubocop:disable Metrics/ParameterLists
-                 placeholder: "Filter...", page_param: "page",
-                 filter_param: "text_filter", **)
-    @turbo_frame = turbo_frame
-    @page = page
-    @total_pages = total_pages
-    @filter_path = filter_path
-    @placeholder = placeholder
-    @page_param = page_param
-    @filter_param = filter_param
-    super(filter, **)
-  end
+  # `filter` (positional) is the base class's own `model` prop --
+  # never referenced under its own name here, only forwarded to
+  # `super`.
+  prop :turbo_frame, String
+  prop :page, Integer
+  prop :total_pages, Integer
+  prop :filter_path, String
+  prop :placeholder, String, default: "Filter..."
+  prop :page_param, String, default: "page"
+  prop :filter_param, String, default: "text_filter"
 
   def around_template(&block)
     nav(class: "d-flex justify-content-between align-items-center p-3",

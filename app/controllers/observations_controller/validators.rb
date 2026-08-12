@@ -66,13 +66,34 @@ module ObservationsController::Validators
     params.dig(:observation, :naming, *keys) || params.dig(:naming, *keys)
   end
 
-  # Helper methods for nested form params (Superform nests under :observation)
+  # Helper methods for nested form params (Superform nests under
+  # :observation, with a top-level fallback for the field-slip
+  # redirect path). Permitting from the top-level `params` object
+  # (rather than digging first and calling `.permit` on the extracted
+  # value) guarantees each key is a scalar (String) or absent --
+  # calling `.permit` on an already-dug-out value raises NoMethodError
+  # if a scanner or malformed request sends a scalar where the nested
+  # hash was expected (e.g. `?observation[collection_number]=abc`),
+  # since `.permit` only exists on ActionController::Parameters, not
+  # String. Permitting both shapes up front filters either malformed
+  # case to nil instead.
   def collection_number_params
-    params.dig(:observation, :collection_number) || params[:collection_number]
+    permitted = params.permit(
+      observation: { collection_number: [:name, :number] },
+      collection_number: [:name, :number]
+    )
+    permitted.dig(:observation, :collection_number) ||
+      permitted[:collection_number]
   end
 
   def herbarium_record_params
-    params.dig(:observation, :herbarium_record) || params[:herbarium_record]
+    permitted = params.permit(
+      observation: { herbarium_record: [:herbarium_name, :herbarium_id,
+                                        :accession_number] },
+      herbarium_record: [:herbarium_name, :herbarium_id, :accession_number]
+    )
+    permitted.dig(:observation, :herbarium_record) ||
+      permitted[:herbarium_record]
   end
 
   # Submitted project_ids array (post-Phlex shape:
@@ -80,7 +101,8 @@ module ObservationsController::Validators
   # form's sentinel hidden input (value=""), leaving the integer-
   # string IDs the user checked.
   def submitted_project_ids
-    params.dig(:observation, :project_ids)&.compact_blank
+    params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)&.compact_blank
   end
 
   # The form may be in a state where it has an existing MO Location name in the

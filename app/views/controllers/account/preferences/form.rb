@@ -20,9 +20,10 @@ class Views::Controllers::Account::Preferences::Form <
   # `Metrics/ClassLength` limit.
   include EmailSection
 
-  def initialize(user, licenses:, languages:, **)
-    @licenses = licenses
-    @languages = languages
+  prop :licenses, _Array(_Tuple(String, Integer))
+  prop :languages, _Array(::Language)
+
+  def initialize(user, **)
     super(user, id: "account_preferences_form", **)
   end
 

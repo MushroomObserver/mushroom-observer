@@ -31,6 +31,7 @@ module ObservationsController::Create
   #
 
   def create
+    normalize_observation_param
     # Create a bare observation
     @observation = create_observation_object(params[:observation])
     # Set license/image defaults again, in case they are not defined

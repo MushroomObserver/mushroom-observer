@@ -5,8 +5,9 @@ module Admin
     # NOTE: Does not inherit from AdminController
     class WebmasterQuestionsController < ApplicationController
       def new
-        @email = params.dig(:user, :email)
-        @message = params.dig(:question, :message)
+        @email = params.permit(user: [:email]).dig(:user, :email)
+        @message = params.permit(question: [:message]).dig(:question,
+                                                           :message)
         @email = @user.email if @user
 
         respond_to do |format|
@@ -29,8 +30,9 @@ module Admin
       end
 
       def create
-        @email = params.dig(:email, :reply_to)
-        @message = params.dig(:email, :message)
+        permitted_email = params.permit(email: [:reply_to, :message])
+        @email = permitted_email.dig(:email, :reply_to)
+        @message = permitted_email.dig(:email, :message)
         @email_error = false
         create_webmaster_question
       end

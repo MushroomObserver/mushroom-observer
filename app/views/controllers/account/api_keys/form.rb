@@ -19,11 +19,8 @@ module Views::Controllers::Account::APIKeys
   # - Standalone create (new, no cancel_target): notes input + centered
   #   Create button. Used by `new.rb` (no-JS fallback).
   class Form < ::Components::ApplicationForm
-    def initialize(model, cancel_target: nil, cancel_parent: nil, **)
-      @cancel_target = cancel_target
-      @cancel_parent = cancel_parent
-      super(model, **)
-    end
+    prop :cancel_target, _Nilable(String), default: nil
+    prop :cancel_parent, _Nilable(String), default: nil
 
     def view_template
       if model.persisted?

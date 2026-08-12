@@ -809,6 +809,21 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(loc, herbarium.location)
   end
 
+  # Regression test: a stale/tampered set_herbarium id used to make
+  # return_to_caller issue no redirect at all (Herbarium.safe_find
+  # returning nil skipped straight past the whole branch), raising a
+  # missing-template error instead of falling back to the location.
+  def test_create_location_with_invalid_set_herbarium
+    login("mary")
+    params = barton_flats_params
+    params[:set_herbarium] = "0"
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(location_path(loc.id))
+  end
+
   ##############################################################################
   #
   #    EDIT

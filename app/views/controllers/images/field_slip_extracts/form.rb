@@ -6,18 +6,20 @@
 # live in `FormObject::FieldSlipReview::Row`.
 module Views::Controllers::Images::FieldSlipExtracts
   class Form < ::Components::ApplicationForm
-    # Superform wants the form's data object as the first positional
-    # arg; the review IS that object, so it goes to `super` rather than
-    # being held as a plain prop.
+    prop :image, ::Image
+    prop :extract, ::FieldSlipExtract
     # `approved_name` is set only on the confirmation round-trip: it is
     # the name the reviewer is being asked to create, and carrying it
     # back on the form action is what turns the resubmit into approval.
+    prop :approved_name, _Nilable(String), default: nil
+
+    # Superform wants the form's data object as the first positional
+    # arg; the review IS that object, so it goes to `super` rather than
+    # being held as a separate prop -- `model` reaches it everywhere
+    # below instead of a dedicated `@review` ivar.
     def initialize(image:, extract:, review:, approved_name: nil, **attrs)
-      @image = image
-      @extract = extract
-      @review = review
-      @approved_name = approved_name
-      super(review, **attrs)
+      super(review, image: image, extract: extract,
+                    approved_name: approved_name, **attrs)
     end
 
     def view_template
@@ -40,7 +42,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     private
 
     def render_table
-      render(Components::Table.new(@review.rows_to_show)) do |t|
+      render(Components::Table.new(model.rows_to_show)) do |t|
         t.column(:field_slip_extract_field.l)
         t.column(:field_slip_extract_read.l)
         t.column(:field_slip_extract_current.l)
@@ -91,7 +93,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     def render_inat_flag(row)
       return unless row.inat_row?
 
-      checkbox_field("inat", checked: @review.inat_code,
+      checkbox_field("inat", checked: model.inat_code,
                              label: :field_slip_extract_inat.l)
     end
 
@@ -159,21 +161,21 @@ module Views::Controllers::Images::FieldSlipExtracts
     # location the abbreviation obviously means; the flag above says
     # what the slip actually read.
     def render_location_section
-      row = @review.location_row
+      row = model.location_row
       return if row.nil? || row.blank?
 
       panel = Components::Panel.new(panel_id: "field_slip_extract_location")
-      render(panel) do |p|
-        p.with_body do
-          autocompleter_field("value[#{row.field}]",
-                              type: :location, value: @review.location_value,
-                              label: :field_slip_extract_locality.l)
-          render_current_note(row)
-          checkbox_field("use[#{row.field}]",
-                         checked: row.default_use?,
-                         label: :field_slip_extract_apply.l)
-        end
-      end
+      render(panel) { |p| p.with_body { render_location_fields(row) } }
+    end
+
+    def render_location_fields(row)
+      autocompleter_field("value[#{row.field}]",
+                          type: :location, value: model.location_value,
+                          label: :field_slip_extract_locality.l)
+      render_current_note(row)
+      checkbox_field("use[#{row.field}]",
+                     checked: row.default_use?,
+                     label: :field_slip_extract_apply.l)
     end
 
     def render_current_note(row)
@@ -191,7 +193,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # other field this one creates a Naming and a Vote rather than
     # writing an attribute.
     def render_name_section
-      row = @review.name_row
+      row = model.name_row
       return if row.nil? || row.blank?
 
       # `with_body`, not a bare block: Panel is slot-based, and content
@@ -216,7 +218,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # holds. An unrecognized one -- "Lumpy Bracket" -- starts clear, so
     # creating a Name is always something the reviewer chose to do.
     def render_name_use(row)
-      checkbox_field("use[#{row.field}]", checked: @review.name_known,
+      checkbox_field("use[#{row.field}]", checked: model.name_known,
                                           label: :field_slip_extract_propose.l)
     end
 

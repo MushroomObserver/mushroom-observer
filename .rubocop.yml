@@ -21,6 +21,7 @@ require:
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
+  - ./lib/rubocop/cop/mo/unguarded_params_to_prop
 
 AllCops:
   NewCops: enable
@@ -77,7 +78,6 @@ MO/InitializeWithoutProp:
     # directly (third-party initialize signatures, positional `field`
     # args, no dedicated test coverage). Not worth the risk/reward;
     # left as manual initialize.
-    - "app/components/application_form.rb"
     - "app/components/application_form/**/*.rb"
 
 MO/LowercaseTranslationTag:
@@ -177,6 +177,18 @@ MO/PreferKitSyntax:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+
+MO/UnguardedParamsToProp:
+  Description: >-
+    A controller passing a raw params[...]/params.dig(...) read (or an
+    ivar assigned from one) straight into a Components::/Views::
+    constructor kwarg can raise Literal::TypeError on a nested-hash
+    param -- guard with params.permit first. See
+    lib/rubocop/cop/mo/unguarded_params_to_prop.rb and
+    .claude/rules/params_to_literal_props.md.
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
 
 Gemspec:
   # Not relevent (MO is not a gem)

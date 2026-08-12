@@ -21,7 +21,7 @@
 # @param user [User] the current user
 # @param button_name [String] submit button text for messages
 # @param projects [Array<Project>] available projects
-# @param submitted_project_ids [Array<String>, nil] user's just-
+# @param submitted_project_ids [Array<Integer>, nil] user's just-
 #   submitted project_ids (failure-reload path); nil on normal
 #   render — form falls back to `observation.project_ids`.
 # @param error_checked_projects [Array<Project>] projects with constraint errors
@@ -32,7 +32,8 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :user, User
   prop :button_name, String
   prop :projects, _Array(Project)
-  prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
+  prop :submitted_project_ids, _Nilable(_Array(Integer)),
+       default: nil, &TO_ID_ARRAY
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }
   prop :cross_prefix_projects, _Array(Project), default: -> { [] }
@@ -188,7 +189,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
 
   def project_checked?(project_id)
     if @submitted_project_ids
-      @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
+      @submitted_project_ids.include?(project_id)
     else
       @observation.project_ids.include?(project_id)
     end

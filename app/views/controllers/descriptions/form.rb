@@ -7,18 +7,32 @@
 # `Locations::DescriptionsController` render it from their own views.
 module Views::Controllers::Descriptions
   class Form < ::Components::ApplicationForm
+    # `description` duplicates the base class's own `model` prop
+    # (positionally satisfied below) -- kept as its own, more
+    # specifically-typed prop so the rest of this file can read
+    # `@description` with a domain-relevant name instead of the
+    # base's loosely-typed `@model`.
+    prop :description, ::Description
+    prop :licenses, _Array(_Tuple(String, Integer))
+    prop :user, ::User
+    prop :merge, _Boolean, default: false
+    prop :old_desc_id, _Nilable(Integer), default: nil
+    prop :delete_after, _Nilable(_Boolean), default: nil
+
     def initialize(description, licenses:, user:, merge_opts: {}, **)
-      @description = description
-      @licenses = licenses
-      @user = user
-      @merge = merge_opts[:merge] || false
-      @old_desc_id = merge_opts[:old_desc_id]
-      @delete_after = merge_opts[:delete_after]
-      # Pass type-specific form ID (e.g., "name_description_form"). The
+      # Type-specific form ID (e.g., "name_description_form"). The
       # auto-id derived from `Views::Controllers::Descriptions::Form`
       # would just be "description_form" — losing the name-vs-location
-      # distinction the controllers + tests rely on.
-      super(description, id: "#{model_type}_description_form", **)
+      # distinction the controllers + tests rely on. Computed from the
+      # local `description` param, not `@description`/`model_type`,
+      # since prop assignment hasn't happened yet at this point in
+      # construction.
+      type_prefix = description.is_a?(NameDescription) ? "name" : "location"
+      super(description, description: description, licenses: licenses,
+                         user: user, merge: merge_opts[:merge] || false,
+                         old_desc_id: merge_opts[:old_desc_id],
+                         delete_after: merge_opts[:delete_after],
+                         id: "#{type_prefix}_description_form", **)
     end
 
     def view_template
@@ -149,7 +163,12 @@ module Views::Controllers::Descriptions
 
     def render_merge_fields
       hidden_field("old_desc_id", value: @old_desc_id)
-      hidden_field("delete_after", value: @delete_after)
+      # `.to_s` -- Phlex renders a raw `true`/`false` attribute value as
+      # a bare boolean HTML attribute (`value` with no `="..."`), not
+      # the string form
+      # `Descriptions#resolve_merge_conflicts_and_delete_old_description`
+      # reads back via `params[:delete_after] == "true"`.
+      hidden_field("delete_after", value: @delete_after.to_s)
     end
 
     # --- Helper methods ---
