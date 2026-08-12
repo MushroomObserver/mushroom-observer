@@ -278,11 +278,17 @@ export default class extends Controller {
     if (this.areAllItemsExifPopulated() ||
       attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
       this.block_form_submission = false;
-      // form.submit() (not requestSubmit()) is fine here for now: the
-      // observation form isn't Turbo-enabled (no local: false), so
-      // there's no submit-event listener to bypass yet. Swap to
-      // requestSubmit() when Turbo is enabled on this form -- see the
-      // nimmo-5052-turbo-submit-prototype branch, which already does.
+      // form.submit(), not requestSubmit(): when there are no images to
+      // upload, this call happens synchronously inside the ORIGINAL
+      // submit event's own onsubmit handler (see set_bindings), before
+      // that handler has returned. requestSubmit() re-enters the
+      // browser's submission algorithm while it's still marked as
+      // "firing submission events" for the outer submit -- the spec's
+      // reentrancy guard silently no-ops it (no error, no event, no
+      // request), and then the outer handler's `return false` cancels
+      // the original submission too, so nothing submits at all
+      // (verified: no network request, no thrown error). submit()
+      // bypasses that guard entirely by skipping the event pipeline.
       this.form.submit();
     } else {
       setTimeout(() => this.submitWhenExifReady(attempt + 1), 100);
