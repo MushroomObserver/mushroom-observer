@@ -218,7 +218,7 @@ export default class extends Controller {
     } else {
       // no images to upload, submit form
       this.block_form_submission = false;
-      this.form.submit();
+      this.form.requestSubmit();
     }
 
     return false;
@@ -244,7 +244,7 @@ export default class extends Controller {
       this.submit_buttons.forEach((element) => {
         element.value = this.localized_text.creating_observation_text;
       });
-      this.form.submit();
+      this.form.requestSubmit();
     }
   }
 
