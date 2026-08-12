@@ -11,9 +11,9 @@ module Views::Controllers::Descriptions::Merges
 
     def initialize(description, user:)
       # Computed from the local `description`/`user` params, not
-      # `@description`/`merges`/`default_checked?` (which read the
-      # `@description` prop) -- prop assignment hasn't happened yet
-      # at this point in construction.
+      # `@description`/`merges` (which read the `@description` prop)
+      # -- prop assignment hasn't happened yet at this point in
+      # construction.
       other_descriptions = description.parent.descriptions - [description]
       form_object = FormObject::DescriptionMoveOrMerge.new
       form_object.target = other_descriptions.first.id if
@@ -50,11 +50,6 @@ module Views::Controllers::Descriptions::Merges
       end
     end
 
-    def default_target_id
-      # default_checked? guarantees merges.length == 1, so .first is safe.
-      merges.first.id
-    end
-
     def render_delete_checkbox
       checkbox_field(:delete, label: :merge_descriptions_delete_after)
     end
@@ -65,10 +60,6 @@ module Views::Controllers::Descriptions::Merges
 
     def merges
       @merges ||= @description.parent.descriptions - [@description]
-    end
-
-    def default_checked?
-      merges.length == 1
     end
 
     def description_title(user, desc)

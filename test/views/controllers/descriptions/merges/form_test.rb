@@ -79,8 +79,9 @@ module Views::Controllers::Descriptions::Merges
       assert_html(html, "form[action*='/merges']")
     end
 
-    # When the parent has exactly one other description, default_checked?
-    # is true and default_target_id pre-selects that lone radio button.
+    # When the parent has exactly one other description, Form#initialize
+    # sets form_object.target to it directly, pre-selecting that lone
+    # radio button.
     def test_single_merge_target_auto_selects
       # coprinus_comatus has 2 descriptions: coprinus_comatus_desc and
       # draft_coprinus_comatus. Rendering the form FOR coprinus_comatus_desc
