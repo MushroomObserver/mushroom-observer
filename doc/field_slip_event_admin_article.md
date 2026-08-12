@@ -103,5 +103,3 @@ your admins.
   observations
 - Aliases entered (sites, walks, collector initials)
 - Every reviewer is a project admin
-- Every reviewer has made one observation with the event's locality
-  set by hand, so the form default doesn't fight them
