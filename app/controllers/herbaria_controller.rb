@@ -80,133 +80,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     end
   end
 
-  private
-
-  def prepare_herbarium_update
-    set_top_users_for_reload
-    @herbarium.attributes = herbarium_params
-    normalize_parameters
-    create_location_object_if_new(@herbarium)
-    try_to_save_location_if_new(@herbarium)
-  end
-
-  def modal_title
-    case action_name
-    when "new", "create"
-      :new_object.t(type: :herbarium)
-    when "edit", "update"
-      render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                         object: @herbarium, mode: :edit,
-                         title: :herbarium_record.ti
-                       ))
-    end
-  end
-
-  def modal_identifier
-    case action_name
-    when "new", "create"
-      "herbarium"
-    when "edit", "update"
-      "herbarium_#{@herbarium.id}"
-    end
-  end
-
-  def render_modal_herbarium_form
-    render(Components::Modal.new(
-             type: :turbo_form,
-             identifier: modal_identifier,
-             title: modal_title,
-             user: @user,
-             model: @herbarium,
-             form_locals: { user: @user,
-                            location: @herbarium.location,
-                            top_users: @top_users }
-           ), layout: false)
-  end
-
-  def set_up_herbarium_for_edit
-    @herbarium.place_name = @herbarium.location.try(&:name)
-    @herbarium.personal           = @herbarium.personal_user_id.present?
-    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    set_top_users_for_reload
-  end
-
-  def render_herbarium_show
-    @canonical_url = herbarium_url(params[:id])
-    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
-
-    render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
-  end
-
-  # Needed both by the initial edit GET and by #update's
-  # validation-failure re-render (reload_form), so it doesn't silently
-  # drop the top-users list the second time around.
-  def set_top_users_for_reload
-    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
-  end
-
-  # Phlex action template — explicit render per the conversion rule.
-  def render_index_view
-    render(Views::Controllers::Herbaria::Index.new(
-             query: @query, pagination_data: @pagination_data,
-             objects: @objects, merge: @merge
-           ))
-  end
-
-  def full_index_sort_options
-    [
-      ["records",    :sort_by_records.t],
-      ["curator",    :sort_by_curator.t],
-      ["code",       :sort_by_code.t],
-      ["name",       :sort_by_name.t],
-      ["user",       :sort_by_user.t],
-      ["created_at", :sort_by_created_at.t],
-      ["updated_at", :sort_by_updated_at.t]
-    ].freeze
-  end
-
-  # Nonpersonal variant is the full list minus `user` only (NOT
-  # `curator` — institutional herbaria can still have curators,
-  # so sorting by curator is meaningful in the nonpersonal view).
-  # Matches the legacy `nonpersonal_herbaria_index_sorts` exactly.
-  def nonpersonal_index_sort_options
-    # rubocop:disable Style/HashExcept
-    # `except` mistakenly suggested here — this is an Array of
-    # [key, label] tuples, not a Hash. `reject` is correct.
-    full_index_sort_options.reject { |key, _| key == "user" }.freeze
-    # rubocop:enable Style/HashExcept
-  end
-
-  # If user clicks "merge" on an herbarium, it reloads the page and asks
-  # them to click on the destination herbarium to merge it with.
-  def set_merge_ivar
-    @merge = Herbarium.safe_find(params[:merge])
-  end
-
-  def default_sort_order
-    ::Query::Herbaria.default_order # :records
-  end
-
-  def index_active_params
-    [:pattern, :nonpersonal, :by, :q, :id].freeze
-  end
-
-  def nonpersonal
-    store_location
-    query = create_query(
-      :Herbarium, nonpersonal: true, order_by: :code_then_name
-    )
-    [query, { always_index: true }]
-  end
-
-  def index_display_opts(opts, _query)
-    { letters: true,
-      num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
-  end
-
-  public
-
   ##############################################################################
   #
   # Display a single herbarium, based on :flow params
@@ -298,6 +171,139 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   private
 
   include Herbaria::SharedPrivateMethods
+
+  # ---------- Index helpers ----------------------------------------------
+
+  # Phlex action template — explicit render per the conversion rule.
+  def render_index_view
+    render(Views::Controllers::Herbaria::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, merge: @merge
+           ))
+  end
+
+  def full_index_sort_options
+    [
+      ["records",    :sort_by_records.t],
+      ["curator",    :sort_by_curator.t],
+      ["code",       :sort_by_code.t],
+      ["name",       :sort_by_name.t],
+      ["user",       :sort_by_user.t],
+      ["created_at", :sort_by_created_at.t],
+      ["updated_at", :sort_by_updated_at.t]
+    ].freeze
+  end
+
+  # Nonpersonal variant is the full list minus `user` only (NOT
+  # `curator` — institutional herbaria can still have curators,
+  # so sorting by curator is meaningful in the nonpersonal view).
+  # Matches the legacy `nonpersonal_herbaria_index_sorts` exactly.
+  def nonpersonal_index_sort_options
+    # rubocop:disable Style/HashExcept
+    # `except` mistakenly suggested here — this is an Array of
+    # [key, label] tuples, not a Hash. `reject` is correct.
+    full_index_sort_options.reject { |key, _| key == "user" }.freeze
+    # rubocop:enable Style/HashExcept
+  end
+
+  # If user clicks "merge" on an herbarium, it reloads the page and asks
+  # them to click on the destination herbarium to merge it with.
+  def set_merge_ivar
+    @merge = Herbarium.safe_find(params[:merge])
+  end
+
+  def default_sort_order
+    ::Query::Herbaria.default_order # :records
+  end
+
+  def index_active_params
+    [:pattern, :nonpersonal, :by, :q, :id].freeze
+  end
+
+  def nonpersonal
+    store_location
+    query = create_query(
+      :Herbarium, nonpersonal: true, order_by: :code_then_name
+    )
+    [query, { always_index: true }]
+  end
+
+  def index_display_opts(opts, _query)
+    { letters: true,
+      num_per_page: 100,
+      include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
+  end
+
+  # ---------- Show helper --------------------------------------------------
+
+  def render_herbarium_show
+    @canonical_url = herbarium_url(params[:id])
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
+
+    render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
+  end
+
+  # ---------- New/Edit form helpers ----------------------------------------
+
+  def set_up_herbarium_for_edit
+    @herbarium.place_name         = @herbarium.location.try(&:name)
+    @herbarium.personal           = @herbarium.personal_user_id.present?
+    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    set_top_users_for_reload
+  end
+
+  # Needed both by the initial edit GET and by #update's
+  # validation-failure re-render (reload_form), so it doesn't silently
+  # drop the top-users list the second time around.
+  def set_top_users_for_reload
+    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
+  end
+
+  def render_modal_herbarium_form
+    render(Components::Modal.new(
+             type: :turbo_form,
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @herbarium,
+             form_locals: { user: @user,
+                            location: @herbarium.location,
+                            top_users: @top_users }
+           ), layout: false)
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium"
+    when "edit", "update"
+      "herbarium_#{@herbarium.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :new_object.t(type: :herbarium)
+    when "edit", "update"
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @herbarium, mode: :edit,
+                         title: :herbarium_record.ti
+                       ))
+    end
+  end
+
+  # ---------- Update helper -------------------------------------------------
+
+  def prepare_herbarium_update
+    set_top_users_for_reload
+    @herbarium.attributes = herbarium_params
+    normalize_parameters
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+  end
+
+  # ---------- Shared validation / persistence helpers -----------------------
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?(@user)
