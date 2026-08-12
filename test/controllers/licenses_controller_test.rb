@@ -126,6 +126,10 @@ class LicensesControllerTest < FunctionalTestCase
       "input[type=checkbox][name='deprecated'][checked='checked']", false,
       "New License form `deprecated` checkbox should be unchecked"
     )
+    # Turbo-conversion prototype (issue #5052): the plain GET render
+    # must stay 200, and the form must actually opt in to Turbo.
+    assert_select("form[data-turbo='true']", true,
+                  "License form should be Turbo-enabled")
   end
 
   def test_create
@@ -170,6 +174,9 @@ class LicensesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash_warning
+    # Turbo requires a non-2xx status on a failed submission's
+    # re-render, or it treats a 200 as a silent no-op (issue #5052).
+    assert_unprocessable
   end
 
   def test_create_missing_attribute
@@ -186,6 +193,7 @@ class LicensesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash_warning
+    assert_unprocessable
   end
 
   def test_create_save_failure
@@ -204,6 +212,7 @@ class LicensesControllerTest < FunctionalTestCase
         end
       end
     end
+    assert_unprocessable
   end
 
   def test_edit
@@ -227,6 +236,8 @@ class LicensesControllerTest < FunctionalTestCase
       "input[type=checkbox][name='license[deprecated]'][checked]", true,
       "License form `Deprecated` checkbox should be checked"
     )
+    assert_select("form[data-turbo='true']", true,
+                  "License form should be Turbo-enabled")
   end
 
   def test_update
@@ -264,6 +275,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_flash(:runtime_edit_name_no_change)
     assert_form_action({ action: :update }, "Failed to re-render edit")
+    assert_unprocessable
   end
 
   def test_update_missing_attribute
@@ -278,6 +290,7 @@ class LicensesControllerTest < FunctionalTestCase
     put(:update, params: params)
     assert(license.reload.display_name, "License is missing display_name")
     assert_flash_warning
+    assert_unprocessable
   end
 
   def test_update_duplicate_attribute
@@ -295,6 +308,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_flash(:runtime_license_duplicate_attributed)
     assert_form_action({ action: :update }, "Failed to re-render edit")
+    assert_unprocessable
   end
 
   def test_destroy

@@ -31,7 +31,7 @@ class LicensesController < AdminController
     # and blanks all the attributes
     if @license.attribute_duplicated?
       flash_warning("Duplicate display_name, code, or url")
-      return render_new_view
+      return render_new_view_invalid
     end
 
     if @license.save
@@ -41,7 +41,7 @@ class LicensesController < AdminController
       redirect_to(license_path(@license.id))
     else
       @license.formatted_errors.each { |msg| flash_warning(msg) }
-      render_new_view
+      render_new_view_invalid
     end
   end
 
@@ -99,12 +99,12 @@ class LicensesController < AdminController
 
   def no_changes
     flash_warning(:runtime_edit_name_no_change.l)
-    render_edit_view
+    render_edit_view_invalid
   end
 
   def duplicate_attribute
     flash_warning(:runtime_license_duplicate_attributed.l)
-    render_edit_view
+    render_edit_view_invalid
   end
 
   def update_succeded
@@ -116,14 +116,30 @@ class LicensesController < AdminController
 
   def update_failed
     @license.errors.full_messages.each { |msg| flash_warning(msg) }
-    render_edit_view
+    render_edit_view_invalid
   end
 
-  def render_new_view
-    render(Views::Controllers::Licenses::New.new(license: @license))
+  # `status: :ok` is the default so the plain GET `new`/`edit` renders
+  # (from the `new`/`edit` actions themselves) stay 200 -- only the
+  # `_invalid` variants below, called from `create`/`update`'s failure
+  # branches, pass `:unprocessable_content`. Turbo requires a non-2xx
+  # status on a failed form submission's re-render; a 200 there is a
+  # silent no-op under Turbo instead of a redisplay.
+  def render_new_view(status: :ok)
+    render(Views::Controllers::Licenses::New.new(license: @license),
+           status: status)
   end
 
-  def render_edit_view
-    render(Views::Controllers::Licenses::Edit.new(license: @license))
+  def render_edit_view(status: :ok)
+    render(Views::Controllers::Licenses::Edit.new(license: @license),
+           status: status)
+  end
+
+  def render_new_view_invalid
+    render_new_view(status: :unprocessable_content)
+  end
+
+  def render_edit_view_invalid
+    render_edit_view(status: :unprocessable_content)
   end
 end
