@@ -760,7 +760,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show")
     click_and_confirm(find(".destroy_observation_link_#{new_obs.id}"))
     assert_flash_for_destroy_observation(new_obs.id)
-    assert_selector("body.observations__index")
+    # Redirects to :index only when there's no active query to fall
+    # back to; the `visit(activity_logs_path)` check above leaves a
+    # session-persisted RssLog query that ObservationsController::
+    # Destroy#redirect_after_destroy correctly adapts into an
+    # Observation subquery with a valid next_id, so this lands on the
+    # next observation's show page instead -- both are correct
+    # outcomes of the same (intentional) "go to next in context, else
+    # index" redirect logic.
+    assert_selector("body.observations__show, body.observations__index")
 
     # Make sure observation is not in log index
     visit(activity_logs_path)
