@@ -16,15 +16,17 @@ module Views::Controllers::GlossaryTerms::Images
   #   for the PUT request
   # @param user [User] current user (passed through to InteractiveImage)
   class RemoveForm < ::Components::ApplicationForm
-    def initialize(model, form_action:, user:, **)
-      @form_action_url = form_action
-      @user = user
+    # `reader: true` generates the `#form_action` accessor Superform's
+    # own `form_tag` calls -- replaces the hand-written override this
+    # class used to need just to read a differently-named ivar
+    # (`@form_action_url`, to dodge colliding with the `form_action`
+    # method name).
+    prop :form_action, _Union(String, Hash), reader: :public
+    prop :user, _Nilable(::User), default: nil
+
+    def initialize(model, **)
       # PUT request; Superform handles `_method` hidden field.
       super(model, method: :put, **)
-    end
-
-    def form_action
-      @form_action_url
     end
 
     def view_template
