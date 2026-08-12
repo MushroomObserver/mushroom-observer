@@ -82,6 +82,69 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   private
 
+  def prepare_herbarium_update
+    set_top_users_for_reload
+    @herbarium.attributes = herbarium_params
+    normalize_parameters
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :new_object.t(type: :herbarium)
+    when "edit", "update"
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @herbarium, mode: :edit,
+                         title: :herbarium_record.ti
+                       ))
+    end
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium"
+    when "edit", "update"
+      "herbarium_#{@herbarium.id}"
+    end
+  end
+
+  def render_modal_herbarium_form
+    render(Components::Modal.new(
+             type: :turbo_form,
+             identifier: modal_identifier,
+             title: modal_title,
+             user: @user,
+             model: @herbarium,
+             form_locals: { user: @user,
+                            location: @herbarium.location,
+                            top_users: @top_users }
+           ), layout: false)
+  end
+
+  def set_up_herbarium_for_edit
+    @herbarium.place_name = @herbarium.location.try(&:name)
+    @herbarium.personal           = @herbarium.personal_user_id.present?
+    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    set_top_users_for_reload
+  end
+
+  def render_herbarium_show
+    @canonical_url = herbarium_url(params[:id])
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
+
+    render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
+  end
+
+  # Needed both by the initial edit GET and by #update's
+  # validation-failure re-render (reload_form), so it doesn't silently
+  # drop the top-users list the second time around.
+  def set_top_users_for_reload
+    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
+  end
+
   # Phlex action template — explicit render per the conversion rule.
   def render_index_view
     render(Views::Controllers::Herbaria::Index.new(
@@ -157,13 +220,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     render_herbarium_show
   end
 
-  def render_herbarium_show
-    @canonical_url = herbarium_url(params[:id])
-    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
-
-    render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
-  end
-
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def new
@@ -190,54 +246,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
                  herbarium: @herbarium, user: @user, top_users: @top_users
                ))
       end
-    end
-  end
-
-  def set_up_herbarium_for_edit
-    @herbarium.place_name         = @herbarium.location.try(&:name)
-    @herbarium.personal           = @herbarium.personal_user_id.present?
-    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    set_top_users_for_reload
-  end
-
-  # Needed both by the initial edit GET and by #update's
-  # validation-failure re-render (reload_form), so it doesn't silently
-  # drop the top-users list the second time around.
-  private def set_top_users_for_reload
-    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
-  end
-
-  def render_modal_herbarium_form
-    render(Components::Modal.new(
-             type: :turbo_form,
-             identifier: modal_identifier,
-             title: modal_title,
-             user: @user,
-             model: @herbarium,
-             form_locals: { user: @user,
-                            location: @herbarium.location,
-                            top_users: @top_users }
-           ), layout: false)
-  end
-
-  def modal_identifier
-    case action_name
-    when "new", "create"
-      "herbarium"
-    when "edit", "update"
-      "herbarium_#{@herbarium.id}"
-    end
-  end
-
-  def modal_title
-    case action_name
-    when "new", "create"
-      :new_object.t(type: :herbarium)
-    when "edit", "update"
-      render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                         object: @herbarium, mode: :edit,
-                         title: :herbarium_record.ti
-                       ))
     end
   end
 
@@ -271,14 +279,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
       return reload_form(:edit)
     end
     redirect_to_create_location_or_referrer_or_show_location
-  end
-
-  def prepare_herbarium_update
-    set_top_users_for_reload
-    @herbarium.attributes = herbarium_params
-    normalize_parameters
-    create_location_object_if_new(@herbarium)
-    try_to_save_location_if_new(@herbarium)
   end
 
   def destroy
