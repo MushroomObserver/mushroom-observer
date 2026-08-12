@@ -30,7 +30,7 @@ module Views::Controllers::Observations::FieldSlipScans
       div(class: "mr-4 mb-3 text-center") do
         InteractiveImage(image: image, user: @user, size: :small,
                          votes: false)
-        div { render_photo_state(image) }
+        div(class: "mt-2") { render_photo_state(image) }
       end
     end
 
