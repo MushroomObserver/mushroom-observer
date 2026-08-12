@@ -70,7 +70,6 @@ class Components::Link::Get < Components::Link
     tab = opts.delete(:tab)
     name, target, opts = resolve_tab_args(tab, name, target, opts)
     icon_opts = extract_icon_opts(opts)
-    opts.delete(:params)
     validate_no_btn_classes!(opts[:class])
     super(name: name, target: target, button: button, new_tab: new_tab,
           **icon_opts, **opts)
@@ -108,7 +107,12 @@ class Components::Link::Get < Components::Link
     base = { class: merged_class }
     base = base.deep_merge(tooltip_data) if @icon
     base = base.deep_merge(confirm_data) if @confirm
-    base = base.deep_merge(@attributes.except(:class))
+    # `params:` is only meaningful to Rails' `button_to` (extra hidden
+    # form fields) -- `link_to` has no such option, so it's dropped
+    # from the merge below and only re-added when actually rendering
+    # via `button_to` (mirrors Button::CRUDBase#button_html_options).
+    base[:params] = @attributes[:params] if @button_to && @attributes[:params]
+    base = base.deep_merge(@attributes.except(:class, :params))
     if @new_tab
       base[:target] = "_blank"
       base[:rel] = "noopener noreferrer"

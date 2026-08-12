@@ -150,6 +150,22 @@ class LinkGetTest < ComponentTestCase
     assert_html(html, "a[data-turbo-confirm='Sure?']")
   end
 
+  def test_params_forwarded_as_hidden_fields_when_button_to
+    html = render_link(name: "Delete", target: @path, button_to: true,
+                       params: { type: "Observation" })
+
+    assert_html(html,
+                "form input[type='hidden'][name='type'][value='Observation']")
+  end
+
+  def test_params_dropped_for_plain_anchor
+    html = render_link(name: "View", target: @path,
+                       params: { type: "Observation" })
+
+    assert_no_html(html, "input[name='type']")
+    assert_no_html(html, "a[params]")
+  end
+
   private
 
   # Wrapper component so the block runs inside a Phlex render context.
