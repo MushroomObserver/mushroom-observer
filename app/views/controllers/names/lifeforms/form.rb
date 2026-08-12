@@ -4,10 +4,7 @@
 # `Names::LifeformsController#edit`.
 module Views::Controllers::Names::Lifeforms
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, **)
-      @name = name
-      super(model, **)
-    end
+    prop :name, ::Name
 
     def view_template
       p { :edit_lifeform_help.t }
