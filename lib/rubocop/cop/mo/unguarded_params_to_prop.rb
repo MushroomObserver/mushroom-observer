@@ -87,8 +87,12 @@ module RuboCop
           PHLEX_PREFIXES.any? { |prefix| name.start_with?(prefix) }
         end
 
+        # Trailing keyword args land as a `hash` node under RuboCop's
+        # builder (verified: RuboCop::AST::ProcessedSource never
+        # produces a `:kwargs` node for `Foo.new(bar: baz)`) -- no
+        # `kwargs_type?` branch needed.
         def kwargs_node(node)
-          node.arguments.find { |arg| arg.hash_type? || arg.kwargs_type? }
+          node.arguments.find(&:hash_type?)
         end
 
         # An ivar's constructor-kwarg use is offending only if EVERY

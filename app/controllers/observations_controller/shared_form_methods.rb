@@ -153,7 +153,9 @@ module ObservationsController::SharedFormMethods
     @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
-    @submitted_project_ids = params.dig(:observation, :project_ids)
+    @submitted_project_ids =
+      params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)
   end
 
   def init_list_vars
@@ -163,7 +165,9 @@ module ObservationsController::SharedFormMethods
   def init_list_vars_for_reload
     init_list_vars
     @lists = @lists.union(@observation.species_lists)
-    @submitted_list_ids = params.dig(:observation, :species_list_ids)
+    @submitted_list_ids =
+      params.permit(observation: { species_list_ids: [] }).
+      dig(:observation, :species_list_ids)
   end
 
   # Save observation now that everything is created successfully.
@@ -322,7 +326,9 @@ module ObservationsController::SharedFormMethods
   # preserved by omission (disabled checkboxes don't submit, and the
   # iteration excludes them anyway).
   def update_projects
-    submitted_ids = params.dig(:observation, :project_ids)
+    submitted_ids =
+      params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
@@ -355,7 +361,9 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_species_lists
-    submitted_ids = params.dig(:observation, :species_list_ids)
+    submitted_ids =
+      params.permit(observation: { species_list_ids: [] }).
+      dig(:observation, :species_list_ids)
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)

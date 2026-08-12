@@ -1839,6 +1839,21 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Regression: a request sending `project_ids` without the `[]` array
+  # suffix (a scalar String, not the checkbox-group Array shape) used
+  # to crash `init_project_vars_for_reload`'s unguarded `.compact_blank`
+  # on the failure-reload path. Copilot flagged the underlying
+  # TO_ID_ARRAY gap on PR #5051 as a "suppressed" finding.
+  def test_create_observation_fails_validation_with_malformed_project_ids
+    login("rolf")
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(project_ids: "5")
+    stub_valid_false_on(Observation) do
+      post(:create, params: params)
+    end
+    assert_response(:success)
+  end
+
   def test_create_observation_fails_naming_validation
     login("rolf")
     stub_valid_false_on(Naming) do

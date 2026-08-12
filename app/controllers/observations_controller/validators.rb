@@ -88,7 +88,8 @@ module ObservationsController::Validators
   # form's sentinel hidden input (value=""), leaving the integer-
   # string IDs the user checked.
   def submitted_project_ids
-    params.dig(:observation, :project_ids)&.compact_blank
+    params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)&.compact_blank
   end
 
   # The form may be in a state where it has an existing MO Location name in the

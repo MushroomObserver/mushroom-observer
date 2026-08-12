@@ -17,6 +17,11 @@ module LiteralIDCoercion
   # checkbox-group forms emit a hidden `name="...[]" value=""`
   # sentinel alongside the real checkboxes so Rack doesn't drop the
   # whole param when nothing is checked -- `compact_blank` drops it
-  # before coercing the rest.
-  TO_ID_ARRAY = ->(value) { value&.compact_blank&.map { |id| Integer(id) } }
+  # before coercing the rest. A request omitting the `[]` suffix
+  # (`?key=5` instead of `?key[]=5`) hands Rack a bare String here
+  # instead of an Array -- `is_a?(Array)` degrades that to nil rather
+  # than raising NoMethodError on `.compact_blank`.
+  TO_ID_ARRAY = lambda { |value|
+    value.compact_blank.map { |id| Integer(id) } if value.is_a?(Array)
+  }
 end

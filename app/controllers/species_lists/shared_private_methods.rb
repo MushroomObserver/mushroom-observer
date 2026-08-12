@@ -129,7 +129,9 @@ module SpeciesLists
       spl.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
       end
-      @submitted_project_ids = params.dig(:species_list, :project_ids)
+      @submitted_project_ids =
+        params.permit(species_list: { project_ids: [] }).
+        dig(:species_list, :project_ids)
     end
   end
 end
