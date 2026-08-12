@@ -114,13 +114,24 @@
 #   #
 #   # This also isn't the place for "is this a valid email" / "is this
 #   # blank" checks -- a Literal prop mismatch raises at construction
-#   # (a 500), and Rails param parsing already guarantees these arrive
-#   # as String-or-nil, so a prop type could barely ever catch anything
-#   # anyway. Real validation belongs on the FormObject, which already
-#   # includes `ActiveModel::Model` (see `FormObject::Base`) -- `validates`
-#   # + `.errors` fail gracefully with a normal form re-render, and
-#   # Superform's field helpers already render `model.errors[:field]`
-#   # inline.
+#   # (a 500), and for a well-formed request these arrive as
+#   # String-or-nil, so a prop type could barely ever catch anything
+#   # useful anyway. Real validation belongs on the FormObject, which
+#   # already includes `ActiveModel::Model` (see `FormObject::Base`) --
+#   # `validates` + `.errors` fail gracefully with a normal form
+#   # re-render, and Superform's field helpers already render
+#   # `model.errors[:field]` inline.
+#
+# @example Guarding a scalar prop sourced from raw params
+#   # A prop's type check fires at construction -- a scalar param
+#   # sent as a nested hash (`?commit[x]=1`) parses to an
+#   # ActionController::Parameters object, not a String, and raises
+#   # Literal::TypeError instead of degrading gracefully. Guard at the
+#   # controller call site that reads the param, not in the form:
+#   #   submit_type: params.permit(:commit)[:commit]
+#   # See .claude/rules/params_to_literal_props.md for the full rule
+#   # (when it applies, what to use for id/Integer coercion, when a
+#   # blanket params.permit sweep is NOT warranted).
 #
 # Field helper methods are defined in FieldHelpers (field_helpers.rb).
 # Upload helpers are in UploadHelpers (upload_helpers.rb).

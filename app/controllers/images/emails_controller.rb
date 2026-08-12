@@ -58,7 +58,7 @@ module Images
 
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image
-      @message = params.dig(:email, :message)
+      @message = params.permit(email: [:message]).dig(:email, :message)
       render(Views::Controllers::Images::Emails::New.new(
                image: @image, message: @message
              ))

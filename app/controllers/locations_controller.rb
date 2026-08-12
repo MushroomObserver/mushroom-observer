@@ -452,10 +452,12 @@ class LocationsController < ApplicationController
                     end
 
     # Where to return after successfully creating location.
-    @set_observation  = params[:set_observation]
-    @set_species_list = params[:set_species_list]
-    @set_user         = params[:set_user]
-    @set_herbarium    = params[:set_herbarium]
+    set_params = params.permit(:set_observation, :set_species_list,
+                               :set_user, :set_herbarium)
+    @set_observation  = set_params[:set_observation]
+    @set_species_list = set_params[:set_species_list]
+    @set_user         = set_params[:set_user]
+    @set_herbarium    = set_params[:set_herbarium]
   end
 
   def create_location_ivar_and_save(done)
