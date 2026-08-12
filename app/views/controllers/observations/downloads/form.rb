@@ -12,12 +12,13 @@
 #   ))
 module Views::Controllers::Observations::Downloads
   class Form < ::Components::ApplicationForm
-    def initialize(query_param:, format: "raw", encoding: "UTF-8", **)
-      @query_param = query_param
+    prop :query_param, _Nilable(Hash), default: nil
+
+    def initialize(query_param:, format: "raw", encoding: "UTF-8", **attrs)
       form_object = FormObject::Download.new(
         format: format, encoding: encoding
       )
-      super(form_object, **)
+      super(form_object, query_param: query_param, **attrs)
     end
 
     def view_template
