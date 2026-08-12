@@ -1949,17 +1949,30 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_includes(project.observations.reload, obs)
   end
 
-  # A slip whose project the observation violates keeps the slip but
-  # stays out of the project -- and says so, since a silent skip looks
-  # exactly like the slip workflow failing (2026 CMS fair postmortem).
-  def test_create_says_when_constraints_keep_the_obs_out_of_the_project
+  # The slip's own project is a target even though a typed code checks
+  # no box: a violation surfaces BEFORE the save, in the same alert as
+  # every other project problem, so the whole mess is fixable in one
+  # pass (2026 CMS fair postmortem: the violation used to appear only
+  # after Create).
+  def test_create_surfaces_a_slip_project_violation_before_saving
     project = projects(:open_membership_project)
     project.update!(location: locations(:albion))
     login("rolf")
 
     # place_name is Massachusetts; the constraint is California.
-    post(:create,
-         params: create_params_with_name.merge(field_code: "OPEN-0902"))
+    params = create_params_with_name.merge(field_code: "OPEN-0902")
+    post(:create, params: params)
+
+    assert_nil(FieldSlip.find_by(code: "OPEN-0902"),
+               "nothing saved; the form reloaded with the warning")
+    assert_flash_warning
+    assert_select("#project_messages li", text: /#{project.title}/)
+
+    # A non-admin's confirmed resubmit saves, but can't force the
+    # project: the slip attaches and goes spare with its observation.
+    params[:observation] = params[:observation].
+                           merge(ignore_proj_conflicts: "1")
+    post(:create, params: params)
 
     slip = FieldSlip.find_by(code: "OPEN-0902")
     obs = slip&.observation
@@ -1970,6 +1983,31 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_nil(slip.reload.project,
                "the slip goes spare along with its observation")
     assert_flash_warning
+  end
+
+  # Invariant 1 (#4932): an admin may force a violating observation
+  # in. Ignore-and-resubmit is that deliberate act, so the observation
+  # AND its slip land in the project together.
+  def test_create_admin_ignore_forces_obs_and_slip_into_the_project
+    project = projects(:open_membership_project)
+    project.update!(location: locations(:albion))
+    project.join(rolf)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+    login("rolf")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0905")
+    params[:observation] = params[:observation].
+                           merge(ignore_proj_conflicts: "1")
+    post(:create, params: params)
+
+    slip = FieldSlip.find_by(code: "OPEN-0905")
+    obs = slip&.observation
+
+    assert_not_nil(obs)
+    assert_includes(project.observations.reload, obs,
+                    "the admin's ignore forces the add")
+    assert_equal(project, slip.reload.project,
+                 "the slip keeps its project alongside its observation")
   end
 
   # --------------------------------------------------------------------

@@ -10,7 +10,7 @@
 #    validate_place_name
 #
 #    validate_projects
-#      checked_project_conflicts
+#      conflicting_among(...)
 
 # Included in both ObservationsController and NamingsController
 module ObservationsController::Validators
@@ -116,41 +116,81 @@ module ObservationsController::Validators
     false
   end
 
+  # One pass, one message: every project problem -- checked projects
+  # violating constraints, the slip's own (possibly unchecked) target
+  # project violating them, cross-prefix leftovers -- surfaces in a
+  # single re-render, so the user fixes everything at once instead of
+  # discovering the next problem after each save.
   def validate_projects
-    ids = submitted_project_ids
-    return true if ids.blank?
-
-    conflicting_projects = checked_project_conflicts - @observation.projects
-    @error_checked_projects = conflicting_projects.reject do |proj|
-      proj.is_admin?(@user)
-    end
-    if @error_checked_projects.any?
-      flash_error(:form_observations_there_is_a_problem_with_projects.t)
-      @any_errors = true
-      return false
-    end
-
+    checked = checked_projects
+    slip_project = slip_prefix_project
+    return true if checked.empty? && slip_project.nil?
+    return false unless checked_projects_addable?(conflicting_among(checked))
     return true if params.dig(:observation, :ignore_proj_conflicts) == "1"
 
-    @suspect_checked_projects = conflicting_projects - @error_checked_projects
-    @cross_prefix_projects = cross_prefix_checked_projects
+    gather_suspect_projects(checked, slip_project)
     return true if @suspect_checked_projects.empty? &&
                    @cross_prefix_projects.empty?
 
-    flash_warning(project_problem_flash_tag.t)
+    flash_warning(:form_observations_there_is_a_problem_with_projects.t)
     @any_errors = true
     false
   end
 
-  # "Violates the constraints" would be wrong for a pure prefix
-  # mismatch -- nothing is violated, the checked project just isn't the
-  # slip's event.
-  def project_problem_flash_tag
-    if @suspect_checked_projects.any?
-      :form_observations_there_is_a_problem_with_projects
-    else
-      :form_observations_projects_cross_prefix_flash
+  def checked_projects
+    ids = submitted_project_ids
+    return [] if ids.blank?
+
+    Project.where(id: ids).includes(:location).to_a
+  end
+
+  def conflicting_among(projects)
+    projects.select { |proj| proj.violates_constraints?(@observation) } -
+      @observation.projects
+  end
+
+  # Only a checked project can hard-block: invariant 1 (#4932) says a
+  # non-admin may not add a violating observation, and checking the
+  # box is that act.
+  def checked_projects_addable?(conflicting)
+    @error_checked_projects = conflicting.reject do |proj|
+      proj.is_admin?(@user)
     end
+    return true if @error_checked_projects.empty?
+
+    flash_error(:form_observations_there_is_a_problem_with_projects.t)
+    @any_errors = true
+    false
+  end
+
+  def gather_suspect_projects(checked, slip_project)
+    @suspect_checked_projects = conflicting_among(checked)
+    add_slip_target_conflict(slip_project, checked)
+    @cross_prefix_projects = cross_prefix_checked_projects(checked)
+  end
+
+  # The slip's own project is a target even when its box isn't checked
+  # -- a typed code doesn't check it, which is how a violation used to
+  # surface only AFTER the save. Always a suspect, never a hard error:
+  # a non-admin's violating slip lands as a spare post-save
+  # (apply_field_slip_project) rather than blocking the create.
+  def add_slip_target_conflict(slip_project, checked)
+    return if slip_project.nil? || checked.include?(slip_project)
+    return if @observation.projects.include?(slip_project)
+    # A barred code (closed project, non-member) never attaches at
+    # all, so its project is not a target -- validate_field_slip
+    # handles that case with its own message.
+    return unless slip_project.member?(@user) ||
+                  slip_project.can_join?(@user)
+    return unless slip_project.violates_constraints?(@observation)
+
+    @suspect_checked_projects |= [slip_project]
+  end
+
+  # The project the typed/scanned code's prefix names.
+  def slip_prefix_project
+    prefix = FieldSlip.prefix_for_code(field_code)
+    prefix && Project.find_by(field_slip_prefix: prefix)
   end
 
   # A field slip prefix marks a project as one event's own. When the
@@ -160,22 +200,13 @@ module ObservationsController::Validators
   # everyone and blocks no one -- the ignore-warnings resubmit
   # proceeds -- because the deliberate case is real (a fair's
   # observations also collected into the herbarium project behind it).
-  def cross_prefix_checked_projects
-    prefix = FieldSlip.prefix_for_code(params[:field_code].to_s.strip.upcase)
+  def cross_prefix_checked_projects(checked)
+    prefix = FieldSlip.prefix_for_code(field_code)
     return [] unless prefix
 
-    Project.where(id: submitted_project_ids).
-      where.not(field_slip_prefix: [nil, ""]).
-      where.not(field_slip_prefix: prefix).to_a - @observation.projects
-  end
-
-  def checked_project_conflicts
-    ids = submitted_project_ids
-    return [] if ids.blank?
-
-    Project.where(id: ids).includes(:location).select do |proj|
-      proj.violates_constraints?(@observation)
-    end
+    checked.select do |proj|
+      proj.field_slip_prefix.present? && proj.field_slip_prefix != prefix
+    end - @observation.projects
   end
 
   def validate_observation

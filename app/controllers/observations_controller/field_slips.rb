@@ -258,7 +258,8 @@ module ObservationsController::FieldSlips
     join_field_slip_project(project)
     return unless project.member?(@user)
 
-    if project.violates_constraints?(@observation)
+    if project.violates_constraints?(@observation) &&
+       !force_slip_project?(project)
       # The slip goes spare rather than asserting a membership its
       # observation doesn't have (#4932 invariant 2). The review's
       # reconcile restores both -- via the printed prefix -- once the
@@ -271,6 +272,14 @@ module ObservationsController::FieldSlips
     end
 
     project.add_observation(@observation)
+  end
+
+  # Invariant 1 (#4932): an admin may add a violating observation.
+  # The form already surfaced the reasons and the admin checked
+  # Ignore -- that is the deliberate act plus the warning.
+  def force_slip_project?(project)
+    params.dig(:observation, :ignore_proj_conflicts) == "1" &&
+      project.is_admin?(@user)
   end
 
   # `Occurrence#observation_count_within_limits` is `on: :update` for

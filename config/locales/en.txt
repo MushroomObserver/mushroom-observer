@@ -1531,10 +1531,7 @@
   form_observations_original_name: Original Name
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:see_message_below]+":#project_messages
-  form_observations_projects_out_of_range: This observation violates one or more constraints of these checked project(s)
-  form_observations_projects_cross_prefix: "This observation's field slip belongs to a different event than these checked project(s), which have their own field slip prefixes"
-  form_observations_projects_cross_prefix_flash: A selected project uses different field slips than this observation's slip code. "+[:see_message_below]+":#project_messages
-  form_observations_projects_cross_prefix_help: "A field slip usually files its observation into its own project only, and a leftover checkbox from a previous event is easy to miss. If you really mean to add this observation to the project(s) above too:\n- Uncheck the ones you don't want"
+  form_observations_projects_out_of_range: This observation violates one or more constraints of these target project(s)
   form_observations_projects_out_of_range_help: "Either:\n- Uncheck the project(s); or\n- Change the observation to align with project requirements"
   form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
@@ -1542,6 +1539,7 @@
   form_observations_projects_kind_bbox: Out-of-bbox location
   form_observations_projects_kind_target_name: Non-target name
   form_observations_projects_kind_target_location: Non-target location
+  form_observations_projects_kind_prefix_mismatch: Field slip prefix mismatch
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:see_message_below]+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:see_message_below]+":#name_messages
