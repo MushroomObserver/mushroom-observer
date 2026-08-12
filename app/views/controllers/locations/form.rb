@@ -15,10 +15,10 @@ module Views::Controllers::Locations
   class Form < ::Components::ApplicationForm
     prop :display_name, _Nilable(String), default: nil
     prop :original_name, _Nilable(String), default: nil
-    prop :set_observation, _Nilable(_Union(String, Integer)), default: nil
-    prop :set_species_list, _Nilable(_Union(String, Integer)), default: nil
-    prop :set_user, _Nilable(_Union(String, Integer)), default: nil
-    prop :set_herbarium, _Nilable(_Union(String, Integer)), default: nil
+    prop :set_observation, _Nilable(Integer), default: nil
+    prop :set_species_list, _Nilable(Integer), default: nil
+    prop :set_user, _Nilable(Integer), default: nil
+    prop :set_herbarium, _Nilable(Integer), default: nil
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
 
