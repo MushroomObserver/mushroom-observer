@@ -17,7 +17,7 @@ development team can help with anything this guide can't.
 
 ## Choosing your field slips
 
-There are two styles of printed slip Mushroom Observer can read:
+There are currently two styles of printed slip Mushroom Observer can read:
 
 - **MO-style slips (recommended).** Mushroom Observer's own printed
   slips, with a QR code and boxes for collector, date, location,
@@ -33,18 +33,22 @@ There are two styles of printed slip Mushroom Observer can read:
   development team — email webmaster@mushroomobserver.org well before
   the event.
 
+Contact the development team if you need to use another type of
+field slip.  This requires a few more changes and requires a bit
+more lead time, but is not difficult.
+
 ## Setting up the project
 
 1. **Field slip prefix.** Give your project a field slip prefix
    matching what is printed on the slips — for example the prefix
    `2026-SMHF` for slips numbered `2026-SMHF-0207`. The prefix is what
    connects a scanned slip to your project. Prefixes are one per
-   project, so an event printing two families of slips needs two
-   projects.
+   project, so an event using more than one family of slips needs one
+   project for each prefix.
 2. **Open membership.** Using a slip automatically enrolls the
    collector in the project — but only when the project's membership
    is open. If membership is closed, a stranger's slip quietly ends up
-   attached to no project at all, which looks like the system failing.
+   attached to no project at all, which may look like the system failing.
    For an event where the public collects, open the membership (or
    pre-enroll every collector).
 3. **Location and date constraints — read this twice.** If the project
@@ -64,22 +68,13 @@ There are two styles of printed slip Mushroom Observer can read:
    limited to the project's admins. Anyone who will review scans at
    the event needs to be a project admin, not just a member.
 
-## The one trap to warn your team about
-
-The observation form remembers each person's *previous* locality. An
-admin arriving from another region gets their home locality prefilled
-on their first observation at the event — which can silently keep that
-observation (and its slip) out of the project. Tell everyone: **on your
-first observation at the event, set the locality by hand.** After that
-first one, the form follows you.
-
 ## How the slip workflow looks at the table
 
 - **Create an observation whose photo shows the slip**: when the QR
   code is readable, the slip attaches and the observation files into
   your project automatically.
 - **When the QR couldn't be read** (glare, angle, a thumb), the site
-  says so and links a page where you choose which photo shows the slip
+  says so and goes to a page where you choose which photo shows the slip
   and press **Read Field Slip**. The reading runs in the background
   and usually takes about fifteen seconds.
 - **The review page** shows everything the reading found next to what
