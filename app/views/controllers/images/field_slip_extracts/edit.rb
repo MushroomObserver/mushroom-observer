@@ -44,7 +44,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       return unless @extract.template_mismatch?
 
       Alert(level: :danger) do
-        plain(:field_slip_extract_template_mismatch.t)
+        plain(:field_slip_extract_template_mismatch.l)
       end
     end
 
@@ -53,7 +53,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       return unless read
 
       Alert(level: :danger) do
-        plain(:field_slip_extract_code_mismatch.t(read: read,
+        plain(:field_slip_extract_code_mismatch.l(read: read,
                                                   attached: attached))
       end
     end
@@ -68,19 +68,23 @@ module Views::Controllers::Images::FieldSlipExtracts
       suggestion = @extract.location_suggestion
       Alert(level: :warning) do
         if suggestion
-          plain(:field_slip_extract_location_guess.t(
+          plain(:field_slip_extract_location_guess.l(
                   written: written, suggestion: suggestion.name
                 ))
         else
-          plain(:field_slip_extract_unknown_alias.t(name: written))
+          plain(:field_slip_extract_unknown_alias.l(name: written))
           whitespace
           render_alias_link
         end
       end
     end
 
+    # The attached slip's project, so the link defines the alias where
+    # the slip actually lives -- `projects.first` sent it to whichever
+    # other project the observation happened to be in.
     def render_alias_link
-      project = @observation.projects.first
+      project = @observation.field_slip&.project ||
+                @observation.projects.first
       return unless project
 
       Link(type: :get, name: :field_slip_extract_add_alias.l,
@@ -120,7 +124,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # once extraction has moved on.
     def render_provenance
       small do
-        plain(:field_slip_extract_provenance.t(
+        plain(:field_slip_extract_provenance.l(
                 provider: @extract.provider, model: @extract.model,
                 template: @extract.template.key,
                 version: @extract.prompt_version.to_s,

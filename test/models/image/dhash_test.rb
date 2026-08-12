@@ -6,9 +6,20 @@ class Image::DhashTest < UnitTestCase
   FIXTURE = Rails.root.join("test/images/Coprinus_comatus.jpg").to_s
 
   def setup
-    return if system("command -v convert >/dev/null 2>&1")
+    return if system("command -v magick >/dev/null 2>&1") ||
+              system("command -v convert >/dev/null 2>&1")
 
-    skip("ImageMagick `convert` not available")
+    skip("ImageMagick not available")
+  end
+
+  # An IMv6-only host (the production servers) has no `magick`.
+  def test_magick_binary_falls_back_to_convert_without_imv7
+    Image::Dhash.instance_variable_set(:@magick_binary, nil)
+    Image::Dhash.stub(:system, false) do
+      assert_equal("convert", Image::Dhash.send(:magick_binary))
+    end
+  ensure
+    Image::Dhash.instance_variable_set(:@magick_binary, nil)
   end
 
   def test_from_file_is_stable
@@ -23,7 +34,8 @@ class Image::DhashTest < UnitTestCase
     hash = Image::Dhash.from_file(FIXTURE)
 
     Tempfile.create(["small", ".jpg"]) do |file|
-      system("convert", FIXTURE, "-resize", "240x240", file.path)
+      system(Image::Dhash.send(:magick_binary),
+             FIXTURE, "-resize", "240x240", file.path)
       resized = Image::Dhash.from_file(file.path)
 
       assert_operator(Image::Dhash.distance(hash, resized), :<=, 2)

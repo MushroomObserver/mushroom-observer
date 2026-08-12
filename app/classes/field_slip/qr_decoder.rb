@@ -12,9 +12,14 @@ class FieldSlip
   # `apt-get install zbar-tools`): callers check `available?` first, so
   # an environment without the binary simply has no QR detection.
   module QRDecoder
-    # Full size first: the QR occupies a small corner of the photo, and
-    # downscaling can cost it the resolution it needs to decode.
-    SIZES = [:full_size, :huge].freeze
+    # The 1280px copy first: it decodes printed slip QRs reliably and
+    # zbar chews through it several times faster than a full-resolution
+    # original -- which matters when the scan runs inline in the
+    # observation-create request. Full size stays as the fallback for a
+    # QR too small or soft to survive the downscale.
+    SIZES = [:huge, :full_size].freeze
+
+    FETCH_TIMEOUT = 30
 
     # The code is the path segment alone -- MO's own /qr/ URLs can
     # carry query params (e.g. ?project=...), which are not part of it.
@@ -58,18 +63,56 @@ class FieldSlip
       code if prefix && Project.exists?(field_slip_prefix: prefix)
     end
 
-    # Every QR payload zbar finds, largest available file first,
-    # stopping at the first size that decodes anything.
+    # Every QR payload zbar finds, preferred size first, stopping at
+    # the first size that decodes anything.
     def self.raw_codes(image)
       return [] unless available?
 
       SIZES.each do |size|
-        path = Image::LocalFile.path(image, size)
-        next unless path
-
-        codes = scan(path)
+        codes = codes_at(image, size)
         return codes if codes.any?
       end
+      []
+    end
+
+    def self.codes_at(image, size)
+      path = local_file(image, size)
+      path ? scan(path) : remote_codes(image, size)
+    end
+
+    # The precedence-resolved URL stops pointing at the local copy the
+    # moment an image transfers (production resolves transferred images
+    # to the image server), but the file itself stays on this machine's
+    # disk until cleanup -- so probe the direct path too, or a fresh
+    # upload becomes unreadable within a second of arriving.
+    def self.local_file(image, size)
+      Image::LocalFile.path(image, size) || direct_path(image, size)
+    end
+
+    def self.direct_path(image, size)
+      path = image.full_filepath(size)
+      path if path && File.exist?(path)
+    end
+
+    # Transfer to the image server can outrun this scan -- the local
+    # copy may vanish within seconds of upload -- so a size no longer
+    # on this machine's disk is fetched from the image server. Any
+    # fetch failure is a plain miss, not an error: in particular, an
+    # archived original is gone from the image server deliberately and
+    # is never pulled out of the archive for a scan.
+    def self.remote_codes(image, size)
+      url = image.image_url(size).url
+      return [] unless url.start_with?("http")
+
+      response = RestClient::Request.execute(method: :get, url: url,
+                                             timeout: FETCH_TIMEOUT,
+                                             raw_response: true)
+      begin
+        scan(response.file.path)
+      ensure
+        response.file.close!
+      end
+    rescue RestClient::Exception, SocketError, SystemCallError
       []
     end
 

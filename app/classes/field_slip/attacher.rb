@@ -12,15 +12,23 @@ class FieldSlip
   # the code's slip is unused, so it can never move an observation,
   # join one to somebody else's collection, or override a choice a
   # person made on a form.
+  #
+  # `join_in_use: true` widens that for a human-confirmed call site
+  # (the review form's ticked code): an in-use slip's occurrence is
+  # joined instead of refused, the same act as editing the code onto
+  # the observation, and the newly reviewed observation becomes the
+  # occurrence's primary.
   class Attacher
-    def self.attach(observation:, code:, user:)
-      new(observation: observation, code: code, user: user).attach
+    def self.attach(observation:, code:, user:, join_in_use: false)
+      new(observation: observation, code: code, user: user,
+          join_in_use: join_in_use).attach
     end
 
-    def initialize(observation:, code:, user:)
+    def initialize(observation:, code:, user:, join_in_use: false)
       @observation = observation
       @code = code.to_s.strip.upcase
       @user = user
+      @join_in_use = join_in_use
     end
 
     # Returns what happened, for the caller's log line.
@@ -28,7 +36,7 @@ class FieldSlip
       return :already_linked if @observation.occurrence_id
 
       existing = FieldSlip.find_by(code: @code)
-      return :in_use if existing&.occurrence
+      return join_or_refuse(existing) if existing&.occurrence
       return :closed_project if barred?(existing)
 
       slip = existing || FieldSlip.find_or_create_by_code(@code, @user)
@@ -48,6 +56,23 @@ class FieldSlip
     def barred?(slip)
       project = slip&.project
       project && !project.member?(@user) && !project.can_join?(@user)
+    end
+
+    def join_or_refuse(slip)
+      return :in_use unless @join_in_use
+      return :occurrence_full if occurrence_full?(slip)
+      return :closed_project if barred?(slip)
+
+      link(slip)
+      # The reviewed observation carries the slip's freshly applied
+      # data, so it becomes the record the slip's /qr/ page shows.
+      slip.occurrence.update!(primary_observation_id: @observation.id)
+      Occurrence.log_field_slip_added([@observation], @user)
+      :joined
+    end
+
+    def occurrence_full?(slip)
+      slip.occurrence.observations.count >= Occurrence::MAX_OBSERVATIONS
     end
 
     def link(slip)

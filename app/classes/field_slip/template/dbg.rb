@@ -75,14 +75,6 @@ class FieldSlip
             field slip code. Give it exactly as written.
         RULES
       end
-
-      # The box is dedicated to iNaturalist, so any long digit run in
-      # it is the observation id -- even mixed with a username or
-      # timestamp ("10:29 388879492"). Five digits keeps clock times
-      # and dates from qualifying.
-      def inat_code_in(value)
-        value.to_s[/\d{5,}/]
-      end
     end
   end
 end
