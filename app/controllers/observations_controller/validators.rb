@@ -163,8 +163,14 @@ module ObservationsController::Validators
     false
   end
 
+  # Ticking "use as spare slip" opts out of the slip's project
+  # entirely, so neither the slip's own target conflict nor a prefix
+  # mismatch against it means anything anymore.
   def gather_suspect_projects(checked, slip_project)
     @suspect_checked_projects = conflicting_among(checked)
+    @cross_prefix_projects = []
+    return if use_spare_slip?
+
     add_slip_target_conflict(slip_project, checked)
     @cross_prefix_projects = cross_prefix_checked_projects(checked)
   end
@@ -184,6 +190,7 @@ module ObservationsController::Validators
                   slip_project.can_join?(@user)
     return unless slip_project.violates_constraints?(@observation)
 
+    @slip_target_project = slip_project
     @suspect_checked_projects |= [slip_project]
   end
 

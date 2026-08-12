@@ -36,6 +36,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }
   prop :cross_prefix_projects, _Array(Project), default: -> { [] }
+  prop :slip_target_project, _Nilable(Project), default: nil
 
   def view_template
     render(panel) do |p|
@@ -51,7 +52,10 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
       panel_id: "observation_projects",
       collapsible: true,
       collapse_target: "#observation_projects_inner",
-      expanded: any_checked?
+      # Constraint messages live inside this panel; collapsing them
+      # away leaves the flash pointing at nothing (reported: every box
+      # unchecked, slip project still warning, no visible explanation).
+      expanded: any_checked? || constraint_issues?
     )
   end
 
@@ -92,11 +96,16 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   # constraint violation and a cross-prefix leftover read the same
   # way, so the user fixes everything in a single pass.
   def render_warning_alert
-    help = :form_observations_projects_out_of_range_help.t +
-           :form_observations_projects_out_of_range_admin_help.t(
-             button_name: @button_name
-           )
+    help = :form_observations_projects_out_of_range_help.t
+    help += :form_observations_projects_use_spare_help.t if spare_slip_option?
+    help += :form_observations_projects_out_of_range_admin_help.t(
+      button_name: @button_name
+    )
     render_constraint_alert(:warning, warning_projects, help)
+  end
+
+  def spare_slip_option?
+    @slip_target_project.present? || @cross_prefix_projects.any?
   end
 
   def warning_projects
@@ -132,6 +141,20 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
     @form.checkbox_field(
       :ignore_proj_conflicts,
       label: :form_observations_projects_ignore_project_constraints
+    )
+    render_spare_slip_checkbox
+  end
+
+  # The opt-out for a slip used outside its event: attach it to this
+  # observation with no project at all. Only offered when the slip's
+  # own project is part of the problem -- either violating (its
+  # target conflict) or mismatched against a checked project's prefix.
+  def render_spare_slip_checkbox
+    return unless spare_slip_option?
+
+    @form.checkbox_field(
+      :use_spare_slip,
+      label: :form_observations_projects_use_spare_slip
     )
   end
 

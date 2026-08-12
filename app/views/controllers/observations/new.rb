@@ -34,6 +34,7 @@ module Views::Controllers::Observations
     prop :error_checked_projects, _Array(::Project), default: -> { [] }
     prop :suspect_checked_projects, _Array(::Project), default: -> { [] }
     prop :cross_prefix_projects, _Array(::Project), default: -> { [] }
+    prop :slip_target_project, _Nilable(::Project), default: nil
     prop :field_code, _Nilable(String), default: nil
 
     def view_template
@@ -67,7 +68,12 @@ module Views::Controllers::Observations
         collectors_number: @collectors_number,
         herbarium_name: @herbarium_name,
         herbarium_id: @herbarium_id,
-        accession_number: @accession_number,
+        accession_number: @accession_number
+      }.merge(project_and_list_attrs)
+    end
+
+    def project_and_list_attrs
+      {
         projects: @projects,
         submitted_project_ids: @submitted_project_ids,
         lists: @lists,
@@ -75,6 +81,7 @@ module Views::Controllers::Observations
         error_checked_projects: @error_checked_projects,
         suspect_checked_projects: @suspect_checked_projects,
         cross_prefix_projects: @cross_prefix_projects,
+        slip_target_project: @slip_target_project,
         field_code: @field_code
       }
     end

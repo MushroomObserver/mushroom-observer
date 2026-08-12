@@ -111,7 +111,8 @@ module ObservationsController::New
       lists: @lists || [], submitted_list_ids: @submitted_list_ids,
       error_checked_projects: @error_checked_projects || [],
       suspect_checked_projects: @suspect_checked_projects || [],
-      cross_prefix_projects: @cross_prefix_projects || []
+      cross_prefix_projects: @cross_prefix_projects || [],
+      slip_target_project: @slip_target_project
     }
   end
 

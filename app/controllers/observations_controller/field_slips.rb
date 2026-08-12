@@ -252,6 +252,8 @@ module ObservationsController::FieldSlips
   # silent skip here looks exactly like the slip workflow failing.
   # Mirrors the slip form's own `assign_project`.
   def apply_field_slip_project(field_slip)
+    return use_slip_as_spare(field_slip) if use_spare_slip?
+
     project = field_slip.project
     return unless project
 
@@ -280,6 +282,19 @@ module ObservationsController::FieldSlips
   def force_slip_project?(project)
     params.dig(:observation, :ignore_proj_conflicts) == "1" &&
       project.is_admin?(@user)
+  end
+
+  # The form's opt-out for a slip used outside its event: the slip
+  # attaches with no project, deliberately, so no warning.
+  def use_spare_slip?
+    params.dig(:observation, :use_spare_slip) == "1"
+  end
+
+  def use_slip_as_spare(field_slip)
+    field_slip.update!(project: nil) if field_slip.project
+    flash_notice(:observation_field_slip_spare_used.t(
+                   code: field_slip.code
+                 ))
   end
 
   # `Occurrence#observation_count_within_limits` is `on: :update` for

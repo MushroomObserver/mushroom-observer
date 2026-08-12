@@ -1480,6 +1480,7 @@
   observation_field_slip_invalid: 'Invalid field slip code "[code]".'
   observation_field_slip_full: 'Field slip "[code]" already has [max] observations, the maximum allowed.'
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
+  observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   create_observation_field_slip_full: 'Observation created, but field slip "[code]" already has [max] observations, the maximum allowed, so it was not attached.'
@@ -1536,6 +1537,8 @@
   form_observations_projects_out_of_range_help: "Either:\n- Uncheck the project(s); or\n- Change the observation to align with project requirements"
   form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+  form_observations_projects_use_spare_slip: Use as Spare Slip
+  form_observations_projects_use_spare_help: "; or\n- Check [:form_observations_projects_use_spare_slip] to attach the field slip to this observation with no project"
   form_observations_projects_kind_date: Out-of-range date
   form_observations_projects_kind_bbox: Out-of-bbox location
   form_observations_projects_kind_target_name: Non-target name

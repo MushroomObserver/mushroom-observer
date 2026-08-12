@@ -1985,6 +1985,38 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
+  # Using another event's slip on purpose: "Use as Spare Slip" attaches
+  # the slip with no project at all, ending the warning loop that
+  # otherwise has no exit (an admin's Ignore would force the project
+  # in, the opposite of spare use). The alert has to be VISIBLE too:
+  # it lives inside the Projects panel, which used to collapse when
+  # nothing was checked -- exactly the spare-use state.
+  def test_create_use_spare_slip_attaches_without_any_project
+    project = projects(:open_membership_project)
+    project.update!(location: locations(:albion))
+    login("rolf")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0906")
+    post(:create, params: params)
+
+    assert_flash_warning
+    assert_select("#observation_projects_inner.collapse.in",
+                  { count: 1 },
+                  "the panel holding the explanation must be expanded")
+    assert_select("input[name='observation[use_spare_slip]']" \
+                  "[type='checkbox']")
+
+    params[:observation] = params[:observation].merge(use_spare_slip: "1")
+    post(:create, params: params)
+
+    slip = FieldSlip.find_by(code: "OPEN-0906")
+    obs = slip&.observation
+
+    assert_not_nil(obs, "the spare resubmit saves")
+    assert_nil(slip.reload.project, "the slip carries no project")
+    assert_empty(obs.projects, "the observation joins nothing")
+  end
+
   # Invariant 1 (#4932): an admin may force a violating observation
   # in. Ignore-and-resubmit is that deliberate act, so the observation
   # AND its slip land in the project together.
