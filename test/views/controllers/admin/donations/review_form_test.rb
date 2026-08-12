@@ -6,7 +6,7 @@ module Views::Controllers::Admin::Donations
   class ReviewFormTest < ComponentTestCase
     def setup
       super
-      @donations = Donation.order(created_at: :desc).limit(3)
+      @donations = Donation.order(created_at: :desc).limit(3).to_a
     end
 
     def test_renders_form_structure

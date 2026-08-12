@@ -26,21 +26,16 @@ class Components::Form::Search < Components::ApplicationForm
   # Additional wrapper options for search-specific fields
   SEARCH_WRAPPER_OPTIONS = [:selected, :between].freeze
 
-  # NOTE: Using regular initialization instead of Literal props because
-  # Superform::Rails::Form has its own initialization pattern
-  # @param search [Query] the query model
-  # @param search_controller [Object] controller with FIELD_COLUMNS
-  # @param local [Boolean] if true, don't render header
-  # @param action [String] optional explicit form action URL
-  attr_reader :form_action_url
-
-  def initialize(search, search_controller:, local: true, form_action_url: nil,
-                 **)
-    @search_controller = search_controller
-    @local = local
-    @form_action_url = form_action_url
-    super(search, **)
-  end
+  # `local:` isn't redeclared here -- it's the base class's own prop,
+  # inherited as-is, so it flows through Literal's combined generated
+  # initializer to both this class's `@local` (header display) and
+  # the base's `@turbo_stream` computation from the same value. Same
+  # flag, same meaning either way: a "local" render (embedded inline,
+  # no page chrome of its own) skips both the header and Turbo; a
+  # non-local render (nav-dropdown, embedded via Turbo swap) shows
+  # both.
+  prop :search_controller, _Interface(:search_type)
+  prop :form_action_url, _Nilable(String), default: nil
 
   def view_template
     render_header unless @local
