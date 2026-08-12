@@ -384,7 +384,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_post_edit_and_destroy_with_details_and_location
-    # browser = page.driver.browser
     setup_image_dirs # in general_extensions
 
     # open_create_observation_form
@@ -1413,8 +1412,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_show_observation_page_has_important_info
 
+  # wait: 8, not the 3s default -- a Turbo-submitted create/update on
+  # this form can involve several image uploads plus a full
+  # FullPageBase render before the flash settles; measured ~3.5s on a
+  # multi-image failure-reload flow, comfortably under 8s but over 3s.
   def assert_flash_for_images_uploaded(filename)
-    assert_flash_success(:runtime_image_uploaded, name: filename)
+    assert_flash_success(:runtime_image_uploaded, name: filename, wait: 8)
   end
 
   def assert_flash_for_destroy_observation(id)
