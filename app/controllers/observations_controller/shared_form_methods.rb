@@ -31,6 +31,22 @@
 module ObservationsController::SharedFormMethods
   private
 
+  # A malformed request can send a scalar for the whole `observation`
+  # param instead of the expected nested hash (`?observation=abc`).
+  # Every method below assumes `params[:observation]` is either
+  # absent or an ActionController::Parameters -- normalize a
+  # present-but-wrong-shape value to absent so they degrade the same
+  # way a missing param already does (a validation failure/redisplay,
+  # not a 500 buried in whichever method first calls `.dig`/`.permit`
+  # on it). Call at the top of `create`/`update`, before anything
+  # else reads params[:observation].
+  def normalize_observation_param
+    return if params[:observation].nil? ||
+              params[:observation].is_a?(ActionController::Parameters)
+
+    params.delete(:observation)
+  end
+
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
     [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,

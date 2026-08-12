@@ -67,20 +67,33 @@ module ObservationsController::Validators
   end
 
   # Helper methods for nested form params (Superform nests under
-  # :observation). `.permit` guarantees each key is a scalar (String)
-  # or absent -- an automated scanner sending a nested hash for one of
-  # these keys (e.g. `?observation[herbarium_record][name][x]=1`)
-  # gets filtered out instead of reaching a Literal `String`/`Integer`
-  # prop as the wrong Ruby type.
+  # :observation, with a top-level fallback for the field-slip
+  # redirect path). Permitting from the top-level `params` object
+  # (rather than digging first and calling `.permit` on the extracted
+  # value) guarantees each key is a scalar (String) or absent --
+  # calling `.permit` on an already-dug-out value raises NoMethodError
+  # if a scanner or malformed request sends a scalar where the nested
+  # hash was expected (e.g. `?observation[collection_number]=abc`),
+  # since `.permit` only exists on ActionController::Parameters, not
+  # String. Permitting both shapes up front filters either malformed
+  # case to nil instead.
   def collection_number_params
-    (params.dig(:observation, :collection_number) ||
-     params[:collection_number])&.permit(:name, :number)
+    permitted = params.permit(
+      observation: { collection_number: [:name, :number] },
+      collection_number: [:name, :number]
+    )
+    permitted.dig(:observation, :collection_number) ||
+      permitted[:collection_number]
   end
 
   def herbarium_record_params
-    (params.dig(:observation, :herbarium_record) ||
-     params[:herbarium_record])&.permit(:herbarium_name, :herbarium_id,
-                                        :accession_number)
+    permitted = params.permit(
+      observation: { herbarium_record: [:herbarium_name, :herbarium_id,
+                                        :accession_number] },
+      herbarium_record: [:herbarium_name, :herbarium_id, :accession_number]
+    )
+    permitted.dig(:observation, :herbarium_record) ||
+      permitted[:herbarium_record]
   end
 
   # Submitted project_ids array (post-Phlex shape:

@@ -282,6 +282,24 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_flash_error
   end
 
+  # Regression: a request sending a bare scalar for the whole
+  # `observation` param instead of the expected nested hash used to
+  # crash deep in the call chain (e.g. notes_param_present?'s
+  # `params.dig(:observation, :notes)`, TypeError: String does not
+  # have #dig method) instead of failing gracefully. Same shape as
+  # the ObservationsControllerCreateTest regression -- Copilot
+  # flagged the sibling issue on PR #5051's
+  # collection_number_params/herbarium_record_params.
+  def test_update_observation_with_malformed_observation_param
+    obs = observations(:detailed_unknown_obs)
+    login(obs.user.login)
+
+    put(:update, params: { id: obs.id, observation: "abc" })
+
+    assert_not_equal(500, @response.status,
+                     "Malformed observation param should not 500")
+  end
+
   def test_update_reflection_is_blocked
     obs = observations(:imported_inat_obs)
     original_notes = obs.notes
