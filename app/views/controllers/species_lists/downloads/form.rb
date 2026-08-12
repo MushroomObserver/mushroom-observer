@@ -6,14 +6,14 @@ module Views::Controllers::SpeciesLists::Downloads
   #
   # @example
   #   render(Views::Controllers::SpeciesLists::Downloads::Form.new(
-  #     query_param: q_param(@query)
+  #     query: @query
   #   ))
   class Form < ::Components::ApplicationForm
-    prop :query_param, _Nilable(Hash), default: nil
+    prop :query, _Nilable(::Query), default: nil
 
-    def initialize(query_param:, **attrs)
+    def initialize(query: nil, **attrs)
       super(FormObject::PrintLabels.new,
-            query_param: query_param,
+            query: query,
             id: "species_list_download_print_labels", **attrs)
     end
 
@@ -27,7 +27,7 @@ module Views::Controllers::SpeciesLists::Downloads
     private
 
     def form_action
-      print_labels_for_observations_path(q: @query_param)
+      print_labels_for_observations_path(q: q_param(@query))
     end
   end
 end

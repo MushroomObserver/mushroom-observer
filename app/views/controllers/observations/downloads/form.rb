@@ -8,17 +8,20 @@
 #
 # @example
 #   render(Views::Controllers::Observations::Downloads::Form.new(
-#     query_param: q_param
+#     query: @query
 #   ))
 module Views::Controllers::Observations::Downloads
   class Form < ::Components::ApplicationForm
-    prop :query_param, _Nilable(Hash), default: nil
+    # `query:` (not a precomputed q_param Hash) so `q_param` -- the
+    # ambient session/current-query helper -- only gets called once,
+    # here, at the point the URL is actually built.
+    prop :query, _Nilable(::Query), default: nil
 
-    def initialize(query_param:, format: "raw", encoding: "UTF-8", **attrs)
+    def initialize(query: nil, format: "raw", encoding: "UTF-8", **attrs)
       form_object = FormObject::Download.new(
         format: format, encoding: encoding
       )
-      super(form_object, query_param: query_param, **attrs)
+      super(form_object, query: query, **attrs)
     end
 
     def view_template
@@ -33,7 +36,7 @@ module Views::Controllers::Observations::Downloads
     private
 
     def form_action
-      observations_downloads_path(q: @query_param)
+      observations_downloads_path(q: q_param(@query))
     end
 
     def render_format_section

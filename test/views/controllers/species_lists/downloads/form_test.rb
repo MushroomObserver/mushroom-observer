@@ -17,8 +17,8 @@ module Views::Controllers::SpeciesLists::Downloads
 
     private
 
-    def render_form(query_param: { model: :Observation })
-      render(Form.new(query_param: query_param))
+    def render_form(query: Query.lookup(:Observation))
+      render(Form.new(query: query))
     end
   end
 end

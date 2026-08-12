@@ -77,7 +77,7 @@ module Views::Controllers::Observations::Downloads
 
     def render_form(format: "raw", encoding: "UTF-8")
       render(Form.new(
-               query_param: { model: :Observation },
+               query: Query.lookup(:Observation),
                format: format,
                encoding: encoding
              ))
