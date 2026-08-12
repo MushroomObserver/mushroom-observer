@@ -8,15 +8,17 @@ module Views::Controllers::Checklists
   # Every taxon row, its display content, link path, and the optional
   # "remove target name" button live here as private methods.
   class Panel < ::Components::Base
-    def initialize(data:, context:, taxa: nil,
-                   panel_id: "checklist_panel",
-                   link_to_name_page: false)
-      super()
-      @data = data
-      @context = context
-      @taxa = taxa || data.taxa
-      @panel_id = panel_id
-      @link_to_name_page = link_to_name_page
+    prop :data, ::Checklist
+    prop :context, ::Views::Controllers::Checklists::Context
+    prop :taxa, _Array(Array)
+    prop :panel_id, String, default: "checklist_panel"
+    prop :link_to_name_page, _Boolean, default: false
+
+    # taxa: defaults to the full checklist when the caller doesn't
+    # pass a filtered subset (see Checklists::Contents#render_panel_
+    # section, which passes species_level_observed_taxa etc).
+    def initialize(data:, taxa: nil, **)
+      super(data: data, taxa: taxa || data.taxa, **)
     end
 
     def view_template

@@ -252,13 +252,13 @@ class ProjectsController < ApplicationController
     @drafts = NameDescription.joins(:admin_groups).
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
-              includes(:name, :user)
+              includes(:name, :user).to_a
     # Save a lookup in comments_for_object
     @comments = @project.comments&.sort_by(&:created_at)&.reverse
     # Matches for the list-search autocompleter
     @object_names = @project.observations.joins(:name).
                     select(Name[:text_name], Name[:id]).distinct.
-                    order(Name[:text_name])
+                    order(Name[:text_name]).to_a
   end
 
   def upload_image_if_present

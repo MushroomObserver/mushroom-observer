@@ -5,23 +5,16 @@
 # form, and a right column with the observation's images.
 module Views::Controllers::Observations::Namings
   class New < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
     # Forwards every prop the Form component needs — `observation`
     # for chrome (title + context-nav + observation_details +
-    # images), the rest for the Form itself. Not a candidate for
-    # the parameter-list refactor lever; this is the form's data.
-    def initialize(observation:, naming:, vote:, given_name:, reasons:,
-                   user: nil, feedback: {})
-      super()
-      @observation = observation
-      @user = user
-      @naming = naming
-      @vote = vote
-      @given_name = given_name
-      @reasons = reasons
-      @feedback = feedback
-    end
-    # rubocop:enable Metrics/ParameterLists
+    # images), the rest for the Form itself.
+    prop :observation, ::Observation
+    prop :naming, ::Naming
+    prop :vote, ::Vote
+    prop :given_name, String
+    prop :reasons, _Hash(Integer, ::Naming::Reason)
+    prop :user, _Nilable(::User), default: nil
+    prop :feedback, Hash, default: -> { {} }
 
     def view_template
       add_chrome

@@ -57,8 +57,7 @@ class NavTabsTest < ComponentTestCase
   end
 
   def test_attributes_forwarded_to_ul
-    html = render_with(attributes: { id: "my_tabs",
-                                     data: { x: "v" } }) do |tabs|
+    html = render_with(id: "my_tabs", data: { x: "v" }) do |tabs|
       tabs.tab("One", "/one")
     end
 

@@ -23,9 +23,6 @@ module SpeciesLists
 
     private
 
-    # MO doesn't wire `Phlex::Rails::Resolver`, so a bare `render(:new)`
-    # can't resolve the Phlex action view at `species_lists/write_in/new.rb`.
-    # Construct it explicitly with the instance state the ERB used to read.
     def render_new_page
       render(
         Views::Controllers::SpeciesLists::WriteIn::New.new(
@@ -220,8 +217,14 @@ module SpeciesLists
     end
 
     def calculated_member_vars_for_reload(member_params)
-      # cannot leave @member_notes == nil because view expects a hash
-      @member_notes = member_params[:notes] || Observation.no_notes
+      # cannot leave @member_notes == nil because view expects a hash.
+      # `member_params[:notes]`, when submitted, is a nested
+      # ActionController::Parameters (dynamic "Other"/template-header
+      # keys, not fixed Strong Params attributes) -- matches
+      # ObservationsController::SharedFormMethods#notes_to_sym_and_compact's
+      # conversion for the same shape of field.
+      @member_notes = member_params[:notes]&.to_unsafe_h&.symbolize_keys ||
+                      Observation.no_notes
       @member_is_collection_location =
         member_params[:is_collection_location].to_s == "1"
       @member_specimen = member_params[:specimen].to_s == "1"

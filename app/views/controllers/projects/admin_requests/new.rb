@@ -3,10 +3,7 @@
 module Views::Controllers::Projects::AdminRequests
   # Phlex view for the admin request form page.
   class New < Views::FullPageBase
-    def initialize(project:)
-      super()
-      @project = project
-    end
+    prop :project, ::Project
 
     def view_template
       add_page_title(

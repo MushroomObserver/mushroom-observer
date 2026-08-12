@@ -3,11 +3,8 @@
 module Views::Controllers::Herbaria::CuratorRequests
   # Action view for the herbarium curator-request form.
   class New < Views::FullPageBase
-    def initialize(herbarium:, back: nil)
-      super()
-      @herbarium = herbarium
-      @back = back
-    end
+    prop :herbarium, ::Herbarium
+    prop :back, _Nilable(String), default: nil
 
     def view_template
       add_page_title(:show_herbarium_curator_request.t)

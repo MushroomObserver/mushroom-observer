@@ -172,6 +172,10 @@ module Projects
             })
 
       assert_response(:success)
+      # Regression: #update didn't set @project before re-rendering the
+      # edit page on validation failure, so the project banner (which
+      # renders nothing at all without a project) silently disappeared.
+      assert_select("#project_tabs")
     end
 
     def test_update_can_use_turbo_to_modify_project_alias

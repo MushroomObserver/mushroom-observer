@@ -69,13 +69,13 @@ module Views::Controllers::FieldSlips
     end
 
     def render_no_prefix_nudge
-      div(class: "alert alert-info mt-3",
-          id: "field_slip_no_prefix_nudge") do
+      Alert(level: :info, id: "field_slip_no_prefix_nudge",
+            class: "mt-3") do
         plain(:show_project_field_slip_no_prefix.t)
         whitespace
         render(Components::Alert::Link.new(
-                 :show_project_field_slip_set_prefix.t,
-                 project_admin_path(project_id: @project.id)
+                 text: :show_project_field_slip_set_prefix.t,
+                 href: project_admin_path(project_id: @project.id)
                ))
       end
     end

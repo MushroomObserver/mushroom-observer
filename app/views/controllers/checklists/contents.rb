@@ -5,11 +5,8 @@ module Views::Controllers::Checklists
   # #checklist_contents so the target-names turbo-stream can replace
   # the whole block when a target is added or removed.
   class Contents < ::Components::Base
-    def initialize(data:, context:)
-      super()
-      @data = data
-      @context = context
-    end
+    prop :data, ::Checklist
+    prop :context, ::Views::Controllers::Checklists::Context
 
     def view_template
       div(id: "checklist_contents") do

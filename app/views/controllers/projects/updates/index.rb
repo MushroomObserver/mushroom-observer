@@ -2,16 +2,25 @@
 
 module Views::Controllers::Projects::Updates
   class Index < Views::FullPageBase
-    def initialize(project:, user:, results:, show_excluded:)
-      super()
-      @project = project
-      @user = user
-      @observations = results[:observations]
-      @pagination = results[:pagination]
-      @request_url = results[:request_url]
-      @form_action_url = results[:form_action_url]
-      @current_count = results[:current_count]
-      @show_excluded = show_excluded
+    prop :project, ::Project
+    prop :user, ::User
+    prop :observations, _Array(::Observation)
+    prop :pagination, ::PaginationData
+    prop :request_url, String
+    prop :form_action_url, String
+    prop :current_count, Integer
+    prop :show_excluded, _Boolean
+
+    # `results:` bundles five values the controller computes together
+    # (see Projects::UpdatesController#build_index_results) -- split
+    # them into individual props here so callers still pass one hash.
+    def initialize(results:, **)
+      super(observations: results[:observations],
+            pagination: results[:pagination],
+            request_url: results[:request_url],
+            form_action_url: results[:form_action_url],
+            current_count: results[:current_count],
+            **)
     end
 
     def view_template

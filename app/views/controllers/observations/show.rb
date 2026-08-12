@@ -20,25 +20,22 @@
 # obs-title chain in `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
-    # The show page consumes every obs-derived ivar the controller
-    # builds; the param list mirrors the controller's `@ivar`s.
-    def initialize(observation:, user: nil, consensus: nil,
-                   comments: [], images: [], other_sites: nil,
-                   sibling_observations: nil, occurrence: nil,
-                   owner_name: nil)
-      super()
-      @observation = observation
-      @user = user
-      @consensus = consensus
-      @comments = comments
-      @images = images
-      @other_sites = other_sites
-      @sibling_observations = sibling_observations || []
-      @occurrence = occurrence
-      @owner_name = owner_name
+    prop :observation, ::Observation
+    prop :user, _Nilable(::User), default: nil
+    prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
+    prop :comments, _Array(::Comment), default: -> { [] }
+    prop :images, _Array(::Image), default: -> { [] }
+    prop :other_sites, _Nilable(_Array(::ExternalSite)), default: nil
+    prop :sibling_observations, _Array(::Observation)
+    prop :occurrence, _Nilable(::Occurrence), default: nil
+    prop :owner_name, _Nilable(::Name), default: nil
+
+    # sibling_observations: only gets computed by the controller when
+    # there's an @occurrence -- normalize nil to [] here so callers
+    # (and this class's own methods) never need a nil-guard.
+    def initialize(sibling_observations: nil, **)
+      super(sibling_observations: sibling_observations || [], **)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       add_chrome
@@ -97,7 +94,7 @@ module Views::Controllers::Observations
     def render_right_column
       render(Details.new(
                obs: @observation, consensus: @consensus, user: @user,
-               sites: @other_sites&.to_a, siblings: @sibling_observations
+               sites: @other_sites, siblings: @sibling_observations
              ))
       return unless @user
 

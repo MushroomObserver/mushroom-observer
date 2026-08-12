@@ -3,11 +3,8 @@
 # Phlex view for the checklist page.
 module Views::Controllers::Checklists
   class Show < Views::FullPageBase
-    def initialize(data:, context:)
-      super()
-      @data = data
-      @context = context
-    end
+    prop :data, ::Checklist
+    prop :context, ::Views::Controllers::Checklists::Context
 
     def view_template
       render_page_chrome
