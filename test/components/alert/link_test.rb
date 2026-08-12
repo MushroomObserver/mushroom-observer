@@ -25,7 +25,8 @@ class Components::Alert::LinkTest < ComponentTestCase
   private
 
   def render_link(**)
-    render(Components::Alert::Link.new("Set prefix", "/projects/1/admin",
-                                       **))
+    render(Components::Alert::Link.new(
+             text: "Set prefix", href: "/projects/1/admin", **
+           ))
   end
 end

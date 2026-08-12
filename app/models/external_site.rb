@@ -107,6 +107,6 @@ class ExternalSite < AbstractModel
       all
     else
       user_is_site_project_member(user.id)
-    end
+    end.to_a
   end
 end

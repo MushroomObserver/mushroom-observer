@@ -115,10 +115,33 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
   # ---- Main container + chrome anchors --------------------------------
 
   def test_main_container_present
+    # `banners(:one)`/`banners(:two)` fixtures (loaded via
+    # `fixtures :all`) mean `Banner.current` finds a record here,
+    # so the "banner" Stimulus controller joins "nav links".
+    html = render(FakePage.new)
+
+    assert_html(html, "#main_container[data-controller='nav links banner']")
+    assert_html(html, "#main_container[data-nav-target='container']")
+  end
+
+  def test_main_container_omits_banner_controller_when_no_banner
+    Banner.delete_all
     html = render(FakePage.new)
 
     assert_html(html, "#main_container[data-controller='nav links']")
-    assert_html(html, "#main_container[data-nav-target='container']")
+  end
+
+  def test_top_nav_show_banner_button_hidden_when_no_banner
+    Banner.delete_all
+    html = render(FakePage.new)
+
+    assert_no_html(html, "svg.mo-icon-interests")
+  end
+
+  def test_top_nav_show_banner_button_present_when_banner_current
+    html = render(FakePage.new)
+
+    assert_html(html, "#top_nav button svg.mo-icon-interests")
   end
 
   def test_main_emits_action_block_inside

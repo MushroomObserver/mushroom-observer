@@ -80,7 +80,99 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     end
   end
 
+  ##############################################################################
+  #
+  # Display a single herbarium, based on :flow params
+  # `:flow` is added by the show-page prev/next pager
+  # (`Views::Layouts::Header::ShowPrevNextNav`).
+  def show
+    flow = params[:flow]
+    return redirect_to_next_object(flow.to_sym, Herbarium, params[:id].to_s) \
+      if %w[next prev].include?(flow)
+
+    render_herbarium_show
+  end
+
+  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
+
+  def new
+    @herbarium = Herbarium.new
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html do
+        render(Views::Controllers::Herbaria::New.new(
+                 herbarium: @herbarium, user: @user
+               ))
+      end
+    end
+  end
+
+  def edit
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return unless @herbarium && make_sure_can_edit!
+
+    set_up_herbarium_for_edit
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html do
+        render(Views::Controllers::Herbaria::Edit.new(
+                 herbarium: @herbarium, user: @user, top_users: @top_users
+               ))
+      end
+    end
+  end
+
+  # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
+
+  def create
+    @herbarium = Herbarium.new(herbarium_params)
+    normalize_parameters
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+    return reload_form(:new) unless validate_herbarium! && !@any_errors
+
+    unless @herbarium.save
+      flash_object_errors(@herbarium)
+      return reload_form(:new)
+    end
+    @herbarium.add_curator(@user) if @herbarium.personal_user
+    notify_admins_of_new_herbarium unless @herbarium.personal_user
+    redirect_to_create_location_or_referrer_or_show_location
+  end
+
+  def update
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
+    return unless make_sure_can_edit!
+
+    prepare_herbarium_update
+    return reload_form(:edit) unless validate_herbarium! && !@any_errors
+
+    unless @herbarium.save
+      flash_object_errors(@herbarium)
+      return reload_form(:edit)
+    end
+    redirect_to_create_location_or_referrer_or_show_location
+  end
+
+  def destroy
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
+
+    if user_can_destroy_herbarium?
+      @herbarium.destroy
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium.try(&:id)))
+    else
+      flash_error(:permission_denied.t)
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
+    end
+  end
+
+  ##############################################################################
+
   private
+
+  include Herbaria::SharedPrivateMethods
+
+  # ---------- Index helpers ----------------------------------------------
 
   # Phlex action template — explicit render per the conversion rule.
   def render_index_view
@@ -142,20 +234,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
       include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
   end
 
-  public
-
-  ##############################################################################
-  #
-  # Display a single herbarium, based on :flow params
-  # `:flow` is added by the show-page prev/next pager
-  # (`Views::Layouts::Header::ShowPrevNextNav`).
-  def show
-    flow = params[:flow]
-    return redirect_to_next_object(flow.to_sym, Herbarium, params[:id].to_s) \
-      if %w[next prev].include?(flow)
-
-    render_herbarium_show
-  end
+  # ---------- Show helper --------------------------------------------------
 
   def render_herbarium_show
     @canonical_url = herbarium_url(params[:id])
@@ -164,42 +243,20 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
   end
 
-  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
-
-  def new
-    @herbarium = Herbarium.new
-    respond_to do |format|
-      format.turbo_stream { render_modal_herbarium_form }
-      format.html do
-        render(Views::Controllers::Herbaria::New.new(
-                 herbarium: @herbarium, user: @user
-               ))
-      end
-    end
-  end
-
-  def edit
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium && make_sure_can_edit!
-
-    set_up_herbarium_for_edit
-    respond_to do |format|
-      format.turbo_stream { render_modal_herbarium_form }
-      format.html do
-        render(Views::Controllers::Herbaria::Edit.new(
-                 herbarium: @herbarium, user: @user, top_users: @top_users
-               ))
-      end
-    end
-  end
+  # ---------- New/Edit form helpers ----------------------------------------
 
   def set_up_herbarium_for_edit
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    return unless in_admin_mode?
+    set_top_users_for_reload
+  end
 
-    @top_users = User.top_users_for_herbarium(@herbarium)
+  # Needed both by the initial edit GET and by #update's
+  # validation-failure re-render (reload_form), so it doesn't silently
+  # drop the top-users list the second time around.
+  def set_top_users_for_reload
+    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
   end
 
   def render_modal_herbarium_form
@@ -236,58 +293,17 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     end
   end
 
-  # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
+  # ---------- Update helper -------------------------------------------------
 
-  def create
-    @herbarium = Herbarium.new(herbarium_params)
-    normalize_parameters
-    create_location_object_if_new(@herbarium)
-    try_to_save_location_if_new(@herbarium)
-    return reload_form(:new) unless validate_herbarium! && !@any_errors
-
-    unless @herbarium.save
-      flash_object_errors(@herbarium)
-      return reload_form(:new)
-    end
-    @herbarium.add_curator(@user) if @herbarium.personal_user
-    notify_admins_of_new_herbarium unless @herbarium.personal_user
-    redirect_to_create_location_or_referrer_or_show_location
-  end
-
-  def update
-    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
-    return unless make_sure_can_edit!
-
+  def prepare_herbarium_update
+    set_top_users_for_reload
     @herbarium.attributes = herbarium_params
     normalize_parameters
     create_location_object_if_new(@herbarium)
     try_to_save_location_if_new(@herbarium)
-    return reload_form(:edit) unless validate_herbarium! && !@any_errors
-
-    unless @herbarium.save
-      flash_object_errors(@herbarium)
-      return reload_form(:edit)
-    end
-    redirect_to_create_location_or_referrer_or_show_location
   end
 
-  def destroy
-    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
-
-    if user_can_destroy_herbarium?
-      @herbarium.destroy
-      redirect_to_referrer || redirect_to(herbarium_path(@herbarium.try(&:id)))
-    else
-      flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
-    end
-  end
-
-  ##############################################################################
-
-  private
-
-  include Herbaria::SharedPrivateMethods
+  # ---------- Shared validation / persistence helpers -----------------------
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?(@user)

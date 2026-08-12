@@ -37,7 +37,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
   # below it to collide with), and is the only context whose ids get
   # `lightbox_`-prefixed, since it's the only one where a second live
   # copy can coexist in the DOM.
-  prop :context, Symbol, default: :matrix
+  prop :context, _Union(:matrix, :carousel, :lightbox), default: :matrix
 
   # The root element's own id -- also what a lazy-loading Turbo Frame
   # wrapper (see #4895) must be given so Turbo can find and swap this
@@ -67,7 +67,6 @@ class Components::ImageFragment::VoteInterface < Components::Base
       case @context
       when :matrix, :carousel then "vote-section"
       when :lightbox then "vote-section-lightbox"
-      else "vote-section-inline"
       end,
       "require-user"
     )
@@ -162,6 +161,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
       type: :put,
       variant: :strip,
       icon: (:x if vote.zero?),
+      icon_class: ("small" if vote.zero?),
       name: vote.zero? ? :clear.ti : image_vote_as_short_string(vote),
       class: "image-vote-link",
       target: image_vote_path(image_id: @image.id, value: vote,

@@ -6,15 +6,11 @@
 # gated "Remove" button sits in the top-right.
 module Views::Controllers::SpeciesLists
   class Observation < Views::Base
-    def initialize(observation:, user:, species_list:,
-                   image: false, remove: false)
-      super()
-      @observation = observation
-      @user = user
-      @species_list = species_list
-      @image = image
-      @remove = remove
-    end
+    prop :observation, ::Observation
+    prop :user, ::User
+    prop :species_list, ::SpeciesList
+    prop :image, _Boolean, default: false
+    prop :remove, _Boolean, default: false
 
     def view_template
       Row do

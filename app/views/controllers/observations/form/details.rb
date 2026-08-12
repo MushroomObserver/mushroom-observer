@@ -79,7 +79,10 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_location_autocompleter
     render(@form.field(:place_name).autocompleter(
              type: :location,
-             wrapper_options: { label: location_label },
+             # label_colon: false -- location_label already embeds its
+             # own colon per span (each state's text differs), so the
+             # default auto-appended colon would double up.
+             wrapper_options: { label: location_label, label_colon: false },
              value: @default_place_name || @location&.name,
              hidden_name: :location_id,
              hidden_value: @location&.id,

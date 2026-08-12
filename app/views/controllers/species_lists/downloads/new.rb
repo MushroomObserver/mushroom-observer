@@ -6,14 +6,11 @@
 # (`Views::Controllers::Observations::Downloads::Form`).
 module Views::Controllers::SpeciesLists::Downloads
   class New < Views::FullPageBase
-    def initialize(list:, query:, type:, format:, encoding:)
-      super()
-      @list = list
-      @query = query
-      @type = type
-      @format = format
-      @encoding = encoding
-    end
+    prop :list, ::SpeciesList
+    prop :query, ::Query
+    prop :type, String
+    prop :format, String
+    prop :encoding, String
 
     def view_template
       add_page_title(:species_list_download_title.t)

@@ -7,10 +7,7 @@
 # meta column).
 module Views::Controllers::Projects
   class ListItem < Views::Base
-    def initialize(project:)
-      super()
-      @project = project
-    end
+    prop :project, ::Project
 
     def view_template
       div(class: "text-larger") do

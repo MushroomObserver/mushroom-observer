@@ -100,12 +100,12 @@ module Views::Controllers::Locations
       location_name = obs[:where]
       list.item do
         Link(type: :location, where: location_name, count: count)
-        Link(type: :icon,
-             content: :list_place_names_merge.l,
-             path: matching_locations_for_observations_path(
+        Link(type: :get,
+             name: :list_place_names_merge.l,
+             target: matching_locations_for_observations_path(
                where: location_name
              ),
-             icon: :merge, show_text: false)
+             icon: :merge, label: false)
       end
     end
   end

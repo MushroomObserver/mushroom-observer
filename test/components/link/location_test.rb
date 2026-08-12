@@ -34,8 +34,9 @@ class LocationLinkTest < ComponentTestCase
 
     location_href = routes.location_path(id: burbank.id)
     # A standalone icon link, distinct from the label's own anchor --
-    # same href, but carrying the globe glyph + tooltip.
-    assert_html(html, "a[href='#{location_href}'] .glyphicon-globe")
+    # same href, but carrying the map glyph + tooltip.
+    assert_html(html,
+                "a[href='#{location_href}'] svg.mo-icon-map")
     assert_html(html, "a[data-title='#{:click_for_map.l}']")
   end
 

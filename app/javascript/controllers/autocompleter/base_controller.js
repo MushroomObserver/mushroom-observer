@@ -917,10 +917,6 @@ export default class BaseAutocompleterController extends Controller {
       if (this.hasKeepBtnTarget) {
         this.keepBtnTarget.classList.remove("d-none");
       }
-      // Directly show indicator as backup to CSS cascade
-      if (this.hasHasIdIndicatorTarget) {
-        this.hasIdIndicatorTarget.style.display = 'inline-block';
-      }
     } else {
       this.wrapTarget.classList.remove('has-id');
       if (this.inputTarget.value &&
@@ -929,10 +925,6 @@ export default class BaseAutocompleterController extends Controller {
       }
       if (this.hasKeepBtnTarget) {
         this.keepBtnTarget.classList.add("d-none");
-      }
-      // Directly hide indicator as backup to CSS cascade
-      if (this.hasHasIdIndicatorTarget) {
-        this.hasIdIndicatorTarget.style.display = 'none';
       }
     }
     if (this.hasMapWrapTarget) {

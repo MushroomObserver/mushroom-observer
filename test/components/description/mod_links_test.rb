@@ -11,7 +11,7 @@ class DescriptionModLinksTest < ComponentTestCase
     # No user → no writer → no admin → Clone is the only icon that
     # always shows (state-agnostic), so the strip renders just the
     # Clone icon (no edit, no destroy, no admin moves).
-    assert_html(html, ".icon-link.clone_name_description_link")
+    assert_html(html, ".stateful-link.clone_name_description_link")
     assert_no_html(html, ".edit_name_description_link_#{desc.id}")
     assert_no_html(html, ".move_this_description_name_description_link")
   end

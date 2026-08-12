@@ -45,7 +45,7 @@ module Views::Controllers::SpeciesLists
         id: @species_list.id
       )
       assert_html(html, "a[href='#{path}']")
-      assert_html(html, "a span.glyphicon-download-alt")
+      assert_html(html, "a svg.mo-icon-download")
     end
 
     def test_renders_projects_when_present

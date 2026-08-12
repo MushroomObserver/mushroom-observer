@@ -8,9 +8,7 @@ module Views::Controllers::Locations
       prop :location, ::Location
 
       def view_template
-        render(
-          ::Components::Panel.new(panel_id: "location_coordinates")
-        ) do |panel|
+        Panel(panel_id: "location_coordinates") do |panel|
           panel.with_heading { :coordinates.ti }
           links = heading_links
           panel.with_heading_links { trusted_html(links) } if links.present?
@@ -54,7 +52,7 @@ module Views::Controllers::Locations
         title, path, opts = ::Tab::Location::ReverseOrder.new(
           location: @location
         ).to_a
-        Link(type: :icon, content: title, path: add_q_param(path), **opts)
+        Link(type: :get, name: title, target: add_q_param(path), **opts)
       end
 
       def render_body
@@ -120,9 +118,9 @@ module Views::Controllers::Locations
 
       def render_footer
         Link(
-          type: :icon,
+          type: :get,
           tab: ::Tab::Location::ObservationsAt.new(location: @location),
-          show_text: true
+          label: true
         )
       end
     end
