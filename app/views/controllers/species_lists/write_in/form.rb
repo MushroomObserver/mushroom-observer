@@ -26,31 +26,30 @@ module Views::Controllers::SpeciesLists::WriteIn
   class Form < ::Components::ApplicationForm
     register_value_helper :strip_tags
 
-    def initialize(species_list, user:, button:, **state)
-      @user = user
-      @button = button
-      extract_state(state)
+    prop :user, ::User
+    prop :button, Symbol
+    prop :new_names, _Nilable(_Array(String)), default: nil
+    prop :deprecated_names, _Nilable(_Array(::Name)), default: nil
+    prop :multiple_names, _Nilable(_Array(_Tuple(::Name, _Array(::Name)))),
+         default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
+    prop :list_members, _Nilable(String), default: nil
+    prop :place_name, _Nilable(String), default: nil
+    prop :member_vote, _Union(Integer, String)
+    prop :member_notes, Hash
+    prop :member_notes_parts, _Array(String)
+    prop :member_lat, _Nilable(String), default: nil
+    prop :member_lng, _Nilable(String), default: nil
+    prop :member_alt, _Nilable(String), default: nil
+    prop :member_is_collection_location, _Boolean
+    prop :member_specimen, _Boolean
+
+    def initialize(species_list, **attrs)
       super(species_list,
             id: "species_list_write_in_form",
-            method: :post)
-    end
-
-    # State keyword args — defaults are merged in once and assigned
-    # by name. Each key in `STATE_DEFAULTS` becomes an instance
-    # variable on the form. Keeps the per-method ABC size manageable
-    # (14 ivars otherwise busts `Metrics/AbcSize`).
-    STATE_DEFAULTS = {
-      new_names: [], deprecated_names: [], multiple_names: nil,
-      dubious_where_reasons: [], list_members: nil, place_name: nil,
-      member_vote: nil, member_notes: {}, member_notes_parts: [],
-      member_lat: nil, member_lng: nil, member_alt: nil,
-      member_is_collection_location: nil, member_specimen: nil
-    }.freeze
-
-    def extract_state(state)
-      STATE_DEFAULTS.merge(state).each do |key, value|
-        instance_variable_set(:"@#{key}", value)
-      end
+            method: :post,
+            **attrs)
     end
 
     def form_action
