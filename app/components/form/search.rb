@@ -35,7 +35,6 @@ class Components::Form::Search < Components::ApplicationForm
   # non-local render (nav-dropdown, embedded via Turbo swap) shows
   # both.
   prop :search_controller, _Interface(:search_type)
-  prop :form_action_url, _Nilable(String), default: nil
 
   def view_template
     render_header unless @local
@@ -52,8 +51,13 @@ class Components::Form::Search < Components::ApplicationForm
     form(action: form_action, method: :post, **form_attributes, &block)
   end
 
+  # Every search controller nests under `namespace :<search_type> do
+  # resource :search, only: [:new, :create] end`, so this is always
+  # `/<search_type>/search` — no need for `url_for`, which also
+  # sidesteps needing a real Rails request/routing context (tests
+  # construct `search_controller` as a bare, un-rendered instance).
   def form_action
-    @form_action_url || url_for(action: :create)
+    "/#{search_type}/search"
   end
 
   def form_attributes
@@ -461,12 +465,7 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   def clear_url
-    if @form_action_url
-      # Derive clear URL from action URL (replace /search with /search/new)
-      "#{@form_action_url.sub(%r{/search$}, "/search/new")}?clear=true"
-    else
-      url_for(action: :new, clear: true)
-    end
+    "/#{search_type}/search/new?clear=true"
   end
 end
 # rubocop:enable Metrics/ClassLength
