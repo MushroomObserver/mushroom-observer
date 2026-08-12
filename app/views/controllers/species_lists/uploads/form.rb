@@ -5,6 +5,8 @@ module Views::Controllers::SpeciesLists::Uploads
   # `SpeciesLists::UploadsController#create` under the
   # `species_list[file]` param namespace.
   class Form < ::Components::ApplicationForm
+    prop :model, ::SpeciesList, :positional
+
     def initialize(species_list, **attrs)
       super(species_list, multipart: true, **attrs)
     end
