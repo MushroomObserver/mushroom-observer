@@ -13,7 +13,12 @@ module Views::Controllers::SpeciesLists
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash)))
     prop :submitted_project_ids, _Nilable(_Array(String))
     prop :user, ::User
-    prop :clone_id, _Nilable(String), default: nil
+    # Comes from `params[:clone]` (always a String, or absent) --
+    # coerced so a non-numeric value fails loudly here instead of
+    # silently round-tripping into SpeciesList.safe_find later.
+    prop :clone_id, _Nilable(Integer), default: nil do |value|
+      value && Integer(value)
+    end
 
     def view_template
       add_new_title(:create_object, :species_list)

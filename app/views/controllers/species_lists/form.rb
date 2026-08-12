@@ -28,7 +28,7 @@ module Views::Controllers::SpeciesLists
     end
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
-    prop :clone_id, _Nilable(String), default: nil
+    prop :clone_id, _Nilable(Integer), default: nil
     # Checkedness for project rows defaults to `model.project_ids`.
     # On a failure-reload the controller passes
     # `submitted_project_ids:` (the user's just-submitted array) —
