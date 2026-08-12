@@ -4,12 +4,11 @@
 # `Names::Synonyms::ApproveController#new`.
 module Views::Controllers::Names::Synonyms::Approve
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, approved_names: nil, user: nil, **)
-      @name = name
-      @approved_names = approved_names
-      @user = user
-      super(model, **)
+    prop :name, ::Name
+    prop :approved_names, _Array(::Name), default: -> { [] } do |value|
+      value || []
     end
+    prop :user, _Nilable(::User), default: nil
 
     def view_template
       submit(:approve.ti, center: true)
