@@ -75,7 +75,7 @@ module Tab::CollectionNumber
         collection_number: @collection_number
       )
 
-      assert_equal(:delete_collection_number.l, tab.title)
+      assert_equal(:destroy_object.t(type: :collection_number), tab.title)
       assert_equal(@collection_number, tab.path)
       assert_equal(:destroy, tab.html_options[:button])
       assert_equal(@collection_number, tab.model)
