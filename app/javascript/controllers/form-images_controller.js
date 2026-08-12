@@ -49,6 +49,11 @@ export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
     "imageGpsMap", "goodImageIds"]
 
+  // How long submitWhenExifReady polls before giving up and submitting
+  // anyway (30 * 100ms = 3s). See submitWhenExifReady for why this is
+  // bounded rather than an unbounded wait.
+  static MAX_EXIF_WAIT_ATTEMPTS = 30
+
   initialize() {
   }
 
@@ -151,14 +156,22 @@ export default class extends Controller {
   // Callback for form-exif event "populated", fired from the carousel-item
   itemExifPopulated(event) {
     const _item = this.findFileStoreItem(event.target);
-    _item.exif_populated = true;
+    // The item may already be gone (user removed it, or EXIF finished
+    // after `fileStore.items` drained past it during upload) -- `index`
+    // is kept in sync with removals, so a miss here means "no longer
+    // relevant," not a bug.
+    if (_item) _item.exif_populated = true;
   }
 
+  // Checks `index`, not the upload-queue `items` array: `items` is
+  // drained via `.shift()` as each image uploads (see `uploadAll`/
+  // `onUploadedCallback`), so by the time every image has uploaded it's
+  // always empty -- `index` is the only place a full, still-accurate
+  // "every item added" list survives to this point.
   areAllItemsExifPopulated() {
-    this.fileStore.items.forEach((item) => {
-      if (!item.exif_populated) return false;
-    });
-    return true;
+    return Object.values(this.fileStore.index).every(
+      (item) => item.exif_populated
+    );
   }
 
   addFiles(files) {
@@ -170,6 +183,7 @@ export default class extends Controller {
       this.loadAndDisplayItem(_item, i);
 
       this.fileStore.items.push(_item)
+      this.fileStore.index[_item.uuid] = _item
     }
   }
 
@@ -180,6 +194,7 @@ export default class extends Controller {
       this.loadAndDisplayItem(_item, 0);
 
       this.fileStore.items.push(_item);
+      this.fileStore.index[_item.uuid] = _item
     }
   }
 
@@ -217,8 +232,7 @@ export default class extends Controller {
       this.uploadItem(_firstUpload);
     } else {
       // no images to upload, submit form
-      this.block_form_submission = false;
-      this.form.submit();
+      this.submitWhenExifReady();
     }
 
     return false;
@@ -240,11 +254,44 @@ export default class extends Controller {
       this.uploadItem(_nextInLine);
     // now the form will be submitted without hitting the uploads.
     else {
-      this.block_form_submission = false;
       this.submit_buttons.forEach((element) => {
         element.value = this.localized_text.creating_observation_text;
       });
+      this.submitWhenExifReady();
+    }
+  }
+
+  // EXIF extraction (form-exif_controller.js) runs asynchronously per
+  // image, in parallel with the upload queue -- nothing otherwise
+  // guarantees it's finished by the time every image has uploaded, so
+  // GPS/date transferred from a photo's EXIF data could lose the race
+  // and never make it into the submitted observation fields. Poll
+  // briefly rather than submitting mid-extraction.
+  //
+  // Bounded: an image with no EXIF data, or EXIF ExifReader can't
+  // parse, never dispatches "populated" (form-exif_controller.js
+  // swallows that error), so `exif_populated` would otherwise stay
+  // false forever and this would poll indefinitely, permanently
+  // blocking submission. MAX_EXIF_WAIT_ATTEMPTS caps the wait at 3s;
+  // past that it submits anyway, no worse than before this existed.
+  submitWhenExifReady(attempt = 0) {
+    if (this.areAllItemsExifPopulated() ||
+      attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
+      this.block_form_submission = false;
+      // form.submit(), not requestSubmit(): when there are no images to
+      // upload, this call happens synchronously inside the ORIGINAL
+      // submit event's own onsubmit handler (see set_bindings), before
+      // that handler has returned. requestSubmit() re-enters the
+      // browser's submission algorithm while it's still marked as
+      // "firing submission events" for the outer submit -- the spec's
+      // reentrancy guard silently no-ops it (no error, no event, no
+      // request), and then the outer handler's `return false` cancels
+      // the original submission too, so nothing submits at all
+      // (verified: no network request, no thrown error). submit()
+      // bypasses that guard entirely by skipping the event pipeline.
       this.form.submit();
+    } else {
+      setTimeout(() => this.submitWhenExifReady(attempt + 1), 100);
     }
   }
 
@@ -452,9 +499,10 @@ export default class extends Controller {
     const _identifiable = element.closest(".carousel-item") ??
       element.closest(".carousel-indicator");
 
-    return this.fileStore.items.find(
-      (item) => item.uuid === _identifiable?.dataset?.imageUuid
-    );
+    // `index` (keyed by uuid), not `items` -- `items` is a draining
+    // upload queue and may no longer hold this item by the time this
+    // is called (e.g. EXIF extraction finishing after upload).
+    return this.fileStore.index[_identifiable?.dataset?.imageUuid];
   }
 
   // This gives the img src a base64 string, or the url.
@@ -596,6 +644,7 @@ export default class extends Controller {
     const idx = this.fileStore.items.indexOf(item);
     if (idx > -1)
       this.fileStore.items.splice(idx, 1);
+    delete this.fileStore.index[item.uuid];
 
     // Re-sort the carousel
     this.sortCarousel();
