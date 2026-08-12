@@ -28,13 +28,15 @@ module Views::Controllers::Observations::Namings::Votes
     # @param vote [::Vote, nil] the current user's existing vote, if
     #   any; nil means this is a fresh vote → POST instead of PATCH
     prop :vote, _Nilable(::Vote), default: nil
-    # @param context [String] arbitrary marker submitted alongside
-    #   the vote — used by the controller to decide which Turbo
-    #   Stream response to send back. Either `"namings_table"` (for
-    #   the show page panel) or `"matrix_box"` (for matrix box UI).
-    prop :context, String, default: "blank"
+    # @param context [String] marker submitted alongside the vote --
+    #   used by the controller's `case params[:context]` to decide
+    #   which Turbo Stream response to send back. No `else` branch
+    #   there, so a value other than these two silently renders
+    #   nothing; both real callers (Show::Namings::Row, Matrix::Box)
+    #   always supply one explicitly.
+    prop :context, _Union("namings_table", "matrix_box")
 
-    def initialize(naming:, user:, vote: nil, context: "blank")
+    def initialize(naming:, user:, context:, vote: nil)
       # Pass the actual Vote (existing or fresh) so Superform picks
       # the right HTTP method (PATCH vs POST) and resolves the
       # `vote[value]` field name from the model.
