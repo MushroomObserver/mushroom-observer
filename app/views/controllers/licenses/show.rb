@@ -10,7 +10,7 @@ module Views::Controllers::Licenses
       add_page_title(show_title)
       add_context_nav(::Tab::License::ShowActions.new(license: @license))
 
-      div { render_fields }
+      ContentPadded { render_fields }
     end
 
     private
