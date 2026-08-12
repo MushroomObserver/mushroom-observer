@@ -5,15 +5,12 @@ module Views::Controllers::Admin::Emails::MergeRequests
   # the admin/emails/merge_requests controller's `new.erb`. Allows
   # users to request merging two objects (e.g., names or locations).
   class Form < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(model, old_obj:, new_obj:, model_class:, user: nil, **)
-      @old_obj = old_obj
-      @new_obj = new_obj
-      @model_class = model_class
-      @user = user
-      super(model, **)
-    end
-    # rubocop:enable Metrics/ParameterLists
+    prop :old_obj, _Union(::Herbarium, ::Location, ::Name)
+    prop :new_obj, _Union(::Herbarium, ::Location, ::Name)
+    # The class itself (Herbarium/Location/Name), not an instance --
+    # see MergeRequestsController#validate_merge_model!.
+    prop :model_class, Class
+    prop :user, _Nilable(::User), default: nil
 
     def view_template
       super do

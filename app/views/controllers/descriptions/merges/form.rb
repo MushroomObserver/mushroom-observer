@@ -6,16 +6,24 @@ module Views::Controllers::Descriptions::Merges
   # lives in the shared `descriptions/` namespace rather than under
   # either parent controller.
   class Form < ::Components::ApplicationForm
+    prop :description, ::Description
+    prop :user, ::User
+
     def initialize(description, user:)
-      @description = description
-      @user = user
+      # Computed from the local `description`/`user` params, not
+      # `@description`/`merges`/`default_checked?` (which read the
+      # `@description` prop) -- prop assignment hasn't happened yet
+      # at this point in construction.
+      other_descriptions = description.parent.descriptions - [description]
       form_object = FormObject::DescriptionMoveOrMerge.new
-      form_object.target = default_target_id if default_checked?
+      form_object.target = other_descriptions.first.id if
+        other_descriptions.length == 1
       form_object.delete = description.is_admin?(user)
       # Keep the explicit DOM id — tests, integration specs, and the
       # auto-derived `description_merge_form` would all rename to a
       # less-recognizable string.
-      super(form_object, id: "merge_descriptions_form")
+      super(form_object, description: description, user: user,
+                         id: "merge_descriptions_form")
     end
 
     def view_template
