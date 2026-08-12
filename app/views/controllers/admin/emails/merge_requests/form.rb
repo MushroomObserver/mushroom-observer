@@ -8,8 +8,13 @@ module Views::Controllers::Admin::Emails::MergeRequests
     prop :old_obj, _Union(::Herbarium, ::Location, ::Name)
     prop :new_obj, _Union(::Herbarium, ::Location, ::Name)
     # The class itself (Herbarium/Location/Name), not an instance --
-    # see MergeRequestsController#validate_merge_model!.
-    prop :model_class, Class
+    # `_SameObject` matches only that exact object, not "is_a?" the
+    # class, so this rejects an instance the way a bare
+    # `_Union(Herbarium, Location, Name)` would not. See
+    # MergeRequestsController#validate_merge_model!.
+    prop :model_class,
+         _Union(_SameObject(Herbarium), _SameObject(Location),
+                _SameObject(Name))
     prop :user, ::User
 
     def view_template
