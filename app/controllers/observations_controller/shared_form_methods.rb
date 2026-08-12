@@ -134,7 +134,7 @@ module ObservationsController::SharedFormMethods
     return unless herb_params
 
     @herbarium_name   = herb_params[:herbarium_name]
-    @herbarium_id     = herb_params[:herbarium_id]
+    @herbarium_id     = safe_integer(herb_params[:herbarium_id])
     @accession_number = herb_params[:accession_number]
   end
 

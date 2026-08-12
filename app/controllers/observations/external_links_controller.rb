@@ -90,7 +90,7 @@ module Observations
       # incoming `?back=<url>` survives a validation-error reload;
       # blank/absent is the common case and every consumer already
       # guards on `@back.present?` before using it.
-      @back = params[:back]
+      @back = params.permit(:back)[:back]
     end
 
     # The link's current site must stay selectable even if the user

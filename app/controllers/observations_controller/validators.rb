@@ -66,13 +66,21 @@ module ObservationsController::Validators
     params.dig(:observation, :naming, *keys) || params.dig(:naming, *keys)
   end
 
-  # Helper methods for nested form params (Superform nests under :observation)
+  # Helper methods for nested form params (Superform nests under
+  # :observation). `.permit` guarantees each key is a scalar (String)
+  # or absent -- an automated scanner sending a nested hash for one of
+  # these keys (e.g. `?observation[herbarium_record][name][x]=1`)
+  # gets filtered out instead of reaching a Literal `String`/`Integer`
+  # prop as the wrong Ruby type.
   def collection_number_params
-    params.dig(:observation, :collection_number) || params[:collection_number]
+    (params.dig(:observation, :collection_number) ||
+     params[:collection_number])&.permit(:name, :number)
   end
 
   def herbarium_record_params
-    params.dig(:observation, :herbarium_record) || params[:herbarium_record]
+    (params.dig(:observation, :herbarium_record) ||
+     params[:herbarium_record])&.permit(:herbarium_name, :herbarium_id,
+                                        :accession_number)
   end
 
   # Submitted project_ids array (post-Phlex shape:
