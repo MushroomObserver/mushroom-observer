@@ -5,15 +5,11 @@
 # shared `Form` Phlex class with `button: :update`.
 module Views::Controllers::SpeciesLists
   class Edit < Views::FullPageBase
-    def initialize(species_list:, projects:, dubious_where_reasons:,
-                   submitted_project_ids:, user:)
-      super()
-      @species_list = species_list
-      @projects = projects
-      @dubious_where_reasons = dubious_where_reasons
-      @submitted_project_ids = submitted_project_ids
-      @user = user
-    end
+    prop :species_list, ::SpeciesList
+    prop :projects, _Array(::Project)
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash)))
+    prop :submitted_project_ids, _Nilable(_Array(String))
+    prop :user, ::User
 
     def view_template
       add_edit_title(@species_list)

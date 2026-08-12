@@ -8,24 +8,27 @@
 # which needs a plain styled link (not a button) with icon support.
 # All other callers should use `Components::Button::ModalToggle` instead.
 class Components::Link::Modal < Components::Link
+  prop :modal_id, String
+  prop :name, String
+  prop :path, String
+  prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
+  prop :icon_class, _Nilable(String), default: nil
+  prop :label, _Nilable(_Boolean), default: nil
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
   def initialize(modal_id:, name:, target:, **opts)
-    @modal_id   = modal_id
-    @name       = name
-    @path       = target
-    @icon       = opts.delete(:icon)
-    @icon_class = opts.delete(:icon_class)
-    @show_text  = opts.delete(:show_text)
-    button      = opts.delete(:button)
-    @html_attrs = opts
-    validate_no_btn_classes!(@html_attrs[:class])
-    super(button: button)
+    icon       = opts.delete(:icon)
+    icon_class = opts.delete(:icon_class)
+    label      = opts.delete(:label)
+    button     = opts.delete(:button)
+    validate_no_btn_classes!(opts[:class])
+    super(modal_id: modal_id, name: name, path: target, icon: icon,
+          icon_class: icon_class, label: label, button: button, **opts)
   end
 
   def view_template
     if @icon
-      render(Components::Link::Icon.new(
-               content: @name, path: @path, **icon_link_args
-             ))
+      Link(type: :get, name: @name, target: @path, **icon_link_args)
     else
       link_to(@name, @path, **plain_link_args)
     end
@@ -35,19 +38,19 @@ class Components::Link::Modal < Components::Link
 
   def plain_link_args
     { class: merged_class }.
-      merge(@html_attrs.except(:class)).
+      merge(@attributes.except(:class)).
       deep_merge(data: modal_data)
   end
 
   def icon_link_args
-    { icon: @icon, icon_class: @icon_class, show_text: @show_text,
+    { icon: @icon, icon_class: @icon_class, label: @label,
       class: merged_class }.
-      merge(@html_attrs.except(:class)).
+      merge(@attributes.except(:class)).
       deep_merge(data: modal_data)
   end
 
   def merged_class
-    class_names(btn_styling, @html_attrs[:class])
+    class_names(btn_styling, @attributes[:class])
   end
 
   def modal_data

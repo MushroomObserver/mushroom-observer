@@ -61,7 +61,7 @@ class Views::Layouts::TopNav
 
       assert_html(html, "form[action='#{routes.article_path(@article)}']")
       assert_html(html, "input[name='_method'][value='delete']")
-      assert_no_html(html, ".glyphicon-remove-circle")
+      assert_no_html(html, "svg.mo-icon")
       assert_no_html(html, ".btn.btn-outline-default")
     end
 

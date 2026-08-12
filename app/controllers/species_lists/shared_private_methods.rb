@@ -84,7 +84,7 @@ module SpeciesLists
       names = sorter.multiple_names.uniq.sort_by(&:search_name)
 
       names.map do |name|
-        [name, name.other_authors.includes([:observations])]
+        [name, name.other_authors.includes([:observations]).to_a]
       end
     end
 

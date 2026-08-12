@@ -6,16 +6,12 @@
 #
 module Views::Controllers::Projects::Locations
   class Tables < Views::Base
-    def initialize(project:, grouped_data:,
-                   ungrouped_locations:, obs_counts:,
-                   user: nil)
-      super()
-      @project = project
-      @grouped_data = grouped_data
-      @ungrouped_locations = ungrouped_locations
-      @obs_counts = obs_counts
-      @user = user
-    end
+    prop :project, ::Project
+    # Each element: { target: ::Location, sub_locations: Array(::Location) }
+    prop :grouped_data, _Array(Hash)
+    prop :ungrouped_locations, _Array(::Location)
+    prop :obs_counts, _Hash(Integer, Integer)
+    prop :user, _Nilable(::User), default: nil
 
     def view_template
       div(id: "locations_table") do

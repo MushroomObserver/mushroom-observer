@@ -2,13 +2,59 @@
 // autocompletion
 // --------------------------------------------------
 
+// Label-row icons (has-id-indicator, find/keep/edit/create) read too
+// small at the default 1.12em next to the bold field label beside
+// them. Vertical alignment is the label row's job now (FieldLabelRow's
+// d-flex align-items-center), not a per-icon `top:` guess.
+// `.has-id-indicator` is a wrapping span, not the icon itself (a bare
+// svg can't take padding -- see autocompleter_field.rb), so this is
+// a descendant selector like the other three, and its 2-class
+// specificity beats the base `.mo-icon` rule in _icons.scss on its
+// own merits, regardless of _icons.scss being @import-ed after this
+// file in mushroom_observer.scss.
+.has-id-indicator .mo-icon,
+.find-btn .mo-icon,
+.keep-btn .mo-icon,
+.edit-btn .mo-icon,
+.create-button .mo-icon {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+// Bootstrap's `label { margin-bottom: 5px; }` (bootstrap-sass
+// _forms.scss, not a variable -- it's a hardcoded literal there too)
+// sits on only one side of the label's margin box, so it throws off
+// FieldLabelRow's align-items-center: centering the label's margin
+// box against between-content that carries no margin of its own
+// (the has-id-indicator/find/keep/edit icons) shifts the label text
+// off the icons' visual center. Zero it here and move the same
+// bottom spacing onto the whole label row instead (see
+// FieldLabelRow#render_label_with_help), so only the *source* of the
+// spacing changes, not the total spacing below the row.
+.autocompleter label {
+  margin-bottom: 0;
+}
+
+.autocompleter-label-row {
+  margin-bottom: 5px;
+}
+
 // autocompleter state - do we have a match?
 .has-id-indicator {
   display: none;
 }
 .has-id {
   .has-id-indicator {
-    display: inline-block;
+    // inline-flex + align-items: center, not inline-block -- the
+    // icon inside is shorter than the span's own content-driven
+    // height (an inline-block SVG taller than the surrounding text's
+    // line-height expands its line box), so even a parent row with
+    // its own align-items: center has nothing left to center against
+    // once this span already fills the row's full height. Centering
+    // the icon within its OWN wrapper first fixes that regardless of
+    // what the row around it does.
+    display: inline-flex;
+    align-items: center;
   }
 }
 

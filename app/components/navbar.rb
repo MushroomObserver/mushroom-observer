@@ -46,7 +46,7 @@ module Components
   # so callers compose the constants with `class_names` instead.
   #
   # `LINK_CLASS`/`LINK_CLASSES` intentionally do NOT include
-  # `btn`/`btn-lg` — `Components::Link::Icon` (the shape every current
+  # `btn`/`btn-lg` — `Components::Link::Get` (the shape every current
   # caller renders through) accepts `button:`/`size:` kwargs directly,
   # so callers pass `button: :link, size: :lg` instead of baking
   # Bootstrap button classes into a raw string constant. `LINK_CLASS`

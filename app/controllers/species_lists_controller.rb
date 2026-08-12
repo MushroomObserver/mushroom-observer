@@ -213,7 +213,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     # Matches for the list-search autocompleter
     @object_names = @species_list.observations.joins(:name).
                     select(Name[:text_name], Name[:id]).distinct.
-                    order(Name[:text_name])
+                    order(Name[:text_name]).to_a
   end
 
   ##############################################################################

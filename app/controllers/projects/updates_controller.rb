@@ -93,7 +93,7 @@ module Projects
       scope.
         offset(pagination.from).
         limit(pagination.num_per_page).
-        includes(Observation.matrix_box_includes)
+        includes(Observation.matrix_box_includes).to_a
     end
 
     def require_admin

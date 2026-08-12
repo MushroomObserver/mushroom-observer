@@ -45,6 +45,25 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # `.dropdown-item` belongs on the <form>, not the inner <button> —
+  # `button_to`'s html_options land on the button, so a class meant
+  # for the row's own padding/hover treatment has to go through
+  # `form:` instead. Regression guard for the form/button hover-fill
+  # split (the form had the row's padding, only the button had the
+  # hover fill, so hovering the padded margin around the button text
+  # did nothing).
+  def test_post_tuple_dropdown_item_on_form_not_button
+    html = render_dropdown_with_button(button: :post)
+
+    # form.dropdown-item alone isn't enough -- Rails' `button_to` only
+    # supplies its default "button_to" form class when no `form:
+    # class:` is given at all, so passing "dropdown-item" without
+    # "button_to" silently drops "button_to" from the form (breaking
+    # _form_elements.scss's browser-chrome-reset selector).
+    assert_html(html, "li form.button_to.dropdown-item")
+    assert_no_html(html, "button.dropdown-item")
+  end
+
   def test_patch_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :patch)
 

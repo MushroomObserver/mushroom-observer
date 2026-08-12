@@ -17,6 +17,13 @@
 # consistent regardless of login state.
 module Views::Layouts
   class Header::InterestIcons < Views::Base
+    # Bootstrap's default tooltip `container: false` inserts the
+    # floating tooltip as the trigger's next DOM sibling -- trapped
+    # inside the tight `<li>`/`.btn` wrapper here, it gets clipped and
+    # mis-stacked. Anchoring it to the whole `<ul>` instead gives it
+    # room (same fix as `ImageFragment::VoteInterface#tooltip_container`).
+    TOOLTIP_CONTAINER = ".interest-eyes"
+
     prop :user, _Nilable(::User), default: nil
     prop :object, ::AbstractModel
 
@@ -42,50 +49,112 @@ module Views::Layouts
 
     def render_watching
       icon_li(:big, "watch", :interest_watching)
-      link_li(0, "halfopen", :interest_default_help)
-      link_li(-1, "ignore", :interest_ignore_help)
+      destroy_li("halfopen", :interest_default_help)
+      update_li(-1, "ignore", :interest_ignore_help)
     end
 
     def render_ignoring
       icon_li(:big, "ignore", :interest_ignoring)
-      link_li(1, "watch", :interest_watch_help)
-      link_li(0, "halfopen", :interest_default_help)
+      update_li(1, "watch", :interest_watch_help)
+      destroy_li("halfopen", :interest_default_help)
     end
 
     def render_default
-      link_li(1, "watch", :interest_watch_help)
-      link_li(-1, "ignore", :interest_ignore_help)
+      create_li(1, "watch", :interest_watch_help)
+      create_li(-1, "ignore", :interest_ignore_help)
     end
 
+    # Inert state indicator, not a control -- `tag: :span` + `.disabled`
+    # (not `Button(type: :post/...)`, which are real form-submitting
+    # controls) gives it a `.btn` box like the two real buttons beside
+    # it, so it doesn't render as a bare, oversized, unpadded image
+    # alongside them. `variant: :outline` (bordered), not `:link`
+    # (borderless, same as the two real buttons) -- the border is what
+    # visually marks this one as "your current state", not clickable.
     def icon_li(size, kind, alt_key)
-      li { interest_icon(size, kind, alt_key) }
+      li do
+        Button(tag: :span, variant: :outline, class: "disabled") do
+          interest_icon(size, kind, alt_key)
+        end
+      end
     end
 
-    def link_li(state, kind, alt_key)
-      li { interest_link(state:) { interest_icon(:small, kind, alt_key) } }
+    # No existing `Interest` row -- `interests_path` has no `:id`
+    # segment, so both `id:` and `state:` ride as form params.
+    def create_li(state, kind, alt_key)
+      params = { type: @object.class.name, id: @object.id, state: }
+      li { interest_button(:post, interests_path, kind:, alt_key:, params:) }
     end
 
-    def interest_link(state:, &block)
-      # `data-turbo-stream="true"` as a literal string (not boolean)
-      # so Phlex emits `data-turbo-stream="true"` rather than the
-      # bare-attribute / empty-value form a `true` boolean would
-      # produce. Matches what Rails' `link_to(..., data: { turbo_stream:
-      # true })` rendered before the conversion.
-      a(href: set_interest_path(id: @object.id,
-                                type: @object.class.name,
-                                state: state),
-        data: { turbo_stream: "true" }, &block)
+    # An `Interest` row already exists and is flipping to the other
+    # non-default state -- `:id` in `interest_path` is the WATCHED
+    # OBJECT's id, matching what `InterestsController#update` reads
+    # from `params[:id]` (not the `Interest` row's own id).
+    def update_li(state, kind, alt_key)
+      params = { type: @object.class.name, state: }
+      li do
+        interest_button(:patch, interest_path(@object.id), kind:, alt_key:,
+                                                           params:)
+      end
     end
 
-    # `size` is `:big` (state-indicator icon, no link wrapper) or
-    # `:small` (clickable variants inside an `<a>`). The filename is
+    # Returning to the default (no-opinion) state destroys the
+    # `Interest` row outright -- no `state:` param needed, the DELETE
+    # verb already says what's happening.
+    def destroy_li(kind, alt_key)
+      params = { type: @object.class.name }
+      li do
+        interest_button(:delete, interest_path(@object.id), kind:, alt_key:,
+                                                            params:)
+      end
+    end
+
+    # `variant: :link` (Bootstrap's own `.btn-link` reset), not
+    # `:strip` -- a fully bare `<button>` falls back to raw browser/OS
+    # form-control chrome (shows up as a blue background in some
+    # browsers) with nothing in MO's CSS to reset it. `.btn-link`
+    # already zeroes background/border/box-shadow.
+    #
+    # `placement: "bottom"` overrides `CRUDBase`'s own hardcoded
+    # `"top"` (deep_merge lets `data:` win) -- the tooltip's the
+    # button's job now, not the icon's (see `interest_icon`).
+    def interest_button(method, path, kind:, alt_key:, params:)
+      Button(type: method, target: path, name: alt_key.l(object: type.l),
+             variant: :link, params:, form: { class: "interest-link" },
+             data: { turbo_stream: "true", placement: "bottom",
+                     tooltip_container: TOOLTIP_CONTAINER }) do
+        interest_icon(:small, kind, alt_key)
+      end
+    end
+
+    # `size` is `:big` (state-indicator icon, no button wrapper -- it
+    # needs its own tooltip) or `:small` (clickable variant inside a
+    # `Button`, which already supplies an equivalent tooltip via
+    # `name:` -- adding a second one on the icon itself doubled up
+    # visibly, one above the button and one below). The filename is
     # `<kind>2.png` for big, `<kind>3.png` for small — matches the
     # asset naming pre-conversion.
+    #
+    # `mo-icon` (see _icons.scss) puts these on the same shared sizing
+    # system as every other icon in the app -- `.interest-eyes
+    # .mo-icon` (_content.scss) sets the actual 1.5em square, matching
+    # #top_nav .top_nav_icon_button .mo-icon's scale, same for the big
+    # indicator and the two small buttons alike. `interest_#{kind}`
+    # (watch/ignore/halfopen) is a stable hook for tests -- asserting
+    # against it instead of the image filename means controller-level
+    # tests don't need to change if this ever moves off .png (e.g. to
+    # the SVG sprite).
     def interest_icon(size, kind, alt_key)
       alt = alt_key.l(object: type.l)
       suffix = size == :big ? "2" : "3"
-      img(src: asset_path("#{kind}#{suffix}.png"),
-          alt: alt, class: "interest_#{size}", title: alt)
+      attrs = { src: asset_path("#{kind}#{suffix}.png"),
+                alt: alt, class: "mo-icon interest_#{kind}" }
+      if size == :big
+        attrs[:title] = alt
+        attrs[:data] = { tooltip_target: "tip", placement: :bottom,
+                         tooltip_container: TOOLTIP_CONTAINER }
+      end
+      img(**attrs)
     end
   end
 end

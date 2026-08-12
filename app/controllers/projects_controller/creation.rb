@@ -85,6 +85,7 @@ module ProjectsController::Creation
     admin_group&.destroy
     user_group&.destroy
     @project = Project.new
+    @project_dates_any = true
     image_ivars
     render_new_form
   end

@@ -247,18 +247,54 @@ module ObservationsController::FieldSlips
   # Using a slip for an open-membership project enrolls the user in it,
   # the way the field slip form has always done — that is what a printed
   # prefix means. The observation then joins the project too, unless it
-  # violates the project's constraints, in which case the slip is being
-  # used as a spare and neither is associated. Mirrors the slip form's
-  # own `assign_project`.
+  # violates the project's constraints, in which case the slip stays
+  # attached but the observation stays out — SAID OUT LOUD, because a
+  # silent skip here looks exactly like the slip workflow failing.
+  # Mirrors the slip form's own `assign_project`.
   def apply_field_slip_project(field_slip)
+    return use_slip_as_spare(field_slip) if use_spare_slip?
+
     project = field_slip.project
     return unless project
 
     join_field_slip_project(project)
     return unless project.member?(@user)
-    return if project.violates_constraints?(@observation)
+
+    if project.violates_constraints?(@observation) &&
+       !force_slip_project?(project)
+      # The slip goes spare rather than asserting a membership its
+      # observation doesn't have (#4932 invariant 2). The review's
+      # reconcile restores both -- via the printed prefix -- once the
+      # observation satisfies the constraints.
+      field_slip.update!(project: nil)
+      flash_warning(:field_slip_project_constraint_violation.t(
+                      code: field_slip.code, title: project.title
+                    ))
+      return
+    end
 
     project.add_observation(@observation)
+  end
+
+  # Invariant 1 (#4932): an admin may add a violating observation.
+  # The form already surfaced the reasons and the admin checked
+  # Ignore -- that is the deliberate act plus the warning.
+  def force_slip_project?(project)
+    params.dig(:observation, :ignore_proj_conflicts) == "1" &&
+      project.is_admin?(@user)
+  end
+
+  # The form's opt-out for a slip used outside its event: the slip
+  # attaches with no project, deliberately, so no warning.
+  def use_spare_slip?
+    params.dig(:observation, :use_spare_slip) == "1"
+  end
+
+  def use_slip_as_spare(field_slip)
+    field_slip.update!(project: nil) if field_slip.project
+    flash_notice(:observation_field_slip_spare_used.t(
+                   code: field_slip.code
+                 ))
   end
 
   # `Occurrence#observation_count_within_limits` is `on: :update` for

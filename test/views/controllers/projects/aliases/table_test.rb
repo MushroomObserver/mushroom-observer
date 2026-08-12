@@ -39,7 +39,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def test_empty_alias_list_renders_just_headers
-      html = render_table(project_aliases: ProjectAlias.none)
+      html = render_table(project_aliases: [])
 
       assert_html(html, "table##{Table::TABLE_ID}")
       assert_html(html, "th", text: :name.ti)
@@ -49,7 +49,7 @@ module Views::Controllers::Projects::Aliases
 
     private
 
-    def render_table(project_aliases: @project.aliases)
+    def render_table(project_aliases: @project.aliases.to_a)
       render(Table.new(project_aliases: project_aliases))
     end
   end

@@ -69,6 +69,19 @@ module Views::Controllers::Observations
       end
     end
 
+    # location_label hand-builds its own per-span colon (each
+    # autocompleter state needs different text before it); without
+    # `label_colon: false` the field helper's auto-append doubled it.
+    def test_location_label_has_a_single_colon
+      user = users(:rolf)
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create)
+
+      assert_html(html, "label span.unconstrained-label", text: "#{:where.ti}:")
+      assert_no_html(html, "label", text: "#{:where.ti}::")
+    end
+
     # --- Field Slip Code ---
 
     def test_new_form_shows_editable_field_slip_code
