@@ -18,31 +18,33 @@
 module Views::Controllers::Observations::Namings::Votes
   class Form < ::Components::ApplicationForm
     # @param naming [::Naming] the naming being voted on
+    prop :naming, ::Naming
     # @param user [::User, nil] the current viewer. Drives the
     #   menu-shape branch — the naming's proposer (or an admin)
     #   defaults to the confidence menu when they already have a
     #   non-zero vote; everyone else stays on the wider opinion
     #   menu. Pass `@user` from the consuming view.
+    prop :user, _Nilable(::User), default: nil
     # @param vote [::Vote, nil] the current user's existing vote, if
     #   any; nil means this is a fresh vote → POST instead of PATCH
+    prop :vote, _Nilable(::Vote), default: nil
     # @param context [String] arbitrary marker submitted alongside
     #   the vote — used by the controller to decide which Turbo
     #   Stream response to send back. Either `"namings_table"` (for
     #   the show page panel) or `"matrix_box"` (for matrix box UI).
+    prop :context, String, default: "blank"
+
     def initialize(naming:, user:, vote: nil, context: "blank")
-      @naming = naming
-      @user = user
-      @vote = vote
-      @context = context
       # Pass the actual Vote (existing or fresh) so Superform picks
       # the right HTTP method (PATCH vs POST) and resolves the
       # `vote[value]` field name from the model.
       super(vote || ::Vote.new,
-            id: "naming_vote_form_#{@naming.id}",
+            naming: naming, user: user, vote: vote, context: context,
+            id: "naming_vote_form_#{naming.id}",
             local: false,
             class: "naming-vote-form d-inline-block " \
                    "float-right float-sm-none",
-            data: form_data)
+            data: form_data(naming))
     end
 
     # Form action: PATCH to a vote when one exists, POST to the
@@ -72,10 +74,10 @@ module Views::Controllers::Observations::Namings::Votes
     # select for change events. `localization:` is read by the JS
     # to pick localized strings for the confirm dialog / inflight
     # state. `naming_id:` lets the JS find sibling rows to refresh.
-    def form_data
+    def form_data(naming)
       {
         controller: "naming-vote",
-        naming_id: @naming.id,
+        naming_id: naming.id,
         localization: form_localizations
       }
     end
