@@ -88,8 +88,13 @@ class LicensesController < AdminController
     add_deprecated(license)
   end
 
+  # `checkbox_field(:deprecated)` in the Phlex form is model-bound, so
+  # its real HTML name is `license[deprecated]` -- not the top-level
+  # `deprecated` this used to read, which meant the checkbox never
+  # actually took effect (every save silently forced `deprecated` to
+  # `false`). Found via a real-form integration test (issue #5052).
   def add_deprecated(license)
-    license.deprecated = (params[:deprecated] == "1")
+    license.deprecated = (params.dig(:license, :deprecated) == "1")
     license
   end
 

@@ -138,8 +138,7 @@ class LicensesControllerTest < FunctionalTestCase
                "Test needs a non-existent License")
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
     params = { license: { display_name: display_name,
-                          url: url },
-               deprecated: "0" }
+                          url: url, deprecated: "0" } }
 
     login("rolf")
     make_admin
@@ -164,8 +163,8 @@ class LicensesControllerTest < FunctionalTestCase
   def test_create_duplicate
     license = licenses(:ccnc30)
     params = { license: { display_name: license.display_name,
-                          url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+                          url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -181,8 +180,8 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_create_missing_attribute
     license = licenses(:ccnc30)
-    params = { license: { display_name: nil, url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+    params = { license: { display_name: nil, url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -199,8 +198,8 @@ class LicensesControllerTest < FunctionalTestCase
   def test_create_save_failure
     license = licenses(:ccnc30)
     params = { license: { display_name: license.display_name,
-                          url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+                          url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -244,8 +243,8 @@ class LicensesControllerTest < FunctionalTestCase
     license = licenses(:ccwiki30)
     params = { id: license.id,
                license: { display_name: "X Special",
-                          url: "https://x.com/explore" },
-               deprecated: "1" }
+                          url: "https://x.com/explore",
+                          deprecated: "1" } }
 
     login("rolf")
     make_admin
@@ -258,15 +257,15 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_equal(params.dig(:license, :display_name), license.display_name)
     assert_equal(params.dig(:license, :url), license.url)
-    assert_equal(params[:deprecated] == "1", license.deprecated)
+    assert_equal(params.dig(:license, :deprecated) == "1", license.deprecated)
   end
 
   def test_update_no_changes
     license = licenses(:ccwiki30)
     params = { id: license.id,
                license: { display_name: license.display_name,
-                          url: license.url },
-               deprecated: license.deprecated ? "1" : "0" }
+                          url: license.url,
+                          deprecated: license.deprecated ? "1" : "0" } }
 
     login("rolf")
     make_admin
@@ -281,8 +280,8 @@ class LicensesControllerTest < FunctionalTestCase
   def test_update_missing_attribute
     license = licenses(:ccnc30)
     params = { id: license.id,
-               license: { display_name: nil, url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+               license: { display_name: nil, url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -298,8 +297,8 @@ class LicensesControllerTest < FunctionalTestCase
     params = { id: license.id,
                license: { display_name: license.display_name,
                           # duplicates another license's attribute
-                          url: licenses(:ccnc25).url },
-               deprecated: (license.deprecated ? "1" : "0") }
+                          url: licenses(:ccnc25).url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
