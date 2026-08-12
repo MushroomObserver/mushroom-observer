@@ -107,6 +107,23 @@ class FieldSlip::AttacherTest < UnitTestCase
     Occurrence.const_set(:MAX_OBSERVATIONS, original)
   end
 
+  # A constraint-violating observation and its slip stay out of the
+  # project together (#4932 invariant 2): the slip goes spare instead
+  # of asserting a membership the observation doesn't have.
+  def test_a_violating_observation_takes_its_slip_out_of_the_project
+    @project.update!(location: locations(:albion))
+
+    assert(@project.violates_constraints?(@obs), "premise")
+
+    result = attach(code: "OPEN-0230")
+    slip = FieldSlip.find_by(code: "OPEN-0230")
+
+    assert_equal(:attached, result)
+    assert_equal(slip, @obs.reload.field_slip)
+    assert_nil(slip.reload.project)
+    assert_not_includes(@project.observations.reload, @obs)
+  end
+
   # An existing slip in a project the user can neither join nor is a
   # member of: attaching would put the observation there against
   # invariant 4 (#4932).

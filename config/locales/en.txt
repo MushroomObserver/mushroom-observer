@@ -1480,6 +1480,7 @@
   observation_field_slip_invalid: 'Invalid field slip code "[code]".'
   observation_field_slip_full: 'Field slip "[code]" already has [max] observations, the maximum allowed.'
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
+  observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   create_observation_field_slip_full: 'Observation created, but field slip "[code]" already has [max] observations, the maximum allowed, so it was not attached.'
@@ -1532,14 +1533,17 @@
   form_observations_original_name: Original Name
 
   form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:see_message_below]+":#project_messages
-  form_observations_projects_out_of_range: This observation violates one or more constraints of these checked project(s)
+  form_observations_projects_out_of_range: This observation violates one or more constraints of these target project(s)
   form_observations_projects_out_of_range_help: "Either:\n- Uncheck the project(s); or\n- Change the observation to align with project requirements"
   form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
   form_observations_projects_ignore_project_constraints: Ignore Project Constraints
+  form_observations_projects_use_spare_slip: Use as Spare Slip
+  form_observations_projects_use_spare_help: "; or\n- Check [:form_observations_projects_use_spare_slip] to attach the field slip to this observation with no project"
   form_observations_projects_kind_date: Out-of-range date
   form_observations_projects_kind_bbox: Out-of-bbox location
   form_observations_projects_kind_target_name: Non-target name
   form_observations_projects_kind_target_location: Non-target location
+  form_observations_projects_kind_prefix_mismatch: Field slip prefix mismatch
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:see_message_below]+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:see_message_below]+":#name_messages
@@ -2556,6 +2560,7 @@
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
+  field_slip_project_constraint_violation: This observation violates the constraints of [title] (location, dates, or species), so neither it nor field slip [code] is associated with that project. The slip stays attached to this observation; fix the observation and re-save it, or ask a project admin to add it.
   field_slip_attached: Field slip [code] was attached to this observation.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
@@ -2621,7 +2626,7 @@
   field_slip_extract_joined: Field slip [code] was already in use, so this observation was linked to it as another observation of the same collection.
   observation_field_slip_in_use: 'Field slip [code] was detected in a photo, but it is already attached to "another observation":[url], so it was not attached automatically. Use Read Field Slip to review the photo — saving the review will link this observation to the same field slip.'
   field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.
-  field_slip_extract_project_blocked: The observation is still not in [title] because it does not satisfy that project's constraints (location, dates, or species).
+  field_slip_extract_conflict: The saved values violate the constraints of [title], but field slip [code] already belongs to another observation there — a conflict only a person can sort out. The values were kept, and this observation was removed from the field slip and the project.
   field_slip_extract_add_alias: Add this abbreviation
   field_slip_extract_code_mismatch: "The slip in this photo reads [read], but the observation is attached to field slip [attached]. Check that this is the right photo before saving."
   field_slip_extract_unknown_alias: "No project abbreviation is defined for [name], so the location was left as written."
