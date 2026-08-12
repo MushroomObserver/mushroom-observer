@@ -47,11 +47,12 @@ Both are documented in their own headers; short form:
   using a slip only auto-enrolls for `open_membership` projects. A
   non-member's slip on a closed project comes out as a project-less
   spare.
-- **"The slip workflow broke for an admin who just arrived."** The
-  observation form defaults locality from the user's *previous*
-  observation, so an admin from another region violates the location
-  constraint on their first event observation (#5038 tracks the fix;
-  the admin guide carries the workaround).
+- **"The form prefilled a locality from the wrong region."** A form
+  opened with a field slip code defaults the locality from the slip's
+  default location (`apply_field_slip_location` / `FieldSlip#calc_location`),
+  overriding the usual previous-observation default. Without a code the old default
+  applies, but a resulting constraint problem surfaces in the pre-save
+  project alert rather than silently keeping the observation out.
 - **Slip reading/review is admin-gated** (project admins + site
   admins): each read is a paid API call and writes to observations the
   reviewer may not own. Recorders who should review need admin, not
