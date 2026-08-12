@@ -13,16 +13,12 @@
 # toggles each one based on whether its id is in the submitted array.
 module Views::Controllers::Observations::Images
   class Form < ::Components::ApplicationForm
-    # Render state is bundled into the `**state` splat so the init
-    # stays under Metrics/ParameterLists. Callers still pass each
-    # piece as a named kwarg (projects:, submitted_project_ids:).
-    def initialize(image, user:, licenses:, **state)
-      @user = user
-      @licenses = licenses
-      @projects = state[:projects] || []
-      @submitted_project_ids = state[:submitted_project_ids]
-      super(image, **state.except(:projects, :submitted_project_ids))
+    prop :user, _Nilable(::User), default: nil
+    prop :licenses, _Array(Array)
+    prop :projects, _Array(::Project), default: -> { [] } do |value|
+      value || []
     end
+    prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
 
     # Explicit form action — `image_path(model)` via the
     # `observations/images` controller. PUT update.
