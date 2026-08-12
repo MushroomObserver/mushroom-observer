@@ -11,8 +11,8 @@ module Views::Controllers::Names::Classification::Inherit
     prop :user, ::User
 
     # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, parent: nil, candidates: nil, message: nil,
-                   user: nil, **attrs)
+    def initialize(name:, user:, parent: nil, candidates: nil, message: nil,
+                   **attrs)
       form_object = FormObject::InheritClassification.new(parent: parent)
       super(form_object, name: name, candidates: candidates,
                          message: message, user: user, **attrs)

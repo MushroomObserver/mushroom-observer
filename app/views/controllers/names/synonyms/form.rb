@@ -12,9 +12,9 @@ module Views::Controllers::Names::Synonyms
     prop :user, ::User
 
     # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, synonym_members: nil, deprecate_all: true,
-                   current_synonyms: nil, proposed_synonyms: nil,
-                   new_names: nil, user: nil, **attrs)
+    def initialize(name:, user:, synonym_members: nil, deprecate_all: true,
+                   current_synonyms: [], proposed_synonyms: nil,
+                   new_names: nil, **attrs)
       form_object = FormObject::EditSynonym.new(
         synonym_members: synonym_members,
         deprecate_all: deprecate_all

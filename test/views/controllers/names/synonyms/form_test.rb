@@ -32,6 +32,12 @@ module Views::Controllers::Names::Synonyms
                   text: @synonym1.id.to_s)
     end
 
+    def test_current_synonyms_defaults_to_empty_when_omitted
+      html = render(Form.new(name: @name, user: users(:rolf)))
+
+      assert_html(html, "form")
+    end
+
     def test_proposed_synonyms_have_same_label_format
       proposed = names(:coprinus_comatus)
       html = render_form(

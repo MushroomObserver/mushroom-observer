@@ -12,7 +12,7 @@ module Views::Controllers::Images::Emails
     # Accept optional model arg for ModalForm compatibility (ignored
     # — we create our own FormObject). Pattern B: form creates
     # FormObject internally.
-    def initialize(_model = nil, image:, user: nil, message: nil, **)
+    def initialize(_model = nil, image:, user:, message: nil, **)
       form_object = FormObject::EmailRequest.new(message: message)
       super(form_object, image: image, user: user, **)
     end

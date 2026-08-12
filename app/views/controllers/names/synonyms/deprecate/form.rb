@@ -13,10 +13,10 @@ module Views::Controllers::Names::Synonyms::Deprecate
     prop :user, ::User
 
     # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, proposed_name: nil, is_misspelling: false,
+    def initialize(name:, user:, proposed_name: nil, is_misspelling: false,
                    comment: nil, names: nil, valid_names: nil,
                    suggest_corrections: false, parent_deprecated: nil,
-                   user: nil, **attrs)
+                   **attrs)
       form_object = FormObject::DeprecateSynonym.new(
         proposed_name: proposed_name,
         is_misspelling: is_misspelling,

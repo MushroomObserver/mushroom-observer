@@ -20,7 +20,7 @@ module Views::Controllers::Observations::ExternalLinks
     prop :back, _Nilable(String), default: nil
 
     # rubocop:disable Metrics/ParameterLists
-    def initialize(model, observation:, sites:, site: nil, user: nil,
+    def initialize(model, observation:, sites:, user:, site: nil,
                    back: nil, **attrs)
       super(model, observation: observation, sites: sites,
                    site: site || sites&.first, user: user, back: back,
