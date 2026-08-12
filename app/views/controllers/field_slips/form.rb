@@ -9,15 +9,9 @@ module Views::Controllers::FieldSlips
   # (depending on action / context) one of the two observation-matrix
   # sections.
   class Form < ::Components::ApplicationForm
-    def initialize(model, **options)
-      @species_list = options.delete(:species_list)
-      @recent_observations = options.delete(:recent_observations) || []
-      @user = options.delete(:user)
-      # Explicit splat: bare `super` would forward the *original*
-      # kwargs including the FieldSlipForm-only keys deleted above,
-      # which would confuse the upstream initializer.
-      super(model, **options) # rubocop:disable Style/SuperArguments
-    end
+    prop :species_list, _Nilable(String), default: nil
+    prop :recent_observations, _Array(::Observation), default: -> { [] }
+    prop :user, _Nilable(::User), default: nil
 
     def view_template
       super do
