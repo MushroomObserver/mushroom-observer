@@ -12,16 +12,15 @@ module Views::Controllers::GlossaryTerms::Images
   # glossary_terms/images controller subtree.
   #
   # @param model [#images] the parent object (e.g. a GlossaryTerm)
-  # @param form_action [String, Hash] URL or url_for-compatible hash
-  #   for the PUT request
+  # @param form_action [String] URL for the PUT request
   # @param user [User] current user (passed through to InteractiveImage)
   class RemoveForm < ::Components::ApplicationForm
-    # `reader: true` generates the `#form_action` accessor Superform's
+    # `reader: :public` generates the `#form_action` accessor Superform's
     # own `form_tag` calls -- replaces the hand-written override this
     # class used to need just to read a differently-named ivar
     # (`@form_action_url`, to dodge colliding with the `form_action`
     # method name).
-    prop :form_action, _Union(String, Hash), reader: :public
+    prop :form_action, String, reader: :public
     prop :user, _Nilable(::User), default: nil
 
     def initialize(model, **)

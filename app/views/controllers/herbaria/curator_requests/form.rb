@@ -6,7 +6,7 @@ module Views::Controllers::Herbaria::CuratorRequests
   class Form < ::Components::ApplicationForm
     prop :herbarium, ::Herbarium
     prop :back, _Nilable(String), default: nil
-    prop :q_param, _Nilable(String), default: nil
+    prop :q_param, _Nilable(Hash), default: nil
 
     def initialize(model, id: nil, **)
       super(model, id: id || "herbarium_curator_request_form", **)
