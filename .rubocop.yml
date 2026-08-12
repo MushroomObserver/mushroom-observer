@@ -77,7 +77,6 @@ MO/InitializeWithoutProp:
     # directly (third-party initialize signatures, positional `field`
     # args, no dedicated test coverage). Not worth the risk/reward;
     # left as manual initialize.
-    - "app/components/application_form.rb"
     - "app/components/application_form/**/*.rb"
     # TEMPORARY, remove once #5020 merges/rebases in: the Link::*/
     # Button::* prop conversions live exclusively on #5020, not here,

@@ -91,27 +91,21 @@ class Components::ApplicationForm < Superform::Rails::Form
   include FieldHelpers
   include UploadHelpers
 
-  # Automatically derive a form id from the class unless one is
-  # explicitly provided. See `derive_form_id` for the rule.
-  # @param model [ActiveRecord::Base] the model object for the form
-  # @param id [String] optional form ID
-  # @param local [Boolean] if true, renders non-turbo form (default: true)
-  # @param options [Hash] additional options passed to Superform
-  def initialize(model, id: nil, local: true, **options)
-    # Auto-derive a form id. Prefer the form class name when it's
-    # specific (`Components::NameForm` -> "name_form";
-    # `Components::NamePropagateLifeformForm` ->
-    # "name_lifeform_propagate_form" — multiple Name-model forms
-    # need distinct ids). For post-move `Views::Controllers::*::Form`
-    # classes the class name yields just "form", so derive the id
-    # from the controller segment of the namespace instead
-    # (`Views::Controllers::Comments::Form` -> parent "Comments" ->
-    # "comment_form"). Ultimately fall back to "application_form"
-    # for anonymous test classes with no name and no model.
-    auto_id = id || derive_form_id(model) || "application_form"
-    @turbo_stream = !local
-    super(model, **options.merge(id: auto_id))
-  end
+  # `model` stays duck-typed rather than a concrete class: it backs
+  # forms across ~69 subclasses spanning ActiveRecord models,
+  # FormObject::Base subclasses, and other Superform-compatible
+  # objects. `model_name`/`persisted?` are exactly what
+  # Superform::Rails::Form itself requires (see `key`/`resource_action`
+  # below and in the gem).
+  prop :model, _Interface(:model_name, :persisted?), :positional
+  prop :id, _Nilable(String), default: nil
+  prop :local, _Boolean, default: true
+  # Catch-all for Superform's own `action:`/`method:` kwargs plus
+  # arbitrary `<form>` HTML attributes -- extracted in
+  # `after_initialize`. `method:` can't be its own named prop; it
+  # would shadow `Object#method` (same landmine documented on
+  # `Button::CRUDBase`'s `@method`).
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def derive_form_id(model)
     views_id = views_controller_form_id
@@ -193,5 +187,40 @@ class Components::ApplicationForm < Superform::Rails::Form
   # @return [FieldProxy] a field proxy for use with field components
   def self.image_field_proxy(type, image_id, field_key, value = nil)
     FieldProxy.image_proxy(type, image_id, field_key, value)
+  end
+
+  private
+
+  # A subclass that declares its own `prop` gets a Literal-generated
+  # `initialize` that never calls `super` -- it dead-ends before
+  # reaching any hand-written `initialize` up the chain, including
+  # this class's. `after_initialize` is the hook Literal calls
+  # unconditionally, right after prop assignment, regardless of how
+  # many prop-declaring subclasses sit in between (resolved via
+  # ordinary `respond_to?` + method dispatch, not baked into the
+  # generated code) -- see
+  # .claude/local/application_form_literal_props_superform_integration.md
+  # for the full mechanism writeup.
+  #
+  # This replicates `Superform::Rails::Form#initialize`'s own body
+  # (`@namespace = Namespace.root(...)` etc.) by hand, since that
+  # method is now permanently unreachable via `super` from any
+  # prop-declaring subclass.
+  def after_initialize
+    @turbo_stream = !@local
+    @action = @attributes.delete(:action)
+    @method = @attributes.delete(:method)
+    # Auto-derive a form id. Prefer the form class name when it's
+    # specific (`Components::NameForm` -> "name_form";
+    # `Components::NamePropagateLifeformForm` ->
+    # "name_lifeform_propagate_form" — multiple Name-model forms
+    # need distinct ids). For post-move `Views::Controllers::*::Form`
+    # classes the class name yields just "form", so derive the id
+    # from the controller segment of the namespace instead
+    # (`Views::Controllers::Comments::Form` -> parent "Comments" ->
+    # "comment_form"). Ultimately fall back to "application_form"
+    # for anonymous test classes with no name and no model.
+    @attributes[:id] = @id || derive_form_id(@model) || "application_form"
+    @namespace = Superform::Namespace.root(key, object: @model, form: self)
   end
 end
