@@ -262,8 +262,7 @@ module ObservationsController::Create
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render(Views::Controllers::Observations::New.new(**new_view_attrs),
-           location: new_observation_path)
+    render_new_view_invalid(location: new_observation_path)
   end
 
   # The observation is already saved by the time the field slip is applied,

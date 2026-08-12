@@ -462,7 +462,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       params,
       "mary"
     )
-    assert_response(:success) # Which really means failure
+    assert_unprocessable
   end
 
   def test_update_observation_with_another_users_image
@@ -535,11 +535,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     login("mary")
     put(:update, params: params)
 
-    # 200 :success means means failure!
-    assert_response(
-      :success,
-      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
-    )
+    assert_unprocessable
     assert_flash_error
   end
 
@@ -965,7 +961,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_flash(:runtime_no_save_observation)
     # Re-renders the edit form rather than redirecting.
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_update_invalid_field_slip_code

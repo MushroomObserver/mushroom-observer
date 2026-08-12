@@ -66,8 +66,9 @@ module ObservationsController::New
 
   private
 
-  def render_new_view
-    render(Views::Controllers::Observations::New.new(**new_view_attrs))
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Observations::New.new(**new_view_attrs),
+           status: status, **render_opts)
   end
 
   def new_view_attrs

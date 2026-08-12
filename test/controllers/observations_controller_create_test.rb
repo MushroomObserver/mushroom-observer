@@ -56,7 +56,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     begin
       if o_num.zero?
-        assert_response(:success)
+        assert_unprocessable
       elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
@@ -1645,7 +1645,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           }
         }
       )
-      assert_response(:success) # success = failure, paradoxically
+      assert_unprocessable
     end
     # Make sure image was created, but that it is unattached, and that it has
     # been kept in the @good_images array for attachment later.
@@ -1825,7 +1825,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # `Observation#valid?` passes but `#save` itself fails - exercises
@@ -1836,7 +1836,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_save_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # Regression: a request sending `project_ids` without the `[]` array
@@ -1851,7 +1851,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Observation) do
       post(:create, params: params)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # Regression: a request sending a bare scalar for the whole
@@ -1865,7 +1865,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     login("rolf")
     post(:create, params: { observation: "abc" })
 
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # Regression: sending a bare scalar for collection_number/
@@ -1891,7 +1891,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Naming) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_create_observation_fails_vote_validation
@@ -1899,7 +1899,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Vote) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # `update_good_images` flash-object-errors branch — when editing

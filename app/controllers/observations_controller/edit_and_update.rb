@@ -264,11 +264,12 @@ module ObservationsController::EditAndUpdate
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render_edit_view
+    render_edit_view_invalid
   end
 
-  def render_edit_view
-    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs))
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs),
+           status: status, **render_opts)
   end
 
   def edit_view_attrs
