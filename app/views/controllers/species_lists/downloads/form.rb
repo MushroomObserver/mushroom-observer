@@ -9,10 +9,12 @@ module Views::Controllers::SpeciesLists::Downloads
   #     query_param: q_param(@query)
   #   ))
   class Form < ::Components::ApplicationForm
-    def initialize(query_param:, **)
-      @query_param = query_param
+    prop :query_param, _Nilable(Hash), default: nil
+
+    def initialize(query_param:, **attrs)
       super(FormObject::PrintLabels.new,
-            id: "species_list_download_print_labels", **)
+            query_param: query_param,
+            id: "species_list_download_print_labels", **attrs)
     end
 
     def view_template
