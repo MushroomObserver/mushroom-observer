@@ -6,10 +6,12 @@ module Views::Controllers::SpeciesLists::Downloads
   # Sibling to `Views::Controllers::SpeciesLists::Downloads::Form`
   # (the print-labels form, also on the downloads/new page).
   class ReportForm < ::Components::ApplicationForm
+    prop :list, ::SpeciesList
+    prop :query_param, _Nilable(Hash), default: nil
+
     def initialize(list:, query_param:, selected: nil)
-      @list = list
-      @query_param = query_param
       super(FormObject::SpeciesListReport.new(format: selected),
+            list: list, query_param: query_param,
             id: "species_list_download_report")
     end
 
