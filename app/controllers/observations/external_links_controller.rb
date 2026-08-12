@@ -226,7 +226,7 @@ module Observations
                model: @external_link,
                observation: @observation,
                back: @back,
-               form_locals: { sites: @sites, site: @site }
+               form_locals: { sites: @sites, site: @site, user: @user }
              ), layout: false)
     end
 

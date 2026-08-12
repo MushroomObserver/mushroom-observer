@@ -8,7 +8,7 @@ module Views::Controllers::Names::Synonyms::Approve
     prop :approved_names, _Array(::Name), default: -> { [] } do |value|
       value || []
     end
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     def view_template
       submit(:approve.ti, center: true)

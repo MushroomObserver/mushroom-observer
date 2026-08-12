@@ -11,7 +11,7 @@ module Views::Controllers::Names::Synonyms
     end
     prop :proposed_synonyms, _Nilable(_Array(::Name)), default: nil
     prop :new_names, _Nilable(_Array(String)), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, synonym_members: nil, deprecate_all: true,

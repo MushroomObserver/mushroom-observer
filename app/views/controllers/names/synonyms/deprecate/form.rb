@@ -10,7 +10,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     prop :valid_names, _Nilable(_Array(::Name)), default: nil
     prop :suggest_corrections, _Boolean, default: false
     prop :parent_deprecated, _Nilable(::Name), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, proposed_name: nil, is_misspelling: false,

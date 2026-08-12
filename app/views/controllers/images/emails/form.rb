@@ -7,7 +7,7 @@
 module Views::Controllers::Images::Emails
   class Form < ::Components::ApplicationForm
     prop :image, ::Image
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     # Accept optional model arg for ModalForm compatibility (ignored
     # — we create our own FormObject). Pattern B: form creates

@@ -24,7 +24,7 @@ module Views::Controllers::Observations::Namings::Votes
     #   defaults to the confidence menu when they already have a
     #   non-zero vote; everyone else stays on the wider opinion
     #   menu. Pass `@user` from the consuming view.
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     # @param vote [::Vote, nil] the current user's existing vote, if
     #   any; nil means this is a fresh vote → POST instead of PATCH
     prop :vote, _Nilable(::Vote), default: nil
@@ -120,8 +120,6 @@ module Views::Controllers::Observations::Namings::Votes
     # explicitly so the form is self-contained — no controller-side
     # ivar dependency.
     def proposer_view?
-      return false unless @user
-
       @user.id == @naming.user_id || in_admin_mode?
     end
 

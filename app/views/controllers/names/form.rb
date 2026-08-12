@@ -4,7 +4,7 @@
 # Rendered by `names/{new,edit}.rb`.
 module Views::Controllers::Names
   class Form < ::Components::ApplicationForm
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     prop :name_string, String, default: "" do |value|
       value || ""
     end

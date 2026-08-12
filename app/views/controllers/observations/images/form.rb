@@ -13,7 +13,7 @@
 # toggles each one based on whether its id is in the submitted array.
 module Views::Controllers::Observations::Images
   class Form < ::Components::ApplicationForm
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] } do |value|
       value || []

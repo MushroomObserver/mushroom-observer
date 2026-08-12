@@ -54,7 +54,8 @@ module Views::Controllers::Names::Synonyms
                deprecate_all: deprecate_all,
                current_synonyms: current_synonyms,
                proposed_synonyms: proposed_synonyms,
-               new_names: new_names
+               new_names: new_names,
+               user: users(:rolf)
              ))
     end
   end

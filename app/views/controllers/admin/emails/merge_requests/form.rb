@@ -10,7 +10,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
     # The class itself (Herbarium/Location/Name), not an instance --
     # see MergeRequestsController#validate_merge_model!.
     prop :model_class, Class
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     def view_template
       super do

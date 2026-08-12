@@ -9,7 +9,7 @@ module Views::Controllers::Observations::Images
     prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     def view_template
       add_edit_title(@image)

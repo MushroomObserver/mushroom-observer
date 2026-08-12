@@ -11,7 +11,7 @@ module Views::Controllers::FieldSlips
   class Form < ::Components::ApplicationForm
     prop :species_list, _Nilable(String), default: nil
     prop :recent_observations, _Array(::Observation), default: -> { [] }
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     def view_template
       super do

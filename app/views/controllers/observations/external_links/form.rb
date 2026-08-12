@@ -16,7 +16,7 @@ module Views::Controllers::Observations::ExternalLinks
     prop :observation, ::Observation
     prop :sites, _Array(::ExternalSite)
     prop :site, _Nilable(::ExternalSite), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     prop :back, _Nilable(String), default: nil
 
     # rubocop:disable Metrics/ParameterLists
@@ -78,7 +78,7 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def render_hidden_fields
-      hidden_field(:user_id, value: @user&.id)
+      hidden_field(:user_id, value: @user.id)
       hidden_field(:observation_id, value: @observation.id)
     end
 

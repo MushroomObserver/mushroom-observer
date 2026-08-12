@@ -8,7 +8,7 @@ module Views::Controllers::Names::Classification::Inherit
     prop :name, ::Name
     prop :candidates, _Nilable(_Array(::Name)), default: nil
     prop :message, _Nilable(Symbol), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, parent: nil, candidates: nil, message: nil,
