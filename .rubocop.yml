@@ -14,6 +14,7 @@ plugins:
 
 require:
   - ./lib/rubocop/cop/mo/dry_test_render_helper
+  - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
@@ -55,6 +56,39 @@ MO/DryTestRenderHelper:
   Include:
     - "test/components/**/*_test.rb"
     - "test/views/**/*_test.rb"
+
+MO/InitializeWithoutProp:
+  Description: >-
+    A Phlex class defining `initialize` with hand-assigned `@ivar =`
+    state and no `prop` of its own should use Literal props instead --
+    see lib/rubocop/cop/mo/initialize_without_prop.rb and the #5020
+    prop-conversion sweep.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # Every field class here takes a Superform::Field or FieldProxy --
+    # both are duck-typed, so the only prop type available is a vague
+    # _Interface(:dom, :value), not a concrete class; `wrapper_options`/
+    # `attributes` are already-generic Hash catch-alls. Converting
+    # doesn't buy real type safety here the way it does elsewhere, and
+    # several files subclass Superform's own component classes
+    # directly (third-party initialize signatures, positional `field`
+    # args, no dedicated test coverage). Not worth the risk/reward;
+    # left as manual initialize.
+    - "app/components/application_form.rb"
+    - "app/components/application_form/**/*.rb"
+    # TEMPORARY, remove once #5020 merges/rebases in: the Link::*/
+    # Button::* prop conversions live exclusively on #5020, not here,
+    # per an explicit decision to keep this branch's diff to the
+    # non-Link/Button sweep. Excluded so this branch's CI stays green
+    # in the meantime rather than flagging files this PR isn't
+    # touching.
+    - "app/components/button.rb"
+    - "app/components/button/**/*.rb"
+    - "app/components/link.rb"
+    - "app/components/link/**/*.rb"
 
 MO/LowercaseTranslationTag:
   Description: >-
