@@ -4,14 +4,13 @@
 # Rendered by `names/{new,edit}.rb`.
 module Views::Controllers::Names
   class Form < ::Components::ApplicationForm
-    def initialize(model, **options)
-      @user = options.delete(:user)
-      @name_string = options.delete(:name_string) || ""
-      @misspelling = options.delete(:misspelling)
-      @correct_spelling = options.delete(:correct_spelling)
-      @approved_rank = options.delete(:approved_rank)
-      super(model, **options) # rubocop:disable Style/SuperArguments
+    prop :user, _Nilable(::User), default: nil
+    prop :name_string, String, default: "" do |value|
+      value || ""
     end
+    prop :misspelling, _Nilable(_Boolean), default: nil
+    prop :correct_spelling, _Nilable(String), default: nil
+    prop :approved_rank, _Nilable(String), default: nil
 
     def view_template
       super do
