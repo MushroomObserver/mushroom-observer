@@ -41,7 +41,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def test_clone_id_renders_when_set
-      html = render_form(species_list: SpeciesList.new, clone_id: 42)
+      html = render_form(species_list: SpeciesList.new, clone_id: "42")
 
       # `clone_id` is top-level, NOT under the species_list
       # namespace — the controller reads `params[:clone_id]`.
