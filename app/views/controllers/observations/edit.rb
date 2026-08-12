@@ -15,7 +15,10 @@ module Views::Controllers::Observations
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
     prop :projects, _Array(::Project), default: -> { [] }
-    prop :submitted_project_ids, _Nilable(Array), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil do |value|
+      value&.map { |id| Integer(id) }
+    end
     prop :lists, _Array(::SpeciesList), default: -> { [] }
     prop :submitted_list_ids, _Nilable(Array), default: nil
     prop :error_checked_projects, _Array(::Project), default: -> { [] }

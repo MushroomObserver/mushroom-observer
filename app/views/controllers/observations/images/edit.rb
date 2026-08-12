@@ -8,7 +8,10 @@ module Views::Controllers::Observations::Images
     prop :image, ::Image
     prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] }
-    prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil do |value|
+      value&.map { |id| Integer(id) }
+    end
     prop :user, ::User
 
     def view_template

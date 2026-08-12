@@ -36,7 +36,10 @@ module Views::Controllers::SpeciesLists
     # user's choices to the DB just to render them back (Rails'
     # has_many-through setter would do that instantly on a
     # persisted record, even though the save itself failed).
-    prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil do |value|
+      value&.map { |id| Integer(id) }
+    end
 
     # Override Superform's default
     # `helpers.url_for(action: resource_action)` so the form action
@@ -140,7 +143,7 @@ module Views::Controllers::SpeciesLists
 
     def project_checked?(project_id)
       if @submitted_project_ids
-        @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
+        @submitted_project_ids.include?(project_id)
       else
         model.project_ids.include?(project_id)
       end

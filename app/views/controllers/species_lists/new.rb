@@ -11,7 +11,9 @@ module Views::Controllers::SpeciesLists
     prop :species_list, ::SpeciesList
     prop :projects, _Array(::Project)
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash)))
-    prop :submitted_project_ids, _Nilable(_Array(String))
+    prop :submitted_project_ids, _Nilable(_Array(Integer)) do |value|
+      value&.map { |id| Integer(id) }
+    end
     prop :user, ::User
     # Comes from `params[:clone]` (always a String, or absent) --
     # coerced so a non-numeric value fails loudly here instead of

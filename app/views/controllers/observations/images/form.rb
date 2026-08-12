@@ -18,7 +18,10 @@ module Views::Controllers::Observations::Images
     prop :projects, _Array(::Project), default: -> { [] } do |value|
       value || []
     end
-    prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil do |value|
+      value&.map { |id| Integer(id) }
+    end
 
     # Explicit form action — `image_path(model)` via the
     # `observations/images` controller. PUT update.
@@ -111,7 +114,7 @@ module Views::Controllers::Observations::Images
 
     def project_checked?(project_id)
       if @submitted_project_ids
-        @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
+        @submitted_project_ids.include?(project_id)
       else
         model.project_ids.include?(project_id)
       end
