@@ -5,16 +5,17 @@
 # FormObject internally from the provided kwargs.
 module Views::Controllers::Names::Classification::Inherit
   class Form < ::Components::ApplicationForm
+    prop :name, ::Name
+    prop :candidates, _Nilable(_Array(::Name)), default: nil
+    prop :message, _Nilable(Symbol), default: nil
+    prop :user, _Nilable(::User), default: nil
+
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, parent: nil, candidates: nil, message: nil,
-                   user: nil, **)
-      @name = name
-      @candidates = candidates
-      @message = message
-      @user = user
-
+                   user: nil, **attrs)
       form_object = FormObject::InheritClassification.new(parent: parent)
-      super(form_object, **)
+      super(form_object, name: name, candidates: candidates,
+                         message: message, user: user, **attrs)
     end
     # rubocop:enable Metrics/ParameterLists
 
