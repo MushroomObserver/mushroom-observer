@@ -13,14 +13,20 @@
 # change.
 module Views::Controllers::Observations::ExternalLinks
   class Form < ::Components::ApplicationForm
-    def initialize(model, **kwargs)
-      @observation = kwargs.delete(:observation)
-      @sites = kwargs.delete(:sites)
-      @site = kwargs.delete(:site) || @sites&.first
-      @user = kwargs.delete(:user)
-      @back = kwargs.delete(:back)
-      super
+    prop :observation, ::Observation
+    prop :sites, _Array(::ExternalSite)
+    prop :site, _Nilable(::ExternalSite), default: nil
+    prop :user, _Nilable(::User), default: nil
+    prop :back, _Nilable(String), default: nil
+
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(model, observation:, sites:, site: nil, user: nil,
+                   back: nil, **attrs)
+      super(model, observation: observation, sites: sites,
+                   site: site || sites&.first, user: user, back: back,
+                   **attrs)
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       render_external_id_field
