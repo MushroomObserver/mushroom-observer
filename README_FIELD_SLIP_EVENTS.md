@@ -48,9 +48,9 @@ Both are documented in their own headers; short form:
   non-member's slip on a closed project comes out as a project-less
   spare.
 - **"The form prefilled a locality from the wrong region."** A form
-  opened with a field slip code defaults the locality from the slip
-  project's location (`apply_field_slip_location`), overriding the
-  usual previous-observation default. Without a code the old default
+  opened with a field slip code defaults the locality from the slip's
+  default location (`apply_field_slip_location` / `FieldSlip#calc_location`),
+  overriding the usual previous-observation default. Without a code the old default
   applies, but a resulting constraint problem surfaces in the pre-save
   project alert rather than silently keeping the observation out.
 - **Slip reading/review is admin-gated** (project admins + site
