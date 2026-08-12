@@ -62,7 +62,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # correcting it is the whole point of the step.
     def render_extracted_cell(row)
       if row.editable
-        text_field("value[#{row.field}]", value: row.extracted, label: false)
+        render_extracted_input(row)
       else
         plain(row.extracted.to_s)
       end
@@ -70,12 +70,26 @@ module Views::Controllers::Images::FieldSlipExtracts
       render_confidence(row)
     end
 
-    # A purely numeric "Other Codes" is an iNaturalist observation id in
-    # practice, so it ticks itself and gets stored as a link. Visible
-    # and overridable rather than silent, since the box is free text and
-    # someone will eventually write a herbarium number in it.
+    # A slip's Notes box is often several lines, and a single-line
+    # input silently drops the newlines from its value -- the browser
+    # strips them, gluing "Phenolic odor\nYellow staining" into
+    # "Phenolic odorYellow staining" on save. A textarea keeps them.
+    def render_extracted_input(row)
+      value = row.extracted.to_s
+      unless value.include?("\n")
+        return text_field("value[#{row.field}]", value: value, label: false)
+      end
+
+      textarea_field("value[#{row.field}]", value: value, label: false,
+                                            rows: value.count("\n") + 1)
+    end
+
+    # A value holding an iNaturalist observation id ticks itself and
+    # gets stored as a link. Visible and overridable rather than
+    # silent, since the box is free text and someone will eventually
+    # write a herbarium number in it.
     def render_inat_flag(row)
-      return unless row.field == ::FieldSlip::Extractor::OTHER_CODES_FIELD
+      return unless row.inat_row?
 
       checkbox_field("inat", checked: @review.inat_code,
                              label: :field_slip_extract_inat.l)
@@ -108,13 +122,34 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
+    # The code row's tick is an attach, not a field write, so it says
+    # so -- everything else gets a bare box under the "Save" header.
     def render_use_cell(row)
       if row.savable
         checkbox_field("use[#{row.field}]", checked: row.default_use?,
-                                            label: false)
+                                            label: use_label(row))
+      elsif row.code_row?
+        render_code_check_state
       else
         small { plain(:field_slip_extract_check_only.l) }
       end
+    end
+
+    # A non-attachable code row only renders when the observation
+    # already has its slip (blank rows are dropped, slip-less ones get
+    # the attach tick), so say what the check FOUND rather than the
+    # generic "cross-check only" that read as "nothing was read".
+    def render_code_check_state
+      key = if @extract.code_mismatch
+              :field_slip_extract_code_differs
+            else
+              :field_slip_extract_code_matches
+            end
+      small { plain(key.l) }
+    end
+
+    def use_label(row)
+      row.code_row? ? :field_slip_extract_attach_code.l : false
     end
 
     # Locality, like the ID, is corrected through an autocompleter and

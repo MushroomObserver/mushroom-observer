@@ -16,19 +16,23 @@ module Images
     before_action :find_image!
     before_action :permission_required
 
+    # Enqueues the read (see ExtractFieldSlipJob) and lands on the
+    # review page, which shows its progress -- the ~15s provider call
+    # used to run right here behind a spinnerless request. Also the
+    # retry path when a read failed.
     def create
-      result = FieldSlip::Extractor.default.extract(@image, context: context)
-      FieldSlipExtract.record(
-        image: @image, user: @user, result: result,
-        prompt_version: FieldSlip::Extractor::PROMPT_VERSION
-      )
+      ExtractFieldSlipJob.request(image: @image, user: @user)
       redirect_to(edit_image_field_slip_extract_path(@image.id))
-    rescue StandardError => e
-      flash_error(:field_slip_extract_failed.t(error: e.message))
-      redirect_to(image_path(@image.id))
     end
 
+    # Three states: a completed extract renders the review form; a
+    # pending or failed one renders the self-refreshing Status page;
+    # no extract at all is only worth waiting on when the caller said
+    # so (`await=1`, set by the observation-create redirect while the
+    # QR jobs are still attaching the slip and starting the read).
     def edit
+      @extract = FieldSlipExtract.find_by(image_id: @image.id)
+      return render_status unless @extract&.complete?
       return unless extract_or_redirect!
 
       # No `layout:` option -- `Views::FullPageBase#around_template`
@@ -41,7 +45,9 @@ module Images
     def update
       return unless extract_or_redirect!
 
+      attach_ticked_code
       apply_chosen_fields
+      rejoin_slip_project
       outcome = propose_name
       # An unrecognized or ambiguous name needs the reviewer to confirm
       # before a Name is created, so the page comes back with the
@@ -64,9 +70,23 @@ module Images
       return unless @image
       return if FieldSlipExtract.permitted?(image: @image, user: @user,
                                             site_admin: in_admin_mode?)
+      return if awaiting_own_upload?
 
       flash_error(:permission_denied.t)
       redirect_to(image_path(@image.id))
+    end
+
+    # The observation-create redirect can land here BEFORE the QR jobs
+    # have filed the observation into its project -- at which point
+    # `permitted?` has no project to check against. Waiting on your own
+    # freshly uploaded photo shows nothing but a status panel, so it
+    # only needs ownership; the review form itself stays behind
+    # `permitted?`, which holds by the time the extract completes.
+    def awaiting_own_upload?
+      return false unless request.get?
+      return false if FieldSlipExtract.find_by(image_id: @image.id)&.complete?
+
+      @image.observations.any? { |obs| obs.user_id == @user.id }
     end
 
     def find_image!
@@ -79,8 +99,14 @@ module Images
       nil
     end
 
-    def context
-      FieldSlip::Extractor::Context.for_image(@image)
+    # A pending or failed extract shows its status; a missing one
+    # renders the same page in its not-scanned-yet state, whose scan
+    # button is how a zbar-missed slip photo gets read at all -- this
+    # is where the no-slip-detected flash on observation create links.
+    def render_status
+      render(Views::Controllers::Images::FieldSlipExtracts::Status.new(
+               image: @image, extract: @extract, user: @user
+             ))
     end
 
     # The extract and the observation it would be written to. Both have
@@ -95,11 +121,17 @@ module Images
       nil
     end
 
+    # The extract's template names the fields, so the same review works
+    # whichever layout the slip was printed on.
+    def name_field
+      @extract.template.name_field
+    end
+
     # Only when the reviewer ticked it. Unticked means "the slip says
     # this, don't propose it" -- the box starts clear for a name MO
     # doesn't hold, so creating one is always a deliberate choice.
     def propose_name
-      unless params.dig(:use, FieldSlip::Extractor::NAME_FIELD) == "1"
+      unless params.dig(:use, name_field) == "1"
         return FieldSlip::Extractor::NameProposer::Outcome.new(
           status: :none, naming: nil, feedback: {}
         )
@@ -108,11 +140,37 @@ module Images
       FieldSlip::Extractor::NameProposer.new(
         observation: @observation, user: @user, vote: params[:vote],
         name_params: {
-          given_name: params.dig(:value, FieldSlip::Extractor::NAME_FIELD),
+          given_name: params.dig(:value, name_field),
           approved_name: params[:approved_name],
           chosen_name: params.dig(:chosen_name, :name_id)
         }
       ).propose
+    end
+
+    # The join decision at slip-attach time ran against the
+    # observation's PRE-review data -- the create form's default date
+    # and leftover locality -- and constraint violations silently kept
+    # it out of the slip's project. The review then applies the slip's
+    # real date and locality: exactly the fields the decision used, so
+    # re-evaluate. (Reported: an NEMF slip's observation stayed out of
+    # the NEMF project while carrying form defaults at attach time.)
+    def rejoin_slip_project
+      @observation.reload
+      project = @observation.field_slip&.project
+      return unless project
+      return if @observation.projects.include?(project)
+      return unless project.member?(@observation.user)
+
+      if project.violates_constraints?(@observation)
+        flash_warning(:field_slip_extract_project_blocked.t(
+                        title: project.title
+                      ))
+      else
+        project.add_observation(@observation)
+        flash_notice(:field_slip_extract_project_joined.t(
+                       title: project.title
+                     ))
+      end
     end
 
     def flash_extract_saved(outcome)
@@ -129,16 +187,57 @@ module Images
       render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
                extract: @extract, observation: @observation, user: @user,
                name_feedback: outcome.feedback,
-               given_name: params.dig(:value,
-                                      FieldSlip::Extractor::NAME_FIELD).to_s
+               given_name: params.dig(:value, name_field).to_s
              ))
     end
 
     def apply_chosen_fields
       FieldSlip::Extractor::Applier.new(
         observation: @observation, chosen: chosen_fields, user: @user,
-        inat_code: params[:inat] == "1"
+        template: @extract.template, inat_code: params[:inat] == "1"
       ).apply
+    end
+
+    # A ticked code row attaches the slip -- the manual path for what
+    # ExtractFieldSlipJob#attach_read_code couldn't decide on its own
+    # (an in-use slip resolved by hand, a corrected misread). Runs
+    # before the field writes so the observation joins its project
+    # first and the project's aliases apply to them.
+    def attach_ticked_code
+      code_field = @extract.template.code_field
+      return unless params.dig(:use, code_field) == "1"
+      return unless @observation.occurrence_id.nil?
+
+      # Normalized once, so lookups, the attach, and the flash all
+      # speak the same canonical code.
+      code = params.dig(:value, code_field).to_s.strip.upcase
+      return if code.blank?
+
+      existed = FieldSlip.exists?(code: code)
+      result = FieldSlip::Attacher.attach(observation: @observation,
+                                          code: code, user: @user,
+                                          join_in_use: true)
+      flash_attach_result(code, result, existed)
+    end
+
+    # "Created", "attached", or "joined", honestly: the code may have
+    # named a pre-existing spare slip, or one already in use -- joining
+    # its occurrence is this form's resolution of that case.
+    def flash_attach_result(code, result, existed)
+      case result
+      when :attached
+        key = existed ? :field_slip_attached : :field_slip_created
+        flash_notice(key.t(code: code))
+        @observation.reload
+      when :joined
+        flash_notice(:field_slip_extract_joined.t(code: code))
+        @observation.reload
+      else
+        flash_warning(:field_slip_extract_attach_failed.t(
+                        code: code,
+                        reason: :"field_slip_attach_reason_#{result}".l
+                      ))
+      end
     end
 
     # Only the ticked rows, keyed by slip field, holding whatever text
@@ -147,8 +246,7 @@ module Images
     # a form submitted with nothing ticked arrives without `use` at all.
     def chosen_fields
       ticked = (params[:use]&.to_unsafe_h || {}).
-               select { |_k, v| v == "1" }.keys -
-               [FieldSlip::Extractor::NAME_FIELD]
+               select { |_k, v| v == "1" }.keys - [name_field]
       values = params[:value]&.to_unsafe_h || {}
       ticked.index_with { |field| values[field] }
     end

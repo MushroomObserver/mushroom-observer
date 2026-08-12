@@ -9,10 +9,11 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     @project.observations << @obs unless @project.observations.include?(@obs)
   end
 
-  def apply_fields(chosen, user: rolf, inat_code: false)
-    FieldSlip::Extractor::Applier.new(observation: @obs, chosen: chosen,
-                                      user: user,
-                                      inat_code: inat_code).apply
+  def apply_fields(chosen, user: rolf, inat_code: false, template: :mo)
+    FieldSlip::Extractor::Applier.new(
+      observation: @obs, chosen: chosen, user: user,
+      template: FieldSlip::Template.for(template), inat_code: inat_code
+    ).apply
     @obs.reload
   end
 
@@ -30,6 +31,16 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
 
     assert_equal("wood", @obs.notes[:Substrate])
     assert_equal("N26-0290", @obs.notes[:MycoMap_Voucher_Number])
+  end
+
+  # A multi-line Notes value keeps its line breaks, with a textarea's
+  # CRLF normalized to bare newlines.
+  def test_multiline_notes_keep_their_line_breaks
+    apply_fields({ "Notes" =>
+                   "Phenolic odor\r\nYellow staining\r\nYellow in KOH" })
+
+    assert_equal("Phenolic odor\nYellow staining\nYellow in KOH",
+                 @obs.notes[:Other])
   end
 
   # Several notes fields in one pass have to merge, not overwrite each
@@ -175,7 +186,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     slip_before = @obs.field_slip&.code
 
     apply_fields({ "Field Slip Code" => "NEMF-99999",
-                   FieldSlip::Extractor::NAME_FIELD => "Coprinus comatus" })
+                   "ID" => "Coprinus comatus" })
 
     assert_equal_even_if_nil(slip_before, @obs.field_slip&.code)
     assert_equal(namings_before, @obs.namings.count,
@@ -188,5 +199,140 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
 
     assert_equal_even_if_nil(before["collector"], @obs.collector)
     assert_equal(before["when"], @obs.when)
+  end
+
+  # ---------- DBG template ----------
+
+  def test_dbg_fields_land_under_their_own_notes_keys
+    apply_fields({ "Plants" => "Spruce",
+                   "Voucher Number" => "CO26-0290",
+                   "ID Date" => "8/7" }, template: :dbg)
+
+    assert_equal("Spruce", @obs.notes[:Plants])
+    assert_equal("CO26-0290", @obs.notes[:Voucher_Number])
+    assert_equal("8/7", @obs.notes[:Field_Slip_ID_Date])
+  end
+
+  def test_dbg_coordinates_are_applied_as_a_pair
+    apply_fields({ "Latitude" => "38.8703",
+                   "Longitude" => "-105.0442" }, template: :dbg)
+
+    assert_in_delta(38.8703, @obs.lat)
+    assert_in_delta(-105.0442, @obs.lng)
+  end
+
+  # Observation validates lat/lng as a pair; half a pair must not sink
+  # the rest of the save.
+  def test_dbg_a_lone_coordinate_is_dropped_not_fatal
+    apply_fields({ "Latitude" => "38.8703",
+                   "Collector" => "A. W. Wilson" }, template: :dbg)
+
+    assert_nil(@obs.lat)
+    assert_equal("A. W. Wilson", @obs.collector)
+  end
+
+  def test_dbg_unparseable_coordinates_are_skipped
+    apply_fields({ "Latitude" => "somewhere",
+                   "Longitude" => "-105.0442" }, template: :dbg)
+
+    assert_nil(@obs.lat)
+    assert_nil(@obs.lng)
+  end
+
+  # A half-pair against existing coordinates would silently mix a slip
+  # coordinate with one from another source (photo EXIF, the form), so
+  # both keep their old values.
+  def test_dbg_one_chosen_coordinate_never_mixes_with_existing_ones
+    @obs.update!(lat: 40.0, lng: -100.0)
+    apply_fields({ "Latitude" => "38.8703",
+                   "Collector" => "A. W. Wilson" }, template: :dbg)
+
+    assert_in_delta(40.0, @obs.lat)
+    assert_in_delta(-100.0, @obs.lng)
+    assert_equal("A. W. Wilson", @obs.collector, "other fields still save")
+  end
+
+  def test_dbg_a_failed_parse_reverts_the_whole_pair
+    @obs.update!(lat: 40.0, lng: -100.0)
+    apply_fields({ "Latitude" => "38.8703",
+                   "Longitude" => "unreadable" }, template: :dbg)
+
+    assert_in_delta(40.0, @obs.lat)
+    assert_in_delta(-100.0, @obs.lng)
+  end
+
+  def test_dbg_a_full_pair_replaces_existing_coordinates
+    @obs.update!(lat: 40.0, lng: -100.0)
+    apply_fields({ "Latitude" => "38.8703",
+                   "Longitude" => "-105.0442" }, template: :dbg)
+
+    assert_in_delta(38.8703, @obs.lat)
+    assert_in_delta(-105.0442, @obs.lng)
+  end
+
+  # The iNaturalist box often holds a timestamp beside the id ("10:29
+  # 388879492"); the id becomes the link and the rest is kept beside
+  # it as a checksum against the iNat record.
+  def test_dbg_inat_box_with_timestamp_links_the_id
+    apply_fields({ "iNaturalist" => "10:29 388879492" },
+                 template: :dbg, inat_code: true)
+
+    link = FieldSlipNotesBuilder.inat_link("388879492")
+
+    assert_equal("#{link} (10:29)", @obs.notes[:iNaturalist])
+  end
+
+  def test_dbg_bare_inat_number_links_without_leftover
+    apply_fields({ "iNaturalist" => "388879863" },
+                 template: :dbg, inat_code: true)
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("388879863"),
+                 @obs.notes[:iNaturalist])
+  end
+
+  # Grouped digits (a real CMS fair entry) normalize into one id, and
+  # removing the id from the entry uses the span as written, so no
+  # digit fragments leak into the leftover.
+  def test_dbg_grouped_inat_digits_link_as_one_id
+    apply_fields({ "iNaturalist" => "388 596 423" },
+                 template: :dbg, inat_code: true)
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("388596423"),
+                 @obs.notes[:iNaturalist])
+  end
+
+  def test_dbg_username_beside_the_id_is_kept
+    apply_fields({ "iNaturalist" => "fungus_junkie iNat: 388891116" },
+                 template: :dbg, inat_code: true)
+
+    link = FieldSlipNotesBuilder.inat_link("388891116")
+
+    assert_equal("#{link} (fungus_junkie iNat)", @obs.notes[:iNaturalist])
+  end
+
+  # Flagged but holding no id -- a username and clock time only -- the
+  # entry stays as written rather than becoming a broken link.
+  def test_dbg_inat_box_without_an_id_left_bare
+    apply_fields({ "iNaturalist" => "someuser 10:29" },
+                 template: :dbg, inat_code: true)
+
+    assert_equal("someuser 10:29", @obs.notes[:iNaturalist])
+  end
+
+  def test_dbg_location_foray_resolves_through_a_project_alias
+    ProjectAlias.create!(project: @project, name: "Crags Creek #2",
+                         target: locations(:albion))
+
+    apply_fields({ "Location/Foray" => "Crags Creek #2" }, template: :dbg)
+
+    assert_equal(locations(:albion), @obs.location)
+  end
+
+  # State and County are components of the reviewed place name, never
+  # stored on their own.
+  def test_dbg_state_and_county_are_review_only
+    apply_fields({ "State" => "CO", "County" => "Teller" }, template: :dbg)
+
+    assert_empty(@obs.notes.to_h.values & %w[CO Teller])
   end
 end

@@ -101,10 +101,13 @@ root> swapon /swap
 root> echo '/swap none swap sw 0 0' | tee -a /etc/fstab
 
 # Install most of the modules that we will need (except ruby).
+# zbar-tools provides zbarimg, used to read field slip QR codes out of
+# uploaded photos (see FieldSlip::QRDecoder); MO runs fine without it,
+# that one feature just stays off.
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev \
-          exiftool mrtg
+          exiftool mrtg zbar-tools
 # (it's saying several services need to be restarted so rebooting
 # sounded like a good idea at this point)
 root> reboot

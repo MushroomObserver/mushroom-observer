@@ -9,7 +9,7 @@ class FieldSlipExtractTest < UnitTestCase
     @obs.images << @image unless @obs.images.include?(@image)
   end
 
-  DEFAULT_RESULT = { provider: "gemini", model: "m",
+  DEFAULT_RESULT = { provider: "gemini", model: "m", template: "mo",
                      raw: { "ok" => true } }.freeze
 
   def result(fields: {}, confidence: {}, **overrides)
@@ -60,6 +60,87 @@ class FieldSlipExtractTest < UnitTestCase
     assert_equal("gemini-3.6-flash", extract.model)
     assert_equal("1", extract.prompt_version)
     assert_equal({ "ok" => true }, extract.data["raw"])
+  end
+
+  # ---------- lifecycle ----------
+
+  # Existing rows (and every `record`) read as complete; only the
+  # background-extraction path ever writes the other two.
+  def test_record_is_complete
+    extract = record(fields: { "Collector" => "A" })
+
+    assert(extract.complete?)
+    assert_not(extract.pending?)
+  end
+
+  def test_start_marks_pending_and_record_completes_it
+    started = FieldSlipExtract.start!(image: @image, user: rolf)
+
+    assert(started.pending?)
+
+    completed = record(fields: { "Collector" => "A" })
+
+    assert_equal(started.id, completed.id, "same one-row-per-image slot")
+    assert(completed.complete?)
+  end
+
+  def test_fail_keeps_the_error_for_the_reviewer
+    extract = FieldSlipExtract.fail!(image: @image, user: rolf,
+                                     error: "429 quota exceeded")
+
+    assert(extract.failed?)
+    assert_equal("429 quota exceeded", extract.error)
+  end
+
+  # A failure after a completed read must not orphan the row's
+  # provider provenance (they are NOT NULL columns).
+  def test_fail_over_an_existing_row_keeps_its_provenance
+    record(fields: { "Collector" => "A" })
+    extract = FieldSlipExtract.fail!(image: @image, user: rolf,
+                                     error: "boom")
+
+    assert(extract.failed?)
+    assert_equal("m", extract.model, "provenance of the last real read")
+  end
+
+  # ---------- template ----------
+
+  def test_record_stores_which_template_was_read
+    assert_instance_of(FieldSlip::Template::Dbg,
+                       record(template: "dbg").template)
+  end
+
+  # Reads stored before templates existed were all of MO's own slip.
+  def test_template_defaults_to_mo_for_old_rows
+    extract = record(fields: { "Collector" => "A" })
+    extract.update!(data: extract.data.except("template"))
+
+    assert_instance_of(FieldSlip::Template::Mo, extract.reload.template)
+  end
+
+  def test_template_mismatch_only_on_explicit_false
+    assert(record(slip_present: true, template_matched: false).
+           template_mismatch?)
+    assert_not(record(template_matched: true).template_mismatch?)
+    assert_not(record.template_mismatch?, "unreported is not evidence")
+  end
+
+  # No slip at all is not a layout mismatch -- different message,
+  # different fix.
+  def test_no_slip_is_not_a_template_mismatch
+    extract = record(slip_present: false, template_matched: false)
+
+    assert(extract.no_slip?)
+    assert_not(extract.template_mismatch?)
+  end
+
+  # The dbg slip names its fields differently; the helpers must follow
+  # the stored template's labels.
+  def test_location_helpers_follow_the_stored_template
+    extract = record(template: "dbg",
+                     fields: { "Location/Foray" => "EB2" })
+
+    assert_equal("EB2", extract.unknown_location_alias)
   end
 
   def test_confidence_defaults_to_low_when_unusable
@@ -151,6 +232,40 @@ class FieldSlipExtractTest < UnitTestCase
 
   def test_unknown_location_alias_nil_when_nothing_was_read
     assert_nil(record(fields: {}).unknown_location_alias)
+  end
+
+  # The applier resolves aliases across every project the observation
+  # is in, so an alias defined in a sibling project (not the slip's
+  # own) must not warn either -- the warning may never contradict what
+  # applying would do.
+  def test_unknown_location_alias_consults_all_the_obs_projects
+    sibling = projects(:eol_project)
+    sibling.observations << @obs unless sibling.observations.include?(@obs)
+    @obs.field_slip.update_columns(
+      project_id: projects(:open_membership_project).id
+    )
+    ProjectAlias.create!(project: sibling, name: "EB2",
+                         target: locations(:albion))
+
+    assert_nil(record(fields: { "Location" => "EB2" }).
+               reload.unknown_location_alias)
+  end
+
+  # The reported bug: an observation in two projects warned "no
+  # abbreviation defined for EB2" although the slip's own project
+  # defined it -- the check consulted `projects.first` instead of the
+  # attached slip's project.
+  def test_unknown_location_alias_consults_the_slips_project
+    project = projects(:eol_project)
+    project.observations << @obs unless project.observations.include?(@obs)
+    slip_project = projects(:open_membership_project)
+    @obs.field_slip.update_columns(project_id: slip_project.id)
+    ProjectAlias.create!(project: slip_project, name: "EB2",
+                         target: locations(:albion))
+
+    extract = record(fields: { "Location" => "EB2" })
+
+    assert_nil(extract.reload.unknown_location_alias)
   end
 
   # A full MO location name is not an unknown abbreviation, alias or no

@@ -12,21 +12,26 @@ class FieldSlip
     # name-creation and voting rules, so it is left to the caller.
     class Applier
       ID_BY_KEY = :Field_Slip_ID_By
+      COORD_TARGETS = [:lat, :lng].freeze
 
       # `chosen` is {slip field => edited value} for the ticked fields.
-      # `inat_code` says whether "Other Codes" holds an iNaturalist
-      # observation id, which is stored as a link rather than as the
-      # bare number.
-      def initialize(observation:, chosen:, user:, inat_code: false)
+      # `template` maps each field to its Observation target.
+      # `inat_code` says whether the template's iNat-codes field holds
+      # an iNaturalist observation id, which is stored as a link rather
+      # than as the bare number.
+      def initialize(observation:, chosen:, user:, template:,
+                     inat_code: false)
         @observation = observation
         @chosen = chosen
         @user = user
+        @template = template
         @inat_code = inat_code
       end
 
       def apply
         assign_columns
         assign_notes
+        enforce_coordinate_pair
         @observation.save!
         @observation
       end
@@ -35,7 +40,7 @@ class FieldSlip
 
       def targets
         @targets ||= @chosen.filter_map do |field, value|
-          target = Extractor::FIELDS[field]
+          target = @template.fields[field]
           [target, value_for(field, value)] if target && value.present?
         end
       end
@@ -43,13 +48,34 @@ class FieldSlip
       # An iNat id is stored as the link the field slip form writes, so
       # an observation reads back the same whichever route entered it.
       # Already-linked values pass through rather than nesting.
+      # CRLF from a textarea submit normalizes to bare newlines, so a
+      # multi-line Notes value stores the same shape however it arrived.
       def value_for(field, value)
-        text = value.to_s.strip
-        return text unless field == Extractor::OTHER_CODES_FIELD
+        text = value.to_s.gsub("\r\n", "\n").strip
+        return text unless field == @template.inat_codes_field
         return text unless @inat_code
         return text if FieldSlipNotesBuilder.inat_link?(text)
 
-        FieldSlipNotesBuilder.inat_link(text)
+        inat_link_for(text)
+      end
+
+      # The box may hold more than the id ("10:29 388879492" -- a
+      # timestamp doubling as a checksum against the iNat record). The
+      # id becomes the link; the rest is kept beside it rather than
+      # dropped. Removing the id uses the span as written, which can
+      # differ from the id itself ("388 596 423").
+      def inat_link_for(text)
+        code = @template.inat_code_in(text)
+        return text unless code
+
+        link = FieldSlipNotesBuilder.inat_link(code)
+        rest = leftover_around_code(text, @template.inat_code_raw(text))
+        rest.present? ? "#{link} (#{rest})" : link
+      end
+
+      def leftover_around_code(text, raw_span)
+        text.sub(raw_span.to_s, " ").squish.
+          sub(/\A[#:\-\s]+/, "").sub(/[#:\-\s]+\z/, "")
       end
 
       def assign_columns
@@ -101,6 +127,43 @@ class FieldSlip
         @observation.when = Date.strptime(value, "%Y-%m-%d")
       rescue Date::Error
         nil
+      end
+
+      # Parsed the way the observation form does, so "39°07'N" works;
+      # a value that doesn't parse is skipped rather than saved (same
+      # reasoning as `assign_when`).
+      def assign_lat(value)
+        parsed = Location.parse_latitude(value)
+        return unless parsed
+
+        @observation.lat = parsed
+        applied_coords << :lat
+      end
+
+      def assign_lng(value)
+        parsed = Location.parse_longitude(value)
+        return unless parsed
+
+        @observation.lng = parsed
+        applied_coords << :lng
+      end
+
+      def applied_coords
+        @applied_coords ||= []
+      end
+
+      # Coordinates land as a pair or not at all: half a pair would
+      # fail Observation's own validation when the observation had
+      # none, and would silently mix a slip coordinate with one from
+      # another source when it did. Unless both were chosen and both
+      # parsed, whatever was assigned reverts -- the other fields
+      # still save.
+      def enforce_coordinate_pair
+        chosen = targets.count { |target, _| COORD_TARGETS.include?(target) }
+        return if chosen.zero?
+        return if chosen == 2 && applied_coords.size == 2
+
+        @observation.restore_attributes(COORD_TARGETS)
       end
 
       # A location the project aliases (or MO itself) know becomes a real

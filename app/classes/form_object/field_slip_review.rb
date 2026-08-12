@@ -9,10 +9,10 @@
 # field labels rather than under this object's namespace: the labels are
 # the extract's keys ("Field Slip Code", "MycoMap Voucher Number"), not
 # attributes of anything, and keying the params by them keeps the
-# controller's read a straight lookup against `Extractor::FIELDS`.
+# controller's read a straight lookup against the extract's template.
 class FormObject::FieldSlipReview < FormObject::Base
   Row = Data.define(:field, :extracted, :current, :confidence, :savable,
-                    :editable) do
+                    :editable, :role) do
     # Nothing to decide when the model read nothing.
     def blank? = extracted.to_s.strip.empty?
 
@@ -35,8 +35,10 @@ class FormObject::FieldSlipReview < FormObject::Base
     # screen, so the decision is still in front of them.
     def default_use? = savable && present?
 
-    def name_row? = field == FieldSlip::Extractor::NAME_FIELD
-    def location_row? = field == FieldSlip::Extractor::LOCATION_FIELD
+    def name_row? = role == :name
+    def location_row? = role == :location
+    def inat_row? = role == :inat
+    def code_row? = role == :code
 
     # Both get their own labelled section rather than a table cell: an
     # autocompleter only renders its dropdown and hidden id field when
@@ -52,32 +54,59 @@ class FormObject::FieldSlipReview < FormObject::Base
   # The Location the written abbreviation obviously means, when the
   # project is already using exactly one that matches.
   attribute :location_suggestion, default: nil
-  # Whether "Other Codes" looks like an iNaturalist observation id.
+  # Whether the template's iNat-codes field holds an iNaturalist
+  # observation id.
   attribute :inat_code, default: false
 
   def self.build(extract:, observation:, user: nil)
-    new(name_known: name_known?(extract, user),
+    template = extract.template
+    new(name_known: name_known?(extract, template, user),
         location_suggestion: extract.location_suggestion,
-        inat_code: FieldSlip::Extractor.inat_code?(
-          extract.value_for(FieldSlip::Extractor::OTHER_CODES_FIELD)
+        inat_code: template.inat_code?(
+          extract.value_for(template.inat_codes_field)
         ),
-        rows: FieldSlip::Extractor::FIELDS.map do |field, target|
-          Row.new(field: field, extracted: extract.value_for(field),
-                  current: current_value(observation, target),
-                  confidence: extract.confidence_for(field),
-                  savable: !target.nil?,
-                  editable: !target.nil? ||
-                            field == FieldSlip::Extractor::NAME_FIELD)
-        end)
+        rows: rows_for(extract, template, observation))
+  end
+
+  def self.rows_for(extract, template, observation)
+    attachable = code_attachable?(extract, template, observation)
+    template.fields.map do |field, target|
+      code = field == template.code_field
+      Row.new(field: field, extracted: extract.value_for(field),
+              current: current_value(observation, target),
+              confidence: extract.confidence_for(field),
+              savable: !target.nil? || (code && attachable),
+              editable: !target.nil? || field == template.name_field ||
+                        (code && attachable),
+              role: role_for(template, field))
+    end
+  end
+
+  # The read code can be applied -- ticking it attaches the slip --
+  # exactly when the observation has none. The background job usually
+  # already did this (see ExtractFieldSlipJob#attach_read_code), so
+  # this is the manual path for what it couldn't decide on its own.
+  def self.code_attachable?(extract, template, observation)
+    observation.occurrence_id.nil? &&
+      extract.value_for(template.code_field).present?
+  end
+
+  def self.role_for(template, field)
+    case field
+    when template.code_field then :code
+    when template.name_field then :name
+    when template.location_field then :location
+    when template.inat_codes_field then :inat
+    end
   end
 
   # Asks the resolver the same question saving will: would proposing
   # this right now succeed without a create-the-name round-trip? Pure
   # lookup -- the resolver only creates on an explicit approved_name.
-  def self.name_known?(extract, user)
+  def self.name_known?(extract, template, user)
     return false unless user
 
-    given = extract.value_for(FieldSlip::Extractor::NAME_FIELD).to_s.strip
+    given = extract.value_for(template.name_field).to_s.strip
     return false if given.blank?
 
     resolver = Naming::NameResolver.new(user, given_name: given)
@@ -85,7 +114,7 @@ class FormObject::FieldSlipReview < FormObject::Base
   end
 
   # What the observation holds today for the column or notes key this
-  # slip field maps to. nil for the two review-only fields.
+  # slip field maps to. nil for the review-only fields.
   def self.current_value(observation, target)
     return nil if target.nil?
 

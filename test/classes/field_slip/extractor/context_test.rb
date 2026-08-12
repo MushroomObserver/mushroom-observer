@@ -28,6 +28,27 @@ class FieldSlip::Extractor::ContextTest < UnitTestCase
     assert_equal(@obs.field_slip&.code, context_for.field_slip_code)
   end
 
+  # An observation can sit in several projects (the obs form pre-checks
+  # the last one used); the attached slip says which event it belongs
+  # to, and the aliases and template must follow the slip. Reported
+  # against a NEMF slip reviewed through another project's aliases.
+  def test_project_prefers_the_attached_slips_project
+    join_project
+    other = projects(:open_membership_project)
+    # update_columns: a real project change cascades the observations
+    # along; the test needs the divergence.
+    @obs.field_slip.update_columns(project_id: other.id)
+
+    assert_equal(other, context_for(@obs.reload).project)
+  end
+
+  def test_project_falls_back_to_the_observations_first_project
+    join_project
+    @obs.field_slip.update_columns(project_id: nil)
+
+    assert_equal(@project, context_for(@obs.reload).project)
+  end
+
   # The abbreviation table is the project's own aliases rather than
   # anything written into the prompt -- that is what lets an alias added
   # during review improve the next slip.
@@ -67,7 +88,11 @@ class FieldSlip::Extractor::ContextTest < UnitTestCase
   end
 
   def test_aliases_empty_without_a_project
-    assert_empty(context_for.aliases("Location"))
+    # The fixture slip carries a project; "no project" now means the
+    # slip's is gone too.
+    @obs.field_slip.update_columns(project_id: nil)
+
+    assert_empty(context_for(@obs.reload).aliases("Location"))
   end
 
   # An alias whose target has been deleted would otherwise render as a

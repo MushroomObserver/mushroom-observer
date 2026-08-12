@@ -240,6 +240,9 @@ module ObservationsController::Create
   end
 
   def redirect_to_next_page
+    return if redirected_to_field_slip_review?
+
+    warn_no_field_slip_detected
     if @observation.location_id.nil?
       redirect_to(new_location_path(where: @observation.place_name(@user),
                                     set_observation: @observation.id))

@@ -105,8 +105,10 @@ continuing. See footnote 1.<sup id="a1">[1](#f1)</sup>**
 
 
 ```sh
-brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
+brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils zbar
 ```
+
+`zbar` provides `zbarimg`, which MO uses to read field slip QR codes out of uploaded photos (see `FieldSlip::QRDecoder`). Everything else works without it; that one feature just stays off.
 
 ## Bash
 
