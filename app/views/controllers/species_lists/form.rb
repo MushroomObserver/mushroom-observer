@@ -35,9 +35,7 @@ module Views::Controllers::SpeciesLists
     # has_many-through setter would do that instantly on a
     # persisted record, even though the save itself failed).
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
-         default: nil do |value|
-      value&.compact_blank&.map { |id| Integer(id) }
-    end
+         default: nil, &TO_ID_ARRAY
 
     # Override Superform's default
     # `helpers.url_for(action: resource_action)` so the form action

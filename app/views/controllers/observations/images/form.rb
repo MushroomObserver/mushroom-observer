@@ -17,9 +17,7 @@ module Views::Controllers::Observations::Images
     prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
-         default: nil do |value|
-      value&.compact_blank&.map { |id| Integer(id) }
-    end
+         default: nil, &TO_ID_ARRAY
 
     # Explicit form action — `image_path(model)` via the
     # `observations/images` controller. PUT update.

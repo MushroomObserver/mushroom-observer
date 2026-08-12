@@ -33,9 +33,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :button_name, String
   prop :projects, _Array(Project)
   prop :submitted_project_ids, _Nilable(_Array(Integer)),
-       default: nil do |value|
-    value&.compact_blank&.map { |id| Integer(id) }
-  end
+       default: nil, &TO_ID_ARRAY
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }
   prop :cross_prefix_projects, _Array(Project), default: -> { [] }

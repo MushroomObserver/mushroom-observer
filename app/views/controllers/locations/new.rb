@@ -10,7 +10,6 @@ module Views::Controllers::Locations
     # All four come from params[...] (always a String, or absent) --
     # coerced to Integer so a non-numeric value fails loudly here
     # instead of round-tripping into the create-URL's query string.
-    TO_ID = ->(value) { value && Integer(value) }
     prop :set_observation, _Nilable(Integer), default: nil, &TO_ID
     prop :set_species_list, _Nilable(Integer), default: nil, &TO_ID
     prop :set_user, _Nilable(Integer), default: nil, &TO_ID
