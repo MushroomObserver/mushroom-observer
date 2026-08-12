@@ -209,10 +209,12 @@ tbody.collapse.in {
   }
 }
 
-// Baseline correction for icon+text links that aren't framed as a
-// .btn (plain Link::Get, including its stateful .stateful-link swap
-// variant) -- excludes .inline-icon-link, which sets its own top: 0.
-a:not(.btn):not(.inline-icon-link) > .mo-icon {
+// Baseline correction for icon+text pairs that aren't framed as a
+// .btn: plain Link::Get (excludes .inline-icon-link, which sets its
+// own top: 0) and the sidebar heading icons (Icon directly inside a
+// ListGroup::Item div, next to a text span).
+a:not(.btn):not(.inline-icon-link) > .mo-icon,
+.list-group-item > .mo-icon {
   top: 2px;
 }
 
