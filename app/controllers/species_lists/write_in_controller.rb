@@ -200,7 +200,8 @@ module SpeciesLists
     end
 
     def validate_place_name
-      @place_name = params[:place_name] || @species_list.place_name(@user)
+      @place_name = params.permit(:place_name)[:place_name] ||
+                    @species_list.place_name(@user)
       @dubious_where_reasons = Location.dubious_reasons_for(
         user: @user, place_name: @place_name,
         approved: params[:approved_where]

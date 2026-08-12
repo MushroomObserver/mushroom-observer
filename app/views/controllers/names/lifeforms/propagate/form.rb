@@ -4,10 +4,7 @@
 # `Names::Lifeforms::PropagateController#edit`.
 module Views::Controllers::Names::Lifeforms::Propagate
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, **)
-      @name = name
-      super(model, **)
-    end
+    prop :name, ::Name
 
     def view_template
       render_add_section

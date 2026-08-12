@@ -155,7 +155,7 @@ module ObservationsController::New
   def init_naming_and_vote
     @naming      = Naming.new
     @vote        = Vote.new
-    @given_name = params[:name] || ""
+    @given_name = params.permit(:name)[:name] || ""
     return unless params[:notes] && params[:notes][:Field_Slip_ID]
 
     @given_name = params[:notes][:Field_Slip_ID].tr("_", "")
@@ -231,9 +231,10 @@ module ObservationsController::New
   end
 
   def check_location
-    if params[:place_name]
+    place_name = params.permit(:place_name)[:place_name]
+    if place_name
       # Cannot use @place_name since that's being used for approved_where
-      @default_place_name = params[:place_name]
+      @default_place_name = place_name
       loc = Location.place_name_to_location(@default_place_name, @user)
       @location = loc if loc
     else

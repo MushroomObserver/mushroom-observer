@@ -158,7 +158,7 @@ module Observations
         observation: @observation,
         local: false,
         show_reasons: true,
-        context: params[:context],
+        context: params.permit(:context)[:context],
         vote: @vote,
         given_name: @given_name,
         reasons: @reasons,

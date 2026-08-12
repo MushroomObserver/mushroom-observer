@@ -5,13 +5,9 @@
 # (`Projects::AdminController#show`).
 module Views::Controllers::Projects
   class Form < ::Components::ApplicationForm
-    def initialize(model, dates_any: true, upload_params: nil,
-                   dirty_form: false, **)
-      @dates_any = dates_any
-      @upload_params = upload_params
-      @dirty_form = dirty_form
-      super(model, **)
-    end
+    prop :dates_any, _Boolean
+    prop :upload_params, _Nilable(Hash), default: nil
+    prop :dirty_form, _Boolean, default: false
 
     # Adds the dirty-form Stimulus controller to the rendered <form>
     # tag when the caller opts in. Used on the Admin/Details tab to

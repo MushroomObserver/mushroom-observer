@@ -1839,6 +1839,53 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Regression: a request sending `project_ids` without the `[]` array
+  # suffix (a scalar String, not the checkbox-group Array shape) used
+  # to crash `init_project_vars_for_reload`'s unguarded `.compact_blank`
+  # on the failure-reload path. Copilot flagged the underlying
+  # TO_ID_ARRAY gap on PR #5051 as a "suppressed" finding.
+  def test_create_observation_fails_validation_with_malformed_project_ids
+    login("rolf")
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(project_ids: "5")
+    stub_valid_false_on(Observation) do
+      post(:create, params: params)
+    end
+    assert_response(:success)
+  end
+
+  # Regression: a request sending a bare scalar for the whole
+  # `observation` param instead of the expected nested hash used to
+  # crash `create_observation_object`'s `.permit` call with
+  # NoMethodError. Copilot flagged this on PR #5051 as a "suppressed"
+  # finding on the sibling collection_number_params/
+  # herbarium_record_params methods; this is the same shape one level
+  # up.
+  def test_create_observation_with_malformed_observation_param
+    login("rolf")
+    post(:create, params: { observation: "abc" })
+
+    assert_response(:success)
+  end
+
+  # Regression: sending a bare scalar for collection_number/
+  # herbarium_record instead of the expected nested hash used to
+  # crash `.permit` (only defined on ActionController::Parameters,
+  # not String). Copilot's actual finding on PR #5051.
+  def test_create_observation_with_malformed_specimen_params
+    login("rolf")
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(
+      collection_number: "abc", herbarium_record: "xyz"
+    )
+
+    assert_difference("Observation.count", 1) do
+      post(:create, params: params)
+    end
+    assert_not_equal(500, @response.status,
+                     "Malformed specimen params should not 500")
+  end
+
   def test_create_observation_fails_naming_validation
     login("rolf")
     stub_valid_false_on(Naming) do

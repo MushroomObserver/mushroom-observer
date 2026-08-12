@@ -6,10 +6,11 @@ module Views::Controllers::HerbariumRecords
   # controller's `new.rb` and `edit.rb`, and dynamically
   # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, observation: nil, back: nil, **)
-      @observation = observation || model.observations.first
-      @back = back
-      super(model, **)
+    prop :observation, _Nilable(::Observation), default: nil
+    prop :back, _Nilable(String), default: nil
+
+    def initialize(model, observation: nil, **)
+      super(model, observation: observation || model.observations.first, **)
     end
 
     def view_template

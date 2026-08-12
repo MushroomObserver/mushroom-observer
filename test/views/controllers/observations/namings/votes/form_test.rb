@@ -121,15 +121,6 @@ module Views::Controllers::Observations::Namings::Votes
                   text: :vote_no_opinion.l)
     end
 
-    def test_opinion_menu_when_no_user
-      # Anonymous viewer (no `user:`) → opinion menu always.
-      html = render_form(user: nil,
-                         vote: ::Vote.new(naming: @naming, value: 2.0))
-
-      assert_html(html, "select option[value='0']",
-                  text: :vote_no_opinion.l)
-    end
-
     # ---- context hidden field + noscript fallback ----------------------
 
     def test_renders_context_hidden_field

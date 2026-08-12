@@ -5,7 +5,7 @@
 module Views::Controllers::Names
   class Edit < Views::FullPageBase
     prop :name, ::Name
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     prop :name_string, _Nilable(String), default: nil
     prop :misspelling, _Boolean, default: false
     prop :correct_spelling, _Nilable(String), default: nil

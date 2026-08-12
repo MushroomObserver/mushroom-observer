@@ -114,7 +114,8 @@ module Observations
     # wire shape. `compact_blank` strips the form's sentinel hidden
     # input (value=""), leaving just the integer-string IDs.
     def submitted_project_ids
-      params.dig(:image, :project_ids)&.compact_blank
+      params.permit(image: { project_ids: [] }).
+        dig(:image, :project_ids)&.compact_blank
     end
 
     def image_data_changed?
@@ -201,7 +202,8 @@ module Observations
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
       end
-      @submitted_project_ids = params.dig(:image, :project_ids)
+      @submitted_project_ids =
+        params.permit(image: { project_ids: [] }).dig(:image, :project_ids)
     end
 
     public

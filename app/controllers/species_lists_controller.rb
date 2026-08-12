@@ -334,7 +334,11 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   def update_redirect_and_flash_notices(create_or_update)
     log_and_flash_notices(create_or_update)
-    update_projects(@species_list, params.dig(:species_list, :project_ids))
+    update_projects(
+      @species_list,
+      params.permit(species_list: { project_ids: [] }).
+        dig(:species_list, :project_ids)
+    )
 
     if @species_list.location_id.nil?
       redirect_to(new_location_path(where: @place_name,

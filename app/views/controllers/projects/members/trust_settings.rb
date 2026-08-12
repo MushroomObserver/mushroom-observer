@@ -32,6 +32,11 @@ module Views::Controllers::Projects::Members
         level: "editing" }
     ].freeze
 
+    prop :project, ::Project
+    prop :current_trust_level, String, default: "no_trust"
+    prop :body_id, _Nilable(String), default: nil
+    prop :flash_id, _Nilable(String), default: nil
+
     # Declares to ModalTurboForm that this form renders its own
     # `.modal-body` and `.modal-footer` divs (so the form tag spans
     # both — submit in the footer is naturally inside the form).
@@ -40,15 +45,14 @@ module Views::Controllers::Projects::Members
     end
 
     def initialize(candidate, project:, current_trust_level: "no_trust",
-                   modal_ids: {}, **)
-      @project = project
-      @current_trust_level = current_trust_level
-      @body_id = modal_ids[:body]
-      @flash_id = modal_ids[:flash]
+                   modal_ids: {}, **attrs)
       # Superform uses the model for `dom.id` + the `persisted?` check
       # that picks PATCH vs POST. The candidate is the natural choice
       # here — it's the user whose membership is being updated.
-      super(candidate, **)
+      super(candidate, project: project,
+                       current_trust_level: current_trust_level,
+                       body_id: modal_ids[:body], flash_id: modal_ids[:flash],
+                       **attrs)
     end
 
     # The form (Superform's default view_template) wraps both modal

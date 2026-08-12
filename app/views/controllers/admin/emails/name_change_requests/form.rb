@@ -5,11 +5,8 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
   # Rendered by the admin/emails/name_change_requests controller's
   # `new.erb`. Allows users to request changing a taxonomic name.
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, new_name_with_icn_id:, **)
-      @name = name
-      @new_name_with_icn_id = new_name_with_icn_id
-      super(model, **)
-    end
+    prop :name, ::Name
+    prop :new_name_with_icn_id, String
 
     def view_template
       super do

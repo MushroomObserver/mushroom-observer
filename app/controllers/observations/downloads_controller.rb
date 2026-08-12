@@ -12,7 +12,7 @@ module Observations
 
       update_stored_query(@query) # also stores query in session
       render(Views::Controllers::Observations::Downloads::New.new(
-               query_param: q_param
+               query: @query
              ))
     end
 

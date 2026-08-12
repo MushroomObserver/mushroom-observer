@@ -452,10 +452,12 @@ class LocationsController < ApplicationController
                     end
 
     # Where to return after successfully creating location.
-    @set_observation  = params[:set_observation]
-    @set_species_list = params[:set_species_list]
-    @set_user         = params[:set_user]
-    @set_herbarium    = params[:set_herbarium]
+    set_params = params.permit(:set_observation, :set_species_list,
+                               :set_user, :set_herbarium)
+    @set_observation  = set_params[:set_observation]
+    @set_species_list = set_params[:set_species_list]
+    @set_user         = set_params[:set_user]
+    @set_herbarium    = set_params[:set_herbarium]
   end
 
   def create_location_ivar_and_save(done)
@@ -480,26 +482,28 @@ class LocationsController < ApplicationController
     done
   end
 
+  # Every branch validates its id via `safe_find` (not just presence)
+  # before redirecting, and always falls through to the next
+  # candidate -- and ultimately to the location itself -- rather than
+  # issuing no redirect at all for a stale or tampered set_* id.
   def return_to_caller
-    if @set_observation
-      redirect_to(observation_path(@set_observation))
-    elsif @set_species_list
-      redirect_to(species_list_path(@set_species_list))
-    elsif @set_herbarium
-      if (herbarium = Herbarium.safe_find(@set_herbarium))
-        herbarium.location = @location
-        herbarium.save
-        redirect_to(herbarium_path(@set_herbarium))
-      end
-    elsif @set_user
-      if (user = User.safe_find(@set_user))
-        user.location = @location
-        user.save
-        redirect_to(user_path(user))
-      end
+    if (observation = Observation.safe_find(@set_observation))
+      redirect_to(observation_path(observation))
+    elsif (species_list = SpeciesList.safe_find(@set_species_list))
+      redirect_to(species_list_path(species_list))
+    elsif (herbarium = Herbarium.safe_find(@set_herbarium))
+      attach_location_and_redirect(herbarium, herbarium_path(herbarium))
+    elsif (user = User.safe_find(@set_user))
+      attach_location_and_redirect(user, user_path(user))
     else
       redirect_to(location_path(@location.id))
     end
+  end
+
+  def attach_location_and_redirect(record, path)
+    record.location = @location
+    record.save
+    redirect_to(path)
   end
 
   # Merge this location with another.

@@ -49,9 +49,9 @@ module Observations::Images
         "added_images",
         ::Components::Form::UploadGallery::TurboStreamSlide.new(
           user: @user, image: @image,
-          img_id: params[:img_id],
-          file_name: params[:file_name],
-          file_size: params[:file_size]
+          img_id: params.permit(:img_id)[:img_id],
+          file_name: params.permit(:file_name)[:file_name],
+          file_size: params.permit(:file_size)[:file_size]
         )
       )
     end
@@ -60,7 +60,8 @@ module Observations::Images
       turbo_stream.prepend(
         "added_thumbnails",
         ::Components::Form::UploadGallery::TurboStreamThumb.new(
-          user: @user, image: @image, img_id: params[:img_id]
+          user: @user, image: @image,
+          img_id: params.permit(:img_id)[:img_id]
         )
       )
     end

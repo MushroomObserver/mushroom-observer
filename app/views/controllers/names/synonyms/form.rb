@@ -5,21 +5,23 @@
 # internally from the provided kwargs.
 module Views::Controllers::Names::Synonyms
   class Form < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, synonym_members: nil, deprecate_all: true,
-                   current_synonyms: [], proposed_synonyms: [],
-                   new_names: [], user: nil, **)
-      @name = name
-      @current_synonyms = current_synonyms
-      @proposed_synonyms = proposed_synonyms
-      @new_names = new_names
-      @user = user
+    prop :name, ::Name
+    prop :current_synonyms, _Array(::Name), default: -> { [] }
+    prop :proposed_synonyms, _Nilable(_Array(::Name)), default: nil
+    prop :new_names, _Nilable(_Array(String)), default: nil
+    prop :user, ::User
 
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(name:, user:, synonym_members: nil, deprecate_all: true,
+                   current_synonyms: [], proposed_synonyms: nil,
+                   new_names: nil, **attrs)
       form_object = FormObject::EditSynonym.new(
         synonym_members: synonym_members,
         deprecate_all: deprecate_all
       )
-      super(form_object, **)
+      super(form_object, name: name, current_synonyms: current_synonyms,
+                         proposed_synonyms: proposed_synonyms,
+                         new_names: new_names, user: user, **attrs)
     end
     # rubocop:enable Metrics/ParameterLists
 

@@ -256,7 +256,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   # validation-failure re-render (reload_form), so it doesn't silently
   # drop the top-users list the second time around.
   def set_top_users_for_reload
-    @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
+    @top_users = User.top_users_for_herbarium(@herbarium).to_a if in_admin_mode?
   end
 
   def render_modal_herbarium_form

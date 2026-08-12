@@ -6,17 +6,17 @@ module Views::Controllers::Translations
   # Creates its own FormObject internally (Pattern B). Uses
   # FieldProxy for dynamic textarea fields with flat param names.
   class Form < ::Components::ApplicationForm
-    def initialize(lang:, tag:, edit_tags:,
-                   strings:, **options)
-      @lang = lang
-      @tag = tag
-      @edit_tags = edit_tags
-      @strings = strings
-      @for_page = options.delete(:for_page)
-      @official_records = options.delete(:official_records)
+    prop :lang, ::Language
+    prop :tag, _Nilable(String), default: nil
+    prop :edit_tags, _Array(String), default: -> { [] }
+    prop :strings, _Hash(String, String), default: -> { {} }
+    prop :for_page, _Nilable(String), default: nil
+    prop :official_records, _Hash(String, ::TranslationString)
 
+    def initialize(lang:, tag:, edit_tags:, strings:, **attrs)
       form_object = FormObject::Translation.new(tag: tag)
-      super(form_object, **options)
+      super(form_object, lang: lang, tag: tag, edit_tags: edit_tags,
+                         strings: strings, **attrs)
     end
 
     def around_template(&block)

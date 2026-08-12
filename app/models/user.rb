@@ -331,7 +331,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :top_users_for_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
       where(herbarium_records: { herbarium_id: herbarium.id }).
-      select(:name, :login, User[:id].count).
+      select(:name, :login, User[:id].count.as("record_count")).
       group(:id).order(User[:id].count.desc).take(5)
   }
 

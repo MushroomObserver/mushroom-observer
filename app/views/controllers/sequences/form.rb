@@ -7,11 +7,8 @@ module Views::Controllers::Sequences
   # controller's `new.rb` and `edit.rb`, and dynamically
   # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, observation: nil, back: nil, **)
-      @observation = observation
-      @back = back
-      super(model, **)
-    end
+    prop :observation, _Nilable(::Observation), default: nil
+    prop :back, _Nilable(String), default: nil
 
     def view_template
       render_locus_field

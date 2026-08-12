@@ -5,18 +5,28 @@ module Views::Controllers::InatImports
   # and Proceed/Go Back buttons. Hidden fields carry form data
   # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
+    prop :expected, _Nilable(::Integer), default: nil
+    prop :unlicensed_obs, _Nilable(::Integer), default: nil
+    prop :inat_import, _Nilable(::InatImport), default: nil
+    prop :requested, _Nilable(::Integer), default: nil
+    prop :after_taxon, _Nilable(::Integer), default: nil
+    prop :not_yet_imported, _Nilable(::Integer), default: nil
+    prop :estimate_with_date, _Nilable(::Integer), default: nil
+    prop :estimated_at, ::Time, default: -> { Time.current }
+    prop :urls, ::Inat::ConfirmURLBuilder
+
     def initialize(model, expected: nil, unlicensed_obs: nil,
                    breakdown: {}, **)
-      @expected = expected
-      @unlicensed_obs = unlicensed_obs
-      @inat_import = breakdown[:inat_import]
-      @requested = breakdown[:requested]
-      @after_taxon = breakdown[:after_taxon]
-      @not_yet_imported = breakdown[:not_yet_imported]
-      @estimate_with_date = breakdown[:estimate_with_date]
-      @estimated_at = Time.current
-      @urls = ::Inat::ConfirmURLBuilder.new(model)
-      super(model, **)
+      super(model,
+            expected: expected,
+            unlicensed_obs: unlicensed_obs,
+            inat_import: breakdown[:inat_import],
+            requested: breakdown[:requested],
+            after_taxon: breakdown[:after_taxon],
+            not_yet_imported: breakdown[:not_yet_imported],
+            estimate_with_date: breakdown[:estimate_with_date],
+            urls: ::Inat::ConfirmURLBuilder.new(model),
+            **)
     end
 
     def view_template
