@@ -120,11 +120,10 @@ class LicensesController < AdminController
   end
 
   # `status: :ok` is the default so the plain GET `new`/`edit` renders
-  # (from the `new`/`edit` actions themselves) stay 200 -- only the
-  # `_invalid` variants below, called from `create`/`update`'s failure
-  # branches, pass `:unprocessable_content`. Turbo requires a non-2xx
-  # status on a failed form submission's re-render; a 200 there is a
-  # silent no-op under Turbo instead of a redisplay.
+  # (from the `new`/`edit` actions themselves) stay 200 --
+  # ApplicationController's `render_new_view_invalid`/
+  # `render_edit_view_invalid` call these with
+  # `status: :unprocessable_content` from `create`/`update`'s failures.
   def render_new_view(status: :ok)
     render(Views::Controllers::Licenses::New.new(license: @license),
            status: status)
@@ -133,13 +132,5 @@ class LicensesController < AdminController
   def render_edit_view(status: :ok)
     render(Views::Controllers::Licenses::Edit.new(license: @license),
            status: status)
-  end
-
-  def render_new_view_invalid
-    render_new_view(status: :unprocessable_content)
-  end
-
-  def render_edit_view_invalid
-    render_edit_view(status: :unprocessable_content)
   end
 end

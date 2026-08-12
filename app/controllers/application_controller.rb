@@ -354,6 +354,20 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # Turbo requires a non-2xx status on a failed form submission's
+  # re-render; a 200 there is a silent no-op under Turbo instead of a
+  # redisplay. Dispatches to the including controller's own
+  # `render_new_view`/`render_edit_view` (status: :ok default) --
+  # every controller with `new`/`edit`/`create`/`update` actions
+  # defines those two, so this pair needs no per-controller override.
+  def render_new_view_invalid
+    render_new_view(status: :unprocessable_content)
+  end
+
+  def render_edit_view_invalid
+    render_edit_view(status: :unprocessable_content)
+  end
+
   # defined here because used by both images_controller and
   # observations_controller
   def permitted_image_args
