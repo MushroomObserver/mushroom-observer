@@ -33,9 +33,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # the observation-scoped scan page's job (linked below), since
     # which photo shows the slip is a decision about the observation.
     def render_unscanned
-      render(Components::Panel.new(
-               panel_id: "field_slip_extract_none"
-             )) do |p|
+      Panel(panel_id: "field_slip_extract_none") do |p|
         p.with_body do
           plain(:field_slip_extract_none_yet.l)
         end
