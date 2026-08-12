@@ -278,6 +278,11 @@ export default class extends Controller {
     if (this.areAllItemsExifPopulated() ||
       attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
       this.block_form_submission = false;
+      // form.submit() (not requestSubmit()) is fine here for now: the
+      // observation form isn't Turbo-enabled (no local: false), so
+      // there's no submit-event listener to bypass yet. Swap to
+      // requestSubmit() when Turbo is enabled on this form -- see the
+      // nimmo-5052-turbo-submit-prototype branch, which already does.
       this.form.submit();
     } else {
       setTimeout(() => this.submitWhenExifReady(attempt + 1), 100);
