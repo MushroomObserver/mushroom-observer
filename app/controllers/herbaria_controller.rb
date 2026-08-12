@@ -203,7 +203,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   # Needed both by the initial edit GET and by #update's
   # validation-failure re-render (reload_form), so it doesn't silently
   # drop the top-users list the second time around.
-  def set_top_users_for_reload
+  private def set_top_users_for_reload
     @top_users = User.top_users_for_herbarium(@herbarium) if in_admin_mode?
   end
 
