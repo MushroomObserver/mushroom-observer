@@ -35,6 +35,8 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }
+  prop :cross_prefix_projects, _Array(Project), default: -> { [] }
+  prop :slip_target_project, _Nilable(Project), default: nil
 
   def view_template
     render(panel) do |p|
@@ -50,7 +52,10 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
       panel_id: "observation_projects",
       collapsible: true,
       collapse_target: "#observation_projects_inner",
-      expanded: any_checked?
+      # Constraint messages live inside this panel; collapsing them
+      # away leaves the flash pointing at nothing (reported: every box
+      # unchecked, slip project still warning, no visible explanation).
+      expanded: any_checked? || constraint_issues?
     )
   end
 
@@ -73,13 +78,13 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
 
     div(id: "project_messages") do
       render_error_alert if @error_checked_projects.any?
-      render_warning_alert if @suspect_checked_projects.any?
+      render_warning_alert if warning_projects.any?
     end
     render_ignore_checkbox
   end
 
   def constraint_issues?
-    @error_checked_projects.any? || @suspect_checked_projects.any?
+    @error_checked_projects.any? || warning_projects.any?
   end
 
   def render_error_alert
@@ -87,38 +92,69 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
                             :form_observations_projects_out_of_range_help.t)
   end
 
+  # One alert, every problem project, each with its reasons -- a
+  # constraint violation and a cross-prefix leftover read the same
+  # way, so the user fixes everything in a single pass.
   def render_warning_alert
-    help = :form_observations_projects_out_of_range_help.t +
-           :form_observations_projects_out_of_range_admin_help.t(
-             button_name: @button_name
-           )
-    render_constraint_alert(:warning, @suspect_checked_projects, help)
+    help = :form_observations_projects_out_of_range_help.t
+    help += :form_observations_projects_use_spare_help.t if spare_slip_option?
+    help += :form_observations_projects_out_of_range_admin_help.t(
+      button_name: @button_name
+    )
+    render_constraint_alert(:warning, warning_projects, help)
+  end
+
+  def spare_slip_option?
+    @slip_target_project.present? || @cross_prefix_projects.any?
+  end
+
+  def warning_projects
+    @suspect_checked_projects | @cross_prefix_projects
   end
 
   def render_constraint_alert(level, projects, help_text)
     Alert(level: level) do
-      div { plain("#{:form_observations_projects_out_of_range.t}:") }
+      div { plain("#{:form_observations_projects_out_of_range.l}:") }
       ul do
         projects.each do |proj|
-          li { "#{proj.title} (#{constraint_kind_labels(proj)})" }
+          li { "#{proj.title} (#{alert_reason_labels(proj)})" }
         end
       end
       p { help_text }
     end
   end
 
-  # Joined, localized kind labels for the violations this observation
-  # incurs against `proj` (Non-target name; Out-of-range date; etc.).
-  def constraint_kind_labels(proj)
-    proj.violation_kinds_for(@observation).map do |kind|
+  # Joined, localized labels for everything wrong with `proj`: the
+  # constraint kinds this observation violates (Non-target name;
+  # Out-of-range date; etc.) plus the cross-prefix soft constraint.
+  def alert_reason_labels(proj)
+    kinds = proj.violation_kinds_for(@observation).map do |kind|
       :"form_observations_projects_kind_#{kind}".l
-    end.join("; ")
+    end
+    if @cross_prefix_projects.include?(proj)
+      kinds << :form_observations_projects_kind_prefix_mismatch.l
+    end
+    kinds.join("; ")
   end
 
   def render_ignore_checkbox
     @form.checkbox_field(
       :ignore_proj_conflicts,
       label: :form_observations_projects_ignore_project_constraints
+    )
+    render_spare_slip_checkbox
+  end
+
+  # The opt-out for a slip used outside its event: attach it to this
+  # observation with no project at all. Only offered when the slip's
+  # own project is part of the problem -- either violating (its
+  # target conflict) or mismatched against a checked project's prefix.
+  def render_spare_slip_checkbox
+    return unless spare_slip_option?
+
+    @form.checkbox_field(
+      :use_spare_slip,
+      label: :form_observations_projects_use_spare_slip
     )
   end
 
