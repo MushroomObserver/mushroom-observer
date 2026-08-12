@@ -77,6 +77,51 @@
 #     end
 #   end
 #
+# @example When a custom `initialize` is (and isn't) needed
+#   # No custom initialize needed: `model` is an object the caller
+#   # already has, passed straight through as the positional arg.
+#   # Every other value the view template reads is just a `prop`.
+#   class NameForm < Components::ApplicationForm
+#     prop :user, ::User
+#   end
+#   # NameForm.new(@name, user: @user)
+#
+#   # Custom initialize needed ("Pattern B"): the model has to be
+#   # *built*, not accepted -- there's no FormObject instance sitting
+#   # around in the caller to pass through. `prop`s you declare are
+#   # still type-checked and assigned even though a hand-written
+#   # initialize now runs -- Literal resolves properties off `self.class`,
+#   # not off whichever ancestor's `initialize` happens to execute.
+#   class WebmasterQuestionForm < Components::ApplicationForm
+#     prop :email_error, _Nilable(_Boolean), default: nil
+#
+#     def initialize(_model = nil, reply_to: nil, message: nil, **)
+#       form_object = FormObject::EmailRequest.new(
+#         reply_to: reply_to, message: message
+#       )
+#       super(form_object, **)
+#     end
+#   end
+#
+#   # `email_error` is a prop because the form itself reads `@email_error`
+#   # (e.g. for autofocus logic). `reply_to`/`message` are plain
+#   # initialize params, not props, because nothing reads `@reply_to`/
+#   # `@message` afterward -- they're forwarded once into the FormObject
+#   # and read back out through Superform's normal field binding
+#   # (`model.reply_to`, `text_field(:reply_to)`). Making them props too
+#   # would just be a second, redundant copy that can drift from
+#   # `model.reply_to`.
+#   #
+#   # This also isn't the place for "is this a valid email" / "is this
+#   # blank" checks -- a Literal prop mismatch raises at construction
+#   # (a 500), and Rails param parsing already guarantees these arrive
+#   # as String-or-nil, so a prop type could barely ever catch anything
+#   # anyway. Real validation belongs on the FormObject, which already
+#   # includes `ActiveModel::Model` (see `FormObject::Base`) -- `validates`
+#   # + `.errors` fail gracefully with a normal form re-render, and
+#   # Superform's field helpers already render `model.errors[:field]`
+#   # inline.
+#
 # Field helper methods are defined in FieldHelpers (field_helpers.rb).
 # Upload helpers are in UploadHelpers (upload_helpers.rb).
 class Components::ApplicationForm < Superform::Rails::Form
