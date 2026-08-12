@@ -5,14 +5,10 @@ module Views::Controllers::InatImports
   # Sets page title and context nav, then renders the
   # form component.
   class New < Views::FullPageBase
-    def initialize(form:, super_importer: false, admin: false,
-                   has_prior_imports: false)
-      super()
-      @form = form
-      @super_importer = super_importer
-      @admin = admin
-      @has_prior_imports = has_prior_imports
-    end
+    prop :form, ::FormObject::InatImport
+    prop :super_importer, _Boolean, default: false
+    prop :admin, _Boolean, default: false
+    prop :has_prior_imports, _Boolean, default: false
 
     def view_template
       add_page_title(:inat_import_create_title.l)

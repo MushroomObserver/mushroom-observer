@@ -2,6 +2,8 @@
 
 module Observations
   class DownloadsController < ApplicationController
+    include DownloadFormatValidatable
+
     before_action :login_required
 
     def new
@@ -65,22 +67,9 @@ module Observations
       report.mark_exported! if report.respond_to?(:mark_exported!)
     end
 
-    FORMATS = %w[
-      raw
-      adolf
-      dwca
-      symbiota
-      fundis
-      mycoportal
-      mycoportal_image_list
-    ].freeze
-    private_constant :FORMATS
-
     def create_report(args)
-      format = args[:format].to_s
-      return do_report(args, format) if FORMATS.include?(format)
-
-      raise("Invalid download type: #{format.inspect}")
+      format = valid_download_format(args[:format].to_s)
+      do_report(args, format)
     end
 
     def do_report(args, format)

@@ -46,9 +46,9 @@ class Components::Link::Location < Components::Link::Object
   end
 
   def click_for_map_icon
-    Components::Link::Icon.new(
-      content: :click_for_map.l,
-      path: location_href,
+    Components::Link::Get.new(
+      name: :click_for_map.l,
+      target: location_href,
       icon: :map,
       class: Components::InlineLinkBlock.item_class
     )

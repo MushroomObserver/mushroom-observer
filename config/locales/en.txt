@@ -1153,6 +1153,7 @@
   banner_update: Update Banner
   banner_update_failure: Failed to update banner.
   banner_update_success: Banner updated successfully.
+  banner_show_tooltip: Show current announcements
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -2823,9 +2824,9 @@
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/admin/emails/webmaster_questions/new for help.
 
   # interest-related controls in names, observations, etc.
-  interest_watch_help: Click here if you want us to send you email whenever there is a change in this [object].
-  interest_ignore_help: Click here if you want to stop getting any emails about this [object].
-  interest_default_help: Click here if you want to go back to the default -- having your account preferences determine whether you get email about this [object].
+  interest_watch_help: Email me about changes to this [object].
+  interest_ignore_help: Don't email me about this [object].
+  interest_default_help: Use my account notifications preference for this [object].
   interest_watching: You have told us to email you about changes in this [object]. Click one of the small icons below to change.
   interest_ignoring: You have told us never to email you about changes in this [object]. Click one of the small icons below to change.
 
@@ -2940,9 +2941,6 @@
   # observer/list_users
   list_users_joined: Joined
   list_users_contribution: Contribution
-
-  # species_list/make_report
-  make_report_not_supported: We don't support report filetype *.[type].
 
   # description/merge_descriptions
   merge_descriptions_title: Merge [object]

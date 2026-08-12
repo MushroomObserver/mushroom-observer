@@ -3,14 +3,14 @@
 module Views::Controllers::Projects
   # Phlex view for the project show page.
   class Show < Views::FullPageBase
-    def initialize(project:, user:, drafts:, comments:, object_names:)
-      super()
-      @project = project
-      @user = user
-      @drafts = drafts
-      @comments = comments
-      @object_names = object_names
-    end
+    prop :project, ::Project
+    prop :user, ::User
+    prop :drafts, _Array(::NameDescription)
+    prop :comments, _Array(::Comment)
+    # Despite selecting Name[:text_name]/Name[:id], the base relation
+    # is `@project.observations` -- these are Observation records
+    # (with those Name columns attached), not Name instances.
+    prop :object_names, _Array(::Observation)
 
     def view_template
       add_show_title(@project)

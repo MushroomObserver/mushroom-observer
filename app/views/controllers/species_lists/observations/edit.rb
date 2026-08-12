@@ -6,11 +6,8 @@
 # current query of observations.
 module Views::Controllers::SpeciesLists::Observations
   class Edit < Views::FullPageBase
-    def initialize(prefill_value:, num_results:)
-      super()
-      @prefill_value = prefill_value
-      @num_results = num_results
-    end
+    prop :prefill_value, String
+    prop :num_results, Integer
 
     def view_template
       add_page_title(:species_list_add_remove_title.t)

@@ -4,11 +4,8 @@
 # `Projects::MembersController#edit`.
 module Views::Controllers::Projects::Members
   class Groups < Views::Base
-    def initialize(project:, user:)
-      super()
-      @project = project
-      @user = user
-    end
+    prop :project, ::Project
+    prop :user, ::User
 
     def view_template
       render_group(:change_member_status_members,

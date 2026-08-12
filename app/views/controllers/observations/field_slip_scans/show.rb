@@ -13,9 +13,7 @@ module Views::Controllers::Observations::FieldSlipScans
     def view_template
       add_page_title(:field_slip_scan_title.t(id: @observation.id))
 
-      render(Components::Panel.new(
-               panel_id: "field_slip_scan_photos"
-             )) do |p|
+      Panel(panel_id: "field_slip_scan_photos") do |p|
         p.with_body do
           plain(:field_slip_scan_help.l)
           div(class: "d-flex flex-wrap mt-3") do
@@ -30,8 +28,8 @@ module Views::Controllers::Observations::FieldSlipScans
 
     def render_photo(image)
       div(class: "mr-4 mb-3 text-center") do
-        render(Components::InteractiveImage.new(image: image, user: @user,
-                                                size: :small, votes: false))
+        InteractiveImage(image: image, user: @user, size: :small,
+                         votes: false)
         div { render_photo_state(image) }
       end
     end

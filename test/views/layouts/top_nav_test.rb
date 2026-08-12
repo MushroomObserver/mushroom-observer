@@ -122,6 +122,23 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_no_html(html, "a[href='#{routes.field_slips_qr_reader_new_path}']")
   end
 
+  # ---- show-banner button ---------------------------------------------
+
+  def test_show_banner_button_hidden_when_no_current_banner
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, "svg.mo-icon-interests")
+  end
+
+  def test_show_banner_button_present_when_banner_given
+    html = render(top_nav(user: @user, banner: banners(:one)))
+
+    assert_html(html,
+                "button.top_nav_button.top_nav_icon_button.hidden-xs" \
+                "[data-banner-target='showButton'] " \
+                "svg.mo-icon-interests[aria-label='#{:banner_show_tooltip.t}']")
+  end
+
   # ---- nav-toggles (mobile chrome) ----------------------------------
 
   def test_left_nav_toggle_renders_with_offcanvas_wiring
@@ -171,8 +188,8 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   private
 
-  def top_nav(user:, query: nil)
-    TopNavWithoutSearchRow.new(user: user, query: query)
+  def top_nav(user:, query: nil, banner: nil)
+    TopNavWithoutSearchRow.new(user: user, query: query, banner: banner)
   end
 
   # Override controller_name on the test controller so methods like

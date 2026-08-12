@@ -159,7 +159,7 @@ class InlineCRUDLinksTest < ComponentTestCase
     html = render_links(modal_id: "collection_number", tab: tab)
 
     assert_html(html, "a[data-modal='modal_collection_number'] " \
-                      "span.glyphicon-plus")
+                      "svg.mo-icon-add")
     # Icon-only -- the tab's own descriptive title drives the tooltip
     # + sr-only text, not a generic "Add".
     assert_html(html, "a[title='#{tab.title}']")

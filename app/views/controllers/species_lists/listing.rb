@@ -12,15 +12,11 @@
 # wrapper of its own; the surrounding ListGroup item provides it.
 module Views::Controllers::SpeciesLists
   class Listing < Views::Base
-    def initialize(species_list:, observation: nil,
-                   remove: false, add: false, project: nil)
-      super()
-      @species_list = species_list
-      @observation = observation
-      @remove = remove
-      @add = add
-      @project = project
-    end
+    prop :species_list, ::SpeciesList
+    prop :observation, _Nilable(::Observation), default: nil
+    prop :remove, _Boolean, default: false
+    prop :add, _Boolean, default: false
+    prop :project, _Nilable(::Project), default: nil
 
     # Row contents only — the surrounding `<div class="list-group-item
     # d-flex justify-content-between align-items-start">` is emitted by

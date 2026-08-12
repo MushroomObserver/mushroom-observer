@@ -26,7 +26,7 @@ module Views::Controllers::Observations::Identify
                          "[data-autocompleter--region-target='wrap']")
 
       # Search icon
-      assert_html(html, "span.glyphicon.glyphicon-search")
+      assert_html(html, "svg.mo-icon-search")
 
       # Hidden field for term_id with dual targets
       assert_html(html, "input[type='hidden']" \

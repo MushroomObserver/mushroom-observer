@@ -116,19 +116,19 @@ class CollapseToggleLinkTest < ComponentTestCase
   def test_icon_kwarg_renders_icon_in_link
     html = render_it(icon: :info)
 
-    assert_html(html, "a span.glyphicon")
+    assert_html(html, "a svg.mo-icon-info")
   end
 
   def test_icon_title_forwarded_to_icon
     html = render_it(icon: :info, icon_title: "Help content")
 
-    assert_html(html, "a span.sr-only", text: "Help content")
+    assert_html(html, "a svg[aria-label='Help content']")
   end
 
   def test_icon_title_defaults_to_closed_text
     html = render_it(icon: :plus, closed_text: "Show more")
 
-    assert_html(html, "a span.sr-only", text: "Show more")
+    assert_html(html, "a svg[aria-label='Show more']")
   end
 
   def test_open_text_renders_collapse_toggle_open_span
