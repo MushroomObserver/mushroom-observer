@@ -255,8 +255,8 @@ module Views::Controllers::Occurrences
     end
 
     def render_occurrence_link(obs)
-      Link(type: :icon, tab: Tab::Occurrence::Existing.new(obs: obs),
-           show_text: true)
+      Link(type: :get, tab: Tab::Occurrence::Existing.new(obs: obs),
+           label: true)
     end
   end
 end

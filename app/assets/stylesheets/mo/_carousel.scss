@@ -113,6 +113,37 @@
     // color: rgba($white, 1);
     opacity: 1;
   }
+
+  // Replaces Bootstrap's own .glyphicon-chevron-left/-right centering,
+  // which no longer matches now that Icon renders <svg class="mo-icon
+  // mo-icon-chevron-left">.
+  .mo-icon-chevron-left,
+  .mo-icon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+  }
+
+  .mo-icon-chevron-left {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .mo-icon-chevron-right {
+    right: 50%;
+    transform: translate(50%, -50%);
+  }
+}
+
+// Bootstrap's own .carousel-control scales its glyph 1.5x here
+// ($carousel-control-font-size 20px -> 30px). .mo-icon inherits
+// .carousel-control's font-size (via .btn { font-size: inherit }
+// above) and sizes itself in em, so bumping font-size here scales
+// the icon the same way without a separate .mo-icon override.
+@media screen and (min-width: $screen-sm-min) {
+  .carousel-control {
+    font-size: 3rem;
+  }
 }
 
 .carousel-heading {

@@ -125,7 +125,7 @@ module Views::Layouts
       assert_nested(
         html,
         parent_selector: "a.index_object_link",
-        child_selector: "span.glyphicon-th"
+        child_selector: "svg.mo-icon-grid"
       )
     end
 
@@ -141,7 +141,7 @@ module Views::Layouts
       assert_nested(
         html,
         parent_selector: "a.index_object_link",
-        child_selector: "span.glyphicon-list"
+        child_selector: "svg.mo-icon-list"
       )
     end
 
@@ -150,7 +150,7 @@ module Views::Layouts
 
       html = render_nav(object: @middle_obs, query: @query)
 
-      # Framed as buttons via Link::Icon's button:/size: kwargs, not
+      # Framed as buttons via Link::Get's button:/size: kwargs, not
       # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
       # (not :default) removes the background/border while keeping
       # button padding — plain icon-only nav buttons, not filled
@@ -190,7 +190,7 @@ module Views::Layouts
       assert_nested(
         html,
         parent_selector: "a.prev_object_link",
-        child_selector: "span.glyphicon"
+        child_selector: "svg.mo-icon-prev"
       )
 
       # SR-only text should be in link

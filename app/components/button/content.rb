@@ -18,11 +18,23 @@ module Components::Button::Content
 
   def button_content
     if @icon
-      render_icon_with_text(@icon, @name, show_text: @label,
-                                          icon_class: @icon_class,
-                                          icon_title: @icon_title)
+      render_icon_with_text(
+        @icon, @name, show_text: @label,
+                      icon_opts: { class: @icon_class, title: @icon_title },
+                      active: { icon: @active_icon, content: @active_content }
+      )
     elsif @name
       trusted_or_plain(@name)
     end
+  end
+
+  # `.stateful-link` is what `_icons.scss`'s active/collapsed swap
+  # rule keys off -- only add it when there's actually a swap pair to
+  # show/hide, so a plain (non-stateful) Button/Link's markup is
+  # unaffected. Shared here (both `Components::Button#merged_class`
+  # and `Components::Link::Get#merged_class` call it) rather than
+  # duplicated.
+  def stateful_class
+    "stateful-link" if @active_icon && @active_content
   end
 end

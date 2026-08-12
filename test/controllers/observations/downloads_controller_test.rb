@@ -199,15 +199,19 @@ module Observations
       assert_no_flash
       assert_response(:success)
 
-      format = "nonexistent"
-      assert_raises("Invalid download type: #{format}") do
-        post(:create,
-             params: {
-               q:,
-               download: { format: format },
-               commit: "Download"
-             })
-      end
+      # Regression: an invalid format falls back to the default ("raw")
+      # instead of raising -- unvalidated params shouldn't be able to
+      # 500 this action.
+      post(
+        :create,
+        params: {
+          q:,
+          download: { format: "nonexistent" },
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
     end
 
     def test_download_too_many_observations

@@ -30,14 +30,14 @@ module Views::Layouts
       adjacent_id = @query.send(:"#{dir}_id")
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
-      Link(type: :icon, content: adjacent_title(dir), path: href,
+      Link(type: :get, name: adjacent_title(dir), target: href,
            icon: dir, button: :link, size: :lg, class: classes)
     end
 
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
 
-      Link(type: :icon, content: index_title, path: index_path,
+      Link(type: :get, name: index_title, target: index_path,
            icon: index_icon, button: :link, size: :lg, class: classes)
     end
 

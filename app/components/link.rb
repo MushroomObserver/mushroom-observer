@@ -20,9 +20,13 @@
 #   Link(type: :modal,          modal_id: "m", name: "Open", target: url)
 #   Link(type: :collapse_toggle, target_id: "div_id")
 #   Link(type: :external,       tab: some_tab)
-#   Link(type: :icon,           tab: some_tab)
 #   Link(type: :active,         content: "Latest",
 #                               path: observations_path)
+#
+# `Link::Get` (and its Edit/New/Download subclasses) also accept
+# `active_icon:`/`active_content:` for a stateful icon+label swap, and
+# `button_to:`/`confirm:` for a form-submitting, Turbo-confirmed
+# variant -- see `Components::Link::Get`'s own doc comment.
 #
 # The inline edit/destroy/add link group used to live here as
 # `:inline_mod` / `:inline_add` -- it renders zero, one, or two links
@@ -33,7 +37,7 @@ class Components::Link < Components::Base
   include Components::Button::Styling
   include Components::Button::Content
 
-  prop :button, _Nilable(Symbol), default: nil
+  prop :button, _Nilable(_Union(*Components::Button::VARIANTS)), default: nil
 
   DISPATCH = {
     active: :Active,
@@ -42,7 +46,6 @@ class Components::Link < Components::Base
     edit: :Edit,
     external: :External,
     get: :Get,
-    icon: :Icon,
     location: :Location,
     modal: :Modal,
     new: :New,

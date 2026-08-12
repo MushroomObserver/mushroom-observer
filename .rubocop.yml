@@ -78,16 +78,6 @@ MO/InitializeWithoutProp:
     # args, no dedicated test coverage). Not worth the risk/reward;
     # left as manual initialize.
     - "app/components/application_form/**/*.rb"
-    # TEMPORARY, remove once #5020 merges/rebases in: the Link::*/
-    # Button::* prop conversions live exclusively on #5020, not here,
-    # per an explicit decision to keep this branch's diff to the
-    # non-Link/Button sweep. Excluded so this branch's CI stays green
-    # in the meantime rather than flagging files this PR isn't
-    # touching.
-    - "app/components/button.rb"
-    - "app/components/button/**/*.rb"
-    - "app/components/link.rb"
-    - "app/components/link/**/*.rb"
 
 MO/LowercaseTranslationTag:
   Description: >-

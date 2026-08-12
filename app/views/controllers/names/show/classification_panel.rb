@@ -28,7 +28,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   private
 
   def render_edit_link
-    Link(type: :icon,
+    Link(type: :get,
          tab: Tab::Name::EditClassification.new(name: @name))
   end
 
