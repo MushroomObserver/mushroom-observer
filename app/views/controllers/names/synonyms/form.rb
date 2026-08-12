@@ -6,9 +6,7 @@
 module Views::Controllers::Names::Synonyms
   class Form < ::Components::ApplicationForm
     prop :name, ::Name
-    prop :current_synonyms, _Array(::Name), default: -> { [] } do |value|
-      value || []
-    end
+    prop :current_synonyms, _Array(::Name), default: -> { [] }
     prop :proposed_synonyms, _Nilable(_Array(::Name)), default: nil
     prop :new_names, _Nilable(_Array(String)), default: nil
     prop :user, ::User

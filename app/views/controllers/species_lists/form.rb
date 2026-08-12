@@ -23,9 +23,7 @@ module Views::Controllers::SpeciesLists
   class Form < ::Components::ApplicationForm
     prop :user, ::User
     prop :button, Symbol
-    prop :projects, _Array(::Project), default: -> { [] } do |value|
-      value || []
-    end
+    prop :projects, _Array(::Project), default: -> { [] }
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
     prop :clone_id, _Nilable(Integer), default: nil

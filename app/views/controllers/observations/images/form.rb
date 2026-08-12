@@ -15,9 +15,7 @@ module Views::Controllers::Observations::Images
   class Form < ::Components::ApplicationForm
     prop :user, ::User
     prop :licenses, _Array(Array)
-    prop :projects, _Array(::Project), default: -> { [] } do |value|
-      value || []
-    end
+    prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil do |value|
       value&.compact_blank&.map { |id| Integer(id) }
