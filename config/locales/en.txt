@@ -544,8 +544,9 @@
   delete: delete
   # deprecate a name
   deprecate: deprecate
-  # destroy an observation or other object
-  destroy: destroy
+  # destroy an observation or other object -- user-facing text says
+  # "delete", not "destroy" (programmer jargon)
+  destroy: delete
   disable: disable
   download: download
   edit: edit
@@ -641,7 +642,7 @@
   cancel_to_index: "[:cancel.ti] ([TYPE] [:index.ti])"
   new_object: New [TYPE]
   create_object: Create [TYPE]
-  destroy_object: Destroy [TYPE]
+  destroy_object: Delete [TYPE]
   edit_object: Edit [TYPE]
   list_objects: List [TYPES]
   update_object: Update [TYPE]
