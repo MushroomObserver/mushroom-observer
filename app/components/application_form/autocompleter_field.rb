@@ -213,71 +213,103 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
+    # A bare <svg> can't take padding -- on a replaced element like
+    # svg, padding eats into the element's own rendered content area
+    # instead of adding space around it, so the checkmark artwork
+    # itself was rendering smaller than its width/height implied.
+    # The spacing (and the has-id/has-id-indicator show/hide toggle,
+    # see _autocomplete.scss) belongs on a wrapping span instead --
+    # every icon needs a wrap, never printed bare in the page.
+    #
+    # The tooltip lives on that same wrapping span, not on `Icon(...)`
+    # itself -- passing `title:` to Icon does not give a bare svg a
+    # working tooltip on its own.
     def render_has_id_indicator
-      Icon(
-        type: :check,
-        title: :autocompleter_has_id.l,
-        class: "px-2 text-success has-id-indicator",
-        data: { target_attr_key => "hasIdIndicator" }
-      )
+      title = :autocompleter_has_id.l
+      span(class: "px-2 has-id-indicator", title: title,
+           data: { target_attr_key => "hasIdIndicator",
+                   tooltip_target: "tip", placement: "top" }) do
+        Icon(type: :check, class: "text-success")
+      end
     end
 
+    # These four are plain `Button`s, not `Link`s -- they never had a
+    # real destination (target: "#" was always a fake href relying on
+    # a Stimulus `:prevent` modifier to stop its own no-op navigation)
+    # and are pure client-side toggles (show/hide a map box, swap in
+    # create fields). `variant: :link, class: "... p-0"` gives
+    # Bootstrap's own .btn-link reset (no bare-<button> browser chrome)
+    # with zero padding, without the padding being baked in as a
+    # site-wide default (see `Components::Button::Styling`).
+    #
+    # `Link::Get` auto-wires a tooltip (data-tooltip-target + title)
+    # whenever `icon:` is present -- plain `Button` doesn't (only
+    # `CRUDBase`, for form-submitting buttons, does that automatically).
+    # Converting away from Link dropped it, so each one adds the same
+    # tooltip_data shape Link::Get used to supply, by hand.
     def render_find_button
       return unless find_text
 
-      Link(type: :icon,
-           content: find_text, path: "#",
-           icon: :find_on_map, show_text: false,
-           icon_class: "text-primary",
-           name: "find_#{autocompleter_type}",
-           class: "ml-3 find-btn d-none",
-           data: { map_target: "showBoxBtn",
-                   action: "map#showBox:prevent" })
+      Button(name: find_text,
+             icon: :find_on_map, label: false,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 find-btn d-none p-0",
+             title: find_text,
+             data: { map_target: "showBoxBtn",
+                     action: "map#showBox",
+                     tooltip_target: "tip", placement: "top",
+                     title: find_text })
     end
 
     def render_keep_box_button
       return unless keep_text
 
-      Link(type: :icon,
-           content: keep_text, path: "#",
-           icon: :apply, show_text: false,
-           icon_class: "text-primary",
-           name: "keep_#{autocompleter_type}",
-           class: "ml-3 keep-btn d-none",
-           data: { target_attr_key => "keepBtn",
-                   map_target: "lockBoxBtn",
-                   action: "map#toggleBoxLock:prevent " \
-                           "form-exif#showFields" })
+      Button(name: keep_text,
+             icon: :apply, label: false,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 keep-btn d-none p-0",
+             title: keep_text,
+             data: { target_attr_key => "keepBtn",
+                     map_target: "lockBoxBtn",
+                     action: "map#toggleBoxLock " \
+                             "form-exif#showFields",
+                     tooltip_target: "tip", placement: "top",
+                     title: keep_text })
     end
 
     def render_edit_box_button
       return unless keep_text
 
-      Link(type: :icon,
-           content: edit_text, path: "#",
-           icon: :edit, show_text: false,
-           icon_class: "text-primary",
-           name: "edit_#{autocompleter_type}",
-           class: "ml-3 edit-btn d-none",
-           data: { target_attr_key => "editBtn",
-                   map_target: "editBoxBtn",
-                   action: "map#toggleBoxLock:prevent " \
-                           "form-exif#showFields" })
+      Button(name: edit_text,
+             icon: :edit, label: false,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 edit-btn d-none p-0",
+             title: edit_text,
+             data: { target_attr_key => "editBtn",
+                     map_target: "editBoxBtn",
+                     action: "map#toggleBoxLock " \
+                             "form-exif#showFields",
+                     tooltip_target: "tip", placement: "top",
+                     title: edit_text })
     end
 
     def render_create_button
       return if !create_text || create.present?
 
-      Link(type: :icon,
-           content: create_text, path: "#",
-           id: "create_#{autocompleter_type}_btn",
-           class: "ml-3 create-button",
-           icon: :plus, show_text: true,
-           icon_class: "text-primary",
-           name: "create_#{autocompleter_type}",
-           data: { target_attr_key => "createBtn",
-                   action: "#{stimulus_controller_name}" \
-                           "#swapCreate:prevent" })
+      Button(name: create_text,
+             id: "create_#{autocompleter_type}_btn",
+             class: "ml-3 create-button p-0",
+             icon: :plus, label: true,
+             icon_class: "text-primary",
+             variant: :link,
+             title: create_text,
+             data: { target_attr_key => "createBtn",
+                     action: "#{stimulus_controller_name}#swapCreate",
+                     tooltip_target: "tip", placement: "top",
+                     title: create_text })
     end
 
     def render_modal_create_link
@@ -287,7 +319,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            modal_id: create,
            name: create_text,
            target: create_path,
-           icon: :plus, show_text: true,
+           icon: :plus, label: true,
            icon_class: "text-primary",
            class: "ml-3 create-link",
            data: { target_attr_key => "createBtn" })

@@ -4,8 +4,8 @@ require "test_helper"
 
 # `Components::Form::Notes` always renders a collapsible Bootstrap Panel
 # wrapping the notes-fields content. The component is exercised here
-# inside small test forms — same pattern as the parity tests in
-# `application_form_helper_parity_test.rb`.
+# inside small test forms — same pattern as the tests in
+# `application_form_test.rb`.
 class FormNotesTest < ComponentTestCase
   def setup
     super

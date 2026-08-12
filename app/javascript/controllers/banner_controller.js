@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["banner", "container", "dismissButton", "showButton"];
+  static targets = ["banner", "dismissButton", "showButton"];
 
   connect() {
     this.element.dataset.banner = "connected";
@@ -10,7 +10,7 @@ export default class extends Controller {
 
     if (this.isBannerDismissed()) {
       this.hideBanner();
-      this.showShowButton(true); // Show the chevron
+      this.showShowButton();
     } else {
       this.showBanner();
       this.hideShowButton();
@@ -47,13 +47,17 @@ export default class extends Controller {
     this.bannerTarget.classList.add('d-block');
   }
 
+  // No `d-block` add/remove here (unlike hideBanner/showBanner) --
+  // this button is a `.btn:has(.mo-icon)`, and _icons.scss already
+  // gives it `display: inline-flex` for icon centering. Adding
+  // Bootstrap's `.d-block` (`display: block !important`) would
+  // override that via !important, un-centering the icon and making
+  // the button taller than its search/qrcode siblings.
   hideShowButton() {
-    this.containerTarget.classList.remove('d-block');
-    this.containerTarget.classList.add('d-none');
+    this.showButtonTarget.classList.add('d-none');
   }
 
   showShowButton() {
-    this.containerTarget.classList.remove('d-none');
-    this.containerTarget.classList.add('d-block');
+    this.showButtonTarget.classList.remove('d-none');
   }
 }

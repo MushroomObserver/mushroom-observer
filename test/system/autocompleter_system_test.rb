@@ -325,10 +325,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Checkmark should be visible
     within(autocompleter) do
-      indicator = find(".has-id-indicator", visible: :all)
-      style = indicator.style("display")
-      assert_equal("inline-block", style["display"],
-                   "Checkmark should be visible after multiple selections")
+      assert_selector(".has-id-indicator", visible: true)
     end
   end
 
@@ -380,10 +377,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Checkmark should be visible
     autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
-      indicator = find(".has-id-indicator", visible: :all)
-      style = indicator.style("display")
-      assert_equal("inline-block", style["display"],
-                   "Checkmark should be visible after pasting matching names")
+      assert_selector(".has-id-indicator", visible: true)
     end
   end
 
@@ -421,10 +415,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Checkmark should be visible
     autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
-      indicator = find(".has-id-indicator", visible: :all)
-      style = indicator.style("display")
-      assert_equal("inline-block", style["display"],
-                   "Checkmark should be visible for prefilled values")
+      assert_selector(".has-id-indicator", visible: true)
     end
   end
 

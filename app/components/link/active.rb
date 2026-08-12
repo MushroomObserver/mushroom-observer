@@ -16,14 +16,9 @@
 #   render(Components::Link::Active.new(content: nil,
 #                                       path: observations_path) { "Latest" })
 class Components::Link::Active < Components::Base
-  attr_reader :content, :path, :args
-
-  def initialize(content:, path:, **args)
-    super()
-    @content = content
-    @path = path
-    @args = args
-  end
+  prop :content, _Nilable(String), default: nil
+  prop :path, String
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
     link_to(@path, **link_args) { trusted_or_plain(@content) }
@@ -32,7 +27,7 @@ class Components::Link::Active < Components::Base
   private
 
   def link_args
-    @args.deep_merge(data: nav_active_data)
+    @attributes.deep_merge(data: nav_active_data)
   end
 
   def nav_active_data

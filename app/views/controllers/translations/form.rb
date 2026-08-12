@@ -197,7 +197,7 @@ module Views::Controllers::Translations
 
     def render_save_button
       submit(:save.ti, as: :button,
-                       name: :commit, value: :submit,
+                       name: "commit", value: "submit",
                        id: "save_button", data: save_button_data)
     end
 

@@ -26,16 +26,14 @@ class ModalLinkTest < ComponentTestCase
     assert_html(html, "a.btn.btn-outline-default[href='/edit']")
   end
 
-  def test_icon_modal_link_renders_through_icon_link
+  def test_icon_modal_link_renders_with_icon_and_modal_wiring
     html = render_modal(icon: :edit)
 
-    # With icon, delegates to Link::Icon — anchor carries modal data attrs
-    # AND the icon-link tooltip wiring.
-    assert_html(html, "a.icon-link[href='/edit']" \
+    assert_html(html, "a[href='/edit']" \
                       "[data-modal='modal_comment']" \
                       "[data-controller='modal-toggle']" \
                       "[data-action='modal-toggle#showModal:prevent']")
-    assert_html(html, "a span.glyphicon-edit")
+    assert_html(html, "a svg.mo-icon-edit")
     assert_html(html, "a span.sr-only", text: "Edit")
   end
 

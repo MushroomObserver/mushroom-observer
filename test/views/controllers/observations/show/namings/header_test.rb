@@ -87,10 +87,10 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
   def test_propose_link_renders_with_plus_icon
     # Tab::Naming::New sets `icon: :add` in its html_options;
     # ModalLink routes through IconLink when an `icon:` is
-    # present, which produces a glyphicon-plus span.
+    # present, which produces it.
     html = render_header
 
-    assert_html(html, "a span.glyphicon-plus")
+    assert_html(html, "a svg.mo-icon-add")
   end
 
   private

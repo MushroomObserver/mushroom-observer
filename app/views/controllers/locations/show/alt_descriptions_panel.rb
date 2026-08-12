@@ -28,7 +28,7 @@ module Views::Controllers::Locations
       private
 
       def heading_links
-        Link(type: :icon,
+        Link(type: :get,
              tab: Tab::Description::Create.new(parent: @object))
       end
 

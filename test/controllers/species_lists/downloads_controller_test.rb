@@ -50,10 +50,11 @@ module SpeciesLists
         x.sub(/\{\\createim\\yr.*\}/, "")
       end
 
+      # Regression: an invalid format falls back to the default ("txt")
+      # instead of erroring out.
       post(:create,
            params: { id: list.id, species_list_report: { format: "bogus" } })
-      assert_response(:redirect)
-      assert_flash_error
+      assert_response_equal_file("#{path}/test.txt")
     end
 
     def test_print_labels
@@ -81,6 +82,31 @@ module SpeciesLists
 
       url = observations_downloads_path(params:)
       assert_select("form[action='#{url}']")
+    end
+
+    # Regression: `format`/`encoding`/`species_list_report[format]` come
+    # straight from raw params with no upstream validation -- garbage
+    # values must fall back to the default radio selection, not crash
+    # or silently pre-select something invalid.
+    def test_new_validates_invalid_format_and_encoding_params
+      login
+      spl = species_lists(:one_genus_three_species_list)
+
+      get(:new, params: {
+            id: spl.id,
+            format: "bogus",
+            encoding: "bogus",
+            species_list_report: { format: "bogus" }
+          })
+
+      assert_response(:success)
+      assert_select(
+        "input[name='species_list_report[format]'][value='txt'][checked]"
+      )
+      assert_select("input[name='download[format]'][value='raw'][checked]")
+      assert_select(
+        "input[name='download[encoding]'][value='UTF-8'][checked]"
+      )
     end
   end
 end
