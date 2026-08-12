@@ -360,12 +360,20 @@ class ApplicationController < ActionController::Base
   # `render_new_view`/`render_edit_view` (status: :ok default) --
   # every controller with `new`/`edit`/`create`/`update` actions
   # defines those two, so this pair needs no per-controller override.
+  # Doesn't pass status: into render_new_view/render_edit_view --
+  # several not-yet-converted controllers (ArticlesController,
+  # LocationsController, PublicationsController) still define a
+  # zero-arg render_new_view/render_edit_view, which would raise
+  # ArgumentError on a forced status: kwarg. Setting status after
+  # render works regardless of the subclass method's signature.
   def render_new_view_invalid(**)
-    render_new_view(status: :unprocessable_content, **)
+    render_new_view(**)
+    self.status = :unprocessable_content
   end
 
   def render_edit_view_invalid(**)
-    render_edit_view(status: :unprocessable_content, **)
+    render_edit_view(**)
+    self.status = :unprocessable_content
   end
 
   # defined here because used by both images_controller and
