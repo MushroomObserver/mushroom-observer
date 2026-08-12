@@ -47,13 +47,17 @@ export default class extends Controller {
     this.bannerTarget.classList.add('d-block');
   }
 
+  // No `d-block` add/remove here (unlike hideBanner/showBanner) --
+  // this button is a `.btn:has(.mo-icon)`, and _icons.scss already
+  // gives it `display: inline-flex` for icon centering. Adding
+  // Bootstrap's `.d-block` (`display: block !important`) would
+  // override that via !important, un-centering the icon and making
+  // the button taller than its search/qrcode siblings.
   hideShowButton() {
-    this.showButtonTarget.classList.remove('d-block');
     this.showButtonTarget.classList.add('d-none');
   }
 
   showShowButton() {
     this.showButtonTarget.classList.remove('d-none');
-    this.showButtonTarget.classList.add('d-block');
   }
 }
