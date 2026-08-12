@@ -9,11 +9,9 @@ module Views::Controllers::Support
   class Form < ::Components::ApplicationForm
     PRESET_AMOUNTS = [25.00, 50.00, 100.00, 200.00].freeze
 
-    def initialize(model, **)
+    def initialize(model, **attrs)
+      attrs[:data] = (attrs[:data] || {}).merge(controller: "donate")
       super
-      @attributes ||= {}
-      @attributes[:data] =
-        (@attributes[:data] || {}).merge(controller: "donate")
     end
 
     def view_template

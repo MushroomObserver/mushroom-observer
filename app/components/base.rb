@@ -5,6 +5,9 @@ class Components::Base < Phlex::HTML
 
   # Include any helpers you want to be available across all components
   include ScalarParams
+  # `TO_ID` / `TO_ID_ARRAY` -- shared Literal `prop` coercion blocks
+  # for id/id-array props sourced from raw HTTP params.
+  include LiteralIDCoercion
   include Phlex::Rails::Helpers::Routes
   include Phlex::Rails::Helpers::AssetPath
   include Phlex::Rails::Helpers::LinkTo

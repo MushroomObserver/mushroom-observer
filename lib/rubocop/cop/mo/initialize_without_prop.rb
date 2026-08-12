@@ -61,22 +61,6 @@ module RuboCop
         PHLEX_SUPERCLASS_PREFIXES = ["Components::", "Views::"].freeze
         PHLEX_SUPERCLASSES = ["Phlex::HTML", "Phlex::SGML"].freeze
 
-        # `Components::ApplicationForm` extends Superform::Rails::Form
-        # (a gem class) and its own hand-written `initialize` sets up
-        # `@namespace`/`@model`/`@action`/`@method` -- state every
-        # Superform field helper depends on. Verified empirically: a
-        # direct subclass that declares its own `prop` hits the same
-        # "child's new props make super skip the parent's initialize
-        # body" gotcha documented above, except here the skipped logic
-        # is core Superform state, not just a validation call, so
-        # there's no safe explicit-call workaround (there's no single
-        # method to call -- it's the whole initialize). Matches
-        # `application_form/**/*.rb`'s exclusion for the same family
-        # of reasons; this covers the OTHER direct subclasses of
-        # ApplicationForm that live outside that directory (most
-        # `views/controllers/**/form.rb` files).
-        NON_PROP_COMPATIBLE_SUPERCLASSES = ["Components::ApplicationForm"].freeze
-
         def on_class(class_node)
           return unless phlex_subclass?(class_node)
 
@@ -95,7 +79,6 @@ module RuboCop
           return false unless superclass
 
           name = superclass.source.delete_prefix("::")
-          return false if NON_PROP_COMPATIBLE_SUPERCLASSES.include?(name)
 
           PHLEX_SUPERCLASSES.include?(name) ||
             PHLEX_SUPERCLASS_PREFIXES.any? { |prefix| name.start_with?(prefix) }

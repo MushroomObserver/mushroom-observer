@@ -102,6 +102,7 @@ module ObservationsController::EditAndUpdate
   def update
     return unless editable_or_redirect?
 
+    normalize_observation_param
     init_update
     apply_observation_changes
     reload_edit_form and return if @any_errors

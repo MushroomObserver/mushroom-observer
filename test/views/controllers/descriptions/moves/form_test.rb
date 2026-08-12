@@ -62,10 +62,11 @@ module Views::Controllers::Descriptions::Moves
     end
 
     # When the parent has exactly one non-misspelling synonym,
-    # default_checked? is true and default_target_id pre-selects that
-    # lone move target. No fixture matches this shape, so we create a
-    # NameDescription on lactifluus_alpinus (paired with the deprecated
-    # but non-misspelling lactifluus_subalpinus).
+    # Form#initialize sets form_object.target to it directly,
+    # pre-selecting that lone move target. No fixture matches this
+    # shape, so we create a NameDescription on lactifluus_alpinus
+    # (paired with the deprecated but non-misspelling
+    # lactifluus_subalpinus).
     def test_single_move_target_auto_selects
       parent = names(:lactifluus_alpinus)
       target = names(:lactifluus_subalpinus)

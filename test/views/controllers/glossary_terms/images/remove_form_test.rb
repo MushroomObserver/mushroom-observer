@@ -15,8 +15,9 @@ module Views::Controllers::GlossaryTerms::Images
 
     def test_renders_form_with_put_method_and_action
       html = render_form
+      path = routes.detach_image_from_glossary_term_path(@model.id)
 
-      assert_html(html, "form[action='/test_action']")
+      assert_html(html, "form[action='#{path}']")
       # Superform: explicit method: :put → POST + hidden _method=put.
       assert_html(html, "form[method='post']")
       assert_html(html,
@@ -70,9 +71,7 @@ module Views::Controllers::GlossaryTerms::Images
     private
 
     def render_form
-      render(RemoveForm.new(@model,
-                            form_action: "/test_action",
-                            user: @user))
+      render(RemoveForm.new(@model, user: @user))
     end
   end
 end

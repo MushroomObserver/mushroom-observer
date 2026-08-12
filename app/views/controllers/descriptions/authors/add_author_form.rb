@@ -10,10 +10,7 @@
 # an author.
 module Views::Controllers::Descriptions::Authors
   class AddAuthorForm < Components::ApplicationForm
-    def initialize(model, object:, **)
-      @object = object
-      super(model, **)
-    end
+    prop :object, ::AbstractModel
 
     def view_template
       div(class: "d-flex align-items-end gap-2 mt-2") do

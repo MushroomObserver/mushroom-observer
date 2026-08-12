@@ -83,12 +83,13 @@ module Views::Controllers::Projects::Violations
       (0..(parts.length - 1)).map { |i| parts[i..].join(", ") }
     end
 
-    def initialize(obs:, project:, existing_locations:, **)
-      @obs = obs
-      @project = project
-      # `name => Location` for every suffix that already has a row;
-      # pre-loaded by `Projects::ViolationsController#target_location_modal`.
-      @existing_locations = existing_locations
+    prop :obs, ::Observation
+    prop :project, ::Project
+    # `name => Location` for every suffix that already has a row;
+    # pre-loaded by `Projects::ViolationsController#target_location_modal`.
+    prop :existing_locations, _Hash(String, ::Location)
+
+    def initialize(obs:, project:, existing_locations:, **attrs)
       # The project is the thing being mutated (a target_location
       # entry is added to its target_locations list), so it's the
       # natural Superform "model" for dom.id. No fields bind to it —
@@ -96,7 +97,8 @@ module Views::Controllers::Projects::Violations
       # the persisted Project model; `project_violations_update_path`
       # accepts both PATCH and PUT (the legacy button_to calls still
       # use PUT).
-      super(project, **)
+      super(project, obs: obs, project: project,
+                     existing_locations: existing_locations, **attrs)
     end
 
     def form_action

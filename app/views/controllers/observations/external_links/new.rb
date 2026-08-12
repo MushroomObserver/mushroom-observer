@@ -10,7 +10,7 @@ module Views::Controllers::Observations::ExternalLinks
     prop :observation, ::Observation
     prop :sites, _Array(::ExternalSite)
     prop :site, _Nilable(::ExternalSite), default: nil
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
 
     def view_template
       container_class(:full)

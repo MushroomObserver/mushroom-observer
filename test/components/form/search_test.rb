@@ -111,8 +111,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true,
-      form_action_url: "/names/search"
+      local: true
     )
     html = render(form)
 
@@ -374,8 +373,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true,
-      form_action_url: "/names/search"
+      local: true
     )
     html = render(form)
     doc = Nokogiri::HTML(html)
@@ -432,8 +430,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true,
-      form_action_url: "/names/search"
+      local: true
     )
     html = render(form)
     doc = Nokogiri::HTML(html)
@@ -623,8 +620,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       @query,
       search_controller: @search_controller,
-      local: local,
-      form_action_url: "/observations/search"
+      local: local
     )
     render(form)
   end
@@ -633,8 +629,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: @search_controller,
-      local: true,
-      form_action_url: "/observations/search"
+      local: true
     )
     render(form)
   end

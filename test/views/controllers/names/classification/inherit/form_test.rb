@@ -42,7 +42,8 @@ module Views::Controllers::Names::Classification::Inherit
                name: name,
                parent: parent,
                candidates: candidates,
-               message: message
+               message: message,
+               user: users(:rolf)
              ))
     end
   end

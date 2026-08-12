@@ -4,10 +4,9 @@ module Views::Controllers::Descriptions::AuthorRequests
   # Form to request authorship of a description. Sends an email to the
   # authors/reviewers. Posts to `Descriptions::AuthorRequestsController`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, object:, action:, **)
-      @object = object
-      super(model, action: action, **)
-    end
+    # Unused within this class -- kept as-is (pre-existing, out of
+    # scope for this conversion) since `New` currently passes it.
+    prop :object, ::AbstractModel
 
     def view_template
       render_note

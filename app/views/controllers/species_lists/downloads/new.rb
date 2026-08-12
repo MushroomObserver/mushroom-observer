@@ -16,16 +16,14 @@ module Views::Controllers::SpeciesLists::Downloads
       add_page_title(:species_list_download_title.t)
       add_context_nav(Tab::Object::Return.new(object: @list))
 
-      query_param = q_param(@query)
-
-      render(Form.new(query_param: query_param))
+      render(Form.new(query: @query))
       render(ReportForm.new(
                list: @list,
-               query_param: query_param,
+               query: @query,
                selected: @type
              ))
       render(Views::Controllers::Observations::Downloads::Form.new(
-               query_param: query_param,
+               query: @query,
                format: @format,
                encoding: @encoding
              ))

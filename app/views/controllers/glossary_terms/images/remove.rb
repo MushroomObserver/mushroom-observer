@@ -15,8 +15,6 @@ module Views::Controllers::GlossaryTerms
 
         render(RemoveForm.new(
                  @object,
-                 form_action:
-                   detach_image_from_glossary_term_path(@object.id),
                  user: current_user
                ))
       end

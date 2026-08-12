@@ -17,14 +17,15 @@
 #
 class Components::ObservationFragment::MarkAsReviewedToggle <
       Components::ApplicationForm
+  prop :selector, String, default: "caption_reviewed"
+  prop :label_class, String, default: ""
+
   def initialize(observation_view:, selector: "caption_reviewed",
                  label_class: "")
-    @observation_view = observation_view
-    @obs_id = observation_view.observation_id
-    @selector = selector
-    @label_class = label_class
     super(observation_view,
-          id: "#{selector}_form_#{@obs_id}",
+          selector: selector,
+          label_class: label_class,
+          id: "#{selector}_form_#{observation_view.observation_id}",
           method: :put,
           local: false,
           data: { controller: "reviewed-toggle" })
@@ -37,14 +38,15 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
                      label_class: label_class_value,
                      label_position: :before,
                      wrap_class: "d-inline",
-                     id: "#{@selector}_#{@obs_id}",
+                     id: "#{@selector}_#{model.observation_id}",
                      class: "mx-3",
                      data: checkbox_data)
     end
   end
 
   def around_template
-    div(class: "d-inline", id: "#{@selector}_toggle_#{@obs_id}") do
+    div(class: "d-inline",
+        id: "#{@selector}_toggle_#{model.observation_id}") do
       super
     end
   end
@@ -52,13 +54,13 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
   protected
 
   def form_action
-    observation_view_path(id: @obs_id)
+    observation_view_path(id: model.observation_id)
   end
 
   private
 
   def reviewed_text
-    @observation_view.reviewed ? :marked_as_reviewed.l : :mark_as_reviewed.l
+    model.reviewed ? :marked_as_reviewed.l : :mark_as_reviewed.l
   end
 
   def label_class_value

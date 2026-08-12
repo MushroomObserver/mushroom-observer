@@ -6,7 +6,7 @@ class TranslationsController < ApplicationController
 
   def index
     @lang = set_language_and_authorize_user
-    @for_page = params[:for_page]
+    @for_page = params.permit(:for_page)[:for_page]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     @show_tags = tags_to_show(@for_page, @strings)
@@ -33,7 +33,7 @@ class TranslationsController < ApplicationController
   # only responds to turbo_stream
   def edit
     @lang = set_language_and_authorize_user
-    @tag = params[:id]
+    @tag = params.permit(:id)[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
@@ -45,7 +45,7 @@ class TranslationsController < ApplicationController
   # Only accessed by turbo_stream from the index
   def update
     @lang = set_language_and_authorize_user
-    @tag = params[:id]
+    @tag = params.permit(:id)[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)

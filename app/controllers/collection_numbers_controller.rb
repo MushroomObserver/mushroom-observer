@@ -345,7 +345,7 @@ class CollectionNumbersController < ApplicationController
   # Determine @observation for redirect after destroy.
   # Must be called before destroy since we need to check observations.
   def figure_out_destroy_redirect
-    back = params[:back].to_s
+    back = params.permit(:back)[:back].to_s
     @observation = nil
     return if back == "index"
 
@@ -399,7 +399,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back]
+    @back = params.permit(:back)[:back]
     @back_object = nil
     if @back == "show"
       @back_object = @collection_number

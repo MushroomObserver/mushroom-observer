@@ -105,6 +105,21 @@ module Views::Controllers::Herbaria
       assert_includes(html, :edit_herbarium_no_herbarium_records.l)
     end
 
+    def test_admin_personal_user_field_with_top_users
+      stub_admin_mode!
+      herbarium = herbaria(:nybg_herbarium)
+      top_user = users(:rolf)
+      top_user.define_singleton_method(:record_count) { 3 }
+      html = render_form(model: herbarium, top_users: [top_user])
+
+      assert_includes(
+        html,
+        :edit_herbarium_user_records.t(
+          name: "#{top_user.name} (#{top_user.login})", num: 3
+        )
+      )
+    end
+
     private
 
     def render_form(model:, local: true, back: nil, top_users: nil)
