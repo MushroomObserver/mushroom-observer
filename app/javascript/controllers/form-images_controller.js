@@ -218,20 +218,29 @@ export default class extends Controller {
     } else {
       // no images to upload, submit form
       this.block_form_submission = false;
-      // form.submit(), not requestSubmit(): this branch runs
-      // synchronously inside the ORIGINAL submit event's own onsubmit
-      // handler (see set_bindings), before that handler has returned.
-      // requestSubmit() re-enters the browser's submission algorithm
-      // while it's still marked as firing the outer submit, so the
-      // spec's reentrancy guard silently no-ops it (no error, no
-      // event, no request), and the outer handler's `return false`
-      // then cancels the original submission too -- nothing submits
-      // at all. Verified via a real browser system test. submit()
-      // bypasses the guard by skipping the event pipeline entirely.
-      this.form.submit();
+      this.submitForm();
     }
 
     return false;
+  }
+
+  // requestSubmit(), deferred to a new task via setTimeout, rather than
+  // form.submit() or a direct requestSubmit() call. This method is
+  // sometimes reached synchronously, from inside the ORIGINAL submit
+  // event's own onsubmit handler (see set_bindings), before that
+  // handler has returned. Calling requestSubmit() directly from there
+  // re-enters the browser's submission algorithm while it's still
+  // marked as firing the outer submit -- the spec's reentrancy guard
+  // silently no-ops a same-stack call (no error, no event, no
+  // request), and the outer handler's `return false` then cancels the
+  // original submission too, so nothing submits at all (verified via
+  // a real browser system test). Deferring via setTimeout(0) runs
+  // requestSubmit() on a fresh task, after the browser has fully
+  // finished processing the original submit event, avoiding the
+  // guard -- and, unlike form.submit(), requestSubmit() dispatches a
+  // real submit event, which is what a later Turbo-enabled form needs.
+  submitForm() {
+    setTimeout(() => this.form.requestSubmit(), 0);
   }
 
   // Show a prominent, blocking message naming each file that exceeds the
@@ -254,10 +263,7 @@ export default class extends Controller {
       this.submit_buttons.forEach((element) => {
         element.value = this.localized_text.creating_observation_text;
       });
-      // See the comment on the other form.submit() call above (in
-      // uploadAll): keeping this consistent rather than assuming this
-      // async path is exempt from the same reentrancy guard.
-      this.form.submit();
+      this.submitForm();
     }
   }
 
