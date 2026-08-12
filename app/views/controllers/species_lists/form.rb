@@ -38,7 +38,7 @@ module Views::Controllers::SpeciesLists
     # persisted record, even though the save itself failed).
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil do |value|
-      value&.map { |id| Integer(id) }
+      value&.compact_blank&.map { |id| Integer(id) }
     end
 
     # Override Superform's default

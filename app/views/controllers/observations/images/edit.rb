@@ -10,7 +10,7 @@ module Views::Controllers::Observations::Images
     prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil do |value|
-      value&.map { |id| Integer(id) }
+      value&.compact_blank&.map { |id| Integer(id) }
     end
     prop :user, ::User
 

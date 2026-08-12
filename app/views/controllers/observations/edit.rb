@@ -17,7 +17,7 @@ module Views::Controllers::Observations
     prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil do |value|
-      value&.map { |id| Integer(id) }
+      value&.compact_blank&.map { |id| Integer(id) }
     end
     prop :lists, _Array(::SpeciesList), default: -> { [] }
     prop :submitted_list_ids, _Nilable(Array), default: nil

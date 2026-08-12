@@ -34,7 +34,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :projects, _Array(Project)
   prop :submitted_project_ids, _Nilable(_Array(Integer)),
        default: nil do |value|
-    value&.map { |id| Integer(id) }
+    value&.compact_blank&.map { |id| Integer(id) }
   end
   prop :error_checked_projects, _Array(Project), default: -> { [] }
   prop :suspect_checked_projects, _Array(Project), default: -> { [] }

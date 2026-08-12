@@ -20,7 +20,7 @@ module Views::Controllers::Observations::Images
     end
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil do |value|
-      value&.map { |id| Integer(id) }
+      value&.compact_blank&.map { |id| Integer(id) }
     end
 
     # Explicit form action — `image_path(model)` via the
