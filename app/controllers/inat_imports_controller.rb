@@ -76,7 +76,7 @@ class InatImportsController < ApplicationController
     pending = InatImport.where(user: @user).
               where(state: %w[Authenticating Importing]).
               order(:updated_at).last
-    return render_new_form unless pending
+    return render_new_view unless pending
 
     flash_warning(:inat_import_tracker_pending.l)
     redirect_to(inat_import_path(pending))
