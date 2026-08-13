@@ -348,13 +348,16 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_update_comment_with_invalid_params_re_renders_form
     # `comment_updated?` `!@comment.save` branch + reload_form
-    # HTML path.
+    # HTML path. Regression: reload_form used to always render the
+    # New template regardless of which action called it -- assert
+    # the Edit page specifically, not just "a comment form somewhere".
     comment = comments(:minimal_unknown_obs_comment_1)
     params = { id: comment.id,
                comment: { summary: "", comment: "Body" } }
     login("rolf")
     put(:update, params: params)
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("body.comments__edit")
     assert_select("form#comment_form")
   end
 
@@ -376,7 +379,7 @@ class CommentsControllerTest < FunctionalTestCase
                comment: { summary: "", comment: "Body" } }
     login
     post(:create, params: params)
-    assert_response(:success)
+    assert_unprocessable
     assert_select("body.comments__new")
     assert_select("form#comment_form")
   end
