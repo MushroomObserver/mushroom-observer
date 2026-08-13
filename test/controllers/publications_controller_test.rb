@@ -81,6 +81,8 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_no_difference("Publication.count") do
       post(:create, params: { publication: {} })
     end
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_show_publication
@@ -141,8 +143,9 @@ class PublicationsControllerTest < FunctionalTestCase
     login
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } })
-    assert_response(:success)
+    assert_unprocessable
     assert_select("body.publications__edit")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_not_destroy_publication_without_permission
