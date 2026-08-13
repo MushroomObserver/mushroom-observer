@@ -9,7 +9,7 @@ module Views::Controllers::Admin::Donations
     def view_template
       add_page_title(:create_donation_title.l)
       add_context_nav(::Tab::Admin::DonationsFormNew.new)
-      render(Form.new(@donation))
+      render(Form.new(@donation, local: false))
     end
   end
 end
