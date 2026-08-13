@@ -70,14 +70,10 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   # to a checkmark on success. Both icons are pre-rendered server-side
   # and toggled by class -- JS only flips visibility, it doesn't
   # construct icon markup (the sprite URL is build-hashed).
-  #
-  # `:reuse` stands in for a true spin/refresh glyph the icon-library
-  # doesn't have yet (tracked separately) -- swap the type once that
-  # lands.
   def render_upload_status_overlay
     div(class: "upload-status-overlay ab-fab d-none",
         data: { form_images_target: "uploadStatus" }) do
-      Icon(type: :reuse, class: "spinner-right upload-status-spinner")
+      Icon(type: :spinner, class: "spinner-right upload-status-spinner")
       Icon(type: :check, class: "upload-status-check d-none")
     end
   end

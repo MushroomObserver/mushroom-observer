@@ -188,6 +188,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # finishes -- which made the gallery visibly empty out item-by-item
   # on submit.
   def test_upload_status_overlay_settles_on_checkmark_without_hiding_item
+    setup_image_dirs # in general_extensions
     login!(katrina)
     visit(new_observation_path)
     assert_selector("body.observations__new")
