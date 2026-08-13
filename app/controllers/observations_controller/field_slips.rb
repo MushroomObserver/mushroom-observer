@@ -12,14 +12,15 @@
 module ObservationsController::FieldSlips
   private
 
-  # After Create, a slip reviewer lands straight on the review of the
-  # photographed slip: the extraction is usually already running by
-  # then (the QR jobs chain it on attach -- see DetectFieldSlipQRJob),
-  # and the review page shows its progress until the read is done.
-  # Decode-only here -- attaching the slip is the QR jobs' business --
-  # so this adds no writes to the request.
-  def redirected_to_field_slip_review?
-    image = field_slip_review_image
+  # After Create -- and after an update that photographed a slip into
+  # an existing observation -- a slip reviewer lands straight on the
+  # review of the photographed slip: the extraction is usually already
+  # running by then (the QR jobs chain it on attach -- see
+  # DetectFieldSlipQRJob), and the review page shows its progress
+  # until the read is done. Decode-only here -- attaching the slip is
+  # the QR jobs' business -- so this adds no writes to the request.
+  def redirected_to_field_slip_review?(images = @observation.images)
+    image = field_slip_review_image(images)
     return false unless image
 
     redirect_to(edit_image_field_slip_extract_path(image.id, await: 1))
@@ -32,11 +33,11 @@ module ObservationsController::FieldSlips
   # observation already HAS the matching slip -- created by scanning
   # or typing the code, which makes the QR jobs skip it -- the read is
   # started from here instead.
-  def field_slip_review_image
+  def field_slip_review_image(images)
     return nil unless FieldSlip::QRDecoder.available?
     return nil unless reviews_field_slips?
 
-    @observation.images.each do |image|
+    images.each do |image|
       code = FieldSlip::QRDecoder.slip_code_in(image)
       next unless code && reviewable_slip_code?(code)
 
@@ -51,10 +52,18 @@ module ObservationsController::FieldSlips
   # the review page would just sit on its scan button -- say why, and
   # that saving the review is what links this observation to the slip.
   def explain_in_use_slip(code)
-    return if @observation.field_slip&.code == code
-
     slip = FieldSlip.find_by(code: code)
-    primary_id = slip&.occurrence&.primary_observation_id
+    occurrence = slip&.occurrence
+    return unless occurrence
+    # Checked against the slip's freshly loaded occurrence, not
+    # `@observation.field_slip` -- the QR job can attach the slip to
+    # THIS observation between the image upload and this check (it
+    # regularly wins that race in production), and the stale in-memory
+    # association would then warn about "another observation" that is
+    # this one (reported: obs 664468 warned about itself).
+    return if occurrence.observation_ids.include?(@observation.id)
+
+    primary_id = occurrence.primary_observation_id
     return unless primary_id
 
     flash_warning(:observation_field_slip_in_use.t(

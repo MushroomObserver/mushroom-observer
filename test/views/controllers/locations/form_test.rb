@@ -19,7 +19,7 @@ module Views::Controllers::Locations
       )
       assert_html(
         html,
-        "form#location_form[data-controller='map'][data-map-open='true']"
+        "form#location_form[data-controller~='map'][data-map-open='true']"
       )
 
       # All input fields

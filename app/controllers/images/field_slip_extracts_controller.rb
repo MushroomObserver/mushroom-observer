@@ -159,7 +159,7 @@ module Images
     def reconcile_slip_project
       @observation.reload
       slip = @observation.field_slip
-      project = slip && slip_event_project(slip)
+      project = slip&.event_project
       return unless project
 
       if project.violates_constraints?(@observation)
@@ -167,14 +167,6 @@ module Images
       else
         rejoin_slip_project(slip, project)
       end
-    end
-
-    # The slip row's own project is nil once the slip has gone spare,
-    # but the printed prefix still names the event.
-    def slip_event_project(slip)
-      slip.project ||
-        Project.find_by(field_slip_prefix:
-                          FieldSlip.prefix_for_code(slip.code))
     end
 
     def rejoin_slip_project(slip, project)
