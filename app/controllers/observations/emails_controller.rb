@@ -56,7 +56,8 @@ module Observations
       @observation = observation
       render(Views::Controllers::Observations::Emails::New.new(
                observation: observation
-             ))
+             ),
+             status: :unprocessable_content)
       false
     end
 
