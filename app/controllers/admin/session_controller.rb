@@ -73,8 +73,12 @@ module Admin
 
       path = URI.parse(request.referer).path
       route = Rails.application.routes.recognize_path(path)
-      "#{route[:controller].camelize}Controller".constantize <= AdminController
-    rescue StandardError
+      controller_class = "#{route[:controller].camelize}Controller".
+                         safe_constantize
+      return false unless controller_class
+
+      controller_class <= AdminController
+    rescue URI::InvalidURIError, ActionController::RoutingError
       false
     end
 
