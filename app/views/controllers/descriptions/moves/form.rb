@@ -10,7 +10,7 @@ module Views::Controllers::Descriptions::Moves
     prop :description, ::Description
     prop :user, ::User
 
-    def initialize(description, user:)
+    def initialize(description, user:, **)
       # `self.class.sorted_moves_for` (not the instance `sorted_moves`,
       # which reads the `@description` prop) -- prop assignment hasn't
       # happened yet at this point in construction.
@@ -20,7 +20,7 @@ module Views::Controllers::Descriptions::Moves
       form_object.delete = description.is_admin?(user)
       # Keep the explicit DOM id — tests rely on it.
       super(form_object, description: description, user: user,
-                         id: "move_descriptions_form")
+                         id: "move_descriptions_form", **)
     end
 
     # Location doesn't have synonyms, only Name does. Class methods
