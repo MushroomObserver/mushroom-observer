@@ -19,7 +19,6 @@
 #  ==== Login
 #  login::              <tt>(. V P)</tt>
 #  logout_user::        <tt>(. V .)</tt>
-#  email_new_password:: <tt>(. V .)</tt>
 #
 #  ==== Preferences
 #  prefs::              <tt>(L V P)</tt>
