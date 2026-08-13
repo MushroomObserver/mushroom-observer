@@ -32,7 +32,8 @@ module Views::Controllers::Account::Profile
                copyright_holder: @copyright_holder,
                copyright_year: @copyright_year,
                licenses: @licenses,
-               upload_license_id: @upload_license_id
+               upload_license_id: @upload_license_id,
+               local: false
              ))
     end
 

@@ -7,7 +7,7 @@ module Account
     def edit
       @user.place_name ||= @user.location&.display_name(@user)
       set_image_upload_ivars
-      render_edit_phlex
+      render_edit_view
     end
 
     def update
@@ -42,14 +42,14 @@ module Account
       end
     end
 
-    def render_edit_phlex
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Profile::Edit.new(
                user: @user,
                copyright_holder: @copyright_holder,
                copyright_year: @copyright_year,
                licenses: @licenses,
                upload_license_id: @upload_license_id
-             ))
+             ), status: status, **render_opts)
     end
 
     def check_and_maybe_update_user_place_name
@@ -87,7 +87,7 @@ module Account
         redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
-        render_edit_phlex and return
+        render_edit_view_invalid and return
       else
         maybe_update_location_and_finish
       end

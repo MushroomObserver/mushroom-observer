@@ -102,7 +102,7 @@ module Account
               }
             })
 
-      assert_response(:success)
+      assert_unprocessable
       assert_select("form")
       assert_flash_error
     end
