@@ -112,6 +112,76 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                "Naming should not have reason 2 (was unchecked before submit)")
   end
 
+  # Regression coverage for "click Create 3x, get 3 Observations": on
+  # main prior to #5035, and still on this Turbo-submit branch,
+  # form-images_controller.js's `set_bindings` queries
+  # `input[type="submit"]` for the buttons to disable -- but Phlex's
+  # `Components::Button::Submit` renders a `<button type="submit">`,
+  # never an `<input>`. The selector matches nothing, so none of the
+  # controller's disabling logic (`uploadAll`'s manual `disabled = true`,
+  # the post-upload re-enable) ever touches a real element. Whether
+  # Turbo's own native submitter-disabling covers the gap depends on
+  # whether the submission reached Turbo's listener with the event still
+  # unprevented -- see the controller's `onsubmit` override, which
+  # `preventDefault`s the original click while it defers to a
+  # `requestSubmit()` a tick later.
+  def test_submit_button_disables_synchronously_on_click
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # katrina has a prior observation, so location/date default to
+    # valid values already -- no field interaction needed to make this
+    # form submittable, keeping the click itself the only variable.
+    disabled_immediately_after_click = evaluate_script(<<~JS)
+      (() => {
+        const btn = document.querySelector(
+          "#observation_form button[type='submit']"
+        );
+        btn.click();
+        return btn.disabled;
+      })()
+    JS
+
+    assert(disabled_immediately_after_click,
+           "Submit button should be disabled synchronously inside the " \
+           "click's own event handling -- before any async image-upload " \
+           "or Turbo step runs. A tardy disable leaves a window where a " \
+           "second click submits again.")
+
+    # Let the now-unblocked submission finish so state is clean going
+    # into whatever runs next.
+    assert_selector("body.observations__show", wait: 10)
+  end
+
+  def test_rapid_triple_click_creates_only_one_observation
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    obs_count = Observation.count
+
+    # Fire three clicks back-to-back in one synchronous script -- no
+    # Ruby/network round-trip between them, reproducing the worst case:
+    # a user clicking faster than any round-trip-gated disabling could
+    # ever catch. Per the DOM spec, `.click()` on an already-disabled
+    # button is a no-op (no event dispatched), so clicks 2 and 3 only
+    # matter if click 1's disabling didn't take effect in time.
+    execute_script(<<~JS)
+      const btn = document.querySelector(
+        "#observation_form button[type='submit']"
+      );
+      btn.click();
+      btn.click();
+      btn.click();
+    JS
+
+    assert_selector("body.observations__show", wait: 10)
+    assert_equal(obs_count + 1, Observation.count,
+                 "Triple-clicking Create should create exactly one " \
+                 "Observation, not one per click.")
+  end
+
   def test_trying_to_create_duplicate_location_just_uses_existing_location
     setup_image_dirs # in general_extensions
     login!(katrina)

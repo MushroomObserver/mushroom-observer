@@ -68,7 +68,7 @@ export default class extends Controller {
     // this.form = document.forms.observation_form;
     this.form = this.element;
     this.drop_zone = this.formTarget;
-    this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
+    this.submit_buttons = this.element.querySelectorAll('button[type="submit"]');
     // Phlex renders `data: { upload_max_size: ... }` as the DOM attribute
     // `data-upload-max-size`, which reads back as `dataset.uploadMaxSize`
     // (camelCase) -- NOT `dataset.upload_max_size`. The old underscore key
