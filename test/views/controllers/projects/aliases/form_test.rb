@@ -24,7 +24,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "select[name='project_alias[target_type]']")
 
       # Type-switch controller
-      assert_html(html, "[data-controller='type-switch']")
+      assert_html(html, "[data-controller~='type-switch']")
       assert_html(html, "select[data-type-switch-target='select']")
 
       # Both autocompleter panels present

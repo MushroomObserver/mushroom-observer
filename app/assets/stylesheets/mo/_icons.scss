@@ -248,6 +248,19 @@ a:not(.btn):not(.inline-icon-link) > .mo-icon,
   animation: spin-r 1s infinite linear;
 }
 
+// The class only animates; the visible glyph is normally an Icon
+// inside. A JS-created spinner can't reach the SVG sprite (its URL is
+// a digested asset), so an EMPTY .spinner-right draws its own ring.
+.spinner-right:empty {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+}
+
 @keyframes spin-r {
   0% {
     transform: rotate(0deg);

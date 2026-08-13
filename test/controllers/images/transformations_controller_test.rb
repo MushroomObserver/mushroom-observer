@@ -59,6 +59,39 @@ module Images
       assert_select("#flash_notices", text: :image_show_transform_note.l)
     end
 
+    # #4989: an admin of a project the image's *observation* belongs
+    # to (not the image itself) may transform the image.
+    def test_transform_allowed_for_project_admin_of_observation
+      image = images(:commercial_inquiry_image)
+      obs = observations(:detailed_unknown_obs)
+      image.observations << obs
+      admin = dick
+      assert_true(obs.can_edit?(admin),
+                  "Fixture expectation: dick can edit detailed_unknown_obs " \
+                  "via bolete_project admin")
+
+      login(admin.login)
+      put(:update, params: { id: image.id, op: "rotate_left",
+                             size: admin.image_size })
+
+      assert_flash(:image_show_transform_note)
+      assert_redirected_to(image_path(image.id))
+    end
+
+    def test_transform_denied_for_unrelated_user
+      image = images(:commercial_inquiry_image)
+      outsider = katrina
+      assert_false(image.can_transform?(outsider),
+                   "Fixture expectation: katrina has no tie to this image")
+
+      login(outsider.login)
+      put(:update, params: { id: image.id, op: "rotate_left",
+                             size: outsider.image_size })
+
+      assert_flash(:permission_denied)
+      assert_redirected_to(image_path(image.id))
+    end
+
     # Real file + real job run, unlike run_transform above -- confirms
     # rotation actually swapped width/height, not just the flash text.
     def test_transform_rotate_swaps_dimensions

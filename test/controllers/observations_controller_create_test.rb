@@ -2131,6 +2131,44 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   # The QR jobs refuse an in-use slip, so the review page would sit on
   # its scan button with nothing running -- the redirect explains why,
   # naming the observation that has the slip.
+  # Production race (obs 664468 warned about itself): the QR job can
+  # attach the slip to THIS observation between the image upload and
+  # the create request's own decode -- an in-memory association check
+  # then reads stale nil while the slip's occurrence is fresh. The
+  # decode stub performs the attach mid-request, exactly as the job
+  # does when it wins the race.
+  def test_create_no_in_use_warning_when_the_job_attached_to_this_obs
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    attach_during_decode = lambda do |img|
+      obs = img.observations.order(:id).last
+      if obs&.occurrence_id.nil?
+        FieldSlip::Attacher.attach(observation: obs, code: "OPEN-0910",
+                                   user: rolf)
+      end
+      "OPEN-0910"
+    end
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, attach_during_decode) do
+        post(:create, params: slip_photo_params(image))
+      end
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+    obs = assigns(:observation)
+
+    assert_equal("OPEN-0910", obs.reload.field_slip.code,
+                 "premise: the slip is attached to this observation")
+    assert_flash(
+      [[:runtime_observation_success, { id: obs.id }]],
+      on_fail: "a slip attached to this very observation is not in use"
+    )
+  end
+
   def test_create_explains_a_detected_code_already_in_use
     image = images(:in_situ_image)
     other = observations(:coprinus_comatus_obs)

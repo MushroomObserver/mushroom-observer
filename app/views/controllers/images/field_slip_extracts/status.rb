@@ -57,7 +57,10 @@ module Views::Controllers::Images::FieldSlipExtracts
       div(data: { controller: "reload-poll" }) do
         Panel(panel_id: "field_slip_extract_pending") do |p|
           p.with_body do
-            span(class: "spinner-right mx-2")
+            # `.spinner-right` only animates; the visible glyph is the
+            # icon (a bare span shows nothing since the SVG-sprite
+            # conversion dropped the class's glyphicon).
+            Icon(type: :spinner, class: "spinner-right mx-2")
             plain(:field_slip_extract_pending.l)
           end
         end
@@ -76,7 +79,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       observation = @image.observations.first
       return unless observation
 
-      p do
+      p(class: "mt-3") do
         Link(type: :get, name: :field_slip_extract_observation_link.l,
              target: permanent_observation_path(observation.id))
       end

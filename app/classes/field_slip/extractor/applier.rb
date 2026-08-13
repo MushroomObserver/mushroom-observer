@@ -188,11 +188,23 @@ class FieldSlip
         project_alias(value, "User")&.target
       end
 
+      # The slip's event project resolves aliases FIRST -- the
+      # collector wrote that event's abbreviations -- even when the
+      # observation isn't in it (a spare slip, a constraint violation
+      # keeping both out). Other memberships are only a fallback, so a
+      # same-named alias in an unrelated project can't outrank the
+      # event's.
       def project_alias(value, target_type)
-        ids = @observation.project_ids
-        return nil if ids.empty?
+        event_id = @observation.field_slip&.event_project&.id
+        find_alias(value, target_type, [event_id].compact) ||
+          find_alias(value, target_type, @observation.project_ids)
+      end
 
-        ProjectAlias.where(project_id: ids, name: value.to_s.strip,
+      def find_alias(value, target_type, project_ids)
+        return nil if project_ids.empty?
+
+        ProjectAlias.where(project_id: project_ids,
+                           name: value.to_s.strip,
                            target_type: target_type).
           includes(:target).order(updated_at: :desc).first
       end
