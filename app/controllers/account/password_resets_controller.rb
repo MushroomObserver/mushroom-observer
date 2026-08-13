@@ -24,6 +24,8 @@ module Account
     private
 
     def find_user_by_login_name_or_email(login)
+      return nil if login.blank?
+
       User.find_by(
         User[:login].eq(login).
         or(User[:name].eq(login)).

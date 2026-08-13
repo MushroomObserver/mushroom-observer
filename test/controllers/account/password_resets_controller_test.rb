@@ -28,6 +28,29 @@ module Account
       assert_select("form#account_password_reset_form")
     end
 
+    # A missing/blank `login` param used to build `User[:name].eq(nil)`
+    # -> `name IS NULL` in the query, which could match an arbitrary
+    # user who never set a display name (`users.name` has no NOT NULL
+    # constraint), silently resetting a stranger's password (Copilot
+    # review on #5072). Create a user with a nil name so this test
+    # would have matched them before the `login.blank?` guard.
+    def test_create_blank_login_does_not_match_nil_name_user
+      nameless_user = User.create!(login: "nameless_login_user",
+                                   email: "nameless_login_user@example.com")
+      assert_nil(nameless_user.name)
+      old_password = nameless_user.password
+
+      assert_no_enqueued_jobs do
+        post(:create, params: { new_user: { login: "" } })
+      end
+
+      assert_unprocessable
+      assert_flash_error
+      nameless_user.reload
+      assert_equal(old_password, nameless_user.password,
+                   "Blank login should not match the nameless user")
+    end
+
     def test_create_success
       user = users(:roy)
       old_password = user.password
