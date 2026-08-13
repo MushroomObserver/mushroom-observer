@@ -62,11 +62,12 @@ module ObservationsController::FieldSlips
     # this one (reported: obs 664468 warned about itself).
     return if occurrence.observation_ids.include?(@observation.id)
 
+    primary_id = occurrence.primary_observation_id
+    return unless primary_id
+
     flash_warning(:observation_field_slip_in_use.t(
                     code: code,
-                    url: permanent_observation_path(
-                      occurrence.primary_observation_id
-                    )
+                    url: permanent_observation_path(primary_id)
                   ))
   end
 
