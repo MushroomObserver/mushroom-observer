@@ -50,7 +50,7 @@ module Account
                        "New password should be different from old")
     end
 
-    # `@new_user.save` failing used to fall through with no render or
+    # A failing password change used to fall through with no render or
     # redirect at all -- a real request would raise, since there's no
     # ERB fallback template in this Phlex-only app (found via Copilot
     # review on #5058). Force the failure by stubbing `save` on the
@@ -59,13 +59,12 @@ module Account
     # fix.
     def test_create_save_failure
       user = users(:roy)
-      # `update_attribute` (called internally by `change_password`)
-      # calls `save(validate: false)` -- accept and ignore args so
-      # both that call and the controller's own `@new_user.save`
-      # hit this stub.
+      # `change_password` calls `update_attribute`, which calls
+      # `save(validate: false)` -- accept and ignore args so that
+      # call hits this stub.
       user.define_singleton_method(:save) { |*_args| false }
 
-      User.stub(:where, ->(*_args) { [user] }) do
+      User.stub(:find_by, ->(*_args) { user }) do
         assert_no_enqueued_jobs do
           post(:create, params: { new_user: { login: user.login } })
         end
