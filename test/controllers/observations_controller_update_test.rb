@@ -1172,7 +1172,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_redirected_to(
       new_location_path(where: obs.reload.place_name(rolf),
-                        set_observation: obs.id)
+                        set_observation: obs.id, format: :html)
     )
   end
 

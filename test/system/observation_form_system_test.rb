@@ -266,6 +266,49 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_not_equal(Location.last.id, obs.location_id)
   end
 
+  # JoeCohen's review on #5055: Create hangs (Create button stays
+  # disabled, page never navigates) when Locality is a non-existent
+  # Location. `ObservationsController::Create#redirect_to_next_page`
+  # creates the Observation anyway and redirects to `new_location_path`
+  # so the user can fill in the missing Location.
+  def test_create_with_nonexistent_location_redirects_to_new_location
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    nonexistent_where = "Chez Cohen, Clackamas Co., Oregon, USA"
+    fill_in("observation_place_name", with: nonexistent_where)
+
+    # A logged-in user's place_name field defaults to their last-used
+    # Location, with a hidden observation_location_id pointing at it.
+    # Typing over the visible text doesn't clear that hidden field --
+    # explicitly click "create_locality" (same interaction as
+    # test_trying_to_create_duplicate_location_just_uses_existing_location)
+    # so the typed text is treated as free-text, not silently ignored
+    # in favor of the stale location_id.
+    find(id: "observation_place_name").trigger("click")
+    within("#observation_location_autocompleter") do
+      assert_selector(".create-button", visible: :all)
+      btn = find(".create-button", visible: :all)
+      execute_script("arguments[0].click()", btn)
+    end
+    assert_field("observation_place_name", with: nonexistent_where)
+    assert_field("observation_location_id", with: "", type: :hidden)
+
+    naming = find_by_id("observation_naming_specimen")
+    scroll_to(naming, align: :top)
+    fill_in("observation_naming_name", with: "Coprinus comatus")
+
+    within("#observation_form") { click_commit }
+
+    assert_selector("body.locations__new", wait: 6)
+    assert_field("location_display_name", with: nonexistent_where)
+    assert_flash_warning(:runtime_location_not_found, name: nonexistent_where)
+
+    new_obs = Observation.last
+    assert_equal(nonexistent_where, new_obs.where)
+  end
+
   # A Locality the user entered outranks an image's GPS, and the date
   # rides along with the location rather than moving on its own. The
   # override is still one click away. See #4917 / #4932.

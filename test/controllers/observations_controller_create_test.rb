@@ -2245,7 +2245,18 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     end
 
     assert_response(:redirect)
-    assert_flash_success
+    # "does not warn" here means no field-slip-prefix warning -- the
+    # place_name in slip_photo_params ("Right Here, Massachusetts,
+    # USA") doesn't match a fixture Location, so the redirect to
+    # new_location_path also flashes runtime_location_not_found
+    # alongside the ordinary create-success message.
+    new_obs = assigns(:observation)
+    assert_not_nil(new_obs, "Cannot find new Observation")
+    assert_flash_warning(
+      [[:runtime_observation_success, { id: new_obs.id }],
+       [:runtime_location_not_found,
+        { name: "Right Here, Massachusetts, USA" }]]
+    )
   end
 
   # Ordinary uploads never pay for the scan or get detoured: the gate

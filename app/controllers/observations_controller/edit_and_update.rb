@@ -312,8 +312,14 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
+      flash_warning(
+        :runtime_location_not_found.t(name: @observation.place_name(@user))
+      )
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @observation.place_name(@user),
-                                    set_observation: @observation.id))
+                                    set_observation: @observation.id,
+                                    format: :html))
     else
       return if redirected_to_new_photo_slip_review?
 

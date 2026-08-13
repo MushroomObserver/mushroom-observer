@@ -4060,6 +4060,7 @@
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
   runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
   runtime_location_merge_success: "[:runtime_merge_success(type=:location,src=this,dest=that)]"
+  runtime_location_not_found: "We don't have a Locality matching '[name]'. Please provide a bit more detail below to create it."
   runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
   runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
   runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"

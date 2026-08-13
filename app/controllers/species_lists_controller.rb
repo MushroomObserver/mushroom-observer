@@ -341,8 +341,12 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     )
 
     if @species_list.location_id.nil?
+      flash_warning(:runtime_location_not_found.t(name: @place_name))
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @place_name,
-                                    set_species_list: @species_list.id))
+                                    set_species_list: @species_list.id,
+                                    format: :html))
     else
       redirect_to(species_list_path(@species_list))
     end

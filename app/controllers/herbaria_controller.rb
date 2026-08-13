@@ -472,9 +472,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
+    # Explicit `format: :html`: see the matching comment in
+    # ObservationsController::Create#redirect_to_next_page.
     redirect_to(new_location_path(back: @back,
                                   where: @herbarium.place_name,
-                                  set_herbarium: @herbarium.id))
+                                  set_herbarium: @herbarium.id,
+                                  format: :html))
     true
   end
 
