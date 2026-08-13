@@ -105,7 +105,7 @@ module Admin
       end
 
       def ask_webmaster_test(email, args)
-        response = args[:response] || :success
+        response = args[:response] || :unprocessable_content
         flash_tag = args[:flash_tag]
         post(:create,
              params: {
