@@ -5,6 +5,52 @@ submits via Turbo if it (or an ancestor) carries `data-turbo="true"`.
 `Components::ApplicationForm` defaults to `local: true` (no Turbo); pass
 `local: false` to opt a form in.
 
+## Turbo Drive vs. Turbo Frames vs. Turbo Streams — three different mechanisms
+
+This sweep is specifically a **Turbo Drive** conversion. Don't conflate
+it with Turbo Frames or Turbo Streams — they're separate Turbo features
+with different response contracts, and mixing up which one a given
+controller uses is how you end up applying the wrong fix (see the
+`Admin::BlockedIpsController` revert below).
+
+- **Turbo Drive** — what `local: false` opts a form into. The response
+  is ordinary HTML (`text/html`), and **the HTTP status code is the
+  success/failure signal**: a 2xx/3xx response is a "visit" (Drive
+  pushes a new history entry, treats it as a fresh page); a 4xx/5xx
+  response (our `:unprocessable_content`) is rendered in place as an
+  error redisplay, with no history push. This is exactly why every
+  full-page re-render failure path in this sweep needs
+  `render_new_view_invalid`/`render_edit_view_invalid` — a validation
+  failure that still returned `200` would make Drive treat the
+  redisplayed form as if the submission had succeeded.
+- **Turbo Frames** — a `<turbo-frame id="...">` scopes the swap to just
+  that subtree. A response gets matched into the frame by finding a
+  same-`id` `<turbo-frame>` in the body — **status code is irrelevant**;
+  Frames don't distinguish 200 from 422, they just look for the
+  matching id. Confirmed the hard way: forcing `:unprocessable_content`
+  onto `Admin::BlockedIpsController`'s frame-wrapped `Manager` form
+  broke the pre-existing `test_turbo_frame_responses` test, which
+  correctly expected `:success` — reverted.
+- **Turbo Streams** — an explicit, separately-negotiated response format
+  (`format.turbo_stream` / `Accept: text/vnd.turbo-stream.html`),
+  independent of whatever `local:` the form itself has. The body is one
+  or more `<turbo-stream action="..." target="...">` elements that
+  surgically patch specific DOM nodes (append/prepend/replace/update/
+  remove) — there's no whole-page navigation concept here at all, so
+  **status code again isn't the failure signal**. MO's own convention
+  (`HerbariaController`, `CommentsController`) keeps these responses at
+  a plain `200` even on validation failure — the "this failed" signal
+  is carried by *which* stream got rendered (a `replace`-the-form
+  stream vs. a modal-closing `remove` stream) and by the flash content
+  inside it, not by HTTP status. Don't try to make a turbo_stream
+  failure path return `422` — there's nothing on the Stream side that
+  interprets it, and MO's existing controllers don't do this.
+
+Practical upshot: before touching a failure path's status code, check
+which of these three the response actually is. Only the Drive case
+(full-page re-render, no `turbo_frame_tag`, no `format.turbo_stream`
+branch) needs the `422` treatment described below.
+
 ## The conversion, per controller
 
 1. **`local: false`** on every `Form.new(...)` call in the controller's
