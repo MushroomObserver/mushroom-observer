@@ -15,7 +15,7 @@ module Projects
     def new
       return unless find_project!
 
-      render_admin_request_form
+      render_new_view
     end
 
     # Redirects back to show_project.
@@ -29,7 +29,7 @@ module Projects
 
       if message.blank?
         flash_error(:runtime_missing.t(field: :request_message.l))
-        return render_admin_request_form
+        return render_new_view_invalid
       end
 
       @project.admin_group.users.each do |receiver|
@@ -43,10 +43,16 @@ module Projects
 
     private
 
-    def render_admin_request_form
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Projects::AdminRequests::New.new(
                project: @project
-             ))
+             ),
+             status: status, **render_opts)
+    end
+
+    def render_new_view_invalid(**)
+      render_new_view(**)
+      self.status = :unprocessable_content
     end
 
     def find_project!
