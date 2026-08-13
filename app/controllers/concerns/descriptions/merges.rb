@@ -19,9 +19,7 @@ module Descriptions::Merges
 
       # render the form, if have permission
       if in_admin_mode? || @src.is_reader?(@user)
-        klass = "Views::Controllers::#{controller_path.camelize}::New".
-                constantize
-        render(klass.new(description: @description, user: @user))
+        render_new_view
         return
       end
 
@@ -87,10 +85,20 @@ module Descriptions::Merges
 
       flash_error(:runtime_edit_description_denied.t)
       @description = @src
+      render_new_view_invalid
+      false
+    end
+
+    def render_new_view(status: :ok, **render_opts)
       klass = "Views::Controllers::#{controller_path.camelize}::New".
               constantize
-      render(klass.new(description: @description, user: @user))
-      false
+      render(klass.new(description: @description, user: @user),
+             status: status, **render_opts)
+    end
+
+    def render_new_view_invalid(**)
+      render_new_view(**)
+      self.status = :unprocessable_content
     end
 
     # Attempt to merge one description into another, deleting the old one

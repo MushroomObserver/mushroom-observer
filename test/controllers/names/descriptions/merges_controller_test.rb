@@ -49,6 +49,8 @@ module Names::Descriptions
       }
       post(:create, params: params)
       assert_flash(:runtime_edit_description_denied)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_merge_descriptions_notes_conflict
