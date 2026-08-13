@@ -62,6 +62,8 @@ module Names::Descriptions
       post(:create, params: params)
       # shouldn't work, there is a conflict. requires manual resolution
       assert_flash(:runtime_description_merge_conflict)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       # dick didn't delete, so the original desc should still be there.
       assert(rolf_desc.reload)
 

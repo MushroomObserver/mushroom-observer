@@ -59,6 +59,8 @@ module Locations::Descriptions
       }
       post(:create, params: params)
       assert_flash(:runtime_description_merge_conflict)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
 
       # Clear notes on source to remove conflict
       public_desc.update(notes: nil)
