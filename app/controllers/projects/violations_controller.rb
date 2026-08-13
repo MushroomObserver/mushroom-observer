@@ -11,9 +11,9 @@ module Projects
   class ViolationsController < ApplicationController
     before_action :login_required
     # Cannot figure out the eager loading here.
-    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
+    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:show]
 
-    def index
+    def show
       return unless find_project!
 
       @violations = @project.violations
@@ -21,10 +21,15 @@ module Projects
     end
 
     # Overrides `ApplicationController::Indexes#render_index_view` so
-    # `show_index_of_objects` renders the Phlex `Violations::Index`
+    # `show_index_of_objects` renders the Phlex `Violations::Show`
     # class instead of `projects/violations/index.html.erb` (deleted).
+    # `resource :violation` is a singleton (#show, not #index), but
+    # the `ApplicationController::Indexes` mixin's own method names
+    # (`build_index_with_query`, `render_index_view`) stay as-is —
+    # they're the mixin's dispatch contract, independent of this
+    # controller's own action name.
     def render_index_view
-      render(Views::Controllers::Projects::Violations::Index.new(
+      render(Views::Controllers::Projects::Violations::Show.new(
                project: @project, violations: @violations, user: @user
              ))
     end
@@ -72,7 +77,7 @@ module Projects
 
       dispatch_action
 
-      redirect_to(project_violations_path(project_id: @project.id))
+      redirect_to(project_violation_path(project_id: @project.id))
     end
 
     private
@@ -86,7 +91,7 @@ module Projects
       Location.where(name: suffixes).index_by(&:name)
     end
 
-    # Eager-loaded variant of `find_or_goto_index` for the index
+    # Eager-loaded variant of `find_or_goto_index` for the show
     # action, which renders the full violations list. `find_by`
     # returns nil rather than raising, so the `||` fallback fires
     # cleanly on a missing id.

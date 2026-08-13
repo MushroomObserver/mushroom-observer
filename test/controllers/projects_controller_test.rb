@@ -236,7 +236,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select("a[href*=?]", project_violations_path(project_id: project.id),
+    assert_select("a[href*=?]", project_violation_path(project_id: project.id),
                   { minimum: 1 }, "Page is missing a link to violations")
   end
 

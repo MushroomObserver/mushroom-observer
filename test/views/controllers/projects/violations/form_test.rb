@@ -60,7 +60,7 @@ module Views::Controllers::Projects::Violations
       # button_to renders a <form method=post> with a hidden _method=put
       # and a <button type=submit>Label</button>.
       assert_includes(html, :form_violations_action_exclude.l)
-      assert_html(html, "form.button_to[action$='/violations']")
+      assert_html(html, "form.button_to[action$='/violation']")
       assert_html(html,
                   "input[type='hidden'][name='project[do]'][value='exclude']")
       assert_html(html, "input[type='hidden'][name='_method'][value='put']")
@@ -107,7 +107,7 @@ module Views::Controllers::Projects::Violations
     end
 
     # Post-#4304: the modal itself is fetched on demand from
-    # `target_location_modal_project_violations_path` and never appears
+    # `target_location_modal_project_violation_path` and never appears
     # in the eagerly-rendered violations form. What this form *does*
     # emit is the trigger link with the modal-toggle wiring.
     def test_admin_sees_add_target_location_trigger
@@ -122,7 +122,7 @@ module Views::Controllers::Projects::Violations
                          user: proj.user)
       obs_id = target_loc_v.obs.id
       modal_id = "location_target_modal_#{obs_id}"
-      href = "/projects/#{proj.id}/violations/" \
+      href = "/projects/#{proj.id}/violation/" \
              "target_location_modal?obs_id=#{obs_id}"
 
       assert_html(html, "a[href='#{href}']",

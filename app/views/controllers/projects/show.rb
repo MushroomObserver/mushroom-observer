@@ -181,10 +181,10 @@ module Views::Controllers::Projects
       )
     end
 
-    # Explicit String target because the violations route uses
-    # `:project_id` (not `:id`), so Button::Get can't auto-build the
-    # path from a model. See the `violations_route_endpoint_smell`
-    # memory for the planned fix.
+    # Explicit String target: `CRUDPathBuilding#target_path` only
+    # builds flat `<type_tag>_path(id)` routes, so it can't derive a
+    # nested `project_violation_path(project_id:)` from `@project`
+    # directly.
     def render_violations_button
       return unless @project.constraints?
 
@@ -192,7 +192,7 @@ module Views::Controllers::Projects
       Button(
         type: :get,
         name: "#{count} #{:constraint_violations.ti}",
-        target: project_violations_path(project_id: @project.id),
+        target: project_violation_path(project_id: @project.id),
         variant: count.positive? ? :warning : nil,
         size: :lg,
         class: "my-2 mr-2"

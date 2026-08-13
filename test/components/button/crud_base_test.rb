@@ -547,7 +547,7 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render_button(
       Components::Button::Put,
       name: "Exclude",
-      target: "/projects/1/violations",
+      target: "/projects/1/violation",
       params: { project: { do: "exclude", obs_id: 42 } }
     )
 

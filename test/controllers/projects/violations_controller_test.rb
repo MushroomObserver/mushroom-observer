@@ -9,7 +9,7 @@ require("test_helper")
 # "Remove Selected" form.
 module Projects
   class ViolationsControllerTest < FunctionalTestCase
-    def test_index_renders_for_owner
+    def test_show_renders_for_owner
       project = projects(:falmouth_2023_09_project)
       violations = project.violations
       assert(violations.any?,
@@ -17,7 +17,7 @@ module Projects
 
       user = project.user
       login(user.login)
-      get(:index, params: { project_id: project.id })
+      get(:show, params: { project_id: project.id })
 
       assert_response(:success)
       assert_select("#content", { text: /#{project.title}/ })
@@ -29,13 +29,13 @@ module Projects
       end
     end
 
-    def test_index_no_violations
+    def test_show_no_violations
       project = projects(:eol_project)
       assert_empty(project.violations,
                    "Test needs project with no violations")
 
       login(project.user.login)
-      get(:index, params: { project_id: project.id })
+      get(:show, params: { project_id: project.id })
 
       assert_response(:success)
       assert_select("p", { text: /#{:form_violations_no_violations.l}/ })
@@ -63,7 +63,7 @@ module Projects
       login(project.user.login)
       put(:update, params: params)
 
-      assert_redirected_to(project_violations_path(project_id: project.id))
+      assert_redirected_to(project_violation_path(project_id: project.id))
       assert_includes(project.excluded_observations, victim)
       assert_not_includes(project.observations, victim)
     end
@@ -100,7 +100,7 @@ module Projects
       login(proj.user.login)
       put(:update, params: params)
 
-      assert_redirected_to(project_violations_path(project_id: proj.id))
+      assert_redirected_to(project_violation_path(project_id: proj.id))
       assert_includes(proj.target_names.reload, off_target.name)
     end
 
@@ -121,7 +121,7 @@ module Projects
       login(proj.user.login)
       put(:update, params: params)
 
-      assert_redirected_to(project_violations_path(project_id: proj.id))
+      assert_redirected_to(project_violation_path(project_id: proj.id))
       assert_includes(proj.target_locations.reload, new_target)
     end
 
@@ -153,7 +153,7 @@ module Projects
                              project: { do: "exclude",
                                         obs_id: victim.id } })
 
-      assert_redirected_to(project_violations_path(project_id: proj.id))
+      assert_redirected_to(project_violation_path(project_id: proj.id))
       assert_includes(proj.excluded_observations, victim,
                       "Obs owner can self-exclude their own violation")
     end

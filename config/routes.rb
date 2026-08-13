@@ -713,8 +713,8 @@ MushroomObserver::Application.routes.draw do
         post :add_all
       end
     end
-    resources :violations, only: [:index],
-                           controller: "projects/violations" do
+    resource :violation, only: [:show, :update],
+                         controller: "projects/violations" do
       collection do
         # GET endpoint that returns the Add-Target-Location modal as a
         # turbo-stream so each open sees fresh DB state (#4304).
@@ -722,16 +722,6 @@ MushroomObserver::Application.routes.draw do
       end
     end
   end
-  # resourceful route won't work because it requires an additional id.
-  # Accept both PATCH and PUT — PATCH is the Rails-idiomatic verb for
-  # updates and what Superform defaults to for a persisted model
-  # (e.g. TargetLocationForm). PUT is kept so the legacy button_to
-  # calls (Exclude/Extend/Add Target Name) and any external callers
-  # continue to work without modification.
-  match("/projects/:project_id/violations",
-        to: "projects/violations#update",
-        as: "project_violations_update",
-        via: [:put, :patch])
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications

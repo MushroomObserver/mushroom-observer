@@ -25,7 +25,7 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
   def test_create_link_opens_new_tab_and_reopen_picks_up_fresh_location
     project, obs, modal_id, missing_suffix = setup_project_with_violation
     login!(project.user)
-    visit(project_violations_path(project_id: project.id))
+    visit(project_violation_path(project_id: project.id))
 
     # ---- First open: missing-suffix row is disabled, with a Create link.
     open_target_location_modal(project, obs)
@@ -69,7 +69,7 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
       click_button(:form_violations_modal_target_location_submit.l)
     end
 
-    assert_current_path(project_violations_path(project_id: project.id))
+    assert_current_path(project_violation_path(project_id: project.id))
     project.target_locations.reload
     assert_includes(
       project.target_locations, new_location,
@@ -102,7 +102,7 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
   def open_target_location_modal(project, obs)
     click_link(
       :form_violations_action_add_target_location.l,
-      href: target_location_modal_project_violations_path(
+      href: target_location_modal_project_violation_path(
         project_id: project.id, obs_id: obs.id
       )
     )
