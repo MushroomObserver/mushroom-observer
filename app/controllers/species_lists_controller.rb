@@ -131,7 +131,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     @species_list = SpeciesList.new
     init_project_vars_for_create
     init_list_for_clone(params[:clone]) if params[:clone].present?
-    render_phlex_new
+    render_new_view
   end
 
   def edit
@@ -140,7 +140,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     if permission!(@species_list)
       @place_name = @species_list.place_name(@user)
       init_project_vars_for_edit(@species_list)
-      render_phlex_edit
+      render_edit_view
     else
       redirect_to(species_list_path(@species_list))
     end
@@ -247,9 +247,9 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
     init_project_vars_for_reload(@species_list)
     if create_or_update == :create
-      render_phlex_new
+      render_new_view_invalid
     else
-      render_phlex_edit
+      render_edit_view_invalid
     end
   end
 
@@ -274,16 +274,16 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
            ))
   end
 
-  def render_phlex_new
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::SpeciesLists::New.new(
              **species_list_form_view, clone_id: @clone_id
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_phlex_edit
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::SpeciesLists::Edit.new(
              **species_list_form_view
-           ))
+           ), status: status, **render_opts)
   end
 
   def validate_place_name

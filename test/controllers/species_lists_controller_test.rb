@@ -454,10 +454,11 @@ class SpeciesListsControllerTest < FunctionalTestCase
          })
     # No save (validation re-renders the form).
     assert_nil(SpeciesList.find_by(title: "Dubious place test"))
-    assert_response(:success)
+    assert_unprocessable
     # `@dubious_where_reasons` was populated and is now in the
     # FormLocationFeedback component.
     assert_select("#dubious_location_messages")
+    assert_select("form[data-turbo='true']")
   end
 
   # Cover the `redirect_to(new_location_path(...))` branch in
@@ -671,6 +672,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
