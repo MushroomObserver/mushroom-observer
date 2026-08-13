@@ -126,6 +126,10 @@ class LicensesControllerTest < FunctionalTestCase
       "input[type=checkbox][name='deprecated'][checked='checked']", false,
       "New License form `deprecated` checkbox should be unchecked"
     )
+    # Turbo-conversion prototype (issue #5052): the plain GET render
+    # must stay 200, and the form must actually opt in to Turbo.
+    assert_select("form[data-turbo='true']", true,
+                  "License form should be Turbo-enabled")
   end
 
   def test_create
@@ -134,8 +138,7 @@ class LicensesControllerTest < FunctionalTestCase
                "Test needs a non-existent License")
     url = "http://creativecommons.org/licenses/by-nc-sa/4.0/"
     params = { license: { display_name: display_name,
-                          url: url },
-               deprecated: "0" }
+                          url: url, deprecated: "0" } }
 
     login("rolf")
     make_admin
@@ -160,8 +163,8 @@ class LicensesControllerTest < FunctionalTestCase
   def test_create_duplicate
     license = licenses(:ccnc30)
     params = { license: { display_name: license.display_name,
-                          url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+                          url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -170,12 +173,15 @@ class LicensesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash_warning
+    # Turbo requires a non-2xx status on a failed submission's
+    # re-render, or it treats a 200 as a silent no-op (issue #5052).
+    assert_unprocessable
   end
 
   def test_create_missing_attribute
     license = licenses(:ccnc30)
-    params = { license: { display_name: nil, url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+    params = { license: { display_name: nil, url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -186,13 +192,14 @@ class LicensesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash_warning
+    assert_unprocessable
   end
 
   def test_create_save_failure
     license = licenses(:ccnc30)
     params = { license: { display_name: license.display_name,
-                          url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+                          url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -204,6 +211,7 @@ class LicensesControllerTest < FunctionalTestCase
         end
       end
     end
+    assert_unprocessable
   end
 
   def test_edit
@@ -227,14 +235,16 @@ class LicensesControllerTest < FunctionalTestCase
       "input[type=checkbox][name='license[deprecated]'][checked]", true,
       "License form `Deprecated` checkbox should be checked"
     )
+    assert_select("form[data-turbo='true']", true,
+                  "License form should be Turbo-enabled")
   end
 
   def test_update
     license = licenses(:ccwiki30)
     params = { id: license.id,
                license: { display_name: "X Special",
-                          url: "https://x.com/explore" },
-               deprecated: "1" }
+                          url: "https://x.com/explore",
+                          deprecated: "1" } }
 
     login("rolf")
     make_admin
@@ -247,15 +257,15 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_equal(params.dig(:license, :display_name), license.display_name)
     assert_equal(params.dig(:license, :url), license.url)
-    assert_equal(params[:deprecated] == "1", license.deprecated)
+    assert_equal(params.dig(:license, :deprecated) == "1", license.deprecated)
   end
 
   def test_update_no_changes
     license = licenses(:ccwiki30)
     params = { id: license.id,
                license: { display_name: license.display_name,
-                          url: license.url },
-               deprecated: license.deprecated ? "1" : "0" }
+                          url: license.url,
+                          deprecated: license.deprecated ? "1" : "0" } }
 
     login("rolf")
     make_admin
@@ -264,13 +274,14 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_flash(:runtime_edit_name_no_change)
     assert_form_action({ action: :update }, "Failed to re-render edit")
+    assert_unprocessable
   end
 
   def test_update_missing_attribute
     license = licenses(:ccnc30)
     params = { id: license.id,
-               license: { display_name: nil, url: license.url },
-               deprecated: (license.deprecated ? "1" : "0") }
+               license: { display_name: nil, url: license.url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -278,6 +289,7 @@ class LicensesControllerTest < FunctionalTestCase
     put(:update, params: params)
     assert(license.reload.display_name, "License is missing display_name")
     assert_flash_warning
+    assert_unprocessable
   end
 
   def test_update_duplicate_attribute
@@ -285,8 +297,8 @@ class LicensesControllerTest < FunctionalTestCase
     params = { id: license.id,
                license: { display_name: license.display_name,
                           # duplicates another license's attribute
-                          url: licenses(:ccnc25).url },
-               deprecated: (license.deprecated ? "1" : "0") }
+                          url: licenses(:ccnc25).url,
+                          deprecated: (license.deprecated ? "1" : "0") } }
 
     login("rolf")
     make_admin
@@ -295,6 +307,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_flash(:runtime_license_duplicate_attributed)
     assert_form_action({ action: :update }, "Failed to re-render edit")
+    assert_unprocessable
   end
 
   def test_destroy

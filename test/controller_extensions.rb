@@ -385,6 +385,14 @@ module ControllerExtensions
     end
   end
 
+  # Assert a failed form submission's re-render used a non-2xx status.
+  # Turbo requires this -- a plain 200 on a failed submission's
+  # re-render is a silent no-op under Turbo instead of a redisplay
+  # (issue #5052).
+  def assert_unprocessable(msg = nil)
+    assert_response(:unprocessable_content, msg)
+  end
+
   # Assert that a response body is same as contents of a given file.
   #   get(:action, params)
   #   assert_response_equal_file("#{path}/file")

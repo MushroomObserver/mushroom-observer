@@ -278,21 +278,29 @@ export default class extends Controller {
     if (this.areAllItemsExifPopulated() ||
       attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
       this.block_form_submission = false;
-      // form.submit(), not requestSubmit(): when there are no images to
-      // upload, this call happens synchronously inside the ORIGINAL
-      // submit event's own onsubmit handler (see set_bindings), before
-      // that handler has returned. requestSubmit() re-enters the
-      // browser's submission algorithm while it's still marked as
-      // "firing submission events" for the outer submit -- the spec's
-      // reentrancy guard silently no-ops it (no error, no event, no
-      // request), and then the outer handler's `return false` cancels
-      // the original submission too, so nothing submits at all
-      // (verified: no network request, no thrown error). submit()
-      // bypasses that guard entirely by skipping the event pipeline.
-      this.form.submit();
+      this.submitForm();
     } else {
       setTimeout(() => this.submitWhenExifReady(attempt + 1), 100);
     }
+  }
+
+  // requestSubmit(), deferred to a new task via setTimeout, rather than
+  // form.submit() or a direct requestSubmit() call. submitWhenExifReady
+  // sometimes reaches this synchronously, from inside the ORIGINAL
+  // submit event's own onsubmit handler (see set_bindings), before
+  // that handler has returned. Calling requestSubmit() directly from
+  // there re-enters the browser's submission algorithm while it's
+  // still marked as firing the outer submit -- the spec's reentrancy
+  // guard silently no-ops a same-stack call (no error, no event, no
+  // request), and the outer handler's `return false` then cancels the
+  // original submission too, so nothing submits at all (verified via
+  // a real browser system test). Deferring via setTimeout(0) runs
+  // requestSubmit() on a fresh task, after the browser has fully
+  // finished processing the original submit event, avoiding the
+  // guard -- and, unlike form.submit(), requestSubmit() dispatches a
+  // real submit event, which is what a later Turbo-enabled form needs.
+  submitForm() {
+    setTimeout(() => this.form.requestSubmit(), 0);
   }
 
   /*********************/
