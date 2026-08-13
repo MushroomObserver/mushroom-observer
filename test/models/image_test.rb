@@ -150,6 +150,68 @@ class ImageTest < UnitTestCase
     assert_true(img.can_edit?(dick))
   end
 
+  def test_can_transform_site_admin_bypasses_everything
+    img = images(:commercial_inquiry_image)
+
+    assert_true(img.can_transform?(katrina, site_admin: true),
+                "Site admin mode should permit transforming any image")
+  end
+
+  def test_can_transform_own_image
+    img = images(:commercial_inquiry_image)
+    assert_equal(rolf, img.user, "Fixture expectation: rolf owns this image")
+
+    assert_true(img.can_transform?(rolf),
+                "Image owner should be able to transform their own image")
+  end
+
+  def test_can_transform_via_project_admin_of_image_itself
+    img = images(:in_situ_image)
+    assert_equal(mary, img.user, "Fixture expectation: mary owns this image")
+
+    assert_true(img.can_transform?(dick),
+                "Admin of a project the image is directly " \
+                "attached to should be able to transform it")
+  end
+
+  def test_can_transform_via_project_admin_of_observation
+    img = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    assert_equal(mary, obs.user,
+                 "Fixture expectation: mary owns this observation")
+    img.observations << obs
+
+    assert_true(img.can_transform?(dick),
+                "Admin of a project the image's observation belongs to " \
+                "should be able to transform the image")
+  end
+
+  def test_can_transform_via_project_admin_regardless_of_owner_trust
+    img = images(:commercial_inquiry_image)
+    obs = observations(:agaricus_campestris_obs)
+    assert_equal(rolf, obs.user,
+                 "Fixture expectation: rolf owns this observation")
+    project = projects(:one_genus_two_species_project)
+    assert_nil(ProjectMember.find_by(project:, user: rolf),
+               "Fixture expectation: rolf has no trust relationship with " \
+               "this project")
+    img.observations << obs
+
+    assert_true(img.can_transform?(dick),
+                "Project admin should be able to transform images of " \
+                "the project's observations regardless of owner trust")
+  end
+
+  def test_can_transform_denies_unrelated_user
+    img = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    img.observations << obs
+
+    assert_false(img.can_transform?(katrina),
+                 "User without ownership/admin/collector tie to the " \
+                 "Image or its Obss should be unable to transform it")
+  end
+
   def test_validation
     img = Image.new
     assert_false(img.valid?)

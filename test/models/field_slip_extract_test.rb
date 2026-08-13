@@ -224,6 +224,24 @@ class FieldSlipExtractTest < UnitTestCase
     assert_nil(extract.reload.unknown_location_alias)
   end
 
+  # The reported bug (obs 664208): a spare slip -- its project released
+  # after a constraint violation -- stopped resolving its event's
+  # aliases, so "EB2" warned as undefined while the event's project
+  # defined it. The printed prefix still names the event.
+  def test_unknown_location_alias_uses_a_spare_slips_event_project
+    project = projects(:eol_project)
+
+    assert_not_includes(project.observations, @obs,
+                        "premise: membership is not what resolves it")
+
+    ProjectAlias.create!(project: project, name: "EB2",
+                         target: locations(:albion))
+    @obs.field_slip.update_columns(project_id: nil)
+    extract = record(fields: { "Location" => "EB2" })
+
+    assert_nil(extract.reload.unknown_location_alias)
+  end
+
   def test_unknown_location_alias_nil_when_it_matches_the_location
     extract = record(fields: { "Location" => @obs.location.name })
 

@@ -66,7 +66,7 @@ module Views::Controllers::Observations
     end
 
     def view_template
-      submit(button_name, center: true)
+      submit(button_name, center: true, disable_with: :submitting.ti)
       render_images_details_panel
       render_naming_specimen_panel
       render_notes_panel

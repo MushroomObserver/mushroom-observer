@@ -222,7 +222,18 @@ class Components::ApplicationForm < Superform::Rails::Form
       @attributes[:data] ||= {}
       @attributes[:data][:turbo] = "true"
     end
+    add_form_feedback_controller
     super
+  end
+
+  # Every non-Turbo form disables its submit buttons once submitted
+  # (see form-feedback_controller.js; Turbo forms are skipped there,
+  # since Turbo manages its own in-flight state). Appended so a form's
+  # own Stimulus controllers keep working alongside it.
+  def add_form_feedback_controller
+    @attributes[:data] ||= {}
+    @attributes[:data][:controller] =
+      [@attributes[:data][:controller], "form-feedback"].compact.join(" ")
   end
 
   # Form subclasses can override form_action to derive action URLs from model

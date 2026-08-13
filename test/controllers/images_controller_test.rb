@@ -187,6 +187,53 @@ class ImagesControllerTest < FunctionalTestCase
     assert_select("form[action=?]", image_field_slip_extract_path(image.id))
   end
 
+  # #4989: rotate/mirror controls follow permission on the image itself
+  # OR on the Observation it belongs to -- not just the image's own
+  # (separate) project attachment.
+  def test_show_hides_transform_buttons_from_unrelated_user
+    image = images(:commercial_inquiry_image)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select(
+      "form[action=?]",
+      transform_image_path(id: image.id, op: "rotate_left",
+                           size: katrina.image_size),
+      count: 0
+    )
+  end
+
+  def test_show_offers_transform_buttons_to_project_admin_of_observation
+    image = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    image.observations << obs
+    admin = dick
+    assert(obs.can_edit?(admin), "premise: dick can edit this observation")
+
+    login(admin.login)
+    get(:show, params: { id: image.id })
+
+    assert_select(
+      "form[action=?]",
+      transform_image_path(id: image.id, op: "rotate_left",
+                           size: admin.image_size)
+    )
+  end
+
+  def test_show_offers_transform_buttons_in_admin_mode
+    image = images(:commercial_inquiry_image)
+    admin = make_admin("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select(
+      "form[action=?]",
+      transform_image_path(id: image.id, op: "rotate_left",
+                           size: admin.image_size)
+    )
+  end
+
   def test_show_image_info_panel_heading
     image = images(:peltigera_image)
     login

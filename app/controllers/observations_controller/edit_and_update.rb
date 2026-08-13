@@ -122,6 +122,9 @@ module ObservationsController::EditAndUpdate
   def init_update
     init_license_var
     init_new_image_var(@observation.when)
+    # Snapshotted so the post-save redirect can tell which photos THIS
+    # update added -- only those get the slip-review detour.
+    @image_ids_before_update = @observation.image_ids
     @any_errors = false
   end
 
@@ -312,7 +315,25 @@ module ObservationsController::EditAndUpdate
       redirect_to(new_location_path(where: @observation.place_name(@user),
                                     set_observation: @observation.id))
     else
+      return if redirected_to_new_photo_slip_review?
+
       redirect_to(permanent_observation_path(@observation.id))
     end
+  end
+
+  # A slip photographed into an existing observation gets the same
+  # review handoff Create gives (reported: a photo added on edit read
+  # the slip invisibly -- no redirect, no link -- so the observation
+  # sat unnamed and the collector rescanned by hand). Only photos this
+  # update added are candidates, so routine edits of a slip
+  # observation never detour.
+  def redirected_to_new_photo_slip_review?
+    new_ids = @observation.image_ids - @image_ids_before_update
+    return false if new_ids.empty?
+
+    new_images = @observation.images.select do |image|
+      new_ids.include?(image.id)
+    end
+    redirected_to_field_slip_review?(new_images)
   end
 end
