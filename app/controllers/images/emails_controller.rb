@@ -62,8 +62,7 @@ module Images
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image
       @message = params.permit(email: [:message]).dig(:email, :message)
-      render_new_view
-      self.status = :unprocessable_content
+      render_new_view_invalid
       false
     end
 
