@@ -165,6 +165,8 @@ module Observations
 
       assert_page_title("Edit Image",
                         "It should return to form if image save fails")
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Appear on both observations/images/new and images/edit
@@ -300,6 +302,8 @@ module Observations
       post(:attach, params: params)
 
       assert_flash(:runtime_image_reuse_invalid_id, id: params[:img_id])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_reuse_image_strip_gps_failed

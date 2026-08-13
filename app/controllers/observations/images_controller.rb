@@ -26,7 +26,7 @@ module Observations
       return unless check_image_permission?
 
       init_project_vars_for_add_or_edit(@image)
-      render_edit_html
+      render_edit_view
     end
 
     def update
@@ -46,13 +46,13 @@ module Observations
         )
       else
         init_project_vars_for_reload(@image)
-        render_edit_html(location: edit_image_path(@image.id))
+        render_edit_view_invalid(location: edit_image_path(@image.id))
       end
     end
 
     private
 
-    def render_edit_html(location: nil)
+    def render_edit_view(status: :ok, **render_opts)
       render(
         Views::Controllers::Observations::Images::Edit.new(
           image: @image,
@@ -61,8 +61,13 @@ module Observations
           submitted_project_ids: @submitted_project_ids,
           user: @user
         ),
-        location: location
+        status: status, **render_opts
       )
+    end
+
+    def render_edit_view_invalid(**)
+      render_edit_view(**)
+      self.status = :unprocessable_content
     end
 
     def find_image!
@@ -216,13 +221,7 @@ module Observations
       return unless check_observation_permission!
 
       load_images_to_reuse
-      render(Views::Controllers::Observations::Images::Reuse.new(
-               observation: @observation,
-               user: @user,
-               objects: @reuse_images,
-               pagination_data: @reuse_pagination,
-               all_users: @reuse_all_users
-             ))
+      render_reuse_view
     end
 
     # reuse image form buttons POST here
@@ -236,13 +235,9 @@ module Observations
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: img_id))
         load_images_to_reuse
-        render(Views::Controllers::Observations::Images::Reuse.new(
-                 observation: @observation,
-                 user: @user,
-                 objects: @reuse_images,
-                 pagination_data: @reuse_pagination,
-                 all_users: @reuse_all_users
-               ), location: reuse_images_for_observation_path(@observation.id))
+        render_reuse_view_invalid(
+          location: reuse_images_for_observation_path(@observation.id)
+        )
         return
       end
 
@@ -250,6 +245,22 @@ module Observations
     end
 
     private
+
+    def render_reuse_view(status: :ok, **render_opts)
+      render(Views::Controllers::Observations::Images::Reuse.new(
+               observation: @observation,
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ),
+             status: status, **render_opts)
+    end
+
+    def render_reuse_view_invalid(**)
+      render_reuse_view(**)
+      self.status = :unprocessable_content
+    end
 
     def find_observation!
       find_or_goto_index(Observation, params[:id].to_s)

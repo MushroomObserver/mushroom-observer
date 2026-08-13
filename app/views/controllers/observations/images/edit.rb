@@ -33,7 +33,8 @@ module Views::Controllers::Observations::Images
                user: @user,
                licenses: @licenses,
                projects: @projects,
-               submitted_project_ids: @submitted_project_ids
+               submitted_project_ids: @submitted_project_ids,
+               local: false
              ))
     end
 
