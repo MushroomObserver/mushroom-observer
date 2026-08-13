@@ -169,10 +169,8 @@ class ImageTest < UnitTestCase
     img = images(:in_situ_image)
     assert_equal(mary, img.user, "Fixture expectation: mary owns this image")
 
-    # Dick is bolete_admins, and this image is directly attached to
-    # bolete_project (fixture-level, not via its observation).
     assert_true(img.can_transform?(dick),
-                "Project admin of a project the image is directly " \
+                "Admin of a project the image is directly " \
                 "attached to should be able to transform it")
   end
 
@@ -183,13 +181,25 @@ class ImageTest < UnitTestCase
                  "Fixture expectation: mary owns this observation")
     img.observations << obs
 
-    # Dick is bolete_admins; bolete_project contains `obs` (not `img`
-    # directly), and `obs`'s owner (mary) trusts bolete_project with
-    # "editing" trust. Dick should therefore be able to transform an
-    # image attached only to that observation, per #4989.
     assert_true(img.can_transform?(dick),
                 "Admin of a project the image's observation belongs to " \
                 "should be able to transform the image")
+  end
+
+  def test_can_transform_via_project_admin_regardless_of_owner_trust
+    img = images(:commercial_inquiry_image)
+    obs = observations(:agaricus_campestris_obs)
+    assert_equal(rolf, obs.user,
+                 "Fixture expectation: rolf owns this observation")
+    project = projects(:one_genus_two_species_project)
+    assert_nil(ProjectMember.find_by(project:, user: rolf),
+               "Fixture expectation: rolf has no trust relationship with " \
+               "this project")
+    img.observations << obs
+
+    assert_true(img.can_transform?(dick),
+                "Project admin should be able to transform images of " \
+                "the project's observations regardless of owner trust")
   end
 
   def test_can_transform_denies_unrelated_user
@@ -198,9 +208,8 @@ class ImageTest < UnitTestCase
     img.observations << obs
 
     assert_false(img.can_transform?(katrina),
-                 "A user with no ownership/admin/collector tie to the " \
-                 "image or its observations should not be able to " \
-                 "transform it")
+                 "User without ownership/admin/collector tie to the " \
+                 "Image or its Obss should be unable to transform it")
   end
 
   def test_validation
