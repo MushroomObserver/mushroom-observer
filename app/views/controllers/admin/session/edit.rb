@@ -8,7 +8,7 @@ module Views::Controllers::Admin::Session
 
     def view_template
       add_page_title(:app_switch_users.l)
-      render(Form.new(@form))
+      render(Form.new(@form, local: false))
     end
   end
 end
