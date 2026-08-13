@@ -265,7 +265,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(:glossary_error_name_blank)
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_create_glossary_term_no_description_or_image

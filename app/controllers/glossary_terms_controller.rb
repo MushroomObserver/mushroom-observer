@@ -60,7 +60,7 @@ class GlossaryTermsController < ApplicationController
   def new
     @glossary_term = GlossaryTerm.new
     assign_image_form_ivars
-    render(new_form_view)
+    render_new_view
   end
 
   def edit
@@ -72,7 +72,7 @@ class GlossaryTermsController < ApplicationController
       return
     end
 
-    render(edit_form_view)
+    render_edit_view
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -160,25 +160,27 @@ class GlossaryTermsController < ApplicationController
     flash_object_errors(@glossary_term)
     assign_image_form_ivars
     case form
-    when "new"  then render(new_form_view)
-    when "edit" then render(edit_form_view)
+    when "new"  then render_new_view_invalid
+    when "edit" then render_edit_view_invalid
     end
   end
 
-  def new_form_view
-    Views::Controllers::GlossaryTerms::New.new(
-      glossary_term: @glossary_term,
-      copyright_holder: @copyright_holder,
-      copyright_year: @copyright_year,
-      licenses: @licenses,
-      upload_license_id: @upload_license_id
-    )
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::GlossaryTerms::New.new(
+             glossary_term: @glossary_term,
+             copyright_holder: @copyright_holder,
+             copyright_year: @copyright_year,
+             licenses: @licenses,
+             upload_license_id: @upload_license_id
+           ),
+           status: status, **render_opts)
   end
 
-  def edit_form_view
-    Views::Controllers::GlossaryTerms::Edit.new(
-      glossary_term: @glossary_term
-    )
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::GlossaryTerms::Edit.new(
+             glossary_term: @glossary_term
+           ),
+           status: status, **render_opts)
   end
 
   # Process any image together with @glossary_term,

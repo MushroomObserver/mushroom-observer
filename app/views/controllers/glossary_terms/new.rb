@@ -27,7 +27,8 @@ module Views::Controllers::GlossaryTerms
                  copyright_year: @copyright_year,
                  licenses: @licenses,
                  upload_license_id: @upload_license_id
-               }
+               },
+               local: false
              ))
     end
   end
