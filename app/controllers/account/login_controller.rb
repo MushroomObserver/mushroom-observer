@@ -111,7 +111,10 @@ module Account
         # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
         PasswordMailer.build(receiver: @new_user, password:).deliver_later
-        render_new_view
+        # Same-URL POST re-render, no redirect -- Turbo Drive needs a
+        # non-2xx status here regardless of whether anything failed
+        # (see turbo_submit_forms.md's hard rule).
+        render_new_view_invalid
       else
         flash_object_errors(@new_user)
       end

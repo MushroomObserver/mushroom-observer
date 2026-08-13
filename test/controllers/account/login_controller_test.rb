@@ -161,6 +161,7 @@ module Account
         post(:new_password_request,
              params: { new_user: { login: users(:roy).login } })
       end
+      assert_unprocessable
       user.reload
       assert_not_equal(user.password, old_password,
                        "New password should be different from old")
