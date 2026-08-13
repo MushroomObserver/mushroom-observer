@@ -318,7 +318,7 @@ class NamesController < ApplicationController
 
   def new
     init_create_name_form
-    render_new_form
+    render_new_view
   end
 
   def create
@@ -336,7 +336,7 @@ class NamesController < ApplicationController
     return unless find_name!
 
     init_edit_name_form
-    render_edit_form
+    render_edit_view
   end
 
   def update
@@ -382,15 +382,14 @@ class NamesController < ApplicationController
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-    render_new_form(location: new_name_path)
-    self.status = :unprocessable_content
+    render_new_view_invalid
   end
 
-  def render_new_form(status: :ok, **render_opts)
+  def render_new_view(status: :ok, **render_opts)
     render(phlex_new_form, status: status, **render_opts)
   end
 
-  def render_edit_form(status: :ok, **render_opts)
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Names::Edit.new(
              name: @name, user: @user,
              name_string: @name_string,
