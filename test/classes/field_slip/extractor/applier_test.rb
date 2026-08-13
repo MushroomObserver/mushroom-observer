@@ -123,6 +123,24 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     assert_equal(locations(:albion).name, @obs.where)
   end
 
+  # The event's alias wins over a same-named alias in another project
+  # the observation belongs to, however recently that one was touched
+  # -- the collector wrote the EVENT's abbreviations.
+  def test_event_alias_outranks_another_projects_newer_alias
+    other = projects(:open_membership_project)
+    other.observations << @obs
+    ProjectAlias.create!(project: @project, name: "EB2",
+                         target: locations(:albion)).
+      update_columns(updated_at: 2.days.ago)
+    ProjectAlias.create!(project: other, name: "EB2",
+                         target: locations(:burbank))
+
+    apply_fields({ "Location" => "EB2" })
+
+    assert_equal(locations(:albion), @obs.location,
+                 "the slip's event project defined the vocabulary")
+  end
+
   # A spare slip's event still resolves its aliases (reported: "EB2"
   # applied verbatim after a constraint violation released the slip's
   # project) -- the printed prefix names the event, membership or not.

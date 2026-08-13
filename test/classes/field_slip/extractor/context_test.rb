@@ -102,7 +102,9 @@ class FieldSlip::Extractor::ContextTest < UnitTestCase
     # "No project" now means no slip project AND no prefix-named event
     # (see FieldSlip#event_project), so the code moves to an unknown
     # prefix too.
-    @obs.field_slip.update_columns(project_id: nil, code: "NEMF-12781")
+    assert_nil(Project.find_by(field_slip_prefix: "ZZZX"),
+               "premise: no fixture project claims this prefix")
+    @obs.field_slip.update_columns(project_id: nil, code: "ZZZX-12781")
 
     assert_empty(context_for(@obs.reload).aliases("Location"))
   end

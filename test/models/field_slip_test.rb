@@ -174,8 +174,11 @@ class FieldSlipTest < UnitTestCase
   end
 
   def test_event_project_nil_for_an_unknown_prefix
+    assert_nil(Project.find_by(field_slip_prefix: "ZZZX"),
+               "premise: no fixture project claims this prefix")
+
     slip = field_slips(:field_slip_one)
-    slip.update_columns(code: "NEMF-12781", project_id: nil)
+    slip.update_columns(code: "ZZZX-12781", project_id: nil)
 
     assert_nil(slip.reload.event_project)
   end
