@@ -38,6 +38,23 @@ module Admin
       assert_nil(session[:notice])
     end
 
+    # Nested admin controllers (route controller path "admin/blocked_ips")
+    # must resolve too -- camelize turns the slash into "::",
+    # producing "Admin::BlockedIpsController".
+    def test_turn_admin_off_from_nested_admin_only_referer_skips_denial_flash
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+      post(:create, params: { turn_on: true })
+
+      @request.env["HTTP_REFERER"] = edit_admin_blocked_ips_url
+      post(:create, params: { turn_off: true })
+
+      assert_false(session[:admin])
+      assert_redirected_to("/")
+      assert_nil(session[:notice])
+    end
+
     # A referer pointing at an ordinary (non-admin-only) page keeps
     # the existing redirect_back behavior.
     def test_turn_admin_off_from_ordinary_referer_redirects_back
