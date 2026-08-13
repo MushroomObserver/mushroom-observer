@@ -51,6 +51,56 @@ which of these three the response actually is. Only the Drive case
 (full-page re-render, no `turbo_frame_tag`, no `format.turbo_stream`
 branch) needs the `422` treatment described below.
 
+## HARD RULE: a same-URL `200` re-render on a Turbo-enabled form hangs the browser
+
+**Never let a Drive-category response return a plain `200` at the same
+URL it was submitted to — always either redirect, or return a non-2xx
+status, even when nothing actually "failed."** This is not a style
+preference; it's confirmed, reproducible browser breakage with **no
+error, no exception, no console message** — the page just never
+navigates and the flash never appears, indistinguishable from a hung
+network request unless you go looking with a real browser.
+
+Confirmed directly: `OccurrencesController`'s project-gaps
+confirmation (`create_occurrence`'s `render_project_confirmation` and
+`update`'s `redirect_after_update` re-render) both render the *same*
+full-page URL at plain `200` after a POST/PATCH, on a form with
+`local: false`. `occurrence_edit_form_system_test.rb`'s two submission
+tests failed with "expected to find css `#flash_notices.alert-success`
+but there were no matches" — even at an explicit 8-second wait, in a
+real browser (Cuprite). Instrumenting `turbo:submit-end` showed
+`success=undefined` and no navigation ever occurred. Forcing
+`status: :unprocessable_content` on the exact same re-render fixed
+both tests immediately, running in under 6s. The same fix was then
+needed in two more places that had independently made the identical
+"leave it at 200, nothing really failed" call before this was
+understood: `Descriptions::Merges#warn_and_render_edit_description_form`
+(the merge-conflict page) and `InfoController#textile_sandbox_create`
+(a live-preview tool with no failure concept at all — 422 here is
+purely a Turbo-mechanics necessity, not a claim that the preview
+"failed").
+
+**The takeaway supersedes earlier guidance in this doc**: the three
+response-target categories above still correctly identify *whether*
+Turbo cares about status at all (redirect / frame / stream → no), but
+within the "full-page Drive re-render" category, the right status is
+never "200 because this is a legitimate next step, not a failure" —
+Turbo Drive doesn't know or care about REST semantics, only whether
+the URL changed and whether the status is 2xx. Same URL + 2xx = Drive
+tries to treat it as a successful new "visit" and — per this
+investigation — that path is broken for a same-URL response. Same URL
++ non-2xx = Drive correctly redisplays in place. If a full-page
+re-render doesn't redirect, it needs `:unprocessable_content`,
+**full stop, regardless of whether anything semantically failed.**
+
+This means: **every Drive-category full-page re-render found in this
+sweep needs a non-2xx status, with no exceptions** — there is no
+legitimate "leave it at 200" case for a same-URL POST/PATCH re-render
+under Turbo. If you find yourself reasoning "this isn't really a
+failure, so 200 is more correct" for a same-URL re-render, that
+reasoning is exactly what produced this bug three separate times in
+this sweep — stop and force the non-2xx status instead.
+
 ## CRUD buttons are a separate, already-solved mechanism — audit, don't convert
 
 Besides the `New`/`Edit` form, a controller's pages (`index`, `show`,
@@ -157,25 +207,35 @@ wrong before writing any test and you'll chase a false failure:
    instead of treating the response as a normal navigation
    (`Images::LicensesController`).
 
-Exception worth a deliberate call-out, not a silent skip: a full-page
-always-re-render controller whose action is a pure preview/sandbox with
-no real validation-failure concept (`InfoController#textile_sandbox_create`)
-may legitimately keep `200` — check for an existing test asserting the
-current status before changing it, and leave it alone with a note if
-changing it would contradict that test and the semantics.
+There is **no exception** to category 3 for "this isn't really a
+failure" cases — see the hard rule above. An earlier version of this
+doc carved out `InfoController#textile_sandbox_create` (a pure
+preview/sandbox tool) as a legitimate case for keeping `200`; that was
+wrong and has been fixed. Same-URL re-renders always need the non-2xx
+status, regardless of whether the action semantically "failed."
 
-## Testing: controller tests are enough — no system tests needed for this sweep
+## Testing: controller tests are enough *once you follow the hard rule above*
 
 The mechanical part of this conversion (`local: false` → `data-turbo`
 attribute, failure path → `422`) is fully verifiable through the
-existing Rails request/response cycle. Controller tests already render
-real HTML into `@response.body` and already exercise the full
-`session[:notice]` flash mechanism (see "Flash" below) — a browser and
-JS engine add nothing beyond what `assert_select` on that body already
-proves for this specific class of change. Reach for a system test only
-when the change involves actual client-side behavior beyond opt-in
-markup (a Stimulus controller reacting to the Turbo swap, a JS-driven
-multi-step flow) — not for the routine conversion pattern itself.
+existing Rails request/response cycle — status codes and rendered HTML
+are exactly what a controller test already inspects, and MO's flash
+mechanism doesn't need a browser either (see "Flash" below). This
+holds *as long as every full-page Drive re-render gets a non-2xx
+status per the hard rule above* — controller tests can't tell the
+difference between "200, and Turbo handles it fine" and "200, and
+Turbo silently hangs," because they never execute Turbo's own JS.
+That gap is exactly how the same-URL-200 bug survived three separate
+sweep decisions undetected. The fix isn't "add a system test for every
+form" — it's "never emit the shape that only a system test can catch
+in the first place." Once every Drive re-render is redirect-or-non-2xx,
+controller tests are sufficient again.
+
+When you genuinely can't avoid ambiguity (a new response shape this
+doc doesn't already cover, or you're not sure whether a case falls
+into the same-URL-200 trap), run the controller's existing system test
+if one exists — see "Why not system tests" below for how cheap that
+check actually is.
 
 Two assertions close the practical gap, both addable to a controller
 test that already exists (no new test files):
@@ -280,7 +340,7 @@ sweep — the existing `assert_flash_error`/`assert_unprocessable` pair on
 a failure path is a complete, meaningful check for MO's flash contract,
 without needing to parse the rendered flash HTML.
 
-## Why not system tests
+## Why not system tests (mostly) — and when to actually run one
 
 A parallel PR (#5055, Observations Turbo conversion) built genuine
 Capybara/Cuprite system-test infrastructure — `wait:` params on
@@ -288,13 +348,37 @@ Capybara/Cuprite system-test infrastructure — `wait:` params on
 discovering Turbo's async page-body swap is measurably slower than a
 normal full-page render, which made naive system-test flash assertions
 flaky. That infrastructure is for verifying **actual browser/JS
-behavior** (does Turbo really intercept the submit, does the swap
-settle before the assertion runs) and is worth its cost for a page with
-non-trivial client-side interaction. It is not needed for this sweep:
-the conversion here is a mechanical, declarative opt-in
-(`local: false` + a status code), fully provable at the HTTP layer, and
-adding a system test per converted form would multiply suite runtime
-for no additional signal. If a future controller in this sweep turns
-out to have real client-side logic riding on the Turbo swap, that's the
-signal to add a targeted system test for that one controller — not a
-blanket policy change.
+behavior** and is worth its cost for a page with non-trivial
+client-side interaction.
+
+For most of this sweep, a system test per converted form still isn't
+worth it — the conversion is mechanical, and correctness is provable
+at the HTTP layer *once the hard rule above is followed*. But that
+qualifier matters: the same-URL-200 bug is real, it was silent, and it
+survived three independent, individually-reasoned "this one's fine at
+200" decisions across this sweep before a system test caught it. So
+the practical policy is:
+
+- **Writing a new full-page Drive re-render?** Apply the hard rule
+  (redirect or non-2xx, always) and controller tests are sufficient —
+  no need to add a system test just because the sweep touched the
+  controller.
+- **Does the controller already have a system test that exercises a
+  form submission this sweep touched?** Run it before calling the
+  controller done. It's cheap (one `bin/rails test` invocation) and
+  it's the only thing that would have caught this bug on the first,
+  second, or third occurrence. `OccurrencesController`,
+  `Names::Descriptions::MergesController`/
+  `Locations::Descriptions::MergesController`, and `InfoController`
+  all had this exact bug ship past controller-test review; only
+  `occurrence_edit_form_system_test.rb` (which happened to already
+  exist) caught it.
+- **Genuinely unsure whether a same-URL response is redirect, 2xx, or
+  the Drive case at all?** That uncertainty is itself the signal to
+  check for an existing system test rather than guess from the
+  controller code alone.
+
+Writing a *new* system test purely for sweep coverage is still
+overkill — the fix is a one-line status code, not a new test file. But
+"don't add tests" and "don't run the tests that already exist" are
+different things; do the latter whenever one is available.
