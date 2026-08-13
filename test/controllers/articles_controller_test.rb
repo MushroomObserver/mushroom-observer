@@ -159,6 +159,7 @@ class ArticlesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(:article_title_required)
+    assert_unprocessable
     # Phlex `Articles::New` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
@@ -215,6 +216,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params[:article][:title] = ""
     post(:update, params: params)
     assert_flash(:article_title_required)
+    assert_unprocessable
     # Phlex `Articles::Edit` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
