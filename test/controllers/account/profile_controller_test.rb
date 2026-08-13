@@ -104,6 +104,7 @@ module Account
 
       assert_unprocessable
       assert_select("form")
+      assert_select("form[data-turbo='true']")
       assert_flash_error
     end
 

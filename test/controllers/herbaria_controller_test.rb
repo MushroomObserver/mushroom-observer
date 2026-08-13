@@ -462,6 +462,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal(herbarium_count, Herbarium.count)
     assert_flash(:create_herbarium_name_blank)
     assert_unprocessable # Back to form for creating herbarium
+    assert_select("form[data-turbo='true']")
   end
 
   # Turbo stream submissions should reload the modal form with flash errors
@@ -475,6 +476,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
     assert_select("turbo-stream[action='replace'][target$='_form']")
+    assert_flash_error(:create_herbarium_name_blank)
   end
 
   # Successful turbo_stream create hits
@@ -495,6 +497,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_select("turbo-stream[action='remove'][target='modal_herbarium']")
+    assert_flash_success
   end
 
   def test_create_duplicate_name
@@ -714,6 +717,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
     assert_select("turbo-stream[action='replace'][target$='_form']")
+    assert_flash_error(:create_herbarium_name_blank)
   end
 
   def test_update_by_non_curator

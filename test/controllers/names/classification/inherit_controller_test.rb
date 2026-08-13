@@ -40,6 +40,7 @@ module Names::Classification
            params: { id: name.id, inherit_classification: { parent: "" } })
       assert_flash_error
       assert_unprocessable
+      assert_select("form[data-turbo='true']")
 
       # Test reload if parent field has no match and no alternate spellings.
       post(:create,

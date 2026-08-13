@@ -661,6 +661,7 @@ class LocationsControllerTest < FunctionalTestCase
     params[:location][:display_name] = ""
     post(:create, params: params)
     assert_unprocessable # means failure!
+    assert_select("form[data-turbo='true']")
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)

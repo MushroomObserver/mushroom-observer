@@ -71,6 +71,7 @@ class AccountControllerTest < FunctionalTestCase
     post(:create, params: { new_user: params.except(:password) })
     assert_flash_error
     assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match

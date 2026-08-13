@@ -163,6 +163,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Phlex `Articles::New` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
+    assert_select("form[data-turbo='true']")
     assert_form_action(action: :create) # "new" form
 
     # Prove authorized user can create Article
