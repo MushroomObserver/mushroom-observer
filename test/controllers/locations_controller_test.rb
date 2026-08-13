@@ -660,7 +660,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     post(:create, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
@@ -954,7 +954,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     put(:update, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     put(:update, params: params)
@@ -978,7 +978,7 @@ class LocationsControllerTest < FunctionalTestCase
     params = update_params_from_loc(loc)
     params[:location][:display_name] = new_normal_name
     put(:update, params: params)
-    assert_response(:success) # means failure
+    assert_unprocessable # means failure
 
     params[:location][:display_name] = new_scientific_name
     put(:update, params: params)

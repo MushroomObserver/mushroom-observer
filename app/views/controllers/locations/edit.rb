@@ -17,7 +17,8 @@ module Views::Controllers::Locations
       render(Form.new(
                @location,
                display_name: @display_name,
-               dubious_where_reasons: @dubious_where_reasons
+               dubious_where_reasons: @dubious_where_reasons,
+               local: false
              ))
     end
   end

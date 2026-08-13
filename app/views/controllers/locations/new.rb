@@ -29,7 +29,8 @@ module Views::Controllers::Locations
                set_species_list: @set_species_list,
                set_user: @set_user,
                set_herbarium: @set_herbarium,
-               dubious_where_reasons: @dubious_where_reasons
+               dubious_where_reasons: @dubious_where_reasons,
+               local: false
              ))
     end
   end
