@@ -15,7 +15,7 @@ module Views::Controllers::Herbaria::CuratorRequests
       trusted_html(:show_herbarium_curator_help.tp)
       render(Views::Controllers::Herbaria::CuratorRequests::Form.new(
                FormObject::HerbariumCuratorRequest.new,
-               herbarium: @herbarium, back: @back
+               herbarium: @herbarium, back: @back, local: false
              ))
     end
   end
