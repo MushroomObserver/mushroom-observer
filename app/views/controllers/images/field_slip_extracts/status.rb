@@ -79,7 +79,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       observation = @image.observations.first
       return unless observation
 
-      p do
+      p(class: "mt-3") do
         Link(type: :get, name: :field_slip_extract_observation_link.l,
              target: permanent_observation_path(observation.id))
       end
