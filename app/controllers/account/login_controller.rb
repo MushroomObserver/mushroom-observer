@@ -16,20 +16,20 @@ module Account
       else
         @login = ""
         @remember = true
-        render_new_phlex
+        render_new_view
       end
     end
 
     # login post action
     def create
-      render_new_phlex and return unless params[:user]
+      render_new_view_invalid and return unless params[:user]
 
       normalize_login_params
       user = User.authenticate(login: @login, password: @password)
 
       unless user
         flash_error(:runtime_login_failed.t)
-        render_new_phlex and return
+        render_new_view_invalid and return
       end
 
       user.verified ? login_success(user) : login_unverified(user)
@@ -37,7 +37,7 @@ module Account
 
     def email_new_password
       @new_user = User.new
-      render_email_new_password_phlex
+      render_email_new_password_view
     end
 
     def new_password_request
@@ -46,7 +46,7 @@ module Account
                              @login, @login, @login).first
       if @new_user.nil?
         flash_error(:runtime_email_new_password_failed.t(user: @login))
-        render_email_new_password_phlex and return
+        render_email_new_password_view_invalid and return
       else
         set_random_password_for_new_user_and_email_them
       end
@@ -61,16 +61,21 @@ module Account
 
     private
 
-    def render_new_phlex
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Login::New.new(
                login: @login, remember: @remember
-             ))
+             ), status: status, **render_opts)
     end
 
-    def render_email_new_password_phlex
+    def render_email_new_password_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Login::EmailNewPassword.new(
                new_user: @new_user
-             ))
+             ), status: status, **render_opts)
+    end
+
+    def render_email_new_password_view_invalid(**)
+      render_email_new_password_view(**)
+      self.status = :unprocessable_content
     end
 
     def normalize_login_params
@@ -106,7 +111,7 @@ module Account
         # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
         PasswordMailer.build(receiver: @new_user, password:).deliver_later
-        render_new_phlex
+        render_new_view
       else
         flash_object_errors(@new_user)
       end

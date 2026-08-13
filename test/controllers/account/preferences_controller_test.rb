@@ -78,7 +78,7 @@ module Account
       patch(:update,
             params: { user: params.merge(password_confirmation: "bogus") })
       assert_flash_error
-      assert_response(:success)
+      assert_unprocessable
       # Rails gives a 204 response to the patch request here, and that response
       # has no message body. 204 means patch not accepted, but form not changed,
       # keep editing. The lack of response body means the following assertions

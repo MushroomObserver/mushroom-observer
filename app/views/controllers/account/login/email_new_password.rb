@@ -16,7 +16,8 @@ module Views::Controllers::Account::Login
       render(EmailNewPasswordForm.new(
                @new_user || ::User.new,
                action: account_new_password_request_path,
-               id: "account_email_new_password_form"
+               id: "account_email_new_password_form",
+               local: false
              ))
     end
   end
