@@ -117,7 +117,8 @@ module Views::Controllers::Images::FieldSlipExtracts
                       review: FormObject::FieldSlipReview.build(
                         extract: @extract, observation: @observation,
                         user: @user
-                      )))
+                      ),
+                      local: false))
     end
 
     # Which setup produced these values -- the part that stays useful

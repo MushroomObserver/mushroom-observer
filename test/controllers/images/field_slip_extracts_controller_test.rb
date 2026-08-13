@@ -354,9 +354,10 @@ module Images
       put(:update, params: { image_id: @image.id, use: { "ID" => "1" },
                              value: { "ID" => "Lumpy Bracket" } })
 
-      assert_response(:success)
+      assert_unprocessable
       assert_equal(names_before, Name.count)
       assert_flash_warning
+      assert_select("form[data-turbo='true']")
     end
 
     # The other fields land on the first pass, so confirming the name
