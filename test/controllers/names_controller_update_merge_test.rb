@@ -922,9 +922,10 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_no_difference("Name.count") do
       put(:update, params: params)
     end
-    assert_response(:success) # form reloaded
+    assert_unprocessable # form reloaded
     assert_flash_error(:edit_name_multiple_names_match,
                        str: new_name.real_search_name(rolf),
                        matches: matches)
+    assert_select("form[data-turbo='true']")
   end
 end

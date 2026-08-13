@@ -373,24 +373,31 @@ class NamesController < ApplicationController
     reload_name_form
   end
 
+  # Shared by both create's and update's rescue blocks -- always
+  # reloads the New form (pre-existing behavior, unchanged here: an
+  # update failure bounces to /names/new rather than back to the
+  # Edit page it came from). Worth a closer look outside this
+  # conversion's scope.
   def reload_name_form
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-    render(phlex_new_form, location: new_name_path)
+    render_new_form(location: new_name_path)
+    self.status = :unprocessable_content
   end
 
-  def render_new_form
-    render(phlex_new_form)
+  def render_new_form(status: :ok, **render_opts)
+    render(phlex_new_form, status: status, **render_opts)
   end
 
-  def render_edit_form
+  def render_edit_form(status: :ok, **render_opts)
     render(Views::Controllers::Names::Edit.new(
              name: @name, user: @user,
              name_string: @name_string,
              misspelling: @misspelling,
              correct_spelling: @correct_spelling
-           ))
+           ),
+           status: status, **render_opts)
   end
 
   def phlex_new_form

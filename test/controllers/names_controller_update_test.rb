@@ -988,6 +988,8 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal("Order", name.rank,
                  "Rank should not change on first submit when rank conflicts")
     assert_flash_warning(on_fail: "Should flash rank warning to admin")
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_select("input[type=hidden][name=approved_rank]",
                   { count: 1 },
                   "Form should include approved_rank hidden field")
