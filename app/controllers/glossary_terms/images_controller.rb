@@ -132,9 +132,9 @@ module GlossaryTerms
     def rerender_remove_form_with_no_save_error
       flash_error(:runtime_no_save.t(type: :glossary_term))
       render_remove_view(
-        location: remove_images_from_glossary_term_path(params[:id])
+        location: remove_images_from_glossary_term_path(params[:id]),
+        status: :unprocessable_content
       )
-      self.status = :unprocessable_content
     end
 
     def render_remove_view(status: :ok, **render_opts)
