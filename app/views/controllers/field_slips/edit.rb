@@ -44,7 +44,8 @@ module Views::Controllers::FieldSlips
           render(Views::Controllers::Occurrences::Projects::Form.new(
                    gaps: @field_slip_project_gaps,
                    primary: @field_slip_occurrence.primary_observation,
-                   occurrence: @field_slip_occurrence
+                   occurrence: @field_slip_occurrence,
+                   local: false
                  ))
         end
       end

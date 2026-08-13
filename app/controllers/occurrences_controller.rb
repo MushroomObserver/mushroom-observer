@@ -130,7 +130,7 @@ class OccurrencesController < ApplicationController
     flash_warning(:occurrence_locations_differ.t)
   end
 
-  def render_new_form(source_obs)
+  def render_new_form(source_obs, status: :ok, **render_opts)
     recent = recent_observations(source_obs)
     confirm = {}
     if @project_gaps&.any?
@@ -143,7 +143,8 @@ class OccurrencesController < ApplicationController
         recent_observations: recent,
         user: @user,
         project_confirm: confirm
-      )
+      ),
+      status: status, **render_opts
     )
   end
 
@@ -184,7 +185,11 @@ class OccurrencesController < ApplicationController
     @project_gaps = gaps
     @project_primary = primary_obs
     @project_selected = selected
-    render_new_form(@source_obs)
+    # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+    # (confirmed: see turbo_submit_forms.md) -- needs a non-2xx status
+    # even though nothing actually "failed" yet; the occurrence just
+    # isn't created until the user resolves the project gaps.
+    render_new_form(@source_obs, status: :unprocessable_content)
   end
 
   def apply_project_resolution(occ, gaps)

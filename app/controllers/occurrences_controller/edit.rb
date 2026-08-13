@@ -37,6 +37,7 @@ module OccurrencesController::Edit
       @project_gaps = @occurrence.project_membership_gaps
       if @project_gaps.any?
         render_edit_page
+        self.status = :unprocessable_content
       else
         redirect_to(occurrence_path(@occurrence))
       end
