@@ -15,8 +15,7 @@ module Views::Controllers::GlossaryTerms
 
         render(RemoveForm.new(
                  @object,
-                 user: current_user,
-                 local: false
+                 user: current_user
                ))
       end
     end

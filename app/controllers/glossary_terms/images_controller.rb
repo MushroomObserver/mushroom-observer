@@ -15,7 +15,13 @@ module GlossaryTerms
       return unless find_glossary_term!
 
       load_images_to_reuse
-      render_reuse_view
+      render(Views::Controllers::GlossaryTerms::Images::Reuse.new(
+               object: @object,
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ))
     end
 
     # reuse image form buttons POST here
@@ -42,25 +48,18 @@ module GlossaryTerms
 
     def render_reuse_with_invalid_id_error
       flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
-      render_reuse_page_invalid
+      render_reuse_page
     end
 
-    def render_reuse_view(status: :ok, **render_opts)
+    def render_reuse_page
+      load_images_to_reuse
       render(
         Views::Controllers::GlossaryTerms::Images::Reuse.new(
           object: @object, user: @user, objects: @reuse_images,
           pagination_data: @reuse_pagination, all_users: @reuse_all_users
         ),
-        status: status, **render_opts
+        location: reuse_images_for_glossary_term_path(@object.id)
       )
-    end
-
-    def render_reuse_page_invalid
-      load_images_to_reuse
-      render_reuse_view(location: reuse_images_for_glossary_term_path(
-        @object.id
-      ))
-      self.status = :unprocessable_content
     end
 
     def attach_image_to_glossary_term(image = nil)
@@ -72,7 +71,7 @@ module GlossaryTerms
         redirect_to(glossary_term_path(@object.id))
       else
         flash_error(:runtime_no_save.t(type: :glossary_term)) if image
-        render_reuse_page_invalid
+        render_reuse_page
       end
     end
 
@@ -96,7 +95,9 @@ module GlossaryTerms
       return unless (@object = find_or_goto_index(GlossaryTerm,
                                                   params[:id].to_s))
 
-      render_remove_view
+      render(Views::Controllers::GlossaryTerms::Images::Remove.new(
+               object: @object
+             ))
     end
 
     # The remove form submits to this action. Same permission note
@@ -131,16 +132,9 @@ module GlossaryTerms
 
     def rerender_remove_form_with_no_save_error
       flash_error(:runtime_no_save.t(type: :glossary_term))
-      render_remove_view(
-        location: remove_images_from_glossary_term_path(params[:id])
-      )
-      self.status = :unprocessable_content
-    end
-
-    def render_remove_view(status: :ok, **render_opts)
       render(
         Views::Controllers::GlossaryTerms::Images::Remove.new(object: @object),
-        status: status, **render_opts
+        location: remove_images_from_glossary_term_path(params[:id])
       )
     end
   end
