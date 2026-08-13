@@ -216,6 +216,24 @@
     }
   }
 
+  // Upload-in-progress feedback (issue #5068 option 1): a dark
+  // overlay + centered spinner/checkmark over the image, toggled by
+  // form-images_controller.js. Kept visible (dimmed), not hidden, so
+  // the gallery doesn't visibly disappear item-by-item on submit.
+  .upload-status-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2;
+
+    .mo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: $white;
+    }
+  }
+
   .form-panel {
     padding: 1rem 1.5rem;
 

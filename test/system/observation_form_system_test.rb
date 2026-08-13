@@ -182,6 +182,38 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                  "Observation, not one per click.")
   end
 
+  # Coverage for issue #5068 option 1: the carousel item stays visible
+  # (with a spinner-then-checkmark overlay) through its upload instead
+  # of the old behavior, hiding each item the moment its own upload
+  # finishes -- which made the gallery visibly empty out item-by-item
+  # on submit.
+  def test_upload_status_overlay_settles_on_checkmark_without_hiding_item
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    click_attach_file("Coprinus_comatus.jpg")
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all)
+    # Overlay exists but is hidden before submission starts.
+    assert_selector(".upload-status-overlay.d-none", visible: :all)
+    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+
+    within("#observation_form") { click_commit }
+
+    # The overlay unhides once this item's own upload POST starts, and
+    # settles on the checkmark (not the spinner) once it succeeds --
+    # all while the carousel item itself remains visible throughout,
+    # unlike the old hide-the-whole-item behavior.
+    assert_selector(".upload-status-overlay:not(.d-none)", wait: 5)
+    assert_selector(".upload-status-check:not(.d-none)", wait: 8)
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: true)
+    assert_selector(".remove_image_button[disabled]", visible: :all)
+
+    assert_selector("body.observations__show", wait: 10)
+  end
+
   def test_trying_to_create_duplicate_location_just_uses_existing_location
     setup_image_dirs # in general_extensions
     login!(katrina)
@@ -930,7 +962,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
 
     # Verify EXIF coordinates were copied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    #
+    # wait: 20, not 10 -- EXIF extraction is client-side FileReader +
+    # binary parsing (form-exif_controller.js), CPU-bound like the map
+    # readiness wait above. Flaked at 10s under full-file contention
+    # (16 preceding heavy tests), reliable alone. Same bump applied to
+    # every occurrence of this wait in this file.
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
     assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
 
     # Autocompleter should be in location_containing mode (MO location exists)
@@ -987,7 +1025,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
 
     # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
 
     # Wait for location_containing mode and server response
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -1032,7 +1070,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
 
     # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
     assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
 
     # Wait for location_containing mode
@@ -1349,9 +1387,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Wait for geolocation collapse to expand
     assert_selector("#observation_geolocation.in", wait: 10)
 
-    # Verify GPS fields are populated
-    assert_field("observation_lat", with: image_data[:lat].to_s, wait: 10)
-    assert_field("observation_lng", with: image_data[:lng].to_s, wait: 10)
+    # Verify GPS fields are populated. wait: 20, not 10 -- same
+    # contention-sensitive EXIF-extraction dependency as the GEOTAGGED_EXIF
+    # waits above.
+    assert_field("observation_lat", with: image_data[:lat].to_s, wait: 20)
+    assert_field("observation_lng", with: image_data[:lng].to_s, wait: 20)
     # We look up the alt from lat/lng, so it's not copied from the image.
     # assert_field("observation_alt", with: image_data[:alt].to_i.to_s)
   end

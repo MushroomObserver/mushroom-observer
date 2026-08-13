@@ -221,9 +221,12 @@ export default class extends Controller {
     this.submit_buttons.forEach(
       (element) => { element.disabled = true }
     );
-    // Note that remove image links are not present at initialization
+    // Note that remove image links are not present at initialization.
+    // Disabled, not hidden (issue #5068 option 1) -- an image mid-write
+    // shouldn't be removable, but the carousel item it belongs to stays
+    // visible until navigation.
     this.removeImgTargets.forEach((elem) => {
-      this.hide(elem);
+      elem.disabled = true;
     });
 
     let _firstUpload;
@@ -255,7 +258,8 @@ export default class extends Controller {
     // now the form will be submitted without hitting the uploads.
     else {
       this.submit_buttons.forEach((element) => {
-        element.value = this.localized_text.creating_observation_text;
+        this.setButtonLabel(element,
+          this.localized_text.creating_observation_text);
       });
       this.submitWhenExifReady();
     }
@@ -584,8 +588,9 @@ export default class extends Controller {
     // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
     // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
     this.submit_buttons.forEach((element) => {
-      element.value = this.localized_text.uploading_text + '...';
+      this.setButtonLabel(element, this.localized_text.uploading_text + '...');
     });
+    this.showUploadSpinner(item);
 
     const _formData = this.asFormData(item);
     // asFormData returns null for an over-limit file. uploadAll blocks
@@ -608,12 +613,35 @@ export default class extends Controller {
       const image = await response.json
       if (image) {
         this.updateObsImages(item, image);
-        this.hide(item.dom_element);
+        this.showUploadCheckmark(item);
         this.onUploadedCallback();
       }
     } else {
       console.log(`got a ${response.status}`);
     }
+  }
+
+  // Upload-in-progress feedback (issue #5068 option 1): show the
+  // spinner overlay on this item alone (uploads are sequential, so at
+  // most one item is ever "in flight"). The overlay's own translucent
+  // background dims the photo underneath; the carousel item itself
+  // stays visible throughout.
+  showUploadSpinner(item) {
+    const overlay = item.dom_element?.querySelector('.upload-status-overlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('d-none');
+  }
+
+  // Swap the same overlay from spinner to checkmark on success, rather
+  // than hiding the carousel item (the old behavior) -- the gallery no
+  // longer visibly empties out item-by-item as uploads finish.
+  showUploadCheckmark(item) {
+    const overlay = item.dom_element?.querySelector('.upload-status-overlay');
+    if (!overlay) return;
+
+    overlay.querySelector('.upload-status-spinner')?.classList.add('d-none');
+    overlay.querySelector('.upload-status-check')?.classList.remove('d-none');
   }
 
   // Add the uploaded image's id to `good_images` and update the
@@ -674,6 +702,18 @@ export default class extends Controller {
     if (element !== undefined) {
       element.classList.remove('in');
       window.setTimeout(() => { element.style.display = 'none'; }, 600);
+    }
+  }
+
+  // Phlex renders submit buttons as <button>, not <input> -- setting
+  // .value on a <button> is a no-op for its displayed text (.value is
+  // only its submitted form value there). Same tag check
+  // form-feedback_controller.js uses for the same reason.
+  setButtonLabel(button, text) {
+    if (button.tagName === 'BUTTON') {
+      button.textContent = text;
+    } else {
+      button.value = text;
     }
   }
 
