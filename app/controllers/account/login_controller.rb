@@ -2,12 +2,7 @@
 
 module Account
   class LoginController < ApplicationController
-    before_action :login_required, except: [
-      :new,
-      :create,
-      :email_new_password,
-      :new_password_request
-    ]
+    before_action :login_required, except: [:new, :create]
 
     # the login form
     def new
@@ -35,23 +30,6 @@ module Account
       user.verified ? login_success(user) : login_unverified(user)
     end
 
-    def email_new_password
-      @new_user = User.new
-      render_email_new_password_view
-    end
-
-    def new_password_request
-      @login = params[:new_user] && params[:new_user][:login]
-      @new_user = User.where("login = ? OR name = ? OR email = ?",
-                             @login, @login, @login).first
-      if @new_user.nil?
-        flash_error(:runtime_email_new_password_failed.t(user: @login))
-        render_email_new_password_view_invalid and return
-      else
-        set_random_password_for_new_user_and_email_them
-      end
-    end
-
     # This is used to test the autologin feature.
     def test_autologin
       render(Views::Controllers::Account::Login::TestAutologin.new)
@@ -65,17 +43,6 @@ module Account
       render(Views::Controllers::Account::Login::New.new(
                login: @login, remember: @remember
              ), status: status, **render_opts)
-    end
-
-    def render_email_new_password_view(status: :ok, **render_opts)
-      render(Views::Controllers::Account::Login::EmailNewPassword.new(
-               new_user: @new_user
-             ), status: status, **render_opts)
-    end
-
-    def render_email_new_password_view_invalid(**)
-      render_email_new_password_view(**)
-      self.status = :unprocessable_content
     end
 
     def normalize_login_params
@@ -100,24 +67,6 @@ module Account
       render(Views::Controllers::Account::Verifications::Reverify.new(
                unverified_user: @unverified_user
              ))
-    end
-
-    def set_random_password_for_new_user_and_email_them
-      password = String.random(10)
-      @new_user.change_password(password)
-      if @new_user.save
-        flash_notice(:runtime_email_new_password_success.tp +
-                     :email_spam_notice.tp)
-        # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
-        # See .claude/deliver_later_migration_plan.md for details.
-        PasswordMailer.build(receiver: @new_user, password:).deliver_later
-        # Same-URL POST re-render, no redirect -- Turbo Drive needs a
-        # non-2xx status here regardless of whether anything failed
-        # (see turbo_submit_forms.md's hard rule).
-        render_new_view_invalid
-      else
-        flash_object_errors(@new_user)
-      end
     end
   end
 end

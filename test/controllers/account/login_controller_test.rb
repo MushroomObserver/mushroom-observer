@@ -5,8 +5,6 @@ require("test_helper")
 # tests of Login controller
 module Account
   class LoginControllerTest < FunctionalTestCase
-    include ActiveJob::TestHelper
-
     def setup
       @request.host = "localhost"
       super
@@ -37,6 +35,7 @@ module Account
       post(:create,
            params: { user: { login: "rolf", password: "not_correct" } })
       assert_nil(@request.session["user_id"])
+      assert_unprocessable
       assert_select("body.login__new")
 
       user = User.create!(
@@ -45,11 +44,13 @@ module Account
       )
       post(:create, params: { user: { login: "api", password: "" } })
       assert_nil(@request.session["user_id"])
+      assert_unprocessable
       assert_select("body.login__new")
 
       user.update(verified: Time.zone.now)
       post(:create, params: { user: { login: "api", password: "" } })
       assert_nil(@request.session["user_id"])
+      assert_unprocessable
       assert_select("body.login__new")
 
       user.change_password("try_this_for_size")
@@ -91,80 +92,6 @@ module Account
       @request.cookies["mo_user"] = cookies["mo_user"]
       get(:test_autologin)
       assert_response(:success)
-    end
-
-    def test_anon_user_email_new_password
-      get(:email_new_password)
-
-      assert_response(:success)
-      assert_head_title(:email_new_password_title.l)
-    end
-
-    # When `@new_user.save` fails inside
-    # `set_random_password_for_new_user_and_email_them`,
-    # the controller flashes the validation errors instead of
-    # sending the email (line 130 of login_controller.rb). Invoke
-    # the private method directly with a stubbed-save User so we
-    # don't need a full Mocha-style any_instance stub.
-    def test_set_random_password_save_failure_flashes_errors
-      user = users(:roy)
-      ctrl = @controller
-      ctrl.instance_variable_set(:@new_user, user)
-
-      # Don't populate `user.errors` — adding errors trips MO's i18n
-      # tag tracker on teardown. Instead stub `flash_object_errors`
-      # to record that it was called.
-      flash_object_errors_called = false
-      ctrl.define_singleton_method(:flash_object_errors) do |obj|
-        flash_object_errors_called = true if obj == user
-      end
-
-      ActionMailer::Base.deliveries.clear
-      assert_no_enqueued_jobs do
-        user.stub(:save, false) do
-          ctrl.send(:set_random_password_for_new_user_and_email_them)
-        end
-      end
-
-      assert_empty(ActionMailer::Base.deliveries,
-                   "Save failure should not deliver the password email")
-      assert(flash_object_errors_called,
-             "Expected flash_object_errors(@new_user) on save failure")
-    end
-
-    def test_email_new_password
-      get(:email_new_password)
-      assert_no_flash
-
-      post(:new_password_request, params: { new_user: {
-             login: "brandnewuser",
-             password: "brandnewpassword",
-             password_confirmation: "brandnewpassword",
-             name: "brand new name"
-           } })
-      assert_flash_error(
-        on_fail: "email_new_password should flash error if user doesn't " \
-                 "already exist"
-      )
-
-      user = users(:roy)
-      old_password = user.password
-      assert_enqueued_with(
-        job: ActionMailer::MailDeliveryJob,
-        args: lambda { |args|
-          args[0] == "PasswordMailer" &&
-            args[1] == "build" &&
-            args[3][:args][0][:receiver] == user &&
-            args[3][:args][0][:password].is_a?(String)
-        }
-      ) do
-        post(:new_password_request,
-             params: { new_user: { login: users(:roy).login } })
-      end
-      assert_unprocessable
-      user.reload
-      assert_not_equal(user.password, old_password,
-                       "New password should be different from old")
     end
   end
 end
