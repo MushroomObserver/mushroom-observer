@@ -83,11 +83,11 @@ class InatImportsController < ApplicationController
   end
 
   def create
-    # Intentional navigation (the "Go Back" button on the confirm
-    # page), not a validation failure -- stays plain :ok.
-    return render_new_view if params[:go_back] == "1"
-    # A genuine validation failure -- same form re-render as above,
-    # but needs the non-2xx status.
+    # Same-URL POST re-render either way -- Turbo Drive needs a non-2xx
+    # status here regardless of whether anything semantically failed,
+    # or it silently hangs instead of redisplaying the response. "Go
+    # Back" isn't a validation failure, but the status still applies.
+    return render_new_view_invalid if params[:go_back] == "1"
     return render_new_view_invalid unless params_valid?
 
     normalize_inat_ids_param!

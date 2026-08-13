@@ -973,7 +973,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1000,7 +1000,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: inat_username,
                    consent: 1, go_back: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1028,7 +1028,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field, "inat_url input field not found in response")
     value = url_field["value"].presence || url_field.text.strip

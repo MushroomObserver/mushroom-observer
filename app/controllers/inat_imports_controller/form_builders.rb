@@ -71,12 +71,13 @@ module InatImportsController::FormBuilders
     "all"
   end
 
-  # The fresh form (no :skip_inat_writeback key at all -- an unchecked
-  # HTML checkbox with no paired hidden field submits no key) pre-checks
-  # the box to mirror the default that will apply if the admin doesn't
-  # touch it: skip in development, write back in production. On reload,
-  # the key is always present (checked or not), so honor the submitted
-  # state instead.
+  # The fresh form (a GET with no params submitted at all, so
+  # :skip_inat_writeback is absent from params entirely) pre-checks the
+  # box to mirror the default that will apply if the admin doesn't
+  # touch it: skip in development, write back in production. On reload
+  # (after a POST), the key is always present -- CheckboxField's hidden
+  # "0" sidecar means an unchecked box still submits the key, just with
+  # value "0" -- so honor the submitted state instead.
   def initial_skip_writeback
     return ("1" if Rails.env.development?) unless
       params.key?(:skip_inat_writeback)
