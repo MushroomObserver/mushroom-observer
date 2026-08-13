@@ -869,7 +869,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # the google.maps loader resolves, so it doesn't gate `this.map`.
     # Wait for `controller.map` to be defined (drawMap to have run)
     # so the click trigger has a real map to fire on.
-    Timeout.timeout(10) do
+    #
+    # 20s, not 10s -- this waits on a real network round-trip to
+    # Google's Maps JS API, not just app-code timing. Flaked with a
+    # 10s budget (Timeout::Error) when running the full file: 16
+    # preceding heavy image-upload/Turbo tests leave the browser under
+    # enough CPU/network contention that the API load + drawMap()
+    # occasionally didn't finish in 10s, even though this test alone
+    # clears the same gate in ~3s.
+    Timeout.timeout(20) do
       loop do
         ready = evaluate_script(<<~JS)
           (() => {
@@ -1494,8 +1502,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_flash_success(:runtime_destroy_observation_success, id: id)
   end
 
-  def assert_has_location_warning(regex)
-    assert_selector(".alert-warning", text: regex)
+  # wait: 8, not the 3s default -- same multi-image-upload failure-reload
+  # flow as assert_flash_for_images_uploaded above, and this assertion
+  # runs right after it on the same reloaded page.
+  def assert_has_location_warning(regex, wait: 8)
+    assert_selector(".alert-warning", text: regex, wait: wait)
   end
 
   def other_notes_id
