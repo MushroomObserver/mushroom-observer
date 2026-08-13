@@ -3,16 +3,13 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
-  def build_params(
-    title, summary, start_date: nil, end_date: nil,
-    dates_any: "false"
-  )
+  def build_params(title, summary, start_date: nil, end_date: nil, **opts)
     {
       project: {
         title: title,
         summary: summary,
         field_slip_prefix: "",
-        place_name: "",
+        place_name: opts.fetch(:place_name, ""),
         open_membership: false,
         "start_date(1i)" => start_date&.year,
         "start_date(2i)" => start_date&.month,
@@ -20,7 +17,7 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date&.year,
         "end_date(2i)" => end_date&.month,
         "end_date(3i)" => end_date&.day,
-        dates_any: dates_any,
+        dates_any: opts.fetch(:dates_any, "false"),
         upload: {
           license_id: licenses(:ccnc25).id,
           copyright_holder: "Someone Else",
@@ -399,6 +396,36 @@ class ProjectsControllerTest < FunctionalTestCase
       { action: :create, id: nil },
       "Failed to return to form when Project ended before it started"
     )
+  end
+
+  # ProjectsController::Creation#cleanup_failed_project_creation is a
+  # separate re-render path from #create's own early guard clauses
+  # (title/date checks) above -- it only fires once creation has
+  # actually started (the members/admin UserGroups get created) and
+  # then fails on the location lookup. It's a plain render_new_view
+  # (not render_new_view_invalid) call site that was overlooked when
+  # the Form got local: false in this same PR -- new-in-this-PR, since
+  # a plain 200 re-render was harmless before the form submitted via
+  # Turbo. This confirms the fix.
+  def test_create_project_with_unrecognized_location
+    title = "Project In Nowhere"
+    params = build_params(title, "summary",
+                          place_name: "Nowhere Land, Not A Real Country")
+
+    assert_no_difference("Project.count") do
+      post_requires_login(:create, params)
+    end
+
+    assert_flash_warning(
+      on_fail: "Missing flash warning for an unrecognized location"
+    )
+    assert_nil(UserGroup.find_by(name: title),
+               "Should clean up the members group on failed creation")
+    assert_nil(UserGroup.find_by(name: "#{title}.admin"),
+               "Should clean up the admin group on failed creation")
+    assert_form_action(action: :create)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_add_project_existing

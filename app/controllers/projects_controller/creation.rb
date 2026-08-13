@@ -87,6 +87,6 @@ module ProjectsController::Creation
     @project = Project.new
     @project_dates_any = true
     image_ivars
-    render_new_form
+    render_new_view_invalid
   end
 end
