@@ -20,7 +20,7 @@ module Names
       return if abort_if_name_locked!(@name)
 
       init_ivars_for_edit
-      render_edit_phlex
+      render_edit_view
     end
 
     def update
@@ -123,12 +123,12 @@ module Names
       @proposed_synonyms = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
-      render_edit_phlex(
+      render_edit_view_invalid(
         location: edit_synonyms_of_name_path(@name.id)
       )
     end
 
-    def render_edit_phlex(**render_opts)
+    def render_edit_view(**render_opts)
       render(Views::Controllers::Names::Synonyms::Edit.new(
                name: @name, list_members: @list_members,
                deprecate_all: @deprecate_all,
