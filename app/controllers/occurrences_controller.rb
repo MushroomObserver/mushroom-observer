@@ -19,7 +19,7 @@ class OccurrencesController < ApplicationController
       return
     end
 
-    render_new_form(@source_obs)
+    render_new_view
   end
 
   def create
@@ -130,8 +130,8 @@ class OccurrencesController < ApplicationController
     flash_warning(:occurrence_locations_differ.t)
   end
 
-  def render_new_form(source_obs, status: :ok, **render_opts)
-    recent = recent_observations(source_obs)
+  def render_new_view(status: :ok, **render_opts)
+    recent = recent_observations(@source_obs)
     confirm = {}
     if @project_gaps&.any?
       confirm = { gaps: @project_gaps, primary: @project_primary,
@@ -139,7 +139,7 @@ class OccurrencesController < ApplicationController
     end
     render(
       Views::Controllers::Occurrences::New.new(
-        source_obs: source_obs,
+        source_obs: @source_obs,
         recent_observations: recent,
         user: @user,
         project_confirm: confirm
@@ -189,7 +189,7 @@ class OccurrencesController < ApplicationController
     # (confirmed: see turbo_submit_forms.md) -- needs a non-2xx status
     # even though nothing actually "failed" yet; the occurrence just
     # isn't created until the user resolves the project gaps.
-    render_new_form(@source_obs, status: :unprocessable_content)
+    render_new_view_invalid
   end
 
   def apply_project_resolution(occ, gaps)
