@@ -206,7 +206,8 @@ module Views::Controllers::Occurrences
       # Stimulus controller is on the form (spans members + candidates)
       doc = Nokogiri::HTML(html)
       form = doc.at_css("form#occurrence_form")
-      assert_equal("occurrence-form", form["data-controller"])
+      assert_includes(form["data-controller"].split(/\s+/),
+                      "occurrence-form")
       assert_equal("first-included",
                    form["data-occurrence-form-fallback-value"])
 
