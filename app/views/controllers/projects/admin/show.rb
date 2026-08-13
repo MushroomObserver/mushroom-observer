@@ -32,7 +32,8 @@ module Views::Controllers::Projects::Admin
                enctype: "multipart/form-data",
                dates_any: @dates_any,
                upload_params: @upload_params,
-               dirty_form: true
+               dirty_form: true,
+               local: false
              ))
     end
 

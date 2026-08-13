@@ -144,7 +144,7 @@ class ProjectsController < ApplicationController
     @project = Project.new(project_params)
     @project_dates_any = params[:project][:dates_any].downcase == "true"
     image_ivars
-    render_new_form
+    render_new_form_invalid
   end
 
   def update
@@ -167,7 +167,7 @@ class ProjectsController < ApplicationController
       end
     end
     image_ivars
-    render_edit_form
+    render_edit_form_invalid
   end
 
   # Callback to destroy a project.
@@ -203,17 +203,23 @@ class ProjectsController < ApplicationController
     )
   end
 
-  def render_new_form
+  def render_new_form(status: :ok, **render_opts)
     render(Views::Controllers::Projects::New.new(
              project: @project, dates_any: @project_dates_any,
              upload_params: upload_params_hash
-           ))
+           ),
+           status: status, **render_opts)
+  end
+
+  def render_new_form_invalid(**)
+    render_new_form(**)
+    self.status = :unprocessable_content
   end
 
   # Re-renders the Admin/Details page on validation failure so the
   # user sees the same sub-tab/Admin context they submitted from.
   # Issue #4148.
-  def render_edit_form
+  def render_edit_form(status: :ok, **render_opts)
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
     @project_dates_any = !@start_date_fixed && !@end_date_fixed
@@ -221,7 +227,13 @@ class ProjectsController < ApplicationController
              project: @project, user: @user,
              dates_any: @project_dates_any,
              upload_params: upload_params_hash
-           ))
+           ),
+           status: status, **render_opts)
+  end
+
+  def render_edit_form_invalid(**)
+    render_edit_form(**)
+    self.status = :unprocessable_content
   end
 
   def upload_params_hash

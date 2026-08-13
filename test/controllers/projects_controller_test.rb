@@ -34,6 +34,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def add_project_helper(title, summary)
     post_requires_login(:create, build_params(title, summary))
     assert_form_action(action: :create)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def edit_project_helper(title, project)
@@ -41,6 +43,8 @@ class ProjectsControllerTest < FunctionalTestCase
     params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     assert_form_action(action: :update, id: project.id)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def destroy_project_helper(project, changer)
@@ -483,6 +487,8 @@ class ProjectsControllerTest < FunctionalTestCase
     # the user can correct the dates without leaving the Admin tab.
     assert_select("input[name='project[title]']", true,
                   "Form should be re-rendered after validation failure")
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_destroy_project

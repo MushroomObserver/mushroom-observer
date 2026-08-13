@@ -15,7 +15,8 @@ module Views::Controllers::Projects
                @project,
                enctype: "multipart/form-data",
                dates_any: @dates_any,
-               upload_params: @upload_params
+               upload_params: @upload_params,
+               local: false
              ))
     end
   end
