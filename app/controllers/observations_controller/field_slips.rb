@@ -51,15 +51,22 @@ module ObservationsController::FieldSlips
   # the review page would just sit on its scan button -- say why, and
   # that saving the review is what links this observation to the slip.
   def explain_in_use_slip(code)
-    return if @observation.field_slip&.code == code
-
     slip = FieldSlip.find_by(code: code)
-    primary_id = slip&.occurrence&.primary_observation_id
-    return unless primary_id
+    occurrence = slip&.occurrence
+    return unless occurrence
+    # Checked against the slip's freshly loaded occurrence, not
+    # `@observation.field_slip` -- the QR job can attach the slip to
+    # THIS observation between the image upload and this check (it
+    # regularly wins that race in production), and the stale in-memory
+    # association would then warn about "another observation" that is
+    # this one (reported: obs 664468 warned about itself).
+    return if occurrence.observation_ids.include?(@observation.id)
 
     flash_warning(:observation_field_slip_in_use.t(
                     code: code,
-                    url: permanent_observation_path(primary_id)
+                    url: permanent_observation_path(
+                      occurrence.primary_observation_id
+                    )
                   ))
   end
 
