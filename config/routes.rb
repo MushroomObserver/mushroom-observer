@@ -272,10 +272,10 @@ MushroomObserver::Application.routes.draw do
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    unresourced_login_gets = %w[email_new_password test_autologin].freeze
-    unresourced_login_gets.each { |action| get(action, controller: "login") }
+    get("test_autologin", controller: "login")
     resource :logout, only: [:show, :create], controller: "logout"
-    post("new_password_request", controller: "login")
+    resource :password_reset, only: [:new, :create],
+                              controller: "password_resets"
 
     resource :preferences, only: [:edit, :update]
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
