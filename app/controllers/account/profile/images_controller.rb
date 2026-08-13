@@ -14,12 +14,7 @@ module Account::Profile
     # was reuse_image params[:mode] = profile
     def reuse
       load_images_to_reuse
-      render(Views::Controllers::Account::Profile::Images::Reuse.new(
-               user: @user,
-               objects: @reuse_images,
-               pagination_data: @reuse_pagination,
-               all_users: @reuse_all_users
-             ))
+      render_reuse_view
     end
 
     # POST action
@@ -50,14 +45,20 @@ module Account::Profile
     # The actual grid of images (partial) is a shared layout.
     # CRUD refactor could make each image link POST to create or delete.
 
-    def render_reuse_with_invalid_id_error
-      flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
-      load_images_to_reuse
+    def render_reuse_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Profile::Images::Reuse.new(
                user: @user, objects: @reuse_images,
                pagination_data: @reuse_pagination,
                all_users: @reuse_all_users
-             ), location: account_profile_select_image_path)
+             ),
+             status: status, **render_opts)
+    end
+
+    def render_reuse_with_invalid_id_error
+      flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
+      load_images_to_reuse
+      render_reuse_view(location: account_profile_select_image_path)
+      self.status = :unprocessable_content
     end
 
     def attach_image_for_profile_and_flash_notice(image)
