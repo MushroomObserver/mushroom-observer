@@ -60,7 +60,7 @@ module Views::Controllers::Images::FieldSlipExtracts
             # `.spinner-right` only animates; the visible glyph is the
             # icon (a bare span shows nothing since the SVG-sprite
             # conversion dropped the class's glyphicon).
-            Icon(type: :reuse, class: "spinner-right mx-2")
+            Icon(type: :spinner, class: "spinner-right mx-2")
             plain(:field_slip_extract_pending.l)
           end
         end
