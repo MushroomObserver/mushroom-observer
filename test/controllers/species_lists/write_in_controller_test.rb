@@ -41,6 +41,8 @@ module SpeciesLists
       login("rolf")
       contrib = rolf.contribution
       post(:create, params: params)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       assert_equal(contrib, rolf.reload.contribution)
       assert_not(synonym_name.reload.deprecated)
       assert_nil(synonym_name.synonym_id)
@@ -470,6 +472,7 @@ module SpeciesLists
       contrib = spl.user.contribution
       post(:create, params: params)
       assert_flash_error
+      assert_unprocessable
       assert_equal(contrib, spl.user.reload.contribution)
       assert_equal(sp_count, spl.reload.observations.size)
       assert_not(spl.name_included?(name))
