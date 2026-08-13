@@ -17,8 +17,18 @@ module InatImportsController::FormBuilders
     )
   end
 
+  # Intentional navigation (the "Go Back" button on the confirm
+  # page), not a validation failure -- stays plain :ok.
   def reload_form
     render_new_form(submitted: reload_form_params)
+  end
+
+  # A genuine validation/availability failure (bad params, iNat
+  # unreachable, nothing importable) -- same form re-render as
+  # `reload_form`, but needs the non-2xx status.
+  def reload_form_invalid
+    render_new_form(submitted: reload_form_params,
+                    status: :unprocessable_content)
   end
 
   def reload_form_params
@@ -44,14 +54,15 @@ module InatImportsController::FormBuilders
     }
   end
 
-  def render_new_form(submitted: {})
+  def render_new_form(submitted: {}, status: :ok, **render_opts)
     render(
       Views::Controllers::InatImports::New.new(
         form: build_new_form(submitted),
         super_importer: InatImport.super_importer?(@user),
         admin: in_admin_mode?,
         has_prior_imports: InatImport.exists?(user: @user)
-      )
+      ),
+      status: status, **render_opts
     )
   end
 

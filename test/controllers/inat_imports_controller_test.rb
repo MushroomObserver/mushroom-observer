@@ -1051,8 +1051,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_authorization_response_denied
@@ -1375,6 +1376,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash(:inat_invalid_url,
                  on_fail: "Non-iNat URL should flash invalid URL error")
+    assert_unprocessable
     assert_form_action(action: :create)
   end
 
@@ -1774,8 +1776,10 @@ class InatImportsControllerTest < FunctionalTestCase
       on_fail: "Flash should surface iNat's error text instead of the " \
                "generic 'Cannot communicate' message"
     )
+    assert_unprocessable
     assert_select("#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_estimate_422_with_non_json_body_falls_back_to_exception_message

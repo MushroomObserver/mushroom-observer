@@ -84,7 +84,7 @@ class InatImportsController < ApplicationController
 
   def create
     return reload_form if params[:go_back] == "1"
-    return reload_form unless params_valid?
+    return reload_form_invalid unless params_valid?
 
     normalize_inat_ids_param!
     normalize_inat_url_param!
@@ -141,7 +141,7 @@ class InatImportsController < ApplicationController
   def confirm_import
     @expected = fetch_expected_count
     return inat_unreachable if @expected.nil?
-    return reload_form if @expected == false
+    return reload_form_invalid if @expected == false
 
     @unlicensed_obs = if import_others?
                         fetch_unlicensed_others_count
@@ -171,7 +171,7 @@ class InatImportsController < ApplicationController
 
   def inat_unreachable
     flash_error(:inat_cannot_communicate.l)
-    reload_form
+    reload_form_invalid
   end
 
   # For storage: extract only digit tokens and join with commas.
