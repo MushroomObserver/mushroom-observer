@@ -31,7 +31,7 @@ class LicensesController < AdminController
     # and blanks all the attributes
     if @license.attribute_duplicated?
       flash_warning("Duplicate display_name, code, or url")
-      return render_new_view
+      return render_new_view_invalid
     end
 
     if @license.save
@@ -41,7 +41,7 @@ class LicensesController < AdminController
       redirect_to(license_path(@license.id))
     else
       @license.formatted_errors.each { |msg| flash_warning(msg) }
-      render_new_view
+      render_new_view_invalid
     end
   end
 
@@ -88,8 +88,13 @@ class LicensesController < AdminController
     add_deprecated(license)
   end
 
+  # `checkbox_field(:deprecated)` in the Phlex form is model-bound, so
+  # its real HTML name is `license[deprecated]` -- not the top-level
+  # `deprecated` this used to read, which meant the checkbox never
+  # actually took effect (every save silently forced `deprecated` to
+  # `false`). Found via a real-form integration test (issue #5052).
   def add_deprecated(license)
-    license.deprecated = (params[:deprecated] == "1")
+    license.deprecated = (params.dig(:license, :deprecated) == "1")
     license
   end
 
@@ -99,12 +104,12 @@ class LicensesController < AdminController
 
   def no_changes
     flash_warning(:runtime_edit_name_no_change.l)
-    render_edit_view
+    render_edit_view_invalid
   end
 
   def duplicate_attribute
     flash_warning(:runtime_license_duplicate_attributed.l)
-    render_edit_view
+    render_edit_view_invalid
   end
 
   def update_succeded
@@ -116,14 +121,21 @@ class LicensesController < AdminController
 
   def update_failed
     @license.errors.full_messages.each { |msg| flash_warning(msg) }
-    render_edit_view
+    render_edit_view_invalid
   end
 
-  def render_new_view
-    render(Views::Controllers::Licenses::New.new(license: @license))
+  # `status: :ok` is the default so the plain GET `new`/`edit` renders
+  # (from the `new`/`edit` actions themselves) stay 200 --
+  # ApplicationController's `render_new_view_invalid`/
+  # `render_edit_view_invalid` call these with
+  # `status: :unprocessable_content` from `create`/`update`'s failures.
+  def render_new_view(status: :ok)
+    render(Views::Controllers::Licenses::New.new(license: @license),
+           status: status)
   end
 
-  def render_edit_view
-    render(Views::Controllers::Licenses::Edit.new(license: @license))
+  def render_edit_view(status: :ok)
+    render(Views::Controllers::Licenses::Edit.new(license: @license),
+           status: status)
   end
 end
