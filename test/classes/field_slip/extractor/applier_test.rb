@@ -123,6 +123,20 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     assert_equal(locations(:albion).name, @obs.where)
   end
 
+  # A spare slip's event still resolves its aliases (reported: "EB2"
+  # applied verbatim after a constraint violation released the slip's
+  # project) -- the printed prefix names the event, membership or not.
+  def test_location_resolves_a_spare_slips_event_alias
+    @project.observations.delete(@obs)
+    @obs.field_slip.update_columns(project_id: nil)
+    ProjectAlias.create!(project: @project, name: "EB2",
+                         target: locations(:albion))
+
+    apply_fields({ "Location" => "EB2" })
+
+    assert_equal(locations(:albion), @obs.reload.location)
+  end
+
   def test_location_resolves_a_real_location_name
     apply_fields({ "Location" => locations(:burbank).name })
 

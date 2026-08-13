@@ -188,8 +188,12 @@ class FieldSlip
         project_alias(value, "User")&.target
       end
 
+      # The slip's event project resolves aliases too -- the collector
+      # wrote its abbreviations -- even when the observation isn't in
+      # it (a spare slip, a constraint violation keeping both out).
       def project_alias(value, target_type)
-        ids = @observation.project_ids
+        ids = ([@observation.field_slip&.event_project&.id] +
+               @observation.project_ids).compact.uniq
         return nil if ids.empty?
 
         ProjectAlias.where(project_id: ids, name: value.to_s.strip,

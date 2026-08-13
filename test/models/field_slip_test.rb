@@ -157,4 +157,26 @@ class FieldSlipTest < UnitTestCase
 
     assert_equal(locations(:albion), slip.location)
   end
+
+  # The event a slip was printed for survives a spare-slip release:
+  # its project association may be gone, but the printed prefix still
+  # names the project, and alias resolution keys off the event.
+  def test_event_project_falls_back_to_the_printed_prefix
+    slip = field_slips(:field_slip_one)
+
+    assert_not_nil(slip.project, "premise: slip starts with a project")
+    assert_equal(slip.project, slip.event_project)
+
+    slip.update_columns(project_id: nil)
+
+    assert_equal(projects(:eol_project), slip.reload.event_project,
+                 "the EOL prefix still names the event")
+  end
+
+  def test_event_project_nil_for_an_unknown_prefix
+    slip = field_slips(:field_slip_one)
+    slip.update_columns(code: "NEMF-12781", project_id: nil)
+
+    assert_nil(slip.reload.event_project)
+  end
 end
