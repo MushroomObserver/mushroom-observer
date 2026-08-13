@@ -65,11 +65,6 @@ module Observations
       )
     end
 
-    def render_edit_view_invalid(**)
-      render_edit_view(**)
-      self.status = :unprocessable_content
-    end
-
     def find_image!
       find_or_goto_index(Image, params[:id].to_s)
     end
