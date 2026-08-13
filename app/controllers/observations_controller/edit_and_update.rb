@@ -327,11 +327,12 @@ module ObservationsController::EditAndUpdate
   # update added are candidates, so routine edits of a slip
   # observation never detour.
   def redirected_to_new_photo_slip_review?
-    new_images = @observation.images.reject do |image|
-      @image_ids_before_update.include?(image.id)
-    end
-    return false if new_images.empty?
+    new_ids = @observation.image_ids - @image_ids_before_update
+    return false if new_ids.empty?
 
+    new_images = @observation.images.select do |image|
+      new_ids.include?(image.id)
+    end
     redirected_to_field_slip_review?(new_images)
   end
 end

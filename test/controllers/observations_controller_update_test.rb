@@ -1152,6 +1152,34 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Location creation still wins over the slip-review detour: an
+  # unresolved locality has to become a Location before anything else.
+  def test_update_location_creation_outranks_the_slip_review_detour
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil)
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_nil(obs.location_id, "premise: locality unresolved")
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0923") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(
+      new_location_path(where: obs.reload.place_name(rolf),
+                        set_observation: obs.id)
+    )
+  end
+
   # Routine edits of a slip observation never detour: only photos THIS
   # update added are candidates.
   def test_update_without_new_photos_does_not_detour
