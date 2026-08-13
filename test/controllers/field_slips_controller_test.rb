@@ -535,6 +535,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
       "select[name=?] option[value=?]",
       "field_slip[project_id]", bolete.id.to_s
     )
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_show_field_slip_and_allow_owner_to_change

@@ -32,7 +32,8 @@ module Views::Controllers::FieldSlips
                @field_slip,
                species_list: @species_list,
                recent_observations: @recent_observations,
-               user: current_user
+               user: current_user,
+               local: false
              ))
 
       render_unresolved_projects_modal if @field_slip_project_gaps&.any?

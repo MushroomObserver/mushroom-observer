@@ -11,7 +11,7 @@ module Views::Controllers::FieldSlips::QRReader
       # which turns the `"MO Field Slips":<url>` syntax into a real
       # `<a href>` — emit raw so the link survives.
       p { trusted_html(:field_slip_qr_intro.t) }
-      render(Form.new(FieldSlip.new))
+      render(Form.new(FieldSlip.new, local: false))
     end
   end
 end
