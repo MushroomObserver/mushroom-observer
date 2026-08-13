@@ -65,13 +65,23 @@ what Turbo Drive can carry.
 
 `Views::Controllers::Observations::Downloads::Form` (shared by
 `Observations::DownloadsController` and
-`SpeciesLists::DownloadsController`) is the one instance of this in the
-sweep so far. Its "Cancel" button redirects and its "Download"/"Print
+`SpeciesLists::DownloadsController`) is one instance of this in the
+sweep. Its "Cancel" button redirects and its "Download"/"Print
 Labels" buttons call `send_data` — since all three share one `local:`
 setting on the same `<form>`, the whole form is exempt, not just the
 download-triggering buttons. Before converting any new form, check
 whether its controller's success path calls `send_data`/`send_file` —
 if so, stop, don't convert it, and add it to this list instead.
+
+`Views::Controllers::SpeciesLists::NameLists::Form`
+(`SpeciesLists::NameListsController`) is the second instance. Its
+`create` action dispatches on `params[:commit]`: one button
+(`name_lister_submit_spl`) creates a `SpeciesList` and renders a plain
+page, but the other three (`_txt`/`_rtf`/`_csv`) call
+`render_name_list_as_txt`/`_rtf`/`_csv` (`SpeciesLists::
+SharedRenderMethods`), each of which calls `send_data`. Same
+one-`local:`-setting-for-four-buttons structure as the Downloads form
+— stays `local: true` permanently.
 
 ## HARD RULE: a same-URL `200` re-render on a Turbo-enabled form hangs the browser
 
