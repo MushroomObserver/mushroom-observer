@@ -51,6 +51,56 @@ which of these three the response actually is. Only the Drive case
 (full-page re-render, no `turbo_frame_tag`, no `format.turbo_stream`
 branch) needs the `422` treatment described below.
 
+## CRUD buttons are a separate, already-solved mechanism — audit, don't convert
+
+Besides the `New`/`Edit` form, a controller's pages (`index`, `show`,
+and the form pages themselves) usually also render mutation buttons —
+destroy, activate, merge, add/remove-curator, etc. — via
+`Components::Button::CRUDBase` (dispatched through `Button(type: :post/
+:put/:patch/:delete, ...)`). **These already opt into Turbo
+unconditionally** — `button_html_options` in
+`app/components/button/crud_base.rb` hardcodes
+`form_data = { turbo: true }` on every instance, restored after a prior
+regression (see git log: "Restore Turbo on CRUD buttons"). There are no
+raw `button_to(` calls left anywhere in `app/views/controllers/` or
+`app/components/` outside `CRUDBase` itself — every CRUD button in the
+app already submits via Turbo. **Nothing to flip on the button side.**
+
+What still needs auditing, per controller, as part of each batch: the
+**target actions** those buttons hit. A button being Turbo-enabled
+doesn't help if its target action does a full-page re-render without
+the right status — same failure mode as an unconverted form, just
+reached via a button instead. Concretely, for each controller in a
+batch:
+
+1. Grep that controller's own view tree (`index.rb`, `show.rb`, and
+   anything nested under them — not just `new.rb`/`edit.rb`) for
+   `type: :post`/`:put`/`:patch`/`:delete`.
+2. For each hit, resolve `target:` to the actual controller#action
+   (follow named routes/resources in `config/routes.rb` — a button
+   rendered on one controller's page often targets a *different*
+   controller, e.g. a curator-removal button on `HerbariaController`'s
+   show page actually targets `Herbaria::CuratorsController#destroy`).
+3. Read that action. If it always redirects (the overwhelmingly common
+   shape for destroy/toggle/merge actions), or responds via
+   `format.turbo_stream`/a `turbo_frame_tag`-wrapped response, it's
+   already safe — no change needed. Only a genuine full-page re-render
+   on failure (rare for these action shapes) needs the same
+   `_invalid`/`422` treatment described above.
+
+This is a one-hop trace (batch's pages → button → target action), not
+unbounded recursion — a button that merely *links* to another page
+(not a CRUD button, just an `a href`) that itself has further buttons
+is that other page's own controller's concern when its turn in the
+sweep comes up, not this batch's.
+
+Worked example from batch 1: `HerbariaController`'s show page renders
+a curator-removal button (`herbaria/show/curator_table.rb`) targeting
+`Herbaria::CuratorsController#destroy` — a controller not otherwise in
+this sweep's Form-based inventory at all. Traced it, found it always
+redirects, no change needed — but the point is it had to be traced,
+not assumed safe because "it's just a destroy button."
+
 ## The conversion, per controller
 
 1. **`local: false`** on every `Form.new(...)` call in the controller's
