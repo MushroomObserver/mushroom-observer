@@ -93,7 +93,7 @@ module Projects
       flash_error(error) if error
       flash_object_errors(@project_alias)
       format.turbo_stream { reload_modal_project_alias_form }
-      format.html { send(:"render_alias_#{action}") }
+      format.html { send(:"render_alias_#{action}_invalid") }
     end
 
     def update
@@ -129,18 +129,30 @@ module Projects
 
     private
 
-    def render_alias_new
+    def render_alias_new(status: :ok, **render_opts)
       render(Views::Controllers::Projects::Aliases::New.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ))
+             ),
+             status: status, **render_opts)
     end
 
-    def render_alias_edit
+    def render_alias_new_invalid(**)
+      render_alias_new(**)
+      self.status = :unprocessable_content
+    end
+
+    def render_alias_edit(status: :ok, **render_opts)
       render(Views::Controllers::Projects::Aliases::Edit.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ))
+             ),
+             status: status, **render_opts)
+    end
+
+    def render_alias_edit_invalid(**)
+      render_alias_edit(**)
+      self.status = :unprocessable_content
     end
 
     def redirect_to_project_aliases
