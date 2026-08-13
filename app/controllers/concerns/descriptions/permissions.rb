@@ -149,11 +149,6 @@ module Descriptions::Permissions
              status: status, **render_opts)
     end
 
-    def render_edit_view_invalid(**)
-      render_edit_view(**)
-      self.status = :unprocessable_content
-    end
-
     # Return name of group or user if it's a one-user group.
     def group_name(group)
       return :adjust_permissions_all_users.t if group.name == "all users"

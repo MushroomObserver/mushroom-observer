@@ -50,11 +50,6 @@ module Projects
              status: status, **render_opts)
     end
 
-    def render_new_view_invalid(**)
-      render_new_view(**)
-      self.status = :unprocessable_content
-    end
-
     def find_project!
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end

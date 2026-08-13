@@ -96,11 +96,6 @@ module Descriptions::Merges
              status: status, **render_opts)
     end
 
-    def render_new_view_invalid(**)
-      render_new_view(**)
-      self.status = :unprocessable_content
-    end
-
     # Attempt to merge one description into another, deleting the old one
     # if requested.  It will only do so if there is no conflict on any of the
     # description fields, i.e. one or the other is blank for any given field.

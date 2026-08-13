@@ -72,11 +72,6 @@ module Images
              status: status, **render_opts)
     end
 
-    def render_edit_view_invalid(**)
-      render_edit_view(**)
-      self.status = :unprocessable_content
-    end
-
     # No return value: a `before_action` halts the chain when it
     # redirects, so signalling with true/false would be decoration.
     # Runs after `find_image!` because the permission depends on the
