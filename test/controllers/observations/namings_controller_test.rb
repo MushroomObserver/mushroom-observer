@@ -302,7 +302,8 @@ module Observations
       }
       login("dick")
       post(:create, params: params)
-      assert_response(:success) # really means failed
+      assert_unprocessable # really means failed
+      assert_select("form[data-turbo='true']")
       what = @controller.instance_variable_get(:@given_name)
       assert_equal("Agaricus campestris L.", what)
     end
@@ -344,7 +345,7 @@ module Observations
       }
       login("dick")
       post(:create, params: params)
-      assert_response(:success) # really means failed
+      assert_unprocessable # really means failed
     end
 
     def test_propose_naming_automatic_author_bug
@@ -365,8 +366,8 @@ module Observations
       name.reload
       assert_equal(old_author, name.author)
       assert_flash_error
-      assert_response(:success, "Was expecting it to re-serve the form " \
-                                "because the name wasn't recognized.")
+      assert_unprocessable("Was expecting it to re-serve the form " \
+                           "because the name wasn't recognized.")
     end
 
     def test_propose_naming_automatic_case_correction
