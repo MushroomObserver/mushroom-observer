@@ -20,6 +20,7 @@ module Admin
         session[:admin] = true if @user&.admin && !in_admin_mode?
       elsif params[:turn_off]
         session[:admin] = nil
+        return redirect_to("/") if referer_is_admin_only?
       end
 
       redirect_back_or_to("/")
@@ -60,6 +61,22 @@ module Admin
     end
 
     private
+
+    # Turning admin mode off while viewing an admin-only page (e.g. a
+    # License) would otherwise redirect_back into that page, which
+    # immediately bounces to AdminController#access_denied with a
+    # startling "Permission denied" flash -- graceless for someone who
+    # just intentionally turned admin mode off, not someone genuinely
+    # denied access. Detect that case and skip straight to "/" instead.
+    def referer_is_admin_only?
+      return false unless request.referer
+
+      path = URI.parse(request.referer).path
+      route = Rails.application.routes.recognize_path(path)
+      "#{route[:controller].camelize}Controller".constantize <= AdminController
+    rescue StandardError
+      false
+    end
 
     def switch_to_user_if_verified(new_user)
       if new_user.verified
