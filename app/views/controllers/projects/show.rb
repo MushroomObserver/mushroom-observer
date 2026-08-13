@@ -182,8 +182,9 @@ module Views::Controllers::Projects
     end
 
     # Explicit String target: `CRUDPathBuilding#target_path` only
-    # builds flat `<type_tag>_path(id)` routes, so it can't derive a
-    # nested `project_violation_path(project_id:)` from `@project`
+    # builds flat `<type_tag>_path(id)` routes, so it can't derive
+    # `project_violations_path` (a differently-named action route,
+    # not `@project`'s own canonical resource path) from `@project`
     # directly.
     def render_violations_button
       return unless @project.constraints?
@@ -192,7 +193,7 @@ module Views::Controllers::Projects
       Button(
         type: :get,
         name: "#{count} #{:constraint_violations.ti}",
-        target: project_violation_path(project_id: @project.id),
+        target: project_violations_path(@project.id),
         variant: count.positive? ? :warning : nil,
         size: :lg,
         class: "my-2 mr-2"

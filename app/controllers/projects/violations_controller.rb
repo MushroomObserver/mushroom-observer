@@ -11,9 +11,9 @@ module Projects
   class ViolationsController < ApplicationController
     before_action :login_required
     # Cannot figure out the eager loading here.
-    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:show]
+    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
-    def show
+    def index
       return unless find_project!
 
       @violations = @project.violations
@@ -21,15 +21,10 @@ module Projects
     end
 
     # Overrides `ApplicationController::Indexes#render_index_view` so
-    # `show_index_of_objects` renders the Phlex `Violations::Show`
+    # `show_index_of_objects` renders the Phlex `Violations::Index`
     # class instead of `projects/violations/index.html.erb` (deleted).
-    # `resource :violation` is a singleton (#show, not #index), but
-    # the `ApplicationController::Indexes` mixin's own method names
-    # (`build_index_with_query`, `render_index_view`) stay as-is —
-    # they're the mixin's dispatch contract, independent of this
-    # controller's own action name.
     def render_index_view
-      render(Views::Controllers::Projects::Violations::Show.new(
+      render(Views::Controllers::Projects::Violations::Index.new(
                project: @project, violations: @violations, user: @user
              ))
     end
@@ -49,7 +44,7 @@ module Projects
     # redirecting; the trigger is a turbo-stream fetch, so the
     # redirect-to-index fallback from `find_project!` doesn't fit.
     def target_location_modal
-      project = Project.find_by(id: params[:project_id])
+      project = Project.find_by(id: params[:id])
       obs = Observation.safe_find(params[:obs_id])
       return head(:not_found) unless project && obs && project.is_admin?(@user)
 
@@ -72,12 +67,12 @@ module Projects
     end
 
     def update
-      @project = find_or_goto_index(Project, params[:project_id])
+      @project = find_or_goto_index(Project, params[:id])
       return unless @project
 
       dispatch_action
 
-      redirect_to(project_violation_path(project_id: @project.id))
+      redirect_to(project_violations_path(@project.id))
     end
 
     private
@@ -91,13 +86,13 @@ module Projects
       Location.where(name: suffixes).index_by(&:name)
     end
 
-    # Eager-loaded variant of `find_or_goto_index` for the show
+    # Eager-loaded variant of `find_or_goto_index` for the index
     # action, which renders the full violations list. `find_by`
     # returns nil rather than raising, so the `||` fallback fires
     # cleanly on a missing id.
     def find_project!
-      @project = Project.violations_includes.find_by(id: params[:project_id]) ||
-                 flash_error_and_goto_index(Project, params[:project_id])
+      @project = Project.violations_includes.find_by(id: params[:id]) ||
+                 flash_error_and_goto_index(Project, params[:id])
     end
 
     # All action params (`do`, `obs_id`, `location_id`) are namespaced

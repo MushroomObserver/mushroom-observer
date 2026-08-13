@@ -91,15 +91,15 @@ module Views::Controllers::Projects::Violations
                   "[data-dismiss='modal']")
     end
 
-    def test_form_action_is_violation_path_with_patch_method
+    def test_form_action_is_resolve_violations_path_with_patch_method
       html = render_form
 
-      expected_action = "/projects/#{@project.id}/violation"
+      expected_action = "/projects/#{@project.id}/violations/resolve"
       assert_html(html,
                   "form[action='#{expected_action}'][method='post']")
       # Superform picks PATCH for the persisted Project model. The
-      # singleton `resource :violation` route accepts both PATCH and
-      # PUT for `#update` by default — see config/routes.rb.
+      # `resolve_project_violations_path` route accepts both PATCH and
+      # PUT for `#update` — see config/routes.rb.
       assert_html(html,
                   "input[type='hidden'][name='_method'][value='patch']")
     end

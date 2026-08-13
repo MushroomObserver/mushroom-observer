@@ -713,15 +713,27 @@ MushroomObserver::Application.routes.draw do
         post :add_all
       end
     end
-    resource :violation, only: [:show, :update],
-                         controller: "projects/violations" do
-      collection do
-        # GET endpoint that returns the Add-Target-Location modal as a
-        # turbo-stream so each open sees fresh DB state (#4304).
-        get :target_location_modal
-      end
-    end
   end
+  # `Project::Violation` (`Project::Violation = Struct.new(:obs,
+  # :kinds)`) isn't a persisted record with its own id -- it's a
+  # computed view of the project's own constraints, so these aren't a
+  # nested child resource requiring a `:project_id` (that would
+  # misname the Project's own id as if it belonged to a separate
+  # "violations" resource). Same shape as the images#edit/update
+  # routes above: plain routes keyed by the Project's own `:id`.
+  get("/projects/:id/violations", to: "projects/violations#index",
+                                  as: "project_violations")
+  # Distinct path from the GET above, not a shared URL -- #update
+  # dispatches one of exclude/extend/add_target_name/
+  # add_target_location (keyed by params[:project][:do]), not a
+  # replace of the violations list the GET returns.
+  match("/projects/:id/violations/resolve",
+        to: "projects/violations#update",
+        as: "resolve_project_violations",
+        via: [:patch, :put])
+  get("/projects/:id/violations/target_location_modal",
+      to: "projects/violations#target_location_modal",
+      as: "target_location_modal_project_violations")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications

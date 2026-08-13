@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# Action template for the Project Violations page.
+# Action template for the Project Violations index.
 #
 # Renders the project banner + the violations form.
 #
-# `Projects::ViolationsController#show` renders this class
+# `Projects::ViolationsController#index` renders this class
 # directly with explicit props.
 module Views::Controllers::Projects::Violations
-  class Show < Views::FullPageBase
+  class Index < Views::FullPageBase
     prop :project, ::Project
     prop :violations, _Array(::Project::Violation)
     # Non-nilable: this view forwards `user` to `Violations::Form`,
