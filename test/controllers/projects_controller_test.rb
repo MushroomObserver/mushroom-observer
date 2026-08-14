@@ -607,6 +607,93 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(Project.find_by(title: title))
   end
 
+  # Regression (#2248): a dubious place_name used to reload a blank
+  # form with just a flash warning and no way to confirm the name --
+  # looping forever on any resubmission of the same name. Now it
+  # reloads with the entered title/place_name intact and an
+  # approved_where hidden field, matching every other model with this
+  # confirm flow.
+  def test_create_project_dubious_place_name_preserves_entries_and_confirms
+    where = "Old Rd, Ohio, USA"
+    title = "Dubious Location Project"
+    params = build_params(title, "a summary")
+    params[:project][:place_name] = where
+    login(rolf.login)
+
+    post(:create, params: params)
+    assert_nil(Project.find_by(title: title))
+    assert_select("#dubious_location_messages")
+    assert_select("input[name='project[title]'][value=?]", title)
+    assert_select("input[name='project[place_name]'][value=?]", where)
+    assert_select("input[name='approved_where'][value=?]", where)
+
+    post(:create, params: params.merge(approved_where: where))
+    project = Project.find_by(title: title)
+    assert_not_nil(project)
+    assert_nil(project.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
+  # A clean name with no exact Location match isn't dubious -- Project
+  # can't create a new Location inline (no bounding-box UI), so it
+  # saves without one and sends the user to build it, the same
+  # offramp herbaria/profile use on their own no-match path.
+  def test_create_project_clean_unmatched_location_redirects_to_new_location
+    where = "Springvale, Wyoming, USA"
+    title = "Clean Unmatched Location Project"
+    params = build_params(title, "a summary")
+    params[:project][:place_name] = where
+    post_requires_login(:create, params)
+
+    project = Project.find_by(title: title)
+    assert_not_nil(project)
+    assert_nil(project.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
+  # Same #2248 regression, on the update/edit path (Validators#valid_where
+  # shares the bug with Creation#find_location).
+  def test_update_project_dubious_place_name_preserves_entries_and_confirms
+    where = "Old Rd, Ohio, USA"
+    project = projects(:eol_project)
+    params = build_params(project.title, project.summary)
+    params[:id] = project.id
+    params[:project][:place_name] = where
+    login(rolf.login)
+
+    put(:update, params: params)
+    assert_nil(project.reload.location)
+    assert_select("#dubious_location_messages")
+    assert_select("input[name='project[title]'][value=?]", project.title)
+    assert_select("input[name='project[place_name]'][value=?]", where)
+    assert_select("input[name='approved_where'][value=?]", where)
+
+    put(:update, params: params.merge(approved_where: where))
+    assert_nil(project.reload.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
+  def test_update_project_clean_unmatched_location_redirects_to_new_location
+    where = "Springvale, Wyoming, USA"
+    project = projects(:eol_project)
+    params = build_params(project.title, project.summary)
+    params[:id] = project.id
+    params[:project][:place_name] = where
+    login(rolf.login)
+
+    put(:update, params: params)
+    assert_nil(project.reload.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
   def test_project_save_fail
     title = "Bad Project"
     project = projects(:eol_project)

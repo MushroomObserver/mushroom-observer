@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ProjectsController < ApplicationController
+  include ::Locationable
   include Validators
   include Creation
 
@@ -161,7 +162,7 @@ class ProjectsController < ApplicationController
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
-        return redirect_to(project_path(@project.id))
+        return redirect_to(update_redirect_path)
       else
         flash_object_errors(@project)
       end
@@ -206,7 +207,9 @@ class ProjectsController < ApplicationController
   def render_new_form
     render(Views::Controllers::Projects::New.new(
              project: @project, dates_any: @project_dates_any,
-             upload_params: upload_params_hash
+             upload_params: upload_params_hash,
+             dubious_where_reasons: @dubious_where_reasons,
+             raw_place_name: @raw_place_name
            ))
   end
 
@@ -220,7 +223,9 @@ class ProjectsController < ApplicationController
     render(Views::Controllers::Projects::Admin::Show.new(
              project: @project, user: @user,
              dates_any: @project_dates_any,
-             upload_params: upload_params_hash
+             upload_params: upload_params_hash,
+             dubious_where_reasons: @dubious_where_reasons,
+             raw_place_name: @raw_place_name
            ))
   end
 
@@ -296,6 +301,18 @@ class ProjectsController < ApplicationController
   def find_project_and_where!
     find_project!
     @where = @project&.location&.display_name || ""
+  end
+
+  # Same offramp as create's finalize_saved_project: once the location
+  # has been resolved-or-confirmed-clean and still doesn't match an
+  # existing one, send the user to build it rather than leaving the
+  # project permanently location-less with no path to fix that.
+  def update_redirect_path
+    if @project.location.nil? && @raw_place_name.present?
+      new_location_path(where: @raw_place_name, set_project: @project.id)
+    else
+      project_path(@project.id)
+    end
   end
 
   def override_fixed_dates

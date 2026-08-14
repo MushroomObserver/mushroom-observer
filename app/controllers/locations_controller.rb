@@ -405,6 +405,7 @@ class LocationsController < ApplicationController
              set_species_list: @set_species_list,
              set_user: @set_user,
              set_herbarium: @set_herbarium,
+             set_project: @set_project,
              dubious_where_reasons: @dubious_where_reasons
            ))
   end
@@ -451,11 +452,12 @@ class LocationsController < ApplicationController
 
     # Where to return after successfully creating location.
     set_params = params.permit(:set_observation, :set_species_list,
-                               :set_user, :set_herbarium)
+                               :set_user, :set_herbarium, :set_project)
     @set_observation  = set_params[:set_observation]
     @set_species_list = set_params[:set_species_list]
     @set_user         = set_params[:set_user]
     @set_herbarium    = set_params[:set_herbarium]
+    @set_project      = set_params[:set_project]
   end
 
   def create_location_ivar_and_save(done)
@@ -491,6 +493,8 @@ class LocationsController < ApplicationController
       attach_location_and_redirect(herbarium, herbarium_path(herbarium))
     elsif (user = User.safe_find(@set_user))
       attach_location_and_redirect(user, user_path(user))
+    elsif (project = Project.safe_find(@set_project))
+      attach_location_and_redirect(project, project_path(project))
     else
       redirect_to(location_path(@location.id))
     end
