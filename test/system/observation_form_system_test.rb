@@ -182,6 +182,54 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                  "Observation, not one per click.")
   end
 
+  # The submit/remove-image buttons aren't the only things that need
+  # locking during the in-flight upload/submit window -- the rest of
+  # the form (locality, date, notes, projects, naming, thumb-image
+  # radios) is serialized at the *deferred* requestSubmit(), not at
+  # click time, so anything left editable can race that submit. Drives
+  # uploadAll() directly (stubbing submitForm so this doesn't actually
+  # navigate) rather than timing a real upload window, since the lock
+  # is applied synchronously at the top of uploadAll() -- no race to
+  # land a Capybara assertion inside.
+  def test_form_locks_during_in_flight_upload_window
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    place_field = find_by_id("observation_place_name")
+    original_value = place_field.value
+
+    locked_state = evaluate_script(<<~JS)
+      (() => {
+        const form = document.getElementById('observation_form');
+        const ctrl = window.Stimulus.getControllerForElementAndIdentifier(
+          form, 'form-images'
+        );
+        ctrl.submitForm = () => {};
+        ctrl.uploadAll();
+        return {
+          inert: form.inert,
+          ariaBusy: form.getAttribute('aria-busy')
+        };
+      })()
+    JS
+    assert(locked_state["inert"],
+           "Form should be inert during the in-flight upload/submit " \
+           "window")
+    assert_equal("true", locked_state["ariaBusy"])
+
+    # `inert` blocks focus, even for a programmatic .focus() call --
+    # confirms the lock actually blocks interaction, not just that the
+    # attribute got set.
+    execute_script(
+      "document.getElementById('observation_place_name').focus();"
+    )
+    assert_not_equal("observation_place_name",
+                     evaluate_script("document.activeElement.id"),
+                     "An inert field should refuse focus")
+    assert_equal(original_value, find_by_id("observation_place_name").value)
+  end
+
   # Coverage for issue #5068 option 1: the carousel item stays visible
   # (with a spinner-then-checkmark overlay) through its upload instead
   # of the old behavior, hiding each item the moment its own upload

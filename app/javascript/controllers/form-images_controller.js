@@ -93,6 +93,11 @@ export default class extends Controller {
     this.submit_buttons.forEach((element) => {
       element.disabled = false;
     });
+    // ...and the rest of the form is interactive (a Turbo-swapped-in
+    // form after a validation failure is a fresh element, but this
+    // covers it explicitly rather than relying on that).
+    this.form.inert = false;
+    this.form.removeAttribute('aria-busy');
 
     // Drag and Drop bindings on the form
     this.drop_zone.addEventListener('dragover', (e) => {
@@ -228,6 +233,20 @@ export default class extends Controller {
     this.removeImgTargets.forEach((elem) => {
       elem.disabled = true;
     });
+
+    // Lock the rest of the form (locality, date, notes, projects,
+    // naming, thumb-image radios, etc.) for the whole in-flight
+    // window, not just the buttons above. Values are serialized at the
+    // deferred requestSubmit() in submitForm(), not at this click, so
+    // anything still editable during the upload/EXIF wait can silently
+    // race that submit. `inert`, unlike `disabled`, doesn't exclude a
+    // field from form serialization -- it only blocks pointer,
+    // keyboard, and focus interaction (and blurs anything already
+    // focused inside it), which is exactly what's needed here. Doesn't
+    // affect this controller's own JS writes to the form (e.g.
+    // updateObsImages) while inert.
+    this.form.inert = true;
+    this.form.setAttribute('aria-busy', 'true');
 
     let _firstUpload;
     // uploads first image. if we have one, and bumps it off the list
