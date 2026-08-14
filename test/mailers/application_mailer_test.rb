@@ -50,4 +50,19 @@ class ApplicationMailerTest < UnitTestCase
 
     assert_equal(:en, I18n.locale)
   end
+
+  # Issue #5074: WebmasterMailer/MergeRequestMailer never call
+  # `setup_user` (they send to MO.webmaster_email_address, not a
+  # User), so `@old_locale` used to stay nil -- ApplicationMailer's
+  # `before_action` must capture it for every mailer, not just ones
+  # that call `setup_user`.
+  def test_locale_restored_for_mailer_without_setup_user
+    I18n.locale = :pt # rubocop:disable Rails/I18nLocaleAssignment
+
+    WebmasterMailer.build(
+      sender_email: "test@example.com", message: "hi"
+    ).deliver_now
+
+    assert_equal(:pt, I18n.locale)
+  end
 end
