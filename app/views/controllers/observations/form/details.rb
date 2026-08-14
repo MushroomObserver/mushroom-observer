@@ -203,10 +203,18 @@ class Views::Controllers::Observations::Form::Details < Views::Base
         addon: addon,
         data: {
           map_target: "#{field}Input",
-          action: "map#bufferInputs"
+          action: coordinate_field_action(field)
         }
       )
     end
+  end
+
+  # Lat/lng also split a pasted "lat, lng" pair (e.g. from iNat) across
+  # both fields -- see GeocodeController#splitPastedCoordinates.
+  def coordinate_field_action(field)
+    return "map#bufferInputs" unless [:lat, :lng].include?(field)
+
+    "map#bufferInputs paste->map#splitPastedCoordinates"
   end
 
   # Label with responsive show/hide variants

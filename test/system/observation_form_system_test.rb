@@ -1018,6 +1018,127 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
+  # Bug fix: a latitude or longitude of exactly 0 (equator or
+  # prime meridian) used to be treated as "no coordinate" by a falsy
+  # check and silently rejected. Under the old bug, a latitude of 0
+  # would keep the autocompleter in plain "location" mode; the fixed
+  # code swaps it into "location_containing" like any other valid
+  # point, and carries the exact (0-valued) params along.
+  def test_zero_latitude_triggers_locality_lookup
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    wait_for_map_outlet_ready
+
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '0';
+      lngField.value = '0.5';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+
+    assert_selector("[data-type='location_containing']", wait: 10)
+
+    request_params = evaluate_script(<<~JS)
+      (() => {
+        const el = document.getElementById('observation_location_autocompleter');
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(
+          el, 'autocompleter--location'
+        );
+        return controller?.request_params;
+      })()
+    JS
+    assert_equal(0, request_params["lat"])
+    assert_in_delta(0.5, request_params["lng"])
+  end
+
+  # Bug fix: iNat exports coordinates as a single
+  # "lat, lng" string. Pasting that into the latitude field should
+  # split it across both fields instead of dumping the whole string
+  # into latitude alone.
+  def test_pasting_coordinate_pair_splits_lat_lng_fields
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    # Wait for the map controller to connect before dispatching a
+    # synthetic paste event at it -- otherwise it can fire before the
+    # controller's action listeners are attached.
+    assert_selector("[data-map='connected']", wait: 10)
+
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const dt = new DataTransfer();
+      dt.setData('text', '40.0028333333, -77.3633033333');
+      const pasteEvent = new ClipboardEvent('paste', {
+        clipboardData: dt, bubbles: true, cancelable: true
+      });
+      latField.dispatchEvent(pasteEvent);
+    JS
+
+    assert_field("observation_lat", with: "40.00283", visible: :all, wait: 5)
+    assert_field("observation_lng", with: "-77.3633", visible: :all, wait: 5)
+
+    # An ordinary single-value paste (no pair) must NOT be intercepted --
+    # it should fall through to the browser's normal paste behavior.
+    execute_script(<<~JS)
+      const lngField = document.getElementById('observation_lng');
+      lngField.value = '';
+      const dt = new DataTransfer();
+      dt.setData('text', '40.7128');
+      const pasteEvent = new ClipboardEvent('paste', {
+        clipboardData: dt, bubbles: true, cancelable: true
+      });
+      window.__pasteDefaultPrevented =
+        !lngField.dispatchEvent(pasteEvent);
+    JS
+    assert_not(evaluate_script("window.__pasteDefaultPrevented"),
+               "A single-value paste should not be intercepted")
+  end
+
+  # Bug fix: each keystroke in the coordinate fields
+  # used to force-focus the locality autocompleter's input as a side
+  # effect of redrawing its dropdown, yanking keyboard focus (and the
+  # viewport) away from the field the user was actually typing in.
+  def test_typing_coordinates_does_not_steal_focus
+    setup_image_dirs
+    login!(katrina)
+    university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
+    pasadena = Location.create!(
+      name: "Pasadena, Los Angeles Co., California, USA",
+      north: 34.25, south: 34.12, east: -118.07, west: -118.20,
+      user: katrina
+    )
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    click_attach_file("geotagged.jpg")
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_selector("[data-type='location_containing']", wait: 10)
+    sleep(2)
+
+    lat_field = find_by_id("observation_lat")
+    lng_field = find_by_id("observation_lng")
+    lat_field.click
+    lat_field.set("34.15")
+    lng_field.click
+    lng_field.set("-118.14")
+
+    # Give the 1s debounce + async autocompleter fetch time to run.
+    sleep(2)
+
+    assert_equal("observation_lng",
+                 evaluate_script("document.activeElement.id"),
+                 "Typing a coordinate should not move focus off the field")
+    place_field = find_by_id("observation_place_name")
+    assert_match(/Pasadena/, place_field.value, wait: 5)
+
+    university_park.destroy
+    pasadena.destroy
+  end
+
   # Editing the primary of a multi-member occurrence, adopting a
   # sibling's note value via its button enables + fills the (initially
   # disabled) textarea so it will submit.
@@ -1239,6 +1360,32 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_alt", with: "", visible: :all)
   end
   private :assert_geolocation_is_empty
+
+  # Waits for the map controller AND its autocompleter--location outlet
+  # to both be ready. `data-map="connected"` alone isn't enough --
+  # Stimulus outlets can connect on a later tick, so a synthetic event
+  # dispatched right after "connected" can still fire into a map
+  # controller whose `sendPointChanged` finds `hasAutocompleterLocationOutlet`
+  # false and silently drops the swap.
+  def wait_for_map_outlet_ready
+    Timeout.timeout(10) do
+      loop do
+        ready = evaluate_script(<<~JS)
+          (() => {
+            const f = document.getElementById('observation_form');
+            const c = window.Stimulus.getControllerForElementAndIdentifier(
+              f, 'map'
+            );
+            return !!(c && c.hasAutocompleterLocationOutlet);
+          })()
+        JS
+        break if ready
+
+        sleep(0.1)
+      end
+    end
+  end
+  private :wait_for_map_outlet_ready
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)

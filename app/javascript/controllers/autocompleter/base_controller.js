@@ -46,6 +46,14 @@ const INTERNAL_OPTS = {
   ROW_HEIGHT: null,
   SCROLLBAR_WIDTH: null,
   focused: false,
+  // Set by constrainedSelectionUI() right before a redraw it triggers
+  // programmatically (e.g. the map controller refreshing the locality
+  // dropdown while the user is typing coordinates elsewhere), so that
+  // redraw doesn't also steal keyboard focus. Cleared by the next real
+  // interaction with this field (ourFocus/ourChange), so a genuine
+  // redraw triggered by the user actually typing here still reclaims
+  // focus as before.
+  silentRedraw: false,
   menu_up: false,
   old_value: null,
   stored_id: 0,
@@ -213,8 +221,11 @@ export default class BaseAutocompleterController extends Controller {
     }
     if (type == undefined) { return; }
 
-    // If same type but different lat/lng params, still update the location
-    const hasNewParams = detail?.request_params?.lat && detail?.request_params?.lng;
+    // If same type but different lat/lng params, still update the location.
+    // 0 is a valid coordinate (equator/prime meridian) -- Number.isFinite,
+    // not truthiness.
+    const hasNewParams = Number.isFinite(detail?.request_params?.lat) &&
+      Number.isFinite(detail?.request_params?.lng);
     const paramsChanged = hasNewParams &&
       (detail.request_params.lat !== this.request_params?.lat ||
        detail.request_params.lng !== this.request_params?.lng);
@@ -425,6 +436,7 @@ export default class BaseAutocompleterController extends Controller {
   }
 
   ourChange(do_refresh) {
+    this.silentRedraw = false;
     const old_value = this.old_value;
     const new_value = this.inputTarget.value;
     if (new_value.length == 0) {
@@ -466,6 +478,7 @@ export default class BaseAutocompleterController extends Controller {
     if (!this.ROW_HEIGHT)
       this.getRowHeight();
     this.focused = true;
+    this.silentRedraw = false;
   }
 
   ourBlur(event) {
@@ -710,7 +723,14 @@ export default class BaseAutocompleterController extends Controller {
       this.highlightNewRow(rows);
       this.makePulldownVisible();
     }
-    this.inputTarget.focus();
+    // Skip when this redraw was triggered programmatically (see
+    // constrainedSelectionUI()) rather than by the user actually typing
+    // in this field -- otherwise it steals keyboard focus (and the
+    // browser's scroll-into-view) from whatever field the user is
+    // really in.
+    if (!this.silentRedraw) {
+      this.inputTarget.focus();
+    }
   }
 
   updateRows(rows) {
@@ -975,7 +995,10 @@ export default class BaseAutocompleterController extends Controller {
         if (this.hasKeepBtnTarget) {
           this.keepBtnTarget.classList.remove('active');
         }
-        this.inputTarget.focus();
+        // See the comment in drawPulldown().
+        if (!this.silentRedraw) {
+          this.inputTarget.focus();
+        }
         if (this.hasMapOutlet) {
           let map;
           try {
@@ -1366,7 +1389,8 @@ export default class BaseAutocompleterController extends Controller {
       }
     }
 
-    if ((this.primer.length > 1) && this.ACT_LIKE_SELECT) {
+    if ((this.primer.length > 1) && this.ACT_LIKE_SELECT &&
+        !this.silentRedraw) {
       this.inputTarget.focus();
     }
   }
