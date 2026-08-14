@@ -49,6 +49,17 @@ class FieldSlip::Extractor::ContextTest < UnitTestCase
     assert_equal(@project, context_for(@obs.reload).project)
   end
 
+  # A spare slip's printed prefix still names the event, so the prompt
+  # is built from that project's aliases even when the observation
+  # belongs to no project at all.
+  def test_project_resolves_a_spare_slip_via_the_printed_prefix
+    @obs.field_slip.update_columns(project_id: nil)
+
+    assert_empty(@obs.projects, "premise: no membership to fall back on")
+    assert_equal(projects(:eol_project), context_for(@obs.reload).project,
+                 "the EOL prefix names the event")
+  end
+
   # The abbreviation table is the project's own aliases rather than
   # anything written into the prompt -- that is what lets an alias added
   # during review improve the next slip.
@@ -88,9 +99,12 @@ class FieldSlip::Extractor::ContextTest < UnitTestCase
   end
 
   def test_aliases_empty_without_a_project
-    # The fixture slip carries a project; "no project" now means the
-    # slip's is gone too.
-    @obs.field_slip.update_columns(project_id: nil)
+    # "No project" now means no slip project AND no prefix-named event
+    # (see FieldSlip#event_project), so the code moves to an unknown
+    # prefix too.
+    assert_nil(Project.find_by(field_slip_prefix: "ZZZX"),
+               "premise: no fixture project claims this prefix")
+    @obs.field_slip.update_columns(project_id: nil, code: "ZZZX-12781")
 
     assert_empty(context_for(@obs.reload).aliases("Location"))
   end
