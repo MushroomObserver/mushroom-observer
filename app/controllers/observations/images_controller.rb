@@ -39,11 +39,11 @@ module Observations
       @image.attributes = permitted_image_params
 
       if image_or_projects_updated
-        # redirect_to(image_path(@image.id))
-        render(
-          Views::Controllers::Images::Show.new(image: @image),
-          location: image_path(@image.id)
-        )
+        # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+        # Drive (see turbo_submit_forms.md) -- `render(...,
+        # location:)` only sets a response header, it isn't a real
+        # redirect, so Turbo never navigates.
+        redirect_to(image_path(@image.id))
       else
         init_project_vars_for_reload(@image)
         render_edit_view_invalid(location: edit_image_path(@image.id))

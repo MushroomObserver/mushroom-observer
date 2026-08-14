@@ -34,10 +34,10 @@ module Observations
         }
       }
       put_requires_login(:update, params)
-      # Action is `:update` (body class would be `images__edit`); the
-      # update success branch does `render("images/show", ...)`. Pin a
-      # stable element from the show page instead.
-      assert_select("#image_votes_container")
+      # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+      # Drive, so the update success branch redirects to the image's
+      # show page rather than rendering it in place.
+      assert_redirected_to(image_path(image.id))
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)

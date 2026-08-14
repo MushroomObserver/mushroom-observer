@@ -514,9 +514,15 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
+      # Explicit `format: :html`: see the matching comment in
+      # HerbariaController#redirect_to_create_location -- the target
+      # action's `respond_to` picks `format.turbo_stream` by Accept
+      # header alone, and this redirect can be reached from a
+      # Turbo-submitted form (see #5055).
       redirect_to(
         new_admin_emails_merge_requests_path(
-          type: :Location, old_id: @location.id, new_id: merge.id
+          type: :Location, old_id: @location.id, new_id: merge.id,
+          format: :html
         )
       )
     end

@@ -76,6 +76,8 @@ module GlossaryTerms
         end
       end
       assert_flash_error
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_reuse_image_for_glossary_bad_image_id

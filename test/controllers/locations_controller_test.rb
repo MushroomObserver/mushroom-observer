@@ -1194,7 +1194,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Should redirect to merge request form
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Location, old_id: to_go.id, new_id: to_stay.id
+                           type: :Location, old_id: to_go.id,
+                           new_id: to_stay.id, format: :html
                          ))
   end
 

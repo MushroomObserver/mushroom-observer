@@ -549,7 +549,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.description)
     assert_empty(herbarium.curators)
     assert_redirected_to(new_location_path(
-                           where: "New Location", set_herbarium: herbarium.id
+                           where: "New Location", set_herbarium: herbarium.id,
+                           format: :html
                          ))
   end
 
@@ -785,7 +786,8 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_nil(nybg.reload.location)
     assert_redirected_to(new_location_path(where: "New Location",
-                                           set_herbarium: nybg.id))
+                                           set_herbarium: nybg.id,
+                                           format: :html))
   end
 
   def test_update_user_make_personal_by_owner_of_some_records
