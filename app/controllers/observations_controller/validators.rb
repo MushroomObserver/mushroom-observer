@@ -130,7 +130,8 @@ module ObservationsController::Validators
     end
 
     @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @observation.place_name(@user)
+      user: @user, place_name: @observation.place_name(@user),
+      approved: params[:approved_where]
     )
     return true if @dubious_where_reasons.empty?
 
