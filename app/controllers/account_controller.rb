@@ -30,7 +30,7 @@ class AccountController < ApplicationController
 
   def new
     @new_user = User.new(theme: MO.default_theme)
-    render_new_phlex
+    render_new_view
   end
 
   def create
@@ -41,7 +41,7 @@ class AccountController < ApplicationController
     return abort_signup_with_client_error if evil_signup_credentials?
 
     if make_sure_theme_is_valid!
-      return render_new_phlex unless validate_and_save_new_user!
+      return render_new_view_invalid unless validate_and_save_new_user!
 
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp} #{:email_spam_notice.tp}")
@@ -61,8 +61,9 @@ class AccountController < ApplicationController
 
   private #################################################
 
-  def render_new_phlex
-    render(Views::Controllers::Account::New.new(new_user: @new_user))
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Account::New.new(new_user: @new_user),
+           status: status, **render_opts)
   end
 
   def initialize_new_user

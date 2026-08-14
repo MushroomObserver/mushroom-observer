@@ -27,7 +27,8 @@ module Views::Controllers::Info
       render(Views::Controllers::Info::TextileSandboxForm.new(
                @textile_sandbox,
                show_result: @show_result,
-               submit_type: @submit_type
+               submit_type: @submit_type,
+               local: false
              ))
     end
   end

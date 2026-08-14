@@ -31,7 +31,7 @@ module Views::Controllers::Comments
     def render_form_column
       Column(xs: 12, sm: 8) do
         comment { "[form:comment]" }
-        render(Form.new(@comment, local: true))
+        render(Form.new(@comment, local: false))
         comment { "[eoform:comment]" }
         render_object_panel
       end

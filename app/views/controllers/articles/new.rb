@@ -9,7 +9,7 @@ module Views::Controllers::Articles
     def view_template
       add_new_title(:create_object, :article)
       add_context_nav(::Tab::Article::FormNew.new)
-      render(Form.new(@article))
+      render(Form.new(@article, local: false))
     end
   end
 end

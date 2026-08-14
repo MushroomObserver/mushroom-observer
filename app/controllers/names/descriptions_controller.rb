@@ -191,10 +191,10 @@ module Names
       @name = Name.find(@description.parent_id.to_s)
     end
 
-    def render_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Names::Descriptions::Edit.new(
                description: @description, user: @user, licenses: @licenses
-             ), location: edit_name_description_path(@name.id))
+             ), status: status, **render_opts)
     end
 
     # called by :create
@@ -229,9 +229,7 @@ module Names
       find_description_parent
       find_licenses
 
-      render(Views::Controllers::Names::Descriptions::Edit.new(
-               description: @description, user: @user, licenses: @licenses
-             ))
+      render_edit_view
     end
 
     def update
@@ -269,7 +267,9 @@ module Names
     def save_updated_description_if_changed_or_flash
       unless @description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        return render_edit
+        return render_edit_view_invalid(
+          location: edit_name_description_path(@name.id)
+        )
       end
 
       @description.current_user = @user

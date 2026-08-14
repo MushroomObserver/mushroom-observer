@@ -78,16 +78,10 @@ module Account
       patch(:update,
             params: { user: params.merge(password_confirmation: "bogus") })
       assert_flash_error
-      assert_response(:success)
-      # Rails gives a 204 response to the patch request here, and that response
-      # has no message body. 204 means patch not accepted, but form not changed,
-      # keep editing. The lack of response body means the following assertions
-      # cannot work unless the edit form is re-rendered by the :update action.
-      # Rails only tests against the current response. Solution: re-render form.
-      # Incidentally rails.ujs disables the button on submit, and does not
-      # re-enable it after the 204.
-      # We now reenable submit button manually (on form input change) in main.js
-      #
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
+      # 422 re-renders the edit form with the submitted values still
+      # filled in, so the following assertions check that re-render.
       assert_input_value(:user_password, "")
       assert_input_value(:user_password_confirmation, "")
       assert_input_value(:user_email, "new@email.com")

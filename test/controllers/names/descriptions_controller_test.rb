@@ -649,6 +649,8 @@ module Names
       put(:update, params: params)
       assert_flash_warning([:runtime_description_public_write_wrong,
                             :runtime_edit_name_description_no_change])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Cover resolve_merge_conflicts_and_delete_old_description

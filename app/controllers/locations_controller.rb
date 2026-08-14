@@ -265,7 +265,7 @@ class LocationsController < ApplicationController
 
     # If done, update any observations at @display_name,
     # and set user's primary location if called from profile.
-    return render_new unless done
+    return render_new_view_invalid unless done
 
     if @original_name.present?
       db_name = Location.user_format(@user, @original_name)
@@ -338,14 +338,6 @@ class LocationsController < ApplicationController
                 flash_error_and_goto_index(Location, params[:id])
   end
 
-  def render_new
-    render_new_view
-  end
-
-  def render_edit
-    render_edit_view
-  end
-
   def render_show_view
     render(Views::Controllers::Locations::Show.new(
              location: @location,
@@ -396,7 +388,7 @@ class LocationsController < ApplicationController
     ::SpeciesList.safe_find(species_lists[0])
   end
 
-  def render_new_view
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::Locations::New.new(
              location: @location,
              display_name: @display_name,
@@ -407,15 +399,15 @@ class LocationsController < ApplicationController
              set_herbarium: @set_herbarium,
              set_project: @set_project,
              dubious_where_reasons: @dubious_where_reasons
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_edit_view
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Locations::Edit.new(
              location: @location,
              display_name: @display_name,
              dubious_where_reasons: @dubious_where_reasons
-           ))
+           ), status: status, **render_opts)
   end
 
   def init_description_ivar(desc_id)
@@ -522,9 +514,15 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
+      # Explicit `format: :html`: see the matching comment in
+      # HerbariaController#redirect_to_create_location -- the target
+      # action's `respond_to` picks `format.turbo_stream` by Accept
+      # header alone, and this redirect can be reached from a
+      # Turbo-submitted form (see #5055).
       redirect_to(
         new_admin_emails_merge_requests_path(
-          type: :Location, old_id: @location.id, new_id: merge.id
+          type: :Location, old_id: @location.id, new_id: merge.id,
+          format: :html
         )
       )
     end
@@ -537,7 +535,7 @@ class LocationsController < ApplicationController
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
     determine_and_check_location if !@location.locked || in_admin_mode?
-    return render_edit unless @dubious_where_reasons.empty?
+    return render_edit_view_invalid unless @dubious_where_reasons.empty?
 
     save_flash_and_redirect_or_render!
   end
@@ -561,7 +559,7 @@ class LocationsController < ApplicationController
       redirect_to(location_path(@location.id))
     elsif !@location.save
       flash_object_errors(@location)
-      render_edit
+      render_edit_view_invalid
     else
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
       redirect_to(location_path(@location.id))

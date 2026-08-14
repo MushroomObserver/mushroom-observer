@@ -99,11 +99,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium = Herbarium.new
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
-      format.html do
-        render(Views::Controllers::Herbaria::New.new(
-                 herbarium: @herbarium, user: @user
-               ))
-      end
+      format.html { render_new_view }
     end
   end
 
@@ -114,11 +110,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     set_up_herbarium_for_edit
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
-      format.html do
-        render(Views::Controllers::Herbaria::Edit.new(
-                 herbarium: @herbarium, user: @user, top_users: @top_users
-               ))
-      end
+      format.html { render_edit_view }
     end
   end
 
@@ -488,21 +480,27 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
     respond_to do |format|
       format.turbo_stream { reload_herbarium_modal_form_and_flash }
-      format.html { render(phlex_form_view_for(action)) }
+      format.html { render_invalid_view_for(action) }
     end
   end
 
-  def phlex_form_view_for(action)
+  def render_invalid_view_for(action)
     case action
-    when :new
-      Views::Controllers::Herbaria::New.new(
-        herbarium: @herbarium, user: @user
-      )
-    when :edit
-      Views::Controllers::Herbaria::Edit.new(
-        herbarium: @herbarium, user: @user, top_users: @top_users
-      )
+    when :new then render_new_view_invalid
+    when :edit then render_edit_view_invalid
     end
+  end
+
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Herbaria::New.new(
+             herbarium: @herbarium, user: @user
+           ), status: status, **render_opts)
+  end
+
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Herbaria::Edit.new(
+             herbarium: @herbarium, user: @user, top_users: @top_users
+           ), status: status, **render_opts)
   end
 
   # this updates both the form and the flash

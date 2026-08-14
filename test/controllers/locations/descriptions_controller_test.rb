@@ -411,7 +411,8 @@ module Locations
       end
 
       assert_flash_error
-      assert_select("form")
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Test update with save validation failure - covers lines 191-193
@@ -435,7 +436,8 @@ module Locations
       end
 
       assert_flash_error
-      assert_select("form")
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
   end
 end
