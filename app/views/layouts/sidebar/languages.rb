@@ -13,35 +13,6 @@ class Views::Layouts::Sidebar
   #     request: request
   #   ))
   class Languages < ::Views::Base
-    # Regional-indicator flag emoji per locale — a deliberate mapping,
-    # not a formula. ISO 639 language codes and ISO 3166 country codes
-    # are different systems that only coincidentally overlap, and
-    # sometimes collide misleadingly: `uk` here is Ukrainian, not "UK"
-    # (which isn't even a real ISO 3166 code — Great Britain is `GB`);
-    # `ar` (Arabic) has no single owning country, and ISO 3166 `AR` is
-    # Argentina, unrelated to the language. Each entry is a curated
-    # choice, matching the flags the old `public/flags/flag-*.png`
-    # assets showed.
-    FLAG_EMOJI = {
-      "ar" => "🇵🇸", # Arabic — Palestine
-      "be" => "🇧🇾", # Belarusian — Belarus
-      "de" => "🇩🇪", # German — Germany
-      "el" => "🇬🇷", # Greek — Greece
-      "en" => "🇬🇧", # English — Great Britain
-      "es" => "🇪🇸", # Spanish — Spain
-      "fa" => "🇮🇷", # Persian/Farsi — Iran
-      "fr" => "🇫🇷", # French — France
-      "it" => "🇮🇹", # Italian — Italy
-      "jp" => "🇯🇵", # Japanese — Japan
-      "pl" => "🇵🇱", # Polish — Poland
-      "pt" => "🇵🇹", # Portuguese — Portugal
-      "ru" => "🇷🇺", # Russian — Russia
-      "tr" => "🇹🇷", # Turkish — Turkey
-      "uk" => "🇺🇦", # Ukrainian — Ukraine
-      "zh" => "🇨🇳"  # Chinese — China
-    }.freeze
-    DEFAULT_FLAG = "🏳️"
-
     TOGGLE_ID = "language_dropdown_toggle"
     COLLAPSE_ID = "language_dropdown_collapse"
 
@@ -81,7 +52,9 @@ class Views::Layouts::Sidebar
              id: TOGGLE_ID, class: css_class) do
           plain("#{:app_languages.t}:")
           whitespace
-          span(class: "lang-flag-emoji") { plain(flag_for(I18n.locale)) }
+          span(class: "lang-flag-emoji") do
+            plain(Components::LanguageSwitchButton.flag_for(I18n.locale))
+          end
           whitespace
           Icon(type: :chevron_down, title: :open.ti,
                class: "active-icon")
@@ -90,37 +63,17 @@ class Views::Layouts::Sidebar
       end
     end
 
-    # POST, not a GET link (issue #5074) -- a GET link here is a
-    # crawler/bookmark/browser-history replay hazard: `set_locale`
-    # reads this same `user_locale` param on every request, so a
-    # remembered/indexed GET URL could flip a logged-in user's
-    # session to a locale they never chose.
     def render_language_row(lang)
       render(
         Components::ListGroup::LinkItem.new(class: "indent")
       ) do |css_class|
-        Button(
-          type: :post,
-          name: lang.name,
-          target: switch_locale_path,
-          params: { user_locale: lang.locale },
-          variant: :link,
+        LanguageSwitchButton(
+          language: lang,
           id: "lang_drop_#{lang.locale}_link",
           class: css_class,
-          # `name:` is required syntax but only drives CRUDBase's
-          # auto-tooltip -- suppress it here since the block content
-          # below already shows the same text visibly.
-          data: { locale: lang.locale, tooltip_target: nil }
-        ) do
-          span(class: "lang-flag-emoji") { plain(flag_for(lang.locale)) }
-          whitespace
-          plain(lang.name)
-        end
+          data: { locale: lang.locale }
+        )
       end
-    end
-
-    def flag_for(locale)
-      FLAG_EMOJI.fetch(locale.to_s, DEFAULT_FLAG)
     end
   end
 end

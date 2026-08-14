@@ -25,9 +25,9 @@ class Views::Layouts::Sidebar
       assert_includes(html, :app_languages.t)
 
       # Current language flag emoji — no image asset (flags are
-      # emoji text via Languages::FLAG_EMOJI, not PNGs).
+      # emoji text via LanguageSwitchButton::FLAG_EMOJI, not PNGs).
       assert_html(html, "##{Languages::TOGGLE_ID} span.lang-flag-emoji",
-                  text: Languages::FLAG_EMOJI.fetch(I18n.locale.to_s))
+                  text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch(I18n.locale.to_s))
       assert_no_html(html, "img.lang-flag")
 
       # Chevron pair — reuses Panel's established collapse-icon
@@ -86,7 +86,7 @@ class Views::Layouts::Sidebar
                     "##{Languages::COLLAPSE_ID} form input[type='hidden']" \
                     "[name='user_locale'][value='#{lang.locale}']")
         assert_html(html, "##{id} span.lang-flag-emoji",
-                    text: Languages::FLAG_EMOJI.fetch(lang.locale))
+                    text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch(lang.locale))
         assert_includes(html, lang.name)
         # CRUDBase's auto-tooltip would just restate the visible
         # label -- suppressed via `tooltip_target: nil`.
