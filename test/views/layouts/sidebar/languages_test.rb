@@ -83,6 +83,9 @@ class Views::Layouts::Sidebar
         assert_html(html, "##{id} span.lang-flag-emoji",
                     text: Languages::FLAG_EMOJI.fetch(lang.locale))
         assert_includes(html, lang.name)
+        # CRUDBase's auto-tooltip would just restate the visible
+        # label -- suppressed via `tooltip_target: nil`.
+        assert_no_html(html, "##{id}[data-tooltip-target]")
       end
     end
 

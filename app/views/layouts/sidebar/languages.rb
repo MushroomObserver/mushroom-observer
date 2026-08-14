@@ -103,7 +103,10 @@ class Views::Layouts::Sidebar
           variant: :link,
           id: "lang_drop_#{lang.locale}_link",
           class: css_class,
-          data: { locale: lang.locale }
+          # `name:` is required syntax but only drives CRUDBase's
+          # auto-tooltip -- suppress it here since the block content
+          # below already shows the same text visibly.
+          data: { locale: lang.locale, tooltip_target: nil }
         ) do
           span(class: "lang-flag-emoji") { plain(flag_for(lang.locale)) }
           whitespace
