@@ -1212,6 +1212,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
   end
 
+  # Regression: validate_place_name never passed `approved:` to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name -- the flow form_observations_dubious_help tells the user
+  # to use ("Click 'Create' to use this location name") -- looped
+  # forever instead of accepting it.
+  def test_construct_observation_dubious_place_name_approved
+    where = "Bogus, Massachusetts, UAS"
+    params = {
+      naming: { name: "Unknown" },
+      location: { north: 35, south: 34, east: -117, west: -118 },
+      observation: { place_name: where, location_id: -1 }
+    }
+
+    # First submission: dubious, rejected, nothing created.
+    generic_construct_observation(params, 0, 0, 0, 0)
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, observation is created.
+    generic_construct_observation(
+      params.merge(approved_where: where), 1, 0, 0, 1
+    )
+  end
+
   def test_name_resolution
     login("rolf")
 
