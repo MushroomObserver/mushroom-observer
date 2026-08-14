@@ -607,6 +607,19 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(Project.find_by(title: title))
   end
 
+  # A narrower version of #2248: a title/group-name conflict never
+  # reaches create_project (and thus never sets @raw_place_name) --
+  # the entered location used to revert to blank on this reload even
+  # though the failure had nothing to do with it.
+  def test_create_project_blank_title_preserves_entered_location
+    where = "Springvale, Wyoming, USA"
+    params = build_params("", "a summary")
+    params[:project][:place_name] = where
+    post_requires_login(:create, params)
+
+    assert_select("input[name='project[place_name]'][value=?]", where)
+  end
+
   # Regression (#2248): a dubious place_name used to reload a blank
   # form with just a flash warning and no way to confirm the name --
   # looping forever on any resubmission of the same name. Now it

@@ -144,6 +144,12 @@ class ProjectsController < ApplicationController
     end
     @project = Project.new(project_params)
     @project_dates_any = params[:project][:dates_any].downcase == "true"
+    # Echo the entered location back on reload, same as
+    # Creation#cleanup_failed_project_creation -- title/group-name
+    # failures land here too, and Project#place_name= has no
+    # free-text fallback for an unresolved name (see that method's
+    # comment for why raw_place_name exists at all).
+    @raw_place_name = params[:project][:place_name]
     image_ivars
     render_new_form
   end
