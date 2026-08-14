@@ -37,8 +37,8 @@ module ApplicationController::Internationalization
   # Globalite default.  Tries to get the locale from:
   #
   # 1. parameters (user clicked on language in bottom left)
-  # 2. user prefs (user edited their preferences)
-  # 3. session (whatever we used last time)
+  # 2. session (user explicitly switched earlier this session)
+  # 3. user prefs (user edited their preferences)
   # 4. navigator (provides default)
   # 5. server (MO.default_locale)
   #
@@ -50,8 +50,15 @@ module ApplicationController::Internationalization
     # changing it to what it already is!!
     change_locale_if_needed(lang.locale)
 
-    # Update user preference.
-    @user.update(locale: lang.locale) if @user && @user.locale != lang.locale
+    # Remember an explicit switch for the rest of the session, so it
+    # outranks prefs_locale on the next request -- otherwise a
+    # logged-in user's switch reverts on their very next page load,
+    # since their stored account preference never changed (only the
+    # Preferences form changes that; see issue #5074). Only written
+    # here, from an explicit params_locale hit -- never from prefs_
+    # locale/browser_locale falling through below, or a stale value
+    # would outrank a fresher account preference after login.
+    session[:locale] = lang.locale if params_locale
 
     logger.debug("[I18n] Locale set to #{I18n.locale}")
 
@@ -60,7 +67,7 @@ module ApplicationController::Internationalization
   end
 
   def specified_locale
-    params_locale || prefs_locale || session_locale || browser_locale
+    params_locale || session_locale || prefs_locale || browser_locale
   end
 
   def params_locale
@@ -71,18 +78,18 @@ module ApplicationController::Internationalization
     locale
   end
 
-  def prefs_locale
-    return unless @user&.locale.present? && params[:controller] != "ajax"
-
-    logger.debug("[I18n] loading locale: #{@user.locale} from @user")
-    @user.locale
-  end
-
   def session_locale
     return unless session[:locale]
 
     logger.debug("[I18n] loading locale: #{session[:locale]} from session")
     session[:locale]
+  end
+
+  def prefs_locale
+    return unless @user&.locale.present? && params[:controller] != "ajax"
+
+    logger.debug("[I18n] loading locale: #{@user.locale} from @user")
+    @user.locale
   end
 
   def browser_locale
@@ -96,7 +103,6 @@ module ApplicationController::Internationalization
     return if I18n.locale.to_s == new_locale
 
     I18n.locale = new_locale
-    session[:locale] = new_locale
   end
 
   # Before filter: Set timezone based on cookie set in application layout.
