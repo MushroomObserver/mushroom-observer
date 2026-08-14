@@ -2,6 +2,14 @@
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
+  # Every mailer action can render in a different locale (see
+  # `setup_user`), so `mo_mail`'s `ensure` needs to know what to
+  # restore `I18n.locale` to when the action's done -- captured here,
+  # not in `setup_user`, so mailers that never call `setup_user`
+  # (e.g. WebmasterMailer, always sent in MO.default_locale) still
+  # get a real value instead of leaving `@old_locale` nil.
+  before_action { @old_locale = I18n.locale }
+
   # Use native Ruby URI::MailTo class
   def self.valid_email_address?(address)
     address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
@@ -32,7 +40,6 @@ class ApplicationMailer < ActionMailer::Base
 
   def setup_user(user)
     @user = user
-    @old_locale = I18n.locale
     new_locale = @user.try(&:locale) || MO.default_locale
     # Setting I18n.locale used to incur a significant performance penalty,
     # avoid doing so if not required.  Not sure if this is still the case.
@@ -45,6 +52,7 @@ class ApplicationMailer < ActionMailer::Base
     content_style = calc_content_style(headers)
     mail_args = mo_mail_args(title, to, headers, content_style)
     deliver_phlex_mail(mail_args, headers, content_style, mailer_view_class)
+  ensure
     I18n.locale = @old_locale if I18n.locale != @old_locale
   end
 
