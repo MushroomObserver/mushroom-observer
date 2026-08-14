@@ -215,6 +215,30 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show", wait: 10)
   end
 
+  # JoeCohen's review on #5055: the "MO does not recognize the name"
+  # message used to appear alone, missing the "To proceed..." help
+  # text telling the user to fix the spelling or click Create.
+  # Root cause was in Components::Form::NameFeedback, not this form,
+  # but the observation form is exactly where a user hits it.
+  def test_name_not_recognized_message_includes_help_text
+    login!(users(:zero_user))
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    fill_in("observation_place_name", with: locations.first.name)
+    naming = find_by_id("observation_naming_specimen")
+    scroll_to(naming, align: :top)
+    fill_in("observation_naming_name", with: "Elfin saddle")
+    page.driver.browser.keyboard.type(:tab)
+
+    within("#observation_form") { click_commit }
+
+    assert_selector("#name_messages.alert-danger", wait: 6)
+    assert_selector("#name_messages", text: "MO does not recognize the name")
+    assert_selector("#name_messages", text: "To proceed")
+    assert_selector("#name_messages", text: "Create")
+  end
+
   def test_trying_to_create_duplicate_location_just_uses_existing_location
     setup_image_dirs # in general_extensions
     login!(katrina)

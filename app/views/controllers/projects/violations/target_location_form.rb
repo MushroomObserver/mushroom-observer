@@ -8,9 +8,9 @@
 #
 # The form posts `do=add_target_location`, `obs_id=<id>`, and
 # `location_id=<id>` (the radio selection — the comma-suffix the
-# user picked) to `project_violations_update_path` with PUT. The
-# route only accepts PUT, not PATCH, so we override Superform's
-# default `_method` value via `method: :put` in the initializer.
+# user picked) to `resolve_project_violations_path` with PATCH
+# (Superform's default for a persisted model) — the route also
+# accepts PUT, for the legacy button_to callers in `Form`.
 #
 # Two render modes inside `.modal-body`:
 #
@@ -94,7 +94,7 @@ module Views::Controllers::Projects::Violations
       # entry is added to its target_locations list), so it's the
       # natural Superform "model" for dom.id. No fields bind to it —
       # every input is named explicitly. Superform picks PATCH for
-      # the persisted Project model; `project_violations_update_path`
+      # the persisted Project model; `resolve_project_violations_path`
       # accepts both PATCH and PUT (the legacy button_to calls still
       # use PUT).
       super(project, obs: obs, project: project,
@@ -102,7 +102,7 @@ module Views::Controllers::Projects::Violations
     end
 
     def form_action
-      project_violations_update_path(project_id: @project.id)
+      resolve_project_violations_path(@project.id)
     end
 
     # Callers (Projects::Violations::Form) check `applicable?(obs)`
