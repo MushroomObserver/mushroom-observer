@@ -3316,12 +3316,14 @@
   create_donation_title: Record Mushroom Observer Donation
   create_donation_add: Add
   create_donation_tab: Record Donation
+  create_donation_success: Donation recorded.
 
   # support/review_donations
   review_donations_title: Review All Donations
   review_donations_not_allowed: Only admins can review donations
   review_donations_update: Update
   review_donations_tab: Review Donations
+  review_donations_success: Donations updated.
   review_reviewed: Reviewed
   review_id: Id
   review_who: Who

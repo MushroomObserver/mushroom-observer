@@ -1026,6 +1026,34 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
   end
 
+  # Coverage gap: no existing create test exercises the
+  # check_field_slip_project_gaps branch reached via
+  # attach_selected_observations -- POSTs two observations whose
+  # projects differ (obs3 is in bolete_project), which sets
+  # @field_slip_project_gaps and renders the modal instead of
+  # redirecting.
+  def test_create_with_project_gaps_renders_modal
+    login("rolf")
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs) # in bolete_project
+    [obs2, obs3].each { |obs| obs.update_column(:occurrence_id, nil) }
+    code = "EOL-9003"
+
+    post(:create,
+         params: {
+           observation_ids: [obs2.id.to_s, obs3.id.to_s],
+           field_slip: { code: code }
+         })
+
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
+    assert_select(
+      "#modal_resolve_projects.modal.fade.in",
+      { count: 1 },
+      "Expected Components::Modal for project-gaps overlay"
+    )
+  end
+
   # ---------- sync_selected_observations on update ----------
 
   def test_update_sync_adds_observation
@@ -1225,7 +1253,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
           field_slip: { code: fs.code }
         })
 
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     # Components::Modal markup proves the new modal composition
     # rendered, not just that we got a 200.
     assert_select(

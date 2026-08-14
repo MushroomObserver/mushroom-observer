@@ -479,7 +479,8 @@ class NamesController < ApplicationController
           name_id: @name.id,
           # Auricularia Bull. [#17132]
           new_name_with_icn_id: "#{@parse.search_name} " \
-                                "[##{params[:name][:icn_id]}]"
+                                "[##{params[:name][:icn_id]}]",
+          format: :html
         )
       )
       return
@@ -729,7 +730,8 @@ class NamesController < ApplicationController
       redirect_to_show_name
     else
       redirect_to(new_admin_emails_merge_requests_path(
-                    type: :Name, old_id: @name.id, new_id: new_name.id
+                    type: :Name, old_id: @name.id, new_id: new_name.id,
+                    format: :html
                   ))
     end
   end

@@ -756,7 +756,8 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     assert_redirected_to(
       new_admin_emails_name_change_requests_path(
-        name_id: name.id, new_name_with_icn_id: "Superboletus [#]"
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]",
+        format: :html
       ),
       "User should be unable to change text_name of Name with dependents"
     )
@@ -913,7 +914,8 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(
       new_admin_emails_name_change_requests_path(
         name_id: name.id,
-        new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
+        new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]",
+        format: :html
       ),
       "Editing id# of Name w/dependents should show Name Change Request form"
     )

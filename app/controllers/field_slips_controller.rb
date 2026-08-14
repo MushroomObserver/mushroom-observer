@@ -176,7 +176,11 @@ class FieldSlipsController < ApplicationController
   def redirect_or_render_field_slip_update
     if @field_slip_project_gaps
       flash_notice(:field_slip_updated.t)
-      render_edit_phlex(status: :ok)
+      # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+      # (see turbo_submit_forms.md) -- needs a non-2xx status even
+      # though nothing actually "failed" yet; the field slip just
+      # isn't fully resolved until the user handles the project gaps.
+      render_edit_phlex(status: :unprocessable_content)
     else
       redirect_to(field_slip_url(@field_slip),
                   notice: :field_slip_updated.t)
@@ -216,7 +220,11 @@ class FieldSlipsController < ApplicationController
       msg = :field_slip_created.t(code: @field_slip.code)
       if @field_slip_project_gaps
         flash_notice(msg)
-        render_new_phlex(status: :ok)
+        # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+        # (see turbo_submit_forms.md) -- needs a non-2xx status even
+        # though nothing actually "failed" yet; the field slip just
+        # isn't fully resolved until the user handles the project gaps.
+        render_new_phlex(status: :unprocessable_content)
       elsif obs
         redirect_to(observation_url(obs), notice: msg)
       else
