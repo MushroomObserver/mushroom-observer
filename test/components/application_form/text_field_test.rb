@@ -81,18 +81,35 @@ class TextFieldTest < ComponentTestCase
     assert_html(form, "label em", text: "all")
   end
 
-  # A field label secretly doubling as a clickable link is a UX smell
-  # (not obviously clickable, easy to miss) -- FieldLabelRow raises
-  # rather than silently rendering one. Route link content through
-  # help: instead (see Components::Form::UploadGallery::Fields#
-  # render_license_field for the established pattern).
-  def test_label_containing_a_link_raises
-    error = assert_raises(RuntimeError) do
-      render_form do
-        text_field(:name, label: '<a href="/x">Click</a>'.html_safe)
-      end
+  # A link inside a label must not crash the page (a production
+  # translation of `donate_who`, Spanish, used Textile link syntax and
+  # took down /support/donate) -- FieldLabelRow forces the link to open
+  # in a new tab rather than rejecting it, since clicking it in the
+  # same tab would navigate away from a form the user may be partway
+  # through filling out.
+  def test_label_containing_a_link_opens_in_new_tab
+    form = render_form do
+      text_field(:name, label: '<a href="/x">Click here</a>'.html_safe)
     end
-    assert_match(/contains a link/, error.message)
+
+    assert_html(form,
+                "label a[href='/x'][target='_blank']" \
+                "[rel='noopener noreferrer']",
+                text: "Click here")
+  end
+
+  # A translator (or a future caller) might already set target= for
+  # their own reason -- don't clobber it with a second target attr.
+  # Spaces around `=` are valid HTML, so the detection has to tolerate
+  # them too, not just the no-space form.
+  def test_label_link_with_existing_target_is_left_alone
+    form = render_form do
+      text_field(:name,
+                 label: '<a href="/x" target = "_self">Click</a>'.html_safe)
+    end
+
+    assert_html(form, "label a[href='/x'][target='_self']", text: "Click")
+    assert_not_includes(form, "_blank")
   end
 
   # Slot tests
