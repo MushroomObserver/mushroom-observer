@@ -61,19 +61,44 @@ class Components::ApplicationForm < Superform::Rails::Form
     # instead (see Components::Form::UploadGallery::Fields#render_license_field
     # for the established pattern) rather than embedding it in the label.
     #
+    # Strips the link (keeping its text) rather than raising: this runs
+    # on every request, for every locale's translation of the label, and
+    # a translator adding textile link syntax to a label string -- a
+    # completely ordinary thing to do everywhere else in the
+    # translations -- has no way to know it would crash the page here.
+    # A production translation did exactly that (`donate_who`, Spanish)
+    # and took down /support/donate for every es-locale visitor. Still
+    # surfaced via ExceptionNotifier so it gets fixed at the source.
+    #
     # Only guards `label_text` below (the colon-suffixed prompt path),
     # NOT `resolved_label_text` itself -- CheckboxField#label_text calls
     # `resolved_label_text` directly, bypassing this guard, because a
     # checkbox's label can be rich content rather than a plain text
     # prompt (e.g. a name link + copy-id badge next to a
     # synonym-selection checkbox -- see names/synonyms/form.rb).
-    LINK_IN_LABEL_RE = /<a[\s>]/
+    LINK_IN_LABEL_RE = %r{<a[^>]*>(.*?)</a>}mi
 
-    def raise_if_label_has_link(text)
-      return unless text.is_a?(String) && text.match?(LINK_IN_LABEL_RE)
+    def strip_link_from_label(text)
+      return text unless text.is_a?(String) && text.match?(LINK_IN_LABEL_RE)
 
-      raise("Field label contains a link -- move it into help: " \
-            "content instead of embedding it in the label: #{text.inspect}")
+      notify_label_link_found(text)
+      stripped = text.gsub(LINK_IN_LABEL_RE, '\1')
+      return stripped unless text.is_a?(ActiveSupport::SafeBuffer)
+
+      ActiveSupport::SafeBuffer.new(stripped)
+    end
+
+    def notify_label_link_found(text)
+      return unless ExceptionNotifier.notifiers.any?
+
+      ExceptionNotifier.notify_exception(
+        RuntimeError.new(
+          "Field label contains a link -- move it into help: content " \
+          "instead of embedding it in the label: #{text.inspect}"
+        ),
+        data: { label_option: wrapper_options[:label].inspect,
+                locale: I18n.locale.to_s }
+      )
     end
 
     # append_colon lives on Components::Localization, included into
@@ -85,8 +110,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # connector between two selects, which reads as a word, not a
     # field prompt).
     def label_text
-      text = resolved_label_text
-      raise_if_label_has_link(text)
+      text = strip_link_from_label(resolved_label_text)
       wrapper_options[:label_colon] == false ? text : append_colon(text)
     end
 

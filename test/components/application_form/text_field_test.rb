@@ -82,17 +82,36 @@ class TextFieldTest < ComponentTestCase
   end
 
   # A field label secretly doubling as a clickable link is a UX smell
-  # (not obviously clickable, easy to miss) -- FieldLabelRow raises
-  # rather than silently rendering one. Route link content through
-  # help: instead (see Components::Form::UploadGallery::Fields#
-  # render_license_field for the established pattern).
-  def test_label_containing_a_link_raises
-    error = assert_raises(RuntimeError) do
-      render_form do
-        text_field(:name, label: '<a href="/x">Click</a>'.html_safe)
+  # (not obviously clickable, easy to miss) -- FieldLabelRow strips the
+  # link rather than rendering one. Route link content through help:
+  # instead (see Components::Form::UploadGallery::Fields#
+  # render_license_field for the established pattern). Must not raise:
+  # this runs on every translated label, for every locale, on every
+  # request -- a translator's textile link syntax must degrade
+  # gracefully, not crash the page.
+  def test_label_containing_a_link_strips_it_keeping_the_text
+    form = render_form do
+      text_field(:name, label: '<a href="/x">Click here</a>'.html_safe)
+    end
+
+    assert_includes(form, "Click here")
+    assert_not_includes(form, "<a")
+  end
+
+  def test_label_containing_a_link_notifies_without_raising
+    notified = []
+    ExceptionNotifier.stub(:notifiers, [:slack]) do
+      ExceptionNotifier.stub(
+        :notify_exception, ->(exception, **_opts) { notified << exception }
+      ) do
+        render_form do
+          text_field(:name, label: '<a href="/x">Click here</a>'.html_safe)
+        end
       end
     end
-    assert_match(/contains a link/, error.message)
+
+    assert_equal(1, notified.length)
+    assert_match(/contains a link/, notified.first.message)
   end
 
   # Slot tests
