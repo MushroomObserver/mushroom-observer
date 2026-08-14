@@ -10,26 +10,9 @@
 #   P = prefetching allowed
 #
 #  ==== Sign-up
-#  signup::             <tt>(. V P)</tt> Create new account.
-#  verify::             <tt>(. V .)</tt> Verify new account.
-#  reverify::           <tt>(. V .)</tt> If verify fails(?)
-#  send_verify::        <tt>(. . .)</tt> Callback used by reverify.
+#  new::                <tt>(. V P)</tt> New-account form.
+#  create::             <tt>(. V P)</tt> Create new account.
 #  welcome::            <tt>(. V .)</tt> Welcome page after signup and verify.
-#
-#  ==== Login
-#  login::              <tt>(. V P)</tt>
-#  logout_user::        <tt>(. V .)</tt>
-#  email_new_password:: <tt>(. V .)</tt>
-#
-#  ==== Preferences
-#  prefs::              <tt>(L V P)</tt>
-#  profile::            <tt>(L V P)</tt>
-#  remove_image::       <tt>(L . .)</tt>
-#  no_email::           <tt>(L V .)</tt>
-#  api_keys::           <tt>(L V .)</tt>
-#
-#  ==== Testing
-#  test_autologin::     <tt>(L V .)</tt>
 #
 ################################################################################
 class AccountController < ApplicationController
