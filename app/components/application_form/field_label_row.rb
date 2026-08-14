@@ -48,57 +48,44 @@ class Components::ApplicationForm < Superform::Rails::Form
     # title-casing, to display correctly.
     def resolved_label_text
       label_option = wrapper_options[:label]
-      case label_option
-      when Symbol then label_option.t
-      when String then label_option
-      else field.key.to_s.humanize
+      text = case label_option
+             when Symbol then label_option.t
+             when String then label_option
+             else field.key.to_s.humanize
+             end
+      open_label_links_in_new_tab(text)
+    end
+
+    # A link inside a label navigates the user away from a form they may
+    # be partway through filling out, in the same tab -- losing whatever
+    # they'd already entered. Force `target="_blank"` (plus
+    # `rel="noopener noreferrer"`) rather than stripping the link: a
+    # translator writing ordinary Textile link syntax into a label
+    # string (a production translation of `donate_who`, Spanish, did
+    # exactly this) has no way to know it lands in a `<label>`, so the
+    # label has to tolerate a link showing up, not reject it.
+    #
+    # Nested links inside a `<label for="...">` are valid HTML, and
+    # browsers give the `<a>` click priority over the label's own
+    # click-to-focus/toggle behavior, so there's no real ambiguity even
+    # for a checkbox/radio label where the label click also toggles the
+    # control -- CheckboxField#label_text calls resolved_label_text
+    # directly and gets this same treatment.
+    LINK_TAG_RE = /<a\b([^>]*)>/i
+
+    def open_label_links_in_new_tab(text)
+      return text unless text.is_a?(String) && text.match?(LINK_TAG_RE)
+
+      rewritten = text.gsub(LINK_TAG_RE) do
+        attrs = Regexp.last_match(1)
+        unless attrs.match?(/\btarget=/i)
+          attrs += ' target="_blank" rel="noopener noreferrer"'
+        end
+        "<a#{attrs}>"
       end
-    end
+      return rewritten unless text.is_a?(ActiveSupport::SafeBuffer)
 
-    # A resolved label containing a real link -- a field-PROMPT label
-    # secretly doubling as a clickable link is a UX smell (not obviously
-    # clickable, easy to miss). Route link content through a help icon
-    # instead (see Components::Form::UploadGallery::Fields#render_license_field
-    # for the established pattern) rather than embedding it in the label.
-    #
-    # Strips the link (keeping its text) rather than raising: this runs
-    # on every request, for every locale's translation of the label, and
-    # a translator adding textile link syntax to a label string -- a
-    # completely ordinary thing to do everywhere else in the
-    # translations -- has no way to know it would crash the page here.
-    # A production translation did exactly that (`donate_who`, Spanish)
-    # and took down /support/donate for every es-locale visitor. Still
-    # surfaced via ExceptionNotifier so it gets fixed at the source.
-    #
-    # Only guards `label_text` below (the colon-suffixed prompt path),
-    # NOT `resolved_label_text` itself -- CheckboxField#label_text calls
-    # `resolved_label_text` directly, bypassing this guard, because a
-    # checkbox's label can be rich content rather than a plain text
-    # prompt (e.g. a name link + copy-id badge next to a
-    # synonym-selection checkbox -- see names/synonyms/form.rb).
-    LINK_IN_LABEL_RE = %r{<a[^>]*>(.*?)</a>}mi
-
-    def strip_link_from_label(text)
-      return text unless text.is_a?(String) && text.match?(LINK_IN_LABEL_RE)
-
-      notify_label_link_found(text)
-      stripped = text.gsub(LINK_IN_LABEL_RE, '\1')
-      return stripped unless text.is_a?(ActiveSupport::SafeBuffer)
-
-      ActiveSupport::SafeBuffer.new(stripped)
-    end
-
-    def notify_label_link_found(text)
-      return unless ExceptionNotifier.notifiers.any?
-
-      ExceptionNotifier.notify_exception(
-        RuntimeError.new(
-          "Field label contains a link -- move it into help: content " \
-          "instead of embedding it in the label: #{text.inspect}"
-        ),
-        data: { label_option: wrapper_options[:label].inspect,
-                locale: I18n.locale.to_s }
-      )
+      ActiveSupport::SafeBuffer.new(rewritten)
     end
 
     # append_colon lives on Components::Localization, included into
@@ -110,7 +97,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # connector between two selects, which reads as a word, not a
     # field prompt).
     def label_text
-      text = strip_link_from_label(resolved_label_text)
+      text = resolved_label_text
       wrapper_options[:label_colon] == false ? text : append_colon(text)
     end
 

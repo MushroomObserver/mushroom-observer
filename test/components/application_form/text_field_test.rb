@@ -81,37 +81,29 @@ class TextFieldTest < ComponentTestCase
     assert_html(form, "label em", text: "all")
   end
 
-  # A field label secretly doubling as a clickable link is a UX smell
-  # (not obviously clickable, easy to miss) -- FieldLabelRow strips the
-  # link rather than rendering one. Route link content through help:
-  # instead (see Components::Form::UploadGallery::Fields#
-  # render_license_field for the established pattern). Must not raise:
-  # this runs on every translated label, for every locale, on every
-  # request -- a translator's textile link syntax must degrade
-  # gracefully, not crash the page.
-  def test_label_containing_a_link_strips_it_keeping_the_text
+  # A link inside a label must not crash the page (a production
+  # translation of `donate_who`, Spanish, used Textile link syntax and
+  # took down /support/donate) -- FieldLabelRow forces the link to open
+  # in a new tab rather than rejecting it, since clicking it in the
+  # same tab would navigate away from a form the user may be partway
+  # through filling out.
+  def test_label_containing_a_link_opens_in_new_tab
     form = render_form do
       text_field(:name, label: '<a href="/x">Click here</a>'.html_safe)
     end
 
-    assert_includes(form, "Click here")
-    assert_not_includes(form, "<a")
+    assert_html(form, "label a[href='/x'][target='_blank']", text: "Click here")
   end
 
-  def test_label_containing_a_link_notifies_without_raising
-    notified = []
-    ExceptionNotifier.stub(:notifiers, [:slack]) do
-      ExceptionNotifier.stub(
-        :notify_exception, ->(exception, **_opts) { notified << exception }
-      ) do
-        render_form do
-          text_field(:name, label: '<a href="/x">Click here</a>'.html_safe)
-        end
-      end
+  # A translator (or a future caller) might already set target= for
+  # their own reason -- don't clobber it with a second target attr.
+  def test_label_link_with_existing_target_is_left_alone
+    form = render_form do
+      text_field(:name,
+                 label: '<a href="/x" target="_self">Click</a>'.html_safe)
     end
 
-    assert_equal(1, notified.length)
-    assert_match(/contains a link/, notified.first.message)
+    assert_html(form, "label a[href='/x'][target='_self']", text: "Click")
   end
 
   # Slot tests
