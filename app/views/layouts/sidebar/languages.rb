@@ -45,18 +45,13 @@ class Views::Layouts::Sidebar
     TOGGLE_ID = "language_dropdown_toggle"
     COLLAPSE_ID = "language_dropdown_collapse"
 
-    # `:browser` is unused inside this view but kept for API
-    # symmetry with `Sidebar`, which threads both
-    # `browser:` and `request:` through to here. Duck-typed for the
-    # same reason as the parent (tests pass a Struct stub).
+    # `:browser` and `:request` are both unused inside this view but
+    # kept for API symmetry with `Sidebar`, which threads both through
+    # uniformly to every sub-view it renders. Duck-typed for the same
+    # reason as the parent (tests pass a Struct stub).
     prop :browser, _Interface(:bot?)
-    # Used via `attr_reader :request` so `reload_with_args` (inherited
-    # from `Views::Base`) can read `request.url`.
     prop :request, _Interface(:url)
     prop :languages, _Array(Language)
-
-    # Make request available to the inherited `reload_with_args`.
-    attr_reader :request
 
     def view_template
       render_toggle
@@ -91,14 +86,25 @@ class Views::Layouts::Sidebar
       end
     end
 
+    # POST, not a GET link (issue #5074) -- a GET link here is a
+    # crawler/bookmark/browser-history replay hazard: `set_locale`
+    # reads this same `user_locale` param on every request, so a
+    # remembered/indexed GET URL could flip a logged-in user's
+    # session to a locale they never chose.
     def render_language_row(lang)
       render(
         Components::ListGroup::LinkItem.new(class: "indent")
       ) do |css_class|
-        a(href: reload_with_args(user_locale: lang.locale),
+        Button(
+          type: :post,
+          name: lang.name,
+          target: switch_locale_path,
+          params: { user_locale: lang.locale },
+          variant: :link,
           id: "lang_drop_#{lang.locale}_link",
           class: css_class,
-          data: { locale: lang.locale }) do
+          data: { locale: lang.locale }
+        ) do
           span(class: "lang-flag-emoji") { plain(flag_for(lang.locale)) }
           whitespace
           plain(lang.name)

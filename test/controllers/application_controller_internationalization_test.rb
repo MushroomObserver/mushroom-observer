@@ -44,3 +44,28 @@ class ApplicationControllerInternationalizationTest < FunctionalTestCase
     assert_equal("fr", I18n.locale.to_s)
   end
 end
+
+# TestController disables `autologin` (see `disable_filters`), so @user is
+# always nil there -- these need a real controller to exercise the
+# account-persistence question.
+class ApplicationControllerInternationalizationAccountPersistenceTest <
+      FunctionalTestCase
+  tests ObservationsController
+
+  # Issue #5074: a bare `?user_locale=` param (bookmark, crawler,
+  # remembered URL) must switch the current request/session locale
+  # but never silently overwrite the account's stored preference --
+  # only the Preferences form does that.
+  def test_params_locale_switches_request_but_not_account_preference
+    user = users(:rolf)
+    user.update(locale: "en")
+    login(user.login)
+
+    get(:index, params: { user_locale: "pt" })
+
+    assert_equal("pt", I18n.locale.to_s)
+    assert_equal("pt", session[:locale])
+    assert_equal("en", user.reload.locale,
+                 "A bare user_locale param must not change @user.locale")
+  end
+end

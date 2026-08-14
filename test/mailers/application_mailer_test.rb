@@ -36,4 +36,18 @@ class ApplicationMailerTest < UnitTestCase
     assert_nil(ActionMailer::Base.deliveries.last,
                "Should not deliver email if recipient has opted out.")
   end
+
+  # Issue #5074: `setup_user` switches I18n.locale to the recipient's
+  # locale; `mo_mail`'s early return (undeliverable `to_address`) must
+  # still restore it via `ensure`, or the mailer thread's I18n.locale
+  # stays leaked to whatever recipient it last tried to email.
+  def test_locale_restored_when_email_undeliverable
+    mary.update(email: "bogus.address", locale: "pt")
+
+    UserQuestionMailer.build(
+      sender: rolf, receiver: mary, subject: "subject", message: "body"
+    ).deliver_now
+
+    assert_equal(:en, I18n.locale)
+  end
 end

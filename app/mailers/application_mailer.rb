@@ -45,6 +45,7 @@ class ApplicationMailer < ActionMailer::Base
     content_style = calc_content_style(headers)
     mail_args = mo_mail_args(title, to, headers, content_style)
     deliver_phlex_mail(mail_args, headers, content_style, mailer_view_class)
+  ensure
     I18n.locale = @old_locale if I18n.locale != @old_locale
   end
 

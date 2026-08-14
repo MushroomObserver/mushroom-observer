@@ -675,6 +675,11 @@ MushroomObserver::Application.routes.draw do
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  # ----- Locale: one route (issue #5074) --------------------------------
+  # POST, not GET, so the language switcher can't be replayed by crawlers,
+  # browser history, or bookmarks -- see LocalesController.
+  post("/locale", to: "locales#update", as: "switch_locale")
+
   namespace :projects do
     resource :search, only: [:new, :create]
   end

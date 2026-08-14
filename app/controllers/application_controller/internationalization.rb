@@ -48,10 +48,12 @@ module ApplicationController::Internationalization
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
+    #
+    # This only ever touches I18n.locale/session -- never @user.locale.
+    # A bare `?user_locale=` param (bookmark, crawler, remembered URL)
+    # must not silently overwrite the account's stored preference; only
+    # the Preferences form does that (see issue #5074).
     change_locale_if_needed(lang.locale)
-
-    # Update user preference.
-    @user.update(locale: lang.locale) if @user && @user.locale != lang.locale
 
     logger.debug("[I18n] Locale set to #{I18n.locale}")
 
