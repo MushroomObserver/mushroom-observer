@@ -1139,6 +1139,47 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     pasadena.destroy
   end
 
+  # Bug fix: when typed coordinates match no existing MO location, the
+  # locality autocompleter falls back from location_containing to
+  # location_google and runs a real Google geocode lookup.
+  # refreshGooglePrimer force-sets `focused = true` "even if input lost
+  # focus" so that fallback's result still gets processed -- without
+  # the fix, that flag doesn't distinguish real vs. programmatic focus,
+  # so the geocode result would also steal focus once it arrives.
+  def test_typing_coordinates_with_no_matching_location_does_not_steal_focus
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    wait_for_map_outlet_ready
+    wait_for_map_geocoder_ready
+
+    # Alert, Nunavut -- the northernmost permanently inhabited place on
+    # Earth. No MO location record contains this point (forcing the
+    # location_containing -> location_google fallback), but it's a
+    # real locality Google geocodes to non-filtered results (unlike a
+    # mid-ocean point, which geocodes only to filtered-out types like
+    # plus_code and comes back empty).
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '82.5';
+      lngField.value = '-62.3';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+
+    assert_selector("[data-type='location_google']", wait: 10)
+    # Confirms the Google geocode round-trip actually completed and
+    # populated the dropdown, rather than the fetch simply not having
+    # resolved yet (which would make the focus assertion a false pass).
+    wait_for_autocompleter_match
+
+    assert_not_equal("observation_place_name",
+                     evaluate_script("document.activeElement.id"),
+                     "A background Google geocode result should not " \
+                     "steal focus from the coordinate field")
+  end
+
   # Editing the primary of a multi-member occurrence, adopting a
   # sibling's note value via its button enables + fills the (initially
   # disabled) textarea so it will submit.
@@ -1386,6 +1427,53 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
   private :wait_for_map_outlet_ready
+
+  # Waits for the map controller's Google Maps loader promise to
+  # resolve (sets up `this.geocoder`), independently of whether the
+  # map itself has been drawn.
+  def wait_for_map_geocoder_ready
+    Timeout.timeout(10) do
+      loop do
+        ready = evaluate_script(<<~JS)
+          (() => {
+            const f = document.getElementById('observation_form');
+            const c = window.Stimulus.getControllerForElementAndIdentifier(
+              f, 'map'
+            );
+            return !!(c && c.geocoder);
+          })()
+        JS
+        break if ready
+
+        sleep(0.1)
+      end
+    end
+  end
+  private :wait_for_map_geocoder_ready
+
+  # Waits for the locality autocompleter to have populated at least
+  # one match.
+  def wait_for_autocompleter_match
+    Timeout.timeout(10) do
+      loop do
+        count = evaluate_script(<<~JS)
+          (() => {
+            const el = document.getElementById(
+              'observation_location_autocompleter'
+            );
+            const c = window.Stimulus.getControllerForElementAndIdentifier(
+              el, 'autocompleter--location'
+            );
+            return (c?.matches || []).length;
+          })()
+        JS
+        break if count.positive?
+
+        sleep(0.2)
+      end
+    end
+  end
+  private :wait_for_autocompleter_match
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)
