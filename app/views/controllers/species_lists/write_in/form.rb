@@ -15,9 +15,9 @@ module Views::Controllers::SpeciesLists::WriteIn
   #   per-observation defaults applied to the obs constructed from
   #   the typed names
   # - `place_name`: top-level WHERE for the observations
-  # - `approved_names` / `approved_deprecated_names`: top-level
-  #   hidden re-submissions of name-confirmation state, only emitted
-  #   when those collections are non-empty
+  # - `approved_names` / `approved_deprecated_names` / `approved_where`:
+  #   top-level hidden re-submissions of name/location-confirmation
+  #   state, only emitted when there's something to confirm
   #
   # Field names go through the helpers in String form (`"member[lat]"`)
   # so the raw `name=` attribute lands as-is on the rendered input,
@@ -83,10 +83,13 @@ module Views::Controllers::SpeciesLists::WriteIn
         hidden_field("approved_names",
                      value: @new_names.join("\n"))
       end
-      return if @deprecated_names.blank?
+      if @deprecated_names.present?
+        hidden_field("approved_deprecated_names",
+                     value: @deprecated_names.map(&:id).join(" "))
+      end
+      return if @place_name.blank?
 
-      hidden_field("approved_deprecated_names",
-                   value: @deprecated_names.map(&:id).join(" "))
+      hidden_field("approved_where", value: @place_name)
     end
 
     def render_list_members_field

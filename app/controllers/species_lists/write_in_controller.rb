@@ -2,6 +2,8 @@
 
 module SpeciesLists
   class WriteInController < ApplicationController
+    include ::Locationable
+
     before_action :login_required
 
     def new
@@ -97,7 +99,15 @@ module SpeciesLists
       return if redirected
 
       # Failed to create due to synonyms, unrecognized names, etc.
+      # init_name_vars_from_sorter (shared with uploads_controller,
+      # which has no separate resubmit-to-confirm mechanism) resets
+      # @place_name to the species_list's already-saved location --
+      # restore the just-submitted value so a dubious-location reload
+      # shows (and echoes back via approved_where) what the user
+      # actually typed, not what's already on the record.
+      submitted_place_name = @place_name
       init_name_vars_from_sorter(@species_list, sorter)
+      @place_name = submitted_place_name
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
       # Member notes parts are derived from the list, not from params;
@@ -202,10 +212,7 @@ module SpeciesLists
     def validate_place_name
       @place_name = params.permit(:place_name)[:place_name] ||
                     @species_list.place_name(@user)
-      @dubious_where_reasons = Location.dubious_reasons_for(
-        user: @user, place_name: @place_name,
-        approved: params[:approved_where]
-      )
+      @dubious_where_reasons = dubious_where_reasons_for(@place_name)
     end
 
     def init_member_vars_for_reload

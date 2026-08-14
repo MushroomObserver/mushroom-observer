@@ -753,6 +753,31 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Regression (#3032): validate_place_name never passed approved: to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name on edit looped forever showing the same flash instead of
+  # accepting it.
+  def test_update_observation_dubious_place_name_approved
+    params = {
+      location: { north: 35, south: 34, east: -117, west: -118 }
+    }
+    where = "Mt. Molehill, Iowa, USA"
+
+    # First submission: dubious ("Mt." should be "Mount"), rejected.
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, update succeeds.
+    generic_update_observation(
+      params.merge(observation: { place_name: where, location_id: -1 },
+                   approved_where: where),
+      1
+    )
+  end
+
   # --------------------------------------------------------------------
   #  Test notes with template
   # --------------------------------------------------------------------
