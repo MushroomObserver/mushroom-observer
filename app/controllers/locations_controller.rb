@@ -18,6 +18,8 @@
 # Locations controller.
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
+  include ::Locationable
+
   before_action :store_location, except: [:index, :destroy]
   before_action :login_required
 
@@ -440,10 +442,6 @@ class LocationsController < ApplicationController
     # Note: names are in user's preferred order unless explicitly otherwise.)
     @original_name = string_param(:where)
 
-    # Previous value of place name: ignore warnings if unchanged
-    # (i.e., resubmit same name).
-    @approved_name = params[:approved_where]
-
     # This is the latest value of place name.
     @display_name = begin
                       params[:location][:display_name].strip_squeeze
@@ -466,9 +464,7 @@ class LocationsController < ApplicationController
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @display_name, approved: @approved_name
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(@display_name)
 
     if @dubious_where_reasons.empty?
       if @location.save
@@ -550,10 +546,7 @@ class LocationsController < ApplicationController
     @location.high  = params[:location][:high]  if params[:location][:high]
     @location.low   = params[:location][:low]   if params[:location][:low]
     @location.display_name = @display_name
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @display_name,
-      approved: params[:approved_where]
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(@display_name)
   end
 
   def save_flash_and_redirect_or_render!
