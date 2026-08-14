@@ -181,11 +181,8 @@ module Views::Controllers::Projects
       )
     end
 
-    # Explicit String target: `CRUDPathBuilding#target_path` only
-    # builds flat `<type_tag>_path(id)` routes, so it can't derive
-    # `project_violations_path` (a differently-named action route,
-    # not `@project`'s own canonical resource path) from `@project`
-    # directly.
+    # Explicit String target -- CRUDPathBuilding only auto-derives a
+    # model's own `<type_tag>_path`, not a differently-named route.
     def render_violations_button
       return unless @project.constraints?
 

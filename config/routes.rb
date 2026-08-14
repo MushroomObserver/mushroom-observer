@@ -714,19 +714,11 @@ MushroomObserver::Application.routes.draw do
       end
     end
   end
-  # `Project::Violation` (`Project::Violation = Struct.new(:obs,
-  # :kinds)`) isn't a persisted record with its own id -- it's a
-  # computed view of the project's own constraints, so these aren't a
-  # nested child resource requiring a `:project_id` (that would
-  # misname the Project's own id as if it belonged to a separate
-  # "violations" resource). Same shape as the images#edit/update
-  # routes above: plain routes keyed by the Project's own `:id`.
+  # Project::Violations are computed Structs, not persisted records,
+  # so they have no ids. Route here under the Project's :id, rather
+  # than building a :project_id nested resource.
   get("/projects/:id/violations", to: "projects/violations#index",
                                   as: "project_violations")
-  # Distinct path from the GET above, not a shared URL -- #update
-  # dispatches one of exclude/extend/add_target_name/
-  # add_target_location (keyed by params[:project][:do]), not a
-  # replace of the violations list the GET returns.
   match("/projects/:id/violations/resolve",
         to: "projects/violations#update",
         as: "resolve_project_violations",
