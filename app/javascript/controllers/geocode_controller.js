@@ -432,8 +432,8 @@ export default class extends Controller {
     }
 
     event.preventDefault()
-    this.latInputTarget.value = coords.decimalLatitude
-    this.lngInputTarget.value = coords.decimalLongitude
+    this.latInputTarget.value = this.roundOff(coords.decimalLatitude)
+    this.lngInputTarget.value = this.roundOff(coords.decimalLongitude)
     this.latInputTarget.dispatchEvent(new Event("input", { bubbles: true }))
   }
 

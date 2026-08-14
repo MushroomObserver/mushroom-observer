@@ -1077,7 +1077,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       latField.dispatchEvent(pasteEvent);
     JS
 
-    assert_field("observation_lat", with: "40.00283", visible: :all, wait: 5)
+    assert_field("observation_lat", with: "40.0028", visible: :all, wait: 5)
     assert_field("observation_lng", with: "-77.3633", visible: :all, wait: 5)
 
     # An ordinary single-value paste (no pair) must NOT be intercepted --
