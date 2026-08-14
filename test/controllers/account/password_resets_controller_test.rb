@@ -28,6 +28,29 @@ module Account
       assert_select("form#account_password_reset_form")
     end
 
+    # A missing/blank `login` param used to build `User[:name].eq(nil)`
+    # -> `name IS NULL` in the query, which could match an arbitrary
+    # user who never set a display name (`users.name` has no NOT NULL
+    # constraint), silently resetting a stranger's password (Copilot
+    # review on #5072). Create a user with a nil name so this test
+    # would have matched them before the `login.blank?` guard.
+    def test_create_blank_login_does_not_match_nil_name_user
+      nameless_user = User.create!(login: "nameless_login_user",
+                                   email: "nameless_login_user@example.com")
+      assert_nil(nameless_user.name)
+      old_password = nameless_user.password
+
+      assert_no_enqueued_jobs do
+        post(:create, params: { new_user: { login: "" } })
+      end
+
+      assert_unprocessable
+      assert_flash_error
+      nameless_user.reload
+      assert_equal(old_password, nameless_user.password,
+                   "Blank login should not match the nameless user")
+    end
+
     def test_create_success
       user = users(:roy)
       old_password = user.password
@@ -50,7 +73,7 @@ module Account
                        "New password should be different from old")
     end
 
-    # `@new_user.save` failing used to fall through with no render or
+    # A failing password change used to fall through with no render or
     # redirect at all -- a real request would raise, since there's no
     # ERB fallback template in this Phlex-only app (found via Copilot
     # review on #5058). Force the failure by stubbing `save` on the
@@ -59,13 +82,12 @@ module Account
     # fix.
     def test_create_save_failure
       user = users(:roy)
-      # `update_attribute` (called internally by `change_password`)
-      # calls `save(validate: false)` -- accept and ignore args so
-      # both that call and the controller's own `@new_user.save`
-      # hit this stub.
+      # `change_password` calls `update_attribute`, which calls
+      # `save(validate: false)` -- accept and ignore args so that
+      # call hits this stub.
       user.define_singleton_method(:save) { |*_args| false }
 
-      User.stub(:where, ->(*_args) { [user] }) do
+      User.stub(:find_by, ->(*_args) { user }) do
         assert_no_enqueued_jobs do
           post(:create, params: { new_user: { login: user.login } })
         end
