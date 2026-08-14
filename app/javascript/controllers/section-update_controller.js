@@ -33,11 +33,12 @@ export default class extends Controller {
     )
   }
 
-  // Dispatch a custom event to the window element, containing a user_id
+  // Dispatch a custom event from this.element, containing the user_id
   // of the user initiating the update (modifying the record updated).
-  // This is compared with the modal controller's userValue -- if they
-  // are the same, a stream render targeting this section should hide
-  // the modal.
+  // It bubbles up to window, where listeners (e.g. modal_controller's
+  // `@window`-scoped action) receive it. The user_id is compared with
+  // the modal controller's userValue -- if they are the same, a
+  // stream render targeting this section should hide the modal.
   updated(event) {
     const stream = event.target
     if (stream.target !== this.element.id) return
