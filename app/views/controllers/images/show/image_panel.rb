@@ -31,10 +31,14 @@ module Views::Controllers::Images
       # --- Heading: rotate / mirror / original / EXIF ---------------
 
       def render_controls
-        render_transform_controls if permission?(@image)
+        render_transform_controls if can_transform?
         ImageFragment(type: :original_link, image: @image)
         plain(" | ")
         ImageFragment(type: :exif_link, image_id: @image.id)
+      end
+
+      def can_transform?
+        @image.can_transform?(current_user, site_admin: in_admin_mode?)
       end
 
       def render_transform_controls

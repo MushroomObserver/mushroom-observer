@@ -1203,6 +1203,23 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.can_edit?(self, user)
   end
 
+  # #4989: broader than `can_edit?` -- also grants admins of any
+  # project an observation belongs to, regardless of owner trust.
+  def can_transform?(user, site_admin: false)
+    return true if site_admin
+    return false unless user
+
+    can_edit?(user) ||
+      observations.any? { |obs| obs_transformable?(obs, user) }
+  end
+
+  def obs_transformable?(obs, user)
+    obs.can_edit?(user) || obs.projects.any? do |project|
+      project.is_admin?(user)
+    end
+  end
+  private :obs_transformable?
+
   ##############################################################################
   #
   #  :section: Callbacks and Logging

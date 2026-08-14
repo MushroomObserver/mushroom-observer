@@ -1678,7 +1678,7 @@
   login_user: User name or Email address
   login_password: Password
   login_remember_me: Remember me at this computer.
-  login_forgot_password: I forgot my password. "Email me a new one.":/account/email_new_password
+  login_forgot_password: I forgot my password. "Email me a new one.":/account/password_reset/new
   login_no_account: I don't have an account. "Create a new account.":/account/signup
   login_having_problems: If you are having problems logging into your account, send "email to the webmaster":/admin/emails/webmaster_questions/new.
   email_new_password_help: When you complete this page and click "Send", we will send you an email with verification information.
