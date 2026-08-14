@@ -56,7 +56,11 @@ class Views::Layouts::Sidebar
     def view_template
       render_toggle
       Collapsible(id: COLLAPSE_ID) do
-        @languages.each { |lang| render_language_row(lang) }
+        @languages.each do |lang|
+          next if lang.locale == I18n.locale.to_s
+
+          render_language_row(lang)
+        end
       end
     end
 

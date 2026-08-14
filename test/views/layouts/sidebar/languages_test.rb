@@ -60,11 +60,16 @@ class Views::Layouts::Sidebar
 
       assert_html(html, "div.collapse##{Languages::COLLAPSE_ID}")
 
+      # The current locale isn't offered as a switch target -- no
+      # point linking to the locale you're already in.
+      assert_no_html(html, "#lang_drop_#{I18n.locale}_link")
+
       # Should have a POST button (not a GET <a href>, see issue
-      # #5074) for all non-beta languages, each a flat
+      # #5074) for every other non-beta language, each a flat
       # `list-group-item` (not wrapped in an extra div) so the whole
       # row stays clickable.
-      Language.where.not(beta: true).order(:order).each do |lang|
+      Language.where.not(beta: true).where.not(locale: I18n.locale.to_s).
+        order(:order).each do |lang|
         id = "lang_drop_#{lang.locale}_link"
         assert_html(html,
                     "##{Languages::COLLAPSE_ID} " \
