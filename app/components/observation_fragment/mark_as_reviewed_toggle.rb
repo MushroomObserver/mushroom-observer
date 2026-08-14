@@ -39,6 +39,13 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
                      label_position: :before,
                      wrap_class: "d-inline",
                      id: "#{@selector}_#{model.observation_id}",
+                     # The "caption" variant's id gets duplicated on
+                     # the page once its content is cloned into
+                     # lightGallery's caption snapshot -- an explicit
+                     # `for=` pointing at a duplicated id leaves label
+                     # clicks ambiguous. The checkbox is already
+                     # nested inside this label, which is sufficient.
+                     label_for: nil,
                      class: "mx-3",
                      data: checkbox_data)
     end
