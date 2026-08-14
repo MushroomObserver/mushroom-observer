@@ -78,7 +78,7 @@ class Views::Layouts::Sidebar
                     "button.list-group-item.indent##{id}" \
                     "[data-locale='#{lang.locale}']")
         assert_html(html,
-                    "form input[type='hidden']" \
+                    "##{Languages::COLLAPSE_ID} form input[type='hidden']" \
                     "[name='user_locale'][value='#{lang.locale}']")
         assert_html(html, "##{id} span.lang-flag-emoji",
                     text: Languages::FLAG_EMOJI.fetch(lang.locale))
