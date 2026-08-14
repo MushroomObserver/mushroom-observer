@@ -714,9 +714,9 @@ MushroomObserver::Application.routes.draw do
       end
     end
   end
-  # Project::Violations are computed Structs, not persisted records,
-  # so they have no ids. Route here under the Project's :id, rather
-  # than building a :project_id nested resource.
+  # Project::Violation instances are computed Structs, not persisted
+  # records, so they have no ids. Route here under the Project's :id,
+  # rather than building a :project_id nested resource.
   get("/projects/:id/violations", to: "projects/violations#index",
                                   as: "project_violations")
   match("/projects/:id/violations/resolve",

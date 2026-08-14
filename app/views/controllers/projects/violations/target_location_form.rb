@@ -8,9 +8,9 @@
 #
 # The form posts `do=add_target_location`, `obs_id=<id>`, and
 # `location_id=<id>` (the radio selection — the comma-suffix the
-# user picked) to `resolve_project_violations_path` with PUT. The
-# route only accepts PUT, not PATCH, so we override Superform's
-# default `_method` value via `method: :put` in the initializer.
+# user picked) to `resolve_project_violations_path` with PATCH
+# (Superform's default for a persisted model) — the route also
+# accepts PUT, for the legacy button_to callers in `Form`.
 #
 # Two render modes inside `.modal-body`:
 #
