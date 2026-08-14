@@ -263,6 +263,57 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show", wait: 10)
   end
 
+  # Copilot review on #5055: a failed upload used to leave the form
+  # permanently `inert` (locked by uploadAll for the in-flight window)
+  # with no way for the user to recover -- nothing ever unlocked it,
+  # since the observation form itself was never submitted. Force the
+  # failure via the same path Image::UploadsController#create already
+  # rescues (image.process_image returning false), rather than a
+  # network-level failure, so this exercises the real server error
+  # response the JS has to handle.
+  def test_form_unlocks_after_upload_failure
+    setup_image_dirs
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    click_attach_file("Coprinus_comatus.jpg")
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all)
+
+    # MiniTest's `stub` has no `any_instance` -- intercept the
+    # constructor and stub the one instance after it's built (same
+    # pattern as ObservationsControllerCreateTest#stub_new_with).
+    original_new = Image.method(:new)
+    Image.define_singleton_method(:new) do |*args, **kwargs|
+      image = original_new.call(*args, **kwargs)
+      image.define_singleton_method(:process_image) { false }
+      image
+    end
+
+    alert_text = begin
+                   accept_alert(wait: 8) do
+                     within("#observation_form") { click_commit }
+                   end
+                 ensure
+                   Image.singleton_class.remove_method(:new)
+                 end
+    assert_match(:form_observations_upload_error.t, alert_text)
+    assert_selector(".upload-status-overlay.d-none", visible: :all, wait: 8)
+
+    # Form is interactive again, not stuck inert -- confirmed the same
+    # way test_form_locks_during_in_flight_upload_window confirms the
+    # locked state: a field can take focus again.
+    execute_script(
+      "document.getElementById('observation_place_name').focus();"
+    )
+    assert_equal("observation_place_name",
+                 evaluate_script("document.activeElement.id"),
+                 "Form should accept focus again after a failed upload")
+    assert_selector("#observation_form button[type='submit']:not([disabled])")
+    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+  end
+
   # JoeCohen's review on #5055: the "MO does not recognize the name"
   # message used to appear alone, missing the "To proceed..." help
   # text telling the user to fix the spelling or click Create.

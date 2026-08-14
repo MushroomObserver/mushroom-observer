@@ -98,6 +98,15 @@ export default class extends Controller {
     // covers it explicitly rather than relying on that).
     this.form.inert = false;
     this.form.removeAttribute('aria-busy');
+    // Captured so a failed upload (handleUploadFailure) can restore
+    // the real "Create"/"Save changes" text -- uploadItem overwrites
+    // it with the uploading_text while a request is in flight, and
+    // there's otherwise no way back to what the button said before.
+    this.original_button_labels = new Map(
+      Array.from(this.submit_buttons).map(
+        (el) => [el, el.tagName === 'BUTTON' ? el.textContent : el.value]
+      )
+    );
 
     // Drag and Drop bindings on the form
     this.drop_zone.addEventListener('dragover', (e) => {
@@ -637,7 +646,44 @@ export default class extends Controller {
       }
     } else {
       console.log(`got a ${response.status}`);
+      this.handleUploadFailure(item);
     }
+  }
+
+  // uploadAll already locked the form (`inert`) and disabled the
+  // submit/remove buttons for the whole in-flight window -- normally
+  // undone by the next successful full queue drain (onUploadedCallback
+  // -> submitWhenExifReady) or a fresh controller connect after a
+  // Turbo-swapped-in form. Neither happens here, since the observation
+  // form itself was never submitted: without this, a failed upload
+  // left the page permanently locked with no way for the user to
+  // recover. Re-queues the item (uploadAll already shifted it off
+  // fileStore.items) so clicking the submit button again retries it
+  // instead of silently dropping it from the upload.
+  handleUploadFailure(item) {
+    this.hideUploadSpinner(item);
+    this.fileStore.items.unshift(item);
+
+    this.form.inert = false;
+    this.form.removeAttribute('aria-busy');
+    this.submit_buttons.forEach((element) => {
+      element.disabled = false;
+      this.setButtonLabel(element, this.original_button_labels.get(element));
+    });
+    this.removeImgTargets.forEach((elem) => {
+      elem.disabled = false;
+    });
+
+    alert(`${this.localized_text.something_went_wrong}\n\n${item.file_name}`);
+  }
+
+  // Counterpart to showUploadSpinner -- a failed item shouldn't be
+  // left looking like it's still uploading.
+  hideUploadSpinner(item) {
+    const overlay = item.dom_element?.querySelector('.upload-status-overlay');
+    if (!overlay) return;
+
+    overlay.classList.add('d-none');
   }
 
   // Upload-in-progress feedback (issue #5068 option 1): show the
