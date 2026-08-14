@@ -464,12 +464,8 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    # Explicit `format: :html`: Turbo Drive's fetch for this
-    # Turbo-submitted form carries a turbo-stream-preferring Accept
-    # header that survives this redirect, so without forcing the
-    # format, LocationsController#new would negotiate its modal-only
-    # turbo_stream branch for what needs to be a real page navigation
-    # (see #5055).
+    # Explicit `format: :html`: see the matching comment in
+    # ObservationsController::Create#redirect_to_next_page.
     redirect_to(new_location_path(back: @back,
                                   where: @herbarium.place_name,
                                   set_herbarium: @herbarium.id,

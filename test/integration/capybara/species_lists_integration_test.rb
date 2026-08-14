@@ -60,7 +60,14 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
       fill_in("species_list_notes", with: "New list notes.")
       click_commit
     end
-    assert_flash_success
+    # Edit succeeded, but the new place_name doesn't resolve to an
+    # existing Location, so the redirect to locations/new also flashes
+    # runtime_location_not_found -- combined level is warning, not
+    # success.
+    assert_flash_warning(
+      [[:runtime_species_list_edit_success, { id: spl.id }],
+       [:runtime_location_not_found, { name: new_location_reverse }]]
+    )
     assert_selector("body.locations__new")
 
     spl.reload

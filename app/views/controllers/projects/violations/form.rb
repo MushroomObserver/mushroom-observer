@@ -51,7 +51,7 @@ module Views::Controllers::Projects::Violations
     end
 
     def violations_path
-      project_violations_update_path(project_id: @project.id)
+      resolve_project_violations_path(@project.id)
     end
 
     def render_violations_table
@@ -176,7 +176,7 @@ module Views::Controllers::Projects::Violations
         type: :get,
         name: :form_violations_action_add_target_location.l,
         target: target_location_modal_project_violations_path(
-          project_id: @project.id, obs_id: obs.id
+          @project.id, obs_id: obs.id
         ),
         size: :xs,
         data: {

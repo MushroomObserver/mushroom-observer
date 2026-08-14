@@ -25,9 +25,9 @@ class Views::Layouts::Sidebar
       assert_includes(html, :app_languages.t)
 
       # Current language flag emoji — no image asset (flags are
-      # emoji text via Languages::FLAG_EMOJI, not PNGs).
+      # emoji text via LanguageSwitchButton::FLAG_EMOJI, not PNGs).
       assert_html(html, "##{Languages::TOGGLE_ID} span.lang-flag-emoji",
-                  text: Languages::FLAG_EMOJI.fetch(I18n.locale.to_s))
+                  text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch(I18n.locale.to_s))
       assert_no_html(html, "img.lang-flag")
 
       # Chevron pair — reuses Panel's established collapse-icon
@@ -60,21 +60,37 @@ class Views::Layouts::Sidebar
 
       assert_html(html, "div.collapse##{Languages::COLLAPSE_ID}")
 
-      # Should have links for all non-beta languages, each a flat
+      # The current locale isn't offered as a switch target -- no
+      # point linking to the locale you're already in.
+      assert_no_html(html, "#lang_drop_#{I18n.locale}_link")
+
+      # Should have a POST button (not a GET <a href>, see issue
+      # #5074) for every other non-beta language, each a flat
       # `list-group-item` (not wrapped in an extra div) so the whole
       # row stays clickable.
-      Language.where.not(beta: true).order(:order).each do |lang|
+      Language.where.not(beta: true).where.not(locale: I18n.locale.to_s).
+        order(:order).each do |lang|
+        id = "lang_drop_#{lang.locale}_link"
+        assert_html(html,
+                    "##{Languages::COLLAPSE_ID} " \
+                    "form[action='#{routes.switch_locale_path}']" \
+                    "[method='post']")
         # `.indent` (not a deeper `pl-*`) — same left padding as the
         # toggle's own `pl-3`, so rows line up with "Languages:"
         # rather than sitting under it.
         assert_html(html,
                     "##{Languages::COLLAPSE_ID} " \
-                    "a.list-group-item.indent#lang_drop_#{lang.locale}_link" \
+                    "button.list-group-item.indent##{id}" \
                     "[data-locale='#{lang.locale}']")
         assert_html(html,
-                    "#lang_drop_#{lang.locale}_link span.lang-flag-emoji",
-                    text: Languages::FLAG_EMOJI.fetch(lang.locale))
+                    "##{Languages::COLLAPSE_ID} form input[type='hidden']" \
+                    "[name='user_locale'][value='#{lang.locale}']")
+        assert_html(html, "##{id} span.lang-flag-emoji",
+                    text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch(lang.locale))
         assert_includes(html, lang.name)
+        # CRUDBase's auto-tooltip would just restate the visible
+        # label -- suppressed via `tooltip_target: nil`.
+        assert_no_html(html, "##{id}[data-tooltip-target]")
       end
     end
 

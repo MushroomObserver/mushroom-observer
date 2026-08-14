@@ -97,7 +97,7 @@ module Account
       if @need_location
         flash_notice(:runtime_profile_must_define.t)
         # Explicit `format: :html`: see the matching comment in
-        # HerbariaController#redirect_to_create_location.
+        # ObservationsController::Create#redirect_to_next_page.
         redirect_to(new_location_path(where: @place_name, set_user: @user.id,
                                       format: :html))
       else

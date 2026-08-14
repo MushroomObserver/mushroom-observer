@@ -61,7 +61,7 @@ module Views::Controllers::Observations::Namings
                reasons: @reasons,
                feedback: @feedback,
                show_reasons: true,
-               local: true
+               local: false
              ))
     end
 

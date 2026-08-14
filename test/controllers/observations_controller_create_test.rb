@@ -56,7 +56,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     begin
       if o_num.zero?
-        assert_response(:success)
+        assert_unprocessable
       elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
@@ -1212,6 +1212,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
   end
 
+  # Regression: validate_place_name never passed `approved:` to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name -- the flow form_observations_dubious_help tells the user
+  # to use ("Click 'Create' to use this location name") -- looped
+  # forever instead of accepting it.
+  def test_construct_observation_dubious_place_name_approved
+    where = "Bogus, Massachusetts, UAS"
+    params = {
+      naming: { name: "Unknown" },
+      location: { north: 35, south: 34, east: -117, west: -118 },
+      observation: { place_name: where, location_id: -1 }
+    }
+
+    # First submission: dubious, rejected, nothing created.
+    generic_construct_observation(params, 0, 0, 0, 0)
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, observation is created.
+    generic_construct_observation(
+      params.merge(approved_where: where), 1, 0, 0, 1
+    )
+  end
+
   def test_name_resolution
     login("rolf")
 
@@ -1645,7 +1668,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           }
         }
       )
-      assert_response(:success) # success = failure, paradoxically
+      assert_unprocessable
     end
     # Make sure image was created, but that it is unattached, and that it has
     # been kept in the @good_images array for attachment later.
@@ -1825,7 +1848,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # `Observation#valid?` passes but `#save` itself fails - exercises
@@ -1836,7 +1859,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_save_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # Regression: a request sending `project_ids` without the `[]` array
@@ -1851,7 +1874,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Observation) do
       post(:create, params: params)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # Regression: a request sending a bare scalar for the whole
@@ -1865,7 +1888,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     login("rolf")
     post(:create, params: { observation: "abc" })
 
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # Regression: sending a bare scalar for collection_number/
@@ -1891,7 +1914,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Naming) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_create_observation_fails_vote_validation
@@ -1899,7 +1922,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Vote) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # `update_good_images` flash-object-errors branch — when editing
@@ -2245,7 +2268,18 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     end
 
     assert_response(:redirect)
-    assert_flash_success
+    # "does not warn" here means no field-slip-prefix warning -- the
+    # place_name in slip_photo_params ("Right Here, Massachusetts,
+    # USA") doesn't match a fixture Location, so the redirect to
+    # new_location_path also flashes runtime_location_not_found
+    # alongside the ordinary create-success message.
+    new_obs = assigns(:observation)
+    assert_not_nil(new_obs, "Cannot find new Observation")
+    assert_flash_warning(
+      [[:runtime_observation_success, { id: new_obs.id }],
+       [:runtime_location_not_found,
+        { name: "Right Here, Massachusetts, USA" }]]
+    )
   end
 
   # Ordinary uploads never pay for the scan or get detoured: the gate
