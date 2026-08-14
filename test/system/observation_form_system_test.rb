@@ -112,6 +112,208 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                "Naming should not have reason 2 (was unchecked before submit)")
   end
 
+  # Regression coverage for "click Create 3x, get 3 Observations": on
+  # main prior to #5035, and still on this Turbo-submit branch,
+  # form-images_controller.js's `set_bindings` queries
+  # `input[type="submit"]` for the buttons to disable -- but Phlex's
+  # `Components::Button::Submit` renders a `<button type="submit">`,
+  # never an `<input>`. The selector matches nothing, so none of the
+  # controller's disabling logic (`uploadAll`'s manual `disabled = true`,
+  # the post-upload re-enable) ever touches a real element. Whether
+  # Turbo's own native submitter-disabling covers the gap depends on
+  # whether the submission reached Turbo's listener with the event still
+  # unprevented -- see the controller's `onsubmit` override, which
+  # `preventDefault`s the original click while it defers to a
+  # `requestSubmit()` a tick later.
+  def test_submit_button_disables_synchronously_on_click
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # katrina has a prior observation, so location/date default to
+    # valid values already -- no field interaction needed to make this
+    # form submittable, keeping the click itself the only variable.
+    disabled_immediately_after_click = evaluate_script(<<~JS)
+      (() => {
+        const btn = document.querySelector(
+          "#observation_form button[type='submit']"
+        );
+        btn.click();
+        return btn.disabled;
+      })()
+    JS
+
+    assert(disabled_immediately_after_click,
+           "Submit button should be disabled synchronously inside the " \
+           "click's own event handling -- before any async image-upload " \
+           "or Turbo step runs. A tardy disable leaves a window where a " \
+           "second click submits again.")
+
+    # Let the now-unblocked submission finish so state is clean going
+    # into whatever runs next.
+    assert_selector("body.observations__show", wait: 10)
+  end
+
+  def test_rapid_triple_click_creates_only_one_observation
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    obs_count = Observation.count
+
+    # Fire three clicks back-to-back in one synchronous script -- no
+    # Ruby/network round-trip between them, reproducing the worst case:
+    # a user clicking faster than any round-trip-gated disabling could
+    # ever catch. Per the DOM spec, `.click()` on an already-disabled
+    # button is a no-op (no event dispatched), so clicks 2 and 3 only
+    # matter if click 1's disabling didn't take effect in time.
+    execute_script(<<~JS)
+      const btn = document.querySelector(
+        "#observation_form button[type='submit']"
+      );
+      btn.click();
+      btn.click();
+      btn.click();
+    JS
+
+    assert_selector("body.observations__show", wait: 10)
+    assert_equal(obs_count + 1, Observation.count,
+                 "Triple-clicking Create should create exactly one " \
+                 "Observation, not one per click.")
+  end
+
+  # The submit/remove-image buttons aren't the only things that need
+  # locking during the in-flight upload/submit window -- the rest of
+  # the form (locality, date, notes, projects, naming, thumb-image
+  # radios) is serialized at the *deferred* requestSubmit(), not at
+  # click time, so anything left editable can race that submit. Drives
+  # uploadAll() directly (stubbing submitForm so this doesn't actually
+  # navigate) rather than timing a real upload window, since the lock
+  # is applied synchronously at the top of uploadAll() -- no race to
+  # land a Capybara assertion inside.
+  def test_form_locks_during_in_flight_upload_window
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    place_field = find_by_id("observation_place_name")
+    original_value = place_field.value
+
+    locked_state = evaluate_script(<<~JS)
+      (() => {
+        const form = document.getElementById('observation_form');
+        const ctrl = window.Stimulus.getControllerForElementAndIdentifier(
+          form, 'form-images'
+        );
+        ctrl.submitForm = () => {};
+        ctrl.uploadAll();
+        return {
+          inert: form.inert,
+          ariaBusy: form.getAttribute('aria-busy')
+        };
+      })()
+    JS
+    assert(locked_state["inert"],
+           "Form should be inert during the in-flight upload/submit " \
+           "window")
+    assert_equal("true", locked_state["ariaBusy"])
+
+    # `inert` blocks focus, even for a programmatic .focus() call --
+    # confirms the lock actually blocks interaction, not just that the
+    # attribute got set.
+    execute_script(
+      "document.getElementById('observation_place_name').focus();"
+    )
+    assert_not_equal("observation_place_name",
+                     evaluate_script("document.activeElement.id"),
+                     "An inert field should refuse focus")
+    assert_equal(original_value, find_by_id("observation_place_name").value)
+  end
+
+  # Coverage for issue #5068 option 1: the carousel item stays visible
+  # (with a spinner-then-checkmark overlay) through its upload instead
+  # of the old behavior, hiding each item the moment its own upload
+  # finishes -- which made the gallery visibly empty out item-by-item
+  # on submit.
+  def test_upload_status_overlay_settles_on_checkmark_without_hiding_item
+    setup_image_dirs # in general_extensions
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    click_attach_file("Coprinus_comatus.jpg")
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all)
+    # Overlay exists but is hidden before submission starts.
+    assert_selector(".upload-status-overlay.d-none", visible: :all)
+    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+
+    within("#observation_form") { click_commit }
+
+    # The overlay unhides once this item's own upload POST starts, and
+    # settles on the checkmark (not the spinner) once it succeeds --
+    # all while the carousel item itself remains visible throughout,
+    # unlike the old hide-the-whole-item behavior.
+    assert_selector(".upload-status-overlay:not(.d-none)", wait: 5)
+    assert_selector(".upload-status-check:not(.d-none)", wait: 8)
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: true)
+    assert_selector(".remove_image_button[disabled]", visible: :all)
+
+    assert_selector("body.observations__show", wait: 10)
+  end
+
+  # Copilot review on #5055: a failed upload used to leave the form
+  # permanently `inert` (locked by uploadAll for the in-flight window)
+  # with no way for the user to recover -- nothing ever unlocked it,
+  # since the observation form itself was never submitted. Force the
+  # failure via the same path Image::UploadsController#create already
+  # rescues (image.process_image returning false), rather than a
+  # network-level failure, so this exercises the real server error
+  # response the JS has to handle.
+  def test_form_unlocks_after_upload_failure
+    setup_image_dirs
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    click_attach_file("Coprinus_comatus.jpg")
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all)
+
+    # MiniTest's `stub` has no `any_instance` -- intercept the
+    # constructor and stub the one instance after it's built (same
+    # pattern as ObservationsControllerCreateTest#stub_new_with).
+    original_new = Image.method(:new)
+    Image.define_singleton_method(:new) do |*args, **kwargs|
+      image = original_new.call(*args, **kwargs)
+      image.define_singleton_method(:process_image) { false }
+      image
+    end
+
+    alert_text = begin
+                   accept_alert(wait: 8) do
+                     within("#observation_form") { click_commit }
+                   end
+                 ensure
+                   Image.singleton_class.remove_method(:new)
+                 end
+    assert_match(:form_observations_upload_error.t, alert_text)
+    assert_selector(".upload-status-overlay.d-none", visible: :all, wait: 8)
+
+    # Form is interactive again, not stuck inert -- confirmed the same
+    # way test_form_locks_during_in_flight_upload_window confirms the
+    # locked state: a field can take focus again.
+    execute_script(
+      "document.getElementById('observation_place_name').focus();"
+    )
+    assert_equal("observation_place_name",
+                 evaluate_script("document.activeElement.id"),
+                 "Form should accept focus again after a failed upload")
+    assert_selector("#observation_form button[type='submit']:not([disabled])")
+    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+  end
+
   # JoeCohen's review on #5055: the "MO does not recognize the name"
   # message used to appear alone, missing the "To proceed..." help
   # text telling the user to fix the spelling or click Create.
@@ -185,6 +387,49 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal(existing_loc.name, obs.where)
     assert_equal(existing_loc.id, obs.location_id)
     assert_not_equal(Location.last.id, obs.location_id)
+  end
+
+  # JoeCohen's review on #5055: Create hangs (Create button stays
+  # disabled, page never navigates) when Locality is a non-existent
+  # Location. `ObservationsController::Create#redirect_to_next_page`
+  # creates the Observation anyway and redirects to `new_location_path`
+  # so the user can fill in the missing Location.
+  def test_create_with_nonexistent_location_redirects_to_new_location
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    nonexistent_where = "Chez Cohen, Clackamas Co., Oregon, USA"
+    fill_in("observation_place_name", with: nonexistent_where)
+
+    # A logged-in user's place_name field defaults to their last-used
+    # Location, with a hidden observation_location_id pointing at it.
+    # Typing over the visible text doesn't clear that hidden field --
+    # explicitly click "create_locality" (same interaction as
+    # test_trying_to_create_duplicate_location_just_uses_existing_location)
+    # so the typed text is treated as free-text, not silently ignored
+    # in favor of the stale location_id.
+    find(id: "observation_place_name").trigger("click")
+    within("#observation_location_autocompleter") do
+      assert_selector(".create-button", visible: :all)
+      btn = find(".create-button", visible: :all)
+      execute_script("arguments[0].click()", btn)
+    end
+    assert_field("observation_place_name", with: nonexistent_where)
+    assert_field("observation_location_id", with: "", type: :hidden)
+
+    naming = find_by_id("observation_naming_specimen")
+    scroll_to(naming, align: :top)
+    fill_in("observation_naming_name", with: "Coprinus comatus")
+
+    within("#observation_form") { click_commit }
+
+    assert_selector("body.locations__new", wait: 6)
+    assert_field("location_display_name", with: nonexistent_where)
+    assert_flash_warning(:runtime_location_not_found, name: nonexistent_where)
+
+    new_obs = Observation.last
+    assert_equal(nonexistent_where, new_obs.where)
   end
 
   # A Locality the user entered outranks an image's GPS, and the date
@@ -408,7 +653,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   def test_post_edit_and_destroy_with_details_and_location
-    # browser = page.driver.browser
     setup_image_dirs # in general_extensions
 
     # open_create_observation_form
@@ -824,7 +1068,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # the google.maps loader resolves, so it doesn't gate `this.map`.
     # Wait for `controller.map` to be defined (drawMap to have run)
     # so the click trigger has a real map to fire on.
-    Timeout.timeout(10) do
+    #
+    # 20s, not 10s -- this waits on a real network round-trip to
+    # Google's Maps JS API, not just app-code timing. Flaked with a
+    # 10s budget (Timeout::Error) when running the full file: 16
+    # preceding heavy image-upload/Turbo tests leave the browser under
+    # enough CPU/network contention that the API load + drawMap()
+    # occasionally didn't finish in 10s, even though this test alone
+    # clears the same gate in ~3s.
+    Timeout.timeout(20) do
       loop do
         ready = evaluate_script(<<~JS)
           (() => {
@@ -877,7 +1129,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
 
     # Verify EXIF coordinates were copied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    #
+    # wait: 20, not 10 -- EXIF extraction is client-side FileReader +
+    # binary parsing (form-exif_controller.js), CPU-bound like the map
+    # readiness wait above. Flaked at 10s under full-file contention
+    # (16 preceding heavy tests), reliable alone. Same bump applied to
+    # every occurrence of this wait in this file.
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
     assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
 
     # Autocompleter should be in location_containing mode (MO location exists)
@@ -934,7 +1192,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
 
     # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
 
     # Wait for location_containing mode and server response
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -979,7 +1237,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     click_attach_file("geotagged.jpg")
 
     # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
     assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
 
     # Wait for location_containing mode
@@ -1599,9 +1857,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Wait for geolocation collapse to expand
     assert_selector("#observation_geolocation.in", wait: 10)
 
-    # Verify GPS fields are populated
-    assert_field("observation_lat", with: image_data[:lat].to_s, wait: 10)
-    assert_field("observation_lng", with: image_data[:lng].to_s, wait: 10)
+    # Verify GPS fields are populated. wait: 20, not 10 -- same
+    # contention-sensitive EXIF-extraction dependency as the GEOTAGGED_EXIF
+    # waits above.
+    assert_field("observation_lat", with: image_data[:lat].to_s, wait: 20)
+    assert_field("observation_lng", with: image_data[:lng].to_s, wait: 20)
     # We look up the alt from lat/lng, so it's not copied from the image.
     # assert_field("observation_alt", with: image_data[:alt].to_i.to_s)
   end
@@ -1740,16 +2000,23 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_show_observation_page_has_important_info
 
+  # wait: 8, not the 3s default -- a Turbo-submitted create/update on
+  # this form can involve several image uploads plus a full
+  # FullPageBase render before the flash settles; measured ~3.5s on a
+  # multi-image failure-reload flow, comfortably under 8s but over 3s.
   def assert_flash_for_images_uploaded(filename)
-    assert_flash_success(:runtime_image_uploaded, name: filename)
+    assert_flash_success(:runtime_image_uploaded, name: filename, wait: 8)
   end
 
   def assert_flash_for_destroy_observation(id)
     assert_flash_success(:runtime_destroy_observation_success, id: id)
   end
 
-  def assert_has_location_warning(regex)
-    assert_selector(".alert-warning", text: regex)
+  # wait: 8, not the 3s default -- same multi-image-upload failure-reload
+  # flow as assert_flash_for_images_uploaded above, and this assertion
+  # runs right after it on the same reloaded page.
+  def assert_has_location_warning(regex, wait: 8)
+    assert_selector(".alert-warning", text: regex, wait: wait)
   end
 
   def other_notes_id

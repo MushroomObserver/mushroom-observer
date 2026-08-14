@@ -96,7 +96,10 @@ module Account
     def maybe_update_location_and_finish
       if @need_location
         flash_notice(:runtime_profile_must_define.t)
-        redirect_to(new_location_path(where: @place_name, set_user: @user.id))
+        # Explicit `format: :html`: see the matching comment in
+        # ObservationsController::Create#redirect_to_next_page.
+        redirect_to(new_location_path(where: @place_name, set_user: @user.id,
+                                      format: :html))
       else
         flash_notice(:runtime_profile_success.t)
         redirect_to(user_path(@user.id))
