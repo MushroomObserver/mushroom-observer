@@ -92,18 +92,24 @@ class TextFieldTest < ComponentTestCase
       text_field(:name, label: '<a href="/x">Click here</a>'.html_safe)
     end
 
-    assert_html(form, "label a[href='/x'][target='_blank']", text: "Click here")
+    assert_html(form,
+                "label a[href='/x'][target='_blank']" \
+                "[rel='noopener noreferrer']",
+                text: "Click here")
   end
 
   # A translator (or a future caller) might already set target= for
   # their own reason -- don't clobber it with a second target attr.
+  # Spaces around `=` are valid HTML, so the detection has to tolerate
+  # them too, not just the no-space form.
   def test_label_link_with_existing_target_is_left_alone
     form = render_form do
       text_field(:name,
-                 label: '<a href="/x" target="_self">Click</a>'.html_safe)
+                 label: '<a href="/x" target = "_self">Click</a>'.html_safe)
     end
 
     assert_html(form, "label a[href='/x'][target='_self']", text: "Click")
+    assert_not_includes(form, "_blank")
   end
 
   # Slot tests

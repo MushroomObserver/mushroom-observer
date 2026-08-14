@@ -78,7 +78,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       rewritten = text.gsub(LINK_TAG_RE) do
         attrs = Regexp.last_match(1)
-        unless attrs.match?(/\btarget=/i)
+        unless attrs.match?(/\btarget\s*=/i)
           attrs += ' target="_blank" rel="noopener noreferrer"'
         end
         "<a#{attrs}>"
