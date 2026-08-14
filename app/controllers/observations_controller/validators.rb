@@ -129,8 +129,7 @@ module ObservationsController::Validators
       return true
     end
 
-    @dubious_where_reasons =
-      dubious_where_reasons_for(@observation.place_name(@user))
+    @dubious_where_reasons = dubious_where_reasons_for(place_name)
     return true if @dubious_where_reasons.empty?
 
     @any_errors = true
