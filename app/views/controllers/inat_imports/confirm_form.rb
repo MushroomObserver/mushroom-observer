@@ -293,9 +293,17 @@ module Views::Controllers::InatImports
 
     def render_buttons
       div(class: "mt-3") do
+        # data-turbo="false": this submit redirects to iNaturalist's
+        # OAuth authorize page (an external host). Turbo Drive's
+        # fetch-based form submission follows redirects as fetch
+        # requests, not real navigations -- a cross-origin redirect
+        # there doesn't land the browser on iNat's login page the way
+        # a plain form submit does. Opting this one button out of
+        # Turbo keeps the redirect a normal top-level navigation.
         submit(:inat_import_confirm_proceed.l, as: :button,
                                                name: "confirmed", value: "1",
-                                               disabled: nothing_to_import?)
+                                               disabled: nothing_to_import?,
+                                               data: { turbo: "false" })
         whitespace
         submit(:inat_import_confirm_go_back.l, as: :button,
                                                name: "go_back", value: "1")

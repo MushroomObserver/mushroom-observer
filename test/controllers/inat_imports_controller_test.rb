@@ -460,7 +460,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: "anything",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_flash(
       :inat_previous_import,
       count: 1,
@@ -588,7 +588,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: inat_username,
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     body = @response.body
     assert_match(:inat_import_confirm_expected_caption.l, body)
@@ -620,7 +620,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: user.inat_username,
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -790,7 +790,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -816,7 +816,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: "rolf",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -850,7 +850,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "3",
@@ -890,7 +890,7 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#requested_count", "24",
                   "Requested should be the user's literal total_results, " \
                   "not an unfiltered (broader) count")
@@ -919,7 +919,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
@@ -948,7 +948,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select(
       "#expected_count", "3",
       "Estimate should still show when only unlicensed-others request fails"
@@ -1121,7 +1121,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: "anyone", inat_ids: nil,
                    consent: 1, all: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
   end
 
@@ -1284,7 +1284,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
-    assert_response(:success, "Valid URL should proceed to confirmation")
+    assert_unprocessable
     assert_select("#expected_count", "5",
                   "Confirmation should show estimate from URL query")
   end
