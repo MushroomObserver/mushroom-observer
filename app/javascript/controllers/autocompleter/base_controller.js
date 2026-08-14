@@ -1271,7 +1271,17 @@ export default class BaseAutocompleterController extends Controller {
       return;
     }
 
+    // ACT_LIKE_SELECT types (location_containing, location_google) key
+    // their results off request_params (lat/lng), not the search
+    // string -- the server ignores the string entirely for these. This
+    // "is my new string just a longer version of the last one" check
+    // is meaningless for them and, worse, actively wrong: leftover
+    // text from a previous selection can look like a valid refinement
+    // of itself even though request_params changed underneath it,
+    // silently skipping the fetch for the new point. The request_params
+    // comparison below is the correct dedup check for these types.
     const new_val_refines_last_request =
+      !this.ACT_LIKE_SELECT &&
       !this.WHOLE_WORDS_ONLY &&
       (last_request?.length < token.length) &&
       (last_request == token.substr(0, last_request?.length));

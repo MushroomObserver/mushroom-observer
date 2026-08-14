@@ -1180,6 +1180,74 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                      "steal focus from the coordinate field")
   end
 
+  # Bug fix: after coordinates matched a location and its name got
+  # auto-filled into the locality field, correcting to a second,
+  # unrelated point silently failed to re-search at all -- the
+  # leftover locality text from the first match looked to
+  # refreshPrimer() like a valid "refinement" of itself, even though
+  # request_params (the actual lat/lng driving the search) had
+  # changed underneath it. Found via user testing during review.
+  def test_correcting_coordinates_after_a_prior_match_still_searches
+    login!(katrina)
+    # MAX_STRING_LENGTH (50 chars) truncates the search token -- the
+    # name has to be longer than that so the leftover text, once
+    # truncated by the intermediate text-based search the "location"
+    # type fallback runs, becomes a proper (shorter) prefix of itself.
+    # That's what makes refreshPrimer() misidentify it as "the same
+    # search, just refined" instead of noticing request_params changed.
+    alpha = Location.create!(
+      name: "Test Location Alpha Extended Forest Preserve Area, " \
+            "Testland Co., Testania, USA",
+      north: 40.05, south: 39.95, east: -77.30, west: -77.40,
+      user: katrina
+    )
+    beta = Location.create!(
+      name: "Test Location Beta, Testland",
+      north: 10.05, south: 9.95, east: 10.40, west: 10.30,
+      user: katrina
+    )
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    wait_for_map_outlet_ready
+
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '40.0028';
+      lngField.value = '-77.35';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    assert_field("observation_place_name", with: alpha.name, wait: 10)
+
+    # Clear, then enter coordinates for a second, unrelated point.
+    # With the bug, the leftover "Alpha" text would make
+    # refreshPrimer() bail before ever fetching for the new point.
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '';
+      lngField.value = '';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    sleep(1)
+
+    execute_script(<<~JS)
+      const latField = document.getElementById('observation_lat');
+      const lngField = document.getElementById('observation_lng');
+      latField.value = '10.0028';
+      lngField.value = '10.35';
+      latField.dispatchEvent(new Event('input', { bubbles: true }));
+      lngField.dispatchEvent(new Event('input', { bubbles: true }));
+    JS
+    assert_field("observation_place_name", with: beta.name, wait: 10)
+
+    alpha.destroy
+    beta.destroy
+  end
+
   # Editing the primary of a multi-member occurrence, adopting a
   # sibling's note value via its button enables + fills the (initially
   # disabled) textarea so it will submit.
