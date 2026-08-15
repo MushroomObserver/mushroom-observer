@@ -11,10 +11,25 @@
 # bearing: Rails' `serialize :notes, coder: YAML` (Observation#notes)
 # detects an in-place `#[]=`/`#delete` on the object this class wraps
 # by re-serializing and comparing against the original column value,
-# so API2::ObservationAPI#update_notes_fields's `obs.notes[key] = val`
-# / `obs.notes.delete(key)` -- with no separate `obs.notes = ...`
-# reassignment -- still gets picked up by `obs.save`. Never dup the
-# hash in `initialize` or `#[]=`.
+# so several callers mutate `obs.notes` directly (`obs.notes[key] =
+# val`, `.delete(key)`, `.value_merge!(...)`, `.compact_blank!`) with
+# no separate `obs.notes = ...` reassignment, relying on that mutation
+# still being picked up by a later `obs.save`/`obs.save!`:
+# API2::ObservationAPI#update_notes_fields, FieldSlipsController::
+# ObservationHandling#update_observation_fields, and
+# ObservationsController::ProjectAliases#resolve_id_by_note/
+# #resolve_other_codes_note. Never dup the hash in `initialize` or
+# `#[]=`.
+#
+# Caveat: this only holds while the underlying column already holds a
+# real Hash. `Observation#notes` returns a fresh, disconnected
+# `Observation.no_notes` (a bare `{}`, not wrapped) whenever the
+# stored value isn't a Hash (i.e. the column is nil) -- two separate
+# calls to `obs.notes` in that state return two different objects, so
+# an in-place mutation followed by `obs.save` silently loses the
+# write. Pre-existing behavior (same gap existed under this class's
+# predecessor, NormalizedHash), not something this class can fix on
+# its own since it never sees the nil case at all.
 class NotesHash
   extend Forwardable
 
@@ -24,8 +39,17 @@ class NotesHash
                  :clear, :each_key, :each_value, :transform_values, :==,
                  :value_merge!, :compact_blank!, :each_with_object, :to_unsafe_h
 
+  # Unwraps a NotesHash argument (by reference, via #to_h) rather than
+  # silently discarding it -- `hash.is_a?(Hash)` alone would be false
+  # for a NotesHash, dropping its contents into an empty {}.
   def initialize(hash = {})
-    @hash = hash.is_a?(Hash) ? hash : {}
+    @hash = if hash.is_a?(NotesHash)
+              hash.to_h
+            elsif hash.is_a?(Hash)
+              hash
+            else
+              {}
+            end
   end
 
   # Builds from a raw params value (an ActionController::Parameters,

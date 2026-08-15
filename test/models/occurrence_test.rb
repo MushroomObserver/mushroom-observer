@@ -1126,6 +1126,10 @@ class OccurrenceTest < UnitTestCase
 
     merged = occ.merged_notes
 
+    # Regression: merged_notes returning a bare Hash instead of
+    # NotesHash would pass every other test silently (they only check
+    # hash content).
+    assert_instance_of(NotesHash, merged)
     assert_equal("primary red", merged[:Cap])       # primary wins
     assert_equal("primary note", merged[:Other])
     assert_equal("wood", merged[:Substrate])        # inherited from sibling

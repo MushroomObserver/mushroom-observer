@@ -15,6 +15,20 @@ class NotesHashTest < UnitTestCase
     assert_equal({}, NotesHash.new.to_h)
   end
 
+  # Regression: `hash.is_a?(Hash)` alone is false for a NotesHash
+  # argument, which used to silently drop its contents into an empty
+  # {} instead of unwrapping it.
+  def test_initialize_unwraps_another_notes_hash_by_reference
+    original = NotesHash.new(Cap: "red")
+    wrapped = NotesHash.new(original)
+
+    assert_equal({ Cap: "red" }, wrapped.to_h)
+
+    wrapped[:Cap] = "brown"
+    assert_equal("brown", original[:Cap],
+                 "should unwrap the same underlying Hash, not a copy")
+  end
+
   def test_bracket_set_normalizes_new_key
     notes = NotesHash.new
     notes["Cap Color"] = "red"
