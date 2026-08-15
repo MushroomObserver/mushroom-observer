@@ -55,7 +55,7 @@ class LicensesControllerTest < FunctionalTestCase
     )
     assert_select(
       "button", { text: :destroy.ti, count: 0 },
-      "Show page for License in use should not have Destroy button"
+      "Show page for License in use should not have Delete button"
     )
   end
 
@@ -85,7 +85,7 @@ class LicensesControllerTest < FunctionalTestCase
     # destroy form so mobile users can actually trigger the delete).
     assert_select(
       "button", { text: :destroy.ti, count: 2 },
-      "Show page for unused License in use should have Destroy button"
+      "Show page for unused License in use should have Delete button"
     )
   end
 
