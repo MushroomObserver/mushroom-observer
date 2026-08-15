@@ -14,7 +14,7 @@ module Views::Controllers::Projects::Aliases
 
       render(Views::Controllers::Projects::Aliases::Form.new(
                @project_alias, user: @user,
-                               local: true
+                               local: false
              ))
       a(href: project_aliases_path(
         project_id: @project_alias.project_id

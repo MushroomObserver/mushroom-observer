@@ -318,7 +318,7 @@ class NamesController < ApplicationController
 
   def new
     init_create_name_form
-    render_new_form
+    render_new_view
   end
 
   def create
@@ -336,7 +336,7 @@ class NamesController < ApplicationController
     return unless find_name!
 
     init_edit_name_form
-    render_edit_form
+    render_edit_view
   end
 
   def update
@@ -373,24 +373,30 @@ class NamesController < ApplicationController
     reload_name_form
   end
 
+  # Shared by both create's and update's rescue blocks -- always
+  # reloads the New form (pre-existing behavior, unchanged here: an
+  # update failure bounces to /names/new rather than back to the
+  # Edit page it came from). Worth a closer look outside this
+  # conversion's scope.
   def reload_name_form
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-    render(phlex_new_form, location: new_name_path)
+    render_new_view_invalid
   end
 
-  def render_new_form
-    render(phlex_new_form)
+  def render_new_view(status: :ok, **render_opts)
+    render(phlex_new_form, status: status, **render_opts)
   end
 
-  def render_edit_form
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Names::Edit.new(
              name: @name, user: @user,
              name_string: @name_string,
              misspelling: @misspelling,
              correct_spelling: @correct_spelling
-           ))
+           ),
+           status: status, **render_opts)
   end
 
   def phlex_new_form
@@ -473,7 +479,8 @@ class NamesController < ApplicationController
           name_id: @name.id,
           # Auricularia Bull. [#17132]
           new_name_with_icn_id: "#{@parse.search_name} " \
-                                "[##{params[:name][:icn_id]}]"
+                                "[##{params[:name][:icn_id]}]",
+          format: :html
         )
       )
       return
@@ -723,7 +730,8 @@ class NamesController < ApplicationController
       redirect_to_show_name
     else
       redirect_to(new_admin_emails_merge_requests_path(
-                    type: :Name, old_id: @name.id, new_id: new_name.id
+                    type: :Name, old_id: @name.id, new_id: new_name.id,
+                    format: :html
                   ))
     end
   end

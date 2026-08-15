@@ -113,6 +113,6 @@ module ProjectsController::Creation
     @project_dates_any = true
     @raw_place_name = where
     image_ivars
-    render_new_form
+    render_new_view_invalid
   end
 end

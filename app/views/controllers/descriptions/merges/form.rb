@@ -9,7 +9,7 @@ module Views::Controllers::Descriptions::Merges
     prop :description, ::Description
     prop :user, ::User
 
-    def initialize(description, user:)
+    def initialize(description, user:, **)
       # Computed from the local `description`/`user` params, not
       # `@description`/`merges` (which read the `@description` prop)
       # -- prop assignment hasn't happened yet at this point in
@@ -23,7 +23,7 @@ module Views::Controllers::Descriptions::Merges
       # auto-derived `description_merge_form` would all rename to a
       # less-recognizable string.
       super(form_object, description: description, user: user,
-                         id: "merge_descriptions_form")
+                         id: "merge_descriptions_form", **)
     end
 
     def view_template
