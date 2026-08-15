@@ -398,36 +398,6 @@ class ProjectsControllerTest < FunctionalTestCase
     )
   end
 
-  # ProjectsController::Creation#cleanup_failed_project_creation is a
-  # separate re-render path from #create's own early guard clauses
-  # (title/date checks) above -- it only fires once creation has
-  # actually started (the members/admin UserGroups get created) and
-  # then fails on the location lookup. It's a plain render_new_view
-  # (not render_new_view_invalid) call site that was overlooked when
-  # the Form got local: false in this same PR -- new-in-this-PR, since
-  # a plain 200 re-render was harmless before the form submitted via
-  # Turbo. This confirms the fix.
-  def test_create_project_with_unrecognized_location
-    title = "Project In Nowhere"
-    params = build_params(title, "summary",
-                          place_name: "Nowhere Land, Not A Real Country")
-
-    assert_no_difference("Project.count") do
-      post_requires_login(:create, params)
-    end
-
-    assert_flash_warning(
-      on_fail: "Missing flash warning for an unrecognized location"
-    )
-    assert_nil(UserGroup.find_by(name: title),
-               "Should clean up the members group on failed creation")
-    assert_nil(UserGroup.find_by(name: "#{title}.admin"),
-               "Should clean up the admin group on failed creation")
-    assert_form_action(action: :create)
-    assert_unprocessable
-    assert_select("form[data-turbo='true']")
-  end
-
   def test_add_project_existing
     project = projects(:eol_project)
     add_project_helper(project.title,
@@ -659,6 +629,15 @@ class ProjectsControllerTest < FunctionalTestCase
   # reloads with the entered title/place_name intact and an
   # approved_where hidden field, matching every other model with this
   # confirm flow.
+  # Also covers ProjectsController::Creation#cleanup_failed_project_creation
+  # as a Turbo re-render path: it's a separate call site from #create's
+  # own early guard clauses (title/date checks), only reached once
+  # creation has actually started (the members/admin UserGroups get
+  # created) and then fails on the location lookup. It needs
+  # render_new_view_invalid (422 + the form still carrying
+  # data-turbo="true"), not a plain 200 -- a same-URL 200 re-render on
+  # a Turbo-submitted form hangs the browser (see
+  # .claude/rules/turbo_submit_forms.md).
   def test_create_project_dubious_place_name_preserves_entries_and_confirms
     where = "Old Rd, Ohio, USA"
     title = "Dubious Location Project"
@@ -668,6 +647,8 @@ class ProjectsControllerTest < FunctionalTestCase
 
     post(:create, params: params)
     assert_nil(Project.find_by(title: title))
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_select("#dubious_location_messages")
     assert_select("input[name='project[title]'][value=?]", title)
     assert_select("input[name='project[place_name]'][value=?]", where)
