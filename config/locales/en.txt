@@ -2879,6 +2879,7 @@
   inat_leading_id: Leading ID as of
   inat_corrected_spelling: (corrected spelling)
   inat_snapshot_caption: iNat imported data
+  inat_geoprivacy_private: Private
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
