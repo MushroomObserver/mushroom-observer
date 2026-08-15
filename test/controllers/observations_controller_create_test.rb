@@ -2302,6 +2302,56 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_no_match(/field_slip_extract/, @response.location.to_s)
   end
 
+  # Reported at the 2026 SMHF event: confirming a flagged free-text
+  # locality looped forever. The validator gate (dubious_reasons_for
+  # approved:) was fine -- the RE-RENDERED form never embedded
+  # approved_where, because nothing assigned @place_name on the
+  # dubious reload, so the resubmit never carried the approval.
+  def test_create_dubious_place_rerender_embeds_approved_where
+    login("rolf")
+    where = "Sunshine Foray/ Dunton Medows"
+
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(place_name: where)
+    post(:create, params: params)
+
+    assert_select("form#observation_form[action*=?]", "approved_where",
+                  true, "the reloaded form must carry the approval")
+
+    params[:approved_where] = where
+    post(:create, params: params)
+
+    obs = assigns(:observation)
+
+    assert_predicate(obs, :persisted?,
+                     "the approved resubmit must go through")
+    assert_equal(where, obs.where)
+  end
+
+  # The other half of the sticky-garbage report: an EXISTING slip code
+  # never got current_user set, which nil-guarded away the location
+  # cascade's user-dependent steps -- so after one free-text
+  # observation, the form kept defaulting to that free text instead of
+  # the user's last real location.
+  def test_new_with_existing_slip_code_prefers_last_located_observation
+    located = rolf.observations.where.not(location_id: nil).
+              order(created_at: :desc, id: :desc).first
+
+    assert_not_nil(located, "premise: rolf has a located observation")
+
+    Observation.create!(user: rolf, when: Time.zone.today,
+                        where: "Sunshine Foray/ Dunton Medows")
+    slip = FieldSlip.find_or_create_by_code("OPEN-0930", rolf)
+    slip.update_columns(project_id: nil)
+
+    login("rolf")
+    get(:new, params: { field_code: "OPEN-0930" })
+
+    assert_equal(located.location, assigns(:observation).location,
+                 "the cascade's last-located step must win over " \
+                 "the previous observation's free text")
+  end
+
   private
 
   def make_slip_project_admin(user)

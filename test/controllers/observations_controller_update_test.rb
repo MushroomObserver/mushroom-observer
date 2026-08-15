@@ -778,6 +778,22 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # The render half of the approval round-trip (see the companion
+  # validator test above): the dubious reload must embed approved_where
+  # in the form action, or the browser never sends the approval and
+  # the confirmation loops forever (reported at the 2026 SMHF event).
+  def test_update_dubious_place_rerender_embeds_approved_where
+    generic_update_observation(
+      { location: { north: 35, south: 34, east: -117, west: -118 },
+        observation: { place_name: "Mt. Molehill, Iowa, USA",
+                       location_id: -1 } },
+      0
+    )
+
+    assert_select("form#observation_form[action*=?]", "approved_where",
+                  true, "the reloaded form must carry the approval")
+  end
+
   # --------------------------------------------------------------------
   #  Test notes with template
   # --------------------------------------------------------------------
