@@ -2352,6 +2352,43 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                  "the previous observation's free text")
   end
 
+  # The reported path had NO field code: a plain new-observation form
+  # (slip arrives as a photo later) defaulted Locality from the
+  # previous observation even when that was dubious free text -- so
+  # one unrecognized slip location re-prompted the confirmation on
+  # every following create. A dubious free-text locality is never
+  # carried forward; the last located observation is used instead.
+  def test_new_locality_default_skips_dubious_free_text
+    located = rolf.observations.where.not(location_id: nil).
+              order(created_at: :desc, id: :desc).first
+
+    assert_not_nil(located, "premise: rolf has a located observation")
+
+    Observation.create!(user: rolf, when: Time.zone.today,
+                        where: "Sunshine Foray/ Dunton Medows")
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(located.location, assigns(:observation).location)
+  end
+
+  # Clean free text (a well-formed name MO just does not know) is a
+  # legitimate repeated locality and still carries forward.
+  def test_new_locality_default_keeps_clean_free_text
+    where = "Somewhere Nice, Massachusetts, USA"
+
+    assert_not(Location.dubious_name?(where, false, false),
+               "premise: the name is clean, just unknown")
+
+    Observation.create!(user: rolf, when: Time.zone.today, where: where)
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(where, assigns(:observation).where)
+  end
+
   private
 
   def make_slip_project_admin(user)
