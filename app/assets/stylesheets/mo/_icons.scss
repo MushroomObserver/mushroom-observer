@@ -170,10 +170,10 @@
 
 // Icon-only buttons: only the glyph (via .mo-icon's fill: currentColor
 // tracking .btn-link's :hover color) should change on hover, not the
-// button background. Excludes .dropdown-item -- those need their
-// normal Bootstrap hover-highlight background, which is the whole
-// point of that rule.
-.btn-link:not(.dropdown-item) {
+// button background. Excludes .dropdown-item and .list-group-item --
+// those need their normal Bootstrap hover-highlight background,
+// which is the whole point of those rules.
+.btn-link:not(.dropdown-item):not(.list-group-item) {
   &:hover,
   &:focus,
   &:active,
@@ -246,6 +246,19 @@ a:not(.btn):not(.inline-icon-link) > .mo-icon,
 .spinner-right {
   line-height: 1.1 !important;
   animation: spin-r 1s infinite linear;
+}
+
+// The class only animates; the visible glyph is normally an Icon
+// inside. A JS-created spinner can't reach the SVG sprite (its URL is
+// a digested asset), so an EMPTY .spinner-right draws its own ring.
+.spinner-right:empty {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
 }
 
 @keyframes spin-r {

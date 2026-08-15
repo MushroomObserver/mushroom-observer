@@ -34,10 +34,10 @@ module Observations
         }
       }
       put_requires_login(:update, params)
-      # Action is `:update` (body class would be `images__edit`); the
-      # update success branch does `render("images/show", ...)`. Pin a
-      # stable element from the show page instead.
-      assert_select("#image_votes_container")
+      # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+      # Drive, so the update success branch redirects to the image's
+      # show page rather than rendering it in place.
+      assert_redirected_to(image_path(image.id))
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)
@@ -165,6 +165,8 @@ module Observations
 
       assert_page_title("Edit Image",
                         "It should return to form if image save fails")
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Appear on both observations/images/new and images/edit
@@ -300,6 +302,8 @@ module Observations
       post(:attach, params: params)
 
       assert_flash(:runtime_image_reuse_invalid_id, id: params[:img_id])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_reuse_image_strip_gps_failed

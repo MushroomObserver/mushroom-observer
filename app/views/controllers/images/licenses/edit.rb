@@ -11,7 +11,8 @@ module Views::Controllers::Images
         add_page_title(:image_updater_title.t(user: @user.login))
         container_class(:wide)
 
-        render(Form.new(@form, action: images_license_updater_path))
+        render(Form.new(@form, action: images_license_updater_path,
+                               local: false))
       end
     end
   end

@@ -6,7 +6,7 @@ module Account
 
     def edit
       load_user_licenses
-      render_edit
+      render_edit_view
     end
 
     def update
@@ -18,7 +18,7 @@ module Account
       if prefs_changed_successfully
         redirect_to(action: :edit)
       else
-        render_edit # render to get the errors to display
+        render_edit_view_invalid # render to get the errors to display
       end
     end
 
@@ -66,11 +66,11 @@ module Account
 
     private
 
-    def render_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Preferences::Edit.new(
                user: @user, licenses: @licenses,
                languages: Language.all.to_a
-             ))
+             ), status: status, **render_opts)
     end
 
     def render_no_email(note)

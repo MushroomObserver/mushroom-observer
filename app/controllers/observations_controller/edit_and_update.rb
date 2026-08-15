@@ -264,14 +264,20 @@ module ObservationsController::EditAndUpdate
     @exif_data    ||= get_exif_data(@good_images)
     @location     ||= @observation.location
     @field_code     = params[:field_code]
+    # See init_location_var_for_reload: the approved_where round-trip
+    # needs @place_name set on a dubious-name re-render.
+    if @dubious_where_reasons.present?
+      @place_name = @observation.place_name(@user)
+    end
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render_edit_view
+    render_edit_view_invalid
   end
 
-  def render_edit_view
-    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs))
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs),
+           status: status, **render_opts)
   end
 
   def edit_view_attrs
@@ -283,7 +289,8 @@ module ObservationsController::EditAndUpdate
   def edit_view_obs_attrs
     {
       observation: @observation, user: @user, location: @location,
-      dubious_where_reasons: @dubious_where_reasons
+      dubious_where_reasons: @dubious_where_reasons,
+      place_name: @place_name
     }
   end
 
@@ -311,8 +318,14 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
+      flash_warning(
+        :runtime_location_not_found.t(name: @observation.place_name(@user))
+      )
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @observation.place_name(@user),
-                                    set_observation: @observation.id))
+                                    set_observation: @observation.id,
+                                    format: :html))
     else
       return if redirected_to_new_photo_slip_review?
 

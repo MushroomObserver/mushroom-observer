@@ -60,7 +60,21 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
           class: @data[:img_class],
           data: @data[:img_data]
         )
+        render_upload_status_overlay if @upload
       end
+    end
+  end
+
+  # Hidden until the image-upload JS shows it (issue #5068 option 1):
+  # a spinner while this item's own upload POST is in flight, swapped
+  # to a checkmark on success. Both icons are pre-rendered server-side
+  # and toggled by class -- JS only flips visibility, it doesn't
+  # construct icon markup (the sprite URL is build-hashed).
+  def render_upload_status_overlay
+    div(class: "upload-status-overlay ab-fab d-none",
+        data: { form_images_target: "uploadStatus" }) do
+      Icon(type: :spinner, class: "spinner-right upload-status-spinner")
+      Icon(type: :check, class: "upload-status-check d-none")
     end
   end
 

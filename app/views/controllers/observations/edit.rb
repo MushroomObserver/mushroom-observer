@@ -14,6 +14,7 @@ module Views::Controllers::Observations
     prop :exif_data, Hash, default: -> { {} }
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
+    prop :place_name, _Nilable(String), default: nil
     prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil, &TO_ID_ARRAY
@@ -33,12 +34,14 @@ module Views::Controllers::Observations
       render(Form.new(
                @observation,
                mode: :update,
+               local: false,
                user: @user,
                location: @location,
                good_images: @good_images,
                sibling_images: @sibling_images,
                exif_data: @exif_data,
                dubious_where_reasons: @dubious_where_reasons,
+               place_name: @place_name,
                projects: @projects,
                submitted_project_ids: @submitted_project_ids,
                lists: @lists,

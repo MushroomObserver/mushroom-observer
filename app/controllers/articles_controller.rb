@@ -76,14 +76,14 @@ class ArticlesController < ApplicationController
 
   def new
     @article = Article.new
-    render(Views::Controllers::Articles::New.new(article: @article))
+    render_new_view
   end
 
   def edit
     @article = find_or_goto_index(Article, params[:id])
     return unless @article
 
-    render(Views::Controllers::Articles::Edit.new(article: @article))
+    render_edit_view
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -94,7 +94,7 @@ class ArticlesController < ApplicationController
       body: params.dig(:article, :body),
       user_id: @user.id
     )
-    return render_new_view if flash_missing_title?
+    return render_new_view_invalid if flash_missing_title?
 
     @article.save
     redirect_to(article_path(@article.id))
@@ -102,7 +102,7 @@ class ArticlesController < ApplicationController
 
   def update
     @article = Article.find(params[:id])
-    return render_edit_view if flash_missing_title?
+    return render_edit_view_invalid if flash_missing_title?
 
     @article.title = params.dig(:article, :title)
     @article.body = params.dig(:article, :body)
@@ -113,12 +113,14 @@ class ArticlesController < ApplicationController
 
   private
 
-  def render_new_view
-    render(Views::Controllers::Articles::New.new(article: @article))
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Articles::New.new(article: @article),
+           status: status, **render_opts)
   end
 
-  def render_edit_view
-    render(Views::Controllers::Articles::Edit.new(article: @article))
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Articles::Edit.new(article: @article),
+           status: status, **render_opts)
   end
 
   public

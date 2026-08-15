@@ -254,7 +254,7 @@ export default class extends Controller {
     // Update lat/lng inputs directly
     if (["observation", "hybrid"].includes(this.map_type) &&
         this.hasLatInputTarget && !viewport && !extents) {
-      if (center != undefined && center?.lat) {
+      if (center != undefined && Number.isFinite(center?.lat)) {
         this.updateLatLngInputs(center)
         points = [center]
       }
@@ -269,7 +269,7 @@ export default class extends Controller {
       type = "rectangle"
     } else if (this.hasLatInputTarget) {
       // Fallback for non-map geocode with lat/lng
-      if (center != undefined && center?.lat) {
+      if (center != undefined && Number.isFinite(center?.lat)) {
         this.updateLatLngInputs(center)
         points = [center]
       }
@@ -401,7 +401,7 @@ export default class extends Controller {
         lng = parseFloat(origLng)
       }
     }
-    if (!lat || !lng)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng))
       return false
     if (lat > 90 || lat < -90 || lng > 180 || lng < -180)
       return false
@@ -409,6 +409,32 @@ export default class extends Controller {
 
     if (update) this.updateLatLngInputs(location)
     return location
+  }
+
+  // Handles pasting a full "lat, lng" pair (e.g. iNat's copy format,
+  // "40.0028333333, -77.3633033333") into either coordinate field.
+  // Only intercepts the paste when the clipboard text parses as a
+  // complete pair on its own -- an ordinary single-value paste (just a
+  // latitude, say) fails to convert and falls through to the browser's
+  // default paste.
+  splitPastedCoordinates(event) {
+    if (!this.hasLatInputTarget || !this.hasLngInputTarget) return
+
+    const pasted = (event.clipboardData || window.clipboardData)?.
+      getData("text")
+    if (!pasted) return
+
+    let coords
+    try {
+      coords = convert(pasted)
+    } catch {
+      return
+    }
+
+    event.preventDefault()
+    this.latInputTarget.value = this.roundOff(coords.decimalLatitude)
+    this.lngInputTarget.value = this.roundOff(coords.decimalLongitude)
+    this.latInputTarget.dispatchEvent(new Event("input", { bubbles: true }))
   }
 
   // For reference:
@@ -432,7 +458,7 @@ export default class extends Controller {
   sendPointChanged({ lat, lng }) {
     this.clearAutocompleterSwapBuffer()
 
-    if (lat && lng) {
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
       this.autocomplete_buffer = setTimeout(() => {
         if (this.hasAutocompleterLocationOutlet) {
           this.autocompleterLocationOutlet.swap({

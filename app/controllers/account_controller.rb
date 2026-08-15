@@ -10,26 +10,9 @@
 #   P = prefetching allowed
 #
 #  ==== Sign-up
-#  signup::             <tt>(. V P)</tt> Create new account.
-#  verify::             <tt>(. V .)</tt> Verify new account.
-#  reverify::           <tt>(. V .)</tt> If verify fails(?)
-#  send_verify::        <tt>(. . .)</tt> Callback used by reverify.
+#  new::                <tt>(. V P)</tt> New-account form.
+#  create::             <tt>(. V P)</tt> Create new account.
 #  welcome::            <tt>(. V .)</tt> Welcome page after signup and verify.
-#
-#  ==== Login
-#  login::              <tt>(. V P)</tt>
-#  logout_user::        <tt>(. V .)</tt>
-#  email_new_password:: <tt>(. V .)</tt>
-#
-#  ==== Preferences
-#  prefs::              <tt>(L V P)</tt>
-#  profile::            <tt>(L V P)</tt>
-#  remove_image::       <tt>(L . .)</tt>
-#  no_email::           <tt>(L V .)</tt>
-#  api_keys::           <tt>(L V .)</tt>
-#
-#  ==== Testing
-#  test_autologin::     <tt>(L V .)</tt>
 #
 ################################################################################
 class AccountController < ApplicationController
@@ -47,7 +30,7 @@ class AccountController < ApplicationController
 
   def new
     @new_user = User.new(theme: MO.default_theme)
-    render_new_phlex
+    render_new_view
   end
 
   def create
@@ -58,7 +41,7 @@ class AccountController < ApplicationController
     return abort_signup_with_client_error if evil_signup_credentials?
 
     if make_sure_theme_is_valid!
-      return render_new_phlex unless validate_and_save_new_user!
+      return render_new_view_invalid unless validate_and_save_new_user!
 
       UserGroup.create_user(@new_user)
       flash_notice("#{:runtime_signup_success.tp} #{:email_spam_notice.tp}")
@@ -78,8 +61,9 @@ class AccountController < ApplicationController
 
   private #################################################
 
-  def render_new_phlex
-    render(Views::Controllers::Account::New.new(new_user: @new_user))
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Account::New.new(new_user: @new_user),
+           status: status, **render_opts)
   end
 
   def initialize_new_user

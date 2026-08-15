@@ -11,7 +11,7 @@ module Admin
         @email = @user.email if @user
 
         respond_to do |format|
-          format.html { render_new_page }
+          format.html { render_new_view }
           format.turbo_stream do
             render(Components::Modal.new(
                      type: :turbo_form,
@@ -58,23 +58,23 @@ module Admin
       def handle_invalid_email
         flash_error(:runtime_ask_webmaster_need_address.t)
         @email_error = true
-        render_new_page
+        render_new_view_invalid
       end
 
       def handle_missing_content
         flash_error(:runtime_ask_webmaster_need_content.t)
-        render_new_page
+        render_new_view_invalid
       end
 
       def handle_spam
         flash_error(:runtime_ask_webmaster_antispam.t)
-        render_new_page
+        render_new_view_invalid
       end
 
-      def render_new_page
+      def render_new_view(status: :ok, **render_opts)
         render(Views::Controllers::Admin::Emails::WebmasterQuestions::New.new(
                  email: @email, message: @message, email_error: @email_error
-               ))
+               ), status: status, **render_opts)
       end
 
       def send_email_and_redirect

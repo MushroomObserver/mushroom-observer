@@ -28,7 +28,7 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_form
-      render(Form.new(@herbarium_record, back: @back))
+      render(Form.new(@herbarium_record, back: @back, local: false))
     end
 
     def render_observation_boxes

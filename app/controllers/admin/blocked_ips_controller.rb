@@ -15,7 +15,15 @@ module Admin
       render_edit_view
     end
 
-    # Render the page after an update
+    # Render the page after an update. Always re-renders this same
+    # page (never redirects) -- but the response is targeted at a
+    # <turbo-frame>, not a full Drive navigation, so the "non-2xx or
+    # silent no-op" rule that applies to Drive-level form submissions
+    # doesn't apply here: Turbo Frames just look for a matching
+    # <turbo-frame id="..."> in the response body to swap in,
+    # regardless of status. Stays a plain 200 (confirmed by the
+    # existing test_turbo_frame_responses test, which asserts
+    # :success on both the add and remove flows).
     def update
       strip_params!
       process_blocked_ips_commands
@@ -39,14 +47,14 @@ module Admin
       ip
     end
 
-    def render_edit_view
+    def render_edit_view(status: :ok, **render_opts)
       preload_stats = stats_for_preload
       render(Views::Controllers::Admin::BlockedIps::Edit.new(
                ip: @ip, stats: @stats,
                okay: @okay, blocked: @blocked,
                users_by_id: preloaded_users_for(preload_stats),
                api_keys_by_str: preloaded_api_keys_for(preload_stats)
-             ))
+             ), status: status, **render_opts)
     end
 
     # The right-column views render at most 51 entries from `@stats`:

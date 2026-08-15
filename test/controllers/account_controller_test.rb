@@ -70,41 +70,42 @@ class AccountControllerTest < FunctionalTestCase
     # Missing password.
     post(:create, params: { new_user: params.except(:password) })
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
     post(:create,
          params: { new_user: params.merge(password_confirmation: "wrong") })
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
     post(:create, params: { new_user: params.except(:email) })
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert(assigns("new_user").errors[:email].any?,
            "Errors: #{assigns("new_user").dump_errors}")
 
     # Invalid email
     post(:create, params: { new_user: params.merge(email: "wrong") })
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert(assigns("new_user").errors[:email].any?,
            "Errors: #{assigns("new_user").dump_errors}")
 
     # Email confirmation blank.
     post(:create, params: { new_user: params.except(:email_confirmation) })
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert(assigns("new_user").errors[:email].any?)
 
     # Email doesn't match.
     post(:create,
          params: { new_user: params.merge(email_confirmation: "wrong") })
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert(assigns("new_user").errors[:email].any?)
 
     # Make sure correct request would have succeeded!

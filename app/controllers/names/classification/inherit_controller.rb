@@ -11,7 +11,7 @@ module Names::Classification
       return unless find_name!
       return unless make_sure_name_is_at_or_above_genus!(@name)
 
-      render_new
+      render_new_view
     end
 
     # POST callback
@@ -27,7 +27,7 @@ module Names::Classification
       )
       unless parent && make_sure_parent_has_classification!(parent) &&
              make_sure_parent_higher_rank!(parent)
-        render_new and return
+        render_new_view_invalid and return
       end
 
       @name.inherit_classification(parent)
@@ -36,14 +36,16 @@ module Names::Classification
 
     private
 
-    def render_new
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Names::Classification::Inherit::New.new(
                name: @name,
                parent_text_name: @parent_text_name,
                candidates: @candidates,
                message: @message
              ),
-             location: form_to_inherit_classification_of_name_path)
+             status: status,
+             location: form_to_inherit_classification_of_name_path,
+             **render_opts)
     end
 
     include Names::Classification::SharedPrivateMethods

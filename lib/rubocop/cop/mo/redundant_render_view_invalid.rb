@@ -47,6 +47,7 @@ module RuboCop
 
           add_offense(node, message: format(MSG, name: node.method_name))
         end
+        alias on_defs on_def
       end
     end
   end

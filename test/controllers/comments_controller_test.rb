@@ -348,14 +348,18 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_update_comment_with_invalid_params_re_renders_form
     # `comment_updated?` `!@comment.save` branch + reload_form
-    # HTML path.
+    # HTML path. Regression: reload_form used to always render the
+    # New template regardless of which action called it -- assert
+    # the Edit page specifically, not just "a comment form somewhere".
     comment = comments(:minimal_unknown_obs_comment_1)
     params = { id: comment.id,
                comment: { summary: "", comment: "Body" } }
     login("rolf")
     put(:update, params: params)
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("body.comments__edit")
     assert_select("form#comment_form")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_create_comment_turbo_invalid_reloads_modal_form
@@ -366,6 +370,23 @@ class CommentsControllerTest < FunctionalTestCase
     login
     post(:create, params: params, format: :turbo_stream)
     assert_response(:success)
+    assert_select("turbo-stream[action='replace'][target='comment_form']")
+    assert_flash_error
+  end
+
+  def test_update_comment_turbo_invalid_reloads_modal_form
+    # `reload_form` turbo_stream branch → `reload_modal_form`, update
+    # side -- symmetric with the create case above.
+    comment = comments(:minimal_unknown_obs_comment_1)
+    params = { id: comment.id,
+               comment: { summary: "", comment: "Body" } }
+    login("rolf")
+    put(:update, params: params, format: :turbo_stream)
+    assert_response(:success)
+    assert_select(
+      "turbo-stream[action='replace'][target='comment_#{comment.id}_form']"
+    )
+    assert_flash_error
   end
 
   def test_create_comment_with_invalid_params_re_renders_form
@@ -376,7 +397,7 @@ class CommentsControllerTest < FunctionalTestCase
                comment: { summary: "", comment: "Body" } }
     login
     post(:create, params: params)
-    assert_response(:success)
+    assert_unprocessable
     assert_select("body.comments__new")
     assert_select("form#comment_form")
   end

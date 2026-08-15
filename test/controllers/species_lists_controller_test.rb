@@ -486,7 +486,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_nil(spl.location_id,
                "Test scenario requires unresolved location_id")
     assert_redirected_to(new_location_path(where: novel,
-                                           set_species_list: spl.id))
+                                           set_species_list: spl.id,
+                                           format: :html))
+    assert_flash_warning
   end
 
   # Test constructing species_lists in various ways.

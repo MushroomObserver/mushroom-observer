@@ -120,6 +120,35 @@ class InatObsTest < UnitTestCase
   end
   # rubocop:enable Style/NumericLiterals
 
+  def test_snapshot_place_private_geoprivacy
+    mock_inat_obs = mock_observation("somion_unicolor")
+    place_guess = mock_inat_obs[:place_guess]
+    mock_inat_obs[:geoprivacy] = "private"
+
+    assert_equal(
+      :inat_geoprivacy_private.l, mock_inat_obs.send(:snapshot_place),
+      "Snapshot Place should read 'Private' when iNat geoprivacy is private"
+    )
+    assert_includes(
+      mock_inat_obs.snapshot,
+      "#{:place.l.upcase_first}: #{:inat_geoprivacy_private.l}",
+      "Notes snapshot should show 'Private' Place when geoprivacy is private"
+    )
+    assert_equal(
+      place_guess, mock_inat_obs[:place_guess],
+      "geoprivacy handling should not mutate the underlying place_guess"
+    )
+  end
+
+  def test_snapshot_place_non_private_geoprivacy
+    mock_inat_obs = mock_observation("distantes")
+
+    assert_equal(
+      mock_inat_obs[:place_guess], mock_inat_obs.send(:snapshot_place),
+      "Snapshot Place should show iNat's place_guess when not private"
+    )
+  end
+
   def test_when
     fname = "somion_unicolor"
     mock_inat_obs = mock_observation(fname)

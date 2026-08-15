@@ -18,7 +18,7 @@ module Views::Controllers::Names::Descriptions
                       ))
 
       render(Views::Controllers::Descriptions::Form.new(
-               @description, licenses: @licenses, user: @user
+               @description, licenses: @licenses, user: @user, local: false
              ))
     end
   end

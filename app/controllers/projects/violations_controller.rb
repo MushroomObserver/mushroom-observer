@@ -44,7 +44,7 @@ module Projects
     # redirecting; the trigger is a turbo-stream fetch, so the
     # redirect-to-index fallback from `find_project!` doesn't fit.
     def target_location_modal
-      project = Project.find_by(id: params[:project_id])
+      project = Project.find_by(id: params[:id])
       obs = Observation.safe_find(params[:obs_id])
       return head(:not_found) unless project && obs && project.is_admin?(@user)
 
@@ -67,12 +67,12 @@ module Projects
     end
 
     def update
-      @project = find_or_goto_index(Project, params[:project_id])
+      @project = find_or_goto_index(Project, params[:id])
       return unless @project
 
       dispatch_action
 
-      redirect_to(project_violations_path(project_id: @project.id))
+      redirect_to(project_violations_path(@project.id))
     end
 
     private
@@ -91,8 +91,8 @@ module Projects
     # returns nil rather than raising, so the `||` fallback fires
     # cleanly on a missing id.
     def find_project!
-      @project = Project.violations_includes.find_by(id: params[:project_id]) ||
-                 flash_error_and_goto_index(Project, params[:project_id])
+      @project = Project.violations_includes.find_by(id: params[:id]) ||
+                 flash_error_and_goto_index(Project, params[:id])
     end
 
     # All action params (`do`, `obs_id`, `location_id`) are namespaced

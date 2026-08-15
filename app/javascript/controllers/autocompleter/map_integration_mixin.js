@@ -166,6 +166,10 @@ export const MapIntegrationMixin = {
       this.deactivateMapOutlet();
       // primer is not based on input, so go ahead and request from server.
       this.focused = true; // so it will draw the pulldown immediately
+      // This redraw is programmatic, not the user typing here -- don't
+      // let it steal keyboard focus. Cleared by the next real
+      // interaction with this field (ourFocus/ourChange).
+      this.silentRedraw = true;
       this.refreshPrimer(); // directly refresh the primer w/request_params
       this.element.classList.add('constrained');
       this.element.classList.remove('create');

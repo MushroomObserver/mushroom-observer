@@ -19,7 +19,8 @@ module Views::Controllers::Account::Login
       render(Form.new(
                FormObject::Login.new(login: @login, remember_me: @remember),
                action: account_login_path,
-               id: "account_login_form"
+               id: "account_login_form",
+               local: false
              ))
       render_create_account_section
       render_why_section
