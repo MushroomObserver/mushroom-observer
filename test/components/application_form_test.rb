@@ -93,6 +93,38 @@ class ApplicationFormTest < ComponentTestCase
     assert_no_html(form, "form[data-turbo]")
   end
 
+  # No `_method` hidden on a plain POST form. Superform emits one
+  # unconditionally, and a stray `_method=post` turns a Turbo PATCH
+  # submission into a bare POST when a second `_method` joins it --
+  # turbo-rails reads only the first, then strips them all (this
+  # looped the field-slip review page back onto itself).
+  def test_post_form_emits_no_method_override_field
+    form = ApplicationFormFieldTestHelpers::TestFormClass.new(
+      CollectionNumber.new, action: "/test_form_path"
+    )
+    form.field_block = proc { text_field(:name, label: "Name") }
+    html = render(form)
+
+    assert_no_html(html, "input[name='_method']")
+  end
+
+  # Non-POST forms still get their override field, exactly once:
+  # inferred from a persisted model, or forced with `method:`.
+  def test_non_post_form_emits_single_method_override_field
+    persisted = render_form { text_field(:name, label: "Name") }
+
+    assert_html(persisted, "input[name='_method'][value='patch']",
+                count: 1)
+
+    forced = ApplicationFormFieldTestHelpers::TestFormClass.new(
+      CollectionNumber.new, action: "/test_form_path", method: :patch
+    )
+    forced.field_block = proc { text_field(:name, label: "Name") }
+    html = render(forced)
+
+    assert_html(html, "input[name='_method'][value='patch']", count: 1)
+  end
+
   # `between_class` (FieldWithHelp) mirrors ERB:
   # inline rows pick "mr-3"; block rows pick "form-between".
   def test_between_class_block_field_with_help

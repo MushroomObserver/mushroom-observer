@@ -78,6 +78,17 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "label[for*='value_ID']")
     end
 
+    # Exactly one `_method`, and it says patch: a second `_method`
+    # hidden (Superform's own `post`) made Turbo submit the review as
+    # a bare POST -- routed to `create`, which re-queued the scan and
+    # bounced straight back to this page instead of saving.
+    def test_review_form_submits_as_patch
+      html = render_page(fields: { "Collector" => "Scott Shapiro" })
+
+      assert_html(html, "form[data-turbo='true']")
+      assert_html(html, "input[name='_method'][value='patch']", count: 1)
+    end
+
     # Ticked only when the ID already resolves to a name MO holds, so
     # creating a Name is always a deliberate act.
     def test_name_tick_defaults_on_for_a_known_name
