@@ -227,7 +227,7 @@ module SpeciesLists
     end
 
     def calculated_member_vars_for_reload(member_params)
-      # cannot leave @member_notes == nil because view expects an
+      # cannot leave @member_notes == nil because view expects a
       # NotesHash.
       @member_notes = NotesHash.from_params(member_params[:notes])
       @member_is_collection_location =
