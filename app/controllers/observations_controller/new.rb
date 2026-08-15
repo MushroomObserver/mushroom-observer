@@ -183,10 +183,10 @@ module ObservationsController::New
     # it every time, while someone out collecting for the day had to
     # check it every time. What the same user did last is a better
     # predictor than the presence of a code. See #4932.
-    %w[where location_id is_collection_location gps_hidden
-       specimen].each do |attr|
+    %w[is_collection_location gps_hidden specimen].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
     end
+    apply_default_locality(last_observation)
     @location = @observation.location
 
     if last_observation.created_at > 1.hour.ago
@@ -207,6 +207,40 @@ module ObservationsController::New
     @lists << list unless @lists.include?(list)
     ids = @observation.species_list_ids
     @observation.species_list_ids = ids | [list.id]
+  end
+
+  # A located (or clean free-text) locality is worth carrying forward;
+  # one that would itself trip the dubious-name confirmation is not --
+  # as a default it re-prompts on every subsequent create until
+  # dislodged (reported: one slip's unrecognized "Sunshine Foray/ ..."
+  # haunting every following observation). Fall back to the most
+  # recent located observation, or no default at all.
+  def apply_default_locality(last_observation)
+    source = locality_default_source(last_observation)
+    return unless source
+
+    @observation.where = source.where
+    @observation.location_id = source.location_id
+  end
+
+  def locality_default_source(last_observation)
+    return last_observation if usable_default_locality?(last_observation)
+
+    @user.observations.where.not(location_id: nil).
+      order(created_at: :desc, id: :desc).first
+  end
+
+  def usable_default_locality?(obs)
+    return true if obs.location_id
+    return false if obs.where.blank?
+
+    # check_db: false, deliberately -- the DB-backed check treats ANY
+    # previously used `where` as known (Observation.pluck(:where) is
+    # in location_name_cache), which would bless the very free text
+    # this guard exists to stop propagating. The syntactic check is
+    # deterministic.
+    !Location.dubious_name?(Location.user_format(@user, obs.where),
+                            false, false)
   end
 
   # Adding a field-slip project: always check it; for other already-
