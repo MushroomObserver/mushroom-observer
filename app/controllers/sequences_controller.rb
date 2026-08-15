@@ -120,11 +120,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_sequence_form }
-      format.html do
-        render(Views::Controllers::Sequences::New.new(
-                 sequence: @sequence, observation: @observation
-               ))
-      end
+      format.html { render_new_view }
     end
   end
 
@@ -142,11 +138,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_sequence_form }
-      format.html do
-        render(Views::Controllers::Sequences::Edit.new(
-                 sequence: @sequence, back: @back, back_object: @back_object
-               ))
-      end
+      format.html { render_edit_view }
     end
   end
 
@@ -202,7 +194,7 @@ class SequencesController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back]
+    @back = params.permit(:back)[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
   end
 
@@ -268,21 +260,29 @@ class SequencesController < ApplicationController
   def respond_to_form_errors
     respond_to do |format|
       format.turbo_stream { render_modal_flash_update(modal_identifier) }
-      format.html { render_form_error_view and return }
+      format.html { render_form_error_view_invalid and return }
     end
   end
 
-  def render_form_error_view
+  def render_form_error_view_invalid
     case action_name
     when "create"
-      render(Views::Controllers::Sequences::New.new(
-               sequence: @sequence, observation: @observation
-             ))
+      render_new_view_invalid
     when "update"
-      render(Views::Controllers::Sequences::Edit.new(
-               sequence: @sequence, back: @back, back_object: @back_object
-             ))
+      render_edit_view_invalid
     end
+  end
+
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Sequences::New.new(
+             sequence: @sequence, observation: @observation
+           ), status: status, **render_opts)
+  end
+
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Sequences::Edit.new(
+             sequence: @sequence, back: @back, back_object: @back_object
+           ), status: status, **render_opts)
   end
 
   def show_flash_and_send_back

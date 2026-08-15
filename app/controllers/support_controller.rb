@@ -12,18 +12,22 @@ class SupportController < ApplicationController
       @donation.who = @user.name
       @donation.email = @user.email
     end
-    render(Views::Controllers::Support::Donate.new(donation: @donation))
+    render_donate_view
   end
 
+  # Always re-renders this same URL on POST -- no redirect, no real
+  # success/failure distinction (the donation review page is the
+  # normal next step). Turbo Drive hangs on a same-URL plain-200
+  # response to a Turbo-enabled form regardless of REST semantics
+  # (see turbo_submit_forms.md), so :unprocessable_content is
+  # required here purely as a Turbo-mechanics necessity, not a claim
+  # that the donation "failed".
   def confirm
-    @donation = if request.method == "POST"
-                  confirm_donation(params["donation"])
-                else
-                  Donation.new
-                end
+    is_post = request.method == "POST"
+    @donation = is_post ? confirm_donation(params["donation"]) : Donation.new
     return if performed?
 
-    render(Views::Controllers::Support::Confirm.new(donation: @donation))
+    render_confirm_view(status: is_post ? :unprocessable_content : :ok)
   end
 
   def donors
@@ -54,6 +58,15 @@ class SupportController < ApplicationController
   end
 
   private
+
+  def render_donate_view
+    render(Views::Controllers::Support::Donate.new(donation: @donation))
+  end
+
+  def render_confirm_view(status: :ok)
+    render(Views::Controllers::Support::Confirm.new(donation: @donation),
+           status: status)
+  end
 
   def find_user(email)
     users = User.where(email: email)

@@ -108,9 +108,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     def render_slip_photo
-      render(Components::InteractiveImage.new(
-               image: @extract.image, user: @user, votes: false
-             ))
+      InteractiveImage(image: @extract.image, user: @user, votes: false)
     end
 
     def render_form
@@ -119,7 +117,8 @@ module Views::Controllers::Images::FieldSlipExtracts
                       review: FormObject::FieldSlipReview.build(
                         extract: @extract, observation: @observation,
                         user: @user
-                      )))
+                      ),
+                      local: false))
     end
 
     # Which setup produced these values -- the part that stays useful

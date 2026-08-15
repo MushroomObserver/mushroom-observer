@@ -18,6 +18,8 @@
 # Locations controller.
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
+  include ::Locationable
+
   before_action :store_location, except: [:index, :destroy]
   before_action :login_required
 
@@ -263,7 +265,7 @@ class LocationsController < ApplicationController
 
     # If done, update any observations at @display_name,
     # and set user's primary location if called from profile.
-    return render_new unless done
+    return render_new_view_invalid unless done
 
     if @original_name.present?
       db_name = Location.user_format(@user, @original_name)
@@ -336,14 +338,6 @@ class LocationsController < ApplicationController
                 flash_error_and_goto_index(Location, params[:id])
   end
 
-  def render_new
-    render_new_view
-  end
-
-  def render_edit
-    render_edit_view
-  end
-
   def render_show_view
     render(Views::Controllers::Locations::Show.new(
              location: @location,
@@ -394,7 +388,7 @@ class LocationsController < ApplicationController
     ::SpeciesList.safe_find(species_lists[0])
   end
 
-  def render_new_view
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::Locations::New.new(
              location: @location,
              display_name: @display_name,
@@ -403,16 +397,17 @@ class LocationsController < ApplicationController
              set_species_list: @set_species_list,
              set_user: @set_user,
              set_herbarium: @set_herbarium,
+             set_project: @set_project,
              dubious_where_reasons: @dubious_where_reasons
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_edit_view
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Locations::Edit.new(
              location: @location,
              display_name: @display_name,
              dubious_where_reasons: @dubious_where_reasons
-           ))
+           ), status: status, **render_opts)
   end
 
   def init_description_ivar(desc_id)
@@ -440,10 +435,6 @@ class LocationsController < ApplicationController
     # Note: names are in user's preferred order unless explicitly otherwise.)
     @original_name = string_param(:where)
 
-    # Previous value of place name: ignore warnings if unchanged
-    # (i.e., resubmit same name).
-    @approved_name = params[:approved_where]
-
     # This is the latest value of place name.
     @display_name = begin
                       params[:location][:display_name].strip_squeeze
@@ -452,10 +443,13 @@ class LocationsController < ApplicationController
                     end
 
     # Where to return after successfully creating location.
-    @set_observation  = params[:set_observation]
-    @set_species_list = params[:set_species_list]
-    @set_user         = params[:set_user]
-    @set_herbarium    = params[:set_herbarium]
+    set_params = params.permit(:set_observation, :set_species_list,
+                               :set_user, :set_herbarium, :set_project)
+    @set_observation  = set_params[:set_observation]
+    @set_species_list = set_params[:set_species_list]
+    @set_user         = set_params[:set_user]
+    @set_herbarium    = set_params[:set_herbarium]
+    @set_project      = set_params[:set_project]
   end
 
   def create_location_ivar_and_save(done)
@@ -464,9 +458,7 @@ class LocationsController < ApplicationController
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @display_name, approved: @approved_name
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(@display_name)
 
     if @dubious_where_reasons.empty?
       if @location.save
@@ -480,26 +472,30 @@ class LocationsController < ApplicationController
     done
   end
 
+  # Every branch validates its id via `safe_find` (not just presence)
+  # before redirecting, and always falls through to the next
+  # candidate -- and ultimately to the location itself -- rather than
+  # issuing no redirect at all for a stale or tampered set_* id.
   def return_to_caller
-    if @set_observation
-      redirect_to(observation_path(@set_observation))
-    elsif @set_species_list
-      redirect_to(species_list_path(@set_species_list))
-    elsif @set_herbarium
-      if (herbarium = Herbarium.safe_find(@set_herbarium))
-        herbarium.location = @location
-        herbarium.save
-        redirect_to(herbarium_path(@set_herbarium))
-      end
-    elsif @set_user
-      if (user = User.safe_find(@set_user))
-        user.location = @location
-        user.save
-        redirect_to(user_path(user))
-      end
+    if (observation = Observation.safe_find(@set_observation))
+      redirect_to(observation_path(observation))
+    elsif (species_list = SpeciesList.safe_find(@set_species_list))
+      redirect_to(species_list_path(species_list))
+    elsif (herbarium = Herbarium.safe_find(@set_herbarium))
+      attach_location_and_redirect(herbarium, herbarium_path(herbarium))
+    elsif (user = User.safe_find(@set_user))
+      attach_location_and_redirect(user, user_path(user))
+    elsif (project = Project.safe_find(@set_project))
+      attach_location_and_redirect(project, project_path(project))
     else
       redirect_to(location_path(@location.id))
     end
+  end
+
+  def attach_location_and_redirect(record, path)
+    record.location = @location
+    record.save
+    redirect_to(path)
   end
 
   # Merge this location with another.
@@ -518,9 +514,15 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
+      # Explicit `format: :html`: see the matching comment in
+      # HerbariaController#redirect_to_create_location -- the target
+      # action's `respond_to` picks `format.turbo_stream` by Accept
+      # header alone, and this redirect can be reached from a
+      # Turbo-submitted form (see #5055).
       redirect_to(
         new_admin_emails_merge_requests_path(
-          type: :Location, old_id: @location.id, new_id: merge.id
+          type: :Location, old_id: @location.id, new_id: merge.id,
+          format: :html
         )
       )
     end
@@ -533,7 +535,7 @@ class LocationsController < ApplicationController
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
     determine_and_check_location if !@location.locked || in_admin_mode?
-    return render_edit unless @dubious_where_reasons.empty?
+    return render_edit_view_invalid unless @dubious_where_reasons.empty?
 
     save_flash_and_redirect_or_render!
   end
@@ -546,10 +548,7 @@ class LocationsController < ApplicationController
     @location.high  = params[:location][:high]  if params[:location][:high]
     @location.low   = params[:location][:low]   if params[:location][:low]
     @location.display_name = @display_name
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @display_name,
-      approved: params[:approved_where]
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(@display_name)
   end
 
   def save_flash_and_redirect_or_render!
@@ -560,7 +559,7 @@ class LocationsController < ApplicationController
       redirect_to(location_path(@location.id))
     elsif !@location.save
       flash_object_errors(@location)
-      render_edit
+      render_edit_view_invalid
     else
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
       redirect_to(location_path(@location.id))

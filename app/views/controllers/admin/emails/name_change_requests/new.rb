@@ -14,7 +14,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
                ::FormObject::EmailRequest.new,
                name: @name,
                new_name_with_icn_id: @new_name_with_icn_id,
-               local: true
+               local: false
              ))
     end
   end

@@ -22,13 +22,14 @@ class FieldSlip
         @observation = observation
       end
 
-      # The attached slip's project is authoritative: an observation
+      # The attached slip's event is authoritative: an observation
       # can sit in several projects (the obs form pre-checks the last
       # one used), and picking `projects.first` read the wrong event's
-      # aliases and template for a slip that says exactly which project
-      # it belongs to.
+      # aliases and template for a slip that says exactly which event
+      # it belongs to -- including a spare slip, whose printed prefix
+      # still names it (see FieldSlip#event_project).
       def project
-        @project ||= observation&.field_slip&.project ||
+        @project ||= observation&.field_slip&.event_project ||
                      observation&.projects&.first
       end
 

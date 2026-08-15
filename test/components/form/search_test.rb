@@ -89,10 +89,10 @@ class SearchFormTest < ComponentTestCase
                 "[aria-controls='search_bar_elements']" \
                 "[aria-expanded='true']" \
                 "[data-search-type-target='barToggle']")
-    assert_html(html, "a[data-search-type-target='barToggle'] span.glyphicon")
     assert_html(html,
-                "a[data-search-type-target='barToggle'] span.sr-only",
-                text: :search_bar_fewer_options.l.as_displayed)
+                "a[data-search-type-target='barToggle'] " \
+                "svg.mo-icon-minus" \
+                "[aria-label='#{:search_bar_fewer_options.l}']")
     # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
     # literal.
     assert_html(html,
@@ -111,8 +111,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true,
-      form_action_url: "/names/search"
+      local: true
     )
     html = render(form)
 
@@ -374,8 +373,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true,
-      form_action_url: "/names/search"
+      local: true
     )
     html = render(form)
     doc = Nokogiri::HTML(html)
@@ -432,8 +430,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true,
-      form_action_url: "/names/search"
+      local: true
     )
     html = render(form)
     doc = Nokogiri::HTML(html)
@@ -623,8 +620,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       @query,
       search_controller: @search_controller,
-      local: local,
-      form_action_url: "/observations/search"
+      local: local
     )
     render(form)
   end
@@ -633,8 +629,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: @search_controller,
-      local: true,
-      form_action_url: "/observations/search"
+      local: true
     )
     render(form)
   end

@@ -31,16 +31,16 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   end
 
   def matching_observations_link
-    Link(type: :icon,
+    Link(type: :get,
          tab: ::Tab::Observation::MatchingObservations.new(
            occurrence: @occurrence
          ))
   end
 
   def add_matching_observations_link
-    Link(type: :icon,
+    Link(type: :get,
          tab: ::Tab::Observation::AddMatchingObservations.new(obs: @obs),
-         show_text: true)
+         label: true)
   end
 
   def render_body

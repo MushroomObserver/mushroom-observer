@@ -17,11 +17,8 @@ module Views::Controllers::Admin::BlockedIps
   #     list: blocked_ip_list_state
   #   ))
   class Manager < ::Components::ApplicationForm
-    def initialize(form, type:, list:, **)
-      @type = type
-      @list = list # ::Admin::BlockedIps::IpListState
-      super(form, **)
-    end
+    prop :type, _Union(:blocked, :okay)
+    prop :list, ::Admin::BlockedIps::IpListState
 
     private
 

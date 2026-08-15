@@ -2,12 +2,14 @@
 
 module SpeciesLists
   class WriteInController < ApplicationController
+    include ::Locationable
+
     before_action :login_required
 
     def new
       @species_list = SpeciesList.find(params[:id])
       init_member_vars_for_create
-      render_new_page
+      render_new_view
     end
 
     def create
@@ -23,10 +25,7 @@ module SpeciesLists
 
     private
 
-    # MO doesn't wire `Phlex::Rails::Resolver`, so a bare `render(:new)`
-    # can't resolve the Phlex action view at `species_lists/write_in/new.rb`.
-    # Construct it explicitly with the instance state the ERB used to read.
-    def render_new_page
+    def render_new_view(status: :ok, **render_opts)
       render(
         Views::Controllers::SpeciesLists::WriteIn::New.new(
           species_list: @species_list,
@@ -46,7 +45,9 @@ module SpeciesLists
           member_alt: @member_alt,
           member_is_collection_location: @member_is_collection_location,
           member_specimen: @member_specimen
-        )
+        ),
+        status: status,
+        **render_opts
       )
     end
 
@@ -100,7 +101,15 @@ module SpeciesLists
       return if redirected
 
       # Failed to create due to synonyms, unrecognized names, etc.
+      # init_name_vars_from_sorter (shared with uploads_controller,
+      # which has no separate resubmit-to-confirm mechanism) resets
+      # @place_name to the species_list's already-saved location --
+      # restore the just-submitted value so a dubious-location reload
+      # shows (and echoes back via approved_where) what the user
+      # actually typed, not what's already on the record.
+      submitted_place_name = @place_name
       init_name_vars_from_sorter(@species_list, sorter)
+      @place_name = submitted_place_name
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
       # Member notes parts are derived from the list, not from params;
@@ -109,7 +118,7 @@ module SpeciesLists
       # inline). Set them here so the Phlex view's constructor can
       # carry them.
       @member_notes_parts = @species_list.form_notes_parts(@user)
-      render_new_page
+      render_new_view_invalid
     end
 
     def list_without_underscores
@@ -203,11 +212,9 @@ module SpeciesLists
     end
 
     def validate_place_name
-      @place_name = params[:place_name] || @species_list.place_name(@user)
-      @dubious_where_reasons = Location.dubious_reasons_for(
-        user: @user, place_name: @place_name,
-        approved: params[:approved_where]
-      )
+      @place_name = params.permit(:place_name)[:place_name] ||
+                    @species_list.place_name(@user)
+      @dubious_where_reasons = dubious_where_reasons_for(@place_name)
     end
 
     def init_member_vars_for_reload
@@ -220,8 +227,14 @@ module SpeciesLists
     end
 
     def calculated_member_vars_for_reload(member_params)
-      # cannot leave @member_notes == nil because view expects a hash
-      @member_notes = member_params[:notes] || Observation.no_notes
+      # cannot leave @member_notes == nil because view expects a hash.
+      # `member_params[:notes]`, when submitted, is a nested
+      # ActionController::Parameters (dynamic "Other"/template-header
+      # keys, not fixed Strong Params attributes) -- matches
+      # ObservationsController::SharedFormMethods#notes_to_sym_and_compact's
+      # conversion for the same shape of field.
+      @member_notes = member_params[:notes]&.to_unsafe_h&.symbolize_keys ||
+                      Observation.no_notes
       @member_is_collection_location =
         member_params[:is_collection_location].to_s == "1"
       @member_specimen = member_params[:specimen].to_s == "1"

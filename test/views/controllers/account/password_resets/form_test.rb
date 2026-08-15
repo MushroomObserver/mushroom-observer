@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-module Views::Controllers::Account::Login
-  class EmailNewPasswordFormTest < ComponentTestCase
+module Views::Controllers::Account::PasswordResets
+  class FormTest < ComponentTestCase
     def setup
       super
       @user = User.new
@@ -33,10 +33,10 @@ module Views::Controllers::Account::Login
     private
 
     def render_form
-      render(EmailNewPasswordForm.new(
+      render(Form.new(
                @user,
                action: "/test_form_path",
-               id: "account_email_new_password_form"
+               id: "account_password_reset_form"
              ))
     end
   end

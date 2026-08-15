@@ -40,6 +40,12 @@ Adds `Location.dubious_reasons_for(user:, place_name:, approved:)` that encapsul
 
 Lists and tables and code blocks still use their natural line structure — this rule is about prose paragraphs only.
 
+## No "real"/"genuine"/"actually" as intensifiers
+
+**Don't use "real," "genuine," or "actually" as hedge words** in a PR or issue title, body, or comment — "a real caller," "a genuine risk," "this actually broke." These work like a preemptive move to shut off the reader's skepticism before they've raised any, which reads as trying to convince rather than stating the fact, and makes the claim read as less trustworthy, not more.
+
+Cut the word outright rather than substituting a synonym ("truly," "legitimately," etc. have the same problem). "A real caller" → "a caller." "This actually broke" → "this broke." If the sentence needs support for the claim, add the evidence instead of an intensifier.
+
 ## Why
 
 Inside `$(...)`, backticks must be escaped as `` \` ``. The escape

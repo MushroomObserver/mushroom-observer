@@ -18,6 +18,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     get(:new, params: { visual_model_id: @visual_model.id })
     assert_response(:success)
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_create_visual_group
@@ -87,8 +88,11 @@ class VisualGroupsControllerTest < FunctionalTestCase
     login
     get(:edit, params: { id: @visual_group.id })
     assert_response(:success)
-    assert_match(image_path(observations(:peltigera_mary_obs).thumb_image.id),
-                 response.body)
+    assert_select(
+      "a[href='#{image_path(id: observations(:peltigera_mary_obs).
+                                thumb_image.id)}']"
+    )
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_get_edit_page_with_excluded_images

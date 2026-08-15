@@ -21,7 +21,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
                new_obj: @new_obj,
                model_class: @model,
                user: current_user,
-               local: true
+               local: false
              ))
     end
   end

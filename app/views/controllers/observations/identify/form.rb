@@ -47,8 +47,13 @@ module Views::Controllers::Observations::Identify
         # its `#search_nav` container.
         class: class_names("flex-bar flex-grow-1",
                            Components::Navbar::FORM_CLASS, "px-0 gap-2"),
-        data: { controller: initial_controller,
-                type: selected }
+        # Merge in @attributes[:data] (set by ApplicationForm's
+        # around_template -- carries the turbo: "true" key when
+        # local: false) rather than replacing it outright, or the
+        # Turbo Drive opt-in silently has no effect on this form.
+        data: (@attributes[:data] || {}).merge(
+          controller: initial_controller, type: selected
+        )
       }
     end
 

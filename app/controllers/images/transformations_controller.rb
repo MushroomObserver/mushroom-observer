@@ -9,7 +9,9 @@ module Images
       image = find_or_goto_index(Image, params[:id].to_s)
       return unless image
 
-      transform_image_and_flash_notices(image) if permission!(image)
+      if authorized_to_transform?(image)
+        transform_image_and_flash_notices(image)
+      end
 
       # A full-page redirect tears down and re-subscribes the
       # turbo_stream_from([@image, :processed]) Action Cable
@@ -26,6 +28,17 @@ module Images
     end
 
     private
+
+    # Broader than `permission!(image)`: also allows anyone who can
+    # edit an Observation this image belongs to (project admin of the
+    # observation's project, or the observation's collector), not just
+    # the image's own owner/project. See Image#can_transform?, #4989.
+    def authorized_to_transform?(image)
+      return true if image.can_transform?(@user, site_admin: in_admin_mode?)
+
+      flash_error(:permission_denied.l)
+      false
+    end
 
     def transform_image_and_flash_notices(image)
       case params[:op]

@@ -76,15 +76,19 @@ class InatImportsController < ApplicationController
     pending = InatImport.where(user: @user).
               where(state: %w[Authenticating Importing]).
               order(:updated_at).last
-    return render_new_form unless pending
+    return render_new_view unless pending
 
     flash_warning(:inat_import_tracker_pending.l)
     redirect_to(inat_import_path(pending))
   end
 
   def create
-    return reload_form if params[:go_back] == "1"
-    return reload_form unless params_valid?
+    # Same-URL POST re-render either way -- Turbo Drive needs a non-2xx
+    # status here regardless of whether anything semantically failed,
+    # or it silently hangs instead of redisplaying the response. "Go
+    # Back" isn't a validation failure, but the status still applies.
+    return render_new_view_invalid if params[:go_back] == "1"
+    return render_new_view_invalid unless params_valid?
 
     normalize_inat_ids_param!
     normalize_inat_url_param!
@@ -141,7 +145,9 @@ class InatImportsController < ApplicationController
   def confirm_import
     @expected = fetch_expected_count
     return inat_unreachable if @expected.nil?
-    return reload_form if @expected == false
+    # Nothing importable -- an availability failure, needs the non-2xx
+    # status.
+    return render_new_view_invalid if @expected == false
 
     @unlicensed_obs = if import_others?
                         fetch_unlicensed_others_count
@@ -151,13 +157,17 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.new(user: @user)
     warn_about_listed_previous_imports
     @confirm_form = build_confirm_form
+    # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+    # (see turbo_submit_forms.md) -- needs a non-2xx status even
+    # though nothing "failed"; this is the normal next step after a
+    # valid New-import submission, just not the same page.
     render(Views::Controllers::InatImports::Confirm.new(
              confirm_form: @confirm_form,
              expected: @expected,
              unlicensed_obs: @unlicensed_obs,
              inat_import: @inat_import,
              **fetch_confirm_counts
-           ))
+           ), status: :unprocessable_content)
   end
 
   def fetch_confirm_counts
@@ -171,7 +181,7 @@ class InatImportsController < ApplicationController
 
   def inat_unreachable
     flash_error(:inat_cannot_communicate.l)
-    reload_form
+    render_new_view_invalid
   end
 
   # For storage: extract only digit tokens and join with commas.

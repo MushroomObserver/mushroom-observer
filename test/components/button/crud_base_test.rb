@@ -42,7 +42,7 @@ class ButtonCRUDBaseTest < ComponentTestCase
                             method: :patch, icon: :remove)
 
     # Icon should be rendered
-    assert_html(html, ".glyphicon")
+    assert_html(html, "svg.mo-icon-remove")
     # Name should be in sr-only span for accessibility
     assert_html(html, "span.sr-only", text: "Remove")
   end
@@ -109,12 +109,12 @@ class ButtonSubclassesTest < ComponentTestCase
   end
 
   # Default icon. `Delete` auto-applies `icon: :delete`, which
-  # renders the remove-circle glyphicon + sr-only label wrapper.
+  # renders the delete icon + sr-only label wrapper.
   def test_delete_default_icon
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Delete, target: herbarium)
 
-    assert_html(html, "button span.glyphicon-remove-circle")
+    assert_html(html, "button svg.mo-icon-delete")
     assert_html(html, "button span.sr-only")
   end
 
@@ -125,7 +125,7 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render_button(Components::Button::Delete,
                          target: herbarium, icon: nil)
 
-    assert_no_html(html, "button span.glyphicon")
+    assert_no_html(html, "button svg.mo-icon")
     assert_no_html(html, "button span.sr-only")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
@@ -137,7 +137,7 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render_button(Components::Button::Delete,
                          target: herbarium, icon: :remove)
 
-    assert_html(html, "button span.glyphicon-remove-circle")
+    assert_html(html, "button svg.mo-icon-remove")
   end
 
   # Default renders the standard btn-default frame.
@@ -171,7 +171,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button.btn")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
-    assert_html(html, "button span.glyphicon-remove-circle")
+    assert_html(html, "button svg.mo-icon-delete")
   end
 
   # `size: :sm` + `variant: :outline` — the typical index-row
@@ -198,7 +198,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
     assert_no_html(html, ".destroy_link_")
-    assert_html(html, "button span.glyphicon-remove-circle")
+    assert_html(html, "button svg.mo-icon-delete")
   end
 
   # Edit default: GET + `edit_<type>_path` + icon `:edit`.
@@ -210,7 +210,7 @@ class ButtonSubclassesTest < ComponentTestCase
                 "a[href='#{routes.edit_herbarium_path(herbarium)}']")
     assert_no_html(html, "form")
     assert_html(html, ".edit_herbarium_link_#{herbarium.id}")
-    assert_html(html, "a span.glyphicon-edit")
+    assert_html(html, "a svg.mo-icon-edit")
     assert_html(html, "a span.sr-only",
                 text: :edit_object.t(type: :herbarium))
     assert_html(html, "a[data-tooltip-target='tip']")
@@ -225,7 +225,7 @@ class ButtonSubclassesTest < ComponentTestCase
     path = routes.edit_herbarium_path(herbarium)
     assert_html(html, "a[href='#{path}']",
                 text: :edit_object.t(type: :herbarium))
-    assert_no_html(html, "a span.glyphicon")
+    assert_no_html(html, "a svg.mo-icon")
     assert_no_html(html, "a span.sr-only")
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
@@ -256,7 +256,7 @@ class ButtonSubclassesTest < ComponentTestCase
 
     assert_no_html(html, "a.btn-outline-default")
     assert_no_html(html, "a.btn")
-    assert_html(html, "a span.glyphicon-edit")
+    assert_html(html, "a svg.mo-icon-edit")
   end
 
   # Edit with String target + explicit `class:` override.
@@ -266,7 +266,7 @@ class ButtonSubclassesTest < ComponentTestCase
                          variant: :link)
 
     assert_html(html, "a.btn.btn-link[href='/items/42/edit']")
-    assert_html(html, "a span.glyphicon-edit")
+    assert_html(html, "a svg.mo-icon-edit")
     assert_html(html, "a span.sr-only", text: "Edit it")
   end
 
@@ -291,7 +291,7 @@ class ButtonSubclassesTest < ComponentTestCase
 
     assert_html(html, "a[href='#{path}']")
     assert_no_html(html, "form")
-    assert_html(html, "a span.glyphicon-plus")
+    assert_html(html, "a svg.mo-icon-add")
     assert_html(html, "a span.sr-only",
                 text: :new_object.t(type: :herbarium))
     assert_html(html, "a[data-tooltip-target='tip']")
@@ -304,7 +304,7 @@ class ButtonSubclassesTest < ComponentTestCase
                          target: path, name: "New Herbarium", icon: nil)
 
     assert_html(html, "a[href='#{path}']", text: "New Herbarium")
-    assert_no_html(html, "a span.glyphicon")
+    assert_no_html(html, "a svg.mo-icon")
     assert_no_html(html, "a span.sr-only")
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
@@ -348,7 +348,7 @@ class ButtonSubclassesTest < ComponentTestCase
 
     assert_html(html, "a[href='#{path}']")
     assert_no_html(html, "form")
-    assert_html(html, "a span.glyphicon-download-alt")
+    assert_html(html, "a svg.mo-icon-download")
     assert_html(html, "a span.sr-only")
   end
 
@@ -547,7 +547,7 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render_button(
       Components::Button::Put,
       name: "Exclude",
-      target: "/projects/1/violations",
+      target: "/projects/1/violations/resolve",
       params: { project: { do: "exclude", obs_id: 42 } }
     )
 

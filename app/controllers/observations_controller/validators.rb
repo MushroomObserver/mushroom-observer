@@ -10,7 +10,7 @@
 #    validate_place_name
 #
 #    validate_projects
-#      checked_project_conflicts
+#      conflicting_among(...)
 
 # Included in both ObservationsController and NamingsController
 module ObservationsController::Validators
@@ -66,13 +66,34 @@ module ObservationsController::Validators
     params.dig(:observation, :naming, *keys) || params.dig(:naming, *keys)
   end
 
-  # Helper methods for nested form params (Superform nests under :observation)
+  # Helper methods for nested form params (Superform nests under
+  # :observation, with a top-level fallback for the field-slip
+  # redirect path). Permitting from the top-level `params` object
+  # (rather than digging first and calling `.permit` on the extracted
+  # value) guarantees each key is a scalar (String) or absent --
+  # calling `.permit` on an already-dug-out value raises NoMethodError
+  # if a scanner or malformed request sends a scalar where the nested
+  # hash was expected (e.g. `?observation[collection_number]=abc`),
+  # since `.permit` only exists on ActionController::Parameters, not
+  # String. Permitting both shapes up front filters either malformed
+  # case to nil instead.
   def collection_number_params
-    params.dig(:observation, :collection_number) || params[:collection_number]
+    permitted = params.permit(
+      observation: { collection_number: [:name, :number] },
+      collection_number: [:name, :number]
+    )
+    permitted.dig(:observation, :collection_number) ||
+      permitted[:collection_number]
   end
 
   def herbarium_record_params
-    params.dig(:observation, :herbarium_record) || params[:herbarium_record]
+    permitted = params.permit(
+      observation: { herbarium_record: [:herbarium_name, :herbarium_id,
+                                        :accession_number] },
+      herbarium_record: [:herbarium_name, :herbarium_id, :accession_number]
+    )
+    permitted.dig(:observation, :herbarium_record) ||
+      permitted[:herbarium_record]
   end
 
   # Submitted project_ids array (post-Phlex shape:
@@ -80,7 +101,8 @@ module ObservationsController::Validators
   # form's sentinel hidden input (value=""), leaving the integer-
   # string IDs the user checked.
   def submitted_project_ids
-    params.dig(:observation, :project_ids)&.compact_blank
+    params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)&.compact_blank
   end
 
   # The form may be in a state where it has an existing MO Location name in the
@@ -107,48 +129,111 @@ module ObservationsController::Validators
       return true
     end
 
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @observation.place_name(@user)
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(place_name)
     return true if @dubious_where_reasons.empty?
 
     @any_errors = true
     false
   end
 
+  # One pass, one message: every project problem -- checked projects
+  # violating constraints, the slip's own (possibly unchecked) target
+  # project violating them, cross-prefix leftovers -- surfaces in a
+  # single re-render, so the user fixes everything at once instead of
+  # discovering the next problem after each save.
   def validate_projects
-    ids = submitted_project_ids
-    return true if ids.blank?
-
-    conflicting_projects = checked_project_conflicts - @observation.projects
-    @error_checked_projects = conflicting_projects.reject do |proj|
-      proj.is_admin?(@user)
-    end
-    if @error_checked_projects.any?
-      flash_error(:form_observations_there_is_a_problem_with_projects.t)
-      @any_errors = true
-      return false
-    end
-
+    checked = checked_projects
+    slip_project = slip_prefix_project
+    return true if checked.empty? && slip_project.nil?
+    return false unless checked_projects_addable?(conflicting_among(checked))
     return true if params.dig(:observation, :ignore_proj_conflicts) == "1"
 
-    @suspect_checked_projects = conflicting_projects - @error_checked_projects
-    if @suspect_checked_projects.any?
-      flash_warning(:form_observations_there_is_a_problem_with_projects.t)
-    end
-    return true if @suspect_checked_projects.empty?
+    gather_suspect_projects(checked, slip_project)
+    return true if @suspect_checked_projects.empty? &&
+                   @cross_prefix_projects.empty?
 
+    flash_warning(:form_observations_there_is_a_problem_with_projects.t)
     @any_errors = true
     false
   end
 
-  def checked_project_conflicts
+  def checked_projects
     ids = submitted_project_ids
     return [] if ids.blank?
 
-    Project.where(id: ids).includes(:location).select do |proj|
-      proj.violates_constraints?(@observation)
+    Project.where(id: ids).includes(:location).to_a
+  end
+
+  def conflicting_among(projects)
+    projects.select { |proj| proj.violates_constraints?(@observation) } -
+      @observation.projects
+  end
+
+  # Only a checked project can hard-block: invariant 1 (#4932) says a
+  # non-admin may not add a violating observation, and checking the
+  # box is that act.
+  def checked_projects_addable?(conflicting)
+    @error_checked_projects = conflicting.reject do |proj|
+      proj.is_admin?(@user)
     end
+    return true if @error_checked_projects.empty?
+
+    flash_error(:form_observations_there_is_a_problem_with_projects.t)
+    @any_errors = true
+    false
+  end
+
+  # Ticking "use as spare slip" opts out of the slip's project
+  # entirely, so neither the slip's own target conflict nor a prefix
+  # mismatch against it means anything anymore.
+  def gather_suspect_projects(checked, slip_project)
+    @suspect_checked_projects = conflicting_among(checked)
+    @cross_prefix_projects = []
+    return if use_spare_slip?
+
+    add_slip_target_conflict(slip_project, checked)
+    @cross_prefix_projects = cross_prefix_checked_projects(checked)
+  end
+
+  # The slip's own project is a target even when its box isn't checked
+  # -- a typed code doesn't check it, which is how a violation used to
+  # surface only AFTER the save. Always a suspect, never a hard error:
+  # a non-admin's violating slip lands as a spare post-save
+  # (apply_field_slip_project) rather than blocking the create.
+  def add_slip_target_conflict(slip_project, checked)
+    return if slip_project.nil? || checked.include?(slip_project)
+    return if @observation.projects.include?(slip_project)
+    # A barred code (closed project, non-member) never attaches at
+    # all, so its project is not a target -- validate_field_slip
+    # handles that case with its own message.
+    return unless slip_project.member?(@user) ||
+                  slip_project.can_join?(@user)
+    return unless slip_project.violates_constraints?(@observation)
+
+    @slip_target_project = slip_project
+    @suspect_checked_projects |= [slip_project]
+  end
+
+  # The project the typed/scanned code's prefix names.
+  def slip_prefix_project
+    prefix = FieldSlip.prefix_for_code(field_code)
+    prefix && Project.find_by(field_slip_prefix: prefix)
+  end
+
+  # A field slip prefix marks a project as one event's own. When the
+  # observation's slip code carries a DIFFERENT prefix, a checked
+  # prefix-bearing project is usually the form's remembered leftover
+  # from the last event, not intent. A soft constraint: it warns
+  # everyone and blocks no one -- the ignore-warnings resubmit
+  # proceeds -- because the deliberate case is real (a fair's
+  # observations also collected into the herbarium project behind it).
+  def cross_prefix_checked_projects(checked)
+    prefix = FieldSlip.prefix_for_code(field_code)
+    return [] unless prefix
+
+    checked.select do |proj|
+      proj.field_slip_prefix.present? && proj.field_slip_prefix != prefix
+    end - @observation.projects
   end
 
   def validate_observation

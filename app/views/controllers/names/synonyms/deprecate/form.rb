@@ -5,24 +5,27 @@
 # FormObject internally from the provided kwargs.
 module Views::Controllers::Names::Synonyms::Deprecate
   class Form < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, proposed_name: nil, is_misspelling: false,
-                   comment: nil, names: [], valid_names: [],
-                   suggest_corrections: false, parent_deprecated: nil,
-                   user: nil, **)
-      @name = name
-      @names = names
-      @valid_names = valid_names
-      @suggest_corrections = suggest_corrections
-      @parent_deprecated = parent_deprecated
-      @user = user
+    prop :name, ::Name
+    prop :names, _Nilable(_Array(::Name)), default: nil
+    prop :valid_names, _Nilable(_Array(::Name)), default: nil
+    prop :suggest_corrections, _Boolean, default: false
+    prop :parent_deprecated, _Nilable(::Name), default: nil
+    prop :user, ::User
 
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(name:, user:, proposed_name: nil, is_misspelling: false,
+                   comment: nil, names: nil, valid_names: nil,
+                   suggest_corrections: false, parent_deprecated: nil,
+                   **attrs)
       form_object = FormObject::DeprecateSynonym.new(
         proposed_name: proposed_name,
         is_misspelling: is_misspelling,
         comment: comment
       )
-      super(form_object, **)
+      super(form_object, name: name, names: names, valid_names: valid_names,
+                         suggest_corrections: suggest_corrections,
+                         parent_deprecated: parent_deprecated, user: user,
+                         **attrs)
     end
     # rubocop:enable Metrics/ParameterLists
 

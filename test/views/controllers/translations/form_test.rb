@@ -34,7 +34,7 @@ module Views::Controllers::Translations
     end
 
     def test_renders_form_with_stimulus_controller
-      assert_html(html, "form[data-controller='translation']")
+      assert_html(html, "form[data-controller~='translation']")
     end
 
     def test_renders_form_with_locale_data

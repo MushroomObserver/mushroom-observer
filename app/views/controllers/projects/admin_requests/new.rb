@@ -3,10 +3,7 @@
 module Views::Controllers::Projects::AdminRequests
   # Phlex view for the admin request form page.
   class New < Views::FullPageBase
-    def initialize(project:)
-      super()
-      @project = project
-    end
+    prop :project, ::Project
 
     def view_template
       add_page_title(
@@ -15,7 +12,8 @@ module Views::Controllers::Projects::AdminRequests
 
       render(Views::Controllers::Projects::AdminRequests::Form.new(
                FormObject::EmailRequest.new,
-               project: @project
+               project: @project,
+               local: false
              ))
     end
   end

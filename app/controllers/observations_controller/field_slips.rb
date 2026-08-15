@@ -12,14 +12,15 @@
 module ObservationsController::FieldSlips
   private
 
-  # After Create, a slip reviewer lands straight on the review of the
-  # photographed slip: the extraction is usually already running by
-  # then (the QR jobs chain it on attach -- see DetectFieldSlipQRJob),
-  # and the review page shows its progress until the read is done.
-  # Decode-only here -- attaching the slip is the QR jobs' business --
-  # so this adds no writes to the request.
-  def redirected_to_field_slip_review?
-    image = field_slip_review_image
+  # After Create -- and after an update that photographed a slip into
+  # an existing observation -- a slip reviewer lands straight on the
+  # review of the photographed slip: the extraction is usually already
+  # running by then (the QR jobs chain it on attach -- see
+  # DetectFieldSlipQRJob), and the review page shows its progress
+  # until the read is done. Decode-only here -- attaching the slip is
+  # the QR jobs' business -- so this adds no writes to the request.
+  def redirected_to_field_slip_review?(images = @observation.images)
+    image = field_slip_review_image(images)
     return false unless image
 
     redirect_to(edit_image_field_slip_extract_path(image.id, await: 1))
@@ -32,11 +33,11 @@ module ObservationsController::FieldSlips
   # observation already HAS the matching slip -- created by scanning
   # or typing the code, which makes the QR jobs skip it -- the read is
   # started from here instead.
-  def field_slip_review_image
+  def field_slip_review_image(images)
     return nil unless FieldSlip::QRDecoder.available?
     return nil unless reviews_field_slips?
 
-    @observation.images.each do |image|
+    images.each do |image|
       code = FieldSlip::QRDecoder.slip_code_in(image)
       next unless code && reviewable_slip_code?(code)
 
@@ -51,10 +52,18 @@ module ObservationsController::FieldSlips
   # the review page would just sit on its scan button -- say why, and
   # that saving the review is what links this observation to the slip.
   def explain_in_use_slip(code)
-    return if @observation.field_slip&.code == code
-
     slip = FieldSlip.find_by(code: code)
-    primary_id = slip&.occurrence&.primary_observation_id
+    occurrence = slip&.occurrence
+    return unless occurrence
+    # Checked against the slip's freshly loaded occurrence, not
+    # `@observation.field_slip` -- the QR job can attach the slip to
+    # THIS observation between the image upload and this check (it
+    # regularly wins that race in production), and the stale in-memory
+    # association would then warn about "another observation" that is
+    # this one (reported: obs 664468 warned about itself).
+    return if occurrence.observation_ids.include?(@observation.id)
+
+    primary_id = occurrence.primary_observation_id
     return unless primary_id
 
     flash_warning(:observation_field_slip_in_use.t(
@@ -129,7 +138,14 @@ module ObservationsController::FieldSlips
     return nil if code.blank?
 
     existing = FieldSlip.find_by(code: code)
-    return existing if existing
+    if existing
+      # current_user gates FieldSlip#calc_location's two user-dependent
+      # steps (latest slip in the project, latest located observation);
+      # without it an existing slip's Locality default silently loses
+      # them and falls back to the previous observation's free text.
+      existing.current_user = @user
+      return existing
+    end
 
     slip = FieldSlip.new
     slip.current_user = @user
@@ -247,18 +263,54 @@ module ObservationsController::FieldSlips
   # Using a slip for an open-membership project enrolls the user in it,
   # the way the field slip form has always done — that is what a printed
   # prefix means. The observation then joins the project too, unless it
-  # violates the project's constraints, in which case the slip is being
-  # used as a spare and neither is associated. Mirrors the slip form's
-  # own `assign_project`.
+  # violates the project's constraints, in which case the slip stays
+  # attached but the observation stays out — SAID OUT LOUD, because a
+  # silent skip here looks exactly like the slip workflow failing.
+  # Mirrors the slip form's own `assign_project`.
   def apply_field_slip_project(field_slip)
+    return use_slip_as_spare(field_slip) if use_spare_slip?
+
     project = field_slip.project
     return unless project
 
     join_field_slip_project(project)
     return unless project.member?(@user)
-    return if project.violates_constraints?(@observation)
+
+    if project.violates_constraints?(@observation) &&
+       !force_slip_project?(project)
+      # The slip goes spare rather than asserting a membership its
+      # observation doesn't have (#4932 invariant 2). The review's
+      # reconcile restores both -- via the printed prefix -- once the
+      # observation satisfies the constraints.
+      field_slip.update!(project: nil)
+      flash_warning(:field_slip_project_constraint_violation.t(
+                      code: field_slip.code, title: project.title
+                    ))
+      return
+    end
 
     project.add_observation(@observation)
+  end
+
+  # Invariant 1 (#4932): an admin may add a violating observation.
+  # The form already surfaced the reasons and the admin checked
+  # Ignore -- that is the deliberate act plus the warning.
+  def force_slip_project?(project)
+    params.dig(:observation, :ignore_proj_conflicts) == "1" &&
+      project.is_admin?(@user)
+  end
+
+  # The form's opt-out for a slip used outside its event: the slip
+  # attaches with no project, deliberately, so no warning.
+  def use_spare_slip?
+    params.dig(:observation, :use_spare_slip) == "1"
+  end
+
+  def use_slip_as_spare(field_slip)
+    field_slip.update!(project: nil) if field_slip.project
+    flash_notice(:observation_field_slip_spare_used.t(
+                   code: field_slip.code
+                 ))
   end
 
   # `Occurrence#observation_count_within_limits` is `on: :update` for

@@ -227,35 +227,37 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 1))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: -1))
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 0))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: -1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(albion.id)
+    )
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch, path: interest_path(albion.id),
+                         state: -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.new(target: albion, user: rolf, state: false).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 0))
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(albion.id)
+    )
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch, path: interest_path(albion.id),
+                        state: 1
+    )
   end
 
   ##############################################################################
@@ -658,7 +660,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     post(:create, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
+    assert_select("form[data-turbo='true']")
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
@@ -807,6 +810,39 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(loc, herbarium.location)
   end
 
+  # Part of #2248's fix: Project has no bounding-box UI, so a clean
+  # but unmatched name sends the user here (via set_project) to
+  # actually create the Location, same offramp as set_herbarium/
+  # set_user.
+  def test_create_location_with_set_project
+    project = projects(:eol_project)
+    login("rolf")
+    params = barton_flats_params
+    params[:set_project] = project.id.to_s
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(project_path(project))
+    project.reload
+    assert_equal(loc, project.location)
+  end
+
+  # Regression test: a stale/tampered set_herbarium id used to make
+  # return_to_caller issue no redirect at all (Herbarium.safe_find
+  # returning nil skipped straight past the whole branch), raising a
+  # missing-template error instead of falling back to the location.
+  def test_create_location_with_invalid_set_herbarium
+    login("mary")
+    params = barton_flats_params
+    params[:set_herbarium] = "0"
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(location_path(loc.id))
+  end
+
   ##############################################################################
   #
   #    EDIT
@@ -937,7 +973,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     put(:update, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     put(:update, params: params)
@@ -961,7 +997,7 @@ class LocationsControllerTest < FunctionalTestCase
     params = update_params_from_loc(loc)
     params[:location][:display_name] = new_normal_name
     put(:update, params: params)
-    assert_response(:success) # means failure
+    assert_unprocessable # means failure
 
     params[:location][:display_name] = new_scientific_name
     put(:update, params: params)
@@ -1176,7 +1212,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Should redirect to merge request form
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Location, old_id: to_go.id, new_id: to_stay.id
+                           type: :Location, old_id: to_go.id,
+                           new_id: to_stay.id, format: :html
                          ))
   end
 

@@ -272,10 +272,10 @@ MushroomObserver::Application.routes.draw do
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    unresourced_login_gets = %w[email_new_password test_autologin].freeze
-    unresourced_login_gets.each { |action| get(action, controller: "login") }
+    get("test_autologin", controller: "login")
     resource :logout, only: [:show, :create], controller: "logout"
-    post("new_password_request", controller: "login")
+    resource :password_reset, only: [:new, :create],
+                              controller: "password_resets"
 
     resource :preferences, only: [:edit, :update]
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
@@ -675,6 +675,11 @@ MushroomObserver::Application.routes.draw do
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
 
+  # ----- Locale: one route (issue #5074) --------------------------------
+  # POST, not GET, so the language switcher can't be replayed by crawlers,
+  # browser history, or bookmarks -- see LocalesController.
+  post("/locale", to: "locales#update", as: "switch_locale")
+
   namespace :projects do
     resource :search, only: [:new, :create]
   end
@@ -713,25 +718,19 @@ MushroomObserver::Application.routes.draw do
         post :add_all
       end
     end
-    resources :violations, only: [:index],
-                           controller: "projects/violations" do
-      collection do
-        # GET endpoint that returns the Add-Target-Location modal as a
-        # turbo-stream so each open sees fresh DB state (#4304).
-        get :target_location_modal
-      end
-    end
   end
-  # resourceful route won't work because it requires an additional id.
-  # Accept both PATCH and PUT — PATCH is the Rails-idiomatic verb for
-  # updates and what Superform defaults to for a persisted model
-  # (e.g. TargetLocationForm). PUT is kept so the legacy button_to
-  # calls (Exclude/Extend/Add Target Name) and any external callers
-  # continue to work without modification.
-  match("/projects/:project_id/violations",
+  # Project::Violation instances are computed Structs, not persisted
+  # records, so they have no ids. Route here under the Project's :id,
+  # rather than building a :project_id nested resource.
+  get("/projects/:id/violations", to: "projects/violations#index",
+                                  as: "project_violations")
+  match("/projects/:id/violations/resolve",
         to: "projects/violations#update",
-        as: "project_violations_update",
-        via: [:put, :patch])
+        as: "resolve_project_violations",
+        via: [:patch, :put])
+  get("/projects/:id/violations/target_location_modal",
+      to: "projects/violations#target_location_modal",
+      as: "target_location_modal_project_violations")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications

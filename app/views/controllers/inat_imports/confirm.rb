@@ -28,7 +28,8 @@ module Views::Controllers::InatImports
                  after_taxon: @after_taxon,
                  not_yet_imported: @not_yet_imported,
                  estimate_with_date: @estimate_with_date
-               }
+               },
+               local: false
              ))
     end
   end

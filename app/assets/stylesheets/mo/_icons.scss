@@ -54,8 +54,8 @@
   clear: both;
 }
 
-.icon-addon.addon-md .glyphicon,
-.icon-addon .glyphicon,
+.icon-addon.addon-md .mo-icon,
+.icon-addon .mo-icon,
 .icon-addon.addon-md .fa,
 .icon-addon .fa {
   position: absolute;
@@ -83,7 +83,7 @@
 }
 
 .icon-addon.addon-lg .fa,
-.icon-addon.addon-lg .glyphicon {
+.icon-addon.addon-lg .mo-icon {
   font-size: 18px;
   margin-left: 0;
   left: 11px;
@@ -98,15 +98,15 @@
 }
 
 .icon-addon.addon-sm .fa,
-.icon-addon.addon-sm .glyphicon {
+.icon-addon.addon-sm .mo-icon {
   margin-left: 0;
   font-size: 12px;
   left: 5px;
   top: 1px
 }
 
-.icon-addon .form-control:focus + .glyphicon,
-.icon-addon:hover .glyphicon,
+.icon-addon .form-control:focus + .mo-icon,
+.icon-addon:hover .mo-icon,
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
   color: $input-color;
@@ -135,7 +135,7 @@
 }
 
 // Icon-to-text gap for Components::IconWithText's visible-label span
-// (Button / Link::Icon families). Deliberately em-based, not one of
+// (Button / Link::Get families). Deliberately em-based, not one of
 // _utilities.scss's rem-based .pl-* scale -- this gap sits right
 // after an icon glyph inline with the label text, so it needs to
 // scale WITH that text's own font-size (e.g. noticeably more gap in
@@ -145,8 +145,11 @@
   padding-left: 0.5em !important;
 }
 
-// This is for the stateful icon_link_to helper
-.icon-link,
+// `.stateful-link` is added by `Link::Get` only when it renders an
+// active_icon:/active_content: swap pair. Shows/hides each pair based
+// on an `.active`/`.collapsed` class toggled on the trigger by JS
+// (not yet written -- no real caller uses this yet).
+.stateful-link,
 .panel-collapse-trigger {
   text-decoration: none;
 
@@ -155,13 +158,27 @@
   }
   &.active,
   &.collapsed {
-    .link-icon:not(.active-icon),
+    .mo-icon:not(.active-icon),
     .sr-only:not(.active-label) {
       display: none;
     }
     .active-icon, .active-label {
       display: inline-block;
     }
+  }
+}
+
+// Icon-only buttons: only the glyph (via .mo-icon's fill: currentColor
+// tracking .btn-link's :hover color) should change on hover, not the
+// button background. Excludes .dropdown-item and .list-group-item --
+// those need their normal Bootstrap hover-highlight background,
+// which is the whole point of those rules.
+.btn-link:not(.dropdown-item):not(.list-group-item) {
+  &:hover,
+  &:focus,
+  &:active,
+  &.active {
+    background-color: transparent;
   }
 }
 
@@ -172,42 +189,76 @@ tbody.collapse.in {
   display: table-row-group;
 }
 
-.glyphicon {
-  // Cancels Bootstrap's own .glyphicon { top: 1px; } base rule --
-  // MO's default (outside a .btn, see below) is flush, not offset.
-  top: 0;
-  font-size: 112%;
+.mo-icon {
+  // SVG icon (see Components::Icon) sized relative to the
+  // surrounding font-size, same scale factor the old font-glyph's
+  // font-size: 112% used, so existing font-size-based overrides
+  // throughout this file (.icon-addon's size variants, etc.) keep
+  // working unchanged.
+  display: inline-block;
+  position: relative;
+  width: 1.12em;
+  height: 1.12em;
+  fill: currentColor;
 
-  // &.link-icon {
-  //   background-color: white;
-  //   border-radius: 50%;
-  // }
+  // Pass `icon_class: "small"` at the call site rather than targeting
+  // a specific icon type or context selector.
+  &.small {
+    width: 0.75em;
+    height: 0.75em;
+  }
 }
 
-// top: 3px is a .btn-specific baseline correction, not a general
-// glyphicon offset -- scoped here instead of on the bare .glyphicon
-// selector above so it doesn't push every non-button icon (inline
-// links, standalone icons, etc.) down by 3px too. Two exclusions:
-// .carousel-control's .btn wrapper, since Bootstrap positions those
-// chevron icons itself (top: 50%, centered) and this nudge would
-// fight that default; and .btn-overlay, an icon-only overlay button
-// with no adjacent visible text to baseline-align against.
-.btn:not(.carousel-control .btn):not(.btn-overlay) > .glyphicon {
-  top: 3px;
-}
-
-// `.theater-btn`'s icon needs its own baseline nudge -- not the
-// button-text +3px above (no adjacent visible text to align to
-// here), and not flush like a bare icon either.
-.theater-btn > .glyphicon {
+// Baseline correction for icon+text pairs that aren't framed as a
+// .btn: plain Link::Get (excludes .inline-icon-link, which sets its
+// own top: 0) and the sidebar heading icons (Icon directly inside a
+// ListGroup::Item div, next to a text span).
+a:not(.btn):not(.inline-icon-link) > .mo-icon,
+.list-group-item > .mo-icon {
   top: 2px;
 }
 
-.spinner-right {
-  @extend .glyphicon, .glyphicon-repeat;
+// A real "filled/bordered" .btn's icon reads small next to the
+// button's bold label text (e.g. the location-map "Show map"
+// toggle). .btn-link buttons look like plain links, not framed
+// buttons, so they're excluded and keep the default 1.12em size.
+.btn:not(.btn-link) .mo-icon {
+  width: 1.2em;
+  height: 1.2em;
+}
 
+// True geometric centering for any icon-bearing button, replacing
+// vertical-align: middle -- an inline SVG's "middle" isn't reliably
+// centered against a button's line box the way text is, and the
+// degree of drift varies by button size/font-size (confirmed
+// empirically: near-zero for #top_nav's 1.5em icons, several px for
+// .theater-btn/.input-group-btn's smaller ones), so a vertical-align
+// approach kept needing separate per-context `top:` corrections that
+// never fully generalized. Flex gives true geometric centering with
+// no per-context tuning -- covers .theater-btn, .input-group-btn's
+// goto button, and the pagination prev/next links (.btn-link, so
+// previously outside .btn:not(.btn-link)'s scope entirely) all at once.
+.btn:has(.mo-icon) {
+  display: inline-flex;
+  align-items: center;
+}
+
+.spinner-right {
   line-height: 1.1 !important;
   animation: spin-r 1s infinite linear;
+}
+
+// The class only animates; the visible glyph is normally an Icon
+// inside. A JS-created spinner can't reach the SVG sprite (its URL is
+// a digested asset), so an EMPTY .spinner-right draws its own ring.
+.spinner-right:empty {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
 }
 
 @keyframes spin-r {

@@ -141,12 +141,19 @@ thread when a Copilot review finding is addressed, so later review
 passes don't re-verify it from scratch.
 See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
 app; use ActiveRecord/Arel instead.
+See `.claude/rules/params_to_literal_props.md` — guard raw params
+(`params.permit`) before they reach a scalar-typed Literal `prop`; an
+unguarded nested-hash param raises instead of degrading gracefully.
 See `.claude/rules/no_pii_in_public.md` for the hard rule against
 putting PII (emails, etc.) in GitHub issues/PRs/comments — enforced
 by a `PreToolUse` hook.
 See `.claude/rules/code_comments.md` — comment the *why* (only when
 unclear), never the *what*; keep one source of truth, don't duplicate
 the same rationale across files.
+See `.claude/rules/turbo_submit_forms.md` — pattern for converting a
+Phlex form to Turbo submission (issue #5052), including which failure
+paths need a `422` and how to test the conversion without a system
+test.
 
 ## Git Workflow
 

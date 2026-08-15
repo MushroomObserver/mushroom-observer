@@ -138,11 +138,19 @@ module Location::Scopes
       in_box(**args).invert_where
     }
     # Use named parameters (lat:, lng:), any order
+    # A location whose box straddles longitude 180 has west > east (e.g.
+    # Kiribati: west=169, east=-145) -- containment there means the point
+    # is east of west OR west of east, not between them. Getting this
+    # backwards (AND instead of OR) previously matched points nowhere
+    # near the location (issue #5080: (0, 0) "contained" by Kiribati).
     scope :contains_point, lambda { |**args|
       args => { lat:, lng: }
+      west = Location[:west]
+      east = Location[:east]
+      not_straddling = west.lteq(east).and(west.lteq(lng)).and(east.gteq(lng))
+      straddling = west.gt(east).and(west.lteq(lng).or(east.gteq(lng)))
       where(Location[:south].lteq(lat).and(Location[:north].gteq(lat)).
-            and(Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
-                or(Location[:west].gteq(lng).and(Location[:east].lteq(lng)))))
+            and(not_straddling.or(straddling)))
     }
     # Use named parameters (lat:, lng:), any order
     scope :with_minimum_bounding_box_containing_point, lambda { |**args|

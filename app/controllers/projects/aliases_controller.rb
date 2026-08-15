@@ -14,7 +14,7 @@ module Projects
     def index
       @project = Project.find(params[:project_id])
       @project_aliases = ProjectAlias.index_includes.
-                         where(project: @project).order(name: :asc)
+                         where(project: @project).order(name: :asc).to_a
       respond_to do |format|
         format.html do
           render(Views::Controllers::Projects::Aliases::Index.new(
@@ -45,7 +45,7 @@ module Projects
 
       respond_to do |format|
         format.turbo_stream { render_modal_project_alias_form }
-        format.html { render_alias_new }
+        format.html { render_new_view }
       end
     end
 
@@ -53,12 +53,13 @@ module Projects
       @project = @project_alias.project
       respond_to do |format|
         format.turbo_stream { render_modal_project_alias_form }
-        format.html { render_alias_edit }
+        format.html { render_edit_view }
       end
     end
 
     def create
       @project_alias = ProjectAlias.new(project_alias_params)
+      @project = @project_alias.project
       err = resolve_verify_target_error(
         @project_alias.verify_target(params[:project_alias][:term])
       )
@@ -92,10 +93,11 @@ module Projects
       flash_error(error) if error
       flash_object_errors(@project_alias)
       format.turbo_stream { reload_modal_project_alias_form }
-      format.html { send(:"render_alias_#{action}") }
+      format.html { send(:"render_#{action}_view_invalid") }
     end
 
     def update
+      @project = @project_alias.project
       respond_to do |format|
         if @project_alias.update(project_alias_params)
           format.turbo_stream do
@@ -127,18 +129,20 @@ module Projects
 
     private
 
-    def render_alias_new
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Projects::Aliases::New.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ))
+             ),
+             status: status, **render_opts)
     end
 
-    def render_alias_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Projects::Aliases::Edit.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ))
+             ),
+             status: status, **render_opts)
     end
 
     def redirect_to_project_aliases
@@ -153,7 +157,8 @@ module Projects
     # `projects/aliases/_target_update.erb` partial. Emits four
     # turbo_stream actions.
     def render_project_alias_target_change(project)
-      project_aliases = project.aliases.includes(:target).order(name: :asc)
+      project_aliases = project.aliases.includes(:target).order(name: :asc).
+                        to_a
       render(turbo_stream: [
                replace_target_alias_widget,
                replace_aliases_table(project_aliases),

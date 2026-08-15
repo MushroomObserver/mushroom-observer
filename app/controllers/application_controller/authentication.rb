@@ -225,7 +225,7 @@ module ApplicationController::Authentication
   # Is the current User in admin mode?  Returns true or false.  (*NOTE*: this
   # is available to views.)
   def in_admin_mode?
-    session[:admin]
+    session[:admin] == true
   end
   # helper_method :in_admin_mode?
 

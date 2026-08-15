@@ -5,11 +5,8 @@
 # with a download button in the header row.
 module Views::Controllers::SpeciesLists
   class Details < Views::Base
-    def initialize(species_list:, query:)
-      super()
-      @species_list = species_list
-      @query = query
-    end
+    prop :species_list, ::SpeciesList
+    prop :query, ::Query
 
     def view_template
       Panel(panel_id: "list_details",

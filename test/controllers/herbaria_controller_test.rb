@@ -461,7 +461,8 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_equal(herbarium_count, Herbarium.count)
     assert_flash(:create_herbarium_name_blank)
-    assert_response(:success) # Back to form for creating herbarium
+    assert_unprocessable # Back to form for creating herbarium
+    assert_select("form[data-turbo='true']")
   end
 
   # Turbo stream submissions should reload the modal form with flash errors
@@ -475,6 +476,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
     assert_select("turbo-stream[action='replace'][target$='_form']")
+    assert_flash_error(:create_herbarium_name_blank)
   end
 
   # Successful turbo_stream create hits
@@ -495,6 +497,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_select("turbo-stream[action='remove'][target='modal_herbarium']")
+    assert_flash_success
   end
 
   def test_create_duplicate_name
@@ -513,7 +516,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_equal(herbarium_count, Herbarium.count)
     assert_flash(:create_herbarium_duplicate_name, name: nybg.name)
-    assert_response(:success) # Back to form with creating herbarium
+    assert_unprocessable # Back to form with creating herbarium
     herbarium = assigns(:herbarium)
     assert_equal(nybg.name, herbarium.name)
     assert_equal("NEW", herbarium.code)
@@ -546,7 +549,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.description)
     assert_empty(herbarium.curators)
     assert_redirected_to(new_location_path(
-                           where: "New Location", set_herbarium: herbarium.id
+                           where: "New Location", set_herbarium: herbarium.id,
+                           format: :html
                          ))
   end
 
@@ -586,7 +590,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash(:create_herbarium_personal_already_exists,
                  name: rolf.personal_herbarium.name)
     assert_equal(herbarium_count, Herbarium.count)
-    assert_response(:success) # Back to the form
+    assert_unprocessable # Back to the form
   end
 
   # Regression test: blank codes should be stored as nil, not empty string.
@@ -630,7 +634,7 @@ class HerbariaControllerTest < FunctionalTestCase
     # Should flash error and stay on form (not redirect with nil id)
     assert_flash(:create_herbarium_duplicate_name, name: existing.name)
     assert_equal(herbarium_count, Herbarium.count)
-    assert_response(:success) # Back to the form, not a redirect
+    assert_unprocessable # Back to the form, not a redirect
   end
 
   def test_create_second_personal_herbarium_by_admin
@@ -645,10 +649,10 @@ class HerbariaControllerTest < FunctionalTestCase
     make_admin("rolf")
     post(:create, params: { herbarium: params })
 
-    assert_response(
-      :success,
+    assert_unprocessable(
       "Response to creating second personal herbarium for user " \
-      "should be 'success' (re-displaying form), not redirect to new herbarium"
+      "should be 'unprocessable_content' (re-displaying form), not " \
+      "redirect to new herbarium"
     )
     assert_flash_error(
       on_fail: "Trying to create second personal herbarium for user " \
@@ -666,10 +670,10 @@ class HerbariaControllerTest < FunctionalTestCase
     make_admin("rolf")
     post(:create, params: { herbarium: params })
 
-    assert_response(
-      :success,
+    assert_unprocessable(
       "Response to :create with invalid personal_user_name " \
-      "should be 'success' (re-displaying form), not redirect to new herbarium"
+      "should be 'unprocessable_content' (re-displaying form), not " \
+      "redirect to new herbarium"
     )
     assert_flash_error(
       on_fail: ":create with invalid personal_user_name should flash error"
@@ -714,6 +718,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
     assert_select("turbo-stream[action='replace'][target$='_form']")
+    assert_flash_error(:create_herbarium_name_blank)
   end
 
   def test_update_by_non_curator
@@ -781,7 +786,8 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_nil(nybg.reload.location)
     assert_redirected_to(new_location_path(where: "New Location",
-                                           set_herbarium: nybg.id))
+                                           set_herbarium: nybg.id,
+                                           format: :html))
   end
 
   def test_update_user_make_personal_by_owner_of_some_records
@@ -853,11 +859,11 @@ class HerbariaControllerTest < FunctionalTestCase
 
     patch(:update, params: { id: herbarium.id, herbarium: params })
 
-    assert_response(
-      :success,
+    assert_unprocessable(
       "Response to edit unowned herbarium to make it personal herbarium " \
-      "of user who doesn't own all its records should be 'success' " \
-      "(re-display form), not redirect to new herbarium"
+      "of user who doesn't own all its records should be " \
+      "'unprocessable_content' (re-display form), not redirect to new " \
+      "herbarium"
     )
     assert_flash_error(
       on_fail: "Trying to edit unowned herbarium to make it personal " \

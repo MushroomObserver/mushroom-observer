@@ -3,13 +3,10 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the add members page.
   class New < Views::FullPageBase
-    def initialize(project:, users:, project_member:, user:)
-      super()
-      @project = project
-      @users = users
-      @project_member = project_member
-      @user = user
-    end
+    prop :project, ::Project
+    prop :users, _Array(::User)
+    prop :project_member, ::ProjectMember
+    prop :user, ::User
 
     def view_template
       add_page_title(
@@ -19,7 +16,7 @@ module Views::Controllers::Projects::Members
       container_class(:wide)
 
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project
+               @project_member, project: @project, local: false
              ))
       render_users_table
     end

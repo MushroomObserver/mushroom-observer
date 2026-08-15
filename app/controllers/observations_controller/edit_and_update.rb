@@ -102,6 +102,7 @@ module ObservationsController::EditAndUpdate
   def update
     return unless editable_or_redirect?
 
+    normalize_observation_param
     init_update
     apply_observation_changes
     reload_edit_form and return if @any_errors
@@ -121,6 +122,9 @@ module ObservationsController::EditAndUpdate
   def init_update
     init_license_var
     init_new_image_var(@observation.when)
+    # Snapshotted so the post-save redirect can tell which photos THIS
+    # update added -- only those get the slip-review detour.
+    @image_ids_before_update = @observation.image_ids
     @any_errors = false
   end
 
@@ -260,14 +264,20 @@ module ObservationsController::EditAndUpdate
     @exif_data    ||= get_exif_data(@good_images)
     @location     ||= @observation.location
     @field_code     = params[:field_code]
+    # See init_location_var_for_reload: the approved_where round-trip
+    # needs @place_name set on a dubious-name re-render.
+    if @dubious_where_reasons.present?
+      @place_name = @observation.place_name(@user)
+    end
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render_edit_view
+    render_edit_view_invalid
   end
 
-  def render_edit_view
-    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs))
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs),
+           status: status, **render_opts)
   end
 
   def edit_view_attrs
@@ -279,7 +289,8 @@ module ObservationsController::EditAndUpdate
   def edit_view_obs_attrs
     {
       observation: @observation, user: @user, location: @location,
-      dubious_where_reasons: @dubious_where_reasons
+      dubious_where_reasons: @dubious_where_reasons,
+      place_name: @place_name
     }
   end
 
@@ -297,7 +308,9 @@ module ObservationsController::EditAndUpdate
       submitted_project_ids: @submitted_project_ids,
       lists: @lists || [], submitted_list_ids: @submitted_list_ids,
       error_checked_projects: @error_checked_projects || [],
-      suspect_checked_projects: @suspect_checked_projects || []
+      suspect_checked_projects: @suspect_checked_projects || [],
+      cross_prefix_projects: @cross_prefix_projects || [],
+      slip_target_project: @slip_target_project
     }
   end
 
@@ -305,10 +318,34 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
+      flash_warning(
+        :runtime_location_not_found.t(name: @observation.place_name(@user))
+      )
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @observation.place_name(@user),
-                                    set_observation: @observation.id))
+                                    set_observation: @observation.id,
+                                    format: :html))
     else
+      return if redirected_to_new_photo_slip_review?
+
       redirect_to(permanent_observation_path(@observation.id))
     end
+  end
+
+  # A slip photographed into an existing observation gets the same
+  # review handoff Create gives (reported: a photo added on edit read
+  # the slip invisibly -- no redirect, no link -- so the observation
+  # sat unnamed and the collector rescanned by hand). Only photos this
+  # update added are candidates, so routine edits of a slip
+  # observation never detour.
+  def redirected_to_new_photo_slip_review?
+    new_ids = @observation.image_ids - @image_ids_before_update
+    return false if new_ids.empty?
+
+    new_images = @observation.images.select do |image|
+      new_ids.include?(image.id)
+    end
+    redirected_to_field_slip_review?(new_images)
   end
 end

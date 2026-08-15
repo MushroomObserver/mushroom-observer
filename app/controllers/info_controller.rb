@@ -45,21 +45,22 @@ class InfoController < ApplicationController
 
   # GET /info/textile_sandbox/new — empty form
   def textile_sandbox
-    render(Views::Controllers::Info::TextileSandbox.new(
-             textile_sandbox: FormObject::TextileSandbox.new(code: nil),
-             show_result: false,
-             submit_type: nil
-           ))
+    render_new_view
   end
 
   # POST /info/textile_sandbox — render result
+  #
+  # Always re-renders this same URL -- no redirect, no real
+  # success/failure distinction (it's a live preview tool). Turbo
+  # Drive hangs on a same-URL plain-200 response to a Turbo-enabled
+  # form regardless of REST semantics (confirmed against a real
+  # browser; see turbo_submit_forms.md), so :unprocessable_content is
+  # required here purely as a Turbo-mechanics necessity, not a
+  # statement that the preview "failed".
   def textile_sandbox_create
     code = params[:code] || params.dig(:textile_sandbox, :code)
-    render(Views::Controllers::Info::TextileSandbox.new(
-             textile_sandbox: FormObject::TextileSandbox.new(code: code),
-             show_result: !code.nil?,
-             submit_type: params[:commit]
-           ))
+    render_new_view(code: code, submit_type: params.permit(:commit)[:commit],
+                    status: :unprocessable_content)
   end
 
   # Allow translator to enter a special note linked to from the lower left.
@@ -81,5 +82,16 @@ class InfoController < ApplicationController
     render(Views::Controllers::Info::SiteStats.new(
              site_data: @site_data, observations: @observations.to_a
            ))
+  end
+
+  private
+
+  def render_new_view(code: nil, submit_type: nil, status: :ok, **render_opts)
+    render(Views::Controllers::Info::TextileSandbox.new(
+             textile_sandbox: FormObject::TextileSandbox.new(code: code),
+             show_result: !code.nil?,
+             submit_type: submit_type
+           ),
+           status: status, **render_opts)
   end
 end

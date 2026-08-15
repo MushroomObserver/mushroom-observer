@@ -5,7 +5,7 @@
 module Views::Controllers::Names
   class New < Views::FullPageBase
     prop :name, ::Name
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     prop :name_string, _Nilable(String), default: nil
     prop :approved_rank, _Nilable(String), default: nil
 
@@ -15,7 +15,7 @@ module Views::Controllers::Names
 
       render(Form.new(
                @name, user: @user, name_string: @name_string,
-                      approved_rank: @approved_rank
+                      approved_rank: @approved_rank, local: false
              ))
     end
   end

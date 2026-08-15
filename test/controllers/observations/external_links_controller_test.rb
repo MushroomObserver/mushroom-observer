@@ -12,6 +12,7 @@ module Observations
       get(:new, params: { id: obs.id })
 
       assert_response(:success)
+      assert_select("form[data-turbo='true']")
     end
 
     def test_new_external_link_form_turbo
@@ -374,6 +375,7 @@ module Observations
       get(:edit, params: { id: link.id })
 
       assert_response(:success)
+      assert_select("form[data-turbo='true']")
     end
 
     def test_edit_external_link_form_turbo
@@ -417,6 +419,25 @@ module Observations
       params[:external_link][:url] = "bad_url"
       put(:update, params:)
       assert_flash_error
+    end
+
+    # `@back` only exists to survive a validation-error reload -- there's
+    # no standalone external_link "show" destination to offer as an
+    # alternative back target, so the observation is always where a
+    # successful save redirects. This just confirms an incoming
+    # `?back=` param round-trips through the reload instead of getting
+    # silently dropped.
+    def test_update_external_link_bad_url_preserves_back_param
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      back_path = "/some/back/path"
+      params = { id: link.id, back: back_path,
+                 external_link: { url: "bad_url" } }
+
+      login("rolf")
+      put(:update, params:)
+
+      assert_redirected_to(edit_external_link_path(id: link.id,
+                                                   back: back_path))
     end
 
     def test_update_external_id_clears_url

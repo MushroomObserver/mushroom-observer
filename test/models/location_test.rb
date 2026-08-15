@@ -691,6 +691,26 @@ class LocationTest < UnitTestCase
       include?(loc), "#{loc.name} should contain its SW corner")
   end
 
+  # Regression (issue #5080): a straddling box's containment check used
+  # to be AND-based instead of OR-based, which happened to still pass
+  # the exact-corner assertions above (the buggy clause coincides with
+  # the correct answer right at the boundary) but matched points nowhere
+  # near the location everywhere else -- e.g. (0, 0) "contained" by
+  # Kiribati. east_lt_west_location (Wrangel Island, west=178.648,
+  # east=-177.433) straddles 180 with a narrow gap; (0, 0) is on the
+  # opposite side of the globe from it.
+  def test_scope_contains_point_excludes_points_outside_straddling_box
+    loc = locations(:east_lt_west_location)
+    # Same latitude as the box (so only the longitude logic is under
+    # test), but a longitude on the opposite side of the globe from
+    # its narrow straddling gap (west=178.648 to east=-177.433).
+    lat = (loc.north + loc.south) / 2
+
+    assert_not(Location.contains_point(lat:, lng: 0).include?(loc),
+               "#{loc.name} should not contain a point on the far side " \
+               "of the globe from its straddling box")
+  end
+
   def cal
     locations(:california)
   end

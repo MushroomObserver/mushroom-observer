@@ -7,13 +7,13 @@ module Views::Controllers::Projects::Admin
   # the form so the user can swap to Members or Aliases without
   # leaving the Admin context.
   class Show < Views::FullPageBase
-    def initialize(project:, user:, dates_any:, upload_params:)
-      super()
-      @project = project
-      @user = user
-      @dates_any = dates_any
-      @upload_params = upload_params
-    end
+    prop :project, ::Project
+    prop :user, ::User
+    prop :dates_any, _Boolean
+    prop :upload_params, Hash
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
+    prop :raw_place_name, _Nilable(String), default: nil
 
     def view_template
       add_project_banner(@project)
@@ -35,7 +35,10 @@ module Views::Controllers::Projects::Admin
                enctype: "multipart/form-data",
                dates_any: @dates_any,
                upload_params: @upload_params,
-               dirty_form: true
+               dirty_form: true,
+               local: false,
+               dubious_where_reasons: @dubious_where_reasons,
+               raw_place_name: @raw_place_name
              ))
     end
 

@@ -16,12 +16,9 @@ module Views::Controllers::Info
     # @param textile_sandbox [FormObject::TextileSandbox] the model
     # @param show_result [Boolean] whether to show rendered result
     # @param submit_type [String] the submit button clicked
-    def initialize(textile_sandbox:, show_result:, submit_type:)
-      super()
-      @textile_sandbox = textile_sandbox
-      @show_result = show_result
-      @submit_type = submit_type
-    end
+    prop :textile_sandbox, ::FormObject::TextileSandbox
+    prop :show_result, _Boolean
+    prop :submit_type, _Nilable(String)
 
     def view_template
       add_page_title(:sandbox_title.t)
@@ -30,7 +27,8 @@ module Views::Controllers::Info
       render(Views::Controllers::Info::TextileSandboxForm.new(
                @textile_sandbox,
                show_result: @show_result,
-               submit_type: @submit_type
+               submit_type: @submit_type,
+               local: false
              ))
     end
   end

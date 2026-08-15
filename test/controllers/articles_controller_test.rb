@@ -159,9 +159,11 @@ class ArticlesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(:article_title_required)
+    assert_unprocessable
     # Phlex `Articles::New` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
+    assert_select("form[data-turbo='true']")
     assert_form_action(action: :create) # "new" form
 
     # Prove authorized user can create Article
@@ -215,6 +217,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params[:article][:title] = ""
     post(:update, params: params)
     assert_flash(:article_title_required)
+    assert_unprocessable
     # Phlex `Articles::Edit` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")

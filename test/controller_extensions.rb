@@ -326,14 +326,29 @@ module ControllerExtensions
            "found #{found_hrefs}")
   end
 
-  def assert_image_link_in_html(img_src, url, _msg = nil)
-    unless url.is_a?(String)
-      revised_opts = raise_params(url)
-      url = url_for(revised_opts)
+  # Assert that `Header::InterestIcons` rendered a button whose icon
+  # carries `icon_class` (e.g. "interest_watch" -- a stable hook, not
+  # the image filename, which is an implementation detail owned by
+  # `interest_icons_test.rb`'s own class-to-image assertions) and
+  # whose form submits `method` to `path` -- `:post` for a
+  # not-yet-existing Interest (create), `:patch` for flipping an
+  # existing one to the other non-default state (update, needs
+  # `state:`), `:delete` for returning to the default state (destroy,
+  # no `state:` param at all). Mirrors `InterestsController`'s own
+  # create/update/destroy dispatch -- see `interest_icons_test.rb`.
+  def assert_interest_button_in_html(icon_class, method:, path:, state: nil)
+    if method == :post
+      assert_select("form[action='#{path}'][method='post'] " \
+                    "input[name='state'][value='#{state}']")
+    else
+      assert_select("form[action='#{path}'] " \
+                    "input[name='_method'][value='#{method}']")
+      if state
+        assert_select("form[action='#{path}'] " \
+                      "input[name='state'][value='#{state}']")
+      end
     end
-    assert_select("a[href = '#{url}']>img") do
-      assert_select(":match('src', ?)", img_src)
-    end
+    assert_select("form[action='#{path}'] img.#{icon_class}")
   end
 
   # Assert that a form exists which posts to the given url.
@@ -368,6 +383,14 @@ module ControllerExtensions
                           "Expected HTML to contain form that posts to " \
                           "<#{url}>, but found nothing at all."))
     end
+  end
+
+  # Assert a failed form submission's re-render used a non-2xx status.
+  # Turbo requires this -- a plain 200 on a failed submission's
+  # re-render is a silent no-op under Turbo instead of a redisplay
+  # (issue #5052).
+  def assert_unprocessable(msg = nil)
+    assert_response(:unprocessable_content, msg)
   end
 
   # Assert that a response body is same as contents of a given file.

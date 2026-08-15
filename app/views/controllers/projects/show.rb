@@ -3,14 +3,14 @@
 module Views::Controllers::Projects
   # Phlex view for the project show page.
   class Show < Views::FullPageBase
-    def initialize(project:, user:, drafts:, comments:, object_names:)
-      super()
-      @project = project
-      @user = user
-      @drafts = drafts
-      @comments = comments
-      @object_names = object_names
-    end
+    prop :project, ::Project
+    prop :user, ::User
+    prop :drafts, _Array(::NameDescription)
+    prop :comments, _Array(::Comment)
+    # Despite selecting Name[:text_name]/Name[:id], the base relation
+    # is `@project.observations` -- these are Observation records
+    # (with those Name columns attached), not Name instances.
+    prop :object_names, _Array(::Observation)
 
     def view_template
       add_show_title(@project)
@@ -181,10 +181,8 @@ module Views::Controllers::Projects
       )
     end
 
-    # Explicit String target because the violations route uses
-    # `:project_id` (not `:id`), so Button::Get can't auto-build the
-    # path from a model. See the `violations_route_endpoint_smell`
-    # memory for the planned fix.
+    # Explicit String target -- CRUDPathBuilding only auto-derives a
+    # model's own `<type_tag>_path`, not a differently-named route.
     def render_violations_button
       return unless @project.constraints?
 
@@ -192,7 +190,7 @@ module Views::Controllers::Projects
       Button(
         type: :get,
         name: "#{count} #{:constraint_violations.ti}",
-        target: project_violations_path(project_id: @project.id),
+        target: project_violations_path(@project.id),
         variant: count.positive? ? :warning : nil,
         size: :lg,
         class: "my-2 mr-2"

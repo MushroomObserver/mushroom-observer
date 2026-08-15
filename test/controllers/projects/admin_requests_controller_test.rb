@@ -36,7 +36,8 @@ module Projects
       login("rolf")
       post(:create, params: params)
       assert_flash_error
-      assert_response(:success)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
   end
 end

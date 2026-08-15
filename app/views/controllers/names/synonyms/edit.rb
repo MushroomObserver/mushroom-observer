@@ -24,7 +24,8 @@ class Views::Controllers::Names::Synonyms::Edit < Views::FullPageBase
              current_synonyms: @name.synonyms,
              proposed_synonyms: @proposed_synonyms,
              new_names: @new_names,
-             user: current_user
+             user: current_user,
+             local: false
            ))
   end
 end

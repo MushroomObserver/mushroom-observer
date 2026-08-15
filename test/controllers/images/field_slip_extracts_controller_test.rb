@@ -354,9 +354,10 @@ module Images
       put(:update, params: { image_id: @image.id, use: { "ID" => "1" },
                              value: { "ID" => "Lumpy Bracket" } })
 
-      assert_response(:success)
+      assert_unprocessable
       assert_equal(names_before, Name.count)
       assert_flash_warning
+      assert_select("form[data-turbo='true']")
     end
 
     # The other fields land on the first pass, so confirming the name
@@ -565,6 +566,105 @@ module Images
                              value: { "Collector" => "A. W. Wilson" } })
 
       assert_not_includes(project.observations.reload, @obs.reload)
+      assert_nil(slip.reload.project,
+                 "the slip goes spare along with its observation")
+      assert_flash_warning
+    end
+
+    # The other reconcile direction: an observation that joined the
+    # project on pre-review data and violates it once the real values
+    # land leaves the project -- and the slip leaves with it (#4932
+    # invariant 2).
+    def test_update_removes_obs_and_slip_when_review_data_violates
+      project = projects(:open_membership_project)
+      project.join(@obs.user)
+      @obs.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0952", @obs.user)
+      @obs.field_slip = slip
+      @obs.save!
+      project.add_observation(@obs)
+      project.update!(start_date: Date.parse("2026-07-30"),
+                      end_date: Date.parse("2026-08-02"))
+      record_extract(fields: { "Date" => "2026-07-01" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Date" => "1" },
+                             value: { "Date" => "2026-07-01" } })
+
+      @obs.reload
+
+      assert_equal(Date.parse("2026-07-01"), @obs.when,
+                   "the reviewed values still apply")
+      assert_not_includes(project.observations.reload, @obs)
+      assert_nil(slip.reload.project)
+      assert_equal(slip, @obs.field_slip, "the slip stays attached")
+      assert_flash_warning
+    end
+
+    # A spare slip (its project released by an earlier violation)
+    # re-claims the prefix's project once the observation satisfies
+    # the constraints.
+    def test_update_restores_a_spare_slips_project_on_rejoin
+      project = projects(:open_membership_project)
+      project.update!(location: locations(:albion))
+      project.join(@obs.user)
+      @obs.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0953", @obs.user)
+      slip.update!(project: nil)
+      @obs.field_slip = slip
+      @obs.save!
+      record_extract(fields: { "Location" => locations(:albion).name })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Location" => "1" },
+                             value: { "Location" => locations(:albion).name } })
+
+      @obs.reload
+
+      assert_includes(project.observations.reload, @obs)
+      assert_equal(project, slip.reload.project,
+                   "the slip re-claims the prefix's project")
+    end
+
+    # A violation against an occurrence with siblings is a data
+    # conflict only a person can sort: the values stay, but this
+    # observation leaves the occurrence and the project -- the slip is
+    # legitimately claimed by the sibling.
+    def test_update_detaches_from_a_shared_occurrence_on_violation
+      project = projects(:open_membership_project)
+      project.join(@obs.user)
+      other = observations(:coprinus_comatus_obs)
+      other.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0954", other.user)
+      other.field_slip = slip
+      other.save!
+      @obs.update!(occurrence: nil)
+      @obs.field_slip = slip
+      @obs.save!
+      occurrence = slip.reload.occurrence
+      occurrence.update!(primary_observation_id: @obs.id)
+      project.add_observation(@obs)
+      project.update!(start_date: Date.parse("2026-07-30"),
+                      end_date: Date.parse("2026-08-02"))
+      record_extract(fields: { "Date" => "2026-07-01" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Date" => "1" },
+                             value: { "Date" => "2026-07-01" } })
+
+      @obs.reload
+
+      assert_equal(Date.parse("2026-07-01"), @obs.when,
+                   "the reviewed values still apply")
+      assert_nil(@obs.occurrence, "detached from the shared occurrence")
+      assert_not_includes(project.observations.reload, @obs)
+      assert_equal(other.id, occurrence.reload.primary_observation_id,
+                   "primary handed to the sibling")
+      assert_equal(slip, other.reload.field_slip,
+                   "the sibling keeps the slip")
       assert_flash_warning
     end
 

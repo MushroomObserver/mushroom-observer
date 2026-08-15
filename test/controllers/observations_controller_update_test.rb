@@ -282,6 +282,24 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_flash_error
   end
 
+  # Regression: a request sending a bare scalar for the whole
+  # `observation` param instead of the expected nested hash used to
+  # crash deep in the call chain (e.g. notes_param_present?'s
+  # `params.dig(:observation, :notes)`, TypeError: String does not
+  # have #dig method) instead of failing gracefully. Same shape as
+  # the ObservationsControllerCreateTest regression -- Copilot
+  # flagged the sibling issue on PR #5051's
+  # collection_number_params/herbarium_record_params.
+  def test_update_observation_with_malformed_observation_param
+    obs = observations(:detailed_unknown_obs)
+    login(obs.user.login)
+
+    put(:update, params: { id: obs.id, observation: "abc" })
+
+    assert_not_equal(500, @response.status,
+                     "Malformed observation param should not 500")
+  end
+
   def test_update_reflection_is_blocked
     obs = observations(:imported_inat_obs)
     original_notes = obs.notes
@@ -444,7 +462,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       params,
       "mary"
     )
-    assert_response(:success) # Which really means failure
+    assert_unprocessable
   end
 
   def test_update_observation_with_another_users_image
@@ -517,11 +535,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     login("mary")
     put(:update, params: params)
 
-    # 200 :success means means failure!
-    assert_response(
-      :success,
-      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
-    )
+    assert_unprocessable
     assert_flash_error
   end
 
@@ -739,6 +753,47 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Regression (#3032): validate_place_name never passed approved: to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name on edit looped forever showing the same flash instead of
+  # accepting it.
+  def test_update_observation_dubious_place_name_approved
+    params = {
+      location: { north: 35, south: 34, east: -117, west: -118 }
+    }
+    where = "Mt. Molehill, Iowa, USA"
+
+    # First submission: dubious ("Mt." should be "Mount"), rejected.
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, update succeeds.
+    generic_update_observation(
+      params.merge(observation: { place_name: where, location_id: -1 },
+                   approved_where: where),
+      1
+    )
+  end
+
+  # The render half of the approval round-trip (see the companion
+  # validator test above): the dubious reload must embed approved_where
+  # in the form action, or the browser never sends the approval and
+  # the confirmation loops forever (reported at the 2026 SMHF event).
+  def test_update_dubious_place_rerender_embeds_approved_where
+    generic_update_observation(
+      { location: { north: 35, south: 34, east: -117, west: -118 },
+        observation: { place_name: "Mt. Molehill, Iowa, USA",
+                       location_id: -1 } },
+      0
+    )
+
+    assert_select("form#observation_form[action*=?]", "approved_where",
+                  true, "the reloaded form must carry the approval")
+  end
+
   # --------------------------------------------------------------------
   #  Test notes with template
   # --------------------------------------------------------------------
@@ -947,7 +1002,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_flash(:runtime_no_save_observation)
     # Re-renders the edit form rather than redirecting.
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_update_invalid_field_slip_code
@@ -1097,6 +1152,120 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                   ) })
 
     assert_equal(rolf.textile_name, obs.reload.notes[:Field_Slip_ID_By])
+  end
+
+  # ----------------------------------------------------------------
+  #  Slip-review handoff for photos added on edit (#5024 pipeline)
+  # ----------------------------------------------------------------
+
+  # A slip photographed into an existing observation gets the same
+  # review detour Create gives. Reported: a phone upload failed during
+  # create, the photo was added on edit instead, and the completed
+  # read sat invisible -- no redirect, no link -- so the observation
+  # stayed unnamed and got rescanned by hand (obs 664471).
+  def test_update_adding_a_slip_photo_detours_to_the_review
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil, location: locations(:burbank),
+                where: locations(:burbank).name)
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_not_includes(obs.images, image, "premise: the photo is new")
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0920") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+  end
+
+  # Location creation still wins over the slip-review detour: an
+  # unresolved locality has to become a Location before anything else.
+  def test_update_location_creation_outranks_the_slip_review_detour
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil)
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_nil(obs.location_id, "premise: locality unresolved")
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0923") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(
+      new_location_path(where: obs.reload.place_name(rolf),
+                        set_observation: obs.id, format: :html)
+    )
+  end
+
+  # Routine edits of a slip observation never detour: only photos THIS
+  # update added are candidates.
+  def test_update_without_new_photos_does_not_detour
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil, location: locations(:burbank),
+                where: locations(:burbank).name)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_not_empty(obs.images, "premise: existing photos to re-decode")
+
+    login("rolf")
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0921") do
+        put(:update, params: { id: obs.id, observation: obs_params(obs) })
+      end
+    end
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+  end
+
+  def test_update_adding_a_photo_does_not_detour_a_non_reviewer
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil, location: locations(:burbank),
+                where: locations(:burbank).name)
+    image = images(:in_situ_image)
+
+    Project.where.not(field_slip_prefix: nil).find_each do |proj|
+      proj.admin_group.users.delete(rolf)
+    end
+
+    assert_not(
+      Project.where.not(field_slip_prefix: nil).
+        exists?(admin_group_id: rolf.reload.user_group_ids),
+      "premise: rolf reviews no slip projects"
+    )
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0922") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(permanent_observation_path(obs.id))
   end
 
   private

@@ -60,7 +60,7 @@ module Views::Controllers::Projects::Violations
       # button_to renders a <form method=post> with a hidden _method=put
       # and a <button type=submit>Label</button>.
       assert_includes(html, :form_violations_action_exclude.l)
-      assert_html(html, "form.button_to[action$='/violations']")
+      assert_html(html, "form.button_to[action$='/violations/resolve']")
       assert_html(html,
                   "input[type='hidden'][name='project[do]'][value='exclude']")
       assert_html(html, "input[type='hidden'][name='_method'][value='put']")

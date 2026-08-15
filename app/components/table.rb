@@ -24,9 +24,9 @@
 #   rooted layout shell with mixed-shape rows. `rows` arg is
 #   unused / can be nil in this mode.
 #
-# Table-level HTML attrs (`data:`, `cols:`, ARIA attrs, etc.) go in
-# the `attributes:` Hash. `class:` and `id:` are first-class init
-# args.
+# Table-level HTML attrs (`class:`, `data:`, `cols:`, ARIA attrs,
+# etc.) are all plain kwargs forwarded to the `<table>` element.
+# `id:` is a first-class init arg.
 #
 # @example Column mode (uniform rows)
 #   Table(@users, variant: :striped) do |t|
@@ -53,7 +53,7 @@
 # @example Body mode (table-level data attrs + mixed rows)
 #   Table(
 #     class: "name-lister",
-#     attributes: { data: { controller: "name-list" } }
+#     data: { controller: "name-list" }
 #   ) do |t|
 #     t.column(:name.ti, width: "20%")
 #     t.column(:options.ti, width: "80%")
@@ -63,38 +63,38 @@
 #     end
 #   end
 class Components::Table < Components::Base
-  # @param rows [Enumerable, nil] rows passed to each column/row
-  #   block (unused in body mode)
-  # @param class [String] extra CSS classes appended after the
-  #   component-managed classes
-  # @param id [String] `id=` for the `<table>` element
-  # @param show_headers [Boolean] render the `<thead>` (default true)
-  # @param tbody_id [String] `id=` for the `<tbody>` element (use to
-  #   make the tbody a Turbo Stream target)
-  # @param attributes [Hash] arbitrary HTML attrs forwarded to the
-  #   `<table>` element (`data:`, `cols:`, ARIA attrs, etc.)
-  # @param variant [Symbol, Array<Symbol>] Bootstrap table modifier(s)
-  #   (:striped, :condensed, :hover, :bordered) → adds "table-striped"
-  #   etc. to the class list
-  # @param identifier [String] stable identifier slug → adds
-  #   "table-{identifier}" class for test/JS targeting
-  #   (e.g. `identifier: "location-help"` → `class="… table-location-help"`)
-  def initialize(rows = nil, class: nil, id: nil, show_headers: true, # rubocop:disable Metrics/ParameterLists
-                 tbody_id: nil, attributes: {}, variant: nil, identifier: nil)
-    super()
-    @rows = rows
+  # Rows passed to each column/row block (unused in body mode).
+  prop :rows, _Nilable(_Interface(:each)), :positional, default: nil
+  # `id=` for the `<table>` element.
+  prop :id, _Nilable(String), default: nil
+  # Render the `<thead>`.
+  prop :show_headers, _Boolean, default: true
+  # `id=` for the `<tbody>` element (use to make the tbody a Turbo
+  # Stream target).
+  prop :tbody_id, _Nilable(String), default: nil
+  # Bootstrap table modifier(s) (:striped, :condensed, :hover,
+  # :bordered) — adds "table-striped" etc. to the class list.
+  prop :variant, _Nilable(_Union(Symbol, _Array(Symbol))), default: nil
+  # Stable identifier slug — adds "table-{identifier}" class for
+  # test/JS targeting (e.g. `identifier: "location-help"` →
+  # `class="… table-location-help"`).
+  prop :identifier, _Nilable(String), default: nil
+  # Catch-all for class:, data:, cols:, ARIA attrs, and any other
+  # HTML attrs forwarded to the `<table>` element -- matches
+  # Icon/Collapsible's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
+  # `@columns`/`@row_block`/`@body_blocks`/`@heading_block`/
+  # `@heading_attrs` are builder-accumulated state (populated by
+  # `column`/`row`/`body`/`heading` during `vanish`), not constructor
+  # props -- see the class docs above.
+  def initialize(*, **)
     @columns = []
     @row_block = nil
     @body_blocks = []
     @heading_block = nil
     @heading_attrs = {}
-    @show_headers = show_headers
-    @tbody_id = tbody_id
-    @html_class = grab(class:)
-    @html_id = id
-    @attributes = attributes
-    @variant = variant
-    @identifier = identifier
+    super
   end
 
   def view_template(&block)
@@ -183,10 +183,10 @@ class Components::Table < Components::Base
   private
 
   def table_attributes
-    attrs = @attributes.dup
+    attrs = @attributes.except(:class)
     attrs[:class] = class_names("table", variant_classes, identifier_class,
-                                @html_class)
-    attrs[:id] = @html_id if @html_id
+                                @attributes[:class])
+    attrs[:id] = @id if @id
     attrs
   end
 

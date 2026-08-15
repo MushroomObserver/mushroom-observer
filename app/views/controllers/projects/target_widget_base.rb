@@ -10,12 +10,13 @@
 # textarea-width override. Both subclasses also share the
 # `project-target-widget` class.
 class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationForm
+  prop :project, ::Project
+
   # Optional positional model arg is accepted for ModalForm
   # compatibility (ignored) — see Pattern B in
   # .claude/rules/phlex_reference.md.
-  def initialize(_model = nil, project:, **)
-    @project = project
-    super(form_object, id: dom_id, local: false, **)
+  def initialize(_model = nil, project:, **attrs)
+    super(form_object, project: project, id: dom_id, local: false, **attrs)
   end
 
   def around_template

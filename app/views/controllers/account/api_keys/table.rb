@@ -6,10 +6,7 @@ module Views::Controllers::Account::APIKeys
   # Shared between the index page render and the post-CUD
   # turbo_stream response (which replaces just this block).
   class Table < Views::Base
-    def initialize(user:)
-      super()
-      @user = user
-    end
+    prop :user, ::User
 
     def view_template
       render_keys_table

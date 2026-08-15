@@ -746,6 +746,8 @@ module Names
       login("rolf")
       put(:update, params: params)
       # Should re-render with ambiguous name message
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
 
       # Name should remain unchanged
       assert_not(selected_name.reload.deprecated)
@@ -771,6 +773,8 @@ module Names
       login("rolf")
       put(:update, params: params)
       # Should show confirmation for unapproved synonyms
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
 
       # Name should remain unchanged until synonyms are approved
       assert_not(selected_name.reload.deprecated)

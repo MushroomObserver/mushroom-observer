@@ -168,6 +168,18 @@ class FieldSlip < AbstractModel
     update(user: obs.user)
   end
 
+  # The event this slip was printed for: its own project, or -- once a
+  # spare-slip release has cleared that -- the project its printed
+  # prefix names. Alias resolution and prompt building key off the
+  # event, which is a fact of the printed slip, not of current project
+  # membership.
+  def event_project
+    return project if project
+
+    prefix = FieldSlip.prefix_for_code(code)
+    prefix && Project.find_by(field_slip_prefix: prefix)
+  end
+
   def update_project
     prefix = self.class.prefix_for_code(code)
     return unless prefix

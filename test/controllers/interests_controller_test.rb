@@ -188,6 +188,21 @@ class InterestsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  # `data-turbo="true"` on the InterestIcons buttons submits with a
+  # `text/vnd.turbo-stream.html` Accept header -- confirm the plain
+  # redirect-based response (no turbo_stream-specific rendering in
+  # this controller) still works and still mutates the DB correctly
+  # under that request shape, matching what a real click submits.
+  def test_create_interest_turbo_stream
+    login("rolf")
+    obs = observations(:minimal_unknown_obs)
+    post(:create, params: { type: "Observation", id: obs.id, state: 1 },
+                  as: :turbo_stream)
+    interest = Interest.find_by(target: obs, user: rolf)
+    assert(interest, "Expected a new Interest")
+    assert_equal(true, interest.state)
+  end
+
   def test_update_interest
     login("rolf")
     obs = observations(:minimal_unknown_obs)
@@ -216,12 +231,30 @@ class InterestsControllerTest < FunctionalTestCase
     end
   end
 
+  def test_update_interest_turbo_stream
+    login("rolf")
+    obs = observations(:minimal_unknown_obs)
+    Interest.create(target: obs, user: rolf, state: true)
+    patch(:update, params: { type: "Observation", id: obs.id, state: -1 },
+                   as: :turbo_stream)
+    assert_equal(false, Interest.find_by(target: obs, user: rolf).state)
+  end
+
   def test_destroy_interest
     login("rolf")
     obs = observations(:minimal_unknown_obs)
     Interest.create(target: obs, user: rolf, state: true)
     delete(:destroy,
            params: { type: "Observation", id: obs.id })
+    assert_nil(Interest.find_by(target: obs, user: rolf))
+  end
+
+  def test_destroy_interest_turbo_stream
+    login("rolf")
+    obs = observations(:minimal_unknown_obs)
+    Interest.create(target: obs, user: rolf, state: true)
+    delete(:destroy, params: { type: "Observation", id: obs.id },
+                     as: :turbo_stream)
     assert_nil(Interest.find_by(target: obs, user: rolf))
   end
 

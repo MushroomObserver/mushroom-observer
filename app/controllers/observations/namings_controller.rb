@@ -31,7 +31,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html { render_phlex_new }
+        format.html { render_new_view }
       end
     end
 
@@ -67,7 +67,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html { render_phlex_edit }
+        format.html { render_edit_view }
       end
     end
 
@@ -158,7 +158,7 @@ module Observations
         observation: @observation,
         local: false,
         show_reasons: true,
-        context: params[:context],
+        context: params.permit(:context)[:context],
         vote: @vote,
         given_name: @given_name,
         reasons: @reasons,
@@ -177,16 +177,18 @@ module Observations
       }
     end
 
-    def render_phlex_new
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Observations::Namings::New.new(
                **naming_phlex_props
-             ))
+             ),
+             status: status, **render_opts)
     end
 
-    def render_phlex_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Observations::Namings::Edit.new(
                **naming_phlex_props
-             ))
+             ),
+             status: status, **render_opts)
     end
 
     # Successful-create response when the form was opened from the
@@ -339,8 +341,8 @@ module Observations
       respond_to do |format|
         format.html do
           case action_name
-          when "create" then render_phlex_new
-          when "update" then render_phlex_edit
+          when "create" then render_new_view_invalid
+          when "update" then render_edit_view_invalid
           end and return
         end
         format.turbo_stream do

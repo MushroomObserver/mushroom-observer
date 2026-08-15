@@ -41,8 +41,7 @@ module Views::Controllers::Herbaria
 
       # Map section
       assert_html(html, "#herbarium_form_map.form-map")
-      assert_html(html, "form#herbarium_form",
-                  attribute: { "data-controller" => "map" })
+      assert_html(html, "form#herbarium_form[data-controller~='map']")
 
       # Personal checkbox for new record
       assert_html(html,
@@ -103,6 +102,21 @@ module Views::Controllers::Herbaria
       # contains the "no herbarium records" notice.
       assert_html(html, "input[name='herbarium[personal_user_name]']")
       assert_includes(html, :edit_herbarium_no_herbarium_records.l)
+    end
+
+    def test_admin_personal_user_field_with_top_users
+      stub_admin_mode!
+      herbarium = herbaria(:nybg_herbarium)
+      top_user = users(:rolf)
+      top_user.define_singleton_method(:record_count) { 3 }
+      html = render_form(model: herbarium, top_users: [top_user])
+
+      assert_includes(
+        html,
+        :edit_herbarium_user_records.t(
+          name: "#{top_user.name} (#{top_user.login})", num: 3
+        )
+      )
     end
 
     private

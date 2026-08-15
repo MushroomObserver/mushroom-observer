@@ -3,14 +3,10 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the project members index page.
   class Index < Views::FullPageBase
-    def initialize(project:, users:, project_member:,
-                   user:)
-      super()
-      @project = project
-      @users = users
-      @project_member = project_member
-      @user = user
-    end
+    prop :project, ::Project
+    prop :users, _Array(::User)
+    prop :project_member, ::ProjectMember
+    prop :user, ::User
 
     def view_template
       add_project_banner(@project)
@@ -20,7 +16,7 @@ module Views::Controllers::Projects::Members
                project: @project, current_subtab: "members"
              ))
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project
+               @project_member, project: @project, local: false
              ))
       render_table
     end

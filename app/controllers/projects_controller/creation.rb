@@ -27,11 +27,19 @@ module ProjectsController::Creation
     nil
   end
 
+  # Exact/reverse-name match only -- Project has no bounding-box UI of
+  # its own, so (unlike Observation/SpeciesList) it can never build a
+  # brand new Location inline. A clean but unmatched name falls through
+  # to a post-save redirect to Locations::New instead (see
+  # finalize_saved_project); a dubious one blocks the save and asks the
+  # user to confirm via @dubious_where_reasons, same as everywhere else
+  # Locationable's dubious_where_reasons_for is used.
   def find_location(where)
     location = Location.find_by_name_or_reverse_name(where)
     return location if location || where == ""
 
-    flash_warning(:add_project_no_location.t(where: where))
+    @dubious_where_reasons = dubious_where_reasons_for(where,
+                                                       param_key: :project)
     nil
   end
 
@@ -40,19 +48,20 @@ module ProjectsController::Creation
     admin_group = create_admin_group(admin_name)
     location = find_location(where)
 
-    if project_groups_ok?(user_group, admin_group, location, where)
-      @project = build_new_project(user_group, admin_group, location)
-      upload_image_if_present
-      return finalize_saved_project if @project.save
-
-      flash_object_errors(@project)
+    if @dubious_where_reasons.blank? && user_group && admin_group
+      save_new_project(user_group, admin_group, location, where)
+    else
+      cleanup_failed_project_creation(user_group, admin_group, where)
     end
-
-    cleanup_failed_project_creation(user_group, admin_group)
   end
 
-  def project_groups_ok?(user_group, admin_group, location, where)
-    user_group && admin_group && (location || where == "")
+  def save_new_project(user_group, admin_group, location, where)
+    @project = build_new_project(user_group, admin_group, location)
+    upload_image_if_present
+    return finalize_saved_project(where) if @project.save
+
+    flash_object_errors(@project)
+    cleanup_failed_project_creation(user_group, admin_group, where)
   end
 
   def build_new_project(user_group, admin_group, location)
@@ -67,7 +76,7 @@ module ProjectsController::Creation
     project
   end
 
-  def finalize_saved_project
+  def finalize_saved_project(where)
     # Same trust the add-member and field-slip paths grant, and said out
     # loud for the same reason: someone setting a project up almost
     # always wants its admins able to work on the observations they put
@@ -78,14 +87,32 @@ module ProjectsController::Creation
     @project.log_create
     flash_notice(:add_project_success.t)
     flash_notice(:add_members_with_editing.l)
-    redirect_to(project_path(@project.id))
+    if @project.location.nil? && where.present?
+      redirect_to(new_location_path(where:, set_project: @project.id))
+    else
+      redirect_to(project_path(@project.id))
+    end
   end
 
-  def cleanup_failed_project_creation(user_group, admin_group)
+  # Rebuilds @project from what was actually submitted (project_params
+  # includes :place_name) rather than a blank Project.new, so a
+  # dubious-location reload shows the user's entered title/summary/etc
+  # back instead of an empty form (the literal #2248 complaint).
+  #
+  # Project#place_name= only ever resolves-or-clears +location+ (see
+  # app/models/project.rb) -- it has no free-text fallback the way
+  # Observation/SpeciesList's place_name does, so the just-submitted,
+  # still-unresolved text can't be read back off @project itself.
+  # @raw_place_name carries it explicitly for the visible autocompleter
+  # and the approved_where hidden field (see Views::Controllers::
+  # Projects::Form).
+  def cleanup_failed_project_creation(user_group, admin_group, where)
     admin_group&.destroy
     user_group&.destroy
-    @project = Project.new
+    @project = Project.new(project_params)
+    @project_dates_any = true
+    @raw_place_name = where
     image_ivars
-    render_new_form
+    render_new_view_invalid
   end
 end

@@ -5,20 +5,14 @@
 # back into the same Form component.
 module Views::Controllers::Observations::Namings
   class Edit < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
-    # See sibling `New#initialize` for the same param-list rationale.
-    def initialize(observation:, naming:, vote:, given_name:, reasons:,
-                   user: nil, feedback: {})
-      super()
-      @observation = observation
-      @user = user
-      @naming = naming
-      @vote = vote
-      @given_name = given_name
-      @reasons = reasons
-      @feedback = feedback
-    end
-    # rubocop:enable Metrics/ParameterLists
+    prop :observation, ::Observation
+    prop :naming, ::Naming
+    # nil when this user hasn't voted on this naming yet.
+    prop :vote, _Nilable(::Vote)
+    prop :given_name, String
+    prop :reasons, _Hash(Integer, ::Naming::Reason)
+    prop :user, _Nilable(::User), default: nil
+    prop :feedback, Hash, default: -> { {} }
 
     def view_template
       add_chrome
@@ -65,7 +59,7 @@ module Views::Controllers::Observations::Namings
                reasons: @reasons,
                feedback: @feedback,
                show_reasons: true,
-               local: true
+               local: false
              ))
     end
 

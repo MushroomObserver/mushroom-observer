@@ -72,7 +72,7 @@ class Views::Controllers::Account::Preferences::FormTest <
        /images/licenses/edit].each do |href|
       assert_html(html, ".input-group-btn a[href='#{href}']")
       assert_html(html,
-                  ".input-group-btn a[href='#{href}'] span[class*='glyphicon']")
+                  ".input-group-btn a[href='#{href}'] svg.mo-icon-new-window")
     end
   end
 

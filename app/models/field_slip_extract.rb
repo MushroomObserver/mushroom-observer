@@ -212,13 +212,14 @@ class FieldSlipExtract < AbstractModel
   end
 
   def relevant_project_ids
-    ([observation&.field_slip&.project_id] +
-     Array(observation&.project_ids)).compact.uniq
+    event_project = observation&.field_slip&.event_project
+    ([event_project&.id] + Array(observation&.project_ids)).compact.uniq
   end
 
-  # The attached slip's project wins over `projects.first` -- see
-  # FieldSlip::Extractor::Context#project.
+  # The attached slip's event wins over `projects.first` -- see
+  # FieldSlip::Extractor::Context#project. A spare slip still names
+  # its event via the printed prefix (FieldSlip#event_project).
   def slip_project
-    observation&.field_slip&.project || observation&.projects&.first
+    observation&.field_slip&.event_project || observation&.projects&.first
   end
 end

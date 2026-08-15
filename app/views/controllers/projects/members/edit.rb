@@ -3,12 +3,9 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the change member status page.
   class Edit < Views::FullPageBase
-    def initialize(project:, project_member:, user:)
-      super()
-      @project = project
-      @project_member = project_member
-      @user = user
-    end
+    prop :project, ::Project
+    prop :project_member, ::ProjectMember
+    prop :user, ::User
 
     def view_template
       add_page_title(
@@ -23,7 +20,7 @@ module Views::Controllers::Projects::Members
                       ))
 
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project
+               @project_member, project: @project, local: false
              ))
       render(Views::Controllers::Projects::Members::Groups.new(
                project: @project, user: @user

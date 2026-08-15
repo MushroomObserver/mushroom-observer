@@ -41,6 +41,18 @@ class Components::Button::SubmitTest < ComponentTestCase
     assert_html(html, "button.btn.btn-default.btn-sm[type='submit']")
   end
 
+  def test_html_name_overrides_the_name_attribute
+    html = render_submit(name: "Save", html_name: "commit")
+
+    assert_html(html, "button[name='commit']", text: "Save")
+  end
+
+  def test_default_html_name_omits_name_attribute
+    html = render_submit(name: "Save")
+
+    assert_no_html(html, "button[name]")
+  end
+
   private
 
   def render_submit(**)

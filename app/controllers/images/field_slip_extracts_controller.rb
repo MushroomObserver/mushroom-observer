@@ -35,11 +35,7 @@ module Images
       return render_status unless @extract&.complete?
       return unless extract_or_redirect!
 
-      # No `layout:` option -- `Views::FullPageBase#around_template`
-      # picks the wrapping layout itself (see ApplicationController).
-      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
-               extract: @extract, observation: @observation, user: @user
-             ))
+      render_edit_view
     end
 
     def update
@@ -47,7 +43,7 @@ module Images
 
       attach_ticked_code
       apply_chosen_fields
-      rejoin_slip_project
+      reconcile_slip_project
       outcome = propose_name
       # An unrecognized or ambiguous name needs the reviewer to confirm
       # before a Name is created, so the page comes back with the
@@ -61,6 +57,20 @@ module Images
     end
 
     private
+
+    # No `layout:` option -- `Views::FullPageBase#around_template`
+    # picks the wrapping layout itself (see ApplicationController).
+    # `name_feedback:`/`given_name:` are set only on the confirmation
+    # round-trip from `rerender_for_name_approval`; a fresh `edit`
+    # GET leaves both nil.
+    def render_edit_view(status: :ok, name_feedback: nil, given_name: nil,
+                         **render_opts)
+      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
+               extract: @extract, observation: @observation, user: @user,
+               name_feedback: name_feedback, given_name: given_name
+             ),
+             status: status, **render_opts)
+    end
 
     # No return value: a `before_action` halts the chain when it
     # redirects, so signalling with true/false would be decoration.
@@ -149,28 +159,74 @@ module Images
 
     # The join decision at slip-attach time ran against the
     # observation's PRE-review data -- the create form's default date
-    # and leftover locality -- and constraint violations silently kept
-    # it out of the slip's project. The review then applies the slip's
-    # real date and locality: exactly the fields the decision used, so
-    # re-evaluate. (Reported: an NEMF slip's observation stayed out of
-    # the NEMF project while carrying form defaults at attach time.)
-    def rejoin_slip_project
+    # and leftover locality. The review applies the slip's real date
+    # and locality: exactly the fields the decision used, so
+    # re-evaluate in BOTH directions. An observation now satisfying
+    # the constraints joins the slip's project (and a slip that went
+    # spare re-claims it); one now violating them leaves, together
+    # with the slip -- the slip and its observations are in the
+    # project together or not at all (#4932 invariant 2).
+    def reconcile_slip_project
       @observation.reload
-      project = @observation.field_slip&.project
+      slip = @observation.field_slip
+      project = slip&.event_project
       return unless project
-      return if @observation.projects.include?(project)
-      return unless project.member?(@observation.user)
 
       if project.violates_constraints?(@observation)
-        flash_warning(:field_slip_extract_project_blocked.t(
-                        title: project.title
-                      ))
+        leave_slip_project(slip, project)
       else
+        rejoin_slip_project(slip, project)
+      end
+    end
+
+    def rejoin_slip_project(slip, project)
+      return unless project.member?(@observation.user)
+
+      unless @observation.projects.include?(project)
         project.add_observation(@observation)
         flash_notice(:field_slip_extract_project_joined.t(
                        title: project.title
                      ))
       end
+      slip.update!(project: project) unless slip.project
+    end
+
+    # A violation with siblings in the occurrence is a data conflict
+    # only a person can resolve -- the slip is legitimately claimed by
+    # another observation there -- so the saved values stay, and this
+    # observation leaves the occurrence and the project. With no
+    # siblings the slip simply goes spare along with its observation
+    # (`Project#remove_observation` releases the slip; a never-joined
+    # observation just needs the slip stripped directly).
+    def leave_slip_project(slip, project)
+      occurrence = @observation.occurrence
+      if occurrence&.observations&.many?
+        detach_from_occurrence(occurrence)
+        key = :field_slip_extract_conflict
+      else
+        release_spare_slip(slip)
+        key = :field_slip_project_constraint_violation
+      end
+      project.remove_observation(@observation)
+      flash_warning(key.t(code: slip.code, title: project.title))
+    end
+
+    def release_spare_slip(slip)
+      slip.reload.update!(project: nil) if slip.reload.project
+    end
+
+    # Primary is handed to a sibling first: the occurrence's
+    # primary-must-belong validation would otherwise reject the update.
+    def detach_from_occurrence(occurrence)
+      if occurrence.primary_observation_id == @observation.id
+        sibling = occurrence.observations.where.not(id: @observation.id).
+                  first
+        occurrence.update!(primary_observation_id: sibling.id)
+      end
+      @observation.update!(occurrence: nil)
+      occurrence.reload
+      occurrence.recompute_has_specimen!
+      occurrence.recalculate_consensus!(@user)
     end
 
     def flash_extract_saved(outcome)
@@ -184,11 +240,10 @@ module Images
 
     def rerender_for_name_approval(outcome)
       flash_warning(:field_slip_extract_name_needs_approval.t)
-      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
-               extract: @extract, observation: @observation, user: @user,
-               name_feedback: outcome.feedback,
-               given_name: params.dig(:value, name_field).to_s
-             ))
+      render_edit_view_invalid(
+        name_feedback: outcome.feedback,
+        given_name: params.dig(:value, name_field).to_s
+      )
     end
 
     def apply_chosen_fields

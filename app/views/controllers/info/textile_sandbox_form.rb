@@ -6,15 +6,8 @@ module Views::Controllers::Info
   # codes. Rendered by `Views::Controllers::Info::TextileSandbox`
   # (the textile_sandbox page view).
   class TextileSandboxForm < ::Components::ApplicationForm
-    # @param model [FormObject::TextileSandbox] struct with code attribute
-    # @param show_result [Boolean] whether to show the rendered result
-    #   above form
-    # @param submit_type [String] the submit button that was clicked
-    def initialize(model, show_result: false, submit_type: nil, **)
-      @show_result = show_result
-      @submit_type = submit_type
-      super(model, **)
-    end
+    prop :show_result, _Boolean, default: false
+    prop :submit_type, _Nilable(String), default: nil
 
     def view_template
       render_result_section if @show_result

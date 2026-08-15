@@ -5,7 +5,7 @@
 module Views::Controllers::Names
   class Edit < Views::FullPageBase
     prop :name, ::Name
-    prop :user, _Nilable(::User), default: nil
+    prop :user, ::User
     prop :name_string, _Nilable(String), default: nil
     prop :misspelling, _Boolean, default: false
     prop :correct_spelling, _Nilable(String), default: nil
@@ -19,7 +19,7 @@ module Views::Controllers::Names
       render(Form.new(
                @name, user: @user, name_string: @name_string,
                       misspelling: @misspelling,
-                      correct_spelling: @correct_spelling
+                      correct_spelling: @correct_spelling, local: false
              ))
     end
   end
