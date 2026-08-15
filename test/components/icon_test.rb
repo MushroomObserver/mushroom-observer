@@ -4,49 +4,93 @@ require("test_helper")
 
 class LinkIconTest < ComponentTestCase
   def test_glyph_only
-    html = render(Components::Icon.new(type: :globe))
+    html = render_icon(type: :globe)
 
-    assert_html(html, "span.glyphicon.glyphicon-globe.link-icon")
-    # No sr-only inner span when title is absent — just the bare glyph.
-    assert_no_html(html, "span.sr-only")
+    assert_html(html, "svg.mo-icon.mo-icon-globe")
+    # No aria-label / <title> when title is absent — just the bare glyph.
+    assert_no_html(html, "svg[aria-label]")
+    assert_no_html(html, "svg > title")
   end
 
-  def test_unknown_type_renders_nothing
-    html = render(Components::Icon.new(type: :bogus_not_a_real_icon))
+  def test_underscored_type_becomes_kebab_case_class
+    html = render_icon(type: :chevron_down)
 
-    # Unknown icon type silently emits nothing — matches the legacy
-    # `link_icon` helper's `return "" unless LINK_ICON_INDEX[type]`.
-    assert_equal("", html)
+    assert_html(html, "svg.mo-icon.mo-icon-chevron-down")
   end
 
-  def test_title_adds_tooltip_and_sr_only_label
-    html = render(Components::Icon.new(
-                    type: :edit, title: :edit.ti,
-                    class: "text-primary"
-                  ))
+  def test_unknown_type_raises_at_construction
+    assert_raises(Literal::TypeError) do
+      Components::Icon.new(type: :bogus_not_a_real_icon)
+    end
+  end
+
+  def test_renders_nothing_when_sprite_unavailable
+    original = Components::Icon::SPRITE_AVAILABLE
+    Components::Icon.send(:remove_const, :SPRITE_AVAILABLE)
+    Components::Icon.const_set(:SPRITE_AVAILABLE, false)
+
+    assert_equal("", render_icon(type: :globe))
+  ensure
+    Components::Icon.send(:remove_const, :SPRITE_AVAILABLE)
+    Components::Icon.const_set(:SPRITE_AVAILABLE, original)
+  end
+
+  def test_title_adds_tooltip_and_accessible_name
+    html = render_icon(type: :edit, title: :edit.ti, class: "text-primary")
 
     assert_html(html,
-                "span.glyphicon-edit.link-icon.text-primary" \
-                "[title='#{:edit.ti}'][data-tooltip-target='tip']")
-    # Screen-reader label so the icon-only link has an accessible name.
-    assert_html(html, "span.sr-only", text: :edit.ti)
+                "svg.mo-icon.mo-icon-edit.text-primary" \
+                "[title='#{:edit.ti}'][data-tooltip-target='tip']" \
+                "[aria-label='#{:edit.ti}']")
+    # No <title> child -- browsers render it as a second, native
+    # tooltip alongside the Bootstrap one triggered by
+    # data-tooltip-target. aria-label carries the accessible name
+    # instead without triggering any native tooltip.
+    assert_no_html(html, "svg > title")
   end
 
   def test_caller_data_attrs_merge_with_tooltip_data
-    html = render(Components::Icon.new(
-                    type: :globe, title: "Tooltip text",
-                    data: { other: "v" }
-                  ))
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       data: { other: "v" })
 
     # Tooltip target still present alongside caller's custom data attr.
-    assert_html(html, "span[data-tooltip-target='tip'][data-other='v']")
+    assert_html(html, "svg[data-tooltip-target='tip'][data-other='v']")
+  end
+
+  def test_caller_aria_attrs_merge_with_accessible_name
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       aria: { hidden: "false" })
+
+    assert_html(html, "svg[aria-label='Tooltip text'][aria-hidden='false']")
   end
 
   def test_extra_attrs_passed_through
-    html = render(Components::Icon.new(
-                    type: :globe, id: "my_icon"
-                  ))
+    html = render_icon(type: :globe, id: "my_icon")
 
-    assert_html(html, "span#my_icon.glyphicon-globe")
+    assert_html(html, "svg#my_icon.mo-icon-globe")
+  end
+
+  def test_padding_class_raises
+    %w[p-2 pl-2 pr-2 pt-2 pb-2 px-2 py-2].each do |cls|
+      assert_raises(ArgumentError) { render_icon(type: :globe, class: cls) }
+    end
+  end
+
+  def test_padding_class_combined_with_other_classes_raises
+    assert_raises(ArgumentError) do
+      render_icon(type: :globe, class: "text-primary px-2")
+    end
+  end
+
+  def test_non_padding_class_does_not_raise
+    html = render_icon(type: :globe, class: "text-primary")
+
+    assert_html(html, "svg.mo-icon-globe.text-primary")
+  end
+
+  private
+
+  def render_icon(**)
+    render(Components::Icon.new(**))
   end
 end

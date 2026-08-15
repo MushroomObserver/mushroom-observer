@@ -4,11 +4,6 @@
 # `Names::ClassificationController#edit`.
 module Views::Controllers::Names::Classification
   class Form < ::Components::ApplicationForm
-    def initialize(name, **)
-      @name = name
-      super(name)
-    end
-
     def view_template
       textarea_field(:classification, label: :form_names_classification,
                                       rows: 10,
@@ -21,12 +16,12 @@ module Views::Controllers::Names::Classification
     private
 
     def classification_help
-      rank = :"rank_#{@name.rank.to_s.downcase}".l
+      rank = :"rank_#{model.rank.to_s.downcase}".l
       Help(element: :p, content: :form_names_classification_help.t(rank: rank))
     end
 
     def form_action
-      classification_of_name_path(@name.id)
+      classification_of_name_path(model.id)
     end
   end
 end

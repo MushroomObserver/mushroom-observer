@@ -26,6 +26,19 @@ module Views::Controllers::InatImports
       assert_html(html, "#as_of")
     end
 
+    # "Proceed" redirects to iNaturalist's external OAuth page --
+    # Turbo Drive's fetch-based submission doesn't navigate the
+    # browser there correctly on a cross-origin redirect, so this one
+    # button opts out of Turbo. "Go Back" stays Turbo-managed (it
+    # reloads the New form in place, already forced to a non-2xx
+    # status).
+    def test_proceed_button_opts_out_of_turbo
+      html = render_form
+
+      assert_html(html, "button[name='confirmed'][data-turbo='false']")
+      assert_no_html(html, "button[name='go_back'][data-turbo]")
+    end
+
     def test_carries_inat_username_through_hidden_field
       html = render_form
 

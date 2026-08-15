@@ -13,9 +13,17 @@ plugins:
   - rubocop-rails
 
 require:
+  - ./lib/rubocop/cop/mo/dry_test_render_helper
+  - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
+  - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
+  - ./lib/rubocop/cop/mo/prefer_kit_syntax
+  - ./lib/rubocop/cop/mo/redundant_render_view_invalid
+  - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
+  - ./lib/rubocop/cop/mo/unguarded_params_to_prop
 
 AllCops:
   NewCops: enable
@@ -41,12 +49,56 @@ AllCops:
 
 ########### Individual cops for which MO uses a non-default configuration
 
+MO/DryTestRenderHelper:
+  Description: >-
+    render(SomeClass.new(...)) repeated inline across sibling test_*
+    methods must go through a private render_x helper instead -- see
+    lib/rubocop/cop/mo/dry_test_render_helper.rb and "Extract DRY
+    Render Helper" in .claude/rules/testing.md.
+  Enabled: true
+  Include:
+    - "test/components/**/*_test.rb"
+    - "test/views/**/*_test.rb"
+
+MO/InitializeWithoutProp:
+  Description: >-
+    A Phlex class defining `initialize` with hand-assigned `@ivar =`
+    state and no `prop` of its own should use Literal props instead --
+    see lib/rubocop/cop/mo/initialize_without_prop.rb and the #5020
+    prop-conversion sweep.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # Every field class here takes a Superform::Field or FieldProxy --
+    # both are duck-typed, so the only prop type available is a vague
+    # _Interface(:dom, :value), not a concrete class; `wrapper_options`/
+    # `attributes` are already-generic Hash catch-alls. Converting
+    # doesn't buy real type safety here the way it does elsewhere, and
+    # several files subclass Superform's own component classes
+    # directly (third-party initialize signatures, positional `field`
+    # args, no dedicated test coverage). Not worth the risk/reward;
+    # left as manual initialize.
+    - "app/components/application_form/**/*.rb"
+
 MO/LowercaseTranslationTag:
   Description: >-
     Translation tag symbols (used with .l/.t/.tl/.tp/.tpl/.ti) must be
     lowercase -- see lib/rubocop/cop/mo/lowercase_translation_tag.rb
     and GH issue #4843.
   Enabled: true
+
+MO/NoActiveRecordRelationProp:
+  Description: >-
+    Phlex `prop` types must not reference ActiveRecord::Relation --
+    materialize with .to_a at the call site and use _Array(<Model>)
+    instead, so the element type is checked too -- see
+    lib/rubocop/cop/mo/no_active_record_relation_prop.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
 
 MO/NoResolvedErrorsAddType:
   Description: >-
@@ -55,6 +107,40 @@ MO/NoResolvedErrorsAddType:
     .tpl call -- see lib/rubocop/cop/mo/no_resolved_errors_add_type.rb
     and #4901/#4920.
   Enabled: true
+
+MO/NoRawBootstrapComponent:
+  Description: >-
+    Phlex views/components must not hand-roll the markup for a
+    top-level Bootstrap UI component MO already has a Components::*
+    wrapper for (Alert, Modal, Dropdown, ListGroup, NavTabs, Panel,
+    Navbar, Carousel, InputGroup, ButtonGroup) -- see
+    lib/rubocop/cop/mo/no_raw_bootstrap_component.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # Superform-based field classes (Components::Form::Input <
+    # Superform::Rails::Components::Input) don't share an inheritance
+    # line with Components::Base, so they have no Kit-sugar/Components
+    # infrastructure to swap into -- see app/components/form/input.rb's
+    # own comment. autocompleter_field.rb's `.dropdown-menu` div is a
+    # Stimulus-driven autocomplete pulldown reusing the class for
+    # styling only, not Bootstrap's actual toggle-button JS behavior.
+    - "app/components/application_form/**/*.rb"
+    # NavTabs' own implementation -- legitimately builds the
+    # `<ul class="nav nav-tabs">` this cop exists to make everyone
+    # else use NavTabs(...) for instead.
+    - "app/components/nav_tabs.rb"
+    # Deliberate: the sidebar's `.list-group` wrapper holds several
+    # independently `cache(...)`-wrapped sections that render
+    # Components::ListGroup::Item/LinkItem directly, not via a
+    # `ListGroup(...) do |list| ... end` builder block -- swapping in
+    # Components::ListGroup here would route those renders through
+    # `vanish`/deferred registration, which silently breaks fragment
+    # caching (see list_group.rb's own docs, which name this file as
+    # the deliberate exception).
+    - "app/views/layouts/sidebar.rb"
 
 MO/NoRawLinkOrButtonTo:
   Description: >-
@@ -83,6 +169,52 @@ MO/NoRawLinkOrButtonTo:
     # is .btn-family styling/variants, which doesn't fit a badge.
     # Genuinely a different primitive, not a bypass of Button.
     - "app/components/id_badge.rb"
+
+MO/PreferKitSyntax:
+  Description: >-
+    Phlex views/components should call Foo(...) (Kit syntax) rather
+    than render(Components::Foo.new(...)) for a single-level
+    Components class -- see lib/rubocop/cop/mo/prefer_kit_syntax.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+
+MO/RedundantRenderViewInvalid:
+  Description: >-
+    A controller/concern defining its own render_new_view_invalid/
+    render_edit_view_invalid duplicates ApplicationController's
+    generic dispatcher -- see
+    lib/rubocop/cop/mo/redundant_render_view_invalid.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+  Exclude:
+    - "app/controllers/application_controller.rb"
+
+MO/SelfStatusOutsideInvalidMethod:
+  Description: >-
+    self.status = ... written outside a *_invalid-named method is the
+    hand-rolled anti-pattern this sweep exists to prevent -- fold it
+    into a *_invalid method instead. See
+    lib/rubocop/cop/mo/self_status_outside_invalid_method.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+
+MO/UnguardedParamsToProp:
+  Description: >-
+    A controller passing a raw params[...]/params.dig(...) read (or an
+    ivar assigned from one) straight into a Components::/Views::
+    constructor kwarg can raise Literal::TypeError on a nested-hash
+    param -- guard with params.permit first. See
+    lib/rubocop/cop/mo/unguarded_params_to_prop.rb and
+    .claude/rules/params_to_literal_props.md.
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
 
 Gemspec:
   # Not relevent (MO is not a gem)

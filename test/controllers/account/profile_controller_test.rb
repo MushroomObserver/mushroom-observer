@@ -67,7 +67,8 @@ module Account
 
       assert_flash(:runtime_profile_must_define)
       assert_redirected_to(new_location_path(where: unknown,
-                                             set_user: rolf.id))
+                                             set_user: rolf.id,
+                                             format: :html))
     end
 
     # Blank place_name when the user previously had a location →
@@ -102,8 +103,9 @@ module Account
               }
             })
 
-      assert_response(:success)
+      assert_unprocessable
       assert_select("form")
+      assert_select("form[data-turbo='true']")
       assert_flash_error
     end
 

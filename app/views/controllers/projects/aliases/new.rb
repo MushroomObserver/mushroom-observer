@@ -3,12 +3,9 @@
 module Views::Controllers::Projects::Aliases
   # Phlex view for the new project alias form page.
   class New < Views::FullPageBase
-    def initialize(project_alias:, project:, user:)
-      super()
-      @project_alias = project_alias
-      @project = project
-      @user = user
-    end
+    prop :project_alias, ::ProjectAlias
+    prop :project, ::Project
+    prop :user, ::User
 
     def view_template
       add_project_banner(@project)
@@ -17,7 +14,7 @@ module Views::Controllers::Projects::Aliases
 
       render(Views::Controllers::Projects::Aliases::Form.new(
                @project_alias, user: @user,
-                               local: true
+                               local: false
              ))
       a(href: project_aliases_path(
         project_id: @project_alias.project_id

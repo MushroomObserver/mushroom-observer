@@ -13,22 +13,20 @@
 #   ))
 module Views::Controllers::Locations
   class Form < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(model, display_name: nil, original_name: nil,
-                   set_observation: nil, set_species_list: nil,
-                   set_user: nil, set_herbarium: nil,
-                   dubious_where_reasons: nil, **)
-      @display_name = display_name
-      @original_name = original_name
-      @set_observation = set_observation
-      @set_species_list = set_species_list
-      @set_user = set_user
-      @set_herbarium = set_herbarium
-      @dubious_where_reasons = dubious_where_reasons
+    prop :display_name, _Nilable(String), default: nil
+    prop :original_name, _Nilable(String), default: nil
+    prop :set_observation, _Nilable(Integer), default: nil
+    prop :set_species_list, _Nilable(Integer), default: nil
+    prop :set_user, _Nilable(Integer), default: nil
+    prop :set_herbarium, _Nilable(Integer), default: nil
+    prop :set_project, _Nilable(Integer), default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
+
+    def initialize(model, **attrs)
       model.force_valid_lat_lngs!
-      super(model, **)
+      super
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def around_template
       @attributes[:data] ||= {}
@@ -207,6 +205,7 @@ module Views::Controllers::Locations
               set_observation: @set_observation,
               set_species_list: @set_species_list,
               set_user: @set_user, set_herbarium: @set_herbarium,
+              set_project: @set_project,
               only_path: true)
     end
 

@@ -4,6 +4,12 @@ require("test_helper")
 
 module Views::Controllers::Images::FieldSlipExtracts
   class EditTest < ComponentTestCase
+    # A proxy, not an include: including url_helpers makes MiniTest
+    # pick up route helpers named test_* as test methods.
+    def routes
+      Rails.application.routes.url_helpers
+    end
+
     def setup
       super
       @user = users(:rolf)
@@ -13,12 +19,12 @@ module Views::Controllers::Images::FieldSlipExtracts
       @project = projects(:eol_project)
     end
 
-    def extract_with(fields: {}, confidence: {})
+    def extract_with(fields: {}, confidence: {}, template: "mo", **flags)
       FieldSlipExtract.record(
         image: @image, user: @user, prompt_version: "1",
         result: FieldSlip::Extractor::Result.new(
           provider: "gemini", model: "gemini-3.6-flash", raw: {},
-          fields: fields, confidence: confidence
+          fields: fields, confidence: confidence, template: template, **flags
         )
       )
     end
@@ -43,11 +49,27 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "input[name='value[Substrate]']")
     end
 
+    # A single-line input drops the newlines from its value, gluing a
+    # slip's multi-line Notes together on save; a textarea keeps them.
+    def test_multiline_values_render_a_textarea
+      html = render_page(fields: {
+                           "Notes" => "Phenolic odor\nYellow staining",
+                           "Collector" => "Scott Shapiro"
+                         })
+
+      assert_html(html, "textarea[name='value[Notes]']", text: "Phenolic odor")
+      assert_html(html, "textarea[name='value[Notes]']",
+                  text: "Yellow staining")
+      assert_html(html, "input[name='value[Collector]']",
+                  count: 1)
+      assert_no_html(html, "textarea[name='value[Collector]']")
+    end
+
     # The name gets an autocompleter, which only renders its dropdown
     # and hidden id field when it has a real label -- `label: false`
     # silently drops the append slot they live in.
     def test_name_row_renders_a_live_autocompleter
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Coprinus comatus" })
 
       assert_html(html, "[data-controller='autocompleter--name']")
@@ -59,14 +81,14 @@ module Views::Controllers::Images::FieldSlipExtracts
     # Ticked only when the ID already resolves to a name MO holds, so
     # creating a Name is always a deliberate act.
     def test_name_tick_defaults_on_for_a_known_name
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Coprinus comatus" })
 
       assert_html(html, "input[name='use[ID]'][checked]")
     end
 
     def test_name_tick_defaults_off_for_an_unknown_name
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Lumpy Bracket" })
 
       assert_html(html, "input[name='use[ID]']")
@@ -76,7 +98,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # Pins the SELECTED option, not just the menu's presence: a
     # type mismatch once left none selected (see `render_vote_field`).
     def test_name_section_defaults_the_vote_to_promising
-      html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
+      html = render_page(fields: { "ID" =>
                                    "Coprinus comatus" })
 
       assert_html(html, "select[name='vote']")
@@ -119,6 +141,17 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "input[name='use[Collector]'][checked]")
     end
 
+    # A field with no observation target and no attach action (dbg's
+    # "State" box) gets the plain check-only cell, not a save checkbox.
+    def test_a_targetless_field_renders_check_only
+      html = render_page(template: "dbg",
+                         fields: { "State" => "Colorado" })
+
+      assert_no_html(html, "input[name='use[State]']")
+      assert_html(html, "td small",
+                  text: :field_slip_extract_check_only.l)
+    end
+
     # ---------- flags ----------
 
     def test_flags_a_code_that_disagrees_with_the_attached_slip
@@ -126,12 +159,18 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_includes(html, "NEMF-99999")
       assert_includes(html, @obs.field_slip.code)
+      # The row itself states the check's outcome, not the generic
+      # "cross-check only" that read as "nothing was read".
+      assert_html(html, "td small",
+                  text: :field_slip_extract_code_differs.l)
     end
 
     def test_no_code_flag_when_they_agree
       html = render_page(fields: { "Field Slip Code" => @obs.field_slip.code })
 
       assert_no_html(html, ".alert-danger")
+      assert_html(html, "td small",
+                  text: :field_slip_extract_code_matches.l)
     end
 
     # Naming the undefined abbreviation is what lets an admin add it,
@@ -143,6 +182,23 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_includes(html, "EB2")
       assert_html(html, "a[href*='aliases/new']")
+    end
+
+    # The reported bug's other half: the Add-abbreviation link went to
+    # whichever other project the observation was in, not the slip's.
+    def test_alias_link_targets_the_slips_project
+      @project.observations << @obs unless @project.observations.include?(@obs)
+      slip_project = projects(:open_membership_project)
+      @obs.field_slip.update_columns(project_id: slip_project.id)
+
+      html = render_page(fields: { "Location" => "EB2" })
+
+      assert_html(
+        html,
+        "a[href='#{routes.new_project_alias_path(
+          project_id: slip_project.id
+        )}']"
+      )
     end
 
     def test_no_alias_flag_for_a_known_abbreviation
@@ -196,6 +252,41 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "input[name='inat']")
     end
 
+    # ---------- template ----------
+
+    # A slip on another event's layout was seen but not read; the page
+    # says so instead of showing an empty table with no explanation.
+    def test_flags_a_template_mismatch
+      html = render_page(slip_present: true, template_matched: false)
+
+      assert_html(html, ".alert-danger",
+                  text: :field_slip_extract_template_mismatch.l[0, 40])
+    end
+
+    def test_no_mismatch_flag_for_a_matching_read
+      html = render_page(fields: { "Collector" => "A" },
+                         template_matched: true)
+
+      assert_no_html(html, ".alert-danger")
+    end
+
+    # A dbg extract reviews through its own labels: Species gets the
+    # name section, Location/Foray the locality section, iNaturalist
+    # the flag.
+    def test_dbg_extract_renders_its_own_fields
+      html = render_page(template: "dbg",
+                         fields: { "Species" => "Coprinus comatus",
+                                   "Location/Foray" => "Crags Creek",
+                                   "iNaturalist" => "10:29 388879492",
+                                   "Plants" => "Spruce" })
+
+      assert_html(html, "#field_slip_extract_name")
+      assert_html(html, "input[name='use[Species]'][checked]")
+      assert_html(html, "input[name='value[Location/Foray]']")
+      assert_html(html, "input[name='value[Plants]'][value='Spruce']")
+      assert_html(html, "input[name='inat'][checked]")
+    end
+
     # ---------- locality ----------
 
     # Corrected through an autocompleter, like the ID: a table cell has
@@ -225,6 +316,9 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       assert_html(html,
                   "input[name='value[Location]'][value='#{target.name}']")
+      # The guess message renders its .t markup (the em dash) rather
+      # than a double-escaped "&#8212;" entity.
+      assert_html(html, ".alert-warning", text: "below — check")
     end
 
     def test_locality_keeps_what_was_written_when_nothing_matches

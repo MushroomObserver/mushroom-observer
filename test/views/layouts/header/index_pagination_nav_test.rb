@@ -49,7 +49,7 @@ module Views::Layouts
     def test_page_links_are_styled_as_large_link_buttons
       html = render_nav(pagination_data: paginated(50, 1))
 
-      # Rendered via Link::Icon's button:/size: kwargs, not via raw
+      # Rendered via Link::Get's button:/size: kwargs, not via raw
       # btn/btn-lg strings — see Components::Navbar::LINK_CLASSES.
       # :link (not :default) removes the background/border while
       # keeping button padding — plain icon-only nav buttons, not

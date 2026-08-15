@@ -5,14 +5,10 @@
 # Optionally overlays a project membership confirmation modal.
 module Views::Controllers::Occurrences
   class New < Views::FullPageBase
-    def initialize(source_obs:, recent_observations:, user:,
-                   project_confirm: {})
-      super()
-      @source_obs = source_obs
-      @recent_observations = recent_observations
-      @user = user
-      @project_confirm = project_confirm
-    end
+    prop :source_obs, ::Observation
+    prop :recent_observations, _Array(::Observation)
+    prop :user, ::User
+    prop :project_confirm, Hash, default: -> { {} }
 
     def view_template
       container_class(:full)
@@ -22,7 +18,8 @@ module Views::Controllers::Occurrences
                model: Occurrence.new(primary_observation: @source_obs),
                source_obs: @source_obs,
                recent_observations: @recent_observations,
-               user: @user
+               user: @user,
+               local: false
              ))
       render_project_modal if @project_confirm[:gaps]&.any?
     end
@@ -36,7 +33,7 @@ module Views::Controllers::Occurrences
             auto_open: true,
             user: @user) do |m|
         m.with_form_content do
-          render(Projects::Form.new(**@project_confirm))
+          render(Projects::Form.new(**@project_confirm, local: false))
         end
       end
     end

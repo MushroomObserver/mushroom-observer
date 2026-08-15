@@ -4,6 +4,10 @@ class FieldSlip
   module Extractor
     # Builds the extraction instructions for one image.
     #
+    # The field list and layout-specific reading rules come from the
+    # slip's Template; the shared discipline (transcribe, don't invent,
+    # what "unreadable" means) lives here.
+    #
     # The abbreviation tables come from the project's own ProjectAliases
     # rather than being written into the prompt: a foray's walk numbers
     # and member initials already live there (see #4932), they change
@@ -15,6 +19,7 @@ class FieldSlip
 
       def initialize(context)
         @context = context
+        @template = context.template
       end
 
       def to_s
@@ -24,33 +29,51 @@ class FieldSlip
 
       private
 
+      # The image may be a specimen photo rather than a slip: an
+      # observation carries several photos and only some show one. And
+      # a slip that IS there may be printed on some other event's form:
+      # without the mismatch escape hatch, its boxes get force-fit onto
+      # this template's field list. In either case the tables further
+      # down -- there to help read handwriting -- must not become the
+      # source of the answer: a run has already returned a full
+      # location name lifted verbatim out of the location table for a
+      # photo containing no slip at all.
       def preamble
         "Extract the data written on this mushroom field slip. The slip " \
           "is a printed form; most values are handwritten. Ignore the " \
           "specimen photographed beside it -- do not identify the " \
-          "mushroom yourself, only transcribe what the slip says."
+          "mushroom yourself, only transcribe what the slip says.\n\n" \
+          "The slip should be #{@template.layout}\n\n" \
+          "If this image does not show a field slip, set \"slip_present\" " \
+          "to false and every field to null. If it shows a field slip " \
+          "printed on a DIFFERENT form than the one described above, set " \
+          "\"slip_present\" to true, \"template_matched\" to false, and " \
+          "every field to null -- do not map another form's boxes onto " \
+          "these fields. Do not infer any value from the tables below " \
+          "-- they are reading aids for handwriting that is actually in " \
+          "the image, never a source of answers."
       end
 
       def field_rules
         <<~RULES.strip
           Fields to extract, using exactly these keys:
-          #{Extractor::FIELDS.keys.map { |f| "  - #{f}" }.join("\n")}
+          #{@template.fields.keys.map { |f| "  - #{f}" }.join("\n")}
 
           Rules:
           - Transcribe what is written. Do not correct spelling or
             expand a name you are unsure of.
-          - Use null for a field that is blank or unreadable.
-          - "Field Slip Code" is printed, not handwritten, and looks
-            like #{code_example}. It also appears in the QR code.
-          - "ID" is the name written by the collector. It may be a
-            scientific name, a common name, or a genus alone. Give it
-            verbatim.
-          - Substrate and Habit are often circled from a printed list
-            rather than written. Report the circled word(s).
-          - "MycoMap Voucher Number" is the PRINTED code in the slip's
-            top-right corner, like N26-0290. It is not handwritten and
-            is not the field slip code. Do not put it in "Other Codes";
-            "Other Codes" is only what a person wrote in that box.
+          - Use null for a field you cannot give a value for, whether
+            its box is empty or its writing cannot be made out. Most
+            slips leave several boxes empty; some fill in only one.
+          - List in "unreadable" only those fields that DO have
+            writing you could not recover -- cut off by the edge of
+            the photo, blurred, obscured, or washed out by glare. A
+            box the collector left empty is not unreadable. Getting
+            this right decides whether another photo is worth
+            consulting for that field.
+          - "#{@template.code_field}" is printed, not handwritten, and
+            looks like #{code_example}. It also appears in the QR code.
+          #{@template.field_rules}
         RULES
       end
 
@@ -63,9 +86,9 @@ class FieldSlip
         rows = alias_rows("Location")
         return nil if rows.empty?
 
-        "\"Location\" is usually a walk number or site abbreviation. " \
-          "Map it to the full location name using this table, and " \
-          "return the FULL NAME:\n#{rows}\n" \
+        "\"#{@template.location_field}\" is usually a walk number or " \
+          "site abbreviation. Map it to the full location name using " \
+          "this table, and return the FULL NAME:\n#{rows}\n" \
           "If the written value is not in the table, return it " \
           "verbatim -- do not guess which site was meant."
       end
@@ -112,8 +135,11 @@ class FieldSlip
           Return ONLY a JSON object, with no markdown fence, of the form:
 
           {
+            "slip_present": true | false,
+            "template_matched": true | false,
             "fields": { <each key above>: <string or null> },
             "confidence": { <each key above>: "high" | "medium" | "low" },
+            "unreadable": [ <keys written on the slip but not recoverable> ],
             "notes": "anything about readability worth a reviewer knowing"
           }
         FORMAT

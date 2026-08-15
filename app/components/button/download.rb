@@ -10,8 +10,11 @@
 #     target: new_download_species_list_path(id: @sl.id)
 #   )
 class Components::Button::Download < Components::Link::Download
-  def initialize(target:, name: nil, icon: :download, variant: nil, **)
-    super(target: target, name: name, icon: icon, button: variant, **)
+  def initialize(target: nil, name: nil, icon: :download, variant: nil,
+                 **opts)
+    tab = opts.delete(:tab)
+    super(target: target, tab: tab, name: name, icon: icon,
+          button: variant, **opts)
   end
 
   private

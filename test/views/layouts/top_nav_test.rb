@@ -75,6 +75,35 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_no_html(html, "a.btn-success")
   end
 
+  # A "+ Add" button pointing at :new from the :new page itself (or a
+  # failed :create re-rendering that same template) is a redundant
+  # link back to the page already showing.
+  def test_nav_create_hidden_on_new_action
+    define_singleton_action_name!("new")
+
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, "a.btn-success")
+  end
+
+  def test_nav_create_hidden_on_create_action
+    define_singleton_action_name!("create")
+
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, "a.btn-success")
+  end
+
+  # Contrast with the above: other pages on the same (creatable)
+  # controller still show the button.
+  def test_nav_create_shown_on_index_and_show_actions
+    define_singleton_action_name!("index")
+    assert_html(render(top_nav(user: @user)), "a.btn-success")
+
+    define_singleton_action_name!("show")
+    assert_html(render(top_nav(user: @user)), "a.btn-success")
+  end
+
   # ---- nav_rubric ----------------------------------------------------
 
   def test_rubric_renders_as_index_link_when_on_show_page
@@ -120,6 +149,23 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     html = render(top_nav(user: nil))
 
     assert_no_html(html, "a[href='#{routes.field_slips_qr_reader_new_path}']")
+  end
+
+  # ---- show-banner button ---------------------------------------------
+
+  def test_show_banner_button_hidden_when_no_current_banner
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, "svg.mo-icon-interests")
+  end
+
+  def test_show_banner_button_present_when_banner_given
+    html = render(top_nav(user: @user, banner: banners(:one)))
+
+    assert_html(html,
+                "button.top_nav_button.top_nav_icon_button.hidden-xs" \
+                "[data-banner-target='showButton'] " \
+                "svg.mo-icon-interests[aria-label='#{:banner_show_tooltip.t}']")
   end
 
   # ---- nav-toggles (mobile chrome) ----------------------------------
@@ -171,8 +217,8 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   private
 
-  def top_nav(user:, query: nil)
-    TopNavWithoutSearchRow.new(user: user, query: query)
+  def top_nav(user:, query: nil, banner: nil)
+    TopNavWithoutSearchRow.new(user: user, query: query, banner: banner)
   end
 
   # Override controller_name on the test controller so methods like

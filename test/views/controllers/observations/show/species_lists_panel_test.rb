@@ -29,11 +29,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     assert(user.species_list_ids.none?,
            "Need user fixture who owns no species lists")
 
-    html = render(
-      Views::Controllers::Observations::Show::SpeciesListsPanel.new(
-        obs: obs, user: user
-      )
-    )
+    html = render(panel_with(obs, user))
 
     assert_equal("", html)
   end
@@ -46,11 +42,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     assert(user.species_list_ids.any?,
            "Need user fixture who owns at least one species list")
 
-    html = render(
-      Views::Controllers::Observations::Show::SpeciesListsPanel.new(
-        obs: obs, user: user
-      )
-    )
+    html = render(panel_with(obs, user))
 
     assert_html(
       html,
@@ -82,7 +74,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     form_selector = "form[action='#{routes.observation_species_list_path(
       id: @obs.id, species_list_id: spl.id, commit: "remove"
     )}']"
-    assert_html(html, "#{form_selector} button span.glyphicon-remove-circle")
+    assert_html(html, "#{form_selector} button svg.mo-icon-remove")
     assert_html(html, "#{form_selector} button span.sr-only",
                 text: :remove.ti)
   end
@@ -93,9 +85,9 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     Rails.application.routes.url_helpers
   end
 
-  def panel_with(obs)
+  def panel_with(obs, user = @user)
     Views::Controllers::Observations::Show::SpeciesListsPanel.new(
-      obs: obs, user: @user
+      obs: obs, user: user
     )
   end
 end

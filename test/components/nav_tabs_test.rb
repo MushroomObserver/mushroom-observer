@@ -57,8 +57,7 @@ class NavTabsTest < ComponentTestCase
   end
 
   def test_attributes_forwarded_to_ul
-    html = render_with(attributes: { id: "my_tabs",
-                                     data: { x: "v" } }) do |tabs|
+    html = render_with(id: "my_tabs", data: { x: "v" }) do |tabs|
       tabs.tab("One", "/one")
     end
 
@@ -107,9 +106,7 @@ class NavTabsTest < ComponentTestCase
     project = projects(:bolete_project)
     collection = Tab::Project::AdminSubtabs.new(project: project)
 
-    html = render(Components::NavTabs.new(
-                    current: "members", tabs: collection
-                  ))
+    html = render_with(current: "members", tabs: collection)
 
     # Collection contributed 4 tabs; the one keyed "members" is active.
     assert_html(html, "ul.nav-tabs > li.nav-item", count: 4)
@@ -123,7 +120,7 @@ class NavTabsTest < ComponentTestCase
     project = projects(:bolete_project)
     collection = Tab::Project::AdminSubtabs.new(project: project)
 
-    html = render(Components::NavTabs.new) do |tabs|
+    html = render_with do |tabs|
       tabs.add_all(collection)
       tabs.tab("Extra", "/extra", key: "extra")
     end

@@ -35,29 +35,33 @@ svg.placeholder {
 .theater-btn {
   z-index: 2;
   opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.vote-section {
   background: rgba(0,0,0, 0.8);
   // border-radius: $border-radius-sm;
   color: white;
-  transition: opacity 0.3s ease-out;
 }
 
 .theater-btn {
   @extend .top-right, .text-center, .mr-2, .mt-2;
-  padding: 0.125em;
-  // `.theater-btn` is a `div` now, not an `a` (#4894 -- an `a` can't
-  // legally contain the caption's interactive content nested inside
-  // it), so the pointer cursor needs to be explicit.
-  cursor: pointer;
+}
+
+// Dark, borderless button styling for a `.btn` overlaying an image --
+// pair with `.btn` on the element. No cursor/display/position/reveal
+// framing of its own; `.theater-btn` (the lightbox toggle) supplies
+// those for its specific placement and hover-reveal behavior, so
+// `.btn-overlay` alone stays usable for a non-hover overlay button
+// too.
+.btn-overlay {
+  @extend .p-1;
+  border: none;
+  background-color: $black;
+  color: $white;
 
   &:hover {
     color: rgba(white, 0.75);
-  }
-
-  i {
-    height: 2.4rem;
-    width: 2.4rem;
-    font-size: 2.1rem;
-    vertical-align: bottom;
   }
 }
 

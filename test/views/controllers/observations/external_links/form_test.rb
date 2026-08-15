@@ -9,7 +9,7 @@ module Views::Controllers::Observations::ExternalLinks
       @external_link = ExternalLink.new
       @observation = observations(:coprinus_comatus_obs)
       @user = users(:rolf)
-      @sites = ExternalSite.all
+      @sites = ExternalSite.all.to_a
       @site = @sites.first
       @base_urls = @sites.to_h do |site|
         [site.name, site.base_url]

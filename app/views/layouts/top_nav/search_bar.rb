@@ -106,9 +106,17 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # `SearchController#pattern` (after it pluralizes the submitted
   # form value) or by `ApplicationController::Queries` (which
   # stores `Query#search_type`, already plural from the
-  # controller's module name).
+  # controller's module name). The latter stores it for EVERY
+  # query-backed index — including types the select has no option
+  # for (e.g. `:rss_logs` from the Activity Log). An unselectable
+  # value would leave the browser showing the first alphabetical
+  # option ("Comments"), so those fall back to :observations
+  # (#4969).
   def default_search_type
-    controller.session[:search_type]&.to_sym || :observations
+    type = controller.session[:search_type]&.to_sym
+    return type if Components::Form::PatternSearch::TYPE_VALUES.include?(type)
+
+    :observations
   end
 
   def help_visible?

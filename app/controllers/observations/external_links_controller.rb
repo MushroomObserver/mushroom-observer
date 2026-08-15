@@ -73,7 +73,6 @@ module Observations
         @user, @observation, admin: in_admin_mode?
       )
       @site = @sites&.first
-      @back_object = @observation
     end
 
     def set_ivars_for_edit
@@ -84,11 +83,24 @@ module Observations
                      includes(Observation.matrix_box_includes).
                      find(@external_link.observation.id)
       @site = @external_link.external_site
-      @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
+      @sites = sites_including_current(@site)
+      # No standalone external_link "show" destination exists to offer
+      # as an alternative (unlike sequences' back=show) -- redirects
+      # always go to the observation. @back only exists so an
+      # incoming `?back=<url>` survives a validation-error reload;
+      # blank/absent is the common case and every consumer already
+      # guards on `@back.present?` before using it.
+      @back = params.permit(:back)[:back]
+    end
+
+    # The link's current site must stay selectable even if the user
+    # is no longer a member of it (project membership can change
+    # after a link is created).
+    def sites_including_current(site)
+      sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       ).to_a
-      @sites |= [@site] # the link's current site must stay selectable
-      @back_object = @observation
+      sites | [site]
     end
 
     def check_external_link_permission!(link: nil, obs: nil, site: nil)
@@ -226,7 +238,7 @@ module Observations
                model: @external_link,
                observation: @observation,
                back: @back,
-               form_locals: { sites: @sites, site: @site }
+               form_locals: { sites: @sites, site: @site, user: @user }
              ), layout: false)
     end
 

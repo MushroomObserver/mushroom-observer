@@ -7,6 +7,11 @@ module InatImportsController::FormBuilders
     :recheck_all, :skip_inat_writeback, :create_skeletons
   ].freeze
 
+  # Params that are literally "1" when checked/selected, absent or any
+  # other value otherwise -- read verbatim, no per-field branching.
+  CHECKBOX_FLAG_PARAMS = [:all, :consent, :import_others,
+                          :recheck_all].freeze
+
   private
 
   def build_confirm_form
@@ -17,87 +22,77 @@ module InatImportsController::FormBuilders
     )
   end
 
-  def reload_form
-    render_new_form(submitted: reload_form_params)
-  end
-
-  def reload_form_params
-    base_reload_params.merge(constraint_reload_params)
-  end
-
-  def base_reload_params
-    {
-      username: params[:inat_username],
-      consent: params[:consent],
-      import_others: params[:import_others],
-      create_skeletons: params[:create_skeletons],
-      recheck_all: params[:recheck_all],
-      skip_writeback: params[:skip_inat_writeback]
-    }
-  end
-
-  def constraint_reload_params
-    {
-      inat_ids: params[:inat_ids],
-      inat_url: params[:original_inat_url] || params[:inat_url],
-      all: params[:all],
-      choose_method: params[:choose_method]
-    }
-  end
-
-  def render_new_form(submitted: {})
+  def render_new_view(status: :ok, **render_opts)
     render(
       Views::Controllers::InatImports::New.new(
-        form: build_new_form(submitted),
+        form: build_new_form,
         super_importer: InatImport.super_importer?(@user),
         admin: in_admin_mode?,
         has_prior_imports: InatImport.exists?(user: @user)
-      )
+      ),
+      status: status, **render_opts
     )
   end
 
-  def build_new_form(submitted)
+  # `params[...]` naturally carries a resubmission's values forward
+  # (Superform's namespaced fields are already flattened to top-level
+  # by flatten_new_form_params/flatten_confirm_params), and is
+  # naturally blank on a fresh GET -- so this needs no separate
+  # "fresh vs. reload" branch, just `params` read directly with the
+  # same fallbacks either way.
+  def build_new_form
     FormObject::InatImport.new(
-      inat_username: submitted.fetch(:username, @user.inat_username),
-      inat_ids: submitted[:inat_ids],
-      inat_url: submitted[:inat_url],
-      all: ("1" if submitted[:all] == "1"),
-      choose_method: submitted[:choose_method] ||
-                     derive_choose_method(submitted),
-      consent: ("1" if submitted[:consent] == "1"),
-      import_others: ("1" if submitted[:import_others] == "1"),
-      create_skeletons: initial_create_skeletons(submitted),
-      recheck_all: ("1" if submitted[:recheck_all] == "1"),
-      skip_inat_writeback: initial_skip_writeback(submitted)
+      inat_username: params[:inat_username] || @user.inat_username,
+      inat_ids: params[:inat_ids],
+      inat_url: reload_inat_url,
+      choose_method: params[:choose_method] || derive_choose_method,
+      skip_inat_writeback: initial_skip_writeback,
+      create_skeletons: initial_create_skeletons,
+      **checkbox_flag_params
     )
   end
 
-  def derive_choose_method(submitted)
-    return "all" if submitted[:all] == "1"
-    return "ids" if submitted[:inat_ids].present?
-    return "url" if submitted[:inat_url].present?
+  def checkbox_flag_params
+    CHECKBOX_FLAG_PARAMS.index_with { |key| "1" if params[key] == "1" }
+  end
+
+  # `normalize_inat_url_param!` overwrites params[:inat_url] in place
+  # with the normalized query string, saving the pre-normalized value
+  # to params[:original_inat_url] first -- prefer that original text
+  # for redisplay so the user sees what they actually typed.
+  def reload_inat_url
+    params[:original_inat_url] || params[:inat_url]
+  end
+
+  def derive_choose_method
+    return "all" if params[:all] == "1"
+    return "ids" if params[:inat_ids].present?
+    return "url" if reload_inat_url.present?
 
     "all"
   end
 
-  # The fresh form (no :skip_writeback key) pre-checks the box to mirror the
-  # default that will apply if the admin doesn't touch it: skip in
-  # development, write back in production. On reload, honor the submitted
-  # state.
-  def initial_skip_writeback(submitted)
+  # The fresh form (a GET with no params submitted at all, so
+  # :skip_inat_writeback is absent from params entirely) pre-checks the
+  # box to mirror the default that will apply if the admin doesn't
+  # touch it: skip in development, write back in production. On reload
+  # (after a POST), the key is always present -- CheckboxField's hidden
+  # "0" sidecar means an unchecked box still submits the key, just with
+  # value "0" -- so honor the submitted state instead.
+  def initial_skip_writeback
     return ("1" if Rails.env.development?) unless
-      submitted.key?(:skip_writeback)
+      params.key?(:skip_inat_writeback)
 
-    ("1" if submitted[:skip_writeback] == "1")
+    ("1" if params[:skip_inat_writeback] == "1")
   end
 
   # The fresh form (no :create_skeletons key) pre-checks the box — building
   # a skeleton counterpart for an unlicensed import-others obs is the
   # default (#4828). On reload, honor the submitted state.
-  def initial_create_skeletons(submitted)
-    return "1" unless submitted.key?(:create_skeletons)
+  def initial_create_skeletons
+    return "1" unless params.key?(:create_skeletons)
 
-    ("1" if submitted[:create_skeletons] == "1")
+    ("1" if params[:create_skeletons] == "1")
   end
 
   # Superform namespaces hidden fields under the model key.

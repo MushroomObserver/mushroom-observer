@@ -17,7 +17,7 @@ module Projects
 
       user = project.user
       login(user.login)
-      get(:index, params: { project_id: project.id })
+      get(:index, params: { id: project.id })
 
       assert_response(:success)
       assert_select("#content", { text: /#{project.title}/ })
@@ -35,7 +35,7 @@ module Projects
                    "Test needs project with no violations")
 
       login(project.user.login)
-      get(:index, params: { project_id: project.id })
+      get(:index, params: { id: project.id })
 
       assert_response(:success)
       assert_select("p", { text: /#{:form_violations_no_violations.l}/ })
@@ -44,7 +44,7 @@ module Projects
     def test_update_legacy_remove_selected
       project = projects(:falmouth_2023_09_project)
       victim = project.violations.first.obs
-      params = { project_id: project.id,
+      params = { id: project.id,
                  project: { "remove_#{victim.id}" => "1" } }
 
       login(project.user.login)
@@ -57,13 +57,13 @@ module Projects
     def test_update_exclude
       project = projects(:falmouth_2023_09_project)
       victim = project.violations.first.obs
-      params = { project_id: project.id,
+      params = { id: project.id,
                  project: { do: "exclude", obs_id: victim.id } }
 
       login(project.user.login)
       put(:update, params: params)
 
-      assert_redirected_to(project_violations_path(project_id: project.id))
+      assert_redirected_to(project_violations_path(project.id))
       assert_includes(project.excluded_observations, victim)
       assert_not_includes(project.observations, victim)
     end
@@ -74,7 +74,7 @@ module Projects
         project.violations.find { |v| v.kinds.include?(:date) }
       assert(future_violation, "Test needs a date violation in fixtures")
       victim = future_violation.obs
-      params = { project_id: project.id,
+      params = { id: project.id,
                  project: { do: "extend", obs_id: victim.id } }
 
       login(project.user.login)
@@ -94,13 +94,13 @@ module Projects
       off_target = observations(:peltigera_obs)
       proj.add_observation(off_target)
 
-      params = { project_id: proj.id,
+      params = { id: proj.id,
                  project: { do: "add_target_name",
                             obs_id: off_target.id } }
       login(proj.user.login)
       put(:update, params: params)
 
-      assert_redirected_to(project_violations_path(project_id: proj.id))
+      assert_redirected_to(project_violations_path(proj.id))
       assert_includes(proj.target_names.reload, off_target.name)
     end
 
@@ -114,14 +114,14 @@ module Projects
       proj.add_observation(elsewhere)
       new_target = locations(:falmouth)
 
-      params = { project_id: proj.id,
+      params = { id: proj.id,
                  project: { do: "add_target_location",
                             obs_id: elsewhere.id,
                             location_id: new_target.id } }
       login(proj.user.login)
       put(:update, params: params)
 
-      assert_redirected_to(project_violations_path(project_id: proj.id))
+      assert_redirected_to(project_violations_path(proj.id))
       assert_includes(proj.target_locations.reload, new_target)
     end
 
@@ -134,7 +134,7 @@ module Projects
       victim = proj.violations.first.obs
 
       login(stranger.login)
-      put(:update, params: { project_id: proj.id,
+      put(:update, params: { id: proj.id,
                              project: { do: "extend",
                                         obs_id: victim.id } })
 
@@ -149,11 +149,11 @@ module Projects
       victim = proj.violations.first.obs
 
       login(victim.user.login)
-      put(:update, params: { project_id: proj.id,
+      put(:update, params: { id: proj.id,
                              project: { do: "exclude",
                                         obs_id: victim.id } })
 
-      assert_redirected_to(project_violations_path(project_id: proj.id))
+      assert_redirected_to(project_violations_path(proj.id))
       assert_includes(proj.excluded_observations, victim,
                       "Obs owner can self-exclude their own violation")
     end
@@ -166,7 +166,7 @@ module Projects
       assert_not(proj.is_admin?(stranger))
 
       login(stranger.login)
-      put(:update, params: { project_id: proj.id,
+      put(:update, params: { id: proj.id,
                              project: { do: "exclude",
                                         obs_id: victim.id } })
 
@@ -176,7 +176,7 @@ module Projects
 
     def test_update_nonexistent_project
       id = -1
-      params = { project_id: id,
+      params = { id: id,
                  project: { do: "exclude", obs_id: 0 } }
       login
       put(:update, params: params)
@@ -195,7 +195,7 @@ module Projects
 
       login(project.user.login)
       get(:target_location_modal,
-          params: { project_id: project.id, obs_id: obs.id },
+          params: { id: project.id, obs_id: obs.id },
           format: :turbo_stream)
 
       assert_response(:success)
@@ -206,6 +206,7 @@ module Projects
                     "Endpoint must render the Add-Target-Location modal")
       assert_select("##{modal_id} form > .modal-body", { count: 1 })
       assert_select("##{modal_id} form > .modal-footer", { count: 1 })
+      assert_select("##{modal_id} form[data-turbo='true']", { count: 1 })
       assert_select(
         "##{modal_id} input[type=hidden][name='project[do]']" \
         "[value=add_target_location]",
@@ -235,7 +236,7 @@ module Projects
 
       login(project.user.login)
       get(:target_location_modal,
-          params: { project_id: project.id, obs_id: obs.id },
+          params: { id: project.id, obs_id: obs.id },
           format: :turbo_stream)
 
       assert_response(:success)
@@ -258,7 +259,7 @@ module Projects
 
       login(users(:mary).login) # not admin of rare_fungi_project
       get(:target_location_modal,
-          params: { project_id: project.id, obs_id: obs.id },
+          params: { id: project.id, obs_id: obs.id },
           format: :turbo_stream)
 
       assert_response(:not_found)
@@ -268,7 +269,7 @@ module Projects
       project = projects(:rare_fungi_project)
       login(project.user.login)
       get(:target_location_modal,
-          params: { project_id: project.id, obs_id: -1 },
+          params: { id: project.id, obs_id: -1 },
           format: :turbo_stream)
 
       assert_response(:not_found)
@@ -278,7 +279,7 @@ module Projects
       obs = observations(:falmouth_2023_09_obs)
       login(users(:rolf).login)
       get(:target_location_modal,
-          params: { project_id: -1, obs_id: obs.id },
+          params: { id: -1, obs_id: obs.id },
           format: :turbo_stream)
 
       assert_response(:not_found)

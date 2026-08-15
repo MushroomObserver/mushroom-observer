@@ -202,7 +202,7 @@ class SequencesController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back]
+    @back = params.permit(:back)[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
   end
 

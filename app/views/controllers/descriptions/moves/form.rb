@@ -7,14 +7,37 @@ module Views::Controllers::Descriptions::Moves
   # shows. Shared between names/descriptions/moves and
   # locations/descriptions/moves.
   class Form < ::Components::ApplicationForm
-    def initialize(description, user:)
-      @description = description
-      @user = user
+    prop :description, ::Description
+    prop :user, ::User
+
+    def initialize(description, user:, **)
+      # `self.class.sorted_moves_for` (not the instance `sorted_moves`,
+      # which reads the `@description` prop) -- prop assignment hasn't
+      # happened yet at this point in construction.
+      sorted = self.class.sorted_moves_for(description)
       form_object = FormObject::DescriptionMoveOrMerge.new
-      form_object.target = default_target_id if default_checked?
+      form_object.target = sorted.first.id if sorted.length == 1
       form_object.delete = description.is_admin?(user)
       # Keep the explicit DOM id — tests rely on it.
-      super(form_object, id: "move_descriptions_form")
+      super(form_object, description: description, user: user,
+                         id: "move_descriptions_form", **)
+    end
+
+    # Location doesn't have synonyms, only Name does. Class methods
+    # (not instance methods reading `@description`) so they're usable
+    # from `initialize`, before prop assignment, as well as after.
+    def self.moves_for(description)
+      return [] unless description.parent.respond_to?(:synonyms)
+
+      description.parent.synonyms.reject do |n|
+        n == description.parent || n.is_misspelling?
+      end
+    end
+
+    def self.sorted_moves_for(description)
+      moves_for(description).sort_by do |n|
+        [(n.deprecated ? 1 : 0), n.sort_name, n.id]
+      end
     end
 
     def view_template
@@ -32,18 +55,13 @@ module Views::Controllers::Descriptions::Moves
     private
 
     # `sorted_moves` is only ever populated for NameDescription moves
-    # (`compute_moves` returns [] when the parent doesn't respond to
+    # (`moves_for` returns [] when the parent doesn't respond to
     # `synonyms`, which is only Name) - always Name instances.
     def render_move_options
       options = sorted_moves.map do |name|
         [name.id, name.display_name(@user).t]
       end
       radio_field(:target, *options)
-    end
-
-    def default_target_id
-      # default_checked? guarantees moves.length == 1, so .first is safe.
-      sorted_moves.first.id
     end
 
     def render_delete_checkbox
@@ -55,24 +73,11 @@ module Views::Controllers::Descriptions::Moves
     end
 
     def moves
-      @moves ||= compute_moves
-    end
-
-    def compute_moves
-      # Location doesn't have synonyms, only Name does
-      return [] unless @description.parent.respond_to?(:synonyms)
-
-      result = @description.parent.synonyms - [@description.parent]
-      result.reject!(&:is_misspelling?)
-      result
+      @moves ||= self.class.moves_for(@description)
     end
 
     def sorted_moves
-      moves.sort_by { |n| [(n.deprecated ? 1 : 0), n.sort_name, n.id] }
-    end
-
-    def default_checked?
-      moves.length == 1
+      self.class.sorted_moves_for(@description)
     end
 
     def name_description?

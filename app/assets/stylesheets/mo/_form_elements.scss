@@ -310,3 +310,13 @@ form {
     }
   }
 }
+
+// Locks a form's remaining fields while a deferred submit is pending,
+// toggled via `form.inert = true/false` in form-images_controller.js.
+// `inert` blocks pointer/keyboard/focus interaction without excluding
+// fields from serialization the way `disabled` would, so this rule is
+// purely the visual signal.
+form[inert] {
+  opacity: 0.6;
+  cursor: progress;
+}

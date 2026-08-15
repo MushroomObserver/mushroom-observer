@@ -14,7 +14,7 @@ class Views::Layouts::Sidebar
     def view_template
       render(Components::ListGroup::Item.new(class: @classes[:heading])) do
         Icon(type: :user)
-        span { plain("#{@heading_key.t}:") }
+        span(class: "ml-2") { plain("#{@heading_key.t}:") }
       end
 
       @tabs.compact.each do |link|

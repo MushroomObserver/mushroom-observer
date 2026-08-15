@@ -15,7 +15,7 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1 or /visual_groups/1.json
   def show
-    @filter = params[:filter]
+    @filter = params.permit(:filter)[:filter]
     @visual_group = VisualGroup.find(params[:id])
     @vals = calc_show_vals
     setup_pagination
@@ -37,7 +37,7 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups/1/edit
   def edit
     @visual_group = VisualGroup.find(params[:id])
-    @filter = params[:filter]
+    @filter = params.permit(:filter)[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""
     @status = status_from_params(params)
     @vals = calc_edit_vals
@@ -63,7 +63,7 @@ class VisualGroupsController < ApplicationController
     return "included" if params[:commit] == :visual_group_included.t
     return "excluded" if params[:commit] == :visual_group_excluded.t
 
-    params[:status] || "needs_review"
+    params.permit(:status)[:status] || "needs_review"
   end
 
   # POST /visual_groups or /visual_groups.json

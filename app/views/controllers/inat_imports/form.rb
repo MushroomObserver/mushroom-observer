@@ -5,11 +5,8 @@ module Views::Controllers::InatImports
   # controller's `new.rb` view. Renders username, observation method
   # radios (all / list of IDs / URL), consent, and details.
   class Form < ::Components::ApplicationForm
-    def initialize(model, super_importer: false, admin: false, **)
-      @super_importer = super_importer
-      @admin = admin
-      super(model, **)
-    end
+    prop :super_importer, _Boolean, default: false
+    prop :admin, _Boolean, default: false
 
     def view_template
       super do

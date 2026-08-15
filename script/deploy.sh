@@ -15,6 +15,91 @@ if [ "$RAILS_ENV" != "production" ]; then
     exit 1
 fi
 
+# Icon-library refresh, shared by --icons-only (asset-only, no code
+# deploy) and --icons (bundled into a normal code deploy below).
+# Nothing else valid lives in $icons_dir, so a stale/broken checkout
+# is clobbered and re-cloned rather than pulled or preserved -- pull
+# can't recover from a non-git or wrong-remote directory, and this
+# way there's only one code path instead of pull-if-clean-else-abort.
+refresh_icon_library() {
+    icons_dir="vendor/assets/images/icons"
+
+    echo "Refreshing $icons_dir..."
+    rm -rf "$icons_dir"
+    git clone --filter=blob:none --sparse \
+        git@github.com:MushroomObserver/icon-library.git "$icons_dir" ||
+        git clone --filter=blob:none --sparse \
+            https://github.com/MushroomObserver/icon-library.git "$icons_dir"
+    if [ $? -ne 0 ]; then
+        echo Cloning the icon library failed.
+        return 1
+    fi
+
+    source script/icon_library_narrow_checkout.sh
+    icon_library_narrow_checkout "$icons_dir"
+    if [ $? -ne 0 ]; then
+        echo Narrowing the icon-library checkout to mo-icons.svg failed.
+        return 1
+    fi
+
+    # A successful clone doesn't guarantee mo-icons.svg itself is
+    # there -- verify explicitly rather than trusting the command's
+    # exit status alone. Production without icons is a real
+    # regression (illegible site), not a tolerable degraded state
+    # (contrast with the best-effort skip elsewhere for CI/dev), so
+    # this is a hard failure.
+    if [ ! -f "$icons_dir/mo-icons.svg" ]; then
+        echo "$icons_dir/mo-icons.svg is missing after the clone --"
+        echo "check icon-library's main branch. Aborting rather than"
+        echo "precompiling and reloading without a working icon sprite."
+        return 1
+    fi
+}
+
+# --icons-only is a manual, opt-in icon-library refresh -- deliberately
+# NOT part of a standard deploy (the icon-library repo has its own
+# release cadence, unrelated to app code). Exits here rather than
+# falling through to the code-deploy flow below, since none of that
+# (git branch check, maintenance page, puma/solidqueue stop,
+# db:migrate, lang:update) applies to a licensed-asset-only refresh.
+#
+# --icons bundles the same refresh into a normal code deploy (see the
+# icons_flag check further down, right before the single
+# assets:precompile that deploy already does) -- one precompile
+# instead of two separate ones from running --icons-only and a plain
+# deploy back to back.
+icons_flag=0
+case "$1" in
+    --icons-only)
+        refresh_icon_library || exit 1
+
+        # Assets are precompiled (config.assets.compile = false in
+        # production) and fingerprinted, so new icon files aren't live
+        # until recompiled. `service puma reload` sends SIGUSR2 (see
+        # config/etc/puma.service's ExecReload) -- Puma's hot restart,
+        # which re-execs and picks up the new manifest while keeping
+        # the listening socket, so this needs neither the maintenance
+        # page nor a full stop/start.
+        echo Precompiling assets... && rake assets:precompile
+        if [ $? -ne 0 ]; then
+            echo assets:precompile failed.
+            exit 1
+        fi
+
+        echo Reloading puma... && sudo service puma reload
+        if [ $? -ne 0 ]; then
+            echo Puma reload failed.
+            exit 1
+        fi
+
+        echo SUCCESS\!
+        exit 0
+        ;;
+    --icons)
+        icons_flag=1
+        ;;
+esac
+
 if [ "$(git branch | grep '^\*')" != "* main" ]; then
     echo Please switch to main branch.
     exit 1
@@ -115,6 +200,18 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
 	echo Restarting solidqueue... && sudo service solidqueue start
 	echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
 	exit 1
+    fi
+fi
+
+if [ "$icons_flag" = "1" ]; then
+    refresh_icon_library
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "Deploy failed. Restarting puma and solidqueue with existing code..."
+        sudo service puma start
+        sudo service solidqueue start
+        echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
+        exit 1
     fi
 fi
 

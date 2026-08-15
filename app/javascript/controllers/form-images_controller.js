@@ -49,6 +49,11 @@ export default class extends Controller {
   static targets = ["form", "carousel", "item", "thumbnail", "removeImg",
     "imageGpsMap", "goodImageIds"]
 
+  // How long submitWhenExifReady polls before giving up and submitting
+  // anyway (30 * 100ms = 3s). See submitWhenExifReady for why this is
+  // bounded rather than an unbounded wait.
+  static MAX_EXIF_WAIT_ATTEMPTS = 30
+
   initialize() {
   }
 
@@ -63,7 +68,7 @@ export default class extends Controller {
     // this.form = document.forms.observation_form;
     this.form = this.element;
     this.drop_zone = this.formTarget;
-    this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
+    this.submit_buttons = this.element.querySelectorAll('button[type="submit"]');
     // Phlex renders `data: { upload_max_size: ... }` as the DOM attribute
     // `data-upload-max-size`, which reads back as `dataset.uploadMaxSize`
     // (camelCase) -- NOT `dataset.upload_max_size`. The old underscore key
@@ -88,6 +93,20 @@ export default class extends Controller {
     this.submit_buttons.forEach((element) => {
       element.disabled = false;
     });
+    // ...and the rest of the form is interactive (a Turbo-swapped-in
+    // form after a validation failure is a fresh element, but this
+    // covers it explicitly rather than relying on that).
+    this.form.inert = false;
+    this.form.removeAttribute('aria-busy');
+    // Captured so a failed upload (handleUploadFailure) can restore
+    // the real "Create"/"Save changes" text -- uploadItem overwrites
+    // it with the uploading_text while a request is in flight, and
+    // there's otherwise no way back to what the button said before.
+    this.original_button_labels = new Map(
+      Array.from(this.submit_buttons).map(
+        (el) => [el, el.tagName === 'BUTTON' ? el.textContent : el.value]
+      )
+    );
 
     // Drag and Drop bindings on the form
     this.drop_zone.addEventListener('dragover', (e) => {
@@ -151,14 +170,22 @@ export default class extends Controller {
   // Callback for form-exif event "populated", fired from the carousel-item
   itemExifPopulated(event) {
     const _item = this.findFileStoreItem(event.target);
-    _item.exif_populated = true;
+    // The item may already be gone (user removed it, or EXIF finished
+    // after `fileStore.items` drained past it during upload) -- `index`
+    // is kept in sync with removals, so a miss here means "no longer
+    // relevant," not a bug.
+    if (_item) _item.exif_populated = true;
   }
 
+  // Checks `index`, not the upload-queue `items` array: `items` is
+  // drained via `.shift()` as each image uploads (see `uploadAll`/
+  // `onUploadedCallback`), so by the time every image has uploaded it's
+  // always empty -- `index` is the only place a full, still-accurate
+  // "every item added" list survives to this point.
   areAllItemsExifPopulated() {
-    this.fileStore.items.forEach((item) => {
-      if (!item.exif_populated) return false;
-    });
-    return true;
+    return Object.values(this.fileStore.index).every(
+      (item) => item.exif_populated
+    );
   }
 
   addFiles(files) {
@@ -170,6 +197,7 @@ export default class extends Controller {
       this.loadAndDisplayItem(_item, i);
 
       this.fileStore.items.push(_item)
+      this.fileStore.index[_item.uuid] = _item
     }
   }
 
@@ -180,6 +208,7 @@ export default class extends Controller {
       this.loadAndDisplayItem(_item, 0);
 
       this.fileStore.items.push(_item);
+      this.fileStore.index[_item.uuid] = _item
     }
   }
 
@@ -206,10 +235,27 @@ export default class extends Controller {
     this.submit_buttons.forEach(
       (element) => { element.disabled = true }
     );
-    // Note that remove image links are not present at initialization
+    // Note that remove image links are not present at initialization.
+    // Disabled, not hidden (issue #5068 option 1) -- an image mid-write
+    // shouldn't be removable, but the carousel item it belongs to stays
+    // visible until navigation.
     this.removeImgTargets.forEach((elem) => {
-      this.hide(elem);
+      elem.disabled = true;
     });
+
+    // Lock the rest of the form (locality, date, notes, projects,
+    // naming, thumb-image radios, etc.) for the whole in-flight
+    // window, not just the buttons above. Values are serialized at the
+    // deferred requestSubmit() in submitForm(), not at this click, so
+    // anything still editable during the upload/EXIF wait can silently
+    // race that submit. `inert`, unlike `disabled`, doesn't exclude a
+    // field from form serialization -- it only blocks pointer,
+    // keyboard, and focus interaction (and blurs anything already
+    // focused inside it), which is exactly what's needed here. Doesn't
+    // affect this controller's own JS writes to the form (e.g.
+    // updateObsImages) while inert.
+    this.form.inert = true;
+    this.form.setAttribute('aria-busy', 'true');
 
     let _firstUpload;
     // uploads first image. if we have one, and bumps it off the list
@@ -217,8 +263,7 @@ export default class extends Controller {
       this.uploadItem(_firstUpload);
     } else {
       // no images to upload, submit form
-      this.block_form_submission = false;
-      this.form.submit();
+      this.submitWhenExifReady();
     }
 
     return false;
@@ -240,12 +285,54 @@ export default class extends Controller {
       this.uploadItem(_nextInLine);
     // now the form will be submitted without hitting the uploads.
     else {
-      this.block_form_submission = false;
       this.submit_buttons.forEach((element) => {
-        element.value = this.localized_text.creating_observation_text;
+        this.setButtonLabel(element,
+          this.localized_text.creating_observation_text);
       });
-      this.form.submit();
+      this.submitWhenExifReady();
     }
+  }
+
+  // EXIF extraction (form-exif_controller.js) runs asynchronously per
+  // image, in parallel with the upload queue -- nothing otherwise
+  // guarantees it's finished by the time every image has uploaded, so
+  // GPS/date transferred from a photo's EXIF data could lose the race
+  // and never make it into the submitted observation fields. Poll
+  // briefly rather than submitting mid-extraction.
+  //
+  // Bounded: an image with no EXIF data, or EXIF ExifReader can't
+  // parse, never dispatches "populated" (form-exif_controller.js
+  // swallows that error), so `exif_populated` would otherwise stay
+  // false forever and this would poll indefinitely, permanently
+  // blocking submission. MAX_EXIF_WAIT_ATTEMPTS caps the wait at 3s;
+  // past that it submits anyway, no worse than before this existed.
+  submitWhenExifReady(attempt = 0) {
+    if (this.areAllItemsExifPopulated() ||
+      attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
+      this.block_form_submission = false;
+      this.submitForm();
+    } else {
+      setTimeout(() => this.submitWhenExifReady(attempt + 1), 100);
+    }
+  }
+
+  // requestSubmit(), deferred to a new task via setTimeout, rather than
+  // form.submit() or a direct requestSubmit() call. submitWhenExifReady
+  // sometimes reaches this synchronously, from inside the ORIGINAL
+  // submit event's own onsubmit handler (see set_bindings), before
+  // that handler has returned. Calling requestSubmit() directly from
+  // there re-enters the browser's submission algorithm while it's
+  // still marked as firing the outer submit -- the spec's reentrancy
+  // guard silently no-ops a same-stack call (no error, no event, no
+  // request), and the outer handler's `return false` then cancels the
+  // original submission too, so nothing submits at all (verified via
+  // a real browser system test). Deferring via setTimeout(0) runs
+  // requestSubmit() on a fresh task, after the browser has fully
+  // finished processing the original submit event, avoiding the
+  // guard -- and, unlike form.submit(), requestSubmit() dispatches a
+  // real submit event, which is what a later Turbo-enabled form needs.
+  submitForm() {
+    setTimeout(() => this.form.requestSubmit(), 0);
   }
 
   /*********************/
@@ -452,9 +539,10 @@ export default class extends Controller {
     const _identifiable = element.closest(".carousel-item") ??
       element.closest(".carousel-indicator");
 
-    return this.fileStore.items.find(
-      (item) => item.uuid === _identifiable?.dataset?.imageUuid
-    );
+    // `index` (keyed by uuid), not `items` -- `items` is a draining
+    // upload queue and may no longer hold this item by the time this
+    // is called (e.g. EXIF extraction finishing after upload).
+    return this.fileStore.index[_identifiable?.dataset?.imageUuid];
   }
 
   // This gives the img src a base64 string, or the url.
@@ -528,8 +616,9 @@ export default class extends Controller {
     // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
     // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
     this.submit_buttons.forEach((element) => {
-      element.value = this.localized_text.uploading_text + '...';
+      this.setButtonLabel(element, this.localized_text.uploading_text + '...');
     });
+    this.showUploadSpinner(item);
 
     const _formData = this.asFormData(item);
     // asFormData returns null for an over-limit file. uploadAll blocks
@@ -552,12 +641,72 @@ export default class extends Controller {
       const image = await response.json
       if (image) {
         this.updateObsImages(item, image);
-        this.hide(item.dom_element);
+        this.showUploadCheckmark(item);
         this.onUploadedCallback();
       }
     } else {
       console.log(`got a ${response.status}`);
+      this.handleUploadFailure(item);
     }
+  }
+
+  // uploadAll already locked the form (`inert`) and disabled the
+  // submit/remove buttons for the whole in-flight window -- normally
+  // undone by the next successful full queue drain (onUploadedCallback
+  // -> submitWhenExifReady) or a fresh controller connect after a
+  // Turbo-swapped-in form. Neither happens here, since the observation
+  // form itself was never submitted: without this, a failed upload
+  // left the page permanently locked with no way for the user to
+  // recover. Re-queues the item (uploadAll already shifted it off
+  // fileStore.items) so clicking the submit button again retries it
+  // instead of silently dropping it from the upload.
+  handleUploadFailure(item) {
+    this.hideUploadSpinner(item);
+    this.fileStore.items.unshift(item);
+
+    this.form.inert = false;
+    this.form.removeAttribute('aria-busy');
+    this.submit_buttons.forEach((element) => {
+      element.disabled = false;
+      this.setButtonLabel(element, this.original_button_labels.get(element));
+    });
+    this.removeImgTargets.forEach((elem) => {
+      elem.disabled = false;
+    });
+
+    alert(`${this.localized_text.something_went_wrong}\n\n${item.file_name}`);
+  }
+
+  // Counterpart to showUploadSpinner -- a failed item shouldn't be
+  // left looking like it's still uploading.
+  hideUploadSpinner(item) {
+    const overlay = item.dom_element?.querySelector('.upload-status-overlay');
+    if (!overlay) return;
+
+    overlay.classList.add('d-none');
+  }
+
+  // Upload-in-progress feedback (issue #5068 option 1): show the
+  // spinner overlay on this item alone (uploads are sequential, so at
+  // most one item is ever "in flight"). The overlay's own translucent
+  // background dims the photo underneath; the carousel item itself
+  // stays visible throughout.
+  showUploadSpinner(item) {
+    const overlay = item.dom_element?.querySelector('.upload-status-overlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('d-none');
+  }
+
+  // Swap the same overlay from spinner to checkmark on success, rather
+  // than hiding the carousel item (the old behavior) -- the gallery no
+  // longer visibly empties out item-by-item as uploads finish.
+  showUploadCheckmark(item) {
+    const overlay = item.dom_element?.querySelector('.upload-status-overlay');
+    if (!overlay) return;
+
+    overlay.querySelector('.upload-status-spinner')?.classList.add('d-none');
+    overlay.querySelector('.upload-status-check')?.classList.remove('d-none');
   }
 
   // Add the uploaded image's id to `good_images` and update the
@@ -596,6 +745,7 @@ export default class extends Controller {
     const idx = this.fileStore.items.indexOf(item);
     if (idx > -1)
       this.fileStore.items.splice(idx, 1);
+    delete this.fileStore.index[item.uuid];
 
     // Re-sort the carousel
     this.sortCarousel();
@@ -617,6 +767,18 @@ export default class extends Controller {
     if (element !== undefined) {
       element.classList.remove('in');
       window.setTimeout(() => { element.style.display = 'none'; }, 600);
+    }
+  }
+
+  // Phlex renders submit buttons as <button>, not <input> -- setting
+  // .value on a <button> is a no-op for its displayed text (.value is
+  // only its submitted form value there). Same tag check
+  // form-feedback_controller.js uses for the same reason.
+  setButtonLabel(button, text) {
+    if (button.tagName === 'BUTTON') {
+      button.textContent = text;
+    } else {
+      button.value = text;
     }
   }
 

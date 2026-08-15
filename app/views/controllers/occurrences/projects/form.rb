@@ -25,12 +25,15 @@
 # (`occurrence_projects[*]`).
 module Views::Controllers::Occurrences::Projects
   class Form < ::Components::ApplicationForm
-    def initialize(gaps:, primary:, selected: nil, occurrence: nil, **)
-      @gaps = gaps
-      @primary = primary
-      @selected = selected
-      @occurrence = occurrence
-      super(build_form_object, **)
+    prop :gaps, Hash
+    prop :primary, ::Observation
+    prop :selected, _Nilable(_Array(::Observation)), default: nil
+    prop :occurrence, _Nilable(::Occurrence), default: nil
+
+    def initialize(gaps:, primary:, selected: nil, occurrence: nil, **attrs)
+      super(build_form_object(selected: selected, primary: primary),
+            gaps: gaps, primary: primary, selected: selected,
+            occurrence: occurrence, **attrs)
     end
 
     # Declares to Modal that this form renders its own `.modal-body`
@@ -67,17 +70,17 @@ module Views::Controllers::Occurrences::Projects
 
     private
 
-    def build_form_object
+    def build_form_object(selected:, primary:)
       # `for_update: true` flips the FormObject's `persisted?` so
       # Superform emits `_method=patch` for edit mode — the nested
       # projects resource expects PATCH. Create mode stays POST.
-      unless @selected
+      unless selected
         return FormObject::OccurrenceProjects.new(for_update: true)
       end
 
       FormObject::OccurrenceProjects.new(
-        observation_ids: @selected.map(&:id),
-        primary_observation_id: @primary.id
+        observation_ids: selected.map(&:id),
+        primary_observation_id: primary.id
       )
     end
 

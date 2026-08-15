@@ -13,14 +13,20 @@
 # change.
 module Views::Controllers::Observations::ExternalLinks
   class Form < ::Components::ApplicationForm
-    def initialize(model, **kwargs)
-      @observation = kwargs.delete(:observation)
-      @sites = kwargs.delete(:sites)
-      @site = kwargs.delete(:site) || @sites&.first
-      @user = kwargs.delete(:user)
-      @back = kwargs.delete(:back)
-      super
+    prop :observation, ::Observation
+    prop :sites, _Array(::ExternalSite)
+    prop :site, _Nilable(::ExternalSite), default: nil
+    prop :user, ::User
+    prop :back, _Nilable(String), default: nil
+
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(model, observation:, sites:, user:, site: nil,
+                   back: nil, **attrs)
+      super(model, observation: observation, sites: sites,
+                   site: site || sites&.first, user: user, back: back,
+                   **attrs)
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       render_external_id_field
@@ -72,7 +78,7 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def render_hidden_fields
-      hidden_field(:user_id, value: @user&.id)
+      hidden_field(:user_id, value: @user.id)
       hidden_field(:observation_id, value: @observation.id)
     end
 

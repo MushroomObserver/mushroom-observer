@@ -22,7 +22,7 @@ class Components::ImageFragment::VoteInterfaceStreams < Components::Base
 
     preload_votes(images)
     images.each do |image|
-      stream_for(image, :overlay)
+      stream_for(image, :matrix)
       stream_for(image, :lightbox)
     end
   end

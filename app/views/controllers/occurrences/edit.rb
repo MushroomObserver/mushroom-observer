@@ -4,15 +4,13 @@
 # Optionally overlays a project membership confirmation modal.
 module Views::Controllers::Occurrences
   class Edit < Views::FullPageBase
-    def initialize(occurrence:, observations:, candidates:,
-                   user:, project_gaps: nil)
-      super()
-      @occurrence = occurrence
-      @observations = observations
-      @candidates = candidates
-      @user = user
-      @project_gaps = project_gaps
-    end
+    prop :occurrence, ::Occurrence
+    prop :observations, _Array(::Observation)
+    prop :candidates, _Array(::Observation)
+    prop :user, ::User
+    # nil on the plain `edit` GET -- only #update's redirect-back-to-
+    # edit path (when gaps remain) computes this first.
+    prop :project_gaps, _Nilable(Hash), default: nil
 
     def view_template
       container_class(:wide)
@@ -25,7 +23,8 @@ module Views::Controllers::Occurrences
                model: @occurrence,
                observations: @observations.to_a,
                candidates: @candidates,
-               user: @user
+               user: @user,
+               local: false
              ))
       render_project_modal if @project_gaps&.any?
     end
@@ -42,7 +41,8 @@ module Views::Controllers::Occurrences
           render(Projects::Form.new(
                    gaps: @project_gaps,
                    primary: @occurrence.primary_observation,
-                   occurrence: @occurrence
+                   occurrence: @occurrence,
+                   local: false
                  ))
         end
       end

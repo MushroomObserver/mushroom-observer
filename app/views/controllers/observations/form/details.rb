@@ -79,7 +79,10 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_location_autocompleter
     render(@form.field(:place_name).autocompleter(
              type: :location,
-             wrapper_options: { label: location_label },
+             # label_colon: false -- location_label already embeds its
+             # own colon per span (each state's text differs), so the
+             # default auto-appended colon would double up.
+             wrapper_options: { label: location_label, label_colon: false },
              value: @default_place_name || @location&.name,
              hidden_name: :location_id,
              hidden_value: @location&.id,
@@ -160,7 +163,11 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              attributes: {
                help: :form_observations_lat_long_help.t,
                help_collapse: true,
-               data: { form_exif_target: "collapseCheck" }
+               data: {
+                 form_exif_target: "collapseCheck",
+                 map_target: "geolocationCheck",
+                 action: "map#geolocationToggled"
+               }
              }
            ))
   end
@@ -169,7 +176,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     Collapsible(
       id: "observation_geolocation",
       expanded: @observation.lat.present?,
-      data: { form_exif_target: "collapseFields" }
+      data: { form_exif_target: "collapseFields",
+              map_target: "geolocationFields" }
     ) do
       p { :form_observations_click_point.l }
       render_lat_lng_alt_row
@@ -195,10 +203,18 @@ class Views::Controllers::Observations::Form::Details < Views::Base
         addon: addon,
         data: {
           map_target: "#{field}Input",
-          action: "map#bufferInputs"
+          action: coordinate_field_action(field)
         }
       )
     end
+  end
+
+  # Lat/lng also split a pasted "lat, lng" pair (e.g. from iNat) across
+  # both fields -- see GeocodeController#splitPastedCoordinates.
+  def coordinate_field_action(field)
+    return "map#bufferInputs" unless [:lat, :lng].include?(field)
+
+    "map#bufferInputs paste->map#splitPastedCoordinates"
   end
 
   # Label with responsive show/hide variants
@@ -227,7 +243,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_map
     render(Components::Form::LocationMap.new(
-             id: "observation_form_map", map_type: "observation"
+             id: "observation_form_map", map_type: "observation",
+             announce_point: update? && @observation.lat.present?
            ))
   end
 

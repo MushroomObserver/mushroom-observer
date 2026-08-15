@@ -9,9 +9,7 @@ class PreviousVersionTest < ComponentTestCase
   end
 
   def test_renders_current_version_label
-    html = render(Components::Description::PreviousVersion.new(
-                    obj: @name, versions: @name.versions.to_a
-                  ))
+    html = render_previous_version(obj: @name)
 
     assert_includes(html, "#{:version.ti}: #{@name.version}")
   end
@@ -19,9 +17,7 @@ class PreviousVersionTest < ComponentTestCase
   def test_renders_previous_version_link_when_multi_version
     skip("Need a name with multiple versions") if @name.versions.size <= 1
 
-    html = render(Components::Description::PreviousVersion.new(
-                    obj: @name, versions: @name.versions.to_a
-                  ))
+    html = render_previous_version(obj: @name)
 
     assert_html(html, "a.previous_version_link",
                 text: :show_name_previous_version.t)
@@ -34,10 +30,16 @@ class PreviousVersionTest < ComponentTestCase
 
     # Use a fresh Name with only one version implicitly.
     name = names(:agaricus_campestris)
-    html = render(Components::Description::PreviousVersion.new(
-                    obj: name, versions: name.versions.to_a
-                  ))
+    html = render_previous_version(obj: name)
 
     assert_no_html(html, "a.previous_version_link")
+  end
+
+  private
+
+  def render_previous_version(obj:)
+    render(Components::Description::PreviousVersion.new(
+             obj: obj, versions: obj.versions.to_a
+           ))
   end
 end

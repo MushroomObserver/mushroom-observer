@@ -55,7 +55,7 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_renders_plain_list_group_with_items
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item { "one" }
       list.item { "two" }
     end
@@ -67,7 +67,7 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_flush_adds_list_group_flush_class
-    html = render(Components::ListGroup.new(flush: true)) do |list|
+    html = render_list(flush: true) do |list|
       list.item { "x" }
     end
 
@@ -77,7 +77,7 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_ul_element_switches_items_to_li
-    html = render(Components::ListGroup.new(element: :ul)) do |list|
+    html = render_list(element: :ul) do |list|
       list.item { "one" }
       list.item { "two" }
     end
@@ -89,10 +89,8 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_container_id_and_class_extras_flow_through
-    html = render(Components::ListGroup.new(
-                    id: "namings_table_rows",
-                    flush: true, class: "namings"
-                  )) do |list|
+    html = render_list(id: "namings_table_rows", flush: true,
+                       class: "namings") do |list|
       list.item { "x" }
     end
 
@@ -102,9 +100,9 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_container_data_attributes_pass_through
-    html = render(Components::ListGroup.new(
-                    attributes: { data: { controller: "section-update" } }
-                  )) do |list|
+    html = render_list(
+      data: { controller: "section-update" }
+    ) do |list|
       list.item { "x" }
     end
 
@@ -114,7 +112,7 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_per_item_id_and_class_extras_flow_through
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item(id: "naming_42", class: "consensus-row") { "x" }
     end
 
@@ -124,7 +122,7 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_per_item_arbitrary_attributes_pass_through
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item(data: { foo: "bar" }) { "x" }
     end
 
@@ -138,7 +136,7 @@ class ListGroupTest < ComponentTestCase
     # `.list-group-item` child — so it shows iff no real rows
     # exist. Works seamlessly with Turbo Stream `append` / `remove`
     # broadcasts that only touch real items.
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item { "real row" }
       list.empty { "nothing yet" }
     end
@@ -152,7 +150,7 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_empty_slot_renders_even_without_real_items
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.empty { "nothing yet" }
     end
 
@@ -166,7 +164,7 @@ class ListGroupTest < ComponentTestCase
     # Empty list with neither items nor placeholder: just the outer
     # container. Helpful for streamed-in content where items arrive
     # via Turbo later.
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       # intentionally empty — no list.item / list.empty calls
       _ = list
     end
@@ -179,7 +177,7 @@ class ListGroupTest < ComponentTestCase
     # Each block must close over its OWN value of `n` from the loop,
     # not a single shared one — proves the deferred-render pattern
     # captures iteration-local bindings correctly.
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       (1..3).each do |n|
         list.item { "row #{n}" }
       end
@@ -189,5 +187,11 @@ class ListGroupTest < ComponentTestCase
     assert_includes(html, "row 1")
     assert_includes(html, "row 2")
     assert_includes(html, "row 3")
+  end
+
+  private
+
+  def render_list(**, &block)
+    render(Components::ListGroup.new(**), &block)
   end
 end

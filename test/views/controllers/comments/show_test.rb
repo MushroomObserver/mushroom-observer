@@ -16,8 +16,7 @@ module Views::Controllers::Comments
       # author, summary, comment.
       comment = comments(:minimal_unknown_obs_comment_1)
 
-      html = render(Show.new(comment: comment, target: comment.target,
-                             user: @user))
+      html = render_show(comment: comment, target: comment.target)
 
       assert_html(html, "a.user_link_#{comment.user.id}")
       assert_includes(html, comment.summary)
@@ -34,11 +33,16 @@ module Views::Controllers::Comments
       comment = ::Comment.create!(target: target, user: @user,
                                   summary: "On the Name", comment: "")
 
-      html = render(Show.new(comment: comment, target: target,
-                             user: @user))
+      html = render_show(comment: comment, target: target)
 
       assert_includes(html, "On the Name")
       assert_html(html, "a.user_link_#{@user.id}")
+    end
+
+    private
+
+    def render_show(**)
+      render(Show.new(user: @user, **))
     end
   end
 end

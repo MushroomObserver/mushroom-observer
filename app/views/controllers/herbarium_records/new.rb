@@ -31,7 +31,8 @@ module Views::Controllers::HerbariumRecords
         trusted_html(:observation.ti)
         plain(" ##{@observation.id}")
       end
-      render(Form.new(@herbarium_record, observation: @observation))
+      render(Form.new(@herbarium_record, observation: @observation,
+                                         local: false))
     end
 
     def render_observation_box

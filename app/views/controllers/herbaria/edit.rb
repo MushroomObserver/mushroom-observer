@@ -3,12 +3,11 @@
 module Views::Controllers::Herbaria
   # Action view for the edit herbarium form page.
   class Edit < Views::FullPageBase
-    def initialize(herbarium:, user:, top_users:)
-      super()
-      @herbarium = herbarium
-      @user = user
-      @top_users = top_users
-    end
+    prop :herbarium, ::Herbarium
+    prop :user, ::User
+    # nil for non-admins -- set_up_herbarium_for_edit only computes
+    # this `if in_admin_mode?`.
+    prop :top_users, _Nilable(_Array(::User))
 
     def view_template
       add_edit_title(@herbarium)
@@ -16,7 +15,7 @@ module Views::Controllers::Herbaria
                                                      q_param: q_param))
 
       render(Views::Controllers::Herbaria::Form.new(
-               @herbarium, user: @user, local: true,
+               @herbarium, user: @user, local: false,
                            location: @herbarium.location, top_users: @top_users
              ))
     end

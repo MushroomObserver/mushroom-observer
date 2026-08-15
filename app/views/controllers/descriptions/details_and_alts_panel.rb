@@ -116,10 +116,10 @@ module Views::Controllers::Descriptions
     end
 
     def create_icon_link(object)
-      content, path, opts = ::Tab::Description::Create.new(
+      name, target, opts = ::Tab::Description::Create.new(
         parent: object
       ).to_a
-      Components::Link.new(type: :icon, content: content, path: path,
+      Components::Link.new(type: :get, name: name, target: target,
                            **(opts || {}))
     end
 

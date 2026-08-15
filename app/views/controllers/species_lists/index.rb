@@ -5,13 +5,10 @@
 # container width), then renders a list of `Listing` rows.
 module Views::Controllers::SpeciesLists
   class Index < Views::FullPageBase
-    def initialize(query:, pagination_data:, objects:, project: nil)
-      super()
-      @query = query
-      @pagination_data = pagination_data
-      @objects = objects
-      @project = project
-    end
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
+    prop :objects, _Array(::SpeciesList)
+    prop :project, _Nilable(::Project), default: nil
 
     def view_template
       add_project_banner(@project) if @project

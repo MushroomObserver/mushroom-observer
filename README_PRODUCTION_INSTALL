@@ -101,27 +101,37 @@ root> swapon /swap
 root> echo '/swap none swap sw 0 0' | tee -a /etc/fstab
 
 # Install most of the modules that we will need (except ruby).
+# zbar-tools provides zbarimg, used to read field slip QR codes out of
+# uploaded photos (see FieldSlip::QRDecoder); MO runs fine without it,
+# that one feature just stays off.
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev \
-          exiftool mrtg
+          exiftool mrtg zbar-tools
 # (it's saying several services need to be restarted so rebooting
 # sounded like a good idea at this point)
 root> reboot
 
-# Install rvm and ruby. [CHECK LATEST RUBY VERSION!!!]
-root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.2
-# It failed here, so I followed the instructions and reran the cmd:
-# (I don't understand the following cmd, so it may change?)
-root> sudo gpg2 --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=3.1.2
-root> gpasswd -a mo rvm
+# Install chruby, ruby-install, and Ruby itself. Production launches
+# puma/solidqueue via bin/run, which sources chruby.sh/auto.sh when
+# RUBY_MANAGER=chruby (see config/etc/puma.service,
+# config/etc/solidqueue.service) -- same install recipe as
+# script/dev_setup_ubuntu_root uses for dev boxes.
+root> mkdir -p /tmp/build && cd /tmp/build
+root> wget https://github.com/postmodern/chruby/archive/master.tar.gz
+root> tar -xzvf master.tar.gz && cd chruby-master
+root> make install
+root> cd ..
+root> wget https://github.com/postmodern/ruby-install/archive/master.tar.gz
+root> tar -xzvf master.tar.gz && cd ruby-install-master
+root> make install
+root> cd / && rm -rf /tmp/build
+root> echo "source /usr/local/share/chruby/chruby.sh" >> /home/mo/.bashrc
+root> echo "source /usr/local/share/chruby/auto.sh" >> /home/mo/.bashrc
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
 root> echo "gem: --no-document" > /home/mo/.gemrc
-root> echo "source /usr/local/rvm/scripts/rvm" >> /root/.bashrc
-root> echo "source /usr/local/rvm/scripts/rvm" >> /home/mo/.bashrc
+root> ruby-install ruby $(curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/.ruby-version)
 
 # Create directory for rails app.
 root> mkdir /var/web

@@ -21,12 +21,12 @@ module Views::Controllers::SpeciesLists
   #   checkboxes don't submit per HTML spec, and the iteration
   #   excludes them anyway).
   class Form < ::Components::ApplicationForm
-    # Controller-passed render state is bundled into the `**state`
-    # splat so the init stays under Metrics/ParameterLists. Callers
-    # still pass each piece as a named kwarg (projects:,
-    # dubious_where_reasons:, clone_id:, submitted_project_ids:) —
-    # the splat just collects them.
-    #
+    prop :user, ::User
+    prop :button, Symbol
+    prop :projects, _Array(::Project), default: -> { [] }
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
+    prop :clone_id, _Nilable(Integer), default: nil
     # Checkedness for project rows defaults to `model.project_ids`.
     # On a failure-reload the controller passes
     # `submitted_project_ids:` (the user's just-submitted array) —
@@ -34,15 +34,8 @@ module Views::Controllers::SpeciesLists
     # user's choices to the DB just to render them back (Rails'
     # has_many-through setter would do that instantly on a
     # persisted record, even though the save itself failed).
-    def initialize(species_list, user:, button:, **state)
-      @user = user
-      @button = button
-      @projects = state[:projects] || []
-      @dubious_where_reasons = state[:dubious_where_reasons] || []
-      @clone_id = state[:clone_id]
-      @submitted_project_ids = state[:submitted_project_ids]
-      super(species_list)
-    end
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil, &TO_ID_ARRAY
 
     # Override Superform's default
     # `helpers.url_for(action: resource_action)` so the form action
@@ -146,7 +139,7 @@ module Views::Controllers::SpeciesLists
 
     def project_checked?(project_id)
       if @submitted_project_ids
-        @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
+        @submitted_project_ids.include?(project_id)
       else
         model.project_ids.include?(project_id)
       end

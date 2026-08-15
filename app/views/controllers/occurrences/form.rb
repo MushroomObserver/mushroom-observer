@@ -20,16 +20,21 @@ module Views::Controllers::Occurrences
   # `primary_observation_id` (a column) are addressed directly via
   # `field(:...)`.
   class Form < ::Components::ApplicationForm
+    prop :source_obs, _Nilable(::Observation), default: nil
+    prop :recent_observations, _Array(::Observation), default: -> { [] }
+    prop :observations, _Nilable(_Array(::Observation)), default: nil
+    prop :candidates, _Array(::Observation), default: -> { [] }
+    prop :user, ::User
+
     # rubocop:disable Metrics/ParameterLists
     def initialize(model:, user:,
                    source_obs: nil, recent_observations: [],
-                   observations: nil, candidates: [], **)
-      @source_obs = source_obs
-      @recent_observations = recent_observations
-      @observations = observations
-      @candidates = candidates
-      @user = user
-      super(model, **form_options_for(model, **))
+                   observations: nil, candidates: [], **attrs)
+      super(model,
+            source_obs: source_obs,
+            recent_observations: recent_observations,
+            observations: observations, candidates: candidates, user: user,
+            **form_options_for(model, **attrs))
     end
     # rubocop:enable Metrics/ParameterLists
 
@@ -255,8 +260,8 @@ module Views::Controllers::Occurrences
     end
 
     def render_occurrence_link(obs)
-      Link(type: :icon, tab: Tab::Occurrence::Existing.new(obs: obs),
-           show_text: true)
+      Link(type: :get, tab: Tab::Occurrence::Existing.new(obs: obs),
+           label: true)
     end
   end
 end

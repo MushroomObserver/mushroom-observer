@@ -5,6 +5,7 @@
 #    permitted_observation_args
 #    update_permitted_observation_attributes
 #    permitted_observation_params
+#    drop_unwanted_geolocation
 #    notes_to_sym_and_compact
 #    notes_param_present?
 #
@@ -30,6 +31,22 @@
 module ObservationsController::SharedFormMethods
   private
 
+  # A malformed request can send a scalar for the whole `observation`
+  # param instead of the expected nested hash (`?observation=abc`).
+  # Every method below assumes `params[:observation]` is either
+  # absent or an ActionController::Parameters -- normalize a
+  # present-but-wrong-shape value to absent so they degrade the same
+  # way a missing param already does (a validation failure/redisplay,
+  # not a 500 buried in whichever method first calls `.dig`/`.permit`
+  # on it). Call at the top of `create`/`update`, before anything
+  # else reads params[:observation].
+  def normalize_observation_param
+    return if params[:observation].nil? ||
+              params[:observation].is_a?(ActionController::Parameters)
+
+    params.delete(:observation)
+  end
+
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
     [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
@@ -51,7 +68,21 @@ module ObservationsController::SharedFormMethods
   def permitted_observation_params
     return unless params[:observation]
 
-    params[:observation].permit(permitted_observation_args).to_h
+    drop_unwanted_geolocation(
+      params[:observation].permit(permitted_observation_args).to_h
+    )
+  end
+
+  # The Geolocation checkbox is the observation's own statement about
+  # whether it has coordinates, but the map sits outside the section the
+  # checkbox collapses, so the inputs can still hold a point the user has
+  # said the observation does not have. Absent key means a caller that
+  # has no such checkbox (the API), which is left alone.
+  def drop_unwanted_geolocation(args)
+    return args unless params[:observation].key?(:has_geolocation)
+    return args if params[:observation][:has_geolocation].to_s == "1"
+
+    args.merge("lat" => nil, "lng" => nil, "alt" => nil)
   end
 
   # Symbolize keys and drop blank values -- except a blank on a key some
@@ -119,7 +150,7 @@ module ObservationsController::SharedFormMethods
     return unless herb_params
 
     @herbarium_name   = herb_params[:herbarium_name]
-    @herbarium_id     = herb_params[:herbarium_id]
+    @herbarium_id     = safe_integer(herb_params[:herbarium_id])
     @accession_number = herb_params[:accession_number]
   end
 
@@ -138,7 +169,9 @@ module ObservationsController::SharedFormMethods
     @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
-    @submitted_project_ids = params.dig(:observation, :project_ids)
+    @submitted_project_ids =
+      params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)
   end
 
   def init_list_vars
@@ -148,7 +181,9 @@ module ObservationsController::SharedFormMethods
   def init_list_vars_for_reload
     init_list_vars
     @lists = @lists.union(@observation.species_lists)
-    @submitted_list_ids = params.dig(:observation, :species_list_ids)
+    @submitted_list_ids =
+      params.permit(observation: { species_list_ids: [] }).
+      dig(:observation, :species_list_ids)
   end
 
   # Save observation now that everything is created successfully.
@@ -307,7 +342,9 @@ module ObservationsController::SharedFormMethods
   # preserved by omission (disabled checkboxes don't submit, and the
   # iteration excludes them anyway).
   def update_projects
-    submitted_ids = params.dig(:observation, :project_ids)
+    submitted_ids =
+      params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
@@ -340,7 +377,9 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_species_lists
-    submitted_ids = params.dig(:observation, :species_list_ids)
+    submitted_ids =
+      params.permit(observation: { species_list_ids: [] }).
+      dig(:observation, :species_list_ids)
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)

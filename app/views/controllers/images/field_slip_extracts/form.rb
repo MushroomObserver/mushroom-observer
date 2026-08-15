@@ -6,18 +6,20 @@
 # live in `FormObject::FieldSlipReview::Row`.
 module Views::Controllers::Images::FieldSlipExtracts
   class Form < ::Components::ApplicationForm
-    # Superform wants the form's data object as the first positional
-    # arg; the review IS that object, so it goes to `super` rather than
-    # being held as a plain prop.
+    prop :image, ::Image
+    prop :extract, ::FieldSlipExtract
     # `approved_name` is set only on the confirmation round-trip: it is
     # the name the reviewer is being asked to create, and carrying it
     # back on the form action is what turns the resubmit into approval.
+    prop :approved_name, _Nilable(String), default: nil
+
+    # Superform wants the form's data object as the first positional
+    # arg; the review IS that object, so it goes to `super` rather than
+    # being held as a separate prop -- `model` reaches it everywhere
+    # below instead of a dedicated `@review` ivar.
     def initialize(image:, extract:, review:, approved_name: nil, **attrs)
-      @image = image
-      @extract = extract
-      @review = review
-      @approved_name = approved_name
-      super(review, **attrs)
+      super(review, image: image, extract: extract,
+                    approved_name: approved_name, **attrs)
     end
 
     def view_template
@@ -40,7 +42,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     private
 
     def render_table
-      render(Components::Table.new(@review.rows_to_show)) do |t|
+      render(Components::Table.new(model.rows_to_show)) do |t|
         t.column(:field_slip_extract_field.l)
         t.column(:field_slip_extract_read.l)
         t.column(:field_slip_extract_current.l)
@@ -62,7 +64,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # correcting it is the whole point of the step.
     def render_extracted_cell(row)
       if row.editable
-        text_field("value[#{row.field}]", value: row.extracted, label: false)
+        render_extracted_input(row)
       else
         plain(row.extracted.to_s)
       end
@@ -70,14 +72,28 @@ module Views::Controllers::Images::FieldSlipExtracts
       render_confidence(row)
     end
 
-    # A purely numeric "Other Codes" is an iNaturalist observation id in
-    # practice, so it ticks itself and gets stored as a link. Visible
-    # and overridable rather than silent, since the box is free text and
-    # someone will eventually write a herbarium number in it.
-    def render_inat_flag(row)
-      return unless row.field == ::FieldSlip::Extractor::OTHER_CODES_FIELD
+    # A slip's Notes box is often several lines, and a single-line
+    # input silently drops the newlines from its value -- the browser
+    # strips them, gluing "Phenolic odor\nYellow staining" into
+    # "Phenolic odorYellow staining" on save. A textarea keeps them.
+    def render_extracted_input(row)
+      value = row.extracted.to_s
+      unless value.include?("\n")
+        return text_field("value[#{row.field}]", value: value, label: false)
+      end
 
-      checkbox_field("inat", checked: @review.inat_code,
+      textarea_field("value[#{row.field}]", value: value, label: false,
+                                            rows: value.count("\n") + 1)
+    end
+
+    # A value holding an iNaturalist observation id ticks itself and
+    # gets stored as a link. Visible and overridable rather than
+    # silent, since the box is free text and someone will eventually
+    # write a herbarium number in it.
+    def render_inat_flag(row)
+      return unless row.inat_row?
+
+      checkbox_field("inat", checked: model.inat_code,
                              label: :field_slip_extract_inat.l)
     end
 
@@ -108,13 +124,34 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
+    # The code row's tick is an attach, not a field write, so it says
+    # so -- everything else gets a bare box under the "Save" header.
     def render_use_cell(row)
       if row.savable
         checkbox_field("use[#{row.field}]", checked: row.default_use?,
-                                            label: false)
+                                            label: use_label(row))
+      elsif row.code_row?
+        render_code_check_state
       else
         small { plain(:field_slip_extract_check_only.l) }
       end
+    end
+
+    # A non-attachable code row only renders when the observation
+    # already has its slip (blank rows are dropped, slip-less ones get
+    # the attach tick), so say what the check FOUND rather than the
+    # generic "cross-check only" that read as "nothing was read".
+    def render_code_check_state
+      key = if @extract.code_mismatch
+              :field_slip_extract_code_differs
+            else
+              :field_slip_extract_code_matches
+            end
+      small { plain(key.l) }
+    end
+
+    def use_label(row)
+      row.code_row? ? :field_slip_extract_attach_code.l : false
     end
 
     # Locality, like the ID, is corrected through an autocompleter and
@@ -124,21 +161,21 @@ module Views::Controllers::Images::FieldSlipExtracts
     # location the abbreviation obviously means; the flag above says
     # what the slip actually read.
     def render_location_section
-      row = @review.location_row
+      row = model.location_row
       return if row.nil? || row.blank?
 
       panel = Components::Panel.new(panel_id: "field_slip_extract_location")
-      render(panel) do |p|
-        p.with_body do
-          autocompleter_field("value[#{row.field}]",
-                              type: :location, value: @review.location_value,
-                              label: :field_slip_extract_locality.l)
-          render_current_note(row)
-          checkbox_field("use[#{row.field}]",
-                         checked: row.default_use?,
-                         label: :field_slip_extract_apply.l)
-        end
-      end
+      render(panel) { |p| p.with_body { render_location_fields(row) } }
+    end
+
+    def render_location_fields(row)
+      autocompleter_field("value[#{row.field}]",
+                          type: :location, value: model.location_value,
+                          label: :field_slip_extract_locality.l)
+      render_current_note(row)
+      checkbox_field("use[#{row.field}]",
+                     checked: row.default_use?,
+                     label: :field_slip_extract_apply.l)
     end
 
     def render_current_note(row)
@@ -156,7 +193,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # other field this one creates a Naming and a Vote rather than
     # writing an attribute.
     def render_name_section
-      row = @review.name_row
+      row = model.name_row
       return if row.nil? || row.blank?
 
       # `with_body`, not a bare block: Panel is slot-based, and content
@@ -181,7 +218,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # holds. An unrecognized one -- "Lumpy Bracket" -- starts clear, so
     # creating a Name is always something the reviewer chose to do.
     def render_name_use(row)
-      checkbox_field("use[#{row.field}]", checked: @review.name_known,
+      checkbox_field("use[#{row.field}]", checked: model.name_known,
                                           label: :field_slip_extract_propose.l)
     end
 

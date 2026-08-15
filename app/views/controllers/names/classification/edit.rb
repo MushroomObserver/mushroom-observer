@@ -12,6 +12,8 @@ class Views::Controllers::Names::Classification::Edit < Views::FullPageBase
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
     container_class(:text)
 
-    render(Views::Controllers::Names::Classification::Form.new(@name))
+    render(Views::Controllers::Names::Classification::Form.new(
+             @name, local: false
+           ))
   end
 end

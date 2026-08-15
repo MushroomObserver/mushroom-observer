@@ -22,8 +22,20 @@ class FieldSlip
         @observation = observation
       end
 
+      # The attached slip's event is authoritative: an observation
+      # can sit in several projects (the obs form pre-checks the last
+      # one used), and picking `projects.first` read the wrong event's
+      # aliases and template for a slip that says exactly which event
+      # it belongs to -- including a spare slip, whose printed prefix
+      # still names it (see FieldSlip#event_project).
       def project
-        @project ||= observation&.projects&.first
+        @project ||= observation&.field_slip&.event_project ||
+                     observation&.projects&.first
+      end
+
+      # Which printed layout this project's slips use.
+      def template
+        @template ||= FieldSlip::Template.for_project(project)
       end
 
       def field_slip_code

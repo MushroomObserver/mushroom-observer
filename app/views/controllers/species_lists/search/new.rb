@@ -5,12 +5,9 @@ module Views::Controllers::SpeciesLists
     # Search form for species_lists. Wraps `Components::Form::Search`
     # with the page chrome (title, container width).
     class New < Views::FullPageBase
-      def initialize(search:, controller:, local: nil)
-        super()
-        @search = search
-        @controller = controller
-        @local = local
-      end
+      prop :search, ::Query
+      prop :controller, ::SpeciesLists::SearchController
+      prop :local, _Nilable(_Boolean), default: nil
 
       def view_template
         add_new_title(:search_object, :species_lists)

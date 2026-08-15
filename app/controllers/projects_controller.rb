@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ProjectsController < ApplicationController
+  include ::Locationable
   include Validators
   include Creation
 
@@ -99,7 +100,7 @@ class ProjectsController < ApplicationController
     image_ivars
     @project = Project.new
     @project_dates_any = true
-    render_new_form
+    render_new_view
   end
 
   # Form to edit a project
@@ -143,8 +144,14 @@ class ProjectsController < ApplicationController
     end
     @project = Project.new(project_params)
     @project_dates_any = params[:project][:dates_any].downcase == "true"
+    # Echo the entered location back on reload, same as
+    # Creation#cleanup_failed_project_creation -- title/group-name
+    # failures land here too, and Project#place_name= has no
+    # free-text fallback for an unresolved name (see that method's
+    # comment for why raw_place_name exists at all).
+    @raw_place_name = params[:project][:place_name]
     image_ivars
-    render_new_form
+    render_new_view_invalid
   end
 
   def update
@@ -161,13 +168,13 @@ class ProjectsController < ApplicationController
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
-        return redirect_to(project_path(@project.id))
+        return redirect_to(update_redirect_path)
       else
         flash_object_errors(@project)
       end
     end
     image_ivars
-    render_edit_form
+    render_edit_view_invalid
   end
 
   # Callback to destroy a project.
@@ -203,25 +210,31 @@ class ProjectsController < ApplicationController
     )
   end
 
-  def render_new_form
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::Projects::New.new(
              project: @project, dates_any: @project_dates_any,
-             upload_params: upload_params_hash
-           ))
+             upload_params: upload_params_hash,
+             dubious_where_reasons: @dubious_where_reasons,
+             raw_place_name: @raw_place_name
+           ),
+           status: status, **render_opts)
   end
 
   # Re-renders the Admin/Details page on validation failure so the
   # user sees the same sub-tab/Admin context they submitted from.
   # Issue #4148.
-  def render_edit_form
+  def render_edit_view(status: :ok, **render_opts)
     @start_date_fixed = @project.start_date.present?
     @end_date_fixed = @project.end_date.present?
     @project_dates_any = !@start_date_fixed && !@end_date_fixed
     render(Views::Controllers::Projects::Admin::Show.new(
              project: @project, user: @user,
              dates_any: @project_dates_any,
-             upload_params: upload_params_hash
-           ))
+             upload_params: upload_params_hash,
+             dubious_where_reasons: @dubious_where_reasons,
+             raw_place_name: @raw_place_name
+           ),
+           status: status, **render_opts)
   end
 
   def upload_params_hash
@@ -252,13 +265,13 @@ class ProjectsController < ApplicationController
     @drafts = NameDescription.joins(:admin_groups).
               where("name_description_admins.user_group_id":
                     @project.admin_group_id).
-              includes(:name, :user)
+              includes(:name, :user).to_a
     # Save a lookup in comments_for_object
     @comments = @project.comments&.sort_by(&:created_at)&.reverse
     # Matches for the list-search autocompleter
     @object_names = @project.observations.joins(:name).
                     select(Name[:text_name], Name[:id]).distinct.
-                    order(Name[:text_name])
+                    order(Name[:text_name]).to_a
   end
 
   def upload_image_if_present
@@ -296,6 +309,18 @@ class ProjectsController < ApplicationController
   def find_project_and_where!
     find_project!
     @where = @project&.location&.display_name || ""
+  end
+
+  # Same offramp as create's finalize_saved_project: once the location
+  # has been resolved-or-confirmed-clean and still doesn't match an
+  # existing one, send the user to build it rather than leaving the
+  # project permanently location-less with no path to fix that.
+  def update_redirect_path
+    if @project.location.nil? && @raw_place_name.present?
+      new_location_path(where: @raw_place_name, set_project: @project.id)
+    else
+      project_path(@project.id)
+    end
   end
 
   def override_fixed_dates

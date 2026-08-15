@@ -37,12 +37,10 @@
 #     Link(type: :active, content: title, path: url, class: css_class)
 #   end
 class Components::ListGroup::LinkItem < Components::Base
-  def initialize(class: nil)
-    super()
-    @html_class = grab(class:)
-  end
+  # Catch-all for class: -- matches Icon/Collapsible's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    yield(class_names("list-group-item", @html_class))
+    yield(class_names("list-group-item", @attributes[:class]))
   end
 end

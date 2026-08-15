@@ -48,8 +48,8 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
                 headers: { "Content-Type" => "application/json" })
   end
 
-  def json_payload(fields: {}, confidence: {})
-    { fields: fields, confidence: confidence }.to_json
+  def json_payload(fields: {}, confidence: {}, **extra)
+    { fields: fields, confidence: confidence, **extra }.to_json
   end
 
   def extract(api_key: KEY, **)
@@ -76,6 +76,112 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
     assert_equal("Scott Shapiro", result.value_for("Collector"))
     assert_equal("high", result.confidence_for("Collector"))
     assert_equal("gemini", result.provider)
+  end
+
+  def test_reports_when_the_image_holds_no_slip
+    stub_gemini(json_payload(fields: { "Collector" => nil },
+                             confidence: {}, slip_present: false))
+
+    result = extract
+
+    assert(result.no_slip?)
+    assert_equal(false, result.slip_present)
+  end
+
+  # A null means "no value from this image" either way, but only a
+  # field listed unreadable is worth looking for in another photo.
+  def test_separates_unreadable_fields_from_empty_boxes
+    stub_gemini(json_payload(fields: { "Substrate" => nil, "Habit" => nil },
+                             unreadable: ["Substrate"]))
+
+    result = extract
+
+    assert_equal(["Substrate"], result.unreadable)
+    assert(result.unreadable?("Substrate"))
+    assert_not(result.unreadable?("Habit"), "an empty box is not unreadable")
+  end
+
+  def test_unreadable_drops_names_that_are_not_slip_fields
+    stub_gemini(json_payload(fields: {},
+                             unreadable: ["Substrate", "Invented Field"]))
+
+    assert_equal(["Substrate"], extract.unreadable)
+  end
+
+  def test_unreadable_defaults_to_empty_when_not_reported
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" }))
+
+    assert_empty(extract.unreadable)
+  end
+
+  # A model that stringifies its booleans must still be understood --
+  # reading "false" as unknown would quietly merge a specimen photo's
+  # invented values (Copilot review on PR #4993).
+  def test_a_stringified_flag_is_still_understood
+    stub_gemini(json_payload(fields: {}, slip_present: "false"))
+
+    result = extract
+
+    assert(result.no_slip?)
+    assert_equal(false, result.slip_present)
+  end
+
+  def test_a_flag_that_is_neither_true_nor_false_reads_as_unreported
+    stub_gemini(json_payload(fields: {}, slip_present: "maybe"))
+
+    result = extract
+
+    assert_not(result.no_slip?)
+    assert_nil(result.slip_present)
+  end
+
+  def test_a_read_that_saw_a_slip_is_not_flagged
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" },
+                             confidence: { "Collector" => "high" },
+                             slip_present: true))
+
+    assert_not(extract.no_slip?)
+  end
+
+  # The result records which layout the prompt asked for, and whether
+  # the model said the photographed slip was that layout at all.
+  def test_reports_the_template_and_a_mismatch
+    stub_gemini(json_payload(fields: {}, slip_present: true,
+                             template_matched: "false"))
+
+    result = extract
+
+    assert_equal(@context.template.key, result.template)
+    assert(result.template_mismatch?)
+  end
+
+  def test_missing_template_matched_is_not_a_mismatch
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" }))
+
+    result = extract
+
+    assert_nil(result.template_matched)
+    assert_not(result.template_mismatch?)
+  end
+
+  def test_a_stringified_true_is_understood_too
+    stub_gemini(json_payload(fields: {}, slip_present: "TRUE"))
+
+    result = extract
+
+    assert_not(result.no_slip?)
+    assert_equal(true, result.slip_present)
+  end
+
+  # A provider (or prompt version) that never reported the flag must not
+  # read as "no slip here" -- absence is not evidence.
+  def test_missing_slip_present_is_not_treated_as_absent
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" }))
+
+    result = extract
+
+    assert_not(result.no_slip?)
+    assert_nil(result.slip_present)
   end
 
   # The alias is what gets requested; the concrete model the API reports

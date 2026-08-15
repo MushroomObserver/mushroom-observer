@@ -14,9 +14,14 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     FieldSlip::Extractor::Prompt.new(context).to_s
   end
 
+  def dbg_prompt
+    @project.update!(field_slip_prefix: "2026-CMS")
+    prompt
+  end
+
   def test_asks_for_every_field_by_its_exact_key
     text = prompt
-    FieldSlip::Extractor::FIELDS.each_key do |field|
+    FieldSlip::Template.for(:mo).fields.each_key do |field|
       assert_includes(text, field, "prompt must name #{field}")
     end
   end
@@ -27,6 +32,56 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     assert_includes(text, "fields")
     assert_includes(text, "confidence")
     assert_includes(text, "JSON")
+  end
+
+  # NEMF 2026 ran out of printed voucher stickers partway through and
+  # wrote the rest by hand, often as a bare number. Identifying the
+  # field by "printed" dropped every one of those.
+  def test_accepts_a_handwritten_voucher_number
+    text = prompt
+
+    assert_includes(text, "MycoMap Voucher Number")
+    assert_includes(text, "printed or handwritten")
+    assert_includes(text, "upper-right")
+  end
+
+  # The corner already holds a logo, and the hand-written numbers were
+  # fitted around it -- above or to the left as often as beside it.
+  def test_looks_past_the_logo_in_the_voucher_corner
+    text = prompt
+
+    assert_includes(text, "logo")
+    assert_includes(text.squish, "read the whole upper-right area")
+  end
+
+  # A bare number must come back bare. The prefix belongs to a
+  # particular event, so inventing one here would put an unverifiable
+  # value into the notes of every slip that was written by hand.
+  def test_does_not_ask_the_model_to_invent_a_voucher_prefix
+    # squish so a rewrap of the prompt does not fail the assertion
+    assert_includes(prompt.squish,
+                    "do not add a prefix a bare number does not carry")
+  end
+
+  # An observation's other photos go through the same prompt, and the
+  # alias tables below are a standing invitation to answer from them
+  # rather than from the image.
+  def test_tells_the_model_how_to_report_an_image_with_no_slip
+    text = prompt
+
+    assert_includes(text, "slip_present")
+    assert_includes(text, "does not show a field slip")
+    assert_includes(text, "never a source of answers")
+  end
+
+  # Most slips leave several boxes empty and some fill in only one, so
+  # a null is only worth chasing into another photo when the box had
+  # writing the camera missed.
+  def test_asks_which_nulls_were_written_but_unreadable
+    text = prompt
+
+    assert_includes(text, "unreadable")
+    assert_includes(text, "left empty is not unreadable")
   end
 
   # The whole point of building the prompt from the database: the walk
@@ -95,6 +150,37 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
 
   def test_tells_the_model_not_to_identify_the_mushroom
     assert_match(/do not identify/i, prompt)
+  end
+
+  # A slip printed on another event's form must be reported, not
+  # force-fit onto this template's field list.
+  def test_tells_the_model_how_to_report_a_template_mismatch
+    text = prompt
+
+    assert_includes(text, "template_matched")
+    assert_includes(text, "DIFFERENT form")
+  end
+
+  # The project's prefix picks the layout, and the whole field list
+  # follows it.
+  def test_dbg_project_gets_the_dbg_field_list
+    text = dbg_prompt
+    FieldSlip::Template.for(:dbg).fields.each_key do |field|
+      assert_includes(text, field, "prompt must name #{field}")
+    end
+
+    assert_not_includes(text, "MycoMap Voucher Number")
+    assert_includes(text, "Location/Foray")
+    assert_includes(text, "iNaturalist")
+  end
+
+  # The alias-table instructions have to name the template's own
+  # location field, or the model maps the wrong box through the table.
+  def test_dbg_location_table_names_the_location_foray_field
+    ProjectAlias.create!(project: @project, name: "EB2",
+                         target: locations(:albion))
+
+    assert_includes(dbg_prompt, "\"Location/Foray\" is usually")
   end
 
   # No project, no aliases: the prompt still has to be usable.

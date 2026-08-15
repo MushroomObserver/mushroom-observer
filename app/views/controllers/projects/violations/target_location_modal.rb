@@ -18,13 +18,10 @@ module Views::Controllers::Projects::Violations
   # one-controller-action modal wrappers — it isn't reusable, it's
   # the rendering of one specific controller action.
   class TargetLocationModal < Views::Base
-    def initialize(project:, obs:, user:, existing_locations:)
-      super()
-      @project = project
-      @obs = obs
-      @user = user
-      @existing_locations = existing_locations
-    end
+    prop :project, ::Project
+    prop :obs, ::Observation
+    prop :user, ::User
+    prop :existing_locations, _Hash(String, ::Location)
 
     def view_template
       Modal(id: TargetLocationForm.modal_id_for(@obs),
@@ -34,7 +31,8 @@ module Views::Controllers::Projects::Violations
           m.with_form_content do
             render(TargetLocationForm.new(
                      obs: @obs, project: @project,
-                     existing_locations: @existing_locations
+                     existing_locations: @existing_locations,
+                     local: false
                    ))
           end
         else

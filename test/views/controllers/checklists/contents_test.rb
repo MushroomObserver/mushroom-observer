@@ -78,13 +78,22 @@ module Views::Controllers::Checklists
     # panel. We deliberately leave taxa arrays empty so
     # `render_panel_section` skips both observed panels — this test is
     # about the summary line, not panel rendering.
-    ChecklistDataStub = Struct.new(
-      :num_species_observed, :num_higher_level_observed,
-      :species_level_observed_taxa, :higher_level_observed_taxa,
-      :unobserved_target_taxa, :duplicate_synonyms,
-      :any_deprecated_flag,
-      keyword_init: true
-    ) do
+    #
+    # Subclasses `Checklist` (rather than a bare Struct) so it still
+    # satisfies `Contents`' `prop :data, ::Checklist` -- overrides
+    # `initialize` entirely, so none of the real DB-driven calculation
+    # in the base class runs.
+    class ChecklistDataStub < Checklist
+      attr_accessor :num_species_observed, :num_higher_level_observed,
+                    :species_level_observed_taxa,
+                    :higher_level_observed_taxa, :unobserved_target_taxa,
+                    :duplicate_synonyms, :any_deprecated_flag
+
+      def initialize(**attrs)
+        super()
+        attrs.each { |key, value| public_send(:"#{key}=", value) }
+      end
+
       def any_deprecated?
         any_deprecated_flag
       end

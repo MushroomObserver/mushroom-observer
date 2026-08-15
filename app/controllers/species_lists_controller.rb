@@ -8,6 +8,8 @@
 #  Observation's to spring into existence.
 #
 class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
+  include ::Locationable
+
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
   before_action :store_location, only: [:show]
@@ -213,7 +215,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     # Matches for the list-search autocompleter
     @object_names = @species_list.observations.joins(:name).
                     select(Name[:text_name], Name[:id]).distinct.
-                    order(Name[:text_name])
+                    order(Name[:text_name]).to_a
   end
 
   ##############################################################################
@@ -297,9 +299,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     @dubious_where_reasons = []
     return if @species_list.location_id
 
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @place_name,
-      approved: params.dig(:species_list, :approved_where)
+    @dubious_where_reasons = dubious_where_reasons_for(
+      @place_name, param_key: :species_list
     )
   end
 
@@ -334,11 +335,19 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   def update_redirect_and_flash_notices(create_or_update)
     log_and_flash_notices(create_or_update)
-    update_projects(@species_list, params.dig(:species_list, :project_ids))
+    update_projects(
+      @species_list,
+      params.permit(species_list: { project_ids: [] }).
+        dig(:species_list, :project_ids)
+    )
 
     if @species_list.location_id.nil?
+      flash_warning(:runtime_location_not_found.t(name: @place_name))
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @place_name,
-                                    set_species_list: @species_list.id))
+                                    set_species_list: @species_list.id,
+                                    format: :html))
     else
       redirect_to(species_list_path(@species_list))
     end

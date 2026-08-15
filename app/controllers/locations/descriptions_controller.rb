@@ -144,10 +144,7 @@ module Locations
       initialize_description_source
       return if performed?
 
-      render(Views::Controllers::Locations::Descriptions::New.new(
-               location: @location, description: @description,
-               user: @user, licenses: @licenses
-             ))
+      render_new_view
     end
 
     def create
@@ -163,7 +160,9 @@ module Locations
         save_new_description_flash_and_redirect
       else
         flash_object_errors(@description)
-        render_new
+        render_new_view_invalid(location: new_location_description_path(
+          @location.id
+        ))
       end
     end
 
@@ -175,9 +174,7 @@ module Locations
       find_description_parent
       find_licenses
 
-      render(Views::Controllers::Locations::Descriptions::Edit.new(
-               description: @description, user: @user, licenses: @licenses
-             ))
+      render_edit_view
     end
 
     def update
@@ -218,17 +215,21 @@ module Locations
       @location = Location.find(@description.parent_id.to_s)
     end
 
-    def render_new
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Locations::Descriptions::New.new(
                location: @location, description: @description,
                user: @user, licenses: @licenses
-             ), location: new_location_description_path(@location.id))
+             ), status: status, **render_opts)
     end
 
-    def render_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Locations::Descriptions::Edit.new(
                description: @description, user: @user, licenses: @licenses
-             ), location: edit_location_description_path(@location.id))
+             ), status: status, **render_opts)
+    end
+
+    def edit_description_reload_path
+      edit_location_description_path(@location.id)
     end
 
     # called by :create
@@ -251,12 +252,12 @@ module Locations
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
-        render_edit
+        render_edit_view_invalid(location: edit_description_reload_path)
 
       # Try to save and flash if there were error(s).
       elsif !@description.save
         flash_object_errors(@description)
-        render_edit
+        render_edit_view_invalid(location: edit_description_reload_path)
 
       # Updated successfully.
       else

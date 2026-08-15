@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+#
+# Automates the "Install Needed Tools" and "Obtain and configure MO"
+# sections of README_DEV_SETUP_MACOSX.md. See that file for the full
+# manual walkthrough, hardware-specific notes, and footnotes if any
+# step here fails or doesn't match your setup.
+#
+# Usage (fresh machine, nothing cloned yet):
+#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_macos | bash
+# Usage (from an existing checkout):
+#   script/dev_setup_macos
+# Usage (just (re)sync the private icon-library repo, skip everything else):
+#   script/dev_setup_macos --icons-only
+
+# Make sure Xcode Command Line Tools is installed
+if ! xcode-select -p >/dev/null 2>&1; then
+    echo "Xcode Command Line Tools not found."
+    echo "Run: xcode-select --install"
+    echo "(You may also need full Xcode from the App Store -- see README_DEV_SETUP_MACOSX.md.)"
+    exit 1
+fi
+
+# Make sure Homebrew is installed
+if ! command -v brew >/dev/null 2>&1; then
+    echo "Homebrew not found. Install it from https://brew.sh/ and re-run this script."
+    exit 1
+fi
+
+# ---------------------------------------------------------------------
+# Clone the app repo before doing anything else. This can run under
+# whatever version of bash is already here (no Bash 4+ features used).
+# Ensuring we have the repo guarantees that `script/bash_ensure_modern`
+# and `script/dev_setup/common.sh` exist locally, whether this script
+# was curl-piped (no repo yet) or run from an existing clone.
+# ---------------------------------------------------------------------
+
+if [ -f script/dev_setup/clone_repo.sh ]; then
+    source script/dev_setup/clone_repo.sh
+else
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+fi
+mo_ensure_repo
+
+# shellcheck source=script/bash_ensure_modern
+MO_REEXEC_SCRIPT="$PWD/script/dev_setup_macos" source script/bash_ensure_modern
+
+# --- everything below this point can assume Bash >= 4 ---
+
+# shellcheck source=script/dev_setup/common.sh
+source script/dev_setup/common.sh
+# shellcheck source=script/dev_setup/finish_app_setup.sh
+source script/dev_setup/finish_app_setup.sh
+# shellcheck source=script/dev_setup/sync_mo_icon_library.sh
+source script/dev_setup/sync_mo_icon_library.sh
+
+if [ "$1" = "--icons-only" ]; then
+    mo_sync_icon_library
+    exit 0
+fi
+
+# Check MySQL install
+if command -v mysql >/dev/null 2>&1; then
+    installed_mysql=$(mysql --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    if [ -n "$installed_mysql" ] && [ "${installed_mysql%%.*}" -lt 9 ]; then
+        echo "Found MySQL $installed_mysql (< 9.0)."
+        echo "Please remove it and its vestiges before continuing -- see footnote 1"
+        echo "in README_DEV_SETUP_MACOSX.md ('Suggested procedure for removing vestiges of mysql')."
+        exit 1
+    fi
+fi
+
+echo "Installing Homebrew packages..."
+brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils zbar
+
+echo "Starting MySQL..."
+brew services start mysql
+
+if mysql -u root -e '' >/dev/null 2>&1; then
+    echo "Setting mysql root password..."
+    if ! mysqladmin -u root password 'root'; then
+        echo ""
+        echo "IMPORTANT: could not set the mysql root password automatically."
+        echo "If you cannot set the mysql root password, please contact us instead"
+        echo "of applying random \"solutions\" from AI or StackOverflow."
+        exit 1
+    fi
+else
+    echo "mysql root already has a password set -- leaving it alone."
+fi
+
+RUBY_VERSION=$(cat .ruby-version)
+
+# ---------------------------------------------------------------------
+# Ruby version manager -- use whichever the dev already has (some of
+# us use chruby, some use rbenv). Default to rbenv, the current
+# recommendation, only on a machine with neither installed yet.
+# ---------------------------------------------------------------------
+
+chruby_sh=""
+for candidate in /usr/local/share/chruby/chruby.sh /opt/homebrew/opt/chruby/share/chruby/chruby.sh; do
+    [ -f "$candidate" ] && chruby_sh="$candidate"
+done
+
+if [ -n "$chruby_sh" ] || command -v chruby >/dev/null 2>&1; then
+    echo "chruby detected -- installing Ruby $RUBY_VERSION with it..."
+    command -v ruby-build >/dev/null 2>&1 || brew install ruby-build
+    [ -n "$chruby_sh" ] && source "$chruby_sh"
+    ruby-build "$RUBY_VERSION" "$HOME/.rubies/ruby-$RUBY_VERSION"
+    chruby "$RUBY_VERSION"
+elif command -v rbenv >/dev/null 2>&1; then
+    echo "rbenv detected -- installing Ruby $RUBY_VERSION with it..."
+    eval "$(rbenv init -)"
+    rbenv install -s "$RUBY_VERSION"
+    rbenv local "$RUBY_VERSION"
+else
+    echo "Neither chruby nor rbenv found -- installing rbenv (see README_DEV_SETUP_MACOSX.md" \
+         "if you'd rather use chruby)..."
+    brew install rbenv ruby-build
+    rc_file="$HOME/.zshrc"
+    init_line='if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi'
+    if [ "$(basename "${SHELL:-}")" = "bash" ]; then
+        rc_file="$HOME/.bash_profile"
+        init_line='if which rbenv > /dev/null; then eval "$(rbenv init - bash)"; fi'
+    fi
+    grep -qxF "$init_line" "$rc_file" 2>/dev/null || echo "$init_line" >>"$rc_file"
+    eval "$(rbenv init -)"
+    rbenv install -s "$RUBY_VERSION"
+    rbenv global "$RUBY_VERSION"
+fi
+
+mo_finish_app_setup "macos"
+
+# ---------------------------------------------------------------------
+# Rock and roll
+# ---------------------------------------------------------------------
+
+bin/rails test

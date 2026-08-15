@@ -20,6 +20,18 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_select("body.rss_logs__show")
   end
 
+  # The index stores `search_type: :rss_logs` in the session (like
+  # every query-backed index), but the navbar search select has no
+  # rss_logs option -- without a fallback the browser would display
+  # the first alphabetical option, "Comments" (#4969).
+  def test_search_bar_type_defaults_to_observations
+    login
+    get(:index)
+
+    assert_select("select[name='pattern_search[type]'] " \
+                  "option[selected][value='observations']")
+  end
+
   def test_rss_with_article_in_feed
     login("rolf")
     article = Article.create!(title: "Really _Neat_ Feature!",

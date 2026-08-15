@@ -44,35 +44,42 @@
 class Components::Link::CollapseToggle < Components::Link
   include Components::Button::CollapseContent
 
+  prop :target_id, String
+  prop :collapsed, _Boolean, default: true
+  prop :fallback_href, _Nilable(String), default: nil
+  prop :size, _Nilable(_Union(*Components::Button::SIZES)), default: nil
+  prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
+  prop :icon_class, _Nilable(String), default: nil
+  prop :icon_title, _Nilable(String), default: nil
+  prop :open_text, _Nilable(String), default: nil
+  prop :closed_text, _Nilable(String), default: nil
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
   def initialize(target_id:, collapsed: true, fallback_href: nil,
                  size: nil, **opts)
-    @target_id     = target_id
-    @collapsed     = collapsed
-    @fallback_href = fallback_href
-    @size          = size
-    @icon          = opts.delete(:icon)
-    @icon_class    = opts.delete(:icon_class)
-    @icon_title    = opts.delete(:icon_title)
-    @open_text     = opts.delete(:open_text)
-    @closed_text   = opts.delete(:closed_text)
-    @html_class    = opts.delete(:class)
-    @extra_data    = opts.delete(:data) || {}
-    opts.delete(:aria)
-    button         = opts.delete(:button)
-    @html_attrs    = opts
-    super(button: button)
+    icon        = opts.delete(:icon)
+    icon_class  = opts.delete(:icon_class)
+    icon_title  = opts.delete(:icon_title)
+    open_text   = opts.delete(:open_text)
+    closed_text = opts.delete(:closed_text)
+    button      = opts.delete(:button)
+    super(target_id: target_id, collapsed: collapsed,
+          fallback_href: fallback_href, size: size, icon: icon,
+          icon_class: icon_class, icon_title: icon_title,
+          open_text: open_text, closed_text: closed_text,
+          button: button, **opts)
   end
 
   def view_template(&block)
     a(
       href: link_href,
       role: "button",
-      class: class_names(btn_styling, size_class, @html_class,
+      class: class_names(btn_styling, size_class, @attributes[:class],
                          { "collapsed" => @collapsed }),
       data: { toggle: "collapse", **collapse_data },
       aria: { expanded: @collapsed ? "false" : "true",
               **(@target_id.present? ? { controls: @target_id } : {}) },
-      **@html_attrs
+      **@attributes.except(:class, :data, :aria)
     ) do
       block ? yield : collapse_content
     end
@@ -85,9 +92,10 @@ class Components::Link::CollapseToggle < Components::Link
   end
 
   def collapse_data
-    return @extra_data unless @fallback_href
+    extra_data = @attributes[:data] || {}
+    return extra_data unless @fallback_href
 
-    @extra_data.merge(target: "##{@target_id}")
+    extra_data.merge(target: "##{@target_id}")
   end
 
   def size_class

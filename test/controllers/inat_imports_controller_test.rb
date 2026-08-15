@@ -460,7 +460,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: "anything",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_flash(
       :inat_previous_import,
       count: 1,
@@ -505,7 +505,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "#{linked_id},#{fresh_id}",
                    inat_username: "anything", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#requested_count", "2",
                   "Requested should be the raw count of listed ids")
     assert_select(
@@ -636,7 +636,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: inat_username,
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     body = @response.body
     assert_match(:inat_import_confirm_expected_caption.l, body)
@@ -668,7 +668,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: user.inat_username,
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -905,7 +905,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -934,7 +934,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: "rolf",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -968,7 +968,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "3",
@@ -1008,7 +1008,7 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#requested_count", "24",
                   "Requested should be the user's literal total_results, " \
                   "not an unfiltered (broader) count")
@@ -1037,7 +1037,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
@@ -1066,7 +1066,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select(
       "#expected_count", "3",
       "Estimate should still show when only unlicensed-others request fails"
@@ -1091,7 +1091,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1118,7 +1118,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: inat_username,
                    consent: 1, go_back: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1146,7 +1146,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field, "inat_url input field not found in response")
     value = url_field["value"].presence || url_field.text.strip
@@ -1169,8 +1169,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_authorization_response_denied
@@ -1238,7 +1239,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: "anyone", inat_ids: nil,
                    consent: 1, all: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
   end
 
@@ -1401,7 +1402,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
-    assert_response(:success, "Valid URL should proceed to confirmation")
+    assert_unprocessable
     assert_select("#expected_count", "5",
                   "Confirmation should show estimate from URL query")
   end
@@ -1493,6 +1494,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash(:inat_invalid_url,
                  on_fail: "Non-iNat URL should flash invalid URL error")
+    assert_unprocessable
     assert_form_action(action: :create)
   end
 
@@ -1892,8 +1894,10 @@ class InatImportsControllerTest < FunctionalTestCase
       on_fail: "Flash should surface iNat's error text instead of the " \
                "generic 'Cannot communicate' message"
     )
+    assert_unprocessable
     assert_select("#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_estimate_422_with_non_json_body_falls_back_to_exception_message

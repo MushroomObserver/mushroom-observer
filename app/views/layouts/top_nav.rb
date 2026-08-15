@@ -25,6 +25,11 @@ class Views::Layouts::TopNav < Views::Base
 
   prop :user, _Nilable(::User), default: nil
   prop :query, _Nilable(::Query), default: nil
+  # The current site banner, if any -- gates the "show announcements"
+  # button. Shared with `Views::Layouts::App::Banners` via the same
+  # `banner` Stimulus controller instance, hoisted onto their common
+  # ancestor (`#main_container`, see `Views::Layouts::Application`).
+  prop :banner, _Nilable(::Banner), default: nil
 
   # Controllers / actions where the search-help dropdown is available
   SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
@@ -99,6 +104,7 @@ class Views::Layouts::TopNav < Views::Base
       render(UserNav.new(user: @user)) if @user
     end
     render(Login.new) if @user.nil?
+    render_show_banner_button
   end
 
   def render_search_row
@@ -155,9 +161,9 @@ class Views::Layouts::TopNav < Views::Base
         type: :collapse_toggle,
         target_id: "search_nav",
         variant: :outline, size: :sm,
-        class: "top_nav_button",
+        class: "top_nav_button top_nav_icon_button",
         aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :search.ti) }
+      ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
     end
   end
 
@@ -223,9 +229,15 @@ class Views::Layouts::TopNav < Views::Base
     Button(**nav_create_button_options)
   end
 
+  # Excludes :new/:create -- those actions render the create form
+  # itself, so a "+ Add" button pointing right back at the page
+  # already showing would be pointless. A failed :create re-renders
+  # the same new-form template, hence checking both actions rather
+  # than just :new.
   def nav_create_visible?
     @user && controller.methods.include?(:new) &&
-      NAV_CREATABLES.include?(controller.controller_name)
+      NAV_CREATABLES.include?(controller.controller_name) &&
+      %w[new create].exclude?(controller.action_name)
   end
 
   def nav_create_button_options
@@ -235,10 +247,10 @@ class Views::Layouts::TopNav < Views::Base
                       action: :new),
       name: :add.ti, label: true,
       variant: :success, size: :sm,
-      class: "ml-1 mr-0 mx-sm-3 top_nav_button",
+      class: "ml-1 mr-0 mx-sm-3 top_nav_button new_object_button",
       title: full_label,
       aria: { label: full_label },
-      data: { tooltip_target: "tip" } }
+      data: { tooltip_target: "tip", placement: :bottom } }
   end
 
   def nav_create_label
@@ -260,7 +272,28 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "mx-0 mx-sm-2 top_nav_button"
+      class: "mx-0 mx-sm-2 top_nav_button top_nav_icon_button",
+      data: { placement: :bottom }
     )
+  end
+
+  # Toggles the dismissed site banner back open. Tablet/desktop only
+  # (hidden-xs) -- the mobile nav is already tight on space, and the
+  # banner itself is reachable by scrolling. Starts `d-none`; the
+  # `banner` Stimulus controller (see `Views::Layouts::App::Banners`
+  # and `Views::Layouts::Application#main_container_data`) flips it
+  # to `d-block` only when the banner is currently dismissed.
+  def render_show_banner_button
+    return unless @banner
+
+    Button(
+      variant: :success, size: :sm,
+      class: "mr-0 ml-0 ml-sm-2 top_nav_button top_nav_icon_button " \
+             "d-none hidden-xs",
+      data: { banner_target: "showButton" }
+    ) do
+      Icon(type: :interests, title: :banner_show_tooltip.t,
+           data: { placement: :bottom })
+    end
   end
 end

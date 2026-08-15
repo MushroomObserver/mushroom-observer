@@ -22,16 +22,36 @@
     margin-right: -100%;
 
     .carousel-caption {
-      @extend .bg-legible, .py-2;
       position: absolute;
       bottom: 0;
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%);
-      width: auto;
+      left: 0;
+      // Bootstrap's own .carousel-caption base rule sets right: 15%.
+      // left/width alone already win it out under CSS's over-
+      // constrained resolution, but pin it explicitly rather than
+      // rely on that.
+      right: 0;
+      width: 100%;
       height: auto;
+      // Bootstrap's own .carousel-caption base rule sets 20-30px of
+      // padding-top/bottom -- MO's .py-2 used to live here and
+      // override it as a side effect; now that it moved to
+      // .caption-content below, this needs to cancel Bootstrap's
+      // default explicitly or the caption floats well above bottom:0.
+      padding: 0;
+      text-align: center;
       opacity: 0;
       transition: opacity 0.2s ease;
+
+      // Full-width so the vote-button tooltip container
+      // (VoteInterface#context == :carousel) has the whole image's
+      // width to lay out in, not just the caption's own content
+      // width. The visible dark backdrop moved to .caption-content
+      // (shrink-wrapped, centered by the text-align above) so it
+      // doesn't stretch full-width along with the positioning box.
+      .caption-content {
+        @extend .bg-legible, .py-2;
+        display: inline-block;
+      }
 
       .vote-section {
         background: transparent;
@@ -92,6 +112,37 @@
   &:focus {
     // color: rgba($white, 1);
     opacity: 1;
+  }
+
+  // Replaces Bootstrap's own .glyphicon-chevron-left/-right centering,
+  // which no longer matches now that Icon renders <svg class="mo-icon
+  // mo-icon-chevron-left">.
+  .mo-icon-chevron-left,
+  .mo-icon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+  }
+
+  .mo-icon-chevron-left {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .mo-icon-chevron-right {
+    right: 50%;
+    transform: translate(50%, -50%);
+  }
+}
+
+// Bootstrap's own .carousel-control scales its glyph 1.5x here
+// ($carousel-control-font-size 20px -> 30px). .mo-icon inherits
+// .carousel-control's font-size (via .btn { font-size: inherit }
+// above) and sizes itself in em, so bumping font-size here scales
+// the icon the same way without a separate .mo-icon override.
+@media screen and (min-width: $screen-sm-min) {
+  .carousel-control {
+    font-size: 3rem;
   }
 }
 
@@ -162,6 +213,24 @@
       // padding-bottom: 50%;
       border-bottom: none;
       border-right: 1px solid $panel-inner-border;
+    }
+  }
+
+  // Upload-in-progress feedback (issue #5068 option 1): a dark
+  // overlay + centered spinner/checkmark over the image, toggled by
+  // form-images_controller.js. Kept visible (dimmed), not hidden, so
+  // the gallery doesn't visibly disappear item-by-item on submit.
+  .upload-status-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2;
+
+    .mo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: $white;
     }
   }
 

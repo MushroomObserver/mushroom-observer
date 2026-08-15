@@ -40,18 +40,18 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   end
 
   def manage_link
-    Link(type: :icon,
+    Link(type: :get,
          tab: ::Tab::Observation::ManageLists.new(
            observation: @obs, q_param: q_param
          ))
   end
 
   def add_to_list_link
-    Link(type: :icon,
+    Link(type: :get,
          tab: ::Tab::Observation::AddToSpeciesList.new(
            observation: @obs, q_param: q_param
          ),
-         show_text: true)
+         label: true)
   end
 
   def render_list

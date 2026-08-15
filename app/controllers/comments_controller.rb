@@ -190,7 +190,7 @@ class CommentsController < ApplicationController
     @comment = Comment.new(target: @target)
 
     respond_to do |format|
-      format.html { render_phlex_new }
+      format.html { render_new_view }
       format.turbo_stream { render_modal_comment_form }
     end
   end
@@ -234,7 +234,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_comment_form }
-      format.html { render_phlex_edit }
+      format.html { render_edit_view }
     end
   end
 
@@ -276,18 +276,18 @@ class CommentsController < ApplicationController
 
   private
 
-  def render_phlex_new
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::Comments::New.new(
              comment: @comment, target: @target, user: @user,
              comments: load_target_comments
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_phlex_edit
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Comments::Edit.new(
              comment: @comment, target: @target, user: @user,
              comments: load_target_comments
-           ))
+           ), status: status, **render_opts)
   end
 
   # Comments-for-target list used by the read-only `CommentsForObject`
@@ -307,10 +307,26 @@ class CommentsController < ApplicationController
     params[:comment].permit([:summary, :comment])
   end
 
+  # Called from both create's and update's failure paths. The
+  # format.html branch previously always rendered the New form, even
+  # on an update failure -- fixed to redisplay whichever form the
+  # calling action actually owns, at status: :unprocessable_content
+  # (a Turbo requirement for a re-rendered, non-redirected form
+  # response). The turbo_stream branch doesn't need that: Turbo
+  # Streams just look for a matching target id in the body, not a
+  # 2xx-implies-redirect signal.
   def reload_form
     respond_to do |format|
       format.turbo_stream { reload_modal_form }
-      format.html { render_phlex_new }
+      format.html { render_reload_form_invalid }
+    end
+  end
+
+  def render_reload_form_invalid
+    if action_name == "update"
+      render_edit_view_invalid
+    else
+      render_new_view_invalid
     end
   end
 
