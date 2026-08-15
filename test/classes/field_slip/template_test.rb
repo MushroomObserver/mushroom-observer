@@ -7,6 +7,8 @@ class FieldSlip::TemplateTest < UnitTestCase
     assert_instance_of(FieldSlip::Template::Mo, FieldSlip::Template.for(:mo))
     assert_instance_of(FieldSlip::Template::Dbg,
                        FieldSlip::Template.for("dbg"))
+    assert_instance_of(FieldSlip::Template::Nama,
+                       FieldSlip::Template.for(:nama))
   end
 
   def test_for_rejects_an_unknown_template
@@ -30,6 +32,11 @@ class FieldSlip::TemplateTest < UnitTestCase
     project.field_slip_prefix = "2026-CMS"
 
     assert_instance_of(FieldSlip::Template::Dbg,
+                       FieldSlip::Template.for_project(project))
+
+    project.field_slip_prefix = "2026-NAMA"
+
+    assert_instance_of(FieldSlip::Template::Nama,
                        FieldSlip::Template.for_project(project))
   end
 
@@ -98,5 +105,17 @@ class FieldSlip::TemplateTest < UnitTestCase
                  template.inat_code_in("1:59 pm 389-198-780 (iNat#) see Alex"))
     assert_nil(template.inat_code_in("gSanchez"))
     assert_nil(template.inat_code_in("1:58 PM"))
+  end
+
+  # The NAMA slip's box is "iNaturalist/MO": an MO observation number
+  # written there (6 digits) stays below RAW_ID's 7-digit floor, so
+  # only iNat-length ids are linked.
+  def test_nama_inat_code_ignores_mo_observation_numbers
+    template = FieldSlip::Template.for(:nama)
+
+    assert_equal("389176438", template.inat_code_in("#389176438"))
+    assert_equal("388596423", template.inat_code_in("388 596 423"))
+    assert_nil(template.inat_code_in("MO 664471"))
+    assert_nil(template.inat_code_in("someuser 10:29"))
   end
 end
