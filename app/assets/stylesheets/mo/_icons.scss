@@ -170,10 +170,10 @@
 
 // Icon-only buttons: only the glyph (via .mo-icon's fill: currentColor
 // tracking .btn-link's :hover color) should change on hover, not the
-// button background. Excludes .dropdown-item -- those need their
-// normal Bootstrap hover-highlight background, which is the whole
-// point of that rule.
-.btn-link:not(.dropdown-item) {
+// button background. Excludes .dropdown-item and .list-group-item --
+// those need their normal Bootstrap hover-highlight background,
+// which is the whole point of those rules.
+.btn-link:not(.dropdown-item):not(.list-group-item) {
   &:hover,
   &:focus,
   &:active,

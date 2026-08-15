@@ -138,7 +138,14 @@ module ObservationsController::FieldSlips
     return nil if code.blank?
 
     existing = FieldSlip.find_by(code: code)
-    return existing if existing
+    if existing
+      # current_user gates FieldSlip#calc_location's two user-dependent
+      # steps (latest slip in the project, latest located observation);
+      # without it an existing slip's Locality default silently loses
+      # them and falls back to the previous observation's free text.
+      existing.current_user = @user
+      return existing
+    end
 
     slip = FieldSlip.new
     slip.current_user = @user

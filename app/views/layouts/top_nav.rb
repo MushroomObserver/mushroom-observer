@@ -229,9 +229,15 @@ class Views::Layouts::TopNav < Views::Base
     Button(**nav_create_button_options)
   end
 
+  # Excludes :new/:create -- those actions render the create form
+  # itself, so a "+ Add" button pointing right back at the page
+  # already showing would be pointless. A failed :create re-renders
+  # the same new-form template, hence checking both actions rather
+  # than just :new.
   def nav_create_visible?
     @user && controller.methods.include?(:new) &&
-      NAV_CREATABLES.include?(controller.controller_name)
+      NAV_CREATABLES.include?(controller.controller_name) &&
+      %w[new create].exclude?(controller.action_name)
   end
 
   def nav_create_button_options

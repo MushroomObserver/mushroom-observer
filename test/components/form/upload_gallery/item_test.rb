@@ -56,6 +56,22 @@ module Form
                           "[value='#{@image.id}']")
       end
 
+      # Upload-status overlay (issue #5068 option 1): only rendered for
+      # not-yet-created images, since only those go through the
+      # JS-driven upload queue.
+      def test_upload_renders_status_overlay
+        html = render_item(upload: true)
+
+        assert_html(html, "div.upload-status-overlay.d-none" \
+                          "[data-form-images-target='uploadStatus']")
+      end
+
+      def test_non_upload_omits_status_overlay
+        html = render_item(upload: false)
+
+        assert_no_html(html, ".upload-status-overlay")
+      end
+
       private
 
       def render_item(image: @image, upload: false,

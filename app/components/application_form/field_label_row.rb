@@ -48,32 +48,44 @@ class Components::ApplicationForm < Superform::Rails::Form
     # title-casing, to display correctly.
     def resolved_label_text
       label_option = wrapper_options[:label]
-      case label_option
-      when Symbol then label_option.t
-      when String then label_option
-      else field.key.to_s.humanize
-      end
+      text = case label_option
+             when Symbol then label_option.t
+             when String then label_option
+             else field.key.to_s.humanize
+             end
+      open_label_links_in_new_tab(text)
     end
 
-    # A resolved label containing a real link -- a field-PROMPT label
-    # secretly doubling as a clickable link is a UX smell (not obviously
-    # clickable, easy to miss). Route link content through a help icon
-    # instead (see Components::Form::UploadGallery::Fields#render_license_field
-    # for the established pattern) rather than embedding it in the label.
+    # A link inside a label navigates the user away from a form they may
+    # be partway through filling out, in the same tab -- losing whatever
+    # they'd already entered. Force `target="_blank"` (plus
+    # `rel="noopener noreferrer"`) rather than stripping the link: a
+    # translator writing ordinary Textile link syntax into a label
+    # string (a production translation of `donate_who`, Spanish, did
+    # exactly this) has no way to know it lands in a `<label>`, so the
+    # label has to tolerate a link showing up, not reject it.
     #
-    # Only guards `label_text` below (the colon-suffixed prompt path),
-    # NOT `resolved_label_text` itself -- CheckboxField#label_text calls
-    # `resolved_label_text` directly, bypassing this guard, because a
-    # checkbox's label can be rich content rather than a plain text
-    # prompt (e.g. a name link + copy-id badge next to a
-    # synonym-selection checkbox -- see names/synonyms/form.rb).
-    LINK_IN_LABEL_RE = /<a[\s>]/
+    # Nested links inside a `<label for="...">` are valid HTML, and
+    # browsers give the `<a>` click priority over the label's own
+    # click-to-focus/toggle behavior, so there's no real ambiguity even
+    # for a checkbox/radio label where the label click also toggles the
+    # control -- CheckboxField#label_text calls resolved_label_text
+    # directly and gets this same treatment.
+    LINK_TAG_RE = /<a\b([^>]*)>/i
 
-    def raise_if_label_has_link(text)
-      return unless text.is_a?(String) && text.match?(LINK_IN_LABEL_RE)
+    def open_label_links_in_new_tab(text)
+      return text unless text.is_a?(String) && text.match?(LINK_TAG_RE)
 
-      raise("Field label contains a link -- move it into help: " \
-            "content instead of embedding it in the label: #{text.inspect}")
+      rewritten = text.gsub(LINK_TAG_RE) do
+        attrs = Regexp.last_match(1)
+        unless attrs.match?(/\btarget\s*=/i)
+          attrs += ' target="_blank" rel="noopener noreferrer"'
+        end
+        "<a#{attrs}>"
+      end
+      return rewritten unless text.is_a?(ActiveSupport::SafeBuffer)
+
+      ActiveSupport::SafeBuffer.new(rewritten)
     end
 
     # append_colon lives on Components::Localization, included into
@@ -86,7 +98,6 @@ class Components::ApplicationForm < Superform::Rails::Form
     # field prompt).
     def label_text
       text = resolved_label_text
-      raise_if_label_has_link(text)
       wrapper_options[:label_colon] == false ? text : append_colon(text)
     end
 

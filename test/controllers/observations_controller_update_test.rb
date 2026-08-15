@@ -462,7 +462,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       params,
       "mary"
     )
-    assert_response(:success) # Which really means failure
+    assert_unprocessable
   end
 
   def test_update_observation_with_another_users_image
@@ -535,11 +535,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     login("mary")
     put(:update, params: params)
 
-    # 200 :success means means failure!
-    assert_response(
-      :success,
-      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
-    )
+    assert_unprocessable
     assert_flash_error
   end
 
@@ -757,6 +753,47 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Regression (#3032): validate_place_name never passed approved: to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name on edit looped forever showing the same flash instead of
+  # accepting it.
+  def test_update_observation_dubious_place_name_approved
+    params = {
+      location: { north: 35, south: 34, east: -117, west: -118 }
+    }
+    where = "Mt. Molehill, Iowa, USA"
+
+    # First submission: dubious ("Mt." should be "Mount"), rejected.
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, update succeeds.
+    generic_update_observation(
+      params.merge(observation: { place_name: where, location_id: -1 },
+                   approved_where: where),
+      1
+    )
+  end
+
+  # The render half of the approval round-trip (see the companion
+  # validator test above): the dubious reload must embed approved_where
+  # in the form action, or the browser never sends the approval and
+  # the confirmation loops forever (reported at the 2026 SMHF event).
+  def test_update_dubious_place_rerender_embeds_approved_where
+    generic_update_observation(
+      { location: { north: 35, south: 34, east: -117, west: -118 },
+        observation: { place_name: "Mt. Molehill, Iowa, USA",
+                       location_id: -1 } },
+      0
+    )
+
+    assert_select("form#observation_form[action*=?]", "approved_where",
+                  true, "the reloaded form must carry the approval")
+  end
+
   # --------------------------------------------------------------------
   #  Test notes with template
   # --------------------------------------------------------------------
@@ -965,7 +1002,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_flash(:runtime_no_save_observation)
     # Re-renders the edit form rather than redirecting.
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_update_invalid_field_slip_code
@@ -1176,7 +1213,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_redirected_to(
       new_location_path(where: obs.reload.place_name(rolf),
-                        set_observation: obs.id)
+                        set_observation: obs.id, format: :html)
     )
   end
 

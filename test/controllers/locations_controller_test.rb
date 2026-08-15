@@ -660,7 +660,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     post(:create, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
+    assert_select("form[data-turbo='true']")
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
@@ -809,6 +810,24 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(loc, herbarium.location)
   end
 
+  # Part of #2248's fix: Project has no bounding-box UI, so a clean
+  # but unmatched name sends the user here (via set_project) to
+  # actually create the Location, same offramp as set_herbarium/
+  # set_user.
+  def test_create_location_with_set_project
+    project = projects(:eol_project)
+    login("rolf")
+    params = barton_flats_params
+    params[:set_project] = project.id.to_s
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(project_path(project))
+    project.reload
+    assert_equal(loc, project.location)
+  end
+
   # Regression test: a stale/tampered set_herbarium id used to make
   # return_to_caller issue no redirect at all (Herbarium.safe_find
   # returning nil skipped straight past the whole branch), raising a
@@ -954,7 +973,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     put(:update, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     put(:update, params: params)
@@ -978,7 +997,7 @@ class LocationsControllerTest < FunctionalTestCase
     params = update_params_from_loc(loc)
     params[:location][:display_name] = new_normal_name
     put(:update, params: params)
-    assert_response(:success) # means failure
+    assert_unprocessable # means failure
 
     params[:location][:display_name] = new_scientific_name
     put(:update, params: params)
@@ -1193,7 +1212,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Should redirect to merge request form
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Location, old_id: to_go.id, new_id: to_stay.id
+                           type: :Location, old_id: to_go.id,
+                           new_id: to_stay.id, format: :html
                          ))
   end
 

@@ -19,6 +19,7 @@ module Views::Controllers::Locations
     prop :set_species_list, _Nilable(Integer), default: nil
     prop :set_user, _Nilable(Integer), default: nil
     prop :set_herbarium, _Nilable(Integer), default: nil
+    prop :set_project, _Nilable(Integer), default: nil
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
 
@@ -204,6 +205,7 @@ module Views::Controllers::Locations
               set_observation: @set_observation,
               set_species_list: @set_species_list,
               set_user: @set_user, set_herbarium: @set_herbarium,
+              set_project: @set_project,
               only_path: true)
     end
 

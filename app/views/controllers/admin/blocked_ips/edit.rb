@@ -47,7 +47,7 @@ module Views::Controllers::Admin::BlockedIps
       # point at this same admin/blocked_ips resource) so they're not
       # passed through here. See the comment on those methods inside
       # `Manager` for the reasoning.
-      render(Manager.new(form, type: type, list: list))
+      render(Manager.new(form, type: type, list: list, local: false))
     end
 
     def render_right_column

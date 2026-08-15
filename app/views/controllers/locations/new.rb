@@ -14,6 +14,7 @@ module Views::Controllers::Locations
     prop :set_species_list, _Nilable(Integer), default: nil, &TO_ID
     prop :set_user, _Nilable(Integer), default: nil, &TO_ID
     prop :set_herbarium, _Nilable(Integer), default: nil, &TO_ID
+    prop :set_project, _Nilable(Integer), default: nil, &TO_ID
     prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
          default: nil
     def view_template
@@ -29,7 +30,9 @@ module Views::Controllers::Locations
                set_species_list: @set_species_list,
                set_user: @set_user,
                set_herbarium: @set_herbarium,
-               dubious_where_reasons: @dubious_where_reasons
+               set_project: @set_project,
+               dubious_where_reasons: @dubious_where_reasons,
+               local: false
              ))
     end
   end

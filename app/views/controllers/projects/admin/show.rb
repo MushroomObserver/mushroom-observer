@@ -11,6 +11,9 @@ module Views::Controllers::Projects::Admin
     prop :user, ::User
     prop :dates_any, _Boolean
     prop :upload_params, Hash
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
+    prop :raw_place_name, _Nilable(String), default: nil
 
     def view_template
       add_project_banner(@project)
@@ -33,7 +36,9 @@ module Views::Controllers::Projects::Admin
                dates_any: @dates_any,
                upload_params: @upload_params,
                dirty_form: true,
-               local: false
+               local: false,
+               dubious_where_reasons: @dubious_where_reasons,
+               raw_place_name: @raw_place_name
              ))
     end
 

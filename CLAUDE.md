@@ -150,6 +150,10 @@ by a `PreToolUse` hook.
 See `.claude/rules/code_comments.md` — comment the *why* (only when
 unclear), never the *what*; keep one source of truth, don't duplicate
 the same rationale across files.
+See `.claude/rules/turbo_submit_forms.md` — pattern for converting a
+Phlex form to Turbo submission (issue #5052), including which failure
+paths need a `422` and how to test the conversion without a system
+test.
 
 ## Git Workflow
 
