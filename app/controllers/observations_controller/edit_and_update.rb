@@ -264,6 +264,11 @@ module ObservationsController::EditAndUpdate
     @exif_data    ||= get_exif_data(@good_images)
     @location     ||= @observation.location
     @field_code     = params[:field_code]
+    # See init_location_var_for_reload: the approved_where round-trip
+    # needs @place_name set on a dubious-name re-render.
+    if @dubious_where_reasons.present?
+      @place_name = @observation.place_name(@user)
+    end
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
@@ -284,7 +289,8 @@ module ObservationsController::EditAndUpdate
   def edit_view_obs_attrs
     {
       observation: @observation, user: @user, location: @location,
-      dubious_where_reasons: @dubious_where_reasons
+      dubious_where_reasons: @dubious_where_reasons,
+      place_name: @place_name
     }
   end
 

@@ -292,6 +292,12 @@ module ObservationsController::Create
   def init_location_var_for_reload
     # Preserve the user's place_name input for form re-render
     @default_place_name = @observation.place_name(@user)
+    # A flagged name re-renders with `approved_where` embedded in the
+    # form action (Form#form_action reads @place_name), so resubmitting
+    # unchanged passes `dubious_reasons_for`'s approved gate. Without
+    # this the "Click Create to use this location name" confirmation
+    # loops forever -- nothing else ever assigns @place_name.
+    @place_name = @default_place_name if @dubious_where_reasons.present?
 
     # keep location_id if it's -1 (new)
     if @location || @observation.location_id.nil? ||
