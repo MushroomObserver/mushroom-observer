@@ -9,7 +9,7 @@ module SpeciesLists
     def new
       @species_list = SpeciesList.find(params[:id])
       init_member_vars_for_create
-      render_new_page
+      render_new_view
     end
 
     def create
@@ -25,7 +25,7 @@ module SpeciesLists
 
     private
 
-    def render_new_page
+    def render_new_view(status: :ok, **render_opts)
       render(
         Views::Controllers::SpeciesLists::WriteIn::New.new(
           species_list: @species_list,
@@ -45,7 +45,9 @@ module SpeciesLists
           member_alt: @member_alt,
           member_is_collection_location: @member_is_collection_location,
           member_specimen: @member_specimen
-        )
+        ),
+        status: status,
+        **render_opts
       )
     end
 
@@ -116,7 +118,7 @@ module SpeciesLists
       # inline). Set them here so the Phlex view's constructor can
       # carry them.
       @member_notes_parts = @species_list.form_notes_parts(@user)
-      render_new_page
+      render_new_view_invalid
     end
 
     def list_without_underscores

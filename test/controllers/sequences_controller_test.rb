@@ -284,8 +284,9 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
+    assert_select("form[data-turbo='true']")
   end
 
   def test_create_no_bases_or_equivalent
@@ -296,7 +297,7 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
   end
 
@@ -308,7 +309,7 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
   end
 
@@ -319,7 +320,7 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
   end
 
@@ -612,8 +613,9 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove locus required.
     login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
+    assert_select("form[data-turbo='true']")
   end
 
   def test_update_no_bases_or_equivalent
@@ -627,7 +629,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove bases or (archive and accession) required
     login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
   end
 
@@ -642,7 +644,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove accession is required if archive present.
     login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
   end
 
@@ -657,7 +659,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove archive is required if accession present.
     login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success) # response is 200 because it just reloads the form
+    assert_unprocessable # form re-render is a same-fetch Turbo Drive response
     assert_flash_error
   end
 

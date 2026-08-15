@@ -12,6 +12,7 @@ module Observations
       get(:new, params: { id: obs.id })
 
       assert_response(:success)
+      assert_select("form[data-turbo='true']")
     end
 
     def test_new_external_link_form_turbo
@@ -374,6 +375,7 @@ module Observations
       get(:edit, params: { id: link.id })
 
       assert_response(:success)
+      assert_select("form[data-turbo='true']")
     end
 
     def test_edit_external_link_form_turbo

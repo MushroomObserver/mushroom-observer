@@ -83,8 +83,10 @@ module Observations
         post(:create,
              params: { id: obs.id, observer_question: { message: "" } })
       end
+      assert_unprocessable
       assert_flash_error
       assert_select("body.emails__new")
+      assert_select("form[data-turbo='true']")
     end
   end
 end
