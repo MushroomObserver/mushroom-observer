@@ -51,6 +51,38 @@ which of these three the response actually is. Only the Drive case
 (full-page re-render, no `turbo_frame_tag`, no `format.turbo_stream`
 branch) needs the `422` treatment described below.
 
+## Exception: forms that trigger a file download are not convertible
+
+`local: false` routes a form's submission through Turbo Drive's
+`fetch()`-based interception. A `fetch()` response body can never
+trigger the browser's native Save-As/download UI, no matter its
+`Content-Disposition` header — only a real, non-intercepted form
+submission does that. So any form whose success path calls `send_data`/
+`send_file`/`render_report` (a CSV, DwC-A, PDF-labels, or similar
+export) must **stay `local: true`, permanently** — this is not a gap to
+close later, it's a structural mismatch between what the form does and
+what Turbo Drive can carry.
+
+`Views::Controllers::Observations::Downloads::Form` (shared by
+`Observations::DownloadsController` and
+`SpeciesLists::DownloadsController`) is one instance of this in the
+sweep. Its "Cancel" button redirects and its "Download"/"Print
+Labels" buttons call `send_data` — since all three share one `local:`
+setting on the same `<form>`, the whole form is exempt, not just the
+download-triggering buttons. Before converting any new form, check
+whether its controller's success path calls `send_data`/`send_file` —
+if so, stop, don't convert it, and add it to this list instead.
+
+`Views::Controllers::SpeciesLists::NameLists::Form`
+(`SpeciesLists::NameListsController`) is the second instance. Its
+`create` action dispatches on `params[:commit]`: one button
+(`name_lister_submit_spl`) creates a `SpeciesList` and renders a plain
+page, but the other three (`_txt`/`_rtf`/`_csv`) call
+`render_name_list_as_txt`/`_rtf`/`_csv` (`SpeciesLists::
+SharedRenderMethods`), each of which calls `send_data`. Same
+one-`local:`-setting-for-four-buttons structure as the Downloads form
+— stays `local: true` permanently.
+
 ## HARD RULE: a same-URL `200` re-render on a Turbo-enabled form hangs the browser
 
 **Never let a Drive-category response return a plain `200` at the same

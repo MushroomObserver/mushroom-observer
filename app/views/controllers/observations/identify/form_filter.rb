@@ -10,7 +10,8 @@ module Views::Controllers::Observations::Identify
                FormObject::IdentifyFilter.new(
                  type: params.dig(:filter, :type),
                  term: params.dig(:filter, :term)
-               )
+               ),
+               local: false
              ))
     end
   end

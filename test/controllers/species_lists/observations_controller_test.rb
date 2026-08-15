@@ -17,6 +17,7 @@ module SpeciesLists
       get(:edit, params: params)
       assert_response(:success)
       assert_input_value(:species_list_title, "")
+      assert_select("form[data-turbo='true']")
 
       get(:edit, params: params.merge(species_list: { title: "blah" }))
       assert_response(:success)

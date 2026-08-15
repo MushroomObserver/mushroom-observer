@@ -8,7 +8,7 @@ module Views::Controllers::Users
 
       def view_template
         add_page_title(:ask_user_question_title.t(user: @target.legal_name))
-        render(Form.new(target: @target, local: true))
+        render(Form.new(target: @target, local: false))
       end
     end
   end

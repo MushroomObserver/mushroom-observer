@@ -17,6 +17,7 @@ class VisualModelsControllerTest < FunctionalTestCase
     login
     get(:new)
     assert_response(:success)
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_create_visual_model
@@ -69,6 +70,7 @@ class VisualModelsControllerTest < FunctionalTestCase
     login
     get(:edit, params: { id: @visual_model.id })
     assert_response(:success)
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_update_visual_model
