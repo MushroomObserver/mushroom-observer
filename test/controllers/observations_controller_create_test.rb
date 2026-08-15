@@ -2302,6 +2302,22 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_no_match(/field_slip_extract/, @response.location.to_s)
   end
 
+  # Android's system photo picker offers no camera (iOS builds one into
+  # its picker), so the form carries a dedicated capture input that
+  # opens the camera directly. Single-shot by nature: no `multiple`.
+  def test_new_offers_a_direct_camera_capture_input
+    login("rolf")
+    get(:new)
+
+    assert_select(
+      "input[type='file'][capture='environment'][accept='image/*']"
+    )
+    assert_select(
+      "input[type='file'][capture='environment'][multiple]", false,
+      "a capture input returns one photo per tap"
+    )
+  end
+
   private
 
   def make_slip_project_admin(user)

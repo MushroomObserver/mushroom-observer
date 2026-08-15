@@ -687,6 +687,7 @@
   removed_from_project: Removed [object] from "[project]".
   removed_from_project_with_siblings: 'Removed all [count] observations of this collection from "[project]".'
   select_file: Select or drop files...
+  take_photo: Take Photo
   no_file_selected: No file selected.
   see_message_below: See message below.
   "yes": "yes"

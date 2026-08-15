@@ -12,6 +12,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
 
   def view_template
     render_file_select_button
+    render_take_photo_button
     render_good_image_ids_field
     render_thumb_image_id_field
   end
@@ -29,6 +30,28 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
         wrapper_options: { label: :images.ti, class: "my-3" }
+      )
+    )
+  end
+
+  # Android's system photo picker has no camera option (iOS builds one
+  # into its picker), so a dedicated capture input is the only way to
+  # photograph a slip straight from the form there. `capture` opens the
+  # rear camera directly on both platforms -- one shot per tap, feeding
+  # the same handler as the file picker. No `multiple`: a capture
+  # returns a single photo by nature.
+  def render_take_photo_button
+    field_proxy = Components::ApplicationForm::FieldProxy.new(
+      "", :take_photo_button, nil
+    )
+    render(
+      Components::ApplicationForm::FileField.new(
+        field_proxy,
+        capture: "environment",
+        controller: "form-images",
+        action: "change->form-images#addSelectedFiles",
+        wrapper_options: { label: false, button_text: :take_photo.l,
+                           wrap_class: "my-3" }
       )
     )
   end
