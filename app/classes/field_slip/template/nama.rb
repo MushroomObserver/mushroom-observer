@@ -10,8 +10,10 @@ class FieldSlip
     class Nama < Base
       FIELDS = {
         "Field Slip Code" => nil,
-        # DNA and VCP are flags, not values: printed faintly in the
-        # header corners for the collector to mark.
+        # DNA and VCP are sticker slots: the faint corner labels mark
+        # where DNA-sequencing and Voucher Collection Program stickers
+        # go. The sticker design isn't settled yet, so the rule below
+        # stays agnostic about what one looks like.
         "DNA" => :"notes.DNA",
         "VCP" => :"notes.VCP",
         "Date" => :when,
@@ -59,10 +61,11 @@ class FieldSlip
             a scientific name, a common name, or a genus alone. Give
             it verbatim.
           - "DNA" and "VCP" are printed faintly in the header's upper
-            corners; the collector circles, checks, or otherwise marks
-            one to flag the specimen. Report the label ("DNA" or
-            "VCP") only when it is clearly marked; an unmarked printed
-            label is null.
+            corners, marking where a DNA-sequencing or voucher sticker
+            may be affixed. When a sticker covers one, report the
+            sticker's printed or written text; if the sticker carries
+            no readable text, report "present". The faint printed
+            label alone, with no sticker over it, is null.
           - "Trees/Plants" is a section with blank lines headed
             Conifer, Deciduous, and Other Host; the collector writes
             tree or plant names on them. Report what is written,
