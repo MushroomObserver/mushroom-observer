@@ -11,8 +11,10 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   prop :good_images, _Array(::Image), default: -> { [] }
 
   def view_template
-    render_file_select_button
-    render_take_photo_button
+    div(class: "d-flex flex-wrap align-items-center") do
+      render_file_select_button
+      render_take_photo_button
+    end
     render_good_image_ids_field
     render_thumb_image_id_field
   end
@@ -39,7 +41,9 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   # photograph a slip straight from the form there. `capture` opens the
   # rear camera directly on both platforms -- one shot per tap, feeding
   # the same handler as the file picker. No `multiple`: a capture
-  # returns a single photo by nature.
+  # returns a single photo by nature. Hidden on non-touch devices via
+  # `.take-photo-field` (see _form_elements.scss) -- desktop browsers
+  # ignore `capture` and the button would just duplicate the picker.
   def render_take_photo_button
     field_proxy = Components::ApplicationForm::FieldProxy.new(
       "", :take_photo_button, nil
@@ -51,7 +55,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
         wrapper_options: { label: false, button_text: :take_photo.l,
-                           wrap_class: "my-3" }
+                           wrap_class: "my-3 ml-3 take-photo-field" }
       )
     )
   end
