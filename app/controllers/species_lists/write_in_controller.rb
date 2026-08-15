@@ -54,9 +54,9 @@ module SpeciesLists
     def init_member_vars_for_create
       @member_vote = Vote.maximum_vote
       @member_notes_parts = @species_list.form_notes_parts(@user)
-      @member_notes = @member_notes_parts.to_h do |part|
-        [part.to_sym, ""]
-      end
+      @member_notes = NotesHash.new(
+        @member_notes_parts.to_h { |part| [part.to_sym, ""] }
+      )
       @member_lat = nil
       @member_lng = nil
       @member_alt = nil
@@ -227,14 +227,9 @@ module SpeciesLists
     end
 
     def calculated_member_vars_for_reload(member_params)
-      # cannot leave @member_notes == nil because view expects a hash.
-      # `member_params[:notes]`, when submitted, is a nested
-      # ActionController::Parameters (dynamic "Other"/template-header
-      # keys, not fixed Strong Params attributes) -- matches
-      # ObservationsController::SharedFormMethods#notes_to_sym_and_compact's
-      # conversion for the same shape of field.
-      @member_notes = member_params[:notes]&.to_unsafe_h&.symbolize_keys ||
-                      Observation.no_notes
+      # cannot leave @member_notes == nil because view expects a
+      # NotesHash.
+      @member_notes = NotesHash.from_params(member_params[:notes])
       @member_is_collection_location =
         member_params[:is_collection_location].to_s == "1"
       @member_specimen = member_params[:specimen].to_s == "1"

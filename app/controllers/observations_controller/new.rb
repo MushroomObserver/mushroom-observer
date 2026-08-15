@@ -36,7 +36,7 @@ module ObservationsController::New
 
     @observation = Observation.new
     if params[:notes]
-      @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
+      @observation.notes = NotesHash.from_params(params[:notes]).to_h
     end
     @observation.current_user = @user
     @observation.place_name = params[:place_name]

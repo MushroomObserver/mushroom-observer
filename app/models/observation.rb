@@ -776,7 +776,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     value = read_attribute(:notes)
     return Observation.no_notes unless value.is_a?(Hash)
 
-    NormalizedHash.new(value)
+    NotesHash.new(value)
   end
 
   # Notes to render on this observation's show page. For the primary

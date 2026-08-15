@@ -83,14 +83,16 @@ class Occurrence < AbstractModel
   #
   # Display-time only: the members' stored notes are never modified, so
   # each observation keeps its own notes intact on its own show page.
-  # Returns a plain Hash shaped like Observation#notes.
+  # Returns a NotesHash, same as Observation#notes.
   def merged_notes
     primary, siblings = primary_and_ranked_siblings
-    return {} unless primary
+    return NotesHash.new unless primary
 
-    merged_notes_keys(primary, siblings).each_with_object({}) do |key, out|
-      merge_notes_key(out, key, primary, siblings)
-    end
+    NotesHash.new(
+      merged_notes_keys(primary, siblings).each_with_object({}) do |key, out|
+        merge_notes_key(out, key, primary, siblings)
+      end
+    )
   end
 
   # For the primary's EDIT form: per notes key, the sibling values worth
