@@ -206,6 +206,7 @@ module Projects
                     "Endpoint must render the Add-Target-Location modal")
       assert_select("##{modal_id} form > .modal-body", { count: 1 })
       assert_select("##{modal_id} form > .modal-footer", { count: 1 })
+      assert_select("##{modal_id} form[data-turbo='true']", { count: 1 })
       assert_select(
         "##{modal_id} input[type=hidden][name='project[do]']" \
         "[value=add_target_location]",

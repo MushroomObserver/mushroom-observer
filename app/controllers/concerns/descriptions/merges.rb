@@ -19,9 +19,7 @@ module Descriptions::Merges
 
       # render the form, if have permission
       if in_admin_mode? || @src.is_reader?(@user)
-        klass = "Views::Controllers::#{controller_path.camelize}::New".
-                constantize
-        render(klass.new(description: @description, user: @user))
+        render_new_view
         return
       end
 
@@ -87,10 +85,15 @@ module Descriptions::Merges
 
       flash_error(:runtime_edit_description_denied.t)
       @description = @src
+      render_new_view_invalid
+      false
+    end
+
+    def render_new_view(status: :ok, **render_opts)
       klass = "Views::Controllers::#{controller_path.camelize}::New".
               constantize
-      render(klass.new(description: @description, user: @user))
-      false
+      render(klass.new(description: @description, user: @user),
+             status: status, **render_opts)
     end
 
     # Attempt to merge one description into another, deleting the old one
@@ -152,9 +155,15 @@ module Descriptions::Merges
       controller_segment = @src.show_controller.to_s.sub(%r{^/}, "")
       klass = "Views::Controllers::#{controller_segment.camelize}::Edit".
               constantize
+      # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+      # Drive (confirmed against a real browser -- see
+      # turbo_submit_forms.md); needs a non-2xx status even though
+      # nothing "failed" -- the merge just can't complete without the
+      # user resolving the conflict by hand.
       render(klass.new(description: @description, user: @user,
                        licenses: @licenses, merge: @merge,
-                       old_desc_id: @old_desc_id))
+                       old_desc_id: @old_desc_id),
+             status: :unprocessable_content)
     end
 
     # Tentatively merge the fields by sticking src's notes after dest's wherever

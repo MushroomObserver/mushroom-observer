@@ -3,16 +3,13 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
-  def build_params(
-    title, summary, start_date: nil, end_date: nil,
-    dates_any: "false"
-  )
+  def build_params(title, summary, start_date: nil, end_date: nil, **opts)
     {
       project: {
         title: title,
         summary: summary,
         field_slip_prefix: "",
-        place_name: "",
+        place_name: opts.fetch(:place_name, ""),
         open_membership: false,
         "start_date(1i)" => start_date&.year,
         "start_date(2i)" => start_date&.month,
@@ -20,7 +17,7 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date&.year,
         "end_date(2i)" => end_date&.month,
         "end_date(3i)" => end_date&.day,
-        dates_any: dates_any,
+        dates_any: opts.fetch(:dates_any, "false"),
         upload: {
           license_id: licenses(:ccnc25).id,
           copyright_holder: "Someone Else",
@@ -34,6 +31,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def add_project_helper(title, summary)
     post_requires_login(:create, build_params(title, summary))
     assert_form_action(action: :create)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def edit_project_helper(title, project)
@@ -41,6 +40,8 @@ class ProjectsControllerTest < FunctionalTestCase
     params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     assert_form_action(action: :update, id: project.id)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def destroy_project_helper(project, changer)
@@ -483,6 +484,8 @@ class ProjectsControllerTest < FunctionalTestCase
     # the user can correct the dates without leaving the Admin tab.
     assert_select("input[name='project[title]']", true,
                   "Form should be re-rendered after validation failure")
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_destroy_project
@@ -626,6 +629,15 @@ class ProjectsControllerTest < FunctionalTestCase
   # reloads with the entered title/place_name intact and an
   # approved_where hidden field, matching every other model with this
   # confirm flow.
+  # Also covers ProjectsController::Creation#cleanup_failed_project_creation
+  # as a Turbo re-render path: it's a separate call site from #create's
+  # own early guard clauses (title/date checks), only reached once
+  # creation has actually started (the members/admin UserGroups get
+  # created) and then fails on the location lookup. It needs
+  # render_new_view_invalid (422 + the form still carrying
+  # data-turbo="true"), not a plain 200 -- a same-URL 200 re-render on
+  # a Turbo-submitted form hangs the browser (see
+  # .claude/rules/turbo_submit_forms.md).
   def test_create_project_dubious_place_name_preserves_entries_and_confirms
     where = "Old Rd, Ohio, USA"
     title = "Dubious Location Project"
@@ -635,6 +647,8 @@ class ProjectsControllerTest < FunctionalTestCase
 
     post(:create, params: params)
     assert_nil(Project.find_by(title: title))
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_select("#dubious_location_messages")
     assert_select("input[name='project[title]'][value=?]", title)
     assert_select("input[name='project[place_name]'][value=?]", where)

@@ -16,6 +16,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   def test_new_requires_login
     requires_login(:new, observation_id: @obs1.id)
     assert_response(:success)
+    assert_select("form[data-turbo='true']")
   end
 
   def test_new_with_missing_observation
@@ -217,7 +218,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_no_difference("Occurrence.count") do
       post(:create, params: params)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_create_with_project_resolution_add_all
@@ -273,7 +274,7 @@ class OccurrencesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     # Should render confirmation due to non-primary gap
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # ---------- project confirmation ----------
@@ -285,12 +286,13 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_no_difference("Occurrence.count") do
       post(:create, params: create_params(@obs1, [@obs1, obs3]))
     end
-    assert_response(:success) # renders confirmation modal
+    assert_unprocessable # renders confirmation modal
     assert_select("#modal_resolve_projects", text: /Add All/)
     # Components::Modal wrapping markup (auto-open, modal-lg, id) —
     # proves the create-mode view file's modal composition rendered.
     assert_select("div#modal_resolve_projects.modal.fade.in")
     assert_select("div.modal-dialog.modal-lg")
+    assert_select("#modal_resolve_projects form[data-turbo='true']")
     # Both Skip and Add All buttons post under the FormObject's
     # namespace (`occurrence_projects[resolution]`).
     assert_select("[name='occurrence_projects[resolution]']", count: 2)
@@ -379,6 +381,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select("[name='occurrence[primary_observation_id]']")
     assert_select("[name*='observation_ids']")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_edit_allowed_for_non_creator
@@ -497,7 +500,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_equal(3, occ.observations.count)
     assert_includes(occ.observations, obs3)
     # May render edit page with project modal or redirect
-    assert_response(:success) if @response.redirect_url.nil?
+    assert_unprocessable if @response.redirect_url.nil?
     assert_flash_success
   end
 
@@ -892,7 +895,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     if @response.redirect_url
       assert_flash_success
     else
-      assert_response(:success)
+      assert_unprocessable
     end
   end
 

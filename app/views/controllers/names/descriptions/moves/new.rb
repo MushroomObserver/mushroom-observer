@@ -16,7 +16,7 @@ module Views::Controllers::Names::Descriptions::Moves
                       ))
 
       render(Views::Controllers::Descriptions::Moves::Form.new(
-               @description, user: @user
+               @description, user: @user, local: false
              ))
     end
   end

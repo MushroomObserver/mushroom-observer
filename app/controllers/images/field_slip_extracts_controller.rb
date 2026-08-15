@@ -35,11 +35,7 @@ module Images
       return render_status unless @extract&.complete?
       return unless extract_or_redirect!
 
-      # No `layout:` option -- `Views::FullPageBase#around_template`
-      # picks the wrapping layout itself (see ApplicationController).
-      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
-               extract: @extract, observation: @observation, user: @user
-             ))
+      render_edit_view
     end
 
     def update
@@ -61,6 +57,20 @@ module Images
     end
 
     private
+
+    # No `layout:` option -- `Views::FullPageBase#around_template`
+    # picks the wrapping layout itself (see ApplicationController).
+    # `name_feedback:`/`given_name:` are set only on the confirmation
+    # round-trip from `rerender_for_name_approval`; a fresh `edit`
+    # GET leaves both nil.
+    def render_edit_view(status: :ok, name_feedback: nil, given_name: nil,
+                         **render_opts)
+      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
+               extract: @extract, observation: @observation, user: @user,
+               name_feedback: name_feedback, given_name: given_name
+             ),
+             status: status, **render_opts)
+    end
 
     # No return value: a `before_action` halts the chain when it
     # redirects, so signalling with true/false would be decoration.
@@ -230,11 +240,10 @@ module Images
 
     def rerender_for_name_approval(outcome)
       flash_warning(:field_slip_extract_name_needs_approval.t)
-      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
-               extract: @extract, observation: @observation, user: @user,
-               name_feedback: outcome.feedback,
-               given_name: params.dig(:value, name_field).to_s
-             ))
+      render_edit_view_invalid(
+        name_feedback: outcome.feedback,
+        given_name: params.dig(:value, name_field).to_s
+      )
     end
 
     def apply_chosen_fields

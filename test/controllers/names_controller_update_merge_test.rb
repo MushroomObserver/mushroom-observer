@@ -39,7 +39,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                           type: :Name, old_id: old_name.id,
+                           new_id: new_name.id, format: :html
                          ))
     assert(Name.find(old_name.id))
     assert(new_name.reload)
@@ -162,7 +163,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     login(rolf.login)
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                           type: :Name, old_id: old_name.id,
+                           new_id: new_name.id, format: :html
                          ))
 
     # Try again as an admin.
@@ -578,7 +580,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     login(rolf.login)
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                           type: :Name, old_id: old_name.id,
+                           new_id: new_name.id, format: :html
                          ))
     assert(old_name.reload)
     assert(new_name.reload)
@@ -922,9 +925,10 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_no_difference("Name.count") do
       put(:update, params: params)
     end
-    assert_response(:success) # form reloaded
+    assert_unprocessable # form reloaded
     assert_flash_error(:edit_name_multiple_names_match,
                        str: new_name.real_search_name(rolf),
                        matches: matches)
+    assert_select("form[data-turbo='true']")
   end
 end

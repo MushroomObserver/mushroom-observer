@@ -9,7 +9,7 @@ module Views::Controllers::GlossaryTerms
       add_edit_title(@glossary_term)
       add_context_nav(::Tab::GlossaryTerm::FormEdit.new(term: @glossary_term))
 
-      render(Form.new(@glossary_term))
+      render(Form.new(@glossary_term, local: false))
     end
   end
 end
