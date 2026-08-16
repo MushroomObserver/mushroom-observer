@@ -18,13 +18,15 @@ module Views::Controllers::Images::FieldSlipExtracts
     # being held as a separate prop -- `model` reaches it everywhere
     # below instead of a dedicated `@review` ivar.
     def initialize(image:, extract:, review:, approved_name: nil, **attrs)
+      # `method: :patch`, not a hand-rolled `_method` hidden: Superform
+      # emits its own `_method` field, and a second one turns a Turbo
+      # submission into a bare POST (see ApplicationForm#_method_field).
       super(review, image: image, extract: extract,
-                    approved_name: approved_name, **attrs)
+                    approved_name: approved_name, method: :patch, **attrs)
     end
 
     def view_template
       super do
-        hidden_field("_method", value: "patch")
         div(class: "table-responsive") { render_table }
         render_location_section
         render_name_section
