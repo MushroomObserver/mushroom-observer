@@ -2302,6 +2302,39 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_no_match(/field_slip_extract/, @response.location.to_s)
   end
 
+  # Android's system photo picker offers no camera (iOS builds one into
+  # its picker), so the form carries a dedicated capture input that
+  # opens the camera directly. Single-shot by nature: no `multiple`.
+  def test_new_offers_a_direct_camera_capture_input
+    login("rolf")
+    get(:new)
+
+    assert_select(
+      "input[type='file'][capture='environment'][accept='image/*']"
+    )
+    assert_select(
+      "input[type='file'][capture='environment'][multiple]", false,
+      "a capture input returns one photo per tap"
+    )
+  end
+
+  # The upload row says what the form already does (whole-form drop
+  # target, document-level paste) and names the picker honestly --
+  # "Select Photos" opens the photo library on mobile, the file
+  # browser on desktop. The hint is CSS-hidden on touch devices.
+  def test_new_upload_row_offers_drop_hint_and_photo_buttons
+    login("rolf")
+    get(:new)
+
+    assert_select("span.drop-paste-hint", text: :drop_or_paste_images.l)
+    assert_select("span.file-field", text: /#{:select_photos.l}/)
+    assert_select("span.file-field", text: /#{:take_photo.l}/)
+    # The button text isn't a <label> for the inputs, so each needs
+    # its own accessible name.
+    assert_select("input[type='file'][aria-label=?]", :select_photos.l)
+    assert_select("input[type='file'][aria-label=?]", :take_photo.l)
+  end
+
   # Reported at the 2026 SMHF event: confirming a flagged free-text
   # locality looped forever. The validator gate (dubious_reasons_for
   # approved:) was fine -- the RE-RENDERED form never embedded
