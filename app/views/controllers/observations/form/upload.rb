@@ -12,10 +12,11 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
 
   # The field wrappers carry mb-0: form-group's bottom margin would
   # otherwise sit INSIDE the flex row, skewing align-items-center and
-  # padding the row's box below the buttons. The row's own mb-3
-  # provides the separation instead, outside the box.
+  # padding the row's box below the buttons. No margin on the row
+  # either -- it fills its own panel body, whose padding is already
+  # symmetric.
   def view_template
-    div(class: "d-flex flex-wrap align-items-center mb-3") do
+    div(class: "d-flex flex-wrap align-items-center") do
       render_drop_hint
       render_file_select_button
       render_take_photo_button
