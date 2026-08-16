@@ -2253,6 +2253,13 @@ class ObservationTest < UnitTestCase
   # read until something is written through `notes=`. This test
   # exercises both code paths for coverage and asserts the
   # round-trip on the populated path.
+  # Regression: #notes returning a bare Hash instead of NotesHash would
+  # pass every other test silently (they only check hash content), but
+  # would break the Literal-typed props NotesHash exists to enable.
+  def test_notes_returns_a_notes_hash
+    assert_instance_of(NotesHash, observations(:detailed_unknown_obs).notes)
+  end
+
   def test_other_notes_getter_and_setter
     populated = observations(:detailed_unknown_obs)
     assert_equal(populated.notes[Observation.other_notes_key],

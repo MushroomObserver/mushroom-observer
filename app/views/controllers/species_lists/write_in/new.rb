@@ -19,7 +19,7 @@ module Views::Controllers::SpeciesLists::WriteIn
     prop :list_members, _Nilable(String)
     prop :place_name, _Nilable(String)
     prop :member_vote, _Union(Integer, String)
-    prop :member_notes, Hash
+    prop :member_notes, ::NotesHash
     prop :member_notes_parts, _Array(String)
     prop :member_lat, _Nilable(String)
     prop :member_lng, _Nilable(String)
