@@ -3,14 +3,20 @@
 
 #  USAGE::
 #
-#    # Phase 1 (dev box): after running
-#    # backfill_mycoportal_export_links.rb with APPLY=1 locally, export
-#    # the resulting links:
+#    # Step 1 (dev box): Run
+#    rails runner script/backfill_mycoportal_export_links.rb --apply
+#
+#    # Step 2 (read the links from the database and writes a CSV file)
 #    bin/rails runner script/transfer_mycoportal_export_links.rb \
 #      --export mycoportal_export_links.csv
 #
-#    # Transfer the CSV to production, then apply it there:
-#    bin/rails runner script/transfer_mycoportal_export_links.rb \
+#    # Step 3 Transfer the CSV to production. Example:
+#    scp tmp/mycoportal_dwca/mycoportal_export_links.csv \
+#      your_username@mushroomobserver.org:/path/on/production/
+#
+#    # Step 4 (production): Apply the transferred CSV:
+#    # (reads the CSV and creates any missing rows in the production DB)
+#    rails runner script/transfer_mycoportal_export_links.rb \
 #      --apply mycoportal_export_links.csv
 #
 #  DESCRIPTION::
