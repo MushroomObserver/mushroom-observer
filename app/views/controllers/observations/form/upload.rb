@@ -12,6 +12,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
 
   def view_template
     div(class: "d-flex flex-wrap align-items-center") do
+      render_drop_hint
       render_file_select_button
       render_take_photo_button
     end
@@ -20,6 +21,16 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   end
 
   private
+
+  # Says out loud what the form already does: the whole form is the
+  # drop target (see form-images_controller.js), and paste works
+  # anywhere too. Hidden on touch devices -- there's no drag source
+  # there, and the buttons speak for themselves.
+  def render_drop_hint
+    span(class: "drop-paste-hint mr-3") do
+      plain(:drop_or_paste_images.l)
+    end
+  end
 
   def render_file_select_button
     field_proxy = Components::ApplicationForm::FieldProxy.new(
@@ -31,7 +42,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         multiple: true,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        wrapper_options: { label: :images.ti }
+        wrapper_options: { label: false, button_text: :select_photos.l }
       )
     )
   end

@@ -82,6 +82,10 @@ export default class extends Controller {
     this.set_bindings();
   }
 
+  disconnect() {
+    document.removeEventListener('paste', this.paste_listener);
+  }
+
   carouselTargetConnected() {
     this.sortCarousel();
   }
@@ -127,6 +131,11 @@ export default class extends Controller {
       this.dropFiles(e);
     });
 
+    // Paste works anywhere on the page, like drop works anywhere on
+    // the form. Document-level, so it needs the disconnect() cleanup.
+    this.paste_listener = (e) => { this.pasteFiles(e) };
+    document.addEventListener('paste', this.paste_listener);
+
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
       if (this.block_form_submission) {
@@ -153,6 +162,17 @@ export default class extends Controller {
     const dataTransfer = e.dataTransfer;
     if (dataTransfer.files.length > 0)
       this.addFiles(dataTransfer.files);
+  }
+
+  // Only claims the paste when the clipboard holds image files --
+  // pasting text into the form's inputs must stay untouched.
+  pasteFiles(e) {
+    const files = Array.from(e.clipboardData?.files || [])
+      .filter((file) => file.type.startsWith('image/'));
+    if (files.length === 0) return;
+
+    e.preventDefault();
+    this.addFiles(files);
   }
 
   addSelectedFiles(event) {
