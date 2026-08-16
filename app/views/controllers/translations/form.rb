@@ -15,8 +15,13 @@ module Views::Controllers::Translations
 
     def initialize(lang:, tag:, edit_tags:, strings:, **attrs)
       form_object = FormObject::Translation.new(tag: tag)
+      # Permanently turbo: true -- both callers (TranslationsController's
+      # standalone render and Index's embedded ui-panel) need this form
+      # Turbo-submitted, so it forces its own state rather than relying
+      # on every caller to remember to pass it. turbo: true comes after
+      # **attrs so no caller can override it.
       super(form_object, lang: lang, tag: tag, edit_tags: edit_tags,
-                         strings: strings, **attrs)
+                         strings: strings, **attrs, turbo: true)
     end
 
     def around_template(&block)

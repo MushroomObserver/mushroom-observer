@@ -2,8 +2,8 @@
 
 # Tiny form rendered in the "other users" section of the
 # description authors-review page: a user autocompleter +
-# "Add Author" submit button. Submits `add_author[user]` (the
-# typed/selected unique_text_name) to `description_authors_path`,
+# "Add Author" submit button. Submits `description_author[user]`
+# (the typed/selected unique_text_name) to `description_authors_path`,
 # which dispatches to `Descriptions::AuthorsController#create`,
 # resolved via `User.lookup_unique_text_name`.
 module Views::Controllers::Descriptions::Authors

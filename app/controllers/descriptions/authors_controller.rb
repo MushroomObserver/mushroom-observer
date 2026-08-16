@@ -21,7 +21,7 @@ module Descriptions
 
     def create
       set_object_and_authors
-      add_ref = params[:add] || params.dig(:add_author, :user)
+      add_ref = params[:add] || params.dig(:description_author, :user)
       add_author_matching(add_ref)
       redirect_to(action: :show)
     end

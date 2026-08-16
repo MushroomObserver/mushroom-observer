@@ -57,7 +57,9 @@ module Descriptions
       # add-author autocompleter form actually submits (the typed/
       # selected unique_text_name, not an id).
       post(:create,
-           params: params.merge(add_author: { user: mary.unique_text_name }))
+           params: params.merge(
+             description_author: { user: mary.unique_text_name }
+           ))
       desc.reload
       assert_user_arrays_equal([mary, rolf], desc.authors, :sort)
     end

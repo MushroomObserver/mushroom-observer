@@ -276,7 +276,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(herbarium_path(nybg))
 
     within("#herbarium_curators_form") do
-      fill_in("add_curator", with: mary.login)
+      fill_in("herbarium_curator_login", with: mary.login)
       click_commit
     end
 
