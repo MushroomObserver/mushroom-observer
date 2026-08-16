@@ -15,7 +15,7 @@ module Views::Controllers::Images
                      num_anonymous: @num_anonymous,
                      num_public: @num_public
                    ),
-                   local: false
+                   turbo: true
                  ))
         end
       end

@@ -10,7 +10,7 @@ module Views::Controllers::Herbaria
       def initialize(herbarium:, **attrs)
         super(FormObject::HerbariumCurator.new,
               herbarium: herbarium, id: "herbarium_curators_form",
-              local: false, **attrs)
+              turbo: true, **attrs)
       end
 
       def form_action

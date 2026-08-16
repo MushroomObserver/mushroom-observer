@@ -16,7 +16,7 @@ module Views::Controllers::Account::Preferences
       add_context_nav(Tab::Account::PreferencesEditActions.new)
 
       render(Form.new(@user, licenses: @licenses, languages: @languages,
-                             local: false))
+                             turbo: true))
     end
   end
 end

@@ -33,7 +33,7 @@ module Views::Controllers::FieldSlips
                species_list: @species_list,
                recent_observations: @recent_observations,
                user: current_user,
-               local: false
+               turbo: true
              ))
 
       render_unresolved_projects_modal if @field_slip_project_gaps&.any?
@@ -52,7 +52,7 @@ module Views::Controllers::FieldSlips
                    gaps: @field_slip_project_gaps,
                    primary: @field_slip_occurrence.primary_observation,
                    occurrence: @field_slip_occurrence,
-                   local: false
+                   turbo: true
                  ))
         end
       end

@@ -11,7 +11,7 @@ module Views::Controllers::Observations::Identify
                  type: params.dig(:filter, :type),
                  term: params.dig(:filter, :term)
                ),
-               local: false
+               turbo: true
              ))
     end
   end

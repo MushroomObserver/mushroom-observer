@@ -10,10 +10,10 @@ module ApplicationFormFieldTestHelpers
   # Binds to whatever model the including test's `setup` assigned to
   # `@collection_number` (a CollectionNumber fixture — has `name`/
   # `number` attributes).
-  def render_form(local: true, &block)
+  def render_form(turbo: false, &block)
     form = TestFormClass.new(@collection_number,
                              action: "/test_form_path",
-                             local: local)
+                             turbo: turbo)
     form.field_block = block
 
     render(form)

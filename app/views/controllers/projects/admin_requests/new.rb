@@ -13,7 +13,7 @@ module Views::Controllers::Projects::AdminRequests
       render(Views::Controllers::Projects::AdminRequests::Form.new(
                FormObject::EmailRequest.new,
                project: @project,
-               local: false
+               turbo: true
              ))
     end
   end

@@ -5,7 +5,7 @@ module Views::Controllers::Herbaria::Search
   class New < Views::FullPageBase
     prop :search, ::Query
     prop :controller, ::Herbaria::SearchController
-    prop :local, _Boolean
+    prop :context, _Union(:page, :dropdown), default: :page
 
     def view_template
       add_new_title(:search_object, :herbaria)
@@ -15,7 +15,7 @@ module Views::Controllers::Herbaria::Search
         render(Components::Form::Search.new(
                  @search,
                  search_controller: @controller,
-                 local: @local != false
+                 context: @context
                ))
       end
     end

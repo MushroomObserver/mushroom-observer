@@ -15,7 +15,7 @@ class Views::Controllers::Names::Lifeforms::Edit < Views::FullPageBase
 
     render(Views::Controllers::Names::Lifeforms::Form.new(
              FormObject::Lifeform.from_name(@name), name: @name,
-                                                    local: false
+                                                    turbo: true
            ))
   end
 end

@@ -31,7 +31,7 @@ module Views::Controllers::VisualGroups
         render_top_nav
         render(Form.new(@visual_group,
                         visual_model: @visual_group.visual_model,
-                        local: false))
+                        turbo: true))
         render_filter_section
         render_status_count
       end

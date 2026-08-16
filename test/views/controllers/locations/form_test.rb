@@ -117,19 +117,19 @@ module Views::Controllers::Locations
 
     def test_enables_turbo_for_modal_rendering
       html = render_form(@location, display_name: "test",
-                                    original_name: "test", local: false)
+                                    original_name: "test", turbo: true)
 
       assert_html(html, "form[data-turbo='true']")
     end
 
     private
 
-    def render_form(location = @location, local: true, **)
+    def render_form(location = @location, turbo: false, **)
       render(Form.new(
                location,
                display_name: "test location",
                original_name: "test location",
-               local: local,
+               turbo: turbo,
                **
              ))
     end

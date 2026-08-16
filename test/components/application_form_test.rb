@@ -76,9 +76,9 @@ class ApplicationFormTest < ComponentTestCase
     assert_not_includes(form, "disabled")
   end
 
-  # Turbo stream form tests (local: false)
+  # Turbo stream form tests (turbo: true)
   def test_turbo_stream_form_has_data_turbo_attribute
-    form = render_form(local: false) do
+    form = render_form(turbo: true) do
       text_field(:name, label: "Name")
     end
 
@@ -86,7 +86,7 @@ class ApplicationFormTest < ComponentTestCase
   end
 
   def test_local_form_has_data_turbo_false_attribute
-    form = render_form(local: true) do
+    form = render_form(turbo: false) do
       text_field(:name, label: "Name")
     end
 

@@ -30,7 +30,7 @@ module Searchable
     end
 
     def new
-      @local = params[:local] != "false"
+      @context = params[:local] == "false" ? :dropdown : :page
       set_up_form_field_groupings
       @search = build_search_query
       respond_to do |format|
@@ -100,7 +100,7 @@ module Searchable
         Components::Form::Search.new(
           @search,
           search_controller: self,
-          local: false
+          context: :dropdown
         )
       )
     end

@@ -52,7 +52,7 @@ module Views::Controllers::SpeciesLists::WriteIn
                       member_is_collection_location:
                         @member_is_collection_location,
                       member_specimen: @member_specimen,
-                      local: false))
+                      turbo: true))
     end
   end
 end

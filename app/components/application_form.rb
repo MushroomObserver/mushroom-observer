@@ -155,7 +155,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # below and in the gem).
   prop :model, _Interface(:model_name, :persisted?), :positional
   prop :id, _Nilable(String), default: nil
-  prop :local, _Boolean, default: true
+  prop :turbo, _Boolean, default: false
   # Catch-all for Superform's own `action:`/`method:` kwargs plus
   # arbitrary `<form>` HTML attributes -- extracted in
   # `after_initialize`. `method:` can't be its own named prop; it
@@ -220,7 +220,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Always set data-turbo explicitly, independent of the global
     # Turbo.config.forms.mode default.
     @attributes[:data] ||= {}
-    @attributes[:data][:turbo] = @turbo_stream ? "true" : "false"
+    @attributes[:data][:turbo] = @turbo ? "true" : "false"
     add_form_feedback_controller
     super
   end
@@ -273,7 +273,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # method is now permanently unreachable via `super` from any
   # prop-declaring subclass.
   def after_initialize
-    @turbo_stream = !@local
     @action = @attributes.delete(:action)
     @method = @attributes.delete(:method)
     # Auto-derive a form id. Prefer the form class name when it's

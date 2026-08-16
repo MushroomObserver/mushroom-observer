@@ -129,7 +129,7 @@ module Views::Controllers::InatImports
         inat_url: inat_url
       )
       render(Form.new(model, super_importer: super_importer,
-                             local: true))
+                             turbo: false))
     end
   end
 end

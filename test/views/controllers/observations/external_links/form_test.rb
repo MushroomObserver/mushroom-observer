@@ -125,7 +125,7 @@ module Views::Controllers::Observations::ExternalLinks
         site: @site,
         user: @user,
         action: "/test_action",
-        local: false
+        turbo: true
       )
       render(form)
     end
@@ -138,7 +138,7 @@ module Views::Controllers::Observations::ExternalLinks
         site: @site,
         user: @user,
         action: "/test_action",
-        local: true
+        turbo: false
       )
       render(form)
     end

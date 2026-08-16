@@ -51,7 +51,7 @@ module Views::Controllers::Observations
     def form_attrs
       {
         mode: :create,
-        local: false,
+        turbo: true,
         user: @user,
         location: @location,
         good_images: @good_images,

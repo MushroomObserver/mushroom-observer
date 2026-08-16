@@ -2,8 +2,8 @@
 
 Tracked by issue #5052. `Turbo.config.forms.mode = "optin"` — a form only
 submits via Turbo if it (or an ancestor) carries `data-turbo="true"`.
-`Components::ApplicationForm` defaults to `local: true` (no Turbo); pass
-`local: false` to opt a form in.
+`Components::ApplicationForm` defaults to `turbo: false` (no Turbo); pass
+`turbo: true` to opt a form in.
 
 ## Turbo Drive vs. Turbo Frames vs. Turbo Streams — three different mechanisms
 
@@ -13,7 +13,7 @@ with different response contracts, and mixing up which one a given
 controller uses is how you end up applying the wrong fix (see the
 `Admin::BlockedIpsController` revert below).
 
-- **Turbo Drive** — what `local: false` opts a form into. The response
+- **Turbo Drive** — what `turbo: true` opts a form into. The response
   is ordinary HTML (`text/html`), and **the HTTP status code is the
   success/failure signal**: a 2xx/3xx response is a "visit" (Drive
   pushes a new history entry, treats it as a fresh page); a 4xx/5xx
@@ -33,7 +33,7 @@ controller uses is how you end up applying the wrong fix (see the
   correctly expected `:success` — reverted.
 - **Turbo Streams** — an explicit, separately-negotiated response format
   (`format.turbo_stream` / `Accept: text/vnd.turbo-stream.html`),
-  independent of whatever `local:` the form itself has. The body is one
+  independent of whatever `turbo:` the form itself has. The body is one
   or more `<turbo-stream action="..." target="...">` elements that
   surgically patch specific DOM nodes (append/prepend/replace/update/
   remove) — there's no whole-page navigation concept here at all, so
@@ -53,13 +53,13 @@ branch) needs the `422` treatment described below.
 
 ## Exception: forms that trigger a file download are not convertible
 
-`local: false` routes a form's submission through Turbo Drive's
+`turbo: true` routes a form's submission through Turbo Drive's
 `fetch()`-based interception. A `fetch()` response body can never
 trigger the browser's native Save-As/download UI, no matter its
 `Content-Disposition` header — only a real, non-intercepted form
 submission does that. So any form whose success path calls `send_data`/
 `send_file`/`render_report` (a CSV, DwC-A, PDF-labels, or similar
-export) must **stay `local: true`, permanently** — this is not a gap to
+export) must **stay `turbo: false`, permanently** — this is not a gap to
 close later, it's a structural mismatch between what the form does and
 what Turbo Drive can carry.
 
@@ -67,7 +67,7 @@ what Turbo Drive can carry.
 `Observations::DownloadsController` and
 `SpeciesLists::DownloadsController`) is one instance of this in the
 sweep. Its "Cancel" button redirects and its "Download"/"Print
-Labels" buttons call `send_data` — since all three share one `local:`
+Labels" buttons call `send_data` — since all three share one `turbo:`
 setting on the same `<form>`, the whole form is exempt, not just the
 download-triggering buttons. Before converting any new form, check
 whether its controller's success path calls `send_data`/`send_file` —
@@ -80,8 +80,8 @@ if so, stop, don't convert it, and add it to this list instead.
 page, but the other three (`_txt`/`_rtf`/`_csv`) call
 `render_name_list_as_txt`/`_rtf`/`_csv` (`SpeciesLists::
 SharedRenderMethods`), each of which calls `send_data`. Same
-one-`local:`-setting-for-four-buttons structure as the Downloads form
-— stays `local: true` permanently.
+one-`turbo:`-setting-for-four-buttons structure as the Downloads form
+— stays `turbo: false` permanently.
 
 `Views::Controllers::SpeciesLists::Downloads::Form` (print labels) and
 `::ReportForm` (text/rtf/csv report), the other two forms rendered on
@@ -89,9 +89,9 @@ the same `species_lists/downloads/new` page, are the third and fourth
 instances — both call `send_data` unconditionally on submit.
 
 **`Components::ApplicationForm#around_template` always sets an explicit
-`data-turbo` attribute** — `"true"` when `local: false`, `"false"` when
-`local: true` (the default) — rather than leaving it unset for
-`local: true`. Earlier revisions of this doc had each of the four
+`data-turbo` attribute** — `"true"` when `turbo: true`, `"false"` when
+`turbo: false` (the default) — rather than leaving it unset for
+`turbo: false`. Earlier revisions of this doc had each of the four
 download-exempt forms above pass `data: { turbo: "false" }` by hand;
 that's no longer necessary and has been removed from all four — the
 base class now guarantees it for every `ApplicationForm` subclass,
@@ -99,7 +99,7 @@ without each form needing to opt in individually. This matters because
 an unset `data-turbo` attribute's Turbo-off behavior was previously
 inert only because `Turbo.config.forms.mode = "optin"` made unmarked
 forms Turbo-off by default; flipping that global config would have
-silently turned every unmarked `local: true` form Turbo-on, including
+silently turned every unmarked `turbo: false` form Turbo-on, including
 these four permanently-exempt ones. The explicit attribute makes every
 form's Turbo state independent of the global config.
 
@@ -111,18 +111,18 @@ hand-rolled `<form>` tag outside the framework never runs
 `around_template` at all. Those need the same `data: { turbo: "false" }`
 treatment applied by hand, at the point the tag is actually built.
 
-**Always write `local: true` explicitly on a permanently-exempt form,
+**Always write `turbo: false` explicitly on a permanently-exempt form,
 even though it's the base class's own default.** Omitting it is
 functionally identical today, but it's indistinguishable from a form
-nobody has reviewed yet — a future pass converting `local: true` forms
-to `local: false` has no way to tell "deliberately kept off" from
+nobody has reviewed yet — a future pass converting `turbo: false` forms
+to `turbo: true` has no way to tell "deliberately kept off" from
 "just hasn't been looked at" without reading every comment. The
-explicit `local: true` is the grep-able signal that this form's Turbo
+explicit `turbo: false` is the grep-able signal that this form's Turbo
 state was a reviewed decision, not an oversight. If the form's
-`initialize` accepts `**attrs`, put `local: true` *after* the splat
-(`**attrs, local: true`), not before — a literal keyword placed before
+`initialize` accepts `**attrs`, put `turbo: false` *after* the splat
+(`**attrs, turbo: false`), not before — a literal keyword placed before
 a splatted hash is silently overridable by that hash (Ruby's later-key-
-wins hash-literal semantics), so `local: true, **attrs` only looks like
+wins hash-literal semantics), so `turbo: false, **attrs` only looks like
 a hard override and isn't one (see `species_lists/downloads/form.rb`
 and `observations/downloads/form.rb` for the correct ordering).
 
@@ -164,7 +164,24 @@ or plain GET navigation Drive intercepted) or a **FormSubmission** (a
 Consequence: a **GET-triggered** download reached via a plain link (not
 a form) doesn't need this treatment at all — check whether a "download"
 entry point is actually a `<form>` submit before assuming it needs
-`data-turbo="false"` or permanent-`local: true` protection.
+`data-turbo="false"` or permanent-`turbo: false` protection.
+
+## `Components::Form::Search`'s `context:` prop is unrelated to `turbo:`
+
+`Components::Form::Search` renders in two places: the standalone
+search page, and the nav-dropdown (loaded via a turbo_stream swap into
+`#search_nav_form`). Which of those two it's in is a page-chrome
+question — does it render its own in-form header/collapse-toggle, does
+the clear button carry a turbo_stream swap-target marker — tracked by
+its own `prop :context, _Union(:page, :dropdown), default: :page`.
+This form is *always* Turbo-submitted regardless of context (`Searchable#
+create` always redirects, so there's no same-URL-200 risk either way);
+it builds its own `<form>` `data:` hash from scratch in `form_attributes`
+rather than calling `super`, so the base class's `turbo:` prop is
+inherited but unused. Don't conflate `context:` with `turbo:` on this
+form, and don't add a `turbo:`/`local:` kwarg to any of its callers —
+none of the 6 `Searchable`-including search controllers or their
+`*/search/new.rb` views need one.
 
 ## HARD RULE: a same-URL `200` re-render on a Turbo-enabled form hangs the browser
 
@@ -180,7 +197,7 @@ Confirmed directly: `OccurrencesController`'s project-gaps
 confirmation (`create_occurrence`'s `render_project_confirmation` and
 `update`'s `redirect_after_update` re-render) both render the *same*
 full-page URL at plain `200` after a POST/PATCH, on a form with
-`local: false`. `occurrence_edit_form_system_test.rb`'s two submission
+`turbo: true`. `occurrence_edit_form_system_test.rb`'s two submission
 tests failed with "expected to find css `#flash_notices.alert-success`
 but there were no matches" — even at an explicit 8-second wait, in a
 real browser (Cuprite). Instrumenting `turbo:submit-end` showed
@@ -268,7 +285,7 @@ not assumed safe because "it's just a destroy button."
 
 ## The conversion, per controller
 
-1. **`local: false`** on every `Form.new(...)` call in the controller's
+1. **`turbo: true`** on every `Form.new(...)` call in the controller's
    `New`/`Edit` action views (`app/views/controllers/<c>/new.rb`,
    `edit.rb`).
 2. **`render_new_view`/`render_edit_view`** — the controller's GET
@@ -306,7 +323,7 @@ wrong before writing any test and you'll chase a false failure:
 
 1. **Redirect-on-failure** — the failure path calls `redirect_to`, not a
    re-render. Turbo already handles redirects natively. **No status
-   change needed at all** — `local: false` on the Form is the only
+   change needed at all** — `turbo: true` on the Form is the only
    change (`CollectionNumbersController`, `HerbariumRecordsController`).
 2. **Turbo Frame / Turbo Stream scoped** — a form wrapped in
    `turbo_frame_tag(...)`, or a `format.turbo_stream` branch. Turbo
@@ -331,7 +348,7 @@ status, regardless of whether the action semantically "failed."
 
 ## Testing: controller tests are enough *once you follow the hard rule above*
 
-The mechanical part of this conversion (`local: false` → `data-turbo`
+The mechanical part of this conversion (`turbo: true` → `data-turbo`
 attribute, failure path → `422`) is fully verifiable through the
 existing Rails request/response cycle — status codes and rendered HTML
 are exactly what a controller test already inspects, and MO's flash
@@ -367,10 +384,10 @@ test that already exists (no new test files):
 
 2. **The re-rendered form still carries `data-turbo="true"`** — this is
    the part a status-code assertion alone doesn't prove. The generic
-   mechanism (`local: false` → `data-turbo="true"`) is already
+   mechanism (`turbo: true` → `data-turbo="true"`) is already
    unit-tested once, in the abstract, at
    `test/components/application_form_test.rb`. That does **not** prove
-   any individual controller's view actually passes `local: false` —
+   any individual controller's view actually passes `turbo: true` —
    only a request through that specific controller does. Add one
    `assert_select` at (or near) the controller's invalid-pathway
    assertion — not at every failure-case call site in a test method

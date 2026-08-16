@@ -7,7 +7,7 @@ module Views::Controllers::Projects::FieldSlips
     prop :project, ::Project
 
     def initialize(model, **attrs)
-      super(model, local: false, **attrs)
+      super(model, turbo: true, **attrs)
     end
 
     def view_template

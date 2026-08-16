@@ -9,7 +9,7 @@ module Views::Controllers::SpeciesLists::Uploads
     def view_template
       add_page_title(:species_list_upload_title.t)
       # Sibling reference within the module.
-      render(Form.new(@species_list, local: false))
+      render(Form.new(@species_list, turbo: true))
     end
   end
 end

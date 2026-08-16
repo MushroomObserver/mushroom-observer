@@ -10,7 +10,7 @@
 #   <%= render(Components::Form::Search.new(
 #         @search,
 #         search_controller: self,
-#         local: false
+#         context: :dropdown
 #       )) %>
 #
 # rubocop:disable Metrics/ClassLength
@@ -26,18 +26,20 @@ class Components::Form::Search < Components::ApplicationForm
   # Additional wrapper options for search-specific fields
   SEARCH_WRAPPER_OPTIONS = [:selected, :between].freeze
 
-  # `local:` isn't redeclared here -- it's the base class's own prop,
-  # inherited as-is, so it flows through Literal's combined generated
-  # initializer to both this class's `@local` (header display) and
-  # the base's `@turbo_stream` computation from the same value. Same
-  # flag, same meaning either way: a "local" render (embedded inline,
-  # no page chrome of its own) skips both the header and Turbo; a
-  # non-local render (nav-dropdown, embedded via Turbo swap) shows
-  # both.
+  # This form is always Turbo-submitted (see `form_attributes` below)
+  # regardless of the base class's `turbo:` prop, which this class
+  # doesn't use at all -- `form_tag`/`form_attributes` build the
+  # `<form>` tag's own `data:` hash from scratch rather than calling
+  # `super`. `context:` is a separate, unrelated concern: which of
+  # the two places this form renders (the standalone search page, or
+  # the nav-dropdown, loaded via a turbo_stream swap) -- it decides
+  # whether the in-form header/collapse-toggle renders and whether
+  # the nav-dropdown's turbo_stream swap-target marker is added.
   prop :search_controller, _Interface(:search_type)
+  prop :context, _Union(:page, :dropdown), default: :page
 
   def view_template
-    render_header unless @local
+    render_header if dropdown?
     div(id: "search_#{search_type}_flash") # turbo_stream update target
     render_form_columns
     render_form_buttons
@@ -69,14 +71,16 @@ class Components::Form::Search < Components::ApplicationForm
         search_length_validator_max_length_value:
           Searchable::MAX_SEARCH_INPUT_LENGTH,
         search_length_validator_search_type_value: search_type,
-        # Always on, regardless of @local -- Searchable#create always
+        # Always on, regardless of context -- Searchable#create always
         # redirects, so there's no same-URL-200 risk either way.
         turbo: "true"
       }
     }
-    attrs[:data].merge!(turbo_stream_data) unless @local
+    attrs[:data].merge!(turbo_stream_data) if dropdown?
     attrs
   end
+
+  def dropdown? = @context == :dropdown
 
   # Only affects how *loading* this form is negotiated (swaps
   # #search_nav_form in place on the nav-dropdown link click) --
@@ -96,7 +100,7 @@ class Components::Form::Search < Components::ApplicationForm
     @search_controller.search_type
   end
 
-  # Header (shown when not local/inline)
+  # Header (shown in dropdown context only)
 
   def render_header
     div(class: "flex-bar w-100") do
@@ -459,7 +463,7 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   def render_clear_button
-    data_attrs = @local ? {} : turbo_stream_data
+    data_attrs = dropdown? ? turbo_stream_data : {}
     Button(
       type: :get,
       name: :clear.ti,

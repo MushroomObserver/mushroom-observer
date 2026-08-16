@@ -21,10 +21,10 @@ module Views::Controllers::Observations::Downloads
       form_object = FormObject::Download.new(
         format: format, encoding: encoding
       )
-      # Permanently local: true -- Download/Print Labels send_data
-      # (see .claude/rules/turbo_submit_forms.md). local: true comes
+      # Permanently turbo: false -- Download/Print Labels send_data
+      # (see .claude/rules/turbo_submit_forms.md). turbo: false comes
       # after **attrs so no caller can override it.
-      super(form_object, query: query, **attrs, local: true)
+      super(form_object, query: query, **attrs, turbo: false)
     end
 
     def view_template

@@ -49,18 +49,18 @@ module Views::Controllers::Sequences
 
     def test_local_form_omits_turbo
       html = render_form(model: Sequence.new(observation: @observation),
-                         local: true)
+                         turbo: false)
 
       assert_html(html, "form[data-turbo='false']")
     end
 
     private
 
-    def render_form(model:, action: "/test_action", local: false)
+    def render_form(model:, action: "/test_action", turbo: true)
       render(Form.new(model,
                       action: action,
                       id: "sequence_form",
-                      local: local))
+                      turbo: turbo))
     end
   end
 end

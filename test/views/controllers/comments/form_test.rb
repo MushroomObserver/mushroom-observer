@@ -60,14 +60,14 @@ module Views::Controllers::Comments
       render(Form.new(@comment,
                       action: "/test_action",
                       id: "comment_form",
-                      local: false))
+                      turbo: true))
     end
 
     def render_form_local
       render(Form.new(@comment,
                       action: "/test_action",
                       id: "comment_form",
-                      local: true))
+                      turbo: false))
     end
 
     def render_form_without_action

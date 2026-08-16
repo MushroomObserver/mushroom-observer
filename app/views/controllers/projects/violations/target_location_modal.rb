@@ -32,7 +32,7 @@ module Views::Controllers::Projects::Violations
             render(TargetLocationForm.new(
                      obs: @obs, project: @project,
                      existing_locations: @existing_locations,
-                     local: false
+                     turbo: true
                    ))
           end
         else

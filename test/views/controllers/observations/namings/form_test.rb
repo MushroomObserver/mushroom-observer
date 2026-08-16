@@ -90,13 +90,13 @@ module Views::Controllers::Observations::Namings
     end
 
     def test_turbo_enabled_when_local_false
-      html = render_form(model: Naming.new, vote: Vote.new, local: false)
+      html = render_form(model: Naming.new, vote: Vote.new, turbo: true)
 
       assert_html(html, "form[data-turbo='true']")
     end
 
     def test_turbo_omitted_when_local_true
-      html = render_form(model: Naming.new, vote: Vote.new, local: true)
+      html = render_form(model: Naming.new, vote: Vote.new, turbo: false)
 
       assert_html(html, "form[data-turbo='false']")
     end
@@ -141,7 +141,7 @@ module Views::Controllers::Observations::Namings
     private
 
     # rubocop:disable Metrics/ParameterLists
-    def render_form(model:, vote:, context: "lightbox", local: true,
+    def render_form(model:, vote:, context: "lightbox", turbo: false,
                     given_name: "", feedback: nil)
       render(Form.new(
                model,
@@ -152,7 +152,7 @@ module Views::Controllers::Observations::Namings
                feedback: feedback,
                show_reasons: true,
                context: context,
-               local: local
+               turbo: turbo
              ))
     end
     # rubocop:enable Metrics/ParameterLists

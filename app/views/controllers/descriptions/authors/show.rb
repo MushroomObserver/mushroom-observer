@@ -51,7 +51,7 @@ module Views::Controllers::Descriptions::Authors
       p do
         plain(:review_authors_other_users.t)
         render(AddAuthorForm.new(::FormObject::DescriptionAuthor.new,
-                                 object: @object, local: false))
+                                 object: @object, turbo: true))
       end
     end
   end

@@ -10,11 +10,11 @@ module Views::Controllers::SpeciesLists::Downloads
     prop :query, _Nilable(::Query), default: nil
 
     def initialize(list:, query: nil, selected: nil)
-      # Permanently local: true -- always send_data (chosen report
+      # Permanently turbo: false -- always send_data (chosen report
       # format) (see .claude/rules/turbo_submit_forms.md).
       super(FormObject::SpeciesListReport.new(format: selected),
             list: list, query: query,
-            id: "species_list_download_report", local: true)
+            id: "species_list_download_report", turbo: false)
     end
 
     def view_template

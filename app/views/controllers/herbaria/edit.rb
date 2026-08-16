@@ -15,7 +15,7 @@ module Views::Controllers::Herbaria
                                                      q_param: q_param))
 
       render(Views::Controllers::Herbaria::Form.new(
-               @herbarium, user: @user, local: false,
+               @herbarium, user: @user, turbo: true,
                            location: @herbarium.location, top_users: @top_users
              ))
     end

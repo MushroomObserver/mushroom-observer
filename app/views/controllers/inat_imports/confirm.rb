@@ -29,7 +29,7 @@ module Views::Controllers::InatImports
                  not_yet_imported: @not_yet_imported,
                  estimate_with_date: @estimate_with_date
                },
-               local: false
+               turbo: true
              ))
     end
   end

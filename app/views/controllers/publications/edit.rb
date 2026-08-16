@@ -11,7 +11,7 @@ module Views::Controllers::Publications
                         publication: @publication
                       ))
 
-      render(Form.new(@publication, local: false))
+      render(Form.new(@publication, turbo: true))
     end
   end
 end
