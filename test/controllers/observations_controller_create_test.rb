@@ -2329,6 +2329,10 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_select("span.drop-paste-hint", text: :drop_or_paste_images.l)
     assert_select("span.file-field", text: /#{:select_photos.l}/)
     assert_select("span.file-field", text: /#{:take_photo.l}/)
+    # The button text isn't a <label> for the inputs, so each needs
+    # its own accessible name.
+    assert_select("input[type='file'][aria-label=?]", :select_photos.l)
+    assert_select("input[type='file'][aria-label=?]", :take_photo.l)
   end
 
   # Reported at the 2026 SMHF event: confirming a flagged free-text

@@ -45,6 +45,9 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
       Components::ApplicationForm::FileField.new(
         field_proxy,
         multiple: true,
+        # The visible button text isn't a <label> for the input, so
+        # without this a screen reader announces just "file upload".
+        aria_label: :select_photos.l,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
         wrapper_options: { label: false, button_text: :select_photos.l,
@@ -69,6 +72,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
       Components::ApplicationForm::FileField.new(
         field_proxy,
         capture: "environment",
+        aria_label: :take_photo.l,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
         wrapper_options: { label: false, button_text: :take_photo.l,
