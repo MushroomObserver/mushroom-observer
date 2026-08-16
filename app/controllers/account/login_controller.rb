@@ -66,7 +66,7 @@ module Account
       @unverified_user = user
       render(Views::Controllers::Account::Verifications::Reverify.new(
                unverified_user: @unverified_user
-             ))
+             ), status: :unprocessable_content)
     end
   end
 end

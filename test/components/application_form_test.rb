@@ -85,12 +85,12 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "form[data-turbo='true']")
   end
 
-  def test_local_form_does_not_have_data_turbo_attribute
+  def test_local_form_has_data_turbo_false_attribute
     form = render_form(local: true) do
       text_field(:name, label: "Name")
     end
 
-    assert_no_html(form, "form[data-turbo]")
+    assert_html(form, "form[data-turbo='false']")
   end
 
   # `between_class` (FieldWithHelp) mirrors ERB:

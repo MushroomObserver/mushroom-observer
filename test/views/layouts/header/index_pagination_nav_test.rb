@@ -83,6 +83,9 @@ module Views::Layouts
       assert_html(html, "form.page_input",
                   attribute: { action: @form_action_url })
       assert_includes(html, 'data-controller="page-input"')
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_html(html, "form.page_input[data-turbo='false']")
       assert_nested(
         html, parent_selector: "form.page_input",
               child_selector: "div.input-group.page-input"
@@ -124,6 +127,7 @@ module Views::Layouts
 
       assert_includes(html, 'class="paginate pagination_letters flex-bar')
       assert_html(html, "input[name='letter']", attribute: { value: "A" })
+      assert_html(html, "form.page_input[data-turbo='false']")
     end
 
     def test_does_not_render_letter_pagination_when_not_needed

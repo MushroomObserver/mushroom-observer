@@ -10,6 +10,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_get_index
     requires_login(:index)
     assert_response(:success)
+    # GET forms aren't Turbo-safe by default either (see
+    # .claude/rules/turbo_submit_forms.md).
+    assert_select("form.form-inline[data-turbo='false']")
   end
 
   def test_should_get_index_at_id

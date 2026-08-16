@@ -42,7 +42,7 @@ module Descriptions
       assert_response(:success)
 
       # Rolf giveth with one hand...
-      post(:create, params: params.merge(add: mary.id))
+      post(:create, params: params.merge(add: mary.unique_text_name))
       assert_redirected_to(description_authors_path)
       desc.reload
       assert_user_arrays_equal([mary, rolf], desc.authors, :sort)
@@ -54,10 +54,53 @@ module Descriptions
       assert_user_arrays_equal([rolf], desc.authors)
 
       # Add via the namespaced FormObject param shape that the
-      # add-author autocompleter form submits.
-      post(:create, params: params.merge(add_author: { user: mary.id }))
+      # add-author autocompleter form actually submits (the typed/
+      # selected unique_text_name, not an id).
+      post(:create,
+           params: params.merge(add_author: { user: mary.unique_text_name }))
       desc.reload
       assert_user_arrays_equal([mary, rolf], desc.authors, :sort)
+    end
+
+    def test_create_no_user
+      desc = location_descriptions(:albion_desc)
+      desc.add_author(rolf)
+      login("rolf")
+
+      post(:create,
+           params: { id: desc.id, type: "LocationDescription",
+                     add: "no such user" })
+
+      assert_redirected_to(description_authors_path)
+      assert_flash_error
+      assert_user_arrays_equal([rolf], desc.reload.authors)
+    end
+
+    def test_create_already_author
+      desc = location_descriptions(:albion_desc)
+      desc.add_author(rolf)
+      login("rolf")
+
+      post(:create,
+           params: { id: desc.id, type: "LocationDescription",
+                     add: rolf.unique_text_name })
+
+      assert_redirected_to(description_authors_path)
+      assert_flash_error
+      assert_user_arrays_equal([rolf], desc.reload.authors)
+    end
+
+    def test_destroy_not_an_author
+      desc = location_descriptions(:albion_desc)
+      desc.add_author(rolf)
+      login("rolf")
+
+      delete(:destroy,
+             params: { id: desc.id, type: "LocationDescription",
+                       remove: mary.id })
+
+      assert_redirected_to(description_authors_path)
+      assert_user_arrays_equal([rolf], desc.reload.authors)
     end
 
     def test_review_name
@@ -87,7 +130,7 @@ module Descriptions
       assert_response(:success)
 
       # Rolf giveth with one hand...
-      post(:create, params: params.merge(add: mary.id))
+      post(:create, params: params.merge(add: mary.unique_text_name))
       assert_redirected_to(description_authors_path)
       assert_user_arrays_equal([mary, rolf], desc.reload.authors, :sort)
 

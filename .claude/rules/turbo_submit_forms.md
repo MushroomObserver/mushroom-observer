@@ -83,6 +83,89 @@ SharedRenderMethods`), each of which calls `send_data`. Same
 one-`local:`-setting-for-four-buttons structure as the Downloads form
 — stays `local: true` permanently.
 
+`Views::Controllers::SpeciesLists::Downloads::Form` (print labels) and
+`::ReportForm` (text/rtf/csv report), the other two forms rendered on
+the same `species_lists/downloads/new` page, are the third and fourth
+instances — both call `send_data` unconditionally on submit.
+
+**`Components::ApplicationForm#around_template` always sets an explicit
+`data-turbo` attribute** — `"true"` when `local: false`, `"false"` when
+`local: true` (the default) — rather than leaving it unset for
+`local: true`. Earlier revisions of this doc had each of the four
+download-exempt forms above pass `data: { turbo: "false" }` by hand;
+that's no longer necessary and has been removed from all four — the
+base class now guarantees it for every `ApplicationForm` subclass,
+without each form needing to opt in individually. This matters because
+an unset `data-turbo` attribute's Turbo-off behavior was previously
+inert only because `Turbo.config.forms.mode = "optin"` made unmarked
+forms Turbo-off by default; flipping that global config would have
+silently turned every unmarked `local: true` form Turbo-on, including
+these four permanently-exempt ones. The explicit attribute makes every
+form's Turbo state independent of the global config.
+
+**This protection does not reach forms that bypass `Components::
+ApplicationForm` entirely** — a subclass that overrides `form_tag`
+directly (e.g. `Components::Form::LiveDataFilter`) builds its own
+`<form>` attributes and never touches `@attributes[:data]`, and a raw
+hand-rolled `<form>` tag outside the framework never runs
+`around_template` at all. Those need the same `data: { turbo: "false" }`
+treatment applied by hand, at the point the tag is actually built.
+
+**Always write `local: true` explicitly on a permanently-exempt form,
+even though it's the base class's own default.** Omitting it is
+functionally identical today, but it's indistinguishable from a form
+nobody has reviewed yet — a future pass converting `local: true` forms
+to `local: false` has no way to tell "deliberately kept off" from
+"just hasn't been looked at" without reading every comment. The
+explicit `local: true` is the grep-able signal that this form's Turbo
+state was a reviewed decision, not an oversight. If the form's
+`initialize` accepts `**attrs`, put `local: true` *after* the splat
+(`**attrs, local: true`), not before — a literal keyword placed before
+a splatted hash is silently overridable by that hash (Ruby's later-key-
+wins hash-literal semantics), so `local: true, **attrs` only looks like
+a hard override and isn't one (see `species_lists/downloads/form.rb`
+and `observations/downloads/form.rb` for the correct ordering).
+
+### Why this only applies to POST form submissions, not GET download links
+
+Read directly from `turbo-rails`'s bundled `turbo.js`
+(`FetchResponse#isHTML`/`#responseHTML`, `Navigator#
+formSubmissionSucceededWithResponse`, `Visit#requestSucceededWithResponse`,
+`BrowserAdapter#visitRequestFailedWithStatusCode`): Turbo Drive treats a
+non-HTML response (`Content-Type` not `text/html`/`application/xhtml+xml`)
+differently depending on whether it came from a **Visit** (a link click
+or plain GET navigation Drive intercepted) or a **FormSubmission** (a
+`<form>` submit, GET or POST, Drive intercepted).
+
+- **Visit (GET link navigation)**: a non-HTML response resolves
+  `responseHTML` to `undefined`, which `Visit#requestSucceededWithResponse`
+  records as `SystemStatusCode.contentTypeMismatch`.
+  `BrowserAdapter#visitRequestFailedWithStatusCode` handles that code by
+  calling `reload()`, which does `window.location.href = url` — a real,
+  non-intercepted top-level navigation. The browser then handles the
+  response exactly as if Turbo had never been involved, so
+  `Content-Disposition`-driven downloads work correctly. **A plain GET
+  link to a download endpoint is safe under Turbo even with no
+  `data-turbo="false"` at all**, because Drive's own fallback degrades it
+  to a real navigation.
+- **FormSubmission (any `<form>` submit)**: `Navigator#
+  formSubmissionSucceededWithResponse` only acts `if (responseHTML)` —
+  there is no `else` branch, no `contentTypeMismatch` recording, and no
+  `reload()` fallback. A non-HTML response to a Turbo-submitted form is
+  silently discarded: no navigation, no error, no download, no visible
+  feedback at all beyond the submit button re-enabling. This is the
+  actual failure mode the "fetch() response body can never trigger the
+  browser's native Save-As/download UI" claim above is about, and it's
+  why the four forms in this section need the explicit
+  `data-turbo="false"` protection rather than being able to rely on
+  Drive's own content-type handling — that handling exists, but only
+  for the Visit path, not the FormSubmission path.
+
+Consequence: a **GET-triggered** download reached via a plain link (not
+a form) doesn't need this treatment at all — check whether a "download"
+entry point is actually a `<form>` submit before assuming it needs
+`data-turbo="false"` or permanent-`local: true` protection.
+
 ## HARD RULE: a same-URL `200` re-render on a Turbo-enabled form hangs the browser
 
 **Never let a Drive-category response return a plain `200` at the same

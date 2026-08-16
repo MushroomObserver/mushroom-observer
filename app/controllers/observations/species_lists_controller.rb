@@ -43,7 +43,8 @@ module Observations
         render_phlex_edit(
           location: edit_observation_species_lists_path(
             id: @observation.id
-          )
+          ),
+          status: :unprocessable_content
         )
       end
     end

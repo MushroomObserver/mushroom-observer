@@ -54,10 +54,12 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
     {
       id: "#{@turbo_frame.tr("_", "-")}-filter-form",
       class: "d-inline-block",
-      data: {
+      # Merge in @attributes[:data] so ApplicationForm's data-turbo
+      # actually reaches this overridden form_tag.
+      data: (@attributes[:data] || {}).merge(
         controller: "autosubmit",
         turbo_frame: @turbo_frame
-      }
+      )
     }
   end
 

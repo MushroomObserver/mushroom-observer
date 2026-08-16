@@ -8,10 +8,6 @@ module Views::Controllers::VisualGroups
   class Form < ::Components::ApplicationForm
     prop :visual_model, ::VisualModel
 
-    def initialize(model, **attrs)
-      super(model, local: true, **attrs)
-    end
-
     def view_template
       super do
         render(Components::Form::Errors.new(model: model))

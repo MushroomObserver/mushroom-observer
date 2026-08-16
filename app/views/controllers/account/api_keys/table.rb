@@ -124,7 +124,7 @@ module Views::Controllers::Account::APIKeys
                key,
                action: account_api_key_path(key.id),
                id: "edit_api_key_#{key.id}_form",
-               data: { turbo: true },
+               local: false,
                cancel_target: "view_notes_#{key.id}_container",
                cancel_parent: "notes_#{key.id}"
              ))
@@ -169,7 +169,7 @@ module Views::Controllers::Account::APIKeys
                ::APIKey.new,
                action: account_api_keys_path,
                id: "new_api_key_form",
-               data: { turbo: true },
+               local: false,
                cancel_target: "new_key_button_container",
                cancel_parent: "new_key_row"
              ))

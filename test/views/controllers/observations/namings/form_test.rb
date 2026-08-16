@@ -98,7 +98,7 @@ module Views::Controllers::Observations::Namings
     def test_turbo_omitted_when_local_true
       html = render_form(model: Naming.new, vote: Vote.new, local: true)
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     # The "see matching observations reasons" link in

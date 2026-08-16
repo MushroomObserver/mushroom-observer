@@ -10,8 +10,10 @@ module Views::Controllers::SpeciesLists::NameLists
     prop :user, ::User
 
     def initialize(name_strings:, user:)
+      # Permanently local: true -- 3 of 4 buttons send_data downloads
+      # (see .claude/rules/turbo_submit_forms.md).
       super(FormObject::NameLister.new(results: name_strings.join("\n")),
-            user: user, id: "name_lister_form")
+            user: user, id: "name_lister_form", local: true)
     end
 
     def view_template

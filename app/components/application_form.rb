@@ -217,11 +217,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   def around_template
-    # Set turbo data attribute for turbo_stream forms
-    if @turbo_stream
-      @attributes[:data] ||= {}
-      @attributes[:data][:turbo] = "true"
-    end
+    # Always set data-turbo explicitly, independent of the global
+    # Turbo.config.forms.mode default.
+    @attributes[:data] ||= {}
+    @attributes[:data][:turbo] = @turbo_stream ? "true" : "false"
     add_form_feedback_controller
     super
   end

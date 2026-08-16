@@ -50,7 +50,8 @@ class Components::IndexFilter < Components::Base
 
   def view_template(&block)
     form(action: url_for(@to), method: "get",
-         class: form_class, id: @form_id) do
+         class: form_class, id: @form_id,
+         data: { turbo: "false" }) do
       div(class: "d-flex gap-2 align-items-end") do
         yield if block
         Button(type: :submit, name: @submit_text,

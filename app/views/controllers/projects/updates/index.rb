@@ -69,7 +69,8 @@ module Views::Controllers::Projects::Updates
         method: "get",
         class: "form-inline mb-0 show-excluded-form",
         data: { controller: "autosubmit",
-                autosubmit_delay_value: "0" }
+                autosubmit_delay_value: "0",
+                turbo: "false" }
       ) do
         label(class: "checkbox-inline") do
           input(type: "checkbox", name: "show_excluded", value: "1",

@@ -55,7 +55,7 @@ module Views::Controllers::Herbaria
       assert_no_html(html, "input[name='herbarium[back]']")
 
       # No turbo for local form
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_existing_record_form

@@ -68,15 +68,20 @@ class Components::Form::Search < Components::ApplicationForm
         controller: "search-length-validator",
         search_length_validator_max_length_value:
           Searchable::MAX_SEARCH_INPUT_LENGTH,
-        search_length_validator_search_type_value: search_type
+        search_length_validator_search_type_value: search_type,
+        # Always on, regardless of @local -- Searchable#create always
+        # redirects, so there's no same-URL-200 risk either way.
+        turbo: "true"
       }
     }
     attrs[:data].merge!(turbo_stream_data) unless @local
     attrs
   end
 
-  # When not local (nav dropdown), use turbo_stream for in-place updates.
-  # When local (search page), #search_nav_form doesn't exist, so skip it.
+  # Only affects how *loading* this form is negotiated (swaps
+  # #search_nav_form in place on the nav-dropdown link click) --
+  # submitting still does a normal Turbo Drive visit, not an
+  # in-place result update.
   def turbo_stream_data
     { turbo_stream: "true" }
   end

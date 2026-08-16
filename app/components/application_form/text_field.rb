@@ -40,7 +40,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def bare_input?
       attributes[:type] == "hidden" ||
-        (wrapper_options[:label] == false && !help_slot)
+        (wrapper_options[:label] == false && !help_slot && !append_slot)
     end
 
     def render_field_input(&block)

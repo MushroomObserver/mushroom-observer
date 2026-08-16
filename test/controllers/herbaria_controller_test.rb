@@ -107,6 +107,17 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  # Target always redirects, so this is Turbo-on.
+  def test_show_add_curator_form
+    herbarium = nybg
+    assert(herbarium.curator?(roy))
+    login("roy")
+
+    get(:show, params: { id: herbarium.id })
+
+    assert_select("form#herbarium_curators_form[data-turbo='true']")
+  end
+
   def test_show_next
     query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)

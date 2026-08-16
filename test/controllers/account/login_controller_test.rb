@@ -59,6 +59,21 @@ module Account
       assert(@request.session["user_id"])
     end
 
+    # Same-URL re-render needs non-2xx or Turbo hangs (see
+    # .claude/rules/turbo_submit_forms.md).
+    def test_login_unverified
+      user = User.create!(login: "unverified_user", email: "foo@bar.com")
+      user.change_password("testpassword")
+
+      post(:create,
+           params: { user: { login: "unverified_user",
+                             password: "testpassword" } })
+
+      assert_nil(@request.session["user_id"])
+      assert_unprocessable
+      assert_select("#account_reverify_link")
+    end
+
     # Test autologin feature.
     def test_autologin
       # Make sure test page that requires login fails without autologin cookie.

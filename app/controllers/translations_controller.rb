@@ -63,7 +63,7 @@ class TranslationsController < ApplicationController
     form_view = Views::Controllers::Translations::Form.new(
       lang: @lang, tag: @tag, edit_tags: @edit_tags,
       strings: @strings, for_page: @for_page,
-      official_records: @official_records
+      official_records: @official_records, local: false
     )
     versions_view = build_versions_view
     render(turbo_stream: turbo_stream.update(

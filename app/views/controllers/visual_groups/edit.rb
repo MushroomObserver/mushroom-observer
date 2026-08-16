@@ -95,7 +95,8 @@ module Views::Controllers::VisualGroups
     # preserves the current status via the hidden status field.
     def render_filter_form
       form(action: edit_visual_group_path(@visual_group), method: "get",
-           id: "visual_group_filters_form", class: "form-inline mb-4") do
+           id: "visual_group_filters_form", class: "form-inline mb-4",
+           data: { turbo: "false" }) do
         # Hidden status field: preserves the current status when the
         # user submits via the text-input's submit. The status submit
         # buttons below carry their own `name="status" value="<s>"`;

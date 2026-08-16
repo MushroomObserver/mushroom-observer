@@ -68,6 +68,23 @@ module Account
       assert_select("button[type='submit']")
       # Posts to the same `create` action as the inline form.
       assert_select("form[action='#{account_api_keys_path}']")
+      # Not Turbo-enabled -- see .claude/rules/turbo_submit_forms.md:
+      # #create only knows how to reply to a turbo_stream request by
+      # replacing #account_api_keys_table, which doesn't exist on
+      # this standalone page.
+      assert_select("form#new_api_key_form[data-turbo='false']")
+    end
+
+    # No-JS fallback, same rationale as test_new_renders_standalone_create_form.
+    def test_edit_renders_standalone_edit_form
+      key = mary.api_keys.create(notes: "app name")
+      login("mary")
+
+      get(:edit, params: { id: key.id })
+
+      assert_response(:success)
+      assert_select("input[name='api_key[notes]']")
+      assert_select("form#account_edit_api_key_form[data-turbo='false']")
     end
 
     def test_update_api_key

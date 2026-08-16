@@ -23,20 +23,21 @@ class SearchFormTest < ComponentTestCase
     assert_html(html, "form#observations_search_form")
   end
 
-  # When local (on a search page), form should NOT use turbo_stream
+  # No turbo_stream when local, but still Turbo-submits.
   def test_form_no_turbo_stream_when_local
     html = render_form(local: true)
 
     assert_html(html, "form#observations_search_form")
     assert_no_html(html, "form#observations_search_form[data-turbo-stream]")
+    assert_html(html, "form#observations_search_form[data-turbo='true']")
   end
 
-  # When not local (in nav dropdown), form SHOULD use turbo_stream
-  # for future in-place result updates
+  # turbo_stream when not local (nav dropdown), and still Turbo-submits.
   def test_form_uses_turbo_stream_when_not_local
     html = render_form(local: false)
 
     assert_html(html, "form#observations_search_form[data-turbo-stream='true']")
+    assert_html(html, "form#observations_search_form[data-turbo='true']")
   end
 
   def test_renders_panels_for_field_columns

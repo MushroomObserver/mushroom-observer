@@ -12,9 +12,12 @@ module Views::Controllers::SpeciesLists::Downloads
     prop :query, _Nilable(::Query), default: nil
 
     def initialize(query: nil, **attrs)
+      # Permanently local: true -- always send_data (a labels PDF)
+      # (see .claude/rules/turbo_submit_forms.md). local: true comes
+      # after **attrs so no caller can override it.
       super(FormObject::PrintLabels.new,
             query: query,
-            id: "species_list_download_print_labels", **attrs)
+            id: "species_list_download_print_labels", **attrs, local: true)
     end
 
     def view_template

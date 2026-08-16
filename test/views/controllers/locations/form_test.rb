@@ -63,7 +63,7 @@ module Views::Controllers::Locations
       assert_html(html, "button[type='submit']", text: :create.ti)
 
       # No turbo for local form
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
 
       # No locked checkbox for regular users
       assert_no_html(html, "input[name='location[locked]']")

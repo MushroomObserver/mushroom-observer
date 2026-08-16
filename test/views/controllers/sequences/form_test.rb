@@ -51,7 +51,7 @@ module Views::Controllers::Sequences
       html = render_form(model: Sequence.new(observation: @observation),
                          local: true)
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     private

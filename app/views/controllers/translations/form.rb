@@ -49,7 +49,6 @@ module Views::Controllers::Translations
 
     def form_dataset
       {
-        turbo: "true",
         controller: :translation,
         locale: @lang.locale,
         confirm_string:
