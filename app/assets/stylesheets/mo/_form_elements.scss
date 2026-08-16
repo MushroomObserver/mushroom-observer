@@ -320,3 +320,24 @@ form[inert] {
   opacity: 0.6;
   cursor: progress;
 }
+
+// Take Photo opens the camera via capture= on touch devices; desktop
+// browsers ignore capture, so there the button would only duplicate
+// the file picker. hover/pointer media is the standard touch-first
+// signal (phones and tablets match; laptops, including touchscreen
+// ones with a mouse, don't).
+.take-photo-field {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .take-photo-field {
+    display: block;
+  }
+
+  // No drag source on a touch device, so the drop/paste hint would
+  // only mislead there.
+  .drop-paste-hint {
+    display: none;
+  }
+}
