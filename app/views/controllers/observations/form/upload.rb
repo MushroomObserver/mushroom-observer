@@ -10,8 +10,12 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   prop :form, ::Components::ApplicationForm
   prop :good_images, _Array(::Image), default: -> { [] }
 
+  # The field wrappers carry mb-0: form-group's bottom margin would
+  # otherwise sit INSIDE the flex row, skewing align-items-center and
+  # padding the row's box below the buttons. The row's own mb-3
+  # provides the separation instead, outside the box.
   def view_template
-    div(class: "d-flex flex-wrap align-items-center") do
+    div(class: "d-flex flex-wrap align-items-center mb-3") do
       render_drop_hint
       render_file_select_button
       render_take_photo_button
@@ -27,7 +31,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   # anywhere too. Hidden on touch devices -- there's no drag source
   # there, and the buttons speak for themselves.
   def render_drop_hint
-    span(class: "drop-paste-hint mr-3") do
+    span(class: "drop-paste-hint font-weight-bold mr-3") do
       plain(:drop_or_paste_images.l)
     end
   end
@@ -42,7 +46,8 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         multiple: true,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        wrapper_options: { label: false, button_text: :select_photos.l }
+        wrapper_options: { label: false, button_text: :select_photos.l,
+                           wrap_class: "mb-0" }
       )
     )
   end
@@ -65,11 +70,8 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         capture: "environment",
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        # No vertical margin of its own: the wrapper has to match the
-        # select field's plain form-group box, or the two buttons sit
-        # at different heights in the align-items-center row.
         wrapper_options: { label: false, button_text: :take_photo.l,
-                           wrap_class: "ml-3 take-photo-field" }
+                           wrap_class: "mb-0 ml-3 take-photo-field" }
       )
     )
   end
