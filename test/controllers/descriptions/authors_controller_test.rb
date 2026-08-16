@@ -105,6 +105,38 @@ module Descriptions
       assert_user_arrays_equal([rolf], desc.reload.authors)
     end
 
+    # Neither an author nor a reviewer -- create/destroy must deny the
+    # same way show does, not just skip the UI and allow the mutation.
+    def test_create_denied_for_non_author_non_reviewer
+      desc = location_descriptions(:albion_desc)
+      desc.add_author(rolf)
+      user_groups(:reviewers).users.delete(mary)
+      login("mary")
+
+      post(:create,
+           params: { id: desc.id, type: "LocationDescription",
+                     add: mary.unique_text_name })
+
+      assert_redirected_to(location_path(id: desc.location_id))
+      assert_flash(:review_authors_denied)
+      assert_user_arrays_equal([rolf], desc.reload.authors)
+    end
+
+    def test_destroy_denied_for_non_author_non_reviewer
+      desc = location_descriptions(:albion_desc)
+      desc.add_author(rolf)
+      user_groups(:reviewers).users.delete(mary)
+      login("mary")
+
+      delete(:destroy,
+             params: { id: desc.id, type: "LocationDescription",
+                       remove: rolf.id })
+
+      assert_redirected_to(location_path(id: desc.location_id))
+      assert_flash(:review_authors_denied)
+      assert_user_arrays_equal([rolf], desc.reload.authors)
+    end
+
     def test_review_name
       name = names(:peltigera)
       desc = name.description
