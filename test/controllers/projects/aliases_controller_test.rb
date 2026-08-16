@@ -75,7 +75,8 @@ module Projects
                  name: "Walk 2",
                  project_id: @project.id,
                  target_type: "Location",
-                 location_id: locations(:albion).id
+                 location_id: locations(:albion).id,
+                 modal: "true"
                }
              }, format: :turbo_stream)
       end
@@ -185,7 +186,8 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "Updated Name", project_id: }
+              project_alias: { name: "Updated Name", project_id:,
+                               modal: "true" }
             }, format: :turbo_stream)
 
       assert_select(
@@ -200,7 +202,8 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "", project_id: } # Invalid params
+              # Invalid params
+              project_alias: { name: "", project_id:, modal: "true" }
             }, format: :turbo_stream)
 
       assert_response(:success)

@@ -13,14 +13,6 @@ module Views::Controllers::Herbaria
     prop :top_users, _Array(::User), default: -> { [] } do |value|
       value || []
     end
-    # Set to :modal only by
-    # `HerbariaController#render_modal_herbarium_form`. Lets the
-    # controller tell a modal submission from a standalone
-    # `/herbaria/new` (or `/edit`) page submission after the POST --
-    # `request.format.turbo_stream?` can't do this, since Turbo Drive
-    # requests turbo_stream on every POST once the form is
-    # Turbo-enabled, regardless of which page submitted it.
-    prop :context, _Union(:page, :modal), default: :page
 
     def initialize(model, **)
       super(model, id: "herbarium_form", **)
@@ -37,7 +29,6 @@ module Views::Controllers::Herbaria
 
     def view_template
       hidden_field(:back, value: @back) if @back
-      hidden_field(:context, value: "modal") if @context == :modal
       render_name_field
       render_personal_user_field
       submit(submit_text, center: true)

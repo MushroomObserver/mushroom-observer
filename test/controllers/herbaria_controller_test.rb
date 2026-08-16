@@ -476,7 +476,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("form[data-turbo='true']")
   end
 
-  # Modal submissions (herbarium[context]="modal") should reload the
+  # Modal submissions (herbarium[modal]="true") should reload the
   # modal form with flash errors. `as: :turbo_stream` alone isn't
   # enough to simulate this -- see `modal_submission?`.
   def test_create_blank_name_turbo_stream
@@ -484,7 +484,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
 
     post(:create,
-         params: { herbarium: herbarium_params.merge(context: "modal") },
+         params: { herbarium: herbarium_params.merge(modal: "true") },
          as: :turbo_stream)
 
     assert_equal(herbarium_count, Herbarium.count)
@@ -492,6 +492,10 @@ class HerbariaControllerTest < FunctionalTestCase
     # Should render modal_form_reload partial to update modal with flash
     assert_select("turbo-stream[action='replace'][target$='_form']")
     assert_flash_error(:create_herbarium_name_blank)
+    # The reloaded form must still carry the modal-context hidden field --
+    # otherwise a retry submission from the still-open modal loses
+    # `modal_submission?` and gets misrouted as a standalone-page one.
+    assert_select("input[name='herbarium[modal]'][value='true']")
   end
 
   # Successful modal-submitted create hits
@@ -505,7 +509,7 @@ class HerbariaControllerTest < FunctionalTestCase
          params: { herbarium: herbarium_params.merge(
            name: "Brand New Test Herbarium",
            code: "BNTH",
-           context: "modal"
+           modal: "true"
          ) },
          as: :turbo_stream)
 
@@ -741,7 +745,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_nil(nybg.personal_user)
   end
 
-  # Modal submissions (herbarium[context]="modal") should reload the
+  # Modal submissions (herbarium[modal]="true") should reload the
   # modal form with flash errors. `as: :turbo_stream` alone isn't
   # enough to simulate this -- see `modal_submission?`.
   def test_update_blank_name_turbo_stream
@@ -750,7 +754,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     patch(:update,
           params: { herbarium: herbarium_params.merge(
-            name: "", context: "modal"
+            name: "", modal: "true"
           ), id: nybg.id },
           as: :turbo_stream)
 
@@ -759,6 +763,10 @@ class HerbariaControllerTest < FunctionalTestCase
     # Should render modal_form_reload partial to update modal with flash
     assert_select("turbo-stream[action='replace'][target$='_form']")
     assert_flash_error(:create_herbarium_name_blank)
+    # The reloaded form must still carry the modal-context hidden field --
+    # otherwise a retry submission from the still-open modal loses
+    # `modal_submission?` and gets misrouted as a standalone-page one.
+    assert_select("input[name='herbarium[modal]'][value='true']")
   end
 
   def test_update_by_non_curator

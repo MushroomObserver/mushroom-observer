@@ -81,7 +81,7 @@ class Components::Modal::TurboForm < Components::Base
     component_class = form_component_class_for(
       model, controller_path: template.try(:controller_path)
     )
-    params = form_locals.except(:model).merge(turbo: true)
+    params = form_locals.except(:model).merge(turbo: true, modal: true)
     template.render(component_class.new(model, **params))
   end
 
@@ -137,7 +137,7 @@ class Components::Modal::TurboForm < Components::Base
 
   def render_form_component
     if @form_class
-      params = merged_locals.except(:model).merge(turbo: true)
+      params = merged_locals.except(:model).merge(turbo: true, modal: true)
       params[:modal_ids] = modal_ids if form_owns_modal_sections?
       render(@form_class.new(@model, **params))
     else

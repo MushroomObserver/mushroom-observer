@@ -260,8 +260,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
              model: @herbarium,
              form_locals: { user: @user,
                             location: @herbarium.location,
-                            top_users: @top_users,
-                            context: :modal }
+                            top_users: @top_users }
            ), layout: false)
   end
 
@@ -449,25 +448,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def redirect_to_create_location_or_referrer_or_show_location
-    # Modal submissions (the herbarium-create modal embedded in the
-    # obs form) never get a redirect: we're in a modal that needs to
-    # close + update the parent page instead.
-    #
-    # This can't be decided from `request.format.turbo_stream?` --
-    # Turbo Drive requests turbo_stream on every POST once a form is
-    # Turbo-enabled, regardless of which page submitted it, so that
-    # check is true for the standalone `/herbaria/new` page's own
-    # submission too. `modal_submission?` reads an explicit
-    # `herbarium[context]` hidden field instead, set only when
-    # `Herbaria::Form` is rendered via `render_modal_herbarium_form`.
-    return close_modal_and_update_observation if modal_submission?
+    # Modal submissions close the modal + update the obs form instead
+    # of redirecting. See ModalUpdater#modal_submission?.
+    return close_modal_and_update_observation if modal_submission?(:herbarium)
 
     redirect_to_create_location || redirect_to_referrer ||
       redirect_to(herbarium_path(@herbarium))
-  end
-
-  def modal_submission?
-    params.dig(:herbarium, :context) == "modal"
   end
 
   def redirect_to_create_location
@@ -487,14 +473,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   # Skip if a redirect was already performed (e.g., by request_merge)
   def reload_form(action)
     return if performed?
-
-    # Same `modal_submission?` reasoning as
-    # `redirect_to_create_location_or_referrer_or_show_location` --
-    # `request.format.turbo_stream?` can't tell a modal submission
-    # from a standalone-page one; the standalone page's re-rendered
-    # form has no `#modal_<identifier>_form` for a turbo_stream
-    # response to target, so it would silently no-op instead.
-    return reload_herbarium_modal_form_and_flash if modal_submission?
+    if modal_submission?(:herbarium)
+      return reload_herbarium_modal_form_and_flash
+    end
 
     render_invalid_view_for(action)
   end
@@ -551,10 +532,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     ]
   end
 
-  # Modal-submission success path -- only ever called once
-  # `modal_submission?` has confirmed this POST came from the
-  # herbarium-create modal embedded in the obs form. Context here is
-  # always the obs form.
+  # Modal success path -- context here is always the obs form.
   def close_modal_and_update_observation
     flash_notice(
       :runtime_created_name.t(type: :herbarium, value: @herbarium.name)

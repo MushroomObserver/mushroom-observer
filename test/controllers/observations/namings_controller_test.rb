@@ -816,12 +816,13 @@ module Observations
     def test_create_turbo_stream_form_errors_render_modal_reload
       login("rolf")
       obs = observations(:detailed_unknown_obs)
-      post(:create, params: { observation_id: obs.id, naming: {} },
-                    as: :turbo_stream)
+      post(:create,
+           params: { observation_id: obs.id, naming: { modal: "true" } },
+           as: :turbo_stream)
 
       assert_match("turbo-stream", @response.media_type)
-      assert_match(/<turbo-stream[^>]*action="update"/, @response.body)
-      assert_match(/<turbo-stream[^>]*action="replace"/, @response.body)
+      assert_select("turbo-stream[action='update']")
+      assert_select("turbo-stream[action='replace']")
     end
 
     # PUT update without changing the vote value drops into

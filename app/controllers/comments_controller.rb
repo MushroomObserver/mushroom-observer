@@ -316,9 +316,10 @@ class CommentsController < ApplicationController
   # Streams just look for a matching target id in the body, not a
   # 2xx-implies-redirect signal.
   def reload_form
-    respond_to do |format|
-      format.turbo_stream { reload_modal_form }
-      format.html { render_reload_form_invalid }
+    if modal_submission?(:comment)
+      reload_modal_form
+    else
+      render_reload_form_invalid
     end
   end
 
@@ -335,17 +336,14 @@ class CommentsController < ApplicationController
   # on the model's own Action Cable broadcast. Edit modal id is
   # "modal_comment_<id>"; the new-comment modal id is "modal_comment".
   def refresh_comments_or_redirect_to_show(extra_streams: [])
-    respond_to do |format|
-      format.turbo_stream do
-        modal_id = "modal_#{modal_identifier}"
-        render(turbo_stream: extra_streams + [
-          turbo_stream.close_modal(modal_id),
-          turbo_stream.remove(modal_id)
-        ])
-      end
-      format.html do
-        redirect_to(@target.show_link_args)
-      end
+    if modal_submission?(:comment)
+      modal_id = "modal_#{modal_identifier}"
+      render(turbo_stream: extra_streams + [
+        turbo_stream.close_modal(modal_id),
+        turbo_stream.remove(modal_id)
+      ])
+    else
+      redirect_to(@target.show_link_args)
     end
   end
 
@@ -388,14 +386,10 @@ class CommentsController < ApplicationController
   end
 
   def show_flash_and_send_back(target)
-    respond_to do |format|
-      format.html do
-        redirect_to(target.show_link_args) and return
-      end
-      # renders the flash in the modal
-      format.turbo_stream do
-        render_modal_flash_update(modal_identifier) and return
-      end
+    if modal_submission?(:comment)
+      render_modal_flash_update(modal_identifier)
+    else
+      redirect_to(target.show_link_args)
     end
   end
 end
