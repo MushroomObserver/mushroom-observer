@@ -98,7 +98,9 @@ class Inat
     ########## MO attributes
 
     # disable cop because gps_hidden is a pseudo-attribute
-    def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
+    # rubocop:disable Naming/PredicateMethod
+    def gps_hidden = @obs[:geoprivacy].present?
+    # rubocop:enable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 

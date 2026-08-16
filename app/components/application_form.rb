@@ -226,6 +226,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     super
   end
 
+  # No `_method` hidden on a plain POST form (Superform emits one
+  # unconditionally). POST needs no override -- and a stray
+  # `_method=post` breaks any form that adds its own `_method` later:
+  # turbo-rails' encodeMethodIntoRequestBody reads only the FIRST
+  # `_method` in the body, then strips them all, so a duplicate turns
+  # a Turbo PATCH submission into a bare POST.
+  def _method_field
+    return if _method_field_value.to_s.casecmp("post").zero?
+
+    super
+  end
+
   # Every non-Turbo form disables its submit buttons once submitted
   # (see form-feedback_controller.js; Turbo forms are skipped there,
   # since Turbo manages its own in-flight state). Appended so a form's

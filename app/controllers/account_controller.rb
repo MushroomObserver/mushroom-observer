@@ -173,7 +173,7 @@ class AccountController < ApplicationController
     "password: #{new_user.password}\n" \
     "email: #{new_user.email}\n" \
     "theme: #{new_user.theme}\n" \
-    "name: #{new_user.name}\n" \
+    "name: #{new_user.name}\n"
   end
 
   def validate_and_save_new_user!
