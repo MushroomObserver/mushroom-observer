@@ -31,7 +31,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         multiple: true,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        wrapper_options: { label: :images.ti, class: "my-3" }
+        wrapper_options: { label: :images.ti }
       )
     )
   end
@@ -54,8 +54,11 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         capture: "environment",
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
+        # No vertical margin of its own: the wrapper has to match the
+        # select field's plain form-group box, or the two buttons sit
+        # at different heights in the align-items-center row.
         wrapper_options: { label: false, button_text: :take_photo.l,
-                           wrap_class: "my-3 ml-3 take-photo-field" }
+                           wrap_class: "ml-3 take-photo-field" }
       )
     )
   end
