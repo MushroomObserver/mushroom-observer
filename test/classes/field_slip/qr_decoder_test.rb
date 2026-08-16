@@ -145,6 +145,32 @@ class FieldSlip::QRDecoderTest < UnitTestCase
     FileUtils.rm_f(path)
   end
 
+  # A slip printed in light gray (the NAMA 2026 template) reads as
+  # blank paper to zbar's binarizer -- every raw pass misses, and the
+  # contrast-enhanced retry is what finds the code.
+  def test_enhanced_pass_rescues_a_low_contrast_slip
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      Image::LocalFile.stub(:path, "/tmp/fake.jpg") do
+        FieldSlip::QRDecoder.stub(:scan, []) do
+          FieldSlip::QRDecoder.stub(:enhanced_scan, ["OPEN-0219"]) do
+            assert_equal("OPEN-0219",
+                         FieldSlip::QRDecoder.slip_code_in(
+                           images(:in_situ_image)
+                         ))
+          end
+        end
+      end
+    end
+  end
+
+  # Without ImageMagick there is no enhanced pass -- a miss, not an
+  # error.
+  def test_enhanced_scan_empty_without_imagemagick
+    FieldSlip::QRDecoder.stub(:magick_binary, nil) do
+      assert_empty(FieldSlip::QRDecoder.enhanced_scan("/x.jpg"))
+    end
+  end
+
   # ---------- zbarimg plumbing ----------
 
   def test_scan_parses_zbar_output
