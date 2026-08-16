@@ -23,7 +23,8 @@ module Views::Controllers::Occurrences
                model: @occurrence,
                observations: @observations.to_a,
                candidates: @candidates,
-               user: @user
+               user: @user,
+               local: false
              ))
       render_project_modal if @project_gaps&.any?
     end
@@ -40,7 +41,8 @@ module Views::Controllers::Occurrences
           render(Projects::Form.new(
                    gaps: @project_gaps,
                    primary: @occurrence.primary_observation,
-                   occurrence: @occurrence
+                   occurrence: @occurrence,
+                   local: false
                  ))
         end
       end

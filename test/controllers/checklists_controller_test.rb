@@ -119,7 +119,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_select("#checklist_higher_panel", count: 0)
     # Legend entry for the red X remove button (admin-only).
     assert_select("#checklist_contents p",
-                  text: /Remove this target name from the project/)
+                  text: :checklist_target_remove_footnote.l)
     # Unobserved-target name link goes to the name page (a project-scoped
     # observation search would always be empty). Observed-target name
     # link still goes to the observations search.
@@ -141,7 +141,7 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("#checklist_contents p",
-                  text: /Remove this target name from the project/, count: 0)
+                  text: :checklist_target_remove_footnote.l, count: 0)
   end
 
   # Prove that Site checklist goes to correct page with correct content

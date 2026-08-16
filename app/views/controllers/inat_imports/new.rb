@@ -16,7 +16,8 @@ module Views::Controllers::InatImports
         Tab::InatImport::FormNew.new(has_prior_imports: @has_prior_imports)
       )
       render(Views::Controllers::InatImports::Form.new(
-               @form, super_importer: @super_importer, admin: @admin
+               @form, super_importer: @super_importer, admin: @admin,
+                      local: false
              ))
     end
   end

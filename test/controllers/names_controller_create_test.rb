@@ -84,7 +84,8 @@ class NamesControllerCreateTest < FunctionalTestCase
     login(rolf.login)
     post(:create, params: params)
 
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     last_name = Name.last
     assert_equal(count, Name.count,
                  "Shouldn't have created #{last_name.search_name.inspect}.")
@@ -109,7 +110,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     }
     login(mary.login)
     post(:create, params: params)
-    assert_response(:success)
+    assert_unprocessable
     last_name = Name.last
     assert_equal(name_count, Name.count,
                  "Shouldn't have created #{last_name.search_name.inspect}.")
@@ -134,7 +135,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_flash(:create_name_multiple_names_match, str: text_name)
-    assert_response(:success)
+    assert_unprocessable
     last_name = Name.last
     assert_equal(count, Name.count,
                  "Shouldn't have created #{last_name.search_name.inspect}.")
@@ -156,7 +157,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_response(:success)
+    assert_unprocessable
     assert_flash(:runtime_name_create_already_exists,
                  name: name.display_name)
     assert_empty(name.reload.author)
@@ -177,7 +178,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     }
     post(:create, params: params)
 
-    assert_response(:success)
+    assert_unprocessable
     assert_flash(:runtime_name_create_already_exists,
                  name: name.display_name)
     assert_equal(author, name.reload.author)

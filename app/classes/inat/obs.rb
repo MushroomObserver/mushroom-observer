@@ -98,7 +98,9 @@ class Inat
     ########## MO attributes
 
     # disable cop because gps_hidden is a pseudo-attribute
-    def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
+    # rubocop:disable Naming/PredicateMethod
+    def gps_hidden = @obs[:geoprivacy].present?
+    # rubocop:enable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
@@ -318,7 +320,7 @@ class Inat
         user: self[:user][:login],
         observed: self.when,
         show_observation_inat_lat_lng: lat_lon_accuracy,
-        place: self[:place_guess],
+        place: snapshot_place,
         id: inat_taxon_name,
         dqa: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
@@ -330,6 +332,15 @@ class Inat
         chomp # prevent blank line between Snapshot and :Other Notes fields
     end
     private :snapshot_raw_str
+
+    def snapshot_place
+      if @obs[:geoprivacy] == "private"
+        :inat_geoprivacy_private.l
+      else
+        self[:place_guess]
+      end
+    end
+    private :snapshot_place
 
     def copyright
       name = self[:user][:name].presence || self[:user][:login]

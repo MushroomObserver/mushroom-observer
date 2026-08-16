@@ -93,14 +93,14 @@ module ObservationsController::SharedFormMethods
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
 
-    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    notes = NotesHash.from_params(params[:observation][:notes]).to_h
     # Collector has its own column; never let it live in notes (#4211).
-    symbolized.delete(:Collector)
+    notes.delete(:Collector)
     suppressible = suppressible_notes_keys
-    symbolized.reject! do |key, value|
+    notes.reject! do |key, value|
       value.blank? && suppressible.exclude?(key)
     end
-    symbolized
+    notes
   end
 
   # Keys where a blank value means "suppress the inherited value" rather

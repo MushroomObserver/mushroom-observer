@@ -13,11 +13,7 @@ module Images
         can_email_user_question?(@image, method: :email_general_commercial)
 
       respond_to do |format|
-        format.html do
-          render(Views::Controllers::Images::Emails::New.new(
-                   image: @image, message: @message
-                 ))
-        end
+        format.html { render_new_view }
         format.turbo_stream do
           render(Components::Modal.new(
                    type: :turbo_form,
@@ -53,15 +49,20 @@ module Images
 
     private
 
+    def render_new_view(status: :ok, **render_opts)
+      render(Views::Controllers::Images::Emails::New.new(
+               image: @image, message: @message
+             ),
+             status: status, **render_opts)
+    end
+
     def message_present?(image)
       return true if params.dig(:email, :message).present?
 
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image
       @message = params.permit(email: [:message]).dig(:email, :message)
-      render(Views::Controllers::Images::Emails::New.new(
-               image: @image, message: @message
-             ))
+      render_new_view_invalid
       false
     end
 
