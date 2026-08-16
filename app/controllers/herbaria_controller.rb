@@ -261,7 +261,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
              form_locals: { user: @user,
                             location: @herbarium.location,
                             top_users: @top_users,
-                            in_modal: true }
+                            context: :modal }
            ), layout: false)
   end
 
@@ -457,17 +457,17 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     # Turbo Drive requests turbo_stream on every POST once a form is
     # Turbo-enabled, regardless of which page submitted it, so that
     # check is true for the standalone `/herbaria/new` page's own
-    # submission too. `in_modal_submission?` reads an explicit
-    # `herbarium[in_modal]` hidden field instead, set only when
+    # submission too. `modal_submission?` reads an explicit
+    # `herbarium[context]` hidden field instead, set only when
     # `Herbaria::Form` is rendered via `render_modal_herbarium_form`.
-    return close_modal_and_update_observation if in_modal_submission?
+    return close_modal_and_update_observation if modal_submission?
 
     redirect_to_create_location || redirect_to_referrer ||
       redirect_to(herbarium_path(@herbarium))
   end
 
-  def in_modal_submission?
-    params.dig(:herbarium, :in_modal) == "true"
+  def modal_submission?
+    params.dig(:herbarium, :context) == "modal"
   end
 
   def redirect_to_create_location
@@ -488,13 +488,13 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def reload_form(action)
     return if performed?
 
-    # Same `in_modal_submission?` reasoning as
+    # Same `modal_submission?` reasoning as
     # `redirect_to_create_location_or_referrer_or_show_location` --
     # `request.format.turbo_stream?` can't tell a modal submission
     # from a standalone-page one; the standalone page's re-rendered
     # form has no `#modal_<identifier>_form` for a turbo_stream
     # response to target, so it would silently no-op instead.
-    return reload_herbarium_modal_form_and_flash if in_modal_submission?
+    return reload_herbarium_modal_form_and_flash if modal_submission?
 
     render_invalid_view_for(action)
   end
@@ -552,7 +552,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   # Modal-submission success path -- only ever called once
-  # `in_modal_submission?` has confirmed this POST came from the
+  # `modal_submission?` has confirmed this POST came from the
   # herbarium-create modal embedded in the obs form. Context here is
   # always the obs form.
   def close_modal_and_update_observation

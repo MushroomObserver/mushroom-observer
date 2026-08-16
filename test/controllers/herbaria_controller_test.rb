@@ -476,15 +476,15 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("form[data-turbo='true']")
   end
 
-  # Modal submissions (herbarium[in_modal]="true") should reload the
+  # Modal submissions (herbarium[context]="modal") should reload the
   # modal form with flash errors. `as: :turbo_stream` alone isn't
-  # enough to simulate this -- see `in_modal_submission?`.
+  # enough to simulate this -- see `modal_submission?`.
   def test_create_blank_name_turbo_stream
     herbarium_count = Herbarium.count
     login("rolf")
 
     post(:create,
-         params: { herbarium: herbarium_params.merge(in_modal: "true") },
+         params: { herbarium: herbarium_params.merge(context: "modal") },
          as: :turbo_stream)
 
     assert_equal(herbarium_count, Herbarium.count)
@@ -505,7 +505,7 @@ class HerbariaControllerTest < FunctionalTestCase
          params: { herbarium: herbarium_params.merge(
            name: "Brand New Test Herbarium",
            code: "BNTH",
-           in_modal: "true"
+           context: "modal"
          ) },
          as: :turbo_stream)
 
@@ -515,11 +515,11 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  # A standalone-page submission (no `in_modal` param) that happens to
+  # A standalone-page submission (no `context` param) that happens to
   # negotiate turbo_stream format must NOT be treated as a modal
   # submission -- Turbo Drive requests turbo_stream on every POST once
   # a form is Turbo-enabled, regardless of which page submitted it.
-  def test_create_success_turbo_stream_format_without_in_modal_redirects
+  def test_create_success_turbo_stream_format_without_context_redirects
     herbarium_count = Herbarium.count
     login("rolf")
 
@@ -741,16 +741,16 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_nil(nybg.personal_user)
   end
 
-  # Modal submissions (herbarium[in_modal]="true") should reload the
+  # Modal submissions (herbarium[context]="modal") should reload the
   # modal form with flash errors. `as: :turbo_stream` alone isn't
-  # enough to simulate this -- see `in_modal_submission?`.
+  # enough to simulate this -- see `modal_submission?`.
   def test_update_blank_name_turbo_stream
     last_update = nybg.updated_at
     login("rolf")
 
     patch(:update,
           params: { herbarium: herbarium_params.merge(
-            name: "", in_modal: "true"
+            name: "", context: "modal"
           ), id: nybg.id },
           as: :turbo_stream)
 
