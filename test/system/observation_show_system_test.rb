@@ -15,6 +15,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_link("Your Observations")
     click_on("Your Observations")
 
+    # `body.observations__index` alone matches both the filtered target
+    # page AND the unfiltered `/observations` page Turbo may still be
+    # showing mid-navigation (login redirects to bare `observations_path`,
+    # so that's genuinely on screen before this click's own page loads) --
+    # a login-warmed vs. cold Puma/Chrome start made this race visible
+    # only sometimes. Assert on the URL actually landing on `by_user=`
+    # so Capybara's own retry waits for the real navigation to finish.
+    assert_current_path(observations_path(by_user: rolf.id))
     assert_selector("body.observations__index")
     assert_link(text: /#{@obs.text_name}/)
     click_link(text: /#{@obs.text_name}/)
