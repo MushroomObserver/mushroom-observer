@@ -14,12 +14,17 @@
 class DateRangeParser
   attr_reader :range
 
-  def initialize(string)
+  # `endpoint:` is internal, set when parsing one side of a separated
+  # range: endpoints don't nest, so "2026-08-12,2026-08-16,2026-08-17"
+  # is rejected rather than silently spanned first-to-last.
+  def initialize(string, endpoint: false)
     @string = string.to_s
+    @endpoint = endpoint
     @range = parse_date_range
   end
 
   def parse_date_range
+    return endpoint_range if @endpoint
     return parse_separated_range(",") if @string.include?(",")
 
     match_date_patterns(parse_date_words) || space_separated_range
@@ -61,8 +66,8 @@ class DateRangeParser
   # doesn't parse.
   def parse_separated_range(sep)
     left, right = @string.split(sep, 2).map(&:strip)
-    from = self.class.new(left).range
-    to = self.class.new(right).range
+    from = self.class.new(left, endpoint: true).range
+    to = self.class.new(right, endpoint: true).range
     return nil unless from && to
 
     [Array(from).first, Array(to).last]
@@ -75,6 +80,14 @@ class DateRangeParser
     return nil unless @string.include?(" ")
 
     parse_separated_range(" ")
+  end
+
+  # An endpoint may still contain spaces ("2 days ago") but never a
+  # comma, and never another separated range.
+  def endpoint_range
+    return nil if @string.include?(",")
+
+    match_date_patterns(parse_date_words)
   end
 
   def yyyymmdd(from, to)

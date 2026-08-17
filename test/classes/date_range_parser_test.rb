@@ -57,4 +57,12 @@ class DateRangeParserTest < UnitTestCase
     assert_nil(parse(""))
     assert_nil(parse(nil))
   end
+
+  # Exactly two endpoints: a list of three dates is rejected, not
+  # silently spanned first-to-last.
+  def test_separators_do_not_nest
+    assert_nil(parse("2026-08-12,2026-08-16,2026-08-17"))
+    assert_nil(parse("2026-08-12 2026-08-16 2026-08-17"))
+    assert_nil(parse("2026-08-12,2026-08-16 2026-08-17"))
+  end
 end
