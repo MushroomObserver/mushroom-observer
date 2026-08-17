@@ -547,6 +547,31 @@ class QueryTest < UnitTestCase
     assert_equal(query.send(:legacy_next_id), query.next_id)
   end
 
+  # `current_sort_values` (read the current row's own sort columns)
+  # and the neighbor lookup are two separate queries -- a concurrent
+  # write to the current row between them could seed the neighbor
+  # search from an already-stale value unless both share one
+  # transaction/snapshot. Regression test for that guarantee: assert
+  # the read runs inside a transaction opened by `seek_or` itself,
+  # not just whatever the test framework already wraps everything in.
+  def test_next_and_prev_seek_wraps_current_row_read_in_a_transaction
+    query = Query.lookup(:Name, order_by: :id)
+    query.current = names(:fungi)
+
+    baseline = ActiveRecord::Base.connection.open_transactions
+    open_during_read = nil
+    query.define_singleton_method(:current_sort_values) do |*args|
+      open_during_read = ActiveRecord::Base.connection.open_transactions
+      super(*args)
+    end
+
+    query.prev_id
+
+    assert_equal(baseline + 1, open_during_read,
+                 "current_sort_values should run inside its own " \
+                 "transaction, not bare autocommit")
+  end
+
   ##############################################################################
   #
   #  :section: Test Subqueries

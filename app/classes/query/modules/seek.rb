@@ -15,6 +15,12 @@
 ##############################################################################
 
 module Query::Modules::Seek
+  # Not a real value -- distinguishes "fall back to the block" from a
+  # legitimate `nil` boundary (no next/prev row) inside `seek_or`'s
+  # transaction, where a bare `return`/`break` would be a non-local
+  # exit Rails may interpret as a rollback signal.
+  NOT_SEEKABLE = Object.new.freeze
+
   private
 
   # Allow-list: anything not a plain column Ascending/Descending
@@ -62,14 +68,27 @@ module Query::Modules::Seek
 
   # Bounded id, boundary nil, or falls through to the block when the
   # order shape or current row isn't seekable.
+  #
+  # `current_sort_values` and the neighbor lookup are two separate
+  # reads -- wrapped in a transaction so they share one consistent
+  # snapshot (MySQL's default REPEATABLE READ). Without this, a
+  # concurrent write to the current row's own sort columns (e.g.
+  # another user's vote) landing between the two reads could seed the
+  # neighbor search from a value that's already stale by the second
+  # query. `result_ids` never had this problem -- it's one query.
   def seek_or(dir)
     return yield if need_letters
     return yield unless current_id
     return yield unless seekable_order?
 
     cols = scope.order_values
+    result = model.transaction { seek_within_transaction(cols, dir) }
+    result == NOT_SEEKABLE ? yield : result
+  end
+
+  def seek_within_transaction(cols, dir)
     current_row = current_sort_values(cols)
-    return yield unless current_row
+    return NOT_SEEKABLE unless current_row
 
     seek_bound_id(cols, current_row, dir)
   end
