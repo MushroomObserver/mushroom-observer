@@ -5,7 +5,6 @@
 #
 #  This is a module of reusable methods included by controllers that handle
 #  "faceted" query searches per model, with separate inputs for each keyword.
-#  It also handles rendering help for the pattern search bar, via `:show` action
 #
 ################################################################################
 
@@ -16,29 +15,6 @@ module Searchable
   MAX_SEARCH_INPUT_LENGTH = 8000
 
   included do
-    # Render help for the pattern search bar (if available), for current model
-    def show
-      respond_to do |format|
-        format.turbo_stream do
-          render(turbo_stream: turbo_stream.update(
-            :search_bar_help, # id of element to update contents of
-            partial: "#{search_type}/search/help"
-          ))
-        end
-        format.html
-      end
-    end
-
-    def new
-      @context = params[:local] == "false" ? :dropdown : :page
-      set_up_form_field_groupings
-      @search = build_search_query
-      respond_to do |format|
-        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
-        format.html
-      end
-    end
-
     def create
       redirect_to(action: :new) and return if clear_form?
 
