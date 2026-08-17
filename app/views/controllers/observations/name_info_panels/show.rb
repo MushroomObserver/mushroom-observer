@@ -39,17 +39,22 @@ module Views::Controllers::Observations::NameInfoPanels
       end
     end
 
-    # Three groups, each rendered as a block-level div wrapping the link:
+    # Three groups, each an `li.hanging-indent` -- same list shape as
+    # `Observations::Show::Details#render_body` -- wrapping the link:
     # related-name filtered indexes, alt-descriptions list, and
     # the per-name distribution map link.
     def render_links_on_mo
-      related_name_tabs.each { |tab| render_tab_link(tab) }
-      render_alt_descriptions
-      render_tab_link(occurrence_map_tab)
+      ul(class: "list-unstyled mb-0") do
+        related_name_tabs.each { |tab| render_tab_link(tab) }
+        render_alt_descriptions
+        render_tab_link(occurrence_map_tab)
+      end
     end
 
     def render_links_on_web
-      web_name_tabs.each { |tab| render_tab_link(tab) }
+      ul(class: "list-unstyled mb-0") do
+        web_name_tabs.each { |tab| render_tab_link(tab) }
+      end
     end
 
     def related_name_tabs
@@ -71,13 +76,15 @@ module Views::Controllers::Observations::NameInfoPanels
     # Renders the alt-description list inline — same view used by
     # the names / locations show pages, just no panel chrome here.
     def render_alt_descriptions
-      render(::Views::Controllers::Descriptions::List.new(
-               user: @user, object: @obs.name, type: :name
-             ))
+      li(class: "hanging-indent") do
+        render(::Views::Controllers::Descriptions::List.new(
+                 user: @user, object: @obs.name, type: :name
+               ))
+      end
     end
 
     def render_tab_link(tab)
-      div do
+      li(class: "hanging-indent") do
         if tab.html_options[:external]
           Link(type: :external, tab: tab)
         else
