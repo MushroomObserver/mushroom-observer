@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Contract tests for `Views::Layouts::Header::EditDeleteIcons` —
-# the edit/delete icon `<ul>` in the show-page title bar.
+# the edit/delete icon pair in the show-page title bar.
 module Views::Layouts
   class Header::EditDeleteIconsTest < ComponentTestCase
     def setup
@@ -13,29 +13,33 @@ module Views::Layouts
       @non_owner = users(:rolf)
     end
 
-    def test_always_renders_ul
+    def test_always_renders_container
       html = render_icons(user: @non_owner)
 
-      assert_html(html, "ul.object_edit")
+      assert_html(html, "div.object_edit")
     end
 
-    def test_renders_empty_ul_when_cannot_edit
+    def test_renders_empty_when_cannot_edit
       html = render_icons(user: @non_owner)
 
-      assert_no_html(html, "ul.object_edit li")
+      assert_no_html(html, "div.object_edit .inline-icon-link")
     end
 
-    def test_renders_empty_ul_with_nil_user
+    def test_renders_empty_with_nil_user
       html = render_icons(user: nil)
 
-      assert_html(html, "ul.object_edit")
-      assert_no_html(html, "ul.object_edit li")
+      assert_html(html, "div.object_edit")
+      assert_no_html(html, "div.object_edit .inline-icon-link")
     end
 
-    def test_renders_edit_and_delete_li_when_owner
+    def test_renders_edit_and_delete_items_when_owner
       html = render_icons(user: @owner)
 
-      assert_html(html, "ul.object_edit li", count: 2)
+      assert_html(html, "div.object_edit .inline-icon-link", count: 2)
+      edit_href = routes.edit_observation_path(@obs.id)
+      destroy_action = routes.observation_path(@obs.id)
+      assert_html(html, "div.object_edit a[href='#{edit_href}']")
+      assert_html(html, "div.object_edit form[action='#{destroy_action}']")
     end
 
     # A read-only reflection (#4214) drops the edit icon (its scalar core
@@ -43,10 +47,13 @@ module Views::Layouts
     def test_reflection_suppresses_edit_icon_but_keeps_delete
       @obs.update_column(:reflected_at, Time.zone.now)
       html = render_icons(user: @owner)
+      edit_href = routes.edit_observation_path(@obs.id)
+      destroy_action = routes.observation_path(@obs.id)
 
-      assert_html(html, "ul.object_edit li", count: 1)
-      assert_no_html(html, "a[href$='/edit']",
+      assert_html(html, "div.object_edit .inline-icon-link", count: 1)
+      assert_no_html(html, "a[href='#{edit_href}']",
                      "a reflection should have no edit-form link")
+      assert_html(html, "div.object_edit form[action='#{destroy_action}']")
     end
 
     private
