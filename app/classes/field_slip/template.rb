@@ -11,7 +11,8 @@ class FieldSlip
   # layouts themselves (issue #5024).
   module Template
     REGISTRY = { "mo" => "FieldSlip::Template::Mo",
-                 "dbg" => "FieldSlip::Template::Dbg" }.freeze
+                 "dbg" => "FieldSlip::Template::Dbg",
+                 "nama" => "FieldSlip::Template::Nama" }.freeze
 
     # Which layout each project's slips are printed on, keyed by the
     # project's field_slip_prefix (stable across environments, unlike
@@ -20,6 +21,7 @@ class FieldSlip
     PROJECT_TEMPLATES = {
       "2025-NAMA" => "dbg",
       "2026-CMS" => "dbg",
+      "2026-NAMA" => "nama",
       "2026-SMHF" => "dbg"
     }.freeze
 
