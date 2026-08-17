@@ -146,26 +146,26 @@ class TransferImageDhashes
 end
 
 if $PROGRAM_NAME == __FILE__
-  options = {}
-  OptionParser.new do |opts|
-    opts.on("--export FILE", "Write id,dhash CSV of local hashes") do |f|
-      options[:export] = f
-    end
-    opts.on("--apply FILE", "Apply id,dhash CSV (fill-NULL-only)") do |f|
-      options[:apply] = f
-    end
-    opts.on("--limit N", Integer, "Apply only the first N rows") do |n|
-      options[:limit] = n
-    end
-    opts.on("--report-interval N", Integer,
-            "Seconds between progress reports (default 10)") do |n|
-      options[:report_interval] = n
-    end
-  end.parse!
-
   begin
+    options = {}
+    OptionParser.new do |opts|
+      opts.on("--export FILE", "Write id,dhash CSV of local hashes") do |f|
+        options[:export] = f
+      end
+      opts.on("--apply FILE", "Apply id,dhash CSV (fill-NULL-only)") do |f|
+        options[:apply] = f
+      end
+      opts.on("--limit N", Integer, "Apply only the first N rows") do |n|
+        options[:limit] = n
+      end
+      opts.on("--report-interval N", Integer,
+              "Seconds between progress reports (default 10)") do |n|
+        options[:report_interval] = n
+      end
+    end.parse!
+
     TransferImageDhashes.new(options).run
-  rescue ArgumentError => e
+  rescue ArgumentError, RuntimeError => e
     abort(e.message)
   end
 end

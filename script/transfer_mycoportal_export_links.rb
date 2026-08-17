@@ -69,7 +69,7 @@ class TransferMycoportalExportLinks
 
     def run_cli(argv)
       new(parse_argv(argv)).run
-    rescue ArgumentError => e
+    rescue ArgumentError, RuntimeError => e
       abort(e.message)
     end
   end

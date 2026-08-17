@@ -201,7 +201,9 @@ class TransferMycoportalExportLinksTest < UnitTestCase
   end
 
   def test_run_cli_aborts_on_invalid_args
-    assert_raises(SystemExit) { TransferMycoportalExportLinks.run_cli([]) }
+    capture_io do
+      assert_raises(SystemExit) { TransferMycoportalExportLinks.run_cli([]) }
+    end
   end
 
   def test_export_then_apply_round_trip
