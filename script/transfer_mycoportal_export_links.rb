@@ -66,6 +66,12 @@ class TransferMycoportalExportLinks
 
       options
     end
+
+    def run_cli(argv)
+      new(parse_argv(argv)).run
+    rescue ArgumentError => e
+      abort(e.message)
+    end
   end
 
   def initialize(opts)
@@ -213,12 +219,4 @@ class TransferMycoportalExportLinks
   end
 end
 
-if $PROGRAM_NAME == __FILE__
-  begin
-    TransferMycoportalExportLinks.new(
-      TransferMycoportalExportLinks.parse_argv(ARGV)
-    ).run
-  rescue ArgumentError => e
-    abort(e.message)
-  end
-end
+TransferMycoportalExportLinks.run_cli(ARGV) if $PROGRAM_NAME == __FILE__

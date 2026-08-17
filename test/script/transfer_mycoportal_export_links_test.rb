@@ -188,6 +188,22 @@ class TransferMycoportalExportLinksTest < UnitTestCase
     end
   end
 
+  def test_run_cli_success
+    image = images(:in_situ_image)
+    make_link(target: image, external_id: "1")
+    path = temp_csv_path("export")
+
+    capture_io { TransferMycoportalExportLinks.run_cli(["--export", path]) }
+
+    rows = CSV.read(path, headers: true)
+    assert_not_nil(rows.find { |r| r["target_type"] == "Image" },
+                   "Expected run_cli(--export) to write the export CSV")
+  end
+
+  def test_run_cli_aborts_on_invalid_args
+    assert_raises(SystemExit) { TransferMycoportalExportLinks.run_cli([]) }
+  end
+
   def test_export_then_apply_round_trip
     image = images(:in_situ_image)
     make_link(target: image, external_id: "1",
