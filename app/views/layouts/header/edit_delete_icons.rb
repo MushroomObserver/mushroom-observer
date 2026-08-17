@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
-# Page-title-bar edit/delete icons. Renders a `<ul>` with edit +
-# delete buttons gated by what the viewer can do to the object.
-# Always emits the `<ul>` — empty when the viewer has no permissions —
-# so the parent flex layout in `Views::Layouts::Header::PageTitle`
-# is consistent regardless of permission state.
+# Page-title-bar edit/delete icons. Renders edit + delete buttons
+# gated by what the viewer can do to the object, via the same
+# `Components::InlineLinkBlock` spacing/styling every other inline
+# edit/destroy icon pair in the app uses (see `Components::
+# InlineCRUDLinks`) -- unlike that component's own `TARGET_HANDLERS`
+# dispatch, this stays generic across every model via plain
+# `AbstractModel#can_edit?`/`#destroyable?`, so it needs no per-model
+# handler. The wrapping `div` always renders -- empty when the viewer
+# has no permissions -- so the parent flex layout in `Views::Layouts::
+# Header::PageTitle` is consistent regardless of permission state.
 #
 # Rendered into `content_for(:edit_icons)` by
 # `Views::FullPageBase::Icons#add_edit_icons`.
@@ -18,25 +23,29 @@ module Views::Layouts
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      ul(class: "nav d-flex align-items-center " \
-                "justify-content-end mt-0 h4 object_edit") do
-        li { render_edit_button } if can_edit_object? && !read_only_reflection?
-        li { render_delete_button } if can_destroy_object?
+      div(class: "h4 my-0 d-flex align-items-center object_edit") do
+        InlineLinkBlock(items: [edit_item, delete_item].compact)
       end
     end
 
     private
 
-    def render_edit_button
-      render(::Components::Button::Edit.new(
-               target: @object, variant: :strip
-             ))
+    def edit_item
+      return nil unless can_edit_object? && !read_only_reflection?
+
+      ::Components::Button::Edit.new(
+        target: @object, variant: :strip,
+        class: ::Components::InlineLinkBlock.item_class
+      )
     end
 
-    def render_delete_button
-      render(::Components::Button::Delete.new(
-               target: @object, variant: :strip
-             ))
+    def delete_item
+      return nil unless can_destroy_object?
+
+      ::Components::Button::Delete.new(
+        target: @object, variant: :strip,
+        class: ::Components::InlineLinkBlock.item_class
+      )
     end
 
     def can_edit_object?
