@@ -294,10 +294,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Subtree consumed by `Observation.show_includes`. The
-  # `Descriptions::List#visible?` path reads each description's
-  # `.user`, so `name: { descriptions: :user }` avoids N+1 per
-  # description on the show page. The `observation_images: :image`
-  # polymorphic preload skips the `images.delete` cascade query.
+  # `observation_images: :image` polymorphic preload skips the
+  # `images.delete` cascade query. `name: { synonym: :names }` is read
+  # by `ConsensusNameLink#preferred_synonym` (title bar, every viewer)
+  # -- stays here. `name`'s descriptions/interests/description subtree
+  # moved to `Observations::NameInfoPanelsController::NAME_INCLUDES`
+  # (#5093) -- the "About this Taxon" panel that used it is now lazily
+  # Turbo-fetched instead of eager-rendered here.
   def self.show_includes_tree
     [:collector_user,
      { collection_numbers: :user },
@@ -307,8 +310,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
      { images: [:image_votes, :license, :projects, :user] },
      { interests: :user },
      :location,
-     { name: [{ synonym: :names }, { descriptions: :user },
-              :interests, :description] },
+     { name: { synonym: :names } },
      { namings: Naming.index_includes_tree },
      { observation_images: :image },
      :observation_collection_numbers,
