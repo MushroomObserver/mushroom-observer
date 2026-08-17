@@ -3,7 +3,8 @@
 # Parses user-input date ranges (or strings) into a range of Ruby dates that
 # MO's date AR scopes can handle.
 #
-# Can parse ranges like "2008-01-05-2008-03-14", "2009-2011",
+# Can parse ranges like "2008-01-05,2008-03-14" (comma between the two
+# endpoints) or the dash-only "2008-01-05-2008-03-14", "2009-2011",
 # "02-08" (month range), "09-03" (month range wrapping new year),
 # and underscored Ruby-style phrases like "last_year", "1_day_ago", etc.
 #
@@ -13,14 +14,24 @@
 class DateRangeParser
   attr_reader :range
 
-  def initialize(string)
+  # `endpoint:` is internal, set when parsing one side of a separated
+  # range: endpoints don't nest, so "2026-08-12,2026-08-16,2026-08-17"
+  # is rejected rather than silently spanned first-to-last.
+  def initialize(string, endpoint: false)
     @string = string.to_s
+    @endpoint = endpoint
     @range = parse_date_range
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity
   def parse_date_range
-    val = parse_date_words
+    return endpoint_range if @endpoint
+    return parse_separated_range(",") if @string.include?(",")
+
+    match_date_patterns(parse_date_words) || space_separated_range
+  end
+
+  # rubocop:disable Metrics/CyclomaticComplexity
+  def match_date_patterns(val)
     a, b, c, d, e, f = val.split("-")
     case val
     when /^\d{4}$/
@@ -48,6 +59,36 @@ class DateRangeParser
   ##########################################################################
 
   private
+
+  # "2026-08-12,2026-08-16": each side parses on its own (so "2026,2027"
+  # and phrases like "last_month,today" work too); the range runs from
+  # the left side's start to the right side's end. nil when either side
+  # doesn't parse.
+  def parse_separated_range(sep)
+    left, right = @string.split(sep, 2).map(&:strip)
+    from = self.class.new(left, endpoint: true).range
+    to = self.class.new(right, endpoint: true).range
+    return nil unless from && to
+
+    [Array(from).first, Array(to).last]
+  end
+
+  # A space separates endpoints too ("2026-08-12 2026-08-16") -- but
+  # only as a last resort, since spaces also occur inside date words
+  # ("2 days ago" is one date, not a range).
+  def space_separated_range
+    return nil unless @string.include?(" ")
+
+    parse_separated_range(" ")
+  end
+
+  # An endpoint may still contain spaces ("2 days ago") but never a
+  # comma, and never another separated range.
+  def endpoint_range
+    return nil if @string.include?(",")
+
+    match_date_patterns(parse_date_words)
+  end
 
   def yyyymmdd(from, to)
     [format("%04<year>d-%02<month>d-%02<day>d",
