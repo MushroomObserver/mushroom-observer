@@ -1119,6 +1119,10 @@ export default class BaseAutocompleterController extends Controller {
   // Autocomplete::PUNCTUATION (app/classes/autocomplete.rb) so a
   // match right after e.g. "(" -- the login in "Name (login)" --
   // counts as a word start, not just after a literal space.
+  // The double backslash before x2F etc. is required: this is a JS
+  // string literal, not a regex literal, so it needs its own escaping
+  // before RegExp() parses the result as a hex range -- do not
+  // "simplify" to a single backslash.
   wordStartMatch(name, token) {
     const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const regex = new RegExp('(^|[ -\\x2F\\x3A-\\x40\\x5B-\\x60\\x7B-\\x7F])' +
