@@ -63,6 +63,27 @@ class FieldSlip::TemplateTest < UnitTestCase
     end
   end
 
+  # Every template's prompt pieces must be present strings -- the
+  # extractor builds its instructions from them (see
+  # Extractor::Prompt). The NAMA slip's distinctive features are
+  # pinned so a copy-paste from Dbg can't silently describe the
+  # wrong form.
+  def test_every_template_describes_its_layout_and_rules
+    FieldSlip::Template::REGISTRY.each_key do |key|
+      template = FieldSlip::Template.for(key)
+
+      assert_kind_of(String, template.layout, key)
+      assert_kind_of(String, template.field_rules, key)
+    end
+
+    nama = FieldSlip::Template.for(:nama)
+
+    assert_match(%r{iNaturalist/MO box}, nama.layout)
+    assert_match(/DNA and VCP labels/, nama.layout)
+    assert_match(/sticker/, nama.field_rules)
+    assert_match(/Substrate Detail/, nama.field_rules)
+  end
+
   # ---------- iNat code detection ----------
 
   # Every template's iNat slot reads ids the same way (see

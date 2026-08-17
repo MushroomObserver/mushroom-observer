@@ -171,6 +171,43 @@ class FieldSlip::QRDecoderTest < UnitTestCase
     end
   end
 
+  # The enhanced pass converts into a tempfile and scans that; a
+  # failed conversion is a miss, not an error.
+  def test_enhanced_scan_scans_the_converted_tempfile
+    ok = Struct.new(:success?).new(true)
+    FieldSlip::QRDecoder.stub(:magick_binary, "magick") do
+      Open3.stub(:capture3, ["", "", ok]) do
+        FieldSlip::QRDecoder.stub(:scan, ["OPEN-0219"]) do
+          assert_equal(["OPEN-0219"],
+                       FieldSlip::QRDecoder.enhanced_scan("/x.jpg"))
+        end
+      end
+    end
+  end
+
+  def test_enhanced_scan_empty_when_conversion_fails
+    failed = Struct.new(:success?).new(false)
+    FieldSlip::QRDecoder.stub(:magick_binary, "magick") do
+      Open3.stub(:capture3, ["", "boom", failed]) do
+        assert_empty(FieldSlip::QRDecoder.enhanced_scan("/x.jpg"))
+      end
+    end
+  end
+
+  # Probes for IMv7's `magick`, then IMv6's `convert`; memoized, nil
+  # when neither exists. Runs the real probe (whichever binaries this
+  # machine has), then pins the memoization.
+  def test_magick_binary_probes_and_memoizes
+    if FieldSlip::QRDecoder.instance_variable_defined?(:@magick_binary)
+      FieldSlip::QRDecoder.remove_instance_variable(:@magick_binary)
+    end
+
+    probed = FieldSlip::QRDecoder.magick_binary
+
+    assert_includes(["magick", "convert", nil], probed)
+    assert_equal(probed, FieldSlip::QRDecoder.magick_binary)
+  end
+
   # ---------- zbarimg plumbing ----------
 
   def test_scan_parses_zbar_output
