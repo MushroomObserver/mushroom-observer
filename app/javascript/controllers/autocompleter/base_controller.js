@@ -1093,10 +1093,9 @@ export default class BaseAutocompleterController extends Controller {
     if (token != '' && primer.length > 1) {
       for (let i = 1; i < primer.length; i++) {
         let s = primer_nm[i]['name'] || '',
-          s2 = ' ' + s + ' ',
           k;
         for (k = 0; k < tokens.length; k++) {
-          if (s2.indexOf(' ' + tokens[k]) < 0) break;
+          if (!this.wordStartMatch(s, tokens[k])) break;
         }
         if (k >= tokens.length) {
           matches.push(primer[i]);
@@ -1114,6 +1113,17 @@ export default class BaseAutocompleterController extends Controller {
       }
     }
     this.matches = matches;
+  }
+
+  // Word-start check for populateUnordered(). Mirrors
+  // Autocomplete::PUNCTUATION (app/classes/autocomplete.rb) so a
+  // match right after e.g. "(" -- the login in "Name (login)" --
+  // counts as a word start, not just after a literal space.
+  wordStartMatch(name, token) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp('(^|[ -\\x2F\\x3A-\\x40\\x5B-\\x60\\x7B-\\x7F])' +
+      escaped)
+    return regex.test(name)
   }
 
   populateCollapsed() {
