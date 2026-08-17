@@ -49,7 +49,13 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
     end
   end
 
+  # `target: "_top"` -- Turbo's frame swap keeps this placeholder
+  # element's own attributes, not the fetched response's frame
+  # attributes, so the escape-the-frame target has to live here too
+  # (see `Observations::NameInfoPanels::Show#view_template`) for
+  # links inside the fetched content to navigate normally instead of
+  # trying to swap into this frame.
   def render_frame
-    turbo_frame_tag(frame_id)
+    turbo_frame_tag(frame_id, target: "_top")
   end
 end

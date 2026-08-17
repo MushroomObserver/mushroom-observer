@@ -12,8 +12,12 @@ module Views::Controllers::Observations::NameInfoPanels
     prop :obs, ::Observation
     prop :user, _Nilable(::User), default: nil
 
+    # `target: "_top"` -- links rendered inside a `<turbo-frame>` are
+    # frame-scoped by default, so without it, clicking e.g. "About
+    # <name>" would try to swap the Names page's content into this
+    # small panel frame instead of navigating there.
     def view_template
-      turbo_frame_tag(frame_id) { render_body }
+      turbo_frame_tag(frame_id, target: "_top") { render_body }
     end
 
     private
