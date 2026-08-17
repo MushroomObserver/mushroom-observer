@@ -286,7 +286,7 @@ class Views::Layouts::TopNav < Views::Base
 
     Button(
       variant: :success, size: :sm,
-      class: "mr-0 ml-0 ml-sm-2 top_nav_button top_nav_icon_button d-none",
+      class: "mr-0 ml-2 top_nav_button top_nav_icon_button d-none",
       data: { banner_target: "showButton" }
     ) do
       Icon(type: :interests, title: :banner_show_tooltip.t,
