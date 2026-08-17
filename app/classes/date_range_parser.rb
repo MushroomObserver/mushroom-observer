@@ -20,9 +20,9 @@ class DateRangeParser
   end
 
   def parse_date_range
-    return parse_comma_range if @string.include?(",")
+    return parse_separated_range(",") if @string.include?(",")
 
-    match_date_patterns(parse_date_words)
+    match_date_patterns(parse_date_words) || space_separated_range
   end
 
   # rubocop:disable Metrics/CyclomaticComplexity
@@ -59,13 +59,22 @@ class DateRangeParser
   # and phrases like "last_month,today" work too); the range runs from
   # the left side's start to the right side's end. nil when either side
   # doesn't parse.
-  def parse_comma_range
-    left, right = @string.split(",", 2).map(&:strip)
+  def parse_separated_range(sep)
+    left, right = @string.split(sep, 2).map(&:strip)
     from = self.class.new(left).range
     to = self.class.new(right).range
     return nil unless from && to
 
     [Array(from).first, Array(to).last]
+  end
+
+  # A space separates endpoints too ("2026-08-12 2026-08-16") -- but
+  # only as a last resort, since spaces also occur inside date words
+  # ("2 days ago" is one date, not a range).
+  def space_separated_range
+    return nil unless @string.include?(" ")
+
+    parse_separated_range(" ")
   end
 
   def yyyymmdd(from, to)

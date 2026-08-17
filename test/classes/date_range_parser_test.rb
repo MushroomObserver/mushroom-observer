@@ -37,6 +37,19 @@ class DateRangeParserTest < UnitTestCase
     assert_equal([first, today], parse("this_month,today"))
   end
 
+  # A space works as the separator too -- but only after the whole
+  # string fails to parse, so spaced date words ("2 days ago") stay
+  # one date, not a range.
+  def test_space_ranges
+    assert_equal(%w[2026-08-12 2026-08-16], parse("2026-08-12 2026-08-16"))
+    assert_equal(%w[2026-01-01 2027-12-31], parse("2026 2027"))
+    assert_equal(%w[2026-08-01 2026-09-30], parse("2026-08 2026-09"))
+
+    two_days_ago = 2.days.ago.strftime("%Y-%m-%d")
+
+    assert_equal([two_days_ago, two_days_ago], parse("2 days ago"))
+  end
+
   def test_unparseable_values_are_nil
     assert_nil(parse("garbage"))
     assert_nil(parse("nonsense,2026"))
