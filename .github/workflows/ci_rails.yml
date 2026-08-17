@@ -145,9 +145,10 @@ jobs:
       - name: Check for deprecation warnings
         if: always()
         run: |
-          if grep -q "DEPRECATION WARNING" test_output.log; then
-            grep "DEPRECATION WARNING" test_output.log | while read -r line; do
-              echo "::warning::$line"
+          if [ -f test_output.log ] && grep -q "DEPRECATION WARNING" test_output.log; then
+            grep "DEPRECATION WARNING" test_output.log | while IFS= read -r line; do
+              escaped=$(printf '%s' "$line" | sed -e 's/%/%25/g' -e 's/\r/%0D/g')
+              echo "::warning::$escaped"
             done
           fi
 
