@@ -25,33 +25,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Unfiltered index (browsing the whole table) only offers sorts with
-  # no join/aggregate over that many rows.
-  def test_index_unfiltered_offers_only_column_sorts
-    login
-    get(:index)
-
-    assert_select("a.observations_by_rss_log_link", true)
-    assert_select("a.observations_by_date_link", true)
-    assert_select("a.observations_by_created_at_link", true)
-    assert_select("a.observations_by_name_link", false)
-    assert_select("a.observations_by_user_link", false)
-    assert_select("a.observations_by_confidence_link", false)
-    assert_select("a.observations_by_thumbnail_quality_link", false)
-    assert_select("a.observations_by_num_views_link", false)
-  end
-
-  def test_index_filtered_offers_all_sorts
-    login(rolf.login)
-    get(:index, params: { by_user: rolf.id })
-
-    assert_select("a.observations_by_name_link", true)
-    assert_select("a.observations_by_user_link", true)
-    assert_select("a.observations_by_confidence_link", true)
-    assert_select("a.observations_by_thumbnail_quality_link", true)
-    assert_select("a.observations_by_num_views_link", true)
-  end
-
   # Regression for #4492: the top-nav `search-type` Stimulus controller
   # reads its help/form type lists as Array values, which Stimulus parses
   # as JSON. Phlexifying top_nav emitted the arrays space-joined ("a b")
