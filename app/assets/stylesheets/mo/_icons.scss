@@ -4,6 +4,12 @@
 // --------------------------------------------------
 
 .has-search .form-control-feedback {
+  // `.mo-icon`'s own `position: relative` (below, for icon+text
+  // baseline alignment) ties with Bootstrap's `.form-control-feedback
+  // { position: absolute }` on specificity, so source order decides
+  // -- and `.mo-icon` loses that tie since it's declared later. Redeclare
+  // here, where the selector's higher specificity wins reliably.
+  position: absolute;
   right: initial;
   left: 0;
   background-color: transparent;
