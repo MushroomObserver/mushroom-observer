@@ -7,6 +7,8 @@ class FieldSlip::TemplateTest < UnitTestCase
     assert_instance_of(FieldSlip::Template::Mo, FieldSlip::Template.for(:mo))
     assert_instance_of(FieldSlip::Template::Dbg,
                        FieldSlip::Template.for("dbg"))
+    assert_instance_of(FieldSlip::Template::Nama,
+                       FieldSlip::Template.for(:nama))
   end
 
   def test_for_rejects_an_unknown_template
@@ -31,6 +33,11 @@ class FieldSlip::TemplateTest < UnitTestCase
 
     assert_instance_of(FieldSlip::Template::Dbg,
                        FieldSlip::Template.for_project(project))
+
+    project.field_slip_prefix = "2026-NAMA"
+
+    assert_instance_of(FieldSlip::Template::Nama,
+                       FieldSlip::Template.for_project(project))
   end
 
   def test_for_project_defaults_to_the_mo_slip
@@ -54,6 +61,27 @@ class FieldSlip::TemplateTest < UnitTestCase
       assert_includes(labels, template.inat_codes_field, key)
       assert_includes(labels, template.code_field, key)
     end
+  end
+
+  # Every template's prompt pieces must be present strings -- the
+  # extractor builds its instructions from them (see
+  # Extractor::Prompt). The NAMA slip's distinctive features are
+  # pinned so a copy-paste from Dbg can't silently describe the
+  # wrong form.
+  def test_every_template_describes_its_layout_and_rules
+    FieldSlip::Template::REGISTRY.each_key do |key|
+      template = FieldSlip::Template.for(key)
+
+      assert_kind_of(String, template.layout, key)
+      assert_kind_of(String, template.field_rules, key)
+    end
+
+    nama = FieldSlip::Template.for(:nama)
+
+    assert_match(%r{iNaturalist/MO box}, nama.layout)
+    assert_match(/DNA and VCP labels/, nama.layout)
+    assert_match(/sticker/, nama.field_rules)
+    assert_match(/Substrate Detail/, nama.field_rules)
   end
 
   # ---------- iNat code detection ----------
@@ -98,5 +126,17 @@ class FieldSlip::TemplateTest < UnitTestCase
                  template.inat_code_in("1:59 pm 389-198-780 (iNat#) see Alex"))
     assert_nil(template.inat_code_in("gSanchez"))
     assert_nil(template.inat_code_in("1:58 PM"))
+  end
+
+  # The NAMA slip's box is "iNaturalist/MO": an MO observation number
+  # written there (6 digits) stays below RAW_ID's 7-digit floor, so
+  # only iNat-length ids are linked.
+  def test_nama_inat_code_ignores_mo_observation_numbers
+    template = FieldSlip::Template.for(:nama)
+
+    assert_equal("389176438", template.inat_code_in("#389176438"))
+    assert_equal("388596423", template.inat_code_in("388 596 423"))
+    assert_nil(template.inat_code_in("MO 664471"))
+    assert_nil(template.inat_code_in("someuser 10:29"))
   end
 end

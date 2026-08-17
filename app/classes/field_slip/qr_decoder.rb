@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require("open3")
+require("tempfile")
 
 class FieldSlip
   # Reads a field slip code out of a photo's QR code, using the zbar
@@ -18,6 +19,13 @@ class FieldSlip
     # observation-create request. Full size stays as the fallback for a
     # QR too small or soft to survive the downscale.
     SIZES = [:huge, :full_size].freeze
+
+    # The enhanced retry uses the huge copy only: stretching a
+    # full-size original costs seconds per image, and this scan runs
+    # inline in observation create on photos that mostly hold no QR
+    # at all. The 2x upscale is part of the same tradeoff -- the huge
+    # copy's ~3px modules are marginal after the downscale.
+    ENHANCE_SIZE = :huge
 
     FETCH_TIMEOUT = 30
 
@@ -64,7 +72,10 @@ class FieldSlip
     end
 
     # Every QR payload zbar finds, preferred size first, stopping at
-    # the first size that decodes anything.
+    # the first size that decodes anything. When every raw pass comes
+    # up empty, one more try with contrast enhancement -- a slip
+    # printed in light gray (the NAMA 2026 template) reads as blank
+    # paper to zbar's binarizer until the gray is stretched to black.
     def self.raw_codes(image)
       return [] unless available?
 
@@ -72,12 +83,14 @@ class FieldSlip
         codes = codes_at(image, size)
         return codes if codes.any?
       end
-      []
+      codes_at(image, ENHANCE_SIZE, enhance: true)
     end
 
-    def self.codes_at(image, size)
+    def self.codes_at(image, size, enhance: false)
       path = local_file(image, size)
-      path ? scan(path) : remote_codes(image, size)
+      return scan_variant(path, enhance) if path
+
+      remote_codes(image, size, enhance: enhance)
     end
 
     # The precedence-resolved URL stops pointing at the local copy the
@@ -100,7 +113,7 @@ class FieldSlip
     # fetch failure is a plain miss, not an error: in particular, an
     # archived original is gone from the image server deliberately and
     # is never pulled out of the archive for a scan.
-    def self.remote_codes(image, size)
+    def self.remote_codes(image, size, enhance: false)
       url = image.image_url(size).url
       return [] unless url.start_with?("http")
 
@@ -108,12 +121,43 @@ class FieldSlip
                                              timeout: FETCH_TIMEOUT,
                                              raw_response: true)
       begin
-        scan(response.file.path)
+        scan_variant(response.file.path, enhance)
       ensure
         response.file.close!
       end
     rescue RestClient::Exception, SocketError, SystemCallError
       []
+    end
+
+    def self.scan_variant(path, enhance)
+      enhance ? enhanced_scan(path) : scan(path)
+    end
+
+    # Grayscale + contrast stretch turns gray print into the black
+    # zbar needs; the resize is explained on ENHANCE_SIZE. Argv-form
+    # capture3, so nothing is shell-interpreted (same reasoning as
+    # Image::Dhash#grayscale_pixels).
+    def self.enhanced_scan(path)
+      return [] unless magick_binary
+
+      Tempfile.create(["qr_enhanced", ".png"]) do |tmp|
+        _out, _err, status = Open3.capture3(
+          magick_binary, path, "-colorspace", "Gray",
+          "-contrast-stretch", "2%x2%", "-resize", "200%", tmp.path
+        )
+        status.success? ? scan(tmp.path) : []
+      end
+    end
+
+    # IMv7 has `magick`; IMv6 only `convert` (see Image::Dhash).
+    # nil when neither is installed: no enhanced pass then.
+    def self.magick_binary
+      return @magick_binary if defined?(@magick_binary)
+
+      @magick_binary =
+        %w[magick convert].find do |bin|
+          system("which", bin, out: File::NULL, err: File::NULL)
+        end
     end
 
     # -Sdisable -Sqrcode.enable: QR only, so a stray barcode elsewhere
