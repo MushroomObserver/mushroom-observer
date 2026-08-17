@@ -13,7 +13,10 @@
   right: initial;
   // Icon is an SVG sized by .mo-icon, not a glyph Bootstrap can center via
   // line-height -- center the icon's own box instead. 15px is half the
-  // 30px padding-left below (icon is hidden-xs, so only sm+ matters).
+  // 30px padding-left below. Not every `.has-search` icon is hidden-xs
+  // (Observations::Identify::Form's isn't), so this left offset has to
+  // hold at every breakpoint -- the padding below can't drop back to 6px
+  // at xs without the icon overlapping typed text.
   top: 50%;
   left: 15px;
   transform: translate(-50%, -50%);
@@ -21,15 +24,8 @@
 }
 
 .has-search .form-control {
-  padding-right: 6px;
-  padding-left: 6px;
-}
-
-@media screen and (min-width: $screen-sm-min) {
-  .has-search .form-control {
-    padding-right: 12px;
-    padding-left: 30px;
-  }
+  padding-right: 12px;
+  padding-left: 30px;
 }
 
 .page-input .form-control-feedback {
