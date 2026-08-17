@@ -644,6 +644,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_17_193736) do
     t.index ["needs_naming"], name: "needs_naming_index"
     t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
     t.index ["reflected_at"], name: "index_observations_on_reflected_at"
+    t.index ["user_id", "created_at"], name: "index_observations_on_user_id_and_created_at"
   end
 
   create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
