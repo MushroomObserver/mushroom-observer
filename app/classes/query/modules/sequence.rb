@@ -9,12 +9,11 @@
 #  through the same results via the "next" and "prev" links on the show page,
 #  within the same query — as if you were paging through results in the index.
 #
-#  NOTE: The next and prev sequence operators always grab the entire set of
-#  result_ids.  No attempt is made to reduce the query.  NOTE: we might be
-#  able to if we can turn the ORDER clause into an upper/lower bound.
-#
-#  The first and last sequence operators ignore result_ids.  However, they are
-#  able to execute optimized queries that return only the first or last result.
+#  NOTE: prev_id/next_id/first_id/last_id try a bounded (keyset) query first
+#  -- see Query::Modules::Seek -- falling back to the full result_ids array
+#  (legacy_prev_id/legacy_next_id/legacy_first_id/legacy_last_id below) for
+#  order shapes Seek can't handle safely. The mutate-and-return-self forms
+#  (prev/next/first/last) still always grab the entire result_ids set.
 #
 #  == Instance Methods:
 #
@@ -132,7 +131,7 @@ module Query::Modules::Sequence
   end
 
   def first_id
-    result_ids&.first
+    seek_edge_id(:first) || legacy_first_id
   end
 
   # Move to previous place.
@@ -152,10 +151,7 @@ module Query::Modules::Sequence
   # Returns the previous id, or nil, without changing the query.
   # Must set current_id= first
   def prev_id
-    index = result_ids.index(current_id)
-    return nil unless index&.positive?
-
-    result_ids[index - 1]
+    seek_or(:prev) { legacy_prev_id }
   end
 
   # Move to next place.
@@ -172,13 +168,10 @@ module Query::Modules::Sequence
     new_self
   end
 
-  # Returns the previous id, or nil, without changing the query.
+  # Returns the next id, or nil, without changing the query.
   # Must set current_id= first
   def next_id
-    index = result_ids.index(current_id)
-    return nil unless index && index < result_ids.length - 1
-
-    result_ids[index + 1]
+    seek_or(:next) { legacy_next_id }
   end
 
   # Move to last place.
@@ -194,6 +187,26 @@ module Query::Modules::Sequence
   end
 
   def last_id
-    result_ids&.last
+    seek_edge_id(:last) || legacy_last_id
   end
+
+  private
+
+  def legacy_prev_id
+    index = result_ids.index(current_id)
+    return nil unless index&.positive?
+
+    result_ids[index - 1]
+  end
+
+  def legacy_next_id
+    index = result_ids.index(current_id)
+    return nil unless index && index < result_ids.length - 1
+
+    result_ids[index + 1]
+  end
+
+  def legacy_first_id = result_ids&.first
+
+  def legacy_last_id = result_ids&.last
 end

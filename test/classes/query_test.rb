@@ -481,6 +481,72 @@ class QueryTest < UnitTestCase
     assert_equal(@names[2].id, query.current_id)
   end
 
+  def test_next_and_prev_seek_dispatch_result_ids_calls_by_order_shape
+    simple_query = Query.lookup(:Name, order_by: :id)
+    simple_query.current = names(:fungi)
+    calls = count_result_ids_calls(simple_query) do
+      simple_query.prev_id
+      simple_query.next_id
+    end
+    assert_equal(0, calls,
+                 "Simple column order should seek without loading result_ids")
+
+    fallback_query = Query.lookup(
+      :Name,
+      id_in_set: [names(:fungi).id, names(:agaricus).id, names(:peltigera).id]
+    )
+    fallback_query.current = names(:agaricus)
+    calls = count_result_ids_calls(fallback_query) do
+      fallback_query.prev_id
+      fallback_query.next_id
+    end
+    assert(calls.positive?,
+           "id_in_set order should fall back to loading result_ids")
+  end
+
+  def test_next_and_prev_seek_compound_order
+    query = Query.lookup(:Observation, order_by: :name)
+    ids = Observation.order_by(:name).pluck(:id)
+    index = ids.length / 2
+
+    query.current_id = ids[index]
+    assert_equal(ids[index - 1], query.prev_id)
+    assert_equal(ids[index + 1], query.next_id)
+  end
+
+  def test_next_and_prev_seek_duplicate_tie
+    obs1 = observations(:agaricus_campestras_obs)
+    obs2 = observations(:agaricus_campestros_obs)
+    assert_equal(obs1.when, obs2.when,
+                 "fixtures must share a `when` to exercise the id tie-break")
+
+    ids = Observation.order_by(:date).pluck(:id)
+    index = ids.index(obs2.id)
+
+    query = Query.lookup(:Observation, order_by: :date)
+    query.current_id = obs2.id
+    assert_equal(ids[index - 1], query.prev_id)
+    assert_equal(ids[index + 1], query.next_id)
+  end
+
+  def test_next_and_prev_seek_ambiguous_join_falls_back
+    image = images(:query_first_image)
+    obs_a = observations(:two_img_obs)
+    obs_b = observations(:vouchered_imged_obs)
+    obs_a.update!(vote_cache: 1.5)
+    obs_b.update!(vote_cache: -1.0)
+
+    query = Query.lookup(:Image, order_by: :confidence)
+    query.current = image
+    cols = query.send(:scope).order_values
+
+    assert_nil(query.send(:current_sort_values, cols),
+               "an image on multiple observations with differing " \
+               "vote_cache should be treated as unseekable")
+    assert_equal(query.send(:legacy_prev_id), query.prev_id)
+    assert_equal(query.send(:legacy_next_id), query.next_id)
+  end
+
   ##############################################################################
   #
   #  :section: Test Subqueries
@@ -701,5 +767,17 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:User, id_in_set: [rolf.id, 1000, mary.id])
     query.sql
     assert_equal(2, query.results.length)
+  end
+
+  private
+
+  def count_result_ids_calls(query)
+    count = 0
+    query.define_singleton_method(:result_ids) do
+      count += 1
+      super()
+    end
+    yield
+    count
   end
 end
