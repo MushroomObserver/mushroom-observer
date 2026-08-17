@@ -45,8 +45,11 @@ class TransferImageDhashes
     @apply = opts[:apply]
     @limit = opts[:limit]
     @report_interval = opts[:report_interval] || 10
-    abort("Give exactly one of --export FILE or --apply FILE") unless
-      @export.nil? ^ @apply.nil?
+    unless @export.nil? ^ @apply.nil?
+      raise(ArgumentError.new(
+              "Give exactly one of --export FILE or --apply FILE"
+            ))
+    end
     @stats = Hash.new(0)
     @started_at = Time.current
     @last_report_at = @started_at
@@ -142,21 +145,27 @@ class TransferImageDhashes
   end
 end
 
-options = {}
-OptionParser.new do |opts|
-  opts.on("--export FILE", "Write id,dhash CSV of local hashes") do |f|
-    options[:export] = f
-  end
-  opts.on("--apply FILE", "Apply id,dhash CSV (fill-NULL-only)") do |f|
-    options[:apply] = f
-  end
-  opts.on("--limit N", Integer, "Apply only the first N rows") do |n|
-    options[:limit] = n
-  end
-  opts.on("--report-interval N", Integer,
-          "Seconds between progress reports (default 10)") do |n|
-    options[:report_interval] = n
-  end
-end.parse!
+if $PROGRAM_NAME == __FILE__
+  options = {}
+  OptionParser.new do |opts|
+    opts.on("--export FILE", "Write id,dhash CSV of local hashes") do |f|
+      options[:export] = f
+    end
+    opts.on("--apply FILE", "Apply id,dhash CSV (fill-NULL-only)") do |f|
+      options[:apply] = f
+    end
+    opts.on("--limit N", Integer, "Apply only the first N rows") do |n|
+      options[:limit] = n
+    end
+    opts.on("--report-interval N", Integer,
+            "Seconds between progress reports (default 10)") do |n|
+      options[:report_interval] = n
+    end
+  end.parse!
 
-TransferImageDhashes.new(options).run
+  begin
+    TransferImageDhashes.new(options).run
+  rescue ArgumentError => e
+    abort(e.message)
+  end
+end

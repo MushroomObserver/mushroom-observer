@@ -182,9 +182,9 @@ class TransferMycoportalExportLinksTest < UnitTestCase
   end
 
   def test_run_requires_exactly_one_of_export_or_apply
-    assert_raises(SystemExit) { TransferMycoportalExportLinks.new({}).run }
-    assert_raises(SystemExit) do
-      TransferMycoportalExportLinks.new(export: "e.csv", apply: "a.csv").run
+    assert_raises(ArgumentError) { TransferMycoportalExportLinks.new({}) }
+    assert_raises(ArgumentError) do
+      TransferMycoportalExportLinks.new(export: "e.csv", apply: "a.csv")
     end
   end
 
