@@ -602,8 +602,72 @@ class QueryTest < UnitTestCase
                    "a stale cache entry is served as-is until refreshed")
 
       fresh = query.send(:refresh_window)
-      assert_equal(ids[9], fresh[0][fresh[1] - 1],
+      assert_equal(ids[9], fresh[:ids][fresh[:offset] - 1],
                    "a fresh recompute reflects live data again")
+    end
+  end
+
+  # need_letters reorders result_ids at paginate time in a way this
+  # module doesn't account for -- prev/next/first/last must bypass the
+  # window cache entirely for these queries, the same way
+  # Query::Modules::Seek#seek_or bails on them. Regression test: the
+  # window cache used to have no need_letters guard at all, so a
+  # need_letters query's ids -- possibly reordered by letter -- could
+  # get cached under a key shared with non-need_letters instances of
+  # the same underlying query.
+  def test_next_and_prev_window_cache_bypasses_need_letters
+    with_real_cache do
+      query = Query.lookup_and_save(:Name, order_by: :id)
+      query.need_letters = true
+      ids = query.send(:result_ids)
+      query.current_id = ids[10]
+
+      assert_equal(ids[9], query.prev_id)
+      query.current_id = ids[10]
+      assert_equal(ids[11], query.next_id)
+      assert_equal(ids.first, query.first_id)
+      assert_equal(ids.last, query.last_id)
+
+      assert_nil(Rails.cache.read(query.send(:window_cache_key)),
+                 "need_letters queries should never populate the " \
+                 "window cache")
+    end
+  end
+
+  # A caller that already checked result_ids.length (e.g. to decide
+  # whether a search matched exactly one thing) shouldn't pay for a
+  # second query when it then asks for first_id/last_id.
+  def test_next_and_prev_window_cache_first_and_last_reuse_memoized_result_ids
+    with_real_cache do
+      query = Query.lookup(:Name, order_by: :id)
+      ids = query.result_ids # memoizes @result_ids, as single_result? does
+
+      calls = 0
+      query.define_singleton_method(:scope) do
+        calls += 1
+        super()
+      end
+
+      assert_equal(ids.first, query.first_id)
+      assert_equal(ids.last, query.last_id)
+      assert_equal(0, calls,
+                   "first_id/last_id should reuse already-memoized " \
+                   "result_ids instead of querying again")
+    end
+  end
+
+  # A persistent cache (Solid Cache) can hand back an entry from a
+  # pre-deploy version of this code whose shape no longer matches --
+  # must be treated as a miss, not raise.
+  def test_next_and_prev_window_cache_ignores_malformed_cache_entry
+    with_real_cache do
+      query = Query.lookup_and_save(:Name, order_by: :id)
+      ids = query.send(:result_ids)
+      query.current_id = ids[10]
+
+      Rails.cache.write(query.send(:window_cache_key), "not a window hash")
+
+      assert_equal(ids[9], query.prev_id)
     end
   end
 

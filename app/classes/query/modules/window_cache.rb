@@ -5,10 +5,10 @@
 #  :module: WindowCache
 #
 #  Cached-window neighbor lookup for `Query::Modules::Sequence`, used as
-#  an alternative to the bounded-query rewrite (`Query::Modules::Seek`,
-#  #5115/#5117) -- keeps prev/next/first/last off the full `result_ids`
-#  array by caching a window of ids around the current position, keyed
-#  by `QueryRecord#id`. See #5101.
+#  an alternative to the bounded-query rewrite (`Query::Modules::Seek`)
+#  -- keeps prev/next/first/last off the full `result_ids` array by
+#  caching a window of ids around the current position, keyed by
+#  `QueryRecord#id`.
 #
 ##############################################################################
 
@@ -47,8 +47,8 @@ module Query::Modules::WindowCache
       at_start: lo.zero?, at_end: hi == ids.length - 1 }
   end
 
-  # [ids, offset, at_start, at_end] positioned at current_id, from
-  # cache or a fresh compute -- or nil if current_id isn't in the
+  # `{ids:, offset:, at_start:, at_end:}` positioned at current_id,
+  # from cache or a fresh compute -- or nil if current_id isn't in the
   # result set at all.
   def window_position
     cached_window_position || refresh_window
@@ -58,12 +58,19 @@ module Query::Modules::WindowCache
     return nil unless (key = window_cache_key)
 
     window = Rails.cache.read(key)
-    return nil unless window
+    return nil unless valid_window?(window)
 
     offset = window[:ids].index(current_id)
     return nil unless offset
 
-    [window[:ids], offset, window[:at_start], window[:at_end]]
+    window.merge(offset:)
+  end
+
+  # A persistent, DB-backed cache (Solid Cache) can hand back an entry
+  # written by a pre-deploy version of this code if its shape ever
+  # changes -- treat anything unexpected as a miss rather than raise.
+  def valid_window?(window)
+    window.is_a?(Hash) && window[:ids].is_a?(Array)
   end
 
   def refresh_window
@@ -72,52 +79,80 @@ module Query::Modules::WindowCache
 
     Rails.cache.write(window_cache_key, window, expires_in: WINDOW_TTL) if
       window_cache_key
-    [window[:ids], window[:offset], window[:at_start], window[:at_end]]
+    window
   end
 
   # Serves prev/next from a cached or freshly-computed window.
   # Refetches when the lookup would run past a cached edge that isn't
   # the true edge of the result set -- distinct from being at the true
   # edge, which is a legitimate nil (no more results).
+  #
+  # Letter-paginated queries (`need_letters`) reorder at paginate time
+  # in a way this module doesn't account for, and aren't cached --
+  # same reason `Query::Modules::Seek#seek_or` bails on them.
   def windowed_id(dir)
-    ids, offset, at_start, at_end = window_position
-    return nil unless ids
+    return legacy_windowed_id(dir) if need_letters
 
-    return boundary_id(ids, offset, at_start, at_end, dir) unless
-      at_window_edge?(ids, offset, dir)
+    window = window_position
+    return nil unless window
 
-    if true_edge?(offset, at_start, at_end, ids, dir)
+    return boundary_id(window, dir) unless at_window_edge?(window, dir)
+
+    if true_edge?(window, dir)
       nil
     else
-      ids, offset, at_start, at_end = refresh_window
-      return nil unless ids
-
-      boundary_id(ids, offset, at_start, at_end, dir)
+      window = refresh_window
+      window ? boundary_id(window, dir) : nil
     end
   end
 
-  def at_window_edge?(ids, offset, dir)
-    dir == :prev ? offset.zero? : offset == ids.length - 1
+  def legacy_windowed_id(dir)
+    ids = result_ids
+    index = ids.index(current_id)
+    return nil unless index
+
+    if dir == :prev
+      ids[index - 1] if index.positive?
+    elsif index < ids.length - 1
+      ids[index + 1]
+    end
   end
 
-  def true_edge?(offset, at_start, at_end, ids, dir)
-    return offset.zero? && at_start if dir == :prev
-
-    offset == ids.length - 1 && at_end
+  def at_window_edge?(window, dir)
+    dir == :prev ? window[:offset].zero? : last_offset?(window)
   end
 
-  def boundary_id(ids, offset, at_start, at_end, dir)
-    return nil if true_edge?(offset, at_start, at_end, ids, dir)
+  def true_edge?(window, dir)
+    return window[:offset].zero? && window[:at_start] if dir == :prev
 
-    dir == :prev ? ids[offset - 1] : ids[offset + 1]
+    last_offset?(window) && window[:at_end]
+  end
+
+  def last_offset?(window)
+    window[:offset] == window[:ids].length - 1
+  end
+
+  def boundary_id(window, dir)
+    return nil if true_edge?(window, dir)
+
+    delta = dir == :prev ? -1 : 1
+    window[:ids][window[:offset] + delta]
   end
 
   # No caching needed -- a direct LIMIT-1 query is already cheap and
   # order-shape-agnostic (works for aggregates/CASE/FIND_IN_SET too).
+  # Falls back to result_ids for need_letters (see windowed_id), or
+  # when it's already memoized -- reuses a caller's existing result
+  # (e.g. search_controller's single-result redirect) instead of
+  # firing another query.
   def edge_id(dir)
-    return nil if need_letters
+    return legacy_edge_id(dir) if need_letters || defined?(@result_ids)
 
     rel = dir == :first ? scope : scope.reverse_order
     rel.pick(model.arel_table[:id])
+  end
+
+  def legacy_edge_id(dir)
+    dir == :first ? result_ids&.first : result_ids&.last
   end
 end
