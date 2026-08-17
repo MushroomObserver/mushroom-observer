@@ -189,13 +189,28 @@ module Searchable
     end
 
     def parse_date_ranges
+      @unparsed_dates = []
       [:date, :created_at, :updated_at].each { |field| parse_date_range(field) }
     end
 
+    # A date the parser doesn't understand must fail the search, not
+    # silently broaden it -- dropping the nil here used to run the
+    # query with the date filter quietly gone.
     def parse_date_range(field)
       return if (date = @query_params[field]).blank?
 
-      @query_params[field] = ::DateRangeParser.new(date).range
+      parsed = ::DateRangeParser.new(date).range
+      @unparsed_dates << date if parsed.nil?
+      @query_params[field] = parsed
+    end
+
+    def dates_parseable?
+      return true if @unparsed_dates.blank?
+
+      @unparsed_dates.each do |value|
+        flash_error(:search_term_date_unparseable.t(value: value))
+      end
+      false
     end
 
     # Note that this @search query instance is not the one that gets saved and
@@ -203,6 +218,8 @@ module Searchable
     # NOTE: We can't call @query_params.compact_blank, because we need to
     # preserve `false` values.
     def validate_search_instance?
+      return false unless dates_parseable?
+
       @query_params.reject! { |_k, v| v == "" }
       @search = Query.create_query(query_model, @query_params)
       return true unless @search.invalid?
