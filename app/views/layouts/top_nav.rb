@@ -277,9 +277,7 @@ class Views::Layouts::TopNav < Views::Base
     )
   end
 
-  # Toggles the dismissed site banner back open. Tablet/desktop only
-  # (hidden-xs) -- the mobile nav is already tight on space, and the
-  # banner itself is reachable by scrolling. Starts `d-none`; the
+  # Toggles the dismissed site banner back open. Starts `d-none`; the
   # `banner` Stimulus controller (see `Views::Layouts::App::Banners`
   # and `Views::Layouts::Application#main_container_data`) flips it
   # to `d-block` only when the banner is currently dismissed.
@@ -288,8 +286,7 @@ class Views::Layouts::TopNav < Views::Base
 
     Button(
       variant: :success, size: :sm,
-      class: "mr-0 ml-0 ml-sm-2 top_nav_button top_nav_icon_button " \
-             "d-none hidden-xs",
+      class: "mr-0 ml-0 ml-sm-2 top_nav_button top_nav_icon_button d-none",
       data: { banner_target: "showButton" }
     ) do
       Icon(type: :interests, title: :banner_show_tooltip.t,
