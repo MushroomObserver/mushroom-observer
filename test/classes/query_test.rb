@@ -481,6 +481,132 @@ class QueryTest < UnitTestCase
     assert_equal(@names[2].id, query.current_id)
   end
 
+  # Test env's cache_store is :null_store -- every fetch/read/write is a
+  # no-op there, so tests exercising real caching swap in a MemoryStore.
+  # Established pattern -- see
+  # test/controllers/observations/inat_resyncs_controller_test.rb.
+  def with_real_cache(&block)
+    Rails.stub(:cache, ActiveSupport::Cache::MemoryStore.new, &block)
+  end
+
+  def test_next_and_prev_window_cache_miss
+    with_real_cache do
+      query = Query.lookup_and_save(:Name, order_by: :id)
+      ids = query.send(:result_ids)
+      query.current_id = ids[10]
+
+      assert_equal(ids[9], query.prev_id)
+      query.current_id = ids[10]
+      assert_equal(ids[11], query.next_id)
+    end
+  end
+
+  def test_next_and_prev_window_cache_hit_skips_result_ids
+    with_real_cache do
+      query = Query.lookup_and_save(:Name, order_by: :id)
+      ids = query.send(:result_ids)
+      query.current_id = ids[10]
+      query.prev_id # populates the cache
+
+      calls = 0
+      query.define_singleton_method(:result_ids) do
+        calls += 1
+        super()
+      end
+      assert_equal(ids[11], query.next_id)
+      assert_equal(0, calls,
+                   "a nearby lookup already covered by the cached " \
+                   "window should not recompute result_ids")
+    end
+  end
+
+  # A cached window's edges aren't always the true edges of the full
+  # result set -- walking past a cached-but-not-true edge must refetch
+  # (recentering the window) rather than incorrectly reporting "no
+  # more." Walking past the true edge must return nil without looping.
+  def test_next_and_prev_window_edge_refetch_and_true_boundary
+    original_radius = Query::Modules::WindowCache::WINDOW_RADIUS
+    Query::Modules::WindowCache.send(:remove_const, :WINDOW_RADIUS)
+    Query::Modules::WindowCache.const_set(:WINDOW_RADIUS, 2)
+
+    with_real_cache do
+      query = Query.lookup_and_save(:Name, order_by: :id)
+      ids = query.send(:result_ids)
+      query.current_id = ids[10]
+
+      calls = 0
+      query.define_singleton_method(:result_ids) do
+        calls += 1
+        super()
+      end
+
+      query.current_id = query.prev_id # -> ids[9], cache hit so far
+      assert_equal(ids[9], query.current_id)
+      query.current_id = query.prev_id # -> ids[8], still within window
+      assert_equal(ids[8], query.current_id)
+      assert_equal(1, calls, "still inside the first cached window")
+
+      # ids[8] sits at the cached window's left edge (radius 2 from
+      # ids[10]) but not the true start -- must refetch, not return nil.
+      prev = query.prev_id
+      assert_equal(ids[7], prev)
+      assert_equal(2, calls, "walking past a non-true edge refetches")
+
+      query.current_id = ids[0]
+      assert_nil(query.prev_id, "the true start has no earlier row")
+    end
+  ensure
+    Query::Modules::WindowCache.send(:remove_const, :WINDOW_RADIUS)
+    Query::Modules::WindowCache.const_set(:WINDOW_RADIUS, original_radius)
+  end
+
+  def test_next_and_prev_first_and_last_never_use_the_window_cache
+    with_real_cache do
+      query = Query.lookup_and_save(:Image, order_by: :name)
+      ids = Image.order_by(:name).pluck(:id)
+
+      calls = 0
+      query.define_singleton_method(:result_ids) do
+        calls += 1
+        super()
+      end
+
+      assert_equal(ids.first, query.first_id)
+      assert_equal(ids.last, query.last_id)
+      assert_equal(0, calls,
+                   "first_id/last_id use a direct LIMIT-1 query, " \
+                   "not result_ids")
+      assert_nil(Rails.cache.read(query.send(:window_cache_key)),
+                 "first_id/last_id should never populate the window cache")
+    end
+  end
+
+  # The cache can legitimately disagree with the live DB until the
+  # next refetch -- that's the documented tradeoff of this design, not
+  # a bug. A stale cache entry gets served as-is; only a fresh
+  # `refresh_window` call reflects current data.
+  def test_next_and_prev_window_cache_can_serve_stale_data
+    with_real_cache do
+      query = Query.lookup_and_save(:Name, order_by: :id)
+      ids = query.send(:result_ids)
+      query.current_id = ids[10]
+      query.prev_id # populates the cache with the real ids[9] at slot 9
+
+      key = query.send(:window_cache_key)
+      cached = Rails.cache.read(key)
+      tampered_ids = cached[:ids].dup
+      tampered_ids[9] = 999_999_999
+      Rails.cache.write(key, cached.merge(ids: tampered_ids))
+
+      assert_equal(999_999_999, query.prev_id,
+                   "a stale cache entry is served as-is until refreshed")
+
+      fresh = query.send(:refresh_window)
+      assert_equal(ids[9], fresh[0][fresh[1] - 1],
+                   "a fresh recompute reflects live data again")
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Test Subqueries
