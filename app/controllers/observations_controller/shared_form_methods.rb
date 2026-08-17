@@ -154,9 +154,13 @@ module ObservationsController::SharedFormMethods
     @accession_number = herb_params[:accession_number]
   end
 
+  # `user_group: :users` (not just `:user_group`) -- the projects form's
+  # per-checkbox `Project#user_can_change_membership?` reads `member?`,
+  # which is `user_group.users.member?(user)`. Without the deeper
+  # preload that's a fresh query per checkbox (#5103).
   def init_project_vars
     @projects = @user.projects_member(order: :title,
-                                      include: :user_group)
+                                      include: { user_group: :users })
   end
 
   # Failure-reload path: capture the user's just-submitted project_ids
