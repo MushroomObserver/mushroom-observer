@@ -3,15 +3,20 @@
 // .has-feedback { position: relative; }
 // --------------------------------------------------
 
-.has-search .form-control-feedback {
-  // `.mo-icon`'s own `position: relative` (below, for icon+text
-  // baseline alignment) ties with Bootstrap's `.form-control-feedback
-  // { position: absolute }` on specificity, so source order decides
-  // -- and `.mo-icon` loses that tie since it's declared later. Redeclare
-  // here, where the selector's higher specificity wins reliably.
+// Overrides Bootstrap's `.navbar-form .has-feedback .form-control-feedback`
+// (same selector -- wins the specificity tie by loading after Bootstrap).
+// Also forces position: absolute, since .mo-icon's own position: relative
+// (below) would otherwise win that tie against the plain
+// .form-control-feedback rule.
+.navbar-form .has-feedback .form-control-feedback {
   position: absolute;
   right: initial;
-  left: 0;
+  // Icon is an SVG sized by .mo-icon, not a glyph Bootstrap can center via
+  // line-height -- center the icon's own box instead. 15px is half the
+  // 30px padding-left below (icon is hidden-xs, so only sm+ matters).
+  top: 50%;
+  left: 15px;
+  transform: translate(-50%, -50%);
   background-color: transparent;
 }
 
