@@ -182,9 +182,27 @@ class TransferMycoportalExportLinksTest < UnitTestCase
   end
 
   def test_run_requires_exactly_one_of_export_or_apply
-    assert_raises(SystemExit) { TransferMycoportalExportLinks.new({}).run }
-    assert_raises(SystemExit) do
-      TransferMycoportalExportLinks.new(export: "e.csv", apply: "a.csv").run
+    assert_raises(ArgumentError) { TransferMycoportalExportLinks.new({}) }
+    assert_raises(ArgumentError) do
+      TransferMycoportalExportLinks.new(export: "e.csv", apply: "a.csv")
+    end
+  end
+
+  def test_run_cli_success
+    image = images(:in_situ_image)
+    make_link(target: image, external_id: "1")
+    path = temp_csv_path("export")
+
+    capture_io { TransferMycoportalExportLinks.run_cli(["--export", path]) }
+
+    rows = CSV.read(path, headers: true)
+    assert_not_nil(rows.find { |r| r["target_type"] == "Image" },
+                   "Expected run_cli(--export) to write the export CSV")
+  end
+
+  def test_run_cli_aborts_on_invalid_args
+    capture_io do
+      assert_raises(SystemExit) { TransferMycoportalExportLinks.run_cli([]) }
     end
   end
 

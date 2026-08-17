@@ -94,6 +94,10 @@ module MushroomObserver
     # Just starting to use Rails caching on 7.1, so we're current
     config.active_support.cache_format_version = 7.1
 
+    # Opt in to the Rails 8.0 #to_time behavior now (preserves the
+    # receiver's timezone offset instead of converting to system local).
+    config.active_support.to_time_preserves_timezone = true
+
     # Set up memcached as the cache store everywhere
     # config.cache_store = :mem_cache_store
     config.cache_store = :solid_cache_store
