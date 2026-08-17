@@ -572,6 +572,71 @@ class QueryTest < UnitTestCase
                  "transaction, not bare autocommit")
   end
 
+  # MySQL sorts NULL as the smallest possible value regardless of
+  # ASC/DESC -- a plain `col > NULL`/`col < NULL` comparison is always
+  # unknown in SQL, so a naive seek predicate can't cross the boundary
+  # between NULL and non-NULL rows in either direction.
+  def test_next_and_prev_seek_null_sort_value_boundary
+    null_image = images(:in_situ_image)
+    others = Image.where.not(id: null_image.id)
+    others.each_with_index { |img, i| img.update!(vote_cache: i + 1.0) }
+    null_image.update!(vote_cache: nil)
+
+    ids = Image.order_by(:image_quality).pluck(:id)
+    prior_id = ids[ids.index(null_image.id) - 1]
+
+    # prev: from NULL, transitioning into non-NULL territory.
+    from_null = Query.lookup(:Image, order_by: :image_quality)
+    from_null.current_id = null_image.id
+    assert_equal(prior_id, from_null.prev_id)
+
+    # next: from non-NULL, transitioning into NULL territory.
+    from_non_null = Query.lookup(:Image, order_by: :image_quality)
+    from_non_null.current_id = prior_id
+    assert_equal(null_image.id, from_non_null.next_id)
+  end
+
+  # ShowPrevNextNav renders prev_id then next_id back-to-back for the
+  # same current_id -- the current row's own sort values shouldn't be
+  # fetched twice for that.
+  def test_next_and_prev_seek_memoizes_current_sort_values
+    query = Query.lookup(:Name, order_by: :id)
+    query.current = names(:fungi)
+
+    calls = 0
+    query.define_singleton_method(:fetch_current_sort_values) do |*args|
+      calls += 1
+      super(*args)
+    end
+
+    query.prev_id
+    query.next_id
+
+    assert_equal(1, calls,
+                 "current row's sort values should be fetched once, " \
+                 "not once per direction")
+  end
+
+  # A caller that already checked result_ids.length (e.g. to decide
+  # whether a search matched exactly one thing) shouldn't pay for a
+  # second query when it then asks for first_id/last_id.
+  def test_next_and_prev_seek_first_and_last_reuse_memoized_result_ids
+    query = Query.lookup(:Name, order_by: :id)
+    ids = query.result_ids # memoizes @result_ids, as single_result? does
+
+    calls = 0
+    query.define_singleton_method(:scope) do
+      calls += 1
+      super()
+    end
+
+    assert_equal(ids.first, query.first_id)
+    assert_equal(ids.last, query.last_id)
+    assert_equal(0, calls,
+                 "first_id/last_id should reuse already-memoized " \
+                 "result_ids instead of querying again")
+  end
+
   ##############################################################################
   #
   #  :section: Test Subqueries
