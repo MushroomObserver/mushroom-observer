@@ -74,8 +74,8 @@ module Views::Controllers::Projects::Aliases
 
     private
 
-    def render_form(model:, local: true)
-      render(Form.new(model, user: @user, local: local))
+    def render_form(model:, turbo: false)
+      render(Form.new(model, user: @user, turbo: turbo))
     end
   end
 end

@@ -10,7 +10,8 @@ module Views::Controllers::RssLogs
 
     def view_template
       form(action: activity_logs_path, method: :get,
-           class: "filter-form", id: "log_filter_form") do
+           class: "filter-form", id: "log_filter_form",
+           data: { turbo: "false" }) do
         render_hidden_fields
         render_filter_buttons
       end

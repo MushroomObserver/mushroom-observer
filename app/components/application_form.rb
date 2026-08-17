@@ -155,7 +155,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   # below and in the gem).
   prop :model, _Interface(:model_name, :persisted?), :positional
   prop :id, _Nilable(String), default: nil
-  prop :local, _Boolean, default: true
+  prop :turbo, _Boolean, default: false
+  # Set only via Components::Modal::TurboForm -- see
+  # `modal_hidden_field` and ModalUpdater#modal_submission?.
+  prop :modal, _Boolean, default: false
   # Catch-all for Superform's own `action:`/`method:` kwargs plus
   # arbitrary `<form>` HTML attributes -- extracted in
   # `after_initialize`. `method:` can't be its own named prop; it
@@ -217,11 +220,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   end
 
   def around_template
-    # Set turbo data attribute for turbo_stream forms
-    if @turbo_stream
-      @attributes[:data] ||= {}
-      @attributes[:data][:turbo] = "true"
-    end
+    # Always set data-turbo explicitly, independent of the global
+    # Turbo.config.forms.mode default.
+    @attributes[:data] ||= {}
+    @attributes[:data][:turbo] = @turbo ? "true" : "false"
     add_form_feedback_controller
     super
   end
@@ -233,9 +235,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # `_method` in the body, then strips them all, so a duplicate turns
   # a Turbo PATCH submission into a bare POST.
   def _method_field
-    return if _method_field_value.to_s.casecmp("post").zero?
-
-    super
+    super unless _method_field_value.to_s.casecmp("post").zero?
+    modal_hidden_field
   end
 
   # Every non-Turbo form disables its submit buttons once submitted
@@ -246,6 +247,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     @attributes[:data] ||= {}
     @attributes[:data][:controller] =
       [@attributes[:data][:controller], "form-feedback"].compact.join(" ")
+  end
+
+  # Called automatically from `_method_field` on every form. Round-trips
+  # `@modal` through the submission -- see ModalUpdater#modal_submission?.
+  def modal_hidden_field
+    hidden_field(:modal, value: "true") if @modal
   end
 
   # Form subclasses can override form_action to derive action URLs from model
@@ -286,7 +293,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # method is now permanently unreachable via `super` from any
   # prop-declaring subclass.
   def after_initialize
-    @turbo_stream = !@local
     @action = @attributes.delete(:action)
     @method = @attributes.delete(:method)
     # Auto-derive a form id. Prefer the form class name when it's

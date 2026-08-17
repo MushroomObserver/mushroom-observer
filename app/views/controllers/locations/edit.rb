@@ -18,7 +18,7 @@ module Views::Controllers::Locations
                @location,
                display_name: @display_name,
                dubious_where_reasons: @dubious_where_reasons,
-               local: false
+               turbo: true
              ))
     end
   end

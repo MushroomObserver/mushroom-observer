@@ -11,6 +11,9 @@ module Views::Controllers::RssLogs
       assert_html(html, "form[action='/activity_logs']")
       assert_html(html, "form#log_filter_form")
       assert_html(html, "form.filter-form")
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_renders_show_label

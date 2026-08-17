@@ -12,7 +12,7 @@ module Views::Controllers::Admin::Donations
       add_page_title(:review_donations_title.l)
       add_context_nav(::Tab::Admin::DonationsFormEdit.new)
       render(ReviewForm.new(::FormObject::ReviewDonations.new,
-                            donations: @donations, local: false))
+                            donations: @donations, turbo: true))
     end
   end
 end

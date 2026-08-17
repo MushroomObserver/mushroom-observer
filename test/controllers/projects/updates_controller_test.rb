@@ -16,6 +16,9 @@ module Projects
       get(:index, params: { project_id: @project.id })
 
       assert_response(:success)
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_select("form.show-excluded-form[data-turbo='false']")
     end
 
     def test_index_with_pagination

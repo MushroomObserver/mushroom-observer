@@ -22,7 +22,7 @@ module Views::Controllers::Comments
       # No in-tree caller; kept in case external scrapers /
       # integration tools look for them.
       comment { "[form:comment]" }
-      render(Form.new(@comment, local: false))
+      render(Form.new(@comment, turbo: true))
       comment { "[eoform:comment]" }
 
       render_object_panel

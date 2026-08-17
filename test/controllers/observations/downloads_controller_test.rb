@@ -13,6 +13,8 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
+      # Permanently exempt -- see .claude/rules/turbo_submit_forms.md.
+      assert_select("form[data-turbo='false']")
       assert_select(
         "input[type=radio][id=download_format_mycoportal]", false,
         "Missing a MyCoPortal radio button"

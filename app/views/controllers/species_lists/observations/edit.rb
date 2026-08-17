@@ -18,7 +18,7 @@ module Views::Controllers::SpeciesLists::Observations
       render(Form.new(
                prefill_value: @prefill_value,
                num_results: @num_results,
-               local: false
+               turbo: true
              ))
     end
   end

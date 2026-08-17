@@ -19,7 +19,7 @@ module Views::Controllers::Occurrences
                source_obs: @source_obs,
                recent_observations: @recent_observations,
                user: @user,
-               local: false
+               turbo: true
              ))
       render_project_modal if @project_confirm[:gaps]&.any?
     end
@@ -33,7 +33,7 @@ module Views::Controllers::Occurrences
             auto_open: true,
             user: @user) do |m|
         m.with_form_content do
-          render(Projects::Form.new(**@project_confirm, local: false))
+          render(Projects::Form.new(**@project_confirm, turbo: true))
         end
       end
     end

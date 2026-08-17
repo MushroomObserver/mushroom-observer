@@ -15,7 +15,7 @@ module Views::Controllers::Names
 
       render(Form.new(
                @name, user: @user, name_string: @name_string,
-                      approved_rank: @approved_rank, local: false
+                      approved_rank: @approved_rank, turbo: true
              ))
     end
   end

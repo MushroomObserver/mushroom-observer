@@ -32,7 +32,7 @@ module Views::Controllers::HerbariumRecords
         plain(" ##{@observation.id}")
       end
       render(Form.new(@herbarium_record, observation: @observation,
-                                         local: false))
+                                         turbo: true))
     end
 
     def render_observation_box

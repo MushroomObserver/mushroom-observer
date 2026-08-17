@@ -110,7 +110,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
     get(:edit, params: { id: @visual_group.id })
 
     # One filter form on the page, with form-inline shell.
-    assert_select("form#visual_group_filters_form.form-inline", count: 1) do
+    assert_select(
+      "form#visual_group_filters_form.form-inline[data-turbo='false']",
+      count: 1
+    ) do
       # Hidden status field carries the current status when the user
       # submits via the text-input's submit button.
       assert_select(

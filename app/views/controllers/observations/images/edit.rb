@@ -34,7 +34,7 @@ module Views::Controllers::Observations::Images
                licenses: @licenses,
                projects: @projects,
                submitted_project_ids: @submitted_project_ids,
-               local: false
+               turbo: true
              ))
     end
 

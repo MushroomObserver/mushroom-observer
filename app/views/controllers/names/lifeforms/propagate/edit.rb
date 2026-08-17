@@ -15,7 +15,7 @@ class Views::Controllers::Names::Lifeforms::Propagate::Edit <
     container_class(:text_image)
 
     render(Views::Controllers::Names::Lifeforms::Propagate::Form.new(
-             FormObject::PropagateLifeform.new, name: @name, local: false
+             FormObject::PropagateLifeform.new, name: @name, turbo: true
            ))
   end
 end

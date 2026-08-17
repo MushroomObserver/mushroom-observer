@@ -28,7 +28,7 @@ module Views::Controllers::Info
                @textile_sandbox,
                show_result: @show_result,
                submit_type: @submit_type,
-               local: false
+               turbo: true
              ))
     end
   end

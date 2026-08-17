@@ -17,7 +17,7 @@ class Views::Controllers::Names::Synonyms::Approve::New < Views::FullPageBase
     render(Views::Controllers::Names::Synonyms::Approve::Form.new(
              FormObject::ApproveSynonym.new(deprecate_others: true),
              name: @name, approved_names: @approved_names, user: current_user,
-             local: false
+             turbo: true
            ))
   end
 end

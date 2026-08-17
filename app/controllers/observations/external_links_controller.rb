@@ -146,9 +146,10 @@ module Observations
       redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
       flash_object_errors(@external_link)
-      respond_to do |format|
-        format.turbo_stream { reload_external_link_modal_form_and_flash }
-        format.html { redirect_to(redirect_params) and return true }
+      if modal_submission?(:external_link)
+        reload_external_link_modal_form_and_flash
+      else
+        redirect_to(redirect_params)
       end
     end
 
@@ -162,11 +163,10 @@ module Observations
                   :runtime_destroyed_id.t(type: :external_link, value: @id)
                 end
       flash_notice(message)
-      respond_to do |format|
-        format.turbo_stream { render_external_links_section_update }
-        format.html do
-          redirect_to(permanent_observation_path(@observation))
-        end
+      if modal_submission?(:external_link)
+        render_external_links_section_update
+      else
+        redirect_to(permanent_observation_path(@observation))
       end
     end
 
@@ -199,13 +199,10 @@ module Observations
       # tests check_external_link_permission! directly without sending a request
       return unless @_response
 
-      respond_to do |format|
-        # renders the flash in the modal, but not sure it's necessary
-        # to have a response here. are they getting sent back?
-        format.turbo_stream { render_modal_flash_update(modal_identifier) }
-        format.html do
-          redirect_to(permanent_observation_path(@observation)) and return
-        end
+      if modal_submission?(:external_link)
+        render_modal_flash_update(modal_identifier)
+      else
+        redirect_to(permanent_observation_path(@observation))
       end
     end
 

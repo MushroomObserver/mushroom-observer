@@ -18,7 +18,7 @@ class Views::Controllers::Names::Trackers::New < Views::FullPageBase
 
     render(Views::Controllers::Names::Trackers::Form.new(
              NameTracker.new(name: @name), note_template: @note_template,
-                                           local: false
+                                           turbo: true
            ))
   end
 

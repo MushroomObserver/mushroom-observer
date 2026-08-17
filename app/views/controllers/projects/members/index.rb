@@ -16,7 +16,7 @@ module Views::Controllers::Projects::Members
                project: @project, current_subtab: "members"
              ))
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project, local: false
+               @project_member, project: @project, turbo: true
              ))
       render_table
     end

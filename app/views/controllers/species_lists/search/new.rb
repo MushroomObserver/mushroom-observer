@@ -7,7 +7,7 @@ module Views::Controllers::SpeciesLists
     class New < Views::FullPageBase
       prop :search, ::Query
       prop :controller, ::SpeciesLists::SearchController
-      prop :local, _Nilable(_Boolean), default: nil
+      prop :context, _Union(:page, :dropdown), default: :page
 
       def view_template
         add_new_title(:search_object, :species_lists)
@@ -17,7 +17,7 @@ module Views::Controllers::SpeciesLists
           render(Components::Form::Search.new(
                    @search,
                    search_controller: @controller,
-                   local: @local != false
+                   context: @context
                  ))
         end
       end

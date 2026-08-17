@@ -27,7 +27,7 @@ module Views::Controllers::Shared
 
     def view_template
       ImageFragment(type: :reuse_form, target: @target,
-                    all_users: @all_users, local: false)
+                    all_users: @all_users, turbo: true)
       render_image_matrix
     end
 

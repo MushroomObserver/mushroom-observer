@@ -12,7 +12,7 @@ module Views::Controllers::Images
         container_class(:wide)
 
         render(Form.new(@form, action: images_license_updater_path,
-                               local: false))
+                               turbo: true))
       end
     end
   end

@@ -31,7 +31,7 @@ module Views::Controllers::SpeciesLists
                user: @user,
                button: :create,
                clone_id: @clone_id,
-               local: false
+               turbo: true
              ))
     end
   end

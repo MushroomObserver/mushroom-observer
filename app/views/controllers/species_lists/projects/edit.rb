@@ -21,7 +21,7 @@ module Views::Controllers::SpeciesLists::Projects
                projects: @projects,
                object_states: @object_states,
                project_states: @project_states,
-               local: false
+               turbo: true
              ))
     end
   end
