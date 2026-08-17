@@ -18,10 +18,17 @@ module Query::Modules::WindowCache
 
   private
 
+  # Scoped by viewer as well as QueryRecord -- `QueryRecord` dedups by
+  # serialized query params only, so two different users browsing the
+  # same logical query (e.g. everyone on the default unfiltered index)
+  # would otherwise share one cache slot and continually evict each
+  # other's window as they browse to different positions. No viewer
+  # (a bot, or `create_query`'s callers that don't set one) means no
+  # caching, rather than falling back to a shared anonymous slot.
   def window_cache_key
-    return nil unless record&.id
+    return nil unless record&.id && viewer&.id
 
-    "query_window/#{record.id}"
+    "query_window/#{record.id}/#{viewer.id}"
   end
 
   # Ids around `current_id`, `current_id`'s own index within them, and

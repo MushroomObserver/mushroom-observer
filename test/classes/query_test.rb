@@ -504,6 +504,7 @@ class QueryTest < UnitTestCase
   def test_next_and_prev_window_cache_hit_skips_result_ids
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
+      query.viewer = rolf
       ids = query.send(:result_ids)
       query.current_id = ids[10]
       query.prev_id # populates the cache
@@ -531,6 +532,7 @@ class QueryTest < UnitTestCase
 
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
+      query.viewer = rolf
       ids = query.send(:result_ids)
       query.current_id = ids[10]
 
@@ -563,6 +565,7 @@ class QueryTest < UnitTestCase
   def test_next_and_prev_first_and_last_never_use_the_window_cache
     with_real_cache do
       query = Query.lookup_and_save(:Image, order_by: :name)
+      query.viewer = rolf
       ids = Image.order_by(:name).pluck(:id)
 
       calls = 0
@@ -588,6 +591,7 @@ class QueryTest < UnitTestCase
   def test_next_and_prev_window_cache_can_serve_stale_data
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
+      query.viewer = rolf
       ids = query.send(:result_ids)
       query.current_id = ids[10]
       query.prev_id # populates the cache with the real ids[9] at slot 9
@@ -618,6 +622,7 @@ class QueryTest < UnitTestCase
   def test_next_and_prev_window_cache_bypasses_need_letters
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
+      query.viewer = rolf
       query.need_letters = true
       ids = query.send(:result_ids)
       query.current_id = ids[10]
@@ -662,12 +667,46 @@ class QueryTest < UnitTestCase
   def test_next_and_prev_window_cache_ignores_malformed_cache_entry
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
+      query.viewer = rolf
       ids = query.send(:result_ids)
       query.current_id = ids[10]
 
       Rails.cache.write(query.send(:window_cache_key), "not a window hash")
 
       assert_equal(ids[9], query.prev_id)
+    end
+  end
+
+  # Two viewers browsing the same logical query (same QueryRecord) get
+  # separate cache slots -- one shouldn't evict the other's window.
+  # Regression test: window_cache_key used to be scoped only by
+  # QueryRecord#id, so any two viewers of the same query shared one
+  # slot and continually clobbered each other's cached window.
+  def test_next_and_prev_window_cache_keyed_per_viewer
+    with_real_cache do
+      rolfs_query = Query.lookup_and_save(:Name, order_by: :id)
+      rolfs_query.viewer = rolf
+      ids = rolfs_query.send(:result_ids)
+      rolfs_query.current_id = ids[10]
+      rolfs_query.prev_id # populates rolf's own cache slot
+
+      marys_query = Query.lookup_and_save(:Name, order_by: :id)
+      marys_query.viewer = mary
+      assert_not_equal(rolfs_query.send(:window_cache_key),
+                       marys_query.send(:window_cache_key))
+
+      marys_query.current_id = ids[500]
+      marys_query.prev_id # a different position -- must not touch rolf's slot
+
+      calls = 0
+      rolfs_query.define_singleton_method(:result_ids) do
+        calls += 1
+        super()
+      end
+      assert_equal(ids[9], rolfs_query.prev_id)
+      assert_equal(0, calls,
+                   "mary's lookup elsewhere in the same query should " \
+                   "not evict rolf's cached window")
     end
   end
 
