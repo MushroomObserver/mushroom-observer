@@ -25,6 +25,49 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Unfiltered index (browsing the whole table) only offers sorts with
+  # no join/aggregate over that many rows.
+  def test_index_unfiltered_offers_only_column_sorts
+    login
+    get(:index)
+
+    assert_select("a.observations_by_rss_log_link", true)
+    assert_select("a.observations_by_date_link", true)
+    assert_select("a.observations_by_created_at_link", true)
+    assert_select("a.observations_by_name_link", false)
+    assert_select("a.observations_by_user_link", false)
+    assert_select("a.observations_by_confidence_link", false)
+    assert_select("a.observations_by_thumbnail_quality_link", false)
+    assert_select("a.observations_by_num_views_link", false)
+  end
+
+  def test_index_filtered_offers_all_sorts
+    login(rolf.login)
+    get(:index, params: { by_user: rolf.id })
+
+    assert_select("a.observations_by_name_link", true)
+    assert_select("a.observations_by_user_link", true)
+    assert_select("a.observations_by_confidence_link", true)
+    assert_select("a.observations_by_thumbnail_quality_link", true)
+    assert_select("a.observations_by_num_views_link", true)
+  end
+
+  # A bookmarked/permalinked unfiltered index carrying an order_by
+  # that's not in the unfiltered allowlist (no other filter params)
+  # must still offer the full sort list -- otherwise the current sort
+  # has no matching option and the dropdown's toggle label goes blank.
+  def test_index_unfiltered_with_unsafe_order_offers_all_sorts
+    login
+    get(:index, params: { q: { model: "Observation", order_by: "name" } })
+
+    assert_select("a.observations_by_name_link", true)
+    assert_select("a.observations_by_user_link", true)
+    assert_select("a.observations_by_confidence_link", true)
+    assert_select("a.observations_by_thumbnail_quality_link", true)
+    assert_select("a.observations_by_num_views_link", true)
+    assert_select("#sort_nav_toggle", text: :sort_by_name.l)
+  end
+
   # Regression for #4492: the top-nav `search-type` Stimulus controller
   # reads its help/form type lists as Array values, which Stimulus parses
   # as JSON. Phlexifying top_nav emitted the arrays space-joined ("a b")
