@@ -156,7 +156,7 @@ module Observations
       {
         model: @naming,
         observation: @observation,
-        local: false,
+        turbo: true,
         show_reasons: true,
         context: params.permit(:context)[:context],
         vote: @vote,
@@ -307,17 +307,10 @@ module Observations
     end
 
     def respond_to_successful_create
-      respond_to do |format|
-        format.turbo_stream do
-          case params[:context]
-          when "lightgallery", "matrix_box"
-            render_update_matrix_box_streams
-          else
-            redirect_to_obs(@observation)
-          end
-          return
-        end
-        format.html { redirect_to_obs(@observation) }
+      if params[:context].in?(%w[lightgallery matrix_box])
+        render_update_matrix_box_streams
+      else
+        redirect_to_obs(@observation)
       end
     end
 
@@ -338,17 +331,14 @@ module Observations
     end
 
     def respond_to_form_errors
-      respond_to do |format|
-        format.html do
-          case action_name
-          when "create" then render_new_view_invalid
-          when "update" then render_edit_view_invalid
-          end and return
-        end
-        format.turbo_stream do
-          render_modal_form_reload(
-            identifier: modal_identifier, form_locals: naming_form_locals
-          ) and return true
+      if modal_submission?(:naming)
+        render_modal_form_reload(
+          identifier: modal_identifier, form_locals: naming_form_locals
+        )
+      else
+        case action_name
+        when "create" then render_new_view_invalid
+        when "update" then render_edit_view_invalid
         end
       end
     end

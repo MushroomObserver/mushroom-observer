@@ -130,7 +130,8 @@ module Views::Layouts
       form(
         action: @form_action_url, method: :get,
         class: class_names(Components::Navbar::FORM_CLASS, "px-0 page_input"),
-        data: { controller: "page-input", page_input_max_value: max_page }
+        data: { controller: "page-input", page_input_max_value: max_page,
+                turbo: "false" }
       ) do
         render_page_input_group(this_page, max_page)
         render_q_hidden_fields
@@ -186,7 +187,8 @@ module Views::Layouts
         action: @form_action_url, method: :get,
         class: class_names(Components::Navbar::FORM_CLASS, "px-0 page_input"),
         data: { controller: "page-input",
-                page_input_letters_value: used_letters }
+                page_input_letters_value: used_letters,
+                turbo: "false" }
       ) do
         InputGroup(class: "page-input ml-2") do
           input(

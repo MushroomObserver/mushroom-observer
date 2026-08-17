@@ -14,7 +14,7 @@ module Views::Controllers::Observations::Emails
         )
       )
 
-      render(Form.new(observation: @observation, local: false))
+      render(Form.new(observation: @observation, turbo: true))
     end
   end
 end

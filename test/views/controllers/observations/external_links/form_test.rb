@@ -61,7 +61,7 @@ module Views::Controllers::Observations::ExternalLinks
     def test_omits_turbo_when_local_true
       html = render_form_local
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_auto_determines_url_for_existing_external_link
@@ -125,7 +125,7 @@ module Views::Controllers::Observations::ExternalLinks
         site: @site,
         user: @user,
         action: "/test_action",
-        local: false
+        turbo: true
       )
       render(form)
     end
@@ -138,7 +138,7 @@ module Views::Controllers::Observations::ExternalLinks
         site: @site,
         user: @user,
         action: "/test_action",
-        local: true
+        turbo: false
       )
       render(form)
     end

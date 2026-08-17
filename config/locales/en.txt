@@ -3225,8 +3225,10 @@
 
   # project/review_authors
   review_authors_add_author: Add
+  review_authors_already_author: "[login] is already an author."
   review_authors_authors: Current [:description] Authors
   review_authors_denied: Only existing authors and reviewers can change the description authors.
+  review_authors_no_user: Couldn't find a user matching "[login]".
   review_authors_note: This page changes the recorded author(s) of a taxon description on the [:app_title] website. This is in no direct way related to the original publishing author of the taxon.
   review_authors_review_authors: Review Authors
   review_authors_other_users: Other [:users]

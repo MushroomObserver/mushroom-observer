@@ -16,7 +16,7 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
   # compatibility (ignored) — see Pattern B in
   # .claude/rules/phlex_reference.md.
   def initialize(_model = nil, project:, **attrs)
-    super(form_object, project: project, id: dom_id, local: false, **attrs)
+    super(form_object, project: project, id: dom_id, turbo: true, **attrs)
   end
 
   def around_template

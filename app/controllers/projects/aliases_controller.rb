@@ -63,20 +63,19 @@ module Projects
       err = resolve_verify_target_error(
         @project_alias.verify_target(params[:project_alias][:term])
       )
-      respond_to do |format|
-        if err.nil? && @project_alias.save
-          render_project_alias_created(format)
-        else
-          flash_and_reload(format, :new, error: err)
-        end
+      if err.nil? && @project_alias.save
+        render_project_alias_created
+      else
+        flash_and_reload(:new, error: err)
       end
     end
 
-    def render_project_alias_created(format)
-      format.turbo_stream do
+    def render_project_alias_created
+      if modal_submission?(:project_alias)
         render_project_alias_target_change(@project_alias.project)
+      else
+        project_aliases_redirect(@project_alias.project_id)
       end
-      format.html { project_aliases_redirect(@project_alias.project_id) }
     end
 
     # ProjectAlias#verify_target returns an unresolved [tag, args]
@@ -89,26 +88,26 @@ module Projects
       tag.t(**args)
     end
 
-    def flash_and_reload(format, action, error: false)
+    def flash_and_reload(action, error: false)
       flash_error(error) if error
       flash_object_errors(@project_alias)
-      format.turbo_stream { reload_modal_project_alias_form }
-      format.html { send(:"render_#{action}_view_invalid") }
+      if modal_submission?(:project_alias)
+        reload_modal_project_alias_form
+      else
+        send(:"render_#{action}_view_invalid")
+      end
     end
 
     def update
       @project = @project_alias.project
-      respond_to do |format|
-        if @project_alias.update(project_alias_params)
-          format.turbo_stream do
-            render_project_alias_target_change(@project_alias.project)
-          end
-          format.html do
-            redirect_to_project_aliases
-          end
+      if @project_alias.update(project_alias_params)
+        if modal_submission?(:project_alias)
+          render_project_alias_target_change(@project_alias.project)
         else
-          flash_and_reload(format, :edit)
+          redirect_to_project_aliases
         end
+      else
+        flash_and_reload(:edit)
       end
     end
 
@@ -116,14 +115,11 @@ module Projects
       project = @project_alias.project
       # Refetch fresh (non-strict_loading) for the destroy cascade.
       ProjectAlias.find(@project_alias.id).destroy
-      respond_to do |format|
-        format.html do
-          redirect_to(project_aliases_path(project_id: project&.id),
-                      notice: :project_alias_destroyed.t)
-        end
-        format.turbo_stream do
-          render_project_alias_target_change(project)
-        end
+      if modal_submission?(:project_alias)
+        render_project_alias_target_change(project)
+      else
+        redirect_to(project_aliases_path(project_id: project&.id),
+                    notice: :project_alias_destroyed.t)
       end
     end
 

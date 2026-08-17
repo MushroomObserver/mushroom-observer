@@ -25,7 +25,7 @@ module Views::Controllers::Sequences
 
     def render_form_column(obs)
       render(ObservationTitle.new(observation: obs))
-      render(Form.new(@sequence, back: @back, local: false))
+      render(Form.new(@sequence, back: @back, turbo: true))
       div(class: "small") do
         span(class: "font-weight-bold") { "#{:created_by.ti}:" }
         whitespace

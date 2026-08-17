@@ -118,6 +118,9 @@ module Observations
                  "Observation from a SpeciesList with an invalid " \
                  "`commit` mode"
       )
+      # Same-URL re-render needs non-2xx or Turbo hangs (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_unprocessable
       assert(spl.reload.observations.member?(obs),
              "Observation should remain in Observation List")
     end

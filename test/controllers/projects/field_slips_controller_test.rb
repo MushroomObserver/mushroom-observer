@@ -69,6 +69,11 @@ module Projects
         }
         post_requires_login(:create, params, katrina.login)
         assert_equal(job_start, enqueued_jobs.size)
+        # Must redirect -- a bare 204 silently drops the flash under
+        # Turbo (see .claude/rules/turbo_submit_forms.md).
+        assert_redirected_to(
+          new_project_field_slip_path(project_id: project.id)
+        )
       end
     end
 

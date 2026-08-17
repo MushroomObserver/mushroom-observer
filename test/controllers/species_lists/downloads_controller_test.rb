@@ -75,13 +75,14 @@ module SpeciesLists
       params = { q: @controller.q_param(query) }
       get(:new, params: { id: spl.id })
       url = print_labels_for_observations_path(params:)
-      assert_select("form[action='#{url}']")
+      assert_select("form[action='#{url}'][data-turbo='false']")
 
       url = download_species_list_path(spl.id, params:)
-      assert_select("form[action='#{url}']")
+      assert_select("form[action='#{url}'][data-turbo='false']")
 
       url = observations_downloads_path(params:)
-      assert_select("form[action='#{url}']")
+      assert_select("form[action='#{url}'][data-turbo='false']")
+      # Permanently exempt -- see .claude/rules/turbo_submit_forms.md.
     end
 
     # Regression: `format`/`encoding`/`species_list_report[format]` come

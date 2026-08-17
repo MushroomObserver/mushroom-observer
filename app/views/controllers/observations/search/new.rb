@@ -5,14 +5,14 @@
 # `Components::Form::Search` against the controller's `@search`
 # (a `Query::Observations` instance).
 #
-# The `new` action in `Searchable` always sets `@local` (the
-# inverse of `params[:local] == "false"`); the prop default just
-# matches that "render full chrome" semantic in case a future caller
+# The `new` action in `Searchable` always sets `@context` (:dropdown
+# only for `params[:local] == "false"`); the prop default just
+# matches the "render full chrome" semantic in case a future caller
 # constructs this view without going through the action.
 module Views::Controllers::Observations::Search
   class New < Views::FullPageBase
     prop :search, ::Query::Observations
-    prop :local, _Boolean, default: true
+    prop :context, _Union(:page, :dropdown), default: :page
 
     def view_template
       add_new_title(:search_object, :observations)
@@ -22,7 +22,7 @@ module Views::Controllers::Observations::Search
         render(::Components::Form::Search.new(
                  @search,
                  search_controller: controller,
-                 local: @local
+                 context: @context
                ))
       end
     end

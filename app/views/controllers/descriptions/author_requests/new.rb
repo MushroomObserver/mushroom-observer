@@ -15,7 +15,7 @@ module Views::Controllers::Descriptions::AuthorRequests
                action: description_author_requests_path(
                  id: @object.id, type: @object.type_tag
                ),
-               local: false
+               turbo: true
              ))
     end
   end

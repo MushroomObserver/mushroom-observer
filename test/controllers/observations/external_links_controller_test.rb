@@ -283,7 +283,9 @@ module Observations
     def test_create_external_link_not_permitted_turbo
       _obs, _obs2, _site, _url, params = setup_create_test
       login("dick")
-      post(:create, params:, format: :turbo_stream)
+      post(:create,
+           params: params.deep_merge(external_link: { modal: "true" }),
+           format: :turbo_stream)
       assert_flash_warning
       assert_select("turbo-stream[action='update'][target$='_flash']")
     end
@@ -469,7 +471,8 @@ module Observations
     def test_update_external_link_turbo
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       new_url = "#{link.external_site.base_url}999999"
-      params = { id: link.id, external_link: { url: new_url } }
+      params = { id: link.id,
+                 external_link: { url: new_url, modal: "true" } }
 
       login("mary")
       put(:update, params: params, format: :turbo_stream)

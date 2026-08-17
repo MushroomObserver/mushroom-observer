@@ -33,7 +33,7 @@ module Views::Controllers::Account::Profile
                copyright_year: @copyright_year,
                licenses: @licenses,
                upload_license_id: @upload_license_id,
-               local: false
+               turbo: true
              ))
     end
 

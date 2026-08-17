@@ -32,7 +32,7 @@ module Observations
       if params[:advanced_retired].present?
         flash_notice(:search_advanced_retired_notice.t)
       end
-      @local = params[:local] != "false"
+      @context = params[:local] == "false" ? :dropdown : :page
       set_up_form_field_groupings
       @search = build_search_query
       respond_to do |format|
@@ -142,7 +142,7 @@ module Observations
 
     def new_phlex_view
       Views::Controllers::Observations::Search::New.new(
-        search: @search, local: @local
+        search: @search, context: @context
       )
     end
 

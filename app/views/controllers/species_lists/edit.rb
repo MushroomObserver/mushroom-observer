@@ -23,7 +23,7 @@ module Views::Controllers::SpeciesLists
                submitted_project_ids: @submitted_project_ids,
                user: @user,
                button: :update,
-               local: false
+               turbo: true
              ))
     end
   end

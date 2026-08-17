@@ -15,7 +15,7 @@
 #   - :parent_deprecated - deprecated parent Name
 # @param show_reasons [Boolean] whether to show reason fields
 # @param context [String] form context ("blank", "lightbox", etc.)
-# @param local [Boolean] if true, non-turbo form
+# @param turbo [Boolean] if true, Turbo-submitted form
 module Views::Controllers::Observations::Namings
   class Form < ::Components::ApplicationForm
     def initialize(naming, **kwargs)
@@ -23,7 +23,7 @@ module Views::Controllers::Observations::Namings
       # Dynamic per-observation form id — can't be auto-derived; pass
       # explicitly so multiple namings on one obs (lightbox / matrix-
       # box renders) don't collide on the same DOM id.
-      super(naming, id: form_id_value, local: @local, **kwargs)
+      super(naming, id: form_id_value, turbo: @turbo, **kwargs)
     end
 
     def view_template
@@ -67,7 +67,7 @@ module Views::Controllers::Observations::Namings
       @reasons = kwargs.delete(:reasons) || naming.init_reasons
       @show_reasons = kwargs.delete(:show_reasons) != false
       @context = kwargs.delete(:context)
-      @local = kwargs.delete(:local) != false
+      @turbo = kwargs.delete(:turbo) == true
       @create = naming.new_record?
       @naming_id = naming.id
     end

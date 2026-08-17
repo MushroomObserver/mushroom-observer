@@ -31,7 +31,7 @@ module Views::Controllers::Observations::ExternalLinks
                sites: @sites,
                site: @site || @sites.first,
                user: @user,
-               local: false
+               turbo: true
              ))
     end
 

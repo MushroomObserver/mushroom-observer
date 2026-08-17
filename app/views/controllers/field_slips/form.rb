@@ -42,7 +42,10 @@ module Views::Controllers::FieldSlips
     end
 
     def form_attributes
-      { id: @attributes[:id] || "field_slip_form" }
+      # Forward @attributes[:data] so ApplicationForm's data-turbo
+      # actually reaches this overridden form_tag.
+      { id: @attributes[:id] || "field_slip_form",
+        data: @attributes[:data] || {} }
     end
 
     # --- "Code only" form: no field-slip code yet, just collect one.

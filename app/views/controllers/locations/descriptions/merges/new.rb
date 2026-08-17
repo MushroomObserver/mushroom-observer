@@ -14,7 +14,7 @@ module Views::Controllers::Locations::Descriptions::Merges
                       ))
 
       render(Views::Controllers::Descriptions::Merges::Form.new(
-               @description, user: @user, local: false
+               @description, user: @user, turbo: true
              ))
     end
   end

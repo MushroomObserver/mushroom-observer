@@ -30,7 +30,7 @@ class Views::Controllers::Names::Synonyms::Deprecate::New < Views::FullPageBase
              suggest_corrections: @suggest_corrections,
              parent_deprecated: @parent_deprecated,
              user: current_user,
-             local: false
+             turbo: true
            ))
   end
 end

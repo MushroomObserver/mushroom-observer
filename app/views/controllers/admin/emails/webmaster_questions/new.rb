@@ -15,7 +15,7 @@ module Views::Controllers::Admin::Emails::WebmasterQuestions
                reply_to: @email,
                message: @message,
                email_error: @email_error,
-               local: false
+               turbo: true
              ))
     end
   end

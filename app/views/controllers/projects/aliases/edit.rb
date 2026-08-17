@@ -16,7 +16,7 @@ module Views::Controllers::Projects::Aliases
 
       render(Views::Controllers::Projects::Aliases::Form.new(
                @project_alias, user: @user,
-                               local: false
+                               turbo: true
              ))
       render_links
     end
