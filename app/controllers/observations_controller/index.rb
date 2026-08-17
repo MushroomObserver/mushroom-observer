@@ -48,8 +48,18 @@ class ObservationsController
 
     private
 
+    # A bookmarked/permalinked unfiltered index can still carry an
+    # `order_by` that isn't in the unfiltered allowlist (e.g.
+    # `q[order_by]=name` with no other params) -- treat that as
+    # filtered for the dropdown too, or `Sorter#toggle_title` can't
+    # find a label for the current sort and the toggle goes blank.
     def unfiltered_index_for_sort?
-      @query.params.except(:order_by).blank?
+      @query.params.except(:order_by).blank? && current_order_sort_safe?
+    end
+
+    def current_order_sort_safe?
+      order = @query.params[:order_by].to_s.sub(/^reverse_/, "")
+      order.blank? || unfiltered_index_sort_options.map(&:first).include?(order)
     end
 
     def unfiltered_index_sort_options
