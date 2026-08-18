@@ -637,6 +637,25 @@ class QueryTest < UnitTestCase
                  "result_ids instead of querying again")
   end
 
+  # A seekable order with zero matching rows is a legitimate nil
+  # boundary from seek_edge_id itself -- first_id/last_id shouldn't
+  # fall back to a full result_ids load just because that nil looks
+  # the same as "order shape isn't seekable" (Copilot review, PR
+  # #5115).
+  def test_next_and_prev_seek_first_and_last_no_fallback_on_empty_results
+    query = Query.lookup(:Name, order_by: :id,
+                                pattern: "no_name_matches_this_zzzzzz")
+
+    calls = count_result_ids_calls(query) do
+      assert_nil(query.first_id)
+      assert_nil(query.last_id)
+    end
+
+    assert_equal(0, calls,
+                 "empty seekable query should return nil without " \
+                 "falling back to loading result_ids")
+  end
+
   ##############################################################################
   #
   #  :section: Test Subqueries

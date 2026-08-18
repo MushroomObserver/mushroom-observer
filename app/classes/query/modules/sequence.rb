@@ -131,7 +131,9 @@ module Query::Modules::Sequence
   end
 
   def first_id
-    seek_edge_id(:first) || legacy_first_id
+    return legacy_first_id if need_letters
+
+    seek_edge_id(:first)
   end
 
   # Move to previous place.
@@ -187,7 +189,9 @@ module Query::Modules::Sequence
   end
 
   def last_id
-    seek_edge_id(:last) || legacy_last_id
+    return legacy_last_id if need_letters
+
+    seek_edge_id(:last)
   end
 
   private
