@@ -122,6 +122,7 @@ module Views::Controllers::InatImports
       new_inat_import_path(
         inat_username: @inat_import.inat_username.presence,
         all: ("1" if @inat_import.import_all),
+        import_others: ("1" if @inat_import.import_others),
         inat_ids: @inat_import.inat_ids.presence,
         inat_url: @inat_import.inat_url.presence
       )
