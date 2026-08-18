@@ -106,6 +106,19 @@ module Views::Controllers::InatImports
       assert_html(html, "#total_ignored_count")
     end
 
+    def test_ignored_total_includes_over_cap_excess
+      requested = InatImport::MAX_IMPORTABLE + 100
+      estimate_with_date = InatImport::MAX_IMPORTABLE + 50
+      excess = InatImport.excess_over_cap(estimate_with_date)
+      html = render_form(
+        breakdown: { requested: requested,
+                     estimate_with_date: estimate_with_date }
+      )
+
+      assert_html(html, "#total_ignored_count",
+                  text: (requested - estimate_with_date + excess).to_s)
+    end
+
     def test_overlap_note_absent_with_single_ignored_row
       # Only not_importable row: requested(12) - after_taxon(10) = 2 > 0
       # already_imported: after_taxon(10) - not_yet_imported(10) = 0, not

@@ -51,7 +51,6 @@ module Views::Controllers::InatImports
           end
           render_ignored_section
           count_expected_line
-          render_over_cap_line
           render_nothing_to_import_notice
           br
           unlicensed_obs_line unless import_others?
@@ -102,6 +101,7 @@ module Views::Controllers::InatImports
           render_ignored_row(row[:key], row[:count], row[:url])
         end
         unlicensed_ignored_row if import_others?
+        render_over_cap_line
       end
       br
     end
@@ -110,7 +110,8 @@ module Views::Controllers::InatImports
       ignored_row_data.any? ||
         # Import-others' unlicensed obs are never imported. So they
         # belong here rather than own-import's informational-only line.
-        import_others?
+        import_others? ||
+        over_cap_count.positive?
     end
 
     def ignored_row_data
@@ -159,7 +160,8 @@ module Views::Controllers::InatImports
     def render_ignored_total
       return unless @requested && (@estimate_with_date || @expected)
 
-      total = @requested.to_i - (@estimate_with_date || @expected).to_i
+      total = @requested.to_i - (@estimate_with_date || @expected).to_i +
+              over_cap_count
       b { plain(:inat_import_confirm_ignored_total_caption.l) }
       plain(": ")
       span(id: "total_ignored_count") { plain(total.to_s) }
