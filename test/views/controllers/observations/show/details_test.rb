@@ -235,6 +235,22 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_no_html(html, "#observation_field_slips")
   end
 
+  def test_renders_attach_link_in_admin_mode_even_when_cannot_edit
+    obs = observations(:coprinus_comatus_obs)
+    viewer = users(:mary)
+    assert_nil(obs.field_slip)
+    assert_not(obs.can_edit?(viewer))
+    stub_admin_mode!
+
+    html = render(panel_with(obs, viewer))
+
+    assert_html(
+      html,
+      "#observation_field_slips a" \
+      "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
+    )
+  end
+
   def test_no_field_slip_section_for_logged_out_viewer
     obs = observations(:minimal_unknown_obs)
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# Shared field-slip handling for the observation create and update actions.
+# Shared field-slip handling for the observation create/update actions
+# and the standalone Observations::FieldSlipsController attach flow.
 #
 # `update_field_slip` applies the `params[:field_code]` change to
 # `@observation` and returns a status (:unchanged / :cleared / :assigned /
