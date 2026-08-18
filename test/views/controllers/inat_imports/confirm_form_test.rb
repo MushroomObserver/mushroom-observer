@@ -185,6 +185,48 @@ module Views::Controllers::InatImports
       assert_html(html, "#estimated_time")
     end
 
+    def test_expected_count_capped_at_max_importable
+      html = render_form(expected: InatImport::MAX_IMPORTABLE + 100)
+
+      assert_html(html, "#expected_count",
+                  text: InatImport::MAX_IMPORTABLE.to_s)
+    end
+
+    def test_expected_count_uncapped_when_under_max_importable
+      html = render_form(expected: InatImport::MAX_IMPORTABLE - 1)
+
+      assert_html(html, "#expected_count",
+                  text: (InatImport::MAX_IMPORTABLE - 1).to_s)
+    end
+
+    def test_over_cap_line_absent_when_under_cap
+      html = render_form(expected: InatImport::MAX_IMPORTABLE)
+
+      assert_no_html(html, "#over_cap_count")
+      assert_no_html(html, "#over_cap_note")
+    end
+
+    def test_over_cap_line_present_when_over_cap
+      excess = 100
+      html = render_form(expected: InatImport::MAX_IMPORTABLE + excess)
+
+      assert_html(html, "#over_cap_count", text: excess.to_s)
+      assert_html(html, "#over_cap_note",
+                  text: :inat_import_confirm_over_cap_note.l)
+    end
+
+    def test_estimated_time_capped_at_max_importable
+      html = render_form(inat_import: nil,
+                         expected: InatImport::MAX_IMPORTABLE + 100)
+      seconds =
+        InatImport::MAX_IMPORTABLE * InatImport::BASE_AVG_IMPORT_SECONDS
+      expected_time = Kernel.format(
+        "%02d:%02d:%02d", seconds / 3600, seconds % 3600 / 60, seconds % 60
+      )
+
+      assert_html(html, "#estimated_time", text: expected_time)
+    end
+
     private
 
     def render_form(form_model: @form_model, inat_import: @import,

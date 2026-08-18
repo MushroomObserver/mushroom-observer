@@ -51,6 +51,7 @@ module Views::Controllers::InatImports
           end
           render_ignored_section
           count_expected_line
+          render_over_cap_line
           render_nothing_to_import_notice
           br
           unlicensed_obs_line unless import_others?
@@ -230,7 +231,7 @@ module Views::Controllers::InatImports
       plain(": ")
       span(id: "expected_count") do
         url = expected_obs_url
-        count = (@estimate_with_date || @expected).to_s
+        count = capped_expected_count.to_s
         if url
           render(Components::Link::External.new(content: count, path: url))
         else
@@ -240,6 +241,18 @@ module Views::Controllers::InatImports
     end
 
     def expected_obs_url = @urls.expected_obs_url
+
+    def expected_count = (@estimate_with_date || @expected).to_i
+
+    def capped_expected_count
+      [expected_count, InatImport::MAX_IMPORTABLE].min
+    end
+
+    def over_cap_count = InatImport.excess_over_cap(expected_count)
+
+    def render_over_cap_line
+      render(OverCapLine.new(count: over_cap_count))
+    end
 
     def render_nothing_to_import_notice
       # Match the count that drives the display and the Proceed button, so
@@ -266,7 +279,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      format_hms((@estimate_with_date || @expected) * avg_import_seconds)
+      format_hms(capped_expected_count * avg_import_seconds)
     end
 
     def format_hms(seconds)

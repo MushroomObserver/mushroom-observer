@@ -322,4 +322,32 @@ class InatImportTest < ActiveSupport::TestCase
 
     assert_not(import.reached_import_cap?)
   end
+
+  def test_excess_over_cap_zero_below_cap
+    assert_equal(
+      0, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE - 1),
+      "Count below MAX_IMPORTABLE should have no excess"
+    )
+  end
+
+  def test_excess_over_cap_zero_at_cap
+    assert_equal(
+      0, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE),
+      "Count exactly at MAX_IMPORTABLE should have no excess"
+    )
+  end
+
+  def test_excess_over_cap_positive_above_cap
+    assert_equal(
+      1, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE + 1),
+      "Count 1 above MAX_IMPORTABLE should have excess of 1"
+    )
+  end
+
+  def test_excess_over_cap_zero_when_nil
+    assert_equal(
+      0, InatImport.excess_over_cap(nil),
+      "Nil count should have no excess"
+    )
+  end
 end

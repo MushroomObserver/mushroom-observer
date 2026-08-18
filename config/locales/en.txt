@@ -2900,6 +2900,8 @@
   inat_import_confirm_unlicensed_obs_caption: Unlicensed observations
   inat_import_confirm_unlicensed_obs_note: "(your default MO license will be applied to images)"
   inat_import_confirm_unlicensed_others_note: "(will not be imported — no iNat license)"
+  inat_import_confirm_over_cap_caption: Exceeds per-import limit
+  inat_import_confirm_over_cap_note: "You can import these later in a new import."
   inat_import_confirm_time_estimate_caption: Estimated time
   inat_import_confirm_explanation: "MO will import your iNat observations that are identified as a fungus or slime mold and that were neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script. Unlicensed images will be imported with your default MO license. You can work on other things while the import is proceeding."
   inat_import_confirm_prompt: Would you like to proceed with the import?
@@ -2937,6 +2939,8 @@
   inat_import_tracker_ignored_already_imported: Already imported
   inat_import_tracker_ignored_unlicensed: Unlicensed (import-others only)
   inat_import_tracker_ignored_date_missing: No observation date
+  inat_import_tracker_over_cap_caption: Not yet imported (exceeds per-import limit)
+  inat_import_tracker_over_cap_reimport: You can import these now in a new import
   inat_import_tracker_date_missing_reimport: "Re-import [count] observation(s) after adding dates on iNat"
   inat_import_tracker_license_added_heading: Observations Imported with MO Default License
   inat_import_tracker_license_added_note: "[count] observation(s) had no iNat license; your default MO license was applied."

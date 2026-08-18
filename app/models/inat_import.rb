@@ -156,6 +156,12 @@ class InatImport < ApplicationRecord
     imported_count.to_i >= MAX_IMPORTABLE
   end
 
+  # Observations beyond MAX_IMPORTABLE that a single run of this size
+  # won't import. 0 when count is at or under the cap.
+  def self.excess_over_cap(count)
+    [count.to_i - MAX_IMPORTABLE, 0].max
+  end
+
   def ignored_total_count
     ignored_not_importable_count +
       ignored_date_missing_count +
