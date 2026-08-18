@@ -43,7 +43,7 @@ module Views::Controllers::Projects
 
     def render_meta_row
       div do
-        small { plain("#{@project.created_at.web_time}:") }
+        small { plain(append_colon(@project.created_at.web_time)) }
         whitespace
         Link(type: :user, user: @project.user)
       end

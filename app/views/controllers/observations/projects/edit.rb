@@ -44,7 +44,7 @@ module Views::Controllers::Observations::Projects
     def render_section(heading:, projects:, remove: false, add: false)
       return if projects.empty?
 
-      h5(class: "mt-3") { plain("#{heading}:") }
+      h5(class: "mt-3") { plain(append_colon(heading)) }
       ListGroup do |list|
         projects.each do |project|
           list.item(
