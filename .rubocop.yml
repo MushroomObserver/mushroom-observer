@@ -17,6 +17,7 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
@@ -95,6 +96,19 @@ MO/NoActiveRecordRelationProp:
     materialize with .to_a at the call site and use _Array(<Model>)
     instead, so the element type is checked too -- see
     lib/rubocop/cop/mo/no_active_record_relation_prop.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+
+MO/NoHandRolledMethodField:
+  Description: >-
+    Superform-based forms must not hand-roll a `_method` hidden field
+    via `hidden_field("_method", ...)` -- Superform already emits one,
+    driven by `persisted?`/an explicit `method:` on the constructor.
+    A second one produces two `_method` hiddens, and turbo-rails
+    silently strips the override rather than picking either -- see
+    lib/rubocop/cop/mo/no_hand_rolled_method_field.rb and #5088.
   Enabled: true
   Include:
     - "app/components/**/*.rb"
