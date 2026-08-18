@@ -2086,6 +2086,8 @@
   show_observation_add_images: "[:add_objects(type=:image)]"
   show_observation_manage_species_lists: Manage Observation Lists
   show_observation_add_to_species_list: Add to an Observation List
+  show_observation_manage_projects: Manage Projects
+  show_observation_add_to_project: Add to a Project
   show_observation_send_question: Send Observer a Question
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   remove_object_confirm: Remove [type] from this [association]?
@@ -2197,6 +2199,11 @@
   species_list_manage_title: Manage Observation Lists for [name]
   species_list_manage_belongs_to: This observation belongs to
   species_list_manage_doesnt_contain: Lists you own that do not contain this observation
+
+  # observations/projects/edit
+  project_manage_title: Manage Projects for [name]
+  project_manage_belongs_to: This observation belongs to
+  project_manage_doesnt_contain: Projects you belong to that do not contain this observation
 
   # species_list/manage_projects
   species_list_projects_title: Manage Projects for [List]
@@ -4077,6 +4084,8 @@
   runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
   runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
   runtime_prefs_success: "[:runtime_updated_at(type=:preferences)]"
+  runtime_project_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
+  runtime_project_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
   runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
   runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
   runtime_profile_success: "[:runtime_updated_at(type=:profile)]"
