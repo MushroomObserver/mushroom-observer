@@ -87,6 +87,47 @@ module Observations
       assert_not(proj.reload.observations.member?(obs))
     end
 
+    # Project#remove_observation removes every sibling observation
+    # sharing the same Occurrence, not just the one clicked -- the
+    # flash has to say how many rather than letting the rest go
+    # unmentioned. See #4932 and the analogous
+    # test_unchecking_a_project_reports_the_whole_collection in
+    # observations_controller_update_test.rb.
+    def test_remove_observation_from_project_reports_whole_collection
+      proj = projects(:bolete_project)
+      obs = observations(:minimal_unknown_obs)
+      sibling = observations(:detailed_unknown_obs)
+      occ = Occurrence.create!(user: mary, primary_observation: obs)
+      [obs, sibling].each do |o|
+        o.update!(occurrence: occ)
+        proj.add_observation(o)
+      end
+      params = { id: obs.id, project_id: proj.id, commit: "remove" }
+
+      login("mary")
+      put(:update, params: params)
+
+      assert_redirected_to(project_path(proj.id))
+      assert_not_includes(proj.reload.observations, obs)
+      assert_not_includes(proj.observations, sibling)
+      assert_includes(get_last_flash.to_s.as_displayed,
+                      :removed_from_project_with_siblings.t(
+                        count: 2, project: proj.title
+                      ).as_displayed)
+    end
+
+    def test_add_observation_to_project_invalid_mode_escapes_commit_value
+      proj = projects(:eol_project)
+      obs = observations(:coprinus_comatus_obs)
+      params = { id: obs.id, project_id: proj.id,
+                 commit: "<script>alert(1)</script>" }
+
+      login("rolf")
+      put(:update, params: params)
+
+      assert_not_includes(get_last_flash.to_s, "<script>")
+    end
+
     def test_edit_renders_add_and_remove_forms
       member_proj = projects(:eol_project)
       other_proj = projects(:bolete_project)

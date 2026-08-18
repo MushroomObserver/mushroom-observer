@@ -41,7 +41,7 @@ module Observations
       when "remove"
         remove_observation_from_project(@project, @observation)
       else
-        flash_error("Invalid mode: #{params[:commit].inspect}")
+        flash_error(:runtime_invalid.t(type: '"mode"', value: params[:commit]))
         render_phlex_edit(
           location: edit_observation_projects_path(id: @observation.id),
           status: :unprocessable_content
@@ -60,9 +60,14 @@ module Observations
       )
     end
 
+    # `violation_kinds_for` (called per project in @other_projects, in
+    # the Edit view) reads location/target_names/target_locations --
+    # preload them here so that's not an N+1 across the list.
     def set_project_ivars
       member_ids = @observation.project_ids.to_set
-      all_projects = @user.projects_member(order: :title)
+      all_projects = @user.projects_member(
+        order: :title, include: [:location, :target_names, :target_locations]
+      )
       @obs_projects, @other_projects =
         all_projects.partition { |project| member_ids.include?(project.id) }
     end
@@ -82,10 +87,21 @@ module Observations
       redirect_to(project_path(id: project.id))
     end
 
+    # Project#remove_observation removes every sibling observation
+    # sharing the same Occurrence too, not just the one clicked --
+    # match ObservationsController::SharedFormMethods#flash_project_removal's
+    # count-aware message so a multi-observation removal isn't
+    # silently reported as if only the clicked one changed.
     def remove_observation_from_project(project, observation)
-      project.remove_observation(observation)
-      flash_notice(:runtime_project_remove_observation_success.
-        t(name: project.title, id: observation.id))
+      removed = project.remove_observation(observation)
+      if removed.size > 1
+        flash_notice(:removed_from_project_with_siblings.t(
+                       count: removed.size, project: project.title
+                     ))
+      else
+        flash_notice(:removed_from_project.t(object: :observation,
+                                             project: project.title))
+      end
       redirect_to(project_path(id: project.id))
     end
   end

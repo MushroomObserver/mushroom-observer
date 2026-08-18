@@ -317,7 +317,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
      :project_observations,
      :species_list_observations,
      { occurrence: [:field_slip, :observations] },
-     { projects: [{ admin_group: :users }, { user_group: :users }, :image] },
+     { projects: [{ admin_group: :users }, :image] },
      :rss_log,
      { sequences: :user },
      { species_lists: [:location, :projects, :user] },

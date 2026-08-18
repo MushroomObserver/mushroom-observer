@@ -4085,7 +4085,6 @@
   runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
   runtime_prefs_success: "[:runtime_updated_at(type=:preferences)]"
   runtime_project_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
-  runtime_project_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
   runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
   runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
   runtime_profile_success: "[:runtime_updated_at(type=:profile)]"

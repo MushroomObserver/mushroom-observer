@@ -887,6 +887,16 @@ class ProjectTest < UnitTestCase
     assert(project.user_can_change_membership?(obs, roy))
   end
 
+  # #member_by_query? is #member?'s query-based twin -- used where
+  # user_group.users isn't eager-loaded. Same answers, no nil-user crash.
+  def test_member_by_query
+    project = projects(:falmouth_2023_09_project)
+
+    assert(project.member_by_query?(roy))
+    assert_not(project.member_by_query?(users(:zero_user)))
+    assert_not(project.member_by_query?(nil))
+  end
+
   # Adoption is the other half of "a slip's project implies its
   # observations are in that project" — claiming the slip has to bring
   # its observations along. See #4932.

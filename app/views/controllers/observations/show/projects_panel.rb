@@ -62,7 +62,7 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
   def render_item(project)
     li do
       Link(type: :object, object: project)
-      if project.user_can_change_membership?(@obs, @user)
+      if project.member_by_query?(@user)
         whitespace
         render_remove_button(project)
       end
