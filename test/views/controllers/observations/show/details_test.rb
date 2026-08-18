@@ -219,6 +219,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_html(
       html,
       "#observation_field_slips a.inline-icon-link" \
+      ".attach_observation_to_field_slip_link_#{obs.id}" \
       "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
     )
   end

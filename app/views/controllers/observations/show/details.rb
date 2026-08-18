@@ -79,9 +79,11 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   end
 
   def render_attach_field_slip_link
-    Link(type: :get,
-         tab: ::Tab::Observation::AttachFieldSlip.new(observation: @obs),
-         class: "inline-icon-link")
+    tab = ::Tab::Observation::AttachFieldSlip.new(observation: @obs)
+    Link(type: :get, tab: tab,
+         class: Components::InlineLinkBlock.item_class(
+           tab.html_options[:class]
+         ))
   end
 
   # ---- external links ---------------------------------------------

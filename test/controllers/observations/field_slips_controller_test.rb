@@ -80,6 +80,31 @@ module Observations
       assert_nil(obs.reload.field_slip)
     end
 
+    # This page's whole purpose is attaching a code when there isn't
+    # one -- an already-attached observation must redirect away rather
+    # than let a blank submit silently detach the existing slip.
+    def test_edit_already_attached_redirects
+      obs = observations(:minimal_unknown_obs)
+      assert_not_nil(obs.field_slip, "Need obs fixture with a field slip")
+      login("mary")
+
+      get(:edit, params: { id: obs.id })
+
+      assert_redirected_to(permanent_observation_path(obs.id))
+    end
+
+    def test_update_already_attached_does_not_detach
+      obs = observations(:minimal_unknown_obs)
+      slip = obs.field_slip
+      assert_not_nil(slip, "Need obs fixture with a field slip")
+      login("mary")
+
+      put(:update, params: { id: obs.id, field_code: "" })
+
+      assert_redirected_to(permanent_observation_path(obs.id))
+      assert_equal(slip.id, obs.reload.field_slip&.id)
+    end
+
     # `validate_field_slip` rejects both of these before update_field_slip
     # ever runs, so the post-validation branches only fire when the slip
     # changed underneath us between validation and application. A real

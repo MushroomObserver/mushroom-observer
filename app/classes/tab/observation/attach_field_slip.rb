@@ -15,6 +15,13 @@ class Tab::Observation::AttachFieldSlip < Tab::Base
     :field_slip_attach_tooltip.l
   end
 
+  # "Attach" alone would derive a generic attach_observation_link
+  # selector class -- too easily confused with other "attach
+  # observation to X" tabs.
+  def alt_title
+    "attach_observation_to_field_slip"
+  end
+
   def path
     edit_observation_field_slip_path(@observation.id)
   end

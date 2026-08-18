@@ -11,13 +11,13 @@ module Observations
     before_action :login_required
 
     def edit
-      return unless editable_or_redirect?
+      return unless attachable_or_redirect?
 
       render_phlex_edit
     end
 
     def update
-      return unless editable_or_redirect?
+      return unless attachable_or_redirect?
 
       validate_field_slip
       if @any_errors
@@ -30,11 +30,25 @@ module Observations
 
     private
 
-    def editable_or_redirect?
+    # This page's whole purpose is attaching a code when there isn't
+    # one yet -- an already-attached observation has nothing here to
+    # do (and a blank submit would otherwise silently detach the
+    # existing slip via clear_field_slip, see ObservationsController::
+    # FieldSlips#update_field_slip).
+    def attachable_or_redirect?
       return false unless (@observation = find_observation!)
-      return true if permission!(@observation)
+      return true if permission!(@observation) && no_field_slip_yet?
 
       redirect_to(permanent_observation_path(@observation.id))
+      false
+    end
+
+    def no_field_slip_yet?
+      return true unless @observation.field_slip
+
+      flash_warning(:observation_field_slip_already_attached.t(
+                      code: @observation.field_slip.code
+                    ))
       false
     end
 
