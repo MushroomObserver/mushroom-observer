@@ -197,6 +197,51 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_html(html, ".obs-who a[data-controller='modal-toggle']")
   end
 
+  # --- Field slip ---
+
+  def test_renders_existing_field_slip_link
+    obs = observations(:minimal_unknown_obs)
+    assert_not_nil(obs.field_slip, "Need obs fixture with a field slip")
+
+    html = render(panel_with(obs))
+    path = routes.field_slip_path(obs.field_slip.id)
+
+    assert_html(html, "#observation_field_slips a[href='#{path}']")
+  end
+
+  def test_renders_attach_link_when_no_field_slip_and_can_edit
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.field_slip)
+    assert(obs.can_edit?(@user), "Need obs fixture the user can edit")
+
+    html = render(panel_with(obs))
+
+    assert_html(
+      html,
+      "#observation_field_slips a.inline-icon-link" \
+      "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
+    )
+  end
+
+  def test_no_field_slip_section_when_no_field_slip_and_cannot_edit
+    obs = observations(:coprinus_comatus_obs)
+    viewer = users(:mary)
+    assert_nil(obs.field_slip)
+    assert_not(obs.can_edit?(viewer))
+
+    html = render(panel_with(obs, viewer))
+
+    assert_no_html(html, "#observation_field_slips")
+  end
+
+  def test_no_field_slip_section_for_logged_out_viewer
+    obs = observations(:minimal_unknown_obs)
+
+    html = render(panel_with(obs, nil))
+
+    assert_no_html(html, "#observation_field_slips")
+  end
+
   private
 
   def who_text(html)

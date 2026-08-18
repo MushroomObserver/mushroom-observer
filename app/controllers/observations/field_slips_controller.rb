@@ -1,0 +1,91 @@
+# frozen_string_literal: true
+
+module Observations
+  # Attach this Observation to a FieldSlip by code, from the
+  # observation's own show page. Reuses the code-validate-and-attach
+  # logic already used by the full observation create/update forms.
+  class FieldSlipsController < ApplicationController
+    include ::ObservationsController::FieldSlips
+    include ::FieldSlipProjectJoinable
+
+    before_action :login_required
+
+    def edit
+      return unless editable_or_redirect?
+
+      render_phlex_edit
+    end
+
+    def update
+      return unless editable_or_redirect?
+
+      validate_field_slip
+      if @any_errors
+        render_phlex_edit(status: :unprocessable_content)
+        return
+      end
+
+      dispatch_update_field_slip
+    end
+
+    private
+
+    def editable_or_redirect?
+      return false unless (@observation = find_observation!)
+      return true if permission!(@observation)
+
+      redirect_to(permanent_observation_path(@observation.id))
+      false
+    end
+
+    def find_observation!
+      find_or_goto_index(Observation, params[:id])
+    end
+
+    def render_phlex_edit(**render_opts)
+      render(
+        Views::Controllers::Observations::FieldSlips::Edit.new(
+          observation: @observation
+        ),
+        **render_opts
+      )
+    end
+
+    # `assign_field_slip` already flashes on a brand-new code
+    # (`:field_slip_created`); an existing code has no other flash in
+    # this standalone flow, so it's added here.
+    def dispatch_update_field_slip
+      existed = FieldSlip.exists?(code: field_code)
+      case update_field_slip
+      when :invalid then flash_invalid_field_slip
+      when :too_many then flash_full_field_slip
+      when :assigned then flash_attached_field_slip if existed
+      end
+      redirect_to_observation_or_reload
+    end
+
+    def flash_attached_field_slip
+      flash_notice(:field_slip_attached.t(code: field_code))
+    end
+
+    def flash_invalid_field_slip
+      @any_errors = true
+      flash_error(:observation_field_slip_invalid.t(code: field_code))
+    end
+
+    def flash_full_field_slip
+      @any_errors = true
+      flash_error(:observation_field_slip_full.t(
+                    code: field_code, max: Occurrence::MAX_OBSERVATIONS
+                  ))
+    end
+
+    def redirect_to_observation_or_reload
+      if @any_errors
+        render_phlex_edit(status: :unprocessable_content)
+      else
+        redirect_to(permanent_observation_path(@observation.id))
+      end
+    end
+  end
+end

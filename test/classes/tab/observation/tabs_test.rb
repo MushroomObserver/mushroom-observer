@@ -40,6 +40,14 @@ module Tab::Observation
       assert_equal(:add, tab.html_options[:icon])
     end
 
+    def test_attach_field_slip
+      tab = Tab::Observation::AttachFieldSlip.new(observation: @obs)
+
+      assert_equal(:field_slip_attach_tooltip.l, tab.title)
+      assert_equal(routes.edit_observation_field_slip_path(@obs.id), tab.path)
+      assert_equal(:add, tab.html_options[:icon])
+    end
+
     def test_matching_observations
       occurrence = occurrences(:occ_field_slip_one)
       tab = Tab::Observation::MatchingObservations.new(occurrence: occurrence)

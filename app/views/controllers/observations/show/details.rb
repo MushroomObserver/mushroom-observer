@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def render_body
     ul(class: "list-unstyled mb-0") { render_when_where_who }
-    render_field_slip if @user && @obs.field_slip
+    render_field_slip if @user
   end
 
   # ---- when / where / who -----------------------------------
@@ -65,10 +65,23 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   # ---- field slip -----------------------------------------------
 
   def render_field_slip
+    return unless @obs.field_slip || in_admin_mode? || @obs.can_edit?(@user)
+
     div(class: "obs-field-slips", id: "observation_field_slips") do
-      span { plain("#{:field_slip.ti}: ") }
-      Link(type: :object, object: @obs.field_slip)
+      span { plain(append_colon(:field_slip.ti)) }
+      whitespace
+      if @obs.field_slip
+        Link(type: :object, object: @obs.field_slip)
+      else
+        render_attach_field_slip_link
+      end
     end
+  end
+
+  def render_attach_field_slip_link
+    Link(type: :get,
+         tab: ::Tab::Observation::AttachFieldSlip.new(observation: @obs),
+         class: "inline-icon-link")
   end
 
   # ---- external links ---------------------------------------------
