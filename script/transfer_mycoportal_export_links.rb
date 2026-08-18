@@ -66,13 +66,22 @@ class TransferMycoportalExportLinks
 
       options
     end
+
+    def run_cli(argv)
+      new(parse_argv(argv)).run
+    rescue ArgumentError, RuntimeError => e
+      abort(e.message)
+    end
   end
 
   def initialize(opts)
     @export = opts[:export]
     @apply = opts[:apply]
-    abort("Give exactly one of --export FILE or --apply FILE") unless
-      @export.nil? ^ @apply.nil?
+    unless @export.nil? ^ @apply.nil?
+      raise(ArgumentError.new(
+              "Give exactly one of --export FILE or --apply FILE"
+            ))
+    end
     @site = ExternalSite.mycoportal
     @admin = User.admin
     @stats = Hash.new(0)
@@ -210,8 +219,4 @@ class TransferMycoportalExportLinks
   end
 end
 
-if $PROGRAM_NAME == __FILE__
-  TransferMycoportalExportLinks.new(
-    TransferMycoportalExportLinks.parse_argv(ARGV)
-  ).run
-end
+TransferMycoportalExportLinks.run_cli(ARGV) if $PROGRAM_NAME == __FILE__
