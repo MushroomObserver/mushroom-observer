@@ -70,7 +70,6 @@ module Observations
     # (`:field_slip_created`); an existing code has no other flash in
     # this standalone flow, so it's added here.
     def dispatch_update_field_slip
-      existed = FieldSlip.exists?(code: field_code)
       case update_field_slip
       when :invalid
         add_field_slip_error(
@@ -83,8 +82,8 @@ module Observations
                              ))
       when :unchanged
         add_field_slip_error(:observation_field_slip_blank.t)
-      when :assigned
-        flash_attached_field_slip if existed
+      when :assigned_existing
+        flash_attached_field_slip
       end
       redirect_to_observation_or_reload
     end
