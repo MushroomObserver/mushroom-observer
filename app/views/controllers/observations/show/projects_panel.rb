@@ -62,11 +62,20 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
   def render_item(project)
     li do
       Link(type: :object, object: project)
-      if project.member_by_query?(@user)
+      if member_project_ids.include?(project.id)
         whitespace
         render_remove_button(project)
       end
     end
+  end
+
+  # manage_link? (called via render_panel? before render_list ever
+  # runs) already loads @user.projects_member -- reuse it instead of
+  # a per-project query, and instead of Observation.show_includes_tree
+  # eager-loading every listed project's full member list just to
+  # answer this same question in-memory.
+  def member_project_ids
+    @member_project_ids ||= (@user&.projects_member || []).to_set(&:id)
   end
 
   def render_remove_button(project)

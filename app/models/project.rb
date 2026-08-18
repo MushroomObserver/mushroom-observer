@@ -245,20 +245,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     user && user_group.users.member?(user)
   end
 
-  # Same test as #member?, via a targeted EXISTS query instead of an
-  # in-memory Array#member? check. Queries UserGroupUser directly by
-  # user_group_id (a plain column, not an association) so it works
-  # under strict_loading without needing user_group -- or its own
-  # users association -- eager-loaded. Use this where user_group.users
-  # isn't (and shouldn't be) preloaded, e.g. once per project in a
-  # list, so checking membership doesn't force loading every project's
-  # full member list just to test one user against it.
-  def member_by_query?(user)
-    return false unless user
-
-    UserGroupUser.exists?(user_group_id: user_group_id, user_id: user.id)
-  end
-
   # Is +user+ an admin for this Project? Reflects actual admin_group
   # membership only — see #member? note about Site Admins.
   def is_admin?(user)
