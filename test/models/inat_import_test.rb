@@ -79,6 +79,47 @@ class InatImportTest < ActiveSupport::TestCase
     assert_equal(0, inat_imports(:lone_wolf_import).estimated_remaining_time)
   end
 
+  def test_total_expected_time_capped_when_over_cap
+    import = inat_imports(:roy_inat_import)
+    import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE * import.initial_avg_import_seconds,
+      import.total_expected_time,
+      "Expected time should reflect the capped target, not the raw " \
+      "(uncapped) total_importables"
+    )
+  end
+
+  def test_estimated_remaining_time_before_any_imported_capped_when_over_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing",
+                   total_importables: InatImport::MAX_IMPORTABLE + 50,
+                   imported_count: 0, started_at: Time.zone.now,
+                   ended_at: nil)
+
+    assert_equal(
+      import.total_expected_time, import.estimated_remaining_time,
+      "Before any obs imported, fall back to the up-front (capped) estimate"
+    )
+  end
+
+  def test_extrapolated_remaining_time_uses_capped_total
+    import = inat_imports(:rolf_inat_import)
+    import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50,
+                   imported_count: 5)
+    import.define_singleton_method(:elapsed_time) { 10.0 }
+
+    remaining = InatImport::MAX_IMPORTABLE - 5
+    expected = (remaining * 10.0 / 5).round
+
+    assert_equal(
+      expected, import.send(:extrapolated_remaining_time),
+      "Extrapolation should use the capped total, not the raw " \
+      "(uncapped) total_importables"
+    )
+  end
+
   def test_adequate_constraints
     assert(
       inat_imports(:rolf_inat_import).adequate_constraints?,
