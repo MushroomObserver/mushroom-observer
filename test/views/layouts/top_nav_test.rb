@@ -163,7 +163,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     html = render(top_nav(user: @user, banner: banners(:one)))
 
     assert_html(html,
-                "button.top_nav_button.top_nav_icon_button.hidden-xs" \
+                "button.top_nav_button.top_nav_icon_button" \
                 "[data-banner-target='showButton'] " \
                 "svg.mo-icon-interests[aria-label='#{:banner_show_tooltip.t}']")
   end

@@ -137,10 +137,6 @@
 // baseline (the default) leaves room below it for a descender it
 // doesn't have, which stretches the surrounding line's height and
 // throws off spacing vs. sibling lines with no icon-link on them.
-// The icon glyph and any visible text (e.g. an "Add" label) get the
-// same treatment so they line up with EACH OTHER too, instead of
-// each defaulting to its own baseline (which put visible text below
-// the icon).
 //
 // .mo-icon's `top: 3px` (see _icons.scss) is a relative offset
 // tuned for icons in their usual (untethered) contexts; inside
@@ -166,7 +162,6 @@
     top: 0;
     width: 1em;
     height: 1em;
-    vertical-align: middle;
   }
 }
 

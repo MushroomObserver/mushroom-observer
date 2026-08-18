@@ -50,6 +50,12 @@ class ModalLinkTest < ComponentTestCase
     assert_html(html, "a.extra-class[href='/edit']")
   end
 
+  def test_size_kwarg_adds_btn_size_class
+    html = render_modal(button: :outline, size: :lg)
+
+    assert_html(html, "a.btn.btn-lg[href='/edit']")
+  end
+
   private
 
   def render_modal(**)
