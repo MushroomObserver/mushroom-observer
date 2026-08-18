@@ -73,5 +73,45 @@ module Observations
       assert_redirected_to(permanent_observation_path(obs.id))
       assert_nil(obs.reload.field_slip)
     end
+
+    # `validate_field_slip` rejects both of these before update_field_slip
+    # ever runs, so the post-validation branches only fire when the slip
+    # changed underneath us between validation and application. A real
+    # race can't be staged, so the status is stubbed -- the point is
+    # that the branch reports rather than failing silently.
+    def test_update_warns_when_field_slip_turns_invalid_after_validation
+      obs = observations(:coprinus_comatus_obs)
+      login("rolf")
+
+      stub_update_field_slip(:invalid) do
+        put(:update, params: { id: obs.id, field_code: "EOL-9999" })
+      end
+
+      assert_flash_error
+      assert_unprocessable
+      assert_nil(obs.reload.field_slip)
+    end
+
+    def test_update_warns_when_field_slip_fills_after_validation
+      obs = observations(:coprinus_comatus_obs)
+      login("rolf")
+
+      stub_update_field_slip(:too_many) do
+        put(:update, params: { id: obs.id, field_code: "EOL-9999" })
+      end
+
+      assert_flash_error
+      assert_unprocessable
+      assert_nil(obs.reload.field_slip)
+    end
+
+    private
+
+    def stub_update_field_slip(status)
+      @controller.define_singleton_method(:update_field_slip) { |*| status }
+      yield
+    ensure
+      @controller.singleton_class.remove_method(:update_field_slip)
+    end
   end
 end
