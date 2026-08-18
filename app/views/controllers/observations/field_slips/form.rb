@@ -22,18 +22,5 @@ module Views::Controllers::Observations::FieldSlips
     def form_action
       observation_field_slip_path(id: @observation.id)
     end
-
-    private
-
-    # Override form_tag -- the FormObject is never "persisted", so
-    # Superform's default persisted?-based method inference would pick
-    # POST. This always PUTs to the same observation.
-    def form_tag(&block)
-      form(action: form_action, method: :put, **form_attributes, &block)
-    end
-
-    def form_attributes
-      { id: @attributes[:id], data: @attributes[:data] || {} }
-    end
   end
 end

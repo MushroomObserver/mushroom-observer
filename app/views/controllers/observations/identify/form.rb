@@ -34,10 +34,15 @@ module Views::Controllers::Observations::Identify
 
     private
 
+    # rubocop:disable MO/NoHandRolledFormTag -- GET is achievable via
+    # method: :get on the constructor, but form_attributes below needs
+    # runtime-computed values (selected/initial_controller), not just
+    # the constructor's static @attributes passthrough.
     def form_tag(&block)
       form(action: form_action, method: :get,
            **form_attributes, &block)
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       {

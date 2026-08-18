@@ -17,6 +17,7 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
@@ -95,6 +96,17 @@ MO/NoActiveRecordRelationProp:
     materialize with .to_a at the call site and use _Array(<Model>)
     instead, so the element type is checked too -- see
     lib/rubocop/cop/mo/no_active_record_relation_prop.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+
+MO/NoHandRolledFormTag:
+  Description: >-
+    Superform-based forms must not override `form_tag` -- use
+    `method: :get` on the constructor (Superform's default `form_tag`
+    already handles it) or a `persisted?` override on the FormObject
+    to force PATCH/PUT -- see lib/rubocop/cop/mo/no_hand_rolled_form_tag.rb.
   Enabled: true
   Include:
     - "app/components/**/*.rb"

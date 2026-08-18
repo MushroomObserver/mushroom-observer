@@ -63,9 +63,14 @@ module Views::Controllers::Admin::BlockedIps
       @list.page.present? && @list.total_pages.present?
     end
 
+    # rubocop:disable MO/NoHandRolledFormTag -- plain POST is
+    # Superform's own default, but form_attributes below needs a
+    # computed id/class/data merge (@type), not just the constructor's
+    # static @attributes passthrough.
     def form_tag(&block)
       form(action: action_path, method: :post, **form_attributes, &block)
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       {

@@ -46,9 +46,14 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
 
   private
 
+  # rubocop:disable MO/NoHandRolledFormTag -- GET is achievable via
+  # method: :get on the constructor, but form_attributes below needs a
+  # computed id/data merge, not just the constructor's static
+  # @attributes passthrough.
   def form_tag(&block)
     form(action: @filter_path, method: :get, **form_attributes, &block)
   end
+  # rubocop:enable MO/NoHandRolledFormTag
 
   def form_attributes
     {

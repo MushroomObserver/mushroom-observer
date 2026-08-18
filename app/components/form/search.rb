@@ -49,9 +49,14 @@ class Components::Form::Search < Components::ApplicationForm
 
   # Form configuration
 
+  # rubocop:disable MO/NoHandRolledFormTag -- plain POST is Superform's
+  # own default, but form_attributes below needs a computed id/data
+  # merge (search_type, dropdown?), not just the constructor's static
+  # @attributes passthrough.
   def form_tag(&block)
     form(action: form_action, method: :post, **form_attributes, &block)
   end
+  # rubocop:enable MO/NoHandRolledFormTag
 
   # Every search controller nests under `namespace :<search_type> do
   # resource :search, only: [:new, :create] end`, so this is always

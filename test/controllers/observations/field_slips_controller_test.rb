@@ -9,8 +9,14 @@ module Observations
       requires_login(:edit, id: obs.id)
 
       assert_response(:success)
-      assert_select("form[action=?]", observation_field_slip_path(id: obs.id),
-                    count: 1)
+      # method="put"/"patch" isn't valid HTML5 -- a real browser would
+      # submit as GET (no matching route) unless the form spoofs the
+      # method via a hidden _method field on an actual method="post"
+      # form. Controller tests calling `put(:update, ...)` directly
+      # bypass this entirely, so it needs its own assertion.
+      assert_select("form[action=?][method='post']",
+                    observation_field_slip_path(id: obs.id), count: 1)
+      assert_select("form input[name='_method'][value=?]", "patch")
     end
 
     def test_edit_no_permission

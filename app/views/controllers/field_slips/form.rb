@@ -31,7 +31,10 @@ module Views::Controllers::FieldSlips
 
     private
 
-    # Override form_tag so we can use GET for the code-only entry form.
+    # rubocop:disable MO/NoHandRolledFormTag -- method needs to switch
+    # between GET (no code yet) and the default's persisted?-driven
+    # PATCH/PUT (code exists) based on runtime model state, which a
+    # static method: kwarg on the constructor can't express.
     def form_tag(&block)
       if model.code
         super
@@ -40,6 +43,7 @@ module Views::Controllers::FieldSlips
              **form_attributes, &block)
       end
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       # Forward @attributes[:data] so ApplicationForm's data-turbo
