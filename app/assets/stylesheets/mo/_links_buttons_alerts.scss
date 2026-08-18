@@ -117,6 +117,14 @@
   }
 }
 
+// The id-badge column of a "table-style" list-group row
+// (Projects::ListItem, SpeciesLists::Listing) -- badge width varies
+// with digit count, so without a floor the title column's left edge
+// drifts row to row.
+.id-badge-col {
+  min-width: 6rem;
+}
+
 // Icon-only inline mod/add links (Components::InlineCRUDLinks'
 // edit/destroy/add links, applied directly to each link/button's own
 // element -- not a wrapper, see Components::InlineLinkBlock). No

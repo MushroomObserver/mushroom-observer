@@ -29,7 +29,9 @@ module Views::Controllers::Projects
     # between the badge and the button instead of hugging it left.
     def render_info
       div(class: "list_info d-flex align-items-start") do
-        div(class: "text-larger") { IDBadge(object: @project, size: :md) }
+        div(class: "id-badge-col") do
+          IDBadge(object: @project, size: :xl)
+        end
         div do
           render_title_row
           render_meta_row
@@ -62,10 +64,18 @@ module Views::Controllers::Projects
     # one or more of its constraints -- doesn't block the add, mirrors
     # `Observations::Form::Projects`'s warning-not-gate behavior.
     def render_violation_warning
-      labels = @violation_kinds.map do |kind|
-        :"form_observations_projects_kind_#{kind}".l
+      div(class: "mt-1") do
+        @violation_kinds.each_with_index do |kind, index|
+          whitespace if index.positive?
+          render_violation_badge(kind)
+        end
       end
-      div(class: "text-warning small mt-1") { plain(labels.join("; ")) }
+    end
+
+    def render_violation_badge(kind)
+      span(class: "badge badge-warning") do
+        plain(:"form_observations_projects_kind_#{kind}".l)
+      end
     end
 
     def render_manage_section
@@ -81,8 +91,11 @@ module Views::Controllers::Projects
     def render_remove_obs_button
       Button(
         type: :put,
-        variant: :strip,
+        variant: :outline,
+        icon: :remove,
+        icon_class: "text-danger",
         name: :remove.ti,
+        label: true,
         target: observation_project_path(
           id: @observation.id, project_id: @project.id, commit: "remove"
         ),
@@ -94,6 +107,8 @@ module Views::Controllers::Projects
       Button(
         type: :put,
         name: :add.ti,
+        icon: :attach,
+        label: true,
         target: observation_project_path(
           id: @observation.id, project_id: @project.id, commit: "add"
         )

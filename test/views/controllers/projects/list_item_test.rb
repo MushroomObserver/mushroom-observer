@@ -78,15 +78,17 @@ module Views::Controllers::Projects
       project = projects(:eol_project)
       html = render_item(project: project, violation_kinds: [:date, :bbox])
 
-      assert_includes(html, :form_observations_projects_kind_date.l)
-      assert_includes(html, :form_observations_projects_kind_bbox.l)
+      assert_html(html, ".badge-warning",
+                  text: :form_observations_projects_kind_date.l)
+      assert_html(html, ".badge-warning",
+                  text: :form_observations_projects_kind_bbox.l)
     end
 
     def test_no_violation_warning_when_no_kinds
       project = projects(:eol_project)
       html = render_item(project: project, violation_kinds: [])
 
-      assert_no_html(html, ".text-warning")
+      assert_no_html(html, ".badge-warning")
     end
 
     private
