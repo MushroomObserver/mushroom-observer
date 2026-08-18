@@ -16,18 +16,27 @@ module Views::Controllers::Projects
     prop :violation_kinds, _Array(Symbol), default: -> { [] }
 
     def view_template
-      div(class: "text-larger") do
-        IDBadge(object: @project, size: :md)
-      end
-      div do
-        render_title_row
-        render_meta_row
-        render_violation_warning if @violation_kinds.any?
-      end
+      render_info
       render_manage_section if @remove || @add
     end
 
     private
+
+    # Badge + title/meta wrapped in one flex child -- keeps the outer
+    # row (in `Observations::Projects::Edit`'s add/remove context) to
+    # exactly two `justify-content-between` children (info, manage
+    # section); three top-level children would center this block
+    # between the badge and the button instead of hugging it left.
+    def render_info
+      div(class: "list_info d-flex align-items-start") do
+        div(class: "text-larger") { IDBadge(object: @project, size: :md) }
+        div do
+          render_title_row
+          render_meta_row
+          render_violation_warning if @violation_kinds.any?
+        end
+      end
+    end
 
     def render_title_row
       div do
