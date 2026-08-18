@@ -156,6 +156,12 @@ class InatImport < ApplicationRecord
     imported_count.to_i >= MAX_IMPORTABLE
   end
 
+  # This run will never import more than MAX_IMPORTABLE, regardless of how
+  # many observations are actually available.
+  def capped_total_importables
+    [total_importables.to_i, MAX_IMPORTABLE].min
+  end
+
   # Observations beyond MAX_IMPORTABLE that a single run of this size
   # won't import. 0 when count is at or under the cap.
   def self.excess_over_cap(count)

@@ -60,4 +60,21 @@ class InatObservationImporterTest < UnitTestCase
       importer.import_page(page)
     end
   end
+
+  def test_reached_import_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE)
+    user = import.user
+    mock_inat_response = File.read("test/inat/calostoma_lutescens.txt")
+    page = JSON.parse(mock_inat_response)
+
+    importer = ::Inat::ObservationImporter.new(import, user)
+    assert_no_difference(
+      "Observation.count",
+      "ObservationImporter should stop importing once MAX_IMPORTABLE " \
+      "is reached, even within a single page"
+    ) do
+      importer.import_page(page)
+    end
+  end
 end

@@ -90,7 +90,9 @@ module Views::Controllers::InatImports
       whitespace
       plain(:of.l)
       whitespace
-      plain(@inat_import.total_importables.to_s)
+      span(id: "total_importables_count") do
+        plain(@inat_import.capped_total_importables.to_s)
+      end
       whitespace
       plain(:observations.l)
     end

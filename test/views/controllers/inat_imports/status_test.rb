@@ -210,6 +210,26 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{reimport_path}']")
     end
 
+    def test_importables_count_uncapped_when_under_cap
+      @import.update_columns(
+        importables: 4, total_importables: 4, imported_count: 3
+      )
+      html = render_status
+
+      assert_html(html, "#total_importables_count", text: "4")
+    end
+
+    def test_importables_count_capped_when_over_cap
+      @import.update_columns(
+        total_importables: InatImport::MAX_IMPORTABLE + 50,
+        imported_count: InatImport::MAX_IMPORTABLE
+      )
+      html = render_status
+
+      assert_html(html, "#total_importables_count",
+                  text: InatImport::MAX_IMPORTABLE.to_s)
+    end
+
     private
 
     def render_status

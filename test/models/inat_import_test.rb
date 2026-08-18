@@ -350,4 +350,34 @@ class InatImportTest < ActiveSupport::TestCase
       "Nil count should have no excess"
     )
   end
+
+  def test_capped_total_importables_below_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: InatImport::MAX_IMPORTABLE - 1)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE - 1, import.capped_total_importables,
+      "Total below MAX_IMPORTABLE should be unchanged"
+    )
+  end
+
+  def test_capped_total_importables_above_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: InatImport::MAX_IMPORTABLE + 50)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE, import.capped_total_importables,
+      "Total above MAX_IMPORTABLE should be capped"
+    )
+  end
+
+  def test_capped_total_importables_zero_when_nil
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: nil)
+
+    assert_equal(
+      0, import.capped_total_importables,
+      "Nil total_importables should cap to zero"
+    )
+  end
 end
