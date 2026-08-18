@@ -7,6 +7,7 @@
 module Views::Controllers::Observations::FieldSlips
   class Edit < Views::FullPageBase
     prop :observation, ::Observation
+    prop :field_code, _Nilable(String), default: nil
 
     def view_template
       add_page_title(
@@ -19,7 +20,7 @@ module Views::Controllers::Observations::FieldSlips
       )
 
       div(class: "p-3") do
-        render(Form.new(observation: @observation))
+        render(Form.new(observation: @observation, field_code: @field_code))
       end
     end
   end

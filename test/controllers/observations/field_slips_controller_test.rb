@@ -68,6 +68,19 @@ module Observations
       # .claude/rules/turbo_submit_forms.md).
       assert_unprocessable
       assert_nil(obs.reload.field_slip)
+      # The rejected code should still be in the field, not lost.
+      assert_select("input[name='field_code'][value=?]", "123-456")
+    end
+
+    def test_attach_blank_field_slip_code
+      obs = observations(:coprinus_comatus_obs)
+      login("rolf")
+
+      put(:update, params: { id: obs.id, field_code: "" })
+
+      assert_flash_error
+      assert_unprocessable
+      assert_nil(obs.reload.field_slip)
     end
 
     def test_update_no_permission

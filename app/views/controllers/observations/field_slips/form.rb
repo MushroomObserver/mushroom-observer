@@ -7,14 +7,15 @@ module Views::Controllers::Observations::FieldSlips
   class Form < Components::ApplicationForm
     prop :observation, ::Observation
 
-    def initialize(_model = nil, observation:, **attrs)
-      super(FormObject::FieldSlipAttach.new, observation: observation,
-                                             **attrs)
+    def initialize(_model = nil, observation:, field_code: nil, **attrs)
+      super(FormObject::FieldSlipAttach.new(field_code: field_code),
+            observation: observation, **attrs)
     end
 
     def view_template
       super do
-        text_field("field_code", label: :field_slip_code)
+        text_field("field_code", value: model.field_code,
+                                 label: :field_slip_code)
         submit(:field_slip_attach_submit.t)
       end
     end
