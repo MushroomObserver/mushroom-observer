@@ -250,13 +250,6 @@ a:not(.btn):not(.inline-icon-link) > .mo-icon,
   align-items: center;
 }
 
-// Flex sizes the button to its icon + padding alone, which falls short
-// of its sibling .form-control's line-height-driven height inside the
-// same table-cell row -- .form-control is sized off this same variable.
-.input-group-btn .btn:has(.mo-icon) {
-  min-height: $input-height-base;
-}
-
 .spinner-right {
   line-height: 1.1 !important;
   animation: spin-r 1s infinite linear;

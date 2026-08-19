@@ -29,12 +29,12 @@ module FieldSlipsController::Show
 
   def render_show_or_keep_redirect
     respond_to do |format|
-      format.html { render_show_phlex }
+      format.html { render_show_view }
       format.json # auto-renders show.json.jbuilder
     end
   end
 
-  def render_show_phlex
+  def render_show_view
     render(Views::Controllers::FieldSlips::Show.new(
              field_slip: @field_slip, notice: flash[:notice]
            ))

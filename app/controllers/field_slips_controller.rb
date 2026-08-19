@@ -34,13 +34,13 @@ class FieldSlipsController < ApplicationController
     else
       flash_notice(:field_slip_cant_join_project.t)
     end
-    render_new_phlex
+    render_new_view
   end
 
   # GET /field_slips/1/edit
   def edit
     @recent_observations = recent_edit_observations
-    render_edit_phlex
+    render_edit_view
   end
 
   # POST /field_slips or /field_slips.json
@@ -59,7 +59,7 @@ class FieldSlipsController < ApplicationController
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
-        format.html { render_new_phlex(status: :unprocessable_content) }
+        format.html { render_new_view_invalid }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_content)
         end
@@ -75,7 +75,7 @@ class FieldSlipsController < ApplicationController
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
         @field_slip.reload
-        format.html { render_edit_phlex(status: :unprocessable_content) }
+        format.html { render_edit_view_invalid }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_content)
         end
@@ -107,8 +107,7 @@ class FieldSlipsController < ApplicationController
   # the observation is saved, so abandoning the form leaves no orphan slip.
   # An invalid code is rejected here rather than after the whole obs form.
   def create_deferred_for_add_images
-    return render_new_phlex(status: :unprocessable_content) unless
-      @field_slip.valid?
+    return render_new_view_invalid unless @field_slip.valid?
 
     redirect_to(new_observation_url(
                   field_code: @field_slip.code,
@@ -120,7 +119,7 @@ class FieldSlipsController < ApplicationController
                 ))
   end
 
-  def render_new_phlex(**render_opts)
+  def render_new_view(**render_opts)
     # The `:new` action populates these; the `:create` validation-
     # failure path and the project-gaps path enter through render_
     # new_phlex without running `:new`, so backfill from params /
@@ -140,7 +139,7 @@ class FieldSlipsController < ApplicationController
     )
   end
 
-  def render_edit_phlex(**render_opts)
+  def render_edit_view(**render_opts)
     # The `:edit` action populates `@recent_observations`; the
     # `:update` validation-failure and project-gaps re-render
     # paths skip it, so backfill via the same query the action
@@ -180,7 +179,7 @@ class FieldSlipsController < ApplicationController
       # (see turbo_submit_forms.md) -- needs a non-2xx status even
       # though nothing actually "failed" yet; the field slip just
       # isn't fully resolved until the user handles the project gaps.
-      render_edit_phlex(status: :unprocessable_content)
+      render_edit_view_invalid
     else
       redirect_to(field_slip_url(@field_slip),
                   notice: :field_slip_updated.t)
@@ -224,7 +223,7 @@ class FieldSlipsController < ApplicationController
         # (see turbo_submit_forms.md) -- needs a non-2xx status even
         # though nothing actually "failed" yet; the field slip just
         # isn't fully resolved until the user handles the project gaps.
-        render_new_phlex(status: :unprocessable_content)
+        render_new_view_invalid
       elsif obs
         redirect_to(observation_url(obs), notice: msg)
       else

@@ -21,10 +21,12 @@ require:
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
+  - ./lib/rubocop/cop/mo/no_render_phlex_method_name
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
   - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
+  - ./lib/rubocop/cop/mo/status_kwarg_outside_invalid_method
   - ./lib/rubocop/cop/mo/unguarded_params_to_prop
 
 AllCops:
@@ -196,6 +198,18 @@ MO/NoRawLinkOrButtonTo:
     # Genuinely a different primitive, not a bypass of Button.
     - "app/components/id_badge.rb"
 
+MO/NoRenderPhlexMethodName:
+  Description: >-
+    A controller render-dispatch method named render_phlex_* -- the
+    whole app is Phlex now, so the qualifier carries no information.
+    Use render_<action>_view instead (render_new_view,
+    render_edit_view, render_show_view, ...) -- see
+    lib/rubocop/cop/mo/no_render_phlex_method_name.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+
 MO/PreferKitSyntax:
   Description: >-
     Phlex views/components should call Foo(...) (Kit syntax) rather
@@ -225,6 +239,18 @@ MO/SelfStatusOutsideInvalidMethod:
     hand-rolled anti-pattern this sweep exists to prevent -- fold it
     into a *_invalid method instead. See
     lib/rubocop/cop/mo/self_status_outside_invalid_method.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+
+MO/StatusKwargOutsideInvalidMethod:
+  Description: >-
+    status: :unprocessable_content passed as a kwarg outside a
+    *_invalid-named method is the same hand-rolled anti-pattern
+    MO/SelfStatusOutsideInvalidMethod bans for `self.status = ...` --
+    fold it into a *_invalid method instead. See
+    lib/rubocop/cop/mo/status_kwarg_outside_invalid_method.rb and
     .claude/rules/turbo_submit_forms.md (issue #5052).
   Enabled: true
   Include:
