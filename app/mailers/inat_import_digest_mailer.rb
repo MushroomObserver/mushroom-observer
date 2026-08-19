@@ -6,12 +6,13 @@
 # imported naming — the batching that keeps a large import from flooding
 # the mail queue. See #4757.
 class InatImportDigestMailer < ApplicationMailer
-  def build(receiver:, namings:)
+  def build(receiver:, namings:, total_observations: nil)
     setup_user(receiver)
-    count = namings.map(&:observation_id).uniq.size
-    subject = :email_subject_inat_import_digest.l(count: count)
-    debug_log(:inat_import_digest, nil, receiver, count: count.to_s)
+    total = total_observations || namings.map(&:observation_id).uniq.size
+    subject = :email_subject_inat_import_digest.l(count: total)
+    debug_log(:inat_import_digest, nil, receiver, count: total.to_s)
     mo_mail(subject, to: receiver,
-                     view_params: { subject:, receiver:, namings: })
+                     view_params: { subject:, receiver:, namings:,
+                                    total_observations: total })
   end
 end
