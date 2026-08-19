@@ -37,9 +37,9 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups/1/edit
   def edit
     @visual_group = VisualGroup.find(params[:id])
-    @filter = params.permit(:filter)[:filter]
+    @filter = edit_filter.filter
     @filter = @visual_group.name unless @filter && @filter != ""
-    @status = status_from_params(params)
+    @status = edit_filter.status
     @vals = calc_edit_vals
     setup_pagination
     render(Views::Controllers::VisualGroups::Edit.new(
@@ -59,11 +59,12 @@ class VisualGroupsController < ApplicationController
     @subset = @vals[@pagination_data.from..@pagination_data.to]
   end
 
-  def status_from_params(params)
-    return "included" if params[:commit] == :visual_group_included.t
-    return "excluded" if params[:commit] == :visual_group_excluded.t
+  def edit_filter
+    @edit_filter ||= FormObject::VisualGroupFilter.new(edit_filter_params)
+  end
 
-    params.permit(:status)[:status] || "needs_review"
+  def edit_filter_params
+    params.fetch(:visual_group_filter, {}).permit(:status, :filter)
   end
 
   # POST /visual_groups or /visual_groups.json
