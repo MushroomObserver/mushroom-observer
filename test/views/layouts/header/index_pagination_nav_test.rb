@@ -7,7 +7,6 @@ module Views::Layouts
     def setup
       super
       @request_url = "/observations?q%5Bmodel%5D=Observation"
-      @form_action_url = "http://test.host/observations"
     end
 
     def test_renders_basic_structure_with_position_top
@@ -32,7 +31,7 @@ module Views::Layouts
       assert_includes(html, 'class="paginate pagination_numbers flex-bar')
       assert_includes(html, "prev_page_link")
       assert_includes(html, "next_page_link")
-      assert_includes(html, 'class="navbar-form px-0 page_input"')
+      assert_includes(html, 'class="input-group page-input mx-2"')
       # Should have the max page link (5 pages = 50/10)
       assert_nested(
         html, parent_selector: "nav.pagination_numbers",
@@ -77,44 +76,36 @@ module Views::Layouts
       assert_html(html, "a.next_page_link:not(.disabled)")
     end
 
-    def test_page_input_form_has_correct_structure
+    # No <form> -- the goto input is a free element and "Goto" is a
+    # plain link (page-input_controller.js keeps it in sync
+    # client-side). MO's suite is Ruby-only, so the Stimulus behavior
+    # itself isn't covered here.
+    def test_page_input_group_has_correct_structure
       html = render_nav(pagination_data: paginated(50, 2))
 
-      assert_html(html, "form.page_input",
-                  attribute: { action: @form_action_url })
-      assert_includes(html, 'data-controller="page-input"')
-      # GET forms aren't Turbo-safe by default either (see
-      # .claude/rules/turbo_submit_forms.md).
-      assert_html(html, "form.page_input[data-turbo='false']")
-      assert_nested(
-        html, parent_selector: "form.page_input",
-              child_selector: "div.input-group.page-input"
+      assert_no_html(html, "form.page_input")
+      assert_html(
+        html, "div.input-group.page-input[data-controller='page-input']",
+        count: 1
       )
       # Input should have current page value
       assert_html(html, "input[name='page']", attribute: { value: "2" })
     end
 
-    # Reads through `q_param(current_query)`: stub current_query with
-    # a saved Query whose params include `order_by`, and the hidden
-    # fields should match the model + order_by shape.
-    def test_renders_q_hidden_fields
-      query = ::Query.lookup(:Observation, order_by: :created_at)
-      query.save
-      stub_current_query(query)
+    def test_page_goto_link_points_at_current_page
+      html = render_nav(pagination_data: paginated(50, 2))
 
-      html = render_nav(pagination_data: paginated(50, 1))
-
-      assert_html(html, "input[type='hidden'][name='q[model]']",
-                  attribute: { value: "Observation" })
-      assert_html(html, "input[type='hidden'][name='q[order_by]']",
-                  attribute: { value: "created_at" })
+      assert_html(html, "a[href='/observations?page=2" \
+                        "&q%5Bmodel%5D=Observation']")
     end
 
-    # Default current_query (nil) → no q-hidden-fields rendered.
-    def test_renders_no_q_hidden_fields_without_current_query
-      html = render_nav(pagination_data: paginated(50, 1))
+    def test_page_goto_link_has_translated_tooltip
+      html = render_nav(pagination_data: paginated(50, 2))
 
-      assert_no_html(html, "input[type='hidden'][name^='q[']")
+      assert_html(
+        html, "a[data-page-input-target='goToLink'] svg",
+        attribute: { title: :goto_page_tooltip.t(number: 2) }
+      )
     end
 
     def test_renders_letter_pagination_when_needed
@@ -127,7 +118,25 @@ module Views::Layouts
 
       assert_includes(html, 'class="paginate pagination_letters flex-bar')
       assert_html(html, "input[name='letter']", attribute: { value: "A" })
-      assert_html(html, "form.page_input[data-turbo='false']")
+      assert_no_html(html, "form.page_input")
+      assert_html(
+        html, "div.input-group.page-input[data-controller='page-input']"
+      )
+    end
+
+    def test_letter_goto_link_clears_page_number
+      pagination_data = ::PaginationData.new(
+        number: 1, num_per_page: 10, num_total: 50, number_arg: :page,
+        letter_arg: :letter, letter: "B", used_letters: %w[A B C]
+      )
+
+      html = render_nav(pagination_data: pagination_data,
+                        request_url: "/observations?page=3&letter=A")
+
+      assert_nested(
+        html, parent_selector: "nav.pagination_letters",
+              child_selector: "a[href='/observations?letter=B']"
+      )
     end
 
     def test_does_not_render_letter_pagination_when_not_needed
@@ -153,24 +162,9 @@ module Views::Layouts
       assert_nested(html, parent_selector: "nav.pagination_numbers",
                           child_selector: "a.prev_page_link")
       assert_nested(html, parent_selector: "nav.pagination_numbers",
-                          child_selector: "form.page_input")
+                          child_selector: "div.input-group.page-input")
       assert_nested(html, parent_selector: "nav.pagination_numbers",
                           child_selector: "a.next_page_link")
-    end
-
-    def test_renders_letter_hidden_field_in_page_form
-      pagination_data = ::PaginationData.new(
-        number: 1, num_per_page: 10, num_total: 50, number_arg: :page,
-        letter_arg: :letter, letter: "B", used_letters: %w[A B C]
-      )
-
-      html = render_nav(pagination_data: pagination_data,
-                        letter_param: "B")
-
-      assert_nested(
-        html, parent_selector: "nav.pagination_numbers form.page_input",
-              child_selector: "input[type='hidden'][name='letter'][value='B']"
-      )
     end
 
     def test_renders_nothing_when_pagination_data_nil
@@ -225,17 +219,12 @@ module Views::Layouts
       Views::Layouts::Header::IndexPaginationNav.new(
         position: :top,
         request_url: @request_url,
-        form_action_url: @form_action_url,
         **overrides
       )
     end
 
     def render_nav(**overrides)
       render(build_nav(**overrides))
-    end
-
-    def stub_current_query(query)
-      controller.instance_variable_set(:@query, query)
     end
   end
 end
