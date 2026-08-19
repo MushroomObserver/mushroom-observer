@@ -13,7 +13,7 @@ module Observations
     def edit
       return unless attachable_or_redirect?
 
-      render_phlex_edit
+      render_edit_view
     end
 
     def update
@@ -21,8 +21,7 @@ module Observations
 
       validate_field_slip
       if @any_errors
-        render_phlex_edit(field_code: field_code,
-                          status: :unprocessable_content)
+        render_edit_view_invalid(field_code: field_code)
         return
       end
 
@@ -57,7 +56,7 @@ module Observations
       find_or_goto_index(Observation, params[:id])
     end
 
-    def render_phlex_edit(field_code: nil, **render_opts)
+    def render_edit_view(field_code: nil, **render_opts)
       render(
         Views::Controllers::Observations::FieldSlips::Edit.new(
           observation: @observation, field_code: field_code
@@ -94,8 +93,7 @@ module Observations
 
     def redirect_to_observation_or_reload
       if @any_errors
-        render_phlex_edit(field_code: field_code,
-                          status: :unprocessable_content)
+        render_edit_view_invalid(field_code: field_code)
       else
         redirect_to(permanent_observation_path(@observation.id))
       end
