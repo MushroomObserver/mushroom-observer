@@ -54,11 +54,15 @@ module Account::Profile
              status: status, **render_opts)
     end
 
+    def render_reuse_view_invalid(**)
+      render_reuse_view(**)
+      self.status = :unprocessable_content
+    end
+
     def render_reuse_with_invalid_id_error
       flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
       load_images_to_reuse
-      render_reuse_view(location: account_profile_select_image_path,
-                        status: :unprocessable_content)
+      render_reuse_view_invalid(location: account_profile_select_image_path)
     end
 
     def attach_image_for_profile_and_flash_notice(image)

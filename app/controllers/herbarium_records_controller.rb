@@ -100,7 +100,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html { render_new_phlex }
+      format.html { render_new_view }
     end
   end
 
@@ -121,7 +121,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html { render_edit_phlex }
+      format.html { render_edit_view }
     end
   end
 
@@ -160,14 +160,14 @@ class HerbariumRecordsController < ApplicationController
     find_herbarium_record!
   end
 
-  def render_new_phlex
+  def render_new_view
     render(Views::Controllers::HerbariumRecords::New.new(
              herbarium_record: @herbarium_record,
              observation: @observation, user: @user
            ))
   end
 
-  def render_edit_phlex
+  def render_edit_view
     render(Views::Controllers::HerbariumRecords::Edit.new(
              herbarium_record: @herbarium_record, user: @user,
              back: @back, back_object: @back_object

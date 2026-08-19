@@ -17,13 +17,13 @@ module Observations::Namings
 
       respond_to do |format|
         format.turbo_stream { render_votes_modal }
-        format.html { render_phlex_index }
+        format.html { render_index_view }
       end
     end
 
     private
 
-    def render_phlex_index
+    def render_index_view
       render(Views::Controllers::Observations::Namings::Votes::Index.new(
                naming: @naming
              ))

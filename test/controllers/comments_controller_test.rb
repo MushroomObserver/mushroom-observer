@@ -391,7 +391,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_create_comment_with_invalid_params_re_renders_form
     # `reload_form` HTML branch: missing summary fails save and
-    # falls through to `render_phlex_new`.
+    # falls through to `render_new_view`.
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id, type: "Observation",
                comment: { summary: "", comment: "Body" } }
