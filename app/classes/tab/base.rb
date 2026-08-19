@@ -136,27 +136,14 @@ class Tab::Base
   # carry the current Query through (e.g. "back to filtered index"
   # links on a show page).
   #
-  # Accepts either:
-  # - a String q_param (the alphabetized-id form — `?q=ABCDE`), or
-  # - a Hash q_param (the model+params form returned by
-  #   `Query#q_param` — `?q[model]=Observation&q[locations][]=1`)
-  #
-  # Uses Rails' `Hash#to_query` (not `Rack::Utils.build_query`)
-  # because Rack stringifies a nested Hash value as a literal Ruby
-  # `inspect` rep; `to_query` recurses correctly into nested
-  # hashes and arrays. Caught by the related_records integration
-  # tests that exercise `Tab::Location::ObservationsAt` — Query#q_param
-  # returns a Hash for newly-created queries, and the resulting URL
-  # was an unparseable literal Ruby Hash rep encoded with `+` for
-  # whitespace.
+  # The actual merge is `Query.merge_q_param_into_url` -- see there
+  # for the String/Hash value shapes and why it uses `Hash#to_query`.
+  # Shared with `ApplicationController::Queries#add_q_param`, which
+  # resolves `q_param_value` from ambient session/request state before
+  # calling it; a Tab has no such state, so its callers resolve the
+  # value and pass it in here instead.
   def with_q_param(path, q_param_value)
-    return path if q_param_value.blank?
-
-    uri = URI.parse(path)
-    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
-    parsed["q"] = q_param_value
-    uri.query = parsed.to_query
-    uri.to_s
+    Query.merge_q_param_into_url(path, q_param_value)
   end
 
   # Stable key NavTabs matches against `current:` to decide `.active`.

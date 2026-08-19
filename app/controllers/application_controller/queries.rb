@@ -289,7 +289,7 @@ module ApplicationController::Queries
     return path_or_params if browser.bot? || !(q_param = q_param(query))
 
     if path_or_params.is_a?(String) # i.e., if "path_or_params" arg is a path
-      append_q_param_to_path(path_or_params, q_param)
+      Query.merge_q_param_into_url(path_or_params, q_param)
     else
       path_or_params[:q] = q_param
       path_or_params
@@ -303,21 +303,6 @@ module ApplicationController::Queries
   def valid_query_model?(model)
     klass = "Query::#{model.to_s.pluralize}".safe_constantize
     klass.is_a?(Class) && klass < Query
-  end
-
-  def append_q_param_to_path(path, q_param)
-    return path unless q_param
-
-    # Figure out if there's an existing URI query_string, like "flow=next"
-    # This query_string is not our q param, it's all the other params.
-    uri = URI.parse(path)
-    query_string = uri.query
-
-    # Parse the query_string as a Ruby hash, and add `q`
-    hash = query_string ? Rack::Utils.parse_query(query_string) : {}
-    hash["q"] = q_param
-    uri.query = hash.to_query
-    uri.to_s
   end
 
   public
