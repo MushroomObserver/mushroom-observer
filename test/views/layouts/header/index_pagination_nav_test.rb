@@ -95,8 +95,9 @@ module Views::Layouts
     def test_page_goto_link_points_at_current_page
       html = render_nav(pagination_data: paginated(50, 2))
 
-      assert_html(html, "a[href='/observations?page=2" \
-                        "&q%5Bmodel%5D=Observation']")
+      # Two attribute-contains selectors, not one exact-match string --
+      # add_args_to_url's param order isn't part of the contract.
+      assert_html(html, "a[href*='page=2'][href*='q%5Bmodel%5D=Observation']")
     end
 
     def test_page_goto_link_has_translated_tooltip
