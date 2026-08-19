@@ -408,7 +408,7 @@ class Query
     { model: model.name.to_sym, **params }
   end
 
-  # Merges an already-serialized `q` param value into a path's
+  # Merges an already-resolved `q` param value into a path's
   # existing query string (preserving other params, e.g. `flow=next`).
   # A plain utility, not tied to any Query instance -- shared by two
   # callers that source the value differently:
