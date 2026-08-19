@@ -59,8 +59,8 @@ class InfoController < ApplicationController
   # statement that the preview "failed".
   def textile_sandbox_create
     code = params[:code] || params.dig(:textile_sandbox, :code)
-    render_new_view(code: code, submit_type: params.permit(:commit)[:commit],
-                    status: :unprocessable_content)
+    render_new_view_invalid(code: code,
+                            submit_type: params.permit(:commit)[:commit])
   end
 
   # Allow translator to enter a special note linked to from the lower left.

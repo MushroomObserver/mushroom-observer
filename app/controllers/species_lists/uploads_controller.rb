@@ -28,7 +28,7 @@ module SpeciesLists
         @species_list.process_file_data(@user, sorter)
         init_name_vars_from_sorter(@species_list, sorter)
         init_project_vars_for_edit(@species_list)
-        render_upload_result_view
+        render_upload_result_view_invalid
       else
         redirect_to(species_list_path(@species_list))
       end
@@ -51,7 +51,7 @@ module SpeciesLists
     # of REST semantics (see turbo_submit_forms.md), so
     # :unprocessable_content is required here purely as a Turbo-
     # mechanics necessity, not a statement that the upload "failed".
-    def render_upload_result_view
+    def render_upload_result_view_invalid
       render(Views::Controllers::SpeciesLists::Edit.new(
                species_list: @species_list,
                projects: @projects,
