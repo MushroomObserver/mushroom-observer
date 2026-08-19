@@ -42,9 +42,8 @@ module Observations
         remove_observation_from_project(@project, @observation)
       else
         flash_error(:runtime_invalid.t(type: '"mode"', value: params[:commit]))
-        render_edit_view(
-          location: edit_observation_projects_path(id: @observation.id),
-          status: :unprocessable_content
+        render_edit_view_invalid(
+          location: edit_observation_projects_path(id: @observation.id)
         )
       end
     end
@@ -61,12 +60,14 @@ module Observations
     end
 
     # `violation_kinds_for` (called per project in @other_projects, in
-    # the Edit view) reads location/target_names/target_locations --
-    # preload them here so that's not an N+1 across the list.
+    # the Edit view) reads location/target_names/target_locations, and
+    # ListItem's meta row reads `project.user` -- preload all of them
+    # so neither is an N+1 across the list.
     def set_project_ivars
       member_ids = @observation.project_ids.to_set
       all_projects = @user.projects_member(
-        order: :title, include: [:location, :target_names, :target_locations]
+        order: :title,
+        include: [:location, :target_names, :target_locations, :user]
       )
       @obs_projects, @other_projects =
         all_projects.partition { |project| member_ids.include?(project.id) }
