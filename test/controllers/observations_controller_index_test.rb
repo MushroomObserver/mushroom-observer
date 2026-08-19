@@ -703,6 +703,72 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
+  # `create_query_from_url_params` (ApplicationController::QueryParamAliases)
+  # isn't wired into any controller action yet (#5137 is the foundation
+  # piece only) -- tested directly via @controller.send, same pattern as
+  # other private-method tests in this file.
+  def test_create_query_from_url_params_resolves_by_alias
+    login
+    raw_params = ActionController::Parameters.new(by: "date")
+
+    query, display_opts = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_equal("date", query.params[:order_by])
+    assert_equal(false, display_opts[:always_index])
+  end
+
+  def test_create_query_from_url_params_ignores_unrecognized_params
+    login
+    raw_params = ActionController::Parameters.new(by: "date",
+                                                  bogus_param: "haxx")
+
+    query, = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_not(query.params.key?(:bogus_param))
+  end
+
+  def test_resolve_param_alias_records_looks_up_record_and_wraps_array
+    login
+    project = projects(:bolete_project)
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project], param_alias: :project)
+    end
+
+    resolved, record_backed = @controller.send(
+      :resolve_param_alias_records, klass,
+      { project: project.id.to_s }, [:project]
+    )
+
+    assert_equal({ projects: [project.id] }, resolved)
+    assert_equal(true, record_backed)
+  end
+
+  # `find_or_goto_index`'s own flash+redirect-on-bad-id behavior is
+  # already covered by test_index_project_with_unknown_id_redirects
+  # (a dispatched request through the existing `project` shortcut) --
+  # this test isolates what resolve_param_alias_records itself does
+  # with a not-found result, stubbing find_or_goto_index so a bare
+  # @controller.send doesn't trip Rails' one-redirect-per-action guard.
+  def test_resolve_param_alias_records_returns_nil_when_lookup_fails
+    login
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project], param_alias: :project)
+    end
+    @controller.define_singleton_method(:find_or_goto_index) { |*| nil }
+
+    resolved, record_backed = @controller.send(
+      :resolve_param_alias_records, klass,
+      { project: "999999999" }, [:project]
+    )
+
+    assert_nil(resolved)
+    assert_equal(false, record_backed)
+  end
+
   def test_index_species_list
     spl = species_lists(:unknown_species_list)
 

@@ -304,8 +304,10 @@ class Query
 
   # NOTE: Declare query subclass attributes with `query_attr`, a custom MO
   # method defined by monkey-patching `Class` in app/extensions/class.rb.
-  # attribute `:order_by` is inherited by all subclasses, necessary for paging.
-  query_attr(:order_by, :string)
+  # attribute `:order_by` is inherited by all subclasses, necessary for
+  # paging. `param_alias: :by` makes the legacy `?by=` URL param a passthrough
+  # alias for `order_by`, inherited by every subclass for free.
+  query_attr(:order_by, :string, param_alias: :by)
 
   validates_with Query::Validator
 
@@ -318,6 +320,7 @@ class Query
   # instance, rather than calling `Query::Subclass.new` directly.
   def self.create_query(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
+    params = klass.resolve_param_aliases(params)
     # Initialize an instance, ignoring undeclared params:
     query = klass.new(params.slice(*klass.attribute_names))
     # Initialize `params`, where query stores the active `attributes`.
@@ -349,6 +352,50 @@ class Query
     attribute_types.key?(key)
   end
   delegate :has_attribute?, to: :class
+
+  # Maps each declared `param_alias:` name to its target query_attr, e.g.
+  # `{ project: :projects, by: :order_by }`. See `query_attr` in
+  # app/extensions/class.rb.
+  def self.param_aliases
+    attribute_types.each_with_object({}) do |(attr, type), map|
+      map[type.param_alias] = attr if type.param_alias
+    end
+  end
+  delegate :param_aliases, to: :class
+
+  # Every top-level URL param name this Query subclass recognizes -- both
+  # its own query_attr names and their param_alias names. The allowlist for
+  # `params.permit(*recognized_params)` at the request boundary --
+  # replaces `index_active_params`'s allowlisting role (see
+  # ApplicationController::QueryParamAliases#create_query_from_url_params).
+  def self.recognized_params
+    (attribute_names + param_aliases.keys).uniq
+  end
+  delegate :recognized_params, to: :class
+
+  # Resolves any `param_alias:`-registered param key present in `params`
+  # (e.g. `project: 123`, the URL shortcut) into its target query_attr
+  # (`projects: [123]`) -- wrapping the value in an Array when the target
+  # attr itself accepts an Array. Pure param-shape translation: does not
+  # verify a record-backed value exists -- see
+  # ApplicationController::QueryParamAliases#create_query_from_url_params,
+  # which needs controller/flash context this class method doesn't have.
+  def self.resolve_param_aliases(params)
+    aliases = param_aliases
+    return params if aliases.empty?
+
+    params = params.dup
+    aliases.each do |alias_key, attr|
+      next unless params.key?(alias_key)
+
+      value = params.delete(alias_key)
+      accepts = attribute_types[attr].accepts
+      params[attr] =
+        accepts.is_a?(Array) && !value.is_a?(Array) ? [value] : value
+    end
+    params
+  end
+  delegate :resolve_param_aliases, to: :class
 
   # :id_in_set must be moved to the last position so it can reorder results.
   def self.scope_parameters
@@ -397,9 +444,12 @@ class Query
     self.class.current_or_related_query(target, model.name.to_sym, self)
   end
 
-  # Defined in each subclass. Default order when `order_by` param not passed.
+  # Default order when `order_by` param not passed. A query_attr's own
+  # `default_order:` (declared via `query_attr`) wins when that attr is
+  # present in `params`; otherwise falls back to the class-wide
+  # `self.class.default_order`, defined in each subclass.
   def default_order
-    self.class.default_order || :id
+    attr_default_order || self.class.default_order || :id
   end
 
   # Returns a hash describing the query instance.
@@ -474,5 +524,20 @@ class Query
 
   def increment_access_count
     record.access_count += 1
+  end
+
+  private
+
+  # The first declared attr whose `default_order:` applies -- present in
+  # `params` and has its own `default_order:` set via `query_attr`. nil if
+  # none match, so `default_order` falls back to the class-wide default.
+  def attr_default_order
+    self.class.attribute_types.each do |attr, type|
+      next unless type.default_order
+      next if params[attr].blank?
+
+      return type.default_order
+    end
+    nil
   end
 end

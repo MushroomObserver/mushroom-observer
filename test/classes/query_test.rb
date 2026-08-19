@@ -251,6 +251,82 @@ class QueryTest < UnitTestCase
                  SearchParams.new(phrase: '-"bad wolf" -foo -bar').bads)
   end
 
+  def test_order_by_has_by_param_alias
+    assert_equal(:order_by, Query::Observations.param_aliases[:by])
+  end
+
+  def test_recognized_params_includes_attrs_and_aliases
+    recognized = Query::Observations.recognized_params
+
+    assert_includes(recognized, :order_by)
+    assert_includes(recognized, :projects)
+    assert_includes(recognized, :by)
+  end
+
+  def test_resolve_param_aliases_renames_scalar_alias
+    assert_equal(
+      { order_by: "date" },
+      Query::Observations.resolve_param_aliases(by: "date")
+    )
+  end
+
+  def test_resolve_param_aliases_ignores_unaliased_params
+    assert_equal(
+      { projects: [1] },
+      Query::Observations.resolve_param_aliases(projects: [1])
+    )
+  end
+
+  def test_resolve_param_aliases_wraps_scalar_value_for_array_attr
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_ids, [Observation], param_alias: :test_id)
+    end
+
+    assert_equal(
+      { test_ids: [123] },
+      subclass.resolve_param_aliases(test_id: 123)
+    )
+    assert_equal(
+      { test_ids: [123, 456] },
+      subclass.resolve_param_aliases(test_id: [123, 456])
+    )
+  end
+
+  def test_create_query_resolves_by_alias_end_to_end
+    query = Query.create_query(:Observation, by: "date")
+
+    assert_equal("date", query.params[:order_by])
+  end
+
+  def test_default_order_falls_back_to_class_default_without_override
+    assert_equal(:date, Query.create_query(:Observation).default_order)
+  end
+
+  def test_default_order_uses_attr_override_when_attr_present
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_flag, :boolean, default_order: :updated_at)
+    end
+    with_flag = subclass.new(test_flag: true)
+    with_flag.params = with_flag.attributes.compact
+    with_flag.valid = with_flag.valid?
+    without_flag = subclass.new(test_flag: nil)
+    without_flag.params = without_flag.attributes.compact
+    without_flag.valid = without_flag.valid?
+
+    assert_equal(:updated_at, with_flag.default_order)
+    assert_equal(:date, without_flag.default_order)
+  end
+
+  def test_position_pagination_at
+    query = Query.lookup(:Observation)
+    ids = query.result_ids
+    pagination_data = PaginationData.new(num_per_page: 1)
+
+    query.position_pagination_at(ids[2], pagination_data)
+
+    assert_equal(3, pagination_data.number)
+  end
+
   def test_lookup
     assert_equal(0, QueryRecord.count)
 

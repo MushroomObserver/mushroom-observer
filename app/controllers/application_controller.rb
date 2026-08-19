@@ -32,6 +32,7 @@ class ApplicationController < ActionController::Base
   include FlashNotices
   include NameValidation
   include Queries
+  include QueryParamAliases
   include ControllerLabels
   include Indexes
   include SectionUpdater
