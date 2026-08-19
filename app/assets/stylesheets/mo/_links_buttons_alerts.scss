@@ -139,17 +139,17 @@
   }
 
   > *:not(:first-child):not(:last-child),
-  form.button_to:not(:first-child):not(:last-child) button {
+  > form.button_to:not(:first-child):not(:last-child) button {
     border-radius: 0;
   }
 
   > *:first-child:not(:last-child),
-  form.button_to:first-child:not(:last-child) button {
+  > form.button_to:first-child:not(:last-child) button {
     @include border-right-radius(0);
   }
 
   > *:last-child:not(:first-child),
-  form.button_to:last-child:not(:first-child) button {
+  > form.button_to:last-child:not(:first-child) button {
     @include border-left-radius(0);
   }
 }
