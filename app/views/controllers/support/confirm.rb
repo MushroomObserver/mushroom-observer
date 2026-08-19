@@ -41,9 +41,12 @@ module Views::Controllers::Support
     end
 
     def render_paypal_form
+      # Cross-origin POST straight to PayPal's own checkout -- Turbo
+      # Drive would intercept this via fetch() and break the hand-off
+      # instead of letting the browser navigate there directly.
       form(id: "donate_form", name: "_xclick",
            action: "https://www.paypal.com/cgi-bin/webscr",
-           method: "post") do
+           method: "post", data: { turbo: "false" }) do
         render_paypal_hidden_fields
         render_paypal_submit_button
       end
