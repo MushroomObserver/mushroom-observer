@@ -691,6 +691,35 @@ class QueryTest < UnitTestCase
     assert_equal(query.q_param, { model: :Observation, **params })
   end
 
+  def test_merge_q_param_into_url
+    assert_equal(
+      "/observations", Query.merge_q_param_into_url("/observations", nil)
+    )
+    assert_equal(
+      "/observations", Query.merge_q_param_into_url("/observations", "")
+    )
+    assert_equal(
+      "/observations?q=ABCDE",
+      Query.merge_q_param_into_url("/observations", "ABCDE")
+    )
+    # Preserves an existing (non-q) query param already on the path.
+    assert_equal(
+      "/observations?flow=next&q=ABCDE",
+      Query.merge_q_param_into_url("/observations?flow=next", "ABCDE")
+    )
+    # A Hash q_param (Query#q_param's own return shape) round-trips via
+    # Hash#to_query, not Rack::Utils.build_query -- a nested value
+    # (:locations here) would otherwise serialize as an unparseable
+    # literal Ruby Hash#inspect string.
+    merged = Query.merge_q_param_into_url(
+      "/observations", { model: :Observation, locations: [1] }
+    )
+    assert_equal(
+      "q%5Blocations%5D%5B%5D=1&q%5Bmodel%5D=Observation",
+      URI.parse(merged).query
+    )
+  end
+
   ##############################################################################
   #
   #  :section: Other stuff

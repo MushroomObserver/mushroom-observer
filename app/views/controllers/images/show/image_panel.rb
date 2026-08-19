@@ -31,10 +31,12 @@ module Views::Controllers::Images
       # --- Heading: rotate / mirror / original / EXIF ---------------
 
       def render_controls
-        render_transform_controls if can_transform?
-        ImageFragment(type: :original_link, image: @image)
-        plain(" | ")
-        ImageFragment(type: :exif_link, image_id: @image.id)
+        ButtonGroup(class: "btn-group-sm") do
+          render_transform_controls if can_transform?
+          ImageFragment(type: :original_link, image: @image, button: :outline)
+          ImageFragment(type: :exif_link, image_id: @image.id,
+                        variant: :outline)
+        end
       end
 
       def can_transform?
@@ -42,21 +44,20 @@ module Views::Controllers::Images
       end
 
       def render_transform_controls
-        render_transform_button(:rotate_left, :image_show_rotate_left)
-        plain(" | ")
-        render_transform_button(:rotate_right, :image_show_rotate_right)
-        plain(" | ")
-        render_transform_button(:mirror, :image_show_mirror)
-        plain(" | ")
+        render_transform_button(:rotate_left, :image_show_rotate_left,
+                                :rotate_left)
+        render_transform_button(:rotate_right, :image_show_rotate_right,
+                                :rotate_right)
+        render_transform_button(:mirror, :image_show_mirror, :flip)
       end
 
-      def render_transform_button(operation, label_key)
+      def render_transform_button(operation, label_key, icon)
         Button(
           type: :put,
           name: label_key.t,
           target: transform_image_path(id: @image.id,
                                        op: operation, size: @size),
-          variant: :strip, icon: nil
+          variant: :outline, icon: icon, label: true
         )
       end
 
