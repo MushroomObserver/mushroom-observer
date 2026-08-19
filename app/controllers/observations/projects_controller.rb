@@ -12,7 +12,7 @@ module Observations
       return unless (@observation = find_observation!)
 
       set_project_ivars
-      render_phlex_edit
+      render_edit_view
     end
 
     def update
@@ -42,14 +42,14 @@ module Observations
         remove_observation_from_project(@project, @observation)
       else
         flash_error(:runtime_invalid.t(type: '"mode"', value: params[:commit]))
-        render_phlex_edit(
+        render_edit_view(
           location: edit_observation_projects_path(id: @observation.id),
           status: :unprocessable_content
         )
       end
     end
 
-    def render_phlex_edit(**render_opts)
+    def render_edit_view(**render_opts)
       render(
         Views::Controllers::Observations::Projects::Edit.new(
           observation: @observation,
