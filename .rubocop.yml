@@ -17,6 +17,7 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -102,6 +103,37 @@ MO/NoActiveRecordRelationProp:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+
+MO/NoHandRolledFormTag:
+  Description: >-
+    Phlex views/components must not call the bare form(...) tag helper
+    directly -- use Components::ApplicationForm (Superform) instead --
+    see lib/rubocop/cop/mo/no_hand_rolled_form_tag.rb and issue #5100.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # ApplicationForm subclasses that legitimately override form_tag
+    # to build their own GET-method (or, for BlockedIps, POST-method)
+    # <form> -- these ARE the Superform-sanctioned way to hand-roll a
+    # form tag, not a bypass of it.
+    - "app/components/form/live_data_filter.rb"
+    - "app/components/form/search.rb"
+    - "app/views/controllers/projects/updates/excluded_toggle_form.rb"
+    - "app/views/controllers/admin/blocked_ips/manager.rb"
+    - "app/views/controllers/visual_groups/filter_form.rb"
+    - "app/views/controllers/field_slips/form.rb"
+    - "app/views/controllers/observations/identify/form.rb"
+    # Reusable raw-form primitive -- GET-only index filters have no
+    # model to bind and no CSRF to send, so Components::IndexFilter is
+    # deliberately not a Superform. This IS the primitive every other
+    # index-filter form should reuse, not a bypass of it.
+    - "app/components/index_filter.rb"
+    # A one-off bespoke filter-button row (not a fit for IndexFilter's
+    # single-field-plus-submit shape); reviewed and kept explicitly
+    # Turbo-off (data-turbo="false").
+    - "app/views/controllers/rss_logs/type_filters.rb"
 
 MO/NoHandRolledMethodField:
   Description: >-
