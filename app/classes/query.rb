@@ -408,6 +408,37 @@ class Query
     { model: model.name.to_sym, **params }
   end
 
+  # Merges an already-serialized `q` param value into a path's
+  # existing query string (preserving other params, e.g. `flow=next`).
+  # A plain utility, not tied to any Query instance -- shared by two
+  # callers that source the value differently:
+  # `ApplicationController::Queries#add_q_param` resolves
+  # `q_param_value` from ambient session/request state before calling
+  # this; `Tab::Base#with_q_param` has no such ambient state (a Tab is
+  # a plain PORO, not a controller/view), so its callers resolve the
+  # value themselves and pass it into the Tab's constructor instead.
+  #
+  # `q_param_value` can be a String (the alphabetized-id form --
+  # `?q=ABCDE`) or a Hash (the model+params form `Query#q_param`
+  # itself returns -- `?q[model]=Observation&q[locations][]=1`). Uses
+  # `Hash#to_query`, not `Rack::Utils.build_query` -- Rack stringifies
+  # a nested Hash value as a literal Ruby `inspect` rep, while
+  # `to_query` recurses correctly into nested hashes and arrays.
+  # Caught by the related_records integration tests exercising
+  # `Tab::Location::ObservationsAt`: a newly-created query's `q_param`
+  # is a Hash, and the resulting URL was an unparseable literal Ruby
+  # Hash rep encoded with `+` for whitespace before this used
+  # `to_query`.
+  def self.merge_q_param_into_url(path, q_param_value)
+    return path if q_param_value.blank?
+
+    uri = URI.parse(path)
+    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
+    parsed["q"] = q_param_value
+    uri.query = parsed.to_query
+    uri.to_s
+  end
+
   # Serialize the query params, adding the model, for saving to a QueryRecord.
   # We use this column of QueryRecord to identify an existing query record that
   # matches current params, and sometimes to recompose a query from the string.
