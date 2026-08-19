@@ -36,6 +36,7 @@ case "$TOOL" in
     # Only source files -- not every Write (e.g. scratch/log files
     # outside the repo) needs this scrutiny.
     case "$FILE" in
+      .claude/*|*/.claude/*) exit 0 ;;
       *.rb|*.rake|*.erb|*.scss|*.md) ;;
       *) exit 0 ;;
     esac
