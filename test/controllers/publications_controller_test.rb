@@ -16,7 +16,13 @@ class PublicationsControllerTest < FunctionalTestCase
     get(:index)
     assert_response(:success)
     assert_not_nil(assigns(:publications))
-    assert_link_in_html("Edit", action: :edit, id: pub_id)
+    # InlineCRUDLinks (via Tab::Publication::Edit) renders an
+    # icon-only link, not visible "Edit" text -- select on the tab's
+    # own derived class instead of `assert_link_in_html`'s text match.
+    assert_select(
+      "a.edit_publication_link_#{pub_id}" \
+      "[href='#{edit_publication_path(pub_id)}']"
+    )
     # `Button(type: :delete, ...)` renders a POST form (with a hidden
     # `_method=delete` field), not an `<a>` link, so this checks the
     # form/button shape rather than `assert_link_in_html`.
