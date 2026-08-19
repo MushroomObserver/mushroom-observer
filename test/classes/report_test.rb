@@ -592,7 +592,7 @@ class ReportTest < UnitTestCase
 
   # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
   # sciname = genus only;
-  # identificationQualifier = Report::Mycoportal::CODE_NAME_QUALIFIER;
+  # identificationQualifier = Report::Mycoportal::NameResolver::CODE_NAME_QUALIFIER;
   # taxonRemarks = full text_name plus author
   def test_mycoportal_code_name_unauthored_no_qualifier
     obs = Observation.create!(
@@ -605,7 +605,8 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Cortinarius",
-      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
+      identificationQualifier:
+        Report::Mycoportal::NameResolver::CODE_NAME_QUALIFIER,
       taxonRemarks: "Cortinarius sp. 'IN34'"
     ).values
 
@@ -631,7 +632,8 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Geoglossum",
-      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
+      identificationQualifier:
+        Report::Mycoportal::NameResolver::CODE_NAME_QUALIFIER,
       taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
     ).values
 
@@ -742,6 +744,141 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       identificationQualifier: "sensu lato"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_misspelled_name_resolves_to_correct_spelling
+    correct_name = Name.create!(
+      user: rolf, rank: "Species", text_name: "Amanita phalloides",
+      author: "(Vaill. ex Fr.) Link", search_name: "Amanita phalloides",
+      display_name: "**__Amanita__** **__phalloides__**"
+    )
+    misspelled_name = Name.create!(
+      user: rolf, rank: "Species", text_name: "Amanita phaloides",
+      author: "", search_name: "Amanita phaloides",
+      display_name: "**__Amanita__** **__phaloides__**",
+      correct_spelling: correct_name
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: misspelled_name)
+
+    expect = hashed_expect(obs).merge(sciname: correct_name.text_name).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # Ranks strictly between Species and Genus (Section, Subsection, Series,
+  # Stirps, Subgenus): sciname = genus only; identificationQualifier =
+  # "aff. <rank>"; taxonRemarks = full text_name + author.
+  def test_mycoportal_infrageneric_section_rank
+    name = Name.create!(
+      user: rolf, rank: "Section", text_name: "Morchella sect. Distantes",
+      author: "", search_name: "Morchella sect. Distantes",
+      display_name: "**__Morchella__** sect. **__Distantes__**"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Morchella",
+      identificationQualifier: "aff. section",
+      taxonRemarks: "Morchella sect. Distantes"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_provisional_nom_ined
+    name = Name.create!(
+      user: rolf, rank: "Species", text_name: "Cortinarius percomis",
+      author: "nom. ined.", search_name: "Cortinarius percomis nom. ined.",
+      display_name: "__Cortinarius__ __percomis__ nom. ined."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "nom. ined.",
+      taxonRemarks: "Cortinarius percomis nom. ined."
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_provisional_comb_inedit
+    name = Name.create!(
+      user: rolf, rank: "Species", text_name: "Cortinarius percomis",
+      author: "(Fr.) auct. comb. inedit",
+      search_name: "Cortinarius percomis (Fr.) auct. comb. inedit",
+      display_name: "__Cortinarius__ __percomis__ (Fr.) auct. comb. inedit"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius percomis",
+      identificationQualifier: "comb. inedit",
+      taxonRemarks: "Cortinarius percomis (Fr.) auct. comb. inedit"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # "Genus sp. 'epithet-STATEnn'" code names get a qualifier naming the
+  # epithet instead of the generic CODE_NAME_QUALIFIER.
+  def test_mycoportal_code_name_precise_qualifier
+    name = Name.create!(
+      user: rolf, rank: "Species",
+      text_name: "Hortiboletus sp. 'flavorubellus-IN04'",
+      author: "S.D. Russell",
+      search_name: "Hortiboletus sp. 'flavorubellus-IN04' S.D. Russell",
+      display_name: "**__Hortiboletus__** sp. **__'flavorubellus-IN04'__** " \
+                    "S.D. Russell"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Hortiboletus",
+      identificationQualifier: "aff. flavorubellus",
+      taxonRemarks: "Hortiboletus sp. 'flavorubellus-IN04' S.D. Russell"
+    ).values
+
+    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  # "Gen. 'Foo' sp. 'bar-ST01'" code names are treated as if they didn't
+  # have the "Gen." prefix.
+  def test_mycoportal_code_name_gen_prefix
+    name = Name.create!(
+      user: rolf, rank: "Species",
+      text_name: "Gen. 'Mycena' sp. 'acicula-PNW01'",
+      author: "",
+      search_name: "Gen. 'Mycena' sp. 'acicula-PNW01'",
+      display_name: "Gen. **__'Mycena'__** sp. **__'acicula-PNW01'__**"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Mycena",
+      identificationQualifier: "aff. acicula",
+      taxonRemarks: "Gen. 'Mycena' sp. 'acicula-PNW01'"
     ).values
 
     do_csv_test(Report::Mycoportal, obs, expect, &:id)
@@ -1010,6 +1147,108 @@ class ReportTest < UnitTestCase
       log, "MyCoPortal export-tracking failed: ActiveRecord::RecordNotFound",
       "mark_exported! should log the swallowed lookup failure"
     )
+  end
+
+  def test_mycoportal_mark_exported_creates_link
+    obs = observations(:detailed_unknown_obs)
+    site = ExternalSite.mycoportal
+    report =
+      Report::Mycoportal.new(query: Query.lookup(:Observation,
+                                                 id_in_set: [obs.id]))
+    report.body
+
+    report.mark_exported!
+
+    link = ExternalLink.find_by(target_type: "Observation",
+                                target_id: obs.id, external_site: site,
+                                relationship: :export)
+    assert_not_nil(link, "mark_exported! should create an export " \
+                         "ExternalLink for observation #{obs.id}")
+    assert_not_nil(link.last_synced_at)
+  end
+
+  def test_mycoportal_mark_exported_refreshes_last_synced_at_on_reexport
+    obs = observations(:detailed_unknown_obs)
+    site = ExternalSite.mycoportal
+    old_time = 1.day.ago
+    ExternalLink.create!(user: User.admin, target_type: "Observation",
+                         target_id: obs.id, external_site: site,
+                         relationship: :export, last_synced_at: old_time)
+
+    report =
+      Report::Mycoportal.new(query: Query.lookup(:Observation,
+                                                 id_in_set: [obs.id]))
+    report.body
+    report.mark_exported!
+
+    assert_equal(
+      1,
+      ExternalLink.where(target_type: "Observation", target_id: obs.id,
+                         external_site: site, relationship: :export).count,
+      "Re-exporting should update the existing link, not create a duplicate"
+    )
+    link = ExternalLink.find_by(target_type: "Observation",
+                                target_id: obs.id, external_site: site,
+                                relationship: :export)
+    assert_operator(link.last_synced_at, :>, old_time)
+  end
+
+  def test_mycoportal_mark_exported_before_body_raises
+    report = Report::Mycoportal.new(query: Query.lookup(:Observation))
+
+    assert_raises(RuntimeError) { report.mark_exported! }
+  end
+
+  def test_mycoportal_mark_exported_logs_on_invalid
+    obs = observations(:detailed_unknown_obs)
+    report =
+      Report::Mycoportal.new(query: Query.lookup(:Observation,
+                                                 id_in_set: [obs.id]))
+    report.body
+
+    warnings = []
+    stubbed_error = lambda do |*|
+      link = ExternalLink.new
+      link.errors.add(:base, "stubbed failure")
+      raise(ActiveRecord::RecordInvalid.new(link))
+    end
+
+    Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do
+      ExternalLink.stub(:create!, stubbed_error) do
+        report.mark_exported!
+      end
+    end
+
+    assert(
+      warnings.any? do |msg|
+        msg.include?(
+          "MyCoPortal export link failed for Observation #{obs.id}"
+        )
+      end,
+      "mark_exported! should log a warning naming the failed observation " \
+      "when ExternalLink.create! raises RecordInvalid"
+    )
+    assert_not(
+      ExternalLink.exists?(target_type: "Observation", target_id: obs.id,
+                           external_site: ExternalSite.mycoportal,
+                           relationship: :export),
+      "No ExternalLink should be created when create! raises"
+    )
+  end
+
+  def test_mycoportal_mark_exported_survives_site_lookup_failure
+    obs = observations(:detailed_unknown_obs)
+    report =
+      Report::Mycoportal.new(query: Query.lookup(:Observation,
+                                                 id_in_set: [obs.id]))
+    report.body
+
+    site_lookup_fails = -> { raise(ActiveRecord::RecordNotFound) }
+    ExternalSite.stub(:mycoportal, site_lookup_fails) do
+      assert_nothing_raised do
+        report.mark_exported!
+      end
+    end
   end
 
   def hashed_expect(obs)

@@ -317,6 +317,13 @@ MushroomObserver::Application.configure do
   config.eol_min_image_vote = 2
   config.eol_min_observation_vote = 2.4
 
+  # MyCoPortal export parameters.
+  config.mycoportal_min_observation_vote = 2.0
+  config.mycoportal_excluded_names = [
+    "Duplicate", "Undetermined", "Mixed collection", "Non-fungal",
+    "Slime-flux", "Eukarya", "Eukaryota"
+  ]
+
   # Default number of items for an RSS page
   config.default_layout_count = 12
 
