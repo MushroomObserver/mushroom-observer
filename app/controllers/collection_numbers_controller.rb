@@ -89,7 +89,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html { render_new_phlex }
+      format.html { render_new_view }
     end
   end
 
@@ -110,7 +110,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html { render_edit_phlex }
+      format.html { render_edit_view }
     end
   end
 
@@ -158,14 +158,14 @@ class CollectionNumbersController < ApplicationController
       flash_error_and_goto_index(CollectionNumber, params[:id])
   end
 
-  def render_new_phlex
+  def render_new_view
     render(Views::Controllers::CollectionNumbers::New.new(
              collection_number: @collection_number,
              observation: @observation, user: @user
            ))
   end
 
-  def render_edit_phlex
+  def render_edit_view
     render(Views::Controllers::CollectionNumbers::Edit.new(
              collection_number: @collection_number, user: @user,
              back: @back, back_object: @back_object
