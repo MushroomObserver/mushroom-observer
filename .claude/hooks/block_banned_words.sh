@@ -27,7 +27,10 @@ set -euo pipefail
 INPUT="$(cat)"
 TOOL="$(printf '%s' "$INPUT" | jq -r '.tool_name // ""')"
 
-WORD_RE='\b(real|genuine(ly)?|actual(ly)?|exactly|never|ever|canonical|consume)\b|at all'
+# POSIX ERE doesn't treat `\b` as a word boundary (BSD/macOS grep in
+# particular) -- use the same `(^|[^[:alnum:]_])...([^[:alnum:]_]|$)`
+# portable boundary as check_any_phlex_props_on_save.sh.
+WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|canonical|consume|at all)([^[:alnum:]_]|$)'
 
 TEXT=""
 case "$TOOL" in
