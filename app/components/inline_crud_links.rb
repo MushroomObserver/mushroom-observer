@@ -28,13 +28,22 @@
 # names. `destroy_path` defaults to `:path_target` and `destroy_name`
 # to `:name_destroy_object` when absent from a handler -- only
 # genuinely non-standard targets need to override them.
+#
+# Why a Tab-PORO dispatch table here but not on the page-title-bar
+# edit/delete icons (`Header::EditDeleteIcons`): that component is
+# fully generic across every model (always the model's own standard
+# edit page, gated by its own `can_edit?`/`destroyable?`), with no
+# per-model behavior to carry. Here the behavior varies per target --
+# modal edit vs. plain link, detach-not-destroy paths, different
+# permission predicates -- which is what a Tab PORO carries.
 class Components::InlineCRUDLinks < Components::Base
   # Target is polymorphic; the supported classes are exactly the
   # keys of `TARGET_HANDLERS` below. `target:` present/absent is
   # what selects edit/destroy mode vs. add mode.
   prop :target, _Nilable(_Union(::CollectionNumber, ::HerbariumRecord,
                                 ::Sequence, ::ExternalLink,
-                                ::Naming, ::Comment, ::Description)),
+                                ::Naming, ::Comment, ::Description,
+                                ::Publication)),
        default: nil
   # CollectionNumber / HerbariumRecord: required -- permission and/or
   # the detach path need the observation. Every other target derives
@@ -113,6 +122,11 @@ class Components::InlineCRUDLinks < Components::Base
       tab: :tab_description_edit,
       can_edit: :can_edit_via_writer?,
       can_destroy: :can_destroy_via_admin?
+    },
+    ::Publication => {
+      edit: :icon_link_edit,
+      tab: :tab_publication_edit,
+      can_edit: :can_edit_via_target?
     }
   }.freeze
 
@@ -290,6 +304,10 @@ class Components::InlineCRUDLinks < Components::Base
 
   def tab_description_edit
     ::Tab::Description::Edit.new(description: @target)
+  end
+
+  def tab_publication_edit
+    ::Tab::Publication::Edit.new(publication: @target)
   end
 
   # ---- :destroy_path handlers -------------------------------
