@@ -3,10 +3,11 @@
 module RuboCop
   module Cop
     module MO
-      # Flags `status: :unprocessable_content` passed as a keyword
-      # argument to any call (`render(...)`, `render_edit_view(...)`,
-      # a controller's own render helper, etc.) written directly
-      # inside a method whose name doesn't end in `_invalid`. Same
+      # Flags `status: :unprocessable_content` (or the older Rails
+      # alias, `:unprocessable_entity`) passed as a keyword argument to
+      # any call (`render(...)`, `render_edit_view(...)`, a
+      # controller's own render helper, etc.) written directly inside
+      # a method whose name doesn't end in `_invalid`. Same
       # convention as `MO/SelfStatusOutsideInvalidMethod`
       # (`self.status = ...` outside a `*_invalid` method) -- this
       # cop exists because the kwarg form is a second way to hand-roll
@@ -42,9 +43,9 @@ module RuboCop
       #     self.status = :unprocessable_content
       #   end
       class StatusKwargOutsideInvalidMethod < Base
-        MSG = "Don't pass `status: :unprocessable_content` as a kwarg " \
-              "here -- fold it into a method whose name ends in " \
-              "`_invalid` (or call the existing " \
+        MSG = "Don't pass `status: %<status>s` as a kwarg here -- fold " \
+              "it into a method whose name ends in `_invalid` (or " \
+              "call the existing " \
               "render_new_view_invalid/render_edit_view_invalid) so " \
               "the status change travels with the render call, not as " \
               "a hand-rolled kwarg a later edit can drop unnoticed. " \
@@ -58,7 +59,8 @@ module RuboCop
           return unless enclosing
           return if enclosing.method_name.to_s.end_with?("_invalid")
 
-          add_offense(node)
+          add_offense(node,
+                      message: format(MSG, status: node.value.value.inspect))
         end
 
         private
