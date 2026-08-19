@@ -9,8 +9,8 @@
 # Why: personal style rules, corrected multiple times in conversation
 # and previously tracked only as memory (which the assistant has to
 # recall and apply itself, and can miss). See
-# .claude/rules/gh_pr_bodies.md's no-hyperbole section and project
-# memory feedback_banned_words_real_genuine.md /
+# .claude/rules/gh_pr_issue_formatting.md ("No \"real\"/\"genuine\"/\"actually\" as intensifiers")
+# and project memory feedback_banned_words_real_genuine.md /
 # feedback_banned_words_canonical_consume.md /
 # feedback_never_is_a_narrative_smell.md.
 #
