@@ -157,17 +157,26 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.new(user: @user)
     warn_about_listed_previous_imports
     @confirm_form = build_confirm_form
-    # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
-    # (see turbo_submit_forms.md) -- needs a non-2xx status even
-    # though nothing "failed"; this is the normal next step after a
-    # valid New-import submission, just not the same page.
+    render_confirm_view_invalid
+  end
+
+  def render_confirm_view(status: :ok, **render_opts)
     render(Views::Controllers::InatImports::Confirm.new(
              confirm_form: @confirm_form,
              expected: @expected,
              unlicensed_obs: @unlicensed_obs,
              inat_import: @inat_import,
              **fetch_confirm_counts
-           ), status: :unprocessable_content)
+           ), status: status, **render_opts)
+  end
+
+  # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+  # (see turbo_submit_forms.md) -- needs a non-2xx status even though
+  # nothing "failed"; this is the normal next step after a valid
+  # New-import submission, just not the same page.
+  def render_confirm_view_invalid(**)
+    render_confirm_view(**)
+    self.status = :unprocessable_content
   end
 
   def fetch_confirm_counts

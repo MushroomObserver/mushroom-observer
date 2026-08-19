@@ -25,6 +25,7 @@ require:
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
   - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
+  - ./lib/rubocop/cop/mo/status_kwarg_outside_invalid_method
   - ./lib/rubocop/cop/mo/unguarded_params_to_prop
 
 AllCops:
@@ -226,6 +227,18 @@ MO/SelfStatusOutsideInvalidMethod:
     hand-rolled anti-pattern this sweep exists to prevent -- fold it
     into a *_invalid method instead. See
     lib/rubocop/cop/mo/self_status_outside_invalid_method.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+
+MO/StatusKwargOutsideInvalidMethod:
+  Description: >-
+    status: :unprocessable_content passed as a kwarg outside a
+    *_invalid-named method is the same hand-rolled anti-pattern
+    MO/SelfStatusOutsideInvalidMethod bans for `self.status = ...` --
+    fold it into a *_invalid method instead. See
+    lib/rubocop/cop/mo/status_kwarg_outside_invalid_method.rb and
     .claude/rules/turbo_submit_forms.md (issue #5052).
   Enabled: true
   Include:

@@ -40,11 +40,10 @@ module Observations
         remove_observation_from_species_list(@species_list, @observation)
       else
         flash_error("Invalid mode: #{params[:commit].inspect}")
-        render_edit_view(
+        render_edit_view_invalid(
           location: edit_observation_species_lists_path(
             id: @observation.id
-          ),
-          status: :unprocessable_content
+          )
         )
       end
     end
