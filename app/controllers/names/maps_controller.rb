@@ -20,14 +20,14 @@ module Names
       find_locations_matching_observations
 
       respond_to do |format|
-        format.html { render_phlex_show }
+        format.html { render_show_view }
         format.json { render(json: map_refetch_payload) }
       end
     end
 
     private
 
-    def render_phlex_show
+    def render_show_view
       render(Views::Controllers::Names::Maps::Show.new(
                name: @name, query: @query,
                observations: @observations.to_a,

@@ -19,7 +19,7 @@ module Admin
       # Parse new set of values.
       @val = params[:val]
       bonuses = calculate_bonuses
-      return render_edit_view(status: :unprocessable_content) if bonuses.nil?
+      return render_edit_view_invalid if bonuses.nil?
 
       update_user_contribution(bonuses)
       redirect_to(user_path(@user2.id))
