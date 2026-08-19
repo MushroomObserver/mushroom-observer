@@ -126,7 +126,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     end
 
     init_ivars_for_show
-    render_phlex_show
+    render_show_view
   end
 
   def new
@@ -267,7 +267,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
       user: @user }
   end
 
-  def render_phlex_show
+  def render_show_view
     render(Views::Controllers::SpeciesLists::Show.new(
              species_list: @species_list, user: @user, query: @query,
              pagination_data: @pagination_data, objects: @objects,

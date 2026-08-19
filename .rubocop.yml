@@ -20,6 +20,7 @@ require:
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
+  - ./lib/rubocop/cop/mo/no_render_phlex_method_name
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
@@ -183,6 +184,18 @@ MO/NoRawLinkOrButtonTo:
     # is .btn-family styling/variants, which doesn't fit a badge.
     # Genuinely a different primitive, not a bypass of Button.
     - "app/components/id_badge.rb"
+
+MO/NoRenderPhlexMethodName:
+  Description: >-
+    A controller render-dispatch method named render_phlex_* -- the
+    whole app is Phlex now, so the qualifier carries no information.
+    Use render_<action>_view instead (render_new_view,
+    render_edit_view, render_show_view, ...) -- see
+    lib/rubocop/cop/mo/no_render_phlex_method_name.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
 
 MO/PreferKitSyntax:
   Description: >-
