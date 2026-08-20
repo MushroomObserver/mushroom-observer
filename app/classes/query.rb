@@ -364,19 +364,46 @@ class Query
   delegate :param_aliases, to: :class
 
   # Every top-level URL param name this Query subclass recognizes -- both
-  # its own query_attr names and their param_alias names. The allowlist for
-  # `params.permit(*recognized_params)` at the request boundary --
-  # replaces `index_active_params`'s allowlisting role (see
-  # ApplicationController::QueryParamAliases#create_query_from_url_params).
+  # its own query_attr names and their param_alias names. A plain name
+  # list for introspection -- not usable as a `params.permit(...)`
+  # filter list for Array/Hash-shaped attrs (bare symbols only permit
+  # scalars). See `permit_filters` for that.
   def self.recognized_params
     (attribute_names + param_aliases.keys).uniq
   end
   delegate :recognized_params, to: :class
 
+  # The `params.permit(*filters)`-compatible filter list for this Query
+  # subclass's recognized_params -- replaces `index_active_params`'s
+  # allowlisting role (see
+  # ApplicationController::QueryParamAliases#create_query_from_url_params).
+  # A scalar attr (or param_alias) permits as a bare symbol; an
+  # Array-typed attr permits via `attr: []`; a Hash-typed attr --
+  # including a subquery hash like `location_query: { subquery: :Location }`
+  # -- permits via `attr: {}`, Rails' "allow this key with any nested
+  # content" filter. Validating what's inside an Array/Hash value is
+  # Query's own job (`clean_and_validate_params`), not strong params' --
+  # this only gates which top-level keys reach `create_query`.
+  def self.permit_filters
+    containers = {}
+    scalars = []
+    attribute_types.each do |attr, type|
+      case type.accepts
+      when Array then containers[attr] = []
+      when Hash then containers[attr] = {}
+      else scalars << attr
+      end
+    end
+    scalars + param_aliases.keys + [containers]
+  end
+  delegate :permit_filters, to: :class
+
   # Resolves any `param_alias:`-registered param key present in `params`
   # (e.g. `project: 123`, the URL shortcut) into its target query_attr
   # (`projects: [123]`) -- wrapping the value in an Array when the target
-  # attr itself accepts an Array. Pure param-shape translation: does not
+  # attr itself accepts an Array. An explicit value already present under
+  # the target attr name takes precedence over the alias (the alias key
+  # is still dropped either way). Pure param-shape translation: does not
   # verify a record-backed value exists -- see
   # ApplicationController::QueryParamAliases#create_query_from_url_params,
   # which needs controller/flash context this class method doesn't have.
@@ -389,6 +416,8 @@ class Query
       next unless params.key?(alias_key)
 
       value = params.delete(alias_key)
+      next if params.key?(attr)
+
       accepts = attribute_types[attr].accepts
       params[attr] =
         accepts.is_a?(Array) && !value.is_a?(Array) ? [value] : value

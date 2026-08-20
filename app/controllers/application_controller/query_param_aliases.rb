@@ -32,7 +32,7 @@ module ApplicationController::QueryParamAliases
   # resolve.
   def create_query_from_url_params(model_symbol, raw_params)
     klass = "Query::#{model_symbol.to_s.pluralize}".constantize
-    permitted = raw_params.permit(*klass.recognized_params).
+    permitted = raw_params.permit(*klass.permit_filters).
                 to_h.symbolize_keys
     aliased_keys = klass.param_aliases.keys & permitted.keys
     resolved, record_backed = resolve_param_alias_records(
@@ -66,10 +66,16 @@ module ApplicationController::QueryParamAliases
 
   # Resolves a single `alias_key` in place on `permitted` (mutating it),
   # returning :scalar, :record_backed, or :not_found -- see
-  # `resolve_param_alias_records`.
+  # `resolve_param_alias_records`. An explicit value already present
+  # under the target attr name takes precedence over the alias (the
+  # alias key is still dropped either way, but as :scalar, not
+  # :record_backed, so it doesn't force always_index: true for a value
+  # this method didn't itself look up).
   def resolve_one_param_alias(klass, permitted, alias_key)
     attr = klass.param_aliases[alias_key]
     raw_value = permitted.delete(alias_key)
+    return :scalar if permitted.key?(attr)
+
     model_class = alias_record_class(klass, attr)
     unless model_class
       permitted[attr] = raw_value

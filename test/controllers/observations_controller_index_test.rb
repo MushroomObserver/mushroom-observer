@@ -731,6 +731,28 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not(query.params.key?(:bogus_param))
   end
 
+  # No query_attr has a record-backed param_alias declared yet (#5137
+  # is the foundation piece only) -- temporarily declares one on
+  # Query::Observations's own `projects` attr so this test exercises
+  # create_query_from_url_params's `constantize` path end-to-end, not
+  # just the lower-level resolve_param_alias_records helper. Restored
+  # in `ensure` so no other test observes the mutated attr.
+  def test_create_query_from_url_params_sets_always_index_for_record_alias
+    login
+    project = projects(:bolete_project)
+    Query::Observations.query_attr(:projects, [Project], param_alias: :project)
+
+    raw_params = ActionController::Parameters.new(project: project.id.to_s)
+    query, display_opts = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_equal([project.id], query.params[:projects])
+    assert_equal(true, display_opts[:always_index])
+  ensure
+    Query::Observations.query_attr(:projects, [Project])
+  end
+
   def test_resolve_param_alias_records_looks_up_record_and_wraps_array
     login
     project = projects(:bolete_project)

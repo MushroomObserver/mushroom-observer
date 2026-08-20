@@ -292,10 +292,101 @@ class QueryTest < UnitTestCase
     )
   end
 
+  def test_resolve_param_aliases_explicit_attr_wins_over_alias
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_ids, [Observation], param_alias: :test_id)
+    end
+
+    resolved = subclass.resolve_param_aliases(test_id: 999, test_ids: [1])
+
+    assert_equal({ test_ids: [1] }, resolved)
+  end
+
   def test_create_query_resolves_by_alias_end_to_end
     query = Query.create_query(:Observation, by: "date")
 
     assert_equal("date", query.params[:order_by])
+  end
+
+  def test_permit_filters_categorizes_by_accepts_shape
+    filters = Query::Observations.permit_filters
+    containers = filters.last
+
+    # Scalar attrs (and the :by alias) are bare symbols.
+    assert_includes(filters, :order_by)
+    assert_includes(filters, :by)
+    assert_includes(filters, :needs_naming) # scalar Class (User)
+    # Array-typed attrs permit via `attr: []`.
+    assert_equal([], containers[:by_users])
+    assert_equal([], containers[:projects])
+    # Hash-typed attrs, including subqueries, permit via `attr: {}`.
+    assert_equal({}, containers[:names])
+    assert_equal({}, containers[:in_box])
+    assert_equal({}, containers[:location_query])
+  end
+
+  def test_permit_filters_permits_array_typed_param
+    raw = ActionController::Parameters.new(by_users: %w[1 2])
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal(%w[1 2], permitted[:by_users])
+  end
+
+  def test_permit_filters_permits_hash_typed_param
+    raw = ActionController::Parameters.new(
+      in_box: { north: "1.0", south: "2.0", east: "3.0", west: "4.0" }
+    )
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal("1.0", permitted[:in_box][:north])
+  end
+
+  def test_permit_filters_permits_multilevel_nested_subquery
+    raw = ActionController::Parameters.new(
+      location_query: {
+        pattern: "California",
+        observation_query: {
+          by_users: ["1"],
+          has_public_lat_lng: "true"
+        }
+      },
+      bogus_toplevel: "haxx"
+    )
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_not(permitted.key?(:bogus_toplevel))
+    nested = permitted[:location_query][:observation_query]
+    assert_equal(["1"], nested[:by_users])
+    assert_equal("true", nested[:has_public_lat_lng])
+  end
+
+  def test_permit_filters_still_strips_unrecognized_top_level_param
+    raw = ActionController::Parameters.new(by_users: ["1"], evil: "haxx")
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_not(permitted.key?(:evil))
+  end
+
+  def test_create_query_builds_valid_query_from_multilevel_nested_subquery
+    query = Query.create_query(
+      :Observation,
+      location_query: {
+        pattern: "California",
+        observation_query: { by_users: ["1"], has_public_lat_lng: "true" }
+      }
+    )
+
+    assert(query.valid?)
+    assert_empty(query.validation_errors)
+    location_subquery = query.subqueries[:location_query]
+    assert_equal("Query::Locations", location_subquery.class.name)
+    observation_subquery = location_subquery.subqueries[:observation_query]
+    assert_equal([1], observation_subquery.params[:by_users])
+    assert_equal(true, observation_subquery.params[:has_public_lat_lng])
   end
 
   def test_default_order_falls_back_to_class_default_without_override
