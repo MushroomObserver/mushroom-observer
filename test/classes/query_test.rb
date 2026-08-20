@@ -292,14 +292,18 @@ class QueryTest < UnitTestCase
     )
   end
 
-  def test_resolve_param_aliases_explicit_attr_wins_over_alias
+  # A singular alias represents a more specific, more recently-expressed
+  # choice than a broader value already present under the target attr
+  # (e.g. a "sort by date" link clicked while a saved query already
+  # carries its own order_by) -- it overwrites, not yields.
+  def test_resolve_param_aliases_alias_wins_over_present_attr
     subclass = Class.new(Query::Observations) do
       query_attr(:test_ids, [Observation], param_alias: :test_id)
     end
 
     resolved = subclass.resolve_param_aliases(test_id: 999, test_ids: [1])
 
-    assert_equal({ test_ids: [1] }, resolved)
+    assert_equal({ test_ids: [999] }, resolved)
   end
 
   def test_create_query_resolves_by_alias_end_to_end
@@ -406,6 +410,20 @@ class QueryTest < UnitTestCase
 
     assert_equal(:updated_at, with_flag.default_order)
     assert_equal(:date, without_flag.default_order)
+  end
+
+  # `false` is a meaningfully-set, active filter value for a boolean
+  # attr -- not "absent". `false.blank?` is true in Rails, so a
+  # `.blank?` presence check here would wrongly skip the override.
+  def test_default_order_uses_attr_override_when_attr_explicitly_false
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_flag, :boolean, default_order: :updated_at)
+    end
+    with_false_flag = subclass.new(test_flag: false)
+    with_false_flag.params = with_false_flag.attributes.compact
+    with_false_flag.valid = with_false_flag.valid?
+
+    assert_equal(:updated_at, with_false_flag.default_order)
   end
 
   def test_position_pagination_at

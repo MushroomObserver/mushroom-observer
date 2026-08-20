@@ -401,10 +401,12 @@ class Query
   # Resolves any `param_alias:`-registered param key present in `params`
   # (e.g. `project: 123`, the URL shortcut) into its target query_attr
   # (`projects: [123]`) -- wrapping the value in an Array when the target
-  # attr itself accepts an Array. An explicit value already present under
-  # the target attr name takes precedence over the alias (the alias key
-  # is still dropped either way). Pure param-shape translation: does not
-  # verify a record-backed value exists -- see
+  # attr itself accepts an Array. The alias wins over an already-present
+  # value under the target attr name: a singular alias represents a more
+  # specific, more recently-expressed choice (e.g. a "sort by date" link
+  # clicked while a broader saved query already carries its own
+  # `order_by`), so it overwrites rather than yields. Pure param-shape
+  # translation: does not verify a record-backed value exists -- see
   # ApplicationController::QueryParamAliases#create_query_from_url_params,
   # which needs controller/flash context this class method doesn't have.
   def self.resolve_param_aliases(params)
@@ -416,8 +418,6 @@ class Query
       next unless params.key?(alias_key)
 
       value = params.delete(alias_key)
-      next if params.key?(attr)
-
       accepts = attribute_types[attr].accepts
       params[attr] =
         accepts.is_a?(Array) && !value.is_a?(Array) ? [value] : value
@@ -563,7 +563,10 @@ class Query
   def attr_default_order
     self.class.attribute_types.each do |attr, type|
       next unless type.default_order
-      next if params[attr].blank?
+      # `.nil?`, not `.blank?` -- `false.blank?` is true in Rails, and
+      # a boolean attr explicitly filtered to `false` is still present
+      # and active, not absent.
+      next if params[attr].nil?
 
       return type.default_order
     end

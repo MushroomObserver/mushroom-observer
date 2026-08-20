@@ -66,16 +66,12 @@ module ApplicationController::QueryParamAliases
 
   # Resolves a single `alias_key` in place on `permitted` (mutating it),
   # returning :scalar, :record_backed, or :not_found -- see
-  # `resolve_param_alias_records`. An explicit value already present
-  # under the target attr name takes precedence over the alias (the
-  # alias key is still dropped either way, but as :scalar, not
-  # :record_backed, so it doesn't force always_index: true for a value
-  # this method didn't itself look up).
+  # `resolve_param_alias_records`. The alias wins over an already-present
+  # value under the target attr name (see Query.resolve_param_aliases for
+  # why), so it resolves and overwrites unconditionally.
   def resolve_one_param_alias(klass, permitted, alias_key)
     attr = klass.param_aliases[alias_key]
     raw_value = permitted.delete(alias_key)
-    return :scalar if permitted.key?(attr)
-
     model_class = alias_record_class(klass, attr)
     unless model_class
       permitted[attr] = raw_value
