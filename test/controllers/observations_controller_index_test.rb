@@ -613,8 +613,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     end
     # On page 1, prev link should be disabled (has opacity-0 class)
     assert_select("a.prev_page_link.disabled.opacity-0")
-    assert_select("form.page_input[action='#{observations_url}']")
-    assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
+    # The goto-page link (no <form> -- see IndexPaginationNav) carries
+    # the full current query state in its own href.
+    assert_select("a[data-page-input-target='goToLink']") do |links|
+      href = links.first["href"]
+      assert_includes(href, q_model,
+                      "Goto link should have q[model]=Observation")
+    end
   end
 
   # Regression test for https://github.com/MushroomObserver/mushroom-observer/pull/3528
@@ -648,13 +653,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                       "Next link should preserve third by_users value")
     end
 
-    # Also check the page input form has hidden fields for all three values
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user1.id}']")
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user2.id}']")
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user3.id}']")
+    # Also check the goto-page link's own href preserves all three
+    # values (no <form>/hidden fields -- see IndexPaginationNav).
+    assert_select("a[data-page-input-target='goToLink']") do |links|
+      href = links.first["href"]
+      assert_includes(href, by_user_1,
+                      "Goto link should preserve first by_users value")
+      assert_includes(href, by_user_2,
+                      "Goto link should preserve second by_users value")
+      assert_includes(href, by_user_3,
+                      "Goto link should preserve third by_users value")
+    end
 
     # Search form prefilling is tested in
     # test/controllers/observations/search_controller_test.rb

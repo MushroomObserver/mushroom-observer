@@ -97,7 +97,8 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
   def test_should_get_edit_page_with_excluded_images
     login
-    get(:edit, params: { id: @visual_group.id, status: "excluded" })
+    get(:edit, params: { id: @visual_group.id,
+                         visual_group_filter: { status: "excluded" } })
     assert_response(:success)
   end
 
@@ -117,7 +118,8 @@ class VisualGroupsControllerTest < FunctionalTestCase
       # Hidden status field carries the current status when the user
       # submits via the text-input's submit button.
       assert_select(
-        "input[type=hidden][name=status][value=needs_review]", count: 1
+        "input[type=hidden][name='visual_group_filter[status]']" \
+        "[value=needs_review]", count: 1
       )
       # Three status submit buttons; the current one ("needs_review")
       # is a non-clickable `<span>` (aria-disabled) so the user can't
@@ -127,15 +129,17 @@ class VisualGroupsControllerTest < FunctionalTestCase
         text: :visual_group_needs_review.t
       )
       assert_select(
-        "button[type=submit][name=status][value=included]",
+        "button[type=submit][name='visual_group_filter[status]']" \
+        "[value=included]",
         text: :visual_group_included.t
       )
       assert_select(
-        "button[type=submit][name=status][value=excluded]",
+        "button[type=submit][name='visual_group_filter[status]']" \
+        "[value=excluded]",
         text: :visual_group_excluded.t
       )
       # Text filter input + its dedicated submit button.
-      assert_select("input[type=text][name=filter]#filter")
+      assert_select("input[type=text][name='visual_group_filter[filter]']")
       assert_select(
         "button[type=submit]",
         text: :edit_visual_group_update_filter.t
@@ -145,9 +149,19 @@ class VisualGroupsControllerTest < FunctionalTestCase
     assert_select("button[onclick]", text: :reload.ti)
   end
 
+  # A malformed visual_group_filter param (a String, not a nested
+  # hash) must not 500 -- found by Copilot review on PR #5141.
+  def test_edit_with_malformed_filter_param_does_not_500
+    login
+    get(:edit, params: { id: @visual_group.id, visual_group_filter: "foo" })
+
+    assert_response(:success)
+  end
+
   def test_edit_filter_form_reload_link_hidden_on_included
     login
-    get(:edit, params: { id: @visual_group.id, status: "included" })
+    get(:edit, params: { id: @visual_group.id,
+                         visual_group_filter: { status: "included" } })
 
     # Active button is the "Included" span (aria-disabled) now.
     assert_select(
@@ -170,8 +184,8 @@ class VisualGroupsControllerTest < FunctionalTestCase
     # the LAST value when the same key appears twice, so order
     # matters: hidden first, button second.
     get(:edit, params: { id: @visual_group.id,
-                         status: "included",
-                         filter: "Trametes" })
+                         visual_group_filter: { status: "included",
+                                                filter: "Trametes" } })
 
     assert_response(:success)
     assert_equal("included", assigns(:status))
@@ -185,8 +199,8 @@ class VisualGroupsControllerTest < FunctionalTestCase
     # (since the user didn't click a status button), preserving
     # whatever status they were on.
     get(:edit, params: { id: @visual_group.id,
-                         status: "excluded",
-                         filter: "Cantharellus" })
+                         visual_group_filter: { status: "excluded",
+                                                filter: "Cantharellus" } })
 
     assert_response(:success)
     assert_equal("excluded", assigns(:status))

@@ -44,6 +44,7 @@ class SupportControllerTest < FunctionalTestCase
     post(:confirm, params: params)
     assert_unprocessable
     assert_select("body.support__confirm")
+    assert_select("form#donate_form[data-turbo='false']")
     assert_donations(donations + 1, final_amount, false, params[:donation])
   end
 

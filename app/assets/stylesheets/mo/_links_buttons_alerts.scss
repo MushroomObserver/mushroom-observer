@@ -245,7 +245,15 @@ form.button_to {
     flex: 0 0 auto;
     width: auto;
     display: flex;
-    align-items: center;
+    // `stretch` (not `center`) -- a `.btn`-classed child (a plain
+    // <button>/<input type=submit>, or a Link-rendered <a>, e.g. the
+    // pagination goto icon) needs to fill this span's own height
+    // (which the outer `.input-group`'s stretch already sized to
+    // match the sibling `.form-control`), not just center at its own
+    // shorter intrinsic content height -- confirmed empirically: an
+    // <a class="btn"> here sat ~2px short of the input's height with
+    // `center`, flush with `stretch`.
+    align-items: stretch;
 
     > .btn {
       display: inline-flex;
