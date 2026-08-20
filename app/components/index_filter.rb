@@ -48,6 +48,12 @@ class Components::IndexFilter < Components::Base
   prop :form_id, _Nilable(String), default: nil
   prop :extra_class, _Nilable(String), default: nil
 
+  # Not a Superform -- this filter's params need to land as flat,
+  # unnamespaced top-level URL params (e.g. ?project=123) for the
+  # index controller to read directly off request.params, not boxed
+  # under a FormObject namespace the way every Superform GET filter
+  # elsewhere in the app is.
+  # rubocop:disable MO/NoHandRolledFormTag
   def view_template(&block)
     form(action: url_for(@to), method: "get",
          class: form_class, id: @form_id,
@@ -59,6 +65,7 @@ class Components::IndexFilter < Components::Base
       end
     end
   end
+  # rubocop:enable MO/NoHandRolledFormTag
 
   private
 

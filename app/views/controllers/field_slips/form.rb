@@ -31,7 +31,15 @@ module Views::Controllers::FieldSlips
 
     private
 
-    # Override form_tag so we can use GET for the code-only entry form.
+    # When model.code is absent, the target route depends on
+    # model.new_record? (new_field_slip_path/field_slips_path/
+    # field_slip_path) -- Rails route helpers, which Phlex-Rails
+    # forbids calling from `initialize` (HelpersCalledBeforeRenderError).
+    # form_action is only reachable once rendering has started, which
+    # means the whole tag has to be built here in form_tag for that
+    # branch, not passed as a constructor kwarg. The model.code branch
+    # uses the base class's own default form_tag unchanged.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       if model.code
         super
@@ -40,6 +48,7 @@ module Views::Controllers::FieldSlips
              **form_attributes, &block)
       end
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       # Forward @attributes[:data] so ApplicationForm's data-turbo

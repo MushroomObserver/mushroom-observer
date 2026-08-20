@@ -17,6 +17,7 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -98,6 +99,21 @@ MO/NoActiveRecordRelationProp:
     materialize with .to_a at the call site and use _Array(<Model>)
     instead, so the element type is checked too -- see
     lib/rubocop/cop/mo/no_active_record_relation_prop.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+
+MO/NoHandRolledFormTag:
+  Description: >-
+    Phlex views/components must not call the bare form(...) tag helper
+    directly -- use Components::ApplicationForm (Superform) instead --
+    see lib/rubocop/cop/mo/no_hand_rolled_form_tag.rb and issue #5100.
+    Every legitimate raw form(...) call site is inline-disabled at the
+    call site itself, not file-excluded here -- a file-level Exclude
+    would give the whole file blanket immunity to any FUTURE raw
+    form(...) call added anywhere else in it, not just the one
+    reviewed site.
   Enabled: true
   Include:
     - "app/components/**/*.rb"

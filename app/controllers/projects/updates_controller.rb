@@ -44,7 +44,7 @@ module Projects
       count = bulk_add_candidates(current_scope)
       flash_notice(:project_updates_added_all.t(count: count))
       redirect_to(project_updates_path(project_id: @project.id,
-                                       show_excluded: show_excluded?))
+                                       **filter_query_params))
     end
 
     private
@@ -54,9 +54,11 @@ module Projects
     end
 
     def show_excluded?
-      params[:show_excluded].present? &&
-        params[:show_excluded] != "false" &&
-        params[:show_excluded] != "0"
+      ActiveModel::Type::Boolean.new.cast(params[:show_excluded]) == true
+    end
+
+    def filter_query_params
+      { show_excluded: show_excluded? }
     end
 
     # The observation list the Updates tab is currently showing.
@@ -75,8 +77,7 @@ module Projects
       { observations: obs_page,
         pagination: pagination,
         current_count: pagination.num_total,
-        request_url: request.fullpath,
-        form_action_url: request.path }
+        request_url: request.fullpath }
     end
 
     def build_pagination(scope)
@@ -115,9 +116,8 @@ module Projects
         end
         format.html do
           redirect_back_or_to(
-            project_updates_path(
-              project_id: @project.id, show_excluded: show_excluded?
-            )
+            project_updates_path(project_id: @project.id,
+                                 **filter_query_params)
           )
         end
       end

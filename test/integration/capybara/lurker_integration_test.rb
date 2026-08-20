@@ -378,9 +378,12 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     click_link(text: "Observations at this Location")
     assert_match("Observations", page.title, "Wrong title")
 
-    within(first("form.page_input")) do
+    # No <form> -- the goto control is a plain link that
+    # page-input_controller.js keeps pointed at the typed page number
+    # (see IndexPaginationNav).
+    within(first(".input-group.page-input")) do
       fill_in("page", with: 2)
-      click_commit
+      find("a[data-page-input-target='goToLink']").click
     end
     assert_match("Observations", page.title, "Wrong title")
 
