@@ -8,6 +8,14 @@ module Views::Controllers::RssLogs
     prop :query, _Nilable(::Query)
     prop :types, _Array(::String)
 
+    # Not a Superform -- a multi-select checkbox filter (RssLogsController
+    # explicitly validates "array of types, from form checkboxes"), not a
+    # single-model-bound field set. Submitting the combined state of
+    # several independently-toggled checkboxes as one q[type][] array
+    # needs a submit, unlike IndexPaginationNav's single-value goto
+    # controls, which each fully specify their own destination and so
+    # reduce to plain links.
+    # rubocop:disable MO/NoHandRolledFormTag
     def view_template
       form(action: activity_logs_path, method: :get,
            class: "filter-form", id: "log_filter_form",
@@ -16,6 +24,7 @@ module Views::Controllers::RssLogs
         render_filter_buttons
       end
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     private
 
