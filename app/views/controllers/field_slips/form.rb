@@ -31,10 +31,15 @@ module Views::Controllers::FieldSlips
 
     private
 
-    # rubocop:disable MO/NoHandRolledFormTag -- method needs to switch
-    # between GET (no code yet) and the default's persisted?-driven
-    # PATCH/PUT (code exists) based on runtime model state, which a
-    # static method: kwarg on the constructor can't express.
+    # When model.code is absent, the target route depends on
+    # model.new_record? (new_field_slip_path/field_slips_path/
+    # field_slip_path) -- Rails route helpers, which Phlex-Rails
+    # forbids calling from `initialize` (HelpersCalledBeforeRenderError).
+    # form_action is only reachable once rendering has started, which
+    # means the whole tag has to be built here in form_tag for that
+    # branch, not passed as a constructor kwarg. The model.code branch
+    # uses the base class's own default form_tag unchanged.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       if model.code
         super

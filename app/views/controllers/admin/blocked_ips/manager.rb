@@ -63,10 +63,12 @@ module Views::Controllers::Admin::BlockedIps
       @list.page.present? && @list.total_pages.present?
     end
 
-    # rubocop:disable MO/NoHandRolledFormTag -- plain POST is
-    # Superform's own default, but form_attributes below needs a
-    # computed id/class/data merge (@type), not just the constructor's
-    # static @attributes passthrough.
+    # `action_path` calls a Rails route helper, which Phlex-Rails
+    # forbids from `initialize` (HelpersCalledBeforeRenderError) --
+    # it's only reachable once rendering has started, which means the
+    # whole tag has to be built here in form_tag, not passed as a
+    # constructor kwarg the base class's own form_tag could use.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: action_path, method: :post, **form_attributes, &block)
     end

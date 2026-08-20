@@ -34,10 +34,13 @@ module Views::Controllers::Observations::Identify
 
     private
 
-    # rubocop:disable MO/NoHandRolledFormTag -- GET is achievable via
-    # method: :get on the constructor, but form_attributes below needs
-    # runtime-computed values (selected/initial_controller), not just
-    # the constructor's static @attributes passthrough.
+    # form_action calls identify_observations_path, a Rails route
+    # helper, which Phlex-Rails forbids from `initialize`
+    # (HelpersCalledBeforeRenderError) -- only reachable once
+    # rendering has started, which means the whole tag has to be
+    # built here in form_tag, not passed as a constructor kwarg the
+    # base class's own form_tag could use.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: form_action, method: :get,
            **form_attributes, &block)

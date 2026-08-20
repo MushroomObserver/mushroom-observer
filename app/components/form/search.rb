@@ -26,17 +26,43 @@ class Components::Form::Search < Components::ApplicationForm
   # Additional wrapper options for search-specific fields
   SEARCH_WRAPPER_OPTIONS = [:selected, :between].freeze
 
-  # This form is always Turbo-submitted (see `form_attributes` below)
-  # regardless of the base class's `turbo:` prop, which this class
-  # doesn't use at all -- `form_tag`/`form_attributes` build the
-  # `<form>` tag's own `data:` hash from scratch rather than calling
-  # `super`. `context:` is a separate, unrelated concern: which of
-  # the two places this form renders (the standalone search page, or
-  # the nav-dropdown, loaded via a turbo_stream swap) -- it decides
-  # whether the in-form header/collapse-toggle renders and whether
-  # the nav-dropdown's turbo_stream swap-target marker is added.
+  # `context:` decides which of the two places this form renders (the
+  # standalone search page, or the nav-dropdown, loaded via a
+  # turbo_stream swap) -- whether the in-form header/collapse-toggle
+  # renders and whether the nav-dropdown's turbo_stream swap-target
+  # marker is added.
   prop :search_controller, _Interface(:search_type)
   prop :context, _Union(:page, :dropdown), default: :page
+
+  # `search_type`/`context` don't need a route helper (every search
+  # controller nests under `namespace :<search_type> do resource
+  # :search, only: [:new, :create] end`, so the action is always
+  # `/<search_type>/search`, built by hand) -- so action/method/id/
+  # class/data all pass straight through as ordinary
+  # Superform::Rails::Form constructor kwargs, no form_tag override
+  # needed. This form is always Turbo-submitted (`turbo: true`,
+  # unconditionally -- Searchable#create always redirects, so there's
+  # no same-URL-200 risk either way), via the base class's own
+  # `turbo:` prop rather than a hand-built `data:` hash -- which also
+  # lets ApplicationForm#around_template's own form-feedback
+  # controller merge in normally instead of being silently dropped by
+  # a data hash built from scratch.
+  def initialize(model, search_controller:, context: :page, **props)
+    type = search_controller.search_type
+    data = {
+      controller: "search-length-validator",
+      search_length_validator_max_length_value:
+        Searchable::MAX_SEARCH_INPUT_LENGTH,
+      search_length_validator_search_type_value: type
+    }
+    data[:turbo_stream] = "true" if context == :dropdown
+    super(model, search_controller:, context:, turbo: true,
+                 action: "/#{type}/search", method: :post,
+                 id: "#{type}_search_form",
+                 class: "faceted-search-form pb-4",
+                 data:,
+                 **props)
+  end
 
   def view_template
     render_header if dropdown?
@@ -46,44 +72,6 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   private
-
-  # Form configuration
-
-  # rubocop:disable MO/NoHandRolledFormTag -- plain POST is Superform's
-  # own default, but form_attributes below needs a computed id/data
-  # merge (search_type, dropdown?), not just the constructor's static
-  # @attributes passthrough.
-  def form_tag(&block)
-    form(action: form_action, method: :post, **form_attributes, &block)
-  end
-  # rubocop:enable MO/NoHandRolledFormTag
-
-  # Every search controller nests under `namespace :<search_type> do
-  # resource :search, only: [:new, :create] end`, so this is always
-  # `/<search_type>/search` — no need for `url_for`, which also
-  # sidesteps needing a real Rails request/routing context (tests
-  # construct `search_controller` as a bare, un-rendered instance).
-  def form_action
-    "/#{search_type}/search"
-  end
-
-  def form_attributes
-    attrs = {
-      id: "#{search_type}_search_form",
-      class: "faceted-search-form pb-4",
-      data: {
-        controller: "search-length-validator",
-        search_length_validator_max_length_value:
-          Searchable::MAX_SEARCH_INPUT_LENGTH,
-        search_length_validator_search_type_value: search_type,
-        # Always on, regardless of context -- Searchable#create always
-        # redirects, so there's no same-URL-200 risk either way.
-        turbo: "true"
-      }
-    }
-    attrs[:data].merge!(turbo_stream_data) if dropdown?
-    attrs
-  end
 
   def dropdown? = @context == :dropdown
 

@@ -506,6 +506,8 @@
   page: page
   by_letter: By letter
   goto: go
+  goto_page_tooltip: Go to page [number]
+  goto_letter_tooltip: Go to letter [letter]
   menu: menu
   area: area
 

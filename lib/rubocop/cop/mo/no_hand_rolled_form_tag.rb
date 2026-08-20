@@ -3,57 +3,57 @@
 module RuboCop
   module Cop
     module MO
-      # Flags a Superform (`Components::ApplicationForm`) subclass that
-      # overrides `form_tag`. A hand-rolled `form_tag` bypasses
-      # Superform's own HTTP-method handling: the default `form_tag`
-      # already emits `method: "get"` when the form was constructed
-      # with `method: :get`, `method: "post"` otherwise, and spoofs
-      # PATCH/PUT/DELETE via a hidden `_method` field driven by the
-      # model's `persisted?` -- never a literal non-GET/POST value on
-      # the `<form method="...">` attribute itself, which HTML5 doesn't
-      # support (an unrecognized method value silently submits as GET).
+      # Phlex views/components must not call the bare `form(...)` tag
+      # helper directly -- use `Components::ApplicationForm` (Superform)
+      # instead, so CSRF tokens, `_method` overrides, and Turbo wiring
+      # all stay centralized in one place instead of drifting per call
+      # site (issue #5100).
       #
-      # Found live: `FormObject::FieldSlipAttach`'s form hardcoded
-      # `method: :put` on the `<form>` tag directly -- a real browser
-      # submitted it as GET to a PUT/PATCH-only route, working only in
-      # controller tests (which call the action directly, bypassing
-      # HTML method semantics entirely).
+      # Scoped via this cop's Include/Exclude in .rubocop.yml, not in
+      # this file: applies to app/components + app/views, excluding the
+      # handful of files whose entire purpose is to legitimately build a
+      # raw-form primitive (an `ApplicationForm` subclass's own GET-form
+      # `form_tag` override, or a reusable raw-form component like
+      # `Components::IndexFilter`). A one-off deviation inside an
+      # otherwise-ordinary view (e.g. a cross-origin POST straight to an
+      # external payment processor) should disable this cop inline at
+      # the call site instead of being added to the file-level Exclude
+      # list -- see `app/views/controllers/support/confirm.rb`.
       #
       # @example
       #   # bad
-      #   class Views::Controllers::Foo::Form < Components::ApplicationForm
-      #     def form_tag(&block)
-      #       form(action: form_action, method: :put, **form_attributes, &block)
-      #     end
-      #   end
+      #   form(action: foo_path, method: :post) { ... }
       #
-      #   # good -- force PATCH/PUT via persisted?, matching
-      #   # FormObject::AdminSession
-      #   class FormObject::Foo < FormObject::Base
-      #     def persisted?
-      #       true
-      #     end
-      #   end
-      #
-      #   # good -- force GET via the constructor, matching Superform's
-      #   # own `form_method` handling, no form_tag override needed
-      #   class Views::Controllers::Foo::Form < Components::ApplicationForm
-      #     def initialize(model, **)
-      #       super(model, method: :get, **)
+      #   # good
+      #   class Components::FooForm < Components::ApplicationForm
+      #     def view_template
+      #       super do
+      #         # fields...
+      #       end
       #     end
       #   end
       class NoHandRolledFormTag < Base
-        MSG = "Don't override `form_tag` -- Superform's default already " \
-              "handles GET (pass `method: :get` to `super`) and spoofs " \
-              "PATCH/PUT via a `persisted?` override (see " \
-              "FormObject::AdminSession). A literal non-GET/POST " \
-              "`method:` on a hand-rolled `<form>` tag isn't valid " \
-              "HTML5 and silently submits as GET."
+        MSG = "Don't call the bare `form(...)` tag helper directly -- " \
+              "use Components::ApplicationForm (Superform) instead, so " \
+              "CSRF tokens, _method overrides, and Turbo wiring stay " \
+              "centralized in one place."
 
-        def on_def(node)
-          return unless node.method?(:form_tag)
+        RESTRICT_ON_SEND = [:form].freeze
+
+        def on_send(node)
+          return unless bare_call?(node)
 
           add_offense(node)
+        end
+
+        private
+
+        # `form(...)` is only the Phlex tag helper when called bare (or
+        # on an explicit `self`) -- `some_object.form(...)` is some
+        # other API's `#form` method, not the tag helper this cop
+        # exists to ban.
+        def bare_call?(node)
+          node.receiver.nil? || node.receiver.self_type?
         end
       end
     end

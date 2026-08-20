@@ -251,6 +251,191 @@ class QueryTest < UnitTestCase
                  SearchParams.new(phrase: '-"bad wolf" -foo -bar').bads)
   end
 
+  def test_order_by_has_by_param_alias
+    assert_equal(:order_by, Query::Observations.param_aliases[:by])
+  end
+
+  def test_recognized_params_includes_attrs_and_aliases
+    recognized = Query::Observations.recognized_params
+
+    assert_includes(recognized, :order_by)
+    assert_includes(recognized, :projects)
+    assert_includes(recognized, :by)
+  end
+
+  def test_resolve_param_aliases_renames_scalar_alias
+    assert_equal(
+      { order_by: "date" },
+      Query::Observations.resolve_param_aliases(by: "date")
+    )
+  end
+
+  def test_resolve_param_aliases_ignores_unaliased_params
+    assert_equal(
+      { projects: [1] },
+      Query::Observations.resolve_param_aliases(projects: [1])
+    )
+  end
+
+  def test_resolve_param_aliases_wraps_scalar_value_for_array_attr
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_ids, [Observation], param_alias: :test_id)
+    end
+
+    assert_equal(
+      { test_ids: [123] },
+      subclass.resolve_param_aliases(test_id: 123)
+    )
+    assert_equal(
+      { test_ids: [123, 456] },
+      subclass.resolve_param_aliases(test_id: [123, 456])
+    )
+  end
+
+  # A singular alias represents a more specific, more recently-expressed
+  # choice than a broader value already present under the target attr
+  # (e.g. a "sort by date" link clicked while a saved query already
+  # carries its own order_by) -- it overwrites, not yields.
+  def test_resolve_param_aliases_alias_wins_over_present_attr
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_ids, [Observation], param_alias: :test_id)
+    end
+
+    resolved = subclass.resolve_param_aliases(test_id: 999, test_ids: [1])
+
+    assert_equal({ test_ids: [999] }, resolved)
+  end
+
+  def test_create_query_resolves_by_alias_end_to_end
+    query = Query.create_query(:Observation, by: "date")
+
+    assert_equal("date", query.params[:order_by])
+  end
+
+  def test_permit_filters_categorizes_by_accepts_shape
+    filters = Query::Observations.permit_filters
+    containers = filters.last
+
+    # Scalar attrs (and the :by alias) are bare symbols.
+    assert_includes(filters, :order_by)
+    assert_includes(filters, :by)
+    assert_includes(filters, :needs_naming) # scalar Class (User)
+    # Array-typed attrs permit via `attr: []`.
+    assert_equal([], containers[:by_users])
+    assert_equal([], containers[:projects])
+    # Hash-typed attrs, including subqueries, permit via `attr: {}`.
+    assert_equal({}, containers[:names])
+    assert_equal({}, containers[:in_box])
+    assert_equal({}, containers[:location_query])
+  end
+
+  def test_permit_filters_permits_array_typed_param
+    raw = ActionController::Parameters.new(by_users: %w[1 2])
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal(%w[1 2], permitted[:by_users])
+  end
+
+  def test_permit_filters_permits_hash_typed_param
+    raw = ActionController::Parameters.new(
+      in_box: { north: "1.0", south: "2.0", east: "3.0", west: "4.0" }
+    )
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal("1.0", permitted[:in_box][:north])
+  end
+
+  def test_permit_filters_permits_multilevel_nested_subquery
+    raw = ActionController::Parameters.new(
+      location_query: {
+        pattern: "California",
+        observation_query: {
+          by_users: ["1"],
+          has_public_lat_lng: "true"
+        }
+      },
+      bogus_toplevel: "haxx"
+    )
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_not(permitted.key?(:bogus_toplevel))
+    nested = permitted[:location_query][:observation_query]
+    assert_equal(["1"], nested[:by_users])
+    assert_equal("true", nested[:has_public_lat_lng])
+  end
+
+  def test_permit_filters_still_strips_unrecognized_top_level_param
+    raw = ActionController::Parameters.new(by_users: ["1"], evil: "haxx")
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_not(permitted.key?(:evil))
+  end
+
+  def test_create_query_builds_valid_query_from_multilevel_nested_subquery
+    query = Query.create_query(
+      :Observation,
+      location_query: {
+        pattern: "California",
+        observation_query: { by_users: ["1"], has_public_lat_lng: "true" }
+      }
+    )
+
+    assert(query.valid?)
+    assert_empty(query.validation_errors)
+    location_subquery = query.subqueries[:location_query]
+    assert_equal("Query::Locations", location_subquery.class.name)
+    observation_subquery = location_subquery.subqueries[:observation_query]
+    assert_equal([1], observation_subquery.params[:by_users])
+    assert_equal(true, observation_subquery.params[:has_public_lat_lng])
+  end
+
+  def test_default_order_falls_back_to_class_default_without_override
+    assert_equal(:date, Query.create_query(:Observation).default_order)
+  end
+
+  def test_default_order_uses_attr_override_when_attr_present
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_flag, :boolean, default_order: :updated_at)
+    end
+    with_flag = subclass.new(test_flag: true)
+    with_flag.params = with_flag.attributes.compact
+    with_flag.valid = with_flag.valid?
+    without_flag = subclass.new(test_flag: nil)
+    without_flag.params = without_flag.attributes.compact
+    without_flag.valid = without_flag.valid?
+
+    assert_equal(:updated_at, with_flag.default_order)
+    assert_equal(:date, without_flag.default_order)
+  end
+
+  # `false` is a meaningfully-set, active filter value for a boolean
+  # attr -- not "absent". `false.blank?` is true in Rails, so a
+  # `.blank?` presence check here would wrongly skip the override.
+  def test_default_order_uses_attr_override_when_attr_explicitly_false
+    subclass = Class.new(Query::Observations) do
+      query_attr(:test_flag, :boolean, default_order: :updated_at)
+    end
+    with_false_flag = subclass.new(test_flag: false)
+    with_false_flag.params = with_false_flag.attributes.compact
+    with_false_flag.valid = with_false_flag.valid?
+
+    assert_equal(:updated_at, with_false_flag.default_order)
+  end
+
+  def test_position_pagination_at
+    query = Query.lookup(:Observation)
+    ids = query.result_ids
+    pagination_data = PaginationData.new(num_per_page: 1)
+
+    query.position_pagination_at(ids[2], pagination_data)
+
+    assert_equal(3, pagination_data.number)
+  end
+
   def test_lookup
     assert_equal(0, QueryRecord.count)
 

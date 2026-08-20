@@ -24,6 +24,21 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
   prop :page_param, String, default: "page"
   prop :filter_param, String, default: "text_filter"
 
+  # `action:`/`method:`/`id:`/`class:`/`data:` are ordinary
+  # Superform::Rails::Form constructor kwargs, extracted by
+  # ApplicationForm#after_initialize -- unlike the route-helper-backed
+  # forms elsewhere in this sweep, `filter_path` is already a resolved
+  # path string supplied by the caller, so there's no
+  # HelpersCalledBeforeRenderError risk computing these here.
+  def initialize(model, turbo_frame:, filter_path:, **props)
+    super(model, turbo_frame:, filter_path:,
+                 action: filter_path, method: :get,
+                 id: "#{turbo_frame.tr("_", "-")}-filter-form",
+                 class: "d-inline-block",
+                 data: { controller: "autosubmit", turbo_frame: turbo_frame },
+                 **props)
+  end
+
   def around_template(&block)
     nav(class: "d-flex justify-content-between align-items-center p-3",
         style: "order: 2") do
@@ -45,28 +60,6 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
   end
 
   private
-
-  # rubocop:disable MO/NoHandRolledFormTag -- GET is achievable via
-  # method: :get on the constructor, but form_attributes below needs a
-  # computed id/data merge, not just the constructor's static
-  # @attributes passthrough.
-  def form_tag(&block)
-    form(action: @filter_path, method: :get, **form_attributes, &block)
-  end
-  # rubocop:enable MO/NoHandRolledFormTag
-
-  def form_attributes
-    {
-      id: "#{@turbo_frame.tr("_", "-")}-filter-form",
-      class: "d-inline-block",
-      # Merge in @attributes[:data] so ApplicationForm's data-turbo
-      # actually reaches this overridden form_tag.
-      data: (@attributes[:data] || {}).merge(
-        controller: "autosubmit",
-        turbo_frame: @turbo_frame
-      )
-    }
-  end
 
   # GET forms don't need authenticity tokens or _method fields
   def authenticity_token_field; end

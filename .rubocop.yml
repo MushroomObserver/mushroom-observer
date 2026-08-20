@@ -106,10 +106,14 @@ MO/NoActiveRecordRelationProp:
 
 MO/NoHandRolledFormTag:
   Description: >-
-    Superform-based forms must not override `form_tag` -- use
-    `method: :get` on the constructor (Superform's default `form_tag`
-    already handles it) or a `persisted?` override on the FormObject
-    to force PATCH/PUT -- see lib/rubocop/cop/mo/no_hand_rolled_form_tag.rb.
+    Phlex views/components must not call the bare form(...) tag helper
+    directly -- use Components::ApplicationForm (Superform) instead --
+    see lib/rubocop/cop/mo/no_hand_rolled_form_tag.rb and issue #5100.
+    Every legitimate raw form(...) call site is inline-disabled at the
+    call site itself, not file-excluded here -- a file-level Exclude
+    would give the whole file blanket immunity to any FUTURE raw
+    form(...) call added anywhere else in it, not just the one
+    reviewed site.
   Enabled: true
   Include:
     - "app/components/**/*.rb"
