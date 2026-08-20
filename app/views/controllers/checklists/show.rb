@@ -5,13 +5,17 @@ module Views::Controllers::Checklists
   class Show < Views::FullPageBase
     prop :data, ::Checklist
     prop :context, ::Views::Controllers::Checklists::Context
+    # Project checklist backing the "Missing Taxa" panel on a
+    # species-list checklist with project context.
+    prop :project_data, _Nilable(::Checklist), default: nil
 
     def view_template
       render_page_chrome
       render_target_names_widget if @context.admin?
       # Sibling reference in the `Views::Controllers::Checklists`
       # module — resolves to `Checklists::Contents`.
-      render(Contents.new(data: @data, context: @context))
+      render(Contents.new(data: @data, context: @context,
+                          project_data: @project_data))
     end
 
     private

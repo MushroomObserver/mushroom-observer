@@ -247,6 +247,14 @@ class Checklist
     @counts
   end
 
+  # Taxa in this checklist whose name does not appear in `other`
+  # (compared by name id). Used for the "Missing Taxa" panel on a
+  # species-list checklist with project context.
+  def taxa_not_in(other)
+    other_ids = other.taxa.to_set { |tuple| tuple[1] }
+    taxa.reject { |tuple| other_ids.include?(tuple[1]) }
+  end
+
   private
 
   def calc_checklist

@@ -43,6 +43,8 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { species_list_id: list.id })
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Wrong page")
+    assert_select("#checklist_missing_panel", { count: 0 },
+                  "No Missing Taxa panel without project context")
 
     prove_checklist_content(expect)
   end
@@ -68,7 +70,22 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Title should still be the species list's")
     assert_select(".checklist a[href*='list%3A#{list.id}']")
-    assert_select(".checklist a[href*='project%3A']", count: 0)
+    assert_select("#checklist_species_panel a[href*='project%3A']",
+                  count: 0)
+    assert_select("#checklist_higher_panel a[href*='project%3A']",
+                  count: 0)
+    # Missing Taxa panel: project taxa absent from the list, with
+    # counts and links matching the project checklist.
+    assert_select("h4", text: :checklist_missing_taxa.l)
+    fungi = names(:fungi)
+    assert_select(
+      "#checklist_missing_panel a[href*='project%3A#{project.id}']" \
+      "[href*='name%3A#{fungi.id}']",
+      { text: /Fungi \(1\)/ },
+      "Missing taxon should show the project count and " \
+      "project-scoped observation link"
+    )
+    assert_select("#checklist_missing_panel a[href*='list%3A']", count: 0)
     assert_select(
       "form[action='#{project_target_names_path(project_id: project.id)}']",
       { count: 0 },

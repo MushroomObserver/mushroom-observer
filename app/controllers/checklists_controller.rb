@@ -32,7 +32,8 @@ class ChecklistsController < ApplicationController
     return unless @data
 
     render(Views::Controllers::Checklists::Show.new(
-             data: @data, context: checklist_context
+             data: @data, context: checklist_context,
+             project_data: @project_checklist
            ))
   end
 
@@ -66,6 +67,9 @@ class ChecklistsController < ApplicationController
   def species_list_checklist(list_id)
     return unless (@species_list = find_or_goto_index(SpeciesList, list_id))
 
+    # Feeds the "Missing Taxa" panel (project taxa absent from the list)
+    # when the checklist carries project context.
+    @project_checklist = Checklist::ForProject.new(@project) if @project
     Checklist::ForSpeciesList.new(@species_list)
   end
 end
