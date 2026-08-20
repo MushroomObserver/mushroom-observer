@@ -769,6 +769,24 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(true, record_backed)
   end
 
+  # Non-record-backed Array-typed attrs (e.g. [:time]) need the same
+  # scalar-to-array wrapping a record-backed alias already gets --
+  # confirmed missing by Copilot review on PR #5142.
+  def test_resolve_param_alias_records_wraps_non_record_backed_array_attr
+    login
+    klass = Class.new(Query::Observations) do
+      query_attr(:test_dates, [:time], param_alias: :test_date)
+    end
+
+    resolved, record_backed = @controller.send(
+      :resolve_param_alias_records, klass,
+      { test_date: "2024-01-01" }, [:test_date]
+    )
+
+    assert_equal({ test_dates: ["2024-01-01"] }, resolved)
+    assert_equal(false, record_backed)
+  end
+
   # `find_or_goto_index`'s own flash+redirect-on-bad-id behavior is
   # already covered by test_index_project_with_unknown_id_redirects
   # (a dispatched request through the existing `project` shortcut) --

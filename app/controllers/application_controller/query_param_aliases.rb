@@ -74,7 +74,7 @@ module ApplicationController::QueryParamAliases
     raw_value = permitted.delete(alias_key)
     model_class = alias_record_class(klass, attr)
     unless model_class
-      permitted[attr] = raw_value
+      permitted[attr] = wrap_if_array_attr(klass, attr, raw_value)
       return :scalar
     end
 
@@ -93,5 +93,14 @@ module ApplicationController::QueryParamAliases
     accepts = klass.attribute_types[attr].accepts
     model_class = accepts.is_a?(Array) ? accepts.first : accepts
     model_class if model_class.is_a?(Class) && model_class < ActiveRecord::Base
+  end
+
+  # Wraps `value` in an Array when the target attr itself accepts an
+  # Array (e.g. `[:time]`) -- mirrors Query.resolve_param_aliases so a
+  # non-record-backed alias (dates, floats, ...) gets the same
+  # scalar-to-array treatment a record-backed one already does.
+  def wrap_if_array_attr(klass, attr, value)
+    accepts = klass.attribute_types[attr].accepts
+    accepts.is_a?(Array) && !value.is_a?(Array) ? [value] : value
   end
 end
