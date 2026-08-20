@@ -51,14 +51,20 @@ class ChecklistsControllerTest < FunctionalTestCase
   # banner, but the checklist itself stays list-scoped: taxon links go
   # to list observations and project admin tools stay hidden.
   def test_checklist_for_species_list_with_project_context
-    login # rolf, an admin of rare_fungi_project
+    login("dick") # an admin of bolete_project
     list = species_lists(:one_genus_three_species_list)
-    project = projects(:rare_fungi_project)
+    project = projects(:bolete_project)
 
     get(:show, params: { species_list_id: list.id, project: project.id })
 
     assert_select("#project_banner",
                   text: /#{Regexp.escape(project.title)}/)
+    assert_select(
+      "li.nav-item a.nav-link.active[href=?]",
+      species_lists_path(project: project.id),
+      { count: 1 },
+      "Observation Lists should be the active banner tab"
+    )
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Title should still be the species list's")
     assert_select(".checklist a[href*='list%3A#{list.id}']")
