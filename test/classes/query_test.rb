@@ -607,23 +607,26 @@ class QueryTest < UnitTestCase
   # The cache can legitimately disagree with the live DB until the
   # next refetch -- that's the design's snapshot semantics working as
   # intended: prev/next walk the ordering as the viewer saw it, not
-  # the live ordering. A cached entry gets served as-is; only a fresh
-  # `refresh_window` call reflects current data.
+  # the live ordering. A stale entry whose ids still exist gets served
+  # as-is; only a fresh `refresh_window` call reflects current data.
+  # (An id that no longer exists is the exception -- see
+  # test_next_and_prev_window_skips_destroyed_neighbor.)
   def test_next_and_prev_window_cache_can_serve_stale_data
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
       query.viewer = rolf
       ids = query.send(:result_ids)
       query.current_id = ids[10]
-      query.prev_id # populates the cache with the real ids[9] at slot 9
+      query.prev_id # populates the cache with ids[9] at slot 9
 
       key = query.send(:window_cache_key)
       cached = Rails.cache.read(key)
       tampered_ids = cached[:ids].dup
-      tampered_ids[9] = 999_999_999
+      # A live id planted out of order -- stale ordering, existing row.
+      tampered_ids[9] = ids[3]
       Rails.cache.write(key, cached.merge(ids: tampered_ids))
 
-      assert_equal(999_999_999, query.prev_id,
+      assert_equal(ids[3], query.prev_id,
                    "a stale cache entry is served as-is until refreshed")
 
       fresh = query.send(:refresh_window)
@@ -728,6 +731,30 @@ class QueryTest < UnitTestCase
       assert_equal(0, calls,
                    "mary's lookup elsewhere in the same query should " \
                    "not evict rolf's cached window")
+    end
+  end
+
+  # A row destroyed after its id was cached must not be served as a
+  # neighbor -- the arrow would point at a dead show page and bounce
+  # the user to the index, losing their place. The lookup checks the
+  # candidate still exists and refetches past it from live data,
+  # healing the cached window in the same step.
+  def test_next_and_prev_window_skips_destroyed_neighbor
+    with_real_cache do
+      query = Query.lookup_and_save(:Observation, order_by: :id)
+      query.viewer = rolf
+      ids = Observation.order_by(:id).pluck(:id)
+      query.current_id = ids[10]
+      assert_equal(ids[11], query.next_id, "sanity: cache filled")
+
+      # Bypass callbacks -- the point is only that the row is gone.
+      Observation.delete(ids[11])
+
+      assert_equal(ids[12], query.next_id,
+                   "next_id should skip the destroyed neighbor")
+      key = query.send(:window_cache_key)
+      assert_not_includes(Rails.cache.read(key)[:ids], ids[11],
+                          "the refetch should heal the cached window")
     end
   end
 

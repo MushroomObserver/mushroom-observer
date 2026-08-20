@@ -174,14 +174,19 @@ module Query::Modules::WindowCache
     window = window_position
     return nil unless window
 
-    return boundary_id(window, dir) unless at_window_edge?(window, dir)
-
-    if true_edge?(window, dir)
-      nil
-    else
-      window = refresh_window
-      window ? boundary_id(window, dir) : nil
+    unless at_window_edge?(window, dir)
+      id = boundary_id(window, dir)
+      # A cached id can be destroyed after caching -- without this
+      # check the arrow would point at a dead show page. Refetching
+      # skips it and rewrites the cache: a fresh window is live data,
+      # so its neighbor can't be a destroyed row.
+      return id if model.exists?(id)
     end
+
+    return nil if true_edge?(window, dir)
+
+    window = refresh_window
+    window ? boundary_id(window, dir) : nil
   end
 
   def legacy_windowed_id(dir)
