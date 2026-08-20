@@ -364,11 +364,11 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def skip_if_coming_back(query, display_opts)
-    if display_opts[:id].present? &&
-       params[@pagination_data.letter_arg].blank? &&
-       params[@pagination_data.number_arg].blank?
-      @pagination_data.index_at(query.index(display_opts[:id]))
-    end
+    return unless display_opts[:id].present? &&
+                  params[@pagination_data.letter_arg].blank? &&
+                  params[@pagination_data.number_arg].blank?
+
+    query.position_pagination_at(display_opts[:id], @pagination_data)
   end
 
   # NOTE: there are two places where cache args have to be sent to enable

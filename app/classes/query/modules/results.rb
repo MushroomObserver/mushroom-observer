@@ -114,6 +114,14 @@ module Query::Modules::Results
     end
   end
 
+  # Positions `pagination_data` at the page containing `id`'s index in the
+  # results -- used when returning to an index from a show page (e.g.
+  # clicking "back" after viewing a record) so the index opens on the page
+  # that includes that record, instead of page 1.
+  def position_pagination_at(id, pagination_data)
+    pagination_data.index_at(index(id))
+  end
+
   # need_letters is the table and column name we're indexing
   # change - to just t/f, and store the title column on the query class!
   #
