@@ -54,19 +54,11 @@ module Projects
     end
 
     def show_excluded?
-      project_exclusions.show
-    end
-
-    def project_exclusions
-      @project_exclusions ||= FormObject::ProjectExclusions.new(filter_params)
-    end
-
-    def filter_params
-      params.fetch(:project_exclusions, {}).permit(:show)
+      ActiveModel::Type::Boolean.new.cast(params[:show_excluded]) == true
     end
 
     def filter_query_params
-      { project_exclusions: { show: show_excluded? } }
+      { show_excluded: show_excluded? }
     end
 
     # The observation list the Updates tab is currently showing.

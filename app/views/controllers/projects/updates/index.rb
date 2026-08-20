@@ -69,7 +69,7 @@ module Views::Controllers::Projects::Updates
         name: :project_updates_add_all.t,
         target: add_all_project_updates_path(
           project_id: @project.id,
-          project_exclusions: { show: @show_excluded }
+          show_excluded: @show_excluded
         ),
         confirm: :project_updates_confirm_add_all.t
       )

@@ -56,7 +56,7 @@ module Projects
       @project.exclude_observation(@matching_obs)
 
       get(:index, params: { project_id: @project.id,
-                            project_exclusions: { show: "1" } })
+                            show_excluded: "1" })
 
       assert_response(:success)
     end
@@ -141,7 +141,7 @@ module Projects
 
       assert_redirected_to(
         project_updates_path(project_id: @project.id,
-                             project_exclusions: { show: false })
+                             show_excluded: false)
       )
       assert_flash(:project_updates_added_all, count: count)
     end
@@ -151,7 +151,7 @@ module Projects
 
       post(:add_all,
            params: { project_id: @project.id,
-                     project_exclusions: { show: "1" } })
+                     show_excluded: "1" })
 
       assert_includes(@project.observations.reload, @matching_obs)
       assert_not_includes(@project.excluded_observations.reload, @matching_obs)
