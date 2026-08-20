@@ -525,41 +525,61 @@ class QueryTest < UnitTestCase
   # result set -- walking past a cached-but-not-true edge must refetch
   # (recentering the window) rather than incorrectly reporting "no
   # more." Walking past the true edge must return nil without looping.
+  # Counts compute_window calls rather than result_ids calls -- a
+  # seekable order's window fill doesn't touch result_ids.
   def test_next_and_prev_window_edge_refetch_and_true_boundary
-    original_radius = Query::Modules::WindowCache::WINDOW_RADIUS
-    Query::Modules::WindowCache.send(:remove_const, :WINDOW_RADIUS)
-    Query::Modules::WindowCache.const_set(:WINDOW_RADIUS, 2)
-
     with_real_cache do
       query = Query.lookup_and_save(:Name, order_by: :id)
       query.viewer = rolf
-      ids = query.send(:result_ids)
+      query.define_singleton_method(:window_radius) { 2 }
+      ids = Name.order_by(:id).pluck(:id)
       query.current_id = ids[10]
 
-      calls = 0
-      query.define_singleton_method(:result_ids) do
-        calls += 1
-        super()
+      fills = 0
+      query.define_singleton_method(:compute_window) do |*args|
+        fills += 1
+        super(*args)
       end
 
       query.current_id = query.prev_id # -> ids[9], cache hit so far
       assert_equal(ids[9], query.current_id)
       query.current_id = query.prev_id # -> ids[8], still within window
       assert_equal(ids[8], query.current_id)
-      assert_equal(1, calls, "still inside the first cached window")
+      assert_equal(1, fills, "still inside the first cached window")
 
       # ids[8] sits at the cached window's left edge (radius 2 from
       # ids[10]) but not the true start -- must refetch, not return nil.
       prev = query.prev_id
       assert_equal(ids[7], prev)
-      assert_equal(2, calls, "walking past a non-true edge refetches")
+      assert_equal(2, fills, "walking past a non-true edge refetches")
 
       query.current_id = ids[0]
       assert_nil(query.prev_id, "the true start has no earlier row")
     end
-  ensure
-    Query::Modules::WindowCache.send(:remove_const, :WINDOW_RADIUS)
-    Query::Modules::WindowCache.const_set(:WINDOW_RADIUS, original_radius)
+  end
+
+  # The per-viewer radius derivation: 2x the viewer's index page size,
+  # clamped to [60, 480] before doubling; no viewer gets the default.
+  def test_next_and_prev_window_radius_derived_from_viewer
+    no_viewer = Query.lookup(:Name, order_by: :id)
+    assert_equal(120, no_viewer.send(:window_radius))
+
+    small = Query.lookup(:Name, order_by: :id)
+    small.viewer = rolf
+    rolf.layout_count = 15
+    assert_equal(120, small.send(:window_radius),
+                 "a page size below 60 clamps up")
+
+    mid = Query.lookup(:Name, order_by: :id)
+    mid.viewer = rolf
+    rolf.layout_count = 100
+    assert_equal(200, mid.send(:window_radius))
+
+    large = Query.lookup(:Name, order_by: :id)
+    large.viewer = rolf
+    rolf.layout_count = 1000
+    assert_equal(960, large.send(:window_radius),
+                 "a page size above 480 clamps down")
   end
 
   def test_next_and_prev_first_and_last_never_use_the_window_cache
@@ -585,8 +605,9 @@ class QueryTest < UnitTestCase
   end
 
   # The cache can legitimately disagree with the live DB until the
-  # next refetch -- that's the documented tradeoff of this design, not
-  # a bug. A stale cache entry gets served as-is; only a fresh
+  # next refetch -- that's the design's snapshot semantics working as
+  # intended: prev/next walk the ordering as the viewer saw it, not
+  # the live ordering. A cached entry gets served as-is; only a fresh
   # `refresh_window` call reflects current data.
   def test_next_and_prev_window_cache_can_serve_stale_data
     with_real_cache do
@@ -708,6 +729,172 @@ class QueryTest < UnitTestCase
                    "mary's lookup elsewhere in the same query should " \
                    "not evict rolf's cached window")
     end
+  end
+
+  # The seek-backed window fill: a plain-column order fills the window
+  # with bounded keyset queries and no result_ids load; an order shape
+  # a keyset predicate can't express (FIND_IN_SET here) falls back to
+  # the full-scan fill.
+  def test_next_and_prev_window_fill_dispatch_by_order_shape
+    simple_query = Query.lookup(:Name, order_by: :id)
+    simple_query.current = names(:fungi)
+    calls = count_result_ids_calls(simple_query) do
+      simple_query.prev_id
+      simple_query.next_id
+    end
+    assert_equal(0, calls,
+                 "Simple column order should fill the window without " \
+                 "loading result_ids")
+
+    fallback_query = Query.lookup(
+      :Name,
+      id_in_set: [names(:fungi).id, names(:agaricus).id, names(:peltigera).id]
+    )
+    fallback_query.current = names(:agaricus)
+    calls = count_result_ids_calls(fallback_query) do
+      fallback_query.prev_id
+      fallback_query.next_id
+    end
+    assert(calls.positive?,
+           "id_in_set order should fall back to loading result_ids")
+  end
+
+  def test_next_and_prev_window_seek_compound_order
+    query = Query.lookup(:Observation, order_by: :name)
+    ids = Observation.order_by(:name).pluck(:id)
+    index = ids.length / 2
+
+    query.current_id = ids[index]
+    assert_equal(ids[index - 1], query.prev_id)
+    assert_equal(ids[index + 1], query.next_id)
+  end
+
+  def test_next_and_prev_window_seek_duplicate_tie
+    obs1 = observations(:agaricus_campestras_obs)
+    obs2 = observations(:agaricus_campestros_obs)
+    assert_equal(obs1.when, obs2.when,
+                 "fixtures must share a `when` to exercise the id tie-break")
+
+    ids = Observation.order_by(:date).pluck(:id)
+    index = ids.index(obs2.id)
+
+    query = Query.lookup(:Observation, order_by: :date)
+    query.current_id = obs2.id
+    assert_equal(ids[index - 1], query.prev_id)
+    assert_equal(ids[index + 1], query.next_id)
+  end
+
+  # An image on multiple observations with differing vote_cache has no
+  # single sort key to seed the keyset predicate from -- the window
+  # fill must fall back to the full-scan fill rather than seed from an
+  # arbitrary join row.
+  def test_next_and_prev_window_seek_ambiguous_join_falls_back
+    image = images(:query_first_image)
+    obs_a = observations(:two_img_obs)
+    obs_b = observations(:vouchered_imged_obs)
+    obs_a.update!(vote_cache: 1.5)
+    obs_b.update!(vote_cache: -1.0)
+
+    query = Query.lookup(:Image, order_by: :confidence)
+    query.current = image
+    cols = query.send(:scope).order_values
+
+    assert_nil(query.send(:current_sort_values, cols),
+               "an image on multiple observations with differing " \
+               "vote_cache should be treated as unseekable")
+    ids = query.send(:result_ids)
+    index = ids.index(image.id)
+    assert_equal(ids[index - 1], query.prev_id)
+    assert_equal(ids[index + 1], query.next_id)
+  end
+
+  # `current_sort_values` (read the current row's own sort columns)
+  # and the two directional window fetches are separate queries -- a
+  # concurrent write to the current row between them could seed the
+  # window from an already-stale value unless the reads share one
+  # transaction/snapshot. Regression test for that guarantee: assert
+  # the read runs inside a transaction opened by `seek_window` itself,
+  # not just whatever the test framework already wraps everything in.
+  def test_next_and_prev_window_seek_wraps_reads_in_a_transaction
+    query = Query.lookup(:Name, order_by: :id)
+    query.current = names(:fungi)
+
+    baseline = ActiveRecord::Base.connection.open_transactions
+    open_during_read = nil
+    query.define_singleton_method(:current_sort_values) do |*args|
+      open_during_read = ActiveRecord::Base.connection.open_transactions
+      super(*args)
+    end
+
+    query.prev_id
+
+    assert_equal(baseline + 1, open_during_read,
+                 "current_sort_values should run inside its own " \
+                 "transaction, not bare autocommit")
+  end
+
+  # MySQL sorts NULL as the smallest possible value regardless of
+  # ASC/DESC -- a plain `col > NULL`/`col < NULL` comparison is always
+  # unknown in SQL, so a naive seek predicate can't cross the boundary
+  # between NULL and non-NULL rows in either direction.
+  def test_next_and_prev_window_seek_null_sort_value_boundary
+    null_image = images(:in_situ_image)
+    others = Image.where.not(id: null_image.id)
+    others.each_with_index { |img, i| img.update!(vote_cache: i + 1.0) }
+    null_image.update!(vote_cache: nil)
+
+    ids = Image.order_by(:image_quality).pluck(:id)
+    prior_id = ids[ids.index(null_image.id) - 1]
+
+    # prev: from NULL, transitioning into non-NULL territory.
+    from_null = Query.lookup(:Image, order_by: :image_quality)
+    from_null.current_id = null_image.id
+    assert_equal(prior_id, from_null.prev_id)
+
+    # next: from non-NULL, transitioning into NULL territory.
+    from_non_null = Query.lookup(:Image, order_by: :image_quality)
+    from_non_null.current_id = prior_id
+    assert_equal(null_image.id, from_non_null.next_id)
+  end
+
+  # Without a viewer there's no cache slot, so prev_id and next_id
+  # each trigger their own window fill -- but the current row's own
+  # sort values shouldn't be fetched twice for the same current_id.
+  def test_next_and_prev_window_seek_memoizes_current_sort_values
+    query = Query.lookup(:Name, order_by: :id)
+    query.current = names(:fungi)
+
+    calls = 0
+    query.define_singleton_method(:fetch_current_sort_values) do |*args|
+      calls += 1
+      super(*args)
+    end
+
+    query.prev_id
+    query.next_id
+
+    assert_equal(1, calls,
+                 "current row's sort values should be fetched once, " \
+                 "not once per direction")
+  end
+
+  # A seekable order with zero matching rows is a legitimate nil
+  # boundary from edge_id's LIMIT-1 query itself -- first_id/last_id
+  # shouldn't fall back to a full result_ids load just because that
+  # nil looks the same as "order shape isn't seekable" (Copilot
+  # review, PR #5115).
+  def test_next_and_prev_window_first_and_last_no_fallback_on_empty_results
+    query = Query.lookup(:Name, order_by: :id,
+                                pattern: "no_name_matches_this_zzzzzz")
+
+    calls = count_result_ids_calls(query) do
+      assert_nil(query.first_id)
+      assert_nil(query.last_id)
+    end
+
+    assert_equal(0, calls,
+                 "empty seekable query should return nil without " \
+                 "falling back to loading result_ids")
   end
 
   ##############################################################################
@@ -959,5 +1146,17 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:User, id_in_set: [rolf.id, 1000, mary.id])
     query.sql
     assert_equal(2, query.results.length)
+  end
+
+  private
+
+  def count_result_ids_calls(query)
+    count = 0
+    query.define_singleton_method(:result_ids) do
+      count += 1
+      super()
+    end
+    yield
+    count
   end
 end
