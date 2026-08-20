@@ -24,9 +24,20 @@ module Views::Controllers::Projects::Updates
 
     private
 
+    # `action:`/`method:`/`class:`/`data:` are ordinary constructor
+    # kwargs the base class would otherwise handle without an
+    # override -- but form_action needs `project_updates_path`, a
+    # Rails route helper, and Phlex-Rails raises
+    # HelpersCalledBeforeRenderError if a route helper runs from
+    # `initialize` (confirmed directly: moving this call into the
+    # constructor throws). `form_tag` runs during rendering, after
+    # helpers become available, so the route-helper call has to live
+    # here, which means the whole tag has to be built here too.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: form_action, method: :get, **form_attributes, &block)
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_action
       project_updates_path(project_id: @project.id)

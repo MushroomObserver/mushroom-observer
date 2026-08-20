@@ -39,10 +39,18 @@ module Views::Controllers::VisualGroups
 
     private
 
+    # form_action calls edit_visual_group_path, a Rails route helper,
+    # which Phlex-Rails forbids from `initialize`
+    # (HelpersCalledBeforeRenderError) -- only reachable once
+    # rendering has started, which means the whole tag has to be
+    # built here in form_tag, not passed as a constructor kwarg the
+    # base class's own form_tag could use.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: form_action, method: :get,
            **form_attributes, &block)
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_action
       edit_visual_group_path(@visual_group)
