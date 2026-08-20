@@ -47,13 +47,11 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
-    # Go back to observation and click on "About...".
-    click_link("About ")
-    assert_match(/#{:app_title.l}: Name/, page.title, "Wrong page")
-
-    # Take a look at the occurrence map.
-    click_link("Occurrence Map")
-    assert_match(/#{:app_title.l}: Occurrence Map/, page.title, "Wrong page")
+    # "About..." and the occurrence map are now behind the "About
+    # this Taxon" panel's lazy-loaded Turbo Frame -- covered in
+    # ObservationShowSystemTest#test_name_info_panel_lazy_load
+    # instead, since this test's rack_test driver has no JS to fetch
+    # the frame's content (#5093).
 
     # Check out a few links from left-hand panel.
     click_on("How To Use")
@@ -95,7 +93,6 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     lurker = users(:katrina)
     obs = observations(:detailed_unknown_obs)
     owner = obs.user
-    name = obs.name
 
     # First login
     reset_session!
@@ -152,21 +149,12 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
     # back at Observation
 
-    # Check out Name
-    go_back_after do
-      # (Should be at least two links to show the Name.)
-      assert(assert_selector("#content a[href^='/names/#{name.id}']",
-                             minimum: 2))
-
-      click_link("About #{name.text_name}")
-      # (Make sure the page contains create_name_description.)
-      assert(
-        assert_selector(
-          "#content a[href^='/names/#{name.id}/descriptions/new']"
-        )
-      )
-    end
-    # back at Observation
+    # Check out Name -- the "About this Taxon" panel (including the
+    # 2nd link to the Name page and the "About <name>" link) is now
+    # behind a lazy-loaded Turbo Frame; this rack_test-driven test
+    # has no JS to fetch it. Covered in
+    # ObservationShowSystemTest#test_name_info_panel_lazy_load
+    # instead (#5093).
 
     # Check out images
     # Observation has at least 2 images
