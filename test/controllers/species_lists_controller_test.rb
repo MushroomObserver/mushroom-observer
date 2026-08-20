@@ -271,6 +271,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
                   text: /#{Regexp.escape(project.title)}/)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id, project: project.id),
+      { count: 1 },
+      "Names button should carry the project context to the checklist"
+    )
   end
 
   # Regression test for bug where params[:q] as a String (saved query ID)

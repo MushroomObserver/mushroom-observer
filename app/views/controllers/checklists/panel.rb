@@ -71,11 +71,13 @@ module Views::Controllers::Checklists
                                  "include_subtaxa:false")
     end
 
+    # The list wins over the project -- a species-list checklist may
+    # carry a project as banner context, but its taxa are list-scoped.
     def link_prefix_for(user:, project:, list:)
-      return "user:#{user.id}"       if user
-      return "project:#{project.id}" if project
+      return "user:#{user.id}" if user
+      return "list:#{list.id}" if list
 
-      "list:#{list.id}" if list
+      "project:#{project.id}" if project
     end
 
     def target_name?(name_id)

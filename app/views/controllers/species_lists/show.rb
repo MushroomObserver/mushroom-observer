@@ -75,11 +75,16 @@ module Views::Controllers::SpeciesLists
         project_button(:map.ti, add_q_param(map_observations_path, @query))
         project_button(:observations.ti,
                        add_q_param(observations_path, @query))
-        project_button(:names.ti,
-                       checklist_path(species_list_id: @species_list.id))
+        project_button(:names.ti, checklist_names_path)
         render_locations_button
         render_images_button
       end
+    end
+
+    def checklist_names_path
+      checklist_path(
+        { species_list_id: @species_list.id, project: @project&.id }.compact
+      )
     end
 
     def render_locations_button

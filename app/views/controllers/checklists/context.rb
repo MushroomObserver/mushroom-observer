@@ -13,8 +13,11 @@ module Views::Controllers::Checklists
       [show_user, project, location, species_list]
     end
 
+    # Project admin tools (target-names widget, remove buttons) belong
+    # to the project-scoped checklist only -- a species-list checklist
+    # may carry a project purely as banner context.
     def admin?
-      project&.is_admin?(user)
+      species_list.nil? && project&.is_admin?(user)
     end
   end
 end

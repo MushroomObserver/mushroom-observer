@@ -15,6 +15,10 @@ class ChecklistsController < ApplicationController
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]
+    # Picks up a `project` param (or single-project query) so a
+    # checklist reached from a project-scoped page keeps the project
+    # banner -- same context passing as SpeciesListsController#show.
+    set_project_ivar
 
     @data = if user_id.present?
               user_checklist(user_id)
