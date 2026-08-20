@@ -63,8 +63,14 @@ class VisualGroupsController < ApplicationController
     @edit_filter ||= FormObject::VisualGroupFilter.new(edit_filter_params)
   end
 
+  # `?visual_group_filter=foo` (a String, not a nested hash) would
+  # otherwise reach `.permit` and raise NoMethodError -- guard the
+  # type before calling it.
   def edit_filter_params
-    params.fetch(:visual_group_filter, {}).permit(:status, :filter)
+    raw = params[:visual_group_filter]
+    return {} unless raw.is_a?(ActionController::Parameters)
+
+    raw.permit(:status, :filter)
   end
 
   # POST /visual_groups or /visual_groups.json

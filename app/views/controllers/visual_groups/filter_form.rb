@@ -101,17 +101,22 @@ module Views::Controllers::VisualGroups
     end
 
     # Force-reload button for the needs_review view, which pulls
-    # fresh inference data on each load. We need a true cache-bypass
-    # reload: a same-URL self-link would let Turbo Drive serve its
-    # snapshot (stale data), and HTTP-layer caching is less reliable
-    # than the explicit `reload(true)` for force-refetch. Phlex's
-    # native `a` strips `javascript:` hrefs as a safety measure, but
-    # the registered Rails `link_to` helper keeps them.
+    # fresh inference data on each load. A same-URL self-link would
+    # let Turbo Drive serve its snapshot (stale data); calling
+    # `window.location.reload()` from onclick bypasses that, since
+    # Turbo Drive only intercepts <a> click-to-navigate, not a
+    # programmatic reload call. The `forceGet` boolean parameter
+    # `reload()` historically accepted is deprecated and ignored by
+    # current browsers, so it's omitted -- HTTP cache freshness is
+    # governed by the response's own cache-control headers, not a JS-
+    # level flag. Phlex's native `a` strips `javascript:` hrefs as a
+    # safety measure, but the registered Rails `link_to` helper keeps
+    # them.
     def render_reload_link
       Button(
         name: :reload.ti,
         class: "ml-2",
-        onclick: "window.location.reload(true)"
+        onclick: "window.location.reload()"
       )
     end
 

@@ -149,6 +149,15 @@ class VisualGroupsControllerTest < FunctionalTestCase
     assert_select("button[onclick]", text: :reload.ti)
   end
 
+  # A malformed visual_group_filter param (a String, not a nested
+  # hash) must not 500 -- found by Copilot review on PR #5141.
+  def test_edit_with_malformed_filter_param_does_not_500
+    login
+    get(:edit, params: { id: @visual_group.id, visual_group_filter: "foo" })
+
+    assert_response(:success)
+  end
+
   def test_edit_filter_form_reload_link_hidden_on_included
     login
     get(:edit, params: { id: @visual_group.id,

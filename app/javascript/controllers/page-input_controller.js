@@ -18,10 +18,13 @@ export default class extends Controller {
     // Cache the server-rendered tooltip so it can be restored (rather
     // than left stale, pointing at a value no longer being typed) if
     // the field gets cleared back to empty -- see updateGotoLink.
+    // aria-label (set unconditionally by Components::Icon whenever a
+    // title: is given) is the stable source: unlike title, it's never
+    // moved/removed by Bootstrap's tooltip init, so it reads the same
+    // whether that init has run yet or not.
     if (this.hasGoToLinkTarget) {
       const icon = this.goToLinkTarget.querySelector("svg")
-      this.originalTooltip = icon?.getAttribute("data-original-title") ||
-        icon?.getAttribute("title") || null
+      this.originalTooltip = icon?.getAttribute("aria-label") || null
     }
   }
 
@@ -83,17 +86,14 @@ export default class extends Controller {
   // Rewrite a goto link's href to point at the new param value (empty
   // string clears the param, matching how the page widget resets
   // when no letter is set). When `replacePattern` is given and there's
-  // a value to substitute, also updates the icon's Bootstrap tooltip
-  // text by finding-and-replacing the old number/letter directly in
-  // the already-rendered (translated) tooltip string, rather than
-  // needing a separate template. `data-original-title` is where
-  // Bootstrap 3 stashes the tooltip text after `fixTitle()`
-  // neutralizes the native `title` attribute on init, and updating it
-  // live is Bootstrap's own supported way to change an
-  // already-initialized tooltip's text. When the value is cleared
-  // (empty), restores the cached server-rendered tooltip (see
-  // connect) instead of leaving stale text naming the last-typed
-  // value the href no longer points at.
+  // a value to substitute, also updates the icon's tooltip text (both
+  // the Bootstrap tooltip and its aria-label accessible name) by
+  // finding-and-replacing the old number/letter directly in the
+  // already-rendered (translated) text, rather than needing a
+  // separate template. When the value is cleared (empty), restores
+  // the cached server-rendered tooltip (see connect) instead of
+  // leaving stale text naming the last-typed value the href no longer
+  // points at.
   updateGotoLink(link, param, value, replacePattern) {
     const url = new URL(link.href, window.location.origin)
     if (value === "" || value === null || value === undefined) {
@@ -108,17 +108,29 @@ export default class extends Controller {
     if (!icon) return
 
     if (!value) {
-      if (this.originalTooltip) {
-        icon.setAttribute("data-original-title", this.originalTooltip)
-      }
+      if (this.originalTooltip) this.setTooltipText(icon, this.originalTooltip)
       return
     }
 
-    const current = icon.getAttribute("data-original-title") ||
-      icon.getAttribute("title")
-    if (current) {
-      icon.setAttribute("data-original-title",
-        current.replace(replacePattern, value))
+    const current = icon.getAttribute("aria-label")
+    if (current) this.setTooltipText(icon, current.replace(replacePattern, value))
+  }
+
+  // Keeps the Bootstrap tooltip text and the icon's own accessible
+  // name in sync. aria-label is always present (see connect) and
+  // never touched by Bootstrap's tooltip init, so it's updated
+  // unconditionally; whichever of `data-original-title` (Bootstrap's
+  // post-init stash, per fixTitle()) or `title` (pre-init) is
+  // currently present carries the Bootstrap tooltip text and is
+  // updated too -- updating a `title` that's already been moved to
+  // `data-original-title` would silently do nothing, since Bootstrap
+  // reads the tooltip text from the latter once initialized.
+  setTooltipText(icon, text) {
+    icon.setAttribute("aria-label", text)
+    if (icon.hasAttribute("data-original-title")) {
+      icon.setAttribute("data-original-title", text)
+    } else if (icon.hasAttribute("title")) {
+      icon.setAttribute("title", text)
     }
   }
 }
