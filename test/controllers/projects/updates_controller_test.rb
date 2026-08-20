@@ -55,7 +55,8 @@ module Projects
     def test_index_show_excluded
       @project.exclude_observation(@matching_obs)
 
-      get(:index, params: { project_id: @project.id, show_excluded: "1" })
+      get(:index, params: { project_id: @project.id,
+                            show_excluded: "1" })
 
       assert_response(:success)
     end
@@ -148,8 +149,9 @@ module Projects
     def test_add_all_with_show_excluded
       @project.exclude_observation(@matching_obs)
 
-      post(:add_all, params: { project_id: @project.id,
-                               show_excluded: "1" })
+      post(:add_all,
+           params: { project_id: @project.id,
+                     show_excluded: "1" })
 
       assert_includes(@project.observations.reload, @matching_obs)
       assert_not_includes(@project.excluded_observations.reload, @matching_obs)
