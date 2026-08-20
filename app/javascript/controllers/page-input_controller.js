@@ -14,6 +14,15 @@ export default class extends Controller {
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
     this.element.dataset.pageInput = "connected"
+
+    // Cache the server-rendered tooltip so it can be restored (rather
+    // than left stale, pointing at a value no longer being typed) if
+    // the field gets cleared back to empty -- see updateGotoLink.
+    if (this.hasGoToLinkTarget) {
+      const icon = this.goToLinkTarget.querySelector("svg")
+      this.originalTooltip = icon?.getAttribute("data-original-title") ||
+        icon?.getAttribute("title") || null
+    }
   }
 
   // When page number input changes, sanitize the value of the input.
@@ -81,7 +90,10 @@ export default class extends Controller {
   // Bootstrap 3 stashes the tooltip text after `fixTitle()`
   // neutralizes the native `title` attribute on init, and updating it
   // live is Bootstrap's own supported way to change an
-  // already-initialized tooltip's text.
+  // already-initialized tooltip's text. When the value is cleared
+  // (empty), restores the cached server-rendered tooltip (see
+  // connect) instead of leaving stale text naming the last-typed
+  // value the href no longer points at.
   updateGotoLink(link, param, value, replacePattern) {
     const url = new URL(link.href, window.location.origin)
     if (value === "" || value === null || value === undefined) {
@@ -91,9 +103,17 @@ export default class extends Controller {
     }
     link.href = url.toString()
 
-    if (!replacePattern || !value) return
+    if (!replacePattern) return
     const icon = link.querySelector("svg")
     if (!icon) return
+
+    if (!value) {
+      if (this.originalTooltip) {
+        icon.setAttribute("data-original-title", this.originalTooltip)
+      }
+      return
+    }
+
     const current = icon.getAttribute("data-original-title") ||
       icon.getAttribute("title")
     if (current) {

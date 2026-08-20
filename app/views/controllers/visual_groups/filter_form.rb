@@ -27,10 +27,10 @@ module Views::Controllers::VisualGroups
       super do
         # Hidden status field: preserves the current status when the
         # user submits via the text-input's submit. The status submit
-        # buttons below carry their own `name="status" value="<s>"`;
-        # because the hidden field appears FIRST in the DOM, the
-        # button's value (later in DOM) wins in Rails' last-value-wins
-        # param parsing.
+        # buttons below carry their own
+        # `name="visual_group_filter[status]" value="<s>"`; because the
+        # hidden field appears FIRST in the DOM, the button's value
+        # (later in DOM) wins in Rails' last-value-wins param parsing.
         hidden_field(:status)
         render_status_button_row
         render_filter_text_row
