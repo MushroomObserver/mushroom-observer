@@ -154,8 +154,9 @@ module Query::Modules::WindowCache
     window = compute_window(current_id)
     return nil unless window
 
-    Rails.cache.write(window_cache_key, window, expires_in: WINDOW_TTL) if
-      window_cache_key
+    if (key = window_cache_key)
+      Rails.cache.write(key, window, expires_in: WINDOW_TTL)
+    end
     window
   end
 
