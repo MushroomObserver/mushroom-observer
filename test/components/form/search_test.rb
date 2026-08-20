@@ -579,7 +579,11 @@ class SearchFormTest < ComponentTestCase
   def test_form_has_length_validator_stimulus_controller
     html = render_form
 
-    assert_html(html, "form[data-controller='search-length-validator']")
+    # `~=` (word-match), not `=` (exact-match) -- ApplicationForm's
+    # own form-feedback controller is also always present,
+    # space-joined alongside search-length-validator.
+    assert_html(html, "form[data-controller~='search-length-validator']")
+    assert_html(html, "form[data-controller~='form-feedback']")
   end
 
   def test_form_has_max_length_value_attribute
