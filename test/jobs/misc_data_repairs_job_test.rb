@@ -25,6 +25,25 @@ class MiscDataRepairsJobTest < ActiveJob::TestCase
     MiscDataRepairsJob.perform_now(dry_run: true)
   end
 
+  # A task that yields row-level failure messages (rows it could not
+  # repair) gets each one routed to ApplicationJob#alert.
+  def test_row_level_failures_are_routed_to_alert
+    alerts = []
+    job = MiscDataRepairsJob.new
+    fake = lambda { |dry_run:, &blk|
+      blk&.call("Occurrence #1: repair failed (dry_run=#{dry_run})")
+      []
+    }
+    job.stub(:alert, ->(msg) { alerts << msg }) do
+      Occurrence.stub(:refresh_has_specimen_cache, fake) do
+        job.perform(dry_run: true)
+      end
+    end
+
+    assert_equal(1, alerts.size)
+    assert_match(/Occurrence #1: repair failed/, alerts.first)
+  end
+
   private
 
   def stub_tasks(calls, tasks = MiscDataRepairsJob::TASKS, &block)

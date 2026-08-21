@@ -225,7 +225,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       return
     end
 
-    old_occ = occurrence
     occ = slip.occurrence
     occ ||= Occurrence.create!(
       user: user || current_user,
@@ -233,7 +232,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       field_slip: slip
     )
     self.occurrence = occ
-    cleanup_old_occurrence(old_occ, occ)
   end
 
   has_many :observation_herbarium_records, dependent: :destroy
@@ -256,6 +254,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   after_update :update_occurrence_specimen_cache
+  after_update :cleanup_abandoned_occurrence
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -1271,16 +1270,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     occ.destroy_if_incomplete!
   end
 
-  # When an observation moves to a new occurrence, clean up the old one.
-  def cleanup_old_occurrence(old_occ, new_occ)
-    return unless old_occ && old_occ.id != new_occ.id
+  # When an observation moves to a different occurrence, clean up the
+  # one it left: repoint the primary if it was this observation, destroy
+  # the occurrence if it emptied or dropped below 2 members, and refresh
+  # its has_specimen cache. Must run after save -- before it, this
+  # observation still counts as a member of the old occurrence, so the
+  # primary could be "reassigned" right back to the departing record.
+  # Detaching (occurrence -> nil) is excluded; those flows (dissolve,
+  # field slip sync, occurrence edit) do their own cleanup.
+  def cleanup_abandoned_occurrence
+    old_id, new_id = saved_change_to_occurrence_id
+    return unless old_id && new_id
 
-    old_occ.reload
+    old_occ = Occurrence.find_by(id: old_id)
+    return unless old_occ
+
     reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
-    return unless Occurrence.exists?(old_occ.id)
+    return if old_occ.destroyed?
 
     old_occ.reload
     old_occ.destroy_if_incomplete!
+    old_occ.recompute_has_specimen! unless old_occ.destroyed?
   end
 
   def reassign_occurrence_primary(occ)

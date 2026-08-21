@@ -19,6 +19,7 @@
 class Occurrence < AbstractModel
   include Occurrence::ProjectGaps
   include Occurrence::Logging
+  include Occurrence::SpecimenCache
 
   MAX_OBSERVATIONS = 10
 
@@ -46,25 +47,6 @@ class Occurrence < AbstractModel
   validates :primary_observation, presence: true
   validate :primary_observation_must_belong_to_occurrence, on: :update
   validate :observation_count_within_limits, on: :update
-
-  # Recompute cached has_specimen from associated observations.
-  def recompute_has_specimen!
-    update!(has_specimen: observations.where(specimen: true).exists?)
-  end
-
-  # Nightly safety net: recompute has_specimen on all occurrences.
-  def self.refresh_has_specimen_cache(dry_run: false)
-    msgs = []
-    find_each do |occ|
-      correct = occ.observations.where(specimen: true).exists?
-      next if occ.has_specimen == correct
-
-      msgs << "Occurrence ##{occ.id}: has_specimen " \
-              "#{occ.has_specimen} -> #{correct}"
-      occ.update!(has_specimen: correct) unless dry_run
-    end
-    msgs
-  end
 
   # Recalculate shared consensus across all observations.
   def recalculate_consensus!(user = nil)
@@ -216,7 +198,10 @@ class Occurrence < AbstractModel
       merged_obs.each do |obs|
         obs.update!(occurrence: keeper)
       end
-      absorbed.reload.destroy!
+      # Observation#cleanup_abandoned_occurrence destroys the emptied
+      # occurrence as its last member moves; finish the job if it
+      # survived (it kept a field slip).
+      Occurrence.find_by(id: absorbed.id)&.destroy!
       keeper.recompute_has_specimen!
     end
     log_observation_added(merged_obs, user)
