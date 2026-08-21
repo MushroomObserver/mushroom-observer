@@ -186,9 +186,11 @@ module Query::Modules::Initialization
     # Bypasses the `order_by_default` scope (used directly, without a
     # `viewer`, by callers outside the Query system) so the default
     # sort on an index page is viewer-aware too - same underlying
-    # `order_by` dispatcher, with `self.class.default_order` standing
-    # in for the model's own `order_by_default` scope body.
-    @scopes = @scopes.order_by(self.class.default_order, viewer: viewer)
+    # `order_by` dispatcher, with `default_order` standing in for the
+    # model's own `order_by_default` scope body. `default_order` (not
+    # `self.class.default_order`) so a query_attr's own per-attr
+    # `default_order:` override applies when that attr is present.
+    @scopes = @scopes.order_by(default_order, viewer: viewer)
   end
 
   # array of max of MO.query_max_array unique ids for use with Arel "in"
