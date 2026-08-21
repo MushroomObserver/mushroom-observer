@@ -2794,6 +2794,7 @@
   checklist_unobserved_targets: Unobserved target names
   checklist_species_level: Species and below
   checklist_higher_level: Higher-level taxa
+  checklist_missing_taxa: Missing taxa
   checklist_taxon: taxon
   checklist_taxa: taxa
 

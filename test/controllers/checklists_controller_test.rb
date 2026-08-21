@@ -43,8 +43,55 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { species_list_id: list.id })
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Wrong page")
+    assert_select("#checklist_missing_panel", { count: 0 },
+                  "No Missing Taxa panel without project context")
 
     prove_checklist_content(expect)
+  end
+
+  # A `project` param on a species-list checklist shows the project
+  # banner, but the checklist itself stays list-scoped: taxon links go
+  # to list observations and project admin tools stay hidden.
+  def test_checklist_for_species_list_with_project_context
+    login("dick") # an admin of bolete_project
+    list = species_lists(:one_genus_three_species_list)
+    project = projects(:bolete_project)
+
+    get(:show, params: { species_list_id: list.id, project: project.id })
+
+    assert_select("#project_banner",
+                  text: /#{Regexp.escape(project.title)}/)
+    assert_select(
+      "li.nav-item a.nav-link.active[href=?]",
+      species_lists_path(project: project.id),
+      { count: 1 },
+      "Observation Lists should be the active banner tab"
+    )
+    assert_match(/Checklist for #{list.title}/, css_select("title").text,
+                 "Title should still be the species list's")
+    assert_select(".checklist a[href*='list%3A#{list.id}']")
+    assert_select("#checklist_species_panel a[href*='project%3A']",
+                  count: 0)
+    assert_select("#checklist_higher_panel a[href*='project%3A']",
+                  count: 0)
+    # Missing Taxa panel: project taxa absent from the list, with
+    # counts and links matching the project checklist.
+    assert_select("h4", text: :checklist_missing_taxa.l)
+    fungi = names(:fungi)
+    assert_select(
+      "#checklist_missing_panel a[href*='project%3A#{project.id}']" \
+      "[href*='name%3A#{fungi.id}']",
+      { text: /Fungi \(1\)/ },
+      "Missing taxon should show the project count and " \
+      "project-scoped observation link"
+    )
+    assert_select("#checklist_missing_panel a[href*='list%3A']", count: 0)
+    assert_select(
+      "form[action='#{project_target_names_path(project_id: project.id)}']",
+      { count: 0 },
+      "Project target-names admin widget belongs to the project " \
+      "checklist, not a list checklist with project context"
+    )
   end
 
   # Prove that Project checklist goes to correct page with correct content
