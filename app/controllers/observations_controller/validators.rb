@@ -214,7 +214,7 @@ module ObservationsController::Validators
     @suspect_checked_projects |= [slip_project]
   end
 
-  # The Project named by typed/scanned code names. When the code is
+  # The Project named by typed/scanned code. When the code is
   # unchanged from the Observation's own field slip, that slip's
   # attached (possibly nil) Project is the source of
   # truth. Looked up fresh by id (rather than
