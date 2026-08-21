@@ -48,9 +48,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_200358) do
   create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.integer "user_id"
-    t.string "summary", limit: 100
+    t.string "summary", limit: 100, collation: "utf8mb4_0900_ai_ci"
     t.text "comment", collation: "utf8mb4_0900_ai_ci"
-    t.string "target_type", limit: 30
+    t.string "target_type", limit: 30, collation: "utf8mb4_0900_ai_ci"
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
     t.index ["target_id", "target_type"], name: "target_index"
