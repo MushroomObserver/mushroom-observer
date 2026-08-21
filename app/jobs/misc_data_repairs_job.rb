@@ -35,6 +35,7 @@ class MiscDataRepairsJob < ApplicationJob
      "occurrence has_specimen cache"],
     [Observation, :refresh_needs_naming_column,
      "observations needing naming"],
+    [Image, :retry_failed_gps_strips, "failed GPS strips"],
     [User, :cull_unverified_users, "cull unverified users"]
   ].freeze
 
