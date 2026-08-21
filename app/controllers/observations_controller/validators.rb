@@ -223,7 +223,7 @@ module ObservationsController::Validators
   def slip_prefix_project
     if field_code_unchanged?
       project_id = @observation.field_slip&.project_id
-      return project_id && Project.find(project_id)
+      return Project.find_by(id: project_id) if project_id
     end
 
     prefix = FieldSlip.prefix_for_code(field_code)
