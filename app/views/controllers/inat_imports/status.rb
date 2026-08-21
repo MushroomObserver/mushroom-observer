@@ -71,6 +71,7 @@ module Views::Controllers::InatImports
         render_status_line
         br
         render_imported_line
+        render_over_cap_line
       end
     end
 
@@ -89,9 +90,44 @@ module Views::Controllers::InatImports
       whitespace
       plain(:of.l)
       whitespace
-      plain(@inat_import.total_importables.to_s)
+      span(id: "total_importables_count") do
+        plain(@inat_import.capped_total_importables.to_s)
+      end
       whitespace
       plain(:observations.l)
+    end
+
+    def over_cap_count
+      InatImport.excess_over_cap(@inat_import.total_importables)
+    end
+
+    def render_over_cap_line
+      return unless over_cap_count.positive?
+
+      br
+      span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_over_cap_caption.l}: "
+      end
+      span(id: "over_cap_count") { plain(over_cap_count.to_s) }
+      render_over_cap_reimport if @inat_import.Done?
+    end
+
+    def render_over_cap_reimport
+      whitespace
+      render(Components::Link::Get.new(
+               name: :inat_import_tracker_over_cap_reimport.l,
+               target: over_cap_reimport_path
+             ))
+    end
+
+    def over_cap_reimport_path
+      new_inat_import_path(
+        inat_username: @inat_import.inat_username.presence,
+        all: ("1" if @inat_import.import_all),
+        import_others: ("1" if @inat_import.import_others),
+        inat_ids: @inat_import.inat_ids.presence,
+        inat_url: @inat_import.inat_url.presence
+      )
     end
 
     def render_started_line

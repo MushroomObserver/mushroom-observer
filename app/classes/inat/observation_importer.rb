@@ -22,6 +22,7 @@ class Inat
     def import_page(page)
       page["results"].each do |result|
         return false if inat_import.reload.canceled?
+        return false if inat_import.reached_import_cap?
 
         import_one_result(JSON.generate(result))
       end

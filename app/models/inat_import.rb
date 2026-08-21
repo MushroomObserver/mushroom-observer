@@ -156,6 +156,18 @@ class InatImport < ApplicationRecord
     imported_count.to_i >= MAX_IMPORTABLE
   end
 
+  # This run will never import more than MAX_IMPORTABLE, regardless of how
+  # many observations are actually available.
+  def capped_total_importables
+    [total_importables.to_i, MAX_IMPORTABLE].min
+  end
+
+  # Observations beyond MAX_IMPORTABLE that a single run of this size
+  # won't import. 0 when count is at or under the cap.
+  def self.excess_over_cap(count)
+    [count.to_i - MAX_IMPORTABLE, 0].max
+  end
+
   def ignored_total_count
     ignored_not_importable_count +
       ignored_date_missing_count +
@@ -190,7 +202,7 @@ class InatImport < ApplicationRecord
   # If user has no import history, use system-wide average import time.
   # If no system-wide history, use BASE_AVG_IMPORT_SECONDS.
   def total_expected_time
-    total_importables.to_i * initial_avg_import_seconds
+    capped_total_importables * initial_avg_import_seconds
   end
 
   def initial_avg_import_seconds
@@ -222,7 +234,7 @@ class InatImport < ApplicationRecord
 
   def estimated_remaining_time
     return 0 if Done?
-    return nil unless total_importables.to_i.positive? && started_at
+    return nil unless capped_total_importables.positive? && started_at
     return total_expected_time if imported_count.to_i.zero?
 
     [extrapolated_remaining_time, 0].max
@@ -230,8 +242,10 @@ class InatImport < ApplicationRecord
 
   # Observed rate (elapsed per imported obs) times obs still to import, so
   # the estimate tracks real progress instead of a fixed up-front guess.
+  # Uses the capped total, not the raw estimate -- this run will never
+  # import more than MAX_IMPORTABLE regardless of how many are available.
   def extrapolated_remaining_time
-    remaining = total_importables.to_i - imported_count.to_i
+    remaining = capped_total_importables - imported_count.to_i
     (remaining * elapsed_time.to_f / imported_count).round
   end
 

@@ -1318,6 +1318,38 @@ class InatImportJobTest < ActiveJob::TestCase
            "Import should remain canceled")
   end
 
+  # reached_import_cap? must be checked per-observation, not just between
+  # pages -- otherwise a page/batch already in progress when the cap is
+  # hit would overshoot it by up to a full page.
+  def test_import_respects_max_importable_mid_page
+    create_ivars_from_filename("listed_ids") # importing multiple observations
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "231104466,195434438",
+                                     token: "MockCode",
+                                     inat_username: "anything")
+    stub_inat_interactions
+
+    saved_max = InatImport.const_get(:MAX_IMPORTABLE)
+    InatImport.send(:remove_const, :MAX_IMPORTABLE)
+    InatImport.const_set(:MAX_IMPORTABLE, 1)
+
+    begin
+      assert_difference(
+        "Observation.count", 1,
+        "Should stop importing once MAX_IMPORTABLE is reached, " \
+        "even mid-page"
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+
+      assert_equal(1, @inat_import.reload.imported_count,
+                   "imported_count should not exceed MAX_IMPORTABLE")
+    ensure
+      InatImport.send(:remove_const, :MAX_IMPORTABLE)
+      InatImport.const_set(:MAX_IMPORTABLE, saved_max)
+    end
+  end
+
   def test_oauth_failure
     create_ivars_from_filename("calostoma_lutescens")
 
