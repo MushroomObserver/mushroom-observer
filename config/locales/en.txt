@@ -1486,6 +1486,8 @@
   form_observations_ambiguous_alias: 'Used "[value]" for the alias "[name]" from [project], because it was updated most recently. That alias is also defined by: [others].'
   observation_field_slip_invalid: 'Invalid field slip code "[code]".'
   observation_field_slip_full: 'Field slip "[code]" already has [max] observations, the maximum allowed.'
+  observation_field_slip_already_attached: This observation is already attached to field slip "[code]".
+  observation_field_slip_blank: Please enter a field slip code.
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
@@ -2088,6 +2090,8 @@
   show_observation_add_images: "[:add_objects(type=:image)]"
   show_observation_manage_species_lists: Manage Observation Lists
   show_observation_add_to_species_list: Add to an Observation List
+  show_observation_manage_projects: Manage Projects
+  show_observation_add_to_project: Add to a Project
   show_observation_send_question: Send Observer a Question
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   remove_object_confirm: Remove [type] from this [association]?
@@ -2199,6 +2203,11 @@
   species_list_manage_title: Manage Observation Lists for [name]
   species_list_manage_belongs_to: This observation belongs to
   species_list_manage_doesnt_contain: Lists you own that do not contain this observation
+
+  # observations/projects/edit
+  project_manage_title: Manage Projects for [name]
+  project_manage_belongs_to: This observation belongs to
+  project_manage_doesnt_contain: Projects you belong to that do not contain this observation
 
   # species_list/manage_projects
   species_list_projects_title: Manage Projects for [List]
@@ -2558,6 +2567,9 @@
 
   # Field Slips
   field_slip_add_images: Add Images or Other Data
+  field_slip_attach_title: Attach Field Slip for [name]
+  field_slip_attach_submit: Attach
+  field_slip_attach_tooltip: Attach
   field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
@@ -4080,6 +4092,7 @@
   runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
   runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
   runtime_prefs_success: "[:runtime_updated_at(type=:preferences)]"
+  runtime_project_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
   runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
   runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
   runtime_profile_success: "[:runtime_updated_at(type=:profile)]"

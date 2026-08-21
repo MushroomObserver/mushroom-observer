@@ -104,7 +104,7 @@ module Views::Controllers::Observations
              ))
       render(NameInfoPanel.new(obs: @observation, user: @user))
       render(SpeciesListsPanel.new(obs: @observation, user: @user))
-      render(ProjectsPanel.new(obs: @observation))
+      render(ProjectsPanel.new(obs: @observation, user: @user))
       render(MatchingObservationsPanel.new(
                obs: @observation, occurrence: @occurrence,
                siblings: @sibling_observations

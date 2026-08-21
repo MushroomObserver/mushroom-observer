@@ -17,9 +17,11 @@
 # `size:` picks the badge's font-size modifier -- `.badge-id` itself
 # has no inherent font-size, so every caller states its size
 # explicitly rather than relying on an implicit default:
-#   :xl -- uppercase site-abbreviation accordion triggers ("iNat", "MCP")
+#   :xl -- project/species-list listing row title badges
+#          (Projects::ListItem, SpeciesLists::Listing)
 #   :lg -- copy-to-clipboard external-site record id (Link::External)
-#   :md -- rss-feed-style contexts (matrix box title, list rows)
+#   :md -- matrix box title and other index-row id badges (Matrix::Box,
+#          Names::Index::Row, Occurrences::Projects::Form)
 #   :sm -- sitting next to a large page-title heading
 class Components::IDBadge < Components::Base
   SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",

@@ -40,8 +40,8 @@ module Views::Controllers::SpeciesLists
 
     def render_info
       div(class: "list_info d-flex align-items-start") do
-        div(class: "text-larger") do
-          IDBadge(object: @species_list, size: :md)
+        div(class: "id-badge-col") do
+          IDBadge(object: @species_list, size: :xl)
         end
         div do
           render_title_row
@@ -89,8 +89,11 @@ module Views::Controllers::SpeciesLists
     def render_remove_obs_button
       Button(
         type: :put,
-        variant: :strip,
+        variant: :outline,
+        icon: :remove,
+        icon_class: "text-danger",
         name: :remove.ti,
+        label: true,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,
