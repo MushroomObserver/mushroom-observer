@@ -979,16 +979,17 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.retry_failed_gps_strips(dry_run: false,
                                    min_id: GPS_STRIP_RETRY_MIN_ID,
                                    limit: 200)
-    images = joins(observation_images: :observation).
-             where(observations: { gps_hidden: true }).
-             where(gps_stripped: false).
-             where(id: min_id..).
-             distinct.order(:id).to_a
-    msgs = images.first(limit).map do |img|
+    scope = joins(observation_images: :observation).
+            where(observations: { gps_hidden: true }).
+            where(gps_stripped: false).
+            where(id: min_id..).
+            distinct
+    total = scope.count
+    msgs = scope.order(:id).limit(limit).map do |img|
       retry_gps_strip(img, dry_run) { |failure| yield(failure) if block_given? }
     end
-    if images.size > limit
-      msgs << "GPS strip retries capped at #{limit}/#{images.size}; " \
+    if total > limit
+      msgs << "GPS strip retries capped at #{limit}/#{total}; " \
               "the rest run on later nights"
     end
     msgs
