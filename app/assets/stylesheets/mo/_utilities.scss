@@ -736,6 +736,15 @@
   background: rgba($black, 0.6);
 }
 
+// Bootstrap 4's contextual badge color variant -- BS3's .badge has
+// none of its own. Reuses the same theme-mapped warning colors as
+// .alert-warning.
+.badge-warning {
+  background-color: $alert-warning-bg;
+  color: $alert-warning-text;
+  font-weight: normal;
+}
+
 // Bootstrap 3 - collapse "fade" instead of "slide"
 .fade-not-slide.collapsing {
   // transition-duration: 0.3s;

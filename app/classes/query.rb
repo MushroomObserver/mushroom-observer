@@ -289,6 +289,8 @@ class Query
   include Query::Modules::Initialization
   include Query::Modules::Results
   include Query::Modules::Sequence
+  include Query::Modules::Seek
+  include Query::Modules::WindowCache
   include Query::Modules::Validation
 
   attr_writer :record
