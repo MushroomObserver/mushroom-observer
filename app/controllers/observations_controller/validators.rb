@@ -214,8 +214,18 @@ module ObservationsController::Validators
     @suspect_checked_projects |= [slip_project]
   end
 
-  # The project the typed/scanned code's prefix names.
+  # The Project named by typed/scanned code names. When the code is
+  # unchanged from the Observation's own field slip, that slip's
+  # attached (possibly nil) Project is the source of
+  # truth. Looked up fresh by id (rather than
+  # via the strict-loaded `field_slip.project` association) to match
+  # the other branch's unscoped `Project.find_by`.
   def slip_prefix_project
+    if field_code_unchanged?
+      project_id = @observation.field_slip&.project_id
+      return project_id && Project.find(project_id)
+    end
+
     prefix = FieldSlip.prefix_for_code(field_code)
     prefix && Project.find_by(field_slip_prefix: prefix)
   end

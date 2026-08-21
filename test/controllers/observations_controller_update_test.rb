@@ -1035,6 +1035,79 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_field_slip_race_reported(:too_many)
   end
 
+  # A project's field_slip_prefix is unique but reassignable: freeing it
+  # from its original project and giving it to a different
+  # project must not make that new project a target for an observation
+  # whose slip code still belongs to the
+  # original project. See #5150.
+  def test_update_unchanged_field_slip_code_ignores_reassigned_prefix
+    obs = observations(:minimal_unknown_obs)
+    slip = field_slips(:field_slip_one)
+    original_project = projects(:eol_project)
+    reassigned_project = projects(:current_project)
+    assert_equal(original_project, slip.project,
+                 "Test fixture setup: obs's field slip should still " \
+                 "belong to its own project")
+    assert_equal(slip, obs.field_slip,
+                 "Test fixture setup: obs should carry this field slip")
+
+    original_project.update!(field_slip_prefix: nil)
+    reassigned_project.update!(
+      field_slip_prefix: FieldSlip.prefix_for_code(slip.code)
+    )
+
+    login(obs.user.login)
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    collector: "Ashley Laman"
+                  ),
+                  field_code: slip.code })
+
+    assert_flash_success(
+      on_fail: "Editing an observation without changing its field " \
+               "slip code should not warn about constraint violations " \
+               "of whichever project now happens to own the slip's " \
+               "prefix -- only the slip's own (unchanged) project " \
+               "matters"
+    )
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_equal("Ashley Laman", obs.reload.collector,
+                 "Update should still have gone through")
+  end
+
+  # The prefix-reassignment scenario above must not swallow a conflict
+  # the user explicitly opts into by checking the box themselves.
+  def test_update_explicit_project_check_still_flags_constraint_violation
+    obs = observations(:minimal_unknown_obs)
+    slip = field_slips(:field_slip_one)
+    original_project = projects(:eol_project)
+    reassigned_project = projects(:current_project)
+
+    original_project.update!(field_slip_prefix: nil)
+    reassigned_project.update!(
+      field_slip_prefix: FieldSlip.prefix_for_code(slip.code)
+    )
+
+    login(obs.user.login)
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    project_ids: [reassigned_project.id.to_s]
+                  ),
+                  field_code: slip.code })
+
+    assert_flash_error(
+      on_fail: "Explicitly checking a project that violates its " \
+               "constraints should still be flagged, even though an " \
+               "unchanged field-slip code no longer implicates it " \
+               "automatically"
+    )
+    assert_not_includes(obs.reload.project_ids, reassigned_project.id,
+                        "A non-admin's violating checked project " \
+                        "should not have been added")
+  end
+
   # Unchecking one project box moves every observation of the occurrence,
   # so the flash has to say how many rather than letting the rest go
   # unmentioned. See #4932.
