@@ -231,10 +231,15 @@ class UserStats < ApplicationRecord
     # This runs after the migration, to copy columns from users to user_stats
     # It's a batch insert, so it's fast.
     def create_user_stats_for_all_users_without
+      # Verified users only: unverified accounts can't contribute and
+      # are culled after a month (User.cull_unverified_users), so a
+      # stats row would just become nightly churn.
       records = User.where.missing(:user_stats).
+                where.not(verified: nil).
                 pluck(:id).map do |id|
                   { user_id: id }
                 end
+      return if records.empty?
 
       UserStats.insert_all(records)
     end

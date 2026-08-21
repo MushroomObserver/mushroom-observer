@@ -2702,6 +2702,47 @@ class ObservationTest < UnitTestCase
     assert_not(obs.shows_merged_notes?)
   end
 
+  def test_define_a_location_updates_matching_observations
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(where: "Deadlock Test Town, USA", location_id: nil)
+    loc = locations(:albion)
+
+    Observation.define_a_location(loc, "Deadlock Test Town, USA")
+
+    obs.reload
+    assert_equal(loc.id, obs.location_id)
+    assert_equal(loc.name, obs.where)
+  end
+
+  def test_define_a_location_retries_once_on_deadlock
+    calls = 0
+    relation = Object.new
+    relation.define_singleton_method(:update_all) do |*_args|
+      calls += 1
+      raise(ActiveRecord::Deadlocked) if calls == 1
+
+      1
+    end
+
+    Observation.stub(:where, relation) do
+      Observation.define_a_location(locations(:albion), "Nowhere, USA")
+    end
+    assert_equal(2, calls, "update should be retried after one deadlock")
+  end
+
+  def test_define_a_location_reraises_repeated_deadlock
+    relation = Object.new
+    relation.define_singleton_method(:update_all) do |*_args|
+      raise(ActiveRecord::Deadlocked)
+    end
+
+    Observation.stub(:where, relation) do
+      assert_raises(ActiveRecord::Deadlocked) do
+        Observation.define_a_location(locations(:albion), "Nowhere, USA")
+      end
+    end
+  end
+
   private
 
   # Build a two-member occurrence from two obs fixtures with the given
