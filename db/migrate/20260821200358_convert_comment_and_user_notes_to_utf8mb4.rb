@@ -8,27 +8,29 @@
 # bytes as utf8mb4) is far under InnoDB's key limit. The connection
 # already runs utf8mb4, so the columns are the only barrier.
 #
-# All of comments' string columns convert together: Comment.pattern
-# CONCATs summary with comment, and on MySQL 8 a CONCAT mixing utf8mb3
-# and utf8mb4 columns resolves to utf8mb4_bin with no derivation, so
-# the pattern-search LIKE fails with "Illegal mix of collations"
-# (caught by CI; MySQL 9's coercion rules tolerate the mix, so it did
-# not reproduce locally). users.notes has no such partner -- the user
-# pattern search reads login + name only.
-#
-# utf8mb4_0900_ai_ci matches every existing utf8mb4 table in the
-# schema (the MySQL 8+ default), so the eventual #4625 conversion
-# normalizes on a single collation.
+# utf8mb4_general_ci, NOT the newer utf8mb4_0900_ai_ci the schema's
+# other (standalone) utf8mb4 tables use: the connection collation is
+# utf8mb4_general_ci, and Arel's `+` string concat (the search_columns
+# pattern scopes, e.g. Comment.pattern) wraps its left operand in a
+# bare CAST(... AS CHAR), which takes the CONNECTION collation no
+# matter what the column's is. CONCAT(general_ci, 0900_ai_ci) then
+# aggregates to utf8mb4_bin with no derivation, and MySQL 8 rejects
+# the pattern-search LIKE on it ("Illegal mix of collations" -- caught
+# by CI; MySQL 9 tolerates it, so it did not reproduce locally).
+# 0900_ai_ci has to wait until #4625 flips the connection collation
+# and every table together. All of comments' string columns convert
+# in one pass so the table stays single-collation; users.notes has no
+# concat partner (the user pattern search reads login + name only).
 class ConvertCommentAndUserNotesToUtf8mb4 < ActiveRecord::Migration[7.2]
   def up
     change_column(:comments, :comment, :text,
-                  collation: "utf8mb4_0900_ai_ci")
+                  collation: "utf8mb4_general_ci")
     change_column(:comments, :summary, :string,
-                  limit: 100, collation: "utf8mb4_0900_ai_ci")
+                  limit: 100, collation: "utf8mb4_general_ci")
     change_column(:comments, :target_type, :string,
-                  limit: 30, collation: "utf8mb4_0900_ai_ci")
+                  limit: 30, collation: "utf8mb4_general_ci")
     change_column(:users, :notes, :text,
-                  collation: "utf8mb4_0900_ai_ci")
+                  collation: "utf8mb4_general_ci")
   end
 
   def down
