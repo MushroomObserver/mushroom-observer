@@ -1270,18 +1270,26 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     occ.destroy_if_incomplete!
   end
 
-  # When an observation moves to a different occurrence, clean up the
-  # one it left: repoint the primary if it was this observation, destroy
-  # the occurrence if it emptied or dropped below 2 members, and refresh
-  # its has_specimen cache. Must run after save -- before it, this
-  # observation still counts as a member of the old occurrence, so the
-  # primary could be "reassigned" right back to the departing record.
-  # Detaching (occurrence -> nil) is excluded; those flows (dissolve,
-  # field slip sync, occurrence edit) do their own cleanup.
+  # When an observation moves to a different occurrence, fix up both
+  # sides. Old occurrence: repoint the primary if it was this
+  # observation, destroy the occurrence if it emptied or dropped below
+  # 2 members, and refresh its has_specimen cache. Must run after save
+  # -- before it, this observation still counts as a member of the old
+  # occurrence, so the primary could be "reassigned" right back to the
+  # departing record. New occurrence: refresh its has_specimen cache
+  # too -- update_occurrence_specimen_cache only fires when `specimen`
+  # itself changed, not when the membership did. Detaching
+  # (occurrence -> nil) is excluded; those flows (dissolve, field slip
+  # sync, occurrence edit) do their own cleanup.
   def cleanup_abandoned_occurrence
     old_id, new_id = saved_change_to_occurrence_id
     return unless old_id && new_id
 
+    cleanup_old_occurrence_after_move(old_id)
+    occurrence&.recompute_has_specimen!
+  end
+
+  def cleanup_old_occurrence_after_move(old_id)
     old_occ = Occurrence.find_by(id: old_id)
     return unless old_occ
 

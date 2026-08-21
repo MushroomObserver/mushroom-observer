@@ -198,9 +198,10 @@ class Occurrence < AbstractModel
       merged_obs.each do |obs|
         obs.update!(occurrence: keeper)
       end
-      # Observation#cleanup_abandoned_occurrence destroys the emptied
-      # occurrence as its last member moves; finish the job if it
-      # survived (it kept a field slip).
+      # Observation#cleanup_abandoned_occurrence normally destroys the
+      # emptied occurrence as its last member moves; finish the job if
+      # it survived (e.g. its primary was already dangling, so the
+      # member-departure reassign path did not run).
       Occurrence.find_by(id: absorbed.id)&.destroy!
       keeper.recompute_has_specimen!
     end

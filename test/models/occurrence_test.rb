@@ -162,6 +162,9 @@ class OccurrenceTest < UnitTestCase
            "Reassigned primary should be a remaining member")
     assert_not(occ_a.has_specimen,
                "has_specimen cache should be refreshed after the move")
+    assert(occ_b.reload.has_specimen,
+           "Destination occurrence's has_specimen cache should pick up " \
+           "the arriving specimen")
   end
 
   def test_move_to_other_occurrence_destroys_incomplete_abandoned
