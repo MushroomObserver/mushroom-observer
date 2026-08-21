@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_21_010000) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_21_200358) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -49,7 +49,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_010000) do
     t.datetime "created_at", precision: nil
     t.integer "user_id"
     t.string "summary", limit: 100
-    t.text "comment"
+    t.text "comment", collation: "utf8mb4_general_ci"
     t.string "target_type", limit: 30
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
@@ -1051,7 +1051,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_21_010000) do
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.text "mailing_address"
     t.integer "layout_count"
     t.boolean "view_owner_id", default: false, null: false
