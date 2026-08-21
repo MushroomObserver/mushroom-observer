@@ -6,11 +6,14 @@
 # index-key-length concerns that defer #4625 don't apply here. The
 # connection already runs utf8mb4, so these columns are the only barrier.
 class ConvertCommentAndUserNotesToUtf8mb4 < ActiveRecord::Migration[7.2]
+  # utf8mb4_0900_ai_ci matches every existing utf8mb4 table in the
+  # schema (the MySQL 8+ default), so the eventual #4625 conversion
+  # normalizes on a single collation.
   def up
     change_column(:comments, :comment, :text,
-                  collation: "utf8mb4_general_ci")
+                  collation: "utf8mb4_0900_ai_ci")
     change_column(:users, :notes, :text,
-                  collation: "utf8mb4_general_ci")
+                  collation: "utf8mb4_0900_ai_ci")
   end
 
   def down
