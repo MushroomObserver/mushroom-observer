@@ -36,7 +36,7 @@ class Inat
       by_observation = namings.group_by(&:observation_id)
       total = by_observation.size
       capped = capped_namings(by_observation)
-      log_truncation(user, total) if capped.size < total
+      log_truncation(user, total) if total > MAX_DIGEST_OBSERVATIONS
 
       InatImportDigestMailer.build(
         receiver: user, namings: capped, total_observations: total
