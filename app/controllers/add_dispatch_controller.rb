@@ -14,7 +14,7 @@ class AddDispatchController < ApplicationController
     # of the field slip if it's different.
     # This is how the Project context gets passed if it is relevant.
     @project = find_project
-    @field_slip_code = find_code(@project, params[:field_slip])&.strip
+    @field_slip_code = find_code(@project, params[:field_slip])
     url = if @field_slip_code
             "#{MO.http_domain}/qr/#{@field_slip_code}"
           else
@@ -38,10 +38,17 @@ class AddDispatchController < ApplicationController
     projects.where.not(field_slip_prefix: nil).first
   end
 
+  # Only a bare number gets the project prefix ("2345" ->
+  # "PREFIX-2345"); anything else is taken as a complete code and
+  # passed through unchanged. Prefixes can start with digits
+  # ("2026-NAMATEST"), so a complete code is recognizable only by
+  # matching the whole entry, not its first character.
   def find_code(project, code)
+    code = code.to_s.strip
     return nil if code.blank?
-    return code unless code[0].match?(/\d/)
-    return "#{project.field_slip_prefix}-#{code}" if project
+    return code unless code.match?(/\A\d+\z/)
+    return "#{project.field_slip_prefix}-#{code}" if
+      project&.field_slip_prefix.present?
 
     flash_warning(:bad_dispatch_code.t(code:))
     nil
