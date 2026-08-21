@@ -1486,6 +1486,8 @@
   form_observations_ambiguous_alias: 'Used "[value]" for the alias "[name]" from [project], because it was updated most recently. That alias is also defined by: [others].'
   observation_field_slip_invalid: 'Invalid field slip code "[code]".'
   observation_field_slip_full: 'Field slip "[code]" already has [max] observations, the maximum allowed.'
+  observation_field_slip_already_attached: This observation is already attached to field slip "[code]".
+  observation_field_slip_blank: Please enter a field slip code.
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
@@ -2565,6 +2567,9 @@
 
   # Field Slips
   field_slip_add_images: Add Images or Other Data
+  field_slip_attach_title: Attach Field Slip for [name]
+  field_slip_attach_submit: Attach
+  field_slip_attach_tooltip: Attach
   field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)

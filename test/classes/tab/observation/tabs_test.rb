@@ -40,6 +40,15 @@ module Tab::Observation
       assert_equal(:add, tab.html_options[:icon])
     end
 
+    def test_attach_field_slip
+      tab = Tab::Observation::AttachFieldSlip.new(observation: @obs)
+
+      assert_equal(:field_slip_attach_tooltip.l, tab.title)
+      assert_equal(routes.edit_observation_field_slip_path(@obs.id), tab.path)
+      assert_equal(:add, tab.html_options[:icon])
+      assert_equal("attach_observation_to_field_slip", tab.alt_title)
+    end
+
     def test_manage_projects
       tab = Tab::Observation::ManageProjects.new(observation: @obs)
 
