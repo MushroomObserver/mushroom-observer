@@ -25,9 +25,9 @@ module Views::Layouts
     private
 
     def render_adjacent_link(dir)
-      hide = no_more?(dir) ? "disabled opacity-0" : ""
-      classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       adjacent_id = @query.send(:"#{dir}_id")
+      hide = adjacent_id.nil? ? "disabled opacity-0" : ""
+      classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
       Link(type: :get, name: adjacent_title(dir), target: href,
@@ -39,14 +39,6 @@ module Views::Layouts
 
       Link(type: :get, name: index_title, target: index_path,
            icon: index_icon, button: :link, size: :lg, class: classes)
-    end
-
-    def no_more?(dir)
-      if dir == :prev
-        @query.result_ids.first == @object.id
-      else
-        @query.result_ids.last == @object.id
-      end
     end
 
     def adjacent_path(id)
