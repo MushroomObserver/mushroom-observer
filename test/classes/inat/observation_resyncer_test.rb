@@ -312,6 +312,30 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "The forked Naming should be attributed to the importer")
   end
 
+  # A forked stand-in's own vote uses the same confidence weight a
+  # skeleton's initial Naming would get (SkeletonObservationBuilder#
+  # naming_vote): Promising for Research Grade, Could Be otherwise.
+  def test_placeholder_resync_fork_vote_reflects_research_grade
+    skeleton = build_skeleton(name: names(:peltigera))
+    anchor = skeleton.namings.first
+    Vote.create!(naming: anchor, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    research_raw = raw_for(names(:coprinus), quality_grade: "research")
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => research_raw },
+                                false])
+    ).resync
+
+    forked = skeleton.reload.namings.where.not(id: anchor.id).first
+    vote = forked.votes.find_by(user: users(:rolf))
+    assert_equal(Vote::NEXT_BEST_VOTE, vote.value,
+                 "A Research Grade source should give the forked stand-in " \
+                 "a Promising vote, not Could Be")
+  end
+
   def test_placeholder_resync_forked_naming_is_a_stable_anchor
     skeleton = build_skeleton(name: names(:peltigera))
     anchor = skeleton.namings.first
@@ -689,8 +713,8 @@ class Inat::ObservationResyncerTest < UnitTestCase
   # (genus rank), so leading-ID resolution needs no API call. Based on
   # coprinus.txt (unlicensed, one photo -- irrelevant here since these
   # tests only exercise placeholder naming/consensus sync).
-  def raw_for(name)
-    raw = mock_raw("coprinus")
+  def raw_for(name, quality_grade: "needs_id")
+    raw = mock_raw("coprinus").merge(quality_grade: quality_grade)
     raw.merge(taxon: raw[:taxon].merge(name: name.text_name, rank: "genus"))
   end
 

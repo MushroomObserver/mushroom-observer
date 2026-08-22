@@ -123,6 +123,23 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     end
   end
 
+  # A duplicate import ExternalLink attempt (the target already has one --
+  # only one import link per target is allowed) fails validation and gets
+  # logged, not raised.
+  def test_create_import_link_logs_and_skips_a_duplicate
+    skeleton = builder_for(name: names(:peltigera)).mo_observation
+    duplicate_builder = builder_for(name: names(:peltigera))
+
+    assert_nothing_raised do
+      duplicate_builder.send(:create_import_link, skeleton, "99999999")
+    end
+
+    assert_equal(
+      1, ExternalLink.where(target: skeleton, relationship: :import).count,
+      "A duplicate import link attempt should be rejected, not added"
+    )
+  end
+
   def assert_naming_reason(obs)
     reason = obs.namings.first.reasons[2]
     today = Time.zone.today.strftime("%Y-%m-%d")
