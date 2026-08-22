@@ -73,11 +73,15 @@ class Inat
       inat_link(obs).external_id
     end
 
-    # Detect a REAL change from what persists, not from the assigned
-    # values: setting `location` triggers a callback that rewrites `where`
-    # to the location's name, so an in-memory `changed?` never converges.
-    # `saved_changes` (sans the timestamp) reflects what actually moved.
+    # Check saved_changes, not changed?, to detect an update. Setting
+    # `location` triggers a callback that rewrites `where` to match the
+    # location's name. So `changed?` stays true even with no update.
+    # Read `saved_changes` (minus the timestamp) to see what got saved.
     def apply(obs, inat_obs)
+      if upgrade_eligible?(obs, inat_obs)
+        return upgrade_placeholder(obs, inat_obs)
+      end
+
       obs.assign_attributes(scalar_attributes(obs, inat_obs))
       sync_placeholder_naming(obs, inat_obs) if obs.placeholder?
       obs.save! if obs.changed?
@@ -87,19 +91,51 @@ class Inat
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
     end
 
-    # The source-owned scalar fields, straight off the fresh iNat data.
-    # `where` is only set when no Location resolves: a present Location
+    def upgrade_eligible?(obs, inat_obs)
+      return false unless obs.placeholder?
+
+      inat_obs[:license_code].present? || importer_is_collector?(obs, inat_obs)
+    end
+
+    # Is the MO importer the iNat collector?
+    def importer_is_collector?(obs, inat_obs)
+      obs.user.inat_username.present? &&
+        obs.user.inat_username == inat_obs.collector
+    end
+
+    # Rebuild the placeholder as a full import, in the same row.
+    # Change only the row's own columns and Namings.
+    # Keep the id, Comments, and Occurrence.
+    #
+    # When the importer is the iNat collector, treat this as their own
+    # import: set import_others: false. Then unlicensed photos import
+    # too, same as any import of a user's own observation.
+    # Else, when only the now-licensed trigger fired, keep import_others
+    # Per-photo license checks then decide each photo separately.
+    #
+    # Don't suppress notifications. A batch import has a digest to
+    # catch them. A lone sync doesn't.
+    def upgrade_placeholder(obs, inat_obs)
+      Inat::MoObservationBuilder.new(
+        inat_obs: inat_obs, user: obs.user, observation: obs,
+        import_others: !importer_is_collector?(obs, inat_obs)
+      ).mo_observation
+      mark_synced(obs)
+      Result.new(status: :synced, observation: obs)
+    end
+
+    # The source-owned scalar fields, from the fresh iNat data.
+    # `where` is set only if no Location resolves: a present Location
     # drives `where` from its own name via a callback, so assigning
     # `where` too would flip it back and forth and never converge.
     #
-    # A placeholder (skeleton, #4828) gets a narrower sync than a full
-    # reflection: only date/location move here. `notes` is deliberately
-    # excluded -- Inat::SkeletonObservationBuilder never copies the
-    # source's Notes/description into MO's Notes in the first place (it
-    # writes a fixed placeholder message instead), so a resync must not
-    # start doing that either. `specimen` is left alone too, since a
-    # skeleton never sets it from source data to begin with. The leading
-    # ID has its own handling in sync_placeholder_naming below.
+    # A placeholder gets a narrower sync than a normal reflection;
+    # only date/location chang here.
+    # `notes` is excluded -- a placeholder includes a fixed message
+    # instead of the iNat source's Notes/description. So a resync must not
+    # change that. `specimen` is left alone too.
+    #
+    # The leading ID has its own handling in sync_placeholder_naming below.
     def scalar_attributes(obs, inat_obs)
       location = inat_obs.location
       attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
@@ -110,23 +146,21 @@ class Inat
       attrs.merge(specimen: inat_obs.specimen?, notes: inat_obs.notes)
     end
 
-    # A placeholder's only Naming (Inat::SkeletonObservationBuilder adds
-    # exactly one, un-attributed to override/provisional/community) is
-    # revised in place -- not replaced with a second Naming -- when iNat's
-    # current *pure* Leading ID (Inat::LeadNameResolver#leading_id_name,
-    # not #lead_name) differs from what it originally proposed. An
-    # override/provisional-name observation field is deliberately ignored
-    # here too, same as at creation -- a skeleton always tracks iNat's own
-    # taxon, never a curator's aside (#4828). The Naming's "Used
-    # references" reason is refreshed to today's date (shared text
-    # format: Inat::LeadNameResolver#reason_text), and the same new name
-    # is assigned onto the observation itself (not yet saved here --
-    # picked up by the single obs.save! in #apply alongside any
-    # date/location changes). Skeletons bypass MO's normal vote-driven
-    # consensus (see Inat::SkeletonObservationBuilder#add_naming_with_vote),
-    # so the Naming and the observation's own name_id/text_name are set
-    # together here, same as at creation. Votes, images, sequences, and
-    # any other namings are never touched.
+    # Revise a placeholder's single Naming when iNat's Leading ID changes.
+    # Compare it to iNat's Leading ID to decide if it changed.
+    #
+    # Refresh the Naming's "Used references" reason to today's date.
+    #
+    # Assign the new name to the Observation too, but don't save it here.
+    # The obs.save! in #apply picks up that change, plus any date or location
+    # updates.
+    #
+    # Skeletons skip MO's normal vote-driven consensus (see
+    # SkeletonObservationBuilder#add_naming_with_vote). So set the
+    # Naming and the observation's name_id/text_name together
+    # here, same as at creation.
+    #
+    # Don't touch votes, images, sequences, or other namings.
     def sync_placeholder_naming(obs, inat_obs)
       naming = obs.namings.order(:id).first
       return unless naming

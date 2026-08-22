@@ -2,13 +2,15 @@
 
 require("test_helper")
 
-# Unit tests for the confidence weight Inat::MoObservationBuilder assigns to
-# an import's single consensus naming (#4212). The integration coverage in
+# Unit tests for the confidence weight MoObservationBuilder assigns to
+# an place's single consensus naming (#4212). The integration coverage in
 # test/jobs/inat_import_job_test.rb exercises the sequence / research /
 # non-research branches against recorded fixtures; this isolates naming_vote
 # so every branch is pinned — including "provisional name without a sequence",
 # which no real iNat fixture can produce (a prov name implies a sequence).
 class InatMoObservationBuilderTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   # Minimal stand-in for an ::Inat::Obs, exposing only the fields/methods
   # MoObservationBuilder reads in these unit tests.
   class FakeInatObs
@@ -304,7 +306,117 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_equal([image.id], builder.created_image_ids)
   end
 
+  # --- observation:  upgrade a placeholder to a full import (#4828) -----
+
+  # Stand-in for ::Inat::Obs exposing everything a full mo_observation
+  # build reads: unlike FakeInatObs above (used only for private-method
+  # unit tests), this drives the whole create_observation/add_external_link/
+  # add_inat_images/update_names_and_proposals/add_inat_sequences chain.
+  class FakeFullInatObs
+    FAKE_INAT_ID = 24_681_357
+
+    def initialize(name:, license_code: "cc-by", login: "some_login")
+      @name = name
+      @license_code = license_code
+      @login = login
+    end
+
+    attr_reader :name
+
+    def collector = @login
+    def provisional_name = nil
+    def name_override = nil
+    def when = Date.new(2024, 5, 1)
+    def location = ::Location.find_by(name: "Albion, California, USA")
+    def where = "Albion, California, USA"
+    def lat = 44.0
+    def lng = -123.0
+    def gps_hidden = false # rubocop:disable Naming/PredicateMethod
+    def specimen? = false
+    def notes = ""
+    def sequences = []
+
+    def [](key)
+      { id: FAKE_INAT_ID, quality_grade: "research",
+        license_code: @license_code, identifications: [],
+        observation_photos: [],
+        user: { login: @login, name: @login } }[key]
+    end
+  end
+
+  def test_observation_upgrades_placeholder_preserving_id_comments_occurrence
+    skeleton = build_skeleton(name: names(:peltigera))
+    comment = Comment.create!(user: users(:mary), target: skeleton,
+                              summary: "s", comment: "c")
+    occ = Occurrence.create!(user: skeleton.user, primary_observation: skeleton)
+    skeleton.update!(occurrence: occ)
+    old_naming_id = skeleton.namings.first.id
+    fresh = FakeFullInatObs.new(name: names(:coprinus))
+
+    result = Inat::MoObservationBuilder.new(
+      inat_obs: fresh, user: skeleton.user, observation: skeleton,
+      import_others: true
+    ).mo_observation
+
+    assert_equal(skeleton.id, result.id,
+                 "Upgrade should write into the pre-existing row")
+    assert_not(result.placeholder?, "Upgrade should clear placeholder")
+    assert_equal(occ.id, result.occurrence_id,
+                 "Upgrade should leave the Occurrence association in place")
+    assert_includes(result.comments, comment,
+                    "Upgrade should leave existing comments in place")
+    assert_not(Naming.exists?(old_naming_id),
+               "The placeholder's single Naming should be replaced")
+    assert_equal(names(:coprinus), result.name)
+  end
+
+  # A normal import batches and digests naming-notification emails
+  # (Naming.suppress_notifications); a lone upgrade has no batch to catch
+  # them, so it must not suppress.
+  def test_observation_upgrade_does_not_suppress_notifications
+    skeleton = build_skeleton(name: names(:peltigera))
+    NameTracker.create!(name: names(:coprinus), user: users(:mary))
+    fresh = FakeFullInatObs.new(name: names(:coprinus))
+
+    assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
+      Inat::MoObservationBuilder.new(
+        inat_obs: fresh, user: skeleton.user, observation: skeleton,
+        import_others: true
+      ).mo_observation
+    end
+  end
+
+  # The row being upgraded predates this run, so a failure partway through
+  # must leave it in place -- unlike a fresh import's Observation, which
+  # gets destroyed on failure since it exists only because of this run.
+  def test_observation_upgrade_does_not_destroy_on_failure
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = FakeFullInatObs.new(name: names(:coprinus))
+    builder = Inat::MoObservationBuilder.new(
+      inat_obs: fresh, user: skeleton.user, observation: skeleton,
+      import_others: true
+    )
+
+    ObservationView.stub(:create!, ->(*) { raise("boom") }) do
+      assert_raises(RuntimeError) { builder.mo_observation }
+    end
+
+    assert(Observation.exists?(skeleton.id),
+           "A failed upgrade must not destroy the pre-existing Observation")
+  end
+
   private
+
+  # A skeleton Observation built via Inat::SkeletonObservationBuilder, so
+  # the upgrade tests exercise its own placeholder/reflected_at state
+  # instead of stubbing it.
+  def build_skeleton(name:)
+    fake = FakeFullInatObs.new(name: name)
+    Inat::SkeletonObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf),
+      external_site: ExternalSite.inaturalist
+    ).mo_observation
+  end
 
   def builder_for(provisional_name: nil, name_override: nil,
                   obs_taxon_name: nil)

@@ -1107,6 +1107,7 @@
   log_observation_updated_at: "[:log_object_updated_by_user(type=:observation)]"
   log_observation_resynced: Resynced from imported source by [user].
   log_observation_source_deleted: Imported source no longer exists; Mushroom Observer record kept.
+  log_observation_upgraded_from_placeholder: Upgraded from placeholder to full import by [user].
   log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
   log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
   log_project_created: "[:log_object_created_by_user(type=:project)]"

@@ -251,6 +251,123 @@ class Inat::ObservationResyncerTest < UnitTestCase
   end
 
   # ---------------------------------------------------------------
+  #  Upgrading a placeholder to a full import on sync (#4828): once MO
+  #  has the right to hold the whole record -- the iNat obs is now
+  #  licensed, or the importer turns out to be the iNat collector --
+  #  the narrow placeholder sync above is skipped in favor of a full
+  #  rebuild, written into the same row.
+  # ---------------------------------------------------------------
+
+  def test_upgrade_eligible_when_now_licensed
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: "cc-by-nc", login: "someone")
+
+    resyncer = Inat::ObservationResyncer.new(skeleton)
+
+    assert(resyncer.send(:upgrade_eligible?, skeleton, fresh),
+           "A now-licensed source should make a placeholder upgrade-eligible")
+  end
+
+  def test_upgrade_eligible_when_importer_is_collector
+    skeleton = build_skeleton(name: names(:peltigera))
+    skeleton.user.update!(inat_username: "someone")
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ObservationResyncer.new(skeleton)
+
+    assert(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh),
+      "The importer matching the iNat collector should make a " \
+      "placeholder upgrade-eligible even though the source is unlicensed"
+    )
+  end
+
+  def test_upgrade_ineligible_when_neither_trigger_fires
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ObservationResyncer.new(skeleton)
+
+    assert_not(resyncer.send(:upgrade_eligible?, skeleton, fresh),
+               "An unlicensed source with an unmatched collector should " \
+               "leave the narrow placeholder sync unchanged")
+  end
+
+  def test_upgrade_ineligible_for_a_non_placeholder
+    non_placeholder = observations(:coprinus_comatus_obs)
+    fresh = licensed_upgrade_obs(license_code: "cc-by-nc", login: "someone")
+
+    resyncer = Inat::ObservationResyncer.new(non_placeholder)
+
+    assert_not(resyncer.send(:upgrade_eligible?, non_placeholder, fresh),
+               "Only a placeholder is eligible for an upgrade")
+  end
+
+  def test_placeholder_upgrades_to_full_import_when_now_licensed
+    skeleton = build_skeleton(name: names(:peltigera))
+    comment = Comment.create!(user: users(:mary), target: skeleton,
+                              summary: "s", comment: "c")
+    occ = Occurrence.create!(user: skeleton.user, primary_observation: skeleton)
+    skeleton.update!(occurrence: occ)
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: "cc-by-nc", login: "mycoprimus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    skeleton.reload
+    assert_not(skeleton.placeholder?,
+               "A now-licensed source should upgrade the placeholder")
+    assert_equal(names(:coprinus), skeleton.name,
+                 "Upgrade should build the full naming set from the " \
+                 "fetched taxon")
+    assert_equal(occ.id, skeleton.occurrence_id,
+                 "Upgrade should leave the Occurrence association in place")
+    assert_includes(skeleton.comments, comment,
+                    "Upgrade should leave existing comments in place")
+    assert_equal(1, ExternalLink.where(target: skeleton, target_type:
+                                       "Observation", relationship: :import).
+                   count,
+                 "Upgrade should not create a duplicate import ExternalLink")
+  end
+
+  def test_placeholder_upgrades_to_full_import_when_importer_is_collector
+    skeleton = build_skeleton(name: names(:peltigera))
+    skeleton.user.update!(inat_username: "devin189")
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: nil, login: "devin189")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    skeleton.reload
+    assert_not(skeleton.placeholder?,
+               "The importer matching the iNat collector should upgrade " \
+               "the placeholder, even though the source is unlicensed")
+    assert_equal(names(:coprinus), skeleton.name)
+  end
+
+  def test_placeholder_stays_narrow_synced_when_neither_trigger_fires
+    skeleton = build_skeleton(name: names(:coprinus))
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: nil, login: "someone_else")
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    ).resync
+
+    assert(skeleton.reload.placeholder?,
+           "Neither trigger fired, so the placeholder should not upgrade")
+  end
+
+  # ---------------------------------------------------------------
   #  Occurrence-wide sync (#4215): one fetch, aggregate reporting
   # ---------------------------------------------------------------
 
@@ -463,5 +580,26 @@ class Inat::ObservationResyncerTest < UnitTestCase
       inat_obs: fake, user: users(:rolf),
       external_site: external_sites(:inaturalist)
     ).mo_observation
+  end
+
+  # A raw iNat obs hash (calostoma_lutescens.txt has no photos, so an
+  # upgrade doesn't trigger an image upload) with license_code and
+  # collector overridden, and its taxon swapped for one that already
+  # matches an MO Name fixture (Coprinus) so name resolution needs no
+  # API call.
+  def licensed_upgrade_raw(license_code:, login:)
+    raw = mock_raw("calostoma_lutescens")
+    raw.merge(
+      license_code: license_code,
+      taxon: raw[:taxon].merge(name: "Coprinus", rank: "genus"),
+      user: raw[:user].merge(login: login)
+    )
+  end
+
+  def licensed_upgrade_obs(license_code:, login:)
+    Inat::Obs.new(
+      JSON.generate(licensed_upgrade_raw(license_code: license_code,
+                                         login: login))
+    )
   end
 end

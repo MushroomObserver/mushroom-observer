@@ -9,46 +9,77 @@ class Inat
     attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs,
                 :created_image_ids
 
-    def initialize(inat_obs:, user:, import_others: false,
-                   external_site: nil, inat_import: nil)
+    # Pass external_site:, inat_import:, and observation via **context
+    # not as their own named params to avoid ParameterLists offense.
+    def initialize(inat_obs:, user:, import_others: false, **context)
       @inat_obs = inat_obs
       @user = user
       @import_others = import_others
-      @external_site = external_site || ExternalSite.inaturalist
-      @inat_import = inat_import
+      @external_site = context[:external_site] || ExternalSite.inaturalist
+      @inat_import = context[:inat_import]
+      # Present => upgrade this existing (placeholder) Observation in
+      # place instead of creating a new one (#4828).
+      @observation = context[:observation]
+      @upgrading = @observation.present?
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
       @created_image_ids = []
     end
 
     def mo_observation
-      # Suppress per-naming notifications during import; the import job sends
-      # one digest per interested user at the end instead (#4757).
-      Naming.suppress_notifications do
-        create_missing_identification_names
-        create_observation
-        add_external_link
-        add_inat_images(inat_obs[:observation_photos])
-        update_names_and_proposals
-        add_inat_sequences
+      if @upgrading
+        build_observation
+      else
+        Naming.suppress_notifications { build_observation }
       end
       @observation
-    rescue StandardError => e
-      # Remove incomplete Observation from the db
-      @observation&.destroy
-      raise(e)
+    rescue StandardError
+      # Remove an incomplete new Observation from the db -- not one being
+      # upgraded, since that record predates this run.
+      @observation&.destroy unless @upgrading
+      raise
     end
 
     private
 
+    def build_observation
+      create_missing_identification_names
+      create_observation
+      add_external_link
+      add_inat_images(inat_obs[:observation_photos])
+      update_names_and_proposals
+      add_inat_sequences
+    end
+
     def create_observation
-      @observation = Observation.create(new_obs_params)
+      if @upgrading
+        upgrade_observation
+      else
+        @observation = Observation.create(new_obs_params)
+      end
       # Lead naming first so it wins calc_consensus ties (see consensus_naming).
       proposed_namings(community_name, prov_name, override_name, naming_vote).
         each do |name, value|
           add_naming_with_vote(name: name, namer: namer_for(name), value: value)
         end
-      @observation.log(:log_observation_created, user: user)
+      @observation.log(create_observation_log_key, user: user)
+    end
+
+    # A full import's namings replace the placeholder's single ad-hoc
+    # leading-ID naming, not add to it.
+    def upgrade_observation
+      @observation.namings.destroy_all
+      @observation.update!(
+        new_obs_params.except(:user, :inat_import_id).merge(placeholder: false)
+      )
+    end
+
+    def create_observation_log_key
+      if @upgrading
+        :log_observation_upgraded_from_placeholder
+      else
+        :log_observation_created
+      end
     end
 
     # Resolves community/provisional/override/lead names, and creates MO
