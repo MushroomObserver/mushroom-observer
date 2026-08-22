@@ -218,11 +218,16 @@ module ObservationsController::FieldSlips
     # `bar_field_slip` already told the user why; saving the observation
     # without the code is the whole point of that branch.
     return :unchanged if @field_slip_barred
+    return :unchanged if field_code_unchanged?
 
-    code = field_code
-    return :unchanged if code == @observation.field_slip&.code.to_s
+    field_code.blank? ? clear_field_slip : assign_field_slip(field_code)
+  end
 
-    code.blank? ? clear_field_slip : assign_field_slip(code)
+  # True when the submitted code is the same as the observation's own
+  # field slip (or both are absent) -- i.e. the slip link isn't
+  # changing on this submit.
+  def field_code_unchanged?
+    field_code == @observation.field_slip&.code.to_s
   end
 
   def clear_field_slip
