@@ -170,10 +170,11 @@ class ImagesController < ApplicationController
            ))
   end
 
-  # Only a logged-in viewer can see the scan-state button, so skip the
-  # lookup for everyone else.
+  # Same gate as the view's scan-state button, so nobody who can't see
+  # it pays for the lookup.
   def field_slip_extract_for_show
-    return unless @user
+    return unless FieldSlipExtract.permitted?(image: @image, user: @user,
+                                              site_admin: in_admin_mode?)
 
     FieldSlipExtract.find_by(image_id: @image.id)
   end
