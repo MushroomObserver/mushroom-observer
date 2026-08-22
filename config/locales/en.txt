@@ -1549,9 +1549,9 @@
   form_observations_projects_use_spare_slip: Use as Spare Slip
   form_observations_projects_use_spare_help: "; or\n- Check [:form_observations_projects_use_spare_slip] to attach the field slip to this observation with no project"
   form_observations_projects_kind_date: Out-of-range date
-  form_observations_projects_kind_bbox: Out-of-bbox location
-  form_observations_projects_kind_target_name: Non-target name
-  form_observations_projects_kind_target_location: Non-target location
+  form_observations_projects_kind_bbox: "[:form_violations_kind_bbox]"
+  form_observations_projects_kind_target_name: "[:form_violations_kind_target_name]"
+  form_observations_projects_kind_target_location: "[:form_violations_kind_target_location]"
   form_observations_projects_kind_prefix_mismatch: Field slip prefix mismatch
 
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:see_message_below]+":#location_messages
