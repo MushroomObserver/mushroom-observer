@@ -318,10 +318,83 @@ class ImageTest < UnitTestCase
     end
   end
 
+  # -- retry_failed_gps_strips --
+
+  def test_retry_failed_gps_strips_dry_run_reports_without_stripping
+    img = unstripped_hidden_image
+
+    Open3.stub(:capture2e, ->(*) { raise("must not shell out") }) do
+      msgs = Image.retry_failed_gps_strips(dry_run: true, min_id: img.id)
+      assert_includes(msgs, "Image ##{img.id}: would retry GPS strip")
+    end
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_retry_failed_gps_strips_strips_and_flags
+    img = unstripped_hidden_image
+    failures = []
+
+    Open3.stub(:capture2e, ["", stub_status(true)]) do
+      msgs = Image.retry_failed_gps_strips(min_id: img.id) do |failure|
+        failures << failure
+      end
+      assert_includes(msgs, "Image ##{img.id}: GPS strip retried")
+    end
+
+    assert_empty(failures)
+    assert_true(img.reload.gps_stripped)
+  end
+
+  def test_retry_failed_gps_strips_yields_failures_and_continues
+    img = unstripped_hidden_image
+    failures = []
+
+    Open3.stub(:capture2e, ["boom", stub_status(false)]) do
+      msgs = Image.retry_failed_gps_strips(min_id: img.id) do |failure|
+        failures << failure
+      end
+      assert_includes(msgs,
+                      "Image ##{img.id}: GPS strip retry failed - boom")
+    end
+
+    assert_includes(failures,
+                    "Image ##{img.id}: GPS strip retry failed - boom")
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_retry_failed_gps_strips_skips_ids_below_min_id
+    img = unstripped_hidden_image
+
+    msgs = Image.retry_failed_gps_strips(dry_run: true, min_id: img.id + 1)
+
+    assert_not(msgs.any? { |m| m.include?("##{img.id}:") },
+               "Images below min_id should be out of scope")
+  end
+
+  def test_retry_failed_gps_strips_caps_per_run_and_reports_remainder
+    img = unstripped_hidden_image
+
+    msgs = Image.retry_failed_gps_strips(dry_run: true, min_id: img.id,
+                                         limit: 0)
+
+    assert_equal(1, msgs.size)
+    assert_match(%r{capped at 0/\d+; the rest run on later nights},
+                 msgs.first)
+  end
+
   def stub_status(success)
     status = Object.new
     status.define_singleton_method(:success?) { success }
     status
+  end
+
+  # A transferred, unstripped image attached to a gps_hidden observation
+  # -- the shape retry_failed_gps_strips sweeps for.
+  def unstripped_hidden_image
+    img = images(:in_situ_image)
+    img.observations.first.update_columns(gps_hidden: true)
+    img.update_columns(gps_stripped: false, transferred: true)
+    img
   end
 
   # dHash is computed from the small local rendition — never the full-size
