@@ -66,8 +66,21 @@ module Views::Controllers::Images
       )
 
       div(class: "mb-3 text-center") do
+        render_field_slip_extract_link
         Button(type: :post, name: :field_slip_extract_button.l,
                target: image_field_slip_extract_path(@image.id))
+      end
+    end
+
+    # The Read button always re-reads, so an existing read needs its
+    # own way back to the review/status page.
+    def render_field_slip_extract_link
+      extract = ::FieldSlipExtract.find_by(image_id: @image.id)
+      return unless extract
+
+      p(class: "mb-2") do
+        Link(type: :get, name: extract.state_label,
+             target: edit_image_field_slip_extract_path(@image.id))
       end
     end
 

@@ -40,18 +40,8 @@ module Views::Controllers::Observations::FieldSlipScans
         Button(type: :post, name: :field_slip_extract_button.l,
                target: image_field_slip_extract_path(image.id))
       else
-        Link(type: :get, name: state_label(extract),
+        Link(type: :get, name: extract.state_label,
              target: edit_image_field_slip_extract_path(image.id))
-      end
-    end
-
-    def state_label(extract)
-      if extract.complete?
-        :field_slip_scan_review.l
-      elsif extract.failed?
-        :field_slip_scan_failed.l
-      else
-        :field_slip_scan_reading.l
       end
     end
 

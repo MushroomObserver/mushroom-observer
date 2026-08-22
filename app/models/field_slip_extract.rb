@@ -86,6 +86,17 @@ class FieldSlipExtract < AbstractModel
   def failed? = status == "failed"
   def complete? = status == "complete"
 
+  # Label for a link to this read's review/status page.
+  def state_label
+    if complete?
+      :field_slip_scan_review.l
+    elsif failed?
+      :field_slip_scan_failed.l
+    else
+      :field_slip_scan_reading.l
+    end
+  end
+
   # What went wrong, for the review page's failed state.
   def error = data.to_h["error"]
 

@@ -73,6 +73,17 @@ class FieldSlipExtractTest < UnitTestCase
     assert_not(extract.pending?)
   end
 
+  def test_state_label_follows_status
+    started = FieldSlipExtract.start!(image: @image, user: rolf)
+    assert_equal(:field_slip_scan_reading.l, started.state_label)
+
+    failed = FieldSlipExtract.fail!(image: @image, user: rolf, error: "x")
+    assert_equal(:field_slip_scan_failed.l, failed.state_label)
+
+    assert_equal(:field_slip_scan_review.l,
+                 record(fields: { "Collector" => "A" }).state_label)
+  end
+
   def test_start_marks_pending_and_record_completes_it
     started = FieldSlipExtract.start!(image: @image, user: rolf)
 
