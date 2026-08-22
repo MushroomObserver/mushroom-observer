@@ -147,7 +147,7 @@ module Views::Controllers::InatImports
         create_skeletons: create_skeletons
       )
       render(Form.new(model, super_importer: super_importer,
-                             local: true))
+                             turbo: false))
     end
   end
 end

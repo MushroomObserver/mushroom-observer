@@ -64,9 +64,18 @@ module Account
 
     def login_unverified(user)
       @unverified_user = user
+      render_unverified_view_invalid
+    end
+
+    def render_unverified_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Verifications::Reverify.new(
                unverified_user: @unverified_user
-             ))
+             ), status: status, **render_opts)
+    end
+
+    def render_unverified_view_invalid(**)
+      render_unverified_view(**)
+      self.status = :unprocessable_content
     end
   end
 end

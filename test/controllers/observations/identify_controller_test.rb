@@ -21,6 +21,7 @@ module Observations
       assert_no_flash
       assert_select(".matrix-box", obs_count)
       assert_response(:success)
+      assert_select("form#identify_filter[data-turbo='true']")
 
       # CLADE
       # make a query, and test that the query results match obs scope

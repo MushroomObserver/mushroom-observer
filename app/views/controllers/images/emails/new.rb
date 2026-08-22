@@ -15,7 +15,7 @@ module Views::Controllers::Images
                  image: @image,
                  user: current_user,
                  message: @message,
-                 local: false
+                 turbo: true
                ))
       end
     end

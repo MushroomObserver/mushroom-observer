@@ -79,6 +79,47 @@ class InatImportTest < ActiveSupport::TestCase
     assert_equal(0, inat_imports(:lone_wolf_import).estimated_remaining_time)
   end
 
+  def test_total_expected_time_capped_when_over_cap
+    import = inat_imports(:roy_inat_import)
+    import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE * import.initial_avg_import_seconds,
+      import.total_expected_time,
+      "Expected time should reflect the capped target, not the raw " \
+      "(uncapped) total_importables"
+    )
+  end
+
+  def test_estimated_remaining_time_before_any_imported_capped_when_over_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing",
+                   total_importables: InatImport::MAX_IMPORTABLE + 50,
+                   imported_count: 0, started_at: Time.zone.now,
+                   ended_at: nil)
+
+    assert_equal(
+      import.total_expected_time, import.estimated_remaining_time,
+      "Before any obs imported, fall back to the up-front (capped) estimate"
+    )
+  end
+
+  def test_extrapolated_remaining_time_uses_capped_total
+    import = inat_imports(:rolf_inat_import)
+    import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50,
+                   imported_count: 5)
+    import.define_singleton_method(:elapsed_time) { 10.0 }
+
+    remaining = InatImport::MAX_IMPORTABLE - 5
+    expected = (remaining * 10.0 / 5).round
+
+    assert_equal(
+      expected, import.send(:extrapolated_remaining_time),
+      "Extrapolation should use the capped total, not the raw " \
+      "(uncapped) total_importables"
+    )
+  end
+
   def test_adequate_constraints
     assert(
       inat_imports(:rolf_inat_import).adequate_constraints?,
@@ -321,5 +362,63 @@ class InatImportTest < ActiveSupport::TestCase
     import.update_columns(imported_count: nil)
 
     assert_not(import.reached_import_cap?)
+  end
+
+  def test_excess_over_cap_zero_below_cap
+    assert_equal(
+      0, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE - 1),
+      "Count below MAX_IMPORTABLE should have no excess"
+    )
+  end
+
+  def test_excess_over_cap_zero_at_cap
+    assert_equal(
+      0, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE),
+      "Count exactly at MAX_IMPORTABLE should have no excess"
+    )
+  end
+
+  def test_excess_over_cap_positive_above_cap
+    assert_equal(
+      1, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE + 1),
+      "Count 1 above MAX_IMPORTABLE should have excess of 1"
+    )
+  end
+
+  def test_excess_over_cap_zero_when_nil
+    assert_equal(
+      0, InatImport.excess_over_cap(nil),
+      "Nil count should have no excess"
+    )
+  end
+
+  def test_capped_total_importables_below_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: InatImport::MAX_IMPORTABLE - 1)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE - 1, import.capped_total_importables,
+      "Total below MAX_IMPORTABLE should be unchanged"
+    )
+  end
+
+  def test_capped_total_importables_above_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: InatImport::MAX_IMPORTABLE + 50)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE, import.capped_total_importables,
+      "Total above MAX_IMPORTABLE should be capped"
+    )
+  end
+
+  def test_capped_total_importables_zero_when_nil
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: nil)
+
+    assert_equal(
+      0, import.capped_total_importables,
+      "Nil total_importables should cap to zero"
+    )
   end
 end

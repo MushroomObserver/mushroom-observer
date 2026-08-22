@@ -965,6 +965,48 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       find { |path| File.exist?(path) }
   end
 
+  # Ids below this have their originals only in the GCS archive bucket,
+  # not on the images server, so script/strip_exif cannot reach them.
+  GPS_STRIP_RETRY_MIN_ID = 1_600_000
+
+  # Nightly retry of GPS strips still pending on images attached to a
+  # gps_hidden observation. A failed strip only flashes an error at the
+  # submitting user (see strip_gps! callers), so without this sweep it
+  # is not retried and the original keeps its GPS. Yields a message per
+  # still-failing image so the caller can alert. The per-run cap keeps
+  # a pathological backlog from turning the nightly job into thousands
+  # of ssh execs; the remainder is reported, not silently dropped.
+  def self.retry_failed_gps_strips(dry_run: false,
+                                   min_id: GPS_STRIP_RETRY_MIN_ID,
+                                   limit: 200)
+    scope = joins(observation_images: :observation).
+            where(observations: { gps_hidden: true }).
+            where(gps_stripped: false).
+            where(id: min_id..).
+            distinct
+    total = scope.count
+    msgs = scope.order(:id).limit(limit).map do |img|
+      retry_gps_strip(img, dry_run) { |failure| yield(failure) if block_given? }
+    end
+    if total > limit
+      msgs << "GPS strip retries capped at #{limit}/#{total}; " \
+              "the rest run on later nights"
+    end
+    msgs
+  end
+
+  def self.retry_gps_strip(img, dry_run)
+    return "Image ##{img.id}: would retry GPS strip" if dry_run
+
+    error = img.strip_gps!
+    return "Image ##{img.id}: GPS strip retried" unless error
+
+    failure = "Image ##{img.id}: GPS strip retry failed - #{error}"
+    yield(failure)
+    failure
+  end
+  private_class_method :retry_gps_strip
+
   # Attempt to strip GPS data from original image. Returns error message as
   # string if it fails.
   #

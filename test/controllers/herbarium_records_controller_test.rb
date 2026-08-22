@@ -284,7 +284,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     params = {
       observation_id: obs.id,
-      herbarium_record: { herbarium_name: "", accession_number: "" }
+      herbarium_record: { herbarium_name: "", accession_number: "",
+                          modal: "true" }
     }
 
     assert_no_difference("HerbariumRecord.count") do
@@ -327,8 +328,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash(:create_herbarium_record_already_used)
     assert_response(:redirect)
 
-    # Do the same via Turbo
-    post(:create, params:, format: :turbo_stream)
+    # Do the same via Turbo (modal)
+    post(:create,
+         params: params.deep_merge(herbarium_record: { modal: "true" }),
+         format: :turbo_stream)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_flash(:create_herbarium_record_already_used)
     assert_select("turbo-stream[action='update'][target$='_flash']")
@@ -451,7 +454,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_update_herbarium_record_turbo
     herbarium_record_setup => { params:, nybg_rec:, nybg_user:, rolf_herb: }
 
-    post(:update, params:, format: :turbo_stream)
+    post(:update,
+         params: params.deep_merge(herbarium_record: { modal: "true" }),
+         format: :turbo_stream)
 
     # _section_update.erb deleted; controllers now render two
     # turbo_stream actions inline (replace + page_flash update).
@@ -467,8 +472,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(action: :edit)
     assert_flash(:create_herbarium_record_missing_herbarium_name)
 
-    # Test turbo shows flash
-    post(:update, params: { id: nybg.id }, format: :turbo_stream)
+    # Test turbo (modal) shows flash
+    post(:update,
+         params: { id: nybg.id, herbarium_record: { modal: "true" } },
+         format: :turbo_stream)
     assert_flash(:create_herbarium_record_missing_herbarium_name)
     assert_select("turbo-stream[action='replace'][target$='_form']")
   end
@@ -481,8 +488,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(controller: "/observations", action: :show, id: obs.id)
     assert_flash(:permission_denied)
 
-    # Test turbo shows flash
-    post(:update, params: { id: nybg.id }, format: :turbo_stream)
+    # Test turbo (modal) shows flash
+    post(:update,
+         params: { id: nybg.id, herbarium_record: { modal: "true" } },
+         format: :turbo_stream)
     assert_flash(:permission_denied)
     assert_select("turbo-stream[action='update'][target$='_flash']")
   end

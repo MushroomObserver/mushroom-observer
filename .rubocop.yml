@@ -17,12 +17,16 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
+  - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
+  - ./lib/rubocop/cop/mo/no_render_phlex_method_name
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
   - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
+  - ./lib/rubocop/cop/mo/status_kwarg_outside_invalid_method
   - ./lib/rubocop/cop/mo/unguarded_params_to_prop
 
 AllCops:
@@ -100,6 +104,34 @@ MO/NoActiveRecordRelationProp:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
+MO/NoHandRolledFormTag:
+  Description: >-
+    Phlex views/components must not call the bare form(...) tag helper
+    directly -- use Components::ApplicationForm (Superform) instead --
+    see lib/rubocop/cop/mo/no_hand_rolled_form_tag.rb and issue #5100.
+    Every legitimate raw form(...) call site is inline-disabled at the
+    call site itself, not file-excluded here -- a file-level Exclude
+    would give the whole file blanket immunity to any FUTURE raw
+    form(...) call added anywhere else in it, not just the one
+    reviewed site.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+
+MO/NoHandRolledMethodField:
+  Description: >-
+    Superform-based forms must not hand-roll a `_method` hidden field
+    via `hidden_field("_method", ...)` -- Superform already emits one,
+    driven by `persisted?`/an explicit `method:` on the constructor.
+    A second one produces two `_method` hiddens, and turbo-rails
+    silently strips the override rather than picking either -- see
+    lib/rubocop/cop/mo/no_hand_rolled_method_field.rb and #5088.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+
 MO/NoResolvedErrorsAddType:
   Description: >-
     errors.add's type argument must be a bare tag symbol, resolved
@@ -170,6 +202,18 @@ MO/NoRawLinkOrButtonTo:
     # Genuinely a different primitive, not a bypass of Button.
     - "app/components/id_badge.rb"
 
+MO/NoRenderPhlexMethodName:
+  Description: >-
+    A controller render-dispatch method named render_phlex_* -- the
+    whole app is Phlex now, so the qualifier carries no information.
+    Use render_<action>_view instead (render_new_view,
+    render_edit_view, render_show_view, ...) -- see
+    lib/rubocop/cop/mo/no_render_phlex_method_name.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+
 MO/PreferKitSyntax:
   Description: >-
     Phlex views/components should call Foo(...) (Kit syntax) rather
@@ -199,6 +243,18 @@ MO/SelfStatusOutsideInvalidMethod:
     hand-rolled anti-pattern this sweep exists to prevent -- fold it
     into a *_invalid method instead. See
     lib/rubocop/cop/mo/self_status_outside_invalid_method.rb and
+    .claude/rules/turbo_submit_forms.md (issue #5052).
+  Enabled: true
+  Include:
+    - "app/controllers/**/*.rb"
+
+MO/StatusKwargOutsideInvalidMethod:
+  Description: >-
+    status: :unprocessable_content passed as a kwarg outside a
+    *_invalid-named method is the same hand-rolled anti-pattern
+    MO/SelfStatusOutsideInvalidMethod bans for `self.status = ...` --
+    fold it into a *_invalid method instead. See
+    lib/rubocop/cop/mo/status_kwarg_outside_invalid_method.rb and
     .claude/rules/turbo_submit_forms.md (issue #5052).
   Enabled: true
   Include:

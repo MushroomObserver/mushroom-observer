@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 # Regression coverage for #5066: submitting the New iNat Import form
-# (Turbo-submitted, local: false) must land on the Confirm page, not
+# (Turbo-submitted, turbo: true) must land on the Confirm page, not
 # hang. confirm_import's success render used to be a plain 200 at the
 # same URL, which Turbo Drive requires either a redirect or a non-2xx
 # status for -- the page silently hung with no visible error (submit

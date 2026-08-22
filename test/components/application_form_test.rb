@@ -76,21 +76,53 @@ class ApplicationFormTest < ComponentTestCase
     assert_not_includes(form, "disabled")
   end
 
-  # Turbo stream form tests (local: false)
+  # Turbo stream form tests (turbo: true)
   def test_turbo_stream_form_has_data_turbo_attribute
-    form = render_form(local: false) do
+    form = render_form(turbo: true) do
       text_field(:name, label: "Name")
     end
 
     assert_html(form, "form[data-turbo='true']")
   end
 
-  def test_local_form_does_not_have_data_turbo_attribute
-    form = render_form(local: true) do
+  def test_local_form_has_data_turbo_false_attribute
+    form = render_form(turbo: false) do
       text_field(:name, label: "Name")
     end
 
-    assert_no_html(form, "form[data-turbo]")
+    assert_html(form, "form[data-turbo='false']")
+  end
+
+  # No `_method` hidden on a plain POST form. Superform emits one
+  # unconditionally, and a stray `_method=post` turns a Turbo PATCH
+  # submission into a bare POST when a second `_method` joins it --
+  # turbo-rails reads only the first, then strips them all (this
+  # looped the field-slip review page back onto itself).
+  def test_post_form_emits_no_method_override_field
+    form = ApplicationFormFieldTestHelpers::TestFormClass.new(
+      CollectionNumber.new, action: "/test_form_path"
+    )
+    form.field_block = proc { text_field(:name, label: "Name") }
+    html = render(form)
+
+    assert_no_html(html, "input[name='_method']")
+  end
+
+  # Non-POST forms still get their override field, exactly once:
+  # inferred from a persisted model, or forced with `method:`.
+  def test_non_post_form_emits_single_method_override_field
+    persisted = render_form { text_field(:name, label: "Name") }
+
+    assert_html(persisted, "input[name='_method'][value='patch']",
+                count: 1)
+
+    forced = ApplicationFormFieldTestHelpers::TestFormClass.new(
+      CollectionNumber.new, action: "/test_form_path", method: :patch
+    )
+    forced.field_block = proc { text_field(:name, label: "Name") }
+    html = render(forced)
+
+    assert_html(html, "input[name='_method'][value='patch']", count: 1)
   end
 
   # `between_class` (FieldWithHelp) mirrors ERB:

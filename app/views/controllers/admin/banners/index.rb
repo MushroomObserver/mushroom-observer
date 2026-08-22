@@ -7,7 +7,7 @@ module Views::Controllers::Admin::Banners
 
     def view_template
       h1 { :change_banner_title.t }
-      render(Form.new(@banner, local: false))
+      render(Form.new(@banner, turbo: true))
     end
   end
 end

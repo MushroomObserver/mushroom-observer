@@ -32,6 +32,7 @@ class ApplicationController < ActionController::Base
   include FlashNotices
   include NameValidation
   include Queries
+  include QueryParamAliases
   include ControllerLabels
   include Indexes
   include SectionUpdater
@@ -326,6 +327,9 @@ class ApplicationController < ActionController::Base
     tab = controller_name
     # Checklist page with location_id is really a locations tab
     tab = "locations" if tab == "checklists" && params.include?("location_id")
+    # A species-list checklist is really an observation-lists tab
+    tab = "species_lists" if tab == "checklists" &&
+                             params.include?("species_list_id")
     tab
   end
   helper_method :active_project_tab

@@ -34,10 +34,18 @@ module Views::Controllers::Observations::Identify
 
     private
 
+    # form_action calls identify_observations_path, a Rails route
+    # helper, which Phlex-Rails forbids from `initialize`
+    # (HelpersCalledBeforeRenderError) -- only reachable once
+    # rendering has started, which means the whole tag has to be
+    # built here in form_tag, not passed as a constructor kwarg the
+    # base class's own form_tag could use.
+    # rubocop:disable MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: form_action, method: :get,
            **form_attributes, &block)
     end
+    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       {
@@ -47,8 +55,13 @@ module Views::Controllers::Observations::Identify
         # its `#search_nav` container.
         class: class_names("flex-bar flex-grow-1",
                            Components::Navbar::FORM_CLASS, "px-0 gap-2"),
-        data: { controller: initial_controller,
-                type: selected }
+        # Merge in @attributes[:data] (set by ApplicationForm's
+        # around_template -- carries the data-turbo="true" key when
+        # turbo: true) rather than replacing it outright, or the
+        # Turbo Drive opt-in silently has no effect on this form.
+        data: (@attributes[:data] || {}).merge(
+          controller: initial_controller, type: selected
+        )
       }
     end
 

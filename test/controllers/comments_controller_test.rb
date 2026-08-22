@@ -366,7 +366,7 @@ class CommentsControllerTest < FunctionalTestCase
     # `reload_form` turbo_stream branch → `reload_modal_form`.
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id, type: "Observation",
-               comment: { summary: "", comment: "Body" } }
+               comment: { summary: "", comment: "Body", modal: "true" } }
     login
     post(:create, params: params, format: :turbo_stream)
     assert_response(:success)
@@ -379,7 +379,7 @@ class CommentsControllerTest < FunctionalTestCase
     # side -- symmetric with the create case above.
     comment = comments(:minimal_unknown_obs_comment_1)
     params = { id: comment.id,
-               comment: { summary: "", comment: "Body" } }
+               comment: { summary: "", comment: "Body", modal: "true" } }
     login("rolf")
     put(:update, params: params, format: :turbo_stream)
     assert_response(:success)
@@ -391,7 +391,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_create_comment_with_invalid_params_re_renders_form
     # `reload_form` HTML branch: missing summary fails save and
-    # falls through to `render_phlex_new`.
+    # falls through to `render_new_view`.
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id, type: "Observation",
                comment: { summary: "", comment: "Body" } }
@@ -440,7 +440,7 @@ class CommentsControllerTest < FunctionalTestCase
     params = { target: obs.id,
                type: "Observation",
                comment: { summary: "Turbo Test",
-                          comment: "Some text." } }
+                          comment: "Some text.", modal: "true" } }
     login
     post(:create, params: params, as: :turbo_stream)
     assert_response(:success)
@@ -466,7 +466,7 @@ class CommentsControllerTest < FunctionalTestCase
     params = { target: obs.id,
                type: "Observation",
                comment: { summary: "Turbo Prepend Test",
-                          comment: "Some text." } }
+                          comment: "Some text.", modal: "true" } }
     login
     post(:create, params: params, as: :turbo_stream)
     assert_response(:success)
@@ -492,7 +492,7 @@ class CommentsControllerTest < FunctionalTestCase
     login_for(comment)
     params = { id: comment.id,
                comment: { summary: "Updated Summary",
-                          comment: "Updated body." } }
+                          comment: "Updated body.", modal: "true" } }
     put(:update, params: params, as: :turbo_stream)
     assert_response(:success)
     target_id = "modal_comment_#{comment.id}"
@@ -509,7 +509,7 @@ class CommentsControllerTest < FunctionalTestCase
     login_for(comment)
     params = { id: comment.id,
                comment: { summary: "Updated Summary",
-                          comment: "Updated body." } }
+                          comment: "Updated body.", modal: "true" } }
     put(:update, params: params, as: :turbo_stream)
     assert_response(:success)
 

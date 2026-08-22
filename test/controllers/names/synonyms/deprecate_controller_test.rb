@@ -87,6 +87,8 @@ module Names::Synonyms
       post(:create, params: params)
       assert_select("#name_messages")
       # Fail since name can't be disambiguated
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
 
       assert_not(old_name.reload.deprecated)
       assert_equal(old_past_name_count, old_name.versions.length)
@@ -156,6 +158,7 @@ module Names::Synonyms
       post(:create, params: params)
       assert_select("#name_messages")
       # Fail since new name is not approved
+      assert_unprocessable
 
       assert_not(old_name.reload.deprecated)
       assert_equal(old_past_name_count, old_name.versions.length)
@@ -212,6 +215,7 @@ module Names::Synonyms
       login("rolf")
       post(:create, params: params)
       assert_flash_error(:runtime_name_deprecate_must_choose)
+      assert_unprocessable
 
       # Name should remain unchanged
       assert_not(old_name.reload.deprecated)

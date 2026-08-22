@@ -289,6 +289,8 @@ class Query
   include Query::Modules::Initialization
   include Query::Modules::Results
   include Query::Modules::Sequence
+  include Query::Modules::Seek
+  include Query::Modules::WindowCache
   include Query::Modules::Validation
 
   attr_writer :record
@@ -304,8 +306,10 @@ class Query
 
   # NOTE: Declare query subclass attributes with `query_attr`, a custom MO
   # method defined by monkey-patching `Class` in app/extensions/class.rb.
-  # attribute `:order_by` is inherited by all subclasses, necessary for paging.
-  query_attr(:order_by, :string)
+  # attribute `:order_by` is inherited by all subclasses, necessary for
+  # paging. `param_alias: :by` makes the legacy `?by=` URL param a passthrough
+  # alias for `order_by`, inherited by every subclass for free.
+  query_attr(:order_by, :string, param_alias: :by)
 
   validates_with Query::Validator
 
@@ -318,6 +322,7 @@ class Query
   # instance, rather than calling `Query::Subclass.new` directly.
   def self.create_query(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
+    params = klass.resolve_param_aliases(params)
     # Initialize an instance, ignoring undeclared params:
     query = klass.new(params.slice(*klass.attribute_names))
     # Initialize `params`, where query stores the active `attributes`.
@@ -349,6 +354,79 @@ class Query
     attribute_types.key?(key)
   end
   delegate :has_attribute?, to: :class
+
+  # Maps each declared `param_alias:` name to its target query_attr, e.g.
+  # `{ project: :projects, by: :order_by }`. See `query_attr` in
+  # app/extensions/class.rb.
+  def self.param_aliases
+    attribute_types.each_with_object({}) do |(attr, type), map|
+      map[type.param_alias] = attr if type.param_alias
+    end
+  end
+  delegate :param_aliases, to: :class
+
+  # Every top-level URL param name this Query subclass recognizes -- both
+  # its own query_attr names and their param_alias names. A plain name
+  # list for introspection -- not usable as a `params.permit(...)`
+  # filter list for Array/Hash-shaped attrs (bare symbols only permit
+  # scalars). See `permit_filters` for that.
+  def self.recognized_params
+    (attribute_names + param_aliases.keys).uniq
+  end
+  delegate :recognized_params, to: :class
+
+  # The `params.permit(*filters)`-compatible filter list for this Query
+  # subclass's recognized_params -- replaces `index_active_params`'s
+  # allowlisting role (see
+  # ApplicationController::QueryParamAliases#create_query_from_url_params).
+  # A scalar attr (or param_alias) permits as a bare symbol; an
+  # Array-typed attr permits via `attr: []`; a Hash-typed attr --
+  # including a subquery hash like `location_query: { subquery: :Location }`
+  # -- permits via `attr: {}`, Rails' "allow this key with any nested
+  # content" filter. Validating what's inside an Array/Hash value is
+  # Query's own job (`clean_and_validate_params`), not strong params' --
+  # this only gates which top-level keys reach `create_query`.
+  def self.permit_filters
+    containers = {}
+    scalars = []
+    attribute_types.each do |attr, type|
+      case type.accepts
+      when Array then containers[attr] = []
+      when Hash then containers[attr] = {}
+      else scalars << attr
+      end
+    end
+    scalars + param_aliases.keys + [containers]
+  end
+  delegate :permit_filters, to: :class
+
+  # Resolves any `param_alias:`-registered param key present in `params`
+  # (e.g. `project: 123`, the URL shortcut) into its target query_attr
+  # (`projects: [123]`) -- wrapping the value in an Array when the target
+  # attr itself accepts an Array. The alias wins over an already-present
+  # value under the target attr name: a singular alias represents a more
+  # specific, more recently-expressed choice (e.g. a "sort by date" link
+  # clicked while a broader saved query already carries its own
+  # `order_by`), so it overwrites rather than yields. Pure param-shape
+  # translation: does not verify a record-backed value exists -- see
+  # ApplicationController::QueryParamAliases#create_query_from_url_params,
+  # which needs controller/flash context this class method doesn't have.
+  def self.resolve_param_aliases(params)
+    aliases = param_aliases
+    return params if aliases.empty?
+
+    params = params.dup
+    aliases.each do |alias_key, attr|
+      next unless params.key?(alias_key)
+
+      value = params.delete(alias_key)
+      accepts = attribute_types[attr].accepts
+      params[attr] =
+        accepts.is_a?(Array) && !value.is_a?(Array) ? [value] : value
+    end
+    params
+  end
+  delegate :resolve_param_aliases, to: :class
 
   # :id_in_set must be moved to the last position so it can reorder results.
   def self.scope_parameters
@@ -397,15 +475,49 @@ class Query
     self.class.current_or_related_query(target, model.name.to_sym, self)
   end
 
-  # Defined in each subclass. Default order when `order_by` param not passed.
+  # Default order when `order_by` param not passed. A query_attr's own
+  # `default_order:` (declared via `query_attr`) wins when that attr is
+  # present in `params`; otherwise falls back to the class-wide
+  # `self.class.default_order`, defined in each subclass.
   def default_order
-    self.class.default_order || :id
+    attr_default_order || self.class.default_order || :id
   end
 
   # Returns a hash describing the query instance.
   # This gets encoded as the URL :q param for indexes etc.
   def q_param
     { model: model.name.to_sym, **params }
+  end
+
+  # Merges an already-resolved `q` param value into a path's
+  # existing query string (preserving other params, e.g. `flow=next`).
+  # A plain utility, not tied to any Query instance -- shared by two
+  # callers that source the value differently:
+  # `ApplicationController::Queries#add_q_param` resolves
+  # `q_param_value` from ambient session/request state before calling
+  # this; `Tab::Base#with_q_param` has no such ambient state (a Tab is
+  # a plain PORO, not a controller/view), so its callers resolve the
+  # value themselves and pass it into the Tab's constructor instead.
+  #
+  # `q_param_value` can be a String (the alphabetized-id form --
+  # `?q=ABCDE`) or a Hash (the model+params form `Query#q_param`
+  # itself returns -- `?q[model]=Observation&q[locations][]=1`). Uses
+  # `Hash#to_query`, not `Rack::Utils.build_query` -- Rack stringifies
+  # a nested Hash value as a literal Ruby `inspect` rep, while
+  # `to_query` recurses correctly into nested hashes and arrays.
+  # Caught by the related_records integration tests exercising
+  # `Tab::Location::ObservationsAt`: a newly-created query's `q_param`
+  # is a Hash, and the resulting URL was an unparseable literal Ruby
+  # Hash rep encoded with `+` for whitespace before this used
+  # `to_query`.
+  def self.merge_q_param_into_url(path, q_param_value)
+    return path if q_param_value.blank?
+
+    uri = URI.parse(path)
+    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
+    parsed["q"] = q_param_value
+    uri.query = parsed.to_query
+    uri.to_s
   end
 
   # Serialize the query params, adding the model, for saving to a QueryRecord.
@@ -443,5 +555,23 @@ class Query
 
   def increment_access_count
     record.access_count += 1
+  end
+
+  private
+
+  # The first declared attr whose `default_order:` applies -- present in
+  # `params` and has its own `default_order:` set via `query_attr`. nil if
+  # none match, so `default_order` falls back to the class-wide default.
+  def attr_default_order
+    self.class.attribute_types.each do |attr, type|
+      next unless type.default_order
+      # `.nil?`, not `.blank?` -- `false.blank?` is true in Rails, and
+      # a boolean attr explicitly filtered to `false` is still present
+      # and active, not absent.
+      next if params[attr].nil?
+
+      return type.default_order
+    end
+    nil
   end
 end

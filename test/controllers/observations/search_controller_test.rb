@@ -252,6 +252,41 @@ module Observations
              "clear_form? should result in a blank query")
     end
 
+    # A comma-separated pair of dates is a range; the filter must reach
+    # the query (the dash-only parser used to return nil and the search
+    # silently ran without the date).
+    def test_create_observations_search_with_comma_date_range
+      login
+      params = {
+        region: "Colorado, USA",
+        date: "2026-08-12,2026-08-16"
+      }
+      post(:create, params: { query_observations: params })
+
+      validated_params = {
+        region: ["Colorado, USA"],
+        date: %w[2026-08-12 2026-08-16]
+      }
+      assert_redirected_to(controller: "/observations", action: :index,
+                           params: {
+                             q: { model: :Observation, **validated_params }
+                           })
+    end
+
+    # A date the parser can't read must fail the search with an error,
+    # never run it with the filter quietly gone.
+    def test_create_observations_search_with_unparseable_date
+      login
+      params = {
+        region: "Colorado, USA",
+        date: "next Tuesday"
+      }
+      post(:create, params: { query_observations: params })
+
+      assert_flash_error
+      assert_redirected_to(action: :new)
+    end
+
     def test_create_observations_search_with_has_field_slips
       login
       params = {

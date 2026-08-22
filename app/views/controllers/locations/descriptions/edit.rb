@@ -24,7 +24,7 @@ module Views::Controllers::Locations::Descriptions
                                merge: @merge, old_desc_id: @old_desc_id,
                                delete_after: @delete_after
                              },
-                             local: false
+                             turbo: true
              ))
     end
   end

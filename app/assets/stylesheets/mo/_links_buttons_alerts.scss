@@ -64,6 +64,205 @@
   color: black;
 }
 
+// `Components::Button::CRUDBase`'s `<form class="button_to">` wrapper
+// -- sitewide base styling (inline flow, submit-button reset to look
+// like a plain link) for every `type: :put/:post/:delete` button,
+// regardless of whether it sits in a `.btn-group`. The `.btn-group`
+// supplement below is the exception to this inline-flow default.
+form.button_to {
+  display: inline;
+  margin: 0;
+  padding: 0;
+
+  input[type=submit]:not(.btn),
+  button[type=submit]:not(.btn) {
+    margin: 0;
+    padding: 0;
+    // -webkit-appearance: caret;
+    background: none;
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    cursor: pointer;
+    // Note: Use a text-info type utility class to color the button text
+
+    &:not(.text-danger) {
+      color: $link-color;
+
+      &:hover {
+        color: $link-hover-color;
+      }
+    }
+  }
+
+  input[type=submit]:hover {
+    text-decoration: underline;
+  }
+}
+
+// A `type: :put/:post/:delete` button (Components::Button::CRUDBase)
+// renders as `<form class="button_to">` wrapping the
+// `<button class="btn">` -- a form is required to spoof a non-GET/POST
+// method. Bootstrap's own `.btn-group` CSS only reaches a `.btn` that's
+// a DIRECT child of `.btn-group`, and only prevents double borders
+// between two siblings that BOTH carry `.btn` directly (`.btn + .btn`)
+// -- neither selector sees through the `<form>` wrapper, so a
+// form-wrapped member of a `.btn-group` gets none of the group's
+// border-radius squaring or margin collapse, and (form.button_to is
+// sitewide `display: inline`, see above) sits at a different height
+// than its `.btn` siblings. This exact class of
+// problem has been worked around ad hoc more than once already
+// (`.vote-btn-group` above, `.project-violations td .button_to`
+// below) -- fixed generally here instead, for every `.btn-group`
+// sitewide, present and future. `.vote-btn-group` (VoteInterface,
+// carrying both `.btn-group` and `.vote-btn-group` on the same
+// element) picks up the border-radius reset below -- harmless there
+// (its members carry no `.btn` class, so there's no radius to square
+// in the first place) -- but its own `> form.button_to, > .image-vote
+// { margin: 0; ... }` (_images.scss) is a MORE specific selector
+// (adds a type selector) than this file's `> *:not(:first-child)`, so
+// it wins regardless of cascade order and keeps its own divider-
+// border spacing rather than the -1px collapse below. Its `display:
+// inline-block` on the same selector is EQUAL specificity to this
+// file's `display: flex`, so that one's decided by import order
+// instead -- `_images.scss` is `@import`ed after this file, so it
+// still wins. Both cases: no explicit override needed here.
+.btn-group {
+  // BS4's own fix for this whole class of problem: flex stretches
+  // every direct child (form-wrapped or not) to the same height,
+  // replacing BS3's float-based layout, which didn't equalize mixed-
+  // content heights on its own.
+  display: inline-flex;
+
+  // The form itself becomes a flex container too, with its one child
+  // (the button) set to fill it -- otherwise `align-items:
+  // stretch` above only grows the (invisible) form's own box, not the
+  // visible button inside it.
+  > form.button_to {
+    display: flex;
+    margin: 0;
+
+    button {
+      flex: 1;
+      // Match `.btn:has(.mo-icon)`'s own centering (_icons.scss) so a
+      // form-wrapped button's content centers the same way a bare
+      // `.btn`'s does once the group stretches it taller than its
+      // own natural content height.
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Content-centering isn't specific to icon-bearing buttons --
+  // `.btn:has(.mo-icon)` (_icons.scss) only centers icon+text pairs,
+  // so a plain-text member (no icon) stretched to match a taller
+  // icon-bearing sibling would otherwise sit at the top of its own
+  // box instead of centered like its neighbor. Apply the same
+  // treatment to every bare `.btn` member regardless of icon.
+  > .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Border-radius squaring / margin collapse, reimplemented keyed on
+  // each member's own position among the group's siblings
+  // (tag-agnostic), not on adjacent-.btn-class matching, so a
+  // form-wrapped member is treated the same as a bare `.btn`.
+  > *:not(:first-child) {
+    margin-left: -1px;
+  }
+
+  > *:not(:first-child):not(:last-child),
+  > form.button_to:not(:first-child):not(:last-child) button {
+    border-radius: 0;
+  }
+
+  > *:first-child:not(:last-child),
+  > form.button_to:first-child:not(:last-child) button {
+    @include border-right-radius(0);
+  }
+
+  > *:last-child:not(:first-child),
+  > form.button_to:last-child:not(:first-child) button {
+    @include border-left-radius(0);
+  }
+}
+
+// BS3's `.input-group` (`_input-groups.scss`) is table/table-cell
+// layout -- `.input-group-addon`/`.input-group-btn`/`.form-control`
+// are each `display: table-cell`, which sizes every cell to the
+// tallest sibling automatically. That breaks down the same way
+// `.btn-group` did above: an icon-bearing `.btn` inside
+// `.input-group-btn` is `display: inline-flex` (`.btn:has(.mo-icon)`,
+// _icons.scss), and flex sizing is intrinsic/content-based -- it
+// doesn't stretch to fill the table-cell around it just because the
+// cell itself is tall enough. That was worked around with a
+// `.input-group-btn .btn:has(.mo-icon) { min-height: ... }` rule
+// scoped only to icon-bearing buttons (removed below in favor of
+// this general fix). Mirrors BS4's own solution
+// (`.input-group { display: flex; align-items: stretch; }`,
+// `.input-group-prepend/-append { display: flex; }`) without
+// adopting BS4's renamed classes -- same approach as the `.btn-group`
+// supplement above, just for `.input-group`.
+//
+// `.navbar-form .input-group` also needs the override explicitly: BS3
+// (`_navbars.scss`, `@media (min-width: 768px)`) sets
+// `display: inline-table` on `.input-group` when it sits inside a
+// `.navbar-form` (the goto-page/letter-jump forms both carry
+// `Components::Navbar::FORM_CLASS`) -- that two-class selector
+// out-specifies a bare `.input-group` rule regardless of import
+// order, and only applies at >=768px, which is why this broke on
+// desktop widths but not on mobile.
+.input-group,
+.navbar-form .input-group {
+  display: flex;
+  align-items: stretch;
+
+  > .form-control {
+    flex: 1 1 auto;
+    // BS3's own `float: left; width: 100%;` (`_input-groups.scss`)
+    // conflicts with flex sizing -- a flex item's width shrinks to
+    // its flex-basis (the `width` value) only when there's room;
+    // `min-width: 0` lets it shrink below its own content's natural
+    // width instead of overflowing the group when a sibling addon
+    // needs space.
+    min-width: 0;
+  }
+
+  > .input-group-addon,
+  > .input-group-btn {
+    // BS3's own `.input-group-addon, .input-group-btn { width: 1%;
+    // ... }` (`_input-groups.scss`) relies on table-cell shrink-to-
+    // content sizing to make "1%" mean "as narrow as the content
+    // allows" -- under flex layout that same 1% is honored as a
+    // literal width, collapsing this box far narrower than its
+    // button/text content, which then overflows the box and visually
+    // sits on top of whatever follows the `.input-group` in the
+    // document. Override back to content-driven sizing.
+    flex: 0 0 auto;
+    width: auto;
+    display: flex;
+    // `stretch` (not `center`) -- a `.btn`-classed child (a plain
+    // <button>/<input type=submit>, or a Link-rendered <a>, e.g. the
+    // pagination goto icon) needs to fill this span's own height
+    // (which the outer `.input-group`'s stretch already sized to
+    // match the sibling `.form-control`), not just center at its own
+    // shorter intrinsic content height -- confirmed empirically: an
+    // <a class="btn"> here sat ~2px short of the input's height with
+    // `center`, flush with `stretch`.
+    align-items: stretch;
+
+    > .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
 // badges
 
 // Used for record id in title. No inherent font-size of its own --
@@ -117,6 +316,14 @@
   }
 }
 
+// The id-badge column of a "table-style" list-group row
+// (Projects::ListItem, SpeciesLists::Listing) -- badge width varies
+// with digit count, so without a floor the title column's left edge
+// drifts row to row.
+.id-badge-col {
+  min-width: 6rem;
+}
+
 // Icon-only inline mod/add links (Components::InlineCRUDLinks'
 // edit/destroy/add links, applied directly to each link/button's own
 // element -- not a wrapper, see Components::InlineLinkBlock). No
@@ -129,10 +336,6 @@
 // baseline (the default) leaves room below it for a descender it
 // doesn't have, which stretches the surrounding line's height and
 // throws off spacing vs. sibling lines with no icon-link on them.
-// The icon glyph and any visible text (e.g. an "Add" label) get the
-// same treatment so they line up with EACH OTHER too, instead of
-// each defaulting to its own baseline (which put visible text below
-// the icon).
 //
 // .mo-icon's `top: 3px` (see _icons.scss) is a relative offset
 // tuned for icons in their usual (untethered) contexts; inside
@@ -158,7 +361,6 @@
     top: 0;
     width: 1em;
     height: 1em;
-    vertical-align: middle;
   }
 }
 

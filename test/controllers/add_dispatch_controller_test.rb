@@ -78,6 +78,51 @@ class AddDispatchControllerTest < FunctionalTestCase
     assert_redirected_to(expected_full_url)
   end
 
+  # A complete code under a digit-leading prefix must pass through
+  # unchanged -- issue #5146: it used to get the prefix prepended
+  # again ("2026-NAMATEST-2026-NAMATEST-1235").
+  def test_new_full_code_with_digit_leading_prefix_passes_through
+    @project.update!(field_slip_prefix: "2026-NAMATEST")
+    field_slip_code = "2026-NAMATEST-1235"
+
+    get(:new, params: {
+          project: @project.id,
+          field_slip: field_slip_code
+        })
+
+    expected_url = "#{MO.http_domain}/qr/#{field_slip_code}"
+    assert_redirected_to("#{expected_url}?project=#{@project.id}")
+  end
+
+  # A digit-leading code entered against a project with no prefix must
+  # not gain a bare leading dash -- issue #5146 ("-2026-NAMA-2345").
+  def test_new_digit_leading_code_without_prefix_passes_through
+    @project.update!(field_slip_prefix: nil)
+    field_slip_code = "2026-NAMA-2345"
+
+    get(:new, params: {
+          project: @project.id,
+          field_slip: field_slip_code
+        })
+
+    expected_url = "#{MO.http_domain}/qr/#{field_slip_code}"
+    assert_redirected_to("#{expected_url}?project=#{@project.id}")
+  end
+
+  # A bare number can't be resolved without a prefix to attach it to.
+  def test_new_numeric_code_with_blank_prefix_warns_and_falls_through
+    @project.update!(field_slip_prefix: nil)
+    field_slip_code = "2345"
+
+    get(:new, params: {
+          project: @project.id,
+          field_slip: field_slip_code
+        })
+
+    assert_redirected_to("#{new_observation_path}?project=#{@project.id}")
+    assert_flash_warning(:bad_dispatch_code, code: field_slip_code)
+  end
+
   # Test with species list
   def test_new_with_species_list_includes_species_list_in_params
     get(:new, params: {

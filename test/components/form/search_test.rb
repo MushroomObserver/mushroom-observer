@@ -23,20 +23,21 @@ class SearchFormTest < ComponentTestCase
     assert_html(html, "form#observations_search_form")
   end
 
-  # When local (on a search page), form should NOT use turbo_stream
-  def test_form_no_turbo_stream_when_local
-    html = render_form(local: true)
+  # No turbo_stream in page context, but still Turbo-submits.
+  def test_form_no_turbo_stream_when_page_context
+    html = render_form(context: :page)
 
     assert_html(html, "form#observations_search_form")
     assert_no_html(html, "form#observations_search_form[data-turbo-stream]")
+    assert_html(html, "form#observations_search_form[data-turbo='true']")
   end
 
-  # When not local (in nav dropdown), form SHOULD use turbo_stream
-  # for future in-place result updates
-  def test_form_uses_turbo_stream_when_not_local
-    html = render_form(local: false)
+  # turbo_stream in dropdown context (nav dropdown), and still Turbo-submits.
+  def test_form_uses_turbo_stream_when_dropdown_context
+    html = render_form(context: :dropdown)
 
     assert_html(html, "form#observations_search_form[data-turbo-stream='true']")
+    assert_html(html, "form#observations_search_form[data-turbo='true']")
   end
 
   def test_renders_panels_for_field_columns
@@ -58,10 +59,10 @@ class SearchFormTest < ComponentTestCase
     assert_html(html, "a.clear-button", text: :clear.ti)
   end
 
-  # When local (on a search page), clear button should NOT use turbo_stream
-  # because #search_nav_form doesn't exist on search pages
-  def test_clear_button_no_turbo_stream_when_local
-    html = render_form(local: true)
+  # In page context (a standalone search page), clear button should NOT
+  # use turbo_stream because #search_nav_form doesn't exist on search pages
+  def test_clear_button_no_turbo_stream_when_page_context
+    html = render_form(context: :page)
 
     assert_html(html, "a.clear-button")
     assert_no_html(html, "a.clear-button[data-turbo-stream]")
@@ -69,16 +70,16 @@ class SearchFormTest < ComponentTestCase
     assert_html(html, "a.clear-button[href*='/search/new?clear=true']")
   end
 
-  # When not local (in nav dropdown), clear button SHOULD use turbo_stream
-  # to update #search_nav_form without full page reload
-  def test_clear_button_uses_turbo_stream_when_not_local
-    html = render_form(local: false)
+  # In dropdown context (nav dropdown), clear button SHOULD use
+  # turbo_stream to update #search_nav_form without full page reload
+  def test_clear_button_uses_turbo_stream_when_dropdown_context
+    html = render_form(context: :dropdown)
 
     assert_html(html, "a.clear-button[data-turbo-stream='true']")
   end
 
-  def test_renders_header_when_not_local
-    html = render_form(local: false)
+  def test_renders_header_when_dropdown_context
+    html = render_form(context: :dropdown)
 
     assert_html(html, ".flex-bar")
     assert_html(html, "body",
@@ -99,8 +100,8 @@ class SearchFormTest < ComponentTestCase
                 "a[data-search-type-target='barToggle'].navbar-link")
   end
 
-  def test_does_not_render_header_when_local
-    html = render_form(local: true)
+  def test_does_not_render_header_when_page_context
+    html = render_form(context: :page)
 
     assert_no_html(html, ".flex-bar")
   end
@@ -111,7 +112,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true
+      context: :page
     )
     html = render(form)
 
@@ -373,7 +374,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true
+      context: :page
     )
     html = render(form)
     doc = Nokogiri::HTML(html)
@@ -430,7 +431,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: search_controller,
-      local: true
+      context: :page
     )
     html = render(form)
     doc = Nokogiri::HTML(html)
@@ -578,7 +579,11 @@ class SearchFormTest < ComponentTestCase
   def test_form_has_length_validator_stimulus_controller
     html = render_form
 
-    assert_html(html, "form[data-controller='search-length-validator']")
+    # `~=` (word-match), not `=` (exact-match) -- ApplicationForm's
+    # own form-feedback controller is also always present,
+    # space-joined alongside search-length-validator.
+    assert_html(html, "form[data-controller~='search-length-validator']")
+    assert_html(html, "form[data-controller~='form-feedback']")
   end
 
   def test_form_has_max_length_value_attribute
@@ -616,11 +621,11 @@ class SearchFormTest < ComponentTestCase
 
   private
 
-  def render_form(local: true)
+  def render_form(context: :page)
     form = Components::Form::Search.new(
       @query,
       search_controller: @search_controller,
-      local: local
+      context: context
     )
     render(form)
   end
@@ -629,7 +634,7 @@ class SearchFormTest < ComponentTestCase
     form = Components::Form::Search.new(
       query,
       search_controller: @search_controller,
-      local: true
+      context: :page
     )
     render(form)
   end

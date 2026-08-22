@@ -24,7 +24,7 @@ module Views::Controllers::Occurrences
                observations: @observations.to_a,
                candidates: @candidates,
                user: @user,
-               local: false
+               turbo: true
              ))
       render_project_modal if @project_gaps&.any?
     end
@@ -42,7 +42,7 @@ module Views::Controllers::Occurrences
                    gaps: @project_gaps,
                    primary: @occurrence.primary_observation,
                    occurrence: @occurrence,
-                   local: false
+                   turbo: true
                  ))
         end
       end

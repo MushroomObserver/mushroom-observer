@@ -7,18 +7,16 @@ module Views::Controllers::Projects::Updates
     prop :observations, _Array(::Observation)
     prop :pagination, ::PaginationData
     prop :request_url, String
-    prop :form_action_url, String
     prop :current_count, Integer
     prop :show_excluded, _Boolean
 
-    # `results:` bundles five values the controller computes together
+    # `results:` bundles four values the controller computes together
     # (see Projects::UpdatesController#build_index_results) -- split
     # them into individual props here so callers still pass one hash.
     def initialize(results:, **)
       super(observations: results[:observations],
             pagination: results[:pagination],
             request_url: results[:request_url],
-            form_action_url: results[:form_action_url],
             current_count: results[:current_count],
             **)
     end
@@ -49,7 +47,9 @@ module Views::Controllers::Projects::Updates
         span(id: "project_updates_count", class: "mr-3") do
           plain(count_label)
         end
-        render_show_excluded_toggle
+        render(ExcludedToggleForm.new(
+                 project: @project, show_excluded: @show_excluded
+               ))
       end
     end
 
@@ -61,23 +61,6 @@ module Views::Controllers::Projects::Updates
       return :project_updates_excluded_count if @show_excluded
 
       :project_updates_count
-    end
-
-    def render_show_excluded_toggle
-      form(
-        action: project_updates_path(project_id: @project.id),
-        method: "get",
-        class: "form-inline mb-0 show-excluded-form",
-        data: { controller: "autosubmit",
-                autosubmit_delay_value: "0" }
-      ) do
-        label(class: "checkbox-inline") do
-          input(type: "checkbox", name: "show_excluded", value: "1",
-                checked: @show_excluded,
-                data: { action: "change->autosubmit#submit" })
-          plain(" #{:project_updates_show_excluded.t}")
-        end
-      end
     end
 
     def render_add_all_button
@@ -97,9 +80,7 @@ module Views::Controllers::Projects::Updates
 
       render(Views::Layouts::Header::IndexPaginationNav.new(
                pagination_data: @pagination,
-               request_url: @request_url,
-               form_action_url: @form_action_url,
-               letter_param: nil
+               request_url: @request_url
              ))
     end
 

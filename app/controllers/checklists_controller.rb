@@ -15,6 +15,10 @@ class ChecklistsController < ApplicationController
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]
+    # Picks up a `project` param (or single-project query) so a
+    # checklist reached from a project-scoped page keeps the project
+    # banner -- same context passing as SpeciesListsController#show.
+    set_project_ivar
 
     @data = if user_id.present?
               user_checklist(user_id)
@@ -28,7 +32,8 @@ class ChecklistsController < ApplicationController
     return unless @data
 
     render(Views::Controllers::Checklists::Show.new(
-             data: @data, context: checklist_context
+             data: @data, context: checklist_context,
+             project_data: @project_checklist
            ))
   end
 
@@ -62,6 +67,9 @@ class ChecklistsController < ApplicationController
   def species_list_checklist(list_id)
     return unless (@species_list = find_or_goto_index(SpeciesList, list_id))
 
+    # Feeds the "Missing Taxa" panel (project taxa absent from the list)
+    # when the checklist carries project context.
+    @project_checklist = Checklist::ForProject.new(@project) if @project
     Checklist::ForSpeciesList.new(@species_list)
   end
 end

@@ -9,7 +9,7 @@ module SpeciesLists
     def new
       @species_list = SpeciesList.find(params[:id])
       init_member_vars_for_create
-      render_new_page
+      render_new_view
     end
 
     def create
@@ -25,7 +25,7 @@ module SpeciesLists
 
     private
 
-    def render_new_page
+    def render_new_view(status: :ok, **render_opts)
       render(
         Views::Controllers::SpeciesLists::WriteIn::New.new(
           species_list: @species_list,
@@ -45,16 +45,18 @@ module SpeciesLists
           member_alt: @member_alt,
           member_is_collection_location: @member_is_collection_location,
           member_specimen: @member_specimen
-        )
+        ),
+        status: status,
+        **render_opts
       )
     end
 
     def init_member_vars_for_create
       @member_vote = Vote.maximum_vote
       @member_notes_parts = @species_list.form_notes_parts(@user)
-      @member_notes = @member_notes_parts.to_h do |part|
-        [part.to_sym, ""]
-      end
+      @member_notes = NotesHash.new(
+        @member_notes_parts.to_h { |part| [part.to_sym, ""] }
+      )
       @member_lat = nil
       @member_lng = nil
       @member_alt = nil
@@ -116,7 +118,7 @@ module SpeciesLists
       # inline). Set them here so the Phlex view's constructor can
       # carry them.
       @member_notes_parts = @species_list.form_notes_parts(@user)
-      render_new_page
+      render_new_view_invalid
     end
 
     def list_without_underscores
@@ -225,14 +227,9 @@ module SpeciesLists
     end
 
     def calculated_member_vars_for_reload(member_params)
-      # cannot leave @member_notes == nil because view expects a hash.
-      # `member_params[:notes]`, when submitted, is a nested
-      # ActionController::Parameters (dynamic "Other"/template-header
-      # keys, not fixed Strong Params attributes) -- matches
-      # ObservationsController::SharedFormMethods#notes_to_sym_and_compact's
-      # conversion for the same shape of field.
-      @member_notes = member_params[:notes]&.to_unsafe_h&.symbolize_keys ||
-                      Observation.no_notes
+      # cannot leave @member_notes == nil because view expects a
+      # NotesHash.
+      @member_notes = NotesHash.from_params(member_params[:notes])
       @member_is_collection_location =
         member_params[:is_collection_location].to_s == "1"
       @member_specimen = member_params[:specimen].to_s == "1"

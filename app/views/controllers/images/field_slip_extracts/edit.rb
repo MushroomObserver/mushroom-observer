@@ -118,7 +118,7 @@ module Views::Controllers::Images::FieldSlipExtracts
                         extract: @extract, observation: @observation,
                         user: @user
                       ),
-                      local: false))
+                      turbo: true))
     end
 
     # Which setup produced these values -- the part that stays useful

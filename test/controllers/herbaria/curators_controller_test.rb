@@ -18,7 +18,8 @@ module Herbaria
 
       login("rolf")
       # simulate user typing raw login (ignoring type-ahead)
-      post(:create, params: { id: nybg.id, add_curator: mary.login })
+      post(:create,
+           params: { id: nybg.id, herbarium_curator: { login: mary.login } })
 
       assert_equal(curator_count + 1, nybg.reload.curators.count)
       assert_redirected_to(herbarium_path(nybg))
@@ -30,7 +31,9 @@ module Herbaria
 
       login("rolf")
       # simulate user picking from type-ahead (which returns unique_text_name)
-      post(:create, params: { id: nybg.id, add_curator: mary.unique_text_name })
+      post(:create,
+           params: { id: nybg.id,
+                     herbarium_curator: { login: mary.unique_text_name } })
 
       assert_equal(curator_count + 1, nybg.reload.curators.count)
       assert_redirected_to(herbarium_path(nybg))
@@ -39,7 +42,9 @@ module Herbaria
     def test_create_no_login
       curator_count = nybg.curators.count
 
-      post(:create, params: { id: nybg.id, add_curator: mary.unique_text_name })
+      post(:create,
+           params: { id: nybg.id,
+                     herbarium_curator: { login: mary.unique_text_name } })
       assert_equal(curator_count, nybg.reload.curators.count)
     end
 
@@ -48,7 +53,9 @@ module Herbaria
       curator_count = nybg.curators.count
 
       login("mary")
-      post(:create, params: { id: nybg.id, add_curator: mary.unique_text_name })
+      post(:create,
+           params: { id: nybg.id,
+                     herbarium_curator: { login: mary.unique_text_name } })
       assert_equal(curator_count, nybg.reload.curators.count)
     end
 
@@ -60,7 +67,9 @@ module Herbaria
         "herbarium.curators.count",
         "Curators should not change when trying to add non-user as curator"
       ) do
-        post(:create, params: { id: herbarium.id, add_curator: "non-user" })
+        post(:create,
+             params: { id: herbarium.id,
+                       herbarium_curator: { login: "non-user" } })
         herbarium.reload
       end
       assert_flash(

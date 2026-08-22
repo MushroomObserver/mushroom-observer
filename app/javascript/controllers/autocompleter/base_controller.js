@@ -1091,14 +1091,16 @@ export default class BaseAutocompleterController extends Controller {
       matches = [];
 
     if (token != '' && primer.length > 1) {
+      // Compile each token's regex once, not once per (row, token) pair --
+      // primer can have up to 5000 rows (server-side limit).
+      const tokenRegexes = tokens.map((t) => this.wordStartRegex(t))
       for (let i = 1; i < primer.length; i++) {
         let s = primer_nm[i]['name'] || '',
-          s2 = ' ' + s + ' ',
           k;
-        for (k = 0; k < tokens.length; k++) {
-          if (s2.indexOf(' ' + tokens[k]) < 0) break;
+        for (k = 0; k < tokenRegexes.length; k++) {
+          if (!tokenRegexes[k].test(s)) break;
         }
-        if (k >= tokens.length) {
+        if (k >= tokenRegexes.length) {
           matches.push(primer[i]);
         }
       }
@@ -1114,6 +1116,20 @@ export default class BaseAutocompleterController extends Controller {
       }
     }
     this.matches = matches;
+  }
+
+  // Builds the word-start regex for one token, for populateUnordered().
+  // Mirrors Autocomplete::PUNCTUATION (app/classes/autocomplete.rb) so
+  // a match right after e.g. "(" -- the login in "Name (login)" --
+  // counts as a word start, not just after a literal space.
+  // The double backslash before x2F etc. is required: this is a JS
+  // string literal, not a regex literal, so it needs its own escaping
+  // before RegExp() parses the result as a hex range -- do not
+  // "simplify" to a single backslash.
+  wordStartRegex(token) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp('(^|[ -\\x2F\\x3A-\\x40\\x5B-\\x60\\x7B-\\x7F])' +
+      escaped)
   }
 
   populateCollapsed() {

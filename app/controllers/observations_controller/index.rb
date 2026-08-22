@@ -34,7 +34,43 @@ class ObservationsController
 
     # Sort options for the index page. Read by `add_sorter` in the
     # view. Each key must resolve to `Observation.order_by_<key>`.
+    # An unfiltered index (browsing the whole table) only offers
+    # plain-column sorts with no join/aggregate -- name/user/
+    # confidence/thumbnail_quality/num_views all cost a join or
+    # aggregate over the full table otherwise.
     def index_sort_options
+      if unfiltered_index_for_sort?
+        unfiltered_index_sort_options
+      else
+        filtered_index_sort_options
+      end
+    end
+
+    private
+
+    # A bookmarked/permalinked unfiltered index can still carry an
+    # `order_by` that isn't in the unfiltered allowlist (e.g.
+    # `q[order_by]=name` with no other params) -- treat that as
+    # filtered for the dropdown too, or `Sorter#toggle_title` can't
+    # find a label for the current sort and the toggle goes blank.
+    def unfiltered_index_for_sort?
+      @query.params.except(:order_by).blank? && current_order_sort_safe?
+    end
+
+    def current_order_sort_safe?
+      order = @query.params[:order_by].to_s.sub(/^reverse_/, "")
+      order.blank? || unfiltered_index_sort_options.map(&:first).include?(order)
+    end
+
+    def unfiltered_index_sort_options
+      [
+        ["rss_log",    :sort_by_activity.l],
+        ["date",       :sort_by_date.l],
+        ["created_at", :sort_by_posted.l]
+      ].freeze
+    end
+
+    def filtered_index_sort_options
       [
         ["rss_log",           :sort_by_activity.l],
         ["date",              :sort_by_date.l],
@@ -46,8 +82,6 @@ class ObservationsController
         ["num_views",         :sort_by_num_views.l]
       ].freeze
     end
-
-    private
 
     # Default on home is :rss_log (:log_updated_at), not :date.
     # Maybe other filters should explicitly specify :date?

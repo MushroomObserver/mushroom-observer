@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_09_175755) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_21_200358) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -48,9 +48,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_09_175755) do
   create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.integer "user_id"
-    t.string "summary", limit: 100
-    t.text "comment"
-    t.string "target_type", limit: 30
+    t.string "summary", limit: 100, collation: "utf8mb4_general_ci"
+    t.text "comment", collation: "utf8mb4_general_ci"
+    t.string "target_type", limit: 30, collation: "utf8mb4_general_ci"
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
     t.index ["target_id", "target_type"], name: "target_index"
@@ -641,12 +641,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_09_175755) do
     t.datetime "reflected_at"
     t.boolean "placeholder", default: false, null: false
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
+    t.index ["created_at", "id"], name: "index_observations_on_created_at_and_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"
     t.index ["location_id"], name: "index_observations_on_location_id"
+    t.index ["log_updated_at", "id"], name: "index_observations_on_log_updated_at_and_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
     t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
     t.index ["reflected_at"], name: "index_observations_on_reflected_at"
+    t.index ["user_id", "created_at"], name: "index_observations_on_user_id_and_created_at"
+    t.index ["when", "id"], name: "index_observations_on_when_and_id"
   end
 
   create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1051,7 +1055,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_09_175755) do
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.text "mailing_address"
     t.integer "layout_count"
     t.boolean "view_owner_id", default: false, null: false

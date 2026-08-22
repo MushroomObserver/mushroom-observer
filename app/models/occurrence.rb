@@ -19,6 +19,7 @@
 class Occurrence < AbstractModel
   include Occurrence::ProjectGaps
   include Occurrence::Logging
+  include Occurrence::SpecimenCache
 
   MAX_OBSERVATIONS = 10
 
@@ -47,25 +48,6 @@ class Occurrence < AbstractModel
   validate :primary_observation_must_belong_to_occurrence, on: :update
   validate :observation_count_within_limits, on: :update
 
-  # Recompute cached has_specimen from associated observations.
-  def recompute_has_specimen!
-    update!(has_specimen: observations.where(specimen: true).exists?)
-  end
-
-  # Nightly safety net: recompute has_specimen on all occurrences.
-  def self.refresh_has_specimen_cache(dry_run: false)
-    msgs = []
-    find_each do |occ|
-      correct = occ.observations.where(specimen: true).exists?
-      next if occ.has_specimen == correct
-
-      msgs << "Occurrence ##{occ.id}: has_specimen " \
-              "#{occ.has_specimen} -> #{correct}"
-      occ.update!(has_specimen: correct) unless dry_run
-    end
-    msgs
-  end
-
   # Recalculate shared consensus across all observations.
   def recalculate_consensus!(user = nil)
     obs = observations.naming_includes.first
@@ -83,14 +65,16 @@ class Occurrence < AbstractModel
   #
   # Display-time only: the members' stored notes are never modified, so
   # each observation keeps its own notes intact on its own show page.
-  # Returns a plain Hash shaped like Observation#notes.
+  # Returns a NotesHash, same as Observation#notes.
   def merged_notes
     primary, siblings = primary_and_ranked_siblings
-    return {} unless primary
+    return NotesHash.new unless primary
 
-    merged_notes_keys(primary, siblings).each_with_object({}) do |key, out|
-      merge_notes_key(out, key, primary, siblings)
-    end
+    NotesHash.new(
+      merged_notes_keys(primary, siblings).each_with_object({}) do |key, out|
+        merge_notes_key(out, key, primary, siblings)
+      end
+    )
   end
 
   # For the primary's EDIT form: per notes key, the sibling values worth
@@ -214,7 +198,11 @@ class Occurrence < AbstractModel
       merged_obs.each do |obs|
         obs.update!(occurrence: keeper)
       end
-      absorbed.reload.destroy!
+      # Observation#cleanup_abandoned_occurrence normally destroys the
+      # emptied occurrence as its last member moves; finish the job if
+      # it survived (e.g. its primary was already dangling, so the
+      # member-departure reassign path did not run).
+      Occurrence.find_by(id: absorbed.id)&.destroy!
       keeper.recompute_has_specimen!
     end
     log_observation_added(merged_obs, user)

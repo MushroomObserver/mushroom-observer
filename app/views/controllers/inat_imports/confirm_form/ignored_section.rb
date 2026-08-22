@@ -22,6 +22,7 @@ module Views::Controllers::InatImports
             render_ignored_row(row[:key], row[:count], row[:url])
           end
           unlicensed_ignored_row if skip_unlicensed_others?
+          render_over_cap_line
         end
         br
       end
@@ -29,9 +30,10 @@ module Views::Controllers::InatImports
       def show_ignored_section?
         ignored_row_data.any? ||
           # Import-others' unlicensed obs, when create_skeletons is off,
-          # are never imported. So they belong here rather than in a
+          # aren't imported. So they belong here rather than in a
           # skeleton/own-import informational-only line (#4828).
-          skip_unlicensed_others?
+          skip_unlicensed_others? ||
+          over_cap_count.positive?
       end
 
       def create_skeletons? = model.create_skeletons == "1"
@@ -88,7 +90,8 @@ module Views::Controllers::InatImports
       def render_ignored_total
         return unless @requested && (@estimate_with_date || @expected)
 
-        total = @requested.to_i - (@estimate_with_date || @expected).to_i
+        total = @requested.to_i - (@estimate_with_date || @expected).to_i +
+                over_cap_count
         b { plain(:inat_import_confirm_ignored_total_caption.l) }
         plain(": ")
         span(id: "total_ignored_count") { plain(total.to_s) }

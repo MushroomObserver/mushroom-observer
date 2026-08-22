@@ -8,9 +8,7 @@ module Admin
 
       @user_stats = UserStats.find_by(user_id: @user2.id) ||
                     UserStats.create(user_id: @user2.id)
-      render(Views::Controllers::Admin::Users::Edit.new(
-               user2: @user2, user_stats: @user_stats
-             ))
+      render_edit_view
     end
 
     def update
@@ -21,7 +19,7 @@ module Admin
       # Parse new set of values.
       @val = params[:val]
       bonuses = calculate_bonuses
-      return if bonuses.nil?
+      return render_edit_view_invalid if bonuses.nil?
 
       update_user_contribution(bonuses)
       redirect_to(user_path(@user2.id))
@@ -39,6 +37,12 @@ module Admin
     end
 
     private
+
+    def render_edit_view(status: :ok, **render_opts)
+      render(Views::Controllers::Admin::Users::Edit.new(
+               user2: @user2, user_stats: @user_stats
+             ), status: status, **render_opts)
+    end
 
     def calculate_bonuses
       line_num = 0

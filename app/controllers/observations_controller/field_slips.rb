@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-# Shared field-slip handling for the observation create and update actions.
+# Shared field-slip handling for the observation create/update actions
+# and the standalone Observations::FieldSlipsController attach flow.
 #
 # `update_field_slip` applies the `params[:field_code]` change to
-# `@observation` and returns a status (:unchanged / :cleared / :assigned /
-# :invalid). It deliberately does NOT flash errors or set `@any_errors` —
+# `@observation` and returns a status (:unchanged / :cleared /
+# :assigned_new / :assigned_existing / :invalid / :too_many). It
+# deliberately does NOT flash errors or set `@any_errors` —
 # create and update surface an invalid code differently: create warns and
 # continues (the observation is already saved by the time this runs), while
 # update flags `@any_errors` and re-renders the edit form so the user can
@@ -216,11 +218,16 @@ module ObservationsController::FieldSlips
     # `bar_field_slip` already told the user why; saving the observation
     # without the code is the whole point of that branch.
     return :unchanged if @field_slip_barred
+    return :unchanged if field_code_unchanged?
 
-    code = field_code
-    return :unchanged if code == @observation.field_slip&.code.to_s
+    field_code.blank? ? clear_field_slip : assign_field_slip(field_code)
+  end
 
-    code.blank? ? clear_field_slip : assign_field_slip(code)
+  # True when the submitted code is the same as the observation's own
+  # field slip (or both are absent) -- i.e. the slip link isn't
+  # changing on this submit.
+  def field_code_unchanged?
+    field_code == @observation.field_slip&.code.to_s
   end
 
   def clear_field_slip
@@ -241,23 +248,25 @@ module ObservationsController::FieldSlips
   # Creates/reuses the field slip and links it to @observation via an
   # occurrence (Observation#field_slip= creates the occurrence). Returns
   # :invalid when the code fails FieldSlip validation, :too_many when the
-  # slip's occurrence is already at capacity.
+  # slip's occurrence is already at capacity, else :assigned_new/
+  # :assigned_existing so callers that care can tell those apart without
+  # their own redundant FieldSlip.exists? check.
   def assign_field_slip(code)
-    existed = FieldSlip.exists?(code: code)
     field_slip = FieldSlip.find_or_create_by_code(code, @user)
     return :invalid unless field_slip
     return :too_many if field_slip_occurrence_full?(field_slip)
 
+    new_slip = field_slip.previously_new_record?
     # Read before the assignment below, which is what creates the
     # occurrence when the slip doesn't have one yet.
     joined = field_slip.occurrence.present?
-    flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
+    flash_notice(:field_slip_created.t(code: field_slip.code)) if new_slip
     @observation.field_slip = field_slip
     @observation.save!
     field_slip.adopt_user_from(@observation)
     sync_occurrence_after_attach(joined)
     apply_field_slip_project(field_slip)
-    :assigned
+    new_slip ? :assigned_new : :assigned_existing
   end
 
   # Using a slip for an open-membership project enrolls the user in it,

@@ -26,7 +26,7 @@ module Views::Controllers::CollectionNumbers
 
     def render_form
       render(Form.new(@collection_number, observation: @observation,
-                                          local: false))
+                                          turbo: true))
     end
 
     def render_observation_box

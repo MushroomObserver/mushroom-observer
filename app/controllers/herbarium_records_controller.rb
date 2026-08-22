@@ -100,7 +100,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html { render_new_phlex }
+      format.html { render_new_view }
     end
   end
 
@@ -121,7 +121,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html { render_edit_phlex }
+      format.html { render_edit_view }
     end
   end
 
@@ -160,14 +160,14 @@ class HerbariumRecordsController < ApplicationController
     find_herbarium_record!
   end
 
-  def render_new_phlex
+  def render_new_view
     render(Views::Controllers::HerbariumRecords::New.new(
              herbarium_record: @herbarium_record,
              observation: @observation, user: @user
            ))
   end
 
-  def render_edit_phlex
+  def render_edit_view
     render(Views::Controllers::HerbariumRecords::Edit.new(
              herbarium_record: @herbarium_record, user: @user,
              back: @back, back_object: @back_object
@@ -227,13 +227,10 @@ class HerbariumRecordsController < ApplicationController
       :runtime_added_to.t(type: :herbarium_record, name: :observation)
     )
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record)
-      end
-      format.turbo_stream do
-        render_herbarium_records_section_update
-      end
+    if modal_submission?(:herbarium_record)
+      render_herbarium_records_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @herbarium_record)
     end
   end
 
@@ -272,14 +269,11 @@ class HerbariumRecordsController < ApplicationController
       @herbarium_record.herbarium != old_herbarium
     flash_notice(:runtime_updated_at.t(type: :herbarium_record))
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record)
-      end
+    if modal_submission?(:herbarium_record)
       @observation = @back_object # if we're here, we're on an obs page
-      format.turbo_stream do
-        render_herbarium_records_section_update
-      end
+      render_herbarium_records_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @herbarium_record)
     end
   end
 
@@ -307,13 +301,10 @@ class HerbariumRecordsController < ApplicationController
                       end
     redirect_params[:back] = @back if @back.present?
 
-    respond_to do |format|
-      format.html do
-        redirect_to(redirect_params)
-      end
-      format.turbo_stream do
-        reload_herbarium_record_modal_form_and_flash
-      end
+    if modal_submission?(:herbarium_record)
+      reload_herbarium_record_modal_form_and_flash
+    else
+      redirect_to(redirect_params)
     end
   end
 
@@ -466,15 +457,10 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def show_flash_and_send_back
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record) and
-          return
-      end
-      format.turbo_stream do
-        # renders the flash in the modal via js
-        render_modal_flash_update(modal_identifier) and return
-      end
+    if modal_submission?(:herbarium_record)
+      render_modal_flash_update(modal_identifier)
+    else
+      redirect_to_back_object_or_object(@back_object, @herbarium_record)
     end
   end
 

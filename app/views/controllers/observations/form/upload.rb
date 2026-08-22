@@ -10,13 +10,32 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   prop :form, ::Components::ApplicationForm
   prop :good_images, _Array(::Image), default: -> { [] }
 
+  # The field wrappers carry mb-0: form-group's bottom margin would
+  # otherwise sit INSIDE the flex row, skewing align-items-center and
+  # padding the row's box below the buttons. No margin on the row
+  # either -- it fills its own panel body, whose padding is already
+  # symmetric.
   def view_template
-    render_file_select_button
+    div(class: "d-flex flex-wrap align-items-center") do
+      render_drop_hint
+      render_file_select_button
+      render_take_photo_button
+    end
     render_good_image_ids_field
     render_thumb_image_id_field
   end
 
   private
+
+  # Says out loud what the form already does: the whole form is the
+  # drop target (see form-images_controller.js), and paste works
+  # anywhere too. Hidden on touch devices -- there's no drag source
+  # there, and the buttons speak for themselves.
+  def render_drop_hint
+    span(class: "drop-paste-hint font-weight-bold mr-3") do
+      plain(:drop_or_paste_images.l)
+    end
+  end
 
   def render_file_select_button
     field_proxy = Components::ApplicationForm::FieldProxy.new(
@@ -26,9 +45,38 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
       Components::ApplicationForm::FileField.new(
         field_proxy,
         multiple: true,
+        # The visible button text isn't a <label> for the input, so
+        # without this a screen reader announces just "file upload".
+        aria_label: :select_photos.l,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        wrapper_options: { label: :images.ti, class: "my-3" }
+        wrapper_options: { label: false, button_text: :select_photos.l,
+                           wrap_class: "mb-0" }
+      )
+    )
+  end
+
+  # Android's system photo picker has no camera option (iOS builds one
+  # into its picker), so a dedicated capture input is the only way to
+  # photograph a slip straight from the form there. `capture` opens the
+  # rear camera directly on both platforms -- one shot per tap, feeding
+  # the same handler as the file picker. No `multiple`: a capture
+  # returns a single photo by nature. Hidden on non-touch devices via
+  # `.take-photo-field` (see _form_elements.scss) -- desktop browsers
+  # ignore `capture` and the button would just duplicate the picker.
+  def render_take_photo_button
+    field_proxy = Components::ApplicationForm::FieldProxy.new(
+      "", :take_photo_button, nil
+    )
+    render(
+      Components::ApplicationForm::FileField.new(
+        field_proxy,
+        capture: "environment",
+        aria_label: :take_photo.l,
+        controller: "form-images",
+        action: "change->form-images#addSelectedFiles",
+        wrapper_options: { label: false, button_text: :take_photo.l,
+                           wrap_class: "mb-0 ml-3 take-photo-field" }
       )
     )
   end

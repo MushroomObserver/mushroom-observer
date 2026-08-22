@@ -89,7 +89,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html { render_new_phlex }
+      format.html { render_new_view }
     end
   end
 
@@ -110,7 +110,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html { render_edit_phlex }
+      format.html { render_edit_view }
     end
   end
 
@@ -158,14 +158,14 @@ class CollectionNumbersController < ApplicationController
       flash_error_and_goto_index(CollectionNumber, params[:id])
   end
 
-  def render_new_phlex
+  def render_new_view
     render(Views::Controllers::CollectionNumbers::New.new(
              collection_number: @collection_number,
              observation: @observation, user: @user
            ))
   end
 
-  def render_edit_phlex
+  def render_edit_view
     render(Views::Controllers::CollectionNumbers::Edit.new(
              collection_number: @collection_number, user: @user,
              back: @back, back_object: @back_object
@@ -216,13 +216,10 @@ class CollectionNumbersController < ApplicationController
                       end
     redirect_params[:back] = @back if @back.present?
 
-    respond_to do |format|
-      format.html do
-        redirect_to(redirect_params)
-      end
-      format.turbo_stream do
-        reload_collection_number_modal_form_and_flash
-      end
+    if modal_submission?(:collection_number)
+      reload_collection_number_modal_form_and_flash
+    else
+      redirect_to(redirect_params)
     end
   end
 
@@ -233,13 +230,10 @@ class CollectionNumbersController < ApplicationController
     flash_notice(
       :runtime_added_to.t(type: :collection_number, name: :observation)
     )
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
-      end
-      format.turbo_stream do
-        render_collection_numbers_section_update
-      end
+    if modal_submission?(:collection_number)
+      render_collection_numbers_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @collection_number)
     end
   end
 
@@ -272,16 +266,12 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     flash_notice(:runtime_updated_at.t(type: :collection_number))
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
-      end
-      format.turbo_stream do
-        # if we're here, we're on an obs page.
-        # back_object should be the obs, sent via :back param from the link
-        @observation = @back_object
-        render_collection_numbers_section_update
-      end
+    if modal_submission?(:collection_number)
+      # back_object should be the obs, sent via :back param from the link
+      @observation = @back_object
+      render_collection_numbers_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @collection_number)
     end
   end
 
@@ -416,15 +406,10 @@ class CollectionNumbersController < ApplicationController
   end
 
   def show_flash_and_send_back
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number) and
-          return
-      end
-      # renders the flash in the modal
-      format.turbo_stream do
-        render_modal_flash_update(modal_identifier) and return
-      end
+    if modal_submission?(:collection_number)
+      render_modal_flash_update(modal_identifier)
+    else
+      redirect_to_back_object_or_object(@back_object, @collection_number)
     end
   end
 

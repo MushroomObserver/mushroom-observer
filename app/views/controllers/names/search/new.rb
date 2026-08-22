@@ -6,7 +6,7 @@ class Views::Controllers::Names::Search::New < Views::FullPageBase
   # `@search = Query.create_query(query_model, @query_params)` per
   # the `Searchable` concern — a `Query::Names` in this context.
   prop :search, _Nilable(::Query::Names), default: nil
-  prop :local, _Boolean, default: true
+  prop :context, _Union(:page, :dropdown), default: :page
 
   def view_template
     add_new_title(:search_object, :names)
@@ -14,7 +14,7 @@ class Views::Controllers::Names::Search::New < Views::FullPageBase
 
     div(id: "names_search_container") do
       render(Components::Form::Search.new(
-               @search, search_controller: controller, local: @local
+               @search, search_controller: controller, context: @context
              ))
     end
   end

@@ -7,12 +7,14 @@ module Views::Controllers::Checklists
   class Contents < ::Components::Base
     prop :data, ::Checklist
     prop :context, ::Views::Controllers::Checklists::Context
+    prop :project_data, _Nilable(::Checklist), default: nil
 
     def view_template
       div(id: "checklist_contents") do
         render_summary
         render_location_header if @context.location
         render_panels
+        render_missing_taxa_panel if @project_data
         render_footnotes
       end
     end
@@ -100,6 +102,22 @@ module Views::Controllers::Checklists
                data: @data, context: @context,
                taxa: taxa, panel_id: panel_id,
                link_to_name_page: link_to_name_page
+             ))
+    end
+
+    # Project taxa absent from the species-list checklist. Counts and
+    # links match the project checklist: `data:` is the project
+    # checklist, and the project-only context scopes taxon links to
+    # project observations (no admin tools -- `user` is omitted).
+    def render_missing_taxa_panel
+      missing = @project_data.taxa_not_in(@data)
+      return if missing.empty?
+
+      h4 { plain(:checklist_missing_taxa.t) }
+      render(Panel.new(
+               data: @project_data,
+               context: Context.new(project: @context.project),
+               taxa: missing, panel_id: "checklist_missing_panel"
              ))
     end
 

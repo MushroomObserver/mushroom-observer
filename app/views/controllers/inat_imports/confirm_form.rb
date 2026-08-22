@@ -119,7 +119,7 @@ module Views::Controllers::InatImports
       plain(": ")
       span(id: "expected_count") do
         url = expected_obs_url
-        count = (@estimate_with_date || @expected).to_s
+        count = capped_expected_count.to_s
         if url
           render(Components::Link::External.new(content: count, path: url))
         else
@@ -129,6 +129,18 @@ module Views::Controllers::InatImports
     end
 
     def expected_obs_url = @urls.expected_obs_url
+
+    def expected_count = (@estimate_with_date || @expected).to_i
+
+    def capped_expected_count
+      [expected_count, InatImport::MAX_IMPORTABLE].min
+    end
+
+    def over_cap_count = InatImport.excess_over_cap(expected_count)
+
+    def render_over_cap_line
+      render(OverCapLine.new(count: over_cap_count))
+    end
 
     def render_nothing_to_import_notice
       # Match the count that drives the display and the Proceed button, so
@@ -143,7 +155,7 @@ module Views::Controllers::InatImports
     # off: nothing here — that count lives in the ignored-total breakdown
     # instead (see unlicensed_ignored_row). Import-others with
     # create_skeletons on (the default, #4828): a skeleton-specific line,
-    # since those obs are genuinely imported, just as lighter records.
+    # since those obs are imported too, just as lighter records.
     def render_unlicensed_line
       if import_others?
         skeleton_obs_line if create_skeletons?
@@ -175,7 +187,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      format_hms((@estimate_with_date || @expected) * avg_import_seconds)
+      format_hms(capped_expected_count * avg_import_seconds)
     end
 
     def format_hms(seconds)
@@ -205,7 +217,7 @@ module Views::Controllers::InatImports
         # data-turbo="false": this submit redirects to iNaturalist's
         # OAuth authorize page (an external host). Turbo Drive's
         # fetch-based form submission follows redirects as fetch
-        # requests, not real navigations -- a cross-origin redirect
+        # requests, not full-page navigations -- a cross-origin redirect
         # there doesn't land the browser on iNat's login page the way
         # a plain form submit does. Opting this one button out of
         # Turbo keeps the redirect a normal top-level navigation.

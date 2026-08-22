@@ -25,10 +25,10 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
     html = render_show(object: desc, authors: [])
 
     # User autocompleter input — the field name is namespaced under
-    # the `AddAuthor` FormObject (`add_author[user]`). The controller's
-    # `create` action handles both `params[:add]` (legacy) and
-    # `params.dig(:add_author, :user)` (new).
-    assert_html(html, "input[name='add_author[user]']")
+    # the `DescriptionAuthor` FormObject (`description_author[user]`).
+    # The controller's `create` action handles both `params[:add]`
+    # (legacy) and `params.dig(:description_author, :user)` (new).
+    assert_html(html, "input[name='description_author[user]']")
     assert_html(html, "form[action*='/descriptions/authors']" \
                       "[action*='id=#{desc.id}']")
     # Stimulus controller for the user autocompleter.

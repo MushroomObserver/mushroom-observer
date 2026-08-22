@@ -294,7 +294,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Missing number should cause validation error
     params = {
       observation_id: obs.id,
-      collection_number: { name: obs.user.legal_name, number: "" }
+      collection_number: { name: obs.user.legal_name, number: "",
+                           modal: "true" }
     }
 
     assert_no_difference("CollectionNumber.count") do
@@ -411,8 +412,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     patch(:update, params:)
     assert_flash(:permission_denied)
 
-    # Test turbo shows flash warning
-    patch(:update, params:, format: :turbo_stream)
+    # Test turbo (modal) shows flash warning
+    patch(:update,
+          params: params.deep_merge(collection_number: { modal: "true" }),
+          format: :turbo_stream)
     assert_flash(:permission_denied)
     assert_select("turbo-stream[action='update'][target$='_flash']")
 
@@ -451,7 +454,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       back: observation.id.to_s,
       collection_number: {
         name: collection_number.name,
-        number: "updated-number"
+        number: "updated-number",
+        modal: "true"
       }
     }
 

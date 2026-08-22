@@ -10,7 +10,7 @@ module Views::Controllers::Licenses
       add_page_title(:create_license_title.l)
       add_context_nav(::Tab::License::FormNew.new)
 
-      render(Form.new(@license, local: false))
+      render(Form.new(@license, turbo: true))
     end
   end
 end

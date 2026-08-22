@@ -11,7 +11,7 @@ module Views::Controllers::Herbaria
       add_context_nav(::Tab::Herbarium::FormNew.new(q_param: q_param))
 
       render(Views::Controllers::Herbaria::Form.new(
-               @herbarium, user: @user, local: false
+               @herbarium, user: @user, turbo: true
              ))
     end
   end

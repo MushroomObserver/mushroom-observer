@@ -27,7 +27,7 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
           label_class: label_class,
           id: "#{selector}_form_#{observation_view.observation_id}",
           method: :put,
-          local: false,
+          turbo: true,
           data: { controller: "reviewed-toggle" })
   end
 

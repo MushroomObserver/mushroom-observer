@@ -54,8 +54,8 @@ class LicensesControllerTest < FunctionalTestCase
       "License page missing link to edit License"
     )
     assert_select(
-      "button", { text: "Destroy", count: 0 },
-      "Show page for License in use should not have Destroy button"
+      "button", { text: :destroy.ti, count: 0 },
+      "Show page for License in use should not have Delete button"
     )
   end
 
@@ -84,8 +84,8 @@ class LicensesControllerTest < FunctionalTestCase
     # to a plain link before #4392; now it correctly emits the
     # destroy form so mobile users can actually trigger the delete).
     assert_select(
-      "button", { text: "Destroy", count: 2 },
-      "Show page for unused License in use should have Destroy button"
+      "button", { text: :destroy.ti, count: 2 },
+      "Show page for unused License in use should have Delete button"
     )
   end
 

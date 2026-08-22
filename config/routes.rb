@@ -665,6 +665,20 @@ MushroomObserver::Application.routes.draw do
         to: "observations/species_lists#update",
         via: [:put, :patch],
         as: "observation_species_list")
+  get("/observations/:id/field_slip/edit",
+      to: "observations/field_slips#edit",
+      as: "edit_observation_field_slip")
+  match("/observations/:id/field_slip",
+        to: "observations/field_slips#update",
+        via: [:put, :patch],
+        as: "observation_field_slip")
+  get("/observations/:id/projects/edit",
+      to: "observations/projects#edit",
+      as: "edit_observation_projects")
+  match("/observations/:id/projects/:project_id(/:commit)",
+        to: "observations/projects#update",
+        via: [:put, :patch],
+        as: "observation_project")
   # These are in observations because they share private methods with
   # :new and :create, which are currently observation-specific
   get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")

@@ -131,9 +131,8 @@ module GlossaryTerms
 
     def rerender_remove_form_with_no_save_error
       flash_error(:runtime_no_save.t(type: :glossary_term))
-      render_remove_view(
-        location: remove_images_from_glossary_term_path(params[:id]),
-        status: :unprocessable_content
+      render_remove_view_invalid(
+        location: remove_images_from_glossary_term_path(params[:id])
       )
     end
 
@@ -142,6 +141,11 @@ module GlossaryTerms
         Views::Controllers::GlossaryTerms::Images::Remove.new(object: @object),
         status: status, **render_opts
       )
+    end
+
+    def render_remove_view_invalid(**)
+      render_remove_view(**)
+      self.status = :unprocessable_content
     end
   end
 end

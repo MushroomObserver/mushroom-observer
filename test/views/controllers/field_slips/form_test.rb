@@ -30,6 +30,9 @@ module Views::Controllers::FieldSlips
 
       # GET form to /field_slips/new — the "enter code" entry point.
       assert_html(html, "form[action='/field_slips/new'][method='get']")
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_html(html, "form[data-turbo='false']")
       assert_html(html, "input[type='text'][name='field_slip[code]']" \
                         "[id='field_slip_code']")
       assert_html(html, "button[type='submit']")

@@ -41,6 +41,8 @@ module SpeciesLists
       login("rolf")
       contrib = rolf.contribution
       post(:create, params: params)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       assert_equal(contrib, rolf.reload.contribution)
       assert_not(synonym_name.reload.deprecated)
       assert_nil(synonym_name.synonym_id)
@@ -470,6 +472,7 @@ module SpeciesLists
       contrib = spl.user.contribution
       post(:create, params: params)
       assert_flash_error
+      assert_unprocessable
       assert_equal(contrib, spl.user.reload.contribution)
       assert_equal(sp_count, spl.reload.observations.size)
       assert_not(spl.name_included?(name))
@@ -554,7 +557,8 @@ module SpeciesLists
       # name, or a real browser resubmit (unlike this test's next call,
       # which sets approved_where directly) could never carry it back.
       post(:create, params: params)
-      assert_response(:success)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       assert_select("#dubious_location_messages")
       assert_select("input[name='approved_where'][value=?]", where)
       assert_equal(0, spl.reload.observations.size)

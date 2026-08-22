@@ -57,6 +57,12 @@ module MushroomObserver
     # else a scanner's malformed bytes reach a String op and 500.
     config.middleware.insert_before(0, Rack::UTF8Sanitizer)
 
+    # A hostile/garbage Accept header (vulnerability scanners) is the
+    # client's error, not a 500.
+    config.action_dispatch.rescue_responses[
+      "ActionDispatch::Http::MimeNegotiation::InvalidType"
+    ] = :not_acceptable
+
     # Tells rails not to generate controller-specific css and js stubs.
     config.generators.assets = false
 
@@ -93,6 +99,10 @@ module MushroomObserver
 
     # Just starting to use Rails caching on 7.1, so we're current
     config.active_support.cache_format_version = 7.1
+
+    # Opt in to the Rails 8.0 #to_time behavior now (preserves the
+    # receiver's timezone offset instead of converting to system local).
+    config.active_support.to_time_preserves_timezone = true
 
     # Set up memcached as the cache store everywhere
     # config.cache_store = :mem_cache_store

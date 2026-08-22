@@ -109,6 +109,27 @@ class FieldSlipTest < UnitTestCase
     assert_not_includes(joined.reload.observations, obs)
   end
 
+  # A slip with no project must not inherit from the user's OTHER
+  # project-less slips: that bucket is orphaned spares, not an event
+  # cohort, and its "most recently updated" member is whatever a
+  # batch job touched last. The chain falls through to the user's
+  # latest located observation instead.
+  def test_projectless_slip_skips_other_projectless_slips
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    field_slips(:field_slip_one).update_columns(project_id: nil,
+                                                updated_at: 1.hour.ago)
+    latest = observations(:detailed_unknown_obs)
+    latest.update_columns(location_id: locations(:burbank).id,
+                          created_at: Time.zone.now)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.update_columns(project_id: nil)
+    slip.current_user = mary
+
+    assert_equal(locations(:burbank), slip.location)
+  end
+
   def test_location_falls_back_to_project_location
     observations(:minimal_unknown_obs).update_columns(location_id: nil)
     observations(:owner_accepts_general_questions).

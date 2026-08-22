@@ -11,6 +11,7 @@ module Account
 
       assert_response(:success)
       assert_head_title(:email_new_password_title.l)
+      assert_select("form#account_password_reset_form[data-turbo='true']")
     end
 
     def test_create_user_not_found

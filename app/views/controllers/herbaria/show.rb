@@ -8,8 +8,6 @@ module Views::Controllers::Herbaria
   # curator-request link, plus optional notes + mailing address;
   # right side has the location map.
   class Show < Views::FullPageBase
-    include ::Phlex::Rails::Helpers::FormAuthenticityToken
-
     prop :herbarium, ::Herbarium
 
     def view_template
@@ -71,7 +69,7 @@ module Views::Controllers::Herbaria
         render(CuratorTable.new(herbarium: @herbarium)) \
           if @herbarium.curators.present?
         if curator_or_admin?
-          render_add_curator_form
+          render(AddCuratorForm.new(herbarium: @herbarium))
         else
           render_curator_request_link
         end
@@ -80,33 +78,6 @@ module Views::Controllers::Herbaria
 
     def curator_or_admin?
       @herbarium.curator?(current_user) || in_admin_mode?
-    end
-
-    # The form posts a top-level `:add_curator` param (NOT nested
-    # under a FormObject). Hand-rolled `<form>` so we don't get
-    # Superform's `<form_name>[:add_curator]` namespacing.
-    def render_add_curator_form
-      form(action: herbaria_curators_path(id: @herbarium, q: q_param),
-           method: "post",
-           id: "herbarium_curators_form") do
-        input(type: "hidden", name: "authenticity_token",
-              value: form_authenticity_token)
-        div(class: "form-inline mt-3") do
-          render(::Components::ApplicationForm::AutocompleterField.new(
-                   ::Components::ApplicationForm::FieldProxy.new(
-                     nil, :add_curator, nil
-                   ),
-                   type: :user, label: false
-                 ))
-          label(for: "add_curator") do
-            Button(
-              type: :submit,
-              name: :show_herbarium_add_curator.t,
-              html_name: "commit"
-            )
-          end
-        end
-      end
     end
 
     def render_curator_request_link

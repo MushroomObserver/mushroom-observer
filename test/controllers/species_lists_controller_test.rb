@@ -271,6 +271,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
                   text: /#{Regexp.escape(project.title)}/)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id, project: project.id),
+      { count: 1 },
+      "Names button should carry the project context to the checklist"
+    )
   end
 
   # Regression test for bug where params[:q] as a String (saved query ID)
@@ -454,10 +460,11 @@ class SpeciesListsControllerTest < FunctionalTestCase
          })
     # No save (validation re-renders the form).
     assert_nil(SpeciesList.find_by(title: "Dubious place test"))
-    assert_response(:success)
+    assert_unprocessable
     # `@dubious_where_reasons` was populated and is now in the
     # FormLocationFeedback component.
     assert_select("#dubious_location_messages")
+    assert_select("form[data-turbo='true']")
   end
 
   # Cover the `redirect_to(new_location_path(...))` branch in
@@ -673,6 +680,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")

@@ -55,7 +55,7 @@ module Views::Controllers::Herbaria
       assert_no_html(html, "input[name='herbarium[back]']")
 
       # No turbo for local form
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_existing_record_form
@@ -83,7 +83,7 @@ module Views::Controllers::Herbaria
     end
 
     def test_modal_form_enables_turbo
-      html = render_form(model: @herbarium, local: false)
+      html = render_form(model: @herbarium, turbo: true)
 
       assert_html(html, "form[data-turbo='true']")
     end
@@ -121,11 +121,11 @@ module Views::Controllers::Herbaria
 
     private
 
-    def render_form(model:, local: true, back: nil, top_users: nil)
+    def render_form(model:, turbo: false, back: nil, top_users: nil)
       render(Form.new(model,
                       user: @user,
                       back: back,
-                      local: local,
+                      turbo: turbo,
                       top_users: top_users))
     end
   end

@@ -126,11 +126,12 @@ module Name::Parse
   UNQUOTED_PROV = /^(?:[a-z]+-)*[A-Z][A-Z0-9]*$/
   LOWER_WORD = /
     (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
-    (?:sp\. \s)?['"]\w[\wë\-. ]*[\wë.]['"] |
-    (?:sp\. \s)?(?:[a-z]+-)*[A-Z][A-Z0-9]* /x
+    (?:sp\.?\s)?['"]\w[\wë\-. ]*[\wë.]['"] |
+    (?:sp\.?\s)?(?:[a-z]+-)*[A-Z][A-Z0-9]* /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
-  LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
-                           sp\.\s\S*\d\S* /x
+  LOWER_WORD_OR_SP_NOV = / (?! sp\.?\s(?!['"]|[A-Z]) | sp\.?$ | species )
+                           #{LOWER_WORD} |
+                           sp\.?\s\S*\d\S* /x
 
   # Matches the last epithet in a (standardized) name,
   # including preceding abbreviation if there is one.

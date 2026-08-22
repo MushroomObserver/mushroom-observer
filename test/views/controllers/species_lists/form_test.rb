@@ -22,9 +22,9 @@ module Views::Controllers::SpeciesLists
       assert_html(html,
                   "form#species_list_form[action='/species_lists']" \
                   "[method='post']")
-      # Superform: non-persisted → `_method=post` (no method override).
-      assert_html(html,
-                  "input[type='hidden'][name='_method'][value='post']")
+      # POST is the form's native method, so no `_method` override
+      # renders (see ApplicationForm#_method_field).
+      assert_no_html(html, "input[name='_method']")
     end
 
     def test_edit_flow_form_action_and_patch_method

@@ -20,7 +20,7 @@ module Views::Controllers::Account::Login
                FormObject::Login.new(login: @login, remember_me: @remember),
                action: account_login_path,
                id: "account_login_form",
-               local: false
+               turbo: true
              ))
       render_create_account_section
       render_why_section

@@ -2253,6 +2253,13 @@ class ObservationTest < UnitTestCase
   # read until something is written through `notes=`. This test
   # exercises both code paths for coverage and asserts the
   # round-trip on the populated path.
+  # Regression: #notes returning a bare Hash instead of NotesHash would
+  # pass every other test silently (they only check hash content), but
+  # would break the Literal-typed props NotesHash exists to enable.
+  def test_notes_returns_a_notes_hash
+    assert_instance_of(NotesHash, observations(:detailed_unknown_obs).notes)
+  end
+
   def test_other_notes_getter_and_setter
     populated = observations(:detailed_unknown_obs)
     assert_equal(populated.notes[Observation.other_notes_key],
@@ -2693,6 +2700,47 @@ class ObservationTest < UnitTestCase
     obs.update!(occurrence: occ)
 
     assert_not(obs.shows_merged_notes?)
+  end
+
+  def test_define_a_location_updates_matching_observations
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(where: "Deadlock Test Town, USA", location_id: nil)
+    loc = locations(:albion)
+
+    Observation.define_a_location(loc, "Deadlock Test Town, USA")
+
+    obs.reload
+    assert_equal(loc.id, obs.location_id)
+    assert_equal(loc.name, obs.where)
+  end
+
+  def test_define_a_location_retries_once_on_deadlock
+    calls = 0
+    relation = Object.new
+    relation.define_singleton_method(:update_all) do |*_args|
+      calls += 1
+      raise(ActiveRecord::Deadlocked) if calls == 1
+
+      1
+    end
+
+    Observation.stub(:where, relation) do
+      Observation.define_a_location(locations(:albion), "Nowhere, USA")
+    end
+    assert_equal(2, calls, "update should be retried after one deadlock")
+  end
+
+  def test_define_a_location_reraises_repeated_deadlock
+    relation = Object.new
+    relation.define_singleton_method(:update_all) do |*_args|
+      raise(ActiveRecord::Deadlocked)
+    end
+
+    Observation.stub(:where, relation) do
+      assert_raises(ActiveRecord::Deadlocked) do
+        Observation.define_a_location(locations(:albion), "Nowhere, USA")
+      end
+    end
   end
 
   private

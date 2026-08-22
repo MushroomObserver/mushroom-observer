@@ -25,6 +25,49 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Unfiltered index (browsing the whole table) only offers sorts with
+  # no join/aggregate over that many rows.
+  def test_index_unfiltered_offers_only_column_sorts
+    login
+    get(:index)
+
+    assert_select("a.observations_by_rss_log_link", true)
+    assert_select("a.observations_by_date_link", true)
+    assert_select("a.observations_by_created_at_link", true)
+    assert_select("a.observations_by_name_link", false)
+    assert_select("a.observations_by_user_link", false)
+    assert_select("a.observations_by_confidence_link", false)
+    assert_select("a.observations_by_thumbnail_quality_link", false)
+    assert_select("a.observations_by_num_views_link", false)
+  end
+
+  def test_index_filtered_offers_all_sorts
+    login(rolf.login)
+    get(:index, params: { by_user: rolf.id })
+
+    assert_select("a.observations_by_name_link", true)
+    assert_select("a.observations_by_user_link", true)
+    assert_select("a.observations_by_confidence_link", true)
+    assert_select("a.observations_by_thumbnail_quality_link", true)
+    assert_select("a.observations_by_num_views_link", true)
+  end
+
+  # A bookmarked/permalinked unfiltered index carrying an order_by
+  # that's not in the unfiltered allowlist (no other filter params)
+  # must still offer the full sort list -- otherwise the current sort
+  # has no matching option and the dropdown's toggle label goes blank.
+  def test_index_unfiltered_with_unsafe_order_offers_all_sorts
+    login
+    get(:index, params: { q: { model: "Observation", order_by: "name" } })
+
+    assert_select("a.observations_by_name_link", true)
+    assert_select("a.observations_by_user_link", true)
+    assert_select("a.observations_by_confidence_link", true)
+    assert_select("a.observations_by_thumbnail_quality_link", true)
+    assert_select("a.observations_by_num_views_link", true)
+    assert_select("#sort_nav_toggle", text: :sort_by_name.l)
+  end
+
   # Regression for #4492: the top-nav `search-type` Stimulus controller
   # reads its help/form type lists as Array values, which Stimulus parses
   # as JSON. Phlexifying top_nav emitted the arrays space-joined ("a b")
@@ -570,8 +613,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     end
     # On page 1, prev link should be disabled (has opacity-0 class)
     assert_select("a.prev_page_link.disabled.opacity-0")
-    assert_select("form.page_input[action='#{observations_url}']")
-    assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
+    # The goto-page link (no <form> -- see IndexPaginationNav) carries
+    # the full current query state in its own href.
+    assert_select("a[data-page-input-target='goToLink']") do |links|
+      href = links.first["href"]
+      assert_includes(href, q_model,
+                      "Goto link should have q[model]=Observation")
+    end
   end
 
   # Regression test for https://github.com/MushroomObserver/mushroom-observer/pull/3528
@@ -605,13 +653,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                       "Next link should preserve third by_users value")
     end
 
-    # Also check the page input form has hidden fields for all three values
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user1.id}']")
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user2.id}']")
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user3.id}']")
+    # Also check the goto-page link's own href preserves all three
+    # values (no <form>/hidden fields -- see IndexPaginationNav).
+    assert_select("a[data-page-input-target='goToLink']") do |links|
+      href = links.first["href"]
+      assert_includes(href, by_user_1,
+                      "Goto link should preserve first by_users value")
+      assert_includes(href, by_user_2,
+                      "Goto link should preserve second by_users value")
+      assert_includes(href, by_user_3,
+                      "Goto link should preserve third by_users value")
+    end
 
     # Search form prefilling is tested in
     # test/controllers/observations/search_controller_test.rb
@@ -658,6 +710,112 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success)
     assert_page_title(:observations.ti)
     assert_flash_error(:runtime_no_matches, type: :observation)
+  end
+
+  # `create_query_from_url_params` (ApplicationController::QueryParamAliases)
+  # isn't wired into any controller action yet (#5137 is the foundation
+  # piece only) -- tested directly via @controller.send, same pattern as
+  # other private-method tests in this file.
+  def test_create_query_from_url_params_resolves_by_alias
+    login
+    raw_params = ActionController::Parameters.new(by: "date")
+
+    query, display_opts = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_equal("date", query.params[:order_by])
+    assert_equal(false, display_opts[:always_index])
+  end
+
+  def test_create_query_from_url_params_ignores_unrecognized_params
+    login
+    raw_params = ActionController::Parameters.new(by: "date",
+                                                  bogus_param: "haxx")
+
+    query, = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_not(query.params.key?(:bogus_param))
+  end
+
+  # No query_attr has a record-backed param_alias declared yet (#5137
+  # is the foundation piece only) -- temporarily declares one on
+  # Query::Observations's own `projects` attr so this test exercises
+  # create_query_from_url_params's `constantize` path end-to-end, not
+  # just the lower-level resolve_param_alias_records helper. Restored
+  # in `ensure` so no other test observes the mutated attr.
+  def test_create_query_from_url_params_sets_always_index_for_record_alias
+    login
+    project = projects(:bolete_project)
+    Query::Observations.query_attr(:projects, [Project], param_alias: :project)
+
+    raw_params = ActionController::Parameters.new(project: project.id.to_s)
+    query, display_opts = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_equal([project.id], query.params[:projects])
+    assert_equal(true, display_opts[:always_index])
+  ensure
+    Query::Observations.query_attr(:projects, [Project])
+  end
+
+  def test_resolve_param_alias_records_looks_up_record_and_wraps_array
+    login
+    project = projects(:bolete_project)
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project], param_alias: :project)
+    end
+
+    resolved, record_backed = @controller.send(
+      :resolve_param_alias_records, klass,
+      { project: project.id.to_s }, [:project]
+    )
+
+    assert_equal({ projects: [project.id] }, resolved)
+    assert_equal(true, record_backed)
+  end
+
+  # Non-record-backed Array-typed attrs (e.g. [:time]) need the same
+  # scalar-to-array wrapping a record-backed alias already gets --
+  # confirmed missing by Copilot review on PR #5142.
+  def test_resolve_param_alias_records_wraps_non_record_backed_array_attr
+    login
+    klass = Class.new(Query::Observations) do
+      query_attr(:test_dates, [:time], param_alias: :test_date)
+    end
+
+    resolved, record_backed = @controller.send(
+      :resolve_param_alias_records, klass,
+      { test_date: "2024-01-01" }, [:test_date]
+    )
+
+    assert_equal({ test_dates: ["2024-01-01"] }, resolved)
+    assert_equal(false, record_backed)
+  end
+
+  # `find_or_goto_index`'s own flash+redirect-on-bad-id behavior is
+  # already covered by test_index_project_with_unknown_id_redirects
+  # (a dispatched request through the existing `project` shortcut) --
+  # this test isolates what resolve_param_alias_records itself does
+  # with a not-found result, stubbing find_or_goto_index so a bare
+  # @controller.send doesn't trip Rails' one-redirect-per-action guard.
+  def test_resolve_param_alias_records_returns_nil_when_lookup_fails
+    login
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project], param_alias: :project)
+    end
+    @controller.define_singleton_method(:find_or_goto_index) { |*| nil }
+
+    resolved, record_backed = @controller.send(
+      :resolve_param_alias_records, klass,
+      { project: "999999999" }, [:project]
+    )
+
+    assert_nil(resolved)
+    assert_equal(false, record_backed)
   end
 
   def test_index_species_list

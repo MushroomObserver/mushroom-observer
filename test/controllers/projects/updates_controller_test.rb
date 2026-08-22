@@ -16,6 +16,9 @@ module Projects
       get(:index, params: { project_id: @project.id })
 
       assert_response(:success)
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_select("form.show-excluded-form[data-turbo='false']")
     end
 
     def test_index_with_pagination
@@ -52,7 +55,8 @@ module Projects
     def test_index_show_excluded
       @project.exclude_observation(@matching_obs)
 
-      get(:index, params: { project_id: @project.id, show_excluded: "1" })
+      get(:index, params: { project_id: @project.id,
+                            show_excluded: "1" })
 
       assert_response(:success)
     end
@@ -145,8 +149,9 @@ module Projects
     def test_add_all_with_show_excluded
       @project.exclude_observation(@matching_obs)
 
-      post(:add_all, params: { project_id: @project.id,
-                               show_excluded: "1" })
+      post(:add_all,
+           params: { project_id: @project.id,
+                     show_excluded: "1" })
 
       assert_includes(@project.observations.reload, @matching_obs)
       assert_not_includes(@project.excluded_observations.reload, @matching_obs)

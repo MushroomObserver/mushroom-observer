@@ -17,7 +17,8 @@ module Views::Controllers::SpeciesLists::Observations
       # Sibling reference within the module.
       render(Form.new(
                prefill_value: @prefill_value,
-               num_results: @num_results
+               num_results: @num_results,
+               turbo: true
              ))
     end
   end

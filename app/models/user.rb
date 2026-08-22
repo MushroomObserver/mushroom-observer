@@ -722,9 +722,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
         UserGroup.one_user(id)&.destroy
       end
       UserGroupUser.where(user_id: ids).delete_all
-      # delete_all below bypasses `has_many :api_keys, dependent: :destroy`,
-      # so clean them here too (erase_user handles this via OWN_RECORDS).
+      # delete_all below bypasses `has_many :api_keys, dependent: :destroy`
+      # and `has_one :user_stats, dependent: :destroy`, so clean them here
+      # too (erase_user handles this via OWN_RECORDS).
       APIKey.where(user_id: ids).delete_all
+      UserStats.where(user_id: ids).delete_all
       User.where(id: ids).delete_all
     end
 

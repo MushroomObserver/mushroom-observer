@@ -44,10 +44,10 @@ module ObservationsController::Show
     load_occurrence_data
     @images = occurrence_images
 
-    render_phlex_show
+    render_show_view
   end
 
-  def render_phlex_show
+  def render_show_view
     render(Views::Controllers::Observations::Show.new(
              observation: @observation, user: @user,
              consensus: @consensus, comments: @comments.to_a,

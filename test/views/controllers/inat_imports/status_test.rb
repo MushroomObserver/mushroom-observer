@@ -236,6 +236,71 @@ module Views::Controllers::InatImports
       )
     end
 
+    def test_over_cap_line_absent_when_under_cap
+      @import.update_columns(total_importables: InatImport::MAX_IMPORTABLE)
+      html = render_status
+
+      assert_no_html(html, "#over_cap_count")
+    end
+
+    def test_over_cap_line_shown_with_count
+      excess = 50
+      @import.update_columns(
+        total_importables: InatImport::MAX_IMPORTABLE + excess
+      )
+      html = render_status
+
+      assert_html(html, "#over_cap_count", text: excess.to_s)
+    end
+
+    def test_over_cap_reimport_link_absent_when_not_done
+      # katrina_inat_import is in Importing state
+      @import.update_columns(
+        total_importables: InatImport::MAX_IMPORTABLE + 50
+      )
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(
+        inat_username: @import.inat_username
+      )
+      assert_no_html(html, "a[href='#{reimport_path}']")
+    end
+
+    def test_over_cap_reimport_link_shown_when_done
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: InatImport::MAX_IMPORTABLE,
+        total_importables: InatImport::MAX_IMPORTABLE + 50
+      )
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(
+        inat_username: @import.inat_username
+      )
+      assert_html(html, "a[href='#{reimport_path}']")
+    end
+
+    def test_importables_count_uncapped_when_under_cap
+      @import.update_columns(
+        importables: 4, total_importables: 4, imported_count: 3
+      )
+      html = render_status
+
+      assert_html(html, "#total_importables_count", text: "4")
+    end
+
+    def test_importables_count_capped_when_over_cap
+      @import.update_columns(
+        total_importables: InatImport::MAX_IMPORTABLE + 50,
+        imported_count: InatImport::MAX_IMPORTABLE
+      )
+      html = render_status
+
+      assert_html(html, "#total_importables_count",
+                  text: InatImport::MAX_IMPORTABLE.to_s)
+    end
+
     private
 
     def render_status

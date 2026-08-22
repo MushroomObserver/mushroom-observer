@@ -230,7 +230,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       return
     end
 
-    old_occ = occurrence
     occ = slip.occurrence
     occ ||= Occurrence.create!(
       user: user || current_user,
@@ -238,7 +237,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       field_slip: slip
     )
     self.occurrence = occ
-    cleanup_old_occurrence(old_occ, occ)
   end
 
   has_many :observation_herbarium_records, dependent: :destroy
@@ -261,6 +259,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   after_update :update_occurrence_specimen_cache
+  after_update :cleanup_abandoned_occurrence
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -781,7 +780,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     value = read_attribute(:notes)
     return Observation.no_notes unless value.is_a?(Hash)
 
-    NormalizedHash.new(value)
+    NotesHash.new(value)
   end
 
   # Notes to render on this observation's show page. For the primary
@@ -1276,16 +1275,35 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     occ.destroy_if_incomplete!
   end
 
-  # When an observation moves to a new occurrence, clean up the old one.
-  def cleanup_old_occurrence(old_occ, new_occ)
-    return unless old_occ && old_occ.id != new_occ.id
+  # When an observation moves to a different occurrence, fix up both
+  # sides. Old occurrence: repoint the primary if it was this
+  # observation, destroy the occurrence if it emptied or dropped below
+  # 2 members, and refresh its has_specimen cache. Must run after save
+  # -- before it, this observation still counts as a member of the old
+  # occurrence, so the primary could be "reassigned" right back to the
+  # departing record. New occurrence: refresh its has_specimen cache
+  # too -- update_occurrence_specimen_cache only fires when `specimen`
+  # itself changed, not when the membership did. Detaching
+  # (occurrence -> nil) is excluded; those flows (dissolve, field slip
+  # sync, occurrence edit) do their own cleanup.
+  def cleanup_abandoned_occurrence
+    old_id, new_id = saved_change_to_occurrence_id
+    return unless old_id && new_id
 
-    old_occ.reload
+    cleanup_old_occurrence_after_move(old_id)
+    occurrence&.recompute_has_specimen!
+  end
+
+  def cleanup_old_occurrence_after_move(old_id)
+    old_occ = Occurrence.find_by(id: old_id)
+    return unless old_occ
+
     reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
-    return unless Occurrence.exists?(old_occ.id)
+    return if old_occ.destroyed?
 
     old_occ.reload
     old_occ.destroy_if_incomplete!
+    old_occ.recompute_has_specimen! unless old_occ.destroyed?
   end
 
   def reassign_occurrence_primary(occ)
@@ -1411,15 +1429,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # After defining a location, update any lists using old "where" name.
+  # After defining a location, update any observations using old "where"
+  # name. The bulk update can deadlock against concurrent observation
+  # saves; one retry after MySQL rolls the victim back is enough.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE observations
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    retried = false
+    begin
+      Observation.where(where: old_name).
+        update_all(where: location.name, location_id: location.id)
+    rescue ActiveRecord::Deadlocked
+      raise if retried
+
+      retried = true
+      retry
+    end
   end
 
   ##############################################################################

@@ -6,6 +6,7 @@ class Views::Mailers::InatImportDigestMailer < Views::Mailers::Base
   prop :subject, ::String
   prop :receiver, ::User
   prop :namings, ::Array
+  prop :total_observations, ::Integer
 
   class Html < self
     def view_template
@@ -19,6 +20,7 @@ class Views::Mailers::InatImportDigestMailer < Views::Mailers::Base
     def render_body
       trusted_html(intro)
       trusted_html(observation_list)
+      render_truncation_note
       emit_tp(handy_links)
       render_links_section(links)
     end
@@ -30,6 +32,7 @@ class Views::Mailers::InatImportDigestMailer < Views::Mailers::Base
       gap
       trusted_html(observation_list.html_to_ascii)
       gap
+      render_truncation_note
       emit_tp(handy_links)
       gap
       render_links_section(links)
@@ -39,7 +42,26 @@ class Views::Mailers::InatImportDigestMailer < Views::Mailers::Base
   private
 
   def intro
-    :email_inat_import_digest_intro.tp(count: grouped.size)
+    :email_inat_import_digest_intro.tp(count: @total_observations)
+  end
+
+  def truncated?
+    grouped.size < @total_observations
+  end
+
+  # No-op (besides the always-safe no-op `gap`) when the digest wasn't
+  # truncated -- callable unconditionally from both Html and Text bodies.
+  def render_truncation_note
+    return unless truncated?
+
+    emit_tp(truncation_note)
+    gap
+  end
+
+  def truncation_note
+    :email_inat_import_digest_truncated.tp(
+      shown: grouped.size, count: @total_observations
+    )
   end
 
   # The receiver's matching namings grouped by observation, id-ordered.

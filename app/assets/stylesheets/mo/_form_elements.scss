@@ -130,43 +130,8 @@ select.has-error {
   }
 }
 
-// Specific text elements
-
-form.button_to {
-  display: inline;
-  margin: 0;
-  padding: 0;
-
-  div {
-    display: inline;
-  }
-
-  input[type=submit]:not(.btn),
-  button[type=submit]:not(.btn) {
-    margin: 0;
-    padding: 0;
-    // -webkit-appearance: caret;
-    background: none;
-    border: none;
-    font-size: inherit;
-    font-family: inherit;
-    font-weight: normal;
-    cursor: pointer;
-    // Note: Use a text-info type utility class to color the button text
-
-    &:not(.text-danger) {
-      color: $link-color;
-
-      &:hover {
-        color: $link-hover-color;
-      }
-    }
-  }
-
-  input[type=submit]:hover {
-    text-decoration: underline;
-  }
-}
+// form.button_to's base styling lives with buttons, not form elements
+// -- see _links_buttons_alerts.scss.
 
 // activity log filters inside btn-group
 a.filter-only {
@@ -319,4 +284,25 @@ form {
 form[inert] {
   opacity: 0.6;
   cursor: progress;
+}
+
+// Take Photo opens the camera via capture= on touch devices; desktop
+// browsers ignore capture, so there the button would only duplicate
+// the file picker. hover/pointer media is the standard touch-first
+// signal (phones and tablets match; laptops, including touchscreen
+// ones with a mouse, don't).
+.take-photo-field {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .take-photo-field {
+    display: block;
+  }
+
+  // No drag source on a touch device, so the drop/paste hint would
+  // only mislead there.
+  .drop-paste-hint {
+    display: none;
+  }
 }
