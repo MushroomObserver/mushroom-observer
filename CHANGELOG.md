@@ -288,6 +288,7 @@
 
 ## 2026-07-27 (deploy-2026-07-27-19-56)
 
+- Fix 500 deleting an external link on an occurrence-member observation (`siblings` relation vs typed prop) (#4927, @mo-nathan)
 - Resync read-only reflections from their iNaturalist source + `Sync now` button (#4215) (#4853, @mo-nathan)
 
 ## 2026-07-27 (deploy-2026-07-27-19-33)
@@ -641,6 +642,7 @@
 
 ## 2026-07-09 (deploy-2026-07-09-04-15)
 
+- Add Components::InputGroup and Components::ButtonGroup (#4722, @nimmolo)
 - Fix strip_checkpoint SQL syntax error; document db/ checkpoint scripts (#4725, @nimmolo)
 - Add Components::Navbar, InputGroup, and ButtonGroup (#4721, @nimmolo)
 - Split Solid Queue into default + maintenance worker pools (#4727, @nimmolo)
@@ -762,6 +764,7 @@
 
 ## 2026-07-03 (deploy-2026-07-03-15-09)
 
+- Track ignored iNat obs counts; show summary on Done (#4634, @nimmolo)
 - iNaturalist imports: one persistent record per import (#4644, @mo-nathan)
 - Batch iNat imports and broadcast `InatImport` status via Turbo, removing `InatImportJobTracker` (#4632, @nimmolo)
 
@@ -793,7 +796,10 @@
 
 ## 2026-07-02 (deploy-2026-07-02-14-27)
 
+- Batch iNat imports and broadcast `InatImport` status via Turbo, removing `InatImportJobTracker` (#3107, @nimmolo)
 - Close 3 coverage gaps (1 dead branch removed, 2 tested) (#4619, @mo-nathan)
+- Batch iNat imports and broadcast `InatImport` status via Turbo, removing `InatImportJobTracker` (#4629, @nimmolo)
+- Remove feature code accidentally pushed to main (#4633, @nimmolo)
 
 ## 2026-06-30 (deploy-2026-06-30-18-24)
 
@@ -904,7 +910,9 @@
 
 ## 2026-06-21 (deploy-2026-06-21-13-54)
 
-(no merged PRs -- asset-only or config deploy)
+- Remediate orphaned iNat-imported images (#4543) (#4567, @mo-nathan)
+- Revert #4567 — one-time remediation script + data file (#4571, @mo-nathan)
+- Consolidate Source into ExternalLink relationship model (#4299 phase 1) (#4568, @mo-nathan)
 
 ## 2026-06-19 (deploy-2026-06-19-21-01)
 
@@ -937,6 +945,7 @@
 
 ## 2026-06-17 (deploy-2026-06-17-05-48)
 
+- rubocop follow-up A+B: TestMethodName via private + small-count manual cops (#4544, @nimmolo)
 - rubocop: wire in rubocop-capybara + rubocop-minitest (#4539, @nimmolo)
 
 ## 2026-06-17 (deploy-2026-06-17-00-00)
@@ -1102,6 +1111,7 @@
 
 ## 2026-06-08 (deploy-2026-06-08-12-05)
 
+- Phlexify header partials + Header::FiltersHelper filter-caption chain (#4460, @nimmolo)
 - Merge nimmo-phlexify-namings-domain into main (brings #4460's Phlex header + 12 other commits) (#4480, @nimmolo)
 
 ## 2026-06-08 (deploy-2026-06-08-11-11)
@@ -1129,6 +1139,7 @@
 
 ## 2026-06-08 (deploy-2026-06-08-00-15)
 
+- copilot-review workflow: defensive token trim + reviewer slug fix (#4470, @nimmolo)
 - Phlexify Names::Show + NamesHelper chain into Tab POROs + 3 Collections (#4469, @nimmolo)
 - Sweep _Any prop violations + add regression guard test (#4471, @nimmolo)
 
@@ -1141,10 +1152,12 @@
 - Improve coverage post deploy-2026-06-05-18-07 (#4453, @JoeCohen)
 - Workflow requesting Copilot review on nimmolo's PRs (#4461, @JoeCohen)
 - Bump rubocop-rails to 2.35.4 (#4463, @JoeCohen)
+- Phlexify rest of observations/namings + dismantle ObservationsHelper (#4458, @nimmolo)
+- Description#put_together_name: fix source_type ||= local-shadow bug (#4447, @nimmolo)
 
 ## 2026-06-06 (deploy-2026-06-06-11-41)
 
-(no merged PRs -- asset-only or config deploy)
+- Phlexify _section_update.erb: ApplicationController::SectionUpdater + inline panel callsites (#4459, @nimmolo)
 
 ## 2026-06-06 (deploy-2026-06-06-08-20)
 
@@ -1179,15 +1192,16 @@
 
 ## 2026-06-04 (deploy-2026-06-04-13-05)
 
-(no merged PRs -- asset-only or config deploy)
+- test/components: routes proxy + render components directly (drop view_context.helper layer) (#4440, @nimmolo)
 
 ## 2026-06-04 (deploy-2026-06-04-12-09)
 
-(no merged PRs -- asset-only or config deploy)
+- Descriptions::List: inline list_descriptions, drop helper registration (#4438, @nimmolo)
 
 ## 2026-06-04 (deploy-2026-06-04-10-41)
 
-(no merged PRs -- asset-only or config deploy)
+- ERB→Phlex: observations/namings/{new,edit} (#4434, @nimmolo)
+- ERB→Phlex: alt_descriptions panel + Descriptions::List view (#4437, @nimmolo)
 
 ## 2026-06-04 (deploy-2026-06-04-00-43)
 
@@ -1195,23 +1209,27 @@
 
 ## 2026-06-04 (deploy-2026-06-04-00-24)
 
-(no merged PRs -- asset-only or config deploy)
+- Relocate *_index_sorts; delete tabs/{locations,names}_helper.rb (#4432, @nimmolo)
 
 ## 2026-06-03 (deploy-2026-06-03-23-38)
 
-(no merged PRs -- asset-only or config deploy)
+- Tab POROs: project members Collections + relocate tabs/projects_helper (#4433, @nimmolo)
 
 ## 2026-06-03 (deploy-2026-06-03-22-04)
 
-(no merged PRs -- asset-only or config deploy)
+- Delete tabs/related_objects_helper (#4431, @nimmolo)
 
 ## 2026-06-03 (deploy-2026-06-03-21-11)
 
-(no merged PRs -- asset-only or config deploy)
+- testing.md: paginate coveralls source_files.json in audit snippet (#4428, @nimmolo)
+- Tab POROs: sweep observations/names/locations adapter callers (#4429, @nimmolo)
+- Tab POROs: name external links + delete object_link_helper URL builders (#4430, @nimmolo)
 
 ## 2026-06-03 (deploy-2026-06-03-15-29)
 
-(no merged PRs -- asset-only or config deploy)
+- Tab POROs: 5 small action-nav helpers + delete general_helper (#4425, @nimmolo)
+- Tab POROs: sidebar batch (8 helpers, ~37 POROs) (#4427, @nimmolo)
+- tabs/related_objects_helper: delete dead related_observations_tab (#4426, @nimmolo)
 
 ## 2026-06-02 (deploy-2026-06-02-18-19)
 
@@ -1219,15 +1237,20 @@
 
 ## 2026-06-02 (deploy-2026-06-02-17-53)
 
-(no merged PRs -- asset-only or config deploy)
+- Tab POROs: users + account + checklists batch (#4423, @nimmolo)
 
 ## 2026-06-02 (deploy-2026-06-02-17-27)
 
 - Drop cross-form vestigial logic in description merge/move forms; close namings form coverage gap (#4420, @mo-nathan)
+- Tab POROs: 12 small action-nav helpers (the big one with field slips) (#4421, @nimmolo)
 
 ## 2026-06-02 (deploy-2026-06-02-00-48)
 
-(no merged PRs -- asset-only or config deploy)
+- Tab POROs: close coverage gaps (delete dead delegators + cover edge cases) (#4418, @nimmolo)
+- Coverage gaps: delete dead form/panel helpers, fix Herbarium#order_by_user (#4419, @nimmolo)
+- Tab POROs: convert glossary_terms (3 single Tabs + 4 Collections) (#4415, @nimmolo)
+- Tab POROs: convert descriptions (10 single Tabs + helper cleanup) (#4416, @nimmolo)
+- Tab POROs: bundle (comments, collection_numbers, herbarium_records, sequences, images) (#4417, @nimmolo)
 
 ## 2026-06-01 (deploy-2026-06-01-13-15)
 
@@ -1235,6 +1258,7 @@
 - Tab POROs: convert locations + locations/descriptions (#4412, @nimmolo)
 - Tab POROs: convert names + names/descriptions (action tabs + 3 cross-domain externals) (#4411, @nimmolo)
 - Tab POROs: convert observations (15 single Tabs + 12 Collections) (#4413, @nimmolo)
+- Cleanup: delete tabs/species_lists_helper.rb + tabs/herbaria_helper.rb (#4414, @nimmolo)
 
 ## 2026-05-31 (deploy-2026-05-31-23-34)
 
@@ -1261,55 +1285,73 @@
 
 ## 2026-05-30 (deploy-2026-05-30-11-34)
 
-(no merged PRs -- asset-only or config deploy)
+- testing.md: no cosmetic Bootstrap classes in component tests (with exception) + sweep (#4397, @nimmolo)
 
 ## 2026-05-30 (deploy-2026-05-30-11-23)
 
-(no merged PRs -- asset-only or config deploy)
+- account/preferences: convert form + action templates to Phlex (#4394, @nimmolo)
+- shared/list_search: convert to Phlex Components::ListSearch (#4395, @nimmolo)
+- Preferences form: fix two broken PUTs and move retroactive update links (#4396, @nimmolo)
 
 ## 2026-05-29 (deploy-2026-05-29-11-34)
 
-(no merged PRs -- asset-only or config deploy)
+- `Header::ContextNavHelper`: convert dropdown + sidebar builders to Phlex (#4392, @nimmolo)
 
 ## 2026-05-29 (deploy-2026-05-29-11-29)
 
-(no merged PRs -- asset-only or config deploy)
+- species_lists_controller: trim under 250 lines; drop ClassLength disable (#4393, @nimmolo)
 
 ## 2026-05-29 (deploy-2026-05-29-10-44)
 
-(no merged PRs -- asset-only or config deploy)
+- LightboxCaption: embed ImageVoteInterface; strengthen test coverage (#4388, @nimmolo)
+- species_lists: convert remaining ERBs to Phlex; add `render_index_view` hook (#4389, @nimmolo)
+- SpeciesList#sync_projects: move project-sync logic to the model (#4390, @nimmolo)
+- Location.dubious_reasons_for: collapse 6-site duplicate pattern (#4391, @nimmolo)
 
 ## 2026-05-29 (deploy-2026-05-29-00-19)
 
-(no merged PRs -- asset-only or config deploy)
+- CrudButton: rename, subclasses, btn:/icon: defaults; sweep callers (#4387, @nimmolo)
 
 ## 2026-05-28 (deploy-2026-05-28-02-12)
 
-(no merged PRs -- asset-only or config deploy)
+- species_lists/write_in: convert to Phlex + fix AutocompleterField hidden-id slicing (#4386, @nimmolo)
 
 ## 2026-05-28 (deploy-2026-05-28-01-37)
 
 - Bump rubocop-rails to 2.35.3 (#4383, @JoeCohen)
+- ApplicationForm field helpers: accept String name for non-bound fields + sweep callers (#4382, @nimmolo)
+- Field helpers: Symbol + explicit value: overrides the model attribute (#4384, @nimmolo)
+- Restore link_icon / modal_link_to to AutocompleterField (Components::Input) (#4385, @nimmolo)
 
 ## 2026-05-27 (deploy-2026-05-27-16-29)
 
-(no merged PRs -- asset-only or config deploy)
+- checkbox_field: positional choices in Rails shape (#4374, @nimmolo)
+- species_lists: convert 5 ERB forms + action templates to Phlex (#4375, @nimmolo)
+- Centralize helper registrations + flatten Phlex view namespaces (#4376, @nimmolo)
+- ProjectsHelper cleanup: inline alias-table rendering + relocate tabs (#4378, @nimmolo)
+- Delete orphan public/graphql/schema.graphql (#4379, @nimmolo)
+- Fix Digestor warnings at source: ERBTracker skip constant-style render args (#4380, @nimmolo)
+- Inline project_alias link helpers into Widget; delete ProjectsHelper (#4381, @nimmolo)
 
 ## 2026-05-27 (deploy-2026-05-27-00-56)
 
-(no merged PRs -- asset-only or config deploy)
+- Views::Base: pre-register common page-chrome helpers (#4373, @nimmolo)
 
 ## 2026-05-26 (deploy-2026-05-26-16-15)
 
-(no merged PRs -- asset-only or config deploy)
+- Bundle update with Rails ~> 7.0 (#4326, @JoeCohen)
 
 ## 2026-05-26 (deploy-2026-05-26-16-10)
 
-(no merged PRs -- asset-only or config deploy)
+- Move 3 single-purpose forms from components/ to views/controllers/ (#4365, @nimmolo)
+- Move Components::Checklist::* to Views::Controllers::Checklists::* (#4366, @nimmolo)
+- Lock in two .claude/rules: PR bodies via --body-file + Phlex-conversion placement (#4367, @nimmolo)
+- Move Components::Descriptions::* forms to Views::Controllers::Descriptions::* (#4368, @nimmolo)
+- Move Components::Sidebar::* to Views::Layouts::Sidebar::* (#4370, @nimmolo)
 
 ## 2026-05-26 (deploy-2026-05-26-16-03)
 
-(no merged PRs -- asset-only or config deploy)
+- Update disconnecting db connection pool (#4256, @JoeCohen)
 
 ## 2026-05-26 (deploy-2026-05-26-14-40)
 
@@ -1317,16 +1359,30 @@
 
 ## 2026-05-26 (deploy-2026-05-26-11-10)
 
-(no merged PRs -- asset-only or config deploy)
+- SelectField: accept Rails-shape [label, value] pairs (#4364, @nimmolo)
 
 ## 2026-05-26 (deploy-2026-05-26-10-16)
 
-(no merged PRs -- asset-only or config deploy)
+- occurrences: move + consolidate OccurrenceForm + OccurrenceEditForm; fix 2 N+1s (#4345, @nimmolo)
+- observations: move 6 forms to Views/ (#4357, @nimmolo)
+- projects: move 17 forms/widgets to Views/ (#4361, @nimmolo)
+- Layouts: introduce Views::Layouts namespace (#4362, @nimmolo)
+- Fix #4360: cross-model q param renders unfiltered Image index (#4363, @nimmolo)
 
 ## 2026-05-25 (deploy-2026-05-25-13-57)
 
 - glossary_terms: move 2 forms to Views/ (#4342, @nimmolo)
 - herbaria: move 2 forms to Views/ (#4343, @nimmolo)
+- inat_imports: move 2 forms to Views/ (#4344, @nimmolo)
+- species_lists: move 3 forms to Views/ (4th stays — genuinely reusable) (#4346, @nimmolo)
+- account: move 4 forms to Views/ (#4347, @nimmolo)
+- admin: move 9 forms to Views/ (#4348, @nimmolo)
+- Testing rule: fix coverage gaps on every touched file (#4350, @nimmolo)
+- locations: move LocationForm to Views/ (#4351, @nimmolo)
+- images: move 2 forms to Views/ (+ test for ImageOriginalLink) (#4353, @nimmolo)
+- names: move 9 forms to Views/ (#4354, @nimmolo)
+- Phlex conversion rule: watch for decorative Model.new passed to super (#4356, @nimmolo)
+- ApplicationForm: derive form id from full controller path (#4355, @nimmolo)
 
 ## 2026-05-24 (deploy-2026-05-24-12-07)
 
