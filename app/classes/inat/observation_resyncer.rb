@@ -77,15 +77,24 @@ class Inat
     # `location` triggers a callback that rewrites `where` to match the
     # location's name. So `changed?` stays true even with no update.
     # Read `saved_changes` (minus the timestamp) to see what got saved.
+    #
+    # Save scalar attributes first. sync_placeholder_naming?'s consensus
+    # recalculation does its own separate save, only when the consensus
+    # itself changes -- so track each save's own "did it change" signal
+    # instead of reading saved_changes once at the end.
     def apply(obs, inat_obs)
       if upgrade_eligible?(obs, inat_obs)
         return upgrade_placeholder(obs, inat_obs)
       end
 
       obs.assign_attributes(scalar_attributes(obs, inat_obs))
-      sync_placeholder_naming(obs, inat_obs) if obs.placeholder?
       obs.save! if obs.changed?
-      changed = obs.saved_changes.except("updated_at").present?
+      scalar_changed = obs.saved_changes.except("updated_at").present?
+
+      naming_changed = obs.placeholder? &&
+                       sync_placeholder_naming?(obs, inat_obs)
+      changed = scalar_changed || naming_changed
+
       mark_synced(obs)
       log_resync(obs) if changed
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
@@ -130,12 +139,12 @@ class Inat
     # `where` too would flip it back and forth and never converge.
     #
     # A placeholder gets a narrower sync than a normal reflection;
-    # only date/location chang here.
+    # only date/location change here.
     # `notes` is excluded -- a placeholder includes a fixed message
     # instead of the iNat source's Notes/description. So a resync must not
     # change that. `specimen` is left alone too.
     #
-    # The leading ID has its own handling in sync_placeholder_naming below.
+    # The leading ID has its own handling in sync_placeholder_naming? below.
     def scalar_attributes(obs, inat_obs)
       location = inat_obs.location
       attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
@@ -146,31 +155,64 @@ class Inat
       attrs.merge(specimen: inat_obs.specimen?, notes: inat_obs.notes)
     end
 
-    # Revise a placeholder's single Naming when iNat's Leading ID changes.
-    # Compare it to iNat's Leading ID to decide if it changed.
-    #
-    # Refresh the Naming's "Used references" reason to today's date.
-    #
-    # Assign the new name to the Observation too, but don't save it here.
-    # The obs.save! in #apply picks up that change, plus any date or location
-    # updates.
-    #
-    # Skeletons skip MO's normal vote-driven consensus (see
-    # SkeletonObservationBuilder#add_naming_with_vote). So set the
-    # Naming and the observation's name_id/text_name together
-    # here, same as at creation.
-    #
-    # Don't touch votes, images, sequences, or other namings.
-    def sync_placeholder_naming(obs, inat_obs)
-      naming = obs.namings.order(:id).first
-      return unless naming
-
+    # Revise MO's own stand-in Naming for iNat's Leading ID
+    # Add a new stand-in instead when the current one is locked.
+    # Recalculate consensus, so votes -- not iNat -- decide obs ID.
+    def sync_placeholder_naming?(obs, inat_obs)
       resolver = Inat::LeadNameResolver.new(inat_obs: inat_obs, user: obs.user)
       lead_name = resolver.leading_id_name
-      return if lead_name == naming.name
+      consensus = Observation::NamingConsensus.new(obs)
+      stand_in = trackable_naming(consensus)
+      return false unless stand_in
+      return false if lead_name == stand_in.name
 
-      naming.update!(name: lead_name, reasons: { 2 => resolver.reason_text })
-      obs.assign_attributes(name: lead_name, text_name: lead_name.text_name)
+      revise_or_add_naming(stand_in, lead_name, resolver, consensus, inat_obs)
+      consensus.calc_consensus(User.admin)
+      obs.reload
+      true
+    end
+
+    # MO's stand-in for iNat's Leading ID: the importer's most recent
+    # Naming -- not a Naming someone else proposed.
+    # nil if the importer has no Naming.
+    def trackable_naming(consensus)
+      obs = consensus.observation
+      obs.namings.where(user: obs.user).order(id: :desc).first
+    end
+
+    # Revise the stand-in Naming in place if unlocked.
+    # Else add a new stand-in.
+    def revise_or_add_naming(stand_in, lead_name, resolver, consensus,
+                             inat_obs)
+      if consensus.editable?(stand_in)
+        stand_in.update!(name: lead_name,
+                         reasons: { 2 => resolver.reason_text })
+      else
+        add_placeholder_naming(consensus, lead_name, resolver,
+                               placeholder_naming_vote(inat_obs))
+      end
+    end
+
+    # Add a new stand-in Naming -- same shape as
+    # SkeletonObservationBuilder#add_naming_with_vote.
+    def add_placeholder_naming(consensus, name, resolver, value)
+      obs = consensus.observation
+      naming = Naming.create(
+        observation: obs, user: obs.user, name: name,
+        reasons: { 2 => resolver.reason_text }
+      )
+      Vote.create(naming: naming, observation: obs, user: obs.user,
+                  value: value)
+      consensus.mark_obs_reviewed(obs.user)
+    end
+
+    # Same confidence weight SkeletonObservationBuilder#naming_vote uses.
+    def placeholder_naming_vote(inat_obs)
+      if inat_obs[:quality_grade] == "research"
+        Vote::NEXT_BEST_VOTE
+      else
+        Vote::MIN_POS_VOTE
+      end
     end
 
     # The iNat obs is gone: keep every MO record intact, record the loss on

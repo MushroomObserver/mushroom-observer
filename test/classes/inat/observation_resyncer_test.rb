@@ -9,6 +9,7 @@ require("json")
 # the API.
 class Inat::ObservationResyncerTest < UnitTestCase
   include ActionCable::TestHelper
+  include ActiveJob::TestHelper
 
   # Stands in for Inat::ObsFetcher — returns a canned [by_id, failed?]
   # and records the ids it was asked for.
@@ -251,11 +252,152 @@ class Inat::ObservationResyncerTest < UnitTestCase
   end
 
   # ---------------------------------------------------------------
-  #  Upgrading a placeholder to a full import on sync (#4828): once MO
-  #  has the right to hold the whole record -- the iNat obs is now
-  #  licensed, or the importer turns out to be the iNat collector --
-  #  the narrow placeholder sync above is skipped in favor of a full
-  #  rebuild, written into the same row.
+  #  Placeholder resync respects MO-side Namings and Votes: it only
+  #  revises its own stand-in Naming, only while no outside vote
+  #  has locked it. A locked stand-in gets a new one instead; a
+  #  Naming someone else proposed stays untouched.
+  # ---------------------------------------------------------------
+
+  def test_placeholder_resync_leaves_independent_naming_untouched
+    skeleton = build_skeleton(name: names(:peltigera))
+    marys_naming = Naming.create!(observation: skeleton, user: mary,
+                                  name: names(:coprinus), reasons: { 1 => "" })
+    Vote.create!(naming: marys_naming, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    Observation::NamingConsensus.new(skeleton).calc_consensus(mary)
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Test setup: Mary's confident vote should already lead")
+
+    link = skeleton.import_link
+    stereum_raw = raw_for(names(:stereum))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => stereum_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Mary's independently-proposed Naming should still win " \
+                 "consensus after resync, not iNat's new Leading ID")
+    assert_equal(names(:coprinus), marys_naming.reload.name,
+                 "Resync should not repoint a Naming a human proposed " \
+                 "independently")
+    assert_equal(1, marys_naming.votes.count,
+                 "Mary's vote on her own Naming should be untouched")
+  end
+
+  def test_placeholder_resync_forks_a_new_naming_when_the_anchor_is_locked
+    skeleton = build_skeleton(name: names(:peltigera))
+    anchor = skeleton.namings.first
+    Vote.create!(naming: anchor, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:peltigera), anchor.reload.name,
+                 "A locked Naming should not be revised by resync")
+    assert_equal(2, skeleton.reload.namings.count,
+                 "resync should add a new Naming instead of editing a " \
+                 "locked one")
+    forked = skeleton.namings.where.not(id: anchor.id).first
+    assert_equal(names(:coprinus), forked.name)
+    assert_equal(users(:rolf), forked.user,
+                 "The forked Naming should be attributed to the importer")
+  end
+
+  def test_placeholder_resync_forked_naming_is_a_stable_anchor
+    skeleton = build_skeleton(name: names(:peltigera))
+    anchor = skeleton.namings.first
+    Vote.create!(naming: anchor, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:unchanged, result.status,
+                 "iNat's Leading ID hasn't moved since the fork, so no " \
+                 "further Naming should be added")
+    assert_equal(2, skeleton.reload.namings.count)
+  end
+
+  def test_placeholder_resync_forks_again_after_the_first_fork_is_locked
+    skeleton = build_skeleton(name: names(:peltigera))
+    original_anchor = skeleton.namings.first
+    Vote.create!(naming: original_anchor, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+    first_fork = skeleton.namings.where.not(id: original_anchor.id).first
+    Vote.create!(naming: first_fork, observation: skeleton, user: dick,
+                 value: Vote::MAXIMUM_VOTE)
+    stereum_raw = raw_for(names(:stereum))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => stereum_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+
+    assert_equal(3, skeleton.namings.count,
+                 "an outside vote locking the first fork should trigger " \
+                 "a second fork")
+    assert_equal(names(:peltigera), original_anchor.reload.name)
+    assert_equal(names(:coprinus), first_fork.reload.name)
+    second_fork = skeleton.namings.
+                  where.not(id: [original_anchor.id, first_fork.id]).first
+    assert_equal(names(:stereum), second_fork.name)
+  end
+
+  # Do not suppress sync-driven consensus recalculation. It sends the
+  # normal ConsensusChangeMailer notification.
+  # Naming#create_emails (after_save callback) separately sends
+  # its own naming-proposal notification for the revised Naming -- two
+  # distinct, expected notifications to the same interested user.
+  def test_placeholder_resync_consensus_change_notifies_interested_users
+    skeleton = build_skeleton(name: names(:peltigera))
+    Interest.create!(target: skeleton, user: katrina, state: true)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+
+    assert_enqueued_jobs(2, only: ActionMailer::MailDeliveryJob) do
+      Inat::ObservationResyncer.new(
+        skeleton,
+        fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                  false])
+      ).resync
+    end
+  end
+
+  # ---------------------------------------------------------------
+  #  Upgrading a placeholder to a full import on sync.
+  #  If the iNat obs is now licensed, or the importer is the collector,
+  #  skip the narrow placeholder sync above in favor of a full
+  #  rebuild, overwriting the existing Observation.
   # ---------------------------------------------------------------
 
   def test_upgrade_eligible_when_now_licensed
@@ -347,9 +489,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     assert_equal(:synced, result.status)
     skeleton.reload
-    assert_not(skeleton.placeholder?,
-               "The importer matching the iNat collector should upgrade " \
-               "the placeholder, even though the source is unlicensed")
+    assert_not(
+      skeleton.placeholder?,
+      "The Observation should upgrade from a placeholder if the importer " \
+      "is the collector, even if the iNat obs is unlicensed"
+    )
     assert_equal(names(:coprinus), skeleton.name)
   end
 
@@ -539,6 +683,15 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # A raw iNat obs hash whose taxon matches an existing MO Name fixture
+  # (genus rank), so leading-ID resolution needs no API call. Based on
+  # coprinus.txt (unlicensed, one photo -- irrelevant here since these
+  # tests only exercise placeholder naming/consensus sync).
+  def raw_for(name)
+    raw = mock_raw("coprinus")
+    raw.merge(taxon: raw[:taxon].merge(name: name.text_name, rank: "genus"))
   end
 
   # Minimal stand-in for an ::Inat::Obs, exposing only what
