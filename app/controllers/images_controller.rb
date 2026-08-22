@@ -160,8 +160,13 @@ class ImagesController < ApplicationController
     # Update view stats on image we're actually showing.
     update_view_stats(@image)
 
+    render_show_view
+  end
+
+  def render_show_view
     render(Views::Controllers::Images::Show.new(
-             image: @image, size: @size, default_size: @default_size
+             image: @image, size: @size, default_size: @default_size,
+             field_slip_extract: FieldSlipExtract.find_by(image_id: @image.id)
            ))
   end
 
