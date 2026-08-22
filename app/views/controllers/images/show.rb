@@ -65,22 +65,16 @@ module Views::Controllers::Images
         image: @image, user: current_user, site_admin: in_admin_mode?
       )
 
-      div(class: "mb-3 text-center") do
-        render_field_slip_extract_link
-        Button(type: :post, name: :field_slip_extract_button.l,
-               target: image_field_slip_extract_path(@image.id))
-      end
-    end
-
-    # The Read button always re-reads, so an existing read needs its
-    # own way back to the review/status page.
-    def render_field_slip_extract_link
+      # The Read button always re-reads, so an existing read gets its
+      # own button back to the review/status page; Read doubles as the
+      # retry for a failed one.
       extract = ::FieldSlipExtract.find_by(image_id: @image.id)
-      return unless extract
-
-      p(class: "mb-2") do
-        Link(type: :get, name: extract.state_label,
-             target: edit_image_field_slip_extract_path(@image.id))
+      div(class: "mb-3 text-center") do
+        FieldSlipScanState(image: @image, extract: extract,
+                           offer_retry: false)
+        Button(type: :post, name: :field_slip_extract_button.l,
+               class: ("ml-2" if extract),
+               target: image_field_slip_extract_path(@image.id))
       end
     end
 

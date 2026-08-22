@@ -40,8 +40,7 @@ module Views::Controllers::Observations::FieldSlipScans
         Button(type: :post, name: :field_slip_extract_button.l,
                target: image_field_slip_extract_path(image.id))
       else
-        Link(type: :get, name: extract.state_label,
-             target: edit_image_field_slip_extract_path(image.id))
+        FieldSlipScanState(image: image, extract: extract)
       end
     end
 

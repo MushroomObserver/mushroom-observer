@@ -53,7 +53,7 @@ module Observations
 
       assert_response(:success)
       assert_select(
-        "a[href='#{edit_image_field_slip_extract_path(@image.id)}']",
+        "a.btn[href='#{edit_image_field_slip_extract_path(@image.id)}']",
         text: :field_slip_scan_reading.l
       )
       assert_select(
@@ -68,7 +68,12 @@ module Observations
 
       get(:show, params: { id: @obs.id })
 
-      assert_select("a", text: :field_slip_scan_failed.l)
+      assert_select("a.btn", text: :field_slip_scan_failed.l)
+      assert_select(
+        "form[action='#{image_field_slip_extract_path(@image.id)}'] " \
+        "button.btn",
+        text: :field_slip_scan_retry.l
+      )
 
       FieldSlipExtract.record(
         image: @image, user: mary, prompt_version: "1",
@@ -79,7 +84,7 @@ module Observations
       )
       get(:show, params: { id: @obs.id })
 
-      assert_select("a", text: :field_slip_scan_review.l)
+      assert_select("a.btn", text: :field_slip_scan_review.l)
     end
 
     def test_show_allowed_for_a_site_admin

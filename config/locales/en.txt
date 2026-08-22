@@ -2631,7 +2631,8 @@
   field_slip_scan_help: Scan the photo that shows the field slip. Photos already scanned link to their results.
   field_slip_scan_review: Review Scan Results
   field_slip_scan_reading: Reading in Progress
-  field_slip_scan_failed: Scan Failed - View / Retry
+  field_slip_scan_failed: Scan Failed - View
+  field_slip_scan_retry: Retry
   field_slip_scan_all_photos: Choose among all of this observation's photos
   observation_no_field_slip_detected: 'No field slip code was automatically detected in the photos. If one of them shows a field slip, you can "scan it":[url].'
   field_slip_extract_code_differs: differs from the attached field slip!
