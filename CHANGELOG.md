@@ -2190,3 +2190,8 @@
 ## 2026-01-01 (deploy-2026-01-01-00-27)
 
 - Fix destroy buttons on show pages for observation associated records ([#3675](https://github.com/MushroomObserver/mushroom-observer/pull/3675), @nimmolo)
+
+## 2026-01-01 (deploy-2026-01-01-00-21)
+
+- Fix autocompleter JS - should clear matching id when string changes ([#3674](https://github.com/MushroomObserver/mushroom-observer/pull/3674), @nimmolo)
+- Phlex HerbariumForm component ([#3640](https://github.com/MushroomObserver/mushroom-observer/pull/3640), @nimmolo)
