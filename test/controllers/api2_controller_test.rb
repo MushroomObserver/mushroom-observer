@@ -361,6 +361,12 @@ class API2ControllerTest < FunctionalTestCase
 
     assert_no_api_errors
     assert_select("primary_image[id=?]", thumb.id.to_s)
+    assert_select("images[number=?]", primary.images.count.to_s)
+    assert_select("images > image", count: primary.images.count)
+    primary.image_ids.each do |id|
+      assert_select("images > image[id=?]", id.to_s)
+    end
+    assert_select("images > image[id=?]", thumb.id.to_s, count: 0)
   end
 
   # A link identified by `external_id` stores no `url` -- the model's

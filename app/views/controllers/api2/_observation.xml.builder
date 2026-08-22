@@ -54,24 +54,19 @@ xml.tag!(
       end
     end
     xml_detailed_location(xml, :location, object.location, object.where)
-    object.images.each do |image|
-      # Do it this way, else will not use eager-loaded image instance.
-      xml_detailed_object(xml, :primary_image, image) \
-        if image.id == object.thumb_image_id
+    # Iterate the eager-loaded images rather than reading the
+    # association, and fall back to `thumb_image` only when the
+    # thumbnail is an occurrence sibling's image, not one of this
+    # observation's own.
+    other_images = object.images.reject do |image|
+      image.id == object.thumb_image_id
     end
-    # The thumbnail may be an occurrence sibling's image, not one of
-    # this observation's own.
-    if object.thumb_image_id &&
-       object.images.none? { |image| image.id == object.thumb_image_id } &&
-       object.thumb_image
-      xml_detailed_object(xml, :primary_image, object.thumb_image)
-    end
-    if object.images.length > 1
-      xml.images(number: object.images.length - 1) do
-        object.images.each do |image|
-          xml_detailed_object(xml, :image, image) \
-            if image.id != object.thumb_image_id
-        end
+    primary = (object.images - other_images).first ||
+              (object.thumb_image if object.thumb_image_id)
+    xml_detailed_object(xml, :primary_image, primary) if primary
+    if other_images.any?
+      xml.images(number: other_images.length) do
+        other_images.each { |image| xml_detailed_object(xml, :image, image) }
       end
     end
     if object.comments.any?
