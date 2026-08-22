@@ -142,13 +142,23 @@ class ChangelogGenerator
   # at most 1000 results, ordered by creation, so a single query drops
   # old PRs that merged recently.
   def pr_pool
-    @pr_pool ||= pool_months.flat_map do |from, to|
-      JSON.parse(
-        run_cmd("gh", "pr", "list", "--state", "merged", "--limit", "1000",
-                "--search", "merged:#{from}..#{to}",
-                "--json", "number,title,author,mergeCommit")
-      )
+    @pr_pool ||= pool_months.flat_map { |from, to| merged_in(from, to) }
+  end
+
+  SEARCH_CAP = 1000
+
+  def merged_in(from, to)
+    pulls = JSON.parse(
+      run_cmd("gh", "pr", "list", "--state", "merged",
+              "--limit", SEARCH_CAP.to_s,
+              "--search", "merged:#{from}..#{to}",
+              "--json", "number,title,author,mergeCommit")
+    )
+    if pulls.size >= SEARCH_CAP
+      abort("#{pulls.size} PRs merged in #{from}..#{to} hits GitHub's " \
+            "search cap; shorten the window in pool_months.")
     end
+    pulls
   end
 
   # Month windows from the lookback before the run's earliest tag to
