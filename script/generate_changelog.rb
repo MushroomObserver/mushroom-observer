@@ -44,6 +44,8 @@ class ChangelogGenerator
   # parent reaches main; the PR pool reaches back this far before the
   # earliest deploy tag a run looks at.
   POOL_LOOKBACK_DAYS = 365
+  # GitHub search returns at most this many results per query.
+  SEARCH_CAP = 1000
 
   def initialize(argv)
     @apply = false
@@ -144,8 +146,6 @@ class ChangelogGenerator
   def pr_pool
     @pr_pool ||= pool_months.flat_map { |from, to| merged_in(from, to) }
   end
-
-  SEARCH_CAP = 1000
 
   def merged_in(from, to)
     pulls = JSON.parse(
