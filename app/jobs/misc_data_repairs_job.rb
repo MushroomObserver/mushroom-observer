@@ -47,8 +47,12 @@ class MiscDataRepairsJob < ApplicationJob
 
   private
 
+  # A task that hits rows it can't repair yields each failure message
+  # instead of raising, so the sweep continues; route those to the
+  # #alerts channel for human review. Tasks that don't yield ignore
+  # the block.
   def run_task(klass, method, description, dry_run)
     log("#{description}...")
-    klass.send(method, dry_run: dry_run)
+    klass.send(method, dry_run: dry_run) { |failure| alert(failure) }
   end
 end
