@@ -221,9 +221,13 @@ class Inat
                  "and the user's own without_field is still stripped")
     end
 
-    def test_add_ownership_filter_defaults_licensed_true_when_absent
+    # create_skeletons off restores the original fetch-side hint: default
+    # licensed:true so iNat trims out (most) unlicensed obs up front, since
+    # they're genuinely skipped rather than imported as skeletons (#4828).
+    def test_add_ownership_filter_licensed_default_skeletons_off
       import = inat_imports(:dick_inat_import).tap do |i|
         i.import_others = true
+        i.create_skeletons = false
         i.inat_username = ""
         i.inat_ids = "123"
       end
@@ -234,12 +238,13 @@ class Inat
 
       assert_equal(true, query_args[:licensed],
                    "licensed should default to true when the stored URL " \
-                   "doesn't specify one")
+                   "doesn't specify one and create_skeletons is off")
     end
 
     def test_add_ownership_filter_preserves_licensed_false
       import = inat_imports(:dick_inat_import).tap do |i|
         i.import_others = true
+        i.create_skeletons = false
         i.inat_username = ""
         i.inat_ids = "123"
       end
@@ -250,8 +255,27 @@ class Inat
 
       assert_equal(false, query_args[:licensed],
                    "licensed:false from the stored URL must not be " \
-                   "overridden — ObservationImporter#unlicensed_other? is " \
-                   "the authoritative safety net, not this fetch filter")
+                   "overridden — ObservationImporter#skip_unlicensed_other? " \
+                   "is the authoritative safety net, not this fetch filter")
+    end
+
+    # create_skeletons on (the default, #4828): unlicensed obs are actually
+    # imported, as skeletons, so nothing should be filtered out up front.
+    def test_add_ownership_filter_no_licensed_filter_when_create_skeletons_on
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.create_skeletons = true
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      parser = PageParser.new(import)
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG }
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_nil(query_args[:licensed],
+                 "No licensed filter should be added when create_skeletons " \
+                 "is on — unlicensed obs are still imported, as skeletons")
     end
 
     def test_add_ownership_filter_sets_user_login_for_own_import

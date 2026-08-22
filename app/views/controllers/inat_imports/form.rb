@@ -11,7 +11,10 @@ module Views::Controllers::InatImports
     def view_template
       super do
         render_inat_username_field
-        render_import_others_field if @super_importer
+        if @super_importer
+          render_import_others_field
+          render_create_skeletons_field
+        end
         render_consent_checkbox
         render_choose_observations_section
         render_skip_writeback_field if @admin
@@ -35,6 +38,13 @@ module Views::Controllers::InatImports
       checkbox_field(:import_others,
                      label: :inat_import_others,
                      wrap_class: "mt-1")
+    end
+
+    def render_create_skeletons_field
+      checkbox_field(:create_skeletons,
+                     label: :inat_create_skeletons,
+                     help: :inat_create_skeletons_help.l,
+                     wrap_class: "mt-1 ml-3")
     end
 
     def render_skip_writeback_field

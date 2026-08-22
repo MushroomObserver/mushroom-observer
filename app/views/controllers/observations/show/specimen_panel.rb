@@ -5,6 +5,7 @@
 # actually recorded; the body holds the collection-numbers /
 # herbarium-records / sequences sections, collapsed by default when
 # none of those exist yet. Renders right below the Details panel.
+# Omitted for a placeholder obs with none of those records.
 class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   include SiblingRecords
 
@@ -13,6 +14,11 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
+    # Omit (rather than collapse) the specimen panel for placeholder obs --
+    # the panel caption ("No specimen available") can be misleading, since
+    # a counterpart external record may have specimen info.
+    return if @obs.placeholder? && !specimen_records?
+
     Panel(panel_id: "observation_specimen",
           collapsible: true,
           collapse_target: "#observation_specimen_body",

@@ -51,6 +51,18 @@ class Inat::ImportDigestTest < UnitTestCase
     end
   end
 
+  # Skeleton observations (#4828) don't suppress their naming's
+  # notification — it fires immediately, so including them here too
+  # would notify interested users twice.
+  def test_excludes_skeleton_observations
+    Interest.create!(target: @name, user: katrina, state: true)
+    @import.update!(skeleton_observation_ids: [@obs.id])
+
+    assert_no_enqueued_jobs do
+      Inat::ImportDigest.deliver_for(@import)
+    end
+  end
+
   def test_truncates_when_over_the_cap_and_reports_true_total
     second_obs = observations(:minimal_unknown_obs)
     second_obs.update_columns(inat_import_id: @import.id, user_id: mary.id)
@@ -115,10 +127,15 @@ class Inat::ImportDigestTest < UnitTestCase
     end
 
     # Dick's digest should still be enqueued even though Katrina's
-    # mailer build raised.
+    # mailer build raised. Rails.logger.error is stubbed silent here --
+    # ImportDigest#deliver_one deliberately logs the isolated failure
+    # (see import_digest.rb), and that log line printing during this
+    # test's intentional "boom" is expected output, not a test failure.
     assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
-      InatImportDigestMailer.stub(:build, failing_build) do
-        Inat::ImportDigest.deliver_for(@import)
+      Rails.logger.stub(:error, nil) do
+        InatImportDigestMailer.stub(:build, failing_build) do
+          Inat::ImportDigest.deliver_for(@import)
+        end
       end
     end
   end

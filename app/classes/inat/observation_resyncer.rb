@@ -79,6 +79,7 @@ class Inat
     # `saved_changes` (sans the timestamp) reflects what actually moved.
     def apply(obs, inat_obs)
       obs.assign_attributes(scalar_attributes(obs, inat_obs))
+      sync_placeholder_naming(obs, inat_obs) if obs.placeholder?
       obs.save! if obs.changed?
       changed = obs.saved_changes.except("updated_at").present?
       mark_synced(obs)
@@ -90,13 +91,52 @@ class Inat
     # `where` is only set when no Location resolves: a present Location
     # drives `where` from its own name via a callback, so assigning
     # `where` too would flip it back and forth and never converge.
-    def scalar_attributes(_obs, inat_obs)
+    #
+    # A placeholder (skeleton, #4828) gets a narrower sync than a full
+    # reflection: only date/location move here. `notes` is deliberately
+    # excluded -- Inat::SkeletonObservationBuilder never copies the
+    # source's Notes/description into MO's Notes in the first place (it
+    # writes a fixed placeholder message instead), so a resync must not
+    # start doing that either. `specimen` is left alone too, since a
+    # skeleton never sets it from source data to begin with. The leading
+    # ID has its own handling in sync_placeholder_naming below.
+    def scalar_attributes(obs, inat_obs)
       location = inat_obs.location
       attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
-                lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden,
-                specimen: inat_obs.specimen?, notes: inat_obs.notes }
+                lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden }
       attrs[:where] = inat_obs.where if location.nil?
-      attrs
+      return attrs if obs.placeholder?
+
+      attrs.merge(specimen: inat_obs.specimen?, notes: inat_obs.notes)
+    end
+
+    # A placeholder's only Naming (Inat::SkeletonObservationBuilder adds
+    # exactly one, un-attributed to override/provisional/community) is
+    # revised in place -- not replaced with a second Naming -- when iNat's
+    # current *pure* Leading ID (Inat::LeadNameResolver#leading_id_name,
+    # not #lead_name) differs from what it originally proposed. An
+    # override/provisional-name observation field is deliberately ignored
+    # here too, same as at creation -- a skeleton always tracks iNat's own
+    # taxon, never a curator's aside (#4828). The Naming's "Used
+    # references" reason is refreshed to today's date (shared text
+    # format: Inat::LeadNameResolver#reason_text), and the same new name
+    # is assigned onto the observation itself (not yet saved here --
+    # picked up by the single obs.save! in #apply alongside any
+    # date/location changes). Skeletons bypass MO's normal vote-driven
+    # consensus (see Inat::SkeletonObservationBuilder#add_naming_with_vote),
+    # so the Naming and the observation's own name_id/text_name are set
+    # together here, same as at creation. Votes, images, sequences, and
+    # any other namings are never touched.
+    def sync_placeholder_naming(obs, inat_obs)
+      naming = obs.namings.order(:id).first
+      return unless naming
+
+      resolver = Inat::LeadNameResolver.new(inat_obs: inat_obs, user: obs.user)
+      lead_name = resolver.leading_id_name
+      return if lead_name == naming.name
+
+      naming.update!(name: lead_name, reasons: { 2 => resolver.reason_text })
+      obs.assign_attributes(name: lead_name, text_name: lead_name.text_name)
     end
 
     # The iNat obs is gone: keep every MO record intact, record the loss on
@@ -184,9 +224,24 @@ class Inat
     end
 
     # Only `:synced` changes anything these panels display (when /
-    # location / GPS / notes) -- `:unchanged`/`:source_deleted`/
-    # `:fetch_failed` leave the observation's own data untouched, so
-    # there's nothing to re-render there.
+    # location / GPS / notes / leading ID for a placeholder, #4828) --
+    # `:unchanged`/`:source_deleted`/`:fetch_failed` leave the
+    # observation's own data untouched, so there's nothing to re-render
+    # there.
+    #
+    # Deliberately NOT broadcasting the Proposed Name table
+    # (Views::Controllers::Observations::Show::Namings) or the page's own
+    # title here, even though a placeholder resync can revise the
+    # leading-ID Naming: Namings' row/footer sub-views require a real,
+    # non-nilable @user for permission-gated vote/edit/propose buttons,
+    # and this broadcast is rendered once for a channel shared by every
+    # viewer, with no per-viewer user available (the resync itself runs
+    # in a background job, InatObservationResyncJob, off the requesting
+    # user's session entirely). Reflecting that fully live would mean
+    # reworking Namings to tolerate user: nil, or adding a separate
+    # read-only display -- out of scope here; a page reload shows the
+    # revised name. NameInfoPanel ("About this taxon") is safe to
+    # broadcast because its own `user` prop is already nilable.
     def broadcast_panels(observation)
       broadcast_replace(observation, "observation_details",
                         Views::Controllers::Observations::Show::Details.new(
@@ -198,6 +253,12 @@ class Inat
                         Views::Controllers::Observations::Show::NotesPanel.new(
                           obs: observation, user: nil
                         ))
+      broadcast_replace(
+        observation, "observation_name_info",
+        Views::Controllers::Observations::Show::NameInfoPanel.new(
+          obs: observation, user: nil
+        )
+      )
     end
 
     # Same lookup `Observations::ExternalLinksController::Show` uses for

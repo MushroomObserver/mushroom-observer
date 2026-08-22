@@ -31,9 +31,10 @@ class Inat
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
       @observation = nil
+      @skeleton = false
       return if unimportable?
       return if date_missing?
-      return if unlicensed_other?
+      return if skip_unlicensed_other?
       return if already_linked?
       return if crosslinked_to_live_mo_obs?
 
@@ -64,12 +65,19 @@ class Inat
       true
     end
 
-    # Safety net for import-others. This check is what actually stops an
-    # unlicensed observation belonging to another iNat user from being
-    # imported. Own-obs imports are never gated here.
-    def unlicensed_other?
+    # Safety net for import-others. Own-obs imports are never gated here.
+    # By default (InatImport#create_skeletons), an unlicensed obs belonging
+    # to another iNat user builds a minimal skeleton counterpart instead of
+    # a full copy (#4828); unchecking that option restores the original
+    # skip-entirely behavior.
+    def skip_unlicensed_other?
       return false unless inat_import.import_others
       return false if @inat_obs[:license_code].present?
+
+      if inat_import.create_skeletons?
+        @skeleton = true
+        return false
+      end
 
       log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
       inat_import.add_ignored_obs(:unlicensed)
@@ -152,13 +160,23 @@ class Inat
       @inat_import.add_response_error(msg)
     end
 
+    def build_observation_builder
+      if @skeleton
+        Inat::SkeletonObservationBuilder.new(
+          inat_obs: @inat_obs, user: @user,
+          external_site: inat_site, inat_import: @inat_import
+        )
+      else
+        Inat::MoObservationBuilder.new(
+          inat_obs: @inat_obs, user: @user,
+          import_others: @inat_import.import_others,
+          external_site: inat_site, inat_import: @inat_import
+        )
+      end
+    end
+
     def create_mo_observation
-      builder = Inat::MoObservationBuilder.new(
-        inat_obs: @inat_obs, user: @user,
-        import_others: @inat_import.import_others,
-        external_site: inat_site,
-        inat_import: @inat_import
-      )
+      builder = build_observation_builder
       @observation = builder.mo_observation
       builder
     rescue ActiveRecord::RecordNotUnique
@@ -187,8 +205,10 @@ class Inat
 
     def finalize_import
       update_inat_observation unless skip_inat_writeback?
-      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}" \
+          "#{" (skeleton)" if @skeleton}")
       increment_imported_counts
+      record_skeleton_import if @skeleton
       update_timings
     rescue StandardError => e
       log_with_response_error(
@@ -240,6 +260,14 @@ class Inat
     def increment_imported_counts
       @inat_import.increment!(:imported_count)
       @inat_import.increment!(:total_imported_count)
+    end
+
+    # Tracks skeleton imports (#4828) so the tracker/summary can report
+    # them separately, and so Inat::ImportDigest can exclude their
+    # namings (already notified immediately, unlike a full import's).
+    def record_skeleton_import
+      @inat_import.increment!(:skeleton_imported_count)
+      @inat_import.add_skeleton_observation(@observation.id)
     end
 
     # Use cumulative moving average to update user's historical avg import time

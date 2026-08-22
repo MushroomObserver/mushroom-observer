@@ -183,7 +183,8 @@ class InatMoObservationBuilderTest < UnitTestCase
   # falls back to nil rather than aborting the import.
   def test_override_name_falls_back_when_resolution_raises
     builder = builder_for(name_override: "Boletus edulis")
-    builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
+    resolver = builder.send(:name_resolver)
+    resolver.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
     assert_nil(builder.send(:override_name))
   end
 

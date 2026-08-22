@@ -99,6 +99,158 @@ class Inat::ObservationResyncerTest < UnitTestCase
   end
 
   # ---------------------------------------------------------------
+  #  Placeholder (skeleton, #4828) resync: narrower than a full
+  #  reflection -- date/location sync automatically, notes/specimen
+  #  never do, and a leading-ID change revises the existing Naming
+  #  in place instead of adding a second one.
+  # ---------------------------------------------------------------
+
+  def test_placeholder_resync_syncs_date_location_not_notes_or_specimen
+    skeleton = build_skeleton(name: names(:coprinus))
+    original_notes = skeleton.notes
+    naming = skeleton.namings.first
+    original_reason = naming.reasons[2]
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:synced, result.status,
+                 "date/location differ from the skeleton's fixed test " \
+                 "values, so this should count as a real change")
+    skeleton.reload
+    fresh = Inat::Obs.new(JSON.generate(coprinus_raw))
+    assert_equal(fresh.when, skeleton.when, "date should sync")
+    assert_equal(fresh.location, skeleton.location, "location should sync")
+    assert_equal(original_notes, skeleton.notes,
+                 "placeholder notes must never be overwritten by source " \
+                 "data -- SkeletonObservationBuilder never copies iNat's " \
+                 "own notes in either")
+    assert_not(skeleton.specimen?,
+               "specimen should be left alone by a placeholder resync")
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "leading ID is unchanged, so the naming shouldn't move")
+    assert_equal(original_reason, naming.reload.reasons[2],
+                 "unchanged leading ID: the naming's reason shouldn't " \
+                 "be rewritten either")
+  end
+
+  def test_placeholder_resync_revises_naming_when_leading_id_changes
+    skeleton = build_skeleton(name: names(:peltigera))
+    naming = skeleton.namings.first
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    assert_equal(1, skeleton.reload.namings.count,
+                 "the existing Naming should be revised, not doubled")
+    assert_equal(names(:coprinus), skeleton.name,
+                 "leading ID changed on iNat: Observation#name should " \
+                 "follow it")
+    assert_equal(names(:coprinus).text_name, skeleton.text_name)
+    naming.reload
+    assert_equal(names(:coprinus), naming.name,
+                 "the skeleton's initial Naming should be revised in " \
+                 "place to the new leading ID")
+    assert_match(
+      /#{Time.zone.today.strftime("%Y-%m-%d")}\z/, naming.reasons[2],
+      "the naming's 'Used references' reason should cite today's date"
+    )
+  end
+
+  # Regression: a placeholder resync must track the pure Leading ID even
+  # when the iNat obs carries a "Species Name Override" observation
+  # field -- same rule as at initial import (#4828).
+  def test_placeholder_resync_ignores_name_override
+    skeleton = build_skeleton(name: names(:peltigera))
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus").merge(
+      ofvs: [{ name: "Species Name Override", value: "Boletus" }]
+    )
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Resync should track the community taxon (Coprinus), " \
+                 "not the 'Species Name Override' field (Boletus)")
+  end
+
+  # Regression: same rule for a "Provisional Species Name" field.
+  def test_placeholder_resync_ignores_provisional_name
+    skeleton = build_skeleton(name: names(:peltigera))
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus").merge(
+      ofvs: [{ name: "Provisional Species Name", value: "Boletus" }]
+    )
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Resync should track the community taxon (Coprinus), " \
+                 "not the 'Provisional Species Name' field (Boletus)")
+  end
+
+  # Defensive: a placeholder's sole Naming could in principle be removed
+  # later (namings may be freely added/destroyed on a reflection -- only
+  # the scalar edit form is locked). sync_placeholder_naming must not
+  # raise when there's nothing to revise; date/location still sync.
+  def test_placeholder_resync_with_no_naming_present
+    skeleton = build_skeleton(name: names(:coprinus))
+    skeleton.namings.first.destroy
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    assert_empty(skeleton.reload.namings)
+  end
+
+  def test_placeholder_resync_leaves_non_placeholder_namings_alone
+    non_placeholder = observations(:coprinus_comatus_obs)
+    assert_not(non_placeholder.placeholder?,
+               "test fixture should not be a placeholder")
+    non_placeholder.update_column(:reflected_at, Time.zone.now)
+    link = ExternalLink.create!(
+      user: non_placeholder.user, target: non_placeholder,
+      external_site: external_sites(:inaturalist), relationship: :import,
+      external_id: 55_443_322,
+      url: "https://www.inaturalist.org/observations/55443322"
+    )
+
+    Inat::ObservationResyncer.new(
+      non_placeholder,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => @raw }, false])
+    ).resync
+
+    assert_equal(@fresh.notes, non_placeholder.reload.notes,
+                 "a non-placeholder reflection keeps syncing notes as " \
+                 "before -- the narrower rule is placeholder-only")
+  end
+
+  # ---------------------------------------------------------------
   #  Occurrence-wide sync (#4215): one fetch, aggregate reporting
   # ---------------------------------------------------------------
 
@@ -140,7 +292,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(1, primary_msgs.length,
                  "the primary's page gets the flash only")
     assert(primary_msgs.first.include?('target="page_flash"'))
-    assert_equal(3, obs_msgs.length,
+    assert_equal(4, obs_msgs.length,
                  "the synced reflection's page gets flash + panels")
   end
 
@@ -178,12 +330,17 @@ class Inat::ObservationResyncerTest < UnitTestCase
       resync(found: { @id => @raw })
     end
 
-    assert_equal(3, messages.length)
+    assert_equal(4, messages.length)
     assert(messages.any? { |m| m.include?('target="page_flash"') })
     assert(
       messages.any? { |m| m.include?('target="observation_details"') }
     )
     assert(messages.any? { |m| m.include?('target="observation_notes"') })
+    assert(
+      messages.any? { |m| m.include?('target="observation_name_info"') },
+      "NameInfoPanel should also refresh, so 'About this taxon' tracks " \
+      "any leading-ID change"
+    )
     flash = messages.find { |m| m.include?('target="page_flash"') }
     assert_includes(flash, :observation_resync_synced.t(count: 1))
   end
@@ -265,5 +422,46 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # Minimal stand-in for an ::Inat::Obs, exposing only what
+  # Inat::SkeletonObservationBuilder and Inat::LeadNameResolver read --
+  # same shape as InatSkeletonObservationBuilderTest::FakeInatObs, kept
+  # local so this file doesn't depend on another test file's fixture.
+  class FakeSkeletonInatObs
+    FAKE_INAT_ID = 99_887_766
+
+    def initialize(name:)
+      @name = name
+    end
+
+    attr_reader :name
+
+    def collector = "A Collector"
+    def provisional_name = nil
+    def name_override = nil
+    def when = Date.new(2024, 4, 29)
+    def location = ::Location.find_by(name: "Albion, California, USA")
+    def where = "Albion, California, USA"
+    def lat = 44.0
+    def lng = -123.0
+    def gps_hidden = false # rubocop:disable Naming/PredicateMethod
+
+    def [](key)
+      { id: FAKE_INAT_ID, quality_grade: "needs_id", license_code: nil,
+        identifications: [],
+        user: { login: "danmorton", name: "Daniel Morton" } }[key]
+    end
+  end
+
+  # A real skeleton Observation (Inat::SkeletonObservationBuilder), so
+  # placeholder-resync tests exercise the real reflected_at/placeholder
+  # state instead of stubbing it.
+  def build_skeleton(name:)
+    fake = FakeSkeletonInatObs.new(name: name)
+    Inat::SkeletonObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf),
+      external_site: external_sites(:inaturalist)
+    ).mo_observation
   end
 end

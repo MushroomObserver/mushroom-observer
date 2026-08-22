@@ -41,6 +41,8 @@ module Views::Controllers::InatImports
 
     private
 
+    include IgnoredSection
+
     def render_expected
       Panel do |panel|
         panel.with_body do
@@ -53,7 +55,7 @@ module Views::Controllers::InatImports
           count_expected_line
           render_nothing_to_import_notice
           br
-          unlicensed_obs_line unless import_others?
+          render_unlicensed_line
           br
           time_estimate_line
         end
@@ -90,123 +92,7 @@ module Views::Controllers::InatImports
 
     def requested_obs_url = @urls.requested_obs_url
 
-    def render_ignored_section
-      return unless show_ignored_section?
-
-      br
-      render_ignored_total
-      render_ignored_overlap_note if ignored_rows_count > 1
-      div(class: "ml-3") do
-        ignored_row_data.each do |row|
-          render_ignored_row(row[:key], row[:count], row[:url])
-        end
-        unlicensed_ignored_row if import_others?
-        render_over_cap_line
-      end
-      br
-    end
-
-    def show_ignored_section?
-      ignored_row_data.any? ||
-        # Import-others' unlicensed obs are never imported. So they
-        # belong here rather than own-import's informational-only line.
-        import_others? ||
-        over_cap_count.positive?
-    end
-
-    def ignored_row_data
-      [not_importable_row, already_imported_row, no_date_row].compact
-    end
-
-    def not_importable_row
-      return unless (c = not_importable_count)&.positive?
-
-      { key: :inat_import_confirm_not_importable_caption, count: c, url: nil }
-    end
-
-    def not_importable_count
-      @requested.to_i - @after_taxon.to_i if @requested && @after_taxon
-    end
-
-    def already_imported_row
-      return unless (c = already_imported_count)&.positive?
-
-      { key: :inat_import_confirm_already_imported_caption,
-        count: c, url: already_imported_url }
-    end
-
-    def already_imported_count
-      return unless @after_taxon && @not_yet_imported
-
-      @after_taxon.to_i - @not_yet_imported.to_i
-    end
-
-    def already_imported_url = @urls.already_imported_url
-
-    def no_date_row
-      return unless (c = no_date_count)&.positive?
-
-      { key: :inat_import_confirm_no_date_caption, count: c, url: nil }
-    end
-
-    def no_date_count
-      return unless @expected && @estimate_with_date
-
-      @expected.to_i - @estimate_with_date.to_i
-    end
-
     def import_others? = model.import_others == "1"
-
-    def render_ignored_total
-      return unless @requested && (@estimate_with_date || @expected)
-
-      total = @requested.to_i - (@estimate_with_date || @expected).to_i +
-              over_cap_count
-      b { plain(:inat_import_confirm_ignored_total_caption.l) }
-      plain(": ")
-      span(id: "total_ignored_count") { plain(total.to_s) }
-    end
-
-    def render_ignored_overlap_note
-      div do
-        small(class: "overlap-note") do
-          plain(:inat_import_confirm_ignored_overlap_note.l)
-        end
-      end
-    end
-
-    def ignored_rows_count
-      ignored_row_data.size + (import_others? ? 1 : 0)
-    end
-
-    def render_ignored_row(caption_key, count, url)
-      div(class: "mb-1") do
-        b { plain("#{caption_key.l}: ") }
-        if url
-          render(Components::Link::External.new(content: count.to_s,
-                                                path: url))
-        else
-          plain(count.to_s)
-        end
-      end
-    end
-
-    # Import-others' unlicensed obs are never imported, so this renders inside
-    # the Total Ignored Observations breakdown rather than as its own
-    # always-visible line. Import execution defaults `licensed` to true unless
-    # the stored URL explicitly sets it (see PageParser#add_ownership_filter).
-    # Rendered unconditionally (even when the count is blank/zero) so a failed
-    # estimate is visible as blank, distinguishable from a genuine zero.
-    def unlicensed_ignored_row
-      div(class: "mb-1") do
-        b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
-        span(id: "unlicensed_obs_count") { render_unlicensed_count }
-        if @unlicensed_obs.to_i.positive?
-          whitespace
-          plain(unlicensed_note_key.l)
-        end
-      end
-    end
 
     def render_unlicensed_count
       url = unlicensed_obs_url
@@ -264,6 +150,20 @@ module Views::Controllers::InatImports
       p { plain(:inat_import_confirm_nothing_to_import.l) }
     end
 
+    # Own-imports: an informational line about unlicensed obs (default MO
+    # license applied to their images). Import-others with create_skeletons
+    # off: nothing here — that count lives in the ignored-total breakdown
+    # instead (see unlicensed_ignored_row). Import-others with
+    # create_skeletons on (the default, #4828): a skeleton-specific line,
+    # since those obs are imported too, just as lighter records.
+    def render_unlicensed_line
+      if import_others?
+        skeleton_obs_line if create_skeletons?
+      else
+        unlicensed_obs_line
+      end
+    end
+
     def unlicensed_obs_line
       b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
       plain(": ")
@@ -272,6 +172,12 @@ module Views::Controllers::InatImports
 
       whitespace
       plain(unlicensed_note_key.l)
+    end
+
+    def skeleton_obs_line
+      b { plain(:inat_import_confirm_skeleton_obs_caption.l) }
+      plain(": ")
+      span(id: "unlicensed_obs_count") { render_unlicensed_count }
     end
 
     def time_estimate_line
@@ -300,7 +206,7 @@ module Views::Controllers::InatImports
 
     def render_hidden_fields
       [:inat_username, :inat_ids, :import_all, :consent, :import_others,
-       :inat_url, :original_inat_url, :recheck_all,
+       :create_skeletons, :inat_url, :original_inat_url, :recheck_all,
        :skip_inat_writeback].each do |f|
         hidden_field(f)
       end
@@ -311,7 +217,7 @@ module Views::Controllers::InatImports
         # data-turbo="false": this submit redirects to iNaturalist's
         # OAuth authorize page (an external host). Turbo Drive's
         # fetch-based form submission follows redirects as fetch
-        # requests, not real navigations -- a cross-origin redirect
+        # requests, not full-page navigations -- a cross-origin redirect
         # there doesn't land the browser on iNat's login page the way
         # a plain form submit does. Opting this one button out of
         # Turbo keeps the redirect a normal top-level navigation.
