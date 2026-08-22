@@ -166,8 +166,16 @@ class ImagesController < ApplicationController
   def render_show_view
     render(Views::Controllers::Images::Show.new(
              image: @image, size: @size, default_size: @default_size,
-             field_slip_extract: FieldSlipExtract.find_by(image_id: @image.id)
+             field_slip_extract: field_slip_extract_for_show
            ))
+  end
+
+  # Only a logged-in viewer can see the scan-state button, so skip the
+  # lookup for everyone else.
+  def field_slip_extract_for_show
+    return unless @user
+
+    FieldSlipExtract.find_by(image_id: @image.id)
   end
 
   # Phlex action template — explicit render per the conversion rule.
