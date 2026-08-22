@@ -59,6 +59,13 @@ xml.tag!(
       xml_detailed_object(xml, :primary_image, image) \
         if image.id == object.thumb_image_id
     end
+    # The thumbnail may be an occurrence sibling's image, not one of
+    # this observation's own.
+    if object.thumb_image_id &&
+       object.images.none? { |image| image.id == object.thumb_image_id } &&
+       object.thumb_image
+      xml_detailed_object(xml, :primary_image, object.thumb_image)
+    end
     if object.images.length > 1
       xml.images(number: object.images.length - 1) do
         object.images.each do |image|

@@ -336,6 +336,33 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(expected, files)
   end
 
+  # The thumbnail can be an occurrence sibling's image (#5160); it is
+  # still the primary_image, and the observation's own images are
+  # still listed.
+  def test_get_observation_primary_image_from_sibling
+    primary = observations(:two_img_obs)
+    sibling = observations(:fungi_obs)
+    thumb = images(:plane_image_example)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ, thumb_image: thumb)
+    sibling.update!(occurrence: occ)
+
+    get(:observations, params: { id: primary.id, detail: :high,
+                                 format: :json })
+
+    assert_no_api_errors
+    result = response.parsed_body["results"][0]
+    assert_equal(thumb.id, result.dig("primary_image", "id"))
+    assert_equal(primary.image_ids.sort,
+                 result["images"].pluck("id").sort)
+
+    get(:observations, params: { id: primary.id, detail: :high,
+                                 format: :xml })
+
+    assert_no_api_errors
+    assert_select("primary_image[id=?]", thumb.id.to_s)
+  end
+
   # A link identified by `external_id` stores no `url` -- the model's
   # `normalize_external_id_and_url` deliberately drops it, and
   # `ExternalSite#observation_url` is "the single source of truth for an

@@ -60,6 +60,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href*='occurrences/#{occ.id}']")
   end
 
+  # Any image in the occurrence can be the thumbnail; when it belongs
+  # to a sibling it still leads the carousel (issue #5160).
+  def test_show_observation_sibling_image_as_thumbnail
+    login("rolf")
+    primary = observations(:two_img_obs)
+    sibling = observations(:fungi_obs)
+    thumb = images(:plane_image_example)
+    assert_includes(sibling.images, thumb)
+    assert_not_includes(primary.images, thumb)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ, thumb_image: thumb)
+    sibling.update!(occurrence: occ)
+
+    get(:show, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#observation_images .carousel-inner " \
+                  ".carousel-item:first-child#carousel_item_#{thumb.id}")
+    assert_select("#observation_images .carousel-item",
+                  count: primary.images.count + sibling.images.count)
+  end
+
   def test_show_observation_noteless_image
     obs = observations(:peltigera_mary_obs)
     img = images(:rolf_profile_image)
