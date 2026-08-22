@@ -1424,15 +1424,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # After defining a location, update any lists using old "where" name.
+  # After defining a location, update any observations using old "where"
+  # name. The bulk update can deadlock against concurrent observation
+  # saves; one retry after MySQL rolls the victim back is enough.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE observations
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    retried = false
+    begin
+      Observation.where(where: old_name).
+        update_all(where: location.name, location_id: location.id)
+    rescue ActiveRecord::Deadlocked
+      raise if retried
+
+      retried = true
+      retry
+    end
   end
 
   ##############################################################################

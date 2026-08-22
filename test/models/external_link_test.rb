@@ -210,4 +210,14 @@ class ExternalLinkTest < UnitTestCase
     link.update!(relationship: :import, external_id: "234723")
     assert(link.reload.import?, "Link should upgrade to import in place")
   end
+
+  def test_external_id_length_validation
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    link.external_id = "9" * 65
+    assert_not(link.valid?, "external_id over 64 chars should be invalid")
+    assert(link.errors[:external_id].any?)
+
+    link.external_id = "9" * 64
+    assert(link.valid?, "external_id of 64 chars should be valid")
+  end
 end

@@ -57,6 +57,9 @@ class ExternalLink < AbstractModel
   validates :external_site, presence: true
   validates :user, presence: true
   validates :url, length: { maximum: 100 }, allow_blank: true
+  # Matches the column's varchar(64); without this a long paste 500s
+  # with ActiveRecord::ValueTooLong instead of a form error.
+  validates :external_id, length: { maximum: 64 }, allow_blank: true
   validate  :check_url_syntax
   # No general one-link-per-(target, site) rule: an MO obs can legitimately
   # correspond to several iNat obs (iNat-side duplicates of one collection),

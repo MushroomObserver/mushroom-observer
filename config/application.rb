@@ -57,6 +57,12 @@ module MushroomObserver
     # else a scanner's malformed bytes reach a String op and 500.
     config.middleware.insert_before(0, Rack::UTF8Sanitizer)
 
+    # A hostile/garbage Accept header (vulnerability scanners) is the
+    # client's error, not a 500.
+    config.action_dispatch.rescue_responses[
+      "ActionDispatch::Http::MimeNegotiation::InvalidType"
+    ] = :not_acceptable
+
     # Tells rails not to generate controller-specific css and js stubs.
     config.generators.assets = false
 
