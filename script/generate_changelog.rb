@@ -3,7 +3,7 @@
 
 # Generates one CHANGELOG.md section per production deploy (issue
 # #5155): a dated heading for a deploy-* tag with a flat list of every
-# PR merged since the previous deploy tag. PR titles/authors/urls come
+# PR merged since the previous deploy tag. PR titles/authors come
 # from the gh CLI (run it wherever gh is authenticated); the PR list
 # comes from the merge commits between the two tags.
 #
@@ -120,7 +120,7 @@ class ChangelogGenerator
   def pr_info(number)
     JSON.parse(
       run_cmd("gh", "pr", "view", number,
-              "--json", "number,title,url,author")
+              "--json", "number,title,author")
     )
   end
 
@@ -134,9 +134,11 @@ class ChangelogGenerator
     "#{lines.join("\n")}\n"
   end
 
+  # A bare #NNNN, which GitHub autolinks in-repo. Not a markdown link
+  # to the PR: a file full of those makes Copilot code review fail on
+  # every PR in the repo.
   def pr_line(info)
-    "- #{info["title"]} ([##{info["number"]}](#{info["url"]}), " \
-      "@#{info.dig("author", "login")})"
+    "- #{info["title"]} (##{info["number"]}, @#{info.dig("author", "login")})"
   end
 
   def dry_run_notice
