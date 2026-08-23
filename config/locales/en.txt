@@ -2921,7 +2921,7 @@
   inat_import_confirm_unlicensed_others_note: "(will not be imported — no iNat license)"
   inat_import_confirm_over_cap_caption: Exceeding per-import limit
   inat_import_confirm_over_cap_note: "You can import these later in a new import."
-  inat_import_confirm_skeleton_obs_caption: Unlicensed observations (to be added as placeholders)
+  inat_import_confirm_skeleton_obs_caption: Unlicensed observations (to be imported as placeholders)
   inat_import_confirm_time_estimate_caption: Estimated time
   inat_import_confirm_explanation: "MO will import your iNat observations that are identified as a fungus or slime mold and that were neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script. Unlicensed images will be imported with your default MO license. You can work on other things while the import is proceeding."
   inat_import_confirm_prompt: Would you like to proceed with the import?

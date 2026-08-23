@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# Unit tests for the confidence weight MoObservationBuilder assigns to
-# an place's single consensus naming (#4212). The integration coverage in
+# Unit tests for the confidence weight Inat::MoObservationBuilder assigns to
+# an import's single consensus naming (#4212). The integration coverage in
 # test/jobs/inat_import_job_test.rb exercises the sequence / research /
 # non-research branches against recorded fixtures; this isolates naming_vote
 # so every branch is pinned — including "provisional name without a sequence",

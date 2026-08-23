@@ -106,10 +106,14 @@ class Inat
       inat_obs[:license_code].present? || importer_is_collector?(obs, inat_obs)
     end
 
-    # Is the MO importer the iNat collector?
+    # Is the MO importer the iNat observer (the account that posted the
+    # obs)? Compares against the account's login, not #collector -- a
+    # custom Collector observation field can name someone else, which
+    # answers a different question (who collected the specimen) than
+    # this one (whose account is this).
     def importer_is_collector?(obs, inat_obs)
       obs.user.inat_username.present? &&
-        obs.user.inat_username == inat_obs.collector
+        obs.user.inat_username.casecmp?(inat_obs[:user][:login].to_s)
     end
 
     # Rebuild the placeholder as a full import, in the same row.

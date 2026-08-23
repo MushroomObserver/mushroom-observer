@@ -465,6 +465,27 @@ class Inat::ObservationResyncerTest < UnitTestCase
     )
   end
 
+  # Regression: importer_is_collector? must compare the iNat account
+  # login, not a custom Collector observation field -- that field can
+  # name someone else entirely (e.g. who physically collected the
+  # specimen), a different question from whose account this is.
+  def test_upgrade_eligible_matches_account_despite_collector_field
+    skeleton = build_skeleton(name: names(:peltigera))
+    skeleton.user.update!(inat_username: "someone")
+    raw = licensed_upgrade_raw(license_code: nil, login: "someone").
+          merge(ofvs: [{ name: "Collector", value: "A Different Person" }])
+    fresh = Inat::Obs.new(JSON.generate(raw))
+
+    resyncer = Inat::ObservationResyncer.new(skeleton)
+
+    assert(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh),
+      "The importer's account login matches the iNat observer, so " \
+      "this should be upgrade-eligible even though a custom " \
+      "Collector field names someone else"
+    )
+  end
+
   def test_upgrade_ineligible_when_neither_trigger_fires
     skeleton = build_skeleton(name: names(:peltigera))
     fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
