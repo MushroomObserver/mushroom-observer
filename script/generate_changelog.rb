@@ -152,7 +152,7 @@ class ChangelogGenerator
       run_cmd("gh", "pr", "list", "--state", "merged",
               "--limit", SEARCH_CAP.to_s,
               "--search", "merged:#{from}..#{to}",
-              "--json", "number,title,author,mergeCommit")
+              "--json", "number,title,author,url,mergeCommit")
     )
     if pulls.size >= SEARCH_CAP
       abort("#{pulls.size} PRs merged in #{from}..#{to} hits GitHub's " \
@@ -189,11 +189,12 @@ class ChangelogGenerator
     "#{lines.join("\n")}\n"
   end
 
-  # A bare #NNNN, which GitHub autolinks in-repo. Not a markdown link
-  # to the PR: a file full of those makes Copilot code review fail on
-  # every PR in the repo.
+  # Link text "PRNNNN", not "#NNNN": a file full of [#NNNN](url) links
+  # makes Copilot code review fail on every PR in the repo, and GitHub
+  # does not autolink a bare #NNNN in a rendered file.
   def pr_line(info)
-    "- #{info["title"]} (##{info["number"]}, @#{info.dig("author", "login")})"
+    "- #{info["title"]} ([PR#{info["number"]}](#{info["url"]}), " \
+      "@#{info.dig("author", "login")})"
   end
 
   def dry_run_notice
