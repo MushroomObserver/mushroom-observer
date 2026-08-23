@@ -49,6 +49,15 @@ module Tab::Observation
       assert_equal("attach_observation_to_field_slip", tab.alt_title)
     end
 
+    def test_field_slip_scan
+      tab = Tab::Observation::FieldSlipScan.new(observation: @obs)
+
+      assert_equal(:field_slip_scan_tooltip.l, tab.title)
+      assert_equal(routes.field_slip_scan_observation_path(@obs.id), tab.path)
+      assert_equal(:qrcode, tab.html_options[:icon])
+      assert_equal("scan_observation_field_slip", tab.alt_title)
+    end
+
     def test_manage_projects
       tab = Tab::Observation::ManageProjects.new(observation: @obs)
 
