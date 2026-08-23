@@ -38,6 +38,20 @@ class FieldSlip::Extractor::NameProposerTest < UnitTestCase
     assert_equal("Coprinus comatus", outcome.naming.name.text_name)
   end
 
+  # Saving the same review twice (a re-review, a rescan) restates one
+  # reading, not two -- it reuses the reviewer's existing naming rather
+  # than stacking duplicates on the observation.
+  def test_proposing_the_same_name_twice_reuses_the_naming
+    first = propose("Coprinus comatus")
+    before = @obs.reload.namings.count
+
+    second = propose("Coprinus comatus")
+
+    assert_predicate(second, :proposed?)
+    assert_equal(first.naming, second.naming)
+    assert_equal(before, @obs.reload.namings.count)
+  end
+
   # An admin reading someone else's slip is stating their own reading of
   # it, so the naming and the vote are theirs, not the owner's.
   def test_naming_is_attributed_to_the_reviewer

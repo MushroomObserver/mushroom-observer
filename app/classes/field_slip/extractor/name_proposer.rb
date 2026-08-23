@@ -72,13 +72,23 @@ class FieldSlip
                     feedback: resolver.results.except(:success))
       end
 
+      # Reuse this user's existing naming for the name if there is one:
+      # a reviewer who saves the same review twice (a re-review, a
+      # rescan) is restating one reading, not proposing it again, so
+      # this must not stack duplicate namings on the observation.
       def propose_naming(name)
+        naming = @observation.namings.find_by(user: @user, name: name) ||
+                 build_naming(name)
+        cast_vote(naming)
+        Outcome.new(status: :proposed, naming: naming, feedback: {})
+      end
+
+      def build_naming(name)
         naming = Naming.construct({}, @observation)
         naming.name = name
         naming.user = @user
         naming.save!
-        cast_vote(naming)
-        Outcome.new(status: :proposed, naming: naming, feedback: {})
+        naming
       end
 
       # Attributed to the reviewer, not the observation's owner: an
