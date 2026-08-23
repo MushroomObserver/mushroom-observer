@@ -160,9 +160,23 @@ class ImagesController < ApplicationController
     # Update view stats on image we're actually showing.
     update_view_stats(@image)
 
+    render_show_view
+  end
+
+  def render_show_view
     render(Views::Controllers::Images::Show.new(
-             image: @image, size: @size, default_size: @default_size
+             image: @image, size: @size, default_size: @default_size,
+             field_slip_extract: field_slip_extract_for_show
            ))
+  end
+
+  # Same gate as the view's scan-state button, so nobody who can't see
+  # it pays for the lookup.
+  def field_slip_extract_for_show
+    return unless FieldSlipExtract.permitted?(image: @image, user: @user,
+                                              site_admin: in_admin_mode?)
+
+    FieldSlipExtract.find_by(image_id: @image.id)
   end
 
   # Phlex action template — explicit render per the conversion rule.

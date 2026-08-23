@@ -65,25 +65,51 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   # ---- field slip -----------------------------------------------
 
   def render_field_slip
-    return unless @obs.field_slip || in_admin_mode? || @obs.can_edit?(@user)
+    return unless @obs.field_slip || can_attach_field_slip? ||
+                  can_scan_field_slip?
 
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { plain(append_colon(:field_slip.ti)) }
       whitespace
-      if @obs.field_slip
-        Link(type: :object, object: @obs.field_slip)
-      else
-        render_attach_field_slip_link
-      end
+      render_field_slip_link_or_attach
+      render_field_slip_scan_link if can_scan_field_slip?
     end
   end
 
-  def render_attach_field_slip_link
-    tab = ::Tab::Observation::AttachFieldSlip.new(observation: @obs)
+  def render_field_slip_link_or_attach
+    if @obs.field_slip
+      Link(type: :object, object: @obs.field_slip)
+    elsif can_attach_field_slip?
+      render_inline_tab(::Tab::Observation::AttachFieldSlip)
+    end
+  end
+
+  def render_field_slip_scan_link
+    whitespace
+    render_inline_tab(::Tab::Observation::FieldSlipScan)
+  end
+
+  def render_inline_tab(tab_class)
+    tab = tab_class.new(observation: @obs)
     Link(type: :get, tab: tab,
          class: Components::InlineLinkBlock.item_class(
            tab.html_options[:class]
          ))
+  end
+
+  # Matches the gate `Observations::FieldSlipsController` enforces.
+  def can_attach_field_slip?
+    in_admin_mode? || @obs.can_edit?(@user)
+  end
+
+  # Matches the scan page's own gate
+  # (`Observations::FieldSlipScansController#permission_required`); a
+  # read that landed unseen at Create time is otherwise unreachable
+  # from the observation.
+  def can_scan_field_slip?
+    return false unless @user && @obs.images.any?
+
+    in_admin_mode? || @obs.projects.any? { |p| p.is_admin?(@user) }
   end
 
   # ---- external links ---------------------------------------------

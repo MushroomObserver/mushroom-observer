@@ -17,6 +17,7 @@ module Views::Controllers::Images
     # `VotePanel#vote_link_args` only compares them for inequality.
     prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
     prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil
+    prop :field_slip_extract, _Nilable(::FieldSlipExtract), default: nil
 
     def view_template
       add_show_title(@image)
@@ -65,8 +66,14 @@ module Views::Controllers::Images
         image: @image, user: current_user, site_admin: in_admin_mode?
       )
 
+      # The Read button always re-reads, so an existing read gets its
+      # own button back to the review/status page; Read doubles as the
+      # retry for a failed one.
       div(class: "mb-3 text-center") do
+        FieldSlipScanState(image: @image, extract: @field_slip_extract,
+                           offer_retry: false)
         Button(type: :post, name: :field_slip_extract_button.l,
+               class: ("ml-2" if @field_slip_extract),
                target: image_field_slip_extract_path(@image.id))
       end
     end

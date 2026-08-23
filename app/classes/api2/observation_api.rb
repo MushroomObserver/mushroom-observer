@@ -20,6 +20,7 @@ class API2
         :name,
         { namings: [:name, :user] },
         :sequences,
+        { thumb_image: [:license, :user] },
         :user,
         { votes: :user }
       ]
