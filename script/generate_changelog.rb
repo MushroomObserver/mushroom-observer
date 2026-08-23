@@ -168,7 +168,7 @@ class ChangelogGenerator
     last = tag_date(@pool_to)
     months = []
     while from <= last
-      to = from.next_month - 1
+      to = [from.next_month - 1, last].min
       months << [from.iso8601, to.iso8601]
       from = to + 1
     end
