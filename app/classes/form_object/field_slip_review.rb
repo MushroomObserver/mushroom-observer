@@ -82,13 +82,20 @@ class FormObject::FieldSlipReview < FormObject::Base
     end
   end
 
-  # The read code can be applied -- ticking it attaches the slip --
-  # exactly when the observation has none. The background job usually
-  # already did this (see ExtractFieldSlipJob#attach_read_code), so
-  # this is the manual path for what it couldn't decide on its own.
+  # Ticking the read code applies it. That does something in two cases:
+  # the observation has no occurrence (attach the slip), or the code
+  # names a slip on a DIFFERENT occurrence (merge the two -- e.g. a
+  # reflection whose Edit-companion gave it an occurrence, reviewed
+  # against a recorder's slip). It does nothing when the observation's
+  # own occurrence already holds the slip, so no tick is offered then.
   def self.code_attachable?(extract, template, observation)
-    observation.occurrence_id.nil? &&
-      extract.value_for(template.code_field).present?
+    code = extract.value_for(template.code_field).to_s.strip
+    return false if code.blank?
+    return true if observation.occurrence_id.nil?
+
+    slip = FieldSlip.find_by(code: code.upcase)
+    slip&.occurrence.present? &&
+      slip.occurrence.id != observation.occurrence_id
   end
 
   def self.role_for(template, field)
