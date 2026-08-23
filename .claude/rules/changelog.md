@@ -39,18 +39,43 @@ faster than they can notice an omission.
 
 **The sentence** (required when `article: yes`, one line):
 
+- **Short: 60 characters or fewer.** It becomes one table cell in the
+  Article, and longer text wraps the table. Readers who want detail
+  click through to the PR, so the sentence only has to say *what*
+  changed, not every case it covers: "Link field slip scans from
+  observation and image pages," not "Field slip scans are now
+  reachable from the observation page, and a photo's existing scan
+  result is linked from its image page instead of only offering a
+  re-read."
 - Written for mushroom observers, not developers. Describe what
   changed from the user's point of view, not how: "Emoji now work in
   comments and profile notes," not "Convert `comments.comment` to
   utf8mb4."
+- Terse, like the existing Article rows: lead with the verb — "Fix …",
+  "Add …", "Allow …", "Speed up …" — no "now", no "This PR".
 - No code identifiers, no backticks, no class/method/file names.
 - No PR/issue numbers — the generator adds the links.
-- Plain present tense, capitalized, ending punctuation optional.
+- Capitalized, no ending punctuation.
+
+These wording rules are the place feedback from Article reviews
+lands: when a reviewer trims or rewords rows, the pattern behind the
+edit belongs here, so the next block is written that way to begin
+with.
 
 ## Format is machine-parsed — keep it exact
 
-The generator reads everything between `<!-- changelog -->` and
+The generators read everything between `<!-- changelog -->` and
 `<!-- /changelog -->`: the first non-blank line must be
 `article: yes` or `article: no`; the remaining non-blank lines are the
 sentence. A block that does not parse is treated as absent (excluded
-from the Article, flagged at deploy).
+from the Article, flagged for manual review). When a description
+quotes an example block, the *last* block in the body is the one that
+counts.
+
+## Producing the Article rows
+
+`script/article_rows.rb --since YYYY-MM-DD [--until YYYY-MM-DD]`
+prints one Textile row per `article: yes` PR merged in the range,
+newest first, and lists the blockless PRs on stderr for a human
+verdict. Paste the rows into the Article by hand (they go under the
+blank separator row, newest first).
