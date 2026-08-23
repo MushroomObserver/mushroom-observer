@@ -185,6 +185,41 @@ class ImagesControllerTest < FunctionalTestCase
     get(:show, params: { id: image.id })
 
     assert_select("form[action=?]", image_field_slip_extract_path(image.id))
+    assert_select("a[href=?]", edit_image_field_slip_extract_path(image.id),
+                  count: 0)
+  end
+
+  # The Read button always re-reads; an existing read is reachable from
+  # here too, as a button labelled by its state, so a result that
+  # landed unseen is not lost behind a re-read. Read doubles as the
+  # retry for a failed one, so no separate Retry button here.
+  def test_show_links_existing_field_slip_read
+    image = images(:in_situ_image)
+    login("rolf")
+    make_admin
+    FieldSlipExtract.fail!(image: image, user: rolf, error: "boom")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("a.btn[href=?]",
+                  edit_image_field_slip_extract_path(image.id),
+                  text: :field_slip_scan_failed.l)
+    assert_select("form[action=?] button.btn.ml-2",
+                  image_field_slip_extract_path(image.id),
+                  text: :field_slip_extract_button.l)
+    assert_select("form[action=?] button",
+                  image_field_slip_extract_path(image.id), count: 1)
+  end
+
+  def test_show_hides_existing_field_slip_read_from_ordinary_users
+    image = images(:in_situ_image)
+    FieldSlipExtract.start!(image: image, user: rolf)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("a[href=?]", edit_image_field_slip_extract_path(image.id),
+                  count: 0)
   end
 
   # #4989: rotate/mirror controls follow permission on the image itself

@@ -259,7 +259,65 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_no_html(html, "#observation_field_slips")
   end
 
+  # --- Field slip scan page link ---
+
+  # Same gate as the scan page itself: admin of one of the
+  # observation's projects. Rendered alongside the existing slip link,
+  # since a read that landed unseen at Create needs a way back.
+  def test_renders_scan_link_for_project_admin
+    obs = observations(:minimal_unknown_obs)
+    viewer = users(:mary)
+    obs.images << images(:in_situ_image) unless obs.images.any?
+    project = projects(:eol_project)
+    project.observations << obs unless project.observations.include?(obs)
+    assert(project.is_admin?(viewer), "premise: mary administers it")
+
+    html = render(panel_with(obs, viewer))
+
+    assert_html(html, "#observation_field_slips a" \
+                      "[href='#{routes.field_slip_path(obs.field_slip.id)}']")
+    assert_html(html, scan_link_selector(obs))
+  end
+
+  def test_renders_scan_link_in_admin_mode
+    obs = observations(:coprinus_comatus_obs)
+    obs.images << images(:in_situ_image) unless obs.images.any?
+    stub_admin_mode!
+
+    html = render(panel_with(obs))
+
+    assert_html(html, scan_link_selector(obs))
+  end
+
+  def test_no_scan_link_for_editor_who_is_not_project_admin
+    obs = observations(:coprinus_comatus_obs)
+    obs.images << images(:in_situ_image) unless obs.images.any?
+    assert(obs.can_edit?(@user), "premise: rolf can edit it")
+    assert_not(obs.projects.any? { |p| p.is_admin?(@user) })
+
+    html = render(panel_with(obs))
+
+    assert_html(html, "#observation_field_slips")
+    assert_no_html(html, scan_link_selector(obs))
+  end
+
+  def test_no_scan_link_without_photos
+    obs = observations(:coprinus_comatus_obs)
+    obs.images.clear
+    stub_admin_mode!
+
+    html = render(panel_with(obs))
+
+    assert_no_html(html, scan_link_selector(obs))
+  end
+
   private
+
+  def scan_link_selector(obs)
+    "#observation_field_slips a.inline-icon-link" \
+      ".scan_observation_field_slip_link_#{obs.id}" \
+      "[href='#{routes.field_slip_scan_observation_path(obs.id)}']"
+  end
 
   def who_text(html)
     Nokogiri::HTML.fragment(html).at_css(".obs-who").text

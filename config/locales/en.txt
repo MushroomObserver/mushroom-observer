@@ -2570,6 +2570,7 @@
   field_slip_attach_title: Attach Field Slip for [name]
   field_slip_attach_submit: Attach
   field_slip_attach_tooltip: Attach
+  field_slip_scan_tooltip: Scan photos for a field slip
   field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
@@ -2628,9 +2629,10 @@
   field_slip_extract_none_yet: This photo has not been scanned for field slip data yet.
   field_slip_scan_title: "Field Slip Scans for Observation [id]"
   field_slip_scan_help: Scan the photo that shows the field slip. Photos already scanned link to their results.
-  field_slip_scan_review: review scan results
-  field_slip_scan_reading: reading in progress
-  field_slip_scan_failed: scan failed - view / retry
+  field_slip_scan_review: Review Scan Results
+  field_slip_scan_reading: Reading in Progress
+  field_slip_scan_failed: Scan Failed - View
+  field_slip_scan_retry: Retry
   field_slip_scan_all_photos: Choose among all of this observation's photos
   observation_no_field_slip_detected: 'No field slip code was automatically detected in the photos. If one of them shows a field slip, you can "scan it":[url].'
   field_slip_extract_code_differs: differs from the attached field slip!
