@@ -14,6 +14,12 @@ Fix Image::Processor#ssh_sizes logging false failures
 
 This lives in this file (not just something said in conversation) because every file under `.claude/rules/` is auto-loaded into context every session regardless of whether `CLAUDE.md` links to it — that's the mechanism that makes a rule actually stick across sessions. Something only ever stated in conversation does not persist once that conversation ends; a rule file does.
 
+## Create every PR as a draft
+
+`gh pr create --draft …`, always. Marking it ready (`gh pr ready <n>`) is Nathan's call unless he asks the session to do it; when asked, wait until the PR is at least two minutes old and the session's own checks (tests, RuboCop) have passed.
+
+Two reasons. Nathan wants session-created PRs to arrive as drafts so a PR is visibly "Claude's proposal" until a human has looked at it. And it sidesteps a Copilot review failure: the repo ruleset requests a Copilot review the moment a non-draft PR opens, and that request sometimes aborts after ~45 s ("Copilot encountered an error") — a fast pre-review failure that then sticks to the PR number, so re-requesting keeps failing and only a fresh PR recovers (#5162→#5169, #5173→#5176, #5177→#5178). Drafts get no automatic request (`review_draft_pull_requests` is off); the request fires on "ready for review," once the PR's merge ref has had time to exist. See `copilot_review_comments.md` for the stuck-PR remedy.
+
 ## Bodies: write to a file, never HEREDOC
 
 When using `gh pr create` or `gh pr edit`, **always** write the body to a file first and pass it via `--body-file`. Never use a HEREDOC (`$(cat <<'EOF' ... EOF)`) for a PR body that contains backticks for code formatting.
