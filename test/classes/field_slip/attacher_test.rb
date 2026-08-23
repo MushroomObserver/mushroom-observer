@@ -117,6 +117,79 @@ class FieldSlip::AttacherTest < UnitTestCase
                "the primary is a native observation")
   end
 
+  # If the slip's occurrence had a reflection as primary, the merge
+  # repoints it to a native member (a reflection is not a primary).
+  def test_merge_repoints_a_reflection_primary_to_a_native
+    own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+    @obs.update!(occurrence: own)
+
+    slip_reflection = observations(:detailed_unknown_obs)
+    slip_reflection.update!(occurrence: nil, reflected_at: Time.zone.now)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0550", slip_reflection.user)
+    slip_reflection.field_slip = slip
+    slip_reflection.save!
+    slip_occ = slip.reload.occurrence
+    assert(slip_occ.primary_observation.reflection?,
+           "premise: reflection is primary")
+
+    result = FieldSlip::Attacher.attach(observation: @obs.reload,
+                                        code: "OPEN-0550",
+                                        user: @obs.user, join_in_use: true)
+
+    assert_equal(:merged, result)
+    assert_equal(@obs.id, slip_occ.reload.primary_observation_id,
+                 "the native member becomes primary")
+    assert_not(slip_occ.primary_observation.reflection?)
+  end
+
+  def test_merge_refuses_a_full_occurrence
+    own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+    @obs.update!(occurrence: own)
+    slip_obs = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0560", slip_obs.user)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = slip
+    slip_obs.save!
+
+    original = Occurrence::MAX_OBSERVATIONS
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, 1)
+    result = FieldSlip::Attacher.attach(observation: @obs.reload,
+                                        code: "OPEN-0560",
+                                        user: @obs.user, join_in_use: true)
+
+    assert_equal(:occurrence_full, result)
+    assert_equal(own.id, @obs.reload.occurrence_id)
+  ensure
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, original)
+  end
+
+  def test_merge_refuses_a_closed_project_slip
+    closed = projects(:bolete_project)
+    assert_not(closed.open_membership, "premise: closed to self-joining")
+    stranger = users(:zero_user)
+    assert_not(closed.member?(stranger), "premise: not a member")
+
+    @obs.update!(user: stranger)
+    own = Occurrence.create!(user: stranger, primary_observation: @obs)
+    @obs.update!(occurrence: own)
+
+    owner = closed.user_group.users.first
+    slip = FieldSlip.find_or_create_by_code("BLT-0570", owner)
+    slip_obs = observations(:coprinus_comatus_obs)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = slip
+    slip_obs.save!
+
+    result = FieldSlip::Attacher.attach(observation: @obs.reload,
+                                        code: "BLT-0570",
+                                        user: stranger, join_in_use: true)
+
+    assert_equal(:closed_project, result)
+    assert_equal(own.id, @obs.reload.occurrence_id)
+  end
+
   # The background (non-join_in_use) path leaves an occurrence-holding
   # observation alone -- no merge.
   def test_occurrence_holding_observation_is_left_alone_without_join_in_use
