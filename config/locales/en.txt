@@ -2644,6 +2644,8 @@
   field_slip_attach_reason_invalid: the code is not valid
   field_slip_attach_reason_already_linked: this observation already has a field slip
   field_slip_extract_joined: Field slip [code] was already in use, so this observation was linked to it as another observation of the same collection.
+  field_slip_extract_merged: Field slip [code] was already in use, so this observation's matching observations were merged with the collection already linked to it.
+  field_slip_attach_reason_occurrence_conflict: this observation's matching observations already carry a different field slip
   observation_field_slip_in_use: 'Field slip [code] was detected in a photo, but it is already attached to "another observation":[url], so it was not attached automatically. Use Read Field Slip to review the photo — saving the review will link this observation to the same field slip.'
   field_slip_extract_project_joined: Added the observation to [title], whose constraints it now satisfies.
   field_slip_extract_conflict: The saved values violate the constraints of [title], but field slip [code] already belongs to another observation there — a conflict only a person can sort out. The values were kept, and this observation was removed from the field slip and the project.

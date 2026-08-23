@@ -82,6 +82,78 @@ class FieldSlip::AttacherTest < UnitTestCase
     assert_includes(@obs.occurrence.observations, other.reload)
   end
 
+  # When the reviewed observation already belongs to an occurrence and
+  # the slip is on a different one, join_in_use merges them into the
+  # slip's occurrence -- keeping the slip and a native primary (#4214).
+  def test_join_in_use_merges_when_the_observation_has_an_occurrence
+    reflection = observations(:minimal_unknown_obs)
+    reflection.update!(occurrence: nil, reflected_at: Time.zone.now)
+    companion = observations(:detailed_unknown_obs)
+    companion.update!(occurrence: nil)
+    own_occ = Occurrence.create!(user: @obs.user,
+                                 primary_observation: companion)
+    [reflection, companion].each { |o| o.update!(occurrence: own_occ) }
+
+    slip_obs = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0520", slip_obs.user)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = slip
+    slip_obs.save!
+    slip_occ = slip.reload.occurrence
+
+    result = FieldSlip::Attacher.attach(observation: reflection.reload,
+                                        code: "OPEN-0520",
+                                        user: @obs.user, join_in_use: true)
+
+    assert_equal(:merged, result)
+    assert_equal(slip_occ.id, reflection.reload.occurrence_id)
+    assert_not(Occurrence.exists?(own_occ.id), "the emptied occ is gone")
+    merged = slip_occ.reload.observations
+    assert_includes(merged, reflection)
+    assert_includes(merged, companion)
+    assert_includes(merged, slip_obs.reload)
+    assert_equal(slip, slip_occ.field_slip, "the slip survives the merge")
+    assert_not(slip_occ.primary_observation.reflection?,
+               "the primary is a native observation")
+  end
+
+  # The background (non-join_in_use) path leaves an occurrence-holding
+  # observation alone -- no merge.
+  def test_occurrence_holding_observation_is_left_alone_without_join_in_use
+    @obs.update!(occurrence: nil)
+    own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+    @obs.update!(occurrence: own)
+    slip_obs = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0521", slip_obs.user)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = slip
+    slip_obs.save!
+
+    assert_equal(:already_linked, attach(code: "OPEN-0521"))
+    assert_equal(own.id, @obs.reload.occurrence_id)
+  end
+
+  # Two occurrences that each already carry a different field slip can't
+  # be merged by a slip review.
+  def test_merge_refuses_when_the_observation_occurrence_has_another_slip
+    own_slip = FieldSlip.find_or_create_by_code("OPEN-0530", @obs.user)
+    @obs.field_slip = own_slip
+    @obs.save!
+
+    slip_obs = observations(:coprinus_comatus_obs)
+    other_slip = FieldSlip.find_or_create_by_code("OPEN-0531", slip_obs.user)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = other_slip
+    slip_obs.save!
+
+    result = FieldSlip::Attacher.attach(observation: @obs.reload,
+                                        code: "OPEN-0531",
+                                        user: @obs.user, join_in_use: true)
+
+    assert_equal(:occurrence_conflict, result)
+    assert_equal("OPEN-0530", @obs.reload.field_slip.code)
+  end
+
   def test_join_in_use_refuses_a_full_occurrence
     other = observations(:coprinus_comatus_obs)
     slip = FieldSlip.find_or_create_by_code("OPEN-0511", other.user)

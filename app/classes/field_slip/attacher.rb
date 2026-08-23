@@ -33,9 +33,8 @@ class FieldSlip
 
     # Returns what happened, for the caller's log line.
     def attach
-      return :already_linked if @observation.occurrence_id
-
       existing = FieldSlip.find_by(code: @code)
+      return merge_or_refuse(existing) if @observation.occurrence_id
       return join_or_refuse(existing) if existing&.occurrence
       return :closed_project if barred?(existing)
 
@@ -73,6 +72,54 @@ class FieldSlip
 
     def occurrence_full?(slip)
       slip.occurrence.observations.count >= Occurrence::MAX_OBSERVATIONS
+    end
+
+    # The observation already belongs to an occurrence, and the slip's
+    # code names a slip on a different one -- both hold observations of
+    # the same collection, so merge them (only on the human-confirmed
+    # review path; the background job leaves it alone). Merge INTO the
+    # slip's occurrence so its field slip and primary survive (see
+    # Occurrence.merge!, which keeps the keeper's).
+    def merge_or_refuse(slip)
+      occ = @observation.occurrence
+      return :already_linked unless @join_in_use && slip&.occurrence
+      return :already_linked if slip.occurrence.id == occ.id
+
+      refusal = merge_refusal(slip, occ)
+      return refusal if refusal
+
+      Occurrence.merge!(slip.occurrence, occ, @user)
+      ensure_native_primary(slip.occurrence)
+      @observation.reload
+      apply_project(slip)
+      :merged
+    end
+
+    # The reason this merge can't happen, or nil.
+    def merge_refusal(slip, occ)
+      if occ.field_slip && occ.field_slip_id != slip.id
+        :occurrence_conflict
+      elsif merge_overflows?(slip, occ)
+        :occurrence_full
+      elsif barred?(slip)
+        :closed_project
+      end
+    end
+
+    def merge_overflows?(slip, occ)
+      combined = (slip.occurrence.observation_ids | occ.observation_ids)
+      combined.size > Occurrence::MAX_OBSERVATIONS
+    end
+
+    # A reflection may not be an occurrence's primary; if the merge
+    # left one there, repoint to the oldest native member.
+    def ensure_native_primary(occurrence)
+      occurrence.reload
+      primary = occurrence.primary_observation
+      return unless primary&.reflection?
+
+      native = occurrence.observations.reject(&:reflection?).min_by(&:id)
+      occurrence.update!(primary_observation: native) if native
     end
 
     def link(slip)
