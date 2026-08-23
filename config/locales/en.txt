@@ -1138,7 +1138,7 @@
   source_credit_external_text: Imported from [name]
   source_credit_help_link: About imported observations
   via: via
-  observation_reflection_read_only_note: Read-only reflection of its imported source. To change it, edit it at the source and resync.
+  observation_reflection_read_only_note: Read-only reflection of its imported source. Edit opens a linked companion observation for your changes; the reflection itself changes only by resync.
   observation_resync_confirm: If you recently edited at the source, those changes may take up to 10 seconds to appear there. Ready to sync now, or would you rather wait?
   observation_resync_started: Syncing imported data from the source. This may take a moment.
   observation_resync_pending: A sync is already underway. Results will appear shortly.
@@ -1491,6 +1491,8 @@
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
+  edit_observation_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created this companion observation for your changes and linked the two as one occurrence. Edit the companion here; the reflection keeps the imported data.
+  edit_observation_companion_existing: That observation is a read-only reflection of its imported source. You are editing its linked companion observation instead.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   create_observation_field_slip_full: 'Observation created, but field slip "[code]" already has [max] observations, the maximum allowed, so it was not attached.'
   form_observations_specimen_available: Specimen Available

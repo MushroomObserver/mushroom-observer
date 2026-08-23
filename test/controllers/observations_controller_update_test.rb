@@ -251,19 +251,56 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # A read-only reflection (#4214) can't be edited on MO even by its
-  # owner — the edit form redirects with a warning. The permission check
-  # runs first, so only the owner (who would otherwise pass) sees the
-  # reflection warning.
-  def test_edit_reflection_redirects_with_warning
+  # Edit on a read-only reflection (#4214) creates a companion
+  # observation in a shared occurrence -- copying the snapshot, sharing
+  # the images, joining the reflection's projects -- and lands on the
+  # companion's edit form. The reflection itself is untouched.
+  def test_edit_reflection_creates_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    obs.images << images(:in_situ_image)
+    project = projects(:eol_project)
+    project.add_observation(obs)
+    login(obs.user.login)
+
+    assert_difference("Observation.count", 1) do
+      get(:edit, params: { id: obs.id })
+    end
+
+    companion = obs.reload.occurrence.observations.where.not(id: obs.id).first
+    assert_not_nil(companion, "Cannot find the companion observation")
+    assert_redirected_to(edit_observation_path(companion.id))
+    assert_flash_success
+    assert_not(companion.reflection?)
+    assert_equal(obs.user_id, companion.user_id)
+    assert_equal(obs.name_id, companion.name_id)
+    assert_equal(obs.when, companion.when)
+    assert_equal(obs.where, companion.where)
+    assert_equal(obs.notes, companion.notes)
+    assert_equal(obs.image_ids.sort, companion.image_ids.sort)
+    assert_equal(obs.project_ids.sort, companion.project_ids.sort)
+    occurrence = companion.occurrence
+    assert_not_nil(occurrence)
+    assert_equal(obs.reload.occurrence_id, occurrence.id)
+    assert_equal(obs.id, occurrence.primary_observation_id)
+    assert(obs.reflection?, "the reflection must stay a reflection")
+  end
+
+  # A second Edit goes to the companion that already exists.
+  def test_edit_reflection_reuses_existing_companion
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)
     login(obs.user.login)
-
     get(:edit, params: { id: obs.id })
+    companion = obs.reload.occurrence.observations.where.not(id: obs.id).first
+    assert_not_nil(companion, "Cannot find the companion observation")
 
-    assert_redirected_to(action: :show, id: obs.id)
-    assert_flash_warning
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: obs.id })
+    end
+
+    assert_redirected_to(edit_observation_path(companion.id))
+    assert_flash_success
   end
 
   # A non-owner hitting edit on a reflection gets the same

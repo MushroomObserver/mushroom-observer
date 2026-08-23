@@ -25,7 +25,7 @@ module ObservationsController::EditAndUpdate
   #   @good_images                      list of images already attached
   #
   def edit
-    return unless editable_or_redirect?
+    return unless editable_or_redirect?(companion: true)
 
     init_license_var
     init_new_image_var(@observation.when)
@@ -55,14 +55,14 @@ module ObservationsController::EditAndUpdate
   # edit see the reflection warning. Returns true only when the request
   # may proceed; each guard performs its own redirect when it stops the
   # request.
-  def editable_or_redirect?
+  def editable_or_redirect?(companion: false)
     return false unless find_observation!
 
     unless permission!(@observation)
       redirect_to(action: :show, id: @observation.id)
       return false
     end
-    return false if redirect_if_reflection!
+    return false if companion ? redirect_to_companion! : redirect_if_reflection!
 
     true
   end
@@ -76,6 +76,30 @@ module ObservationsController::EditAndUpdate
 
     flash_warning(:edit_observation_is_reflection.t)
     redirect_to(action: :show, id: @observation.id)
+  end
+
+  # Edit on a reflection opens its companion instead (#4214): the
+  # occurrence's existing editable member, or a new one copying the
+  # snapshot. Returns the redirect when it stops the request.
+  def redirect_to_companion!
+    return unless @observation.reflection?
+
+    companion, notice = find_or_create_companion
+    flash_notice(notice.t)
+    redirect_to(edit_observation_path(companion.id))
+  rescue ActiveRecord::RecordInvalid => e
+    flash_error(e.record.errors.full_messages.join("; "))
+    redirect_to(action: :show, id: @observation.id)
+  end
+
+  # [companion, flash tag]
+  def find_or_create_companion
+    builder = Observation::Companion.new(@observation, @user)
+    if (companion = builder.existing)
+      [companion, :edit_observation_companion_existing]
+    else
+      [builder.create, :edit_observation_companion_created]
+    end
   end
 
   # Edit-mode: just build the union of projects to display. The
