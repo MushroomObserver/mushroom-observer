@@ -306,6 +306,30 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_flash_success
   end
 
+  # When the companion can't be made -- the reflection's occurrence is
+  # already full -- Edit flashes the error and returns to Show rather
+  # than 500ing.
+  def test_edit_reflection_flashes_when_the_companion_cannot_be_created
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    occ = Occurrence.create!(user: obs.user, primary_observation: obs)
+    obs.update!(occurrence: occ)
+    login(obs.user.login)
+
+    original = Occurrence::MAX_OBSERVATIONS
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, 1)
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: obs.id })
+    end
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_error
+  ensure
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, original)
+  end
+
   # A non-owner hitting edit on a reflection gets the same
   # permission-denied error as on any observation they can't edit —
   # not the reflection warning (Copilot review on #4852).
