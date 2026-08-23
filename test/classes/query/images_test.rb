@@ -247,6 +247,27 @@ class Query::ImagesTest < UnitTestCase
                  :Image, pattern: "DSCN8835") # original filename
   end
 
+  # Regression test for #4804: Image.pattern concatenates the (now
+  # utf8mb4) images columns with still-utf8mb3 observations/names
+  # columns. Confirm that mixed-encoding concat does not error and
+  # still finds emoji content.
+  #
+  # NOTE: deliberately calls the Image.pattern scope directly rather
+  # than through assert_query/Query.lookup -- Query.lookup persists
+  # its params to QueryRecord#description, a separate utf8mb3 column,
+  # which rejects an emoji-containing pattern with its own unrelated
+  # "Cannot convert string ... from utf8mb3 to utf8mb4" error. This
+  # is a distinct bug outside the images table this PR converts.
+  def test_image_pattern_matches_emoji_copyright_holder
+    obs = observations(:minimal_unknown_obs)
+    img = Image.create!(user: rolf, copyright_holder: "🍄 collector")
+    ObservationImage.create!(observation: obs, image: img)
+
+    results = Image.pattern("🍄").order_by_default
+    assert_includes(results, img,
+                    "Image.pattern should find emoji in copyright_holder")
+  end
+
   def test_image_has_observations
     expects = Image.includes(:observations).distinct.
               where.not(observations: { thumb_image: nil }).order_by_default
