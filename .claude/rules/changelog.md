@@ -6,7 +6,7 @@ end, after the test plan):
 ```
 <!-- changelog -->
 article: yes
-Maps of name lists now support clustering and zoom.
+Add clustering and zoom to name list maps
 <!-- /changelog -->
 ```
 

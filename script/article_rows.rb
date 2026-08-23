@@ -33,6 +33,7 @@ class ArticleRows
     @until = Date.today # rubocop:disable Rails/Date -- plain Ruby, no zone
     parse_args(argv)
     abort(USAGE) unless @since
+    abort("--until #{@until} is before --since #{@since}.") if @until < @since
   end
 
   def run
@@ -86,9 +87,13 @@ class ArticleRows
 
     lines = match[0].lines.map(&:strip).reject(&:empty?)
     verdict = lines.shift.to_s[/\Aarticle:\s*(yes|no)\z/i, 1]&.downcase
-    return [nil, nil] unless verdict
+    sentence = lines.join(" ")
+    usable?(verdict, sentence) ? [verdict, sentence] : [nil, nil]
+  end
 
-    [verdict, lines.join(" ")]
+  # A yes with nothing to say is not a usable block either.
+  def usable?(verdict, sentence)
+    verdict == "no" || (verdict == "yes" && !sentence.empty?)
   end
 
   def row(pull, sentence)
@@ -115,11 +120,13 @@ class ArticleRows
     months.flat_map { |from, to| merged_in(from, to) }
   end
 
+  # Calendar months: --since to the end of its month, then whole
+  # months, the last one cut at --until.
   def months
     from = @since
     windows = []
     while from <= @until
-      to = [from.next_month - 1, @until].min
+      to = [Date.new(from.year, from.month, -1), @until].min
       windows << [from.iso8601, to.iso8601]
       from = to + 1
     end
