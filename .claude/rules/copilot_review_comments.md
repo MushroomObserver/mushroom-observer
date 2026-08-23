@@ -64,3 +64,20 @@ re-verification across the `nimmo-4735-*` PR stack (#4751/#4749/#4752)
 multiple times across sessions, each requiring a fresh read of the
 surrounding logic. A reply on the thread turns that into "already
 answered, scroll up" instead of a re-derivation.
+
+## "Copilot encountered an error" — the PR is stuck; open a fresh one
+
+Once Copilot's review of a PR has errored, that PR keeps erroring:
+re-requesting the review fails again even after the cause is gone,
+and converting to draft and back does not clear it (#5162 errored
+three times on a commit that reviewed fine as a fresh PR; #5173 the
+same). What works: close the PR and open a new one from the same
+branch with the same description — the new PR reviews normally. Its
+first auto-request is sometimes dropped silently (no review, no
+error); a manual re-request then goes through.
+
+So when the error appears: check the content cause first if the PR
+is the first to fail since some change (a throwaway PR from the same
+commit tells content from state — see #5163–#5166 for the
+`[#NNNN](url)` changelog-link case), then open the fresh PR. Do not
+keep re-requesting on the stuck one.
