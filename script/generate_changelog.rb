@@ -3,9 +3,12 @@
 
 # Generates one CHANGELOG.md section per production deploy (issue
 # #5155): a dated heading for a deploy-* tag with a flat list of every
-# PR merged since the previous deploy tag. PR titles/authors come
-# from the gh CLI (run it wherever gh is authenticated); the PR list
-# comes from the merge commits between the two tags.
+# PR merged since the previous deploy tag. A PR belongs to a deploy
+# when its merge commit is reachable from that deploy's tag but not
+# from the previous one -- true for merge, squash and rebase merges
+# alike, and for a stacked PR in the deploy where its parent landed.
+# PR numbers, titles and authors come from one gh CLI call (run it
+# wherever gh is authenticated).
 #
 #   Dry run (default -- prints the section(s), writes nothing):
 #     script/generate_changelog.rb              # most recent deploy tag
@@ -13,16 +16,18 @@
 #     script/generate_changelog.rb --since deploy-2026-08-01-10-00
 #   Apply (inserts into CHANGELOG.md, newest first):
 #     script/generate_changelog.rb [--tag TAG | --since TAG] --apply
+#   Regenerate sections already present (after a generator change):
+#     script/generate_changelog.rb --since TAG --replace --apply
 #
 # --since TAG backfills one section for every deploy after TAG (TAG is
 # the baseline, not itself listed). Sections are applied one at a time,
-# so a gh failure mid-run keeps what was already written, and a rerun
-# skips sections already present.
+# so a failure mid-run keeps what was already written, and a rerun
+# skips sections already present unless --replace is given.
 #
-# Idempotent: --apply refuses to insert a section whose deploy tag is
-# already present. Standalone by design -- the deploy.sh hook comes
-# later, once the format has settled.
+# Standalone by design -- the deploy.sh hook comes later, once the
+# format has settled.
 
+require("date")
 require("json")
 require("open3")
 
@@ -31,13 +36,20 @@ class ChangelogGenerator
   CHANGELOG = "CHANGELOG.md"
   TAG_PATTERN = /\Adeploy-(\d{4}-\d{2}-\d{2})-\d{2}-\d{2}\z/
   USAGE = "Usage: script/generate_changelog.rb " \
-          "[--tag DEPLOY_TAG | --since DEPLOY_TAG] [--apply]"
+          "[--tag DEPLOY_TAG | --since DEPLOY_TAG] [--replace] [--apply]"
   HEADER = <<~MD
     # Changelog
   MD
+  # A stacked PR can be merged into its parent branch long before the
+  # parent reaches main; the PR pool reaches back this far before the
+  # earliest deploy tag a run looks at.
+  POOL_LOOKBACK_DAYS = 365
+  # GitHub search returns at most this many results per query.
+  SEARCH_CAP = 1000
 
   def initialize(argv)
     @apply = false
+    @replace = false
     @tag = nil
     @since = nil
     parse_args(argv)
@@ -61,6 +73,7 @@ class ChangelogGenerator
   def parse_arg(arg, rest)
     case arg
     when "--apply" then @apply = true
+    when "--replace" then @replace = true
     when "--tag" then @tag = rest.shift || abort(USAGE)
     when "--since" then @since = rest.shift || abort(USAGE)
     else abort("Unknown argument: #{arg}\n#{USAGE}")
@@ -72,6 +85,8 @@ class ChangelogGenerator
     index = tag_index(tags, target)
     abort("#{target} is the earliest deploy tag; no range.") if index.zero?
 
+    @pool_from = tags[index - 1]
+    @pool_to = target
     section = build_section(target, merged_prs(tags[index - 1], target))
     @apply ? apply(section, target) : puts(section)
     dry_run_notice unless @apply
@@ -82,6 +97,8 @@ class ChangelogGenerator
     targets = tags[(index + 1)..]
     abort("No deploy tags after #{@since}.") if targets.empty?
 
+    @pool_from = @since
+    @pool_to = targets.last
     targets.each_with_index do |target, i|
       warn("[#{i + 1}/#{targets.size}] #{target}")
       generate(tags[index + i], target)
@@ -90,7 +107,9 @@ class ChangelogGenerator
   end
 
   def generate(prev_tag, target)
-    return warn("  skipped: already in #{CHANGELOG}.") if present?(target)
+    if present?(target) && !@replace
+      return warn("  skipped: already in #{CHANGELOG} (--replace to redo).")
+    end
 
     section = build_section(target, merged_prs(prev_tag, target))
     @apply ? apply(section, target) : puts(section)
@@ -107,21 +126,57 @@ class ChangelogGenerator
       grep(TAG_PATTERN).sort
   end
 
-  # git log lists newest first; reverse to merge order.
+  # PRs whose merge commit is in prev..target, in commit order.
   def merged_prs(prev_tag, target_tag)
-    run_cmd("git", "log", "--merges", "--format=%s",
-            "#{prev_tag}..#{target_tag}").
-      split("\n").
-      filter_map { |subject| subject[/\AMerge pull request #(\d+)/, 1] }.
-      reverse.
-      map { |number| pr_info(number) }
+    order = run_cmd("git", "rev-list", "--reverse",
+                    "#{prev_tag}..#{target_tag}").
+            split("\n").each_with_index.to_h
+    pr_pool.select { |pull| order.key?(merge_sha(pull)) }.
+      sort_by { |pull| order[merge_sha(pull)] }
   end
 
-  def pr_info(number)
-    JSON.parse(
-      run_cmd("gh", "pr", "view", number,
-              "--json", "number,title,author")
+  def merge_sha(pull)
+    pull.dig("mergeCommit", "oid")
+  end
+
+  # Every merged PR from POOL_LOOKBACK_DAYS before the run's earliest
+  # tag onward, fetched once. Month by month: GitHub's search returns
+  # at most 1000 results, ordered by creation, so a single query drops
+  # old PRs that merged recently.
+  def pr_pool
+    @pr_pool ||= pool_months.flat_map { |from, to| merged_in(from, to) }
+  end
+
+  def merged_in(from, to)
+    pulls = JSON.parse(
+      run_cmd("gh", "pr", "list", "--state", "merged",
+              "--limit", SEARCH_CAP.to_s,
+              "--search", "merged:#{from}..#{to}",
+              "--json", "number,title,author,url,mergeCommit")
     )
+    if pulls.size >= SEARCH_CAP
+      abort("#{pulls.size} PRs merged in #{from}..#{to} hits GitHub's " \
+            "search cap; shorten the window in pool_months.")
+    end
+    pulls
+  end
+
+  # Month windows from the lookback before the run's earliest tag to
+  # its newest tag's date (nothing merged later can be in range).
+  def pool_months
+    from = tag_date(@pool_from) - POOL_LOOKBACK_DAYS
+    last = tag_date(@pool_to)
+    months = []
+    while from <= last
+      to = [from.next_month - 1, last].min
+      months << [from.iso8601, to.iso8601]
+      from = to + 1
+    end
+    months
+  end
+
+  def tag_date(tag)
+    Date.parse(run_cmd("git", "log", "-1", "--format=%cs", tag).strip)
   end
 
   def build_section(tag, prs)
@@ -134,19 +189,21 @@ class ChangelogGenerator
     "#{lines.join("\n")}\n"
   end
 
-  # A bare #NNNN, which GitHub autolinks in-repo. Not a markdown link
-  # to the PR: a file full of those makes Copilot code review fail on
-  # every PR in the repo.
+  # Link text "PRNNNN", not "#NNNN": a file full of [#NNNN](url) links
+  # makes Copilot code review fail on every PR in the repo, and GitHub
+  # does not autolink a bare #NNNN in a rendered file.
   def pr_line(info)
-    "- #{info["title"]} (##{info["number"]}, @#{info.dig("author", "login")})"
+    "- #{info["title"]} ([PR#{info["number"]}](#{info["url"]}), " \
+      "@#{info.dig("author", "login")})"
   end
 
   def dry_run_notice
     range = if @since then " --since #{@since}"
             elsif @tag then " --tag #{@tag}"
             end
+    replace = " --replace" if @replace
     warn("Dry run - nothing written. To apply: " \
-         "script/generate_changelog.rb#{range} --apply")
+         "script/generate_changelog.rb#{range}#{replace} --apply")
   end
 
   def changelog_content
@@ -158,10 +215,18 @@ class ChangelogGenerator
   end
 
   def apply(section, tag)
-    abort("CHANGELOG.md already has a section for #{tag}.") if present?(tag)
-
-    File.write(CHANGELOG, insert_sorted(changelog_content, section, tag))
-    warn("Inserted #{tag} section into #{CHANGELOG}.")
+    content = changelog_content
+    if present?(tag)
+      unless @replace
+        abort("#{CHANGELOG} already has a section for #{tag} (--replace " \
+              "to redo).")
+      end
+      File.write(CHANGELOG, replace_section(content, section, tag))
+      warn("Replaced #{tag} section in #{CHANGELOG}.")
+    else
+      File.write(CHANGELOG, insert_sorted(content, section, tag))
+      warn("Inserted #{tag} section into #{CHANGELOG}.")
+    end
   end
 
   # Sections run newest first. Insert above the first existing section
@@ -175,6 +240,16 @@ class ChangelogGenerator
     else
       "#{content.chomp}\n\n#{section}"
     end
+  end
+
+  # Swap the section for this tag, heading through the line before the
+  # next heading (or end of file).
+  def replace_section(content, section, tag)
+    positions = section_positions(content)
+    i = positions.index { |_pos, t| t == tag }
+    start = positions[i][0]
+    tail = positions[i + 1] ? content[positions[i + 1][0]..] : ""
+    "#{content[0...start]}#{section}#{"\n#{tail}" unless tail.empty?}"
   end
 
   # [offset, deploy-tag] for each section heading, in file order.
