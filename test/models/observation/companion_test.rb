@@ -33,15 +33,15 @@ class Observation::CompanionTest < UnitTestCase
     assert_equal(@reflection.name_id, companion.name_id)
     assert_equal(@reflection.name_id,
                  companion.namings.first.name_id)
-    assert_equal([images(:in_situ_image).id], companion.image_ids)
+    # Images stay on the reflection; only the thumbnail pointer is shared.
+    assert_empty(companion.image_ids)
     assert_equal(images(:in_situ_image).id, companion.thumb_image_id)
     assert_equal([project.id], companion.project_ids)
     assert_equal(@reflection.reload.occurrence_id, companion.occurrence_id)
-    assert_equal(@reflection.id,
-                 companion.occurrence.primary_observation_id)
+    assert_equal(companion.id, companion.occurrence.primary_observation_id)
   end
 
-  def test_create_joins_the_reflections_existing_occurrence
+  def test_create_joins_the_reflections_existing_occurrence_as_primary
     sibling = observations(:minimal_unknown_obs)
     occurrence = Occurrence.create!(user: @user,
                                     primary_observation: @reflection)
@@ -51,7 +51,7 @@ class Observation::CompanionTest < UnitTestCase
     companion = Observation::Companion.new(@reflection, @user).create
 
     assert_equal(occurrence.id, companion.occurrence_id)
-    assert_equal(@reflection.id, occurrence.reload.primary_observation_id)
+    assert_equal(companion.id, occurrence.reload.primary_observation_id)
     assert_equal(3, occurrence.observations.count)
   end
 
@@ -65,6 +65,22 @@ class Observation::CompanionTest < UnitTestCase
     # A reflection sibling is not a companion.
     companion.update_column(:reflected_at, Time.zone.now)
     assert_nil(Observation::Companion.new(@reflection, @user).existing)
+  end
+
+  # An occurrence whose primary is still the reflection gets repaired
+  # when Edit lands on its native member.
+  def test_existing_promotes_the_native_member_to_primary
+    native = observations(:minimal_unknown_obs)
+    occurrence = Occurrence.create!(user: @user,
+                                    primary_observation: @reflection)
+    @reflection.update!(occurrence: occurrence)
+    native.update!(occurrence: occurrence, user: @user)
+    assert(native.can_edit?(@user), "premise: the native is editable")
+
+    found = Observation::Companion.new(@reflection, @user).existing
+
+    assert_equal(native, found)
+    assert_equal(native.id, occurrence.reload.primary_observation_id)
   end
 
   def test_create_refuses_a_full_occurrence

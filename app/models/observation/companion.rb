@@ -4,9 +4,12 @@
 # snapshot (date, location, GPS, notes, images) mirrors its source and
 # cannot be edited on MO, so Edit hands the user a companion
 # observation in the same occurrence: one that already exists, or a
-# new one copying the snapshot and sharing the images. The reflection
-# stays the occurrence's primary, and -- members of an occurrence share
-# project membership -- the companion joins the reflection's projects.
+# new one copying the snapshot. The native companion is the
+# occurrence's primary (a reflection is not), and -- members of an
+# occurrence share project membership -- it joins the reflection's
+# projects. Images stay on the reflection: the occurrence pools its
+# members' images for display, so the companion only points its
+# thumbnail at the reflection's.
 class Observation::Companion
   # `collector_user_id` is left to the model, which re-derives it from
   # `collector` on save.
@@ -19,15 +22,18 @@ class Observation::Companion
     @user = user
   end
 
-  # A non-reflection member of the occurrence the user may edit. Read
-  # from the database, not the reflection's loaded association, which
-  # can predate a companion created moments ago.
+  # A non-reflection member of the occurrence the user may edit, made
+  # the primary if a reflection still holds that spot. Read from the
+  # database, not the reflection's loaded association, which can
+  # predate a companion created moments ago.
   def existing
     return unless @reflection.occurrence_id
 
-    Observation.where(occurrence_id: @reflection.occurrence_id).
-      where.not(id: @reflection.id).order(:id).
-      find { |obs| !obs.reflection? && obs.can_edit?(@user) }
+    companion = Observation.where(occurrence_id: @reflection.occurrence_id).
+                where.not(id: @reflection.id).order(:id).
+                find { |obs| !obs.reflection? && obs.can_edit?(@user) }
+    make_primary(companion) if companion
+    companion
   end
 
   # Raises ActiveRecord::RecordInvalid when the occurrence is full.
@@ -37,9 +43,7 @@ class Observation::Companion
       companion.save!
       propose_name(companion)
       join_occurrence(companion)
-      # After the occurrence link: a photo attached to an observation
-      # with no occurrence gets scanned for a field slip QR code.
-      share_images(companion)
+      point_thumbnail(companion)
       join_projects(companion)
       companion.log(:log_observation_created, user: @user)
       companion
@@ -76,17 +80,21 @@ class Observation::Companion
       companion.update!(occurrence: occurrence)
       Occurrence.log_observation_added([companion], @user)
       occurrence.recompute_has_specimen!
+      make_primary(companion)
     else
-      Occurrence.create_manual(@reflection, [@reflection, companion], @user)
+      Occurrence.create_manual(companion, [@reflection, companion], @user)
     end
   end
 
-  def share_images(companion)
-    @reflection.images.each do |image|
-      companion.add_image(image)
-      image.current_user = @user
-      image.log_reuse_for(companion)
-    end
+  def make_primary(companion)
+    occurrence = Occurrence.find(companion.occurrence_id)
+    return if occurrence.primary_observation_id == companion.id
+
+    occurrence.update!(primary_observation: companion)
+  end
+
+  # Any occurrence member's image may be an observation's thumbnail.
+  def point_thumbnail(companion)
     return unless @reflection.thumb_image_id
 
     companion.update!(thumb_image_id: @reflection.thumb_image_id)

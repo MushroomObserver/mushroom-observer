@@ -259,6 +259,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)
     obs.images << images(:in_situ_image)
+    obs.update_column(:thumb_image_id, images(:in_situ_image).id)
     project = projects(:eol_project)
     project.add_observation(obs)
     login(obs.user.login)
@@ -277,12 +278,14 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_equal(obs.when, companion.when)
     assert_equal(obs.where, companion.where)
     assert_equal(obs.notes, companion.notes)
-    assert_equal(obs.image_ids.sort, companion.image_ids.sort)
+    assert_empty(companion.image_ids, "images stay on the reflection")
+    assert_equal(obs.thumb_image_id, companion.thumb_image_id)
     assert_equal(obs.project_ids.sort, companion.project_ids.sort)
     occurrence = companion.occurrence
     assert_not_nil(occurrence)
     assert_equal(obs.reload.occurrence_id, occurrence.id)
-    assert_equal(obs.id, occurrence.primary_observation_id)
+    assert_equal(companion.id, occurrence.primary_observation_id,
+                 "the native companion is the primary")
     assert(obs.reflection?, "the reflection must stay a reflection")
   end
 
