@@ -256,7 +256,9 @@ class Inat
     # Observation.
     def retry_or_raise_writeback(error, payload, attempt)
       ofv = payload[:observation_field_value]
-      return if field_actually_written?(ofv[:observation_id], ofv[:value])
+      return if field_actually_written?(ofv[:observation_id],
+                                        ofv[:observation_field_id],
+                                        ofv[:value])
 
       if attempt <= MAX_WRITEBACK_RETRIES
         backoff_for_writeback_retry(error, attempt)
@@ -270,9 +272,14 @@ class Inat
       log_and_raise_writeback_error(error, payload)
     end
 
-    def field_actually_written?(observation_id, value)
+    # Verify by the field_id passed in, not a field hard-coded to the MO
+    # URL field -- update_inat_observation_field's signature is generic,
+    # so this stays correct if it's called for another observation field.
+    def field_actually_written?(observation_id, field_id, value)
       raw_obs = fetch_inat_observation(observation_id)
-      Inat::Obs.new(JSON.generate(raw_obs)).mo_url_field_value == value
+      fields = Inat::Obs.new(JSON.generate(raw_obs)).inat_obs_fields
+      fields&.find { |field| field[:field_id] == field_id }&.dig(:value) ==
+        value
     rescue StandardError
       false
     end
