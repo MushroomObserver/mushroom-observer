@@ -253,10 +253,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
   # ---------------------------------------------------------------
   #  Placeholder resync respects MO-side Namings and Votes: it only
-  #  revises the observation's original Naming, only while no outside
-  #  vote has locked it. Once locked, it's left alone for good -- no
-  #  replacement Naming. A Naming anyone proposed independently,
-  #  including the importer, stays untouched.
+  #  revises the Naming recorded in inat_stand_in_naming_id, only
+  #  while no outside vote has locked it. A locked stand-in gets a
+  #  new one instead, tracked by repointing that same column, not by
+  #  guessing from who proposed a Naming or when. A Naming anyone
+  #  proposed independently, including the importer, stays untouched.
   # ---------------------------------------------------------------
 
   # Regression: the importer themselves can propose a second Naming at
@@ -292,9 +293,13 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(1, second_naming.votes.count,
                  "The importer's vote on their second Naming should be " \
                  "untouched")
+    assert_equal(skeleton.namings.order(:id).first.id,
+                 skeleton.inat_stand_in_naming_id,
+                 "The stand-in pointer should stay on the original " \
+                 "Naming, not shift to the importer's second one")
   end
 
-  def test_placeholder_resync_leaves_a_locked_naming_alone_for_good
+  def test_placeholder_resync_forks_a_new_naming_when_the_stand_in_is_locked
     skeleton = build_skeleton(name: names(:peltigera))
     original = skeleton.namings.first
     Vote.create!(naming: original, observation: skeleton, user: mary,
@@ -310,23 +315,117 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     assert_equal(names(:peltigera), original.reload.name,
                  "A locked Naming should not be revised by resync")
-    assert_equal(1, skeleton.reload.namings.count,
-                 "resync should not add a replacement Naming for a " \
-                 "locked original")
+    assert_equal(2, skeleton.reload.namings.count,
+                 "resync should add a new Naming instead of editing a " \
+                 "locked one")
+    forked = skeleton.namings.where.not(id: original.id).first
+    assert_equal(names(:coprinus), forked.name)
+    assert_equal(users(:rolf), forked.user,
+                 "The forked Naming should be attributed to the importer")
+    assert_equal(forked.id, skeleton.inat_stand_in_naming_id,
+                 "The stand-in pointer should repoint to the forked Naming")
+  end
+
+  # A forked stand-in's own vote uses the same confidence weight a
+  # skeleton's initial Naming would get (SkeletonObservationBuilder#
+  # naming_vote): Promising for Research Grade, Could Be otherwise.
+  def test_placeholder_resync_fork_vote_reflects_research_grade
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    research_raw = raw_for(names(:coprinus)).merge(quality_grade: "research")
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => research_raw },
+                                false])
+    ).resync
+
+    forked = skeleton.reload.namings.where.not(id: original.id).first
+    vote = forked.votes.find_by(user: users(:rolf))
+    assert_equal(Vote::NEXT_BEST_VOTE, vote.value,
+                 "A Research Grade source should give the forked stand-in " \
+                 "a Promising vote, not Could Be")
+  end
+
+  def test_placeholder_resync_forked_naming_is_the_new_stand_in
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:unchanged, result.status,
+                 "iNat's Leading ID hasn't moved since the fork, so no " \
+                 "further Naming should be added")
+    assert_equal(2, skeleton.reload.namings.count)
+  end
+
+  def test_placeholder_resync_forks_again_after_the_fork_is_locked
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+    first_fork = skeleton.namings.where.not(id: original.id).first
+    Vote.create!(naming: first_fork, observation: skeleton, user: dick,
+                 value: Vote::MAXIMUM_VOTE)
+    stereum_raw = raw_for(names(:stereum))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => stereum_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+
+    assert_equal(3, skeleton.namings.count,
+                 "an outside vote locking the first fork should trigger " \
+                 "a second fork")
+    assert_equal(names(:peltigera), original.reload.name)
+    assert_equal(names(:coprinus), first_fork.reload.name)
+    second_fork = skeleton.namings.
+                  where.not(id: [original.id, first_fork.id]).first
+    assert_equal(names(:stereum), second_fork.name)
+    assert_equal(second_fork.id, skeleton.inat_stand_in_naming_id)
   end
 
   # Do not suppress sync-driven consensus recalculation. It sends the
-  # normal ConsensusChangeMailer notification.
-  # Naming#create_emails (after_save callback) separately sends
-  # its own naming-proposal notification for the revised Naming -- two
-  # distinct, expected notifications to the same interested user.
+  # normal ConsensusChangeMailer notification -- to the interested
+  # user (Katrina) and to the observation's own owner (Rolf, the
+  # importer, opted into email_observations_consensus by default).
+  # Naming#create_emails (after_save callback) separately sends its
+  # own naming-proposal notification for the revised Naming, to
+  # Katrina -- three distinct, expected notifications.
   def test_placeholder_resync_consensus_change_notifies_interested_users
     skeleton = build_skeleton(name: names(:peltigera))
     Interest.create!(target: skeleton, user: katrina, state: true)
     link = skeleton.import_link
     coprinus_raw = raw_for(names(:coprinus))
 
-    assert_enqueued_jobs(2, only: ActionMailer::MailDeliveryJob) do
+    assert_enqueued_jobs(3, only: ActionMailer::MailDeliveryJob) do
       Inat::ObservationResyncer.new(
         skeleton,
         fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },

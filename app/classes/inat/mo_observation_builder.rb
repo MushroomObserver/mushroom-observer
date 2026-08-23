@@ -70,7 +70,8 @@ class Inat
     def upgrade_observation
       @observation.namings.destroy_all
       @observation.update!(
-        new_obs_params.except(:user, :inat_import_id).merge(placeholder: false)
+        new_obs_params.except(:user, :inat_import_id).
+          merge(placeholder: false, inat_stand_in_naming_id: nil)
       )
     end
 

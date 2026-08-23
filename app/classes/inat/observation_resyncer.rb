@@ -155,28 +155,67 @@ class Inat
       attrs.merge(specimen: inat_obs.specimen?, notes: inat_obs.notes)
     end
 
-    # Revise the observation's original Naming if iNat's Leading ID
-    # changes and it's unlocked (no outside vote).
-    # Leave locked Naming alone.
-    # The first Naming is the only one this method can safely ID as MO's
-    # own. A later Naming can't be used the same way
-    # There's no way to distinguish it from a Naming MO itself added.
+    # Revise MO's stand-in Naming if iNat's Leading ID changes and
+    # it's unlocked (no outside vote). Once locked, fork a new stand-in
+    # instead of touching the old one. Find the stand-in by
+    # obs.inat_stand_in_naming_id.
     #
-    # Recalculate consensus on a revision, so votes -- not iNat --
-    # decide the observation's displayed name.
+    # Recalculate consensus on a change, so votes -- not iNat -- decide
+    # the observation's displayed name.
     def sync_placeholder_naming?(obs, inat_obs)
       resolver = Inat::LeadNameResolver.new(inat_obs: inat_obs, user: obs.user)
       lead_name = resolver.leading_id_name
       consensus = Observation::NamingConsensus.new(obs)
-      original = obs.namings.order(:id).first
-      return false unless original
-      return false unless consensus.editable?(original)
-      return false if lead_name == original.name
+      stand_in = stand_in_naming(obs)
+      return false unless stand_in
+      return false if lead_name == stand_in.name
 
-      original.update!(name: lead_name, reasons: { 2 => resolver.reason_text })
+      revise_or_fork_naming(stand_in, lead_name, resolver, consensus,
+                            inat_obs)
       consensus.calc_consensus(User.admin)
       obs.reload
       true
+    end
+
+    def stand_in_naming(obs)
+      return nil unless obs.inat_stand_in_naming_id
+
+      Naming.find_by(id: obs.inat_stand_in_naming_id)
+    end
+
+    # Revise the stand-in Naming in place while it's still unlocked; fork
+    # a new one instead once an outside vote has locked it.
+    def revise_or_fork_naming(stand_in, lead_name, resolver, consensus,
+                              inat_obs)
+      if consensus.editable?(stand_in)
+        stand_in.update!(name: lead_name,
+                         reasons: { 2 => resolver.reason_text })
+      else
+        fork_stand_in_naming(consensus, lead_name, resolver, inat_obs)
+        consensus.mark_obs_reviewed(consensus.observation.user)
+      end
+    end
+
+    # New stand-in Naming -- same shape as
+    # SkeletonObservationBuilder#add_naming_with_vote.
+    def fork_stand_in_naming(consensus, name, resolver, inat_obs)
+      obs = consensus.observation
+      naming = Naming.create(
+        observation: obs, user: obs.user, name: name,
+        reasons: { 2 => resolver.reason_text }
+      )
+      Vote.create(naming: naming, observation: obs, user: obs.user,
+                  value: placeholder_naming_vote(inat_obs))
+      obs.update!(inat_stand_in_naming_id: naming.id)
+    end
+
+    # Same confidence weight SkeletonObservationBuilder#naming_vote uses.
+    def placeholder_naming_vote(inat_obs)
+      if inat_obs[:quality_grade] == "research"
+        Vote::NEXT_BEST_VOTE
+      else
+        Vote::MIN_POS_VOTE
+      end
     end
 
     # The iNat obs is gone: keep every MO record intact, record the loss on

@@ -53,6 +53,7 @@
 #  notes::                  Arbitrary text supplied by User and serialized.
 #  placeholder::            Minimal counterpart for another observation,
 #                           e.g., an unlicensed iNaturalist obs.
+#  inat_stand_in_naming_id:: Naming that mirrors a placeholder's iNat Leading ID
 #  needs_naming::           Does it need a name?
 #  lifeform::               Cached name.lifeform for content filtering.
 #  text_name::              Cached name.text_name for content filtering.

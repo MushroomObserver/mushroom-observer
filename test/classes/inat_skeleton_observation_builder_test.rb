@@ -63,6 +63,8 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     assert_equal(1, obs.namings.length, "Skeleton should have 1 naming")
     assert_equal(users(:rolf), obs.namings.first.user,
                  "Skeleton's naming should always be attributed to importer")
+    assert_equal(obs.namings.first.id, obs.inat_stand_in_naming_id,
+                 "Skeleton's Naming should be recorded as sync's stand-in")
     assert_naming_reason(obs)
     assert_placeholder_notes(obs)
     assert(

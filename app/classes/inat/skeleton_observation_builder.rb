@@ -141,10 +141,13 @@ class Inat
         observation: @observation, user: user, name: name,
         reasons: { 2 => naming_reason }
       )
+      # Records which Naming sync should treat as MO's own stand-in for
+      # iNat's Leading ID. See ObservationResyncer.
+      @observation.update!(inat_stand_in_naming_id: naming.id)
 
       vote = Vote.create(naming: naming, observation: @observation,
                          user: user, value: value)
-      # We need an ObservationView, but no one has actually viewed this Obs.
+      # We need an ObservationView -- no one has viewed this Obs yet.
       ObservationView.create!(observation: @observation, user: user,
                               last_view: vote.updated_at, reviewed: 1)
     end
