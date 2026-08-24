@@ -71,7 +71,7 @@ class Inat
       # not already exported from or imported to MO
       # (field written by iNat's defunct Import from MO feature,
       # Pulk's mirror script, and ObservationImporter)
-      without_field: "Mushroom Observer URL"
+      without_field: MO_URL_OBSERVATION_FIELD_NAME
     }.freeze
 
     # A work-around because iNat has no "has a date" filter;

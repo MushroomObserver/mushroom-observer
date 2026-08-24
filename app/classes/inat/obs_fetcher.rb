@@ -82,8 +82,9 @@ class Inat
       # colon is significant to iNat's parser, so it can't go through
       # to_query (which escapes the colon to %3A). Append it raw,
       # url-encoding the name (spaces as %20, matching iNat).
-      qs += "&field:#{CGI.escape(field_present).gsub("+", "%20")}" if
-        field_present
+      if field_present
+        qs += "&field:#{CGI.escape(field_present).gsub("+", "%20")}"
+      end
       qs
     end
 
