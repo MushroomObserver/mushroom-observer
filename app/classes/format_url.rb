@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Can simply validate one url as a working url,
-# or check it conforms to a the format of a provided base_url.
+# Validates a url's format -- an http/https scheme with a host -- and
+# optionally that it matches the format of a provided base_url. Does not
+# check that the url is reachable.
 #
 # Main accessors
 #
