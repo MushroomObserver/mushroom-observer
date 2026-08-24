@@ -57,6 +57,11 @@ module Name::Taxonomy
 
   # ----------------------------------------------------------------------------
 
+  # Is this an informal "code name"? Ex:  Cortinarius sp. 'IN34'
+  def code_name?
+    / sp(\.) '/.match?(text_name)
+  end
+
   # Is the Name (potentially) registrable in a fungal nomenclature repository?
   # This and #unregistrable are used in the views to determine whether
   # to display the ICN identifier, links to nomenclature records or searches

@@ -149,6 +149,8 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Right column -------------------------------------------------
 
   def render_right_column
+    return if @name.code_name?
+
     Column(xs: 12, sm: 6) do
       ul(class: "list-unstyled") do
         if @name.icn_id?
