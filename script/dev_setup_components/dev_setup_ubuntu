@@ -37,7 +37,12 @@ if [ "$(id -u)" -eq 0 ]; then
     mo_ubuntu_root_setup
 
     echo "Continuing as mo..."
-    exec su - mo -c "curl -fsSL https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash"
+    # Targets this script directly, not script/dev_setup -- the OS is
+    # already known at this point (we're in the Ubuntu root branch),
+    # so routing back through the dispatcher would only add an unused
+    # mo_ensure_repo clone into mo's home directory before this same
+    # script cd's into /var/web and clones there for real.
+    exec su - mo -c "curl -fsSL https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_components/dev_setup_ubuntu | bash"
 fi
 
 cd /var/web || exit 1
