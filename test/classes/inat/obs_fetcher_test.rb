@@ -27,6 +27,14 @@ class Inat::ObsFetcherTest < UnitTestCase
     assert_equal(%w[1], by_id.keys)
   end
 
+  def test_fetch_batch_with_no_ids_makes_no_request
+    # No WebMock stub -- if a request went out, WebMock would raise.
+    by_id, failed = Inat::ObsFetcher.new.fetch_batch([nil])
+
+    assert_not(failed)
+    assert_empty(by_id)
+  end
+
   def test_fetch_batch_reports_failure_after_exhausting_retries
     stub_obs_status("1", 429) # TooManyRequests is retryable
     fetcher = Inat::ObsFetcher.new

@@ -36,11 +36,15 @@ class Inat
     # nil, the batch returns every id -- and only then does an id missing
     # from the results mean "deleted on iNat" rather than "unchanged".
     def fetch_batch(external_ids, updated_since: nil)
+      ids = external_ids.compact.uniq
+      # An empty id list would query iNat with no `id` filter (i.e. every
+      # observation), so short-circuit to an empty (non-failed) result.
+      return [{}, false] if ids.empty?
+
       by_id = {}
-      fetch_page(external_ids.compact.uniq, updated_since: updated_since).
-        each do |raw|
-          by_id[raw[:id].to_s] = raw
-        end
+      fetch_page(ids, updated_since: updated_since).each do |raw|
+        by_id[raw[:id].to_s] = raw
+      end
       [by_id, false]
     rescue FetchError
       [{}, true]

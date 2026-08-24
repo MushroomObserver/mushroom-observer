@@ -51,11 +51,14 @@ class Inat
 
     def tally_all(reflections, since)
       counts = Hash.new(0)
-      reflections.each_slice(CHUNK_SIZE).with_index do |chunk, i|
+      # Stream in DB-sized batches rather than loading every reflection into
+      # memory at once -- the population can reach hundreds of thousands.
+      reflections.in_batches(of: CHUNK_SIZE).each_with_index do |batch, i|
         # Pace chunks to iNat's ~1 req/sec guidance -- the fetcher paces
         # only its own paginating callers, not one call per chunk here.
         # No wait before the first chunk.
         sleep(ObsFetcher::INTER_PAGE_SLEEP) if i.positive?
+        chunk = batch.preload(external_links: :external_site).to_a
         tally_chunk(chunk, counts, since)
       end
       counts
@@ -84,15 +87,14 @@ class Inat
     end
 
     # Every read-only iNat reflection. `updated_since` narrows the fetch
-    # server-side, so there's no per-reflection due filter here.
-    # external_links is preloaded so the per-reflection import_link /
-    # external_site reads the applier makes don't each hit the database.
+    # server-side, so there's no per-reflection due filter here. Ordering
+    # and external_links preloading happen per batch in tally_all
+    # (in_batches orders by primary key; preload can't survive its
+    # id-range re-query).
     def reflections(site)
       Observation.where.not(reflected_at: nil).
         joins(:external_links).merge(ExternalLink.import).
-        where(external_links: { external_site_id: site.id }).
-        order(:id).
-        preload(external_links: :external_site)
+        where(external_links: { external_site_id: site.id })
     end
   end
 end
