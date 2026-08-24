@@ -33,7 +33,11 @@ class Inat
       return {} unless site
 
       counts = Hash.new(0)
-      due_reflections(site).each_slice(CHUNK_SIZE) do |chunk|
+      due_reflections(site).each_slice(CHUNK_SIZE).with_index do |chunk, i|
+        # Pace chunks to iNat's ~1 req/sec guidance -- the fetcher paces
+        # only its own paginating callers, not one call per chunk here.
+        # No wait before the first chunk.
+        sleep(ObsFetcher::INTER_PAGE_SLEEP) if i.positive?
         tally_chunk(chunk, counts)
       end
       # Only advance the source watermark on a clean run: a transient
