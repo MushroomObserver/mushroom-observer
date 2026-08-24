@@ -106,9 +106,13 @@ class Inat
     # `where` too would flip it back and forth and never converge.
     def scalar_attributes(inat_obs)
       location = inat_obs.location
+      # specimen is intentionally not synced: iNat gives no reliable signal
+      # (Inat::Obs#specimen? is hardcoded false), and MO's specimen is set by
+      # MO-side herbarium records / collection numbers a user may add to a
+      # reflection -- syncing it could only unset a legitimate true.
       attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
                 lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden,
-                specimen: inat_obs.specimen?, notes: inat_obs.notes }
+                notes: inat_obs.notes }
       attrs[:where] = inat_obs.where if location.nil?
       attrs
     end
