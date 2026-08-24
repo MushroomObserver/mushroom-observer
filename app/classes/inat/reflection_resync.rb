@@ -36,21 +36,33 @@ class Inat
 
     # Turn one reflection plus the batch's (by_id, failed) into a Result.
     #   fetch failed (transient)  -> :fetch_failed, nothing touched;
-    #   id absent from results    -> :source_deleted, MO data kept, logged;
-    #   id present                -> :synced / :unchanged.
-    def call(reflection, by_id, failed)
+    #   id present                -> :synced / :unchanged;
+    #   id absent from results    -> depends on `absent:`.
+    #
+    # `absent:` is what a missing id means, which depends on how the
+    # batch was fetched. A full fetch (the "Sync now" button) queried
+    # every id, so a missing one is gone from iNat -> :deleted. An
+    # incremental fetch (updated_since) returns only changed ids, so a
+    # missing one merely didn't change -> :unchanged, untouched.
+    def call(reflection, by_id, failed, absent: :deleted)
       return failed_result(reflection) if failed
 
       raw = by_id[self.class.inat_id(reflection).to_s]
-      return deleted(reflection) unless raw
+      return apply(reflection, Inat::Obs.new(JSON.generate(raw))) if raw
 
-      apply(reflection, Inat::Obs.new(JSON.generate(raw)))
+      absent == :deleted ? deleted(reflection) : unchanged(reflection)
     end
 
     private
 
     def failed_result(reflection)
       Result.new(status: :fetch_failed, observation: reflection)
+    end
+
+    # Not in this incremental batch's results, so unchanged on iNat: leave
+    # the reflection alone, don't even stamp -- it wasn't fetched.
+    def unchanged(reflection)
+      Result.new(status: :unchanged, observation: reflection)
     end
 
     # Detect a change from what persists, not from the assigned values:

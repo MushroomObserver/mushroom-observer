@@ -35,10 +35,11 @@ production:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
   # Daily refresh of read-only iNat reflections from their source (#4215):
-  # re-fetches each due reflection's scalar core in a few rate-limited
-  # batched API calls. Off the midnight cluster above (and off any :00/:03
-  # mark shared with recover_stuck_inat_imports) so it doesn't queue
-  # behind them on the 2-thread :maintenance pool.
+  # fetches only the reflections changed on iNat since the last run
+  # (updated_since) in a few rate-limited batched API calls. Off the
+  # midnight cluster above (and off any :00/:03 mark shared with
+  # recover_stuck_inat_imports) so it doesn't queue behind them on the
+  # 2-thread :maintenance pool.
   resync_inat_reflections:
     class: InatReflectionBatchResyncJob
     schedule: every day at 1:17am

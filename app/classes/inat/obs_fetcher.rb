@@ -31,11 +31,16 @@ class Inat
     # Fetch one batch of up to PAGE_SIZE external ids. Returns
     # [results_by_id, failed?] - failed? is true when the batch exhausted its
     # retries, so the caller can mark those obs "fetch_error" vs "not_found".
-    def fetch_batch(external_ids)
+    # `updated_since` (a Time) narrows the batch to ids changed on iNat
+    # since then, so an incremental sync fetches only what moved. Left
+    # nil, the batch returns every id -- and only then does an id missing
+    # from the results mean "deleted on iNat" rather than "unchanged".
+    def fetch_batch(external_ids, updated_since: nil)
       by_id = {}
-      fetch_page(external_ids.compact.uniq).each do |raw|
-        by_id[raw[:id].to_s] = raw
-      end
+      fetch_page(external_ids.compact.uniq, updated_since: updated_since).
+        each do |raw|
+          by_id[raw[:id].to_s] = raw
+        end
       [by_id, false]
     rescue FetchError
       [{}, true]
@@ -43,14 +48,14 @@ class Inat
 
     private
 
-    def fetch_page(ids, attempt: 1)
-      response = get("observations?#{page_query(ids)}")
+    def fetch_page(ids, updated_since: nil, attempt: 1)
+      response = get("observations?#{page_query(ids, updated_since)}")
       JSON.parse(response.body, symbolize_names: true)[:results] || []
     rescue *RETRYABLE_ERRORS, JSON::ParserError => e
       raise(FetchError.new(e.message)) if attempt > MAX_RETRIES
 
       backoff_for_retry(e, ids, attempt)
-      fetch_page(ids, attempt: attempt + 1)
+      fetch_page(ids, updated_since: updated_since, attempt: attempt + 1)
     end
 
     def backoff_for_retry(error, ids, attempt)
@@ -60,9 +65,11 @@ class Inat
       sleep(backoff)
     end
 
-    def page_query(ids)
-      { id: ids.join(","), per_page: PAGE_SIZE,
-        order_by: "id", order: "asc" }.to_query
+    def page_query(ids, updated_since = nil)
+      query = { id: ids.join(","), per_page: PAGE_SIZE,
+                order_by: "id", order: "asc" }
+      query[:updated_since] = updated_since.utc.iso8601 if updated_since
+      query.to_query
     end
 
     def get(path)
