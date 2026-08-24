@@ -12,10 +12,11 @@ require("json")
 class Inat::ReflectionBatchResyncerTest < UnitTestCase
   # Stands in for Inat::ObsFetcher -- returns a canned [by_id, failed?]
   # and records the ids and updated_since it was asked for.
-  FakeFetcher = Struct.new(:batch, :seen_ids, :seen_since) do
-    def fetch_batch(ids, updated_since: nil)
+  FakeFetcher = Struct.new(:batch, :seen_ids, :seen_since, :seen_field) do
+    def fetch_batch(ids, updated_since: nil, field_present: nil)
       self.seen_ids = ids
       self.seen_since = updated_since
+      self.seen_field = field_present
       batch
     end
   end
@@ -50,6 +51,17 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
     assert_not_nil(fetcher.seen_since)
     assert_in_delta(since.to_i, fetcher.seen_since.to_i, 1,
                     "the fetch is narrowed by the last successful run")
+  end
+
+  # Every batch fetch is constrained to obs carrying MO's back-link field,
+  # the marker that says "this is a synced MO reflection".
+  def test_constrains_the_fetch_to_the_mo_url_field
+    fetcher = FakeFetcher.new([{ @id => @raw }, false])
+
+    Inat::ReflectionBatchResyncer.new(fetcher: fetcher).resync_all
+
+    assert_equal(Inat::Constants::MO_URL_OBSERVATION_FIELD_NAME,
+                 fetcher.seen_field)
   end
 
   def test_first_run_with_no_watermark_fetches_everything

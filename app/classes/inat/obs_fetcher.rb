@@ -35,14 +35,15 @@ class Inat
     # since then, so an incremental sync fetches only what moved. Left
     # nil, the batch returns every id -- and only then does an id missing
     # from the results mean "deleted on iNat" rather than "unchanged".
-    def fetch_batch(external_ids, updated_since: nil)
+    def fetch_batch(external_ids, updated_since: nil, field_present: nil)
       ids = external_ids.compact.uniq
       # An empty id list would query iNat with no `id` filter (i.e. every
       # observation), so short-circuit to an empty (non-failed) result.
       return [{}, false] if ids.empty?
 
       by_id = {}
-      fetch_page(ids, updated_since: updated_since).each do |raw|
+      fetch_page(ids, updated_since: updated_since,
+                      field_present: field_present).each do |raw|
         by_id[raw[:id].to_s] = raw
       end
       [by_id, false]
@@ -52,14 +53,17 @@ class Inat
 
     private
 
-    def fetch_page(ids, updated_since: nil, attempt: 1)
-      response = get("observations?#{page_query(ids, updated_since)}")
+    def fetch_page(ids, updated_since: nil, field_present: nil, attempt: 1)
+      response = get(
+        "observations?#{page_query(ids, updated_since, field_present)}"
+      )
       JSON.parse(response.body, symbolize_names: true)[:results] || []
     rescue *RETRYABLE_ERRORS, JSON::ParserError => e
       raise(FetchError.new(e.message)) if attempt > MAX_RETRIES
 
       backoff_for_retry(e, ids, attempt)
-      fetch_page(ids, updated_since: updated_since, attempt: attempt + 1)
+      fetch_page(ids, updated_since: updated_since,
+                      field_present: field_present, attempt: attempt + 1)
     end
 
     def backoff_for_retry(error, ids, attempt)
@@ -69,11 +73,18 @@ class Inat
       sleep(backoff)
     end
 
-    def page_query(ids, updated_since = nil)
+    def page_query(ids, updated_since = nil, field_present = nil)
       query = { id: ids.join(","), per_page: PAGE_SIZE,
                 order_by: "id", order: "asc" }
       query[:updated_since] = updated_since.utc.iso8601 if updated_since
-      query.to_query
+      qs = query.to_query
+      # iNat's observation-field filter is literally `field:<Name>` -- the
+      # colon is significant to iNat's parser, so it can't go through
+      # to_query (which escapes the colon to %3A). Append it raw,
+      # url-encoding the name (spaces as %20, matching iNat).
+      qs += "&field:#{CGI.escape(field_present).gsub("+", "%20")}" if
+        field_present
+      qs
     end
 
     def get(path)

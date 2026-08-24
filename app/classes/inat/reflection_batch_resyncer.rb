@@ -65,9 +65,14 @@ class Inat
     end
 
     def tally_chunk(chunk, counts, since)
+      # Constrain to obs carrying MO's "Mushroom Observer URL" back-link --
+      # the marker that says "this is a synced MO reflection". Every id
+      # here already has it, so it doesn't change the set; it enforces the
+      # invariant and mirrors the field-based discovery this will grow into.
       by_id, failed = @fetcher.fetch_batch(
         chunk.map { |reflection| ReflectionResync.inat_id(reflection) },
-        updated_since: since
+        updated_since: since,
+        field_present: Inat::Constants::MO_URL_OBSERVATION_FIELD_NAME
       )
       chunk.each do |reflection|
         result = @applier.call(reflection, by_id, failed, absent: :unchanged)

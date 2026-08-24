@@ -47,6 +47,17 @@ class Inat::ObsFetcherTest < UnitTestCase
     assert_empty(by_id)
   end
 
+  def test_field_present_appends_the_inat_field_filter
+    fetcher = Inat::ObsFetcher.new
+    with_field = fetcher.send(:page_query, %w[1 2], nil,
+                              "Mushroom Observer URL")
+
+    assert_includes(with_field, "field:Mushroom%20Observer%20URL",
+                    "the field: filter is appended raw (colon unescaped)")
+    assert_not(fetcher.send(:page_query, %w[1 2], nil, nil).include?("field:"),
+               "no field filter when none is given")
+  end
+
   private
 
   def obs_url(ids)
