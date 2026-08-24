@@ -12,9 +12,8 @@ class IconSpriteCheck
                     "(vendor/assets/images/icons/mo-icons.svg)... ***\n"
   FAILURE_MESSAGE = "\n*** Could not fetch the icon sprite automatically " \
                     "-- icons won't render until you do. Run " \
-                    "`script/dev_setup_macos --icons-only` (or " \
-                    "`dev_setup_ubuntu`), or ask an MO admin for " \
-                    "icon-library access if that fails. ***\n"
+                    "`script/setup --icons-only`, or ask an MO admin " \
+                    "for icon-library access if that fails. ***\n"
 
   def self.sprite_path
     Rails.root.join("vendor/assets/images/icons/mo-icons.svg")

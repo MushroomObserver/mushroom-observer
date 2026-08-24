@@ -10,8 +10,8 @@ require("test_helper")
 class IconGlyphSyncTest < UnitTestCase
   def test_every_glyph_key_has_sprite_artwork
     unless File.exist?(Components::Icon::SPRITE_PATH)
-      skip("mo-icons.svg not present -- run script/dev_setup_macos " \
-           "--icons-only (requires icon-library access) to fetch it.")
+      skip("mo-icons.svg not present -- run script/setup --icons-only " \
+           "(requires icon-library access) to fetch it.")
     end
 
     doc = Nokogiri::XML(File.read(Components::Icon::SPRITE_PATH))
