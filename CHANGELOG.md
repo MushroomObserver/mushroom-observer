@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-24 (deploy-2026-08-24-12-01)
+
+- Changelog block convention: `.claude/rules/changelog.md` + PR template (#5155 step 1) ([PR5158](https://github.com/MushroomObserver/mushroom-observer/pull/5158), @mo-nathan)
+- Standalone `CHANGELOG.md` generator: `script/generate_changelog.rb` (#5155 step 2) ([PR5159](https://github.com/MushroomObserver/mushroom-observer/pull/5159), @mo-nathan)
+- Changelog: bare `#NNNN` PR references instead of markdown links (#5155) ([PR5167](https://github.com/MushroomObserver/mushroom-observer/pull/5167), @mo-nathan)
+- Link field slip scans from the observation and image pages (#5161) ([PR5169](https://github.com/MushroomObserver/mushroom-observer/pull/5169), @mo-nathan)
+- Lead with the thumbnail even when it is a sibling's image (#5160) ([PR5170](https://github.com/MushroomObserver/mushroom-observer/pull/5170), @mo-nathan)
+- Changelog: find PRs by merge-commit reachability; regenerate 2026 (#5155) ([PR5171](https://github.com/MushroomObserver/mushroom-observer/pull/5171), @mo-nathan)
+- Add `script/article_rows.rb`: MO Article rows from PR changelog blocks (#5155) ([PR5176](https://github.com/MushroomObserver/mushroom-observer/pull/5176), @mo-nathan)
+- Edit on a read-only reflection opens a companion observation (#4214) ([PR5178](https://github.com/MushroomObserver/mushroom-observer/pull/5178), @mo-nathan)
+- Rule: create every PR as a draft ([PR5179](https://github.com/MushroomObserver/mushroom-observer/pull/5179), @mo-nathan)
+
 ## 2026-08-22 (deploy-2026-08-22-01-42)
 
 - Prefix only bare-number field slip codes in `AddDispatchController` ([PR5147](https://github.com/MushroomObserver/mushroom-observer/pull/5147), @mo-nathan)
