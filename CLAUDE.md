@@ -168,7 +168,8 @@ test.
   - **Setup**: Create `.claude/developer.json` with
     `{"branchPrefix": "your-initials"}` (git-ignored)
 - Commit messages include Claude Code attribution
-- Create PRs via `gh pr create` with detailed descriptions
+- Create PRs via `gh pr create --draft` with detailed descriptions —
+  always a draft; see `.claude/rules/gh_pr_issue_formatting.md`
 - Link PRs to issues with `Fixes #issue_number`
 
 ## Architecture
