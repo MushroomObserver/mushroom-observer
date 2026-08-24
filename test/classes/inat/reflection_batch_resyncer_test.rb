@@ -127,6 +127,32 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
                     "the watermark advances despite the invalid site row")
   end
 
+  # The MO URL back-link field should point at the reflection's own obs;
+  # a match raises no alert.
+  def test_no_back_link_alert_when_the_field_points_at_the_reflection
+    raw = @raw.merge(ofvs: [mo_url_ofv(@obs.id)])
+    resyncer = Inat::ReflectionBatchResyncer.new(
+      fetcher: FakeFetcher.new([{ @id => raw }, false])
+    )
+
+    resyncer.resync_all
+
+    assert_empty(resyncer.back_link_alerts)
+  end
+
+  # A back-link pointing at a different MO obs is collected for #alerts.
+  def test_back_link_alert_when_the_field_points_elsewhere
+    raw = @raw.merge(ofvs: [mo_url_ofv(@obs.id + 999)])
+    resyncer = Inat::ReflectionBatchResyncer.new(
+      fetcher: FakeFetcher.new([{ @id => raw }, false])
+    )
+
+    resyncer.resync_all
+
+    assert_equal(1, resyncer.back_link_alerts.size)
+    assert_includes(resyncer.back_link_alerts.first, @obs.id.to_s)
+  end
+
   def test_no_inaturalist_site_is_a_no_op
     @site.destroy!
 
@@ -143,5 +169,11 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  def mo_url_ofv(mo_id)
+    { field_id: Inat::Constants::MO_URL_OBSERVATION_FIELD_ID,
+      name: "Mushroom Observer URL",
+      value: "https://mushroomobserver.org/#{mo_id}" }
   end
 end
