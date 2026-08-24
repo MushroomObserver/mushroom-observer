@@ -22,13 +22,21 @@ class Inat
   # run is a handful of API calls rather than one per reflection. No Turbo
   # broadcast -- a scheduled run has no viewer.
   class ReflectionBatchResyncer
+    include Inat::Constants
+
     # iNat returns at most PAGE_SIZE results for one id-list query, so a
     # larger chunk would silently drop the overflow.
     CHUNK_SIZE = ObsFetcher::PAGE_SIZE
 
+    # Messages for reflections whose iNat "Mushroom Observer URL" back-link
+    # points at the wrong MO obs (see #check_back_link); the job sends
+    # these to #alerts.
+    attr_reader :back_link_alerts
+
     def initialize(fetcher: ObsFetcher.new, applier: ReflectionResync.new)
       @fetcher = fetcher
       @applier = applier
+      @back_link_alerts = []
     end
 
     # Runs the batch and returns a status => count Hash across every
@@ -65,14 +73,43 @@ class Inat
     end
 
     def tally_chunk(chunk, counts, since)
+      # Constrain to obs carrying MO's "Mushroom Observer URL" back-link --
+      # the marker that says "this is a synced MO reflection". Every id
+      # here already has it, so it doesn't change the set; it enforces the
+      # invariant and mirrors the field-based discovery this will grow into.
       by_id, failed = @fetcher.fetch_batch(
         chunk.map { |reflection| ReflectionResync.inat_id(reflection) },
-        updated_since: since
+        updated_since: since,
+        field_present: MO_URL_OBSERVATION_FIELD_NAME
       )
       chunk.each do |reflection|
+        raw = by_id[ReflectionResync.inat_id(reflection).to_s]
+        check_back_link(reflection, raw) if raw
         result = @applier.call(reflection, by_id, failed, absent: :unchanged)
         counts[result.status] += 1
       end
+    end
+
+    # The iNat "Mushroom Observer URL" field should point back to this
+    # reflection's own MO obs. A mismatch means the field was edited on
+    # iNat, or points at the wrong obs -- collect it for the job to send to
+    # #alerts, but don't repair it: the ExternalLink stays authoritative
+    # for the sync. Field ABSENCE isn't checked here (the field: filter
+    # already excludes it); the periodic reconciliation job (#5200) covers
+    # cleared/deleted fields.
+    def check_back_link(reflection, raw)
+      value = mo_url_field_value(raw)
+      return if value.to_s[MO_URL_FIELD_VALUE_ID_RE, 1].to_i == reflection.id
+
+      @back_link_alerts <<
+        "Reflection obs #{reflection.id} (iNat " \
+        "#{ReflectionResync.inat_id(reflection)}): Mushroom Observer URL " \
+        "field = #{value.inspect}, expected .../#{reflection.id}"
+    end
+
+    def mo_url_field_value(raw)
+      Array(raw[:ofvs]).
+        find { |f| f[:field_id] == MO_URL_OBSERVATION_FIELD_ID }&.dig(:value)
     end
 
     # Advance the source watermark only on a clean run: a transient fetch
