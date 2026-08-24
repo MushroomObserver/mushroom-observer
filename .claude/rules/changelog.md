@@ -53,7 +53,8 @@ faster than they can notice an omission.
   utf8mb4."
 - Terse, like the existing Article rows: lead with the verb — "Fix …",
   "Add …", "Allow …", "Speed up …" — no "now", no "This PR".
-- No code identifiers, no backticks, no class/method/file names.
+- No code identifiers, no backticks, no class/method/file names in
+  the sentence text itself.
 - **No developer or UI-implementation jargon** (Joe, 2026-08-24
   Article review). Replace it with what the user sees:
   - "lightbox" → "the enlarged image" / "the enlarged image view"
