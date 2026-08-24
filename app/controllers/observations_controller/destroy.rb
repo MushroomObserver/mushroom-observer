@@ -12,6 +12,8 @@ module ObservationsController::Destroy
 
     @observation.current_user = @user
     obs_id = @observation.id
+    return if destroy_blocked_for_reflection?(obs_id)
+
     # decide where to redirect after deleting observation, using Query.next_id
     if (this_query = find_query(:Observation))
       this_query.current_id = @observation.id
@@ -33,6 +35,17 @@ module ObservationsController::Destroy
   end
 
   private
+
+  # A read-only reflection mirrors its imported source and is changed
+  # only by resync; deleting it on MO would drop the mirror (and its
+  # import link) while the source lives on. Block it like the edit lock.
+  def destroy_blocked_for_reflection?(obs_id)
+    return false unless @observation.reflection?
+
+    flash_warning(:destroy_observation_is_reflection.t)
+    redirect_to(action: :show, id: obs_id)
+    true
+  end
 
   def refetch_for_destroy(id)
     obs = Observation.find(id)

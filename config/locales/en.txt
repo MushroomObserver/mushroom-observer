@@ -1491,6 +1491,7 @@
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
+  destroy_observation_is_reflection: This observation is a read-only reflection of its imported source and can't be deleted here. To remove it, delete it at the source and resync.
   edit_observation_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created this companion observation for your changes and linked the two as one occurrence. Edit the companion here; the reflection keeps the imported data.
   edit_observation_companion_existing: That observation is a read-only reflection of its imported source. You are editing its linked companion observation instead.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'

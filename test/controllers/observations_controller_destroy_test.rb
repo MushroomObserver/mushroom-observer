@@ -43,6 +43,22 @@ class ObservationsControllerDestroyTest < FunctionalTestCase
     end
   end
 
+  # A read-only reflection (#4214) can't be deleted on MO -- the guard
+  # blocks it before the permission check, even for the owner.
+  def test_destroy_reflection_blocked
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    id = obs.id
+    login(obs.user.login)
+
+    assert_no_difference("Observation.count") do
+      delete(:destroy, params: { id: id })
+    end
+    assert_redirected_to(action: :show, id: id)
+    assert_flash_warning
+    assert(Observation.find(id).reflection?)
+  end
+
   def test_original_filename_visibility
     login("mary")
     obs_id = observations(:agaricus_campestris_obs).id
