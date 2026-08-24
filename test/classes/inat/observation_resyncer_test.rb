@@ -39,6 +39,17 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_not_nil(@link.reload.last_synced_at, "should stamp last_synced_at")
   end
 
+  # specimen is MO-side (herbarium records / collection numbers a user may
+  # add to a reflection); iNat gives no reliable signal, so a resync must
+  # leave it alone rather than reset it to false.
+  def test_resync_does_not_unset_specimen
+    @obs.update_column(:specimen, true)
+
+    resync(found: { @id => @raw })
+
+    assert(@obs.reload.specimen, "resync must not unset a true specimen")
+  end
+
   # Sync is owned by the admin account: anyone logged in may trigger it
   # and the scheduled batch has no triggering user, so every resync log
   # is attributed to the system actor.
