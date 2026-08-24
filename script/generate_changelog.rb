@@ -44,6 +44,12 @@ class ChangelogGenerator
   # parent reaches main; the PR pool reaches back this far before the
   # earliest deploy tag a run looks at.
   POOL_LOOKBACK_DAYS = 365
+  # The gh search bounds are calendar days, but a deploy tag's local
+  # date can trail the UTC merge date of a PR deployed seconds before
+  # it (a PR merged 00:03 UTC, tagged 20:04 the prior day local). Pad
+  # the pool's upper bound so those PRs still fall inside a window; the
+  # rev-list intersection drops anything not in the range.
+  POOL_LOOKAHEAD_DAYS = 2
   # GitHub search returns at most this many results per query.
   SEARCH_CAP = 1000
 
@@ -165,7 +171,7 @@ class ChangelogGenerator
   # its newest tag's date (nothing merged later can be in range).
   def pool_months
     from = tag_date(@pool_from) - POOL_LOOKBACK_DAYS
-    last = tag_date(@pool_to)
+    last = tag_date(@pool_to) + POOL_LOOKAHEAD_DAYS
     months = []
     while from <= last
       to = [from.next_month - 1, last].min
