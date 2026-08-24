@@ -36,20 +36,22 @@ though Sequoia 15.2.
 
 # Quick Start: Run the Setup Script
 
-`script/dev_setup_macos` automates everything below it in this document --
+`script/dev_setup` automates everything below it in this document --
 Homebrew packages, MySQL, Ruby, database setup, config files -- ending by
-running the test suite.
+running the test suite. It detects your OS and hands off to
+`script/dev_setup_components/dev_setup_macos`, so there's one command
+to remember regardless of platform.
 
 Fresh machine, nothing cloned yet:
 
 ```sh
-curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_macos | bash
+curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash
 ```
 
 Existing checkout:
 
 ```sh
-script/dev_setup_macos
+script/dev_setup
 ```
 
 It still expects Xcode Command Line Tools and Homebrew to already be

@@ -4,15 +4,15 @@
 # icon-library sprite isn't present locally -- a dev with no sprite
 # sees every icon missing, with no indication why. Checked once at
 # server boot by config/initializers/ensure_icon_sprite.rb: fetches
-# the sprite via script/dev_setup/sync_mo_icon_library.sh if missing,
-# or tells the dev how to fetch it themselves if that fails (no
-# icon-library access yet, network issue, etc).
+# the sprite via script/dev_setup_components/sync_mo_icon_library.sh
+# if missing, or tells the dev how to fetch it themselves if that
+# fails (no icon-library access yet, network issue, etc).
 class IconSpriteCheck
   MISSING_MESSAGE = "\n*** Icon sprite not found -- fetching it now " \
                     "(vendor/assets/images/icons/mo-icons.svg)... ***\n"
   FAILURE_MESSAGE = "\n*** Could not fetch the icon sprite automatically " \
                     "-- icons won't render until you do. Run " \
-                    "`script/setup --icons-only`, or ask an MO admin " \
+                    "`script/dev_setup --icons-only`, or ask an MO admin " \
                     "for icon-library access if that fails. ***\n"
 
   def self.sprite_path
@@ -38,7 +38,7 @@ class IconSpriteCheck
   def self.fetch_sprite
     system(
       "bash", "-c",
-      "source script/dev_setup/sync_mo_icon_library.sh && " \
+      "source script/dev_setup_components/sync_mo_icon_library.sh && " \
       "mo_sync_icon_library",
       chdir: Rails.root.to_s
     )

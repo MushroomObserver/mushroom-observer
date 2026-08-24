@@ -28,8 +28,9 @@ jobs:
       # Contents access on icon-library only. Not available on
       # pull_request runs from forks (GitHub doesn't expose repo
       # secrets there) -- skips rather than fails, matching the
-      # best-effort stance script/dev_setup/sync_mo_icon_library.sh
-      # already takes for devs without icon-library access. An
+      # best-effort stance
+      # script/dev_setup_components/sync_mo_icon_library.sh already
+      # takes for devs without icon-library access. An
       # expired (rather than missing) token is NOT covered by this
       # skip -- git clone fails with a bad-credentials error, which
       # fails the step loudly, since $ICON_LIBRARY_PAT is still
