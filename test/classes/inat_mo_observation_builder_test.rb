@@ -288,6 +288,75 @@ class InatMoObservationBuilderTest < UnitTestCase
     end
   end
 
+  # AWS/S3 is occasionally unavailable for a moment (#5183); a download
+  # failure should be retried, not fail the whole observation.
+  def test_upload_inat_image_retries_transient_download_failure
+    image = images(:in_situ_image)
+    responses = [
+      FakeAPI2Response.new([download_error], nil),
+      FakeAPI2Response.new([download_error], nil),
+      FakeAPI2Response.new([], [image])
+    ]
+    call_count = 0
+    builder = builder_for
+    builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
+
+    API2.stub(:execute, lambda { |_params|
+      call_count += 1
+      responses[call_count - 1]
+    }) do
+      result = builder.send(:upload_inat_image, {}, "377332865")
+      assert_equal(image, result,
+                   "Should return the image once a retry succeeds")
+    end
+
+    assert_equal(3, call_count,
+                 "Should retry an image download failure, succeed on the " \
+                 "third attempt")
+  end
+
+  def test_upload_inat_image_raises_after_exhausting_retries
+    fake_api = FakeAPI2Response.new([download_error], nil)
+    call_count = 0
+    builder = builder_for
+    builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
+
+    API2.stub(:execute, lambda { |_params|
+      call_count += 1
+      fake_api
+    }) do
+      err = assert_raises(RuntimeError) do
+        builder.send(:upload_inat_image, {}, "377332865")
+      end
+      assert_match(/Failed to import image 377332865/, err.message,
+                   "Error should identify the failing iNat photo")
+    end
+
+    assert_equal(Inat::MoObservationBuilder::ImageHandling::
+                 MAX_UPLOAD_RETRIES + 1, call_count,
+                 "Should try once, retry until the cap is reached, " \
+                 "before giving up")
+  end
+
+  def test_upload_inat_image_does_not_retry_non_download_errors
+    error = API2::MissingParameter.new(:upload_url)
+    fake_api = FakeAPI2Response.new([error], nil)
+    call_count = 0
+    builder = builder_for
+
+    API2.stub(:execute, lambda { |_params|
+      call_count += 1
+      fake_api
+    }) do
+      assert_raises(RuntimeError) do
+        builder.send(:upload_inat_image, {}, "377332865")
+      end
+    end
+
+    assert_equal(1, call_count,
+                 "A non-retryable API2 error should not be retried")
+  end
+
   # created_image_ids is what ObservationImporter (then InatImportJob)
   # reads to enqueue one TransferImagesJob per import batch (#4791).
   def test_upload_inat_image_accumulates_created_image_ids
@@ -304,6 +373,14 @@ class InatMoObservationBuilderTest < UnitTestCase
   end
 
   private
+
+  def download_error
+    API2::CouldntDownloadURL.new(
+      "https://inaturalist-open-data.s3.amazonaws.com/photos/" \
+      "377332865/original.jpeg",
+      StandardError.new("simulated S3 outage")
+    )
+  end
 
   def builder_for(provisional_name: nil, name_override: nil,
                   obs_taxon_name: nil)
