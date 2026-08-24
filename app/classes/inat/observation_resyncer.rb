@@ -14,6 +14,11 @@ class Inat
   # namings, votes, comments, images and sequences are handled by later
   # slices.
   #
+  # The per-reflection refresh itself lives in Inat::ReflectionResync,
+  # shared with the scheduled daily batch (Inat::ReflectionBatchResyncer);
+  # this class adds the occurrence-wide framing and the Turbo broadcast
+  # that updates the page live.
+  #
   # Runs BELOW the read-only edit guard: that guard blocks the web/API
   # edit actions, while this service writes the records directly, so it
   # can refresh reflections nobody is allowed to hand-edit.
@@ -23,13 +28,15 @@ class Inat
   #   - id absent from results    -> :source_deleted, MO data kept, logged;
   #   - id present                -> :synced / :unchanged.
   class ObservationResyncer
-    # Per-reflection outcome; status is one of :synced, :unchanged,
-    # :source_deleted, :fetch_failed.
-    Result = Data.define(:status, :observation)
+    # Per-reflection outcomes come from Inat::ReflectionResync; re-exported
+    # here for callers and tests that reference the occurrence path.
+    Result = ReflectionResync::Result
 
-    def initialize(observation, fetcher: ObsFetcher.new)
+    def initialize(observation, fetcher: ObsFetcher.new,
+                   applier: ReflectionResync.new)
       @observation = observation
       @fetcher = fetcher
+      @applier = applier
     end
 
     # Returns the Array of per-reflection Results (empty when the
@@ -37,20 +44,15 @@ class Inat
     def resync
       return [] if targets.empty?
 
-      by_id, failed = @fetcher.fetch_batch(targets.map { |t| inat_id(t) })
-      results = targets.map { |target| target_result(target, by_id, failed) }
+      by_id, failed = @fetcher.fetch_batch(
+        targets.map { |t| ReflectionResync.inat_id(t) }
+      )
+      results = targets.map { |target| @applier.call(target, by_id, failed) }
       broadcast(results)
       results
     end
 
     private
-
-    def target_result(target, by_id, failed)
-      return Result.new(status: :fetch_failed, observation: target) if failed
-
-      raw = by_id[inat_id(target).to_s]
-      raw ? apply(target, Inat::Obs.new(JSON.generate(raw))) : deleted(target)
-    end
 
     # The occurrence's reflections that have an iNat import link. Only
     # read-only reflections are refreshable: the backlog of still-editable
@@ -58,65 +60,7 @@ class Inat
     # MO-side edits.
     def targets
       @targets ||= @observation.sync_reflections.
-                   select { |obs| inat_link(obs) }
-    end
-
-    def inat_link(obs)
-      link = obs.import_link
-      return nil unless link&.external_site&.name ==
-                        ExternalSite::INATURALIST_NAME
-
-      link
-    end
-
-    def inat_id(obs)
-      inat_link(obs).external_id
-    end
-
-    # Detect a REAL change from what persists, not from the assigned
-    # values: setting `location` triggers a callback that rewrites `where`
-    # to the location's name, so an in-memory `changed?` never converges.
-    # `saved_changes` (sans the timestamp) reflects what actually moved.
-    def apply(obs, inat_obs)
-      obs.assign_attributes(scalar_attributes(obs, inat_obs))
-      obs.save! if obs.changed?
-      changed = obs.saved_changes.except("updated_at").present?
-      mark_synced(obs)
-      log_resync(obs) if changed
-      Result.new(status: changed ? :synced : :unchanged, observation: obs)
-    end
-
-    # The source-owned scalar fields, straight off the fresh iNat data.
-    # `where` is only set when no Location resolves: a present Location
-    # drives `where` from its own name via a callback, so assigning
-    # `where` too would flip it back and forth and never converge.
-    def scalar_attributes(_obs, inat_obs)
-      location = inat_obs.location
-      attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
-                lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden,
-                specimen: inat_obs.specimen?, notes: inat_obs.notes }
-      attrs[:where] = inat_obs.where if location.nil?
-      attrs
-    end
-
-    # The iNat obs is gone: keep every MO record intact, record the loss on
-    # the activity log, and still stamp last_synced_at so the check ran.
-    def deleted(obs)
-      mark_synced(obs)
-      obs.log(:log_observation_source_deleted, user: User.admin)
-      Result.new(status: :source_deleted, observation: obs)
-    end
-
-    def mark_synced(obs)
-      inat_link(obs).update!(last_synced_at: Time.zone.now)
-    end
-
-    # Sync is owned by the admin account: anyone logged in may trigger
-    # it, and the scheduled batch has no triggering user at all, so the
-    # log attributes every resync to the system actor rather than to
-    # whoever happened to press the button.
-    def log_resync(obs)
-      obs.log(:log_observation_resynced, user: User.admin)
+                   select { |obs| ReflectionResync.inat_link(obs) }
     end
 
     # Turbo Stream broadcast so "Sync now" updates pages live, no reload
