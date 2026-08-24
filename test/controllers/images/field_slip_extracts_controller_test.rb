@@ -484,6 +484,32 @@ module Images
       assert_equal(@obs.id, @obs.occurrence.primary_observation_id)
     end
 
+    # The reviewed observation already belongs to an occurrence (e.g. a
+    # reflection paired with its companion), and the slip is on another
+    # one: saving the ticked code merges the two (#4214), rather than
+    # doing nothing silently as it did before.
+    def test_update_merges_when_the_observation_already_has_an_occurrence
+      own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+      @obs.update!(occurrence: own)
+      other = observations(:coprinus_comatus_obs)
+      other.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0540", other.user)
+      other.field_slip = slip
+      other.save!
+      slip_occ = slip.reload.occurrence
+      record_extract(fields: { "Field Slip Code" => "OPEN-0540" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0540" } })
+
+      assert_flash_success
+      assert_equal(slip_occ.id, @obs.reload.occurrence_id)
+      assert_not(Occurrence.exists?(own.id))
+      assert_includes(slip_occ.reload.observations, other.reload)
+    end
+
     def test_update_warns_when_the_ticked_code_cannot_attach
       @obs.update!(occurrence: nil)
       other = observations(:coprinus_comatus_obs)

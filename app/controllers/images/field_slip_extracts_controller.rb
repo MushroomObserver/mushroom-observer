@@ -261,10 +261,11 @@ module Images
     def attach_ticked_code
       code_field = @extract.template.code_field
       return unless params.dig(:use, code_field) == "1"
-      return unless @observation.occurrence_id.nil?
 
       # Normalized once, so lookups, the attach, and the flash all
-      # speak the same canonical code.
+      # speak the same code. An observation that is already in an
+      # occurrence is handled too -- Attacher merges the occurrences
+      # when the slip is on a different one.
       code = params.dig(:value, code_field).to_s.strip.upcase
       return if code.blank?
 
@@ -286,6 +287,9 @@ module Images
         @observation.reload
       when :joined
         flash_notice(:field_slip_extract_joined.t(code: code))
+        @observation.reload
+      when :merged
+        flash_notice(:field_slip_extract_merged.t(code: code))
         @observation.reload
       else
         flash_warning(:field_slip_extract_attach_failed.t(

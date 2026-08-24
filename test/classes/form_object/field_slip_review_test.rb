@@ -93,6 +93,40 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_not(row_for(review, "Field Slip Code").savable)
   end
 
+  # The observation has its own occurrence (e.g. a reflection paired
+  # with its Edit-companion), and the read code names a slip on a
+  # different one: the code row is savable so the reviewer can merge
+  # the two (#4214).
+  def test_code_row_savable_to_merge_a_different_slip_occurrence
+    @obs.update!(occurrence: nil)
+    own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+    @obs.update!(occurrence: own)
+    slip_obs = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("NEMF-10333", slip_obs.user)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = slip
+    slip_obs.save!
+
+    review = build(fields: { "Field Slip Code" => "NEMF-10333" })
+    row = row_for(review, "Field Slip Code")
+
+    assert(row.savable)
+    assert(row.default_use?)
+  end
+
+  # The read code names the slip already on the observation's own
+  # occurrence -- applying it would do nothing, so no tick is offered.
+  def test_code_row_review_only_when_its_own_occurrence_holds_the_slip
+    @obs.update!(occurrence: nil)
+    slip = FieldSlip.find_or_create_by_code("NEMF-10444", @obs.user)
+    @obs.field_slip = slip
+    @obs.save!
+
+    review = build(fields: { "Field Slip Code" => "NEMF-10444" })
+
+    assert_not(row_for(review, "Field Slip Code").savable)
+  end
+
   # ---------- current values ----------
 
   def test_current_value_reads_a_column

@@ -30,8 +30,10 @@ module Views::Layouts
 
     private
 
+    # A read-only reflection keeps its edit icon: Edit opens a linked
+    # companion observation for the changes.
     def edit_item
-      return nil unless can_edit_object? && !read_only_reflection?
+      return nil unless can_edit_object?
 
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
@@ -50,13 +52,6 @@ module Views::Layouts
 
     def can_edit_object?
       in_admin_mode? || @object.can_edit?(@user)
-    end
-
-    # A read-only reflection (#4214) can't have its scalar core edited on
-    # MO, so no edit icon -- change it at the source and resync. Delete is
-    # a separate lifecycle concern and stays available.
-    def read_only_reflection?
-      @object.respond_to?(:reflection?) && @object.reflection?
     end
 
     def can_destroy_object?
