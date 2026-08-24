@@ -130,9 +130,9 @@ class ExternalLinkTest < UnitTestCase
     assert_empty(link.errors[:url], "Valid URL should have no url errors")
   end
 
-  # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
-  # causing FormatURL#url_exists? to return false and silently drop the link.
-  # For iNat URLs constructed from base_url, skip FormatURL entirely.
+  # An iNat observation link is validated by its strict base_url + numeric
+  # id shape (inat_url?), not FormatURL's looser host/path match, so
+  # FormatURL is not called for it.
   def test_inaturalist_link_skips_format_url
     site = external_sites(:inaturalist)
     obs = observations(:minimal_unknown_obs)
