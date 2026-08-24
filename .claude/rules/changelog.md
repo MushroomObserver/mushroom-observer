@@ -54,6 +54,21 @@ faster than they can notice an omission.
 - Terse, like the existing Article rows: lead with the verb — "Fix …",
   "Add …", "Allow …", "Speed up …" — no "now", no "This PR".
 - No code identifiers, no backticks, no class/method/file names.
+- **No developer or UI-implementation jargon** (Joe, 2026-08-24
+  Article review). Replace it with what the user sees:
+  - "lightbox" → "the enlarged image" / "the enlarged image view"
+  - "modal" → "pop-up" / "dialog", or rewrite without it
+  - "500", "crash", "race" → "error" / "bug"
+  - "parameter" / "param" — this word almost always means the entry
+    is describing an internal detail, not a user-facing change. Take
+    it as a signal to either rewrite the sentence for the user or set
+    `article: no`.
+- **Capitalize MO object names, singular and plural** (Joe, same
+  review): Observation(s), Name(s), Location(s), Project(s), Image(s),
+  Occurrence(s), Field Slip(s), Species List(s), Herbarium/Herbaria,
+  Naming(s), Sequence(s), Comment(s), Description(s), Publication(s),
+  User(s), Checklist(s), External Link(s). Leave everyday words
+  lowercase (photo, thumbnail, collector, admin as a role).
 - No PR/issue numbers — the generator adds the links.
 - Capitalized, no ending punctuation.
 
