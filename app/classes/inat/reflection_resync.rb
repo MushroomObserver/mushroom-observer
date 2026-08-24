@@ -86,8 +86,11 @@ class Inat
       Result.new(status: :source_deleted, observation: obs)
     end
 
+    # update_column, not update!, so stamping the sync time isn't blocked
+    # by validating unrelated fields on the link (e.g. a pre-existing
+    # invalid URL) and doesn't bump its updated_at.
     def mark_synced(obs)
-      self.class.inat_link(obs).update!(last_synced_at: Time.zone.now)
+      self.class.inat_link(obs).update_column(:last_synced_at, Time.zone.now)
     end
 
     # Sync is owned by the admin account: anyone logged in may trigger

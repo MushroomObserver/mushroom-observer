@@ -101,6 +101,20 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
                "a failed run must not advance the source watermark")
   end
 
+  # Stamping the bookkeeping watermark must not run full-record
+  # validation: a production snapshot's iNaturalist site had an invalid
+  # base_url, which blocked an update! but must not block the sync.
+  def test_advances_the_watermark_even_when_the_site_row_is_invalid
+    @site.update_column(:base_url, "not a url")
+    @site.update_column(:last_successful_sync_at, 3.days.ago)
+    assert(@site.invalid?, "the site row must be invalid for this test")
+
+    run_batch(found: { @id => @raw })
+
+    assert_operator(@site.reload.last_successful_sync_at, :>, 3.days.ago,
+                    "the watermark advances despite the invalid site row")
+  end
+
   def test_no_inaturalist_site_is_a_no_op
     @site.destroy!
 

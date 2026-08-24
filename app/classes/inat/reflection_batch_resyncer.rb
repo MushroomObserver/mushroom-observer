@@ -74,10 +74,13 @@ class Inat
 
     # Advance the source watermark only on a clean run: a transient fetch
     # failure leaves its window unsynced, so the next run must re-cover it.
+    # update_column, not update!, so stamping this bookkeeping timestamp
+    # isn't blocked by validating unrelated (possibly pre-existing invalid)
+    # fields on the site, and doesn't bump its updated_at.
     def advance_watermark(site, started_at, counts)
       return if counts[:fetch_failed].positive?
 
-      site.update!(last_successful_sync_at: started_at)
+      site.update_column(:last_successful_sync_at, started_at)
     end
 
     # Every read-only iNat reflection. `updated_since` narrows the fetch
