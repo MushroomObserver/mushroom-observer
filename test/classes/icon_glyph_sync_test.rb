@@ -10,7 +10,7 @@ require("test_helper")
 class IconGlyphSyncTest < UnitTestCase
   def test_every_glyph_key_has_sprite_artwork
     unless File.exist?(Components::Icon::SPRITE_PATH)
-      skip("mo-icons.svg not present -- run script/dev_setup_macos " \
+      skip("mo-icons.svg not present -- run script/dev_setup " \
            "--icons-only (requires icon-library access) to fetch it.")
     end
 

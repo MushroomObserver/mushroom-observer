@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 #
+# Prefer `script/dev_setup` over running this directly -- it detects
+# your OS and calls this script for you. Run this one directly only
+# if you already know you're on macOS and want to skip that check.
+#
 # Automates the "Install Needed Tools" and "Obtain and configure MO"
 # sections of README_DEV_SETUP_MACOSX.md. See that file for the full
 # manual walkthrough, hardware-specific notes, and footnotes if any
 # step here fails or doesn't match your setup.
 #
 # Usage (fresh machine, nothing cloned yet):
-#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_macos | bash
+#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash
 # Usage (from an existing checkout):
-#   script/dev_setup_macos
+#   script/dev_setup
 # Usage (just (re)sync the private icon-library repo, skip everything else):
-#   script/dev_setup_macos --icons-only
+#   script/dev_setup --icons-only
 
 # Make sure Xcode Command Line Tools is installed
 if ! xcode-select -p >/dev/null 2>&1; then
@@ -30,28 +34,29 @@ fi
 # Clone the app repo before doing anything else. This can run under
 # whatever version of bash is already here (no Bash 4+ features used).
 # Ensuring we have the repo guarantees that `script/bash_ensure_modern`
-# and `script/dev_setup/common.sh` exist locally, whether this script
-# was curl-piped (no repo yet) or run from an existing clone.
+# and `script/dev_setup_components/common.sh` exist locally, whether
+# this script was curl-piped (no repo yet) or run from an existing
+# clone.
 # ---------------------------------------------------------------------
 
-if [ -f script/dev_setup/clone_repo.sh ]; then
-    source script/dev_setup/clone_repo.sh
+if [ -f script/dev_setup_components/clone_repo.sh ]; then
+    source script/dev_setup_components/clone_repo.sh
 else
-    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup/clone_repo.sh")
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_components/clone_repo.sh")
 fi
 mo_ensure_repo
 
 # shellcheck source=script/bash_ensure_modern
-MO_REEXEC_SCRIPT="$PWD/script/dev_setup_macos" source script/bash_ensure_modern
+MO_REEXEC_SCRIPT="$PWD/script/dev_setup_components/dev_setup_macos" source script/bash_ensure_modern
 
 # --- everything below this point can assume Bash >= 4 ---
 
-# shellcheck source=script/dev_setup/common.sh
-source script/dev_setup/common.sh
-# shellcheck source=script/dev_setup/finish_app_setup.sh
-source script/dev_setup/finish_app_setup.sh
-# shellcheck source=script/dev_setup/sync_mo_icon_library.sh
-source script/dev_setup/sync_mo_icon_library.sh
+# shellcheck source=script/dev_setup_components/common.sh
+source script/dev_setup_components/common.sh
+# shellcheck source=script/dev_setup_components/finish_app_setup.sh
+source script/dev_setup_components/finish_app_setup.sh
+# shellcheck source=script/dev_setup_components/sync_mo_icon_library.sh
+source script/dev_setup_components/sync_mo_icon_library.sh
 
 if [ "$1" = "--icons-only" ]; then
     mo_sync_icon_library

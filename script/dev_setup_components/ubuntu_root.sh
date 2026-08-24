@@ -3,8 +3,9 @@
 # Every step is individually idempotent, so this is safe to call even
 # if some or all of it already ran.
 #
-# Called automatically by script/dev_setup_ubuntu when it detects it's
-# running as root -- see that file for the root -> mo handoff.
+# Called automatically by script/dev_setup_components/dev_setup_ubuntu
+# when it detects it's running as root -- see that file for the
+# root -> mo handoff.
 mo_ubuntu_root_setup() {
     apt update
     DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt -y install zsh
@@ -132,7 +133,7 @@ EOF
             echo "set it yourself and re-run as $username:"
             echo "  passwd $username"
             echo "  su - $username"
-            echo "  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash"
+            echo "  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash"
             exit 1
         fi
     fi

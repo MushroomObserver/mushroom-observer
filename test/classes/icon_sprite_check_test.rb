@@ -87,7 +87,7 @@ class IconSpriteCheckTest < UnitTestCase
 
     assert_equal(
       [["bash", "-c",
-        "source script/dev_setup/sync_mo_icon_library.sh && " \
+        "source script/dev_setup_components/sync_mo_icon_library.sh && " \
         "mo_sync_icon_library"],
        { chdir: Rails.root.to_s }],
       called_with

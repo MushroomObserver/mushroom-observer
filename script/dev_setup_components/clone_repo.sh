@@ -7,8 +7,9 @@
 # file can be sourced (sourcing requires a local checkout to exist).
 # Entry-point scripts source this file directly when run from an
 # existing checkout, or via `source <(curl -s ...)` when curl-piped
-# on a fresh machine with nothing cloned yet -- see script/dev_setup_macos
-# and script/dev_setup_ubuntu for the exact bootstrap snippet.
+# on a fresh machine with nothing cloned yet -- see script/dev_setup
+# for the exact bootstrap snippet (dev_setup_macos/dev_setup_ubuntu,
+# in this same directory, use the identical pattern).
 mo_ensure_repo() {
     if [ -f .ruby-version ] && [ -d app ] && [ -f config/application.rb ]; then
         return 0 # already inside an existing checkout
