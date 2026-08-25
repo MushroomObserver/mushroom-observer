@@ -34,7 +34,7 @@ module Observations
       # get(:index, params: { q: })
       assert_equal(query.num_results, aga_obs.count)
       get(:index,
-          params: { filter: { type: :clade, term: "Agaricales" } })
+          params: { identify_filter: { type: :clade, term: "Agaricales" } })
       assert_no_flash
       assert_select(".matrix-box", aga_obs.count)
 
@@ -62,7 +62,8 @@ module Observations
       assert_equal(query.num_results, cal_obs_count)
 
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
 
@@ -85,7 +86,8 @@ module Observations
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 5)
 
@@ -105,7 +107,8 @@ module Observations
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 6)
 

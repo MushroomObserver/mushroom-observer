@@ -23,6 +23,9 @@ class Query::Observations < Query
   query_attr(:needs_naming, User)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
+  # The identify page's clade/region autocompleter -- see
+  # Observation::Scopes#identify_filter.
+  query_attr(:identify_filter, { type: :string, term: :string })
 
   query_attr(:is_collection_location, :boolean)
   query_attr(:has_public_lat_lng, :boolean)

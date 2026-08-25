@@ -1523,6 +1523,20 @@ class ObservationTest < UnitTestCase
                     observations(:coprinus_comatus_obs))
   end
 
+  def test_scope_identify_filter
+    clade_result = Observation.identify_filter(type: "clade",
+                                               term: "Agaricales")
+    assert_includes(clade_result, observations(:coprinus_comatus_obs))
+    assert_equal(Observation.clade("Agaricales").to_a, clade_result.to_a)
+
+    region_result = Observation.identify_filter(type: "region",
+                                                term: "South America")
+    assert_equal(Observation.region("South America").to_a,
+                 region_result.to_a)
+
+    assert_empty(Observation.identify_filter(type: "bogus", term: "x"))
+  end
+
   def test_scope_by_users
     assert_includes(Observation.by_users(users(:mary)),
                     observations(:minimal_unknown_obs))
