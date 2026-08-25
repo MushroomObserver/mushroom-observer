@@ -191,7 +191,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!
-  has_many :namings
+  #
+  # Order by id (creation order): consensus tie-breaking and dump_votes
+  # read this association in order, so it must be deterministic and not
+  # left to whichever index MySQL picks. The (observation_id, user_id,
+  # name_id) unique index (#5186) otherwise sorts these rows by user.
+  has_many :namings, -> { order(:id) }, inverse_of: :observation
 
   has_many :observation_images, dependent: :destroy
   has_many :images, through: :observation_images
