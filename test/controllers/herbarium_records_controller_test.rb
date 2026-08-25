@@ -55,6 +55,17 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash(:runtime_no_matches, type: :herbarium_record)
   end
 
+  def test_index_herbarium_id_bad_id
+    bad_herbarium_id = Herbarium.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { herbarium: bad_herbarium_id })
+
+    assert_flash(:runtime_object_not_found, type: :herbarium,
+                                            id: bad_herbarium_id)
+    assert_redirected_to(herbarium_records_path)
+  end
+
   def test_index_observation_id
     obs = observations(:coprinus_comatus_obs)
 

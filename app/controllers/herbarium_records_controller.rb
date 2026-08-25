@@ -49,10 +49,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def herbarium
-    query = create_query(:HerbariumRecord,
-                         herbaria: params[:herbarium].to_s,
-                         order_by: :herbarium_label)
-    [query, { always_index: true }]
+    create_query_from_url_params(:HerbariumRecord, params)
   end
 
   def observation
