@@ -108,9 +108,16 @@ class QueryTest < UnitTestCase
   end
 
   def test_validate_params_order_by_unsupported
-    assert_validation_errors(
-      Query.lookup(:Name, order_by: "totally_bogus_sort_key")
-    )
+    query = Query.lookup(:Name, order_by: "totally_bogus_sort_key")
+    assert_validation_errors(query)
+    # The bad value must not survive validation -- otherwise it reaches
+    # AbstractModel::OrderingScopes#order_by's dispatcher, which silently
+    # falls back to `all` (id: :desc) instead of the model's own
+    # default_order.
+    assert_nil(query.params[:order_by],
+               "Invalid order_by should be cleared, not left in params")
+    assert_equal(:name, query.default_order,
+                 "Should fall back to Query::Names.default_order")
   end
 
   def test_validate_params_instances_users
