@@ -186,7 +186,7 @@ class ObservationsController
 
     # Display matrix of Observations attached to a given project.
     #
-    # `by: :thumbnail_quality` is this page's own default sort, not
+    # `by: :thumbnail_quality` is this page's default sort, not
     # Query::Observations' class-wide one -- a bare `projects:` filter
     # elsewhere (e.g. a raw Query.lookup) still gets the class
     # default, so the override is threaded through the raw params
@@ -216,23 +216,8 @@ class ObservationsController
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
-      derive_project_ivar(query)
+      derive_ivar_from_query(:@project, query, :projects, Project)
       query
-    end
-
-    # Derives @project (drives the project banner, "add observation to
-    # this project" buttons, and the admin-permission check in the
-    # view) from the query itself -- covers both the `project`
-    # shortcut and a bookmarked/permalinked `q[projects][]=` query the
-    # same way, one lookup, after the query (and its own record-lookup
-    # validation) already exists -- instead of a second independent
-    # lookup racing the one `project`/`create_query_from_url_params`
-    # already did.
-    def derive_project_ivar(query)
-      project_ids = query.params[:projects]
-      return unless project_ids.is_a?(Array) && project_ids.size == 1
-
-      @project = Project.safe_find(project_ids.first)
     end
 
     def index_display_opts(opts, query)

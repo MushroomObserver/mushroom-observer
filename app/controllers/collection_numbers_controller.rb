@@ -51,22 +51,16 @@ class CollectionNumbersController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
+  #
+  # @observation (drives the page's observation-context banner) is
+  # derived from the query itself, after its own record-lookup
+  # validation already ran -- replaces the old
+  # `Observation.find(params[:observation])`, which raised
+  # RecordNotFound (500) on a bad id instead of flashing/redirecting
+  # like every other shortcut.
   def filtered_index_final_hook(query, _display_opts)
-    derive_observation_ivar(query)
+    derive_ivar_from_query(:@observation, query, :observations, Observation)
     query
-  end
-
-  # Derives @observation (drives the page's observation-context
-  # banner) from the query itself, after its own record-lookup
-  # validation already ran -- instead of a second independent lookup
-  # (the old `Observation.find(params[:observation])`, which also
-  # raised RecordNotFound on a bad id rather than flashing/
-  # redirecting like every other shortcut).
-  def derive_observation_ivar(query)
-    observation_ids = query.params[:observations]
-    return unless observation_ids.is_a?(Array) && observation_ids.size == 1
-
-    @observation = Observation.safe_find(observation_ids.first)
   end
 
   def index_display_opts(opts, _query)

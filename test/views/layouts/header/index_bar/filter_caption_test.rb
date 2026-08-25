@@ -50,6 +50,21 @@ module Views::Layouts
       )
     end
 
+    # Query::Comments has its own, unrelated `:types` attr (comment
+    # target model). Colliding with RssLog's `:types` by bare key name
+    # alone would run this through RssLog's tag vocabulary and
+    # silently blank any tag RssLog doesn't share, like
+    # `location_description` -- must fall through to the generic
+    # array-join branch instead.
+    def test_comments_types_param_does_not_use_rss_log_tag_vocabulary
+      html = render_for(
+        Query.lookup_and_save(:Comment, types: [:location_description])
+      )
+
+      assert_html(html, "#caption-truncated .small b",
+                  text: "location_description")
+    end
+
     def test_single_name_lookup_renders_italicized_inside_b
       # Names query: `names` is a grouped param wrapping the
       # `lookup:` lookup key. `:lookup` is in PARAM_LOOKUPS AND

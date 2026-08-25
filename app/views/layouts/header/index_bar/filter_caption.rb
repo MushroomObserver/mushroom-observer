@@ -244,8 +244,13 @@ module Views::Layouts
       val.map { |v| Vote.confidence_string(v.to_f) }.join(" – ")
     end
 
+    # `:types` isn't unique to RssLog -- Query::Comments has its own,
+    # unrelated `:types` attr (comment target model). Gate on model,
+    # not just the key name, or a Comments query's `:types` renders
+    # through RssLog's tag vocabulary and silently drops any Comment
+    # type tag RssLog doesn't share (`location_description`, etc).
     def param_val_itself(key, val, truncate:)
-      if key == :types
+      if key == :types && @query.model == RssLog
         type_tags_to_label(val)
       elsif val.is_a?(Array)
         join_array_val(val, truncate: truncate)
