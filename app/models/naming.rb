@@ -435,10 +435,18 @@ class Naming < AbstractModel
   end
 
   def combined_reason_notes(mine, theirs)
-    texts = [mine, theirs].map { |t| t.to_s.strip }.compact_blank.uniq
+    texts = distinct_reason_notes(mine, theirs)
     return "" if texts.empty?
     return texts.first if texts.one?
 
     "#{texts.map { |t| t.sub(/\s*\.\s*\z/, "") }.join(". ")}."
+  end
+
+  # Non-blank, de-duplicated notes, dropping any fully contained in a
+  # longer one -- a truncated earlier version (e.g. a re-submit) should
+  # not be concatenated onto the fuller text, just superseded by it.
+  def distinct_reason_notes(*notes)
+    texts = notes.map { |t| t.to_s.strip }.compact_blank.uniq
+    texts.reject { |t| texts.any? { |other| other != t && other.include?(t) } }
   end
 end

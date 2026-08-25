@@ -230,4 +230,37 @@ class NamingTest < UnitTestCase
     nrs[1].delete
     assert_equal({ 2 => "", 3 => "test" }, naming.reasons)
   end
+
+  # absorb folds another naming for the same obs/user/name into this one:
+  # the higher vote per voter is kept, and reasons merge -- a note fully
+  # contained in a longer one is superseded, not concatenated (#5186).
+  def test_absorb_merges_votes_and_reasons
+    obs = observations(:coprinus_comatus_obs)
+    name = names(:coprinus_comatus)
+    obs.namings.to_a.each do |n|
+      n.current_user = rolf
+      n.destroy
+    end
+
+    keeper = Naming.new(observation: obs, name: name, user: rolf,
+                        reasons: { 1 => "Fibrillose cap" })
+    keeper.current_user = rolf
+    keeper.save!
+    Vote.create!(naming: keeper, observation: obs, user: rolf, value: 1)
+
+    other = Naming.new(observation: obs, name: name, user: rolf,
+                       reasons: { 1 => "Fibrillose cap and fragile stem" })
+    other.current_user = rolf
+    other.save!
+    Vote.create!(naming: other, observation: obs, user: rolf, value: 3)
+
+    keeper.absorb(other)
+
+    assert_nil(Naming.find_by(id: other.id), "the absorbed naming is gone")
+    assert_equal({ 1 => "Fibrillose cap and fragile stem" },
+                 keeper.reload.reasons,
+                 "a contained note is superseded, not concatenated")
+    assert_equal(3, keeper.votes.find_by(user: rolf).value,
+                 "the higher vote value is kept")
+  end
 end
