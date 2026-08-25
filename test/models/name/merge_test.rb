@@ -98,4 +98,54 @@ class Name::MergeTest < UnitTestCase
                  "Misspelling created mid-merge should be caught by the " \
                  "re-snapshot before destroy, not left dangling")
   end
+
+  # A name merge must not leave a user with two namings of the same name on
+  # one observation: the re-pointed naming is folded into the existing one,
+  # keeping the higher vote per voter (favorite OR'd) and merging reasons
+  # (#5186).
+  def test_merge_folds_a_users_duplicate_naming
+    user = rolf
+    obs = observations(:minimal_unknown_obs)
+    obs.namings.to_a.each do |n|
+      n.current_user = user
+      n.destroy
+    end
+    old_name = names(:conocybe_filaris)
+    survivor = names(:coprinus_comatus)
+
+    keeper = build_naming(obs, survivor, user, { 1 => "by sight" })
+    cast_vote(keeper, obs, user, 1)
+    absorbed = build_naming(obs, old_name, user, { 2 => "used a book" })
+    cast_vote(absorbed, obs, user, 3)
+    cast_vote(absorbed, obs, mary, 2, favorite: true)
+
+    survivor.merge(user, old_name)
+
+    kept = obs.reload.namings.where(user: user, name: survivor)
+    assert_equal(1, kept.count, "the two namings collapse into one")
+    assert_nil(Naming.find_by(id: absorbed.id), "the absorbed naming is gone")
+    assert_equal(3, kept.first.votes.find_by(user: user).value,
+                 "the higher vote value per voter is kept")
+    assert(kept.first.votes.find_by(user: mary).favorite,
+           "a foreign favorite vote migrates onto the keeper")
+    assert_equal({ 1 => "by sight", 2 => "used a book" }, kept.first.reasons,
+                 "reasons from both namings are merged")
+  end
+
+  private
+
+  def build_naming(obs, name, user, reasons)
+    naming = Naming.new(observation: obs, name: name, user: user,
+                        reasons: reasons)
+    naming.current_user = user
+    naming.save!
+    naming
+  end
+
+  def cast_vote(naming, obs, user, value, favorite: false)
+    vote = Vote.new(naming: naming, observation: obs, user: user,
+                    value: value, favorite: favorite)
+    vote.save!
+    vote
+  end
 end
