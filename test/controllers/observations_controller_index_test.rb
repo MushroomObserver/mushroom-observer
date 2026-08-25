@@ -796,18 +796,21 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(false, record_backed)
   end
 
-  # `find_or_goto_index`'s own flash+redirect-on-bad-id behavior is
-  # already covered by test_index_project_with_unknown_id_redirects
-  # (a dispatched request through the existing `project` shortcut) --
-  # this test isolates what resolve_param_alias_records itself does
-  # with a not-found result, stubbing find_or_goto_index so a bare
+  # find_alias_record_or_goto_own_index's own flash+redirect-on-bad-id
+  # behavior is already covered by
+  # test_index_project_with_unknown_id_redirects (a dispatched request
+  # through the existing `project` shortcut) -- this test isolates
+  # what resolve_param_alias_records itself does with a not-found
+  # result, stubbing find_alias_record_or_goto_own_index so a bare
   # @controller.send doesn't trip Rails' one-redirect-per-action guard.
   def test_resolve_param_alias_records_returns_nil_when_lookup_fails
     login
     klass = Class.new(Query::Observations) do
       query_attr(:projects, [Project], param_alias: :project)
     end
-    @controller.define_singleton_method(:find_or_goto_index) { |*| nil }
+    @controller.define_singleton_method(
+      :find_alias_record_or_goto_own_index
+    ) { |*| nil }
 
     resolved, record_backed = @controller.send(
       :resolve_param_alias_records, klass,

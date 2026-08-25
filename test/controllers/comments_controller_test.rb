@@ -127,7 +127,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: id })
 
     assert_flash(:runtime_object_not_found, type: :user, id: id)
-    assert_redirected_to(users_path)
+    assert_redirected_to(comments_path)
   end
 
   def test_index_for_user_who_received_multiple_comments
@@ -174,7 +174,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { for_user: id })
 
     assert_flash(:runtime_object_not_found, type: :user, id: id)
-    assert_redirected_to(users_path)
+    assert_redirected_to(comments_path)
   end
 
   #########################################################

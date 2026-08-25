@@ -210,7 +210,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { by_user: bad_user_id })
 
     assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
-    assert_redirected_to(users_path)
+    assert_redirected_to(names_path)
   end
 
   def test_index_by_editor_of_multiple_names
@@ -262,7 +262,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { by_editor: bad_user_id })
 
     assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
-    assert_redirected_to(users_path)
+    assert_redirected_to(names_path)
   end
 
   ################################################
