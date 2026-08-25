@@ -33,12 +33,19 @@ class DateFieldTest < ComponentTestCase
     assert_html(form, "input[type='text']#collection_number_when_1i")
     assert_html(form, "input[name='collection_number[when(1i)]'][size='4']")
 
-    # Verify order: day, month, year (3i before 2i before 1i)
-    day_pos = form.index("_3i")
-    month_pos = form.index("_2i")
-    year_pos = form.index("_1i")
-    assert(day_pos < month_pos && month_pos < year_pos,
-           "Expected order day(_3i), month(_2i), year(_1i)")
+    # Verify order: day, month, year (3i before 2i before 1i). Scoped
+    # to the date-selects wrapper's own children via Nokogiri element
+    # order, not a substring search over the whole form -- the
+    # authenticity_token hidden field is a random per-render value
+    # that can coincidentally contain "_1i"/"_2i"/"_3i".
+    date_selects = Nokogiri::HTML5.fragment(form).at_css("div.date-selects")
+    field_ids = date_selects.css("select, input").pluck("id")
+    assert_equal(
+      %w[collection_number_when_3i collection_number_when_2i
+         collection_number_when_1i],
+      field_ids,
+      "Expected order day(_3i), month(_2i), year(_1i)"
+    )
   end
 
   def test_date_field_with_append_slot
