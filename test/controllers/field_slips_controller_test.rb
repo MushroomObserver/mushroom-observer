@@ -31,6 +31,16 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_index_for_user_bad_id
+    bad_user_id = User.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
+    assert_redirected_to(users_path)
+  end
+
   # eol_project: admins rolf + mary; katrina is a member but not admin.
   def test_index_nudges_admin_to_set_missing_prefix
     project = projects(:eol_project)
