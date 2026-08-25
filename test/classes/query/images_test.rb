@@ -253,11 +253,9 @@ class Query::ImagesTest < UnitTestCase
   # still finds emoji content.
   #
   # NOTE: deliberately calls the Image.pattern scope directly rather
-  # than through assert_query/Query.lookup -- Query.lookup persists
-  # its params to QueryRecord#description, a separate utf8mb3 column,
-  # which rejects an emoji-containing pattern with its own unrelated
-  # "Cannot convert string ... from utf8mb3 to utf8mb4" error. This
-  # is a distinct bug outside the images table this PR converts.
+  # than through assert_query/Query.lookup to keep this test focused on
+  # the scope behavior; emoji handling in Query/QueryRecord is covered
+  # separately in QueryTest.
   def test_image_pattern_matches_emoji_copyright_holder
     obs = observations(:minimal_unknown_obs)
     img = Image.create!(user: rolf, copyright_holder: "🍄 collector")
