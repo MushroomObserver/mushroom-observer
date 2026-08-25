@@ -8,10 +8,9 @@ module Views::Controllers::RssLogs
     prop :query, _Nilable(::Query)
     prop :types, _Array(::String)
 
-    # Not a Superform -- a multi-select checkbox filter (RssLogsController
-    # explicitly validates "array of types, from form checkboxes"), not a
+    # Not a Superform -- a multi-select checkbox filter, not a
     # single-model-bound field set. Submitting the combined state of
-    # several independently-toggled checkboxes as one q[type][] array
+    # several independently-toggled checkboxes as one q[types][] array
     # needs a submit, unlike IndexPaginationNav's single-value goto
     # controls, which each fully specify their own destination and so
     # reduce to plain links.
@@ -31,7 +30,7 @@ module Views::Controllers::RssLogs
     def render_hidden_fields
       return unless @query
 
-      query_params_except_type.each do |key, value|
+      query_params_except_types.each do |key, value|
         input(type: "hidden", name: key, value: value)
       end
     end
@@ -94,7 +93,7 @@ module Views::Controllers::RssLogs
     # in `_form_elements.scss`.
     def render_type_checkbox(type)
       render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
-               name: "q[type][]", value: type,
+               name: "q[types][]", value: type,
                id: "type_#{type}", checked: type_checked?(type),
                variant: :outline, size: :sm,
                label: { class: "filter-checkbox my-0" },
@@ -109,7 +108,7 @@ module Views::Controllers::RssLogs
       label_text = :rss_all.t
       return plain(label_text) if @types == ["all"]
 
-      link = activity_logs_path(q: query_params_with_type("all"))
+      link = activity_logs_path(q: query_params_with_types(["all"]))
       a(href: link, title: :rss_all_help.t, class: "filter-only") do
         label_text
       end
@@ -120,7 +119,7 @@ module Views::Controllers::RssLogs
       label_text = :"rss_one_#{type}".t
       return plain(label_text) if @types == [type]
 
-      link = activity_logs_path(q: query_params_with_type(type))
+      link = activity_logs_path(q: query_params_with_types([type]))
       a(href: link,
         title: :rss_one_help.t(type: type.to_sym),
         class: "filter-only") { label_text }
@@ -132,10 +131,10 @@ module Views::Controllers::RssLogs
       @types.include?(type) || @types == ["all"]
     end
 
-    def query_params_except_type
+    def query_params_except_types
       return {} unless @query
 
-      q = q_param(@query).except(:type)
+      q = q_param(@query).except(:types)
       # Convert { q: { model: "RssLog" } }.to_query to key/value pairs
       query_string = { q: q }.to_query
       pairs = query_string.split("&")
@@ -145,10 +144,10 @@ module Views::Controllers::RssLogs
       end
     end
 
-    def query_params_with_type(type)
-      return { type: type } unless @query
+    def query_params_with_types(types)
+      return { types: types } unless @query
 
-      q_param(@query).merge(type: type)
+      q_param(@query).merge(types: types)
     end
   end
 end
