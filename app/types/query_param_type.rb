@@ -27,22 +27,26 @@
 # re: custom attribute types - https://stackoverflow.com/a/79417688/3357635
 #                              https://stackoverflow.com/a/78668203/3357635
 #
-# NOTE: to retrieve the :accepts/:param_alias/:default_order value for an
-#       attribute, you can call the Query method `attribute_types`. Rails
-#       `type_for_attribute` doesn't work.
+# NOTE: to retrieve the :accepts/:param_alias/:default_order/
+#       :always_index value for an attribute, you can call the Query
+#       method `attribute_types`. Rails `type_for_attribute` doesn't
+#       work.
 #
 #       Query::Observations.attribute_types[:has_sequences].accepts
 #       Query::Observations.attribute_types[:projects].param_alias
 #
 class QueryParamType < ActiveModel::Type::Value
-  attr_reader :accepts, :param_alias, :default_order
+  attr_reader :accepts, :param_alias, :default_order, :always_index
 
-  # Add our custom args :accepts, :param_alias, :default_order to the
-  # default args -- see `query_attr` in app/extensions/class.rb.
-  def initialize(accepts: nil, param_alias: nil, default_order: nil)
+  # Add our custom args :accepts, :param_alias, :default_order,
+  # :always_index to the default args -- see `query_attr` in
+  # app/extensions/class.rb.
+  def initialize(accepts: nil, param_alias: nil, default_order: nil,
+                 always_index: true)
     @accepts = accepts
     @param_alias = param_alias
     @default_order = default_order
+    @always_index = always_index
     super()
   end
 

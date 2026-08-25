@@ -320,13 +320,29 @@ class QueryTest < UnitTestCase
     assert_includes(filters, :order_by)
     assert_includes(filters, :by)
     assert_includes(filters, :needs_naming) # scalar Class (User)
+    # An "enum" hash (`{ boolean: [true] }`/`{ string: [...] }`) is a
+    # bare scalar from the URL's perspective, not a nested hash --
+    # permitting it as `attr: {}` would strip a request's scalar
+    # value entirely (confirmed: this broke Names#has_observations
+    # until permit_filters learned to tell enum hashes apart from
+    # structural ones).
+    assert_includes(filters, :location_undefined)
     # Array-typed attrs permit via `attr: []`.
     assert_equal([], containers[:by_users])
     assert_equal([], containers[:projects])
-    # Hash-typed attrs, including subqueries, permit via `attr: {}`.
+    # Structural hash-typed attrs, including subqueries, permit via
+    # `attr: {}`.
     assert_equal({}, containers[:names])
     assert_equal({}, containers[:in_box])
     assert_equal({}, containers[:location_query])
+  end
+
+  def test_permit_filters_permits_enum_hash_typed_param_as_scalar
+    raw = ActionController::Parameters.new(location_undefined: "true")
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal("true", permitted[:location_undefined])
   end
 
   def test_permit_filters_permits_array_typed_param

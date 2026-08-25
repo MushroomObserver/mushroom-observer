@@ -69,6 +69,11 @@ module ApplicationController::QueryParamAliases
   # `resolve_param_alias_records`. The alias wins over an already-present
   # value under the target attr name (see Query.resolve_param_aliases for
   # why), so it resolves and overwrites unconditionally.
+  #
+  # A found record still returns :scalar (not forcing always_index) when
+  # the attr declares `always_index: false` -- the record-lookup/flash/
+  # redirect-on-bad-id behavior below is unconditional either way, only
+  # whether a *found* record forces always_index changes.
   def resolve_one_param_alias(klass, permitted, alias_key)
     attr = klass.param_aliases[alias_key]
     raw_value = permitted.delete(alias_key)
@@ -78,12 +83,21 @@ module ApplicationController::QueryParamAliases
       return :scalar
     end
 
+    resolve_record_backed_alias(klass, permitted, attr, model_class, raw_value)
+  end
+
+  # Looks up `raw_value` as `model_class`, flashing and redirecting on a
+  # bad id (`find_or_goto_index`). :not_found on failure; otherwise
+  # :record_backed, unless the attr opts out via `always_index: false`
+  # (see `resolve_one_param_alias`), in which case :scalar.
+  def resolve_record_backed_alias(klass, permitted, attr, model_class,
+                                  raw_value)
     return :not_found unless (record = find_or_goto_index(model_class,
                                                           raw_value))
 
     accepts = klass.attribute_types[attr].accepts
     permitted[attr] = accepts.is_a?(Array) ? [record.id] : record.id
-    :record_backed
+    klass.attribute_types[attr].always_index ? :record_backed : :scalar
   end
 
   # The ActiveRecord model class a query_attr's `accepts` type is backed
