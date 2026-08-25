@@ -244,4 +244,25 @@ class ApplicationControllerTest < FunctionalTestCase
     IpStats.remove_blocked_ips([ip])
     IpStats.reset!
   end
+
+  # `ApplicationController::Indexes#default_sort_order`'s base
+  # implementation returns nil -- every controller with an index
+  # overrides it, so InfoController (no index action) is the only
+  # way to reach the base method itself.
+  def test_default_sort_order_base_implementation_is_nil
+    assert_nil(@controller.send(:default_sort_order))
+  end
+
+  # `paginator_number`'s rescue guards against an unparseable page
+  # value -- inject a value that raises on `#to_s` to exercise it
+  # directly, since ordinary HTTP params (String/Array/Hash) don't.
+  def test_paginator_number_rescues_unparseable_value
+    poison = Object.new
+    def poison.to_s
+      raise(StandardError.new("boom"))
+    end
+    @controller.define_singleton_method(:params) { { page: poison } }
+
+    assert_equal(1, @controller.send(:paginator_number, :page))
+  end
 end

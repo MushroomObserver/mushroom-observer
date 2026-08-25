@@ -22,6 +22,16 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Companion to the `name` case above -- exercises
+  # `Query::Images#alphabetical_by`'s `"user"`/`"reverse_user"` branch
+  # (`User[:login]`), not just `"name"`/`"reverse_name"`.
+  def test_index_sort_by_user_enables_letter_pagination
+    login
+    get(:index, params: { by: "user" })
+
+    assert_response(:success)
+  end
+
   def test_index_by_user
     user = rolf
 

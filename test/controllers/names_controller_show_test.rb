@@ -38,6 +38,29 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_select("#nomenclature")
   end
 
+  # `@has_name_tracker`'s `@user ? ... : false` branch requires `@user`
+  # nil inside `show` -- unreachable through a request, since
+  # `login_required` redirects to the login page before `show` runs
+  # whenever `@user` would end up nil (autologin clears an invalid
+  # session's `user_id` before `login_required` even checks it). Stub
+  # out both auth before_actions for the scope of this test to reach
+  # that state directly.
+  def test_show_name_without_user_has_name_tracker_false
+    name = names(:coprinus_comatus)
+    NamesController.define_method(:autologin) { true }
+    NamesController.define_method(:login_required) { true }
+
+    get(:show, params: { id: name.id })
+
+    assert_response(:success)
+    assert_equal(
+      false, @controller.instance_variable_get(:@has_name_tracker)
+    )
+  ensure
+    NamesController.remove_method(:autologin)
+    NamesController.remove_method(:login_required)
+  end
+
   # Regression for #4491: name text (author, synonyms, classification
   # rows) is textile-safe HTML. The Phlex conversion emitted it via
   # `plain`, which re-escaped the entities, so panels showed literal

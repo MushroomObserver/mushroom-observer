@@ -164,6 +164,27 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                                               order_by: by)
   end
 
+  # A distinct, lower-level check from the one above: `by:` alone goes
+  # through `order_by_or_flash_if_unknown` (sorted_index's own
+  # pre-check), which stops a bad value from reaching the Query. A
+  # subaction that forwards raw params straight into
+  # `create_query_from_url_params` (e.g. `by_user`) skips that
+  # pre-check, so an invalid `by:` alongside it reaches
+  # `Query#validate_order_by!` instead -- caught there, substituted
+  # with the default, and surfaced via
+  # `ApplicationController::Indexes#flash_query_validation_errors`,
+  # a different flash message than `:runtime_invalid_sort_order`.
+  def test_index_by_user_with_invalid_order_flashes_query_validation
+    login
+    get(:index, params: { by_user: rolf.id, by: "totally_bogus_order" })
+
+    assert_flash_warning(
+      :query_validation_order_by_unsupported,
+      models: "Observations", key: "totally_bogus_order",
+      model: Observation, base: "totally_bogus_order"
+    )
+  end
+
   def test_index_with_id
     obs = observations(:agaricus_campestris_obs)
 

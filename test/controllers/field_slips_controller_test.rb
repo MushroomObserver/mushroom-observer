@@ -26,6 +26,17 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_index_for_project_bad_id_redirects
+    bad_project_id = Project.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { project: bad_project_id })
+
+    assert_flash(:runtime_object_not_found, type: :project,
+                                            id: bad_project_id)
+    assert_redirected_to(projects_path)
+  end
+
   def test_should_get_index_for_user
     requires_login(:index, by_user: @field_slip.user.id)
     assert_response(:success)
