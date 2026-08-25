@@ -372,6 +372,35 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_equal([image.id], builder.created_image_ids)
   end
 
+  # Re-importing (or re-running the builder) reuses the namer's existing
+  # naming instead of stacking a duplicate, updating the vote in place
+  # (#5186).
+  def test_add_naming_with_vote_reuses_the_namers_naming
+    obs = observations(:minimal_unknown_obs)
+    obs.namings.to_a.each do |n|
+      n.current_user = users(:rolf)
+      n.destroy
+    end
+    name = names(:coprinus_comatus)
+    namer = users(:rolf)
+    builder = builder_for
+    builder.instance_variable_set(:@observation, obs)
+    builder.define_singleton_method(:used_references_explanation) { |_| "ref" }
+
+    assert_difference("Naming.count", 1) do
+      builder.send(:add_naming_with_vote, name:, namer:,
+                                          value: Vote::MAXIMUM_VOTE)
+    end
+    assert_no_difference("Naming.count") do
+      builder.send(:add_naming_with_vote, name:, namer:,
+                                          value: Vote::MINIMUM_VOTE)
+    end
+
+    naming = obs.reload.namings.find_by(user: namer, name:)
+    assert_equal(Vote::MINIMUM_VOTE, naming.votes.find_by(user: namer).value,
+                 "the second import updates the vote in place")
+  end
+
   private
 
   def download_error

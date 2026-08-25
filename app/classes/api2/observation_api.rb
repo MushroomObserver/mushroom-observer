@@ -160,7 +160,7 @@ class API2
     def add_field_slip_code(observation)
       return unless @code
 
-      field_slip = FieldSlip.find_by(code: @code)
+      field_slip = FieldSlip.find_by(code: @code.upcase)
       unless field_slip
         field_slip = FieldSlip.create!(code: @code, user: @user)
         field_slip.current_user = @user

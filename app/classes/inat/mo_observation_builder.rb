@@ -272,19 +272,23 @@ class Inat
     end
 
     def add_naming_with_vote(name:, namer:, value:)
-      used_references = 2
-      explanation = used_references_explanation(name)
-      naming = Naming.create(
-        observation: @observation,
-        user: namer, name: name,
-        reasons: { used_references => explanation }
-      )
+      # Reuse the namer's existing naming for this name rather than stacking
+      # a duplicate -- a re-import (or a re-run of this builder) otherwise
+      # left the observation with identical namings (#5186).
+      naming = @observation.namings.find_by(user: namer, name: name) ||
+               Naming.create!(
+                 observation: @observation, user: namer, name: name,
+                 reasons: { 2 => used_references_explanation(name) }
+               )
 
-      vote = Vote.create(naming: naming, observation: @observation,
-                         user: user, value: value)
-      # We need an ObservationView, but noone has actually viewed this Obs.
-      ObservationView.create!(observation: @observation, user: user,
-                              last_view: vote.updated_at, reviewed: 1)
+      vote = Vote.find_or_initialize_by(naming: naming, user: user)
+      vote.update!(observation: @observation, value: value)
+      # An ObservationView is needed even though noone has viewed this obs.
+      ObservationView.find_or_create_by(observation: @observation,
+                                        user: user) do |view|
+        view.last_view = vote.updated_at
+        view.reviewed = 1
+      end
     end
 
     def suggested?(name)
