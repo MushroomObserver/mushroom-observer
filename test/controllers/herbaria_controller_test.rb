@@ -301,6 +301,19 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  # nonpersonal defaults to code_then_name (Query::Herbaria's
+  # default_order: for this attr), but this page has its own sorter
+  # (see index_sort_options) -- an explicit `by` must win, not get
+  # silently overridden by the default.
+  def test_index_nonpersonal_explicit_by_respected
+    login
+    get(:index, params: { nonpersonal: true, by: "name" })
+
+    assert_page_title(:herbaria.ti)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal("name", query.params[:order_by])
+  end
+
   def test_index_pattern_text_personal
     pattern = "Personal Herbarium"
 
