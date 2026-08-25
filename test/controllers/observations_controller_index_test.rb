@@ -475,6 +475,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Do not show Observer ID when nobody logged in")
   end
 
+  def test_index_user_single_match_redirects
+    user = lone_wolf
+    obs = Observation.where(user: user).first
+    assert(Observation.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url)
+  end
+
   def test_index_user_unknown_user
     user = observations(:minimal_unknown_obs)
 
@@ -496,6 +507,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters(
       "#{:query_within_locations.l}: #{location.display_name}"
     )
+  end
+
+  def test_index_location_single_match_redirects
+    location = locations(:collection_location)
+    obs = Observation.within_locations(location).first
+    assert(Observation.within_locations(location).one?)
+
+    login
+    get(:index, params: { location: location.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url)
   end
 
   def test_index_location_without_observations

@@ -11,7 +11,8 @@ class Query::Observations < Query
   query_attr(:date, [:date])
   query_attr(:id_in_set, [Observation])
   query_attr(:by_users, [User], param_alias: :by_user,
-                                redirect_to: :model_index)
+                                redirect_to: :model_index,
+                                always_index: false)
   query_attr(:has_name, :boolean)
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
@@ -32,7 +33,8 @@ class Query::Observations < Query
   query_attr(:location_undefined, { boolean: [true] })
   query_attr(:locations, [Location])
   query_attr(:within_locations, [Location], param_alias: :location,
-                                            redirect_to: :model_index)
+                                            redirect_to: :model_index,
+                                            always_index: false)
   # query_attr(:region, :string) # content filter
 
   query_attr(:has_notes, :boolean)
