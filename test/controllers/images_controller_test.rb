@@ -42,7 +42,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { by_user: bad_user_id })
 
     assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
-    assert_redirected_to(images_path)
+    assert_redirected_to(users_path)
   end
 
   def test_index_projects
