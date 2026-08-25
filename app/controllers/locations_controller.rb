@@ -76,26 +76,22 @@ class LocationsController < ApplicationController
   end
 
   # Display list of locations that a given user created.
+  #
+  # Discards create_query_from_url_params's `always_index` -- above,
+  # `index_display_opts` computes it from `@undef_pages` for every
+  # subaction, which single-match auto-redirect depends on.
   def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: locations_path
-    )
-    return unless user
+    query, = create_query_from_url_params(:Location, params)
+    return unless query
 
-    query = create_query(:Location, by_users: user)
     [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user is editor on.
   def by_editor
-    editor = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_editor].to_s,
-      index_path: locations_path
-    )
-    return unless editor
+    query, = create_query_from_url_params(:Location, params)
+    return unless query
 
-    query = create_query(:Location, by_editor: editor)
     [query, {}]
   end
 
