@@ -135,7 +135,10 @@ class FieldSlipExtract < AbstractModel
   def code_mismatch
     read = value_for(template.code_field).to_s.strip
     attached = observation&.field_slip&.code.to_s.strip
-    return nil if read.blank? || attached.blank? || read == attached
+    # Field slip codes are case-insensitive (stored upcased), so a
+    # case-only difference -- e.g. a hand-made slip's "NAMAtest" vs the
+    # stored "NAMATEST" -- is not a mismatch.
+    return nil if read.blank? || attached.blank? || read.casecmp?(attached)
 
     [read, attached]
   end
