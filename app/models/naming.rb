@@ -434,12 +434,11 @@ class Naming < AbstractModel
     merged
   end
 
+  # Distinct notes joined by a line break (reason notes support newlines),
+  # so two different justifications read as separate lines rather than a
+  # run-on. One note (or an empty set) needs no join.
   def combined_reason_notes(mine, theirs)
-    texts = distinct_reason_notes(mine, theirs)
-    return "" if texts.empty?
-    return texts.first if texts.one?
-
-    "#{texts.map { |t| t.sub(/\s*\.\s*\z/, "") }.join(". ")}."
+    distinct_reason_notes(mine, theirs).join("\n")
   end
 
   # Non-blank, de-duplicated notes, dropping any fully contained in a
