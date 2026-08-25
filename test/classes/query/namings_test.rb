@@ -42,10 +42,24 @@ class Query::NamingsTest < UnitTestCase
 
   def test_naming_confidence
     naming = namings(:coprinus_comatus_naming) # vote_cache: 1
-    range = naming.vote_cache..naming.vote_cache
-    scope = Naming.confidence(range).order_by_default
+    scope = Naming.confidence(naming.vote_cache, naming.vote_cache).
+            order_by_default
     assert_query_scope([naming.id], scope, :Naming,
                        confidence: naming.vote_cache.to_s)
+  end
+
+  # A min/max range must filter BETWEEN the bounds, not just match the
+  # bounds themselves -- an Array value on an AR `where` produces an
+  # IN-list, which coprinus_comatus_naming's vote_cache of 1 (strictly
+  # between 0 and 2, equal to neither bound) would fail against.
+  def test_naming_confidence_range
+    ids = Naming.where(
+      Naming[:vote_cache].gteq(0).and(Naming[:vote_cache].lteq(2))
+    ).order_by_default.pluck(:id)
+    assert_includes(ids, namings(:coprinus_comatus_naming).id)
+
+    scope = Naming.confidence(0, 2).order_by_default
+    assert_query_scope(ids, scope, :Naming, confidence: [0, 2])
   end
 
   def test_naming_alphabetical_by

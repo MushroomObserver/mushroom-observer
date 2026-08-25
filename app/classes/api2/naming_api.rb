@@ -12,7 +12,7 @@ class API2
     end
 
     def high_detail_includes
-      [:name, :user]
+      [:name, :user, { votes: :user }]
     end
 
     def query_params
