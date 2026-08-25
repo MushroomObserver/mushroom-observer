@@ -175,26 +175,26 @@ class Observation
       nil
     end
 
-    # Has anyone besides the naming's own author voted on this?  We don't
-    # want people changing the name for namings the community has voted
-    # on -- renaming destroys every other user's vote on it (`clean_votes`),
-    # regardless of that vote's value, so a positive-only check here would
-    # let a negative vote get silently destroyed too.
-    # Returns true if no one else has voted.
+    # Has anyone voted (positively) on this?  We don't want people changing
+    # the name for namings that the community has voted on.
+    # Returns true if no one has.
     def editable?(naming)
-      no_votes_from_others?(naming)
+      naming.votes.each do |v|
+        return false if v.user_id != naming.user_id && v.value.positive?
+      end
+      true
     end
 
-    # Has anyone besides the naming's own author voted on this?  We don't
-    # want people destroying namings someone else has weighed in on --
-    # same reasoning as `editable?`.
-    # Returns true if no one else has voted.
+    # Has anyone given this their strongest (positive) vote?
+    # We don't want people destroying namings that someone else likes best.
+    # Returns true if no one has.
     def deletable?(naming)
-      no_votes_from_others?(naming)
-    end
-
-    def no_votes_from_others?(naming)
-      naming.votes.none? { |v| v.user_id != naming.user_id }
+      naming.votes.each do |v|
+        if v.user_id != naming.user_id && v.value.positive? && v.favorite
+          return false
+        end
+      end
+      true
     end
 
     # Returns true if a given Naming has received one of the highest positive

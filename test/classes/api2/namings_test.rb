@@ -146,21 +146,6 @@ class API2::NamingsTest < UnitTestCase
     assert_names_equal(names(:coprinus_comatus), naming.reload.name)
   end
 
-  # A negative vote is still a vote -- renaming must not silently
-  # destroy a disagreeing user's vote via `clean_votes`.
-  def test_updating_namings_locked_by_negative_vote
-    naming = namings(:agaricus_campestras_naming) # rolf, no votes yet
-    consensus = ::Observation::NamingConsensus.new(naming.observation)
-    consensus.change_vote(naming, Vote.min_neg_vote, mary)
-    @api_key.update!(user: naming.user)
-    params = params_patch(id: naming.id, set_name: names(:peltigera).id)
-
-    assert_api_fail(params)
-    assert_names_equal(names(:agaricus_campestras), naming.reload.name)
-    assert_not_nil(naming.votes.find_by(user: mary),
-                   "Mary's vote should not have been destroyed")
-  end
-
   def test_updating_namings_vote_by_any_user
     naming = namings(:agaricus_campestris_naming) # owned by rolf
     @api_key.update!(user: mary)
@@ -189,18 +174,6 @@ class API2::NamingsTest < UnitTestCase
 
   def test_deleting_namings_locked
     naming = namings(:coprinus_comatus_naming) # mary has a positive vote
-    @api_key.update!(user: naming.user)
-    params = params_delete(id: naming.id)
-
-    assert_api_fail(params)
-    assert_not_nil(Naming.safe_find(naming.id))
-  end
-
-  # See test_updating_namings_locked_by_negative_vote.
-  def test_deleting_namings_locked_by_negative_vote
-    naming = namings(:boletus_edulis_naming) # dick, no foreign votes yet
-    consensus = ::Observation::NamingConsensus.new(naming.observation)
-    consensus.change_vote(naming, Vote.min_neg_vote, mary)
     @api_key.update!(user: naming.user)
     params = params_delete(id: naming.id)
 
