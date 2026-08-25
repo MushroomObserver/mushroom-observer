@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# Report-only pass: wraps every test's execution, capturing
-# $stdout/$stderr for that test alone, and appends anything
-# unexpectedly written there to REPORT_PATH instead of failing the
-# test. A test that already redirects its own output (capture_io,
-# Rails.logger.stub) doesn't leak anything here, since that redirect
-# happens inside this wrapper's span and is restored before it ends.
+# Wraps every test's execution, capturing $stdout/$stderr for that
+# test alone. A test that already redirects its own output
+# (capture_io, Rails.logger.stub) doesn't leak anything here, since
+# that redirect happens inside this wrapper's span and is restored
+# before it ends. Anything else written there fails the test
+# (ENFORCE = true) -- set false to log leaks to REPORT_PATH instead
+# of failing, for an initial sweep against the full suite.
 #
 # Redirects at the OS file-descriptor level (STDOUT.reopen), not by
 # reassigning the $stdout global -- Rails.logger's underlying
@@ -15,12 +16,9 @@
 # swap doesn't touch it. Reopening STDOUT's file descriptor mutates
 # that same captured object in place, so every writer is redirected
 # regardless of which reference it holds.
-#
-# Once a run against the full suite is clean, flip ENFORCE to true so
-# a leak becomes a test failure instead of a report line.
 module NoTestConsoleNoise
   REPORT_PATH = Rails.root.join("tmp/test_console_noise_report.txt")
-  ENFORCE = false
+  ENFORCE = true
 
   def run
     # rubocop:disable Style/GlobalStdStream -- this hook redirects the
@@ -45,7 +43,7 @@ module NoTestConsoleNoise
     # rubocop:enable Style/GlobalStdStream
 
     leaked = read_and_close(out_tempfile) + read_and_close(err_tempfile)
-    record_leak(leaked) if leaked.present?
+    handle_leak(result, leaked) if leaked.present?
     result
   end
 
@@ -58,8 +56,29 @@ module NoTestConsoleNoise
     content
   end
 
-  def record_leak(leaked)
-    entry = "#{self.class}##{name}\n#{leaked}#{"-" * 40}\n"
+  def handle_leak(result, leaked)
+    message = "Unexpected console output during this test -- capture " \
+              "it (Rails.logger.stub, capture_io, etc.) instead of " \
+              "letting it print:\n\n#{leaked}"
+    if ENFORCE
+      fail_result(result, message)
+    else
+      record_leak(message)
+    end
+  end
+
+  # flunk raises through Minitest::Assertions (included in every Test)
+  # so the failure gets a proper backtrace; `super`'s Result.from(self)
+  # already ran by the time this fires, so the failure has to go onto
+  # that Result directly, not onto self.failures.
+  def fail_result(result, message)
+    flunk(message)
+  rescue Minitest::Assertion => e
+    result.failures << e
+  end
+
+  def record_leak(message)
+    entry = "#{self.class}##{name}\n#{message}#{"-" * 40}\n"
     File.open(REPORT_PATH, "a") do |f|
       f.flock(File::LOCK_EX)
       f.write(entry)
