@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-08-25 (deploy-2026-08-25-12-05)
+
+- Enforce one Naming per `(Observation, User, Name)` (#5186) ([PR5218](https://github.com/MushroomObserver/mushroom-observer/pull/5218), @mo-nathan)
+
+## 2026-08-25 (deploy-2026-08-25-12-00)
+
+- Changelog for `deploy-2026-08-24-12-01`; fix pool timezone skew ([PR5191](https://github.com/MushroomObserver/mushroom-observer/pull/5191), @mo-nathan)
+- Changelog blocks: no UI jargon, capitalize MO object names ([PR5190](https://github.com/MushroomObserver/mushroom-observer/pull/5190), @mo-nathan)
+- Block deleting a read-only reflection (#5180) ([PR5193](https://github.com/MushroomObserver/mushroom-observer/pull/5193), @mo-nathan)
+- Add daily batch resync of read-only iNat reflections (#4215) ([PR5194](https://github.com/MushroomObserver/mushroom-observer/pull/5194), @mo-nathan)
+- Drop the live network check from URL validation (`FormatURL`) ([PR5195](https://github.com/MushroomObserver/mushroom-observer/pull/5195), @mo-nathan)
+- Retry after flaky iNat response to writing Observation Field ([PR5185](https://github.com/MushroomObserver/mushroom-observer/pull/5185), @JoeCohen)
+- Retry iNat photo downloads if Amazon Web Services flakes out ([PR5184](https://github.com/MushroomObserver/mushroom-observer/pull/5184), @JoeCohen)
+- Exclude MO's own back-link field from the iNat snapshot ([PR5196](https://github.com/MushroomObserver/mushroom-observer/pull/5196), @mo-nathan)
+- Stop the iNat resync from clearing an observation's specimen flag ([PR5197](https://github.com/MushroomObserver/mushroom-observer/pull/5197), @mo-nathan)
+- Constrain the batch resync to MO's `Mushroom Observer URL` field (#4215) ([PR5198](https://github.com/MushroomObserver/mushroom-observer/pull/5198), @mo-nathan)
+- Single-entry `script/dev_setup` dispatcher ([PR5202](https://github.com/MushroomObserver/mushroom-observer/pull/5202), @nimmolo)
+- Prevent duplicate namings: name merges + iNat import (#5186) ([PR5204](https://github.com/MushroomObserver/mushroom-observer/pull/5204), @mo-nathan)
+- Treat field slip codes case-insensitively (#5199) ([PR5210](https://github.com/MushroomObserver/mushroom-observer/pull/5210), @mo-nathan)
+- Fix `MO/PreferKitSyntax`; use Kit syntax in `field_slip_extracts/form.rb` ([PR5208](https://github.com/MushroomObserver/mushroom-observer/pull/5208), @nimmolo)
+- Rename `Votes::Table` to `Tally`; thread consensus through vote modal ([PR5209](https://github.com/MushroomObserver/mushroom-observer/pull/5209), @nimmolo)
+- Write a placeholder `name_list_data.js` if missing before tests run ([PR5214](https://github.com/MushroomObserver/mushroom-observer/pull/5214), @nimmolo)
+- Fail tests that leak console output, leave trace of which ones do ([PR5211](https://github.com/MushroomObserver/mushroom-observer/pull/5211), @nimmolo)
+- Fall back to Query's `default_order` on an invalid `order_by` ([PR5215](https://github.com/MushroomObserver/mushroom-observer/pull/5215), @nimmolo)
+
 ## 2026-08-24 (deploy-2026-08-24-12-01)
 
 - Changelog block convention: `.claude/rules/changelog.md` + PR template (#5155 step 1) ([PR5158](https://github.com/MushroomObserver/mushroom-observer/pull/5158), @mo-nathan)
