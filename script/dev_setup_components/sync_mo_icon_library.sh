@@ -27,10 +27,9 @@
 # script/icon_library_narrow_checkout.sh for why it's narrowed further
 # to just mo-icons.svg.
 #
-# Callable standalone via `script/dev_setup_macos --icons-only` or
-# `script/dev_setup_ubuntu --icons-only`, without running the rest of
-# either setup script -- e.g. to pick up a fresh mo-icons.svg locally
-# after icon-library updates.
+# Callable standalone via `script/dev_setup --icons-only`, without
+# running the rest of setup -- e.g. to pick up a fresh mo-icons.svg
+# locally after icon-library updates.
 mo_sync_icon_library() {
     clone_dir="tmp/icon-library"
     dest_svg="vendor/assets/images/icons/mo-icons.svg"

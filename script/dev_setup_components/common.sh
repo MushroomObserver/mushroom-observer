@@ -1,6 +1,7 @@
 # Shared functions for the per-platform dev onboarding scripts
-# (script/dev_setup_macos, script/dev_setup_ubuntu). Source this, then call
-# whichever functions apply, in order, from the calling script.
+# (script/dev_setup_components/dev_setup_macos, .../dev_setup_ubuntu).
+# Source this, then call whichever functions apply, in order, from the
+# calling script.
 #
 # Every function is idempotent -- safe to re-run the whole setup
 # script after a partial failure without redoing completed work.
