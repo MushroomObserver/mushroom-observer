@@ -15,10 +15,12 @@ module ApplicationController::QueryParamAliases
   # allowlist.
   #
   # A param_alias'd id that doesn't resolve to an existing record flashes
-  # and redirects back to the calling controller's own index -- same as
-  # every hand-written shortcut method's `find_obj_or_goto_index` --
-  # returns nil in that case, so check the return value the same way you
-  # would any other index-redirecting lookup.
+  # and redirects -- to the calling controller's own index by default
+  # (matching `find_obj_or_goto_index`), or to the looked-up model's own
+  # index when the attr declares `redirect_to: :model_index` (matching
+  # `find_or_goto_index`) -- see `resolve_record_backed_alias`. Returns
+  # nil in that case, so check the return value the same way you would
+  # any other index-redirecting lookup.
   #
   # `always_index: true` is set automatically whenever a record-backed
   # param_alias resolved a param (e.g. `project`, not the scalar `by`
@@ -48,11 +50,11 @@ module ApplicationController::QueryParamAliases
 
   # Resolves each `aliased_keys` entry to its target query_attr value,
   # looking up record-backed attrs (e.g. `projects: [Project]`) via
-  # `find_or_goto_index` -- which flashes and redirects on a bad id, same
-  # as every hand-written shortcut method. Returns `[nil, false]`
-  # (redirect already performed) the moment one fails to resolve;
-  # otherwise `[resolved_params, record_backed?]`, where `record_backed?`
-  # is true iff at least one resolved alias was record-backed.
+  # `resolve_record_backed_alias` -- which flashes and redirects on a bad
+  # id. Returns `[nil, false]` (redirect already performed) the moment
+  # one fails to resolve; otherwise `[resolved_params, record_backed?]`,
+  # where `record_backed?` is true iff at least one resolved alias was
+  # record-backed.
   def resolve_param_alias_records(klass, permitted, aliased_keys)
     record_backed = false
     aliased_keys.each do |alias_key|
@@ -86,20 +88,25 @@ module ApplicationController::QueryParamAliases
     resolve_record_backed_alias(klass, permitted, attr, model_class, raw_value)
   end
 
-  # Looks up `raw_value` as `model_class`, flashing and redirecting back
-  # to the calling controller's own index on a bad id. :not_found on
+  # Looks up `raw_value` as `model_class`, flashing and redirecting on a
+  # bad id -- to the calling controller's own index by default, or to
+  # `model_class`'s own index when the attr declares
+  # `redirect_to: :model_index` (see `query_attr`). :not_found on
   # failure; otherwise :record_backed, unless the attr opts out via
   # `always_index: false` (see `resolve_one_param_alias`), in which case
   # :scalar.
   def resolve_record_backed_alias(klass, permitted, attr, model_class,
                                   raw_value)
-    return :not_found unless (record = find_alias_record_or_goto_own_index(
-      model_class, raw_value
-    ))
+    type = klass.attribute_types[attr]
+    record = if type.redirect_to == :model_index
+               find_or_goto_index(model_class, raw_value)
+             else
+               find_alias_record_or_goto_own_index(model_class, raw_value)
+             end
+    return :not_found unless record
 
-    accepts = klass.attribute_types[attr].accepts
-    permitted[attr] = accepts.is_a?(Array) ? [record.id] : record.id
-    klass.attribute_types[attr].always_index ? :record_backed : :scalar
+    permitted[attr] = type.accepts.is_a?(Array) ? [record.id] : record.id
+    type.always_index ? :record_backed : :scalar
   end
 
   # Like `find_or_goto_index` (ApplicationController::Indexes), but

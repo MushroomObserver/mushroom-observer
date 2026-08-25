@@ -23,9 +23,15 @@ class Class
   # Set false on an attr whose single-match auto-redirect is
   # intentional/tested. Doesn't affect the record-lookup/flash/redirect
   # behavior on a bad id, only whether a *found* record forces the index.
-  def query_attr(attr, accepts, param_alias: nil, default_order: nil,
-                 always_index: true)
-    attribute(attr, :query_param, accepts:, param_alias:, default_order:,
-                                  always_index:)
+  #
+  # `redirect_to:` (default `:own_index`) picks where a record-backed
+  # `param_alias:` sends the user when the id doesn't resolve.
+  # `:own_index` redirects back to the calling controller's own index
+  # (matches every hand-written shortcut built on `find_obj_or_goto_index`).
+  # `:model_index` redirects to the *looked-up* model's own index instead
+  # (matches shortcuts built on the older `find_or_goto_index` -- e.g.
+  # `ObservationsController::Index#by_user` sending a bad id to `/users`).
+  def query_attr(attr, accepts, **)
+    attribute(attr, :query_param, accepts:, **)
   end
 end
