@@ -178,6 +178,17 @@ class FieldSlipExtractTest < UnitTestCase
     assert_nil(extract.code_mismatch)
   end
 
+  # A case-only difference is not a mismatch -- field slip codes are
+  # case-insensitive (#5199): a hand-made slip photographed as
+  # "nemf-10222" still matches the attached "NEMF-10222".
+  def test_code_mismatch_nil_when_codes_differ_only_in_case
+    slip = FieldSlip.create!(code: "NEMF-10222", user: @obs.user)
+    attach_slip(slip)
+    extract = record(fields: { "Field Slip Code" => "nemf-10222" })
+
+    assert_nil(extract.code_mismatch)
+  end
+
   # The strongest signal that this photo is not this observation's slip.
   def test_code_mismatch_reports_both_codes
     slip = FieldSlip.create!(code: "NEMF-10222", user: @obs.user)

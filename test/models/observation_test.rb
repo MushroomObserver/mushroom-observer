@@ -388,7 +388,7 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       new_naming = Naming.create(
         observation: obs.reload,
-        name: names(:agaricus_campestris),
+        name: names(:conocybe_filaris),
         vote_cache: 0,
         user: mary
       )
@@ -470,7 +470,7 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Naming.create(
         observation: observations(:coprinus_comatus_obs),
-        name: names(:agaricus_campestris),
+        name: names(:conocybe_filaris),
         vote_cache: 0,
         user: mary
       )

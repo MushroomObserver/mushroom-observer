@@ -44,7 +44,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     private
 
     def render_table
-      render(Components::Table.new(model.rows_to_show)) do |t|
+      Table(model.rows_to_show) do |t|
         t.column(:field_slip_extract_field.l)
         t.column(:field_slip_extract_read.l)
         t.column(:field_slip_extract_current.l)
@@ -200,7 +200,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       # `with_body`, not a bare block: Panel is slot-based, and content
       # passed straight to it is discarded rather than rendered.
-      render(Components::Panel.new(panel_id: "field_slip_extract_name")) do |p|
+      Panel(panel_id: "field_slip_extract_name") do |p|
         p.with_body do
           render_name_field(row)
           render_name_use(row)

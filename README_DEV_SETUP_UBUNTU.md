@@ -23,7 +23,7 @@ MacBook Pro) they take under 3 minutes.
 
 Shortly after I was able to access the web-based console from the DO UI
 
-# Run dev_setup_ubuntu
+# Run dev_setup
 I don't recommend running straight from a web console due to
 potential timeouts.  Better to run screen.  Note that the -L option
 puts all the output in a file in the root home directory which can be
@@ -33,8 +33,12 @@ On any freshly built Ubuntu box, logged in as root, you should be able
 to run:
 
 ```sh
-  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash
 ```
+
+`script/dev_setup` detects the OS and hands off to
+`script/dev_setup_components/dev_setup_ubuntu`, so this is the same
+command as on macOS -- no need to remember the platform-specific name.
 
 This does the one-time root-level system prep (creates the `mo` user,
 installs system packages, chruby, ruby-install), then automatically
@@ -44,17 +48,17 @@ and run the test suite -- one command instead of two.
 It may prompt you to set a password for `mo` partway through (needed
 for `mo` to `sudo` in the steps after that) if one isn't set yet.
 That prompt works fine if you downloaded the script to a file first
-(`curl -o dev_setup_ubuntu ... && bash dev_setup_ubuntu`); if you ran
-the one-liner above via a raw pipe, the prompt may not read your input
-correctly (a well-known limitation of interactive prompts inside a
-`curl | bash` pipe -- the prompt reads from the same stdin bash is
-still consuming as script source). If that happens, set the password
-yourself and re-run as `mo`:
+(`curl -o dev_setup ... && bash dev_setup`); if you ran the one-liner
+above via a raw pipe, the prompt may not read your input correctly (a
+well-known limitation of interactive prompts inside a `curl | bash`
+pipe -- the prompt reads from the same stdin bash is still consuming
+as script source). If that happens, set the password yourself and
+re-run as `mo`:
 
 ```sh
   passwd mo
   su - mo
-  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_ubuntu | bash
+  curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash
 ```
 
 Or ssh in as the mo user from any system that has the key for any

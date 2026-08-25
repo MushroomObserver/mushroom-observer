@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_23_214602) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_25_021326) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -572,6 +572,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_23_214602) do
     t.integer "user_id"
     t.float "vote_cache", default: 0.0
     t.text "reasons"
+    t.index ["observation_id", "user_id", "name_id"], name: "index_namings_on_obs_user_name", unique: true
     t.index ["observation_id"], name: "index_namings_on_observation_id"
   end
 
