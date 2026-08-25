@@ -80,7 +80,7 @@ module Names
       get(:index, params: { by_author: bad_user_id })
 
       assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
-      assert_redirected_to(name_descriptions_index_path)
+      assert_redirected_to(users_path)
     end
 
     def test_index_by_editor_of_one_description
@@ -140,7 +140,7 @@ module Names
       get(:index, params: { by_editor: bad_user_id })
 
       assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
-      assert_redirected_to(name_descriptions_index_path)
+      assert_redirected_to(users_path)
     end
 
     def test_show_name_description
