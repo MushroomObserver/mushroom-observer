@@ -10,7 +10,8 @@ class Query::Herbaria < Query
   query_attr(:description_has, :string)
   query_attr(:mailing_address_has, :string)
   query_attr(:pattern, :string)
-  query_attr(:nonpersonal, { boolean: [true] })
+  query_attr(:nonpersonal, { boolean: [true] },
+             default_order: :code_then_name)
 
   def alphabetical_by
     @alphabetical_by ||= Herbarium[:name]

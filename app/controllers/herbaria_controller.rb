@@ -214,9 +214,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   def nonpersonal
     store_location
-    query = create_query(
-      :Herbarium, nonpersonal: true, order_by: :code_then_name
-    )
+    query, = create_query_from_url_params(:Herbarium, params)
+    return unless query
+
     [query, { always_index: true }]
   end
 
