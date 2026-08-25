@@ -79,6 +79,13 @@ class Naming < AbstractModel
   scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
+  scope :order_by_default,
+        -> { order_by(::Query::Namings.default_order) }
+
+  scope :observations, ->(ids) { where(observation_id: ids) }
+  scope :names, ->(ids) { where(name_id: ids) }
+  scope :confidence, ->(range) { where(vote_cache: range) }
+
   # Override the default show_controller
   def self.show_controller
     "/observations"
