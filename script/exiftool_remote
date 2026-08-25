@@ -6,9 +6,9 @@
 # binary directly (flags first, target path/URL last). All arguments
 # except the last are exiftool flags; the last argument is the URL to
 # fetch. Fetches the URL via curl (confirmed on production -- see
-# README_PRODUCTION_INSTALL / script/dev_setup/ubuntu_root.sh -- and ships
-# with macOS by default, unlike wget) and pipes the bytes into
-# exiftool reading from stdin, with those flags applied.
+# README_PRODUCTION_INSTALL / script/dev_setup_components/ubuntu_root.sh
+# -- and ships with macOS by default, unlike wget) and pipes the bytes
+# into exiftool reading from stdin, with those flags applied.
 #
 # pipefail so a failed curl (bad URL, HTTP error, network failure)
 # makes the whole pipeline -- and this script's own exit status, which
