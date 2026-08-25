@@ -738,14 +738,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal("date", query.params[:order_by])
   end
 
-  # A bad `project:` id redirects to this controller's own index,
-  # `/observations`. See `redirect_to:` in `query_attr`
-  # (app/extensions/class.rb).
+  # A bad project id redirects to the projects index. See redirect_to:
+  # in query_attr (app/extensions/class.rb).
   def test_index_project_with_unknown_id_redirects
     login
     get(:index, params: { project: 999_999_999 })
 
-    assert_redirected_to(observations_path)
+    assert_redirected_to(projects_path)
   end
 
   def test_index_project_banner_from_query_param

@@ -54,7 +54,8 @@ class Query::Observations < Query
 
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
-  query_attr(:projects, [Project], param_alias: :project)
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
   query_attr(:project_lists, [Project])
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
