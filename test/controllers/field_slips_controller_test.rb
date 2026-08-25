@@ -31,6 +31,19 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_index_for_user_single_match_redirects
+    user = roy
+    assert_not(FieldSlip.where(user: user).exists?,
+               "Test needs a user with no existing field slips")
+    slip = FieldSlip.create!(user: user, project: @field_slip.project,
+                             code: "EOL-ROY1")
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(field_slip_path(slip.id))
+  end
+
   def test_index_for_user_bad_id
     bad_user_id = User.maximum(:id).to_i + 1000
 
