@@ -57,11 +57,21 @@ module RuboCop
           return if captures_logging?(node)
           return if expects_propagation?(node)
           return if simulates_io_failure?(node)
+          return if wrapped_in_capture_io?(node)
 
           add_offense(node)
         end
 
         private
+
+        # MiniTest's capture_io redirects $stdout/$stderr for the whole
+        # block -- any warn/puts a rescue makes inside it is already
+        # swallowed, whether or not the test reads it back.
+        def wrapped_in_capture_io?(node)
+          node.each_descendant(:send).any? do |send_node|
+            send_node.method?(:capture_io)
+          end
+        end
 
         def simulates_io_failure?(node)
           node.each_descendant(:send).any? do |send_node|

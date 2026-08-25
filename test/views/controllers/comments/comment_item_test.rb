@@ -108,6 +108,9 @@ module Views::Controllers::Comments
       assert_no_html(html, "h4")
     end
 
+    # rubocop:disable MO/NoUncapturedTestLogging -- target_name_link/
+    # target_type's rescues just substitute placeholder text, no
+    # Rails.logger call to capture.
     def test_show_name_with_deleted_target_falls_back_to_deleted_text
       # `target_name_link` and `target_type` are wrapped in
       # `rescue StandardError` so a comment outliving its target
@@ -129,6 +132,7 @@ module Views::Controllers::Comments
       assert_includes(html, :comment_list_deleted.t)
       assert_includes(html, :runtime_object_deleted.to_s)
     end
+    # rubocop:enable MO/NoUncapturedTestLogging
 
     # ---- avatar -----------------------------------------------------
 

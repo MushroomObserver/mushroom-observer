@@ -70,6 +70,8 @@ module Views::Controllers::SpeciesLists
 
     # `place` rescues StandardError from `place_name.t` and falls back
     # to `:unknown.ti`. Stub `place_name` to raise so the rescue fires.
+    # rubocop:disable MO/NoUncapturedTestLogging -- place's rescue just
+    # falls back to :unknown.ti, no Rails.logger call to capture.
     def test_place_falls_back_to_unknown_when_place_name_raises
       @species_list.define_singleton_method(:place_name) do
         raise(StandardError.new("bad place"))
@@ -78,6 +80,7 @@ module Views::Controllers::SpeciesLists
 
       assert_html(html, "span", text: :unknown.ti.as_displayed)
     end
+    # rubocop:enable MO/NoUncapturedTestLogging
 
     # `remove` wins when both flags set — defensive guard.
     def test_remove_wins_when_both_remove_and_add_set

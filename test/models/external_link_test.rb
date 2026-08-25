@@ -133,6 +133,9 @@ class ExternalLinkTest < UnitTestCase
   # An iNat observation link is validated by its strict base_url + numeric
   # id shape (inat_url?), not FormatURL's looser host/path match, so
   # FormatURL is not called for it.
+  # rubocop:disable MO/NoUncapturedTestLogging -- canary: FormatURL.new
+  # is skipped for an iNat link on this passing path, so the stub raise
+  # doesn't fire and there's nothing to capture.
   def test_inaturalist_link_skips_format_url
     site = external_sites(:inaturalist)
     obs = observations(:minimal_unknown_obs)
@@ -146,6 +149,7 @@ class ExternalLinkTest < UnitTestCase
       assert_equal(url, link.url, "iNat link URL should be saved unchanged")
     end
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   # iNat URLs must be only the base url plus an observation numeric id,
   # e.g. /observations/12345.

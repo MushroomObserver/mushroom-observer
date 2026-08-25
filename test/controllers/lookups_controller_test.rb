@@ -132,6 +132,8 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(glossary_term_path(term.id))
   end
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- find_name_matches's
+  # rescue only calls flash_error, no Rails.logger call to capture.
   def test_lookup_name_with_error
     login
     # Stub a method used inside `lookup_name` to provoke an error
@@ -141,6 +143,7 @@ class LookupsControllerTest < FunctionalTestCase
 
     assert_flash_error
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_lookup_observation
     login

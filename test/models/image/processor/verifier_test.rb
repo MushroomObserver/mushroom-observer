@@ -241,6 +241,10 @@ class Image::Processor::VerifierTest < UnitTestCase
   # A raised exception (e.g. missing rsync binary, Errno::ENOENT) from one
   # file's transfer must not abort the rest of the run -- every other
   # mismatched file still needs its chance to upload.
+  # rubocop:disable MO/NoUncapturedTestLogging -- the log IS captured,
+  # via the `messages` array passed to Verifier.new's block (Verifier's
+  # own injectable-log convention), not Rails.logger.stub. The assertion
+  # below reads it back.
   def test_transfer_continues_after_one_file_raises
     image = images(:turned_over_image)
     seed_locally_complete(image)
@@ -266,6 +270,7 @@ class Image::Processor::VerifierTest < UnitTestCase
       msg.include?("Failed to upload") && msg.include?("boom")
     end)
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_transfer_takes_an_active_record_relation
     image = images(:turned_over_image)

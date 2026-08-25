@@ -35,6 +35,8 @@ module Views::Controllers::Admin::Users
     # passed) — the `rescue` only exists for environments where that
     # route helper isn't available. Stub it to raise to exercise the
     # fallback directly.
+    # rubocop:disable MO/NoUncapturedTestLogging -- form_action's rescue
+    # just returns a fallback string, no Rails.logger call to capture.
     def test_form_action_falls_back_when_admin_route_raises
       form = render_form_instance
       form.define_singleton_method(:admin_user_path) do |*|
@@ -43,6 +45,7 @@ module Views::Controllers::Admin::Users
 
       assert_equal("/admin/users/#{@user_stats.user_id}", form.form_action)
     end
+    # rubocop:enable MO/NoUncapturedTestLogging
 
     private
 

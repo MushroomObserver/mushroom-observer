@@ -2714,6 +2714,8 @@ class ObservationTest < UnitTestCase
     assert_equal(loc.name, obs.where)
   end
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- Observation.define_a_location's
+  # rescue retries and re-raises; it has no Rails.logger call to capture.
   def test_define_a_location_retries_once_on_deadlock
     calls = 0
     relation = Object.new
@@ -2729,6 +2731,7 @@ class ObservationTest < UnitTestCase
     end
     assert_equal(2, calls, "update should be retried after one deadlock")
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_define_a_location_reraises_repeated_deadlock
     relation = Object.new

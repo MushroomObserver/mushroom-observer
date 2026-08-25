@@ -168,15 +168,22 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions
     raiser = ->(*) { raise(ActiveRecord::RecordInvalid.new(ExternalLink.new)) }
-    ExternalLink.stub(:create!, raiser) do
-      assert_no_difference(
-        "Observation.count",
-        "A cross-referenced iNat obs is skipped even when the " \
-        "self-heal link fails"
-      ) do
-        InatImportJob.perform_now(@inat_import)
+    # Inat::ObservationImporter#create_crosslink logs the validation
+    # failure via Rails.logger.warn -- capture it instead of letting it
+    # print to the test suite's console.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      ExternalLink.stub(:create!, raiser) do
+        assert_no_difference(
+          "Observation.count",
+          "A cross-referenced iNat obs is skipped even when the " \
+          "self-heal link fails"
+        ) do
+          InatImportJob.perform_now(@inat_import)
+        end
       end
     end
+    assert_includes(logged, "failed to create remote_manual ExternalLink")
 
     assert_nil(
       ExternalLink.find_by(external_id: @parsed_results.first[:id].to_s,
@@ -983,6 +990,9 @@ class InatImportJobTest < ActiveJob::TestCase
   # (the import ExternalLink's unique index). The importer should swallow
   # it and log a "race" skip — same effect as the already_imported?
   # pre-check.
+  # rubocop:disable MO/NoUncapturedTestLogging -- the rescue's log() call
+  # (Inat::ObservationImporter -> ApplicationJob#log) writes to the job
+  # log file, not Rails.logger/$stdout.
   def test_import_handles_record_not_unique_race
     create_ivars_from_filename("calostoma_lutescens")
     @user.update(inat_username: @inat_import.inat_username)
@@ -1007,6 +1017,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  job_log_file.read,
                  "Should log a race-skip when RecordNotUnique fires")
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_import_update_inat_username_if_job_succeeds
     updated_inat_username = "updatedInatUsername"
@@ -1061,6 +1072,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Prove that import continues with subsequent observations
   # when an error occurs during import of one observation
+  # rubocop:disable MO/NoUncapturedTestLogging -- log_with_response_error
+  # writes to the job log file and the InatImport#response_errors column,
+  # not Rails.logger/$stdout.
   def test_import_multiple_continues_after_error
     create_ivars_from_filename("listed_ids")
 
@@ -1112,6 +1126,7 @@ class InatImportJobTest < ActiveJob::TestCase
       define_method(:notes, original_notes_method)
     end
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   # Prove that "Import all my iNat observations imports" multiple obsservations
   # NOTE: It would be complicated to prove that it imports multiple pages.
@@ -1681,6 +1696,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- rescue Exception / non_rescuable? tests
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- perform's `rescue
+  # Exception` branch only calls log() (job log file) and
+  # add_response_error (DB column), not Rails.logger/$stdout.
   def test_perform_records_unexpected_non_standard_exception
     create_ivars_from_filename("calostoma_lutescens")
     stub_token_requests
@@ -1699,6 +1717,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal("Done", @inat_import.state,
                  "Import should be marked Done after unexpected exception")
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_non_rescuable_true_for_remaining_fatal_types
     job = InatImportJob.new

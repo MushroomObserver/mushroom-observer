@@ -93,6 +93,8 @@ class Image::Processor::GapDetectorTest < UnitTestCase
     assert_empty(result[:regenerated])
   end
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- GapDetector.new with no
+  # block leaves @log nil, so its rescue's log() call is a no-op here.
   def test_only_attempts_regeneration_once_per_image_per_run
     image = images(:turned_over_image)
     image.update_columns(transferred: true)
@@ -113,6 +115,7 @@ class Image::Processor::GapDetectorTest < UnitTestCase
     assert_equal(1, call_count,
                  "regeneration should only be attempted once per image")
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   # A remote listing that failed outright (#4974) verified nothing --
   # treating every path in the chunk as missing would trigger a mass

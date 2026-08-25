@@ -72,6 +72,11 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     end
   end
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- the "test" message is
+  # deliberate: ImageLoaderJob's rescue only warns to $stdout when
+  # `e.message != "test"` (see its Rails.env.test? guard), so this
+  # message value itself suppresses the console noise. Its other log
+  # call writes to a job-log file, not $stdout.
   def test_image_download_fails
     with_stubs do
       MockBucket.stub(:new, -> { raise("test") }) do
@@ -80,4 +85,5 @@ class ImageLoaderJobTest < ActiveJob::TestCase
       end
     end
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 end

@@ -311,6 +311,9 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
   end
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- run_script's warn IS
+  # captured, by the capture_io in the shared run_script_against helper
+  # (not visible in this method's own body).
   def test_invalid_record_is_logged_and_skipped
     image = images(:in_situ_image)
     stubbed_error = lambda do |*|
@@ -330,6 +333,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
     assert_nil(link_for(image))
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_progress_logging_at_interval
     subject = build

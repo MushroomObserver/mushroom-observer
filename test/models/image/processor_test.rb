@@ -251,6 +251,8 @@ class Image::ProcessorTest < UnitTestCase
   # false. A raised exception on one server must not abort the loop any
   # more than a returned false does -- the next server must still get
   # its chance.
+  # rubocop:disable MO/NoUncapturedTestLogging -- try_fetch_orig's rescue
+  # just returns false, no Rails.logger call to capture.
   def test_make_sure_we_have_full_size_locally_tries_next_server_after_raise
     image = images(:in_situ_image)
     FileUtils.cp(JPG_FIXTURE, "#{remote_server_path(1)}/orig/#{image.id}.jpg")
@@ -278,6 +280,7 @@ class Image::ProcessorTest < UnitTestCase
 
     assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_requires_image
     assert_raises(RuntimeError) { Image::Processor.new(image: nil) }

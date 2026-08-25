@@ -730,6 +730,9 @@ class API2ControllerTest < FunctionalTestCase
     get(:observations, params: params.merge(format: :xml, detail: :high))
   end
 
+  # rubocop:disable MO/NoUncapturedTestLogging -- Api2Controller's rescue
+  # (render_api_results/index) only builds an API2::RenderFailed error;
+  # neither it nor RenderFailed#initialize calls Rails.logger.
   def test_render_api_results_rescue_wraps_unexpected_errors
     boom = RuntimeError.new("unexpected")
     API2.stub(:execute, ->(_) { raise(boom) }) do
@@ -757,6 +760,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("true", error["fatal"],
                  "RenderFailed error should be fatal")
   end
+  # rubocop:enable MO/NoUncapturedTestLogging
 
   def test_routing
     assert_routing({ path: "/api2/comments", method: :delete },
