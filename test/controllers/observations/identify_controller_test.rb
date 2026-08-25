@@ -118,5 +118,16 @@ module Observations
       assert_no_flash
       assert_select(".matrix-box", obs_count - 6)
     end
+
+    # A scalar `?identify_filter=x` (not the expected nested hash)
+    # used to 500: FormFilter (rendered in every identify page's
+    # top-nav) called `params.dig(:identify_filter, :type)` directly
+    # on the raw param, and String has no #dig.
+    def test_identify_index_with_scalar_identify_filter_param
+      login("mary")
+      get(:index, params: { identify_filter: "x" })
+
+      assert_response(:success)
+    end
   end
 end
