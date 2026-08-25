@@ -56,12 +56,13 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { q: { type: [] } })
     assert_select("body.rss_logs__index")
 
-    # Old-style top level :type param now redirects
+    # Top-level :type/:types are query_attr aliases now -- no redirect,
+    # renders directly (see test_old_style_type_param_no_longer_redirects).
     get(:index, params: { type: "all" })
-    assert_response(:redirect)
+    assert_select("body.rss_logs__index")
 
-    get(:index, params: { type: %w[article glossary_term] })
-    assert_response(:redirect)
+    get(:index, params: { types: %w[article glossary_term] })
+    assert_select("body.rss_logs__index")
   end
 
   def test_get_index_rss_log
@@ -246,7 +247,9 @@ class RssLogsControllerTest < FunctionalTestCase
     login
 
     # Simulate form submission with type checkboxes as array under q param
-    # Form submits q[type][]=observation&q[type][]=name
+    # (the TypeFilters form submits q[types][]=observation&
+    # q[types][]=name; this exercises the same array shape via the
+    # singular `type` alias key, which also accepts an Array value).
     get(:index, params: {
           q: { model: "RssLog", type: %w[observation name] }
         })
@@ -257,33 +260,27 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_includes(types, "name")
   end
 
-  def test_old_style_type_param_redirects_to_q_param
+  # `:type` used to redirect a bookmarked top-level param onto a `q[]`
+  # URL. It's a plain query_attr alias now (Query::RssLogs) -- top-level
+  # params are a first-class URL form, so it renders directly instead.
+  def test_old_style_type_param_no_longer_redirects
     login
 
-    # Old-style string type param should redirect to q param URL
     get(:index, params: { type: "observation" })
-    assert_response(:redirect)
-    assert_match(/q%5Bmodel%5D=RssLog/, @response.location)
-    assert_match(/q%5Btype%5D=observation/, @response.location)
+    assert_response(:success)
+    assert_equal(["observation"], @controller.instance_variable_get(:@types))
 
-    # Old-style array type param should redirect to q param URL
-    get(:index, params: { type: %w[glossary_term article] })
-    assert_response(:redirect)
-    # Should contain both types (order may vary)
-    assert_match(/q%5Bmodel%5D=RssLog/, @response.location)
-    assert_match(/q%5Btype%5D=/, @response.location)
-    assert_match(/glossary_term/, @response.location)
-    assert_match(/article/, @response.location)
+    # `:type` is the scalar form; an array needs `:types` (see
+    # test_type_filter_form_submits_as_array).
+    get(:index, params: { types: %w[glossary_term article] })
+    assert_response(:success)
+    assert_equal(%w[article glossary_term],
+                 @controller.instance_variable_get(:@types))
 
-    # Invalid type should redirect with "none"
+    # Invalid tag drops out entirely -> "none"
     get(:index, params: { type: "evil<script>" })
-    assert_response(:redirect)
-    assert_match(/q%5Btype%5D=none/, @response.location)
-
-    # Non-string/non-array type (e.g., hash) should redirect with "all"
-    get(:index, params: { type: { weird: "hash" } })
-    assert_response(:redirect)
-    assert_match(/q%5Btype%5D=all/, @response.location)
+    assert_response(:success)
+    assert_equal(["none"], @controller.instance_variable_get(:@types))
   end
 
   def test_type_filter_preserves_other_query_params
@@ -294,7 +291,7 @@ class RssLogsControllerTest < FunctionalTestCase
                                order_by: "created_at" } })
     assert_select("body.rss_logs__index")
     query = QueryRecord.last.query
-    assert_equal("observation", query.params[:type])
+    assert_equal(["observation"], query.params[:types])
     assert_equal("created_at", query.params[:order_by])
 
     # Now change type filter - order_by should be preserved
@@ -302,7 +299,7 @@ class RssLogsControllerTest < FunctionalTestCase
                                order_by: "created_at" } })
     assert_select("body.rss_logs__index")
     query = QueryRecord.last.query
-    assert_equal("name", query.params[:type])
+    assert_equal(["name"], query.params[:types])
     assert_equal("created_at", query.params[:order_by],
                  "order_by should be preserved when changing type filter")
   end
@@ -313,7 +310,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { q: { model: "RssLog", type: "observation" } })
     assert_select("body.rss_logs__index")
 
-    # Check that the filter links don't have duplicate q[model] or q[type]
+    # Check that the filter links don't have duplicate q[model] or q[types]
     body = @response.body
 
     # Find all href attributes containing activity_logs
@@ -321,14 +318,14 @@ class RssLogsControllerTest < FunctionalTestCase
 
     hrefs.each do |href|
       decoded = CGI.unescape(href)
-      # Count occurrences of q[model] and q[type]
+      # Count occurrences of q[model] and q[types]
       model_count = decoded.scan("q[model]").length
-      type_count = decoded.scan("q[type]").length
+      type_count = decoded.scan("q[types]").length
 
       assert_operator(model_count, :<=, 1,
                       "URL has duplicate q[model]: #{decoded}")
       assert_operator(type_count, :<=, 1,
-                      "URL has duplicate q[type]: #{decoded}")
+                      "URL has duplicate q[types]: #{decoded}")
     end
   end
 end

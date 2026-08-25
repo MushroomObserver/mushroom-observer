@@ -25,6 +25,9 @@ class Query::Observations < Query
   query_attr(:needs_naming, User)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
+  # The identify page's clade/region autocompleter -- see
+  # Observation::Scopes#identify_filter.
+  query_attr(:identify_filter, { type: :string, term: :string })
 
   query_attr(:is_collection_location, :boolean)
   query_attr(:has_public_lat_lng, :boolean)
@@ -51,7 +54,8 @@ class Query::Observations < Query
 
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
-  query_attr(:projects, [Project])
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
   query_attr(:project_lists, [Project])
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)

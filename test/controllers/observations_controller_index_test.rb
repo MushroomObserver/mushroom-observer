@@ -722,8 +722,24 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
   end
 
-  # Covers the `return unless (project = find_or_goto_index(...))`
-  # bail-out in `ObservationsController::Index#project` (L169).
+  # thumbnail_quality is this page's own default sort, not a
+  # class-wide default_order on the shared `projects` query_attr
+  # (test_observation_names_in_species_lists_and_projects proves a
+  # bare `projects:` query elsewhere still needs the class default)
+  # -- an explicit `by` must still win.
+  def test_index_project_explicit_by_respected
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { project: project.id, by: "date" })
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal("date", query.params[:order_by])
+  end
+
+  # A bad project id redirects to the projects index. See redirect_to:
+  # in query_attr (app/extensions/class.rb).
   def test_index_project_with_unknown_id_redirects
     login
     get(:index, params: { project: 999_999_999 })
@@ -783,16 +799,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not(query.params.key?(:bogus_param))
   end
 
-  # No query_attr has a record-backed param_alias declared yet (#5137
-  # is the foundation piece only) -- temporarily declares one on
-  # Query::Observations's own `projects` attr so this test exercises
-  # create_query_from_url_params's `constantize` path end-to-end, not
-  # just the lower-level resolve_param_alias_records helper. Restored
-  # in `ensure` so no other test observes the mutated attr.
+  # Query::Observations's own `projects` attr already declares a
+  # record-backed param_alias (see app/classes/query/observations.rb)
+  # -- exercises create_query_from_url_params's `constantize` path,
+  # not just the lower-level resolve_param_alias_records helper.
   def test_create_query_from_url_params_sets_always_index_for_record_alias
     login
     project = projects(:bolete_project)
-    Query::Observations.query_attr(:projects, [Project], param_alias: :project)
 
     raw_params = ActionController::Parameters.new(project: project.id.to_s)
     query, display_opts = @controller.send(
@@ -801,8 +814,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_equal([project.id], query.params[:projects])
     assert_equal(true, display_opts[:always_index])
-  ensure
-    Query::Observations.query_attr(:projects, [Project])
   end
 
   def test_resolve_param_alias_records_looks_up_record_and_wraps_array

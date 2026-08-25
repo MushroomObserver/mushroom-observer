@@ -26,94 +26,55 @@ class RssLogsController < ApplicationController
   end
 
   def unfiltered_index_opts
-    super.merge(query_args: { type: index_type_default })
+    super.merge(query_args: { types: index_type_default })
   end
 
   def index_type_default
     @user ? @user.default_rss_type : "all"
   end
 
-  # ApplicationController uses this to dispatch #index to a private method
+  # ApplicationController uses this to dispatch #index to a private method.
+  # `:type` (legacy scalar bookmarks) and `:types` (the type-filter form,
+  # or a direct `?types[]=` URL) both resolve to the same query_attr --
+  # see `Query::RssLogs`.
   def index_active_params
-    [:type, :by, :q, :id].freeze
+    [:type, :types, :by, :q, :id].freeze
   end
 
   # Show selected list, based on current Query.
   def sorted_index_opts
     super.deep_merge(
-      query_args: { type: index_type_from_params || index_type_default }
+      query_args: { types: index_type_from_params || index_type_default }
     )
   end
 
-  # Redirect old-style top-level `type` param to proper `q` param URL.
-  # This handles bookmarked URLs like /activity_logs?type=observation
+  # `:type`/`:types` are plain query_attr aliases now (see
+  # Query::RssLogs) -- no bookmark redirect needed, top-level params
+  # are a first-class URL form.
   def type
-    validated_type = validate_type_param(params[:type])
-    redirect_to(
-      activity_logs_path(q: { model: :RssLog, type: validated_type })
-    )
+    create_query_from_url_params(:RssLog, params)
   end
+  alias types type
 
-  # Validate type param (array or string) and return sanitized string
-  def validate_type_param(param)
-    if param.is_a?(Array)
-      validate_type_array(param)
-    elsif param.is_a?(String)
-      validate_type_string(param)
-    else
-      "all"
-    end
-  end
-
-  # Get the types whose value == "1"
-  # Handles:
-  # - String types from pagination/bookmarks: "observation name"
-  # - Array types from form checkboxes: ["observation", "name"]
-  # - Old-style top-level type param for backwards compatibility
+  # The types filter active in the current Query, if any, otherwise
+  # whatever the request itself supplies -- from a stored/`q`-decoded
+  # query when sorting an already-filtered index, or a fresh top-level
+  # `type`/`types` param otherwise. `Query::RssLogs`'s own validation
+  # normalizes whatever shape comes back.
   def index_type_from_params
-    types = ""
-    param = if (query = query_from_q_param)
-              # Query validated type as string; if nil, check raw q param
-              query.params[:type] || params.dig(:q, :type)
-            else
-              params[:type]
-            end
-
-    if param.is_a?(Array)
-      types = validate_type_array(param)
-    elsif param.is_a?(String)
-      types = validate_type_string(param)
+    if (query = query_from_q_param)
+      query.params[:types] || params.dig(:q, :types) ||
+        params.dig(:q, :type)
+    else
+      params[:types] || params[:type]
     end
-    types
-  end
-
-  # Validate array of types (from form checkboxes or bookmarked URLs)
-  def validate_type_array(param)
-    valid_tags = RssLog::ALL_TYPE_TAGS.map(&:to_s)
-    validated = param.map(&:to_s).select { |t| valid_tags.include?(t) }
-    return "none" if validated.empty?
-    return "all" if validated.length == valid_tags.length
-
-    validated.join(" ")
-  end
-
-  # Validate type string to ensure only valid type tags are used
-  def validate_type_string(param)
-    return param if param.in?(%w[all none])
-
-    valid_tags = RssLog::ALL_TYPE_TAGS.map(&:to_s)
-    validated = param.split.select { |t| valid_tags.include?(t) }
-    return "none" if validated.empty?
-    return "all" if validated.length == valid_tags.length
-
-    validated.join(" ")
   end
 
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
-    # store_query_in_session(query)
     update_stored_query(query) # also stores query in session
-    @types = query.params[:type].to_s.split.sort
+    tags = RssLog.normalize_type_tags(query.params[:types])
+    @types = tags.empty? ? ["none"] : tags.sort
 
     # Let the user make this their default and fine tune.
     if @user && params[:make_default] == "1"

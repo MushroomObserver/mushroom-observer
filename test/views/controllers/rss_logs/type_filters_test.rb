@@ -46,7 +46,7 @@ module Views::Controllers::RssLogs
       RssLog::ALL_TYPE_TAGS.each do |type|
         type_str = type.to_s
         # Check checkbox input exists
-        assert_html(html, "input[type='checkbox'][name='q[type][]']" \
+        assert_html(html, "input[type='checkbox'][name='q[types][]']" \
                           "[value='#{type_str}'][id='type_#{type_str}']")
         # Check label exists
         assert_html(html,
@@ -94,7 +94,7 @@ module Views::Controllers::RssLogs
       html = render_component(nil, ["observation"])
 
       # Name filter should have a link (since it's not the only selected type)
-      assert_html(html, "label a.filter-only[href*='type']",
+      assert_html(html, "label a.filter-only[href*='types']",
                   text: :rss_one_name.t)
     end
 

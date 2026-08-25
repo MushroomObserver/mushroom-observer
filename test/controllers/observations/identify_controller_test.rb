@@ -34,7 +34,7 @@ module Observations
       # get(:index, params: { q: })
       assert_equal(query.num_results, aga_obs.count)
       get(:index,
-          params: { filter: { type: :clade, term: "Agaricales" } })
+          params: { identify_filter: { type: :clade, term: "Agaricales" } })
       assert_no_flash
       assert_select(".matrix-box", aga_obs.count)
 
@@ -62,7 +62,8 @@ module Observations
       assert_equal(query.num_results, cal_obs_count)
 
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
 
@@ -85,7 +86,8 @@ module Observations
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 5)
 
@@ -105,7 +107,8 @@ module Observations
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 6)
 
@@ -114,6 +117,17 @@ module Observations
       get(:index, params: { commit: :clear.ti })
       assert_no_flash
       assert_select(".matrix-box", obs_count - 6)
+    end
+
+    # A scalar `?identify_filter=x` used to crash. FormFilter renders
+    # in every identify page's top-nav. It called
+    # `params.dig(:identify_filter, :type)` directly on the raw
+    # param. String has no `#dig` method.
+    def test_identify_index_with_scalar_identify_filter_param
+      login("mary")
+      get(:index, params: { identify_filter: "x" })
+
+      assert_response(:success)
     end
   end
 end

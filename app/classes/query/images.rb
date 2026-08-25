@@ -22,7 +22,8 @@ class Query::Images < Query
   query_attr(:observations, [Observation])
   query_attr(:locations, [Location])
   query_attr(:projects, [Project], param_alias: :project,
-                                   always_index: false)
+                                   always_index: false,
+                                   redirect_to: :model_index)
   query_attr(:species_lists, [SpeciesList])
   query_attr(:observation_query, { subquery: :Observation })
 

@@ -206,6 +206,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
 
+    # Discriminator + payload shape for the identify page's clade/region
+    # autocompleter, which submits `identify_filter[type]`/
+    # `identify_filter[term]` under one field pair (a single swappable
+    # widget, not separate clade/region inputs). Mirrors Comment#target's
+    # type-dispatched scope.
+    scope :identify_filter, lambda { |filter|
+      case filter[:type]&.to_sym
+      when :clade
+        clade(filter[:term])
+      when :region
+        region(filter[:term])
+      else
+        none
+      end
+    }
+
     # This should really be clades/clade, but changing user prefs/filters and
     # autocompleters is very involved, requires migration and script.
     scope :clade, lambda { |clades|

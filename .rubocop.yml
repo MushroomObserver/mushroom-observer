@@ -19,6 +19,7 @@ require:
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
+  - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_render_phlex_method_name
@@ -131,6 +132,14 @@ MO/NoHandRolledMethodField:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+
+MO/NoQuerySubclassMutation:
+  Description: >-
+    query_attr/attribute must not be called on a live Query/Query::*
+    class constant -- it mutates shared state for the rest of the
+    process. Use Class.new(Query::Whatever) { query_attr(...) }
+    instead -- see lib/rubocop/cop/mo/no_query_subclass_mutation.rb.
+  Enabled: true
 
 MO/NoResolvedErrorsAddType:
   Description: >-

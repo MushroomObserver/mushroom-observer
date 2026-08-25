@@ -47,11 +47,20 @@ class CollectionNumbersController < ApplicationController
 
   # Display list of CollectionNumbers for an Observation
   def observation
-    @observation = Observation.find(params[:observation])
-    query = create_query(
-      :CollectionNumber, observations: params[:observation].to_s
-    )
-    [query, { always_index: true }]
+    create_query_from_url_params(:CollectionNumber, params)
+  end
+
+  # Hook runs before template displayed. Must return query.
+  #
+  # @observation (drives the page's observation-context banner) is
+  # derived from the query itself, after its own record-lookup
+  # validation already ran -- replaces the old
+  # `Observation.find(params[:observation])`, which raised
+  # RecordNotFound (500) on a bad id instead of flashing/redirecting
+  # like every other shortcut.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@observation, query, :observations, Observation)
+    query
   end
 
   def index_display_opts(opts, _query)

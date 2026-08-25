@@ -43,49 +43,23 @@ module Observations
     end
 
     def index_active_params
-      [:filter, :q, :id].freeze
+      [:identify_filter, :q, :id].freeze
     end
 
-    # Ideally the filter form should pass the clade/region params with separate
-    # terms, so we can build the query by multiple flat params as expected.
-    # However, this form uses a single field with swapping autocompleter;
-    # the form scope is :filter and the field name is always :term.
-    # Currently params needs both a :filter[:type] and a filter[:term] to work.
-    def filter
-      return unless (type = params.dig(:filter, :type).to_sym)
-      return unless (term = params.dig(:filter, :term).strip)
-
-      case type
-      when :clade
-        clade(term)
-      when :region
-        region(term)
-        # when :user
-        #   user(term)
-      end
-    end
-
-    # Some inefficiency here comes from having to parse the name from a string.
-    # Check if the autocompleters return a name_id or location_id.
-    def clade(term)
-      # return unless (clade = Name.find_by(text_name: term))
-
-      query = create_query(:Observation, needs_naming: @user, clade: term,
+    # Dispatches to Observation.identify_filter (Observation::Scopes),
+    # which picks clade or region based on identify_filter[type] --
+    # the single swappable autocompleter submits both under one field
+    # pair, so this permits the nested hash directly rather than going
+    # through create_query_from_url_params (no alias/record lookup
+    # applies to this attr).
+    def identify_filter
+      filter = params.permit(identify_filter: [:type, :term])[:identify_filter].
+               to_h.symbolize_keys
+      query = create_query(:Observation, identify_filter: filter,
+                                         needs_naming: @user,
                                          order_by: :rss_log)
       [query, {}]
     end
-
-    def region(term)
-      query = create_query(:Observation, needs_naming: @user, region: term,
-                                         order_by: :rss_log)
-      [query, {}]
-    end
-
-    # def user_filter(term)
-    #   query = create_query(:Observation, needs_naming: @user, by_users: term,
-    #                                      order_by: :rss_log)
-    #   [query, {}]
-    # end
 
     def index_display_opts(opts, _query)
       { matrix: true, cache: true,

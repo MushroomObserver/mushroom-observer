@@ -10,14 +10,14 @@ require("test_helper")
 class ButtonStyleCheckboxTest < ComponentTestCase
   def test_renders_label_wrapping_checkbox_input
     html = render_checkbox(
-      name: "q[type][]", value: "observation", id: "type_observation"
+      name: "q[types][]", value: "observation", id: "type_observation"
     ) { "Observations" }
 
     # <label for="type_observation">
     #   <input type="checkbox" ...>Observations
     # </label>
     assert_html(html, "label[for='type_observation'] > input[type='checkbox']" \
-                      "[name='q[type][]'][value='observation']" \
+                      "[name='q[types][]'][value='observation']" \
                       "[id='type_observation']")
     assert_includes(html, "Observations")
     # No `.checkbox` div wrap — intentional (this is the filter-button
@@ -71,11 +71,11 @@ class ButtonStyleCheckboxTest < ComponentTestCase
   # — that's the whole reason this component exists separately from
   # ButtonStyleRadio. Verify the name-array shape is preserved.
   def test_multiple_instances_share_name_array_shape
-    html_a = render_checkbox(name: "q[type][]", value: "a", id: "ta")
-    html_b = render_checkbox(name: "q[type][]", value: "b", id: "tb")
+    html_a = render_checkbox(name: "q[types][]", value: "a", id: "ta")
+    html_b = render_checkbox(name: "q[types][]", value: "b", id: "tb")
 
-    assert_html(html_a, "input[name='q[type][]'][value='a']")
-    assert_html(html_b, "input[name='q[type][]'][value='b']")
+    assert_html(html_a, "input[name='q[types][]'][value='a']")
+    assert_html(html_b, "input[name='q[types][]'][value='b']")
   end
 
   private

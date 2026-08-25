@@ -79,6 +79,21 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash(:runtime_no_matches, type: :collection_number)
   end
 
+  # A bad observation id flashes and redirects to the observations
+  # index. This matches by_user-style shortcuts elsewhere, which
+  # redirect to the looked-up model's own index (see redirect_to:
+  # :model_index in Query::CollectionNumbers).
+  def test_index_observation_id_bad_id
+    bad_observation_id = Observation.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { observation: bad_observation_id })
+
+    assert_flash(:runtime_object_not_found, type: :observation,
+                                            id: bad_observation_id)
+    assert_redirected_to(observations_path)
+  end
+
   def test_index_pattern_str_matching_multiple_collection_numbers
     pattern = "Singer"
     numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)

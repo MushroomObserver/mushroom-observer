@@ -5,7 +5,6 @@ class ObservationsController
   module Index
     def index
       make_name_suggestions
-      set_project_ivar
       build_index_with_query
     end
 
@@ -179,15 +178,22 @@ class ObservationsController
     end
 
     # Display matrix of Observations attached to a given project.
+    #
+    # `by: :thumbnail_quality` is this page's default sort, not
+    # Query::Observations' class-wide one -- a bare `projects:` filter
+    # elsewhere (e.g. a raw Query.lookup) still gets the class
+    # default, so the override is threaded through the raw params
+    # here rather than a shared `default_order:` on the `projects`
+    # attr. An explicit `by` still wins.
     def project
-      return unless (
-        project = find_or_goto_index(Project, params[:project].to_s)
-      )
-
-      query = create_query(:Observation, projects: project,
-                                         order_by: "thumbnail_quality")
-      @project = project
-      [query, { always_index: true }]
+      raw_params = if params[:by].present?
+                     params
+                   else
+                     params.merge(
+                       by: :thumbnail_quality
+                     )
+                   end
+      create_query_from_url_params(:Observation, raw_params)
     end
 
     # Display matrix of Observations attached to a given species_list.
@@ -198,6 +204,7 @@ class ObservationsController
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
+      derive_ivar_from_query(:@project, query, :projects, Project)
       query
     end
 
