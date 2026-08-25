@@ -679,6 +679,22 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
   end
 
+  # thumbnail_quality is this page's own default sort, not a
+  # class-wide default_order on the shared `projects` query_attr
+  # (test_observation_names_in_species_lists_and_projects proves a
+  # bare `projects:` query elsewhere still needs the class default)
+  # -- an explicit `by` must still win.
+  def test_index_project_explicit_by_respected
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { project: project.id, by: "date" })
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal("date", query.params[:order_by])
+  end
+
   # Covers the `return unless (project = find_or_goto_index(...))`
   # bail-out in `ObservationsController::Index#project` (L169).
   def test_index_project_with_unknown_id_redirects

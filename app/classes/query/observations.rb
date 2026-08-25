@@ -50,7 +50,7 @@ class Query::Observations < Query
 
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
-  query_attr(:projects, [Project])
+  query_attr(:projects, [Project], param_alias: :project)
   query_attr(:project_lists, [Project])
   query_attr(:species_lists, [SpeciesList])
   # query_attr(:search_name, :string) # advanced search

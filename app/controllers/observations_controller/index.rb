@@ -5,7 +5,6 @@ class ObservationsController
   module Index
     def index
       make_name_suggestions
-      set_project_ivar
       build_index_with_query
     end
 
@@ -186,15 +185,22 @@ class ObservationsController
     end
 
     # Display matrix of Observations attached to a given project.
+    #
+    # `by: :thumbnail_quality` is this page's own default sort, not
+    # Query::Observations' class-wide one -- a bare `projects:` filter
+    # elsewhere (e.g. a raw Query.lookup) still gets the class
+    # default, so the override is threaded through the raw params
+    # here rather than a shared `default_order:` on the `projects`
+    # attr. An explicit `by` still wins.
     def project
-      return unless (
-        project = find_or_goto_index(Project, params[:project].to_s)
-      )
-
-      query = create_query(:Observation, projects: project,
-                                         order_by: "thumbnail_quality")
-      @project = project
-      [query, { always_index: true }]
+      raw_params = if params[:by].present?
+                     params
+                   else
+                     params.merge(
+                       by: :thumbnail_quality
+                     )
+                   end
+      create_query_from_url_params(:Observation, raw_params)
     end
 
     # Display matrix of Observations attached to a given species_list.
@@ -210,7 +216,23 @@ class ObservationsController
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
+      derive_project_ivar(query)
       query
+    end
+
+    # Derives @project (drives the project banner, "add observation to
+    # this project" buttons, and the admin-permission check in the
+    # view) from the query itself -- covers both the `project`
+    # shortcut and a bookmarked/permalinked `q[projects][]=` query the
+    # same way, one lookup, after the query (and its own record-lookup
+    # validation) already exists -- instead of a second independent
+    # lookup racing the one `project`/`create_query_from_url_params`
+    # already did.
+    def derive_project_ivar(query)
+      project_ids = query.params[:projects]
+      return unless project_ids.is_a?(Array) && project_ids.size == 1
+
+      @project = Project.safe_find(project_ids.first)
     end
 
     def index_display_opts(opts, query)
