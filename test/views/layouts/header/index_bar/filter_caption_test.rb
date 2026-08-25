@@ -176,6 +176,22 @@ module Views::Layouts
       assert_html(html, "#filters", text: :query_target.l)
     end
 
+    def test_identify_filter_grouped_param_renders_type_label
+      query = Query.lookup_and_save(
+        :Observation, identify_filter: { type: "region", term: "California" }
+      )
+
+      html = render_for(query)
+
+      # `:identify_filter` triggers `render_identify_filter_val`,
+      # which labels the value with the selected type's own
+      # query_param label (`:query_region`) instead of the generic
+      # "Identify filter: Type: region, Term: ..." nested breakdown.
+      assert_html(html, "#filters", text: :query_region.l)
+      assert_html(html, "#filters", text: "California")
+      assert_no_html(html, "#filters", text: :query_identify_filter.l)
+    end
+
     def test_subquery_wraps_nested_params_in_brackets
       query = Query.lookup_and_save(
         :Name, description_query: { by_users: users(:rolf) }

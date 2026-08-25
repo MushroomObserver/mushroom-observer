@@ -3925,6 +3925,7 @@
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
   validate_naming_user_missing: "[:validate_missing(field=:user)]"
+  validate_naming_duplicate: You have already proposed that name for this observation.
   validate_notification_user_missing: "[:validate_missing(field=:user)]"
   validate_observation_user_missing: "[:validate_missing(field=:user)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
@@ -4453,6 +4454,10 @@
   query_target: "on"
   query_type: "type"
   query_id: "id"
+
+  # identify filter
+  query_identify_filter: filter
+  query_term: term
 
   # name queries
   query_names: "[:names]"

@@ -163,17 +163,22 @@ module Views::Layouts
       span { plain(" ] ") }
     end
 
-    # Nested params on one line separated by comma. The `:target`
-    # key gets a Lookup-driven single-string val rather than nested
-    # iteration.
+    # Nested params on one line separated by comma. The `:target` key
+    # gets a Lookup-driven single-string val; `:identify_filter` gets
+    # its own type-labeled val (see `render_identify_filter_val`) --
+    # both rather than the generic nested key/val iteration.
     def render_grouped_params(label, hash, truncate:)
       compact = hash.compact_blank
       return if compact.empty?
 
-      span { plain("#{query_param_label(label)}: ") }
-      if label == :target
+      case label
+      when :target
+        span { plain("#{query_param_label(label)}: ") }
         span { plain(lookup_comment_target_val(hash).to_s) }
+      when :identify_filter
+        render_identify_filter_val(hash)
       else
+        span { plain("#{query_param_label(label)}: ") }
         render_nested_params(compact, truncate: truncate)
       end
     end
@@ -183,6 +188,18 @@ module Views::Layouts
         render_plain_param(key, val, truncate: truncate)
         span { plain(", ") } if idx < compact.size - 1
       end
+    end
+
+    # `identify_filter`'s `type` (clade/region) picks which existing
+    # query_param label describes `term`, so this reads "Region:
+    # California, USA" instead of exposing the internal type/term
+    # hash shape ("Identify filter: Type: region, Term: ...").
+    def render_identify_filter_val(hash)
+      type, term = hash.values_at(:type, :term)
+      return if type.blank? || term.blank?
+
+      span { plain("#{query_param_label(type.to_sym)}: ") }
+      b { plain(term) }
     end
 
     def render_plain_param(key, val, truncate:)
