@@ -5,7 +5,8 @@ class Query::Images < Query
   query_attr(:updated_at, [:time])
   query_attr(:date, [:date])
   query_attr(:id_in_set, [Image])
-  query_attr(:by_users, [User], param_alias: :by_user)
+  query_attr(:by_users, [User], param_alias: :by_user,
+                                always_index: false)
   query_attr(:sizes, [{ string: Image::ALL_SIZES - [:full_size] }])
   query_attr(:content_types, [{ string: Image::ALL_EXTENSIONS }])
   query_attr(:has_notes, :boolean)
@@ -20,7 +21,8 @@ class Query::Images < Query
   query_attr(:has_observations, :boolean)
   query_attr(:observations, [Observation])
   query_attr(:locations, [Location])
-  query_attr(:projects, [Project], param_alias: :project)
+  query_attr(:projects, [Project], param_alias: :project,
+                                   always_index: false)
   query_attr(:species_lists, [SpeciesList])
   query_attr(:observation_query, { subquery: :Observation })
 
