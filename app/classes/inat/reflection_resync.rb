@@ -105,16 +105,15 @@ class Inat
     # drives `where` from its own name via a callback, so assigning
     # `where` too would flip it back and forth and never converge.
     def scalar_attributes(inat_obs)
-      location = inat_obs.location
-      # specimen is intentionally not synced: iNat gives no reliable signal
-      # (Inat::Obs#specimen? is hardcoded false), and MO's specimen is set by
-      # MO-side herbarium records / collection numbers a user may add to a
-      # reflection -- syncing it could only unset a legitimate true.
-      attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
-                lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden,
-                notes: inat_obs.notes }
-      attrs[:where] = inat_obs.where if location.nil?
-      attrs
+      # Coordinates and place are NOT synced. The batch resync fetches iNat
+      # unauthenticated (Inat::ApiToken is per-user; the scheduled job runs
+      # as no user), so it sees only iNat's obscured public coordinate --
+      # mirroring that would overwrite the authenticated import's accurate
+      # coordinate with a blurred one on every gps_hidden observation. The
+      # first run degraded 1,421 reflections this way (#4215) before this
+      # was caught. specimen is likewise MO-owned (see git history). Only
+      # the observation date and the iNat snapshot notes are safe to mirror.
+      { when: inat_obs.when, notes: inat_obs.notes }
     end
   end
 end

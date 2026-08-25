@@ -34,9 +34,28 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(:synced, result.status)
     @obs.reload
     assert_equal(@fresh.when, @obs.when, "date should mirror the source")
-    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
     assert_equal(@fresh.notes, @obs.notes, "notes should mirror the source")
     assert_not_nil(@link.reload.last_synced_at, "should stamp last_synced_at")
+  end
+
+  # Coordinates and place are NOT synced: the public fetch sees only iNat's
+  # obscured coordinate, so the accurate imported one is left intact -- the
+  # source data here would move location to "Earth" but must not (#4215).
+  def test_synced_leaves_the_coordinates_and_place_intact
+    assert_not_equal(@fresh.location, @obs.location, "test needs a diff")
+    @obs.update_columns(lat: 12.3456789, lng: -98.7654321, gps_hidden: true)
+    @obs.reload
+    original = @obs.slice(:lat, :lng, :gps_hidden, :where)
+    original_location = @obs.location
+
+    resync(found: { @id => @raw })
+
+    @obs.reload
+    assert_equal(original_location, @obs.location, "location left intact")
+    assert_equal(original["lat"], @obs.lat, "lat left intact")
+    assert_equal(original["lng"], @obs.lng, "lng left intact")
+    assert_equal(original["gps_hidden"], @obs.gps_hidden, "gps_hidden intact")
+    assert_equal(original["where"], @obs.where, "where left intact")
   end
 
   # specimen is MO-side (herbarium records / collection numbers a user may
