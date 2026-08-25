@@ -50,6 +50,19 @@ class QueryTest < UnitTestCase
     assert_equal(0, query3.record.access_count)
   end
 
+  # Regression test for #5188: an emoji in a query param crashed
+  # Query.lookup because QueryRecord#description was utf8mb3.
+  def test_lookup_and_save_with_emoji
+    query = Query.lookup_and_save(:Image, pattern: "🍄")
+    assert_not(query.record.new_record?,
+               "Query with an emoji param should save its QueryRecord")
+
+    found = Query.lookup(:Image, pattern: "🍄")
+    assert_equal(query.record.id, found.record.id,
+                 "Re-looking-up the same emoji pattern should find the " \
+                 "same QueryRecord instead of erroring or duplicating it")
+  end
+
   def assert_validation_errors(query)
     assert_false(query.valid)
     assert_not_empty(query.validation_errors)
