@@ -67,6 +67,7 @@ require_relative("../config/environment")
 require("rails/test_help")
 
 %w[
+  no_test_console_noise
   bullet_helper
 
   general_extensions
