@@ -216,12 +216,15 @@ MO/NoRenderPhlexMethodName:
 
 MO/PreferKitSyntax:
   Description: >-
-    Phlex views/components should call Foo(...) (Kit syntax) rather
-    than render(Components::Foo.new(...)) for a single-level
-    Components class -- see lib/rubocop/cop/mo/prefer_kit_syntax.rb.
+    Phlex views should call Foo(...) (Kit syntax) rather than
+    render(Components::Foo.new(...)) for a single-level Components
+    class -- see lib/rubocop/cop/mo/prefer_kit_syntax.rb. Scoped to
+    app/views only, not app/components -- component-to-component
+    render calls inside app/components have legitimate complexity
+    (self-dispatch, mixins included at varying depth) not worth
+    policing there.
   Enabled: true
   Include:
-    - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
 MO/RedundantRenderViewInvalid:
