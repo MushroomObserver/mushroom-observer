@@ -251,6 +251,21 @@ class Naming < AbstractModel
     result
   end
 
+  # Fold another naming for the same observation and user into this one and
+  # destroy it: per voter keep the higher vote value (favorite OR'd), and
+  # merge in the other's reasons (identical text once, differing text
+  # concatenated as separate sentences). Used when a name merge would
+  # otherwise leave a user with two namings of the same name on one
+  # observation (#5186). Callers set current_user on both.
+  def absorb(other)
+    Naming.transaction do
+      fold_votes_from(other)
+      self.reasons = merged_reasons_with(other)
+      other.destroy!
+      save!
+    end
+  end
+
   def init_reasons(args = nil)
     result = {}
     reasons_array.each do |reason|
@@ -391,5 +406,39 @@ class Naming < AbstractModel
     errors.add(:name, :validate_naming_name_missing) unless name
     errors.add(:user, :validate_naming_user_missing) if !user_id &&
                                                         !@current_user
+  end
+
+  private
+
+  # Move the other naming's votes onto this one, keeping the higher value
+  # per voter (favorite OR'd). A voter this naming already has keeps its
+  # own row updated; the rest are re-pointed. The other's leftover votes go
+  # when it is destroyed.
+  def fold_votes_from(other)
+    Vote.where(naming_id: other.id).find_each do |their_vote|
+      mine = Vote.find_by(naming_id: id, user_id: their_vote.user_id)
+      if mine
+        mine.update!(value: [mine.value, their_vote.value].max,
+                     favorite: mine.favorite || their_vote.favorite)
+      else
+        their_vote.update!(naming_id: id)
+      end
+    end
+  end
+
+  def merged_reasons_with(other)
+    merged = (reasons || {}).dup
+    (other.reasons || {}).each do |num, notes|
+      merged[num] = combined_reason_notes(merged[num], notes)
+    end
+    merged
+  end
+
+  def combined_reason_notes(mine, theirs)
+    texts = [mine, theirs].map { |t| t.to_s.strip }.compact_blank.uniq
+    return "" if texts.empty?
+    return texts.first if texts.one?
+
+    "#{texts.map { |t| t.sub(/\s*\.\s*\z/, "") }.join(". ")}."
   end
 end
