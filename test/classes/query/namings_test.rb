@@ -47,4 +47,12 @@ class Query::NamingsTest < UnitTestCase
     assert_query_scope([naming.id], scope, :Naming,
                        confidence: naming.vote_cache.to_s)
   end
+
+  def test_naming_alphabetical_by
+    query = Query.lookup(:Naming)
+    attribute = query.alphabetical_by
+
+    assert_equal("sort_name", attribute.name)
+    assert_equal(Name.table_name, attribute.relation.name)
+  end
 end

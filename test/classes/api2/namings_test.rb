@@ -22,6 +22,13 @@ class API2::NamingsTest < UnitTestCase
     assert_api_results([naming])
   end
 
+  def test_getting_namings_detail_high
+    naming = namings(:coprinus_comatus_naming)
+    assert_api_pass(params_get(id: naming.id, detail: :high))
+    assert_equal(1, @api.results.length)
+    assert_equal(naming.id, @api.results.first.id)
+  end
+
   def test_getting_namings_by_observation
     obs = observations(:coprinus_comatus_obs)
     assert_not_empty(obs.namings)
