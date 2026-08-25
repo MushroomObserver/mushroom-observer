@@ -23,21 +23,26 @@ module NoTestConsoleNoise
   ENFORCE = false
 
   def run
+    # rubocop:disable Style/GlobalStdStream -- this hook redirects the
+    # process's STDOUT/STDERR file descriptors, not the reassignable
+    # $stdout/$stderr globals (see the class comment) -- autocorrecting
+    # these to $stdout/$stderr defeats the point.
     out_tempfile = Tempfile.new("test_stdout")
     err_tempfile = Tempfile.new("test_stderr")
-    original_stdout = $stdout.dup
-    original_stderr = $stderr.dup
+    original_stdout = STDOUT.dup
+    original_stderr = STDERR.dup
     result = nil
     begin
-      $stdout.reopen(out_tempfile)
-      $stderr.reopen(err_tempfile)
+      STDOUT.reopen(out_tempfile)
+      STDERR.reopen(err_tempfile)
       result = super
     ensure
-      $stdout.reopen(original_stdout)
-      $stderr.reopen(original_stderr)
+      STDOUT.reopen(original_stdout)
+      STDERR.reopen(original_stderr)
       original_stdout.close
       original_stderr.close
     end
+    # rubocop:enable Style/GlobalStdStream
 
     leaked = read_and_close(out_tempfile) + read_and_close(err_tempfile)
     record_leak(leaked) if leaked.present?
