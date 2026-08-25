@@ -23,6 +23,7 @@ require:
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
   - ./lib/rubocop/cop/mo/no_render_phlex_method_name
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
+  - ./lib/rubocop/cop/mo/no_uncaptured_test_logging
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
   - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
@@ -213,6 +214,18 @@ MO/NoRenderPhlexMethodName:
   Enabled: true
   Include:
     - "app/controllers/**/*.rb"
+
+MO/NoUncapturedTestLogging:
+  Description: >-
+    A test method that deliberately triggers a failure (a literal
+    raise/fail inside a .stub(...) block or define_singleton_method)
+    must also stub/capture the resulting warn/Rails.logger.error/
+    Rails.logger.warn call, or it prints to the test suite's console
+    looking like a failure elsewhere -- see
+    lib/rubocop/cop/mo/no_uncaptured_test_logging.rb.
+  Enabled: true
+  Include:
+    - "test/**/*.rb"
 
 MO/PreferKitSyntax:
   Description: >-

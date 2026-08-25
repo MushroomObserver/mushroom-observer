@@ -184,7 +184,16 @@ class InatMoObservationBuilderTest < UnitTestCase
   def test_override_name_falls_back_when_resolution_raises
     builder = builder_for(name_override: "Boletus edulis")
     builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
-    assert_nil(builder.send(:override_name))
+
+    # Capture the rescue's Rails.logger.warn call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" otherwise dumps into the suite's console output looking
+    # like a failure elsewhere.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      assert_nil(builder.send(:override_name))
+    end
+    assert_includes(logged, "boom")
   end
 
   # No override field => no override name.
