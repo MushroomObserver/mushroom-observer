@@ -180,7 +180,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_response(:redirect)
-    assert_redirected_to(species_lists_path)
+    assert_redirected_to(users_path)
     assert_displayed_title("")
     assert_flash(:runtime_object_not_found, type: :user, id: user.id)
   end
