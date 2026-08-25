@@ -258,6 +258,26 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_page_title(:projects.ti)
   end
 
+  def test_index_member_single_match_redirects
+    project = projects(:lone_wolf_project)
+    assert(Project.members(lone_wolf.id).one?)
+
+    login
+    get(:index, params: { member: lone_wolf.id })
+
+    assert_redirected_to(project_path(project.id))
+  end
+
+  def test_index_member_bad_id_redirects_to_projects_index
+    login
+    bogus_id = User.maximum(:id).to_i + 1000
+
+    get(:index, params: { member: bogus_id })
+
+    assert_flash_error
+    assert_redirected_to(projects_path)
+  end
+
   def test_index_pattern_search_multiple_hits
     pattern = "Project"
 

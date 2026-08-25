@@ -301,6 +301,19 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  # nonpersonal defaults to code_then_name (Query::Herbaria's
+  # default_order: for this attr), but this page has its own sorter
+  # (see index_sort_options) -- an explicit `by` must win, not get
+  # silently overridden by the default.
+  def test_index_nonpersonal_explicit_by_respected
+    login
+    get(:index, params: { nonpersonal: true, by: "name" })
+
+    assert_page_title(:herbaria.ti)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal("name", query.params[:order_by])
+  end
+
   def test_index_pattern_text_personal
     pattern = "Personal Herbarium"
 
@@ -419,14 +432,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
-
-  # NOTE: `create` and `update`'s `unless @herbarium.save` branches
-  # (`flash_object_errors` + `reload_form`) require forcing
-  # `Herbarium#save` to return false on the controller-built instance
-  # AFTER `validate_herbarium!` returns true. MO doesn't pull in Mocha
-  # (no `any_instance` stubbing). Left uncovered intentionally —
-  # defensive against DB-level failures past Rails validations. See
-  # `observations/namings_controller_test.rb` for the same pattern.
 
   def test_create
     email_count = ActionMailer::Base.deliveries.count
@@ -677,6 +682,26 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_unprocessable # Back to the form, not a redirect
   end
 
+  # `create`'s `unless @herbarium.save` branch (`flash_object_errors`
+  # + `reload_form(:new)`) guards against a save failure past
+  # `validate_herbarium!`'s own checks -- force it by redefining
+  # `#save` on the class for the scope of this test (no Mocha in this
+  # repo; same technique as
+  # observations/namings_controller_test.rb's
+  # test_destroy_naming_failure_flashes_error).
+  def test_create_save_returns_false_reloads_form
+    herbarium_count = Herbarium.count
+    login("katrina")
+
+    Herbarium.define_method(:save) { false }
+    post(:create, params: { herbarium: create_params })
+
+    assert_equal(herbarium_count, Herbarium.count)
+    assert_unprocessable
+  ensure
+    Herbarium.remove_method(:save)
+  end
+
   def test_create_second_personal_herbarium_by_admin
     params = herbarium_params.merge(
       name: "My Herbarium",
@@ -743,6 +768,28 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("All\nNew\nLocation", nybg.mailing_address)
     assert_equal("And  more  stuff.", nybg.description)
     assert_nil(nybg.personal_user)
+  end
+
+  # `update`'s `unless @herbarium.save` branch (`flash_object_errors`
+  # + `reload_form(:edit)`) guards against a save failure past
+  # `validate_herbarium!`'s own checks -- force it by redefining
+  # `#save` on the class for the scope of this test (no Mocha in this
+  # repo; same technique as
+  # observations/namings_controller_test.rb's
+  # test_destroy_naming_failure_flashes_error).
+  def test_update_save_returns_false_reloads_form
+    last_update = nybg.updated_at
+    login("rolf")
+
+    Herbarium.define_method(:save) { false }
+    patch(:update, params: { herbarium: herbarium_params.merge(
+      name: "New Name"
+    ), id: nybg.id })
+
+    assert_equal(last_update, nybg.reload.updated_at)
+    assert_unprocessable
+  ensure
+    Herbarium.remove_method(:save)
   end
 
   # Modal submissions (herbarium[modal]="true") should reload the

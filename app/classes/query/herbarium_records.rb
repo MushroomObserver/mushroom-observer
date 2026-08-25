@@ -11,7 +11,7 @@ class Query::HerbariumRecords < Query
   query_attr(:initial_det_has, :string)
   query_attr(:accession, [:string])
   query_attr(:accession_has, :string)
-  query_attr(:herbaria, [Herbarium])
+  query_attr(:herbaria, [Herbarium], param_alias: :herbarium)
   query_attr(:observations, [Herbarium])
   query_attr(:pattern, :string)
 

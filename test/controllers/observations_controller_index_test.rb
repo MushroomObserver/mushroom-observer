@@ -164,6 +164,27 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                                               order_by: by)
   end
 
+  # A distinct, lower-level check from the one above: `by:` alone goes
+  # through `order_by_or_flash_if_unknown` (sorted_index's own
+  # pre-check), which stops a bad value from reaching the Query. A
+  # subaction that forwards raw params straight into
+  # `create_query_from_url_params` (e.g. `by_user`) skips that
+  # pre-check, so an invalid `by:` alongside it reaches
+  # `Query#validate_order_by!` instead -- caught there, substituted
+  # with the default, and surfaced via
+  # `ApplicationController::Indexes#flash_query_validation_errors`,
+  # a different flash message than `:runtime_invalid_sort_order`.
+  def test_index_by_user_with_invalid_order_flashes_query_validation
+    login
+    get(:index, params: { by_user: rolf.id, by: "totally_bogus_order" })
+
+    assert_flash_warning(
+      :query_validation_order_by_unsupported,
+      models: "Observations", key: "totally_bogus_order",
+      model: Observation, base: "totally_bogus_order"
+    )
+  end
+
   def test_index_with_id
     obs = observations(:agaricus_campestris_obs)
 
@@ -475,6 +496,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Do not show Observer ID when nobody logged in")
   end
 
+  def test_index_user_single_match_redirects
+    user = lone_wolf
+    obs = Observation.where(user: user).first
+    assert(Observation.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url)
+  end
+
   def test_index_user_unknown_user
     user = observations(:minimal_unknown_obs)
 
@@ -496,6 +528,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters(
       "#{:query_within_locations.l}: #{location.display_name}"
     )
+  end
+
+  def test_index_location_single_match_redirects
+    location = locations(:collection_location)
+    obs = Observation.within_locations(location).first
+    assert(Observation.within_locations(location).one?)
+
+    login
+    get(:index, params: { location: location.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url)
   end
 
   def test_index_location_without_observations
@@ -807,18 +850,21 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(false, record_backed)
   end
 
-  # `find_or_goto_index`'s own flash+redirect-on-bad-id behavior is
-  # already covered by test_index_project_with_unknown_id_redirects
-  # (a dispatched request through the existing `project` shortcut) --
-  # this test isolates what resolve_param_alias_records itself does
-  # with a not-found result, stubbing find_or_goto_index so a bare
+  # find_alias_record_or_goto_own_index's own flash+redirect-on-bad-id
+  # behavior is already covered by
+  # test_index_project_with_unknown_id_redirects (a dispatched request
+  # through the existing `project` shortcut) -- this test isolates
+  # what resolve_param_alias_records itself does with a not-found
+  # result, stubbing find_alias_record_or_goto_own_index so a bare
   # @controller.send doesn't trip Rails' one-redirect-per-action guard.
   def test_resolve_param_alias_records_returns_nil_when_lookup_fails
     login
     klass = Class.new(Query::Observations) do
       query_attr(:projects, [Project], param_alias: :project)
     end
-    @controller.define_singleton_method(:find_or_goto_index) { |*| nil }
+    @controller.define_singleton_method(
+      :find_alias_record_or_goto_own_index
+    ) { |*| nil }
 
     resolved, record_backed = @controller.send(
       :resolve_param_alias_records, klass,

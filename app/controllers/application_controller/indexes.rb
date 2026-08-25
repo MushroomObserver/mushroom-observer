@@ -556,26 +556,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     nil
   end
 
-  # Like find_or_goto_index, but allows redirect to a different index
-  def find_obj_or_goto_index(model:, obj_id:, index_path:)
-    model.safe_find(obj_id) ||
-      flash_obj_not_found_and_goto_index(
-        model: model, obj_id: obj_id, index_path: index_path
-      )
-  end
-
-  private ##########
-
-  def flash_obj_not_found_and_goto_index(model:, obj_id:, index_path:)
-    flash_error(
-      :runtime_object_not_found.t(id: obj_id, type: model.type_tag)
-    )
-    redirect_with_query(index_path)
-    nil
-  end
-
-  public ##########
-
   # Initialize PaginationData object for pagination by letter.
   # This now does very little thanks to the new Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
