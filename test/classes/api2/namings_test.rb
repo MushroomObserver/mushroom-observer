@@ -107,6 +107,25 @@ class API2::NamingsTest < UnitTestCase
     assert_api_pass(params_patch(id: naming.id, set_name: new_name.id))
     naming.reload
     assert_names_equal(new_name, naming.name)
+
+    # naming.current_user must be threaded into the update so this log
+    # entry is attributed to the editor, not ":unknown".
+    assert_match(
+      /log_naming_updated.*user #{naming.user.login}/,
+      naming.observation.reload.rss_log.notes,
+      "RSS log entry should attribute the update to the editor"
+    )
+  end
+
+  def test_updating_namings_reasons_only
+    naming = namings(:agaricus_campestros_naming) # rolf, no votes yet
+    @api_key.update!(user: naming.user)
+    @reasons = { 1 => "Recognized it", 2 => nil, 3 => nil, 4 => nil }
+    params = params_patch(id: naming.id, set_reason_1: @reasons[1])
+
+    assert_api_pass(params)
+    assert_names_equal(names(:agaricus_campestros), naming.reload.name)
+    assert_last_reasons_correct(naming)
   end
 
   def test_updating_namings_wrong_user

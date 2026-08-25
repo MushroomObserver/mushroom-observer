@@ -97,6 +97,7 @@ class API2
       consensus = ::Observation::NamingConsensus.new(naming.observation)
       raise(NamingLocked.new(naming)) unless consensus.editable?(naming)
 
+      naming.current_user = @user
       consensus.clean_votes(naming, new_name, @user) if new_name
       apply_reasons!(naming)
       new_name ? naming.update_object(new_name, true) : naming.save!
