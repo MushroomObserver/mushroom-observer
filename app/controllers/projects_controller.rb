@@ -49,14 +49,7 @@ class ProjectsController < ApplicationController
 
   # Display list of projects with a given member, sorted by date.
   def member
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:member].to_s,
-      index_path: projects_path
-    )
-    return unless user
-
-    query = create_query(:Project, members: user)
-    [query, {}]
+    create_query_from_url_params(:Project, params)
   end
 
   def index_display_opts(opts, _query)

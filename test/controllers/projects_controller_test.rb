@@ -258,6 +258,19 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_page_title(:projects.ti)
   end
 
+  # create_query_from_url_params redirects a bad aliased id to the
+  # aliased model's own index, not back to this controller's -- an
+  # ?member=<bad id> here lands on /users, not back on /projects.
+  def test_index_member_bad_id_redirects_to_users_index
+    login
+    bogus_id = User.maximum(:id).to_i + 1000
+
+    get(:index, params: { member: bogus_id })
+
+    assert_flash_error
+    assert_redirected_to(users_path)
+  end
+
   def test_index_pattern_search_multiple_hits
     pattern = "Project"
 
