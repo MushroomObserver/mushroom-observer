@@ -76,14 +76,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   # Display list of user's species_lists, sorted by date.
   def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: species_lists_path
-    )
-    return unless user
-
-    query = create_query(:SpeciesList, by_users: user, order_by: :date)
-    [query, {}]
+    create_query_from_url_params(:SpeciesList, params)
   end
 
   # Display list of SpeciesList's attached to a given project.

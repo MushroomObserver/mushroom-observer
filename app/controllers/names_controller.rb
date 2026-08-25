@@ -71,8 +71,7 @@ class NamesController < ApplicationController
   # rubocop:disable Naming/PredicatePrefix
   # Display list of names that have observations.
   def has_observations
-    query = create_query(:Name, has_observations: 1)
-    [query, {}]
+    create_query_from_url_params(:Name, params)
   end
 
   # Display list of names with descriptions that have authors.
@@ -93,26 +92,12 @@ class NamesController < ApplicationController
 
   # Display list of names that a given user is author on.
   def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: names_path
-    )
-    return unless user
-
-    query = create_query(:Name, by_users: user)
-    [query, {}]
+    create_query_from_url_params(:Name, params)
   end
 
   # Display list of names that a given user is editor on.
   def by_editor
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_editor].to_s,
-      index_path: names_path
-    )
-    return unless user
-
-    query = create_query(:Name, by_editor: user)
-    [query, {}]
+    create_query_from_url_params(:Name, params)
   end
 
   # Hook runs before template displayed. Must return query.

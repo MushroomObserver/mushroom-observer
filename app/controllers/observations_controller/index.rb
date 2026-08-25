@@ -159,20 +159,12 @@ class ObservationsController
 
     # Displays matrix of User's Observations, by date.
     def by_user
-      return unless (user = find_or_goto_index(User, params[:by_user]))
-
-      query = create_query(:Observation, by_users: user)
-      [query, {}]
+      create_query_from_url_params(:Observation, params)
     end
 
     # Displays matrix of Observations at a Location, by date.
     def location
-      return unless (
-        location = find_or_goto_index(Location, params[:location].to_s)
-      )
-
-      query = create_query(:Observation, within_locations: location)
-      [query, {}]
+      create_query_from_url_params(:Observation, params)
     end
 
     # Display matrix of Observations whose "where" matches a string.
@@ -180,8 +172,9 @@ class ObservationsController
     # AbstractModel's scope `search_where`, which searches two tables
     # (obs and loc) for the fuzzy match.
     def where
-      where = params[:where].to_s
-      query = create_query(:Observation, search_where: where)
+      query, = create_query_from_url_params(:Observation, params)
+      return unless query
+
       [query, { always_index: true }]
     end
 
@@ -199,12 +192,7 @@ class ObservationsController
 
     # Display matrix of Observations attached to a given species_list.
     def species_list
-      return unless (
-        spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
-      )
-
-      query = create_query(:Observation, species_lists: spl)
-      [query, { always_index: true }]
+      create_query_from_url_params(:Observation, params)
     end
 
     # Hook runs before template displayed. Must return query.

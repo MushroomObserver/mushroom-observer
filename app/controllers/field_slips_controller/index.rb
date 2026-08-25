@@ -40,10 +40,7 @@ module FieldSlipsController::Index
 
   # Displays list of User's FieldSlips, by date.
   def by_user
-    return unless (user = find_or_goto_index(User, params[:by_user]))
-
-    query = create_query(:FieldSlip, by_users: user)
-    [query, {}]
+    create_query_from_url_params(:FieldSlip, params)
   end
 
   # `show_index_of_objects` consumes `:include` as an array of

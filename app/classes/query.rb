@@ -392,13 +392,29 @@ class Query
     attribute_types.each do |attr, type|
       case type.accepts
       when Array then containers[attr] = []
-      when Hash then containers[attr] = {}
+      when Hash
+        if enum_hash?(type.accepts)
+          scalars << attr
+        else
+          containers[attr] = {}
+        end
       else scalars << attr
       end
     end
     scalars + param_aliases.keys + [containers]
   end
   delegate :permit_filters, to: :class
+
+  # A Hash-shaped `accepts` is either an "enum" (its declared values
+  # are a list of allowed scalars, e.g. `{ boolean: [true] }`) -- the
+  # URL param is a bare scalar, not a nested hash -- or a structural
+  # hash (`{ subquery: :Model }`, or named sub-fields) that needs
+  # `attr: {}` permit syntax. Mirrors
+  # Query::Modules::Validation#validate_hash_param's own
+  # classification.
+  def self.enum_hash?(accepts)
+    [:string, :boolean].include?(accepts.keys.first)
+  end
 
   # Resolves any `param_alias:`-registered param key present in `params`
   # (e.g. `project: 123`, the URL shortcut) into its target query_attr

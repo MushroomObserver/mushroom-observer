@@ -10,8 +10,14 @@ class Query::Names < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Name])
-  query_attr(:by_users, [User])
-  query_attr(:by_editor, User)
+  # always_index: false on both -- a single matching name auto-redirects
+  # straight to it rather than showing a one-row index (tested,
+  # deliberate: see test_index_by_user_who_created_one_name/
+  # test_index_by_editor_of_one_name).
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
+  # param_alias: matches its own attr name here -- not a rename, just
+  # opts this into create_query_from_url_params's record-lookup path.
+  query_attr(:by_editor, User, param_alias: :by_editor, always_index: false)
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
                        include_subtaxa: :boolean,

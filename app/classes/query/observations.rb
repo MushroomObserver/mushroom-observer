@@ -10,7 +10,9 @@ class Query::Observations < Query
   query_attr(:updated_at, [:time])
   query_attr(:date, [:date])
   query_attr(:id_in_set, [Observation])
-  query_attr(:by_users, [User])
+  query_attr(:by_users, [User], param_alias: :by_user,
+                                redirect_to: :model_index,
+                                always_index: false)
   query_attr(:has_name, :boolean)
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
@@ -30,7 +32,9 @@ class Query::Observations < Query
                         east: :float, west: :float })
   query_attr(:location_undefined, { boolean: [true] })
   query_attr(:locations, [Location])
-  query_attr(:within_locations, [Location])
+  query_attr(:within_locations, [Location], param_alias: :location,
+                                            redirect_to: :model_index,
+                                            always_index: false)
   # query_attr(:region, :string) # content filter
 
   query_attr(:has_notes, :boolean)
@@ -49,7 +53,8 @@ class Query::Observations < Query
   query_attr(:herbarium_records, [HerbariumRecord])
   query_attr(:projects, [Project])
   query_attr(:project_lists, [Project])
-  query_attr(:species_lists, [SpeciesList])
+  query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
+                                            redirect_to: :model_index)
   # query_attr(:search_name, :string) # advanced search
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
@@ -69,6 +74,10 @@ class Query::Observations < Query
   extra_parameter_declarations.each do |param_name, accepts|
     query_attr(param_name, accepts)
   end
+
+  # ObservationsController::Index's `where` shortcut aliases to this
+  # attr -- redeclared (after the loop above) with the alias.
+  query_attr(:search_where, :string, param_alias: :where)
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s

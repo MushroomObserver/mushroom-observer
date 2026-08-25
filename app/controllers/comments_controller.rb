@@ -58,27 +58,13 @@ class CommentsController < ApplicationController
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
   def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: comments_path
-    )
-    return unless user
-
-    query = create_query(:Comment, by_users: user)
-    [query, {}]
+    create_query_from_url_params(:Comment, params)
   end
 
   # Shows comments for a given user's Observations, most recent first.
   # (Linked from show_user.)
   def for_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:for_user].to_s,
-      index_path: comments_path
-    )
-    return unless user
-
-    query = create_query(:Comment, for_user: user)
-    [query, {}]
+    create_query_from_url_params(:Comment, params)
   end
 
   # Shows comments for a given object, most recent first. (Linked from the

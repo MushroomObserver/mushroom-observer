@@ -22,6 +22,16 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Companion to the `name` case above -- exercises
+  # `Query::Images#alphabetical_by`'s `"user"`/`"reverse_user"` branch
+  # (`User[:login]`), not just `"name"`/`"reverse_name"`.
+  def test_index_sort_by_user_enables_letter_pagination
+    login
+    get(:index, params: { by: "user" })
+
+    assert_response(:success)
+  end
+
   def test_index_by_user
     user = rolf
 
@@ -32,6 +42,17 @@ class ImagesControllerTest < FunctionalTestCase
     assert_select(".matrix-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
+  end
+
+  def test_index_by_user_single_match_redirects
+    user = katrina
+    image = Image.where(user: user).first
+    assert(Image.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(image_path(image.id))
   end
 
   def test_index_by_users_bad_user_id
@@ -53,6 +74,17 @@ class ImagesControllerTest < FunctionalTestCase
     assert_select(".matrix-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
+  end
+
+  def test_index_project_single_match_redirects
+    project = projects(:lone_wolf_project)
+    image = Image.projects(project.id).first
+    assert(Image.projects(project.id).one?)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_redirected_to(image_path(image.id))
   end
 
   def test_index_too_many_pages
