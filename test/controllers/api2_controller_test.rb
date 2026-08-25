@@ -566,7 +566,7 @@ class API2ControllerTest < FunctionalTestCase
   # Prove user can add a Naming to someone else's Observation
   def test_post_naming
     obs = observations(:coprinus_comatus_obs)
-    name = names(:boletus_edulis) # mary hasn't proposed this on obs yet
+    name = names(:agaricus_campestris)
     params = {
       observation: obs.id,
       api_key: api_keys(:marys_api_key).key,
