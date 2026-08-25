@@ -26,10 +26,9 @@ class Class
   #
   # `redirect_to:` (default `:own_index`) picks where a record-backed
   # `param_alias:` sends the user when the id doesn't resolve.
-  # `:own_index` redirects back to the calling controller's own index
-  # (matches every hand-written shortcut built on `find_obj_or_goto_index`).
+  # `:own_index` redirects back to the calling controller's own index.
   # `:model_index` redirects to the *looked-up* model's own index instead
-  # (matches shortcuts built on the older `find_or_goto_index` -- e.g.
+  # (matches shortcuts built on `find_or_goto_index` -- e.g.
   # `ObservationsController::Index#by_user` sending a bad id to `/users`).
   def query_attr(attr, accepts, **)
     attribute(attr, :query_param, accepts:, **)

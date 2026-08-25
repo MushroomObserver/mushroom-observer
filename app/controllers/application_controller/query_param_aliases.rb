@@ -15,12 +15,12 @@ module ApplicationController::QueryParamAliases
   # allowlist.
   #
   # A param_alias'd id that doesn't resolve to an existing record flashes
-  # and redirects -- to the calling controller's own index by default
-  # (matching `find_obj_or_goto_index`), or to the looked-up model's own
-  # index when the attr declares `redirect_to: :model_index` (matching
-  # `find_or_goto_index`) -- see `resolve_record_backed_alias`. Returns
-  # nil in that case, so check the return value the same way you would
-  # any other index-redirecting lookup.
+  # and redirects -- to the calling controller's own index by default,
+  # or to the looked-up model's own index when the attr declares
+  # `redirect_to: :model_index` (matching `find_or_goto_index`) -- see
+  # `resolve_record_backed_alias`. Returns nil in that case, so check
+  # the return value the same way you would any other
+  # index-redirecting lookup.
   #
   # `always_index: true` is set automatically whenever a record-backed
   # param_alias resolved a param (e.g. `project`, not the scalar `by`
@@ -112,8 +112,7 @@ module ApplicationController::QueryParamAliases
   # Like `find_or_goto_index` (ApplicationController::Indexes), but
   # redirects back to the calling controller's own index action instead
   # of the looked-up model's -- a bad `?by_user=<id>` on `/species_lists`
-  # redirects back to `/species_lists`, not to `/users`, matching every
-  # hand-written shortcut's `find_obj_or_goto_index` behavior. Omitting
+  # redirects back to `/species_lists`, not to `/users`. Omitting
   # `controller:` keeps `redirect_with_query` within whichever
   # controller/namespace is handling this request.
   def find_alias_record_or_goto_own_index(model_class, id)
