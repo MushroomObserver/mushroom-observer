@@ -253,7 +253,7 @@ module ObservationsController::New
   # user pressed "Add" on can override the slip's own project.
   def add_field_slip_project(code)
     project = Project.safe_find(params[:project]) ||
-              FieldSlip.find_by(code: code.to_s.upcase)&.project
+              FieldSlip.find_by(code: code.to_s.strip.upcase)&.project
     return unless project&.current? || project&.admin?(@user)
     return unless project&.member?(@user)
 
