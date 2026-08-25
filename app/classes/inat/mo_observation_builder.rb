@@ -276,13 +276,13 @@ class Inat
       # a duplicate -- a re-import (or a re-run of this builder) otherwise
       # left the observation with identical namings (#5186).
       naming = @observation.namings.find_by(user: namer, name: name) ||
-               Naming.create(
+               Naming.create!(
                  observation: @observation, user: namer, name: name,
                  reasons: { 2 => used_references_explanation(name) }
                )
 
       vote = Vote.find_or_initialize_by(naming: naming, user: user)
-      vote.update(observation: @observation, value: value)
+      vote.update!(observation: @observation, value: value)
       # An ObservationView is needed even though noone has viewed this obs.
       ObservationView.find_or_create_by(observation: @observation,
                                         user: user) do |view|

@@ -415,9 +415,9 @@ class Naming < AbstractModel
   # own row updated; the rest are re-pointed. The other's leftover votes go
   # when it is destroyed.
   def fold_votes_from(other)
+    mine_by_user = Vote.where(naming_id: id).index_by(&:user_id)
     Vote.where(naming_id: other.id).find_each do |their_vote|
-      mine = Vote.find_by(naming_id: id, user_id: their_vote.user_id)
-      if mine
+      if (mine = mine_by_user[their_vote.user_id])
         mine.update!(value: [mine.value, their_vote.value].max,
                      favorite: mine.favorite || their_vote.favorite)
       else
