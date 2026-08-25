@@ -184,7 +184,16 @@ class InatMoObservationBuilderTest < UnitTestCase
   def test_override_name_falls_back_when_resolution_raises
     builder = builder_for(name_override: "Boletus edulis")
     builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
-    assert_nil(builder.send(:override_name))
+
+    # Capture the rescue's Rails.logger.warn call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" otherwise dumps into the suite's console output looking
+    # like a failure elsewhere.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      assert_nil(builder.send(:override_name))
+    end
+    assert_includes(logged, "boom")
   end
 
   # No override field => no override name.
@@ -300,6 +309,11 @@ class InatMoObservationBuilderTest < UnitTestCase
     call_count = 0
     builder = builder_for
     builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
+    # Capture the retry backoff's warn() instead of letting it print --
+    # bare Kernel#warn isn't Rails.logger, so config.log_level doesn't
+    # filter it, and it dumps straight into the test suite's console.
+    warnings = []
+    builder.define_singleton_method(:warn) { |msg| warnings << msg }
 
     API2.stub(:execute, lambda { |_params|
       call_count += 1
@@ -313,6 +327,8 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_equal(3, call_count,
                  "Should retry an image download failure, succeed on the " \
                  "third attempt")
+    assert_equal(2, warnings.size,
+                 "Should warn once per retry, not on the final success")
   end
 
   def test_upload_inat_image_raises_after_exhausting_retries
@@ -320,6 +336,11 @@ class InatMoObservationBuilderTest < UnitTestCase
     call_count = 0
     builder = builder_for
     builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
+    # Capture the retry backoff's warn() instead of letting it print --
+    # bare Kernel#warn isn't Rails.logger, so config.log_level doesn't
+    # filter it, and it dumps straight into the test suite's console.
+    warnings = []
+    builder.define_singleton_method(:warn) { |msg| warnings << msg }
 
     API2.stub(:execute, lambda { |_params|
       call_count += 1
@@ -332,6 +353,9 @@ class InatMoObservationBuilderTest < UnitTestCase
                    "Error should identify the failing iNat photo")
     end
 
+    assert_equal(Inat::MoObservationBuilder::ImageHandling::
+                 MAX_UPLOAD_RETRIES, warnings.size,
+                 "Should warn once per retry, not on the final failure")
     assert_equal(Inat::MoObservationBuilder::ImageHandling::
                  MAX_UPLOAD_RETRIES + 1, call_count,
                  "Should try once, retry until the cap is reached, " \

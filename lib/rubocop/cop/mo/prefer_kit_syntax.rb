@@ -3,41 +3,37 @@
 module RuboCop
   module Cop
     module MO
-      # Phlex views/components should call `Foo(...)` (Kit syntax)
-      # rather than `render(Components::Foo.new(...))` when `Foo` sits
-      # directly under `Components` -- Phlex::Kit generates a bare
-      # instance method for every such class (see
-      # .claude/rules/phlex_reference.md's "Kit syntax" section), so
-      # the verbose `render(...)` form is never necessary for a
-      # single-level Components class.
+      # Phlex views should call `Foo(...)`, Kit syntax, rather than
+      # `render(Components::Foo.new(...))` when `Foo` sits directly
+      # under `Components`. Phlex::Kit generates a bare instance
+      # method for every such class -- see
+      # .claude/rules/phlex_reference.md's "Kit syntax" section. The
+      # verbose `render(...)` form is not needed for a single-level
+      # Components class.
       #
-      # Three real, already-encountered exceptions are detected and
-      # skipped automatically (no `.rubocop.yml` file lists needed):
+      # Two already-encountered exceptions are detected and skipped
+      # automatically, without any `.rubocop.yml` file list.
+      # `Components::ApplicationForm` subclasses are NOT an exception
+      # -- Kit syntax reaches them fine, same as any other
+      # `Components::Base` descendant.
       #
       # 1. **Self-name collision**: a class named the same as the Kit
-      #    method it would call (e.g. `Components::Matrix::Carousel`
-      #    calling `Carousel(...)`, or a view class named `Table`
-      #    calling `Table(...)`) breaks -- Kit's method resolution
+      #    method it would call breaks -- Kit's method resolution
       #    recurses into the caller's own class instead of resolving
-      #    `Components::Carousel`/`Components::Table`. Confirmed by two
-      #    existing bug-fix comments (commit 33fdc952e5).
-      #    `render(Components::X.new(...))` is the correct, permanent
-      #    form here, not a workaround to eventually remove.
+      #    the top-level Components class. `Components::Matrix::
+      #    Carousel` calling `Carousel(...)`, and a view class named
+      #    `Table` calling `Table(...)`, are both confirmed instances
+      #    -- see commit 33fdc952e5. `render(Components::X.new(...))`
+      #    is the correct, permanent form here, not a workaround to
+      #    eventually remove.
       #
       # 2. **Mixin modules**: a `module Components::X` meant to be
-      #    `include`d at varying nesting depths (e.g.
+      #    `include`d at varying nesting depths can't reliably assume
+      #    Kit syntax is mixed in that far down the ancestor chain.
       #    `Components::IconWithText`, included by deeply-dispatched
-      #    subclasses like `Components::Button::Edit`) can't reliably
-      #    assume Kit sugar is mixed in that far down the ancestor
-      #    chain. Any `render(...)` whose nearest enclosing definition
-      #    is a bare `module` (not a `class`) is skipped.
-      #
-      # 3. **`ApplicationForm` subclasses**: `Components::ApplicationForm`
-      #    is a class, not a module, so Phlex::Kit's `const_added` hook
-      #    never fires for its subclasses (see phlex_reference.md's
-      #    "Kit sugar doesn't reach app/components/application_form/*").
-      #    A class whose direct superclass name ends in `ApplicationForm`
-      #    is skipped.
+      #    subclasses like `Components::Button::Edit`, is one such
+      #    module. Any `render(...)` whose nearest enclosing
+      #    definition is a bare `module`, not a `class`, is skipped.
       #
       # @example
       #   # bad
@@ -46,15 +42,18 @@ module RuboCop
       #   # good
       #   Alert(level: :info) { ... }
       #
-      #   # good -- self-name collision (exception 1 above)
+      #   # good -- self-name collision, exception 1 above
       #   class Components::Matrix::Carousel < Components::Base
       #     def view_template
       #       render(Components::Carousel.new(...)) { ... }
       #     end
       #   end
       class PreferKitSyntax < Base
-        MSG = "Use bare `%<name>s(...)` (Kit syntax) instead of " \
-              "`render(Components::%<name>s.new(...))`."
+        extend AutoCorrector
+
+        MSG = "Use bare `%<name>s(...)` Kit syntax instead of " \
+              "`render(Components::%<name>s.new(...))` for this " \
+              "top-level Components class -- it reads more clearly."
 
         RESTRICT_ON_SEND = [:render].freeze
 
@@ -67,13 +66,30 @@ module RuboCop
           name = single_level_components_class(ctor)
           return unless name
           return if inside_module?(node)
-          return if application_form_subclass?(node)
           return if enclosing_class_named?(node, name)
 
-          add_offense(node, message: format(MSG, name: name))
+          add_offense(node, message: format(MSG, name: name)) do |corrector|
+            autocorrect(corrector, node, ctor, name)
+          end
         end
 
         private
+
+        # Reuses the constructor's own parens when it has them --
+        # `Components::Foo.new(a, b)` becomes `Foo(a, b)`, dropping
+        # `render(` and the outer `)`. A parens-less `.new` call (e.g.
+        # `Components::Foo.new a, b`) has no inner closer to reuse, so
+        # the whole node is replaced with its arguments re-wrapped in
+        # parens instead of being dropped.
+        def autocorrect(corrector, node, ctor, name)
+          if ctor.loc.begin
+            corrector.replace(node.loc.selector.join(ctor.loc.selector), name)
+            corrector.remove(node.loc.end)
+          else
+            args = ctor.arguments.map(&:source).join(", ")
+            corrector.replace(node.source_range, "#{name}(#{args})")
+          end
+        end
 
         def bare_call?(node)
           node.receiver.nil? || node.receiver.self_type?
@@ -102,16 +118,6 @@ module RuboCop
         def inside_module?(node)
           enclosing = node.each_ancestor(:class, :module).first
           enclosing&.module_type? || false
-        end
-
-        def application_form_subclass?(node)
-          class_node = node.each_ancestor(:class).first
-          return false unless class_node
-
-          superclass = class_node.children[1]
-          return false unless superclass
-
-          superclass.source.delete_prefix("::").end_with?("ApplicationForm")
         end
 
         def enclosing_class_named?(node, name)

@@ -20,7 +20,7 @@
 # in `.claude/rules/phlex_reference.md`.
 #
 module Views::Controllers::Observations::Namings::Votes
-  class Table < Views::Base
+  class Tally < Views::Base
     prop :naming, _Union(::Naming, ::Observation::MergedNaming)
     # Optional. When the caller already has a NamingConsensus
     # (controller mutation paths), pass it; otherwise the view
