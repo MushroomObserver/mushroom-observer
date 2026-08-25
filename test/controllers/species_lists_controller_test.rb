@@ -163,6 +163,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
+  def test_index_by_user_single_match_redirects
+    user = lone_wolf
+    spl = SpeciesList.where(user: user).first
+    assert(SpeciesList.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(species_list_path(spl.id))
+  end
+
   def test_index_by_user_with_no_species_lists
     user = users(:zero_user)
 
