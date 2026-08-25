@@ -77,15 +77,17 @@ module RuboCop
 
         # Reuses the constructor's own parens when it has them --
         # `Components::Foo.new(a, b)` becomes `Foo(a, b)`, dropping
-        # `render(` and the outer `)`. A parens-less `.new` call has
-        # no inner closer to reuse, so the whole node is replaced
-        # outright.
+        # `render(` and the outer `)`. A parens-less `.new` call (e.g.
+        # `Components::Foo.new a, b`) has no inner closer to reuse, so
+        # the whole node is replaced with its arguments re-wrapped in
+        # parens instead of being dropped.
         def autocorrect(corrector, node, ctor, name)
           if ctor.loc.begin
             corrector.replace(node.loc.selector.join(ctor.loc.selector), name)
             corrector.remove(node.loc.end)
           else
-            corrector.replace(node.source_range, "#{name}()")
+            args = ctor.arguments.map(&:source).join(", ")
+            corrector.replace(node.source_range, "#{name}(#{args})")
           end
         end
 
