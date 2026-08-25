@@ -78,27 +78,13 @@ class UsersController < ApplicationController
   end
 
   # Display list of Users whose name, notes, etc. match a string pattern.
+  # An exact numeric-id or verified-email match wins outright (see
+  # User.exact_match/User.pattern); a single fuzzy login/name match
+  # falls through to the generic single-result auto-redirect
+  # (display_opts has no always_index override, same as before).
   def pattern
-    pattern = params[:pattern].to_s
-    if (user = user_exact_match(pattern))
-      redirect_to(user_path(user.id))
-      [nil, {}]
-    else
-      query = create_query(:User, pattern: pattern)
-      [query, {}]
-    end
-  end
-
-  # This doesn't return direct hits on the user login or name, in case fuzzy.
-  def user_exact_match(pattern)
-    if ((pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))) ||
-       # (user = User.find_by(login: pattern)) ||
-       # (user = User.find_by(name: pattern)) ||
-       (user = User.find_by(email: pattern))) && user.verified
-      return user
-    end
-
-    false
+    query = create_query(:User, pattern: params[:pattern].to_s)
+    [query, {}]
   end
 
   # Hook runs before template displayed. Must return query.
