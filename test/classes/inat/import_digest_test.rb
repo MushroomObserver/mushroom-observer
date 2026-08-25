@@ -115,12 +115,19 @@ class Inat::ImportDigestTest < UnitTestCase
     end
 
     # Dick's digest should still be enqueued even though Katrina's
-    # mailer build raised.
-    assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
-      InatImportDigestMailer.stub(:build, failing_build) do
-        Inat::ImportDigest.deliver_for(@import)
+    # mailer build raised. Capture the rescue's Rails.logger.error call
+    # instead of letting it through -- the test logger writes to
+    # $stdout, so the deliberate "boom" otherwise dumps into the
+    # suite's console output looking like a failure elsewhere.
+    logged = nil
+    Rails.logger.stub(:error, ->(msg) { logged = msg }) do
+      assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
+        InatImportDigestMailer.stub(:build, failing_build) do
+          Inat::ImportDigest.deliver_for(@import)
+        end
       end
     end
+    assert_includes(logged, "boom")
   end
 
   private

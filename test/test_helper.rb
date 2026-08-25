@@ -66,7 +66,36 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# MiniExiftool caches its tag list in a pstore file on first use,
+# printing two lines to $stderr while generating it -- invisible on a
+# dev machine where the cache already exists from a prior run, but
+# guaranteed noise on a fresh CI runner. Parallel test workers fork
+# from this process, so warming the cache here (before parallelize
+# forks them) means every worker finds the file already on disk.
+MiniExiftool.all_tags
+
+# RefreshNameListerCacheJob writes this file from a DB query, but
+# nothing guarantees it exists on a fresh checkout -- a CI runner has
+# no name_list_data.js until something runs the job. Every layout
+# renders javascript_importmap_tags, which pins the whole
+# app/javascript/src directory, so any page render fails with
+# Sprockets::Rails::Helper::AssetNotPrecompiledError until it does. A
+# syntactically valid placeholder with empty data satisfies the pin
+# before parallelize forks workers, so every worker finds a file on
+# disk from the start; RefreshNameListerCacheJobTest overwrites it
+# with fixture-backed data when that job's own test runs.
+cache_file = MO.name_lister_cache_file
+unless File.exist?(cache_file)
+  FileUtils.mkpath(File.dirname(cache_file))
+  File.write(cache_file, <<~JS)
+    export let NL_GENERA = [];
+    export let NL_SPECIES = [];
+    export let NL_NAMES = [];
+  JS
+end
+
 %w[
+  no_test_console_noise
   bullet_helper
 
   general_extensions

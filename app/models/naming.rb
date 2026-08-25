@@ -258,6 +258,21 @@ class Naming < AbstractModel
     result
   end
 
+  # Fold another naming for the same observation and user into this one and
+  # destroy it: per voter keep the higher vote value (favorite OR'd), and
+  # merge in the other's reasons (identical text once, differing text
+  # concatenated as separate sentences). Used when a name merge would
+  # otherwise leave a user with two namings of the same name on one
+  # observation (#5186). Callers set current_user on both.
+  def absorb(other)
+    Naming.transaction do
+      fold_votes_from(other)
+      self.reasons = merged_reasons_with(other)
+      other.destroy!
+      save!
+    end
+  end
+
   def init_reasons(args = nil)
     result = {}
     reasons_array.each do |reason|
@@ -398,5 +413,60 @@ class Naming < AbstractModel
     errors.add(:name, :validate_naming_name_missing) unless name
     errors.add(:user, :validate_naming_user_missing) if !user_id &&
                                                         !@current_user
+  end
+
+  # A user may propose a given name on an observation only once; the DB
+  # unique index (#5186) is the hard backstop, this is the graceful one
+  # so a double-submit or a re-pointed naming flashes an error instead of
+  # raising RecordNotUnique. Skipped when the key columns aren't all set
+  # (check_requirements already reports those).
+  validate :name_not_already_proposed_by_user
+  def name_not_already_proposed_by_user # :nodoc:
+    return unless observation_id && user_id && name_id
+
+    scope = Naming.where(observation_id:, user_id:, name_id:)
+    scope = scope.where.not(id:) if persisted?
+    errors.add(:name, :validate_naming_duplicate) if scope.exists?
+  end
+
+  private
+
+  # Move the other naming's votes onto this one, keeping the higher value
+  # per voter (favorite OR'd). A voter this naming already has keeps its
+  # own row updated; the rest are re-pointed. The other's leftover votes go
+  # when it is destroyed.
+  def fold_votes_from(other)
+    mine_by_user = Vote.where(naming_id: id).index_by(&:user_id)
+    Vote.where(naming_id: other.id).find_each do |their_vote|
+      if (mine = mine_by_user[their_vote.user_id])
+        mine.update!(value: [mine.value, their_vote.value].max,
+                     favorite: mine.favorite || their_vote.favorite)
+      else
+        their_vote.update!(naming_id: id)
+      end
+    end
+  end
+
+  def merged_reasons_with(other)
+    merged = (reasons || {}).dup
+    (other.reasons || {}).each do |num, notes|
+      merged[num] = combined_reason_notes(merged[num], notes)
+    end
+    merged
+  end
+
+  # Distinct notes joined by a line break (reason notes support newlines),
+  # so two different justifications read as separate lines rather than a
+  # run-on. One note (or an empty set) needs no join.
+  def combined_reason_notes(mine, theirs)
+    distinct_reason_notes(mine, theirs).join("\n")
+  end
+
+  # Non-blank, de-duplicated notes, dropping any fully contained in a
+  # longer one -- a truncated earlier version (e.g. a re-submit) should
+  # not be concatenated onto the fuller text, just superseded by it.
+  def distinct_reason_notes(*notes)
+    texts = notes.map { |t| t.to_s.strip }.compact_blank.uniq
+    texts.reject { |t| texts.any? { |other| other != t && other.include?(t) } }
   end
 end

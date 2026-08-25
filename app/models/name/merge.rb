@@ -30,7 +30,7 @@ class Name
 
       Name.transaction do
         move_observations(old_name)
-        move_namings(old_name)
+        move_namings(user, old_name)
         move_mispellings(user, old_name)
         move_followings(old_name) # move Interest and Tracking
         move_descriptions(user, old_name)
@@ -75,11 +75,27 @@ class Name
       end
     end
 
-    def move_namings(old_name)
-      old_name.namings.each do |name|
-        name.name = self
-        name.save!
+    def move_namings(user, old_name)
+      old_name.namings.each do |naming|
+        if (existing = duplicate_naming_for(naming))
+          # This user already has a naming for the surviving name on this
+          # observation, so re-pointing would duplicate it -- fold the two
+          # into one instead (#5186).
+          existing.current_user = user
+          naming.current_user = user
+          existing.absorb(naming)
+        else
+          naming.name = self
+          naming.save!
+        end
       end
+    end
+
+    # A naming by the same user for the surviving name (self) on the same
+    # observation as `naming`, or nil.
+    def duplicate_naming_for(naming)
+      Naming.find_by(observation_id: naming.observation_id,
+                     user_id: naming.user_id, name_id: id)
     end
 
     def move_mispellings(user, old_name, misspellings: old_name.misspellings)

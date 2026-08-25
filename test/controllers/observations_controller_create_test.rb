@@ -175,6 +175,23 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(project.location, assigns(:observation).location)
   end
 
+  # A field code with surrounding whitespace and mixed case still resolves
+  # the existing slip's project onto the new observation --
+  # add_field_slip_project normalizes the code the same way
+  # field_slip_for_code does (#5199, #5210).
+  def test_new_from_field_slip_adds_project_case_and_space_insensitively
+    slip = field_slips(:field_slip_no_obs)
+    project = slip.project
+    assert(project.member?(users(:mary)),
+           "Test needs a member of the slip's project")
+
+    login("mary")
+    get(:new, params: { field_code: "  #{slip.code.downcase}  " })
+
+    assert_includes(assigns(:observation).project_ids, project.id,
+                    "whitespace/mixed-case code should still add the project")
+  end
+
   # Without a field code the plain last-observation default still applies.
   def test_new_without_field_slip_keeps_last_observation_location
     user = users(:rolf)

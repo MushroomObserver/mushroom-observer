@@ -184,7 +184,16 @@ class InatMoObservationBuilderTest < UnitTestCase
   def test_override_name_falls_back_when_resolution_raises
     builder = builder_for(name_override: "Boletus edulis")
     builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
-    assert_nil(builder.send(:override_name))
+
+    # Capture the rescue's Rails.logger.warn call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" otherwise dumps into the suite's console output looking
+    # like a failure elsewhere.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      assert_nil(builder.send(:override_name))
+    end
+    assert_includes(logged, "boom")
   end
 
   # No override field => no override name.
@@ -300,6 +309,11 @@ class InatMoObservationBuilderTest < UnitTestCase
     call_count = 0
     builder = builder_for
     builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
+    # Capture the retry backoff's warn() instead of letting it print --
+    # bare Kernel#warn isn't Rails.logger, so config.log_level doesn't
+    # filter it, and it dumps straight into the test suite's console.
+    warnings = []
+    builder.define_singleton_method(:warn) { |msg| warnings << msg }
 
     API2.stub(:execute, lambda { |_params|
       call_count += 1
@@ -313,6 +327,8 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_equal(3, call_count,
                  "Should retry an image download failure, succeed on the " \
                  "third attempt")
+    assert_equal(2, warnings.size,
+                 "Should warn once per retry, not on the final success")
   end
 
   def test_upload_inat_image_raises_after_exhausting_retries
@@ -320,6 +336,11 @@ class InatMoObservationBuilderTest < UnitTestCase
     call_count = 0
     builder = builder_for
     builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
+    # Capture the retry backoff's warn() instead of letting it print --
+    # bare Kernel#warn isn't Rails.logger, so config.log_level doesn't
+    # filter it, and it dumps straight into the test suite's console.
+    warnings = []
+    builder.define_singleton_method(:warn) { |msg| warnings << msg }
 
     API2.stub(:execute, lambda { |_params|
       call_count += 1
@@ -332,6 +353,9 @@ class InatMoObservationBuilderTest < UnitTestCase
                    "Error should identify the failing iNat photo")
     end
 
+    assert_equal(Inat::MoObservationBuilder::ImageHandling::
+                 MAX_UPLOAD_RETRIES, warnings.size,
+                 "Should warn once per retry, not on the final failure")
     assert_equal(Inat::MoObservationBuilder::ImageHandling::
                  MAX_UPLOAD_RETRIES + 1, call_count,
                  "Should try once, retry until the cap is reached, " \
@@ -370,6 +394,35 @@ class InatMoObservationBuilderTest < UnitTestCase
     end
 
     assert_equal([image.id], builder.created_image_ids)
+  end
+
+  # Re-importing (or re-running the builder) reuses the namer's existing
+  # naming instead of stacking a duplicate, updating the vote in place
+  # (#5186).
+  def test_add_naming_with_vote_reuses_the_namers_naming
+    obs = observations(:minimal_unknown_obs)
+    obs.namings.to_a.each do |n|
+      n.current_user = users(:rolf)
+      n.destroy
+    end
+    name = names(:coprinus_comatus)
+    namer = users(:rolf)
+    builder = builder_for
+    builder.instance_variable_set(:@observation, obs)
+    builder.define_singleton_method(:used_references_explanation) { |_| "ref" }
+
+    assert_difference("Naming.count", 1) do
+      builder.send(:add_naming_with_vote, name:, namer:,
+                                          value: Vote::MAXIMUM_VOTE)
+    end
+    assert_no_difference("Naming.count") do
+      builder.send(:add_naming_with_vote, name:, namer:,
+                                          value: Vote::MINIMUM_VOTE)
+    end
+
+    naming = obs.reload.namings.find_by(user: namer, name:)
+    assert_equal(Vote::MINIMUM_VOTE, naming.votes.find_by(user: namer).value,
+                 "the second import updates the vote in place")
   end
 
   private

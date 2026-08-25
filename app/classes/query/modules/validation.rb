@@ -75,6 +75,13 @@ module Query::Modules::Validation
     @validation_errors << [:query_validation_order_by_unsupported,
                            { models: model.name.pluralize, key:, model:,
                              base: }]
+    # Clear the bad value so `add_default_order_if_none_specified` treats
+    # it as unset and substitutes the model/attr's own `default_order` --
+    # otherwise it survives validation and reaches
+    # AbstractModel::OrderingScopes#order_by's dispatcher, which silently
+    # falls back to `all` (id: :desc) instead, ignoring the model's
+    # declared default.
+    @params[:order_by] = nil
   end
 
   private
