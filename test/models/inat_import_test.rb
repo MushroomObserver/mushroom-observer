@@ -421,4 +421,27 @@ class InatImportTest < ActiveSupport::TestCase
       "Nil total_importables should cap to zero"
     )
   end
+
+  def test_reimport_url_wraps_stored_query_in_site_url
+    import = inat_imports(:rolf_inat_import)
+    stored_query = "taxon_id=48701&user_login=rolf"
+    import.update_columns(inat_url: stored_query)
+
+    assert_equal(
+      "#{Inat::Constants::SITE}/observations?#{stored_query}",
+      import.reimport_url,
+      "reimport_url should wrap the stored bare query string in the " \
+      "iNat site URL so it round-trips as a valid search URL"
+    )
+  end
+
+  def test_reimport_url_nil_when_inat_url_blank
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(inat_url: nil)
+
+    assert_nil(
+      import.reimport_url,
+      "reimport_url should be nil when no inat_url was stored"
+    )
+  end
 end
