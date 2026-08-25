@@ -408,6 +408,20 @@ class Naming < AbstractModel
                                                         !@current_user
   end
 
+  # A user may propose a given name on an observation only once; the DB
+  # unique index (#5186) is the hard backstop, this is the graceful one
+  # so a double-submit or a re-pointed naming flashes an error instead of
+  # raising RecordNotUnique. Skipped when the key columns aren't all set
+  # (check_requirements already reports those).
+  validate :name_not_already_proposed_by_user
+  def name_not_already_proposed_by_user # :nodoc:
+    return unless observation_id && user_id && name_id
+
+    scope = Naming.where(observation_id:, user_id:, name_id:)
+    scope = scope.where.not(id:) if persisted?
+    errors.add(:name, :validate_naming_duplicate) if scope.exists?
+  end
+
   private
 
   # Move the other naming's votes onto this one, keeping the higher value
