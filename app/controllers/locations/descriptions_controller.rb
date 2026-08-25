@@ -58,26 +58,12 @@ module Locations
 
     # Display list of location_descriptions that a given user is author on.
     def by_author
-      user = find_obj_or_goto_index(
-        model: User, obj_id: params[:by_author].to_s,
-        index_path: location_descriptions_index_path
-      )
-      return unless user
-
-      query = create_query(:LocationDescription, by_author: user)
-      [query, {}]
+      create_query_from_url_params(:LocationDescription, params)
     end
 
     # Display list of location_descriptions that a given user is editor on.
     def by_editor
-      user = find_obj_or_goto_index(
-        model: User, obj_id: params[:by_editor].to_s,
-        index_path: location_descriptions_index_path
-      )
-      return unless user
-
-      query = create_query(:LocationDescription, by_editor: user)
-      [query, {}]
+      create_query_from_url_params(:LocationDescription, params)
     end
 
     # Hook runs before template displayed. Must return query.
