@@ -79,9 +79,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash(:runtime_no_matches, type: :collection_number)
   end
 
-  # Previously `Observation.find(params[:observation])` -- raised
-  # RecordNotFound (500) on a bad id instead of flashing/redirecting
-  # like every other shortcut.
+  # A bad observation id flashes and redirects to the observations
+  # index. This matches by_user-style shortcuts elsewhere, which
+  # redirect to the looked-up model's own index (see redirect_to:
+  # :model_index in Query::CollectionNumbers).
   def test_index_observation_id_bad_id
     bad_observation_id = Observation.maximum(:id).to_i + 1000
 

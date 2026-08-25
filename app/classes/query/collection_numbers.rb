@@ -9,7 +9,8 @@ class Query::CollectionNumbers < Query
   query_attr(:numbers, [:string])
   query_attr(:collector_has, :string)
   query_attr(:number_has, :string)
-  query_attr(:observations, [Observation], param_alias: :observation)
+  query_attr(:observations, [Observation], param_alias: :observation,
+                                           redirect_to: :model_index)
   query_attr(:pattern, :string)
 
   def alphabetical_by
