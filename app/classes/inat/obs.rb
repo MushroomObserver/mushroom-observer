@@ -102,6 +102,13 @@ class Inat
     def gps_hidden = @obs[:geoprivacy].present?
     # rubocop:enable Naming/PredicateMethod
 
+    # True when iNat has blurred the public coordinate for any reason --
+    # user geoprivacy OR automatic taxon geoprivacy (which #gps_hidden,
+    # reading only :geoprivacy, misses). iNat's :obscured folds both. A
+    # missing flag is treated as obscured, so an unexpected response keeps
+    # a blurred coordinate from overwriting MO's accurate one (#4215).
+    def obscured? = @obs[:obscured] != false
+
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
     def notes
