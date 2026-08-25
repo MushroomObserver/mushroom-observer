@@ -66,6 +66,14 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# MiniExiftool caches its tag list in a pstore file on first use,
+# printing two lines to $stderr while generating it -- invisible on a
+# dev machine where the cache already exists from a prior run, but
+# guaranteed noise on a fresh CI runner. Parallel test workers fork
+# from this process, so warming the cache here (before parallelize
+# forks them) means every worker finds the file already on disk.
+MiniExiftool.all_tags
+
 %w[
   no_test_console_noise
   bullet_helper
