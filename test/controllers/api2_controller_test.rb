@@ -563,6 +563,23 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("sequence notes", sequence.notes)
   end
 
+  # Prove user can add a Naming to someone else's Observation
+  def test_post_naming
+    obs = observations(:coprinus_comatus_obs)
+    name = names(:boletus_edulis) # mary hasn't proposed this on obs yet
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      name: name.id
+    }
+    post(:namings, params: params)
+    assert_no_api_errors
+    naming = obs.namings.find_by(name: name)
+    assert_not_nil(naming, "Naming should have been created")
+    assert_users_equal(mary, naming.user)
+    assert_not_equal(obs.user, naming.user)
+  end
+
   def test_get_field_slip_observation_ids
     fs = field_slips(:field_slip_one)
     assert(fs.observations.any?, "Test needs field_slip with observations")
