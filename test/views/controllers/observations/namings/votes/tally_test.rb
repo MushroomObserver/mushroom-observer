@@ -3,7 +3,7 @@
 require("test_helper")
 
 module Views::Controllers::Observations::Namings::Votes
-  class TableTest < ComponentTestCase
+  class TallyTest < ComponentTestCase
     def setup
       super
       @naming = namings(:coprinus_comatus_naming)
@@ -84,7 +84,7 @@ module Views::Controllers::Observations::Namings::Votes
     private
 
     def render_table(naming: @naming)
-      render(Table.new(naming: naming))
+      render(Tally.new(naming: naming))
     end
   end
 end
