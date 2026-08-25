@@ -245,7 +245,7 @@ module Views::Layouts
     end
 
     def param_val_itself(key, val, truncate:)
-      if key == :type
+      if key == :types
         type_tags_to_label(val)
       elsif val.is_a?(Array)
         join_array_val(val, truncate: truncate)
@@ -285,12 +285,12 @@ module Views::Layouts
       end
     end
 
-    # Space-separated RssLog type tag list ("species_list project") →
-    # localized labels joined by ", ". `SENTINEL_TYPE_TAGS` covers
-    # `"all"` / `"none"` (which have no plural); everything else
-    # goes through `tag.pluralize.to_sym.ti`.
+    # `types` param (Array, each entry possibly space-separated --
+    # see `RssLog.normalize_type_tags`) → localized labels joined by
+    # ", ". `SENTINEL_TYPE_TAGS` covers `"all"` / `"none"` (which have
+    # no plural); everything else goes through `tag.pluralize.to_sym.ti`.
     def type_tags_to_label(val)
-      val.split.map do |tag|
+      ::RssLog.normalize_type_tags(val).map do |tag|
         (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.to_sym).ti
       end.join(", ")
     end

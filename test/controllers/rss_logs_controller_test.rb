@@ -247,7 +247,9 @@ class RssLogsControllerTest < FunctionalTestCase
     login
 
     # Simulate form submission with type checkboxes as array under q param
-    # Form submits q[type][]=observation&q[type][]=name
+    # (the TypeFilters form submits q[types][]=observation&
+    # q[types][]=name; this exercises the same array shape via the
+    # singular `type` alias key, which also accepts an Array value).
     get(:index, params: {
           q: { model: "RssLog", type: %w[observation name] }
         })
@@ -308,7 +310,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { q: { model: "RssLog", type: "observation" } })
     assert_select("body.rss_logs__index")
 
-    # Check that the filter links don't have duplicate q[model] or q[type]
+    # Check that the filter links don't have duplicate q[model] or q[types]
     body = @response.body
 
     # Find all href attributes containing activity_logs
@@ -316,14 +318,14 @@ class RssLogsControllerTest < FunctionalTestCase
 
     hrefs.each do |href|
       decoded = CGI.unescape(href)
-      # Count occurrences of q[model] and q[type]
+      # Count occurrences of q[model] and q[types]
       model_count = decoded.scan("q[model]").length
-      type_count = decoded.scan("q[type]").length
+      type_count = decoded.scan("q[types]").length
 
       assert_operator(model_count, :<=, 1,
                       "URL has duplicate q[model]: #{decoded}")
       assert_operator(type_count, :<=, 1,
-                      "URL has duplicate q[type]: #{decoded}")
+                      "URL has duplicate q[types]: #{decoded}")
     end
   end
 end
