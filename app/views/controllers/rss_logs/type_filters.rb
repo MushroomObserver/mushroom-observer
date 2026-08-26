@@ -7,6 +7,12 @@ module Views::Controllers::RssLogs
   class TypeFilters < Views::Base
     prop :query, _Nilable(::Query)
     prop :types, _Array(::String)
+    prop :user, _Nilable(::User), default: nil
+
+    # Only the Save-Defaults button needs this (its formmethod="post"
+    # override is a state-changing request); the Apply button's plain
+    # GET is exempt from CSRF checks entirely.
+    register_value_helper :form_authenticity_token
 
     # Not a Superform -- a multi-select checkbox filter, not a
     # single-model-bound field set. Submitting the combined state of
@@ -28,6 +34,20 @@ module Views::Controllers::RssLogs
     private
 
     def render_hidden_fields
+      # `formmethod="post"` is the only verb HTML5 allows on a button
+      # override -- Rack::MethodOverride reads `_method` to route the
+      # Save-Defaults POST to Account::Preferences#update (PATCH).
+      # Inert for the Apply button's GET submission: MethodOverride
+      # only inspects `_method` on a POST request.
+      input(type: "hidden", name: "_method", value: "patch")
+      input(type: "hidden", name: "authenticity_token",
+            value: form_authenticity_token)
+      # Only reached by the plain-HTML fallback path (no JS/Turbo) --
+      # sends the user back to the activity log instead of the
+      # account prefs edit page. The Turbo path stays on this page
+      # regardless. `back` is an enum key, not a URL -- see
+      # Account::PreferencesController::BACK_DESTINATIONS.
+      input(type: "hidden", name: "back", value: "rss_logs")
       return unless @query
 
       query_params_except_types.each do |key, value|
@@ -48,6 +68,7 @@ module Views::Controllers::RssLogs
           render_everything_button
           render_type_buttons
           render_submit_button
+          render_save_default_button
         end
       end
     end
@@ -83,6 +104,21 @@ module Views::Controllers::RssLogs
     # stands out as the commit action.
     def render_submit_button
       Button(type: :submit, name: :apply.ti, size: :sm)
+    end
+
+    # A second submit button on the same form as "Apply," targeting a
+    # different action via `formaction`/`formmethod` -- whatever's
+    # checked at the moment of click is what gets saved, the same
+    # values "Apply" would filter by. `data-turbo="true"` opts just
+    # this button into Turbo, overriding the form's own
+    # `data-turbo="false"`, so the response is a flash-only
+    # confirmation with no page navigation.
+    def render_save_default_button
+      return unless show_make_default?
+
+      Button(type: :submit, name: :rss_make_default.t, variant: :outline,
+             size: :sm, formaction: account_preferences_path,
+             formmethod: "post", data: { turbo: "true" })
     end
 
     # Individual type checkbox styled as a Bootstrap button. Routes
@@ -129,6 +165,10 @@ module Views::Controllers::RssLogs
 
     def type_checked?(type)
       @types.include?(type) || @types == ["all"]
+    end
+
+    def show_make_default?
+      @user && @user.default_rss_type.to_s.split.sort != @types
     end
 
     def query_params_except_types

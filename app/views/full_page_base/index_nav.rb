@@ -41,11 +41,11 @@ module Views::FullPageBase::IndexNav
   # Type-filter row above the RssLogs index — checkboxes that drop
   # query types in/out of the result set. Used only by
   # `RssLogsController#index` today.
-  def add_type_filters(query, types)
+  def add_type_filters(query, types, user: nil)
     content_for(:type_filters) do
       capture do
         render(::Views::Controllers::RssLogs::TypeFilters.new(
-                 query: query, types: types
+                 query: query, types: types, user: user
                ))
       end
     end

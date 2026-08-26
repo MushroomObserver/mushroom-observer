@@ -291,5 +291,140 @@ module Account
         end
       end
     end
+
+    # "Save these as my defaults" on the RSS-logs filter form submits
+    # q[types][], not user[default_rss_type] directly.
+    def test_normalize_rss_type_list_param
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[name observation] } },
+            format: :turbo_stream)
+
+      assert_equal("name observation", rolf.reload.default_rss_type)
+    end
+
+    # Selecting "Everything" checks every type box (type_checked? in
+    # type_filters.rb treats @types == ["all"] as "check them all"),
+    # so Save Defaults submits every individual type tag. Collapses
+    # back to "all" instead of storing every tag individually.
+    def test_update_selecting_everything_collapses_to_all
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: RssLog::ALL_TYPE_TAGS.map(&:to_s) },
+                      back: "rss_logs" })
+
+      assert_response(:redirect)
+      assert_equal("all", rolf.reload.default_rss_type)
+    end
+
+    # Not just "select everything" -- any 5+ types selected (out of
+    # the 7 tags) is long enough to exceed the old limit: 40 column,
+    # even for a deliberate manual selection that isn't literally
+    # "all" and so doesn't collapse to that value.
+    def test_update_selecting_all_but_one_does_not_exceed_column_limit
+      login("rolf")
+      types = RssLog::ALL_TYPE_TAGS.map(&:to_s) - ["name"]
+
+      patch(:update, params: { q: { types: types }, back: "rss_logs" })
+
+      assert_response(:redirect)
+      assert_equal(types.join(" "), rolf.reload.default_rss_type)
+    end
+
+    # E.g. unchecking every type box before clicking Save Defaults,
+    # which submits no q[types]. No user[...] fields either, so
+    # params[:user] stays nil; update_password/update_prefs_from_form
+    # must not crash on that.
+    def test_update_with_empty_params
+      login("rolf")
+
+      patch(:update, params: {}, format: :turbo_stream)
+
+      assert_response(:success)
+    end
+
+    def test_normalize_rss_type_list_param_rejects_malformed_shape
+      login("rolf")
+      default_rss_type = rolf.default_rss_type
+
+      patch(:update,
+            params: { q: { types: { foo: "bar" } } },
+            format: :turbo_stream)
+
+      assert_equal(default_rss_type, rolf.reload.default_rss_type)
+    end
+
+    def test_update_partial_submission_preserves_other_prefs
+      login("rolf")
+      assert_equal(true, rolf.thumbnail_maps)
+      assert_equal(true, rolf.email_html)
+
+      patch(:update,
+            params: { q: { types: %w[observation] } },
+            format: :turbo_stream)
+
+      user = rolf.reload
+      assert_equal("observation", user.default_rss_type)
+      assert_equal(true, user.thumbnail_maps)
+      assert_equal(true, user.email_html)
+    end
+
+    def test_update_turbo_stream_success
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_flash(:runtime_prefs_success)
+    end
+
+    def test_update_turbo_stream_failure
+      login("rolf")
+
+      patch(:update,
+            params: { user: { login: "mary" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_flash_error
+      assert_equal("rolf", rolf.reload.login)
+    end
+
+    def test_update_html_redirects_to_back_destination
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] }, back: "rss_logs" })
+
+      assert_redirected_to(activity_logs_path(q: { types: %w[observation] }))
+    end
+
+    def test_update_html_unknown_back_falls_back_to_edit
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] }, back: "bogus" })
+
+      assert_redirected_to(action: :edit)
+    end
+
+    # Unchecking every type box before clicking Save Defaults submits
+    # no q[types] (normalize_rss_type_list_param leaves params[:user]
+    # unset) -- combined with the plain-HTML fallback path and
+    # back: "rss_logs", confirms back_url's activity_logs_path(q: {
+    # types: nil }) call does not raise.
+    def test_update_html_no_types_with_back_redirects_cleanly
+      login("rolf")
+
+      patch(:update, params: { back: "rss_logs" })
+
+      assert_redirected_to(activity_logs_path(q: { types: nil }))
+    end
   end
 end
