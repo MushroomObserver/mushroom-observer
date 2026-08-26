@@ -74,7 +74,7 @@ class AbstractModel < ApplicationRecord
   # (attribution) or looking at this (viewer-aware formatting),
   # set explicitly by the controller/caller before save/render. No
   # ambient global fallback (no Current.user) - every model gets
-  # this accessor for free so callers never need to add their own.
+  # this accessor for free, so callers don't need to add one.
   attr_accessor :current_user
 
   # Language tag for name, e.g. :observation, :rss_log, etc.

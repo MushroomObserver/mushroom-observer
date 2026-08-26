@@ -64,9 +64,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     { q: { model: :Name, pattern: } }
   end
 
-  # The bare `pattern` param (maintained for backwards compatibility with
-  # old bookmarks) builds the query directly now, via PatternSearch::Name,
-  # in place of redirecting through SearchController#pattern.
+  # Via PatternSearch::Name.
   def test_index_pattern_param_builds_query_directly
     pattern = "Agaricus"
 

@@ -105,9 +105,6 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
-  # The bare `pattern` param (maintained for backwards compatibility with
-  # old bookmarks) builds the query directly now, in place of redirecting
-  # through SearchController#pattern.
   def test_index_pattern_param_builds_query_directly
     pattern = "USA"
 
@@ -266,7 +263,7 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   # #4989: rotate/mirror controls follow permission on the image itself
-  # OR on the Observation it belongs to -- not just the image's own
+  # OR on the Observation it belongs to -- not just the image's
   # (separate) project attachment.
   def test_show_hides_transform_buttons_from_unrelated_user
     image = images(:commercial_inquiry_image)

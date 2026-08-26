@@ -271,7 +271,7 @@ module AbstractModel::Scopes
   # class methods here, `self` included
   module ClassMethods
     # Utility for all subqueries, which are defined on the model
-    # Callers must do their own joins to `model_name` because we can't know
+    # Callers must join to `model_name` themselves because we can't know
     # whether the association (has_one, has_many) is singular or plural.
     def subquery(model_name, params)
       return all if params.blank?
@@ -486,13 +486,13 @@ module AbstractModel::Scopes
       end
     end
 
-    # Prioritizes an exact identifier match (id, or a subclass's own
+    # Prioritizes an exact identifier match (id, or a subclass's
     # `exact_match` override) over the fuzzy search the block builds, so
     # e.g. `Comment.pattern("123")` returns just the record with that id
-    # instead of unioning it with every fuzzy substring match. Without
-    # this, a bare digit string is a substring of huge numbers of
-    # unrelated records, so id-based lookup would return a multi-row
-    # index instead of the single intended record for most ids.
+    # instead of unioning it with every fuzzy substring match. A bare
+    # digit string is a substring of huge numbers of unrelated records,
+    # so without this, id-based lookup would return a multi-row index
+    # instead of the single intended record for most ids.
     def exact_match_or(phrase)
       if (exact = exact_match(phrase))
         where(id: exact.id)

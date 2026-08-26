@@ -9,9 +9,9 @@
 #                         Remember the pattern for the search bar, unless
 #                         doing so would overflow the session cookie.
 #
-#  Shared by SearchController (the search bar's own submission) and
+#  Shared by SearchController (the search bar's submission) and
 #  ApplicationController::Indexes#pattern (a model index hit directly
-#  with `?pattern=`, e.g. an old-style bookmark).
+#  with `?pattern=`).
 #
 module ApplicationController::PatternSearchState
   private

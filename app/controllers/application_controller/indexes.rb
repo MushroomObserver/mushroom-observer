@@ -220,11 +220,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     { id: params[:id].to_s, always_index: true }
   end
 
-  # Handles `?pattern=` hitting a model's index directly (an old-style
-  # bookmark, or the plain-fuzzy-search shape the search bar itself
-  # builds). Builds the query in place -- no redirect through
-  # SearchController. A single result still lands on its show page,
-  # via #show_index_of_objects' generic single-result redirect.
+  # e.g. Observations' checklist taxon links, its "did you mean" alert.
   def pattern
     model_name = controller_model_name.to_sym
     pattern = params[:pattern].to_s.strip_squeeze

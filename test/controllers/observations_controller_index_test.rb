@@ -165,7 +165,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   # A distinct, lower-level check from the one above: `by:` alone goes
-  # through `order_by_or_flash_if_unknown` (sorted_index's own
+  # through `order_by_or_flash_if_unknown` (sorted_index's
   # pre-check), which stops a bad value from reaching the Query. A
   # subaction that forwards raw params straight into
   # `create_query_from_url_params` (e.g. `by_user`) skips that
@@ -261,10 +261,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # The bare `pattern` param (maintained for backwards compatibility with
-  # old bookmarks) builds the query directly now, via
-  # PatternSearch::Observation, in place of redirecting through
-  # SearchController#pattern.
+  # Via PatternSearch::Observation.
   def test_index_pattern_param_builds_query_directly
     pattern = "Agaricus"
 
@@ -662,7 +659,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # On page 1, prev link should be disabled (has opacity-0 class)
     assert_select("a.prev_page_link.disabled.opacity-0")
     # The goto-page link (no <form> -- see IndexPaginationNav) carries
-    # the full current query state in its own href.
+    # the full current query state in its href.
     assert_select("a[data-page-input-target='goToLink']") do |links|
       href = links.first["href"]
       assert_includes(href, q_model,
@@ -701,7 +698,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                       "Next link should preserve third by_users value")
     end
 
-    # Also check the goto-page link's own href preserves all three
+    # Also check the goto-page link's href preserves all three
     # values (no <form>/hidden fields -- see IndexPaginationNav).
     assert_select("a[data-page-input-target='goToLink']") do |links|
       href = links.first["href"]
@@ -727,7 +724,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
   end
 
-  # thumbnail_quality is this page's own default sort, not a
+  # thumbnail_quality is this page's default sort, not a
   # class-wide default_order on the shared `projects` query_attr
   # (test_observation_names_in_species_lists_and_projects proves a
   # bare `projects:` query elsewhere still needs the class default)
@@ -804,7 +801,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not(query.params.key?(:bogus_param))
   end
 
-  # Query::Observations's own `projects` attr already declares a
+  # Query::Observations's `projects` attr already declares a
   # record-backed param_alias (see app/classes/query/observations.rb)
   # -- exercises create_query_from_url_params's `constantize` path,
   # not just the lower-level resolve_param_alias_records helper.
@@ -855,7 +852,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(false, record_backed)
   end
 
-  # find_alias_record_or_goto_own_index's own flash+redirect-on-bad-id
+  # find_alias_record_or_goto_own_index's flash+redirect-on-bad-id
   # behavior is already covered by
   # test_index_project_with_unknown_id_redirects (a dispatched request
   # through the existing `project` shortcut) -- this test isolates

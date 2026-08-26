@@ -62,8 +62,8 @@ class SearchController < ApplicationController
   end
 
   # An exact numeric-id (or other identifier, e.g. User's verified email)
-  # match is already prioritized by the model's own `pattern` scope --
-  # see AbstractModel::Scopes#exact_match_or -- so a single_result? here
+  # match is already prioritized by the model's `pattern` scope -- see
+  # AbstractModel::Scopes#exact_match_or -- so a single_result? here
   # covers both an exact match and a fuzzy search that happens to find
   # just one record.
   def build_query_and_redirect(type, model_name, pattern)

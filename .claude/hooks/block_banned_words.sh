@@ -15,10 +15,17 @@
 # feedback_never_is_a_narrative_smell.md.
 #
 # Word list: real, genuine(ly), actual(ly), exactly, never, ever,
-# canonical, consume, "at all" -- used as intensifiers/hedges, they
-# carry no information and read as arguing for a claim instead of
-# just stating it. Whole-word matches only (so e.g. "actualization",
-# "eventual" don't false-positive); case-insensitive.
+# canonical, consume, "at all", own -- used as intensifiers/hedges,
+# they carry no information and read as arguing for a claim instead of
+# just stating it. "own" is the odd one out: it's a redundant
+# possessive almost every time ("the model's own X" just means "the
+# model's X" -- see .claude/rules/code_comments.md rule 4), not an
+# intensifier, but it gets the same blunt treatment because the
+# illegitimate-use rate is just as high. The rare legitimate case
+# (idiomatic "own", not a redundant possessive) gets rephrased like any
+# other false positive here -- that's cheaper than a smarter check.
+# Whole-word matches only (so e.g. "actualization", "eventual",
+# "owner", "shown" don't false-positive); case-insensitive.
 #
 # Blunt by design, same philosophy as block_pii_in_gh.sh: false
 # positives get fixed by rephrasing, not by bypassing the hook.
@@ -30,7 +37,7 @@ TOOL="$(printf '%s' "$INPUT" | jq -r '.tool_name // ""')"
 # POSIX ERE doesn't treat `\b` as a word boundary (BSD/macOS grep in
 # particular) -- use the same `(^|[^[:alnum:]_])...([^[:alnum:]_]|$)`
 # portable boundary as check_any_phlex_props_on_save.sh.
-WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|canonical|consume|at all)([^[:alnum:]_]|$)'
+WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|canonical|consume|at all|own)([^[:alnum:]_]|$)'
 
 TEXT=""
 case "$TOOL" in
@@ -74,8 +81,9 @@ HITS="$(printf '%s' "$TEXT" | grep -inE "$WORD_RE" || true)"
 if [ -n "$HITS" ]; then
   cat >&2 <<EOF
 🚫 BLOCKED: banned word/phrase detected (real/genuine/actual(ly)/
-exactly/never/ever/canonical/consume/"at all" used as an intensifier
-or hedge -- personal style ban, corrected multiple times).
+exactly/never/ever/canonical/consume/"at all"/own used as an
+intensifier, hedge, or redundant possessive -- personal style ban,
+corrected multiple times).
 
 Matches:
 $HITS
