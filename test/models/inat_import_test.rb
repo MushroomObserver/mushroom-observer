@@ -446,13 +446,27 @@ class InatImportTest < ActiveSupport::TestCase
     )
   end
 
-  def test_reimport_url_nil_when_original_inat_url_blank
+  def test_reimport_url_falls_back_to_inat_url_when_original_blank
     import = inat_imports(:rolf_inat_import)
-    import.update_columns(original_inat_url: nil)
+    stored_query = "taxon_id=48701&user_login=rolf"
+    import.update_columns(original_inat_url: nil, inat_url: stored_query)
+
+    assert_equal(
+      "#{Inat::Constants::SITE}/observations?#{stored_query}",
+      import.reimport_url,
+      "reimport_url should rebuild a UI URL from inat_url for a record " \
+      "predating original_inat_url, so its reimport link still lands " \
+      "in URL mode instead of defaulting to \"import all\""
+    )
+  end
+
+  def test_reimport_url_nil_when_both_url_columns_blank
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(original_inat_url: nil, inat_url: nil)
 
     assert_nil(
       import.reimport_url,
-      "reimport_url should be nil when no original_inat_url was stored"
+      "reimport_url should be nil when neither URL column was stored"
     )
   end
 end

@@ -168,12 +168,12 @@ class InatImport < ApplicationRecord
     [count.to_i - MAX_IMPORTABLE, 0].max
   end
 
-  # original_inat_url holds the user's literal URL (UI or API host), saved
-  # so a reimport link can repopulate the "search URL" field with the same
-  # URL rather than guessing a host from the normalized inat_url query
-  # string alone.
+  # url for re-filling the import form "search URL" field
   def reimport_url
-    original_inat_url.presence
+    original_inat_url.presence ||
+      # Records predating presence column lack an original_inat_url
+      # So rebuild a best-effort UI URL
+      legacy_reimport_url
   end
 
   def ignored_total_count
@@ -282,6 +282,15 @@ class InatImport < ApplicationRecord
     self.response_errors ||= ""
     self.date_missing_inat_ids ||= []
     self.license_added_inat_ids ||= []
+  end
+
+  # inat_url is stored as a normalized query string with no record of
+  # which iNat host it came from; assume the UI host, since that's what
+  # every reimport link produced before original_inat_url existed.
+  def legacy_reimport_url
+    return nil if inat_url.blank?
+
+    "#{Inat::Constants::SITE}/observations?#{inat_url}"
   end
 
   def append_date_missing(inat_id)
