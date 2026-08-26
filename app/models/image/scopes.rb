@@ -111,12 +111,17 @@ module Image::Scopes
     #   search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
     # }
 
-    # Excludes images without observations!
+    # Excludes images without observations! The join is chained before
+    # exact_match_or so an id match is scoped by it too -- otherwise a
+    # numeric pattern would find an unattached image the fuzzy branch
+    # would have excluded. `distinct` covers an id match on an image
+    # with multiple observations, which the join would otherwise
+    # multiply into duplicate rows.
     scope :pattern, lambda { |phrase|
-      exact_match_or(phrase) do
+      joins(observations: :name).distinct.exact_match_or(phrase) do
         cols = Image.searchable_columns + Observation[:where] +
                Name[:search_name]
-        joins(observations: :name).search_columns(cols, phrase)
+        search_columns(cols, phrase)
       end
     }
 
