@@ -189,20 +189,23 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     query
   end
 
-  # Derives a controller ivar (e.g. `@project`, `@observation`) from an
-  # already-built Query's resolved params, for a single-record
-  # `attr` (e.g. `:projects`, `:observations`) -- covers both a URL
-  # shortcut (`?project=id`) and a bookmarked/permalinked
-  # `q[projects][]=id` query the same way, since both resolve into the
-  # same `query.params[attr]` shape. Call from a controller's
-  # `filtered_index_final_hook` override. No-op (ivar left unset) when
-  # `attr` isn't present or holds more than one id -- a multi-value
-  # filter has no single record to derive an ivar from.
+  # Sets @project/@observation-style ivars from a Query's resolved
+  # params. Call it from filtered_index_final_hook. No-op when attr
+  # is absent or holds more than one id.
   def derive_ivar_from_query(ivar, query, attr, model_class)
     ids = query.params[attr]
     return unless ids.is_a?(Array) && ids.size == 1
 
-    instance_variable_set(ivar, model_class.safe_find(ids.first))
+    instance_variable_set(ivar, resolved_alias_record(attr, ids.first) ||
+                                 model_class.safe_find(ids.first))
+  end
+
+  # Reuses the record already fetched for this attr, instead of
+  # fetching it again. Returns nil if nothing was cached (a
+  # bookmarked query) or the id doesn't match.
+  def resolved_alias_record(attr, id)
+    cached = @resolved_alias_records && @resolved_alias_records[attr]
+    cached if cached&.id == id
   end
 
   # Default for the display_opts hash passed to show_index_of_objects.

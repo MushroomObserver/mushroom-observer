@@ -53,11 +53,13 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def observation
-    @observation = Observation.find(params[:observation])
-    query = create_query(:HerbariumRecord,
-                         observations: params[:observation].to_s,
-                         order_by: :herbarium_label)
-    [query, { always_index: true }]
+    create_query_from_url_params(:HerbariumRecord, params)
+  end
+
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@observation, query, :observations, Observation)
+    query
   end
 
   def index_display_opts(opts, _query)

@@ -67,21 +67,17 @@ class CommentsController < ApplicationController
     create_query_from_url_params(:Comment, params)
   end
 
-  # Shows comments for a given object, most recent first. (Linked from the
-  # "and more..." thingy at the bottom of truncated embedded comment lists.)
+  # Shows comments for a given object, most recent first. Linked from
+  # the "and more..." link at the bottom of a truncated comment list.
+  # Target validation lives in
+  # `Query::Modules::HashValidation#validate_polymorphic`, shared
+  # with the bookmarked `q[target][...]` query path. It flashes on an
+  # unrecognized type or nonexistent id.
   def target
-    return no_model unless (model = Comment.safe_model_from_name(params[:type]))
-    return unless (target = find_or_goto_index(model, params[:target].to_s))
-
-    query = create_query(:Comment, target: { type: target.class.name,
-                                             id: target.id })
-    [query, {}]
-  end
-
-  def no_model
-    flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
-    redirect_back_or_default(action: :index)
-    [nil, {}]
+    create_query_from_url_params(
+      :Comment, params.merge(target: { type: params[:type],
+                                       id: params[:target] })
+    )
   end
 
   def index_display_opts(opts, query)

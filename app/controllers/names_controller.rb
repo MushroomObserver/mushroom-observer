@@ -76,18 +76,14 @@ class NamesController < ApplicationController
 
   # Display list of names with descriptions that have authors.
   def has_descriptions
-    @has_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, has_descriptions: 1)
-    [query, {}]
+    create_query_from_url_params(:Name, params)
   end
   # rubocop:enable Naming/PredicatePrefix
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
   def needs_description
-    @help = :needed_descriptions_help
-    query = create_query(:Name, needs_description: 1)
-    [query, { num_per_page: 100 }]
+    create_query_from_url_params(:Name, params)
   end
 
   # Display list of names that a given user is author on.
@@ -103,15 +99,26 @@ class NamesController < ApplicationController
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
+    @has_descriptions = query.params[:has_descriptions] == true
+    @help = :needed_descriptions_help if query.params[:needs_description]
     query
   end
 
-  def index_display_opts(opts, _query)
+  def index_display_opts(opts, query)
     {
       letters: true,
-      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
+      num_per_page: index_num_per_page(query),
       include: [:description]
     }.merge(opts)
+  end
+
+  # Needs-description page shows the 100 most popular unresolved
+  # names; every other sort of the index paginates 50 (500 for a
+  # letter-anchored jump).
+  def index_num_per_page(query)
+    return 100 if query.params[:needs_description]
+
+    /^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50
   end
 
   ###################################

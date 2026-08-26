@@ -116,44 +116,28 @@ class ObservationsController
       end
     end
 
-    # Displays matrix of Observations with the given name proposed but not
-    # actually that name.
+    # Displays matrix of Observations with the given name proposed, where
+    # that name is not the consensus. `look_alikes` itself is a mode
+    # flag (`?look_alikes=1`); the name comes from the separate `name`
+    # param, same as the `name`/`related_taxa` subactions below.
     def look_alikes
-      query = create_query(
-        :Observation, names: { lookup: [params[:name]],
-                               include_synonyms: true,
-                               include_all_name_proposals: true,
-                               exclude_consensus: true },
-                      order_by: :confidence
+      create_query_from_url_params(
+        :Observation,
+        params.merge(look_alikes: [params[:name]]).except(:name)
       )
-      [query, {}]
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      query = create_query(
-        :Observation, names: { lookup: parents(params[:name]),
-                               include_subtaxa: true },
-                      order_by: :confidence
+      create_query_from_url_params(
+        :Observation,
+        params.merge(related_taxa: [params[:name]]).except(:name)
       )
-      [query, {}]
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).
     def name
-      query = create_query(
-        :Observation, names: { lookup: [params[:name]],
-                               include_synonyms: true },
-                      order_by: :confidence
-      )
-      [query, {}]
-    end
-
-    def parents(name_str)
-      names = Name.where(id: name_str).to_a
-      names = Name.where(search_name: name_str).to_a if names.empty?
-      names = Name.where(text_name: name_str).to_a if names.empty?
-      names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
+      create_query_from_url_params(:Observation, params)
     end
 
     # Displays matrix of User's Observations, by date.

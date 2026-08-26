@@ -3,7 +3,7 @@
 #  ==== QueryParamAliases
 #  create_query_from_url_params:: Build a Query from raw request params,
 #                                 resolving any registered `param_alias:`
-#                                 shortcut params along the way.
+#                                 index filter params along the way.
 #
 module ApplicationController::QueryParamAliases
   # Builds a Query for `model_symbol` from raw request params, resolving
@@ -24,7 +24,7 @@ module ApplicationController::QueryParamAliases
   #
   # `always_index: true` is set automatically whenever a record-backed
   # param_alias resolved a param (e.g. `project`, not the scalar `by`
-  # sort alias), matching every hand-written shortcut's existing
+  # sort alias), matching every hand-written index filter param's existing
   # `always_index: true` (an aliased single-result index should show the
   # list, not auto-redirect to the one result). A sort-order change has
   # no such single-result-redirect concern, so `by` alone doesn't trigger
@@ -105,8 +105,16 @@ module ApplicationController::QueryParamAliases
              end
     return :not_found unless record
 
+    # Caches the record so a later ivar-derivation step can reuse it
+    # instead of fetching it again.
+    cache_resolved_alias_record(attr, record)
     permitted[attr] = type.accepts.is_a?(Array) ? [record.id] : record.id
     type.always_index ? :record_backed : :scalar
+  end
+
+  def cache_resolved_alias_record(attr, record)
+    @resolved_alias_records ||= {}
+    @resolved_alias_records[attr] = record
   end
 
   # Like `find_or_goto_index` (ApplicationController::Indexes), but
