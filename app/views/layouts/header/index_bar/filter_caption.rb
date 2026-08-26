@@ -25,6 +25,12 @@ module Views::Layouts
       names: :Names,
       lookup: :Names,
       clade: :Names,
+      look_alikes: :Names,
+      related_taxa: :Names,
+      any_name: :Names,
+      name_proposed: :Names,
+      this_name: :Names,
+      other_names: :Names,
       projects: :Projects,
       project_lists: :ProjectSpeciesLists,
       species_lists: :SpeciesLists,
@@ -47,7 +53,9 @@ module Views::Layouts
     CAPTION_TRUNCATE = 3
     # Lookup keys whose joined string is italicized inside the `<b>`
     # tag (Latin / taxonomic names).
-    ITALICIZE_LOOKUP_KEYS = [:names, :lookup].freeze
+    ITALICIZE_LOOKUP_KEYS = [:names, :lookup, :look_alikes, :related_taxa,
+                             :any_name, :name_proposed, :this_name,
+                             :other_names].freeze
 
     prop :query, ::Query
 

@@ -460,4 +460,14 @@ class Name < AbstractModel
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
   end
+
+  # Resolves a name string or id to the ids of its parent taxa.
+  # Called from Query::Observations#validate_name_parents, for the
+  # "related taxa" page linked from a Name's show page. Matching goes
+  # through Lookup::Names, the same name-resolution every other
+  # name-lookup filter in the app uses.
+  def self.parent_ids_for(name_str)
+    Lookup::Names.new(name_str).instances.
+      map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
+  end
 end

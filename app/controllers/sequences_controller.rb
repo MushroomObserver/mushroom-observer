@@ -64,14 +64,14 @@ class SequencesController < ApplicationController
     ::Query::Sequences.default_order # :created_at
   end
 
+  # `?all=true` isn't listed here -- `build_index_with_query` already
+  # falls through to `unfiltered_index` when no recognized param has a
+  # value, so a dedicated `:all` subaction dispatching to the exact
+  # same `unfiltered_index` call was a no-op. Left as a documented
+  # URL shape (see the class comment above and `test_index_all`), not
+  # a dispatched param.
   def index_active_params
-    [:all, :by, :q].freeze
-  end
-
-  # This is a param handler. In this controller, people usually want sequences
-  # for an observation. If they want all sequences, use the :all param.
-  def all
-    unfiltered_index
+    [:by, :q].freeze
   end
 
   def index_display_opts(opts, _query)

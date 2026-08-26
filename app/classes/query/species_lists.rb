@@ -24,7 +24,8 @@ class Query::SpeciesLists < Query
                        exclude_original_names: :boolean,
                        include_all_name_proposals: :boolean,
                        exclude_consensus: :boolean })
-  query_attr(:projects, [Project])
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
   query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by

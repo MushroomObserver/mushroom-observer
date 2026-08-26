@@ -203,6 +203,45 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
       scope.distinct
     }
+    # Observations with the given Name (or a synonym) proposed but not
+    # consensus'd -- the "look-alikes" page linked from a Name's show
+    # page, and (same filter) the "Observations of other taxa where
+    # this taxon was proposed" Name-page tab.
+    scope :look_alikes, lambda { |name_strs|
+      names(lookup: name_strs, include_synonyms: true,
+            include_all_name_proposals: true, exclude_consensus: true)
+    }
+    # Observations of subtaxa of the parent of the given name. The
+    # query_attr resolves the searched name to its parent ids at
+    # validation time (Query::Observations#validate_name_parents), so
+    # this scope receives parent ids directly, not the searched name.
+    scope :related_taxa, lambda { |parent_ids|
+      names(lookup: parent_ids, include_subtaxa: true)
+    }
+    # Observations of this taxon under any name -- the given
+    # text_name/search_name/id or any of its synonyms. Named
+    # `any_name`, not `name` -- a `name` scope would collide with
+    # `Class#name` (Observation.name is Ruby's own class-name reader,
+    # called throughout Rails internals).
+    scope :any_name, lambda { |name_strs|
+      names(lookup: name_strs, include_synonyms: true)
+    }
+    # Observations where this exact Name was proposed (via Namings),
+    # regardless of consensus.
+    scope :name_proposed, lambda { |name_strs|
+      names(lookup: name_strs, include_all_name_proposals: true)
+    }
+    # Observations whose consensus is this Name -- no synonyms, no
+    # proposed-but-not-consensus matches.
+    scope :this_name, lambda { |name_strs|
+      names(lookup: name_strs)
+    }
+    # Observations under other names -- expands to the synonym set,
+    # excluding this Name itself.
+    scope :other_names, lambda { |name_strs|
+      names(lookup: name_strs, include_synonyms: true,
+            exclude_original_names: true)
+    }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
 

@@ -50,8 +50,12 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash(:runtime_invalid, type: '"type"',
-                                   value: params[:type].to_s)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_invalid_polymorphic_type,
+        { param: "target", type: params[:type] }]]
+    )
+    assert_select("#results tr", count: 0)
   end
 
   def test_index_target_for_non_model
@@ -59,8 +63,26 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash(:runtime_invalid, type: '"type"',
-                                   value: params[:type].to_s)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_invalid_polymorphic_type,
+        { param: "target", type: params[:type] }]]
+    )
+    assert_select("#results tr", count: 0)
+  end
+
+  def test_index_target_nonexistent_id
+    bad_id = Name.maximum(:id).to_i + 1000
+    params = { type: "Name", target: bad_id }
+
+    login
+    get(:index, params: params)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_polymorphic_not_found,
+        { param: "target", type: :name, id: bad_id.to_s.inspect }]]
+    )
+    assert_select("#results tr", count: 0)
   end
 
   def test_index_pattern_search_str

@@ -10,11 +10,7 @@ class Tab::Name::ObsLink::ThisName < Tab::Name::ObsLink
     :obss_of_this_name
   end
 
-  def build_query
-    q = Query.create_query(:Observation,
-                           names: { lookup: @name.id },
-                           order_by: :confidence)
-    q.save
-    q
+  def filter_attr
+    :this_name
   end
 end

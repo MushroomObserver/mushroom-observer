@@ -1504,6 +1504,16 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
+  # `this_name` backs Tab::Name::ObsLink::ThisName and the observations
+  # index's `name` subaction -- a bare `names(lookup:)` preset, no
+  # synonym/subtaxa expansion.
+  def test_scope_this_name
+    assert_includes(Observation.this_name(names(:peltigera).id),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.this_name(names(:fungi).id),
+                        observations(:peltigera_obs))
+  end
+
   def test_scope_clade
     assert_includes(Observation.clade("Agaricales"),
                     observations(:coprinus_comatus_obs))
