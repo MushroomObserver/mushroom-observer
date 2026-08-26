@@ -25,7 +25,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_has_comments
     target = observations(:minimal_unknown_obs)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
     comments = Comment.where(target_type: target.class.name, target: target)
 
     login
@@ -37,7 +37,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_valid_target_without_comments
     target = names(:conocybe_filaris)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
 
     login
     get(:index, params: params)
@@ -46,34 +46,34 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_invalid_target_type
     target = api_keys(:rolfs_api_key)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
 
     login
     get(:index, params: params)
     assert_flash(
       [[:runtime_no_matches, { type: :comment }],
        [:query_validation_invalid_polymorphic_type,
-        { param: "target", type: params[:type] }]]
+        { param: "target", type: params[:target][:type] }]]
     )
     assert_select("#results tr", count: 0)
   end
 
   def test_index_target_for_non_model
-    params = { type: "Hacker", target: 666 }
+    params = { target: { type: "Hacker", id: 666 } }
 
     login
     get(:index, params: params)
     assert_flash(
       [[:runtime_no_matches, { type: :comment }],
        [:query_validation_invalid_polymorphic_type,
-        { param: "target", type: params[:type] }]]
+        { param: "target", type: params[:target][:type] }]]
     )
     assert_select("#results tr", count: 0)
   end
 
   def test_index_target_nonexistent_id
     bad_id = Name.maximum(:id).to_i + 1000
-    params = { type: "Name", target: bad_id }
+    params = { target: { type: "Name", id: bad_id } }
 
     login
     get(:index, params: params)

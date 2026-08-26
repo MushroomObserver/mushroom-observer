@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_26_000000) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -1045,7 +1045,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_000000) do
     t.boolean "email_names_admin", default: false
     t.integer "thumbnail_size", default: 1
     t.integer "image_size", default: 5
-    t.string "default_rss_type", limit: 40, default: "all"
+    t.string "default_rss_type", default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
     t.datetime "last_activity", precision: nil
