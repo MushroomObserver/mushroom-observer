@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-25 (deploy-2026-08-25-22-30)
+
+- Changelog for `deploy-2026-08-25-12-00` and `deploy-2026-08-25-12-05` ([PR5219](https://github.com/MushroomObserver/mushroom-observer/pull/5219), @mo-nathan)
+- Stop the iNat resync from overwriting coordinates with obscured data (#4215) ([PR5220](https://github.com/MushroomObserver/mushroom-observer/pull/5220), @mo-nathan)
+- Query params — Migrate pass-thru `index_active_params` to `query_attr` alias ([PR5216](https://github.com/MushroomObserver/mushroom-observer/pull/5216), @nimmolo)
+- Namings endpoint ([PR5206](https://github.com/MushroomObserver/mushroom-observer/pull/5206), @JoeCohen)
+
 ## 2026-08-25 (deploy-2026-08-25-12-05)
 
 - Enforce one Naming per `(Observation, User, Name)` (#5186) ([PR5218](https://github.com/MushroomObserver/mushroom-observer/pull/5218), @mo-nathan)
