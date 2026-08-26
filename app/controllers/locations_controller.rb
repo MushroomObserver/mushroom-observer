@@ -78,10 +78,6 @@ class LocationsController < ApplicationController
   end
 
   # Display list of locations that a given user created.
-  #
-  # Discards create_query_from_url_params's `always_index` -- above,
-  # `index_display_opts` computes it from `@undef_pages` for every
-  # subaction, which single-match auto-redirect depends on.
   def by_user
     query, = create_query_from_url_params(:Location, params)
     return unless query
@@ -109,6 +105,13 @@ class LocationsController < ApplicationController
   end
 
   # Paginate the defined locations using the usual helper.
+  #
+  # always_index always comes from @undef_pages here, regardless of
+  # what a subaction's own create_query_from_url_params call
+  # resolved -- country/project/by_user/by_editor above all discard
+  # that value and pass a fixed opts hash instead. Single-match
+  # auto-redirect for this index depends on @undef_pages's
+  # letter-pagination total, not the Query layer's opinion.
   def index_display_opts(opts, _query)
     { always_index: @undef_pages&.num_total&.positive? }.merge(opts)
   end

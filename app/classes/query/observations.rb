@@ -20,8 +20,7 @@ class Query::Observations < Query
                        include_immediate_subtaxa: :boolean,
                        exclude_original_names: :boolean,
                        include_all_name_proposals: :boolean,
-                       exclude_consensus: :boolean },
-             default_order: :confidence)
+                       exclude_consensus: :boolean })
   # Each of these is a named preset of `names:` options, backed by a
   # same-named Observation scope (Observation::Scopes) -- see there
   # for what each preset means. `[:string]`, not `:string`, so the

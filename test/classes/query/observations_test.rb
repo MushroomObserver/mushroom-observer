@@ -378,7 +378,7 @@ class Query::ObservationsTest < UnitTestCase
     name = names(:agaricus)
     params = { lookup: name.id, include_subtaxa: true }
     expects = Observation.names(**params).order_by_default
-    assert_query(expects, :Observation, names: params, order_by: :date)
+    assert_query(expects, :Observation, names: params)
   end
 
   # This test ensures we force empty results when the lookup gets no ids.
@@ -391,19 +391,17 @@ class Query::ObservationsTest < UnitTestCase
                         exclude_original_names: true).order_by_default,
       :Observation, names: { lookup: name.id,
                              include_subtaxa: true,
-                             exclude_original_names: true },
-                    order_by: :date
+                             exclude_original_names: true }
     )
   end
 
   def test_observation_names_with_no_modifiers
     params = { lookup: [names(:fungi).id] }
     scope = Observation.names(**params).order_by_default
-    assert_query(scope, :Observation, names: params, order_by: :date)
+    assert_query(scope, :Observation, names: params)
     assert_query(
       [],
-      :Observation, names: { lookup: [names(:macrolepiota_rachodes).id] },
-                    order_by: :date
+      :Observation, names: { lookup: [names(:macrolepiota_rachodes).id] }
     )
   end
 
@@ -430,7 +428,7 @@ class Query::ObservationsTest < UnitTestCase
     scope = Observation.names(**params).order_by_default
     assert_query_scope(
       [observations(:agaricus_campestris_obs).id], scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -442,7 +440,7 @@ class Query::ObservationsTest < UnitTestCase
                exclude_consensus: true }
     scope = Observation.names(**params).order_by_default
     assert_query_scope(
-      [], scope, :Observation, names: params, order_by: :date
+      [], scope, :Observation, names: params
     )
   end
 
@@ -457,7 +455,7 @@ class Query::ObservationsTest < UnitTestCase
       [observations(:agaricus_campestris_obs).id,
        observations(:coprinus_comatus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -471,7 +469,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query_scope(
       [observations(:coprinus_comatus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -485,7 +483,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query_scope(
       [observations(:coprinus_comatus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -502,7 +500,7 @@ class Query::ObservationsTest < UnitTestCase
        observations(:agaricus_campestrus_obs).id,
        observations(:agaricus_campestris_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -517,7 +515,7 @@ class Query::ObservationsTest < UnitTestCase
        observations(:agaricus_campestras_obs).id,
        observations(:agaricus_campestrus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -531,7 +529,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query_scope(
       [],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -549,7 +547,7 @@ class Query::ObservationsTest < UnitTestCase
        observations(:agaricus_campestris_obs).id,
        observations(:coprinus_comatus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -563,7 +561,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query_scope(
       [observations(:coprinus_comatus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date
+      :Observation, names: params
     )
   end
 
@@ -583,7 +581,7 @@ class Query::ObservationsTest < UnitTestCase
       [observations(:agaricus_campestros_obs).id,
        observations(:agaricus_campestrus_obs).id],
       scope,
-      :Observation, names: params, order_by: :date, species_lists: [spl.title]
+      :Observation, names: params, species_lists: [spl.title]
     )
 
     params = { lookup: agaricus_ssp.map(&:text_name) }
@@ -593,7 +591,7 @@ class Query::ObservationsTest < UnitTestCase
       [observations(:agaricus_campestras_obs).id,
        observations(:agaricus_campestris_obs).id],
       scope,
-      :Observation, names: params, order_by: :date, projects: [proj.title]
+      :Observation, names: params, projects: [proj.title]
     )
   end
 
