@@ -304,6 +304,29 @@ module Account
       assert_equal("name observation", rolf.reload.default_rss_type)
     end
 
+    # E.g. unchecking every type box before clicking Save Defaults,
+    # which submits no q[types]. No user[...] fields either, so
+    # params[:user] stays nil; update_password/update_prefs_from_form
+    # must not crash on that.
+    def test_update_with_empty_params
+      login("rolf")
+
+      patch(:update, params: {}, format: :turbo_stream)
+
+      assert_response(:success)
+    end
+
+    def test_normalize_rss_type_list_param_rejects_malformed_shape
+      login("rolf")
+      default_rss_type = rolf.default_rss_type
+
+      patch(:update,
+            params: { q: { types: { foo: "bar" } } },
+            format: :turbo_stream)
+
+      assert_equal(default_rss_type, rolf.reload.default_rss_type)
+    end
+
     def test_update_partial_submission_preserves_other_prefs
       login("rolf")
       assert_equal(true, rolf.thumbnail_maps)

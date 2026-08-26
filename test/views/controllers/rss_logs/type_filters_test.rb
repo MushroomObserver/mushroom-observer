@@ -112,10 +112,14 @@ module Views::Controllers::RssLogs
     # helper available. The integration test in rss_logs_controller_test.rb
     # covers the query param preservation functionality.
 
-    def test_no_hidden_fields_without_query
+    def test_no_query_hidden_fields_without_query
       html = render_component(nil, ["all"])
 
-      assert_html(html, "input[type='hidden']", count: 0)
+      # _method/authenticity_token always render (Save-Defaults needs
+      # them); only the query-derived hidden fields are conditional.
+      assert_html(html, "input[type='hidden']", count: 2)
+      assert_html(html, "input[type='hidden'][name='_method'][value='patch']")
+      assert_html(html, "input[type='hidden'][name='authenticity_token']")
     end
 
     def test_no_save_default_button_without_user

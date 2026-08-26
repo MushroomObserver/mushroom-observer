@@ -9,6 +9,11 @@ module Views::Controllers::RssLogs
     prop :types, _Array(::String)
     prop :user, _Nilable(::User), default: nil
 
+    # Only the Save-Defaults button needs this (its formmethod="post"
+    # override is a state-changing request); the Apply button's plain
+    # GET is exempt from CSRF checks entirely.
+    register_value_helper :form_authenticity_token
+
     # Not a Superform -- a multi-select checkbox filter, not a
     # single-model-bound field set. Submitting the combined state of
     # several independently-toggled checkboxes as one q[types][] array
@@ -29,6 +34,14 @@ module Views::Controllers::RssLogs
     private
 
     def render_hidden_fields
+      # `formmethod="post"` is the only verb HTML5 allows on a button
+      # override -- Rack::MethodOverride reads `_method` to route the
+      # Save-Defaults POST to Account::Preferences#update (PATCH).
+      # Inert for the Apply button's GET submission: MethodOverride
+      # only inspects `_method` on a POST request.
+      input(type: "hidden", name: "_method", value: "patch")
+      input(type: "hidden", name: "authenticity_token",
+            value: form_authenticity_token)
       return unless @query
 
       query_params_except_types.each do |key, value|

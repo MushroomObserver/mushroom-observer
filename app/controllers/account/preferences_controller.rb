@@ -81,6 +81,7 @@ module Account
     # prefs loop runs.
     def normalize_rss_type_list_param
       types = params.dig(:q, :types)
+      return unless types.is_a?(Array) || types.is_a?(String)
       return if types.blank?
 
       params[:user] ||= {}
@@ -105,7 +106,7 @@ module Account
     end
 
     def update_password
-      return unless (password = params[:user][:password])
+      return unless (password = params[:user]&.dig(:password))
 
       if password == params[:user][:password_confirmation]
         @user.change_password(password)
@@ -115,6 +116,8 @@ module Account
     end
 
     def update_prefs_from_form
+      return unless params[:user]
+
       prefs_types.each do |pref, type|
         next unless params[:user].key?(pref)
 
