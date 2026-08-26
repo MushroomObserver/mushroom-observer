@@ -25,9 +25,16 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
     # No JS driver here, so the button's formaction/formmethod submit
     # via a plain (non-Turbo) POST -- goes through the route table,
     # Rack::MethodOverride, and CSRF checks, unlike a controller test
-    # calling the action directly. A successful PATCH redirects to
-    # the edit page and saves the preference.
-    assert_match("Preferences", page.title)
+    # calling the action directly. A successful PATCH saves the
+    # preference and, via back: "rss_logs", redirects here instead
+    # of the account prefs edit page.
+    assert_match("Activity Log", page.title)
     assert_equal("glossary_term", user.reload.default_rss_type)
+    # The redirect carries q[types] through, so the page lands back
+    # on the same filter the user just saved, not an unfiltered index.
+    within("#log_filter_form") do
+      assert(has_checked_field?("type_glossary_term"))
+      assert(has_unchecked_field?("type_observation"))
+    end
   end
 end

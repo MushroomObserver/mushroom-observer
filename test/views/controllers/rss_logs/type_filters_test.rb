@@ -115,11 +115,13 @@ module Views::Controllers::RssLogs
     def test_no_query_hidden_fields_without_query
       html = render_component(nil, ["all"])
 
-      # _method/authenticity_token always render (Save-Defaults needs
-      # them); only the query-derived hidden fields are conditional.
-      assert_html(html, "input[type='hidden']", count: 2)
+      # _method/authenticity_token/back always render (Save-Defaults
+      # needs them); only the query-derived hidden fields are
+      # conditional.
+      assert_html(html, "input[type='hidden']", count: 3)
       assert_html(html, "input[type='hidden'][name='_method'][value='patch']")
       assert_html(html, "input[type='hidden'][name='authenticity_token']")
+      assert_html(html, "input[type='hidden'][name='back'][value='rss_logs']")
     end
 
     def test_no_save_default_button_without_user

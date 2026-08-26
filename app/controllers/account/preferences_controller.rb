@@ -65,13 +65,32 @@ module Account
       general_question
     ].freeze
 
+    # `back` is an enum of known destinations, not a URL -- same
+    # convention as HerbariumRecordsController's `:back`. Keeps this
+    # a plain lookup instead of trusting an attacker-controllable URL
+    # on this public POST endpoint. Used by the plain-HTML fallback
+    # path only; the turbo_stream path stays put regardless.
+    BACK_DESTINATIONS = %w[rss_logs].freeze
+
     private
 
     def render_update_response(success)
       if success
-        redirect_to(action: :edit)
+        redirect_to(back_url || { action: :edit })
       else
         render_edit_view_invalid # render to get the errors to display
+      end
+    end
+
+    def back_url
+      key = params.permit(:back)[:back].to_s
+      return nil unless BACK_DESTINATIONS.include?(key)
+
+      case key
+      when "rss_logs"
+        # Same types the user just saved as their default, so the
+        # page they land back on reflects it.
+        activity_logs_path(q: { types: params.dig(:q, :types) })
       end
     end
 

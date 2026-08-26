@@ -42,6 +42,12 @@ module Views::Controllers::RssLogs
       input(type: "hidden", name: "_method", value: "patch")
       input(type: "hidden", name: "authenticity_token",
             value: form_authenticity_token)
+      # Only reached by the plain-HTML fallback path (no JS/Turbo) --
+      # sends the user back to the activity log instead of the
+      # account prefs edit page. The Turbo path stays on this page
+      # regardless. `back` is an enum key, not a URL -- see
+      # Account::PreferencesController::BACK_DESTINATIONS.
+      input(type: "hidden", name: "back", value: "rss_logs")
       return unless @query
 
       query_params_except_types.each do |key, value|

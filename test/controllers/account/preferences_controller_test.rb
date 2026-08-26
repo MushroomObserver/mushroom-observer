@@ -366,5 +366,23 @@ module Account
       assert_flash_error
       assert_equal("rolf", rolf.reload.login)
     end
+
+    def test_update_html_redirects_to_back_destination
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] }, back: "rss_logs" })
+
+      assert_redirected_to(activity_logs_path(q: { types: %w[observation] }))
+    end
+
+    def test_update_html_unknown_back_falls_back_to_edit
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] }, back: "bogus" })
+
+      assert_redirected_to(action: :edit)
+    end
   end
 end
