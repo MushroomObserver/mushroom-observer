@@ -2002,7 +2002,7 @@
   show_name_deprecated_synonyms: Deprecated Synonyms
   show_name_misspelled_synonyms: Misspellings
   show_name_misspelling_correct: "[:correct_spelling.ti]"
-  show_name_refresh_classification: Refresh from Genus
+  show_name_refresh_classification: Refresh from Parent
   show_name_propagate_classification: Propagate to Subtaxa
   show_name_lifeform: Lifeform
   show_name_propagate_lifeform: Propagate to Subtaxa
