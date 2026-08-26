@@ -7,6 +7,7 @@ module Views::Controllers::RssLogs
   class TypeFilters < Views::Base
     prop :query, _Nilable(::Query)
     prop :types, _Array(::String)
+    prop :user, _Nilable(::User), default: nil
 
     # Not a Superform -- a multi-select checkbox filter, not a
     # single-model-bound field set. Submitting the combined state of
@@ -48,6 +49,7 @@ module Views::Controllers::RssLogs
           render_everything_button
           render_type_buttons
           render_submit_button
+          render_save_default_button
         end
       end
     end
@@ -83,6 +85,21 @@ module Views::Controllers::RssLogs
     # stands out as the commit action.
     def render_submit_button
       Button(type: :submit, name: :apply.ti, size: :sm)
+    end
+
+    # A second submit button on the same form as "Apply," targeting a
+    # different action via `formaction`/`formmethod` -- whatever's
+    # checked at the moment of click is what gets saved, the same
+    # values "Apply" would filter by. `data-turbo="true"` opts just
+    # this button into Turbo, overriding the form's own
+    # `data-turbo="false"`, so the response is a flash-only
+    # confirmation with no page navigation.
+    def render_save_default_button
+      return unless show_make_default?
+
+      Button(type: :submit, name: :rss_make_default.t, variant: :outline,
+             size: :sm, formaction: account_preferences_path,
+             formmethod: "post", data: { turbo: "true" })
     end
 
     # Individual type checkbox styled as a Bootstrap button. Routes
@@ -129,6 +146,10 @@ module Views::Controllers::RssLogs
 
     def type_checked?(type)
       @types.include?(type) || @types == ["all"]
+    end
+
+    def show_make_default?
+      @user && @user.default_rss_type.to_s.split.sort != @types
     end
 
     def query_params_except_types

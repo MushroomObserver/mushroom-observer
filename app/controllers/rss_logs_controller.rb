@@ -75,13 +75,6 @@ class RssLogsController < ApplicationController
     update_stored_query(query) # also stores query in session
     tags = RssLog.normalize_type_tags(query.params[:types])
     @types = tags.empty? ? ["none"] : tags.sort
-
-    # Let the user make this their default and fine tune.
-    if @user && params[:make_default] == "1"
-      @user.default_rss_type = @types.join(" ")
-      @user.save_without_our_callbacks
-    end
-
     query
   end
 

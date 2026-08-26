@@ -12,13 +12,14 @@ module Account
     def update
       load_user_licenses
 
+      normalize_rss_type_list_param
       update_password
       update_prefs_from_form
+      success = prefs_changed_successfully
 
-      if prefs_changed_successfully
-        redirect_to(action: :edit)
-      else
-        render_edit_view_invalid # render to get the errors to display
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_flash_update) }
+        format.html { render_update_response(success) }
       end
     end
 
@@ -66,6 +67,26 @@ module Account
 
     private
 
+    def render_update_response(success)
+      if success
+        redirect_to(action: :edit)
+      else
+        render_edit_view_invalid # render to get the errors to display
+      end
+    end
+
+    # "Save these as my defaults" on the RSS-logs filter form submits
+    # the same q[types][] checkboxes the Apply button uses, not
+    # user[default_rss_type] directly. Translate before the generic
+    # prefs loop runs.
+    def normalize_rss_type_list_param
+      types = params.dig(:q, :types)
+      return if types.blank?
+
+      params[:user] ||= {}
+      params[:user][:default_rss_type] = Array(types).join(" ")
+    end
+
     def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Account::Preferences::Edit.new(
                user: @user, licenses: @licenses,
@@ -95,14 +116,19 @@ module Account
 
     def update_prefs_from_form
       prefs_types.each do |pref, type|
-        val = params[:user][pref]
-        case type
-        when :string  then update_pref(pref, val.to_s.strip)
-        when :integer then update_pref(pref, val.to_i)
-        when :boolean then update_pref(pref, val == "1")
-        when :enum    then update_pref(pref, val)
-        when :content_filter then update_content_filter(pref, val)
-        end
+        next unless params[:user].key?(pref)
+
+        apply_pref(pref, type, params[:user][pref])
+      end
+    end
+
+    def apply_pref(pref, type, val)
+      case type
+      when :string  then update_pref(pref, val.to_s.strip)
+      when :integer then update_pref(pref, val.to_i)
+      when :boolean then update_pref(pref, val == "1")
+      when :enum    then update_pref(pref, val)
+      when :content_filter then update_content_filter(pref, val)
       end
     end
 
@@ -122,13 +148,7 @@ module Account
 
     def prefs_changed_successfully
       result = false
-      if !@user.changed
-        # NOTE: The next line appears to be unreachable
-        # because @user.changed is always truthy. (It's at least `[]`.)
-        # Perhaps `!@user.changed?` was intended, but it breaks tests.
-        # 2023-06-11 JDC
-        flash_notice(:runtime_no_changes.t)
-      elsif !@user.errors.empty? || !@user.save
+      if !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
       else
         flash_notice(:runtime_prefs_success.t)
@@ -141,6 +161,7 @@ module Account
     # Used by update_prefs_from_form
     def prefs_types # rubocop:disable Metrics/MethodLength
       [
+        [:default_rss_type, :string],
         [:email_comments_owner, :boolean],
         [:email_comments_response, :boolean],
         [:email_general_commercial, :boolean],

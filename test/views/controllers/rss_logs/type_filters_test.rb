@@ -118,10 +118,40 @@ module Views::Controllers::RssLogs
       assert_html(html, "input[type='hidden']", count: 0)
     end
 
+    def test_no_save_default_button_without_user
+      html = render_component(nil, ["observation"])
+
+      assert_no_html(html, "button[formaction]")
+    end
+
+    def test_no_save_default_button_when_types_match_default
+      user = users(:rolf)
+      user.update!(default_rss_type: "observation")
+
+      html = render_component(nil, ["observation"], user: user)
+
+      assert_no_html(html, "button[formaction]")
+    end
+
+    def test_save_default_button_when_types_differ_from_default
+      user = users(:rolf)
+      user.update!(default_rss_type: "all")
+
+      html = render_component(nil, ["observation"], user: user)
+
+      assert_html(
+        html,
+        "#log_filter_form button[type='submit']" \
+        "[formaction='#{routes.account_preferences_path}'][formmethod='post']" \
+        "[data-turbo='true']",
+        text: :rss_make_default.t
+      )
+    end
+
     private
 
-    def render_component(query, types)
-      component = TypeFilters.new(query:, types:)
+    def render_component(query, types, user: nil)
+      component = TypeFilters.new(query:, types:, user:)
       render(component)
     end
   end

@@ -91,16 +91,14 @@ class RssLogsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_user_default_rss_log
-    # Prove that user can change his default rss log type.
+  # "Make this my default" moved to Account::PreferencesController
+  # (issue #5224) -- a stray `?make_default=1` on the index is inert.
+  def test_make_default_param_is_a_noop_on_index
     login("rolf")
     get(:index, params: { q: { model: "RssLog", type: "glossary_term" },
                           make_default: 1 })
-    assert_equal("glossary_term", rolf.reload.default_rss_type)
-    # Test that this actually works
-    q = @controller.q_param(QueryRecord.last.query)
-    get(:index, params: { q: q })
     assert_select("body.rss_logs__index")
+    assert_not_equal("glossary_term", rolf.reload.default_rss_type)
   end
 
   # Prove that user content_filter works on rss_log

@@ -291,5 +291,57 @@ module Account
         end
       end
     end
+
+    # "Save these as my defaults" on the RSS-logs filter form submits
+    # q[types][], not user[default_rss_type] directly.
+    def test_normalize_rss_type_list_param
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[name observation] } },
+            format: :turbo_stream)
+
+      assert_equal("name observation", rolf.reload.default_rss_type)
+    end
+
+    def test_update_partial_submission_preserves_other_prefs
+      login("rolf")
+      assert_equal(true, rolf.thumbnail_maps)
+      assert_equal(true, rolf.email_html)
+
+      patch(:update,
+            params: { q: { types: %w[observation] } },
+            format: :turbo_stream)
+
+      user = rolf.reload
+      assert_equal("observation", user.default_rss_type)
+      assert_equal(true, user.thumbnail_maps)
+      assert_equal(true, user.email_html)
+    end
+
+    def test_update_turbo_stream_success
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_flash(:runtime_prefs_success)
+    end
+
+    def test_update_turbo_stream_failure
+      login("rolf")
+
+      patch(:update,
+            params: { user: { login: "mary" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_flash_error
+      assert_equal("rolf", rolf.reload.login)
+    end
   end
 end
