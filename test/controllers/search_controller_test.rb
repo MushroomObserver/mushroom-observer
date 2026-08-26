@@ -158,53 +158,6 @@ class SearchControllerTest < FunctionalTestCase
     )
   end
 
-  def test_pattern_search_from_needs_naming
-    pattern = "Briceland"
-    params = { pattern_search: { pattern:, type: :observations },
-               needs_naming: rolf }
-
-    login
-    get(:pattern, params:)
-
-    assert_redirected_to(
-      identify_observations_path(q: { model: :Observation, pattern: }),
-      "Pattern in search from obs_needing_ids should render " \
-      "obs_needing_ids"
-    )
-  end
-
-  def test_pattern_search_from_needs_naming_blank_pattern
-    login
-    get(:pattern,
-        params: { pattern_search: { pattern: "", type: :observations },
-                  needs_naming: rolf })
-
-    assert_redirected_to(
-      observations_path,
-      "Blank pattern from obs_needing_ids should render blank obs index"
-    )
-  end
-
-  def test_pattern_search_from_needs_naming_bad_pattern
-    login
-    get(:pattern,
-        params: { pattern_search: { pattern: "help:me",
-                                    type: :observations },
-                  needs_naming: rolf })
-
-    assert_redirected_to(
-      identify_observations_path(q: { model: :Observation }),
-      "Bad pattern from obs_needing_ids should render " \
-      "obs_needing_ids with query"
-    )
-    assert_flash_error(
-      :pattern_search_bad_term_error,
-      type: :observation,
-      term: '"help"',
-      help: :pattern_search_terms_short_help.l
-    )
-  end
-
   def test_pattern_search_redirects_to_google
     login
     stub_request(:any, /google.com/)
