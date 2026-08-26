@@ -7,7 +7,12 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
   # Prove that MO offers to make non-default log the user's default.
   def test_user_default_rss_log
     user = users(:zero_user)
+    original_default = user.default_rss_type
     login(user)
+    assert_not_equal("glossary_term", original_default,
+                     "Fixture default_rss_type already matches the " \
+                     "type this test selects -- pick a fixture where " \
+                     "it doesn't, so the assertion below proves a change")
     visit("/activity_logs")
     within("#log_filter_form") do
       click_link("Glossary")
@@ -29,7 +34,9 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
     # preference and, via back: "rss_logs", redirects here instead
     # of the account prefs edit page.
     assert_match("Activity Log", page.title)
-    assert_equal("glossary_term", user.reload.default_rss_type)
+    new_default = user.reload.default_rss_type
+    assert_equal("glossary_term", new_default)
+    assert_not_equal(original_default, new_default)
     # The redirect carries q[types] through, so the page lands back
     # on the same filter the user just saved, not an unfiltered index.
     within("#log_filter_form") do
