@@ -631,6 +631,8 @@ MushroomObserver::Application.routes.draw do
       get("field_slip_scan", to: "observations/field_slip_scans#show")
       get("map", to: "observations/maps#show")
       get("map_popup", to: "observations/maps#popup")
+      get("name_info_panel", to: "observations/name_info_panels#show",
+                             as: "name_info_panel_for")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
       get("emails/new", to: "observations/emails#new",

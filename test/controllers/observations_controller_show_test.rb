@@ -482,12 +482,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs_id = observations(:coprinus_comatus_obs).id
     get(:show, params: { id: obs_id })
 
-    assert_select("a[href *= 'images.google.com']")
-
-    # There is a MycoBank link which includes taxon name and MycoBank language
-    assert_select("a[href *= 'mycobank.org']") do
-      assert_select("a[href *= '/Coprinus%20comatus']")
-    end
+    # Google Images / MycoBank links now live in the "About this Taxon"
+    # panel's lazily-fetched Turbo Frame (#5093), not inline on the show
+    # page -- see name_info_panels_controller_test.rb for that coverage.
 
     # MycoPortal link now lives behind the "Shared with" MCP badge's info
     # modal, not inline on the page -- see external_links_controller_test.rb

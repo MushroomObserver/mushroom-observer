@@ -1,82 +1,61 @@
 # frozen_string_literal: true
 
-# "About this taxon" panel on the observation show page. Two
-# columns: "On MO" (related-name links + alt-descriptions list +
-# distribution map) and "On the web" (external taxonomic search
-# sites the user has enabled).
+# "About this taxon" panel on the observation show page. Collapsed by
+# default -- an empty Turbo Frame placeholder -- to keep the page's
+# initial load from paying for the name subtree (synonyms, alt
+# descriptions, interests) on every view (#5093). Expanding the panel
+# sends a real GET to `Observations::NameInfoPanelsController#show`
+# carrying a `Turbo-Frame` header, fetching the two-column "On MO" /
+# "On the web" content rendered by `Views::Controllers::Observations::
+# NameInfoPanels::Show`.
 class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
 
+  BODY_ID = "observation_name_info_body"
+
   def view_template
-    Panel(panel_id: "observation_name_info",
-          panel_class: "small") do |panel|
+    Panel(panel_id: "observation_name_info", panel_class: "small",
+          collapse_target: "##{BODY_ID}", expanded: false) do |panel|
       panel.with_heading { :about_this_taxon.l }
-      panel.with_body { render_body }
+      panel.with_heading_links { render_toggle }
+      panel.with_body(collapse: true) { render_frame }
     end
   end
 
   private
 
-  def render_body
-    Row do
-      Column(xs: 6) do
-        div(class: "font-weight-bold") { plain("#{:on_mo.l}:") }
-        render_links_on_mo
-      end
-      Column(xs: 6) do
-        div(class: "font-weight-bold") { plain("#{:on_the_web.l}:") }
-        render_links_on_web
-      end
+  # Must match `Views::Controllers::Observations::NameInfoPanels::
+  # Show#frame_id`.
+  def frame_id = "name_info_frame_#{@obs.id}"
+
+  # Bootstrap's collapse.js only calls preventDefault() when
+  # `data-target` is absent -- passing `fallback_href:` makes
+  # `Link::CollapseToggle` set `data-target` explicitly (see
+  # `Components::Panel#collapse_toggle_data`'s comment), so this
+  # click's real `href` navigation goes through to Turbo, which
+  # intercepts it via `data-turbo-frame` and fetches instead of doing
+  # a full-page nav. Not using Panel's own `collapsible:` auto-toggle
+  # here since it deliberately skips `data-target` for id-based
+  # targets, blocking exactly this fetch.
+  def render_toggle
+    Link(type: :collapse_toggle,
+         target_id: BODY_ID,
+         fallback_href: name_info_panel_for_observation_path(@obs.id),
+         class: "panel-collapse-trigger ml-3",
+         data: { turbo_frame: frame_id }) do
+      Icon(type: :chevron_down, title: :open.ti, class: "active-icon")
+      Icon(type: :chevron_up, title: :close.ti)
     end
   end
 
-  # Three groups, each rendered as a block-level div wrapping the link:
-  # related-name filtered indexes, alt-descriptions list, and
-  # the per-name distribution map link.
-  def render_links_on_mo
-    related_name_tabs.each { |tab| render_tab_link(tab) }
-    render_alt_descriptions
-    render_tab_link(occurrence_map_tab)
-  end
-
-  def render_links_on_web
-    web_name_tabs.each { |tab| render_tab_link(tab) }
-  end
-
-  def related_name_tabs
-    ::Tab::Observation::RelatedNameTabs.new(
-      user: @user, name: @obs.name
-    ).reject { |tab| tab.to_a.empty? }
-  end
-
-  def web_name_tabs
-    ::Tab::Observation::WebNameTabs.new(
-      user: @user, name: @obs.name
-    ).reject { |tab| tab.to_a.empty? }
-  end
-
-  def occurrence_map_tab
-    ::Tab::Name::OccurrenceMap.new(name: @obs.name)
-  end
-
-  # Renders the alt-description list inline — same view used by
-  # the names / locations show pages, just no panel chrome here.
-  def render_alt_descriptions
-    render(::Views::Controllers::Descriptions::List.new(
-             user: @user, object: @obs.name, type: :name
-           ))
-  end
-
-  def render_tab_link(tab)
-    div do
-      if tab.html_options[:external]
-        Link(type: :external, tab: tab)
-      else
-        content, path, opts = tab.to_a
-        a(href: url_for(path),
-          class: opts[:class]) { trusted_html(content) }
-      end
-    end
+  # `target: "_top"` -- Turbo's frame swap keeps this placeholder
+  # element's own attributes, not the fetched response's frame
+  # attributes, so the escape-the-frame target has to live here too
+  # (see `Observations::NameInfoPanels::Show#view_template`) for
+  # links inside the fetched content to navigate normally instead of
+  # trying to swap into this frame.
+  def render_frame
+    turbo_frame_tag(frame_id, target: "_top")
   end
 end

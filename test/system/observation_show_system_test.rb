@@ -31,6 +31,36 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector(".print_label_observation_#{@obs.id}")
   end
 
+  # The "About this Taxon" panel starts collapsed as an empty Turbo
+  # Frame placeholder; content only exists once expanded (#5093). A
+  # non-JS test (lurker_integration_test.rb, rack_test driver) can't
+  # exercise this -- moved here so Turbo's fetch actually runs.
+  def test_name_info_panel_lazy_load
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
+
+    name = @obs.name
+    frame_id = "name_info_frame_#{@obs.id}"
+
+    # Not fetched yet -- panel starts collapsed.
+    assert_no_selector("##{frame_id} a", visible: :all)
+
+    within("#observation_name_info") { find(".panel-collapse-trigger").click }
+
+    # Turbo fetches the frame's content on expand.
+    assert_selector("##{frame_id} a", wait: 6)
+    # Title bar's own name link, plus the panel's "About <name>" link.
+    assert_selector("#content a[href^='#{name_path(name)}']", minimum: 2)
+
+    within("##{frame_id}") { click_link("About #{name.text_name}") }
+    assert_selector("body.names__show")
+
+    click_link("Occurrence Map")
+    assert_selector("body.maps__show")
+  end
+
   def test_add_and_edit_collection_numbers
     rolf = users("rolf")
     login!(rolf)
