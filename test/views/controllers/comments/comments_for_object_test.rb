@@ -102,7 +102,7 @@ module Views::Controllers::Comments
       # full comments index for this target.
       assert_html(html, "#comments .list-group-item.comment", count: 1)
       assert_html(html, "a[href='#{routes.comments_path(
-        target: @observation.id, type: @observation.class.name
+        target: { type: @observation.class.name, id: @observation.id }
       )}']", text: :show_comments_and_more.t(num: and_more).as_displayed)
     end
 

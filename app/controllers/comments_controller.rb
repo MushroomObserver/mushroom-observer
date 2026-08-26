@@ -74,10 +74,7 @@ class CommentsController < ApplicationController
   # with the bookmarked `q[target][...]` query path. It flashes on an
   # unrecognized type or nonexistent id.
   def target
-    create_query_from_url_params(
-      :Comment, params.merge(target: { type: params[:type],
-                                       id: params[:target] })
-    )
+    create_query_from_url_params(:Comment, params)
   end
 
   def index_display_opts(opts, query)
