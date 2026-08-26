@@ -168,12 +168,12 @@ class InatImport < ApplicationRecord
     [count.to_i - MAX_IMPORTABLE, 0].max
   end
 
-  # inat_url is stored as a normalized query string, Prepend the site URL
-  # so a reimport link can correctly fill the "Search URL" field
+  # original_inat_url holds the user's literal URL (UI or API host), saved
+  # so a reimport link can repopulate the "search URL" field with the same
+  # URL rather than guessing a host from the normalized inat_url query
+  # string alone.
   def reimport_url
-    return nil if inat_url.blank?
-
-    "#{Inat::Constants::SITE}/observations?#{inat_url}"
+    original_inat_url.presence
   end
 
   def ignored_total_count

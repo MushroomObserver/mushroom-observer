@@ -422,26 +422,37 @@ class InatImportTest < ActiveSupport::TestCase
     )
   end
 
-  def test_reimport_url_wraps_stored_query_in_site_url
+  def test_reimport_url_returns_stored_original_ui_url
     import = inat_imports(:rolf_inat_import)
-    stored_query = "taxon_id=48701&user_login=rolf"
-    import.update_columns(inat_url: stored_query)
+    original_url = "https://www.inaturalist.org/observations?taxon_id=48701"
+    import.update_columns(original_inat_url: original_url)
 
     assert_equal(
-      "#{Inat::Constants::SITE}/observations?#{stored_query}",
-      import.reimport_url,
-      "reimport_url should wrap the stored bare query string in the " \
-      "iNat site URL so it round-trips as a valid search URL"
+      original_url, import.reimport_url,
+      "reimport_url should return the stored original URL verbatim"
     )
   end
 
-  def test_reimport_url_nil_when_inat_url_blank
+  def test_reimport_url_returns_stored_original_api_url
     import = inat_imports(:rolf_inat_import)
-    import.update_columns(inat_url: nil)
+    original_url =
+      "https://api.inaturalist.org/v1/observations?taxon_id=48701&d1=2020-01-01"
+    import.update_columns(original_inat_url: original_url)
+
+    assert_equal(
+      original_url, import.reimport_url,
+      "reimport_url should preserve the API host, not rewrite it to the " \
+      "UI host -- UI and API search params do not fully overlap"
+    )
+  end
+
+  def test_reimport_url_nil_when_original_inat_url_blank
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(original_inat_url: nil)
 
     assert_nil(
       import.reimport_url,
-      "reimport_url should be nil when no inat_url was stored"
+      "reimport_url should be nil when no original_inat_url was stored"
     )
   end
 end
