@@ -56,6 +56,13 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { q: { type: [] } })
     assert_select("body.rss_logs__index")
 
+    # An empty string, not an empty array -- what Account::
+    # PreferencesController's back_url redirect produces for
+    # q[types] when no types were submitted (activity_logs_path(q: {
+    # types: nil }) serializes to ?q[types]=, not an absent param).
+    get(:index, params: { q: { types: "" } })
+    assert_select("body.rss_logs__index")
+
     # Top-level :type/:types are query_attr aliases now -- no redirect,
     # renders directly (see test_old_style_type_param_no_longer_redirects).
     get(:index, params: { type: "all" })

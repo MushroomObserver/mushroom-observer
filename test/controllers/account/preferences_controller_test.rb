@@ -413,5 +413,18 @@ module Account
 
       assert_redirected_to(action: :edit)
     end
+
+    # Unchecking every type box before clicking Save Defaults submits
+    # no q[types] (normalize_rss_type_list_param leaves params[:user]
+    # unset) -- combined with the plain-HTML fallback path and
+    # back: "rss_logs", confirms back_url's activity_logs_path(q: {
+    # types: nil }) call does not raise.
+    def test_update_html_no_types_with_back_redirects_cleanly
+      login("rolf")
+
+      patch(:update, params: { back: "rss_logs" })
+
+      assert_redirected_to(activity_logs_path(q: { types: nil }))
+    end
   end
 end
