@@ -4,8 +4,8 @@
 # (#5186). Duplicate namings arose from name merges repointing without
 # folding, an import that re-created rather than reused, and web-form
 # double-submits; the code paths are fixed (#5204) and the existing
-# duplicates are collapsed by projects/5186/dedup_namings.rb, which must
-# run before this migration -- a leftover duplicate makes add_index fail.
+# duplicates are collapsed by script/dedup_namings.rb, which must run
+# before this migration -- a leftover duplicate makes add_index fail.
 #
 # Occurrence members keep their own copies: each is a distinct
 # Observation, so (observation_id, user_id, name_id) still differs.
