@@ -123,17 +123,11 @@ class SearchController < ApplicationController
     query = query_from_pattern(model_name, pattern)
 
     # Finally we can redirect.
-    if coming_from_obs_needing_ids?(model_name)
-      redirect_to(identify_observations_path(q: query.q_param))
-    elsif single_result?(query)
+    if single_result?(query)
       redirect_to(send(:"#{type.to_s.singularize}_path", query.first_id))
     else
       redirect_to(send(:"#{type}_path", params: { q: query.q_param }))
     end
-  end
-
-  def coming_from_obs_needing_ids?(model_name)
-    model_name == :Observation && params[:needs_naming]
   end
 
   def single_result?(query)
