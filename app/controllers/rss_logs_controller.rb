@@ -70,13 +70,7 @@ class RssLogsController < ApplicationController
     end
   end
 
-  # Hook runs before template displayed. Must return query. Unlike
-  # every other controller's version of this hook, this one has a
-  # write side effect (persisting `@user.default_rss_type`), not just
-  # session/ivar bookkeeping -- a future generic dispatcher (issue
-  # #5140) can't assume every `filtered_index_final_hook` override is
-  # safe to collapse away; this one needs to keep running on every
-  # index render, filtered or not.
+  # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     update_stored_query(query) # also stores query in session
     tags = RssLog.normalize_type_tags(query.params[:types])
