@@ -4348,6 +4348,8 @@
   query_validation_record: "Value for ':[param]' should be id, string or :[type] instance, got: [val]."
   query_validation_id_in_set: "Value for :id_in_set should be an array of ids or :[type] instances, got: [val]."
   query_validation_string: "Value for ':[param]' should be a string or symbol, got a :[class] : [val]."
+  query_validation_invalid_polymorphic_type: "Value for ':[param]' should be a valid type, got: [type]."
+  query_validation_polymorphic_not_found: "Value for ':[param]' refers to a :[type] that does not exist: [id]."
   query_validation_date: "Value for ':[param]' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
   query_validation_time: "Value for ':[param]' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
   query_validation_order_by_unsupported: "Query::[models] does not accept order_by: `[key]` — no [model].order_by_[base] scope is defined."
@@ -4442,6 +4444,7 @@
   query_title_has: title has
   query_types: types
   query_url_has: url has
+  query_in_country: country
 
   # in box
   query_in_box: in box
@@ -4469,6 +4472,12 @@
   query_exclude_original_names: exclude original
   query_include_all_name_proposals: all proposed
   query_exclude_consensus: exclude consensus
+  query_look_alikes: look-alikes
+  query_related_taxa: related taxa
+  query_any_name: any name
+  query_name_proposed: name proposed
+  query_this_name: this name
+  query_other_names: other names
 
   # records
   query_external_sites: "[:sites]"

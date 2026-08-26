@@ -292,6 +292,7 @@ class Query
   include Query::Modules::Seek
   include Query::Modules::WindowCache
   include Query::Modules::Validation
+  include Query::Modules::HashValidation
 
   attr_writer :record
 

@@ -10,13 +10,7 @@ class Tab::Name::ObsLink::AnyName < Tab::Name::ObsLink
     :obss_of_taxon
   end
 
-  def build_query
-    q = Query.create_query(
-      :Observation,
-      names: { lookup: @name.id, include_synonyms: true },
-      order_by: :confidence
-    )
-    q.save
-    q
+  def filter_attr
+    :any_name
   end
 end

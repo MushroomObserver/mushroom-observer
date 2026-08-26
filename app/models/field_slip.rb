@@ -76,11 +76,6 @@ class FieldSlip < AbstractModel
       where(observations: { id: observation_ids }).distinct
   }
 
-  scope :project, lambda { |project|
-    project_ids = Lookup::Projects.new(project).ids
-    where(project: project_ids)
-  }
-
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids
     where(project: project_ids).distinct

@@ -88,6 +88,19 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash(:runtime_no_matches, type: :herbarium_record)
   end
 
+  # A bad observation id redirects to the observations index. See
+  # redirect_to: in query_attr (app/extensions/class.rb).
+  def test_index_observation_id_bad_id
+    bad_observation_id = Observation.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { observation: bad_observation_id })
+
+    assert_flash(:runtime_object_not_found, type: :observation,
+                                            id: bad_observation_id)
+    assert_redirected_to(observations_path)
+  end
+
   ##############################################################################
   # SHOW
   #

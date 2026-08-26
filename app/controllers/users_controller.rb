@@ -83,8 +83,7 @@ class UsersController < ApplicationController
   # falls through to the generic single-result auto-redirect
   # (display_opts has no always_index override, same as before).
   def pattern
-    query = create_query(:User, pattern: params[:pattern].to_s)
-    [query, {}]
+    create_query_from_url_params(:User, params)
   end
 
   # Hook runs before template displayed. Must return query.
