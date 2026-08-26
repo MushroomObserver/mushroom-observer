@@ -113,8 +113,11 @@ module Image::Scopes
 
     # Excludes images without observations!
     scope :pattern, lambda { |phrase|
-      cols = Image.searchable_columns + Observation[:where] + Name[:search_name]
-      joins(observations: :name).search_columns(cols, phrase)
+      exact_match_or(phrase) do
+        cols = Image.searchable_columns + Observation[:where] +
+               Name[:search_name]
+        joins(observations: :name).search_columns(cols, phrase)
+      end
     }
 
     scope :observation_query, lambda { |hash|

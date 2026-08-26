@@ -476,6 +476,15 @@ class AbstractModelTest < UnitTestCase
     )
   end
 
+  def test_exact_match
+    obs = Observation.first
+
+    assert_equal(obs, Observation.exact_match(obs.id.to_s))
+    assert_nil(Observation.exact_match((Observation.maximum(:id) + 1).to_s))
+    assert_nil(Observation.exact_match("not a number"))
+    assert_nil(Observation.exact_match(""))
+  end
+
   # fixture for above tests
   class ::Phony < AbstractModel
   end

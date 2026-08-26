@@ -144,9 +144,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = (Project[:title] + Project[:summary].coalesce("") +
-            Project[:field_slip_prefix].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (Project[:title] + Project[:summary].coalesce("") +
+              Project[:field_slip_prefix].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
   # Accepts multiple regions, see Observation.region for why this is singular
   scope :region, lambda { |place_names|

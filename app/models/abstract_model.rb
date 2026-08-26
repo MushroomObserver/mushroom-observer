@@ -9,6 +9,8 @@
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
+#  exact_match::        Does a phrase identify a single record outright
+#                       (id, or a class-specific override)?
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
 #                       Add limit to a SQL query, then pass it to find_by_sql.
@@ -106,6 +108,14 @@ class AbstractModel < ApplicationRecord
     find(id)
   rescue ActiveRecord::RecordNotFound
     nil
+  end
+
+  # Does `phrase` identify a single record, without a fuzzy `pattern`
+  # search? Used by SearchController to short-circuit a pattern search
+  # straight to the show page. Override where a class has another
+  # unambiguous identifier (User overrides for verified email).
+  def self.exact_match(phrase)
+    safe_find(phrase) if /^\d+$/.match?(phrase)
   end
 
   # At minimum this list should include all objects that can have

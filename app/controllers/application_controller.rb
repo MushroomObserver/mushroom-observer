@@ -35,6 +35,7 @@ class ApplicationController < ActionController::Base
   include QueryParamAliases
   include ControllerLabels
   include Indexes
+  include PatternSearchState
   include SectionUpdater
   include ModalUpdater
   include ViewerAwareFormat

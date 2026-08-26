@@ -77,15 +77,6 @@ class UsersController < ApplicationController
     index_query_authorized?
   end
 
-  # Display list of Users whose name, notes, etc. match a string pattern.
-  # An exact numeric-id or verified-email match wins outright (see
-  # User.exact_match/User.pattern); a single fuzzy login/name match
-  # falls through to the generic single-result auto-redirect
-  # (display_opts has no always_index override, same as before).
-  def pattern
-    create_query_from_url_params(:User, params)
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)

@@ -261,17 +261,22 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern, which instantiates the
-  # PatternSearch::Observation and then redirects here with :q param
-  def test_index_pattern_param_redirected_to_search
+  # The bare `pattern` param (maintained for backwards compatibility with
+  # old bookmarks) builds the query directly now, via
+  # PatternSearch::Observation, in place of redirecting through
+  # SearchController#pattern.
+  def test_index_pattern_param_builds_query_directly
     pattern = "Agaricus"
 
-    login
+    setup_rolfs_index
     get(:index, params: { pattern: })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :observations })
-    )
+
+    # Pattern search guesses this is a name query
+    assert_page_title(:observations.ti)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
+    count = Observation.pattern(pattern).count
+    assert_results(text: /#{pattern}/i, count:)
   end
 
   def setup_rolfs_index
