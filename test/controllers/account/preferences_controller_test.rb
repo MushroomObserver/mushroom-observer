@@ -304,6 +304,35 @@ module Account
       assert_equal("name observation", rolf.reload.default_rss_type)
     end
 
+    # Selecting "Everything" checks every type box (type_checked? in
+    # type_filters.rb treats @types == ["all"] as "check them all"),
+    # so Save Defaults submits every individual type tag. Collapses
+    # back to "all" instead of storing every tag individually.
+    def test_update_selecting_everything_collapses_to_all
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: RssLog::ALL_TYPE_TAGS.map(&:to_s) },
+                      back: "rss_logs" })
+
+      assert_response(:redirect)
+      assert_equal("all", rolf.reload.default_rss_type)
+    end
+
+    # Not just "select everything" -- any 5+ types selected (out of
+    # the 7 tags) is long enough to exceed the old limit: 40 column,
+    # even for a deliberate manual selection that isn't literally
+    # "all" and so doesn't collapse to that value.
+    def test_update_selecting_all_but_one_does_not_exceed_column_limit
+      login("rolf")
+      types = RssLog::ALL_TYPE_TAGS.map(&:to_s) - ["name"]
+
+      patch(:update, params: { q: { types: types }, back: "rss_logs" })
+
+      assert_response(:redirect)
+      assert_equal(types.join(" "), rolf.reload.default_rss_type)
+    end
+
     # E.g. unchecking every type box before clicking Save Defaults,
     # which submits no q[types]. No user[...] fields either, so
     # params[:user] stays nil; update_password/update_prefs_from_form

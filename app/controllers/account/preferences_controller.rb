@@ -104,7 +104,18 @@ module Account
       return if types.blank?
 
       params[:user] ||= {}
-      params[:user][:default_rss_type] = Array(types).join(" ")
+      params[:user][:default_rss_type] = rss_type_list_value(Array(types))
+    end
+
+    # "Everything" checks every type box (type_checked? in
+    # type_filters.rb treats @types == ["all"] as "check them all"),
+    # so this collapses back to the single "all" value instead of
+    # storing every tag individually.
+    def rss_type_list_value(tags)
+      all_tags = RssLog::ALL_TYPE_TAGS.map(&:to_s)
+      return "all" if tags.sort == all_tags.sort
+
+      tags.join(" ")
     end
 
     def render_edit_view(status: :ok, **render_opts)
