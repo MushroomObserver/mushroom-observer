@@ -19,7 +19,8 @@
 #
 # Subclasses MUST implement:
 #   #label_key      — Symbol for the link label (e.g. `:obss_of_this_name`)
-#   #build_query    — returns the (saved) `Query::Observations` instance
+#   #filter_attr    — Query::Observations attr for this Tab's preset
+#                      (e.g. `:this_name`, `:any_name`)
 #
 # The base inherits `Tab::QueryLink`'s memoized `#query` and
 # `#path` (via `controller.add_q_param(observations_path, query)`).
@@ -62,8 +63,18 @@ class Tab::Name::ObsLink < Tab::QueryLink
 
   private
 
+  def build_query
+    q = Query.create_query(:Observation, filter_attr => @name.id)
+    q.save
+    q
+  end
+
   def label_key
     raise(NotImplementedError.new("#{self.class}#label_key"))
+  end
+
+  def filter_attr
+    raise(NotImplementedError.new("#{self.class}#filter_attr"))
   end
 
   def target_params

@@ -63,15 +63,17 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(:Location, regexp: "#{params[:country]}$")
+    query, = create_query_from_url_params(:Location, params)
+    return unless query
+
     [query, { link_all_sorts: true }]
   end
 
   # Displays a list of locations of obs whose project matches the param.
   def project
-    obs_query = create_query(:Observation,
-                             projects: Project.find(params[:project]))
-    query = create_query(:Location, observation_query: obs_query.params)
+    query, = create_query_from_url_params(:Location, params)
+    return unless query
+
     [query, { link_all_sorts: true }]
   end
 

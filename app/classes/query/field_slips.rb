@@ -10,8 +10,8 @@ class Query::FieldSlips < Query
   query_attr(:code, [:string])
   query_attr(:code_has, [:string])
   query_attr(:observation, [Observation])
-  query_attr(:project, [Project])
-  query_attr(:projects, [Project])
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
 
   def self.default_order
     :code_then_date

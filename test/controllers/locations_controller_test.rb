@@ -362,7 +362,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_page_title(:locations.ti)
-    assert_displayed_filters("#{:query_regexp.l}: #{country}")
+    assert_displayed_filters("#{:query_in_country.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
@@ -377,7 +377,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_page_title(:locations.ti)
-    assert_displayed_filters("#{:query_regexp.l}: #{country}")
+    assert_displayed_filters("#{:query_in_country.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true, "USA page should include New Mexico"

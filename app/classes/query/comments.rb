@@ -12,7 +12,7 @@ class Query::Comments < Query
   # param_alias: matches its own attr name here -- not a rename, just
   # opts this into create_query_from_url_params's record-lookup path.
   query_attr(:for_user, User, param_alias: :for_user, always_index: false)
-  query_attr(:target, { type: :string, id: AbstractModel })
+  query_attr(:target, { polymorphic: Comment::ALL_TYPES })
   query_attr(:types, [{ string: Comment::ALL_TYPE_TAGS }])
   query_attr(:summary_has, :string)
   query_attr(:content_has, :string)

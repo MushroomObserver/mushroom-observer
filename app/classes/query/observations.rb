@@ -20,14 +20,36 @@ class Query::Observations < Query
                        include_immediate_subtaxa: :boolean,
                        exclude_original_names: :boolean,
                        include_all_name_proposals: :boolean,
-                       exclude_consensus: :boolean })
+                       exclude_consensus: :boolean },
+             default_order: :confidence)
+  # Each of these is a named preset of `names:` options, backed by a
+  # same-named Observation scope (Observation::Scopes) -- see there
+  # for what each preset means. `[:string]`, not `:string`, so the
+  # FilterCaption's Lookup-driven rendering (PARAM_LOOKUPS) applies --
+  # it expects an Array, matching every other name-lookup attr.
+  query_attr(:look_alikes, [:string], default_order: :confidence)
+  # `[:name_parents]`, not `[:string]` -- the stored value is the
+  # matched name's parent ids, not the searched name itself, so the
+  # filter caption shows the parent (see `validate_name_parents`
+  # below and Observation::Scopes#related_taxa).
+  query_attr(:related_taxa, [:name_parents], default_order: :confidence)
+  # param_alias matches the URL shortcut (`?name=`) -- attr itself is
+  # `any_name`, not `name`, to avoid colliding with `Observation.name`
+  # (see Observation::Scopes#any_name).
+  query_attr(:any_name, [:string], param_alias: :name,
+                                   default_order: :confidence)
+  query_attr(:name_proposed, [:string], default_order: :confidence)
+  query_attr(:this_name, [:string], default_order: :confidence)
+  query_attr(:other_names, [:string], default_order: :confidence)
   query_attr(:confidence, [:float])
   query_attr(:needs_naming, User)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
   # The identify page's clade/region autocompleter -- see
-  # Observation::Scopes#identify_filter.
-  query_attr(:identify_filter, { type: :string, term: :string })
+  # Observation::Scopes#identify_filter. default_order matches the
+  # identify page's own default (Observations::IdentifyController).
+  query_attr(:identify_filter, { type: :string, term: :string },
+             default_order: :rss_log)
 
   query_attr(:is_collection_location, :boolean)
   query_attr(:has_public_lat_lng, :boolean)
@@ -94,5 +116,17 @@ class Query::Observations < Query
 
   def self.default_order
     :date
+  end
+
+  private
+
+  # Custom scalar type for `related_taxa` (a Symbol `accepts`, same
+  # dispatch convention as `validate_string`/`validate_boolean` --
+  # see Query::Modules::Validation#scalar_validate). Resolves the
+  # searched name string/id to its approved name's parent ids at
+  # validation time, so the stored query param is what the filter
+  # caption and `Observation.related_taxa` scope both need.
+  def validate_name_parents(_param, val)
+    Name.parent_ids_for(val)
   end
 end

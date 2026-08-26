@@ -18,7 +18,6 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   # INDEX
   #
   def index
-    set_project_ivar
     build_index_with_query
   end
 
@@ -81,12 +80,13 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   # Display list of SpeciesList's attached to a given project.
   def project
-    project = find_or_goto_index(Project, params[:project].to_s)
-    return unless project
+    create_query_from_url_params(:SpeciesList, params)
+  end
 
-    query = create_query(:SpeciesList, projects: project)
-    @project = project
-    [query, { always_index: true }]
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@project, query, :projects, Project)
+    query
   end
 
   def index_display_opts(opts, query)

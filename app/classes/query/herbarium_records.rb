@@ -12,7 +12,8 @@ class Query::HerbariumRecords < Query
   query_attr(:accession, [:string])
   query_attr(:accession_has, :string)
   query_attr(:herbaria, [Herbarium], param_alias: :herbarium)
-  query_attr(:observations, [Herbarium])
+  query_attr(:observations, [Observation], param_alias: :observation,
+                                           redirect_to: :model_index)
   query_attr(:pattern, :string)
 
   def alphabetical_by

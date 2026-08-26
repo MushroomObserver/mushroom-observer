@@ -402,7 +402,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
+    assert_displayed_filters("#{:query_look_alikes.l}: #{name.text_name}")
     assert_results(count: look_alikes)
   end
 
@@ -435,7 +435,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     get(:index, params: { related_taxa: "1", name: name.text_name })
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_names.l}: #{parent.text_name}")
+    assert_displayed_filters("#{:query_related_taxa.l}: #{parent.text_name}")
     assert_results(count: obss_of_related_taxa.count)
   end
 
@@ -450,7 +450,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
+    assert_displayed_filters("#{:query_any_name.l}: #{name.text_name}")
     ids.each do |id|
       assert_select(
         "a:match('href', ?)", %r{^/obs/#{id}}, true,
