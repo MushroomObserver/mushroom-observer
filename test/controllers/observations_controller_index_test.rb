@@ -801,10 +801,11 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not(query.params.key?(:bogus_param))
   end
 
-  # Query::Observations's `projects` attr already declares a
-  # record-backed param_alias (see app/classes/query/observations.rb)
-  # -- exercises create_query_from_url_params's `constantize` path,
-  # not just the lower-level resolve_param_alias_records helper.
+  # Query::Observations' `project` attr is record-backed but not an
+  # alias for `projects` (see app/classes/query/observations.rb) --
+  # exercises create_query_from_url_params's `constantize` path with a
+  # directly-matching attr name, not just the lower-level
+  # resolve_query_param_records helper.
   def test_create_query_from_url_params_sets_always_index_for_record_alias
     login
     project = projects(:bolete_project)
@@ -814,52 +815,73 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       :create_query_from_url_params, :Observation, raw_params
     )
 
-    assert_equal([project.id], query.params[:projects])
+    assert_equal(project.id, query.params[:project])
     assert_equal(true, display_opts[:always_index])
   end
 
-  def test_resolve_param_alias_records_looks_up_record_and_wraps_array
+  def test_resolve_query_param_records_looks_up_record_and_wraps_array
     login
     project = projects(:bolete_project)
     klass = Class.new(Query::Observations) do
       query_attr(:projects, [Project], param_alias: :project)
     end
 
-    resolved, record_backed = @controller.send(
-      :resolve_param_alias_records, klass,
-      { project: project.id.to_s }, [:project]
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass, { project: project.id.to_s }
     )
 
     assert_equal({ projects: [project.id] }, resolved)
-    assert_equal(true, record_backed)
+    assert_equal(true, force_index)
+  end
+
+  # Multiple ids submitted directly under the attr's name (not via a
+  # param_alias) must not collapse to a single record --
+  # find_by(id: [...]) only returns the first match, so this attr
+  # skips single-record lookup entirely instead of silently dropping
+  # every id but one.
+  def test_resolve_query_param_records_preserves_multiple_ids
+    login
+    project1 = projects(:bolete_project)
+    project2 = projects(:empty_project)
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project])
+    end
+
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass,
+      { projects: [project1.id.to_s, project2.id.to_s] }
+    )
+
+    assert_equal({ projects: [project1.id.to_s, project2.id.to_s] },
+                 resolved)
+    assert_equal(false, force_index)
   end
 
   # Non-record-backed Array-typed attrs (e.g. [:time]) need the same
   # scalar-to-array wrapping a record-backed alias already gets --
   # confirmed missing by Copilot review on PR #5142.
-  def test_resolve_param_alias_records_wraps_non_record_backed_array_attr
+  def test_resolve_query_param_records_wraps_non_record_backed_array_attr
     login
     klass = Class.new(Query::Observations) do
       query_attr(:test_dates, [:time], param_alias: :test_date)
     end
 
-    resolved, record_backed = @controller.send(
-      :resolve_param_alias_records, klass,
-      { test_date: "2024-01-01" }, [:test_date]
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass, { test_date: "2024-01-01" }
     )
 
     assert_equal({ test_dates: ["2024-01-01"] }, resolved)
-    assert_equal(false, record_backed)
+    assert_equal(false, force_index)
   end
 
   # find_alias_record_or_goto_own_index's flash+redirect-on-bad-id
   # behavior is already covered by
   # test_index_project_with_unknown_id_redirects (a dispatched request
   # through the existing `project` shortcut) -- this test isolates
-  # what resolve_param_alias_records itself does with a not-found
+  # what resolve_query_param_records itself does with a not-found
   # result, stubbing find_alias_record_or_goto_own_index so a bare
   # @controller.send doesn't trip Rails' one-redirect-per-action guard.
-  def test_resolve_param_alias_records_returns_nil_when_lookup_fails
+  def test_resolve_query_param_records_returns_nil_when_lookup_fails
     login
     klass = Class.new(Query::Observations) do
       query_attr(:projects, [Project], param_alias: :project)
@@ -868,13 +890,12 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       :find_alias_record_or_goto_own_index
     ) { |*| nil }
 
-    resolved, record_backed = @controller.send(
-      :resolve_param_alias_records, klass,
-      { project: "999999999" }, [:project]
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass, { project: "999999999" }
     )
 
     assert_nil(resolved)
-    assert_equal(false, record_backed)
+    assert_equal(false, force_index)
   end
 
   def test_index_species_list

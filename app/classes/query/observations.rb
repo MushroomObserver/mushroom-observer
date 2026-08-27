@@ -75,8 +75,11 @@ class Query::Observations < Query
 
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
-  query_attr(:projects, [Project], param_alias: :project,
-                                   redirect_to: :model_index)
+  query_attr(:projects, [Project], redirect_to: :model_index)
+  # Separate attr, not aliased to `projects` -- its default_order would
+  # leak into `projects:`-filtered subqueries composed elsewhere.
+  query_attr(:project, Project, redirect_to: :model_index,
+                                default_order: :thumbnail_quality)
   query_attr(:project_lists, [Project])
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
@@ -102,7 +105,7 @@ class Query::Observations < Query
 
   # ObservationsController::Index's `where` shortcut aliases to this
   # attr -- redeclared (after the loop above) with the alias.
-  query_attr(:search_where, :string, param_alias: :where)
+  query_attr(:search_where, :string, param_alias: :where, always_index: true)
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s

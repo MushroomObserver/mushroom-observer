@@ -619,6 +619,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:project_observations).
         where(project_observations: { project: project_ids }).distinct
     }
+    # Separate query_attr from `projects` -- see Query::Observations.
+    scope :project, ->(project) { projects(project) }
     scope :project_lists, lambda { |projects|
       project_ids = Lookup::Projects.new(projects).ids
       joins(species_lists: :project_species_lists).

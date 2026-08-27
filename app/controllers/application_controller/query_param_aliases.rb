@@ -10,92 +10,114 @@ module ApplicationController::QueryParamAliases
   # any of the target Query's registered `param_alias:` params (e.g.
   # `?project=123`) into their query_attr (`projects: [123]`) before
   # creating the query. Permits only params the Query subclass
-  # recognizes (its query_attr names plus their param_alias names) -- the
-  # generic replacement for a controller's own `index_active_params`
+  # recognizes (its query_attr names plus their param_alias names) --
+  # the generic replacement for a controller's `index_active_params`
   # allowlist.
   #
-  # A param_alias'd id that doesn't resolve to an existing record flashes
-  # and redirects -- to the calling controller's own index by default,
-  # or to the looked-up model's own index when the attr declares
+  # A record-backed value that doesn't resolve to an existing record
+  # flashes and redirects -- to the calling controller's index by
+  # default, or to the looked-up model's index when the attr declares
   # `redirect_to: :model_index` (matching `find_or_goto_index`) -- see
-  # `resolve_record_backed_alias`. Returns nil in that case, so check
-  # the return value the same way you would any other
-  # index-redirecting lookup.
+  # `resolve_record_backed_value`. Returns nil in that case, so check
+  # the return value the same way you would any other index-redirecting
+  # lookup.
   #
-  # `always_index: true` is set automatically whenever a record-backed
-  # param_alias resolved a param (e.g. `project`, not the scalar `by`
-  # sort alias), matching every hand-written index filter param's existing
-  # `always_index: true` (an aliased single-result index should show the
-  # list, not auto-redirect to the one result). A sort-order change has
-  # no such single-result-redirect concern, so `by` alone doesn't trigger
-  # it.
+  # `always_index: true` is set automatically whenever a resolved attr
+  # declares it (default true -- see `query_attr`), matching every
+  # hand-written index filter param's existing `always_index: true` (a
+  # single-result index should show the list, not auto-redirect to the
+  # one result). A sort-order change has no such single-result-redirect
+  # concern, so `by` alone doesn't trigger it.
   #
-  # Returns `[query, display_opts]`, or nil if a param_alias'd id failed to
-  # resolve.
+  # Returns `[query, display_opts]`, or nil if a record-backed value
+  # failed to resolve.
   def create_query_from_url_params(model_symbol, raw_params)
     klass = "Query::#{model_symbol.to_s.pluralize}".constantize
     permitted = raw_params.permit(*klass.permit_filters).
                 to_h.symbolize_keys
-    aliased_keys = klass.param_aliases.keys & permitted.keys
-    resolved, record_backed = resolve_param_alias_records(
-      klass, permitted, aliased_keys
-    )
+    resolved, force_index = resolve_query_param_records(klass, permitted)
     return nil unless resolved
 
     query = create_query(model_symbol, resolved)
-    [query, { always_index: record_backed }]
+    [query, { always_index: force_index }]
   end
 
   private
 
-  # Resolves each `aliased_keys` entry to its target query_attr value,
-  # looking up record-backed attrs (e.g. `projects: [Project]`) via
-  # `resolve_record_backed_alias` -- which flashes and redirects on a bad
-  # id. Returns `[nil, false]` (redirect already performed) the moment
-  # one fails to resolve; otherwise `[resolved_params, record_backed?]`,
-  # where `record_backed?` is true iff at least one resolved alias was
-  # record-backed.
-  def resolve_param_alias_records(klass, permitted, aliased_keys)
-    record_backed = false
-    aliased_keys.each do |alias_key|
-      outcome = resolve_one_param_alias(klass, permitted, alias_key)
+  # Resolves every permitted param -- whether it arrived under its attr
+  # name or a `param_alias:` shortcut -- looking up record-backed attrs
+  # (e.g. `projects: [Project]`) via `resolve_record_backed_value`,
+  # which flashes and redirects on a bad id. Returns `[nil, false]`
+  # (redirect already performed) the moment one fails to resolve;
+  # otherwise `[resolved_params, force_index?]`, where `force_index?` is
+  # true iff at least one resolved attr declares `always_index: true`
+  # (record-backed or scalar).
+  def resolve_query_param_records(klass, permitted)
+    force_index = false
+    # `keys` snapshots into a plain Array first -- resolving a param may
+    # add a new key to `permitted` (e.g. renaming an alias), and
+    # iterating the live Hash during that (`each_key`) raises.
+    keys = permitted.keys
+    keys.each do |key|
+      attr = klass.param_aliases[key] || key
+      outcome = resolve_one_query_param(klass, permitted, key, attr)
       return [nil, false] if outcome == :not_found
 
-      record_backed ||= outcome == :record_backed
+      force_index ||= outcome == :forces_index
     end
-    [permitted, record_backed]
+    [permitted, force_index]
   end
 
-  # Resolves a single `alias_key` in place on `permitted` (mutating it),
-  # returning :scalar, :record_backed, or :not_found -- see
-  # `resolve_param_alias_records`. The alias wins over an already-present
-  # value under the target attr name (see Query.resolve_param_aliases for
-  # why), so it resolves and overwrites unconditionally.
-  #
-  # A found record still returns :scalar (not forcing always_index) when
-  # the attr declares `always_index: false` -- the record-lookup/flash/
-  # redirect-on-bad-id behavior below is unconditional either way, only
-  # whether a *found* record forces always_index changes.
-  def resolve_one_param_alias(klass, permitted, alias_key)
-    attr = klass.param_aliases[alias_key]
-    raw_value = permitted.delete(alias_key)
+  # Resolves a single `key` in place on `permitted` (mutating it),
+  # returning :forces_index, :no_force, or :not_found -- see
+  # `resolve_query_param_records`. When `key` is an alias (`key != attr`),
+  # it wins over an already-present value under the target attr name
+  # (see Query.resolve_param_aliases for why), so it resolves and
+  # overwrites unconditionally.
+  def resolve_one_query_param(klass, permitted, key, attr)
+    raw_value = permitted[key]
+    permitted.delete(key) if key != attr
     model_class = alias_record_class(klass, attr)
-    unless model_class
-      permitted[attr] = wrap_if_array_attr(klass, attr, raw_value)
-      return :scalar
+    return resolve_scalar_query_param(klass, permitted, attr, raw_value) unless
+      model_class
+
+    if raw_value.is_a?(Array) && raw_value.size > 1
+      return resolve_multi_id_query_param(permitted, attr, raw_value)
     end
 
-    resolve_record_backed_alias(klass, permitted, attr, model_class, raw_value)
+    raw_value = raw_value.first if raw_value.is_a?(Array)
+    resolve_record_backed_value(klass, permitted, attr, model_class,
+                                raw_value)
+  end
+
+  # Scalar: opposite polarity from the record-backed branch -- forces
+  # only when explicitly declared (`nil` doesn't force). Most scalar
+  # attrs (e.g. `by`) have no opinion on this.
+  def resolve_scalar_query_param(klass, permitted, attr, raw_value)
+    permitted[attr] = wrap_if_array_attr(klass, attr, raw_value)
+    always_index = klass.attribute_types[attr].always_index
+    always_index ? :forces_index : :no_force
+  end
+
+  # Multiple ids (e.g. `q[projects][]=1&q[projects][]=2`) skip
+  # single-record lookup/validation -- `find_by(id: [...])` returns only
+  # the first match, which would silently drop the rest. Pass the list
+  # through as-is; the underlying scope (e.g. Lookup::Projects) already
+  # resolves a list of ids/titles/instances.
+  def resolve_multi_id_query_param(permitted, attr, raw_value)
+    permitted[attr] = raw_value
+    :no_force
   end
 
   # Looks up `raw_value` as `model_class`, flashing and redirecting on a
-  # bad id -- to the calling controller's own index by default, or to
-  # `model_class`'s own index when the attr declares
+  # bad id -- to the calling controller's index by default, or to
+  # `model_class`'s index when the attr declares
   # `redirect_to: :model_index` (see `query_attr`). :not_found on
-  # failure; otherwise :record_backed, unless the attr opts out via
-  # `always_index: false` (see `resolve_one_param_alias`), in which case
-  # :scalar.
-  def resolve_record_backed_alias(klass, permitted, attr, model_class,
+  # failure; otherwise :forces_index, unless the attr opts out via
+  # `always_index: false`, in which case :no_force. The record-lookup/
+  # flash/redirect-on-bad-id behavior above is unconditional either way --
+  # only whether a *found* record forces always_index changes.
+  def resolve_record_backed_value(klass, permitted, attr, model_class,
                                   raw_value)
     type = klass.attribute_types[attr]
     record = if type.redirect_to == :model_index
@@ -109,7 +131,10 @@ module ApplicationController::QueryParamAliases
     # instead of fetching it again.
     cache_resolved_alias_record(attr, record)
     permitted[attr] = type.accepts.is_a?(Array) ? [record.id] : record.id
-    type.always_index ? :record_backed : :scalar
+    # Record-backed: forces unless explicitly opted out (`always_index`
+    # undeclared/nil still forces -- matches every hand-written index
+    # filter param's existing behavior before this attr had one).
+    type.always_index == false ? :no_force : :forces_index
   end
 
   def cache_resolved_alias_record(attr, record)

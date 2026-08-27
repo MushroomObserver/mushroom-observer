@@ -155,29 +155,12 @@ class ObservationsController
     # AbstractModel's scope `search_where`, which searches two tables
     # (obs and loc) for the fuzzy match.
     def where
-      query, = create_query_from_url_params(:Observation, params)
-      return unless query
-
-      [query, { always_index: true }]
+      create_query_from_url_params(:Observation, params)
     end
 
     # Display matrix of Observations attached to a given project.
-    #
-    # `by: :thumbnail_quality` is this page's default sort, not
-    # Query::Observations' class-wide one -- a bare `projects:` filter
-    # elsewhere (e.g. a raw Query.lookup) still gets the class
-    # default, so the override is threaded through the raw params
-    # here rather than a shared `default_order:` on the `projects`
-    # attr. An explicit `by` still wins.
     def project
-      raw_params = if params[:by].present?
-                     params
-                   else
-                     params.merge(
-                       by: :thumbnail_quality
-                     )
-                   end
-      create_query_from_url_params(:Observation, raw_params)
+      create_query_from_url_params(:Observation, params)
     end
 
     # Display matrix of Observations attached to a given species_list.
@@ -189,6 +172,7 @@ class ObservationsController
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
       derive_ivar_from_query(:@project, query, :projects, Project)
+      derive_ivar_from_query(:@project, query, :project, Project)
       query
     end
 

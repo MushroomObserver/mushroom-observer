@@ -51,10 +51,6 @@ class LocationsController < ApplicationController
     ::Query::Locations.default_order # :name
   end
 
-  def unfiltered_index_opts
-    super.merge(display_opts: { link_all_sorts: true })
-  end
-
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
     [:pattern, :country, :project, :by_user, :by_editor,
@@ -63,57 +59,48 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations whose country matches the param.
   def country
-    query, = create_query_from_url_params(:Location, params)
-    return unless query
-
-    [query, { link_all_sorts: true }]
+    create_query_from_url_params(:Location, params)
   end
 
   # Displays a list of locations of obs whose project matches the param.
   def project
-    query, = create_query_from_url_params(:Location, params)
-    return unless query
-
-    [query, { link_all_sorts: true }]
+    create_query_from_url_params(:Location, params)
   end
 
   # Display list of locations that a given user created.
   def by_user
-    query, = create_query_from_url_params(:Location, params)
-    return unless query
-
-    [query, { link_all_sorts: true }]
+    create_query_from_url_params(:Location, params)
   end
 
   # Display list of locations that a given user is editor on.
   def by_editor
-    query, = create_query_from_url_params(:Location, params)
-    return unless query
-
-    [query, {}]
+    create_query_from_url_params(:Location, params)
   end
 
   # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, display_opts)
+  def filtered_index_final_hook(query, _display_opts)
     # Matching undefined locations is meaningless in a box.
     # (Undefined locations don't have a box!)
     return query if query.params[:in_box].present?
 
-    # Get matching *undefined* locations.
-    set_matching_undefined_location_ivars(query, display_opts)
+    # "By name"/"by frequency" subtitles apply to every filter except
+    # by_editor -- computed from the resolved query, not which subaction
+    # fired, so this covers the unfiltered index too.
+    set_matching_undefined_location_ivars(
+      query, link_all_sorts: !query.params.key?(:by_editor)
+    )
     query
   end
 
   # Paginate the defined locations using the usual helper.
   #
   # always_index always comes from @undef_pages here, regardless of
-  # what a subaction's own create_query_from_url_params call
-  # resolved -- country/project/by_user/by_editor above all discard
-  # that value and pass a fixed opts hash instead. Single-match
-  # auto-redirect for this index depends on @undef_pages's
-  # letter-pagination total, not the Query layer's opinion.
+  # what the query resolved -- single-match auto-redirect for this
+  # index depends on @undef_pages's letter-pagination total, not the
+  # Query layer's opinion. Merged last so it wins over any :always_index
+  # a generic create_query_from_url_params call put in `opts`.
   def index_display_opts(opts, _query)
-    { always_index: @undef_pages&.num_total&.positive? }.merge(opts)
+    opts.merge(always_index: @undef_pages&.num_total&.positive?)
   end
 
   def set_matching_undefined_location_ivars(query, display_opts)
