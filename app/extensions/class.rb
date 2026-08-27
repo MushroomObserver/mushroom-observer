@@ -19,7 +19,7 @@ class Class
   # `param_alias:` forces `always_index: true` on the display opts (so a
   # single-result match shows the index instead of auto-redirecting to
   # that one result) -- see
-  # ApplicationController::QueryParamAliases#create_query_from_url_params.
+  # ApplicationController::QueryParams#create_query_from_url_params.
   # Set false on an attr whose single-match auto-redirect is
   # intentional/tested. Doesn't affect the record-lookup/flash/redirect
   # behavior on a bad id, only whether a *found* record forces the index.

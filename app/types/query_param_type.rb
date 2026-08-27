@@ -46,7 +46,7 @@ class QueryParamType < ActiveModel::Type::Value
   # `always_index` defaults to nil (not `true`) so a consumer can tell
   # an undeclared attr apart from an explicit value -- record-backed and
   # scalar aliases interpret nil with opposite polarity (see
-  # ApplicationController::QueryParamAliases).
+  # ApplicationController::QueryParams).
   def initialize(accepts: nil, param_alias: nil, default_order: nil,
                  always_index: nil, redirect_to: :own_index)
     @accepts = accepts
