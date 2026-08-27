@@ -155,29 +155,23 @@ class ObservationsController
     # AbstractModel's scope `search_where`, which searches two tables
     # (obs and loc) for the fuzzy match.
     def where
-      query, = create_query_from_url_params(:Observation, params)
-      return unless query
-
-      [query, { always_index: true }]
+      create_query_from_url_params(:Observation, params)
     end
 
     # Display matrix of Observations attached to a given project.
     #
     # `by: :thumbnail_quality` is this page's default sort, not
-    # Query::Observations' class-wide one -- a bare `projects:` filter
-    # elsewhere (e.g. a raw Query.lookup) still gets the class
-    # default, so the override is threaded through the raw params
-    # here rather than a shared `default_order:` on the `projects`
-    # attr. An explicit `by` still wins.
+    # Query::Observations' class-wide one. This can't move onto the
+    # `projects` query_attr's `default_order:` -- that scope has a
+    # join/where side effect (see order_by_thumbnail_quality), which
+    # leaks into any subquery composition of `projects:` (e.g.
+    # Query::Images' `observation_query: {projects: ...}`) even though
+    # `AbstractModel::Scopes#subquery` reorders the merged relation away;
+    # reorder clears the ORDER BY clause, not a join/where a scope added
+    # as a side effect of computing it.
     def project
-      raw_params = if params[:by].present?
-                     params
-                   else
-                     params.merge(
-                       by: :thumbnail_quality
-                     )
-                   end
-      create_query_from_url_params(:Observation, raw_params)
+      create_query_from_url_params(:Observation,
+                                   params.reverse_merge(by: :thumbnail_quality))
     end
 
     # Display matrix of Observations attached to a given species_list.

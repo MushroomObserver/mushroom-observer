@@ -102,7 +102,7 @@ class Query::Observations < Query
 
   # ObservationsController::Index's `where` shortcut aliases to this
   # attr -- redeclared (after the loop above) with the alias.
-  query_attr(:search_where, :string, param_alias: :where)
+  query_attr(:search_where, :string, param_alias: :where, always_index: true)
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s
