@@ -365,8 +365,16 @@ export default class extends Controller {
   // blocking submission. MAX_EXIF_WAIT_ATTEMPTS caps the wait at 3s;
   // past that it submits anyway, no worse than before this existed.
   submitWhenExifReady(attempt = 0) {
-    if (this.areAllItemsExifPopulated() ||
-      attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
+    const _ready = this.areAllItemsExifPopulated();
+    if (_ready || attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
+      // TEMP instrumentation (#5238): remove before merge. attempt 0 =
+      // submitted immediately; ~30 with ready=false = full EXIF timeout.
+      const _unsettled = Object.values(this.fileStore.index)
+        .filter((i) => !i.exif_populated).length;
+      console.log(`[exif-timing] submit after ${attempt} attempts ` +
+        `(~${attempt * 100}ms); ready=${_ready}; ` +
+        `items=${Object.keys(this.fileStore.index).length}; ` +
+        `unsettled=${_unsettled}`);
       this.block_form_submission = false;
       this.submitForm();
     } else {
