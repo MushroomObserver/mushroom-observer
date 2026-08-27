@@ -833,7 +833,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # rejected, but images uploaded
     assert_selector("body.observations__new", wait: 12)
-    assert_flash_for_images_uploaded("Coprinus_comatus.jpg")
+    assert_images_uploaded(2)
     assert_has_location_warning(/Unknown country/)
 
     # check form values after first changes
@@ -2000,12 +2000,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_show_observation_page_has_important_info
 
-  # wait: 8, not the 3s default -- a Turbo-submitted create/update on
-  # this form can involve several image uploads plus a full
-  # FullPageBase render before the flash settles; measured ~3.5s on a
-  # multi-image failure-reload flow, comfortably under 8s but over 3s.
-  def assert_flash_for_images_uploaded(filename)
-    assert_flash_success(:runtime_image_uploaded, name: filename, wait: 8)
+  # The per-upload "Uploaded image" flash was dropped in #5238 (it lost
+  # writes once uploads ran concurrently), so confirm the images survived
+  # instead via the good_image_ids the reloaded form carries. Waits (like
+  # the old flash assertion did) for the reload to settle with `count`
+  # space-separated image ids.
+  def assert_images_uploaded(count)
+    pattern = /\A\d+(?: \d+){#{count - 1}}\z/
+    assert_field("observation[good_image_ids]", type: :hidden,
+                                                with: pattern, wait: 8)
   end
 
   def assert_flash_for_destroy_observation(id)
@@ -2013,7 +2016,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   # wait: 8, not the 3s default -- same multi-image-upload failure-reload
-  # flow as assert_flash_for_images_uploaded above, and this assertion
+  # flow as assert_images_uploaded above, and this assertion
   # runs right after it on the same reloaded page.
   def assert_has_location_warning(regex, wait: 8)
     assert_selector(".alert-warning", text: regex, wait: wait)

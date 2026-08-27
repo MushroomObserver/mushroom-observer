@@ -54,6 +54,13 @@ export default class extends Controller {
   // bounded rather than an unbounded wait.
   static MAX_EXIF_WAIT_ATTEMPTS = 30
 
+  // Cap on images uploaded at once. Uploads run concurrently now (#5238),
+  // but an HTTP/2 connection multiplexes streams, bypassing the browser's
+  // ~6-connection limit, so without a cap every queued image would hit the
+  // server's image processor simultaneously. Set conservatively; raise or
+  // lower (1 == the old sequential behavior) as server load testing shows.
+  static MAX_CONCURRENT_UPLOADS = 3
+
   initialize() {
   }
 
@@ -102,10 +109,10 @@ export default class extends Controller {
     // covers it explicitly rather than relying on that).
     this.form.inert = false;
     this.form.removeAttribute('aria-busy');
-    // Captured so a failed upload (handleUploadFailure) can restore
-    // the real "Create"/"Save changes" text -- uploadItem overwrites
-    // it with the uploading_text while a request is in flight, and
-    // there's otherwise no way back to what the button said before.
+    // Captured so a failed upload (handleUploadFailures) can restore
+    // the "Create"/"Save changes" text -- uploadAll swaps it to the
+    // uploading_text for the upload window, and there's otherwise no
+    // way back to what the button said before.
     this.original_button_labels = new Map(
       Array.from(this.submit_buttons).map(
         (el) => [el, el.tagName === 'BUTTON' ? el.textContent : el.value]
@@ -198,10 +205,10 @@ export default class extends Controller {
   }
 
   // Checks `index`, not the upload-queue `items` array: `items` is
-  // drained via `.shift()` as each image uploads (see `uploadAll`/
-  // `onUploadedCallback`), so by the time every image has uploaded it's
-  // always empty -- `index` is the only place a full, still-accurate
-  // "every item added" list survives to this point.
+  // drained via `.splice(0)` when the batch uploads (see `uploadAll`),
+  // so by the time uploading starts it's always empty -- `index` is the
+  // only place a full, still-accurate "every item added" list survives
+  // to this point.
   areAllItemsExifPopulated() {
     return Object.values(this.fileStore.index).every(
       (item) => item.exif_populated
@@ -251,10 +258,12 @@ export default class extends Controller {
       return false;
     }
 
-    // disable submit and remove image buttons during upload process.
-    this.submit_buttons.forEach(
-      (element) => { element.disabled = true }
-    );
+    // disable submit and remove image buttons during upload process,
+    // and show the uploading label.
+    this.submit_buttons.forEach((element) => {
+      element.disabled = true;
+      this.setButtonLabel(element, this.localized_text.uploading_text + '...');
+    });
     // Note that remove image links are not present at initialization.
     // Disabled, not hidden (issue #5068 option 1) -- an image mid-write
     // shouldn't be removable, but the carousel item it belongs to stays
@@ -273,17 +282,17 @@ export default class extends Controller {
     // keyboard, and focus interaction (and blurs anything already
     // focused inside it), which is exactly what's needed here. Doesn't
     // affect this controller's own JS writes to the form (e.g.
-    // updateObsImages) while inert.
+    // uploadBatch, updateThumbRadio) while inert.
     this.form.inert = true;
     this.form.setAttribute('aria-busy', 'true');
 
-    let _firstUpload;
-    // uploads first image. if we have one, and bumps it off the list
-    if (_firstUpload = this.fileStore.items.shift()) {
-      this.uploadItem(_firstUpload);
-    } else {
-      // no images to upload, submit form
+    // Upload the whole queue concurrently (#5238) rather than one image
+    // at a time. Snapshot the items (in selection order) off the queue.
+    const _items = this.fileStore.items.splice(0);
+    if (_items.length === 0) {
       this.submitWhenExifReady();
+    } else {
+      this.uploadBatch(_items);
     }
 
     return false;
@@ -298,19 +307,48 @@ export default class extends Controller {
     alert(`${this.localized_text.image_too_big_text}\n\n${_names}`);
   }
 
-  onUploadedCallback() {
-    let _nextInLine;
-    // uploads next image. if we have one, and bumps it off the list
-    if (_nextInLine = this.fileStore.items.shift())
-      this.uploadItem(_nextInLine);
-    // now the form will be submitted without hitting the uploads.
-    else {
+  // Upload every image in the batch concurrently (capped), then submit.
+  // good_images is assembled from the succeeded items in their original
+  // selection order -- not completion order -- so parallel uploads don't
+  // reorder the observation's images. On any failure the form is
+  // recovered and only the failed items are re-queued (#5238).
+  async uploadBatch(items) {
+    const _failed = await this.runUploads(
+      items, this.constructor.MAX_CONCURRENT_UPLOADS
+    );
+
+    const _ids = items.filter((item) => item.uploaded_image).
+      map((item) => item.uploaded_image.id);
+    this.goodImageIdsTarget.value =
+      [this.goodImageIdsTarget.value || "", ..._ids].join(" ").trim();
+
+    if (_failed.length > 0) {
+      this.handleUploadFailures(_failed);
+    } else {
       this.submit_buttons.forEach((element) => {
         this.setButtonLabel(element,
           this.localized_text.creating_observation_text);
       });
       this.submitWhenExifReady();
     }
+  }
+
+  // Run uploadItem over `items` with at most `limit` uploads in flight.
+  // Returns the items that failed. A fixed pool of `limit` workers each
+  // pull the next item off a shared queue until it drains.
+  async runUploads(items, limit) {
+    const _queue = items.slice();
+    const _failed = [];
+    const _worker = async () => {
+      let _item;
+      while ((_item = _queue.shift())) {
+        const _ok = await this.uploadItem(_item);
+        if (!_ok) _failed.push(_item);
+      }
+    };
+    const _count = Math.min(limit, _queue.length);
+    await Promise.all(Array.from({ length: _count }, _worker));
+    return _failed;
   }
 
   // EXIF extraction (form-exif_controller.js) runs asynchronously per
@@ -629,60 +667,57 @@ export default class extends Controller {
   // This essentially submits a "form" for each image. But there can't
   // currently be a form element, because the image fields are nested inside
   // the obs form. So we turn the fields into a FormData object with JS.
+  // Upload one image and return whether it succeeded. On success the
+  // returned image is remembered on the item (uploadBatch assembles
+  // good_images from these in selection order) and the item's overlay
+  // swaps to a checkmark. Does not chain to the next item -- runUploads
+  // owns the queue now (#5238).
   async uploadItem(item) {
     // It would be nice to do a progress bar, but as of now, upload with
     // readable stream is not implemented yet for fetch in the browser spec.
     // https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
-    // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-    // https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
-    this.submit_buttons.forEach((element) => {
-      this.setButtonLabel(element, this.localized_text.uploading_text + '...');
-    });
     this.showUploadSpinner(item);
 
     const _formData = this.asFormData(item);
     // asFormData returns null for an over-limit file. uploadAll blocks
     // these up front (issue #4872), so this is a belt-and-suspenders guard:
-    // skip the pointless empty POST and keep the queue moving instead of
-    // stalling on a failed request.
-    if (_formData === null) {
-      this.onUploadedCallback();
-      return;
-    }
-    const response = await post(this.upload_image_uri,
-      { body: _formData, responseKind: "json" });
+    // skip the pointless empty POST and treat the item as done.
+    if (_formData === null) return true;
 
-    // Note: It never hits any of the below, even with multiple images (!)
-    // The controller action at upload_image_uri is uploading the images, and
-    // it's already submitting the form and leaving the page.
-    // Maybe because this is async? Anyway, it seems to work.
-    // updateObsImages is never called, nor onUploadedCallback.
-    if (response.ok) {
-      const image = await response.json
-      if (image) {
-        this.updateObsImages(item, image);
-        this.showUploadCheckmark(item);
-        this.onUploadedCallback();
+    try {
+      const response = await post(this.upload_image_uri,
+        { body: _formData, responseKind: "json" });
+      if (response.ok) {
+        const image = await response.json;
+        if (image) {
+          item.uploaded_image = image;
+          this.updateThumbRadio(item, image);
+          this.showUploadCheckmark(item);
+          return true;
+        }
       }
-    } else {
       console.log(`got a ${response.status}`);
-      this.handleUploadFailure(item);
+    } catch (_e) {
+      console.log(`image upload failed: ${_e}`);
     }
+    this.hideUploadSpinner(item);
+    return false;
   }
 
-  // uploadAll already locked the form (`inert`) and disabled the
-  // submit/remove buttons for the whole in-flight window -- normally
-  // undone by the next successful full queue drain (onUploadedCallback
-  // -> submitWhenExifReady) or a fresh controller connect after a
-  // Turbo-swapped-in form. Neither happens here, since the observation
-  // form itself was never submitted: without this, a failed upload
-  // left the page permanently locked with no way for the user to
-  // recover. Re-queues the item (uploadAll already shifted it off
-  // fileStore.items) so clicking the submit button again retries it
-  // instead of silently dropping it from the upload.
-  handleUploadFailure(item) {
-    this.hideUploadSpinner(item);
-    this.fileStore.items.unshift(item);
+  // uploadAll locked the form (`inert`) and disabled the submit/remove
+  // buttons for the whole in-flight window -- normally undone when the
+  // batch fully succeeds (uploadBatch -> submitWhenExifReady) or a fresh
+  // controller connect after a Turbo-swapped-in form. Neither happens on
+  // a failed upload, since the observation form itself was never
+  // submitted: without this, a failed upload left the page permanently
+  // locked with no way for the user to recover. Re-queues the failed
+  // items (uploadAll snapshotted them off fileStore.items) so clicking
+  // the submit button again retries just those.
+  handleUploadFailures(items) {
+    // Re-queue the failed items (their successful siblings already added
+    // their ids to good_images) so clicking Create again retries only
+    // those, then unlock the form the batch had left inert.
+    items.forEach((item) => this.fileStore.items.unshift(item));
 
     this.form.inert = false;
     this.form.removeAttribute('aria-busy');
@@ -694,7 +729,8 @@ export default class extends Controller {
       elem.disabled = false;
     });
 
-    alert(`${this.localized_text.something_went_wrong}\n\n${item.file_name}`);
+    const _names = items.map((item) => item.file_name).join("\n");
+    alert(`${this.localized_text.something_went_wrong}\n\n${_names}`);
   }
 
   // Counterpart to showUploadSpinner -- a failed item shouldn't be
@@ -707,10 +743,10 @@ export default class extends Controller {
   }
 
   // Upload-in-progress feedback (issue #5068 option 1): show the
-  // spinner overlay on this item alone (uploads are sequential, so at
-  // most one item is ever "in flight"). The overlay's own translucent
-  // background dims the photo underneath; the carousel item itself
-  // stays visible throughout.
+  // spinner overlay on this item. Uploads run concurrently now (#5238),
+  // so several items may show a spinner at once. The overlay's own
+  // translucent background dims the photo underneath; the carousel item
+  // itself stays visible throughout.
   showUploadSpinner(item) {
     const overlay = item.dom_element?.querySelector('.upload-status-overlay');
     if (!overlay) return;
@@ -729,9 +765,10 @@ export default class extends Controller {
     overlay.querySelector('.upload-status-check')?.classList.remove('d-none');
   }
 
-  // Add the uploaded image's id to `good_images` and update the
-  // carousel-item radio's value, its id, and the wrapping label's
-  // `for=` to point at the new image.
+  // Point the carousel-item's thumb radio (its value, id, and the
+  // wrapping label's `for=`) at the real image id from the server.
+  // good_images is assembled separately, in selection order, by
+  // uploadBatch -- so it is not touched here.
   //
   // At render time the radio's `value` was `"true"` and its `id`
   // was `thumb_image_id_<UUID>` (UUID generated client-side per
@@ -741,15 +778,12 @@ export default class extends Controller {
   //   - the submitted `observation[thumb_image_id]` value is real,
   //   - tests can find the radio by its predictable image-id-based id,
   //   - the label's `for=` stays in sync with the input's id.
-  updateObsImages(item, image) {
-    const _good_image_vals = this.goodImageIdsTarget.value || "";
+  updateThumbRadio(item, image) {
     const _radio = item.dom_element.querySelector(
       'input[type="radio"][name="observation[thumb_image_id]"]'
     );
     const _label = _radio.closest("label");
     const _new_id = `thumb_image_id_${image.id}`;
-
-    this.goodImageIdsTarget.value = [_good_image_vals, image.id].join(" ").trim();
 
     _radio.value = image.id;
     _radio.id = _new_id;

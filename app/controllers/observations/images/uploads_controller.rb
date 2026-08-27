@@ -66,9 +66,11 @@ module Observations::Images
       )
     end
 
-    def render_image(image, args)
-      name = args[:original_name].to_s
-      flash_notice(:runtime_image_uploaded.t(name: name))
+    def render_image(image, _args)
+      # No per-upload success flash: uploads now run concurrently (#5238),
+      # and MO's session-based flash loses writes under parallel requests.
+      # The created observation page already shows the uploaded images, so
+      # the per-image confirmation was redundant.
       render(json: image)
     end
 
