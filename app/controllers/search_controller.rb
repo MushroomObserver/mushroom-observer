@@ -4,8 +4,9 @@
 class SearchController < ApplicationController
   # These are plural symbols because the search bar sends them this way.
   PATTERN_SEARCHABLE_MODELS = [
-    :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
-    :locations, :names, :observations, :projects, :species_lists, :users
+    :collection_numbers, :comments, :glossary_terms, :herbaria,
+    :herbarium_records, :images, :locations, :names, :observations,
+    :projects, :species_lists, :users
   ].freeze
 
   # This is the action the search bar commits to.
