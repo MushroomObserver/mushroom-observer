@@ -159,19 +159,8 @@ class ObservationsController
     end
 
     # Display matrix of Observations attached to a given project.
-    #
-    # `by: :thumbnail_quality` is this page's default sort, not
-    # Query::Observations' class-wide one. This can't move onto the
-    # `projects` query_attr's `default_order:` -- that scope has a
-    # join/where side effect (see order_by_thumbnail_quality), which
-    # leaks into any subquery composition of `projects:` (e.g.
-    # Query::Images' `observation_query: {projects: ...}`) even though
-    # `AbstractModel::Scopes#subquery` reorders the merged relation away;
-    # reorder clears the ORDER BY clause, not a join/where a scope added
-    # as a side effect of computing it.
     def project
-      create_query_from_url_params(:Observation,
-                                   params.reverse_merge(by: :thumbnail_quality))
+      create_query_from_url_params(:Observation, params)
     end
 
     # Display matrix of Observations attached to a given species_list.
@@ -183,6 +172,7 @@ class ObservationsController
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
       derive_ivar_from_query(:@project, query, :projects, Project)
+      derive_ivar_from_query(:@project, query, :project, Project)
       query
     end
 
