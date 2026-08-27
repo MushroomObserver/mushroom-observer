@@ -78,17 +78,35 @@ module ApplicationController::QueryParamAliases
     raw_value = permitted[key]
     permitted.delete(key) if key != attr
     model_class = alias_record_class(klass, attr)
-    unless model_class
-      permitted[attr] = wrap_if_array_attr(klass, attr, raw_value)
-      # Scalar: opposite polarity from the record-backed branch below --
-      # forces only when explicitly declared (`nil` doesn't force). Most
-      # scalar attrs (e.g. `by`) have no opinion on this.
-      always_index = klass.attribute_types[attr].always_index
-      return always_index ? :forces_index : :no_force
+    return resolve_scalar_query_param(klass, permitted, attr, raw_value) unless
+      model_class
+
+    if raw_value.is_a?(Array) && raw_value.size > 1
+      return resolve_multi_id_query_param(permitted, attr, raw_value)
     end
 
+    raw_value = raw_value.first if raw_value.is_a?(Array)
     resolve_record_backed_value(klass, permitted, attr, model_class,
                                 raw_value)
+  end
+
+  # Scalar: opposite polarity from the record-backed branch -- forces
+  # only when explicitly declared (`nil` doesn't force). Most scalar
+  # attrs (e.g. `by`) have no opinion on this.
+  def resolve_scalar_query_param(klass, permitted, attr, raw_value)
+    permitted[attr] = wrap_if_array_attr(klass, attr, raw_value)
+    always_index = klass.attribute_types[attr].always_index
+    always_index ? :forces_index : :no_force
+  end
+
+  # Multiple ids (e.g. `q[projects][]=1&q[projects][]=2`) skip
+  # single-record lookup/validation -- `find_by(id: [...])` returns only
+  # the first match, which would silently drop the rest. Pass the list
+  # through as-is; the underlying scope (e.g. Lookup::Projects) already
+  # resolves a list of ids/titles/instances.
+  def resolve_multi_id_query_param(permitted, attr, raw_value)
+    permitted[attr] = raw_value
+    :no_force
   end
 
   # Looks up `raw_value` as `model_class`, flashing and redirecting on a

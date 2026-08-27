@@ -834,6 +834,29 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(true, force_index)
   end
 
+  # Multiple ids submitted directly under the attr's name (not via a
+  # param_alias) must not collapse to a single record --
+  # find_by(id: [...]) only returns the first match, so this attr
+  # skips single-record lookup entirely instead of silently dropping
+  # every id but one.
+  def test_resolve_query_param_records_preserves_multiple_ids
+    login
+    project1 = projects(:bolete_project)
+    project2 = projects(:empty_project)
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project])
+    end
+
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass,
+      { projects: [project1.id.to_s, project2.id.to_s] }
+    )
+
+    assert_equal({ projects: [project1.id.to_s, project2.id.to_s] },
+                 resolved)
+    assert_equal(false, force_index)
+  end
+
   # Non-record-backed Array-typed attrs (e.g. [:time]) need the same
   # scalar-to-array wrapping a record-backed alias already gets --
   # confirmed missing by Copilot review on PR #5142.
