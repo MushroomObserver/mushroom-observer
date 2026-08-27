@@ -379,7 +379,7 @@ class Query
   # The `params.permit(*filters)`-compatible filter list for this Query
   # subclass's recognized_params -- replaces `index_active_params`'s
   # allowlisting role (see
-  # ApplicationController::QueryParamAliases#create_query_from_url_params).
+  # ApplicationController::QueryParams#create_query_from_url_params).
   # A scalar attr (or param_alias) permits as a bare symbol; an
   # Array-typed attr permits via `attr: []`; a Hash-typed attr --
   # including a subquery hash like `location_query: { subquery: :Location }`
@@ -426,7 +426,7 @@ class Query
   # clicked while a broader saved query already carries its own
   # `order_by`), so it overwrites rather than yields. Pure param-shape
   # translation: does not verify a record-backed value exists -- see
-  # ApplicationController::QueryParamAliases#create_query_from_url_params,
+  # ApplicationController::QueryParams#create_query_from_url_params,
   # which needs controller/flash context this class method doesn't have.
   def self.resolve_param_aliases(params)
     aliases = param_aliases

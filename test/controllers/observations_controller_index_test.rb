@@ -773,10 +773,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
-  # `create_query_from_url_params` (ApplicationController::QueryParamAliases)
-  # isn't wired into any controller action yet (#5137 is the foundation
-  # piece only) -- tested directly via @controller.send, same pattern as
-  # other private-method tests in this file.
+  # `create_query_from_url_params` (ApplicationController::QueryParams)
+  # tested directly via @controller.send, same pattern as other
+  # private-method tests in this file.
   def test_create_query_from_url_params_resolves_by_alias
     login
     raw_params = ActionController::Parameters.new(by: "date")
