@@ -233,4 +233,40 @@ class FieldSlip::QRDecoderTest < UnitTestCase
     assert_not(FieldSlip::QRDecoder.available?)
     assert_includes([true, false], FieldSlip::QRDecoder.zbarimg?)
   end
+
+  # ---------- reading: slip code + QR presence ----------
+
+  def stub_reading(codes)
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      Image::LocalFile.stub(:path, "/tmp/fake.jpg") do
+        FieldSlip::QRDecoder.stub(:scan, codes) do
+          FieldSlip::QRDecoder.reading(images(:in_situ_image))
+        end
+      end
+    end
+  end
+
+  def test_reading_returns_the_slip_code_and_qr_presence
+    read = stub_reading(["https://example.com", "OPEN-0219"])
+
+    assert_equal("OPEN-0219", read.slip_code)
+    assert(read.qr_present)
+  end
+
+  # A QR whose payload is not a slip code (a DNA-sticker code, a
+  # product label): no slip code, but a QR is present -- the signal
+  # that drives the model-read fallback.
+  def test_reading_flags_a_qr_that_is_not_a_slip_code
+    read = stub_reading(["2099-XYZ-0001"])
+
+    assert_nil(read.slip_code)
+    assert(read.qr_present)
+  end
+
+  def test_reading_reports_no_qr_when_nothing_decodes
+    read = stub_reading([])
+
+    assert_nil(read.slip_code)
+    assert_not(read.qr_present)
+  end
 end
