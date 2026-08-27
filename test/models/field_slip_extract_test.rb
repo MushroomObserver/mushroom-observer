@@ -380,6 +380,17 @@ class FieldSlipExtractTest < UnitTestCase
     assert(FieldSlipExtract.permitted?(image: @image.reload, user: rolf))
   end
 
+  # The collector reviews -- and can rescan -- the slip on their photo,
+  # even when the observation is in no project. Exactly the
+  # field-scanner case a constraint-violating location produced: the
+  # slip's observation was left out of its project, which used to lock
+  # the owner out of the review.
+  def test_permitted_for_the_image_owner
+    assert_equal(mary, @image.user, "fixture premise: mary owns the image")
+
+    assert(FieldSlipExtract.permitted?(image: @image, user: mary))
+  end
+
   def test_not_permitted_for_a_plain_member
     project = projects(:eol_project)
     project.observations << @obs unless project.observations.include?(@obs)
