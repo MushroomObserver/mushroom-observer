@@ -111,10 +111,11 @@ class AbstractModel < ApplicationRecord
   end
 
   # Does `phrase` identify a single record, without a fuzzy `pattern`
-  # search? Used by SearchController to short-circuit a pattern search
-  # straight to the show page. Override where a class has another
+  # search? Used by `exact_match_or` to prioritize an identifier match
+  # ahead of the fuzzy scope. Override where a class has another
   # unambiguous identifier (User overrides for verified email).
   def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
     safe_find(phrase) if /^\d+$/.match?(phrase)
   end
 

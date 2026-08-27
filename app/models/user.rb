@@ -441,6 +441,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # scope instead, in case of a partial match) -- only a numeric id or
   # a verified email address counts as "exact."
   def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
     user = (phrase.match?(/^\d+$/) && safe_find(phrase)) ||
            find_by(email: phrase)
     user if user&.verified

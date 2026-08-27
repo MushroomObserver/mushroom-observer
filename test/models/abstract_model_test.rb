@@ -483,6 +483,13 @@ class AbstractModelTest < UnitTestCase
     assert_nil(Observation.exact_match((Observation.maximum(:id) + 1).to_s))
     assert_nil(Observation.exact_match("not a number"))
     assert_nil(Observation.exact_match(""))
+    # Non-String callers (an id passed as an Integer, or a blank param
+    # that came through as nil) shouldn't raise.
+    assert_equal(obs, Observation.exact_match(obs.id))
+    assert_nil(Observation.exact_match(nil))
+    # A stray space around a typed-in id (easy to enter by accident)
+    # still counts as an exact match.
+    assert_equal(obs, Observation.exact_match(" #{obs.id} "))
   end
 
   # fixture for above tests
