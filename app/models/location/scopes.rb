@@ -61,8 +61,10 @@ module Location::Scopes
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|
-      cols = Location[:name] + LocationDescription.searchable_columns
-      joins_default_descriptions.search_columns(cols, phrase)
+      exact_match_or(phrase) do
+        cols = Location[:name] + LocationDescription.searchable_columns
+        joins_default_descriptions.search_columns(cols, phrase)
+      end
     }
     scope :regexp, lambda { |phrase|
       where(Location[:name] =~ phrase.to_s.strip.squeeze(" ")).distinct

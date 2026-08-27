@@ -13,6 +13,13 @@ class UserTest < UnitTestCase
     assert_equal(rolf, User.exact_match(rolf.id.to_s))
     assert_equal(rolf, User.exact_match(rolf.email))
     assert_nil(User.exact_match("nonexistent_login_or_email"))
+    # Non-String callers (an id passed as an Integer, or a blank param
+    # that came through as nil) shouldn't raise.
+    assert_equal(rolf, User.exact_match(rolf.id))
+    assert_nil(User.exact_match(nil))
+    # A stray space around a typed-in id (easy to enter by accident)
+    # still counts as an exact match.
+    assert_equal(rolf, User.exact_match(" #{rolf.id} "))
 
     unverified_user = users(:unverified)
     assert_nil(

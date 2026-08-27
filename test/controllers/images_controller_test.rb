@@ -105,16 +105,15 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern
-  def test_index_pattern_param_redirected_to_search
+  def test_index_pattern_param_builds_query_directly
     pattern = "USA"
 
     login
     get(:index, params: { pattern: pattern })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :images })
-    )
+
+    assert_select(".matrix-box")
+    assert_page_title(:images.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def q_pattern(pattern)
@@ -264,7 +263,7 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   # #4989: rotate/mirror controls follow permission on the image itself
-  # OR on the Observation it belongs to -- not just the image's own
+  # OR on the Observation it belongs to -- not just the image's
   # (separate) project attachment.
   def test_show_hides_transform_buttons_from_unrelated_user
     image = images(:commercial_inquiry_image)

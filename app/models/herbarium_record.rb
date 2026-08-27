@@ -85,10 +85,12 @@ class HerbariumRecord < AbstractModel
         ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
 
   scope :pattern, lambda { |phrase|
-    cols = (HerbariumRecord[:initial_det] +
-            HerbariumRecord[:accession_number] +
-            HerbariumRecord[:notes].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (HerbariumRecord[:initial_det] +
+              HerbariumRecord[:accession_number] +
+              HerbariumRecord[:notes].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   # Eager-loads the show / edit page (HR record + its herbarium,

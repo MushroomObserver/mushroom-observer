@@ -312,20 +312,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     where(User[:contribution].gt(0))
   }
 
-  # An exact numeric-id or verified-email match wins outright, ahead
-  # of (not unioned with) the fuzzy login/name search below -- a bare
-  # digit string is a substring of huge numbers of spam logins in
-  # production (e.g. `User.pattern("1")` fuzzy-matches thousands of
-  # users), so folding the two into one OR'd query would make
-  # id-based lookup return a multi-row index instead of the single
-  # intended record for most ids.
   scope :pattern, lambda { |phrase|
-    if (exact = exact_match(phrase))
-      return where(id: exact.id)
+    exact_match_or(phrase) do
+      cols = User[:login] + User[:name]
+      search_columns(cols, phrase)
     end
-
-    cols = User[:login] + User[:name]
-    search_columns(cols, phrase)
   }
 
   # NOTE: the obs images are a separate optimized query
@@ -450,6 +441,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # scope instead, in case of a partial match) -- only a numeric id or
   # a verified email address counts as "exact."
   def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
     user = (phrase.match?(/^\d+$/) && safe_find(phrase)) ||
            find_by(email: phrase)
     user if user&.verified

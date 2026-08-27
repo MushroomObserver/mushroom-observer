@@ -64,15 +64,19 @@ class NamesControllerIndexTest < FunctionalTestCase
     { q: { model: :Name, pattern: } }
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern
-  def test_index_pattern_param_redirected_to_search
+  # Via PatternSearch::Name.
+  def test_index_pattern_param_builds_query_directly
     pattern = "Agaricus"
 
     login
     get(:index, params: { pattern: })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :names })
+    assert_page_title(:names.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
+               with_correct_spelling.count },
+      "Wrong number of (correctly spelled) Names"
     )
   end
 

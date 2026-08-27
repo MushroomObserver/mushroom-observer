@@ -9,6 +9,8 @@
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
+#  exact_match::        Does a phrase identify a single record outright
+#                       (id, or a class-specific override)?
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
 #                       Add limit to a SQL query, then pass it to find_by_sql.
@@ -72,7 +74,7 @@ class AbstractModel < ApplicationRecord
   # (attribution) or looking at this (viewer-aware formatting),
   # set explicitly by the controller/caller before save/render. No
   # ambient global fallback (no Current.user) - every model gets
-  # this accessor for free so callers never need to add their own.
+  # this accessor for free, so callers don't need to add one.
   attr_accessor :current_user
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
@@ -106,6 +108,15 @@ class AbstractModel < ApplicationRecord
     find(id)
   rescue ActiveRecord::RecordNotFound
     nil
+  end
+
+  # Does `phrase` identify a single record, without a fuzzy `pattern`
+  # search? Used by `exact_match_or` to prioritize an identifier match
+  # ahead of the fuzzy scope. Override where a class has another
+  # unambiguous identifier (User overrides for verified email).
+  def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
+    safe_find(phrase) if /^\d+$/.match?(phrase)
   end
 
   # At minimum this list should include all objects that can have

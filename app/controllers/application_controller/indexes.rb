@@ -220,13 +220,18 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     { id: params[:id].to_s, always_index: true }
   end
 
-  # Pattern searches should now hit each controller with a :q param,
-  # after the search is parsed in `SearchController#pattern`.
-  # This is for backwards compatibility with old bookmarks.
+  # e.g. Observations' checklist taxon links, its "did you mean" alert.
   def pattern
-    pattern = params[:pattern].to_s
-    type = controller_model_name.pluralize.underscore.to_sym
-    redirect_to(search_pattern_path(pattern_search: { pattern:, type: }))
+    model_name = controller_model_name.to_sym
+    pattern = params[:pattern].to_s.strip_squeeze
+
+    return if pattern_too_long?(pattern)
+
+    save_pattern_if_it_wont_overfill_cookie_store(
+      model_name.to_s.tableize.to_sym, pattern
+    )
+
+    [query_from_pattern(model_name, pattern), {}]
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:

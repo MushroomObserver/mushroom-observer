@@ -112,6 +112,29 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(numbers.count * 2, collection_number_links.count)
   end
 
+  def test_index_pattern_param_builds_query_directly
+    pattern = "Singer"
+    numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
+    assert(numbers.many?,
+           "Test needs a pattern matching many collection numbers")
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:success)
+    assert_page_title(:collection_numbers.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+  end
+
+  def test_index_pattern_param_matching_id_redirects_to_show
+    number = collection_numbers(:coprinus_comatus_coll_num)
+
+    login
+    get(:index, params: { pattern: number.id })
+
+    assert_redirected_to(collection_number_path(number.id))
+  end
+
   ##############################################################################
   # SHOW
   #
@@ -508,7 +531,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([new_num], obs1.collection_numbers)
     assert_obj_arrays_equal([new_num], obs2.reload.collection_numbers)
     assert_equal("Joe Schmoe", new_num.name)
-    assert_equal("07-123a", new_num.number)
+    assert_equal("07-456a", new_num.number)
     # Make sure it updates the herbarium record which shared the old
     # collection number.
     assert_equal(
