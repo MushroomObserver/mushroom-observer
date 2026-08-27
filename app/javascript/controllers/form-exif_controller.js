@@ -58,8 +58,13 @@ export default class extends Controller {
 
     // For saved "good" images, the server has already extracted EXIF data
     // from the original files and passed it via camera_info props.
-    // We only need to extract EXIF in the browser for "upload" images.
-    if (itemElement.dataset.imageStatus == "good") return;
+    // We only need to extract EXIF in the browser for "upload" images --
+    // but still settle the item, or the submit gate would wait on it if
+    // it is tracked in the upload store (#5238).
+    if (itemElement.dataset.imageStatus == "good") {
+      this.markExifSettled(itemElement);
+      return;
+    }
 
     // Initialize geocode for uploads
     itemElement.dataset.geocode = "";
@@ -79,6 +84,10 @@ export default class extends Controller {
         this.populateExifData(itemElement, _exif_data);
       } catch (error) {
         console.log("Could not load EXIF data:", error);
+        // No usable EXIF, but the item is still "settled" -- otherwise
+        // submitWhenExifReady would stall the full timeout waiting for a
+        // "populated" event this image never sends (#5238).
+        this.markExifSettled(itemElement);
       }
     };
 
@@ -87,9 +96,22 @@ export default class extends Controller {
     if (_image.complete && _image.naturalHeight !== 0) {
       loadExifData();
     } else {
-      // Otherwise, wait for image to load
+      // Otherwise, wait for image to load. An image that fails to load
+      // never runs loadExifData, so settle it here too, or it would
+      // stall submission the same way.
       _image.onload = loadExifData;
+      _image.onerror = () => this.markExifSettled(itemElement);
     }
+  }
+
+  // Mark an item's EXIF step complete without applying any data -- used
+  // when there was no parseable EXIF or the image failed to load, so the
+  // "all items settled" gate in form-images stops waiting on it (#5238).
+  markExifSettled(itemElement) {
+    if (itemElement.dataset.initialized == "true") return;
+
+    itemElement.dataset.initialized = "true";
+    this.dispatch("populated", { detail: { target: itemElement } });
   }
 
   // Now that we've read the data from the loaded file, populate carousel-item
