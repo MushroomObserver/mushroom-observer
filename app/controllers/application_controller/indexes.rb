@@ -20,41 +20,57 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #  These methods help to assemble filtered index results (from the query) and
   #  render the interface for the index pagination with info returned by Query.
   #
-  #  Each controller's index may have "subactions". These are params that
-  #  trigger a method by the same name, applying a single filter to the results.
-  #  Subactions are not combinable - they all immediately execute their queries
-  #  and render, so if you want to combine params, call `create_query`.
+  #  Every param a controller's Query subclass recognizes (its query_attr
+  #  names and their param_alias shortcuts) is a live top-level index
+  #  filter -- no per-controller method or allowlist required. Unlike the
+  #  old subaction dispatch, recognized params combine: `?by_user=X&
+  #  has_notes=true` filters by both, instead of only the first one a
+  #  controller happened to list.
   #
-  #  The shared "index_active_params" are similar to subactions but handle:
-  #  (`q`) - parsing forwarded queries
-  #  (`by`) - ordering results
-  #  (`id`) - indexing at the current cursor when returning from :show
-  #  All three params can be mutually combined, but with at most one subaction.
-  #
-  #  NOTE: The current plan is to phase subactions out and make all incoming
-  #  links create a query, sent through `q`, to eliminate conflicting param
-  #  directives so we can prepare for a simple standard for permalinks.
-  #  When that's resolved, we can then expose the query params in the URL,
-  #  enabling permalinks for filtered queries. Eventually it should be easy
-  #  for developers to combine filters with Query. - AN 2025-FEB
+  #  `:pattern` gets first priority when both recognized and present,
+  #  since it goes through `PatternSearch`'s keyword parsing instead of
+  #  the generic per-attr resolution. `:by`/`:q`/`:id` (`sorted_index`)
+  #  apply only when no other recognized param is present.
   #
   ##############################################################################
   #
-  # Assemble query and display_args from a param subaction, or unfiltered_index.
-  # All subactions call `create_query` to generate paginated results.
+  # Assemble query and display_args: a pattern search, any other
+  # recognized filter param, :by/:q/:id, or the unfiltered index -- in
+  # that priority order.
   def build_index_with_query
-    current_params = index_active_params.intersection(params.keys.map(&:to_sym))
-    current_params.each do |subaction|
-      next if params[subaction].blank?
+    query, display_opts = index_query_and_display_opts
+    return nil if performed? || query.blank?
 
-      return filtered_subaction_index(subaction)
-    end
+    filtered_index(query, display_opts)
+  end
 
-    # Otherwise, display the unfiltered index.
-    new_query, display_opts = unfiltered_index
-    return unless new_query
+  # The Query subclass this controller's index filters against, e.g.
+  # `Query::Observations` for `ObservationsController`.
+  def controller_query_class
+    @controller_query_class ||=
+      "Query::#{controller_model_name.pluralize}".constantize
+  end
 
-    filtered_index(new_query, display_opts)
+  INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
+
+  def index_query_and_display_opts
+    return pattern if pattern_param_present?
+    return create_query_from_url_params(controller_model_name.to_sym, params) if
+      other_filter_param_present?
+    return sorted_index if INDEX_BASIC_PARAMS.any? { |p| params[p].present? }
+
+    unfiltered_index
+  end
+
+  def pattern_param_present?
+    controller_query_class.recognized_params.include?(:pattern) &&
+      params[:pattern].present?
+  end
+
+  def other_filter_param_present?
+    filter_params = controller_query_class.recognized_params -
+                    INDEX_BASIC_PARAMS - [:pattern]
+    filter_params.any? { |p| params[p].present? }
   end
 
   def check_for_spider_block(request, params)
@@ -81,27 +97,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # query_base = "::Query::#{controller_model_name.pluralize}".constantize
     # query_base.send(:default_order) || nil
     nil
-  end
-
-  # Provide defaults for the params an index can handle.
-  # Note the order of this array governs logic in build_index_with_query.
-  INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
-
-  # Overrides should include any of the above basics, if relevant.
-  def index_active_params
-    ApplicationController::Indexes::INDEX_BASIC_PARAMS
-  end
-
-  # Figure which of the active params should get handled by :sorted_index.
-  # Some controllers don't handle all three basics, so we derive what's there.
-  def index_basic_params
-    index_active_params.intersection(INDEX_BASIC_PARAMS)
-  end
-
-  # If param is [:by, :q, :id] it's handled by :sorted_index.
-  # Other params are handled by a named method in the downstream controller.
-  def index_param_method_or_default(subaction)
-    index_basic_params.include?(subaction) ? :sorted_index : subaction
   end
 
   # Generally this is the default index action, no params given.
@@ -305,19 +300,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   private ##########
-
-  def filtered_subaction_index(subaction)
-    # May go through #sorted_index to create the query, before #filtered_index
-    query, display_opts = send(index_param_method_or_default(subaction))
-
-    # Some actions may redirect instead of returning a query, such as pattern
-    # searches when they resolve to a single object or get no results.
-    # In Rails 7.2.3+, redirect_to returns the status code (Integer), so
-    # performed? guards against treating that as a query.
-    return nil if performed? || query.blank?
-
-    filtered_index(query, display_opts)
-  end
 
   def show_index_setup(query, display_opts)
     store_location

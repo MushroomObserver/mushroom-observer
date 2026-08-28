@@ -4,7 +4,12 @@ module Observations
   class IdentifyController < ApplicationController
     before_action :login_required
 
+    # `needs_naming` always applies on this page, filtered or not --
+    # forcing it here (rather than merging it in a subaction) means
+    # every request recognizes a filter param, so build_index_with_query
+    # always takes the generic filtered path, not unfiltered_index.
     def index
+      params[:needs_naming] ||= "1"
       build_index_with_query
     end
 
@@ -32,31 +37,6 @@ module Observations
     end
 
     private
-
-    # override the default? maybe no longer necessary
-    def unfiltered_index_opts
-      super.merge(query_args: { needs_naming: true, order_by: :rss_log })
-    end
-
-    def default_sort_order
-      :rss_log
-    end
-
-    def index_active_params
-      [:identify_filter, :q, :id].freeze
-    end
-
-    # Dispatches to Observation.identify_filter (Observation::Scopes),
-    # which picks clade or region based on identify_filter[type] --
-    # the single swappable autocompleter submits both under one field
-    # pair. `needs_naming` always applies on this page regardless of
-    # the optional clade/region sub-filter, so it's merged in here
-    # rather than coming from the URL.
-    def identify_filter
-      create_query_from_url_params(
-        :Observation, params.merge(needs_naming: true)
-      )
-    end
 
     def index_display_opts(opts, _query)
       { matrix: true, cache: true,
