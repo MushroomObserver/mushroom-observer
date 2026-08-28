@@ -3,6 +3,26 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Images, :Image,
+      overrides: {
+        id_in_set: images(:in_situ_image).id,
+        by_users: rolf.id,
+        license: licenses(:ccnc25).id,
+        observations: observations(:minimal_unknown_obs).id,
+        locations: locations(:burbank).id,
+        projects: projects(:bolete_project).id,
+        species_lists: species_lists(:first_species_list).id
+      }
+    )
+  end
+
   # Tests of index: unfiltered index, then each recognized filter param.
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at

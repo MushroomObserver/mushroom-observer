@@ -3,8 +3,25 @@
 require("test_helper")
 
 class FieldSlipsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   setup do
     @field_slip = field_slips(:field_slip_one)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::FieldSlips, :FieldSlip,
+      overrides: {
+        id_in_set: field_slips(:field_slip_one).id,
+        by_users: rolf.id,
+        observation: observations(:minimal_unknown_obs).id,
+        projects: projects(:bolete_project).id
+      }
+    )
   end
 
   def test_should_get_index

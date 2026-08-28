@@ -4,7 +4,18 @@ require("test_helper")
 
 # functional tests of glossary controller and views
 class GlossaryTermsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ESSENTIAL_ATTRIBUTES = %w[name description].freeze
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::GlossaryTerms, :GlossaryTerm, overrides: { by_users: rolf.id }
+    )
+  end
 
   # ---------- Test actions that Display data (index, show, etc.) --------------
 

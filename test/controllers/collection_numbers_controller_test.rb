@@ -3,6 +3,8 @@
 require("test_helper")
 
 class CollectionNumbersControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ##############################################################################
   # INDEX
   #
@@ -11,6 +13,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index)
 
     assert_page_title(:collection_numbers.ti)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::CollectionNumbers, :CollectionNumber,
+      overrides: {
+        id_in_set: collection_numbers(:minimal_unknown_coll_num).id,
+        by_users: rolf.id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
   end
 
   def test_index_with_query

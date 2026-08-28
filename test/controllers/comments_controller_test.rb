@@ -3,12 +3,28 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   # Test of index: unfiltered index, then each recognized filter param.
   def test_index
     login
     get(:index)
     assert_response(:success)
     assert_select("body.comments__index")
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Comments, :Comment,
+      overrides: {
+        id_in_set: comments(:minimal_unknown_obs_comment_1).id,
+        by_users: rolf.id,
+        for_user: rolf.id
+      }
+    )
   end
 
   def test_index_by_non_default_sort_order
