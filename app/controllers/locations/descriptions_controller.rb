@@ -51,21 +51,6 @@ module Locations
       ::Query::LocationDescriptions.default_order # :name
     end
 
-    # Used by ApplicationController to dispatch #index to a private method
-    def index_active_params
-      [:by_author, :by_editor, :by, :q, :id].freeze
-    end
-
-    # Display list of location_descriptions that a given user is author on.
-    def by_author
-      create_query_from_url_params(:LocationDescription, params)
-    end
-
-    # Display list of location_descriptions that a given user is editor on.
-    def by_editor
-      create_query_from_url_params(:LocationDescription, params)
-    end
-
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)

@@ -10,7 +10,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   # ----------------------------
   #
   # Tests arranged as follows:
-  # default subaction; then other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
   def test_index
     login

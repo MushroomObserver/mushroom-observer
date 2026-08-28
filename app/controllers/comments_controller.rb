@@ -51,32 +51,6 @@ class CommentsController < ApplicationController
     ::Query::Comments.default_order # :created_at
   end
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:target, :pattern, :by_user, :for_user, :by, :q].freeze
-  end
-
-  # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def by_user
-    create_query_from_url_params(:Comment, params)
-  end
-
-  # Shows comments for a given user's Observations, most recent first.
-  # (Linked from show_user.)
-  def for_user
-    create_query_from_url_params(:Comment, params)
-  end
-
-  # Shows comments for a given object, most recent first. Linked from
-  # the "and more..." link at the bottom of a truncated comment list.
-  # Target validation lives in
-  # `Query::Modules::HashValidation#validate_polymorphic`, shared
-  # with the bookmarked `q[target][...]` query path. It flashes on an
-  # unrecognized type or nonexistent id.
-  def target
-    create_query_from_url_params(:Comment, params)
-  end
-
   def index_display_opts(opts, query)
     # `:include` falls back to `Comment.index_includes_tree` via
     # `default_index_includes_for_model`. (Re: the historical

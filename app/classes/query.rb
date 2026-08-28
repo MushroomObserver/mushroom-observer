@@ -377,9 +377,10 @@ class Query
   delegate :recognized_params, to: :class
 
   # The `params.permit(*filters)`-compatible filter list for this Query
-  # subclass's recognized_params -- replaces `index_active_params`'s
-  # allowlisting role (see
-  # ApplicationController::QueryParams#create_query_from_url_params).
+  # subclass's recognized_params -- the allowlist
+  # ApplicationController::Indexes#build_index_with_query and
+  # ApplicationController::QueryParams#create_query_from_url_params use
+  # to decide which top-level URL params are live index filters.
   # A scalar attr (or param_alias) permits as a bare symbol; an
   # Array-typed attr permits via `attr: []`; a Hash-typed attr --
   # including a subquery hash like `location_query: { subquery: :Location }`

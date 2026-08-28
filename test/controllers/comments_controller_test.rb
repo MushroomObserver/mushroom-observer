@@ -3,9 +3,7 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
-  # Test of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # Test of index: unfiltered index, then each recognized filter param.
   def test_index
     login
     get(:index)

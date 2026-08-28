@@ -3,9 +3,7 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
-  # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # Tests of index: unfiltered index, then each recognized filter param.
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
     assert_select(".matrix-box")

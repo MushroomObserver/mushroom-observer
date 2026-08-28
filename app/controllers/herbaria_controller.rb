@@ -208,14 +208,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     ::Query::Herbaria.default_order # :records
   end
 
-  def index_active_params
-    [:pattern, :nonpersonal, :by, :q, :id].freeze
-  end
-
-  def nonpersonal
-    create_query_from_url_params(:Herbarium, params)
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 100,
