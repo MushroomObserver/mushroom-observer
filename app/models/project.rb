@@ -800,13 +800,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     base.where.not(name_id: expanded_target_name_id_set.to_a)
   end
 
+  # Builds the combined predicate with Arel's `.or` directly instead
+  # of `Relation#or` -- `Relation#or` diffs the two sides' where
+  # clauses using Arel node `==`, which considers
+  # location_suffix_conditions and where_suffix_conditions equal
+  # (same LIKE-or-equals shape, different columns) even though their
+  # `hash`es differ, and silently drops one of the two.
   def violating_by_target_location(base)
     return unless target_locations.any?
 
-    with_loc = base.where.not(location_id: nil).
-               where(location_suffix_conditions)
-    without_loc = base.where(location_id: nil).where(where_suffix_conditions)
-    base.where.not(id: with_loc.or(without_loc).select(:id))
+    has_loc = Observation[:location_id].not_eq(nil).
+              and(location_suffix_conditions)
+    no_loc = Observation[:location_id].eq(nil).and(where_suffix_conditions)
+    passing = base.where(has_loc.or(no_loc))
+    base.where.not(id: passing.select(:id))
   end
 
   public
