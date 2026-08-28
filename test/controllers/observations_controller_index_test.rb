@@ -401,7 +401,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(look_alikes > 1, "Test needs different fixture")
 
     setup_rolfs_index
-    get(:index, params: { look_alikes: "1", name: name.id })
+    get(:index, params: { look_alikes: name.id })
 
     assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_look_alikes.l}: #{name.text_name}")
@@ -417,11 +417,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(look_alikes.zero?, "Test needs different fixture")
 
     setup_rolfs_index
-    get(:index, params: { look_alikes: "1", name: name.id })
+    get(:index, params: { look_alikes: name.id })
 
     assert_response(:success)
     assert_page_title(:observations.ti)
     assert_results(count: look_alikes)
+  end
+
+  # look_alikes is record-backed (Name) -- a bad id flashes and
+  # redirects, same as any other record-backed shortcut.
+  def test_index_look_alikes_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { look_alikes: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
   end
 
   def test_index_related_taxa
@@ -435,10 +447,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       )
 
     setup_rolfs_index
-    get(:index, params: { related_taxa: "1", name: name.text_name })
+    get(:index, params: { related_taxa: name.id })
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_related_taxa.l}: #{parent.text_name}")
+    assert_displayed_filters("#{:query_related_taxa.l}: #{name.text_name}")
     assert_results(count: obss_of_related_taxa.count)
+  end
+
+  # related_taxa is record-backed (Name) -- a bad id flashes and
+  # redirects, same as look_alikes and any other record-backed
+  # shortcut.
+  def test_index_related_taxa_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { related_taxa: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
   end
 
   def test_index_name
