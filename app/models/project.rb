@@ -317,23 +317,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user)
   end
 
-  # SQL-based count over the four violation kinds (#4136). Each branch
-  # plucks ids of OFFENDING observations and merges them into a Set
-  # for dedup; total cost is O(violations) rather than the
-  # O(visible_observations) cost of the full Ruby iteration in
-  # `#violations`. Called from the project show page's
-  # `render_violations_button` (inlined from the former
-  # `Tabs::ProjectsHelper#violations_button`), so any per-project
-  # work multiplies by the number of projects rendered.
+  # Called from the project show page's `render_violations_button`
+  # (inlined from the former `Tabs::ProjectsHelper#violations_button`),
+  # so any per-project work multiplies by the number of projects
+  # rendered.
   def count_violations
-    return 0 unless constraints?
-
-    ids = Set.new
-    collect_date_violation_ids(ids)
-    collect_bbox_violation_ids(ids)
-    collect_target_name_violation_ids(ids)
-    collect_target_location_violation_ids(ids)
-    ids.size
+    violating_observation_ids.size
   end
 
   def constraints?
@@ -740,7 +729,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     end.reduce(:or)
   end
 
-  # ----- helpers for SQL-based count_violations (#4136) -----
+  # ----- helpers for SQL-based violation detection -----
+
+  # Set of ids of every observation violating at least one configured
+  # constraint. Shared building block for `count_violations` (just
+  # the size) and `violating_observations` (the AR relation built
+  # from these ids).
+  def violating_observation_ids
+    return Set.new unless constraints?
+
+    ids = Set.new
+    collect_date_violation_ids(ids)
+    collect_bbox_violation_ids(ids)
+    collect_target_name_violation_ids(ids)
+    collect_target_location_violation_ids(ids)
+    ids
+  end
 
   def collect_date_violation_ids(ids)
     return unless start_date || end_date
@@ -912,16 +916,32 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   Violation = Struct.new(:obs, :kinds)
 
   def violations
-    return [] unless constraints?
+    violations_for(violating_observations)
+  end
 
-    rows = visible_observations.includes(:name, :location).
-           filter_map do |obs|
+  # Ordered relation of every observation violating at least one
+  # configured constraint. Unpaginated -- a caller that only needs
+  # one page (`Projects::ViolationsController#index`) should
+  # paginate this directly rather than loading every violation into
+  # Ruby first.
+  def violating_observations
+    return Observation.none unless constraints?
+
+    Observation.where(id: violating_observation_ids).
+      includes(:name, :location).order_by(:name)
+  end
+
+  # Builds `Violation` structs (obs + kinds) for a collection of
+  # observations already known to violate a constraint, e.g. a page
+  # of `violating_observations`. Skips any observation
+  # `violation_kinds_for` doesn't agree is a violation.
+  def violations_for(observations)
+    observations.filter_map do |obs|
       kinds = violation_kinds_for(obs)
       next if kinds.empty?
 
       Violation.new(obs, kinds)
     end
-    rows.sort_by { |v| v.obs.name&.sort_name.to_s.downcase }
   end
 
   # Returns the kinds of violation that apply to the given observation

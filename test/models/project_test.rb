@@ -614,6 +614,48 @@ class ProjectTest < UnitTestCase
     assert_equal(proj.violations.size, proj.count_violations)
   end
 
+  def test_violating_observations_matches_violations
+    proj = projects(:falmouth_2023_09_project)
+
+    assert_equal(proj.violations.map { |v| v.obs.id },
+                 proj.violating_observations.map(&:id),
+                 "violating_observations should match violations, in order")
+  end
+
+  # violating_observations is a relation, so a caller can paginate it
+  # with LIMIT/OFFSET instead of loading every violation into Ruby.
+  # Uses 3 target_name violations (not a fixture count, so this
+  # doesn't depend on fixture data staying in sync) to prove
+  # offset/limit slices the query.
+  def test_violating_observations_is_paginable_with_offset_and_limit
+    proj = Project.create!(title: "Paginable #{SecureRandom.hex(4)}",
+                           user: users(:rolf))
+    proj.add_target_name(names(:agaricus))
+    off_target = [observations(:peltigera_obs),
+                  observations(:california_obs),
+                  observations(:minimal_unknown_obs)]
+    off_target.each { |obs| proj.add_observation(obs) }
+
+    ordered_ids = proj.violations.map { |v| v.obs.id }
+    assert_equal(3, ordered_ids.size, "Test needs exactly 3 violations")
+
+    page = proj.violating_observations.offset(1).limit(1)
+    assert_equal([ordered_ids[1]], page.map(&:id),
+                 "offset(1).limit(1) should return only the 2nd violation")
+  end
+
+  def test_violations_for_skips_observations_that_are_not_violations
+    proj = projects(:falmouth_2023_09_project)
+    violating_obs = proj.violations.first.obs
+    visible = proj.visible_observations.to_a - [violating_obs]
+    passing_obs = visible.find { |obs| proj.violation_kinds_for(obs).empty? }
+    assert(passing_obs, "Test needs a visible obs that is not a violation")
+
+    result = proj.violations_for([violating_obs, passing_obs])
+
+    assert_equal([violating_obs.id], result.map { |v| v.obs.id })
+  end
+
   def test_candidate_observations_respects_date_range
     proj = build_target_name_project_with_dates
     in_range = observations(:agaricus_campestris_obs)
