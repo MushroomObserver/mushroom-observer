@@ -868,6 +868,116 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(true, force_index)
   end
 
+  # Proves every param Query::Observations recognizes survives the
+  # top-level URL round trip through create_query_from_url_params --
+  # not each attr's filtering behavior, which
+  # test/classes/query/observations_test.rb already covers via direct
+  # Query.lookup(:Observation, attr: value) calls. A record-backed
+  # attr needs a fixture id, since a bad one hits
+  # resolve_record_backed_value's flash+redirect path instead of
+  # building a query; ROUND_TRIP_VALUE_OVERRIDES supplies those (and
+  # the one other attr, order_by, whose value must be a valid scope
+  # name to survive validate_order_by!, not just match its type).
+  # Deeply-nested Hash-shaped attrs (subqueries, `names`,
+  # `identify_filter`, `in_box`) are skipped -- they're not part of
+  # the "hundreds of shortcuts newly live as top-level params" this
+  # test guards, since nothing links to them at the top level anyway.
+  ROUND_TRIP_SKIPPED_ATTRS = [
+    :names, :identify_filter, :in_box,
+    :image_query, :location_query, :name_query, :sequence_query
+  ].freeze
+
+  ROUND_TRIP_VALUE_OVERRIDES = {
+    order_by: "date",
+    id_in_set: :minimal_unknown_obs,
+    by_users: :rolf,
+    look_alikes: :fungi,
+    related_taxa: :fungi,
+    locations: :burbank,
+    within_locations: :burbank,
+    herbaria: :nybg_herbarium,
+    herbarium_records: :coprinus_comatus_nybg_spec,
+    projects: :bolete_project,
+    project_lists: :bolete_project,
+    species_lists: :first_species_list,
+    inat_import: :rolf_inat_import
+  }.freeze
+
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+    klass = Query::Observations
+
+    (klass.recognized_params - ROUND_TRIP_SKIPPED_ATTRS).each do |key|
+      assert_round_trip_param_survives(klass, key)
+    end
+  end
+
+  # A param_alias always permits (and resolves) as a bare scalar,
+  # regardless of the target attr's shape -- permit_filters puts every
+  # alias in its `scalars` bucket. The attr's declared name permits
+  # per its declared shape, so an Array-typed attr (e.g. `created_at`,
+  # `projects`) needs an Array value there, or strong params silently
+  # drops it before it reaches query.params.
+  def assert_round_trip_param_survives(klass, key)
+    attr = klass.param_aliases[key] || key
+    aliased = klass.param_aliases.key?(key)
+    value = round_trip_value_for(klass.attribute_types[attr], attr, aliased)
+    raw_params = ActionController::Parameters.new(key => value)
+
+    query, = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_not_nil(query, "?#{key}=#{value.inspect} failed to build a query")
+    assert(query.params.key?(attr),
+           "?#{key}=#{value.inspect} didn't survive into query.params: " \
+           "#{query.params.inspect}")
+  end
+
+  def round_trip_value_for(type, attr, aliased)
+    base = round_trip_base_value(type, attr)
+    return base if aliased || !type.accepts.is_a?(Array)
+
+    Array(base)
+  end
+
+  def round_trip_base_value(type, attr)
+    override = ROUND_TRIP_VALUE_OVERRIDES[attr]
+    return round_trip_resolve_override(override) if override
+
+    accepts = type.accepts
+    accepts = accepts.first if accepts.is_a?(Array)
+
+    case accepts
+    when :string then "test"
+    # Hash here is an enum shape, e.g. { boolean: [true] }.
+    when :boolean, :truthy, Hash then true
+    when :float then 1.0
+    when :date, :time then "2021-01-06"
+    else
+      raise("No round-trip value defined for #{attr}: #{accepts.inspect}")
+    end
+  end
+
+  # Fixture overrides are given as bare Symbols (the model is implied
+  # by ROUND_TRIP_VALUE_OVERRIDES's key), except order_by's, which is
+  # already the literal scope-name String it needs to be.
+  def round_trip_resolve_override(override)
+    return override unless override.is_a?(Symbol)
+
+    case override
+    when :rolf then users(override).id
+    when :fungi then names(override).id
+    when :minimal_unknown_obs then observations(override).id
+    when :burbank then locations(override).id
+    when :bolete_project then projects(override).id
+    when :first_species_list then species_lists(override).id
+    when :nybg_herbarium then herbaria(override).id
+    when :coprinus_comatus_nybg_spec then herbarium_records(override).id
+    when :rolf_inat_import then inat_imports(override).id
+    end
+  end
+
   # Multiple ids submitted directly under the attr's name (not via a
   # param_alias) must not collapse to a single record --
   # find_by(id: [...]) only returns the first match, so this attr
