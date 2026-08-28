@@ -326,7 +326,26 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def constraints?
     start_date || end_date || location ||
-      target_names.any? || target_locations.any?
+      target_names_present? || target_locations_present?
+  end
+
+  # Memoized: violation_kinds_for calls violates_target_name?/
+  # violates_target_location? once per observation, and neither
+  # target_names.any? nor target_locations.any? caches its result on
+  # an unloaded association -- without this, checking violations for
+  # a page of observations re-queries "does this project have any
+  # target names/locations" once per observation instead of once per
+  # request.
+  def target_names_present?
+    return @target_names_present if defined?(@target_names_present)
+
+    @target_names_present = target_names.any?
+  end
+
+  def target_locations_present?
+    return @target_locations_present if defined?(@target_locations_present)
+
+    @target_locations_present = target_locations.any?
   end
 
   # Check if user has permission to edit a given object.
@@ -590,6 +609,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add target name to this project if not already present.
   def add_target_name(name)
     project_target_names.find_or_create_by!(name: name)
+    @target_names_present = true
     touch
   rescue ActiveRecord::RecordNotUnique
     # Already exists, no-op
@@ -604,12 +624,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     record.destroy
     purge_observations_matching_name(name)
+    remove_instance_variable(:@target_names_present) if
+      defined?(@target_names_present)
     touch
   end
 
   # Add target location to this project if not already present.
   def add_target_location(location)
     project_target_locations.find_or_create_by!(location: location)
+    @target_locations_present = true
     touch
   rescue ActiveRecord::RecordNotUnique
     # Already exists, no-op
@@ -621,6 +644,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless record
 
     record.destroy
+    remove_instance_variable(:@target_locations_present) if
+      defined?(@target_locations_present)
     touch
   end
 
@@ -1060,7 +1085,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # AND the observation's name (with synonyms and sub-taxa expansion,
   # matching candidate_observations) is not in it.
   def violates_target_name?(observation)
-    return false unless target_names.any?
+    return false unless target_names_present?
 
     expanded_target_name_id_set.exclude?(observation.name_id)
   end
@@ -1070,7 +1095,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # the obs's location name (or `where`, when there's no location).
   # GPS overlap with a target_location does NOT satisfy the rule.
   def violates_target_location?(observation)
-    return false unless target_locations.any?
+    return false unless target_locations_present?
 
     !target_location_suffix_match?(observation)
   end
