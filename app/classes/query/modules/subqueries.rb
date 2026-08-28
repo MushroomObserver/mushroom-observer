@@ -101,9 +101,15 @@ module Query::Modules::Subqueries
       params.merge(is_collection_location: true)
     end
 
+    # `target`/`filter` are Symbols throughout this module (e.g.
+    # `:Location`), not the model classes. `params` is
+    # `current_query.params` -- already resolved, so this checks the
+    # stored attr names (`projects`/`species_lists`), not their URL
+    # param_alias shortcuts (`project`/`species_list`), which don't
+    # appear as keys here.
     def needs_is_collection_location(target, filter, params)
-      target == Location && filter == :Observation &&
-        (params[:project] || params[:species_list]) &&
+      target == :Location && filter == :Observation &&
+        (params[:projects].present? || params[:species_lists].present?) &&
         params[:is_collection_location].blank?
     end
   end

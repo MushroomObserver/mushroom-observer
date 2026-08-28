@@ -190,13 +190,14 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   # Sets @project/@observation-style ivars from a Query's resolved
-  # params. Call it from filtered_index_final_hook. No-op when attr is
-  # absent or (for an array-typed attr) holds more than one id.
+  # params. Call it from filtered_index_final_hook. `attr` must be
+  # Array-typed -- no-op when its value isn't an Array, or isn't a
+  # 1-element one.
   def derive_ivar_from_query(ivar, query, attr, model_class)
     value = query.params[attr]
-    id = value.is_a?(Array) ? (value.first if value.size == 1) : value
-    return unless id
+    return unless value.is_a?(Array) && value.size == 1
 
+    id = value.first
     instance_variable_set(ivar, resolved_alias_record(attr, id) ||
                                  model_class.safe_find(id))
   end

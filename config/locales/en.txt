@@ -4488,7 +4488,6 @@
   query_locations: "[:locations]"
   query_within_locations: "[:within_locations]"
   query_observations: "[:observations]"
-  query_project: "[:project]"
   query_project_lists: "[:project_lists]"
   query_projects: "[:projects]"
   query_species_lists: "[:species_lists]"

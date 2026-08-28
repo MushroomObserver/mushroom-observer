@@ -164,7 +164,6 @@ class ObservationsController
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
       derive_ivar_from_query(:@project, query, :projects, Project)
-      derive_ivar_from_query(:@project, query, :project, Project)
       query
     end
 
