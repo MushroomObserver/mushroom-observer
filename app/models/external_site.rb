@@ -35,11 +35,20 @@ class ExternalSite < AbstractModel
     where(project: Project.user_is_member(user_id))
   }
 
-  # `[name, id]` pairs for a select -- memoized for the process's
-  # life. This table barely changes, so a new row only appears after
-  # the next deploy restarts the app.
+  # Request-scoped memo (Thread.current, not a class ivar) for the
+  # select-options list -- matches UserGroup::THREAD_KEYS's pattern,
+  # isolated per request/thread rather than persisting stale data
+  # across requests pooled onto the same thread. Reset once per HTTP
+  # request via ApplicationController#reset_external_site_cache, and
+  # once per unit test (test_helper.rb's setup) for tests that call
+  # this directly without going through a request.
   def self.select_options
-    @select_options ||= order(:name).pluck(:name, :id)
+    Thread.current[:mo_external_site_select_options] ||=
+      order(:name).pluck(:name, :id)
+  end
+
+  def self.reset_request_cache
+    Thread.current[:mo_external_site_select_options] = nil
   end
 
   def check_url_syntax
