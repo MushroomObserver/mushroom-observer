@@ -1221,6 +1221,41 @@ class QueryTest < UnitTestCase
     assert_equal(1, obs_queries[6].keys.length)
   end
 
+  # An Observation query filtered by project or species_list defaults
+  # its converted Location subquery to is_collection_location: true --
+  # checks the resolved attr names (`projects`/`species_lists`), not
+  # their param_alias shortcuts (`project`/`species_list`), which don't
+  # appear in a Query's stored params. See
+  # Query::Modules::Subqueries#needs_is_collection_location.
+  def test_observation_subquery_of_location_defaults_collection_location
+    project = projects(:bolete_project)
+    species_list = species_lists(:first_species_list)
+
+    by_project = Query.lookup_and_save(:Observation, projects: [project.id])
+    by_species_list = Query.lookup_and_save(
+      :Observation, species_lists: [species_list.id]
+    )
+    unfiltered = Query.lookup_and_save(:Observation, order_by: :id)
+
+    project_location = by_project.subquery_of(:Location)
+    species_list_location = by_species_list.subquery_of(:Location)
+    unfiltered_location = unfiltered.subquery_of(:Location)
+
+    assert_equal(
+      true,
+      project_location.params[:observation_query][:is_collection_location]
+    )
+    assert_equal(
+      true,
+      species_list_location.
+        params[:observation_query][:is_collection_location]
+    )
+    assert_not(
+      unfiltered_location.params[:observation_query].
+        key?(:is_collection_location)
+    )
+  end
+
   def test_observation_subquery_of_name
     burbank = locations(:burbank)
     query_a = []
