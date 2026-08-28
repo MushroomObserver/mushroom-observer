@@ -3,13 +3,16 @@
 # "Species lists" panel on the observation show page. When the
 # observation already belongs to species lists, the heading is the
 # bare "Observation Lists" title with an icon-only "manage lists"
-# link flush right (for users who own any species lists), and the
+# link flush right (for users who can edit any species list), and the
 # body lists every species_list this observation is part of, with
 # an inline `[REMOVE]` button for any list the user has permission
 # to edit. When the observation belongs to no lists yet, the whole
 # heading is an icon+text "Add to an Observation List" link — shown
-# only if the user owns a list to add it to; otherwise the panel
-# doesn't render at all.
+# only if the user can edit a list to add it to; otherwise the panel
+# does not render.
+#
+# The link is gated on editable lists, not owned ones, so a foray
+# recorder who can edit a project list (but owns none) can still add.
 #
 class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   prop :obs, ::Observation
@@ -36,7 +39,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   end
 
   def manage_link?
-    @user&.species_list_ids&.any?
+    @user&.all_editable_species_lists&.any?
   end
 
   def manage_link
