@@ -68,6 +68,27 @@ module Projects
       assert_redirected_to(project_violations_path(project))
     end
 
+    # `Query::Projects`' `members`/`member` opts out of `always_index`
+    # (see query/projects.rb) -- without index_display_opts forcing
+    # it back on, `filtered_index` would take its single-result
+    # shortcut (`show_index_of_objects`) whenever a `member:` filter
+    # narrows to one project site-wide, regardless of which project's
+    # violations page it was submitted on, since the query built here
+    # isn't scoped to @project. Confirms a member of only one project
+    # (`lone_wolf`, sole member of "Lone Wolf Project") still renders
+    # this page instead of redirecting away to their project's show
+    # page.
+    def test_index_member_filter_matching_one_project_does_not_redirect
+      viewed_project = projects(:falmouth_2023_09_project)
+      sole_member = users(:lone_wolf)
+      login(viewed_project.user.login)
+
+      get(:index, params: { id: viewed_project.id,
+                            member: sole_member.id })
+
+      assert_response(:success)
+    end
+
     def test_update_legacy_remove_selected
       project = projects(:falmouth_2023_09_project)
       victim = project.violations.first.obs
