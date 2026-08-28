@@ -453,6 +453,19 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_results(count: obss_of_related_taxa.count)
   end
 
+  # related_taxa is record-backed (Name) -- a bad id flashes and
+  # redirects, same as look_alikes and any other record-backed
+  # shortcut.
+  def test_index_related_taxa_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { related_taxa: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
+  end
+
   def test_index_name
     name = names(:fungi)
     ids = Observation.where(name: name).map(&:id)
