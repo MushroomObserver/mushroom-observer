@@ -40,6 +40,26 @@ class Query::NamingsTest < UnitTestCase
     assert_query_scope(ids, scope, :Naming, names: [name.id])
   end
 
+  def test_naming_by_user_alias
+    ids = Naming.where(user: dick).order_by_default.pluck(:id)
+    scope = Naming.by_users(dick).order_by_default
+    assert_query_scope(ids, scope, :Naming, by_user: dick.id)
+  end
+
+  def test_naming_observation_alias
+    obs = observations(:coprinus_comatus_obs)
+    ids = Naming.observations(obs.id).order_by_default.pluck(:id)
+    scope = Naming.observations(obs.id).order_by_default
+    assert_query_scope(ids, scope, :Naming, observation: obs.id)
+  end
+
+  def test_naming_name_alias
+    name = names(:fungi)
+    ids = Naming.names(name.id).order_by_default.pluck(:id)
+    scope = Naming.names(name.id).order_by_default
+    assert_query_scope(ids, scope, :Naming, name: name.id)
+  end
+
   def test_naming_confidence
     naming = namings(:coprinus_comatus_naming) # vote_cache: 1
     scope = Naming.confidence(naming.vote_cache, naming.vote_cache).

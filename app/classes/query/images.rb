@@ -19,12 +19,12 @@ class Query::Images < Query
   query_attr(:confidence, [:float])
   query_attr(:pattern, :string)
   query_attr(:has_observations, :boolean)
-  query_attr(:observations, [Observation])
-  query_attr(:locations, [Location])
+  query_attr(:observations, [Observation], param_alias: :observation)
+  query_attr(:locations, [Location], param_alias: :location)
   query_attr(:projects, [Project], param_alias: :project,
                                    always_index: false,
                                    redirect_to: :model_index)
-  query_attr(:species_lists, [SpeciesList])
+  query_attr(:species_lists, [SpeciesList], param_alias: :species_list)
   query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by

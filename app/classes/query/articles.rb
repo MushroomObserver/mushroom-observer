@@ -6,7 +6,7 @@ class Query::Articles < Query
   query_attr(:id_in_set, [Article])
   query_attr(:title_has, :string)
   query_attr(:body_has, :string)
-  query_attr(:by_users, [User])
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
 
   def alphabetical_by
     @alphabetical_by ||= Article[:title]
