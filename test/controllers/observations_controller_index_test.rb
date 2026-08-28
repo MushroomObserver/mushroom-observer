@@ -724,20 +724,34 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
   end
 
-  # thumbnail_quality is this page's default sort, not a
-  # class-wide default_order on the shared `projects` query_attr
-  # (test_observation_names_in_species_lists_and_projects proves a
-  # bare `projects:` query elsewhere still needs the class default)
-  # -- an explicit `by` must still win.
+  # `project` is a plain param_alias for `projects` -- no attr-level
+  # default_order, so a bare `?project=X` (no `by`) falls through to
+  # the class default (:date). thumbnail_quality only applies via the
+  # explicit `by:` the project header's Observations tab sends (see
+  # Tab::Project::Observations) -- keeping the two orderings separate
+  # is what test_observation_names_in_species_lists_and_projects
+  # already relies on for a bare `projects:` query elsewhere.
+  def test_index_project_bare_url_uses_class_default_order
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_nil(query.params[:order_by])
+    assert_equal(:date, query.default_order)
+  end
+
   def test_index_project_explicit_by_respected
     project = projects(:bolete_project)
 
     login
-    get(:index, params: { project: project.id, by: "date" })
+    get(:index, params: { project: project.id, by: "thumbnail_quality" })
 
     assert_response(:success)
     query = @controller.instance_variable_get(:@query)
-    assert_equal("date", query.params[:order_by])
+    assert_equal("thumbnail_quality", query.params[:order_by])
   end
 
   # A bad project id redirects to the projects index. See redirect_to:
@@ -800,11 +814,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not(query.params.key?(:bogus_param))
   end
 
-  # Query::Observations' `project` attr is record-backed but not an
-  # alias for `projects` (see app/classes/query/observations.rb) --
-  # exercises create_query_from_url_params's `constantize` path with a
-  # directly-matching attr name, not just the lower-level
-  # resolve_query_param_records helper.
+  # `project` is a record-backed param_alias for `projects` -- exercises
+  # create_query_from_url_params's `constantize` path end to end.
   def test_create_query_from_url_params_sets_always_index_for_record_alias
     login
     project = projects(:bolete_project)
@@ -814,7 +825,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       :create_query_from_url_params, :Observation, raw_params
     )
 
-    assert_equal(project.id, query.params[:project])
+    assert_equal([project.id], query.params[:projects])
     assert_equal(true, display_opts[:always_index])
   end
 

@@ -81,11 +81,8 @@ class Query::Observations < Query
 
   query_attr(:herbaria, [Herbarium])
   query_attr(:herbarium_records, [HerbariumRecord])
-  query_attr(:projects, [Project], redirect_to: :model_index)
-  # Separate attr, not aliased to `projects` -- its default_order would
-  # leak into `projects:`-filtered subqueries composed elsewhere.
-  query_attr(:project, Project, redirect_to: :model_index,
-                                default_order: :thumbnail_quality)
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
   query_attr(:project_lists, [Project])
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
