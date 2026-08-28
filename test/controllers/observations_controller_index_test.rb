@@ -897,7 +897,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
         projects: projects(:bolete_project).id,
         project_lists: projects(:bolete_project).id,
         species_lists: species_lists(:first_species_list).id,
-        inat_import: inat_imports(:rolf_inat_import).id
+        inat_import: inat_imports(:rolf_inat_import).id,
+        external_sites: external_sites(:mycoportal).id
       }
     )
   end
