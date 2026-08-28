@@ -16,6 +16,8 @@ Dispatch priority, per request:
 3. `:by`/`:q`/`:id` (`sorted_index`) — only when no other recognized param is present.
 4. Otherwise, the unfiltered index.
 
+`:by` is in `recognized_params` too (`Query#order_by` declares `param_alias: :by`), but it's deliberately excluded from step 2 and handled by `sorted_index` instead. A "sort by X" link submits only `?by=X`, relying on `find_or_create_query` to look up the existing session/bookmarked query first and merge the new sort onto its full param set -- preserving whatever filter is already active. The generic resolver in step 2 never does that lookup; it builds params solely from what's submitted in the current request, with nothing carried over from a prior query. (Both paths end up saving their result to session afterward, via the same shared `update_stored_query` step in `filtered_index` -- that part's identical. The difference is only that the generic path's query never inherited the previous one's filters to begin with.) Folding `:by` into step 2 would mean every sort-link click builds a filter-less query from scratch. `sorted_index` also does `:by`-specific validation (`order_by_or_flash_if_unknown`, a distinct flash message from the generic path's) and legacy value remapping (`map_past_bys`). `:q`/`:id` aren't real recognized params at all -- `:q` is the forwarded/bookmarked-query meta-param, `:id` is pagination-cursor positioning only -- so excluding them from step 2 is defensive, not load-bearing.
+
 ## Adding a new filter shortcut
 
 Just declare the `query_attr` (with a `param_alias:` if it needs a shorter URL name than the attr itself) on the model's `Query` subclass. No controller method, no array entry, nothing else to wire up:

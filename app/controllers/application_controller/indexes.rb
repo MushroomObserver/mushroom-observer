@@ -69,11 +69,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # `:by` is in recognized_params too (order_by's param_alias), but
   # stays out of this generic path on purpose -- a bare `?by=X` relies
-  # on sorted_index's find_or_create_query to merge the sort onto the
-  # current session/bookmarked query. The generic resolver has no
-  # notion of "the current query"; it always builds fresh from
-  # submitted params only, which would silently drop the active
-  # filter on every sort-link click.
+  # on sorted_index's find_or_create_query to look up the existing
+  # session/bookmarked query and merge the new sort onto its full
+  # param set. This resolver skips that lookup; it builds params
+  # solely from what's submitted this request, so folding `:by` in
+  # would mean every sort-link click builds a filter-less query from
+  # scratch.
   def other_filter_param_present?
     filter_params = controller_query_class.recognized_params -
                     INDEX_BASIC_PARAMS - [:pattern]
