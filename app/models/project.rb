@@ -732,7 +732,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     scope.select("observations.id")
   end
 
+  public
+
   # OR clause: location.name LIKE '%, <target>' OR = '<target>'
+  # Public: also called from Observation.project_violations (the
+  # target_location violation check).
   def location_suffix_conditions
     tbl = Location.arel_table
     target_locations.map do |tl|
@@ -752,71 +756,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
         or(tbl[:where].eq(tl.name))
     end.reduce(:or)
   end
-
-  # ----- helpers for SQL-based violation detection -----
-
-  # Each constraint kind builds a relation off the same base, so all
-  # of them can combine with Relation#or into one query. A kind
-  # returns nil when the project doesn't have that constraint set;
-  # violating_observations drops the nils before combining.
-  def violation_detection_base
-    visible_observations.left_joins(:name, :location)
-  end
-
-  def violating_by_date(base)
-    return unless start_date || end_date
-    return base.where(Observation[:when].gt(end_date)) unless start_date
-    return base.where(Observation[:when].lt(start_date)) unless end_date
-
-    base.where(Observation[:when].gt(end_date)).
-      or(base.where(Observation[:when].lt(start_date)))
-  end
-
-  # found_here? checks obs.location == self first, before geoloc or
-  # location-bbox logic. The three branches below don't each repeat
-  # that exclusion; it's ANDed onto the combined result once instead.
-  def violating_by_bbox(base)
-    return unless location
-
-    has_geoloc = base.where.not(lat: nil).not_in_box(**location.bounding_box)
-    no_geoloc_has_location = base.where(lat: nil).where.not(location_id: nil).
-                             merge(Location.not_in_box(**location.bounding_box))
-    no_geoloc_no_location = base.where(lat: nil, location_id: nil)
-
-    # `location_id != X` is false in SQL for rows where location_id
-    # IS NULL, so a plain where.not(location_id: location.id) would
-    # drop the no_geoloc_no_location branch's rows from the combined
-    # result. Comparing against nil explicitly keeps them in.
-    not_project_location = Observation[:location_id].not_eq(location.id).
-                           or(Observation[:location_id].eq(nil))
-
-    has_geoloc.or(no_geoloc_has_location).or(no_geoloc_no_location).
-      where(not_project_location)
-  end
-
-  def violating_by_target_name(base)
-    return unless target_names.any?
-
-    base.where.not(name_id: expanded_target_name_id_set.to_a)
-  end
-
-  # Builds the combined predicate with Arel's `.or` directly instead
-  # of `Relation#or` -- `Relation#or` diffs the two sides' where
-  # clauses using Arel node `==`, which considers
-  # location_suffix_conditions and where_suffix_conditions equal
-  # (same LIKE-or-equals shape, different columns) even though their
-  # `hash`es differ, and silently drops one of the two.
-  def violating_by_target_location(base)
-    return unless target_locations.any?
-
-    has_loc = Observation[:location_id].not_eq(nil).
-              and(location_suffix_conditions)
-    no_loc = Observation[:location_id].eq(nil).and(where_suffix_conditions)
-    passing = base.where(has_loc.or(no_loc))
-    base.where.not(id: passing.select(:id))
-  end
-
-  public
 
   delegate :count, to: :candidate_observations, prefix: true
 
@@ -956,17 +895,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # page should paginate this directly instead of loading every
   # violation into Ruby first.
   def violating_observations
-    return Observation.none unless constraints?
-
-    base = violation_detection_base
-    relations = [
-      violating_by_date(base),
-      violating_by_bbox(base),
-      violating_by_target_name(base),
-      violating_by_target_location(base)
-    ].compact
-
-    relations.reduce(:or).distinct.includes(:name, :location).order_by(:name)
+    Observation.project_violations(self)
   end
 
   # Builds `Violation` structs (obs + kinds) for a collection of

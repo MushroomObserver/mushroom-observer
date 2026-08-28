@@ -621,13 +621,24 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(species_lists: :project_species_lists).
         where(project_species_lists: { project: project_ids }).distinct
     }
-    # Delegates to Project#violating_observations rather than
-    # rebuilding the same OR-combined condition here -- a project's
-    # constraint config (dates, bbox, target names/locations) only
-    # lives on the Project instance.
+    # Every observation violating at least one of the given project's
+    # configured constraints (date range, bbox, target names, target
+    # locations). See the project_violating_by_* class methods below
+    # for the per-kind logic.
     scope :project_violations, lambda { |project|
       project = Project.find(project) unless project.is_a?(Project)
-      where(id: project.violating_observations.select(:id))
+      return none unless project.constraints?
+
+      base = project_violation_base(project)
+      relations = [
+        project_violating_by_date(project, base),
+        project_violating_by_bbox(project, base),
+        project_violating_by_target_name(project, base),
+        project_violating_by_target_location(project, base)
+      ].compact
+
+      relations.reduce(:or).distinct.includes(:name, :location).
+        order_by(:name)
     }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
@@ -787,6 +798,76 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
                       (value + 1.0)
         Observation[:vote_cache].lt(next_higher)
       end
+    end
+
+    # ----- helpers for the project_violations scope -----
+
+    def project_violation_base(project)
+      project.visible_observations.left_joins(:name, :location)
+    end
+
+    def project_violating_by_date(project, base)
+      start_date = project.start_date
+      end_date = project.end_date
+      return unless start_date || end_date
+      return base.where(Observation[:when].gt(end_date)) unless start_date
+      return base.where(Observation[:when].lt(start_date)) unless end_date
+
+      base.where(Observation[:when].gt(end_date)).
+        or(base.where(Observation[:when].lt(start_date)))
+    end
+
+    # Location#found_here? checks obs.location == self first, before
+    # geoloc or location-bbox logic. The three branches below don't
+    # each repeat that exclusion; it's ANDed onto the combined result
+    # once instead, via not_project_location_condition.
+    def project_violating_by_bbox(project, base)
+      location = project.location
+      return unless location
+
+      branches = bbox_violation_branches(base, location)
+      branches.reduce(:or).where(not_project_location_condition(location))
+    end
+
+    def bbox_violation_branches(base, location)
+      has_geoloc = base.where.not(lat: nil).not_in_box(**location.bounding_box)
+      no_geoloc_has_location =
+        base.where(lat: nil).where.not(location_id: nil).
+        merge(Location.not_in_box(**location.bounding_box))
+      no_geoloc_no_location = base.where(lat: nil, location_id: nil)
+      [has_geoloc, no_geoloc_has_location, no_geoloc_no_location]
+    end
+
+    # `location_id != X` is false in SQL for rows where location_id
+    # IS NULL, so a plain where.not(location_id: location.id) would
+    # drop no-location rows from the combined result. Comparing
+    # against nil explicitly keeps them in.
+    def not_project_location_condition(location)
+      Observation[:location_id].not_eq(location.id).
+        or(Observation[:location_id].eq(nil))
+    end
+
+    def project_violating_by_target_name(project, base)
+      return unless project.target_names.any?
+
+      base.where.not(name_id: project.expanded_target_name_id_set.to_a)
+    end
+
+    # Builds the combined predicate with Arel's `.or` directly
+    # instead of `Relation#or` -- `Relation#or` diffs the two sides'
+    # where clauses using Arel node `==`, which considers
+    # location_suffix_conditions and where_suffix_conditions equal
+    # (same LIKE-or-equals shape, different columns) even though
+    # their `hash`es differ, and silently drops one of the two.
+    def project_violating_by_target_location(project, base)
+      return unless project.target_locations.any?
+
+      has_loc = Observation[:location_id].not_eq(nil).
+                and(project.location_suffix_conditions)
+      no_loc = Observation[:location_id].eq(nil).
+               and(project.where_suffix_conditions)
+      passing = base.where(has_loc.or(no_loc))
+      base.where.not(id: passing.select(:id))
     end
   end
 end
