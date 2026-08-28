@@ -623,8 +623,8 @@ class ProjectTest < UnitTestCase
   end
 
   # violation_kinds_for's bbox check (Location#found_here?) has two
-  # branches violating_by_bbox must also cover, or
-  # count_violations/violating_observations would disagree with
+  # branches Observation.project_violating_by_bbox must also cover,
+  # or count_violations/violating_observations would disagree with
   # violates_location? for these obs.
   def test_bbox_violation_matches_found_here_with_no_geoloc_or_location
     proj = Project.create!(title: "Bbox Missing Info #{SecureRandom.hex(4)}",
