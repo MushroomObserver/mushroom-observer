@@ -38,10 +38,6 @@ class ProjectsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Projects.default_order # :updated_at
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 50,

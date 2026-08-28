@@ -60,10 +60,6 @@ class SequencesController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Sequences.default_order # :created_at
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       include: [{ observation: :name }, :user],

@@ -46,11 +46,6 @@ module Locations
 
     private
 
-    # Is :name
-    def default_sort_order
-      ::Query::LocationDescriptions.default_order # :name
-    end
-
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)

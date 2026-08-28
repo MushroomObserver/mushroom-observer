@@ -47,10 +47,6 @@ class CommentsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Comments.default_order # :created_at
-  end
-
   def index_display_opts(opts, query)
     # `:include` falls back to `Comment.index_includes_tree` via
     # `default_index_includes_for_model`. (Re: the historical

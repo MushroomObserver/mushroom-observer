@@ -59,11 +59,6 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   private
 
-  # unused now. should be :date, maybe - AN
-  def default_sort_order
-    ::Query::SpeciesLists.default_order # :date
-  end
-
   def unfiltered_index_opts
     super.merge(query_args: { order_by: :date })
   end

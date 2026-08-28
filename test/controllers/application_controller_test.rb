@@ -245,14 +245,6 @@ class ApplicationControllerTest < FunctionalTestCase
     IpStats.reset!
   end
 
-  # `ApplicationController::Indexes#default_sort_order`'s base
-  # implementation returns nil -- every controller with an index
-  # overrides it, so InfoController (no index action) is the only
-  # way to reach the base method itself.
-  def test_default_sort_order_base_implementation_is_nil
-    assert_nil(@controller.send(:default_sort_order))
-  end
-
   # `ApplicationController::Indexes#index_display_opts`'s base
   # implementation merges into an empty hash -- every controller with
   # an index overrides it, so InfoController (no index action) is the

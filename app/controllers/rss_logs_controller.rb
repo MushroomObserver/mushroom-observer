@@ -21,10 +21,6 @@ class RssLogsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::RssLogs.default_order # :updated_at
-  end
-
   def unfiltered_index_opts
     super.merge(query_args: { types: index_type_default })
   end

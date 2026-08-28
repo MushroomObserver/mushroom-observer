@@ -37,8 +37,11 @@ class CollectionNumbersController < ApplicationController
 
   private
 
+  # `Query::CollectionNumbers.default_order` is :name_and_number, but
+  # nil keeps this index titled "Collection Numbers Index" rather than
+  # "... by Name and Number" -- see the base class's doc.
   def default_sort_order
-    nil # Query::CollectionNumbers.default_order
+    nil
   end
 
   # Hook runs before template displayed. Must return query.

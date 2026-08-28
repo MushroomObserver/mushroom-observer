@@ -204,10 +204,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @merge = Herbarium.safe_find(params[:merge])
   end
 
-  def default_sort_order
-    ::Query::Herbaria.default_order # :records
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 100,

@@ -97,14 +97,11 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
            status: :forbidden)
   end
 
-  # Currently some controller tests expect nil: Even though the sort order
-  # resulting from `nil` is the default, passing no explicit :by param
-  # means the index is titled "____ Index", rather than "____ by ____".
-  # NOTE: Could be standardized.
+  # `CollectionNumbersController` overrides this to `nil` -- passing no
+  # explicit :by param there keeps the index titled "____ Index" rather
+  # than "____ by ____ and ____".
   def default_sort_order
-    # query_base = "::Query::#{controller_model_name.pluralize}".constantize
-    # query_base.send(:default_order) || nil
-    nil
+    controller_query_class.default_order
   end
 
   # Generally this is the default index action, no params given.

@@ -39,10 +39,6 @@ class HerbariumRecordsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Herbaria.default_order # :name
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     derive_ivar_from_query(:@observation, query, :observations, Observation)

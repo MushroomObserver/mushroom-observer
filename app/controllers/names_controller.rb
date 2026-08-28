@@ -47,10 +47,6 @@ class NamesController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Names.default_order # :name
-  end
-
   def make_name_suggestions
     return unless @objects.empty? &&
                   params[:q].is_a?(ActionController::Parameters) &&

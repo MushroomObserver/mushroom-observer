@@ -34,6 +34,17 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                   "Wrong number of Herbarium Records")
   end
 
+  # Unfiltered index sorts by Query::HerbariumRecords.default_order.
+  def test_index_default_sort_order
+    login
+    get(:index)
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal(Query::HerbariumRecords.default_order.to_s,
+                 query.params[:order_by])
+  end
+
   def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
