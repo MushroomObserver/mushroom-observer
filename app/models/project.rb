@@ -317,12 +317,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user)
   end
 
-  # Called from the project show page's `render_violations_button`
-  # (inlined from the former `Tabs::ProjectsHelper#violations_button`),
-  # so any per-project work multiplies by the number of projects
+  # Called from the project show page's render_violations_button, so
+  # any per-project work multiplies by the number of projects
   # rendered.
   def count_violations
-    violating_observation_ids.size
+    violating_observations.count
   end
 
   def constraints?
@@ -731,58 +730,58 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # ----- helpers for SQL-based violation detection -----
 
-  # Set of ids of every observation violating at least one configured
-  # constraint. Shared building block for `count_violations` (just
-  # the size) and `violating_observations` (the AR relation built
-  # from these ids).
-  def violating_observation_ids
-    return Set.new unless constraints?
-
-    ids = Set.new
-    collect_date_violation_ids(ids)
-    collect_bbox_violation_ids(ids)
-    collect_target_name_violation_ids(ids)
-    collect_target_location_violation_ids(ids)
-    ids
+  # Each constraint kind builds a relation off the same base, so all
+  # of them can combine with Relation#or into one query. A kind
+  # returns nil when the project doesn't have that constraint set;
+  # violating_observations drops the nils before combining.
+  def violation_detection_base
+    visible_observations.left_joins(:name, :location)
   end
 
-  def collect_date_violation_ids(ids)
+  def violating_by_date(base)
     return unless start_date || end_date
+    return base.where(Observation[:when].gt(end_date)) unless start_date
+    return base.where(Observation[:when].lt(start_date)) unless end_date
 
-    ids.merge(out_of_range_observations.ids)
+    base.where(Observation[:when].gt(end_date)).
+      or(base.where(Observation[:when].lt(start_date)))
   end
 
-  def collect_bbox_violation_ids(ids)
+  # found_here? checks obs.location == self first, before geoloc or
+  # location-bbox logic. The three branches below don't each repeat
+  # that exclusion; it's ANDed onto the combined result once instead.
+  def violating_by_bbox(base)
     return unless location
 
-    ids.merge(obs_geoloc_outside_project_location.ids)
-    ids.merge(obs_without_geoloc_location_not_contained_in_location.ids)
-    ids.merge(obs_missing_geoloc_and_location.ids)
+    has_geoloc = base.where.not(lat: nil).not_in_box(**location.bounding_box)
+    no_geoloc_has_location = base.where(lat: nil).where.not(location_id: nil).
+                             merge(Location.not_in_box(**location.bounding_box))
+    no_geoloc_no_location = base.where(lat: nil, location_id: nil)
+
+    # `location_id != X` is false in SQL for rows where location_id
+    # IS NULL, so a plain where.not(location_id: location.id) would
+    # drop the no_geoloc_no_location branch's rows from the combined
+    # result. Comparing against nil explicitly keeps them in.
+    not_project_location = Observation[:location_id].not_eq(location.id).
+                           or(Observation[:location_id].eq(nil))
+
+    has_geoloc.or(no_geoloc_has_location).or(no_geoloc_no_location).
+      where(not_project_location)
   end
 
-  def collect_target_name_violation_ids(ids)
+  def violating_by_target_name(base)
     return unless target_names.any?
 
-    ids.merge(
-      visible_observations.
-        where.not(name_id: expanded_target_name_id_set.to_a).ids
-    )
+    base.where.not(name_id: expanded_target_name_id_set.to_a)
   end
 
-  def collect_target_location_violation_ids(ids)
+  def violating_by_target_location(base)
     return unless target_locations.any?
 
-    passing = passing_target_location_ids
-    ids.merge(visible_observations.where.not(id: passing).ids)
-  end
-
-  def passing_target_location_ids
-    with_loc = visible_observations.joins(:location).
-               where(location_suffix_conditions).
-               pluck("observations.id")
-    without_loc = visible_observations.where(location_id: nil).
-                  where(where_suffix_conditions).pluck(:id)
-    (with_loc + without_loc).uniq
+    with_loc = base.where.not(location_id: nil).
+               where(location_suffix_conditions)
+    without_loc = base.where(location_id: nil).where(where_suffix_conditions)
+    base.where.not(id: with_loc.or(without_loc).select(:id))
   end
 
   public
@@ -921,15 +920,21 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Ordered relation of every observation violating at least one
-  # configured constraint. Unpaginated -- a caller that only needs
-  # one page (`Projects::ViolationsController#index`) should
-  # paginate this directly rather than loading every violation into
-  # Ruby first.
+  # configured constraint. Unpaginated. A caller that only needs one
+  # page should paginate this directly instead of loading every
+  # violation into Ruby first.
   def violating_observations
     return Observation.none unless constraints?
 
-    Observation.where(id: violating_observation_ids).
-      includes(:name, :location).order_by(:name)
+    base = violation_detection_base
+    relations = [
+      violating_by_date(base),
+      violating_by_bbox(base),
+      violating_by_target_name(base),
+      violating_by_target_location(base)
+    ].compact
+
+    relations.reduce(:or).distinct.order_by(:name)
   end
 
   # Builds `Violation` structs (obs + kinds) for a collection of
@@ -1208,14 +1213,5 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
         # invert_where is safe (doesn't invert observations.where(lat: nil))
         Location.not_in_box(**location.bounding_box)
       )
-  end
-
-  # Mirrors Location#found_here?'s last branch (`return false unless
-  # loc`) -- an obs with neither GPS nor an assigned Location can't
-  # be confirmed inside the project's area, so it violates. Neither
-  # of the two scopes above matches this case: one requires lat
-  # present, the other requires a location to join against.
-  def obs_missing_geoloc_and_location
-    visible_observations.where(lat: nil, location_id: nil)
   end
 end

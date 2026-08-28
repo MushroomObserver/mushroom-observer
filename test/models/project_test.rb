@@ -623,7 +623,7 @@ class ProjectTest < UnitTestCase
   end
 
   # violation_kinds_for's bbox check (Location#found_here?) has two
-  # branches the four SQL id-collecting scopes must also cover, or
+  # branches violating_by_bbox must also cover, or
   # count_violations/violating_observations would disagree with
   # violates_location? for these obs.
   def test_bbox_violation_matches_found_here_with_no_geoloc_or_location
@@ -636,7 +636,7 @@ class ProjectTest < UnitTestCase
 
     assert(proj.violates_location?(obs),
            "Test needs an obs with neither geoloc nor location")
-    assert_includes(proj.send(:violating_observation_ids), obs.id,
+    assert_includes(proj.violating_observations.pluck(:id), obs.id,
                     "Obs with no geoloc and no location should violate " \
                     "the project's location constraint")
   end
@@ -653,7 +653,7 @@ class ProjectTest < UnitTestCase
     assert_not(proj.violates_location?(obs),
                "Test needs an obs whose location matches the project's, " \
                "with geoloc outside that location's bbox")
-    assert_not_includes(proj.send(:violating_observation_ids), obs.id,
+    assert_not_includes(proj.violating_observations.pluck(:id), obs.id,
                         "Obs assigned to the project's location should be " \
                         "compliant regardless of geoloc precision")
   end
