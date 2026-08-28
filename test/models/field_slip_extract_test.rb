@@ -370,14 +370,43 @@ class FieldSlipExtractTest < UnitTestCase
                                        site_admin: true))
   end
 
-  # A foray's own organizers are the people who can tell whether a slip
-  # was transcribed right, so project admins get in too.
+  # A foray's organizers get in -- but through edit rights on the
+  # observation, so the collector must have trusted the project with
+  # editing (Observation#can_edit?, via Project.user_admin_via_project?).
   def test_permitted_for_admin_of_the_observations_project
     project = projects(:eol_project)
     project.observations << @obs unless project.observations.include?(@obs)
 
-    assert(project.is_admin?(rolf), "fixture must have rolf as admin")
+    assert(@obs.reload.can_edit?(rolf), "premise: rolf can edit the obs")
     assert(FieldSlipExtract.permitted?(image: @image.reload, user: rolf))
+  end
+
+  # The collector reviews -- and can rescan -- the slip on their own
+  # observation, even when it is in no project. The field-scanner case
+  # a constraint-violating location produced: the slip's observation
+  # was left out of its project, which used to lock the collector out
+  # of the review. Permission is edit rights on the observation, not
+  # ownership of the photo.
+  def test_permitted_for_the_observation_owner
+    assert_equal(mary, @obs.user, "premise: mary owns the observation")
+    assert(@obs.can_edit?(mary))
+
+    assert(FieldSlipExtract.permitted?(image: @image, user: mary))
+  end
+
+  # Owning the photo is not enough: the review writes the transcribed
+  # values onto the observation, so a user who cannot edit it is
+  # refused even on an image they uploaded (Copilot + Nathan review,
+  # PR #5240). Here katrina's photo hangs on mary's observation, which
+  # katrina cannot edit.
+  def test_not_permitted_for_an_image_owner_who_cannot_edit_the_obs
+    image = images(:amateur_image)
+    @obs.images << image unless @obs.images.include?(image)
+
+    assert_equal(katrina, image.user, "premise: katrina owns the image")
+    assert_not(@obs.can_edit?(katrina), "premise: katrina cannot edit it")
+    assert_not(FieldSlipExtract.permitted?(image: image.reload,
+                                           user: katrina))
   end
 
   def test_not_permitted_for_a_plain_member
@@ -413,7 +442,7 @@ class FieldSlipExtractTest < UnitTestCase
     other = @image.observations.find { |obs| obs.id != @obs.id }
 
     assert(other, "premise: the image carries a second observation")
-    assert(other.projects.any? { |project| project.is_admin?(dick) })
+    assert(other.can_edit?(dick), "premise: dick can edit the other obs")
     assert(FieldSlipExtract.permitted?(image: @image, user: dick))
   end
 
