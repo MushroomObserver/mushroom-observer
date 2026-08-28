@@ -20,9 +20,20 @@ class DetectFieldSlipQRJob < ApplicationJob
     return unless observation && image && observation.occurrence_id.nil?
     return unless FieldSlip::QRDecoder.available?
 
-    code = FieldSlip::QRDecoder.slip_code_in(image)
-    return unless code
+    reading = FieldSlip::QRDecoder.reading(image)
+    if reading.slip_code
+      attach_and_read(observation, image, reading.slip_code)
+    elsif reading.qr_present
+      # zbar decoded a QR but not a slip code (a DNA-sticker code, say):
+      # the photo still holds a slip it could not read, so hand off to
+      # the model-based read (see ResolveFieldSlipCodeJob).
+      escalate(observation, image)
+    end
+  end
 
+  private
+
+  def attach_and_read(observation, image, code)
     result = FieldSlip::Attacher.attach(observation: observation,
                                         code: code, user: observation.user)
     Rails.logger.info(
@@ -38,5 +49,10 @@ class DetectFieldSlipQRJob < ApplicationJob
     # linked observation never re-reads a slip somebody may have
     # reviewed (those runs exit above on the occurrence check).
     ExtractFieldSlipJob.request(image: image, user: observation.user)
+  end
+
+  def escalate(observation, image)
+    ResolveFieldSlipCodeJob.perform_later(observation.id, image.id,
+                                          observation.user_id)
   end
 end

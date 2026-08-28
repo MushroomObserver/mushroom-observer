@@ -22,6 +22,18 @@ class FieldSlip
       IMAGE_SIZE = :huge
       TIMEOUT = 60
 
+      # Pass-1 prompt of the QR-miss fallback: just the printed slip
+      # code, no template -- the full field read comes later, with the
+      # right one (see #read_slip_code).
+      CODE_PROMPT =
+        "This photo may show a mushroom field slip: a printed form " \
+        "carrying a code like \"2026-NAMA-0205\" or \"NEMF-10222\" " \
+        "(letters and digits, often beside a QR code). Return JSON " \
+        "{\"slip_present\": true|false, \"code\": \"<the printed " \
+        "slip code, or null>\"}. If no field slip is visible, " \
+        "slip_present is false and code is null. Read only what is " \
+        "printed; do not invent a code."
+
       # The model that will be asked for, credentials override first --
       # also what a pending/failed extract stamps as provenance before
       # any response reports the concrete model that answered.
@@ -43,6 +55,19 @@ class FieldSlip
 
         raw = post(Prompt.new(context).to_s, image_data(image))
         build_result(raw, parse(raw), context)
+      end
+
+      # Pass 1 of the QR-miss fallback (ResolveFieldSlipCodeJob): read
+      # only the printed slip code, template-free. Its prefix names the
+      # project, which picks the template for the full read. Returns
+      # the code, or nil when the model reports no slip / no code.
+      def read_slip_code(image)
+        raise(MissingKey) if @api_key.blank?
+
+        payload = parse(post(CODE_PROMPT, image_data(image)))
+        return nil unless payload["slip_present"]
+
+        payload["code"].to_s.strip.presence
       end
 
       class MissingKey < StandardError

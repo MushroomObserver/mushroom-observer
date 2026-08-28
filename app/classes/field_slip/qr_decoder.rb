@@ -49,10 +49,25 @@ class FieldSlip
                                             err: File::NULL) || false
     end
 
+    # One zbar read, yielding both signals a caller needs: the slip
+    # code a QR names (nil when none does), and whether any QR decoded
+    # at all. A non-slip QR -- a DNA-sticker code, a product label --
+    # still means the photo holds something worth a model read (the
+    # QR-miss fallback, see ResolveFieldSlipCodeJob).
+    Reading = Data.define(:slip_code, :qr_present)
+
+    def self.reading(image)
+      codes = raw_codes(image)
+      Reading.new(
+        slip_code: codes.filter_map { |text| slip_code_from(text) }.first,
+        qr_present: codes.any?
+      )
+    end
+
     # The slip code in the image's QR code, or nil: no local file, no
     # QR, or QR content that isn't a slip code.
     def self.slip_code_in(image)
-      raw_codes(image).filter_map { |text| slip_code_from(text) }.first
+      reading(image).slip_code
     end
 
     # A bare code is only believed when its prefix names a project --
