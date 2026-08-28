@@ -102,16 +102,14 @@ module Tab::Observation
     def test_of_look_alikes
       tab = Tab::Observation::OfLookAlikes.new(name: @name)
 
-      assert_equal(routes.observations_path(name: @name.id,
-                                            look_alikes: "1"),
+      assert_equal(routes.observations_path(look_alikes: @name.id),
                    tab.path)
     end
 
     def test_of_related_taxa
       tab = Tab::Observation::OfRelatedTaxa.new(name: @name)
 
-      assert_equal(routes.observations_path(name: @name.id,
-                                            related_taxa: "1"),
+      assert_equal(routes.observations_path(related_taxa: @name.id),
                    tab.path)
     end
 

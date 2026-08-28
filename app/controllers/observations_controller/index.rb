@@ -117,22 +117,14 @@ class ObservationsController
     end
 
     # Displays matrix of Observations with the given name proposed, where
-    # that name is not the consensus. `look_alikes` itself is a mode
-    # flag (`?look_alikes=1`); the name comes from the separate `name`
-    # param, same as the `name`/`related_taxa` subactions below.
+    # that name is not the consensus.
     def look_alikes
-      create_query_from_url_params(
-        :Observation,
-        params.merge(look_alikes: [params[:name]]).except(:name)
-      )
+      create_query_from_url_params(:Observation, params)
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      create_query_from_url_params(
-        :Observation,
-        params.merge(related_taxa: [params[:name]]).except(:name)
-      )
+      create_query_from_url_params(:Observation, params)
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).

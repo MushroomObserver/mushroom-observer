@@ -209,16 +209,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # consensus'd -- the "look-alikes" page linked from a Name's show
     # page, and (same filter) the "Observations of other taxa where
     # this taxon was proposed" Name-page tab.
-    scope :look_alikes, lambda { |name_strs|
-      names(lookup: name_strs, include_synonyms: true,
+    scope :look_alikes, lambda { |name_id|
+      names(lookup: name_id, include_synonyms: true,
             include_all_name_proposals: true, exclude_consensus: true)
     }
-    # Observations of subtaxa of the parent of the given name. The
-    # query_attr resolves the searched name to its parent ids at
-    # validation time (Query::Observations#validate_name_parents), so
-    # this scope receives parent ids directly, not the searched name.
-    scope :related_taxa, lambda { |parent_ids|
-      names(lookup: parent_ids, include_subtaxa: true)
+    # Observations of subtaxa of the parent of the given name.
+    scope :related_taxa, lambda { |name_id|
+      names(lookup: Name.parent_ids_for(name_id), include_subtaxa: true)
     }
     # Observations of this taxon under any name -- the given
     # text_name/search_name/id or any of its synonyms. Named
