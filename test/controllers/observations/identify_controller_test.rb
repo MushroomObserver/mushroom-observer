@@ -14,7 +14,8 @@ module Observations
       obs_count = obs.count
       mary.update(layout_count: obs_count + 1)
 
-      query = Query.lookup_and_save(:Observation, needs_naming: mary)
+      query = Query.lookup_and_save(:Observation, needs_naming: true)
+      query.viewer = mary
       assert_equal(query.num_results, obs_count)
 
       get(:index)
@@ -27,8 +28,9 @@ module Observations
       # make a query, and test that the query results match obs scope
       aga_obs = Observation.needs_naming(mary).clade("Agaricales")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, clade: "Agaricales"
+        :Observation, needs_naming: true, clade: "Agaricales"
       )
+      query.viewer = mary
 
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
@@ -40,8 +42,9 @@ module Observations
 
       bol_obs = Observation.needs_naming(mary).clade("Boletus")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, clade: "Boletus"
+        :Observation, needs_naming: true, clade: "Boletus"
       )
+      query.viewer = mary
       assert_equal(query.num_results, bol_obs.count)
 
       # REGION
@@ -49,16 +52,18 @@ module Observations
       # start with continent
       sam_obs = Observation.needs_naming(mary).region("South America")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, region: "South America"
+        :Observation, needs_naming: true, region: "South America"
       )
+      query.viewer = mary
       assert_equal(query.num_results, sam_obs.count)
 
       cal_obs = Observation.needs_naming(mary).region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, region: "California, USA"
+        :Observation, needs_naming: true, region: "California, USA"
       )
+      query.viewer = mary
       assert_equal(query.num_results, cal_obs_count)
 
       get(:index,

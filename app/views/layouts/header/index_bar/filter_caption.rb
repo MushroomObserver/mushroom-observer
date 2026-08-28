@@ -40,12 +40,11 @@ module Views::Layouts
       by_editor: :Users,
       collectors: :Users,
       members: :Users,
-      # Both User-typed too — without these the caption fell
-      # through to the raw-value path and printed the user id
+      # User-typed too — without this the caption fell through to
+      # the raw-value path and printed the user id
       # ("editable_by_user: 1") instead of the proper title
       # ("editable_by_user: Nathan Wilson (nathan)").
-      editable_by_user: :Users,
-      needs_naming: :Users
+      editable_by_user: :Users
     }.freeze
     # The captions with these sub-params make more sense without keys:
     CAPTION_IGNORE_KEYS = [:lookup, :id].freeze

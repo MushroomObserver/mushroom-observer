@@ -326,7 +326,7 @@ class QueryTest < UnitTestCase
     # Scalar attrs (and the :by alias) are bare symbols.
     assert_includes(filters, :order_by)
     assert_includes(filters, :by)
-    assert_includes(filters, :needs_naming) # scalar Class (User)
+    assert_includes(filters, :needs_naming) # scalar :truthy
     # An "enum" hash (`{ boolean: [true] }`/`{ string: [...] }`) is a
     # bare scalar from the URL's perspective, not a nested hash --
     # permitting it as `attr: {}` would strip a request's scalar

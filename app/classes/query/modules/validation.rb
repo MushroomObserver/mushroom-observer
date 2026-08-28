@@ -175,6 +175,16 @@ module Query::Modules::Validation
   end
   # rubocop:enable Lint/BooleanSymbol
 
+  # Permissive sibling of `validate_boolean`, with no error branch --
+  # an old stored value whose identity no longer matters (e.g. a
+  # legacy `needs_naming: <user_id>` bookmark, see
+  # Query::Observations) stays a working "flag on" instead of failing
+  # validation. Same FALSE_VALUES Rails already uses to cast a param
+  # string to boolean.
+  def validate_truthy(_param, val)
+    ActiveRecord::Type::Boolean.new.cast(val)
+  end
+
   # We don't currently have params for integers, but this would enable them.
   # def validate_integer(param, val)
   #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
