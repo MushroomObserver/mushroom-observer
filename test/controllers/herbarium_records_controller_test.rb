@@ -3,6 +3,23 @@
 require("test_helper")
 
 class HerbariumRecordsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::HerbariumRecords, :HerbariumRecord,
+      overrides: {
+        id_in_set: herbarium_records(:coprinus_comatus_nybg_spec).id,
+        by_users: rolf.id,
+        herbaria: herbaria(:nybg_herbarium).id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
+  end
+
   ##############################################################################
   # INDEX
   #

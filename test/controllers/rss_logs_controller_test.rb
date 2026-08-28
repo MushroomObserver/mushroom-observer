@@ -3,6 +3,18 @@
 require("test_helper")
 
 class RssLogsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::RssLogs, :RssLog,
+      overrides: { id_in_set: rss_logs(:minimal_unknown_obs_rss_log).id }
+    )
+  end
+
   def test_page_loads
     get(:index)
     assert_redirected_to(new_account_login_path)

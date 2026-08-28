@@ -4,6 +4,24 @@ require("test_helper")
 
 module Locations
   class DescriptionsControllerTest < FunctionalTestCase
+    include QueryParamRoundTripTestHelpers
+
+    # See QueryParamRoundTripTestHelpers.
+    def test_create_query_from_url_params_recognizes_every_top_level_param
+      login
+
+      assert_all_top_level_params_survive(
+        Query::LocationDescriptions, :LocationDescription,
+        overrides: {
+          id_in_set: location_descriptions(:albion_desc).id,
+          by_users: rolf.id,
+          by_author: rolf.id,
+          by_editor: rolf.id,
+          locations: locations(:burbank).id
+        }
+      )
+    end
+
     ##########################################################################
     #
     #    SHOW

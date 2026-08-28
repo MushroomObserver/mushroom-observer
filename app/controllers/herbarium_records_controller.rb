@@ -43,19 +43,6 @@ class HerbariumRecordsController < ApplicationController
     ::Query::Herbaria.default_order # :name
   end
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
-  end
-
-  def herbarium
-    create_query_from_url_params(:HerbariumRecord, params)
-  end
-
-  def observation
-    create_query_from_url_params(:HerbariumRecord, params)
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     derive_ivar_from_query(:@observation, query, :observations, Observation)

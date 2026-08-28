@@ -76,21 +76,6 @@ class ImagesController < ApplicationController
     )
   end
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display matrix of images by a given user.
-  def by_user
-    create_query_from_url_params(:Image, params)
-  end
-
-  # Display matrix of Image's attached to a given project.
-  def project
-    create_query_from_url_params(:Image, params)
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)

@@ -4,6 +4,22 @@ require("test_helper")
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Sequences, :Sequence,
+      overrides: {
+        id_in_set: sequences(:local_sequence).id,
+        by_users: rolf.id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
+  end
+
   ITS_BASES =
     "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
     "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \

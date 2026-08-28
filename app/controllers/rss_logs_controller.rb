@@ -33,28 +33,12 @@ class RssLogsController < ApplicationController
     @user ? @user.default_rss_type : "all"
   end
 
-  # ApplicationController uses this to dispatch #index to a private method.
-  # `:type` (legacy scalar bookmarks) and `:types` (the type-filter form,
-  # or a direct `?types[]=` URL) both resolve to the same query_attr --
-  # see `Query::RssLogs`.
-  def index_active_params
-    [:type, :types, :by, :q, :id].freeze
-  end
-
   # Show selected list, based on current Query.
   def sorted_index_opts
     super.deep_merge(
       query_args: { types: index_type_from_params || index_type_default }
     )
   end
-
-  # `:type`/`:types` are plain query_attr aliases now (see
-  # Query::RssLogs) -- no bookmark redirect needed, top-level params
-  # are a first-class URL form.
-  def type
-    create_query_from_url_params(:RssLog, params)
-  end
-  alias types type
 
   # The types filter active in the current Query, if any, otherwise
   # whatever the request itself supplies -- from a stored/`q`-decoded
