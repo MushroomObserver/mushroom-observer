@@ -4,7 +4,7 @@ class Query::Herbaria < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Herbarium])
-  query_attr(:by_users, [User])
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
   query_attr(:code_has, :string)
   query_attr(:name_has, :string)
   query_attr(:description_has, :string)

@@ -3,7 +3,7 @@
 class Query::GlossaryTerms < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
-  query_attr(:by_users, [User])
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
   query_attr(:name_has, :string)
   query_attr(:description_has, :string)
   query_attr(:pattern, :string)

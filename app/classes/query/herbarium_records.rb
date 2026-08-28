@@ -4,7 +4,7 @@ class Query::HerbariumRecords < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [HerbariumRecord])
-  query_attr(:by_users, [User])
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
   query_attr(:has_notes, :boolean)
   query_attr(:notes_has, :string)
   query_attr(:initial_det, [:string])

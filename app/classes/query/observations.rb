@@ -74,11 +74,12 @@ class Query::Observations < Query
   # query_attr(:has_specimen, :boolean) # content filter
   # query_attr(:has_images, :boolean) # content filter
 
-  query_attr(:herbaria, [Herbarium])
-  query_attr(:herbarium_records, [HerbariumRecord])
+  query_attr(:herbaria, [Herbarium], param_alias: :herbarium)
+  query_attr(:herbarium_records, [HerbariumRecord],
+             param_alias: :herbarium_record)
   query_attr(:projects, [Project], param_alias: :project,
                                    redirect_to: :model_index)
-  query_attr(:project_lists, [Project])
+  query_attr(:project_lists, [Project], param_alias: :project_list)
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
   # query_attr(:search_name, :string) # advanced search
