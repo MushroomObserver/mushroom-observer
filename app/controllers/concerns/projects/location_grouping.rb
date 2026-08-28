@@ -9,7 +9,7 @@ module Projects
     def build_grouped_locations(project)
       obs_locs = project.locations.distinct.to_a
       targets = sorted_targets(project)
-      sorted_obs = obs_locs.sort_by(&:scientific_name)
+      sorted_obs = obs_locs.sort_by { |loc| sort_key(loc) }
       return [[], sorted_obs] if targets.empty?
 
       groups = build_groups(obs_locs, targets)
@@ -18,6 +18,13 @@ module Projects
         grouped_ids.include?(l.id)
       end
       [groups, ungrouped]
+    end
+
+    # `scientific_name` isn't guaranteed on legacy Location rows -- fall
+    # back to `name` so a nil doesn't blow up `sort_by`'s comparison
+    # against other locations' non-nil scientific names.
+    def sort_key(loc)
+      loc.scientific_name || loc.name
     end
 
     def sorted_targets(project)
@@ -29,7 +36,7 @@ module Projects
       assignments = assign_to_targets(obs_locs, targets)
       targets.map do |target|
         subs = (assignments[target.id] || []).
-               sort_by(&:scientific_name)
+               sort_by { |loc| sort_key(loc) }
         { target: target, sub_locations: subs }
       end
     end
