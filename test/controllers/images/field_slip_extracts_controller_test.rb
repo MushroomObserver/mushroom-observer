@@ -69,7 +69,7 @@ module Images
       record_extract(fields: { "Collector" => "A" })
       join_project_as_admin(rolf)
 
-      assert(@project.is_admin?(rolf), "premise: rolf administers it")
+      assert(@obs.reload.can_edit?(rolf), "premise: rolf can edit the obs")
       assert_not_equal(rolf, @image.user, "premise: not the image owner")
       get(:edit, params: { image_id: @image.id })
 
@@ -168,15 +168,14 @@ module Images
       assert_response(:success)
     end
 
-    # The image's owner may watch their upload's read progress even
-    # before the observation has joined any project -- permission comes
-    # from owning the photo, not from the observation's project
-    # membership.
+    # The collector may watch their read progress even before the
+    # observation has joined any project -- permission is edit rights
+    # on the observation, not the observation's project membership.
     def test_owner_sees_their_pending_read
       owner = @obs.user
       login(owner.login)
 
-      assert_equal(owner, @image.reload.user, "premise: owner owns the image")
+      assert(@obs.can_edit?(owner), "premise: owner can edit the observation")
       assert(FieldSlipExtract.permitted?(image: @image, user: owner))
 
       FieldSlipExtract.start!(image: @image, user: owner)
@@ -195,7 +194,7 @@ module Images
       owner = @obs.user
       login(owner.login)
 
-      assert_equal(owner, @image.reload.user, "premise: owner owns the image")
+      assert(@obs.can_edit?(owner), "premise: owner can edit the observation")
       record_extract(fields: { "Collector" => "Scott Shapiro" })
 
       get(:edit, params: { image_id: @image.id })

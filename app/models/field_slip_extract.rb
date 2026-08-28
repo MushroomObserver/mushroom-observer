@@ -18,28 +18,19 @@ class FieldSlipExtract < AbstractModel
   validates :model, presence: true
   validates :image_id, uniqueness: true
 
-  # Who may read a slip and review the result:
-  #
-  # - The image's owner: it is their photo, so the read costs them an
-  #   API call and the review finalizes their upload. This is also how
-  #   a collector scans their image and reviews it, even
-  #   before the observation has joined any project.
-  # - Admins of any project the image's observations belong to: a
-  #   foray's organizers can tell whether a slip was transcribed
-  #   correctly and are already trusted with that project's data.
-  # - Site admins.
-  #
-  # Still not open to everyone: for someone who is none of these, the
-  # read costs an API call and the review would write to a record they
-  # do not own.
+  # Who may read a slip and review the result: site admins, and anyone
+  # who can edit an observation the image is on. The review writes the
+  # transcribed values straight onto that observation (see
+  # Applier#apply), so the permission to review is the permission to
+  # edit -- the collector, and the project admins the collector has
+  # trusted with editing (Observation#can_edit?), no wider. An image
+  # owner whose photo hangs on somebody else's observation cannot
+  # review a slip into a record they could not otherwise touch.
   def self.permitted?(image:, user:, site_admin: false)
     return false unless user
     return true if site_admin
-    return true if image.user_id == user.id
 
-    image.observations.any? do |obs|
-      obs.projects.any? { |project| project.is_admin?(user) }
-    end
+    image.observations.any? { |obs| obs.can_edit?(user) }
   end
 
   # An extraction has a lifecycle now that it runs in the background:
