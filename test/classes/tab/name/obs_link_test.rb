@@ -97,7 +97,7 @@ class Tab::Name::ObsLinkTest < UnitTestCase
   def test_taxon_proposed_query_excludes_consensus
     q = build_tab(Tab::Name::ObsLink::TaxonProposed, count: 1).query
 
-    assert_equal([@name.id.to_s], q.params[:look_alikes])
+    assert_equal(@name.id, q.params[:look_alikes])
   end
 
   def test_name_proposed_query_has_all_proposals_no_synonyms

@@ -273,9 +273,12 @@ module Views::Layouts
       string
     end
 
-    # The max number of named items is hardcoded to 3.
+    # The max number of named items is hardcoded to 3. `Array(...)` --
+    # a singular record-backed attr (e.g. look_alikes) stores a bare
+    # id, not a 1-element Array; `.first(n)` below needs an Array
+    # either way.
     def filter_lookup_strings(param, truncate:)
-      ids = @query.params.deep_find(param)
+      ids = Array(@query.params.deep_find(param))
       lookups = truncate ? ids.first(CAPTION_TRUNCATE) : ids
       subclass = PARAM_LOOKUPS[param]
       lookup = "Lookup::#{subclass}".constantize
