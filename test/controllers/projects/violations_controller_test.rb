@@ -42,7 +42,7 @@ module Projects
     end
 
     # @pagination_data.num_total must reflect the full violation
-    # count, not just the first page's worth (#5250).
+    # count, not just the first page's worth.
     def test_index_pagination_data_matches_full_violation_count
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)
@@ -53,10 +53,9 @@ module Projects
       assert_equal(project.violations.size, pagination_data.num_total)
     end
 
-    # #5250: build_index_with_query used to run here for its query,
-    # whose result was discarded -- but update_stored_query still
-    # overwrote session[:query_record] with it, clobbering whatever
-    # unrelated query the user had active elsewhere.
+    # This page builds no Query, so it must not touch
+    # session[:query_record] -- an unrelated query stored elsewhere
+    # should survive a visit here untouched.
     def test_index_does_not_clobber_session_query_record
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)
@@ -71,10 +70,9 @@ module Projects
                    "unrelated stored query")
     end
 
-    # #5250: redirect_past_last_page? used to clamp/redirect based on
-    # the discarded query's (unrelated) page count. No query is built
-    # here anymore, so an out-of-range page just renders empty,
-    # instead of redirecting.
+    # This page builds no Query, so an out-of-range page has no
+    # page-clamp mechanism to trigger -- it renders empty instead of
+    # redirecting.
     def test_index_large_page_number_does_not_redirect
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)
