@@ -11,8 +11,15 @@ class DetectFieldSlipQRJobTest < ActiveJob::TestCase
   end
 
   def perform_with_code(code)
+    perform_with_reading(slip_code: code, qr_present: code.present?)
+  end
+
+  def perform_with_reading(slip_code:, qr_present: false)
+    reading = FieldSlip::QRDecoder::Reading.new(
+      slip_code: slip_code, qr_present: qr_present
+    )
     FieldSlip::QRDecoder.stub(:available?, true) do
-      FieldSlip::QRDecoder.stub(:slip_code_in, code) do
+      FieldSlip::QRDecoder.stub(:reading, reading) do
         DetectFieldSlipQRJob.perform_now(@obs.id, @image.id)
       end
     end
@@ -79,5 +86,24 @@ class DetectFieldSlipQRJobTest < ActiveJob::TestCase
     DetectFieldSlipQRJob.perform_now(@obs.id, -1)
 
     assert_nil(@obs.reload.occurrence)
+  end
+
+  # zbar decoded a QR (a DNA-sticker code, say) but not a slip code:
+  # the photo still holds a slip it could not read, so the model-based
+  # read (ResolveFieldSlipCodeJob) takes over. The QR job itself
+  # attaches nothing in this branch.
+  def test_escalates_when_a_qr_is_present_but_not_a_slip_code
+    assert_enqueued_with(job: ResolveFieldSlipCodeJob,
+                         args: [@obs.id, @image.id, @obs.user_id]) do
+      perform_with_reading(slip_code: nil, qr_present: true)
+    end
+
+    assert_nil(@obs.reload.occurrence)
+  end
+
+  def test_no_escalation_when_no_qr_was_decoded
+    assert_no_enqueued_jobs(only: ResolveFieldSlipCodeJob) do
+      perform_with_reading(slip_code: nil, qr_present: false)
+    end
   end
 end

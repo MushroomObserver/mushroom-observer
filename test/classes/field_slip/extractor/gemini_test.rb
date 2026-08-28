@@ -311,6 +311,38 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
                     "models/gemini-from-credentials:generateContent")
   end
 
+  # ---------- read_slip_code: the pass-1 code-only read ----------
+
+  def read_slip_code(api_key: KEY)
+    FieldSlip::Extractor::Gemini.new(api_key: api_key).read_slip_code(@image)
+  end
+
+  def test_read_slip_code_returns_the_printed_code
+    stub_gemini({ slip_present: true, code: "2026-NAMA-0205" }.to_json)
+
+    assert_equal("2026-NAMA-0205", read_slip_code)
+  end
+
+  def test_read_slip_code_is_nil_when_no_slip_is_present
+    stub_gemini({ slip_present: false, code: nil }.to_json)
+
+    assert_nil(read_slip_code)
+  end
+
+  def test_read_slip_code_is_nil_when_the_code_is_blank
+    stub_gemini({ slip_present: true, code: "" }.to_json)
+
+    assert_nil(read_slip_code)
+  end
+
+  def test_read_slip_code_raises_without_a_key
+    with_gemini_credentials(nil) do
+      assert_raises(FieldSlip::Extractor::Gemini::MissingKey) do
+        FieldSlip::Extractor::Gemini.new.read_slip_code(@image)
+      end
+    end
+  end
+
   private
 
   # Which bytes reached the provider, read off THIS test's captured
