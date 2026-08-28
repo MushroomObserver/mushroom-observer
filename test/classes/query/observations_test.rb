@@ -887,4 +887,50 @@ class Query::ObservationsTest < UnitTestCase
     # 3 raw matches, but obs2 collapses into obs1 → 2 results
     assert_equal(2, query.num_results)
   end
+
+  def test_observation_needs_naming_true_filters_by_viewer
+    mary = users(:mary)
+    expected = Observation.needs_naming(mary)
+
+    query = Query.lookup_and_save(:Observation, needs_naming: true)
+    query.viewer = mary
+
+    assert_equal(expected.count, query.num_results)
+  end
+
+  # `false` is a presence flag turned off, not "show only reviewed" --
+  # the scope stays out of the chain entirely.
+  def test_observation_needs_naming_false_applies_no_filter
+    query = Query.lookup_and_save(:Observation, needs_naming: false)
+    query.viewer = users(:mary)
+
+    assert_equal(Observation.count, query.num_results)
+  end
+
+  # No login (e.g. a stray `?needs_naming=1` on an anonymous session) --
+  # `viewer` is nil. `Observation.needs_naming(nil)` still applies
+  # (the `needs_naming` DB column half of the scope doesn't depend on
+  # viewer), so the correct comparison is the scope itself, not an
+  # unfiltered count.
+  def test_observation_needs_naming_without_viewer_does_not_raise
+    expected = Observation.needs_naming(nil)
+
+    query = Query.lookup_and_save(:Observation, needs_naming: true)
+
+    assert_equal(expected.count, query.num_results)
+  end
+
+  # A legacy bookmark stored `needs_naming: <user_id>` (record-backed,
+  # pre-#5246) -- :truthy must keep resolving that as "flag on" rather
+  # than failing validation, since the value's identity is ignored
+  # regardless (see apply_scope_param).
+  def test_observation_needs_naming_accepts_legacy_stored_id
+    mary = users(:mary)
+    expected = Observation.needs_naming(mary)
+
+    query = Query.lookup_and_save(:Observation, needs_naming: 999_999)
+    query.viewer = mary
+
+    assert_equal(expected.count, query.num_results)
+  end
 end

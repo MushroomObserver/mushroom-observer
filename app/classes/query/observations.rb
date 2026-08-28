@@ -43,9 +43,11 @@ class Query::Observations < Query
   query_attr(:confidence, [:float])
   # A presence flag, not a User id -- Query::Modules::Initialization's
   # apply_scope_param sends `viewer` to the scope, ignoring this value's
-  # identity, so the URL can only mean "my queue". default_order matches
-  # the identify page's default (Observations::IdentifyController).
-  query_attr(:needs_naming, :boolean, default_order: :rss_log)
+  # identity, so the URL can only mean "my queue". `:truthy`, not
+  # `:boolean`, so an old `needs_naming: <user_id>` bookmark still
+  # resolves to "flag on" instead of failing validation. default_order
+  # matches the identify page's default (Observations::IdentifyController).
+  query_attr(:needs_naming, :truthy, default_order: :rss_log)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
   # The identify page's clade/region autocompleter -- see
