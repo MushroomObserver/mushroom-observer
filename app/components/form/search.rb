@@ -355,12 +355,12 @@ class Components::Form::Search < Components::ApplicationForm
 
   # NOTE: `SearchFieldUI` returns `:single_value_autocompleter` for
   # Class-typed `query_attr` definitions (e.g.
-  # `query_attr(:needs_naming, User)`). No current search-form
+  # `query_attr(:editable_by_user, User)`). No current search-form
   # `FIELD_COLUMNS` exposes such a field, and the few existing
-  # Class-typed attrs' names (`needs_naming`, `for_user`,
-  # `by_author`, `editable_by_user`) don't map to a supported
-  # autocompleter `type` via `AutocompleterPrefill#autocompleter_type`
-  # either. The dispatcher in `render_search_field` would raise
+  # Class-typed attrs' names (`for_user`, `by_author`,
+  # `editable_by_user`) don't map to a supported autocompleter `type`
+  # via `AutocompleterPrefill#autocompleter_type` either. The
+  # dispatcher in `render_search_field` would raise
   # `NoMethodError` if a future FIELD_COLUMNS added one — loud and
   # actionable. Add `render_single_value_autocompleter` back here
   # when that day comes.

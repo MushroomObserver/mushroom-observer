@@ -4426,7 +4426,7 @@
   query_misspellings: misspellings
   query_name_has: name has
   query_needs_description: needs description
-  query_needs_naming: needing identification, user
+  query_needs_naming: needing identification
   query_nonpersonal: nonpersonal
   query_notes_has: notes has
   query_number_has: number has

@@ -109,11 +109,10 @@ module Views::Layouts
       assert_no_html(html, "#caption-truncated .small b i")
     end
 
-    # Both `editable_by_user` (SpeciesLists) and `needs_naming`
-    # (Observations) are User-typed query attrs. Before this PR
-    # they weren't in PARAM_LOOKUPS, so the caption fell through
-    # to the raw-value formatter and printed the user id
-    # ("editable_by_user: 1") instead of the user's title.
+    # `editable_by_user` is a User-typed query attr -- without it in
+    # PARAM_LOOKUPS, the caption falls through to the raw-value
+    # formatter and prints the user id ("editable_by_user: 1") instead
+    # of the user's title.
     def test_editable_by_user_renders_user_title_not_id
       user = users(:rolf)
       query = Query.lookup_and_save(:SpeciesList, editable_by_user: user.id)
@@ -124,14 +123,15 @@ module Views::Layouts
                   text: user.unique_text_name)
     end
 
-    def test_needs_naming_renders_user_title_not_id
-      user = users(:rolf)
-      query = Query.lookup_and_save(:Observation, needs_naming: user.id)
+    # `needs_naming` is a presence flag, not a User id -- it renders
+    # as a bare label, not a lookup.
+    def test_needs_naming_renders_bare_label
+      query = Query.lookup_and_save(:Observation, needs_naming: true)
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b",
-                  text: user.unique_text_name)
+      assert_html(html, "#caption-truncated .small span",
+                  text: :query_needs_naming.l)
     end
 
     def test_project_lookup_does_not_italicize

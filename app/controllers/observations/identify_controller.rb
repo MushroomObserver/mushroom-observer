@@ -35,7 +35,7 @@ module Observations
 
     # override the default? maybe no longer necessary
     def unfiltered_index_opts
-      super.merge(query_args: { needs_naming: @user, order_by: :rss_log })
+      super.merge(query_args: { needs_naming: true, order_by: :rss_log })
     end
 
     def default_sort_order
@@ -49,12 +49,12 @@ module Observations
     # Dispatches to Observation.identify_filter (Observation::Scopes),
     # which picks clade or region based on identify_filter[type] --
     # the single swappable autocompleter submits both under one field
-    # pair. `needs_naming` is always this page's current user,
-    # regardless of the optional clade/region sub-filter, so it's
-    # merged in here rather than coming from the URL.
+    # pair. `needs_naming` always applies on this page regardless of
+    # the optional clade/region sub-filter, so it's merged in here
+    # rather than coming from the URL.
     def identify_filter
       create_query_from_url_params(
-        :Observation, params.merge(needs_naming: @user&.id)
+        :Observation, params.merge(needs_naming: true)
       )
     end
 
