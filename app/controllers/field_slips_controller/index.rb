@@ -19,10 +19,6 @@ module FieldSlipsController::Index
 
   private
 
-  def default_sort_order
-    ::Query::FieldSlips.default_order # :date
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     derive_ivar_from_query(:@project, query, :projects, Project)

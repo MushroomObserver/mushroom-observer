@@ -47,10 +47,6 @@ class LocationsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Locations.default_order # :name
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     # Matching undefined locations is meaningless in a box.

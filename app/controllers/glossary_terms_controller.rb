@@ -22,10 +22,6 @@ class GlossaryTermsController < ApplicationController
            ))
   end
 
-  def default_sort_order
-    ::Query::GlossaryTerms.default_order # :name
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 50,

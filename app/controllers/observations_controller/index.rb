@@ -82,14 +82,6 @@ class ObservationsController
       ].freeze
     end
 
-    # Default on home is :rss_log (:log_updated_at), not :date.
-    # Maybe other filters should explicitly specify :date?
-    # Then we could use default_sort_order above.
-    # Or, set an "unfiltered sort order" method that defaults to this.
-    def default_sort_order
-      ::Query::Observations.default_order # :date
-    end
-
     # Note all other filters of the obs index are sorted by date.
     def unfiltered_index_opts
       super.merge(query_args: { order_by: :rss_log })

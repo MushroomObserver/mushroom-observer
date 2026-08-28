@@ -64,10 +64,6 @@ class UsersController < ApplicationController
     false
   end
 
-  def default_sort_order
-    ::Query::Users.default_order # :name
-  end
-
   def sorted_index_permitted?
     index_query_authorized?
   end

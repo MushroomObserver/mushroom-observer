@@ -44,10 +44,6 @@ class ImagesController < ApplicationController
     ].freeze
   end
 
-  def default_sort_order
-    ::Query::Images.default_order # :created_at
-  end
-
   private
 
   # Don't show the index if they're asking too much.
