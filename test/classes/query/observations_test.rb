@@ -295,6 +295,19 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, projects: project)
   end
 
+  # Delegates to Project#violating_observations -- see project_test.rb
+  # for coverage of the underlying violation logic itself. This just
+  # proves the query_attr wiring returns the same set, in the same
+  # order.
+  def test_observation_project_violations
+    project = projects(:falmouth_2023_09_project)
+    assert(project.violating_observations.any?,
+           "Test needs a project fixture with violations")
+
+    assert_query(project.violating_observations,
+                 :Observation, project_violations: project, order_by: :name)
+  end
+
   def test_observation_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project))

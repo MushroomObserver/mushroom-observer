@@ -621,6 +621,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(species_lists: :project_species_lists).
         where(project_species_lists: { project: project_ids }).distinct
     }
+    # Delegates to Project#violating_observations rather than
+    # rebuilding the same OR-combined condition here -- a project's
+    # constraint config (dates, bbox, target names/locations) only
+    # lives on the Project instance.
+    scope :project_violations, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      where(id: project.violating_observations.select(:id))
+    }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(:species_list_observations).

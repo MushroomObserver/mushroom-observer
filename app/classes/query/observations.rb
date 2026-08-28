@@ -80,6 +80,7 @@ class Query::Observations < Query
   query_attr(:projects, [Project], param_alias: :project,
                                    redirect_to: :model_index)
   query_attr(:project_lists, [Project], param_alias: :project_list)
+  query_attr(:project_violations, Project)
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
   query_attr(:external_sites, [ExternalSite], param_alias: :external_site)

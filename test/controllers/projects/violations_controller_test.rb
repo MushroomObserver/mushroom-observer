@@ -62,10 +62,30 @@ module Projects
       assert_equal(project.violations.size, pagination_data.num_total)
     end
 
-    # This page builds no Query, so it must not touch
-    # session[:query_record] -- an unrelated query stored elsewhere
-    # should survive a visit here untouched.
-    def test_index_does_not_clobber_session_query_record
+    # An obs link's q: must resolve to the violations query, not an
+    # unfiltered/unrelated one, or prev/next from that obs won't stay
+    # within this project's violations.
+    def test_index_obs_links_carry_violations_query
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+
+      get(:index, params: { id: project.id })
+
+      assert_response(:success)
+      encoded = CGI.escape("q[project_violations]")
+      assert_select(
+        "a[href*='#{encoded}=#{project.id}']",
+        { minimum: 1 },
+        "Obs links should carry q: for the stored violations query"
+      )
+    end
+
+    # Visiting the violations page stores a Query for this project's
+    # violations, replacing whatever was stored before -- same as
+    # any other index page. This is what lets prev/next from a
+    # violation's obs page stay within this project's violations
+    # instead of falling back to the stale query.
+    def test_index_stores_violations_query_in_session
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)
       other_query = Query.lookup_and_save(:Project, by_users: project.user.id)
@@ -74,14 +94,18 @@ module Projects
       get(:index, params: { id: project.id })
 
       assert_response(:success)
-      assert_equal(other_query.id, session[:query_record],
-                   "Visiting the violations page should not overwrite an " \
-                   "unrelated stored query")
+      assert_not_equal(other_query.id, session[:query_record],
+                       "Visiting the violations page should replace an " \
+                       "unrelated stored query with the violations query")
+      stored = Query.safe_find(session[:query_record])
+      assert_not_nil(stored)
+      assert_equal(project.id, stored.params[:project_violations])
     end
 
-    # This page builds no Query, so an out-of-range page has no
-    # page-clamp mechanism to trigger -- it renders empty instead of
-    # redirecting.
+    # Pagination here is manual LIMIT/OFFSET on @project.violating_
+    # observations, not the stored Query's paginate/clamp machinery,
+    # so an out-of-range page has no page-clamp mechanism to trigger
+    # -- it renders empty instead of redirecting.
     def test_index_large_page_number_does_not_redirect
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)

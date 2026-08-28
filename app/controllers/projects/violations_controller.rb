@@ -18,6 +18,12 @@ module Projects
     # usage. Unlike the array-slicing shown there, the current page
     # is fetched with LIMIT/OFFSET, so only one page of observations
     # gets its violation kinds computed.
+    #
+    # A Query is built and stored too, apart from the row fetch
+    # above, so prev/next from a violation's obs page stays within
+    # this project's violations instead of falling back to session
+    # leftovers or an unscoped default. See Observation's
+    # project_violations scope.
     def index
       return unless find_project!
 
@@ -27,6 +33,7 @@ module Projects
       page = observations.offset(@pagination_data.from).
              limit(@pagination_data.num_per_page)
       @violations = @project.violations_for(page)
+      store_violations_query
       render_index_view
     end
 
@@ -84,6 +91,16 @@ module Projects
     end
 
     private
+
+    # @query isn't used to fetch @violations (see the index action's
+    # comment), but setting it here makes q_param/current_query
+    # resolve it from the view, so obs links can carry q: and
+    # prev/next stays within this project's violations.
+    def store_violations_query
+      @query = create_query(:Observation, project_violations: @project.id,
+                                          order_by: :name)
+      update_stored_query(@query)
+    end
 
     # Pre-loads `name => Location` for every suffix of `obs.where`
     # that has a corresponding Location row. `TargetLocationForm`
