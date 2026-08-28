@@ -29,6 +29,15 @@ module Projects
       end
     end
 
+    # Overrides the `controller_name.classify` default (which would
+    # derive "Violation", not a model). Nothing else exercises this:
+    # TopNav's create-button label and Sorter's sort-link name both
+    # call it, but neither renders on this controller's pages (no
+    # `new` action, no sortable Query).
+    def test_controller_model_name
+      assert_equal("Project", @controller.controller_model_name)
+    end
+
     def test_index_no_violations
       project = projects(:eol_project)
       assert_empty(project.violations,
