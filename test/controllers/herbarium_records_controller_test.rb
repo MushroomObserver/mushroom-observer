@@ -41,7 +41,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     query = @controller.instance_variable_get(:@query)
-    assert_equal("herbarium_label", query.params[:order_by])
+    assert_equal(Query::HerbariumRecords.default_order.to_s,
+                 query.params[:order_by])
   end
 
   def test_index_pattern_with_multiple_matching_records
