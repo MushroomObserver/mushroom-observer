@@ -109,7 +109,7 @@ module Query::Modules::Subqueries
     # appear as keys here.
     def needs_is_collection_location(target, filter, params)
       target == :Location && filter == :Observation &&
-        (params[:projects] || params[:species_lists]) &&
+        (params[:projects].present? || params[:species_lists].present?) &&
         params[:is_collection_location].blank?
     end
   end

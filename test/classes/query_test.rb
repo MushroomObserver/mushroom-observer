@@ -1254,6 +1254,16 @@ class QueryTest < UnitTestCase
       unfiltered_location.params[:observation_query].
         key?(:is_collection_location)
     )
+
+    # An empty array is a present key, not a filter -- .present?, not
+    # truthiness, decides this.
+    empty_projects = Query.lookup_and_save(:Observation, projects: [])
+    empty_projects_location = empty_projects.subquery_of(:Location)
+
+    assert_not(
+      empty_projects_location.params[:observation_query].
+        key?(:is_collection_location)
+    )
   end
 
   def test_observation_subquery_of_name
