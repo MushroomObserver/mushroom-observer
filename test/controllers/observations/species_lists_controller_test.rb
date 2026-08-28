@@ -75,7 +75,7 @@ module Observations
       assert_not(spl.observations.member?(obs))
       params = { id: obs.id, species_list_id: spl.id, commit: "add" }
       requires_login(:update, params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert(spl.reload.observations.member?(obs))
     end
 
@@ -86,7 +86,7 @@ module Observations
       params = { id: obs.id, species_list_id: spl.id, commit: "add" }
       login("dick")
       put(:update, params: params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -111,14 +111,14 @@ module Observations
       assert_not_equal("rolf", owner)
 
       # Try with non-owner (can't use requires_user since failure is a redirect)
-      # effectively fails and gets redirected to show_species_list
+      # effectively fails and gets redirected to the observation
       requires_login(:update, params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert(spl.reload.observations.member?(obs))
 
       login(owner)
       put(:update, params: params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -203,7 +203,7 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "add" })
-      assert_redirected_to(species_list_path(spl1.id))
+      assert_redirected_to(permanent_observation_path(obs2.id))
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
@@ -215,7 +215,7 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "remove" })
-      assert_redirected_to(species_list_path(spl1.id))
+      assert_redirected_to(permanent_observation_path(obs2.id))
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
