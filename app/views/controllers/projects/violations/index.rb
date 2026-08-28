@@ -10,6 +10,7 @@ module Views::Controllers::Projects::Violations
   class Index < Views::FullPageBase
     prop :project, ::Project
     prop :violations, _Array(::Project::Violation)
+    prop :pagination_data, ::PaginationData
     # Non-nilable: this view forwards `user` to `Violations::Form`,
     # whose `prop :user` is non-nilable, and the controller's
     # `login_required` guarantees `@user` is present.
@@ -18,10 +19,13 @@ module Views::Controllers::Projects::Violations
     def view_template
       add_project_banner(@project)
       container_class(:wide)
+      add_pagination(@pagination_data)
 
-      render(Views::Controllers::Projects::Violations::Form.new(
-               project: @project, violations: @violations, user: @user
-             ))
+      PaginatedResults do
+        render(Views::Controllers::Projects::Violations::Form.new(
+                 project: @project, violations: @violations, user: @user
+               ))
+      end
     end
   end
 end

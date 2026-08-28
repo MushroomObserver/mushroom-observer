@@ -29,6 +29,15 @@ module Projects
       end
     end
 
+    # Overrides the `controller_name.classify` default (which would
+    # derive "Violation", not a model). Nothing else exercises this:
+    # TopNav's create-button label and Sorter's sort-link name both
+    # call it, but neither renders on this controller's pages (no
+    # `new` action, no sortable Query).
+    def test_controller_model_name
+      assert_equal("Project", @controller.controller_model_name)
+    end
+
     def test_index_no_violations
       project = projects(:eol_project)
       assert_empty(project.violations,
@@ -41,50 +50,42 @@ module Projects
       assert_select("p", { text: /#{:form_violations_no_violations.l}/ })
     end
 
-    # This controller shares Query::Projects with ProjectsController
-    # (see `controller_model_name`), so every param Query::Projects
-    # recognizes -- not just `:by`/`:q`/`:id` (`:id` here is the
-    # route's project id, always present) -- is a live top-level
-    # filter here too, through the generic dispatch in
-    # ApplicationController::Indexes#build_index_with_query. The page
-    # ignores the built query's results (renders `@violations`
-    # directly), so this only needs to confirm the dispatch itself is
-    # harmless: a recognized filter still renders, and a bad
-    # record-backed id degrades to a redirect back to this same page,
-    # not a crash.
-    def test_index_recognizes_projects_query_filter_param
+    # @pagination_data.num_total must reflect the full violation
+    # count, not just the first page's worth.
+    def test_index_pagination_data_matches_full_violation_count
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)
-      get(:index, params: { id: project.id, member: project.user.id })
+      get(:index, params: { id: project.id })
 
       assert_response(:success)
+      pagination_data = @controller.instance_variable_get(:@pagination_data)
+      assert_equal(project.violations.size, pagination_data.num_total)
     end
 
-    def test_index_bad_member_id_redirects_instead_of_crashing
+    # This page builds no Query, so it must not touch
+    # session[:query_record] -- an unrelated query stored elsewhere
+    # should survive a visit here untouched.
+    def test_index_does_not_clobber_session_query_record
       project = projects(:falmouth_2023_09_project)
       login(project.user.login)
-      get(:index, params: { id: project.id, member: 999_999_999 })
+      other_query = Query.lookup_and_save(:Project, by_users: project.user.id)
+      session[:query_record] = other_query.id
 
-      assert_redirected_to(project_violations_path(project))
+      get(:index, params: { id: project.id })
+
+      assert_response(:success)
+      assert_equal(other_query.id, session[:query_record],
+                   "Visiting the violations page should not overwrite an " \
+                   "unrelated stored query")
     end
 
-    # `Query::Projects`' `members`/`member` opts out of `always_index`
-    # (see query/projects.rb) -- without index_display_opts forcing
-    # it back on, `filtered_index` would take its single-result
-    # shortcut (`show_index_of_objects`) whenever a `member:` filter
-    # narrows to one project site-wide, regardless of which project's
-    # violations page it was submitted on, since the query built here
-    # isn't scoped to @project. Confirms a member of only one project
-    # (`lone_wolf`, sole member of "Lone Wolf Project") still renders
-    # this page instead of redirecting away to their project's show
-    # page.
-    def test_index_member_filter_matching_one_project_does_not_redirect
-      viewed_project = projects(:falmouth_2023_09_project)
-      sole_member = users(:lone_wolf)
-      login(viewed_project.user.login)
-
-      get(:index, params: { id: viewed_project.id,
-                            member: sole_member.id })
+    # This page builds no Query, so an out-of-range page has no
+    # page-clamp mechanism to trigger -- it renders empty instead of
+    # redirecting.
+    def test_index_large_page_number_does_not_redirect
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+      get(:index, params: { id: project.id, page: 999 })
 
       assert_response(:success)
     end

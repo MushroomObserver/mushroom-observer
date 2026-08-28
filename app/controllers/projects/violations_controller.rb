@@ -13,38 +13,26 @@ module Projects
     # Cannot figure out the eager loading here.
     around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
-    # build_index_with_query's query and display_opts are discarded --
-    # render_index_view below renders @violations, not @objects.
-    # controller_model_name ("Project") only decides which Query
-    # class's params are live top-level filters here, not what gets
-    # listed. See #5250 for known side-effect bugs from calling this
-    # on a page whose query result is unused.
+    # @violations is a plain Ruby Array (Project#violations), not a
+    # Query/AR relation, so it's paginated directly with
+    # PaginationData rather than through build_index_with_query's
+    # Query-driven machinery -- see the class doc on PaginationData
+    # for this exact "without Query" usage.
     def index
       return unless find_project!
 
       @violations = @project.violations
-      build_index_with_query
+      @pagination_data = number_pagination_data
+      @pagination_data.num_total = @violations.length
+      @violations = @violations[@pagination_data.from_to] || []
+      render_index_view
     end
 
-    # Overrides `ApplicationController::Indexes#render_index_view` so
-    # `show_index_of_objects` renders the Phlex `Violations::Index`
-    # class instead of `projects/violations/index.html.erb` (deleted).
     def render_index_view
       render(Views::Controllers::Projects::Violations::Index.new(
-               project: @project, violations: @violations, user: @user
+               project: @project, violations: @violations,
+               pagination_data: @pagination_data, user: @user
              ))
-    end
-
-    # The discarded query's display_opts still control
-    # show_index_of_objects's single-result auto-redirect --
-    # Query::Projects' `member` filter opts out of always_index (see
-    # query/projects.rb), so without forcing it here, a `member:`
-    # filter that narrows to one project site-wide would redirect
-    # this page away to that other project's show page instead of
-    # rendering the violations list -- @violations plays no part in
-    # that decision.
-    def index_display_opts(opts, _query)
-      opts.merge(always_index: true)
     end
 
     # GET-only turbo-stream endpoint that renders the Add-Target-Location
