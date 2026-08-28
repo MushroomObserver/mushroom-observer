@@ -622,6 +622,42 @@ class ProjectTest < UnitTestCase
                  "violating_observations should match violations, in order")
   end
 
+  # violation_kinds_for's bbox check (Location#found_here?) has two
+  # branches the four SQL id-collecting scopes must also cover, or
+  # count_violations/violating_observations would disagree with
+  # violates_location? for these obs.
+  def test_bbox_violation_matches_found_here_with_no_geoloc_or_location
+    proj = Project.create!(title: "Bbox Missing Info #{SecureRandom.hex(4)}",
+                           user: users(:rolf), location: locations(:burbank))
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location_id: nil,
+                              lat: nil, lng: nil, where: "Nowhere specific")
+    proj.add_observation(obs)
+
+    assert(proj.violates_location?(obs),
+           "Test needs an obs with neither geoloc nor location")
+    assert_includes(proj.send(:violating_observation_ids), obs.id,
+                    "Obs with no geoloc and no location should violate " \
+                    "the project's location constraint")
+  end
+
+  def test_bbox_violation_matches_found_here_when_location_matches_project
+    proj = Project.create!(title: "Bbox Matching Loc #{SecureRandom.hex(4)}",
+                           user: users(:rolf), location: locations(:burbank))
+    outside_burbank = proj.location.north + 5.0
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location: proj.location,
+                              lat: outside_burbank, lng: proj.location.east)
+    proj.add_observation(obs)
+
+    assert_not(proj.violates_location?(obs),
+               "Test needs an obs whose location matches the project's, " \
+               "with geoloc outside that location's bbox")
+    assert_not_includes(proj.send(:violating_observation_ids), obs.id,
+                        "Obs assigned to the project's location should be " \
+                        "compliant regardless of geoloc precision")
+  end
+
   # violating_observations is a relation, so a caller can paginate it
   # with LIMIT/OFFSET instead of loading every violation into Ruby.
   # Uses 3 target_name violations (not a fixture count, so this

@@ -757,6 +757,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     ids.merge(obs_geoloc_outside_project_location.ids)
     ids.merge(obs_without_geoloc_location_not_contained_in_location.ids)
+    ids.merge(obs_missing_geoloc_and_location.ids)
   end
 
   def collect_target_name_violation_ids(ids)
@@ -1187,16 +1188,34 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       end
   end
 
+  # Mirrors Location#found_here?'s first branch (`return true if
+  # obs.location == self`) -- an obs assigned to the project's
+  # location is compliant regardless of GPS precision, so it's
+  # excluded here even when its lat/lng falls outside the location's
+  # bbox.
   def obs_geoloc_outside_project_location
     visible_observations.
-      where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
+      where.not(observations: { lat: nil }).
+      where.not(location_id: location.id).
+      not_in_box(**location.bounding_box)
   end
 
   def obs_without_geoloc_location_not_contained_in_location
-    visible_observations.where(lat: nil).joins(:location).
+    visible_observations.where(lat: nil).
+      where.not(location_id: location.id).
+      joins(:location).
       merge(
         # invert_where is safe (doesn't invert observations.where(lat: nil))
         Location.not_in_box(**location.bounding_box)
       )
+  end
+
+  # Mirrors Location#found_here?'s last branch (`return false unless
+  # loc`) -- an obs with neither GPS nor an assigned Location can't
+  # be confirmed inside the project's area, so it violates. Neither
+  # of the two scopes above matches this case: one requires lat
+  # present, the other requires a location to join against.
+  def obs_missing_geoloc_and_location
+    visible_observations.where(lat: nil, location_id: nil)
   end
 end
