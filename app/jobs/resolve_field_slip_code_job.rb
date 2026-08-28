@@ -23,13 +23,18 @@ class ResolveFieldSlipCodeJob < ApplicationJob
   rescue StandardError => e
     # Logged, not re-raised: a provider hiccup here should not wedge the
     # job. The collector can still scan the slip by hand.
-    Rails.logger.error(
-      "ResolveFieldSlipCodeJob failed on image #{image_id}: " \
-      "#{e.class}: #{e.message}"
-    )
+    log_failure(image_id, e)
   end
 
   private
+
+  def log_failure(image_id, error)
+    Rails.logger.error(
+      "ResolveFieldSlipCodeJob failed on image #{image_id}: " \
+      "#{error.class}: #{error.message}\n" \
+      "#{error.backtrace&.first(10)&.join("\n")}"
+    )
+  end
 
   def resolve(observation, image, user)
     code = FieldSlip::Extractor.default.read_slip_code(image)
