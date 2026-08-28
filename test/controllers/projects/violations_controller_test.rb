@@ -41,6 +41,33 @@ module Projects
       assert_select("p", { text: /#{:form_violations_no_violations.l}/ })
     end
 
+    # This controller shares Query::Projects with ProjectsController
+    # (see `controller_model_name`), so every param Query::Projects
+    # recognizes -- not just `:by`/`:q`/`:id` (`:id` here is the
+    # route's project id, always present) -- is a live top-level
+    # filter here too, through the generic dispatch in
+    # ApplicationController::Indexes#build_index_with_query. The page
+    # ignores the built query's results (renders `@violations`
+    # directly), so this only needs to confirm the dispatch itself is
+    # harmless: a recognized filter still renders, and a bad
+    # record-backed id degrades to a redirect back to this same page,
+    # not a crash.
+    def test_index_recognizes_projects_query_filter_param
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+      get(:index, params: { id: project.id, member: project.user.id })
+
+      assert_response(:success)
+    end
+
+    def test_index_bad_member_id_redirects_instead_of_crashing
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+      get(:index, params: { id: project.id, member: 999_999_999 })
+
+      assert_redirected_to(project_violations_path(project))
+    end
+
     def test_update_legacy_remove_selected
       project = projects(:falmouth_2023_09_project)
       victim = project.violations.first.obs
