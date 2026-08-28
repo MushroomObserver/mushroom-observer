@@ -3618,6 +3618,7 @@
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
   observation_term_herbaria: "[:observation_term_herbarium]"
+  observation_term_external_sites: Observation has an external link to this site.
   observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
   observation_term_locations: "[:observation_term_location]"
   observation_term_within_locations: "[:observation_term_location]"
@@ -4480,7 +4481,7 @@
   query_other_names: other names
 
   # records
-  query_external_sites: "[:sites]"
+  query_external_sites: "[:external_sites]"
   query_field_slips: "[:field_slips]"
   query_herbaria: "[:herbaria]"
   query_herbarium_records: "[:herbarium_records]"

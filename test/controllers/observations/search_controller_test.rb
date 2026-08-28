@@ -133,6 +133,21 @@ module Observations
                     selected: "no")
     end
 
+    def test_new_observations_search_form_prefilled_with_external_sites
+      login
+      site = external_sites(:mycoportal)
+      query = @controller.find_or_create_query(
+        :Observation,
+        external_sites: [site.id]
+      )
+      assert(query.id)
+      get(:new)
+      assert_select("select#query_observations_external_sites",
+                    selected: site.name) do
+        assert_select("option[value='#{site.id}']")
+      end
+    end
+
     def test_new_observations_search_form_retains_include_subtaxa_false
       login
       # Create a query with a name lookup and include_subtaxa explicitly false
@@ -430,6 +445,18 @@ module Observations
       assert_redirected_to(
         controller: "/observations", action: :index,
         params: { q: { model: :Observation, herbaria: [herb1.id, herb2.id] } }
+      )
+    end
+
+    def test_create_with_external_site
+      login
+      site = external_sites(:mycoportal)
+      params = { external_sites: site.id.to_s }
+      post(:create, params: { query_observations: params })
+
+      assert_redirected_to(
+        controller: "/observations", action: :index,
+        params: { q: { model: :Observation, external_sites: [site.id] } }
       )
     end
 

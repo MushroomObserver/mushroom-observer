@@ -268,6 +268,24 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
+  # Query wraps a scalar into a 1-element array, so a bare submitted
+  # id validates fine even though external_sites is Array-typed.
+  #
+  # ExternalSite.select_options queries the DB, so this still hits it
+  # during render, just not on every render -- a deliberate tradeoff,
+  # not an oversight. Threading the options through as a prop instead
+  # would avoid that entirely, but ExternalSite is 2 rows and barely
+  # changes, and select_options memoizes per request (see the comment
+  # there), so this is at most one query per request, not per render.
+  def render_select_external_sites(field_name:)
+    options = [["", ""]] + ExternalSite.select_options
+    select_field(field_name, options,
+                 label: query_field_label(field_name),
+                 selected: field_value(field_name)&.first) do |f|
+      f.with_help { field_help(field_name) }
+    end
+  end
+
   def render_select_rank_range(field_name:)
     options = [nil] + Name.all_ranks
     value, range_value = sorted_rank_range(field_value(field_name))

@@ -626,6 +626,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:species_list_observations).
         where(species_list_observations: { species_list: spl_ids }).distinct
     }
+    scope :external_sites, lambda { |sites|
+      site_ids = Lookup::ExternalSites.new(sites).ids
+      joins(:external_links).
+        where(external_links: { external_site: site_ids }).distinct
+    }
 
     scope :inat_import, lambda { |inat_import|
       where(inat_import_id: inat_import)

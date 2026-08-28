@@ -239,11 +239,12 @@ module ActiveSupport
       # rubocop:enable Rails/TimeZoneAssignment
       clear_logs unless ActiveSupport::TestCase.cleared_logs
       Symbol.missing_tags = []
-      # Functional/integration tests reset this via ApplicationController's
-      # own before_action on every get/post; this covers unit tests that
-      # call UserGroup.all_users/reviewers/one_user directly, with no
+      # Functional/integration tests reset these via
+      # ApplicationController's before_actions on every get/post; this
+      # covers unit tests that call these methods directly, with no
       # request to trigger that reset.
       UserGroup.reset_request_cache
+      ExternalSite.reset_request_cache
     end
 
     # Otherwise WebMock accumulates every request made anywhere in this
