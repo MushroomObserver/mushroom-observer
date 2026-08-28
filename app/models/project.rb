@@ -934,7 +934,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       violating_by_target_location(base)
     ].compact
 
-    relations.reduce(:or).distinct.order_by(:name)
+    relations.reduce(:or).distinct.includes(:name, :location).order_by(:name)
   end
 
   # Builds `Violation` structs (obs + kinds) for a collection of
