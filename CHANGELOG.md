@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-08-28 (deploy-2026-08-28-12-10)
+
+- Query params - Make `needs_naming` a viewer-bound presence flag, not a User id ([PR5246](https://github.com/MushroomObserver/mushroom-observer/pull/5246), @nimmolo)
+- Query params - Retype `look_alikes`/`related_taxa` as record-backed `Name` attrs ([PR5247](https://github.com/MushroomObserver/mushroom-observer/pull/5247), @nimmolo)
+- Query params - Revert Observations `project` attr split; move ordering to the Tab link ([PR5248](https://github.com/MushroomObserver/mushroom-observer/pull/5248), @nimmolo)
+- Query params - Collapse `build_index_with_query` to generic dispatch; delete `index_active_params` ([PR5249](https://github.com/MushroomObserver/mushroom-observer/pull/5249), @nimmolo)
+- Let an image's uploader scan and review its field slip extract ([PR5240](https://github.com/MushroomObserver/mushroom-observer/pull/5240), @mo-nathan)
+- Read a field slip when zbar decodes a QR but not its slip code ([PR5241](https://github.com/MushroomObserver/mushroom-observer/pull/5241), @mo-nathan)
+
+## 2026-08-27 (deploy-2026-08-27-23-19)
+
+- Query params — Move complex params to scopes and set ivars in ApplicationController, part 1 ([PR5217](https://github.com/MushroomObserver/mushroom-observer/pull/5217), @nimmolo)
+- Changelog for `deploy-2026-08-25-22-30` ([PR5222](https://github.com/MushroomObserver/mushroom-observer/pull/5222), @mo-nathan)
+- Revert accidental direct push to `main` ([PR5227](https://github.com/MushroomObserver/mushroom-observer/pull/5227), @nimmolo)
+- Add spacing to Account preferences `InputGroupAddon` buttons with icons ([PR5226](https://github.com/MushroomObserver/mushroom-observer/pull/5226), @nimmolo)
+- Query params — Finish `index_active_params` -> `create_query_from_url_params` sweep ([PR5225](https://github.com/MushroomObserver/mushroom-observer/pull/5225), @nimmolo)
+- Query params - fix RssLogs index writing to db on GET with `?make_default=1` ([PR5228](https://github.com/MushroomObserver/mushroom-observer/pull/5228), @nimmolo)
+- Query params - Send `target` as a polymorphic hash for the comments index filter ([PR5231](https://github.com/MushroomObserver/mushroom-observer/pull/5231), @nimmolo)
+- Generalize "Refresh from Genus" label to "Refresh from Parent" ([PR5232](https://github.com/MushroomObserver/mushroom-observer/pull/5232), @app/copilot-swe-agent)
+- Delete dead `SearchController#coming_from_obs_needing_ids?` redirect ([PR5234](https://github.com/MushroomObserver/mushroom-observer/pull/5234), @nimmolo)
+- Query params - Unify `exact_match` and pattern-search dispatch across all models ([PR5235](https://github.com/MushroomObserver/mushroom-observer/pull/5235), @nimmolo)
+- Query params – eliminate remaining controller exceptions ([PR5236](https://github.com/MushroomObserver/mushroom-observer/pull/5236), @nimmolo)
+- Rename `ApplicationController::QueryParamAliases` to `QueryParams` ([PR5237](https://github.com/MushroomObserver/mushroom-observer/pull/5237), @nimmolo)
+- Fix show Yoop Locations crash ([PR5243](https://github.com/MushroomObserver/mushroom-observer/pull/5243), @JoeCohen)
+
 ## 2026-08-25 (deploy-2026-08-25-22-30)
 
 - Changelog for `deploy-2026-08-25-12-00` and `deploy-2026-08-25-12-05` ([PR5219](https://github.com/MushroomObserver/mushroom-observer/pull/5219), @mo-nathan)
