@@ -4,7 +4,22 @@ require("test_helper")
 
 # Controller tests for news articles
 class ArticlesControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ############ test Actions that Display data (index, show, etc.)
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Articles, :Article,
+      overrides: {
+        id_in_set: articles(:premier_article).id,
+        by_users: rolf.id
+      }
+    )
+  end
 
   def test_index
     get(:index)

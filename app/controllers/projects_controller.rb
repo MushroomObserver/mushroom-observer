@@ -42,16 +42,6 @@ class ProjectsController < ApplicationController
     ::Query::Projects.default_order # :updated_at
   end
 
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :member, :by, :q].freeze
-  end
-
-  # Display list of projects with a given member, sorted by date.
-  def member
-    create_query_from_url_params(:Project, params)
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 50,

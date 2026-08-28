@@ -95,13 +95,6 @@ class ObservationsController
       super.merge(query_args: { order_by: :rss_log })
     end
 
-    # Searches come 1st because they may have the other params
-    def index_active_params
-      [:pattern, :look_alikes, :related_taxa, :name,
-       :by_user, :location, :where, :project, :species_list,
-       :by, :q, :id].freeze
-    end
-
     # Different from NamesController. Returns arrays of [name, count]
     def make_name_suggestions
       return unless @objects.empty? &&
@@ -114,50 +107,6 @@ class ObservationsController
         count = query.num_results
         [name, count]
       end
-    end
-
-    # Displays matrix of Observations with the given name proposed, where
-    # that name is not the consensus.
-    def look_alikes
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Displays matrix of Observations of subtaxa of the parent of given name.
-    def related_taxa
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Displays matrix of Observations with the given text_name (or search_name).
-    def name
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Displays matrix of User's Observations, by date.
-    def by_user
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Displays matrix of Observations at a Location, by date.
-    def location
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Display matrix of Observations whose "where" matches a string.
-    # NOTE: We're passing the `search_where` param from advanced search to
-    # AbstractModel's scope `search_where`, which searches two tables
-    # (obs and loc) for the fuzzy match.
-    def where
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Display matrix of Observations attached to a given project.
-    def project
-      create_query_from_url_params(:Observation, params)
-    end
-
-    # Display matrix of Observations attached to a given species_list.
-    def species_list
-      create_query_from_url_params(:Observation, params)
     end
 
     # Hook runs before template displayed. Must return query.

@@ -23,20 +23,6 @@ module FieldSlipsController::Index
     ::Query::FieldSlips.default_order # :date
   end
 
-  def index_active_params
-    [:project, :by_user, :by, :q, :id].freeze
-  end
-
-  # Display list of FieldSlips attached to a given project.
-  def project
-    create_query_from_url_params(:FieldSlip, params)
-  end
-
-  # Displays list of User's FieldSlips, by date.
-  def by_user
-    create_query_from_url_params(:FieldSlip, params)
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     derive_ivar_from_query(:@project, query, :projects, Project)

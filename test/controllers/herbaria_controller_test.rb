@@ -5,11 +5,22 @@ require("test_helper")
 # tests of Herbarium controller
 class HerbariaControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
+  include QueryParamRoundTripTestHelpers
 
   # ---------- Helpers ----------
 
   def nybg
     herbaria(:nybg_herbarium)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Herbaria, :Herbarium,
+      overrides: { id_in_set: nybg.id, by_users: rolf.id }
+    )
   end
 
   def fundis

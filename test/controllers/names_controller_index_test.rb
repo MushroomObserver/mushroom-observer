@@ -3,14 +3,32 @@
 require("test_helper")
 
 class NamesControllerIndexTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   tests NamesController
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Names, :Name,
+      overrides: {
+        id_in_set: names(:fungi).id,
+        by_users: rolf.id,
+        by_editor: rolf.id,
+        within_locations: locations(:burbank).id,
+        species_lists: species_lists(:first_species_list).id
+      }
+    )
+  end
 
   # ----------------------------
   #  Index tests.
   # ----------------------------
   #
   # Tests arranged as follows:
-  # default subaction; then other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
   def test_index
     login

@@ -13,6 +13,12 @@ module Projects
     # Cannot figure out the eager loading here.
     around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
+    # build_index_with_query's query and display_opts are discarded --
+    # render_index_view below renders @violations, not @objects.
+    # controller_model_name ("Project") only decides which Query
+    # class's params are live top-level filters here, not what gets
+    # listed. See #5250 for known side-effect bugs from calling this
+    # on a page whose query result is unused.
     def index
       return unless find_project!
 
@@ -27,6 +33,18 @@ module Projects
       render(Views::Controllers::Projects::Violations::Index.new(
                project: @project, violations: @violations, user: @user
              ))
+    end
+
+    # The discarded query's display_opts still control
+    # show_index_of_objects's single-result auto-redirect --
+    # Query::Projects' `member` filter opts out of always_index (see
+    # query/projects.rb), so without forcing it here, a `member:`
+    # filter that narrows to one project site-wide would redirect
+    # this page away to that other project's show page instead of
+    # rendering the violations list -- @violations plays no part in
+    # that decision.
+    def index_display_opts(opts, _query)
+      opts.merge(always_index: true)
     end
 
     # GET-only turbo-stream endpoint that renders the Add-Target-Location

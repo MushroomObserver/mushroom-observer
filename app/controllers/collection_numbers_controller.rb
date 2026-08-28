@@ -41,15 +41,6 @@ class CollectionNumbersController < ApplicationController
     nil # Query::CollectionNumbers.default_order
   end
 
-  def index_active_params
-    [:pattern, :observation, :by, :q, :id].freeze
-  end
-
-  # Display list of CollectionNumbers for an Observation
-  def observation
-    create_query_from_url_params(:CollectionNumber, params)
-  end
-
   # Hook runs before template displayed. Must return query.
   #
   # @observation (drives the page's observation-context banner) is

@@ -3,6 +3,8 @@
 require("test_helper")
 
 class ObservationsControllerIndexTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   tests ObservationsController
 
   def setup
@@ -13,8 +15,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
 
   # First, test that the index does not require login - AN 20230923
@@ -867,6 +868,38 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_equal({ projects: [project.id] }, resolved)
     assert_equal(true, force_index)
+  end
+
+  # See QueryParamRoundTripTestHelpers -- proves every param
+  # Query::Observations recognizes survives the top-level URL round
+  # trip through create_query_from_url_params, not each attr's
+  # filtering behavior (test/classes/query/observations_test.rb
+  # already covers that via direct Query.lookup(:Observation,
+  # attr: value) calls). `identify_filter`, `names`, and the subquery
+  # attrs are structural Hashes, so the helper skips them
+  # automatically.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Observations, :Observation,
+      overrides: {
+        id_in_set: observations(:minimal_unknown_obs).id,
+        by_users: rolf.id,
+        look_alikes: names(:fungi).id,
+        related_taxa: names(:fungi).id,
+        locations: locations(:burbank).id,
+        within_locations: locations(:burbank).id,
+        herbaria: herbaria(:nybg_herbarium).id,
+        herbarium_records: herbarium_records(
+          :coprinus_comatus_nybg_spec
+        ).id,
+        projects: projects(:bolete_project).id,
+        project_lists: projects(:bolete_project).id,
+        species_lists: species_lists(:first_species_list).id,
+        inat_import: inat_imports(:rolf_inat_import).id
+      }
+    )
   end
 
   # Multiple ids submitted directly under the attr's name (not via a

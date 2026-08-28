@@ -253,6 +253,16 @@ class ApplicationControllerTest < FunctionalTestCase
     assert_nil(@controller.send(:default_sort_order))
   end
 
+  # `ApplicationController::Indexes#index_display_opts`'s base
+  # implementation merges into an empty hash -- every controller with
+  # an index overrides it, so InfoController (no index action) is the
+  # only way to reach the base method itself.
+  def test_index_display_opts_base_implementation_merges_extra_opts
+    opts = @controller.send(:index_display_opts, { foo: 1 }, nil)
+
+    assert_equal({ foo: 1 }, opts)
+  end
+
   # `paginator_number`'s rescue guards against an unparseable page
   # value -- inject a value that raises on `#to_s` to exercise it
   # directly, since ordinary HTTP params (String/Array/Hash) don't.
