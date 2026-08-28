@@ -268,6 +268,17 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
+  # Query wraps a scalar into a 1-element array, so a bare submitted
+  # id validates fine even though external_sites is Array-typed.
+  def render_select_external_sites(field_name:)
+    options = [["", ""]] + ExternalSite.select_options
+    select_field(field_name, options,
+                 label: query_field_label(field_name),
+                 selected: field_value(field_name)&.first) do |f|
+      f.with_help { field_help(field_name) }
+    end
+  end
+
   def render_select_rank_range(field_name:)
     options = [nil] + Name.all_ranks
     value, range_value = sorted_rank_range(field_value(field_name))

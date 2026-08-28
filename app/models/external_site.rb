@@ -35,6 +35,13 @@ class ExternalSite < AbstractModel
     where(project: Project.user_is_member(user_id))
   }
 
+  # `[name, id]` pairs for a select -- memoized for the process's
+  # life. This table barely changes, so a new row only appears after
+  # the next deploy restarts the app.
+  def self.select_options
+    @select_options ||= order(:name).pluck(:name, :id)
+  end
+
   def check_url_syntax
     return if format_base_url
 

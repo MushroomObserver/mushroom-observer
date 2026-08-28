@@ -319,6 +319,29 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
+  def test_observation_external_sites
+    mycoportal = external_sites(:mycoportal)
+    inaturalist = external_sites(:inaturalist)
+    obs_with_both = observations(:coprinus_comatus_obs)
+
+    assert_query([obs_with_both],
+                 :Observation, external_sites: mycoportal.id)
+    assert_query(Observation.external_sites(inaturalist).order_by_default,
+                 :Observation, external_sites: inaturalist.id)
+    # A site both link to doesn't double-count obs_with_both.
+    assert_query(
+      Observation.external_sites([mycoportal, inaturalist]).order_by_default,
+      :Observation, external_sites: [mycoportal.id, inaturalist.id]
+    )
+  end
+
+  def test_observation_external_site_alias
+    mycoportal = external_sites(:mycoportal)
+    obs_with_both = observations(:coprinus_comatus_obs)
+
+    assert_query([obs_with_both], :Observation, external_site: mycoportal.id)
+  end
+
   def test_observation_clade
     assert_query(Observation.clade("Agaricales").order_by_default,
                  :Observation, clade: "Agaricales")

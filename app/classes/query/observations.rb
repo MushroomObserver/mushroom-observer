@@ -81,6 +81,7 @@ class Query::Observations < Query
   query_attr(:project_lists, [Project])
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
+  query_attr(:external_sites, [ExternalSite], param_alias: :external_site)
   # query_attr(:search_name, :string) # advanced search
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
