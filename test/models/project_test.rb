@@ -622,9 +622,10 @@ class ProjectTest < UnitTestCase
                  "violating_observations should match violations, in order")
   end
 
-  # violation_kinds_for's bbox check (Location#found_here?) has two
-  # branches Observation.project_violating_by_bbox must also cover,
-  # or count_violations/violating_observations would disagree with
+  # violation_kinds_for's bbox check (Location#found_here?) falls
+  # back to "violates" when an obs has neither geoloc nor a Location.
+  # Observation.project_violating_by_bbox must also cover this, or
+  # count_violations/violating_observations would disagree with
   # violates_location? for these obs.
   def test_bbox_violation_matches_found_here_with_no_geoloc_or_location
     proj = Project.create!(title: "Bbox Missing Info #{SecureRandom.hex(4)}",
@@ -641,7 +642,11 @@ class ProjectTest < UnitTestCase
                     "the project's location constraint")
   end
 
-  def test_bbox_violation_matches_found_here_when_location_matches_project
+  # Devs' verdict (2026-08-28): flagged as a violation, even though
+  # the obs is assigned to the project's Location -- violations are
+  # review flags, not a binding state, and imprecise GPS is worth a
+  # look regardless of the assigned Location name.
+  def test_bbox_violation_flags_imprecise_geoloc_even_when_location_matches
     proj = Project.create!(title: "Bbox Matching Loc #{SecureRandom.hex(4)}",
                            user: users(:rolf), location: locations(:burbank))
     outside_burbank = proj.location.north + 5.0
@@ -650,12 +655,12 @@ class ProjectTest < UnitTestCase
                               lat: outside_burbank, lng: proj.location.east)
     proj.add_observation(obs)
 
-    assert_not(proj.violates_location?(obs),
-               "Test needs an obs whose location matches the project's, " \
-               "with geoloc outside that location's bbox")
-    assert_not_includes(proj.violating_observations.pluck(:id), obs.id,
-                        "Obs assigned to the project's location should be " \
-                        "compliant regardless of geoloc precision")
+    assert(proj.violates_location?(obs),
+           "Test needs an obs whose location matches the project's, " \
+           "with geoloc outside that location's bbox")
+    assert_includes(proj.violating_observations.pluck(:id), obs.id,
+                    "Obs with geoloc outside the bbox should violate " \
+                    "even when its Location matches the project's")
   end
 
   # violating_observations is a relation, so a caller can paginate it
