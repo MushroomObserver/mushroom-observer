@@ -151,13 +151,6 @@ class ProjectTest < UnitTestCase
     assert_equal(expect, project.in_range_observations.count)
   end
 
-  def test_out_of_area_observations
-    project = projects(:falmouth_2023_09_project)
-    assert_equal(2, project.out_of_area_observations.size)
-
-    assert_empty(projects(:unlimited_project).out_of_area_observations)
-  end
-
   def test_place_name
     proj = projects(:eol_project)
     loc = locations(:albion)
@@ -171,48 +164,6 @@ class ProjectTest < UnitTestCase
     loc = locations(:albion)
     proj.place_name = loc.display_name(roy)
     assert_equal(proj.location, loc)
-  end
-
-  def test_location_violations
-    proj = Project.create(
-      location: locations(:burbank),
-      title: "With Location Violations",
-      open_membership: true
-    )
-    geoloc_in_burbank = observations(:unknown_with_lat_lng)
-    geoloc_outside_burbank =
-      observations(:trusted_hidden) # lat/lon in Falmouth
-    geoloc_nil_burbank_contains_loc =
-      observations(:minimal_unknown_obs)
-    geoloc_nil_outside_burbank = observations(:reused_observation)
-
-    proj.observations = [
-      geoloc_in_burbank,
-      geoloc_nil_burbank_contains_loc,
-      geoloc_outside_burbank,
-      geoloc_nil_outside_burbank
-    ]
-
-    location_violations = proj.out_of_area_observations
-
-    assert_includes(
-      location_violations, geoloc_outside_burbank,
-      "Noncompliant Obss missing Obs with geoloc outside Proj location"
-    )
-    assert_includes(
-      location_violations, geoloc_nil_outside_burbank,
-      "Noncompliant Obss missing Obs w/o geoloc " \
-      "whose Loc is not contained in Proj location"
-    )
-    assert_not_includes(
-      location_violations, geoloc_in_burbank,
-      "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
-    )
-    assert_not_includes(
-      location_violations, geoloc_nil_burbank_contains_loc,
-      "Noncompliant Obss wrongly includes Obs w/o geoloc " \
-      "whose Loc is contained in Proj location"
-    )
   end
 
   def test_add_and_remove_target_names
@@ -271,6 +222,40 @@ class ProjectTest < UnitTestCase
 
     empty = projects(:empty_project)
     assert_not(empty.has_targets?)
+  end
+
+  # A concurrent insert of the same target name/location can make
+  # find_or_create_by! raise RecordNotUnique instead of returning the
+  # existing record, skipping the line that would otherwise memoize
+  # target_names_present?/target_locations_present? as true.
+  def test_add_target_name_after_record_not_unique_race
+    proj = projects(:empty_project)
+    assert_not(proj.target_names_present?)
+
+    proj.project_target_names.stub(
+      :find_or_create_by!, ->(*) { raise(ActiveRecord::RecordNotUnique) }
+    ) do
+      proj.add_target_name(names(:agaricus))
+    end
+
+    assert(proj.target_names_present?,
+           "target_names_present? must not stay stale after a " \
+           "RecordNotUnique race")
+  end
+
+  def test_add_target_location_after_record_not_unique_race
+    proj = projects(:empty_project)
+    assert_not(proj.target_locations_present?)
+
+    proj.project_target_locations.stub(
+      :find_or_create_by!, ->(*) { raise(ActiveRecord::RecordNotUnique) }
+    ) do
+      proj.add_target_location(locations(:burbank))
+    end
+
+    assert(proj.target_locations_present?,
+           "target_locations_present? must not stay stale after a " \
+           "RecordNotUnique race")
   end
 
   def test_candidate_observations

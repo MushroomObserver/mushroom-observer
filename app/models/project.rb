@@ -609,10 +609,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add target name to this project if not already present.
   def add_target_name(name)
     project_target_names.find_or_create_by!(name: name)
-    @target_names_present = true
     touch
   rescue ActiveRecord::RecordNotUnique
-    # Already exists, no-op
+    # Already exists, no-op -- a concurrent insert raced this one, but
+    # the target name exists either way.
+  ensure
+    @target_names_present = true
   end
 
   # Remove target name from this project. Also removes observations
@@ -632,10 +634,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add target location to this project if not already present.
   def add_target_location(location)
     project_target_locations.find_or_create_by!(location: location)
-    @target_locations_present = true
     touch
   rescue ActiveRecord::RecordNotUnique
-    # Already exists, no-op
+    # Already exists, no-op -- a concurrent insert raced this one, but
+    # the target location exists either way.
+  ensure
+    @target_locations_present = true
   end
 
   # Remove target location from this project.
@@ -679,9 +683,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # GPS-inside-bbox OR (no GPS AND obs.location bbox is fully
-  # contained in project bbox). Mirrors out_of_area_observations'
-  # inverse so candidate_observations and the bbox violation kind
-  # agree on what "in" means.
+  # contained in project bbox). Agrees with the bbox violation kind
+  # in Observation.project_violations on what "in" means.
   def constrain_to_project_bbox(scope)
     return scope if location.nil?
 
@@ -987,15 +990,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Obs lat/lon is outside Project.location exor
-  # Obs location is not a subset of Project.location
-  def out_of_area_observations
-    return [] if location.nil?
-
-    obs_geoloc_outside_project_location +
-      obs_without_geoloc_location_not_contained_in_location
-  end
-
   def violates_constraints?(observation)
     violation_kinds_for(observation).any?
   end
@@ -1152,27 +1146,5 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       transform_values do |aliases|
         aliases.map { |project_alias| [project_alias.name, project_alias.id] }
       end
-  end
-
-  # Mirrors Location#found_here?'s first branch (`return true if
-  # obs.location == self`) -- an obs assigned to the project's
-  # location is compliant regardless of GPS precision, so it's
-  # excluded here even when its lat/lng falls outside the location's
-  # bbox.
-  def obs_geoloc_outside_project_location
-    visible_observations.
-      where.not(observations: { lat: nil }).
-      where.not(location_id: location.id).
-      not_in_box(**location.bounding_box)
-  end
-
-  def obs_without_geoloc_location_not_contained_in_location
-    visible_observations.where(lat: nil).
-      where.not(location_id: location.id).
-      joins(:location).
-      merge(
-        # invert_where is safe (doesn't invert observations.where(lat: nil))
-        Location.not_in_box(**location.bounding_box)
-      )
   end
 end
