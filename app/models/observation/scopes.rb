@@ -817,16 +817,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         or(base.where(Observation[:when].lt(start_date)))
     end
 
-    # Location#found_here? checks obs.location == self first, before
-    # geoloc or location-bbox logic. The three branches below don't
-    # each repeat that exclusion; it's ANDed onto the combined result
-    # once instead, via not_project_location_condition.
     def project_violating_by_bbox(project, base)
       location = project.location
       return unless location
 
-      branches = bbox_violation_branches(base, location)
-      branches.reduce(:or).where(not_project_location_condition(location))
+      bbox_violation_branches(base, location).reduce(:or)
     end
 
     def bbox_violation_branches(base, location)
@@ -836,15 +831,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         merge(Location.not_in_box(**location.bounding_box))
       no_geoloc_no_location = base.where(lat: nil, location_id: nil)
       [has_geoloc, no_geoloc_has_location, no_geoloc_no_location]
-    end
-
-    # `location_id != X` is false in SQL for rows where location_id
-    # IS NULL, so a plain where.not(location_id: location.id) would
-    # drop no-location rows from the combined result. Comparing
-    # against nil explicitly keeps them in.
-    def not_project_location_condition(location)
-      Observation[:location_id].not_eq(location.id).
-        or(Observation[:location_id].eq(nil))
     end
 
     def project_violating_by_target_name(project, base)
