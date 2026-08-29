@@ -644,11 +644,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def add_target_location(location)
     project_target_locations.find_or_create_by!(location: location)
     @target_locations_present = true
+    invalidate_target_location_names!
     touch
   rescue ActiveRecord::RecordNotUnique
     # Already exists, no-op -- a concurrent insert raced this one, but
     # the target location exists either way.
     @target_locations_present = true
+    invalidate_target_location_names!
   end
 
   # Remove target location from this project.
@@ -659,6 +661,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     record.destroy
     remove_instance_variable(:@target_locations_present) if
       defined?(@target_locations_present)
+    invalidate_target_location_names!
     touch
   end
 
@@ -1085,7 +1088,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # where_suffix_conditions always see the current list, with no
   # invalidation call needed on the mutator side.
   def target_location_names
-    project_target_locations.joins(:location).pluck(Location[:name])
+    @target_location_names ||=
+      project_target_locations.joins(:location).pluck(Location[:name])
+  end
+
+  # add_target_location/remove_target_location call this so a
+  # Project instance that already memoized the name list doesn't
+  # keep using a stale one after the target_locations it's built
+  # from changed.
+  def invalidate_target_location_names!
+    remove_instance_variable(:@target_location_names) if
+      defined?(@target_location_names)
   end
 
   def trackers
