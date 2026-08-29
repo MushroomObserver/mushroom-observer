@@ -609,12 +609,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add target name to this project if not already present.
   def add_target_name(name)
     project_target_names.find_or_create_by!(name: name)
+    @target_names_present = true
+    invalidate_expanded_target_name_id_set!
     touch
   rescue ActiveRecord::RecordNotUnique
     # Already exists, no-op -- a concurrent insert raced this one, but
     # the target name exists either way.
-  ensure
     @target_names_present = true
+    invalidate_expanded_target_name_id_set!
   end
 
   # Remove target name from this project. Also removes observations
@@ -628,17 +630,18 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     purge_observations_matching_name(name)
     remove_instance_variable(:@target_names_present) if
       defined?(@target_names_present)
+    invalidate_expanded_target_name_id_set!
     touch
   end
 
   # Add target location to this project if not already present.
   def add_target_location(location)
     project_target_locations.find_or_create_by!(location: location)
+    @target_locations_present = true
     touch
   rescue ActiveRecord::RecordNotUnique
     # Already exists, no-op -- a concurrent insert raced this one, but
     # the target location exists either way.
-  ensure
     @target_locations_present = true
   end
 
@@ -1049,6 +1052,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def expanded_target_name_id_set
     @expanded_target_name_id_set ||=
       expanded_target_name_ids(target_name_ids).to_set
+  end
+
+  # add_target_name/remove_target_name call this so a Project
+  # instance that already memoized the expanded set doesn't keep
+  # using a stale one after the target_names it's built from changed.
+  def invalidate_expanded_target_name_id_set!
+    # target_names is a has_many :through the project_target_names
+    # join table add/remove_target_name just mutated directly, so
+    # Rails' association cache doesn't know to invalidate it -- reset
+    # it too, or target_name_ids below would still return the
+    # pre-change list.
+    target_names.reset
+    remove_instance_variable(:@expanded_target_name_id_set) if
+      defined?(@expanded_target_name_id_set)
   end
 
   def trackers

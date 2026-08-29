@@ -258,6 +258,42 @@ class ProjectTest < UnitTestCase
            "RecordNotUnique race")
   end
 
+  # violates_target_name? memoizes expanded_target_name_id_set on the
+  # Project instance -- add/remove_target_name must invalidate it so a
+  # check made before the change doesn't leak into one made after.
+  def test_add_target_name_invalidates_stale_expanded_set
+    proj = projects(:rare_fungi_project)
+    peltigera_obs = observations(:peltigera_obs)
+
+    assert(proj.violates_target_name?(peltigera_obs),
+           "Test needs an obs whose name is not yet a target")
+
+    proj.add_target_name(names(:peltigera))
+
+    assert_not(
+      proj.violates_target_name?(peltigera_obs),
+      "violates_target_name? used a stale expanded_target_name_id_set " \
+      "memoized before the target name was added"
+    )
+  end
+
+  def test_remove_target_name_invalidates_stale_expanded_set
+    proj = projects(:rare_fungi_project)
+    peltigera_obs = observations(:peltigera_obs)
+    proj.add_target_name(names(:peltigera))
+
+    assert_not(proj.violates_target_name?(peltigera_obs),
+               "Test needs peltigera added as a target first")
+
+    proj.remove_target_name(names(:peltigera))
+
+    assert(
+      proj.violates_target_name?(peltigera_obs),
+      "violates_target_name? used a stale expanded_target_name_id_set " \
+      "memoized before the target name was removed"
+    )
+  end
+
   def test_candidate_observations
     proj = projects(:rare_fungi_project)
     # Project has both target names and target locations, so
