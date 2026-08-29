@@ -34,7 +34,7 @@ class FieldSlip
     # Returns what happened, for the caller's log line.
     def attach
       existing = FieldSlip.find_by(code: @code)
-      return merge_or_refuse(existing) if @observation.occurrence_id
+      return attach_with_occurrence(existing) if @observation.occurrence_id
       return join_or_refuse(existing) if existing&.occurrence
       return :closed_project if barred?(existing)
 
@@ -46,6 +46,38 @@ class FieldSlip
     end
 
     private
+
+    # The observation already belongs to an occurrence. Three shapes:
+    # the code names a slip on a different occurrence (merge), the
+    # occurrence carries no field slip yet -- a reflection's
+    # Edit-companion (adopt the read slip onto that shared occurrence),
+    # or the occurrence already holds a slip and the read code adds
+    # nothing (leave it).
+    def attach_with_occurrence(existing)
+      return merge_or_refuse(existing) if existing&.occurrence
+      unless @join_in_use && @observation.occurrence.field_slip.nil?
+        return :already_linked
+      end
+
+      adopt_into_occurrence(existing)
+    end
+
+    # Set the read slip on the occurrence the observation already sits
+    # in, rather than the fresh occurrence `link` would build -- which
+    # would strand the occurrence's other members (the reflection)
+    # outside the slip.
+    def adopt_into_occurrence(existing)
+      return :closed_project if barred?(existing)
+
+      slip = existing || FieldSlip.find_or_create_by_code(@code, @user)
+      return :invalid unless slip
+
+      @observation.occurrence.update!(field_slip: slip)
+      slip.adopt_user_from(@observation)
+      refresh_occurrence
+      apply_project(slip)
+      :attached
+    end
 
     # An existing slip already in a project the user can neither join
     # nor is a member of: attaching would put the observation in that
