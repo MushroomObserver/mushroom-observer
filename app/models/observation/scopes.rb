@@ -843,18 +843,29 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         no_geoloc_no_location_ids(base)
     end
 
+    # Location#found_here? only trusts GPS when both lat and lng are
+    # present -- match that here rather than keying off lat alone, so
+    # a row with one of the two set (blocked at the model layer by
+    # Observation#check_latitude/#check_longitude, but not something
+    # the DB itself forbids) can't fall through every branch below
+    # unclassified.
+    def incomplete_or_missing_geoloc
+      Observation[:lat].eq(nil).or(Observation[:lng].eq(nil))
+    end
+
     def geoloc_outside_bbox_ids(base, location)
-      base.where.not(lat: nil).not_in_box(**location.bounding_box).ids
+      base.where.not(incomplete_or_missing_geoloc).
+        not_in_box(**location.bounding_box).ids
     end
 
     def location_outside_bbox_ids(base, location)
-      base.where(lat: nil).where.not(location_id: nil).
+      base.where(incomplete_or_missing_geoloc).where.not(location_id: nil).
         left_joins(:location).
         merge(Location.not_in_box(**location.bounding_box)).ids
     end
 
     def no_geoloc_no_location_ids(base)
-      base.where(lat: nil, location_id: nil).ids
+      base.where(incomplete_or_missing_geoloc).where(location_id: nil).ids
     end
 
     def project_target_name_violation_ids(project)
