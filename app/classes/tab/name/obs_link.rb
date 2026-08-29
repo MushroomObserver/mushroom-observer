@@ -14,10 +14,10 @@
 # Query::Observations to filter by, and the pre-computed count of
 # matching observations (carried by `Name::Observations` -- one
 # query total for all 5 counts, computed before any of these Tabs
-# are built). Building the path here is plain string formatting;
-# it does not query the database. Title format is `"#{label.t}
-# (#{count})"`. When `count.zero?`, `linked?` returns false and the
-# view renders a plain "(0)" placeholder instead of a link.
+# are built). Building the path here uses a route helper and does not
+# query the database. Title format is "#{label.t} (#{count})". When
+# `count.zero?`, `linked?` returns false and the view renders a plain
+# "(0)" placeholder instead of a link.
 #
 # Subclasses MUST implement:
 #   #label_key      — Symbol for the link label (e.g. `:obss_of_this_name`)
