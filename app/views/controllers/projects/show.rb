@@ -182,13 +182,7 @@ module Views::Controllers::Projects
     end
 
     # Explicit String target -- CRUDPathBuilding only auto-derives a
-    # model's `<type_tag>_path`, not a differently-named route.
-    #
-    # Links to the Observations index filtered by project_violations
-    # rather than the dedicated violations page, so the count badge
-    # takes admins straight to a browsable, sortable list. Exclude/
-    # Extend/Add-Target-Name/Add-Target-Location actions still live
-    # only on project_violations_path.
+    # model's own `<type_tag>_path`, not a differently-named route.
     def render_violations_button
       return unless @project.constraints?
 
@@ -196,7 +190,7 @@ module Views::Controllers::Projects
       Button(
         type: :get,
         name: "#{count} #{:constraint_violations.ti}",
-        target: observations_path(project_violations: @project.id),
+        target: project_violations_path(@project.id),
         variant: count.positive? ? :warning : nil,
         size: :lg,
         class: "my-2 mr-2"
