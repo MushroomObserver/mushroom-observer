@@ -17,8 +17,10 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_colon_suffix
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
+  - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -105,6 +107,21 @@ MO/NoActiveRecordRelationProp:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
+MO/NoHandRolledColonSuffix:
+  Description: >-
+    Phlex views/components must not interpolate a trailing colon onto
+    a label string ("#{text}:") -- use append_colon(text) instead, so
+    an html_safe value isn't coerced back into an unsafe String -- see
+    lib/rubocop/cop/mo/no_hand_rolled_colon_suffix.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # append_colon's own definition -- legitimately builds the ":"
+    # suffix this cop exists to keep everywhere else.
+    - "app/components/localization.rb"
+
 MO/NoHandRolledFormTag:
   Description: >-
     Phlex views/components must not call the bare form(...) tag helper
@@ -132,6 +149,21 @@ MO/NoHandRolledMethodField:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+
+MO/NoHandRolledWhitespace:
+  Description: >-
+    Phlex views/components must not hand-roll inter-element spacing
+    (plain(" "), a padded interpolated string) or a literal &nbsp;
+    entity -- use the whitespace/nbsp helpers instead -- see
+    lib/rubocop/cop/mo/no_hand_rolled_whitespace.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # nbsp's definition -- legitimately builds the &nbsp; entity this
+    # cop exists to keep everywhere else.
+    - "app/components/base.rb"
 
 MO/NoQuerySubclassMutation:
   Description: >-
