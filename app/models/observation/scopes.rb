@@ -623,22 +623,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Every observation violating at least one of the given project's
     # configured constraints (date range, bbox, target names, target
-    # locations). See the project_violating_by_* class methods below
+    # locations). See the project_*_violation_ids class methods below
     # for the per-kind logic.
     scope :project_violations, lambda { |project|
       project = Project.find(project) unless project.is_a?(Project)
       return none unless project.constraints?
 
-      base = project_violation_base(project)
-      relations = [
-        project_violating_by_date(project, base),
-        project_violating_by_bbox(project, base),
-        project_violating_by_target_name(project, base),
-        project_violating_by_target_location(project, base)
-      ].compact
+      ids = Set.new
+      ids.merge(project_date_violation_ids(project))
+      ids.merge(project_bbox_violation_ids(project))
+      ids.merge(project_target_name_violation_ids(project))
+      ids.merge(project_target_location_violation_ids(project))
 
-      relations.reduce(:or).distinct.includes(:name, :location).
-        order_by(:name)
+      where(id: ids).includes(:name, :location).order_by(:name)
     }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
@@ -801,15 +798,27 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     end
 
     # ----- helpers for the project_violations scope -----
+    #
+    # Each helper runs a separate query plucking the ids of
+    # observations violating one constraint kind. project_violations
+    # merges the four id sets in Ruby and wraps the result in a single
+    # where(id: ...), rather than combining four relations into one
+    # query with Relation#or. Relation#or dedups the two sides' where
+    # clauses by comparing Arel nodes with ==, and for two predicates
+    # that are structurally similar but semantically different (see
+    # project_target_location_violation_ids) that == is wrong, so
+    # Relation#or can silently drop one of them.
 
-    def project_violation_base(project)
-      project.visible_observations.left_joins(:name, :location)
-    end
-
-    def project_violating_by_date(project, base)
+    def project_date_violation_ids(project)
       start_date = project.start_date
       end_date = project.end_date
-      return unless start_date || end_date
+      return [] unless start_date || end_date
+
+      project_date_violations(project.visible_observations,
+                              start_date, end_date).ids
+    end
+
+    def project_date_violations(base, start_date, end_date)
       return base.where(Observation[:when].gt(end_date)) unless start_date
       return base.where(Observation[:when].lt(start_date)) unless end_date
 
@@ -817,43 +826,51 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         or(base.where(Observation[:when].lt(start_date)))
     end
 
-    def project_violating_by_bbox(project, base)
+    def project_bbox_violation_ids(project)
       location = project.location
-      return unless location
+      return [] unless location
 
-      bbox_violation_branches(base, location).reduce(:or)
+      base = project.visible_observations
+      geoloc_outside_bbox_ids(base, location) +
+        location_outside_bbox_ids(base, location) +
+        no_geoloc_no_location_ids(base)
     end
 
-    def bbox_violation_branches(base, location)
-      has_geoloc = base.where.not(lat: nil).not_in_box(**location.bounding_box)
-      no_geoloc_has_location =
-        base.where(lat: nil).where.not(location_id: nil).
-        merge(Location.not_in_box(**location.bounding_box))
-      no_geoloc_no_location = base.where(lat: nil, location_id: nil)
-      [has_geoloc, no_geoloc_has_location, no_geoloc_no_location]
+    def geoloc_outside_bbox_ids(base, location)
+      base.where.not(lat: nil).not_in_box(**location.bounding_box).ids
     end
 
-    def project_violating_by_target_name(project, base)
-      return unless project.target_names.any?
-
-      base.where.not(name_id: project.expanded_target_name_id_set.to_a)
+    def location_outside_bbox_ids(base, location)
+      base.where(lat: nil).where.not(location_id: nil).
+        left_joins(:location).
+        merge(Location.not_in_box(**location.bounding_box)).ids
     end
 
-    # Builds the combined predicate with Arel's `.or` directly
-    # instead of `Relation#or` -- `Relation#or` diffs the two sides'
-    # where clauses using Arel node `==`, which considers
-    # location_suffix_conditions and where_suffix_conditions equal
-    # (same LIKE-or-equals shape, different columns) even though
-    # their `hash`es differ, and silently drops one of the two.
-    def project_violating_by_target_location(project, base)
-      return unless project.target_locations.any?
+    def no_geoloc_no_location_ids(base)
+      base.where(lat: nil, location_id: nil).ids
+    end
 
-      has_loc = Observation[:location_id].not_eq(nil).
-                and(project.location_suffix_conditions)
-      no_loc = Observation[:location_id].eq(nil).
-               and(project.where_suffix_conditions)
-      passing = base.where(has_loc.or(no_loc))
-      base.where.not(id: passing.select(:id))
+    def project_target_name_violation_ids(project)
+      return [] unless project.target_names_present?
+
+      project.visible_observations.
+        where.not(name_id: project.expanded_target_name_id_set.to_a).ids
+    end
+
+    # An observation passes the target-location check if its
+    # Location's name matches a target location's name, or, lacking a
+    # Location, its where text matches. A name-suffix match, not a
+    # bounding box -- project_bbox_violation_ids covers that check.
+    # Violation ids are every other visible observation.
+    def project_target_location_violation_ids(project)
+      return [] unless project.target_locations_present?
+
+      base = project.visible_observations
+      passing_ids = base.where.not(location_id: nil).left_joins(:location).
+                    where(project.location_suffix_conditions).ids
+      passing_ids += base.where(location_id: nil).
+                     where(project.where_suffix_conditions).ids
+      base.where.not(id: passing_ids).ids
     end
   end
 end
