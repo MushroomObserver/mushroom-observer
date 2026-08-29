@@ -3,17 +3,14 @@
 require("test_helper")
 
 # Contract tests for the `Tab::Name::ObsLink::*` family. Each Tab
-# encapsulates a label, a saved `Query::Observations`, and a
+# encapsulates a label, a `Query::Observations` filter attr, and a
 # count. The view uses `#linked?` to decide whether to render an
 # `<a>` (count > 0) or a plain "(0)" placeholder.
-#
-# Path construction (`controller.add_q_param`) is exercised via
-# the names-show controller test — that has a live controller; a
-# unit test here would stub it out and prove little. We pin the
-# title format, the link/no-link predicate, the html_options data
-# attrs, and that each subclass's query is built with the right
-# attr.
 class Tab::Name::ObsLinkTest < UnitTestCase
+  def routes
+    Rails.application.routes.url_helpers
+  end
+
   def setup
     @name = names(:coprinus_comatus)
   end
@@ -49,75 +46,41 @@ class Tab::Name::ObsLinkTest < UnitTestCase
     assert_equal("taxon_obss_other_names", tab.alt_title)
   end
 
-  # --- html_options data attrs ----------------------------------
-
-  def test_html_options_empty_when_not_linked
-    tab = build_tab(Tab::Name::ObsLink::ThisName, count: 0)
-
-    # Allow the Tab::Base composer to add a derived selector
-    # class, but the data attrs must be absent.
-    assert_nil(tab.html_options[:data])
-  end
-
-  def test_html_options_carries_filter_caption_data_when_linked
-    tab = build_tab(Tab::Name::ObsLink::ThisName, count: 4)
-
-    data = tab.html_options[:data]
-    assert_not_nil(data)
-    assert(data[:query_params].present?)
-    assert(data[:query_record].positive?)
-    assert(data[:query_alph].present?)
-  end
-
-  # --- Query shape per subclass --------------------------------
+  # --- Path per subclass ------------------------------------------
 
   # Each subclass's flag combination (synonyms, exclude_consensus,
-  # etc.) lives in the same-named Observation scope now, not in
-  # `query.params` -- see obs_link_query_integration_test.rb for the
+  # etc.) lives in the same-named Query::Observations attr, not
+  # here -- see obs_link_query_integration_test.rb for the
   # results-based coverage of that behavior. These just pin which
-  # attr each subclass wires up.
-  def test_this_name_query_has_lookup_only
-    q = build_tab(Tab::Name::ObsLink::ThisName, count: 1).query
-
-    assert_equal([@name.id.to_s], q.params[:this_name])
-  end
-
-  def test_other_names_query_has_synonyms_and_exclude
-    q = build_tab(Tab::Name::ObsLink::OtherNames, count: 1).query
-
-    assert_equal([@name.id.to_s], q.params[:other_names])
-  end
-
-  def test_any_name_query_includes_synonyms_no_exclude
-    q = build_tab(Tab::Name::ObsLink::AnyName, count: 1).query
-
-    assert_equal([@name.id.to_s], q.params[:any_name])
-  end
-
-  def test_taxon_proposed_query_excludes_consensus
-    q = build_tab(Tab::Name::ObsLink::TaxonProposed, count: 1).query
-
-    assert_equal(@name.id, q.params[:look_alikes])
-  end
-
-  def test_name_proposed_query_has_all_proposals_no_synonyms
-    q = build_tab(Tab::Name::ObsLink::NameProposed, count: 1).query
-
-    assert_equal([@name.id.to_s], q.params[:name_proposed])
-  end
-
-  # --- Query memoization saves once ----------------------------
-
-  def test_query_save_runs_once
+  # attr each subclass's path wires up.
+  def test_this_name_path
     tab = build_tab(Tab::Name::ObsLink::ThisName, count: 1)
 
-    # First read triggers build + save; second read returns the
-    # memoized instance without rebuilding.
-    first = tab.query
-    second = tab.query
+    assert_equal(routes.observations_path(this_name: @name.id), tab.path)
+  end
 
-    assert_same(first, second,
-                "memoization should return the same instance")
+  def test_other_names_path
+    tab = build_tab(Tab::Name::ObsLink::OtherNames, count: 1)
+
+    assert_equal(routes.observations_path(other_names: @name.id), tab.path)
+  end
+
+  def test_any_name_path
+    tab = build_tab(Tab::Name::ObsLink::AnyName, count: 1)
+
+    assert_equal(routes.observations_path(any_name: @name.id), tab.path)
+  end
+
+  def test_taxon_proposed_path
+    tab = build_tab(Tab::Name::ObsLink::TaxonProposed, count: 1)
+
+    assert_equal(routes.observations_path(look_alikes: @name.id), tab.path)
+  end
+
+  def test_name_proposed_path
+    tab = build_tab(Tab::Name::ObsLink::NameProposed, count: 1)
+
+    assert_equal(routes.observations_path(name_proposed: @name.id), tab.path)
   end
 
   # --- Subtaxa wraps a controller-provided query ---------------
@@ -135,6 +98,6 @@ class Tab::Name::ObsLinkTest < UnitTestCase
   private
 
   def build_tab(klass, count:)
-    klass.new(name: @name, count: count, controller: nil)
+    klass.new(name: @name, count: count)
   end
 end
