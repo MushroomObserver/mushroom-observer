@@ -10,23 +10,26 @@
 #   - `Tab::Name::ObsLink::TaxonProposed`
 #   - `Tab::Name::ObsLink::NameProposed`
 #
-# Each Tab knows: a translation key for its label, a Query of
-# Observations to point at, and the pre-computed count of matching
-# observations (carried by `Name::Observations`). Title format is
-# `"#{label.t} (#{count})"`. When `count.zero?`, `linked?` returns
-# false and the view renders a plain "(0)" placeholder instead of
-# a link.
+# Each Tab knows: a translation key for its label, a query_attr on
+# Query::Observations to filter by, and the pre-computed count of
+# matching observations (carried by `Name::Observations` -- one
+# query total for all 5 counts, computed before any of these Tabs
+# are built). Building the path here is plain string formatting;
+# it does not query the database. Title format is `"#{label.t}
+# (#{count})"`. When `count.zero?`, `linked?` returns false and the
+# view renders a plain "(0)" placeholder instead of a link.
 #
 # Subclasses MUST implement:
 #   #label_key      — Symbol for the link label (e.g. `:obss_of_this_name`)
 #   #filter_attr    — Query::Observations attr for this Tab's preset
 #                      (e.g. `:this_name`, `:any_name`)
 #
-# The base inherits `Tab::QueryLink`'s memoized `#query` and
-# `#path` (via `controller.add_q_param(observations_path, query)`).
-class Tab::Name::ObsLink < Tab::QueryLink
-  def initialize(name:, count:, controller:)
-    super(controller: controller)
+# `Tab::Name::ObsLink::Subtaxa` is a separate case, not a subclass
+# of this base -- it wraps a Query the controller already built for
+# other page chrome, so it inherits `Tab::QueryLink` instead.
+class Tab::Name::ObsLink < Tab::Base
+  def initialize(name:, count:)
+    super()
     @name = name
     @count = count
   end
@@ -43,31 +46,16 @@ class Tab::Name::ObsLink < Tab::QueryLink
   end
 
   # When false, the panel renders `"#{title}"` as plain text
-  # without an anchor — no need to build / save the query.
+  # without an anchor.
   def linked?
     @count.positive?
   end
 
-  # Data attrs read by the `filter-caption` Stimulus controller on
-  # the observations index. Empty when the tab isn't linked (the
-  # view doesn't render an `<a>` in that case).
-  def html_options
-    return {} unless linked?
-
-    { data: {
-      query_params: query.params.deep_compact_blank.to_json,
-      query_record: query.record.id,
-      query_alph: query.record.id.alphabetize
-    } }
+  def path
+    observations_path(filter_attr => @name.id)
   end
 
   private
-
-  def build_query
-    q = Query.create_query(:Observation, filter_attr => @name.id)
-    q.save
-    q
-  end
 
   def label_key
     raise(NotImplementedError.new("#{self.class}#label_key"))
@@ -75,9 +63,5 @@ class Tab::Name::ObsLink < Tab::QueryLink
 
   def filter_attr
     raise(NotImplementedError.new("#{self.class}#filter_attr"))
-  end
-
-  def target_params
-    observations_path
   end
 end
