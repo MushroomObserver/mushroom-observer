@@ -807,6 +807,8 @@
   rank_plural_order: orders
   rank_suborder: suborder
   rank_plural_suborder: suborders
+  rank_superorder: superorder
+  rank_plural_superorder: superorders
   rank_family: family
   rank_plural_family: families
   rank_subfamily: subfamily
