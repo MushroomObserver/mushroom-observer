@@ -567,8 +567,9 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(name, obs.name, "Wrong consensus id")
   end
 
-  # A rank absent from MO's enum: iNat's declared rank is still
-  # authoritative, same mechanism as the ambiguous-suffix case above.
+  # A rank MO can't reliably infer from the name string: iNat's declared
+  # rank is authoritative, using the same trusted-rank fallback as the
+  # ambiguous-suffix case above.
   def test_import_job_superorder_rank
     create_ivars_from_filename("stemonitidia")
     stub_inat_interactions
