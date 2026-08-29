@@ -861,16 +861,26 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Location's name matches a target location's name, or, lacking a
     # Location, its where text matches. A name-suffix match, not a
     # bounding box -- project_bbox_violation_ids covers that check.
-    # Violation ids are every other visible observation.
+    # An observation with a Location violates when that name doesn't
+    # match; one without a Location violates when its where text
+    # doesn't match. The two branches partition on location_id, so
+    # concatenating their ids needs no dedup.
     def project_target_location_violation_ids(project)
       return [] unless project.target_locations_present?
 
       base = project.visible_observations
-      passing_ids = base.where.not(location_id: nil).left_joins(:location).
-                    where(project.location_suffix_conditions).ids
-      passing_ids += base.where(location_id: nil).
-                     where(project.where_suffix_conditions).ids
-      base.where.not(id: passing_ids).ids
+      with_location_violation_ids(base, project) +
+        no_location_violation_ids(base, project)
+    end
+
+    def with_location_violation_ids(base, project)
+      base.where.not(location_id: nil).left_joins(:location).
+        where.not(project.location_suffix_conditions).ids
+    end
+
+    def no_location_violation_ids(base, project)
+      base.where(location_id: nil).
+        where.not(project.where_suffix_conditions).ids
     end
   end
 end
