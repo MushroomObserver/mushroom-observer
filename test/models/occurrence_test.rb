@@ -178,6 +178,39 @@ class OccurrenceTest < UnitTestCase
     assert_nil(@obs2.reload.occurrence_id)
   end
 
+  # A thumbnail borrowed from a sibling stops being reachable once the
+  # borrower leaves that sibling's occurrence.
+  def test_move_to_other_occurrence_resets_borrowed_thumbnail
+    borrowed = images(:in_situ_image)
+    assert_includes(@obs3.image_ids, borrowed.id, "premise: obs3's image")
+    assert_empty(@obs1.image_ids, "premise: obs1 has no images")
+    create_occurrence(@obs3, @obs1, @obs2)
+    occ_b = create_occurrence(@obs4)
+    @obs1.update!(thumb_image: borrowed)
+
+    @obs1.update!(occurrence: occ_b)
+
+    assert_empty(occ_b.observations.flat_map(&:image_ids),
+                 "premise: nothing to borrow in the new occurrence")
+    assert_nil(@obs1.reload.thumb_image_id,
+               "the borrowed thumbnail is dropped, not left dangling")
+  end
+
+  def test_move_to_other_occurrence_resets_siblings_borrowed_thumbnail
+    borrowed = images(:in_situ_image)
+    assert_includes(@obs3.image_ids, borrowed.id, "premise: obs3's image")
+    occ_a = create_occurrence(@obs1, @obs2, @obs3)
+    occ_b = create_occurrence(@obs4)
+    @obs2.update!(thumb_image: borrowed)
+
+    @obs3.update!(occurrence: occ_b)
+
+    assert(Occurrence.exists?(occ_a.id), "two members remain")
+    assert_equal(images(:connected_coprinus_comatus_image).id,
+                 @obs2.reload.thumb_image_id,
+                 "the sibling falls back to a photo it owns")
+  end
+
   def test_single_obs_occurrence_not_destroyed
     fs = field_slips(:field_slip_no_obs)
     @obs1.update!(field_slip: fs)
