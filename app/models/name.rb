@@ -310,6 +310,7 @@ class Name < AbstractModel
     Family: 600,    # -aceae
     Suborder: 650,  # -ineae
     Order: 700,     # -ales
+    Superorder: 720,
     Subclass: 750,  # -mycetidae
     Class: 800,     # -mycetes
     Subphylum: 850, # -mycotina

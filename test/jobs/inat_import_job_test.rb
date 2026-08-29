@@ -567,6 +567,25 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(name, obs.name, "Wrong consensus id")
   end
 
+  # A rank absent from MO's enum: iNat's declared rank is still
+  # authoritative, same mechanism as the ambiguous-suffix case above.
+  def test_import_job_superorder_rank
+    create_ivars_from_filename("stemonitidia")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Stemonitidia", rank: "Superorder")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Superorder"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
+  end
+
   # Prove that Namings, Votes, Identification are correct
   # when iNat obs has provisional name that wasn't in MO
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
