@@ -1049,21 +1049,24 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Memoized: project's target_names with synonyms + sub-taxa expanded
   # into a Set of name_ids, matching the candidate_observations rule.
   # Used by violates_target_name? as a per-obs membership test.
+  # Reads name ids via project_target_names.pluck, not the
+  # target_names association -- target_names may already be loaded
+  # (callers like TargetNamesController#add_names check it before
+  # add_target_name/remove_target_name run) on a strict_loading
+  # Project, and resetting or reloading it here to pick up the change
+  # would make a later access of that same association raise
+  # ActiveRecord::StrictLoadingViolationError instead of reusing its
+  # existing load. pluck queries project_target_names directly and
+  # doesn't touch target_names' loaded state.
   def expanded_target_name_id_set
     @expanded_target_name_id_set ||=
-      expanded_target_name_ids(target_name_ids).to_set
+      expanded_target_name_ids(project_target_names.pluck(:name_id)).to_set
   end
 
   # add_target_name/remove_target_name call this so a Project
   # instance that already memoized the expanded set doesn't keep
   # using a stale one after the target_names it's built from changed.
   def invalidate_expanded_target_name_id_set!
-    # target_names is a has_many :through the project_target_names
-    # join table add/remove_target_name just mutated directly, so
-    # Rails' association cache doesn't know to invalidate it -- reset
-    # it too, or target_name_ids below would still return the
-    # pre-change list.
-    target_names.reset
     remove_instance_variable(:@expanded_target_name_id_set) if
       defined?(@expanded_target_name_id_set)
   end
