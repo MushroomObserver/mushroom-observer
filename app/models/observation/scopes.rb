@@ -629,13 +629,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       project = Project.find(project) unless project.is_a?(Project)
       return none unless project.constraints?
 
-      ids = Set.new
-      ids.merge(project_date_violation_ids(project))
-      ids.merge(project_bbox_violation_ids(project))
-      ids.merge(project_target_name_violation_ids(project))
-      ids.merge(project_target_location_violation_ids(project))
-
-      where(id: ids).includes(:name, :location).order_by(:name)
+      where(id: project_violation_ids(project)).includes(:name, :location).
+        order_by(:name)
     }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
@@ -800,14 +795,26 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # ----- helpers for the project_violations scope -----
     #
     # Each helper runs a separate query plucking the ids of
-    # observations violating one constraint kind. project_violations
-    # merges the four id sets in Ruby and wraps the result in a single
-    # where(id: ...), rather than combining four relations into one
-    # query with Relation#or. Relation#or dedups the two sides' where
-    # clauses by comparing Arel nodes with ==, and for two predicates
-    # that are structurally similar but semantically different (see
-    # project_target_location_violation_ids) that == is wrong, so
-    # Relation#or can silently drop one of them.
+    # observations violating one constraint kind. project_violation_ids
+    # merges the four id sets in Ruby, rather than combining four
+    # relations into one query with Relation#or. Relation#or dedups
+    # the two sides' where clauses by comparing Arel nodes with ==,
+    # and for two predicates that are structurally similar but
+    # semantically different (see project_target_location_violation_ids)
+    # that == is wrong, so Relation#or can silently drop one of them.
+    #
+    # Public so Project#count_violations can take just the Set's size,
+    # skipping the includes/order_by/distinct project_violations adds
+    # for display -- a count doesn't need the observations sorted or
+    # their name/location eager-loaded.
+    def project_violation_ids(project)
+      ids = Set.new
+      ids.merge(project_date_violation_ids(project))
+      ids.merge(project_bbox_violation_ids(project))
+      ids.merge(project_target_name_violation_ids(project))
+      ids.merge(project_target_location_violation_ids(project))
+      ids
+    end
 
     def project_date_violation_ids(project)
       start_date = project.start_date
