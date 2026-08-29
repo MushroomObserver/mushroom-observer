@@ -305,7 +305,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def found_here?(obs)
-    return true if obs.location == self
     return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
 
     loc = obs.location

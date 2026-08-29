@@ -10,21 +10,23 @@
 module Projects
   class ViolationsController < ApplicationController
     before_action :login_required
-    # Cannot figure out the eager loading here.
-    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
-    # @violations is a plain Ruby Array (Project#violations), not a
-    # Query/AR relation, so it's paginated directly with
-    # PaginationData rather than through build_index_with_query's
-    # Query-driven machinery -- see the class doc on PaginationData
-    # for this exact "without Query" usage.
+    # `@project.violating_observations` is an AR relation (not a
+    # Query), so it's paginated directly with PaginationData rather
+    # than through build_index_with_query's Query-driven machinery --
+    # see the class doc on PaginationData for this "without Query"
+    # usage. Unlike the array-slicing shown there, the current page
+    # is fetched with LIMIT/OFFSET, so only one page of observations
+    # gets its violation kinds computed.
     def index
       return unless find_project!
 
-      @violations = @project.violations
+      observations = @project.violating_observations
       @pagination_data = number_pagination_data
-      @pagination_data.num_total = @violations.length
-      @violations = @violations[@pagination_data.from_to] || []
+      @pagination_data.num_total = observations.count
+      page = observations.offset(@pagination_data.from).
+             limit(@pagination_data.num_per_page)
+      @violations = @project.violations_for(page)
       render_index_view
     end
 
