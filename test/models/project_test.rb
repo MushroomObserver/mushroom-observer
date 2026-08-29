@@ -294,6 +294,50 @@ class ProjectTest < UnitTestCase
     )
   end
 
+  # location_suffix_conditions/where_suffix_conditions read location
+  # names via project_target_locations, not the target_locations
+  # association, precisely so a caller that already loaded
+  # target_locations (as Projects::TargetLocationsController does)
+  # still sees an add/remove take effect immediately.
+  def test_add_target_location_reflects_even_if_association_preloaded
+    proj = projects(:rare_fungi_project)
+    albion = locations(:albion)
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location: albion)
+    proj.target_locations.load
+
+    assert(proj.violates_target_location?(obs),
+           "Test needs an obs whose Location is not yet a target")
+
+    proj.add_target_location(albion)
+
+    assert_not(
+      proj.violates_target_location?(obs),
+      "violates_target_location? must reflect the new target location " \
+      "even when target_locations was already loaded"
+    )
+  end
+
+  def test_remove_target_location_reflects_even_if_association_preloaded
+    proj = projects(:rare_fungi_project)
+    albion = locations(:albion)
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location: albion)
+    proj.add_target_location(albion)
+    proj.target_locations.load
+
+    assert_not(proj.violates_target_location?(obs),
+               "Test needs albion added as a target location first")
+
+    proj.remove_target_location(albion)
+
+    assert(
+      proj.violates_target_location?(obs),
+      "violates_target_location? must reflect the removed target " \
+      "location even when target_locations was already loaded"
+    )
+  end
+
   def test_candidate_observations
     proj = projects(:rare_fungi_project)
     # Project has both target names and target locations, so

@@ -320,8 +320,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Called from the project show page's render_violations_button, so
   # any per-project work multiplies by the number of projects
   # rendered.
+  # Counts via the same per-kind id helpers project_violations uses,
+  # not violating_observations.count -- that relation carries
+  # includes/order_by/distinct for display, none of which a count
+  # needs, and .count would otherwise re-run all of it as a query.
   def count_violations
-    violating_observations.count
+    return 0 unless constraints?
+
+    Observation.project_violation_ids(self).size
   end
 
   def constraints?
@@ -745,10 +751,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # target_location violation check).
   def location_suffix_conditions
     tbl = Location.arel_table
-    target_locations.map do |tl|
-      escaped = self.class.sanitize_sql_like(tl.name)
+    target_location_names.map do |name|
+      escaped = self.class.sanitize_sql_like(name)
       tbl[:name].matches("%, #{escaped}").
-        or(tbl[:name].eq(tl.name))
+        or(tbl[:name].eq(name))
     end.reduce(:or)
   end
 
@@ -756,10 +762,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # `observations.where` (used when an obs has no location_id).
   def where_suffix_conditions
     tbl = Observation.arel_table
-    target_locations.map do |tl|
-      escaped = self.class.sanitize_sql_like(tl.name)
+    target_location_names.map do |name|
+      escaped = self.class.sanitize_sql_like(name)
       tbl[:where].matches("%, #{escaped}").
-        or(tbl[:where].eq(tl.name))
+        or(tbl[:where].eq(name))
     end.reduce(:or)
   end
 
@@ -1041,8 +1047,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
            end
     return false if name.blank?
 
-    target_locations.any? do |tl|
-      name == tl.name || name.end_with?(", #{tl.name}")
+    target_location_names.any? do |tl_name|
+      name == tl_name || name.end_with?(", #{tl_name}")
     end
   end
 
@@ -1069,6 +1075,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def invalidate_expanded_target_name_id_set!
     remove_instance_variable(:@expanded_target_name_id_set) if
       defined?(@expanded_target_name_id_set)
+  end
+
+  # Same reasoning as expanded_target_name_id_set above: reads via
+  # project_target_locations, not the target_locations association,
+  # so add_target_location/remove_target_location updating the join
+  # table directly doesn't leave a caller's already-loaded
+  # target_locations stale. location_suffix_conditions/
+  # where_suffix_conditions always see the current list, with no
+  # invalidation call needed on the mutator side.
+  def target_location_names
+    project_target_locations.joins(:location).pluck(Location[:name])
   end
 
   def trackers
