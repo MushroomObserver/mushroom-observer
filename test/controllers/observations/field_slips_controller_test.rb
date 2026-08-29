@@ -55,6 +55,32 @@ module Observations
       assert_equal(slip.id, obs.reload.field_slip&.id)
     end
 
+    # A reflection's Edit-companion shares a slip-less occurrence with
+    # the reflection. Attaching a code from the companion's page puts
+    # the slip on that occurrence; the reflection stays in it.
+    def test_attach_onto_slipless_companion_occurrence
+      companion = observations(:coprinus_comatus_obs)
+      reflection = observations(:minimal_unknown_obs)
+      [companion, reflection].each do |o|
+        o.update_column(:occurrence_id, nil)
+      end
+      reflection.update!(reflected_at: Time.zone.now)
+      shared = Occurrence.create!(user: companion.user,
+                                  primary_observation: companion)
+      [companion, reflection].each { |o| o.update!(occurrence: shared) }
+      code = "EOL-9998"
+      assert_not(FieldSlip.exists?(code: code))
+
+      login("rolf")
+      put(:update, params: { id: companion.id, field_code: code })
+
+      assert_redirected_to(permanent_observation_path(companion.id))
+      assert_equal(code, shared.reload.field_slip&.code)
+      assert_equal(shared.id, companion.reload.occurrence_id)
+      assert_equal(shared.id, reflection.reload.occurrence_id,
+                   "the reflection is not stranded outside the slip")
+    end
+
     def test_attach_invalid_field_slip_code
       obs = observations(:coprinus_comatus_obs)
       login("rolf")

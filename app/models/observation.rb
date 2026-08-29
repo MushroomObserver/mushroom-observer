@@ -223,20 +223,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Backward-compatible writer: creates/reuses an occurrence to
-  # link this observation to the given field slip.
+  # link this observation to the given field slip. Detaching is done
+  # by clearing the occurrence, so nil is a no-op here.
   def field_slip=(slip)
-    if slip.nil?
-      # Detach: handled by clearing occurrence
-      return
-    end
+    return if slip.nil?
 
-    occ = slip.occurrence
-    occ ||= Occurrence.create!(
-      user: user || current_user,
-      primary_observation: self,
-      field_slip: slip
-    )
-    self.occurrence = occ
+    self.occurrence = slip.occurrence ||
+                      adopt_slip_onto_occurrence(slip) ||
+                      Occurrence.create!(user: user || current_user,
+                                         primary_observation: self,
+                                         field_slip: slip)
   end
 
   has_many :observation_herbarium_records, dependent: :destroy
@@ -1291,6 +1287,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless old_id && new_id
 
     cleanup_old_occurrence_after_move(old_id)
+    reset_thumbnail_left_behind
     occurrence&.recompute_has_specimen!
   end
 
@@ -1301,9 +1298,39 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
     return if old_occ.destroyed?
 
+    old_occ.reassign_thumbnails_from(self)
     old_occ.reload
     old_occ.destroy_if_incomplete!
     old_occ.recompute_has_specimen! unless old_occ.destroyed?
+  end
+
+  # A thumbnail borrowed from a sibling in the old occurrence is not
+  # reachable from the new one. update_columns: an after_update
+  # callback must not re-enter the save callbacks.
+  def reset_thumbnail_left_behind
+    return if thumb_image_id.nil? || thumb_image_reachable?
+
+    update_columns(thumb_image_id: next_thumb_image&.id,
+                   updated_at: Time.zone.now)
+  end
+
+  def thumb_image_reachable?
+    return true if image_ids.include?(thumb_image_id)
+    return false unless occurrence
+
+    ObservationImage.exists?(image_id: thumb_image_id,
+                             observation_id: occurrence.observation_ids)
+  end
+
+  # An occurrence this observation already sits in that carries no
+  # slip -- a reflection's Edit-companion occurrence -- takes the slip,
+  # so its other members stay under it instead of being stranded when
+  # a fresh occurrence is built around this observation alone.
+  def adopt_slip_onto_occurrence(slip)
+    return nil unless occurrence && occurrence.field_slip_id.nil?
+
+    occurrence.update!(field_slip: slip)
+    occurrence
   end
 
   def reassign_occurrence_primary(occ)

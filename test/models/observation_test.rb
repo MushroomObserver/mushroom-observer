@@ -2243,6 +2243,49 @@ class ObservationTest < UnitTestCase
                  "Setting field_slip to nil should not alter occurrence")
   end
 
+  # A reflection's Edit-companion sits in an occurrence with no slip.
+  # A new slip lands on that occurrence, so the reflection stays under
+  # it, instead of a second occurrence being built around the
+  # companion alone (which dissolved the shared one -- obs 670589).
+  def test_field_slip_setter_adopts_slipless_occurrence
+    companion = observations(:coprinus_comatus_obs)
+    reflection = observations(:minimal_unknown_obs)
+    [companion, reflection].each { |o| o.update_column(:occurrence_id, nil) }
+    shared = Occurrence.create!(user: companion.user,
+                                primary_observation: companion)
+    [companion, reflection].each { |o| o.update!(occurrence: shared) }
+    slip = field_slips(:field_slip_no_obs)
+    assert_nil(slip.occurrence, "premise: slip has no occurrence")
+
+    companion.field_slip = slip
+    companion.save!
+
+    assert_equal(shared.id, companion.reload.occurrence_id)
+    assert_equal(slip.id, shared.reload.field_slip_id)
+    assert_equal(shared.id, reflection.reload.occurrence_id)
+  end
+
+  # An occurrence that already carries a slip keeps it: a different
+  # new slip still moves the observation into a separate occurrence.
+  def test_field_slip_setter_leaves_occurrence_that_has_a_slip
+    obs = observations(:coprinus_comatus_obs)
+    other = observations(:minimal_unknown_obs)
+    [obs, other].each { |o| o.update_column(:occurrence_id, nil) }
+    old_slip = FieldSlip.find_or_create_by_code("EOL-7777", obs.user)
+    taken = Occurrence.create!(user: obs.user, primary_observation: other,
+                               field_slip: old_slip)
+    [obs, other].each { |o| o.update!(occurrence: taken) }
+    slip = field_slips(:field_slip_no_obs)
+
+    obs.field_slip = slip
+    obs.save!
+
+    assert_not_equal(taken.id, obs.reload.occurrence_id)
+    assert_equal(slip.id, obs.occurrence.field_slip_id)
+    assert_equal(old_slip.id, taken.reload.field_slip_id)
+    assert_equal(taken.id, other.reload.occurrence_id)
+  end
+
   # destroy_orphaned_collection_numbers wipes any collection_number
   # that was attached to only this obs (line 312). Called directly
   # rather than via obs.destroy because the dependent: :destroy on
