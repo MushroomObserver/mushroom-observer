@@ -1329,6 +1329,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def adopt_slip_onto_occurrence(slip)
     return nil unless occurrence && occurrence.field_slip_id.nil?
 
+    # update! on purpose: the validations that can fail here (slip on
+    # another occurrence, primary not a member, over the member cap)
+    # mean the occurrence is already inconsistent, and a slip must not
+    # be written onto it silently.
     occurrence.update!(field_slip: slip)
     occurrence
   end
