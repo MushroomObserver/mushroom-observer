@@ -49,7 +49,7 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
   def render_heading
     modifier = class_names(CSS_CLASSES[:heading], CSS_CLASSES[:mobile_only])
     render(Components::ListGroup::Item.new(class: modifier)) do
-      plain("#{:app_context_actions.t}:")
+      append_colon(:app_context_actions.t)
     end
   end
 

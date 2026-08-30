@@ -160,10 +160,9 @@ module Views::Controllers::Herbaria
 
     def location_label
       capture do
-        span(class: "unconstrained-label") { "#{:location.ti}:" }
-        whitespace
+        span(class: "unconstrained-label") { append_colon(:location.ti) }
         span(class: "create-label") do
-          "#{:form_observations_create_locality.l}:"
+          append_colon(:form_observations_create_locality.l)
         end
       end
     end

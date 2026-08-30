@@ -306,6 +306,6 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # value means.
   def render_mobile_label(text, block: false)
     vis = block ? "visible-xs-inline-block" : "visible-xs-inline mr-4"
-    small(class: vis) { plain("#{text}: ") }
+    small(class: vis) { append_colon(text) }
   end
 end

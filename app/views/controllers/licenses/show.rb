@@ -36,13 +36,15 @@ module Views::Controllers::Licenses
       capture do
         plain(@license.display_name)
         whitespace
-        span(class: "smaller") { span { "#(#{@license.id || "?"}):" } }
+        span(class: "smaller") do
+          span { append_colon("#(#{@license.id || "?"})") }
+        end
       end
     end
 
     def labeled_field(label, value)
       p do
-        plain("#{label}: ")
+        trusted_html(append_colon(label))
         b { value.is_a?(::ActiveSupport::SafeBuffer) ? trusted_html(value) : plain(value.to_s) }
       end
     end

@@ -104,7 +104,8 @@ module Views::Controllers::Projects::Members
     # emits via `trusted_html` without escaping.
     def option_label(option)
       capture do
-        strong { plain(" #{option[:label_key].l}") }
+        whitespace
+        strong { plain(option[:label_key].l) }
         div(class: "ml-4 text-muted") { plain(option[:help_key].l) }
       end
     end

@@ -83,7 +83,7 @@ class Components::Form::NameFeedback < Components::Base
   end
 
   def render_synonyms_header
-    div { "#{:form_naming_valid_synonyms.t}:" }
+    div { append_colon(:form_naming_valid_synonyms.t) }
   end
 
   # ----- Error alerts -----

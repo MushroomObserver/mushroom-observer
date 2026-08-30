@@ -68,7 +68,7 @@ module Views::Controllers::VisualGroups
 
     def render_distinct_names
       p do
-        strong { plain("#{:visual_group_includes_names.t}:") }
+        strong { append_colon(:visual_group_includes_names.t) }
         br
         @visual_group.distinct_names.each do |name|
           Link(type: :get, name: name[0],

@@ -10,7 +10,7 @@ class Views::Controllers::InatImports::ConfirmForm::OverCapLine <
     return unless @count.positive?
 
     div(class: "mb-1") do
-      b { plain("#{:inat_import_confirm_over_cap_caption.l}: ") }
+      b { append_colon(:inat_import_confirm_over_cap_caption.l) }
       span(id: "over_cap_count") { plain(@count.to_s) }
       br
       small(id: "over_cap_note") do

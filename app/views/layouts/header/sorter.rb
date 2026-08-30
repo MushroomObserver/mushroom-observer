@@ -27,7 +27,7 @@ module Views::Layouts
       ul(class: "list-unstyled flex-bar pl-3 sorter") do
         render(Components::Navbar::Text.new(element: :li,
                                             class: "mx-0 hidden-xs")) do
-          plain("#{:sort_by_header.l}:")
+          append_colon(:sort_by_header.l)
         end
         Dropdown(
           id: "sort_nav_toggle",
@@ -64,7 +64,7 @@ module Views::Layouts
       capture do
         li(class: "visible-xs") do
           a(href: "#", disabled: true, class: "opacity-75") do
-            plain("#{:sort_by_header.l}:")
+            append_colon(:sort_by_header.l)
           end
         end
       end

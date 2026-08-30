@@ -54,8 +54,7 @@ module Views::Controllers::Projects
 
     def render_drafts
       p do
-        b { plain("#{:show_project_drafts.t}:") }
-        whitespace
+        b { append_colon(:show_project_drafts.t) }
         plain(@drafts.length.to_s)
         br
         render_draft_list
@@ -78,8 +77,7 @@ module Views::Controllers::Projects
 
     def render_created_at
       p do
-        strong { plain("#{:show_project_created_at.l}:") }
-        whitespace
+        strong { append_colon(:show_project_created_at.l) }
         plain(@project.created_at.web_date)
       end
     end

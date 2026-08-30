@@ -105,10 +105,12 @@ module Views::Controllers::Admin::BlockedIps
       plain("Showing #{@list.ips.size}")
       return unless filterable?
 
-      plain(" of #{@list.total_count}")
+      whitespace
+      plain("of #{@list.total_count}")
       return unless @list.total_pages > 1
 
-      plain(" (page #{@list.page} of #{@list.total_pages})")
+      whitespace
+      plain("(page #{@list.page} of #{@list.total_pages})")
     end
 
     def render_controls_row

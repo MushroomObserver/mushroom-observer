@@ -72,7 +72,8 @@ module Views::Controllers::Checklists
 
     def render_location_header
       h4 do
-        plain("#{:checklist_for.t} ")
+        plain(:checklist_for.t)
+        whitespace
         Link(type: :location, location: @context.location)
       end
     end
@@ -138,7 +139,8 @@ module Views::Controllers::Checklists
     def render_target_remove_footnote
       p do
         Icon(type: :x, class: "text-danger")
-        plain(" #{:checklist_target_remove_footnote.l}")
+        whitespace
+        plain(:checklist_target_remove_footnote.l)
       end
     end
   end

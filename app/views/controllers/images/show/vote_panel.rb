@@ -50,7 +50,7 @@ module Views::Controllers::Images
       def render_your_vote_summary
         current = current_user_vote
         p do
-          plain("#{:image_show_your_vote.t}: ")
+          trusted_html(append_colon(:image_show_your_vote.t))
           span(class: "font-weight-normal") do
             trusted_html(image_vote_as_long_string(current).t)
           end

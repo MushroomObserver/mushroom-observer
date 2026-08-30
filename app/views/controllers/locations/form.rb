@@ -159,8 +159,7 @@ module Views::Controllers::Locations
 
     def render_locked_field_display(_field, value)
       div(class: "mb-0") do
-        strong { "#{:where.ti}:" }
-        whitespace
+        strong { append_colon(:where.ti) }
         plain(value)
       end
     end
@@ -169,8 +168,7 @@ module Views::Controllers::Locations
       value = model.send(direction)
       hidden_field(direction, value: value.to_s)
       div(class: "mb-0") do
-        strong { "#{direction.to_sym.ti}:" }
-        whitespace
+        strong { append_colon(direction.to_sym.ti) }
         plain("#{value}°")
       end
     end
@@ -180,8 +178,7 @@ module Views::Controllers::Locations
         value = model.send(dir)
         hidden_field(dir, value: value.to_s)
         div(class: "mb-0") do
-          strong { "#{:"show_location_#{dir}est".l}:" }
-          whitespace
+          strong { append_colon(:"show_location_#{dir}est".l) }
           plain("#{value}m")
         end
       end

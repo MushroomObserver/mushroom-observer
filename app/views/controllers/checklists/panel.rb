@@ -53,7 +53,8 @@ module Views::Controllers::Checklists
 
     def render_taxon_content(name, deprecated, synonym_id)
       i { plain(name) }
-      plain(" (#{@data.counts[name]})")
+      whitespace
+      plain("(#{@data.counts[name]})")
       plain(" *") if deprecated
       plain(" +") if @data.duplicate_synonyms&.include?(synonym_id)
     end

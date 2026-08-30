@@ -30,8 +30,7 @@ module Views::Controllers::SpeciesLists
     def render_header_row
       div(class: "d-flex justify-content-between align-items-center") do
         div do
-          strong { plain("#{:when.ti}:") }
-          whitespace
+          strong { append_colon(:when.ti) }
           plain(@species_list.when.web_date)
         end
         div { render_download_button }
@@ -52,8 +51,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_count
       div do
-        b { plain("#{:observations.ti}:") }
-        whitespace
+        b { append_colon(:observations.ti) }
         plain(@query.num_results.to_s)
       end
     end
@@ -62,8 +60,7 @@ module Views::Controllers::SpeciesLists
     # back to a plain `:unknown.ti` label in that case.
     def render_where
       div do
-        b { plain("#{:where.ti}:") }
-        whitespace
+        b { append_colon(:where.ti) }
         begin
           Link(type: :location,
                where: @species_list.where,
@@ -76,16 +73,14 @@ module Views::Controllers::SpeciesLists
 
     def render_who
       div do
-        b { plain("#{:who.ti}:") }
-        whitespace
+        b { append_colon(:who.ti) }
         Link(type: :user, user: @species_list.user)
       end
     end
 
     def render_projects
       div do
-        b { plain("#{:projects.ti}:") }
-        whitespace
+        b { append_colon(:projects.ti) }
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
           Link(type: :object, object: project)

@@ -159,9 +159,9 @@ module Views::Layouts
 
     def render_source_credit
       span(class: "source-credit") do
-        plain(" ")
+        whitespace
         b { plain(:via.l) }
-        plain(" ")
+        whitespace
         trusted_html(:"source_credit_#{@obj.source}".l.tl)
       end
     end

@@ -92,7 +92,7 @@ module Views::Controllers::Occurrences::Projects
       projects = @gaps[:projects]
       return unless projects&.any?
 
-      strong { "#{:projects.ti}:" }
+      strong { append_colon(:projects.ti) }
       # `list-unstyled` drops the bullet + left padding. Each row is a
       # flex container so the id badge (button) sits inline with the
       # project-title link.

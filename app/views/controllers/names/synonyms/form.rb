@@ -47,7 +47,7 @@ module Views::Controllers::Names::Synonyms
       namespace(:existing_synonyms) do |field_namespace|
         div(class: "form-group") do
           div(class: "font-weight-bold my-3") do
-            plain("#{:form_synonyms_current_synonyms.l}:")
+            append_colon(:form_synonyms_current_synonyms.l)
           end
           Help(element: :p, content: :form_synonyms_current_synonyms_help.t)
 
@@ -67,7 +67,7 @@ module Views::Controllers::Names::Synonyms
       namespace(:proposed_synonyms) do |field_namespace|
         div(class: "form-group") do
           div(class: "font-weight-bold my-3") do
-            plain("#{:form_synonyms_proposed_synonyms.l}:")
+            append_colon(:form_synonyms_proposed_synonyms.l)
           end
           Help(element: :p, content: :form_synonyms_proposed_synonyms_help.t)
 

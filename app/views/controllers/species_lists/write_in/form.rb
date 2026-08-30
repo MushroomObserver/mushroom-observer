@@ -142,9 +142,8 @@ module Views::Controllers::SpeciesLists::WriteIn
     def render_notes_block
       div(class: "form-group") do
         label(for: "member_notes") do
-          plain("#{:form_species_lists_member_notes.t}:")
+          append_colon(:form_species_lists_member_notes.t)
         end
-        whitespace
         plain("(")
         trusted_html(:general_textile_link.t)
         plain(")")
