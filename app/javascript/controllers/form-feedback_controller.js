@@ -15,10 +15,17 @@ export default class extends Controller {
     this.element.dataset.formFeedback = "connected";
     this.submitted = this.submitted.bind(this)
     this.element.addEventListener("submit", this.submitted)
+    // Non-Turbo submission navigates away, so a real browser Back
+    // restores this page from bfcache -- a frozen snapshot taken
+    // after disableButtons() already ran. Nothing else re-enables
+    // the button on that restore, so it's stuck disabled/spinning.
+    this.restoreOnPageshow = this.restoreOnPageshow.bind(this)
+    window.addEventListener("pageshow", this.restoreOnPageshow)
   }
 
   disconnect() {
     this.element.removeEventListener("submit", this.submitted)
+    window.removeEventListener("pageshow", this.restoreOnPageshow)
   }
 
   submitted() {
@@ -27,6 +34,10 @@ export default class extends Controller {
     // Deferred so the clicked button's name/value is serialized into
     // the request before the button is disabled.
     setTimeout(() => this.disableButtons(), 0)
+  }
+
+  restoreOnPageshow(event) {
+    if (event.persisted) this.restoreButtons()
   }
 
   disableButtons() {
@@ -39,6 +50,9 @@ export default class extends Controller {
       button.disabled = true
       const label = button.dataset.disableWith
       if (label) {
+        const original = button.tagName === "BUTTON" ?
+          button.textContent : button.value
+        button.dataset.originalLabel = original
         if (button.tagName === "BUTTON") {
           button.textContent = label
         } else {
@@ -50,6 +64,28 @@ export default class extends Controller {
         spinner.className = "spinner-right mx-2"
         button.appendChild(spinner)
       }
+    })
+  }
+
+  restoreButtons() {
+    const buttons = this.element.querySelectorAll(
+      "button[type=submit], input[type=submit]"
+    )
+    buttons.forEach((button) => {
+      if (!button.disabled) return
+
+      button.disabled = false
+      const original = button.dataset.originalLabel
+      if (original !== undefined) {
+        if (button.tagName === "BUTTON") {
+          button.textContent = original
+        } else {
+          button.value = original
+        }
+        delete button.dataset.originalLabel
+      }
+      const spinner = button.querySelector(".spinner-right")
+      if (spinner) spinner.remove()
     })
   }
 }
