@@ -264,6 +264,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.text "license_added_inat_ids"
     t.boolean "recheck_all", default: false, null: false
     t.integer "ignored_unlicensed_count", default: 0, null: false
+    t.text "original_inat_url"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

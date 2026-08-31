@@ -126,7 +126,7 @@ module Views::Controllers::InatImports
         all: ("1" if @inat_import.import_all),
         import_others: ("1" if @inat_import.import_others),
         inat_ids: @inat_import.inat_ids.presence,
-        inat_url: @inat_import.inat_url.presence
+        inat_url: @inat_import.reimport_url
       )
     end
 
