@@ -68,11 +68,10 @@ module Views::Controllers::Admin::BlockedIps
     # it's only reachable once rendering has started, which means the
     # whole tag has to be built here in form_tag, not passed as a
     # constructor kwarg the base class's own form_tag could use.
-    # rubocop:disable MO/NoHandRolledFormTag
+    # rubocop:disable-next MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: action_path, method: :post, **form_attributes, &block)
     end
-    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       {

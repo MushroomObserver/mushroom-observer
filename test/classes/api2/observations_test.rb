@@ -581,7 +581,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_obj_arrays_equal(rolf.images, rolfs_obs.images, :sort)
     assert_api_pass(params.merge(remove_images: rolfs_img.id))
     rolfs_obs.reload
-    assert(rolfs_obs.thumb_image != rolfs_img)
+    assert_not_equal(rolfs_obs.thumb_image, rolfs_img)
     assert_objs_equal(rolfs_obs.images.first, rolfs_obs.thumb_image)
     imgs = rolf.images[2..6].map { |img| img.id.to_s }.join(",")
     imgs += ",#{marys_img.id}"

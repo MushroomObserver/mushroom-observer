@@ -88,7 +88,7 @@ module Locationable
     # was trying to create a new Location with the existing name, use the
     # existing location and flash that we did that, returning `true` so we can
     # bail on creating a "new" location, but go ahead with the observation save.
-    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable-next Metrics/CyclomaticComplexity
     def place_name_exists?(object)
       name = Location.user_format(@user, object.place_name(@user))
       location = Location.find_by(name: name)
@@ -103,7 +103,6 @@ module Locationable
 
       false
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def try_to_save_location_if_new(object)
       return if @any_errors || !@location&.new_record? || save_location(object)

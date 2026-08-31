@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying herbarium records.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
   before_action :store_location, except: [:destroy]
@@ -506,4 +506,3 @@ class HerbariumRecordsController < ApplicationController
                              }) and return true
   end
 end
-# rubocop:enable Metrics/ClassLength

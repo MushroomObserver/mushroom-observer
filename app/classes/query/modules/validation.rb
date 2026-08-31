@@ -160,7 +160,7 @@ module Query::Modules::Validation
   end
 
   # Disable cop because we do mean to symbols with boolean names
-  # rubocop:disable Lint/BooleanSymbol
+  # rubocop:disable-next Lint/BooleanSymbol
   def validate_boolean(param, val)
     case val
     when :true, :yes, :on, "true", "yes", "on", "1", 1, true
@@ -173,7 +173,6 @@ module Query::Modules::Validation
       add_validation_error(:query_validation_boolean, param: param.to_s, val:)
     end
   end
-  # rubocop:enable Lint/BooleanSymbol
 
   # Permissive sibling of `validate_boolean`, with no error branch --
   # an old stored value whose identity no longer matters (e.g. a

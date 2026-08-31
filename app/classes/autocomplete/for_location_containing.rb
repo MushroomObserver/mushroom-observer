@@ -15,7 +15,7 @@ class Autocomplete::ForLocationContaining < Autocomplete::ByWord
 
   # This list should be short. We don't care about matching a user input
   # letter, we're only matching locations that contain the given lat/lng.
-  # rubocop:disable Style/MultilineBlockChain
+  # rubocop:disable-next Style/MultilineBlockChain
   def rough_matches(_letter)
     locations =
       Location.select(:name, :id, :north, :south, :east, :west).
@@ -27,7 +27,6 @@ class Autocomplete::ForLocationContaining < Autocomplete::ByWord
 
     matches_array(locations)
   end
-  # rubocop:enable Style/MultilineBlockChain
 
   def exact_match(_string)
     [rough_matches("").first]

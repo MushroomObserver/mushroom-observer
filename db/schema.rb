@@ -217,8 +217,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.string "content_type", limit: 100
     t.integer "user_id"
     t.date "when"
-    t.text "notes"
-    t.string "copyright_holder"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.string "copyright_holder", collation: "utf8mb4_general_ci"
     t.integer "license_id", default: 10, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
@@ -226,7 +226,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.integer "height"
     t.float "vote_cache"
     t.boolean "ok_for_export", default: true, null: false
-    t.string "original_name", limit: 120, default: ""
+    t.string "original_name", limit: 120, default: "", collation: "utf8mb4_general_ci"
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
     t.boolean "diagnostic", default: true, null: false
@@ -264,6 +264,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.text "license_added_inat_ids"
     t.boolean "recheck_all", default: false, null: false
     t.integer "ignored_unlicensed_count", default: 0, null: false
+    t.text "original_inat_url"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -763,7 +764,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
   create_table "query_records", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "updated_at", precision: nil
     t.integer "access_count"
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.boolean "permalink", default: false
   end
 

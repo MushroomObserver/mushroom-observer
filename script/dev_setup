@@ -21,6 +21,14 @@ else
 fi
 mo_ensure_repo
 
+if [ "${EUID}" -ne 0 ]; then
+    if ! command -v sudo >/dev/null 2>&1; then
+        echo "This setup script must run as root, but sudo is not available." >&2
+        exit 1
+    fi
+    exec sudo script/dev_setup "$@"
+fi
+
 case "$(uname -s)" in
     Darwin)
         exec script/dev_setup_components/dev_setup_macos "$@"

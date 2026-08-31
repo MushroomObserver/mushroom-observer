@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class NamesController < ApplicationController
   class RankWarning < RuntimeError; end
 
@@ -413,11 +413,11 @@ class NamesController < ApplicationController
   end
 
   def set_locked_if_admin
-    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+    @name.locked = params[:name][:locked].to_s == "1" if in_admin_mode?
   end
 
   def set_icn_id_if_unlocked_or_admin
-    @name.icn_id   = params[:name][:icn_id] if editable_in_session?
+    @name.icn_id = params[:name][:icn_id] if editable_in_session?
   end
 
   # ------
@@ -785,4 +785,3 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
-# rubocop:enable Metrics/ClassLength

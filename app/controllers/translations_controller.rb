@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class TranslationsController < ApplicationController
   before_action :login_required
 
@@ -395,4 +395,3 @@ class TranslationsController < ApplicationController
     alias ttag string
   end
 end
-# rubocop:enable Metrics/ClassLength
