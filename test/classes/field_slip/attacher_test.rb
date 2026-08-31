@@ -117,6 +117,50 @@ class FieldSlip::AttacherTest < UnitTestCase
                "the primary is a native observation")
   end
 
+  # A reflection's Edit-companion is created in an occurrence with no
+  # field slip. The review's confirmed tick attaches the read slip
+  # onto that shared occurrence -- so the slip reaches the reflection
+  # too -- instead of building a new occurrence that would strand the
+  # reflection outside it.
+  def test_join_in_use_adopts_a_new_slip_onto_a_slipless_occurrence
+    reflection = observations(:minimal_unknown_obs)
+    reflection.update!(occurrence: nil, reflected_at: Time.zone.now)
+    companion = observations(:detailed_unknown_obs)
+    companion.update!(occurrence: nil)
+    shared = Occurrence.create!(user: @obs.user, primary_observation: companion)
+    [reflection, companion].each { |o| o.update!(occurrence: shared) }
+
+    assert_nil(shared.field_slip, "premise: occurrence has no slip")
+    assert_not(FieldSlip.exists?(code: "OPEN-0601"), "premise: new code")
+
+    result = FieldSlip::Attacher.attach(observation: companion.reload,
+                                        code: "OPEN-0601",
+                                        user: @obs.user, join_in_use: true)
+
+    assert_equal(:attached, result)
+    assert_equal("OPEN-0601", companion.reload.field_slip.code)
+    assert_equal(shared.id, companion.occurrence_id,
+                 "the slip lands on the existing occurrence, not a new one")
+    assert_equal(shared.id, reflection.reload.occurrence_id,
+                 "the reflection stays in it, now under the slip")
+    assert_includes(@project.observations.reload, companion,
+                    "the observation files into the prefix project")
+  end
+
+  # Without the confirmed tick (background auto-attach), an observation
+  # that already sits in an occurrence is left alone, even when that
+  # occurrence carries no slip.
+  def test_background_attach_leaves_a_slipless_occurrence_alone
+    companion = observations(:detailed_unknown_obs)
+    companion.update!(occurrence: nil)
+    shared = Occurrence.create!(user: @obs.user, primary_observation: companion)
+    companion.update!(occurrence: shared)
+
+    assert_equal(:already_linked,
+                 attach(obs: companion.reload, code: "OPEN-0601"))
+    assert_nil(shared.reload.field_slip)
+  end
+
   # If the slip's occurrence had a reflection as primary, the merge
   # repoints it to a native member (a reflection is not a primary).
   def test_merge_repoints_a_reflection_primary_to_a_native

@@ -28,7 +28,7 @@ module Observations
                     (@observation = find_observation!)
 
       unless permission!(@species_list)
-        return redirect_to(species_list_path(@species_list.id))
+        return redirect_with_query(permanent_observation_path(@observation.id))
       end
 
       set_list_ivars
@@ -92,7 +92,7 @@ module Observations
       species_list.add_observation(observation)
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(species_list_path(id: species_list.id))
+      redirect_with_query(permanent_observation_path(observation.id))
     end
 
     # Used by manage_species_lists.
@@ -100,7 +100,7 @@ module Observations
       species_list.remove_observation(observation)
       flash_notice(:runtime_species_list_remove_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(species_list_path(id: species_list.id))
+      redirect_with_query(permanent_observation_path(observation.id))
     end
   end
 end

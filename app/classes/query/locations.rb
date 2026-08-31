@@ -9,8 +9,10 @@ class Query::Locations < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Location])
-  query_attr(:by_users, [User])
-  query_attr(:by_editor, [User])
+  query_attr(:by_users, [User], param_alias: :by_user)
+  query_attr(:by_editor, [User], param_alias: :by_editor)
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
   query_attr(:in_box, { north: :float, south: :float,
                         east: :float, west: :float })
   # query_attr(:region, :string) # content filter
@@ -18,6 +20,7 @@ class Query::Locations < Query
   query_attr(:notes_has, :string)
   query_attr(:pattern, :string)
   query_attr(:regexp, :string)
+  query_attr(:in_country, :string, param_alias: :country)
   # query_attr(:search_name, :string) # advanced search
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search

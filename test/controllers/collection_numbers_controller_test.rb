@@ -3,6 +3,8 @@
 require("test_helper")
 
 class CollectionNumbersControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ##############################################################################
   # INDEX
   #
@@ -11,6 +13,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index)
 
     assert_page_title(:collection_numbers.ti)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::CollectionNumbers, :CollectionNumber,
+      overrides: {
+        id_in_set: collection_numbers(:minimal_unknown_coll_num).id,
+        by_users: rolf.id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
   end
 
   def test_index_with_query
@@ -79,6 +95,21 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash(:runtime_no_matches, type: :collection_number)
   end
 
+  # A bad observation id flashes and redirects to the observations
+  # index. This matches by_user-style shortcuts elsewhere, which
+  # redirect to the looked-up model's own index (see redirect_to:
+  # :model_index in Query::CollectionNumbers).
+  def test_index_observation_id_bad_id
+    bad_observation_id = Observation.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { observation: bad_observation_id })
+
+    assert_flash(:runtime_object_not_found, type: :observation,
+                                            id: bad_observation_id)
+    assert_redirected_to(observations_path)
+  end
+
   def test_index_pattern_str_matching_multiple_collection_numbers
     pattern = "Singer"
     numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
@@ -95,6 +126,29 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # a show link, and (because logged in user created the numbers)
     # an edit link
     assert_equal(numbers.count * 2, collection_number_links.count)
+  end
+
+  def test_index_pattern_param_builds_query_directly
+    pattern = "Singer"
+    numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
+    assert(numbers.many?,
+           "Test needs a pattern matching many collection numbers")
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:success)
+    assert_page_title(:collection_numbers.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+  end
+
+  def test_index_pattern_param_matching_id_redirects_to_show
+    number = collection_numbers(:coprinus_comatus_coll_num)
+
+    login
+    get(:index, params: { pattern: number.id })
+
+    assert_redirected_to(collection_number_path(number.id))
   end
 
   ##############################################################################
@@ -493,7 +547,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([new_num], obs1.collection_numbers)
     assert_obj_arrays_equal([new_num], obs2.reload.collection_numbers)
     assert_equal("Joe Schmoe", new_num.name)
-    assert_equal("07-123a", new_num.number)
+    assert_equal("07-456a", new_num.number)
     # Make sure it updates the herbarium record which shared the old
     # collection number.
     assert_equal(

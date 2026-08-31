@@ -47,57 +47,6 @@ class CommentsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Comments.default_order # :created_at
-  end
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:target, :pattern, :by_user, :for_user, :by, :q].freeze
-  end
-
-  # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: comments_path
-    )
-    return unless user
-
-    query = create_query(:Comment, by_users: user)
-    [query, {}]
-  end
-
-  # Shows comments for a given user's Observations, most recent first.
-  # (Linked from show_user.)
-  def for_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:for_user].to_s,
-      index_path: comments_path
-    )
-    return unless user
-
-    query = create_query(:Comment, for_user: user)
-    [query, {}]
-  end
-
-  # Shows comments for a given object, most recent first. (Linked from the
-  # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def target
-    return no_model unless (model = Comment.safe_model_from_name(params[:type]))
-    return unless (target = find_or_goto_index(model, params[:target].to_s))
-
-    query = create_query(:Comment, target: { type: target.class.name,
-                                             id: target.id })
-    [query, {}]
-  end
-
-  def no_model
-    flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
-    redirect_back_or_default(action: :index)
-    [nil, {}]
-  end
-
   def index_display_opts(opts, query)
     # `:include` falls back to `Comment.index_includes_tree` via
     # `default_index_includes_for_model`. (Re: the historical

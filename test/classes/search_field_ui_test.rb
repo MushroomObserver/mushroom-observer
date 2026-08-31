@@ -20,6 +20,7 @@ class SearchFieldUITest < UnitTestCase
         :in_box,
         :has_comments,
         :include_synonyms,
+        :external_sites,
         :undefined_field
       ]
     end
@@ -136,6 +137,12 @@ class SearchFieldUITest < UnitTestCase
   def test_array_of_class_field
     ui = SearchFieldUI.new(controller: @obs_controller, field: :by_users)
     assert_equal(:multiple_value_autocompleter, ui.ui_type)
+  end
+
+  # Test special case: external_sites (plain select)
+  def test_external_sites_field
+    ui = SearchFieldUI.new(controller: @obs_controller, field: :external_sites)
+    assert_equal(:select_external_sites, ui.ui_type)
   end
 
   # Test array of date field

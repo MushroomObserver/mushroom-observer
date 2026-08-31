@@ -43,7 +43,7 @@ class Query::HerbariaTest < UnitTestCase
   end
 
   def test_herbarium_nonpersonal
-    expects = Herbarium.nonpersonal.order_by_default
+    expects = Herbarium.nonpersonal.order_by(:code_then_name)
     assert_query(expects, :Herbarium, nonpersonal: true)
     # Currently nonpersonal(false) is not parsed by Query, maybe intentionally.
     # It seems to me this param should be reversed to `personal`, and the

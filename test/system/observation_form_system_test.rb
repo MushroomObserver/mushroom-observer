@@ -292,8 +292,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     alert_text = begin
-                   accept_alert(wait: 8) do
-                     within("#observation_form") { click_commit }
+                   # The forced process_image failure makes
+                   # Observations::Images::UploadsController log
+                   # UPLOAD_FAILED error -- expected here,
+                   # so stub it rather than let it print.
+                   Rails.logger.stub(:error, nil) do
+                     accept_alert(wait: 8) do
+                       within("#observation_form") { click_commit }
+                     end
                    end
                  ensure
                    Image.singleton_class.remove_method(:new)

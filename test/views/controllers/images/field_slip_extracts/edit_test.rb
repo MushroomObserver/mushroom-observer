@@ -339,6 +339,22 @@ module Views::Controllers::Images::FieldSlipExtracts
                   "input[name='value[Location]'][value='Behind the barn']")
     end
 
+    # The ambiguous-name radio choice has to submit with the Save
+    # button so the resolver can pick the chosen Name. When the radios
+    # sat outside the form, the choice was dropped and the round-trip
+    # looped on the ambiguous name.
+    def test_ambiguous_name_feedback_radios_render_inside_the_form
+      options = [names(:coprinus_comatus), names(:agaricus_campestris)]
+      html = render(Edit.new(
+                      extract: extract_with(fields: { "ID" => "Mycena" }),
+                      observation: @obs, user: @user, given_name: "Mycena",
+                      name_feedback: { names: options }
+                    ))
+
+      assert_html(html,
+                  "form input[type='radio'][name='chosen_name[name_id]']")
+    end
+
     private
 
     # Puts a second observation in the project at a known location, so

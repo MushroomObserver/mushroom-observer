@@ -1,6 +1,6 @@
 # Code comments: explain *why* (only when unclear), one source of truth
 
-Three rules for every comment in this codebase — app code, tests,
+Four rules for every comment in this codebase — app code, tests,
 config, `Gemfile`, scripts, everywhere.
 
 ## 1. Comment the *why*, and only when it isn't already clear
@@ -80,6 +80,26 @@ it got there. Never write:
 If a comment needs several sentences to justify a rule, that's usually
 a sign the *code* should be simpler — not that the comment should be
 longer.
+
+## 4. Cut redundant possessives — write plainly
+
+"X's own Y" almost always just means "X's Y" — the possessive already
+says whose it is; "own" adds nothing. Cut it outright rather than
+finding a synonym.
+
+```ruby
+# BAD — "own" is padding; "the model's" already says whose scope it is
+# An exact match is already prioritized by the model's own `pattern`
+# scope.
+
+# GOOD
+# An exact match is already prioritized by the model's `pattern` scope.
+```
+
+Same principle for other padding that doesn't add information — write
+short, declarative sentences, not stacked qualifiers or a parenthetical
+inside a parenthetical. If a sentence reads awkwardly once the padding
+is cut, restructure the sentence — don't put the padding back.
 
 ## Why this is a rule
 

@@ -136,9 +136,11 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
-           Location[:name].coalesce(SpeciesList[:where])
-    left_outer_joins(:location).search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+             Location[:name].coalesce(SpeciesList[:where])
+      left_outer_joins(:location).search_columns(cols, phrase)
+    end
   }
 
   scope :editable_by_user, lambda { |user|
@@ -423,7 +425,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #     :specimen               => false
   #   )
   #
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable-next Metrics/MethodLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
@@ -469,7 +471,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
     observations << obs
   end
-  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
   #

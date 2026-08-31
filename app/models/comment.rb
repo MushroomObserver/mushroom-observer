@@ -218,14 +218,13 @@ class Comment < AbstractModel
   # Pass either { type:, id: } or a commentable model instance.
   # Scope makes sure instance exists.
   scope :target, lambda { |target|
-    if target.is_a?(Hash) && target[:type] && target[:id]
-      type = target[:type]
-      return none unless (model = Comment.safe_model_from_name(type))
+    if target.is_a?(Hash)
+      return none unless target[:type] && target[:id]
+      return none unless (model = Comment.safe_model_from_name(target[:type]))
 
       target = model.safe_find(target[:id])
     elsif target.is_a?(AbstractModel)
-      type = target.class.name
-      return none unless Comment.safe_model_from_name(type)
+      return none unless Comment.safe_model_from_name(target.class.name)
     end
 
     where(target:)
@@ -238,8 +237,10 @@ class Comment < AbstractModel
         ->(phrase) { search_columns(Comment[:comment], phrase) }
 
   scope :pattern, lambda { |phrase|
-    cols = (Comment[:summary] + Comment[:comment].coalesce(""))
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = (Comment[:summary] + Comment[:comment].coalesce(""))
+      search_columns(cols, phrase)
+    end
   }
 
   scope :search_content, lambda { |phrase|

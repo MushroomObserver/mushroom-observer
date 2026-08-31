@@ -3,9 +3,27 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
-  # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Images, :Image,
+      overrides: {
+        id_in_set: images(:in_situ_image).id,
+        by_users: rolf.id,
+        license: licenses(:ccnc25).id,
+        observations: observations(:minimal_unknown_obs).id,
+        locations: locations(:burbank).id,
+        projects: projects(:bolete_project).id,
+        species_lists: species_lists(:first_species_list).id
+      }
+    )
+  end
+
+  # Tests of index: unfiltered index, then each recognized filter param.
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
     assert_select(".matrix-box")
@@ -22,6 +40,16 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Companion to the `name` case above -- exercises
+  # `Query::Images#alphabetical_by`'s `"user"`/`"reverse_user"` branch
+  # (`User[:login]`), not just `"name"`/`"reverse_name"`.
+  def test_index_sort_by_user_enables_letter_pagination
+    login
+    get(:index, params: { by: "user" })
+
+    assert_response(:success)
+  end
+
   def test_index_by_user
     user = rolf
 
@@ -32,6 +60,17 @@ class ImagesControllerTest < FunctionalTestCase
     assert_select(".matrix-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
+  end
+
+  def test_index_by_user_single_match_redirects
+    user = katrina
+    image = Image.where(user: user).first
+    assert(Image.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(image_path(image.id))
   end
 
   def test_index_by_users_bad_user_id
@@ -55,6 +94,26 @@ class ImagesControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
+  def test_index_project_single_match_redirects
+    project = projects(:lone_wolf_project)
+    image = Image.projects(project.id).first
+    assert(Image.projects(project.id).one?)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_redirected_to(image_path(image.id))
+  end
+
+  # A bad project id redirects to the projects index. See redirect_to:
+  # in query_attr (app/extensions/class.rb).
+  def test_index_project_with_unknown_id_redirects
+    login
+    get(:index, params: { project: 999_999_999 })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_index_too_many_pages
     login
     get(:index, params: { page: 1_000_000 })
@@ -64,16 +123,15 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern
-  def test_index_pattern_param_redirected_to_search
+  def test_index_pattern_param_builds_query_directly
     pattern = "USA"
 
     login
     get(:index, params: { pattern: pattern })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :images })
-    )
+
+    assert_select(".matrix-box")
+    assert_page_title(:images.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def q_pattern(pattern)
@@ -223,7 +281,7 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   # #4989: rotate/mirror controls follow permission on the image itself
-  # OR on the Observation it belongs to -- not just the image's own
+  # OR on the Observation it belongs to -- not just the image's
   # (separate) project attachment.
   def test_show_hides_transform_buttons_from_unrelated_user
     image = images(:commercial_inquiry_image)

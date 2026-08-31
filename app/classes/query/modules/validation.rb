@@ -72,9 +72,8 @@ module Query::Modules::Validation
     base = key.to_s.delete_prefix("reverse_")
     return if model.private_methods(false).include?(:"order_by_#{base}")
 
-    @validation_errors << [:query_validation_order_by_unsupported,
-                           { models: model.name.pluralize, key:, model:,
-                             base: }]
+    add_validation_error(:query_validation_order_by_unsupported,
+                         models: model.name.pluralize, key:, model:, base:)
     # Clear the bad value so `add_default_order_if_none_specified` treats
     # it as unset and substitutes the model/attr's own `default_order` --
     # otherwise it survives validation and reaches
@@ -85,6 +84,16 @@ module Query::Modules::Validation
   end
 
   private
+
+  # Every validator failure is a `[tag, args]` pair appended to
+  # `@validation_errors` (see `validation_error_messages` above) --
+  # this is the one place that builds that pair, so call sites read
+  # as a single statement instead of repeating the array literal +
+  # explicit `nil` return every time.
+  def add_validation_error(tag, **args)
+    @validation_errors << [tag, args]
+    nil
+  end
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
@@ -135,10 +144,9 @@ module Query::Modules::Validation
     when Hash
       validate_hash_param(param, val, param_type)
     else
-      @validation_errors << [:query_validation_invalid_declaration,
-                             { param: param.to_s, model:,
-                               type_class: param_type.class.name }]
-      nil
+      add_validation_error(:query_validation_invalid_declaration,
+                           param: param.to_s, model:,
+                           type_class: param_type.class.name)
     end
   end
 
@@ -146,74 +154,13 @@ module Query::Modules::Validation
     if param_type.respond_to?(:descends_from_active_record?)
       validate_record(param, val, param_type)
     else
-      @validation_errors << [:query_validation_unknown_class_param,
-                             { param_type:, param: param.to_s, model: }]
-      nil
+      add_validation_error(:query_validation_unknown_class_param,
+                           param_type:, param: param.to_s, model:)
     end
-  end
-
-  def validate_hash_param(param, val, param_type)
-    if [:string, :boolean].include?(param_type.keys.first)
-      validate_enum(param, val, param_type)
-    elsif param_type.keys.first == :subquery
-      validate_subquery(param, val, param_type)
-    else
-      validate_nested_params(param, val, param_type)
-    end
-  end
-
-  # For results, don't compact_blank, because sometimes we want `false`
-  def validate_nested_params(_param, val, param_type)
-    val2 = {}
-    param_type.each do |key, arg_type|
-      val2[key] = validate_value(arg_type, key, val[key])
-    end
-    val2.compact
-  end
-
-  # Validate the subquery's params by creating another Query instance
-  # and save it in @subqueries to facilitate access
-  def validate_subquery(param, val, param_type)
-    if param_type.keys.length != 1
-      @validation_errors << [:query_validation_invalid_subquery,
-                             { param: param.to_s, model: }]
-      return nil
-    end
-    submodel = param_type.values.first
-    subquery = Query.create_query(submodel, val)
-    @subqueries[param] = subquery
-    @validation_errors += subquery.validation_errors
-    subquery.params
-  end
-
-  def validate_enum(param, val, hash)
-    if hash.keys.length != 1
-      @validation_errors << [:query_validation_invalid_enum_keys,
-                             { param: param.to_s, model: }]
-      return nil
-    end
-
-    arg_type = hash.keys.first
-    set = hash.values.first
-    unless set.is_a?(Array)
-      @validation_errors << [:query_validation_invalid_enum_not_array,
-                             { param: param.to_s, model: }]
-      return nil
-    end
-
-    val2 = scalar_validate(param, val, arg_type)
-    if (arg_type == :string) && set.include?(val2.to_s.to_sym)
-      val2 = val2.to_s.to_sym
-    elsif set.exclude?(val2)
-      @validation_errors << [:query_validation_param_not_in_set,
-                             { param: param.to_s, set: set.inspect }]
-      val2 = nil
-    end
-    val2
   end
 
   # Disable cop because we do mean to symbols with boolean names
-  # rubocop:disable Lint/BooleanSymbol
+  # rubocop:disable-next Lint/BooleanSymbol
   def validate_boolean(param, val)
     case val
     when :true, :yes, :on, "true", "yes", "on", "1", 1, true
@@ -223,12 +170,19 @@ module Query::Modules::Validation
     when nil
       nil
     else
-      @validation_errors << [:query_validation_boolean,
-                             { param: param.to_s, val: }]
-      nil
+      add_validation_error(:query_validation_boolean, param: param.to_s, val:)
     end
   end
-  # rubocop:enable Lint/BooleanSymbol
+
+  # Permissive sibling of `validate_boolean`, with no error branch --
+  # an old stored value whose identity no longer matters (e.g. a
+  # legacy `needs_naming: <user_id>` bookmark, see
+  # Query::Observations) stays a working "flag on" instead of failing
+  # validation. Same FALSE_VALUES Rails already uses to cast a param
+  # string to boolean.
+  def validate_truthy(_param, val)
+    ActiveRecord::Type::Boolean.new.cast(val)
+  end
 
   # We don't currently have params for integers, but this would enable them.
   # def validate_integer(param, val)
@@ -247,9 +201,8 @@ module Query::Modules::Validation
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
-      @validation_errors << [:query_validation_float,
-                             { param: param.to_s, val: val.inspect }]
-      nil
+      add_validation_error(:query_validation_float,
+                           param: param.to_s, val: val.inspect)
     end
   end
 
@@ -258,9 +211,8 @@ module Query::Modules::Validation
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       unless val.id
-        @validation_errors << [:query_validation_record_unsaved,
-                               { param: param.to_s, type: }]
-        return nil
+        return add_validation_error(:query_validation_record_unsaved,
+                                    param: param.to_s, type:)
       end
 
       set_cached_parameter_instance(param, val)
@@ -270,27 +222,24 @@ module Query::Modules::Validation
     elsif val.is_a?(String)
       validate_string_for_record(param, val, type)
     else
-      @validation_errors << [:query_validation_record,
-                             { param: param.to_s, type:, val: val.inspect }]
-      nil
+      add_validation_error(:query_validation_record,
+                           param: param.to_s, type:, val: val.inspect)
     end
   end
 
   def validate_string_for_record(param, val, type)
     return val unless param == :id_in_set
 
-    @validation_errors << [:query_validation_id_in_set, { type:, val: }]
-    nil
+    add_validation_error(:query_validation_id_in_set, type:, val:)
   end
 
   def validate_string(param, val)
     if val.is_any?(Integer, Float, String, Symbol)
       val.to_s
     else
-      @validation_errors << [:query_validation_string,
-                             { param: param.to_s, class: val.class,
-                               val: val.inspect }]
-      nil
+      add_validation_error(:query_validation_string,
+                           param: param.to_s, class: val.class,
+                           val: val.inspect)
     end
   end
 
@@ -305,9 +254,7 @@ module Query::Modules::Validation
     elsif (val2 = parse_date(val)).acts_like?(:date)
       format_date(val2)
     else
-      @validation_errors << [:query_validation_date,
-                             { param: param.to_s, val: }]
-      nil
+      add_validation_error(:query_validation_date, param: param.to_s, val:)
     end
   end
 
@@ -331,9 +278,8 @@ module Query::Modules::Validation
     elsif (val2 = parse_time(val)).acts_like?(:time)
       format_time(val2)
     else
-      @validation_errors << [:query_validation_time,
-                             { param: param.to_s, class: val.class.name, val: }]
-      nil
+      add_validation_error(:query_validation_time,
+                           param: param.to_s, class: val.class.name, val:)
     end
   end
 

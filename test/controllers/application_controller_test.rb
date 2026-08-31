@@ -244,4 +244,27 @@ class ApplicationControllerTest < FunctionalTestCase
     IpStats.remove_blocked_ips([ip])
     IpStats.reset!
   end
+
+  # `ApplicationController::Indexes#index_display_opts`'s base
+  # implementation merges into an empty hash -- every controller with
+  # an index overrides it, so InfoController (no index action) is the
+  # only way to reach the base method itself.
+  def test_index_display_opts_base_implementation_merges_extra_opts
+    opts = @controller.send(:index_display_opts, { foo: 1 }, nil)
+
+    assert_equal({ foo: 1 }, opts)
+  end
+
+  # `paginator_number`'s rescue guards against an unparseable page
+  # value -- inject a value that raises on `#to_s` to exercise it
+  # directly, since ordinary HTTP params (String/Array/Hash) don't.
+  def test_paginator_number_rescues_unparseable_value
+    poison = Object.new
+    def poison.to_s
+      raise(StandardError.new("boom"))
+    end
+    @controller.define_singleton_method(:params) { { page: poison } }
+
+    assert_equal(1, @controller.send(:paginator_number, :page))
+  end
 end

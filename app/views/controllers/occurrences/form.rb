@@ -26,7 +26,7 @@ module Views::Controllers::Occurrences
     prop :candidates, _Array(::Observation), default: -> { [] }
     prop :user, ::User
 
-    # rubocop:disable Metrics/ParameterLists
+    # rubocop:disable-next Metrics/ParameterLists
     def initialize(model:, user:,
                    source_obs: nil, recent_observations: [],
                    observations: nil, candidates: [], **attrs)
@@ -36,7 +36,6 @@ module Views::Controllers::Occurrences
             observations: observations, candidates: candidates, user: user,
             **form_options_for(model, **attrs))
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       if model.persisted?

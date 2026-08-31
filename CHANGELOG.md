@@ -1,5 +1,48 @@
 # Changelog
 
+## 2026-08-29 (deploy-2026-08-29-11-00)
+
+- Add Observation filter by external site (`Observation.external_sites`, search-form UI) ([PR5251](https://github.com/MushroomObserver/mushroom-observer/pull/5251), @nimmolo)
+- Query params - Add singular `param_alias` to remaining plural record-backed `query_attr` ([PR5252](https://github.com/MushroomObserver/mushroom-observer/pull/5252), @nimmolo)
+- `Projects::ViolationsController#index`- no discarded query, paginate directly ([PR5255](https://github.com/MushroomObserver/mushroom-observer/pull/5255), @nimmolo)
+- Query params - Collapse `default_sort_order` to `controller_query_class.default_order` ([PR5257](https://github.com/MushroomObserver/mushroom-observer/pull/5257), @nimmolo)
+- Gate the observation-list panel on editable lists; redirect to the observation ([PR5260](https://github.com/MushroomObserver/mushroom-observer/pull/5260), @mo-nathan)
+- Changelog for `deploy-2026-08-27-23-19` and `deploy-2026-08-28-12-10` ([PR5253](https://github.com/MushroomObserver/mushroom-observer/pull/5253), @mo-nathan)
+- Render field slip name-approval radios inside the review form ([PR5262](https://github.com/MushroomObserver/mushroom-observer/pull/5262), @mo-nathan)
+- Attach a read field slip onto a companion occurrence ([PR5266](https://github.com/MushroomObserver/mushroom-observer/pull/5266), @mo-nathan)
+
+## 2026-08-28 (deploy-2026-08-28-12-10)
+
+- Query params - Make `needs_naming` a viewer-bound presence flag, not a User id ([PR5246](https://github.com/MushroomObserver/mushroom-observer/pull/5246), @nimmolo)
+- Query params - Retype `look_alikes`/`related_taxa` as record-backed `Name` attrs ([PR5247](https://github.com/MushroomObserver/mushroom-observer/pull/5247), @nimmolo)
+- Query params - Revert Observations `project` attr split; move ordering to the Tab link ([PR5248](https://github.com/MushroomObserver/mushroom-observer/pull/5248), @nimmolo)
+- Query params - Collapse `build_index_with_query` to generic dispatch; delete `index_active_params` ([PR5249](https://github.com/MushroomObserver/mushroom-observer/pull/5249), @nimmolo)
+- Let an image's uploader scan and review its field slip extract ([PR5240](https://github.com/MushroomObserver/mushroom-observer/pull/5240), @mo-nathan)
+- Read a field slip when zbar decodes a QR but not its slip code ([PR5241](https://github.com/MushroomObserver/mushroom-observer/pull/5241), @mo-nathan)
+
+## 2026-08-27 (deploy-2026-08-27-23-19)
+
+- Query params — Move complex params to scopes and set ivars in ApplicationController, part 1 ([PR5217](https://github.com/MushroomObserver/mushroom-observer/pull/5217), @nimmolo)
+- Changelog for `deploy-2026-08-25-22-30` ([PR5222](https://github.com/MushroomObserver/mushroom-observer/pull/5222), @mo-nathan)
+- Revert accidental direct push to `main` ([PR5227](https://github.com/MushroomObserver/mushroom-observer/pull/5227), @nimmolo)
+- Add spacing to Account preferences `InputGroupAddon` buttons with icons ([PR5226](https://github.com/MushroomObserver/mushroom-observer/pull/5226), @nimmolo)
+- Query params — Finish `index_active_params` -> `create_query_from_url_params` sweep ([PR5225](https://github.com/MushroomObserver/mushroom-observer/pull/5225), @nimmolo)
+- Query params - fix RssLogs index writing to db on GET with `?make_default=1` ([PR5228](https://github.com/MushroomObserver/mushroom-observer/pull/5228), @nimmolo)
+- Query params - Send `target` as a polymorphic hash for the comments index filter ([PR5231](https://github.com/MushroomObserver/mushroom-observer/pull/5231), @nimmolo)
+- Generalize "Refresh from Genus" label to "Refresh from Parent" ([PR5232](https://github.com/MushroomObserver/mushroom-observer/pull/5232), @app/copilot-swe-agent)
+- Delete dead `SearchController#coming_from_obs_needing_ids?` redirect ([PR5234](https://github.com/MushroomObserver/mushroom-observer/pull/5234), @nimmolo)
+- Query params - Unify `exact_match` and pattern-search dispatch across all models ([PR5235](https://github.com/MushroomObserver/mushroom-observer/pull/5235), @nimmolo)
+- Query params – eliminate remaining controller exceptions ([PR5236](https://github.com/MushroomObserver/mushroom-observer/pull/5236), @nimmolo)
+- Rename `ApplicationController::QueryParamAliases` to `QueryParams` ([PR5237](https://github.com/MushroomObserver/mushroom-observer/pull/5237), @nimmolo)
+- Fix show Yoop Locations crash ([PR5243](https://github.com/MushroomObserver/mushroom-observer/pull/5243), @JoeCohen)
+
+## 2026-08-25 (deploy-2026-08-25-22-30)
+
+- Changelog for `deploy-2026-08-25-12-00` and `deploy-2026-08-25-12-05` ([PR5219](https://github.com/MushroomObserver/mushroom-observer/pull/5219), @mo-nathan)
+- Stop the iNat resync from overwriting coordinates with obscured data (#4215) ([PR5220](https://github.com/MushroomObserver/mushroom-observer/pull/5220), @mo-nathan)
+- Query params — Migrate pass-thru `index_active_params` to `query_attr` alias ([PR5216](https://github.com/MushroomObserver/mushroom-observer/pull/5216), @nimmolo)
+- Namings endpoint ([PR5206](https://github.com/MushroomObserver/mushroom-observer/pull/5206), @JoeCohen)
+
 ## 2026-08-25 (deploy-2026-08-25-12-05)
 
 - Enforce one Naming per `(Observation, User, Name)` (#5186) ([PR5218](https://github.com/MushroomObserver/mushroom-observer/pull/5218), @mo-nathan)

@@ -40,9 +40,9 @@ class SequencesController < ApplicationController
   #  https://mushroomobserver.org/sequences?all=true
   #    => displays a list of all sequences in MO
   #
-  # NOTE: #index does not handle params[:pattern] or params[:ids] because
-  # we don't offer sequence pattern search. However, the Query::Sequences
-  # class can handle a pattern param.
+  # `?pattern=` works too -- Query::Sequences recognizes it (a plain
+  # fuzzy match, no keyword parser), so it's live like any other
+  # recognized param, not a dedicated UI feature.
   def index
     build_index_with_query
   end
@@ -59,20 +59,6 @@ class SequencesController < ApplicationController
   end
 
   private
-
-  def default_sort_order
-    ::Query::Sequences.default_order # :created_at
-  end
-
-  def index_active_params
-    [:all, :by, :q].freeze
-  end
-
-  # This is a param handler. In this controller, people usually want sequences
-  # for an observation. If they want all sequences, use the :all param.
-  def all
-    unfiltered_index
-  end
 
   def index_display_opts(opts, _query)
     { letters: true,

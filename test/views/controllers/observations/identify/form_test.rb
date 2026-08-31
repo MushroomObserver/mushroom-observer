@@ -30,7 +30,7 @@ module Views::Controllers::Observations::Identify
 
       # Hidden field for term_id with dual targets
       assert_html(html, "input[type='hidden']" \
-                         "[name='filter[term_id]']" \
+                         "[name='identify_filter[term_id]']" \
                          "[data-autocompleter--clade-target='hidden']" \
                          "[data-autocompleter--region-target='hidden']")
 
@@ -49,7 +49,7 @@ module Views::Controllers::Observations::Identify
       assert_html(html, "li.dropdown-item", count: 10)
 
       # Type select with dual targets and swap actions
-      assert_html(html, "select#filter_type" \
+      assert_html(html, "select#identify_filter_type" \
                          "[data-autocompleter--clade-target='select']")
 
       # Default clade selected

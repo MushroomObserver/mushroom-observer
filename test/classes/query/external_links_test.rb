@@ -49,6 +49,23 @@ class Query::ExternalLinksTest < UnitTestCase
     end
   end
 
+  def test_external_link_by_user_alias
+    assert_query(ExternalLink.by_users(users(:mary)).order_by_default,
+                 :ExternalLink, by_user: users(:mary).id)
+  end
+
+  def test_external_link_observation_alias
+    obs = observations(:coprinus_comatus_obs)
+    expects = obs.external_links.sort_by(&:url)
+    assert_query(expects, :ExternalLink, observation: obs.id)
+  end
+
+  def test_external_link_external_site_alias
+    site = external_sites(:mycoportal)
+    expects = site.external_links.sort_by(&:url)
+    assert_query(expects, :ExternalLink, external_site: site.id)
+  end
+
   def test_external_link_url_has
     site = external_sites(:inaturalist)
     assert_query(site.external_links.sort_by(&:url),

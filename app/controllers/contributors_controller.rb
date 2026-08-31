@@ -40,10 +40,6 @@ class ContributorsController < ApplicationController
            ))
   end
 
-  def default_sort_order
-    :contribution # ::Query::Users.default_order is :name
-  end
-
   def unfiltered_index_opts
     super.merge(query_args: { has_contribution: true })
   end

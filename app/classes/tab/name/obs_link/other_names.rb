@@ -11,14 +11,7 @@ class Tab::Name::ObsLink::OtherNames < Tab::Name::ObsLink
     :taxon_obss_other_names
   end
 
-  def build_query
-    q = Query.create_query(
-      :Observation,
-      names: { lookup: @name.id, include_synonyms: true,
-               exclude_original_names: true },
-      order_by: :confidence
-    )
-    q.save
-    q
+  def filter_attr
+    :other_names
   end
 end

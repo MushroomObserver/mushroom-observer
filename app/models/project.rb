@@ -144,9 +144,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = (Project[:title] + Project[:summary].coalesce("") +
-            Project[:field_slip_prefix].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (Project[:title] + Project[:summary].coalesce("") +
+              Project[:field_slip_prefix].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
   # Accepts multiple regions, see Observation.region for why this is singular
   scope :region, lambda { |place_names|
@@ -315,28 +317,41 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user)
   end
 
-  # SQL-based count over the four violation kinds (#4136). Each branch
-  # plucks ids of OFFENDING observations and merges them into a Set
-  # for dedup; total cost is O(violations) rather than the
-  # O(visible_observations) cost of the full Ruby iteration in
-  # `#violations`. Called from the project show page's
-  # `render_violations_button` (inlined from the former
-  # `Tabs::ProjectsHelper#violations_button`), so any per-project
-  # work multiplies by the number of projects rendered.
+  # Called from the project show page's render_violations_button, so
+  # any per-project work multiplies by the number of projects
+  # rendered.
+  # Counts via the same per-kind id helpers project_violations uses,
+  # not violating_observations.count -- that relation carries
+  # includes/order_by/distinct for display, none of which a count
+  # needs, and .count would otherwise re-run all of it as a query.
   def count_violations
     return 0 unless constraints?
 
-    ids = Set.new
-    collect_date_violation_ids(ids)
-    collect_bbox_violation_ids(ids)
-    collect_target_name_violation_ids(ids)
-    collect_target_location_violation_ids(ids)
-    ids.size
+    Observation.project_violation_ids(self).size
   end
 
   def constraints?
     start_date || end_date || location ||
-      target_names.any? || target_locations.any?
+      target_names_present? || target_locations_present?
+  end
+
+  # Memoized: violation_kinds_for calls violates_target_name?/
+  # violates_target_location? once per observation, and neither
+  # target_names.any? nor target_locations.any? caches its result on
+  # an unloaded association -- without this, checking violations for
+  # a page of observations re-queries "does this project have any
+  # target names/locations" once per observation instead of once per
+  # request.
+  def target_names_present?
+    return @target_names_present if defined?(@target_names_present)
+
+    @target_names_present = target_names.any?
+  end
+
+  def target_locations_present?
+    return @target_locations_present if defined?(@target_locations_present)
+
+    @target_locations_present = target_locations.any?
   end
 
   # Check if user has permission to edit a given object.
@@ -600,9 +615,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add target name to this project if not already present.
   def add_target_name(name)
     project_target_names.find_or_create_by!(name: name)
+    @target_names_present = true
+    invalidate_expanded_target_name_id_set!
     touch
   rescue ActiveRecord::RecordNotUnique
-    # Already exists, no-op
+    # Already exists, no-op -- a concurrent insert raced this one, but
+    # the target name exists either way.
+    @target_names_present = true
+    invalidate_expanded_target_name_id_set!
   end
 
   # Remove target name from this project. Also removes observations
@@ -614,15 +634,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     record.destroy
     purge_observations_matching_name(name)
+    remove_instance_variable(:@target_names_present) if
+      defined?(@target_names_present)
+    invalidate_expanded_target_name_id_set!
     touch
   end
 
   # Add target location to this project if not already present.
   def add_target_location(location)
     project_target_locations.find_or_create_by!(location: location)
+    @target_locations_present = true
+    invalidate_target_location_names!
     touch
   rescue ActiveRecord::RecordNotUnique
-    # Already exists, no-op
+    # Already exists, no-op -- a concurrent insert raced this one, but
+    # the target location exists either way.
+    @target_locations_present = true
+    invalidate_target_location_names!
   end
 
   # Remove target location from this project.
@@ -631,6 +659,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless record
 
     record.destroy
+    remove_instance_variable(:@target_locations_present) if
+      defined?(@target_locations_present)
+    invalidate_target_location_names!
     touch
   end
 
@@ -664,9 +695,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # GPS-inside-bbox OR (no GPS AND obs.location bbox is fully
-  # contained in project bbox). Mirrors out_of_area_observations'
-  # inverse so candidate_observations and the bbox violation kind
-  # agree on what "in" means.
+  # contained in project bbox). Agrees with the bbox violation kind
+  # in Observation.project_violations on what "in" means.
   def constrain_to_project_bbox(scope)
     return scope if location.nil?
 
@@ -717,13 +747,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     scope.select("observations.id")
   end
 
+  public
+
   # OR clause: location.name LIKE '%, <target>' OR = '<target>'
+  # Public: also called from Observation.project_violations (the
+  # target_location violation check).
   def location_suffix_conditions
     tbl = Location.arel_table
-    target_locations.map do |tl|
-      escaped = self.class.sanitize_sql_like(tl.name)
+    target_location_names.map do |name|
+      escaped = self.class.sanitize_sql_like(name)
       tbl[:name].matches("%, #{escaped}").
-        or(tbl[:name].eq(tl.name))
+        or(tbl[:name].eq(name))
     end.reduce(:or)
   end
 
@@ -731,54 +765,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # `observations.where` (used when an obs has no location_id).
   def where_suffix_conditions
     tbl = Observation.arel_table
-    target_locations.map do |tl|
-      escaped = self.class.sanitize_sql_like(tl.name)
+    target_location_names.map do |name|
+      escaped = self.class.sanitize_sql_like(name)
       tbl[:where].matches("%, #{escaped}").
-        or(tbl[:where].eq(tl.name))
+        or(tbl[:where].eq(name))
     end.reduce(:or)
   end
-
-  # ----- helpers for SQL-based count_violations (#4136) -----
-
-  def collect_date_violation_ids(ids)
-    return unless start_date || end_date
-
-    ids.merge(out_of_range_observations.ids)
-  end
-
-  def collect_bbox_violation_ids(ids)
-    return unless location
-
-    ids.merge(obs_geoloc_outside_project_location.ids)
-    ids.merge(obs_without_geoloc_location_not_contained_in_location.ids)
-  end
-
-  def collect_target_name_violation_ids(ids)
-    return unless target_names.any?
-
-    ids.merge(
-      visible_observations.
-        where.not(name_id: expanded_target_name_id_set.to_a).ids
-    )
-  end
-
-  def collect_target_location_violation_ids(ids)
-    return unless target_locations.any?
-
-    passing = passing_target_location_ids
-    ids.merge(visible_observations.where.not(id: passing).ids)
-  end
-
-  def passing_target_location_ids
-    with_loc = visible_observations.joins(:location).
-               where(location_suffix_conditions).
-               pluck("observations.id")
-    without_loc = visible_observations.where(location_id: nil).
-                  where(where_suffix_conditions).pluck(:id)
-    (with_loc + without_loc).uniq
-  end
-
-  public
 
   delegate :count, to: :candidate_observations, prefix: true
 
@@ -910,16 +902,28 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   Violation = Struct.new(:obs, :kinds)
 
   def violations
-    return [] unless constraints?
+    violations_for(violating_observations)
+  end
 
-    rows = visible_observations.includes(:name, :location).
-           filter_map do |obs|
+  # Ordered relation of every observation violating at least one
+  # configured constraint. Unpaginated. A caller that only needs one
+  # page should paginate this directly instead of loading every
+  # violation into Ruby first.
+  def violating_observations
+    Observation.project_violations(self)
+  end
+
+  # Builds `Violation` structs (obs + kinds) for a collection of
+  # observations already known to violate a constraint, e.g. a page
+  # of `violating_observations`. Skips any observation
+  # `violation_kinds_for` doesn't agree is a violation.
+  def violations_for(observations)
+    observations.filter_map do |obs|
       kinds = violation_kinds_for(obs)
       next if kinds.empty?
 
       Violation.new(obs, kinds)
     end
-    rows.sort_by { |v| v.obs.name&.sort_name.to_s.downcase }
   end
 
   # Returns the kinds of violation that apply to the given observation
@@ -998,15 +1002,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Obs lat/lon is outside Project.location exor
-  # Obs location is not a subset of Project.location
-  def out_of_area_observations
-    return [] if location.nil?
-
-    obs_geoloc_outside_project_location +
-      obs_without_geoloc_location_not_contained_in_location
-  end
-
   def violates_constraints?(observation)
     violation_kinds_for(observation).any?
   end
@@ -1032,7 +1027,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # AND the observation's name (with synonyms and sub-taxa expansion,
   # matching candidate_observations) is not in it.
   def violates_target_name?(observation)
-    return false unless target_names.any?
+    return false unless target_names_present?
 
     expanded_target_name_id_set.exclude?(observation.name_id)
   end
@@ -1042,7 +1037,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # the obs's location name (or `where`, when there's no location).
   # GPS overlap with a target_location does NOT satisfy the rule.
   def violates_target_location?(observation)
-    return false unless target_locations.any?
+    return false unless target_locations_present?
 
     !target_location_suffix_match?(observation)
   end
@@ -1055,17 +1050,55 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
            end
     return false if name.blank?
 
-    target_locations.any? do |tl|
-      name == tl.name || name.end_with?(", #{tl.name}")
+    target_location_names.any? do |tl_name|
+      name == tl_name || name.end_with?(", #{tl_name}")
     end
   end
 
   # Memoized: project's target_names with synonyms + sub-taxa expanded
   # into a Set of name_ids, matching the candidate_observations rule.
   # Used by violates_target_name? as a per-obs membership test.
+  # Reads name ids via project_target_names.pluck, not the
+  # target_names association -- target_names may already be loaded
+  # (callers like TargetNamesController#add_names check it before
+  # add_target_name/remove_target_name run) on a strict_loading
+  # Project, and resetting or reloading it here to pick up the change
+  # would make a later access of that same association raise
+  # ActiveRecord::StrictLoadingViolationError instead of reusing its
+  # existing load. pluck queries project_target_names directly and
+  # doesn't touch target_names' loaded state.
   def expanded_target_name_id_set
     @expanded_target_name_id_set ||=
-      expanded_target_name_ids(target_name_ids).to_set
+      expanded_target_name_ids(project_target_names.pluck(:name_id)).to_set
+  end
+
+  # add_target_name/remove_target_name call this so a Project
+  # instance that already memoized the expanded set doesn't keep
+  # using a stale one after the target_names it's built from changed.
+  def invalidate_expanded_target_name_id_set!
+    remove_instance_variable(:@expanded_target_name_id_set) if
+      defined?(@expanded_target_name_id_set)
+  end
+
+  # Same reasoning as expanded_target_name_id_set above: reads via
+  # project_target_locations, not the target_locations association,
+  # so add_target_location/remove_target_location updating the join
+  # table directly doesn't leave a caller's already-loaded
+  # target_locations stale. location_suffix_conditions/
+  # where_suffix_conditions always see the current list, with no
+  # invalidation call needed on the mutator side.
+  def target_location_names
+    @target_location_names ||=
+      project_target_locations.joins(:location).pluck(Location[:name])
+  end
+
+  # add_target_location/remove_target_location call this so a
+  # Project instance that already memoized the name list doesn't
+  # keep using a stale one after the target_locations it's built
+  # from changed.
+  def invalidate_target_location_names!
+    remove_instance_variable(:@target_location_names) if
+      defined?(@target_location_names)
   end
 
   def trackers
@@ -1163,18 +1196,5 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       transform_values do |aliases|
         aliases.map { |project_alias| [project_alias.name, project_alias.id] }
       end
-  end
-
-  def obs_geoloc_outside_project_location
-    visible_observations.
-      where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
-  end
-
-  def obs_without_geoloc_location_not_contained_in_location
-    visible_observations.where(lat: nil).joins(:location).
-      merge(
-        # invert_where is safe (doesn't invert observations.where(lat: nil))
-        Location.not_in_box(**location.bounding_box)
-      )
   end
 end

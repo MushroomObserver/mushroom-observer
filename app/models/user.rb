@@ -313,8 +313,10 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = User[:login] + User[:name]
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = User[:login] + User[:name]
+      search_columns(cols, phrase)
+    end
   }
 
   # NOTE: the obs images are a separate optimized query
@@ -433,6 +435,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     users.find_each do |user|
       return user if user.unique_text_name == str
     end
+  end
+
+  # Doesn't match on login/name (those go through the fuzzy `pattern`
+  # scope instead, in case of a partial match) -- only a numeric id or
+  # a verified email address counts as "exact."
+  def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
+    user = (phrase.match?(/^\d+$/) && safe_find(phrase)) ||
+           find_by(email: phrase)
+    user if user&.verified
   end
 
   # Return User's full name if present, else return login.

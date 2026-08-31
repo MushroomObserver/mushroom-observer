@@ -3,6 +3,22 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Projects, :Project,
+      overrides: {
+        id_in_set: projects(:bolete_project).id,
+        by_users: rolf.id,
+        members: rolf.id
+      }
+    )
+  end
+
   def build_params(title, summary, start_date: nil, end_date: nil, **opts)
     {
       project: {
@@ -256,6 +272,26 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_select("body.projects__index .list-group")
     assert_page_title(:projects.ti)
+  end
+
+  def test_index_member_single_match_redirects
+    project = projects(:lone_wolf_project)
+    assert(Project.members(lone_wolf.id).one?)
+
+    login
+    get(:index, params: { member: lone_wolf.id })
+
+    assert_redirected_to(project_path(project.id))
+  end
+
+  def test_index_member_bad_id_redirects_to_projects_index
+    login
+    bogus_id = User.maximum(:id).to_i + 1000
+
+    get(:index, params: { member: bogus_id })
+
+    assert_flash_error
+    assert_redirected_to(projects_path)
   end
 
   def test_index_pattern_search_multiple_hits

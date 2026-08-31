@@ -79,6 +79,19 @@ class Naming < AbstractModel
   scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
+  scope :order_by_default,
+        -> { order_by(::Query::Namings.default_order) }
+
+  scope :observations, ->(ids) { where(observation_id: ids) }
+  scope :names, ->(ids) { where(name_id: ids) }
+  # The Query system hands a `[min, max]` Array to a `[:float]`-typed
+  # attribute's scope, not a Range -- `where(vote_cache: [min, max])`
+  # would filter on an IN-list instead of a range.
+  scope :confidence, lambda { |min, max = nil|
+    min, max = min if min.is_a?(Array)
+    where(vote_cache: min..(max || min))
+  }
+
   # Override the default show_controller
   def self.show_controller
     "/observations"

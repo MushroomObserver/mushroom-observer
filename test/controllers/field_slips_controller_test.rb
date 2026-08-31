@@ -3,8 +3,25 @@
 require("test_helper")
 
 class FieldSlipsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   setup do
     @field_slip = field_slips(:field_slip_one)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::FieldSlips, :FieldSlip,
+      overrides: {
+        id_in_set: field_slips(:field_slip_one).id,
+        by_users: rolf.id,
+        observation: observations(:minimal_unknown_obs).id,
+        projects: projects(:bolete_project).id
+      }
+    )
   end
 
   def test_should_get_index
@@ -26,9 +43,43 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_index_for_project_bad_id_redirects
+    bad_project_id = Project.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { project: bad_project_id })
+
+    assert_flash(:runtime_object_not_found, type: :project,
+                                            id: bad_project_id)
+    assert_redirected_to(projects_path)
+  end
+
   def test_should_get_index_for_user
     requires_login(:index, by_user: @field_slip.user.id)
     assert_response(:success)
+  end
+
+  def test_index_for_user_single_match_redirects
+    user = roy
+    assert_not(FieldSlip.where(user: user).exists?,
+               "Test needs a user with no existing field slips")
+    slip = FieldSlip.create!(user: user, project: @field_slip.project,
+                             code: "EOL-ROY1")
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(field_slip_path(slip.id))
+  end
+
+  def test_index_for_user_bad_id
+    bad_user_id = User.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
+    assert_redirected_to(users_path)
   end
 
   # eol_project: admins rolf + mary; katrina is a member but not admin.

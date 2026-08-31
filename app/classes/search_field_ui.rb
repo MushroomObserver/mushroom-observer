@@ -59,6 +59,9 @@ class SearchFieldUI
     # RegionWithBoxFields, not a standalone field. Uncomment if used directly.
     # when :in_box then :in_box_fields
     when :has_notes_fields then :textarea_field_with_label
+    # Plain select, not the default multiple_value_autocompleter --
+    # ExternalSite only has a couple of rows.
+    when :external_sites then :select_external_sites
     else
       field_ui_from_query_attribute
     end

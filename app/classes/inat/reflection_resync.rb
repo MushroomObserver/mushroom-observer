@@ -104,15 +104,27 @@ class Inat
     # `where` is only set when no Location resolves: a present Location
     # drives `where` from its own name via a callback, so assigning
     # `where` too would flip it back and forth and never converge.
+    # Date, notes and the obscured flag always mirror the source; specimen
+    # is MO-owned (see git history) and left alone. Coordinates sync only
+    # when iNat is NOT obscuring the location -- the resync fetches iNat
+    # unauthenticated (Inat::ApiToken is per-user; both the scheduled batch
+    # and "Sync now" run as no user), so an obscured observation yields
+    # only iNat's blurred public coordinate, which would overwrite the
+    # authenticated import's accurate one. The first run degraded 1,421
+    # reflections that way (#4215) before this gate was added.
     def scalar_attributes(inat_obs)
+      attrs = { when: inat_obs.when, notes: inat_obs.notes,
+                gps_hidden: inat_obs.obscured? }
+      attrs.merge!(location_attributes(inat_obs)) unless inat_obs.obscured?
+      attrs
+    end
+
+    # A present Location drives `where` from its own name via a callback,
+    # so `where` is set only when no Location resolves (otherwise the two
+    # flip back and forth without converging).
+    def location_attributes(inat_obs)
       location = inat_obs.location
-      # specimen is intentionally not synced: iNat gives no reliable signal
-      # (Inat::Obs#specimen? is hardcoded false), and MO's specimen is set by
-      # MO-side herbarium records / collection numbers a user may add to a
-      # reflection -- syncing it could only unset a legitimate true.
-      attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
-                lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden,
-                notes: inat_obs.notes }
+      attrs = { location: location, lat: inat_obs.lat, lng: inat_obs.lng }
       attrs[:where] = inat_obs.where if location.nil?
       attrs
     end

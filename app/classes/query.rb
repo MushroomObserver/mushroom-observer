@@ -292,6 +292,7 @@ class Query
   include Query::Modules::Seek
   include Query::Modules::WindowCache
   include Query::Modules::Validation
+  include Query::Modules::HashValidation
 
   attr_writer :record
 
@@ -376,9 +377,10 @@ class Query
   delegate :recognized_params, to: :class
 
   # The `params.permit(*filters)`-compatible filter list for this Query
-  # subclass's recognized_params -- replaces `index_active_params`'s
-  # allowlisting role (see
-  # ApplicationController::QueryParamAliases#create_query_from_url_params).
+  # subclass's recognized_params -- the allowlist
+  # ApplicationController::Indexes#build_index_with_query and
+  # ApplicationController::QueryParams#create_query_from_url_params use
+  # to decide which top-level URL params are live index filters.
   # A scalar attr (or param_alias) permits as a bare symbol; an
   # Array-typed attr permits via `attr: []`; a Hash-typed attr --
   # including a subquery hash like `location_query: { subquery: :Location }`
@@ -392,13 +394,29 @@ class Query
     attribute_types.each do |attr, type|
       case type.accepts
       when Array then containers[attr] = []
-      when Hash then containers[attr] = {}
+      when Hash
+        if enum_hash?(type.accepts)
+          scalars << attr
+        else
+          containers[attr] = {}
+        end
       else scalars << attr
       end
     end
     scalars + param_aliases.keys + [containers]
   end
   delegate :permit_filters, to: :class
+
+  # A Hash-shaped `accepts` is either an "enum" (its declared values
+  # are a list of allowed scalars, e.g. `{ boolean: [true] }`) -- the
+  # URL param is a bare scalar, not a nested hash -- or a structural
+  # hash (`{ subquery: :Model }`, or named sub-fields) that needs
+  # `attr: {}` permit syntax. Mirrors
+  # Query::Modules::Validation#validate_hash_param's own
+  # classification.
+  def self.enum_hash?(accepts)
+    [:string, :boolean].include?(accepts.keys.first)
+  end
 
   # Resolves any `param_alias:`-registered param key present in `params`
   # (e.g. `project: 123`, the URL shortcut) into its target query_attr
@@ -409,7 +427,7 @@ class Query
   # clicked while a broader saved query already carries its own
   # `order_by`), so it overwrites rather than yields. Pure param-shape
   # translation: does not verify a record-backed value exists -- see
-  # ApplicationController::QueryParamAliases#create_query_from_url_params,
+  # ApplicationController::QueryParams#create_query_from_url_params,
   # which needs controller/flash context this class method doesn't have.
   def self.resolve_param_aliases(params)
     aliases = param_aliases

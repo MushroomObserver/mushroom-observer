@@ -29,6 +29,15 @@ module Projects
       end
     end
 
+    # Overrides the `controller_name.classify` default (which would
+    # derive "Violation", not a model). Nothing else exercises this:
+    # TopNav's create-button label and Sorter's sort-link name both
+    # call it, but neither renders on this controller's pages (no
+    # `new` action, no sortable Query).
+    def test_controller_model_name
+      assert_equal("Project", @controller.controller_model_name)
+    end
+
     def test_index_no_violations
       project = projects(:eol_project)
       assert_empty(project.violations,
@@ -39,6 +48,70 @@ module Projects
 
       assert_response(:success)
       assert_select("p", { text: /#{:form_violations_no_violations.l}/ })
+    end
+
+    # @pagination_data.num_total must reflect the full violation
+    # count, not just the first page's worth.
+    def test_index_pagination_data_matches_full_violation_count
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+      get(:index, params: { id: project.id })
+
+      assert_response(:success)
+      pagination_data = @controller.instance_variable_get(:@pagination_data)
+      assert_equal(project.violations.size, pagination_data.num_total)
+    end
+
+    # An obs link's q: must resolve to the violations query, not an
+    # unfiltered/unrelated one, or prev/next from that obs won't stay
+    # within this project's violations.
+    def test_index_obs_links_carry_violations_query
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+
+      get(:index, params: { id: project.id })
+
+      assert_response(:success)
+      encoded = CGI.escape("q[project_violations]")
+      assert_select(
+        "a[href*='#{encoded}=#{project.id}']",
+        { minimum: 1 },
+        "Obs links should carry q: for the stored violations query"
+      )
+    end
+
+    # Visiting the violations page stores a Query for this project's
+    # violations, replacing whatever was stored before -- same as
+    # any other index page. This is what lets prev/next from a
+    # violation's obs page stay within this project's violations
+    # instead of falling back to the stale query.
+    def test_index_stores_violations_query_in_session
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+      other_query = Query.lookup_and_save(:Project, by_users: project.user.id)
+      session[:query_record] = other_query.id
+
+      get(:index, params: { id: project.id })
+
+      assert_response(:success)
+      assert_not_equal(other_query.id, session[:query_record],
+                       "Visiting the violations page should replace an " \
+                       "unrelated stored query with the violations query")
+      stored = Query.safe_find(session[:query_record])
+      assert_not_nil(stored)
+      assert_equal(project.id, stored.params[:project_violations])
+    end
+
+    # Pagination here is manual LIMIT/OFFSET on @project.violating_
+    # observations, not the stored Query's paginate/clamp machinery,
+    # so an out-of-range page has no page-clamp mechanism to trigger
+    # -- it renders empty instead of redirecting.
+    def test_index_large_page_number_does_not_redirect
+      project = projects(:falmouth_2023_09_project)
+      login(project.user.login)
+      get(:index, params: { id: project.id, page: 999 })
+
+      assert_response(:success)
     end
 
     def test_update_legacy_remove_selected

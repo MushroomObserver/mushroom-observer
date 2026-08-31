@@ -28,15 +28,40 @@ class Inat::ObservationResyncerTest < UnitTestCase
     @fresh = Inat::Obs.new(JSON.generate(@raw))
   end
 
+  # calostoma_lutescens is open (obscured: false), so its precise public
+  # coordinate mirrors into MO along with date and notes.
   def test_synced_updates_scalar_core_and_stamps_last_synced_at
     result = resync(found: { @id => @raw }).first
 
     assert_equal(:synced, result.status)
     @obs.reload
     assert_equal(@fresh.when, @obs.when, "date should mirror the source")
-    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
     assert_equal(@fresh.notes, @obs.notes, "notes should mirror the source")
+    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
+    # MO rounds coordinates to 4 decimals (Location.parse_latitude).
+    assert_in_delta(@fresh.lat, @obs.lat.to_f, 1e-4, "lat mirrors the source")
+    assert_in_delta(@fresh.lng, @obs.lng.to_f, 1e-4, "lng mirrors the source")
+    assert_not(@obs.gps_hidden, "an open source is not gps_hidden")
     assert_not_nil(@link.reload.last_synced_at, "should stamp last_synced_at")
+  end
+
+  # An obscured source yields only iNat's blurred coordinate, so MO's
+  # accurate imported one is left intact; gps_hidden mirrors the obscuring
+  # so MO hides the coordinate it keeps (#4215).
+  def test_an_obscured_source_hides_gps_but_keeps_the_coordinate
+    @obs.update_columns(lat: 12.3456789, lng: -98.7654321, gps_hidden: false)
+    @obs.reload
+    original = @obs.slice(:lat, :lng, :where)
+    original_location = @obs.location
+
+    resync(found: { @id => obscured_raw })
+
+    @obs.reload
+    assert(@obs.gps_hidden, "gps_hidden mirrors the iNat obscuring")
+    assert_equal(original_location, @obs.location, "location left intact")
+    assert_equal(original["lat"], @obs.lat, "lat left intact")
+    assert_equal(original["lng"], @obs.lng, "lng left intact")
+    assert_equal(original["where"], @obs.where, "where left intact")
   end
 
   # specimen is MO-side (herbarium records / collection numbers a user may
@@ -276,5 +301,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # The open calostoma raw, flipped to obscured -- the flag iNat sets when
+  # it blurs the public coordinate (user or taxon geoprivacy).
+  def obscured_raw
+    @raw.merge(obscured: true)
   end
 end
