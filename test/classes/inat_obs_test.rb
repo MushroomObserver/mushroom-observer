@@ -8,7 +8,7 @@ class InatObsTest < UnitTestCase
   include InatStubHelpers
 
   # disable cop to facilitate typing/reading id's
-  # rubocop:disable Style/NumericLiterals
+  # rubocop:disable-next Style/NumericLiterals
   def test_complicated_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/inat/somion_unicolor.json
@@ -118,7 +118,6 @@ class InatObsTest < UnitTestCase
     # then Somion unicolor suggested twice
     assert_equal(3, mock_inat_obs[:identifications].size)
   end
-  # rubocop:enable Style/NumericLiterals
 
   def test_snapshot_place_private_geoprivacy
     mock_inat_obs = mock_observation("somion_unicolor")

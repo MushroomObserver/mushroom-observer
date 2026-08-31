@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying collection numbers.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
   before_action :store_location, except: [:destroy]
@@ -474,4 +474,3 @@ class CollectionNumbersController < ApplicationController
                              }) and return true
   end
 end
-# rubocop:enable Metrics/ClassLength

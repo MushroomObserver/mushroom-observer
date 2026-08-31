@@ -39,7 +39,7 @@ module Views::Controllers::FieldSlips
     # means the whole tag has to be built here in form_tag for that
     # branch, not passed as a constructor kwarg. The model.code branch
     # uses the base class's own default form_tag unchanged.
-    # rubocop:disable MO/NoHandRolledFormTag
+    # rubocop:disable-next MO/NoHandRolledFormTag
     def form_tag(&block)
       if model.code
         super
@@ -48,7 +48,6 @@ module Views::Controllers::FieldSlips
              **form_attributes, &block)
       end
     end
-    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       # Forward @attributes[:data] so ApplicationForm's data-turbo

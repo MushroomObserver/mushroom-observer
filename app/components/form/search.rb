@@ -13,7 +13,7 @@
 #         context: :dropdown
 #       )) %>
 #
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class Components::Form::Search < Components::ApplicationForm
   include ApplicationForm::AutocompleterPrefill
 
@@ -488,4 +488,3 @@ class Components::Form::Search < Components::ApplicationForm
     "/#{search_type}/search/new?clear=true"
   end
 end
-# rubocop:enable Metrics/ClassLength

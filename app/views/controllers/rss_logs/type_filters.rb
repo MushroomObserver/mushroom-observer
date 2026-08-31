@@ -20,7 +20,7 @@ module Views::Controllers::RssLogs
     # needs a submit, unlike IndexPaginationNav's single-value goto
     # controls, which each fully specify their own destination and so
     # reduce to plain links.
-    # rubocop:disable MO/NoHandRolledFormTag
+    # rubocop:disable-next MO/NoHandRolledFormTag
     def view_template
       form(action: activity_logs_path, method: :get,
            class: "filter-form", id: "log_filter_form",
@@ -29,7 +29,6 @@ module Views::Controllers::RssLogs
         render_filter_buttons
       end
     end
-    # rubocop:enable MO/NoHandRolledFormTag
 
     private
 
