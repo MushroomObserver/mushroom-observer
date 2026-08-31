@@ -44,10 +44,12 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # `Capybara.server = :puma` cannot suppress it. Wrap that
     # registration and force Silent: true so NoTestConsoleNoise
     # doesn't flag the first system test on each parallel worker/port.
-    Capybara.register_server(:puma_silent) do |app, port, host|
-      Capybara.servers[:puma].call(app, port, host, Silent: true)
-    end
-    Capybara.server = :puma_silent
+unless Capybara.servers.key?(:puma_silent)
+  Capybara.register_server(:puma_silent) do |app, port, host|
+    Capybara.servers[:puma].call(app, port, host, Silent: true)
+  end
+end
+Capybara.server = :puma_silent
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
     # Bind to a Maps-API-whitelisted port starting at
