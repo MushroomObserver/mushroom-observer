@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-29 (deploy-2026-08-29-11-00)
+
+- Add Observation filter by external site (`Observation.external_sites`, search-form UI) ([PR5251](https://github.com/MushroomObserver/mushroom-observer/pull/5251), @nimmolo)
+- Query params - Add singular `param_alias` to remaining plural record-backed `query_attr` ([PR5252](https://github.com/MushroomObserver/mushroom-observer/pull/5252), @nimmolo)
+- `Projects::ViolationsController#index`- no discarded query, paginate directly ([PR5255](https://github.com/MushroomObserver/mushroom-observer/pull/5255), @nimmolo)
+- Query params - Collapse `default_sort_order` to `controller_query_class.default_order` ([PR5257](https://github.com/MushroomObserver/mushroom-observer/pull/5257), @nimmolo)
+- Gate the observation-list panel on editable lists; redirect to the observation ([PR5260](https://github.com/MushroomObserver/mushroom-observer/pull/5260), @mo-nathan)
+- Changelog for `deploy-2026-08-27-23-19` and `deploy-2026-08-28-12-10` ([PR5253](https://github.com/MushroomObserver/mushroom-observer/pull/5253), @mo-nathan)
+- Render field slip name-approval radios inside the review form ([PR5262](https://github.com/MushroomObserver/mushroom-observer/pull/5262), @mo-nathan)
+- Attach a read field slip onto a companion occurrence ([PR5266](https://github.com/MushroomObserver/mushroom-observer/pull/5266), @mo-nathan)
+
 ## 2026-08-28 (deploy-2026-08-28-12-10)
 
 - Query params - Make `needs_naming` a viewer-bound presence flag, not a User id ([PR5246](https://github.com/MushroomObserver/mushroom-observer/pull/5246), @nimmolo)
