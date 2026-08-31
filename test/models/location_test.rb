@@ -6,7 +6,7 @@ class LocationTest < UnitTestCase
   include ActiveJob::TestHelper
 
   def bad_location(str)
-    assert(Location.dubious_name?(str, true) != [])
+    assert_not_equal(Location.dubious_name?(str, true), [])
   end
 
   def good_location(str)

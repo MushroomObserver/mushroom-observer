@@ -38,7 +38,7 @@ module SpeciesLists
       # make sure we are actually trying to add some observations!
       assert(new_count > old_count)
       # make sure some of the query results are already in there
-      assert(query.results & spl.observations != [])
+      assert_not_equal(query.results & spl.observations, [])
 
       # The form does not require any starting species_list or obs
       put_requires_login(:update)
