@@ -267,7 +267,7 @@ module Observations
       post_requires_login(:attach, id: obs.id, img_id: image.id)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert(obs.reload.images.member?(image))
-      assert(updated_at != obs.updated_at)
+      assert_not_equal(updated_at, obs.updated_at)
     end
 
     def test_reuse_image_by_id
@@ -291,7 +291,7 @@ module Observations
       # assert_template(controller: "/observations", action: :show)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert(obs.reload.images.member?(image))
-      assert(updated_at != obs.updated_at)
+      assert_not_equal(updated_at, obs.updated_at)
     end
 
     def test_reuse_image_for_observation_bad_image_id

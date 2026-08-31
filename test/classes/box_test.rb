@@ -37,9 +37,9 @@ class BoxTest < UnitTestCase
   end
 
   def test_straddle_dateline
-    assert(Mappable::Box.new(**valid_args,  east: -10, west: 10).
+    assert(Mappable::Box.new(**valid_args, east: -10, west: 10).
            straddles_180_deg?)
-    assert(Mappable::Box.new(**valid_args,  west: 20).
+    assert(Mappable::Box.new(**valid_args, west: 20).
            straddles_180_deg?)
     assert_not(Mappable::Box.new(**valid_args).straddles_180_deg?)
   end

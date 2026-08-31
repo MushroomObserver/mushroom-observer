@@ -85,7 +85,7 @@ class FormCameraInfoTest < ComponentTestCase
 
   private
 
-  # rubocop:disable Metrics/ParameterLists
+  # rubocop:disable-next Metrics/ParameterLists
   def render_info(lat: nil, lng: nil, alt: nil, date: "2024-01-15",
                   file_name: nil, file_size: nil)
     render(Components::Form::CameraInfo.new(
@@ -98,5 +98,4 @@ class FormCameraInfoTest < ComponentTestCase
              file_size: file_size
            ))
   end
-  # rubocop:enable Metrics/ParameterLists
 end

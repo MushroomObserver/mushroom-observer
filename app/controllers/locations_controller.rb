@@ -16,7 +16,7 @@
 #  :destroy
 
 # Locations controller.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class LocationsController < ApplicationController
   include ::Locationable
 
@@ -592,4 +592,3 @@ class LocationsController < ApplicationController
              :notes, :hidden)
   end
 end
-# rubocop:enable Metrics/ClassLength

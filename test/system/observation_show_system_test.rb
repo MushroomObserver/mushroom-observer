@@ -251,6 +251,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
+
+    # Wait for the flash triggered by the delete action
+    # so the link check doesn't race a still-in-flight page
+    # in a parallel test.
+    assert_flash_success(
+      :runtime_destroyed_id.t(type: :sequence, value: seq.id.to_s), wait: 5
+    )
     assert_no_link(text: /LSU/)
   end
 

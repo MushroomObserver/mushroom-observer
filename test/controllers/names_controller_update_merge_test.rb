@@ -713,7 +713,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     name4.skip_notify = true
     name4.save
     assert(name1.correct_spelling)
-    assert(name1.correct_spelling != name4)
+    assert_not_equal(name1.correct_spelling, name4)
     assert(name1.deprecated)
     assert_not(name4.correct_spelling)
     assert_not(name4.deprecated)

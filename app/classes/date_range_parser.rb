@@ -30,7 +30,7 @@ class DateRangeParser
     match_date_patterns(parse_date_words) || space_separated_range
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable-next Metrics/CyclomaticComplexity
   def match_date_patterns(val)
     a, b, c, d, e, f = val.split("-")
     case val
@@ -54,7 +54,6 @@ class DateRangeParser
       mmdd([a, b], [c, d])
     end
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
 
   ##########################################################################
 
