@@ -186,10 +186,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_label_appends { render_label_after }
 
       # Add label_end buttons to label_end slot — only when content is
-      # present. Registering an empty slot makes
-      # `label_appends_present?` return true and forces the label row
-      # into the d-flex path with an empty right side (see
-      # FieldLabelRow#render_label_row).
+      # present. Registering an empty slot makes `label_end_present?`
+      # return true and forces the label row into the d-flex path
+      # with an empty right side (see FieldLabelRow#render_label_row).
       field_component.with_label_end { render_label_end } if create_text
 
       # Pass through help slot to inner field

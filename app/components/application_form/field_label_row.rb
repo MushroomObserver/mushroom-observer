@@ -8,11 +8,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Three layouts depending on what the label row itself needs:
     #
     # - No label_appends/label_end: bare `<label>` (no wrap div noise).
-    # - Has label_appends but no label_end: plain `<div>` wrap holding
-    #   label + appends inline — `justify-content-between` is
-    #   meaningless without a right-side counterpart, so skip d-flex.
-    # - Has label_end: d-flex with left (label+appends) and right
-    #   (label_end) children.
+    # - Has label_appends but no label_end: `d-flex` wrap holding
+    #   label + appends inline, no `justify-content-between` --
+    #   meaningless without a right-side counterpart to space against.
+    # - Has label_end: `d-flex justify-content-between` with left
+    #   (label+appends) and right (label_end) children.
     #
     # `between` (block content between the label row and the field)
     # and `help` (the field's explanation block) are NOT part of the
