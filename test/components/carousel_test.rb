@@ -125,8 +125,9 @@ class CarouselTest < ComponentTestCase
 
   # `show_controls: true` (default) renders the prev/next Controls
   # subcomponent at the bottom of `.carousel-inner`. The
-  # `controls_wrap_class` prop, when set, wraps Controls in a div with
-  # that class (Form::UploadGallery uses `carousel-control-wrap row`).
+  # `controls_wrap_class` prop, when set, wraps Controls in a `Row`
+  # with that class -- `Row` auto-prepends "row" (Form::UploadGallery
+  # passes just `"carousel-control-wrap"`).
   def test_controls_render_inline_by_default
     html = render_carousel(carousel_args: { carousel_id: "c" },
                            slides: [{ content: "s" }])
@@ -140,7 +141,7 @@ class CarouselTest < ComponentTestCase
     html = render_carousel(
       carousel_args: {
         carousel_id: "c",
-        controls_wrap_class: "carousel-control-wrap row"
+        controls_wrap_class: "carousel-control-wrap"
       },
       slides: [{ content: "s" }]
     )
