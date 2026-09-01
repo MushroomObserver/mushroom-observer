@@ -1,0 +1,4 @@
+|{white-space:nowrap}. 2026-09-01 | Fix Name page Observation links showing every Observation | "PR#5291":https://github.com/MushroomObserver/mushroom-observer/pull/5291 |
+|{white-space:nowrap}. 2026-09-01 | Fix form fields where help text overlapped the label | "PR#5287":https://github.com/MushroomObserver/mushroom-observer/pull/5287 |
+|{white-space:nowrap}. 2026-09-01 | Fix the iNat badge on imported Observations showing an empty panel | "PR#5288":https://github.com/MushroomObserver/mushroom-observer/pull/5288 |
+|{white-space:nowrap}. 2026-09-01 | Fix theme changes not applying until a page reload | "PR#5286":https://github.com/MushroomObserver/mushroom-observer/pull/5286 |
