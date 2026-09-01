@@ -828,34 +828,7 @@
   .float-sm-none {
     float: none !important;
   }
-}
 
-// display utilities at the remaining BS3 breakpoints -- Components::Column's
-// show_at:/hide_at: (app/components/column.rb) can target any of xs/sm/md/
-// lg, so all three need their .d-{bp}-* set defined, not just sm.
-@media screen and (min-width: $screen-md-min) {
-  .d-md-none {
-    display: none !important;
-  }
-
-  .d-md-block {
-    display: block !important;
-  }
-
-  .d-md-inline {
-    display: inline !important;
-  }
-
-  .d-md-inline-block {
-    display: inline-block !important;
-  }
-
-  .d-md-flex {
-    display: flex !important;
-  }
-}
-
-@media screen and (min-width: $screen-sm-min) {
   .mt-sm-3 {
     margin-top: 1em !important;
   }
@@ -894,6 +867,31 @@
 
   .table {
     overflow-x: scroll;
+  }
+}
+
+// display utilities at the remaining BS3 breakpoints -- Components::Column's
+// show_at:/hide_at: (app/components/column.rb) can target any of xs/sm/md/
+// lg, so all three need their .d-{bp}-* set defined, not just sm.
+@media screen and (min-width: $screen-md-min) {
+  .d-md-none {
+    display: none !important;
+  }
+
+  .d-md-block {
+    display: block !important;
+  }
+
+  .d-md-inline {
+    display: inline !important;
+  }
+
+  .d-md-inline-block {
+    display: inline-block !important;
+  }
+
+  .d-md-flex {
+    display: flex !important;
   }
 }
 
