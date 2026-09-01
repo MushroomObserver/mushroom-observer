@@ -27,8 +27,10 @@ module Views::Controllers::Interests
     end
 
     def render_type_filter
-      ButtonGroup(class: class_names("pb-1 text-nowrap mt-5",
-                                     Components::Column.mobile_hide_classes)) do
+      ButtonGroup(class: class_names(
+        "pb-1 text-nowrap mt-5",
+        Components::Column.mobile_hide_classes(display: :"inline-block")
+      )) do
         Button(
           name: :rss_show.l, tag: :span, size: :sm,
           class: "disabled"
