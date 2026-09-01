@@ -57,6 +57,8 @@
 # different widths in the same `Column` call.
 class Components::Column < Components::Base
   BREAKPOINTS = [:xs, :sm, :md, :lg, :xl].freeze
+  # The `.d-{bp}-*` bridge classes defined in _utilities.scss.
+  DISPLAY_VALUES = [:none, :block, :inline, :"inline-block", :flex].freeze
 
   # Callable without instantiating -- for call sites that need a raw class
   # string merged into an existing element's `class:` rather than a full
@@ -81,6 +83,9 @@ class Components::Column < Components::Base
   # bare `.visible-xs`) or `:inline`/`:"inline-block"` (matching
   # `.visible-xs-inline`/`.visible-xs-inline-block`).
   def self.visibility_classes(show_at: nil, hide_at: nil, display: :block)
+    validate_breakpoint!(show_at)
+    validate_breakpoint!(hide_at)
+    validate_display!(display)
     entries = []
     entries << [BREAKPOINTS.index(show_at), display_class(show_at, display)] \
       if show_at
@@ -88,6 +93,26 @@ class Components::Column < Components::Base
       if hide_at
     entries.sort_by(&:first).map(&:last)
   end
+
+  def self.validate_breakpoint!(breakpoint)
+    return if breakpoint.nil? || BREAKPOINTS.include?(breakpoint)
+
+    raise(ArgumentError.new(
+            "Unknown breakpoint: #{breakpoint.inspect}. " \
+            "Valid breakpoints: #{BREAKPOINTS.join(", ")}."
+          ))
+  end
+  private_class_method :validate_breakpoint!
+
+  def self.validate_display!(display)
+    return if DISPLAY_VALUES.include?(display)
+
+    raise(ArgumentError.new(
+            "Unknown display: #{display.inspect}. " \
+            "Valid values: #{DISPLAY_VALUES.join(", ")}."
+          ))
+  end
+  private_class_method :validate_display!
 
   # Shorthand for the two most common visibility patterns across
   # non-Column elements. `class_names("foo", mobile_hide_classes)`.

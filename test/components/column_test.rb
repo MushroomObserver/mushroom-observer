@@ -35,6 +35,21 @@ class ColumnTest < ComponentTestCase
                  ))
   end
 
+  def test_visibility_classes_rejects_unknown_breakpoint
+    assert_raises(ArgumentError) do
+      Components::Column.visibility_classes(show_at: :xxl, hide_at: :sm)
+    end
+    assert_raises(ArgumentError) do
+      Components::Column.visibility_classes(show_at: :xs, hide_at: :xxl)
+    end
+  end
+
+  def test_visibility_classes_rejects_unknown_display
+    assert_raises(ArgumentError) do
+      Components::Column.visibility_classes(show_at: :xs, display: :foo)
+    end
+  end
+
   def test_mobile_hide_classes_shorthand
     assert_equal(%w[d-none d-sm-block],
                  Components::Column.mobile_hide_classes)
