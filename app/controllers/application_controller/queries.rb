@@ -16,7 +16,6 @@
 #  query_from_session::     Query instance from the session[:query_record]
 #  add_q_param::            Adds :q param to path or hash. Accepts passed query.
 #  q_param::                Returns :q param hash. Accepts passed query.
-#  add_index_filters::      Flat, same-model add_q_param -- see index_filter.
 #  index_filter::           Flat, same-model q_param -- see Query#index_filter.
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
@@ -25,7 +24,7 @@ module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_q_param, :q_param,
-      :add_index_filters, :index_filter, :find_or_create_query, :current_query
+      :index_filter, :find_or_create_query, :current_query
     )
   end
 
@@ -298,21 +297,6 @@ module ApplicationController::Queries
   end
   # helper_method :add_q_param
 
-  # Same as add_q_param, but flat top-level params (`?project=123`)
-  # for a link to a model's index page. Use only when path_or_params'
-  # target indexes the model `query` is for -- see Query#index_filter.
-  def add_index_filters(path_or_params, query = nil)
-    return path_or_params if browser.bot? || !(filters = index_filter(query))
-
-    if path_or_params.is_a?(String)
-      Query.merge_index_filters_into_url(path_or_params, filters)
-    else
-      path_or_params.merge!(filters)
-      path_or_params
-    end
-  end
-  # helper_method :add_index_filters
-
   private
 
   # Internal to query_from_q_param_hash: true only for a real Query subclass.
@@ -341,9 +325,23 @@ module ApplicationController::Queries
   # helper_method :q_param # defined in application_controller.rb
 
   # Same as q_param, but returns the flat filter hash (no :model) --
-  # see Query#index_filter.
-  def index_filter(query = nil)
-    resolve_query_param(query)&.index_filter
+  # see Query#index_filter. Unlike q_param, `model` is required: the
+  # ambient `current_query` fallback in resolve_query_param can be
+  # leftover state from browsing a different model (e.g. the last
+  # search was Observations, then the user navigates to a Name edit
+  # page with no query set for it). q_param stays safe in that case
+  # because it tags the mismatched query with :model for the
+  # receiving page to reconcile or ignore, but a flat index_filter
+  # hash carries no such tag, so returning it unchecked could apply
+  # an unrelated model's filter attrs to this page's index link
+  # whenever the attribute names happen to coincide. Returns nil
+  # (no filter) rather than the ambient query's filters when the
+  # models don't match.
+  def index_filter(model, query = nil)
+    resolved = resolve_query_param(query)
+    return nil unless resolved && resolved.model.name.to_sym == model.to_sym
+
+    resolved.index_filter
   end
   # helper_method :index_filter
 

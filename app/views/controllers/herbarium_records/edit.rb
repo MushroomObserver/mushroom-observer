@@ -16,7 +16,7 @@ module Views::Controllers::HerbariumRecords
       add_context_nav(
         Tab::HerbariumRecord::FormEdit.new(
           back: @back, back_object: @back_object,
-          q_param: q_param, index_filter: index_filter
+          q_param: q_param, index_filter: index_filter(:HerbariumRecord)
         )
       )
 

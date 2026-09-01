@@ -17,7 +17,7 @@ module Views::Controllers::CollectionNumbers
         Tab::CollectionNumber::FormEdit.new(
           collection_number: @collection_number,
           back: @back, back_object: @back_object,
-          index_filter: index_filter
+          index_filter: index_filter(:CollectionNumber)
         )
       )
 

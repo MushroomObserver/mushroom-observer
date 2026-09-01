@@ -162,10 +162,20 @@ module Tab::Observation
       with_filter = Tab::Observation::Index.new(
         index_filter: { by_user: 1 }
       )
+      # Array-valued filters go through Query.merge_index_filters_into_url
+      # (via with_index_filter), a different code path than the plain
+      # Hash#merge the other migrated Tab classes use -- confirm it
+      # round-trips correctly too.
+      with_array_filter = Tab::Observation::Index.new(
+        index_filter: { by_users: [1, 2] }
+      )
 
       assert_equal(:cancel_to_index.t(type: :observation), tab.title)
       assert_equal(routes.observations_path, tab.path)
       assert_equal(routes.observations_path(by_user: 1), with_filter.path)
+      assert_equal(
+        routes.observations_path(by_users: [1, 2]), with_array_filter.path
+      )
     end
 
     def test_edit

@@ -13,7 +13,9 @@ module Views::Controllers::Names
     def view_template
       add_edit_title(@name, user: @user)
       add_context_nav(
-        Tab::Name::FormEdit.new(name: @name, index_filter: index_filter)
+        Tab::Name::FormEdit.new(
+          name: @name, index_filter: index_filter(:Name)
+        )
       )
 
       render(Form.new(

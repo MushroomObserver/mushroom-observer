@@ -1407,6 +1407,17 @@ class QueryTest < UnitTestCase
     assert_equal(query.index_filter, params)
   end
 
+  def test_index_filter_excludes_routing_keys
+    query = Query.lookup(:Observation, by_users: [rolf.id])
+    # No query_attr is currently named these, but a future one could
+    # be -- defensively strip them so they can't clobber the route-
+    # helper args index_filter gets merged into.
+    query.params = query.params.merge(controller: "x", action: "y",
+                                      id: 1, format: "json")
+
+    assert_equal({ by_users: [rolf.id] }, query.index_filter)
+  end
+
   def test_merge_q_param_into_url
     assert_equal(
       "/observations", Query.merge_q_param_into_url("/observations", nil)

@@ -516,8 +516,13 @@ class Query
   # controller. A link that crosses models (e.g. forwarding an
   # RssLog query to an Observation's show page) still needs q_param,
   # not this.
+  # Excludes :controller/:action/:id/:format defensively -- merged
+  # directly onto a Rails route-helper args hash by Tab classes
+  # (`args.merge(@index_filter)`), and a future query_attr sharing
+  # one of those names would silently clobber the routing key it's
+  # merged over instead of raising.
   def index_filter
-    params
+    params.except(:controller, :action, :id, :format)
   end
 
   # Merges an already-resolved `q` param value into a path's
@@ -544,11 +549,7 @@ class Query
   def self.merge_q_param_into_url(path, q_param_value)
     return path if q_param_value.blank?
 
-    uri = URI.parse(path)
-    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
-    parsed["q"] = q_param_value
-    uri.query = parsed.to_query
-    uri.to_s
+    merge_query_params_into_url(path) { |parsed| parsed["q"] = q_param_value }
   end
 
   # Merges an index_filter hash into a path's existing query string
@@ -558,12 +559,24 @@ class Query
   def self.merge_index_filters_into_url(path, filters)
     return path if filters.blank?
 
+    merge_query_params_into_url(path) do |parsed|
+      parsed.merge!(filters.stringify_keys)
+    end
+  end
+
+  # Shared by merge_q_param_into_url/merge_index_filters_into_url:
+  # parses path's existing query string, yields it for the caller to
+  # update, then rebuilds the URL. Uses Hash#to_query, not
+  # Rack::Utils.build_query -- see merge_q_param_into_url's history
+  # for why (a nested Hash value needs to recurse correctly).
+  def self.merge_query_params_into_url(path)
     uri = URI.parse(path)
     parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
-    parsed.merge!(filters.stringify_keys)
+    yield(parsed)
     uri.query = parsed.to_query
     uri.to_s
   end
+  private_class_method :merge_query_params_into_url
 
   # Serialize the query params, adding the model, for saving to a QueryRecord.
   # We use this column of QueryRecord to identify an existing query record that
