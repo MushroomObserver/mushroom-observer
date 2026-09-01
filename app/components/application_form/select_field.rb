@@ -103,6 +103,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       div(class: form_group_class("form-group", inline,
                                   wrapper_options[:wrap_class])) do
         render_label_row(label_text, inline)
+        render_between_block
         render_select_field(&block)
         render_help_after_field
         render(append_slot) if append_slot

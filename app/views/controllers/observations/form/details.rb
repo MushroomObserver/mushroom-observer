@@ -199,6 +199,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
       @form.text_field(
         field,
         label: label_html,
+        label_colon: false,
         wrap_class: "mb-0",
         addon: addon,
         data: {

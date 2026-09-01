@@ -46,12 +46,12 @@ module Views::Controllers::Account::Profile
     def render_place_name_field
       autocompleter_field(:place_name, type: :location,
                                        label: :profile_location,
-                                       between: "(33%)")
+                                       label_appends: "(33%)")
     end
 
     def render_notes_field
       textarea_field(:notes, label: :profile_notes,
-                             rows: 10, between: "(33%)")
+                             rows: 10, label_appends: "(33%)")
     end
 
     def render_upload_fields
@@ -78,7 +78,7 @@ module Views::Controllers::Account::Profile
 
     def image_file_label
       key = model.image_id ? :profile_image_change : :profile_image_create
-      append_colon(key.t)
+      key.t
     end
   end
 end

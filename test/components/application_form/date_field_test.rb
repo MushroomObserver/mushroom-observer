@@ -72,23 +72,24 @@ class DateFieldTest < ComponentTestCase
     assert_html(form, "div.date-selects.d-inline-block")
   end
 
-  # Regression: date_field's between: renders inside the label row
-  # (before the date-selects), not as a separate row or a trailing
-  # sibling -- FieldLabelRow handles this via
-  # wrapper_options[:between].
-  def test_date_field_between_renders_inline_with_label
+  # Regression: date_field's label_appends: renders inside the label
+  # row (before the date-selects), not as a separate row or a
+  # trailing sibling -- FieldLabelRow handles this via
+  # wrapper_options[:label_appends].
+  def test_date_field_label_appends_renders_inline_with_label
     form = render_comment_form do
-      date_field(:created_at, label: "When:", between: "(picker note)")
+      date_field(:created_at, label: "When:",
+                              label_appends: "(picker note)")
     end
 
     assert_includes(form, "(picker note)")
 
-    between_pos = form.index("(picker note)")
+    appends_pos = form.index("(picker note)")
     selects_pos = form.index("date-selects")
-    assert(between_pos && selects_pos,
-           "both between content and date-selects should be present")
-    assert(between_pos < selects_pos,
-           "between content must render in the label row " \
+    assert(appends_pos && selects_pos,
+           "both label_appends content and date-selects should be present")
+    assert(appends_pos < selects_pos,
+           "label_appends content must render in the label row " \
            "(before the date-selects)")
   end
 end

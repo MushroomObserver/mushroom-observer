@@ -51,21 +51,30 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Only plain help renders an always-visible .help-block sibling
     # right after this div (what mb-0, above, is compensating for).
     # help_collapse: true renders a Collapsible that's hidden by
-    # default -- dropping this div's own bottom margin there would
-    # shrink the gap to whatever field comes next, with no visible
-    # help-block to justify it.
+    # default -- dropping this div's bottom margin there would shrink
+    # the gap to whatever field comes next, with no visible help-block
+    # to justify it. help_placement: :above renders help inside this
+    # div instead of as a trailing sibling, so there's no bottom-margin
+    # doubling to compensate for either.
     def help_present?
-      respond_to?(:help_slot) && help_slot && !wrapper_options[:help_collapse]
+      respond_to?(:help_slot) && help_slot &&
+        !wrapper_options[:help_collapse] && !help_placement_above?
     end
 
-    def render_with_wrapper
+    def render_with_wrapper(&block)
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
-        render(prepend_slot) if prepend_present?
-        yield
-        render(append_slot) if append_present?
+        render_between_block
+        render_help_after_field if help_placement_above?
+        render_wrapper_body(&block)
       end
-      render_help_after_field
+      render_help_after_field unless help_placement_above?
+    end
+
+    def render_wrapper_body
+      render(prepend_slot) if prepend_present?
+      yield
+      render(append_slot) if append_present?
     end
   end
 end

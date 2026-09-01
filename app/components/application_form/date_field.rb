@@ -41,6 +41,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       div(class: form_group_class(wrap_class)) do
         render_label_row(label_text, false) if show_label?
+        render_between_block
         yield
         render_help_after_field
         render(append_slot) if append_slot

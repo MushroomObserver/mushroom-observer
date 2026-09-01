@@ -7,8 +7,10 @@ module Views::Controllers::Names::Classification
     def view_template
       textarea_field(:classification, label: :form_names_classification,
                                       rows: 10,
-                                      between: classification_help,
-                                      data: { autofocus: true })
+                                      help_placement: :above,
+                                      data: { autofocus: true }) do |f|
+        f.with_help { classification_help }
+      end
 
       submit(:save.ti, center: true)
     end
@@ -17,7 +19,7 @@ module Views::Controllers::Names::Classification
 
     def classification_help
       rank = :"rank_#{model.rank.to_s.downcase}".l
-      Help(element: :p, content: :form_names_classification_help.t(rank: rank))
+      trusted_html(:form_names_classification_help.t(rank: rank))
     end
 
     def form_action
