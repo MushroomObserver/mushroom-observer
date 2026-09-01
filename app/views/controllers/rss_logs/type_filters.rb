@@ -61,8 +61,7 @@ module Views::Controllers::RssLogs
       # span ends up after the group). Sibling-of-group keeps it
       # inline-aligned without being subject to the group's layout
       # rules.
-      div(class: class_names("px-3 pb-1 text-nowrap",
-                             Components::Column.mobile_hide_classes)) do
+      div(class: "px-3 pb-1 hidden-xs text-nowrap") do
         render_show_label
         ButtonGroup do
           render_everything_button

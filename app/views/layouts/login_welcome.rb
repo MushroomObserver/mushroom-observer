@@ -17,8 +17,7 @@ module Views::Layouts
     def view_template
       comment { "LOGIN WELCOME" }
       Container(width: :text) do
-        div(class: class_names("text-center",
-                               Components::Column.mobile_only_classes)) do
+        div(class: "text-center visible-xs-block") do
           img(class: "logo-trim", alt: "MO Logo", src: "/logo-trim.png")
         end
         h2(class: "h3 text-center") { plain("Mushroom Observer (MO)") }

@@ -11,10 +11,10 @@ class ButtonGroupTest < ComponentTestCase
 
   def test_renders_with_custom_class
     html = render_component(
-      Components::ButtonGroup.new(class: "pb-1 mt-3")
+      Components::ButtonGroup.new(class: "pb-1 hidden-xs")
     ) { "content" }
 
-    assert_html(html, "div.btn-group.pb-1.mt-3[role='group']",
+    assert_html(html, "div.btn-group.pb-1.hidden-xs[role='group']",
                 text: "content")
   end
 

@@ -25,16 +25,6 @@
 #
 # @example Visible on xs only, hidden from sm up
 #   Column(show_at: :xs, hide_at: :sm) { render_mobile_only }
-#
-# @example Non-Column element needing only the visibility classes
-#   (replaces bare BS3 `.hidden-xs`)
-#   span(class: class_names("foo", Components::Column.mobile_hide_classes))
-#
-# @example Non-Column element, a different visibility pattern
-#   (replaces BS3 `.visible-xs-inline`)
-#   small(class: class_names(Components::Column.visibility_classes(
-#           show_at: :xs, hide_at: :sm, display: :inline
-#         ))) { render_mobile_label }
 class Components::Column < Components::Base
   BREAKPOINTS = [:xs, :sm, :md, :lg, :xl].freeze
 
@@ -56,34 +46,14 @@ class Components::Column < Components::Base
   # effect -- ordered ascending by breakpoint (not by show/hide) so e.g.
   # `hide_at: :xs, show_at: :sm` reads as "d-none d-sm-block" (hidden at
   # xs, then shown from sm up), matching the order the equivalent BS3
-  # `.hidden-xs` / `.visible-xs-*` utilities implied. `display:` picks
-  # what "shown" means at `show_at:` -- `:block` (the default, matching
-  # bare `.visible-xs`) or `:inline`/`:"inline-block"` (matching
-  # `.visible-xs-inline`/`.visible-xs-inline-block`).
-  def self.visibility_classes(show_at: nil, hide_at: nil, display: :block)
+  # `.hidden-xs` / `.visible-xs-*` utilities implied.
+  def self.visibility_classes(show_at: nil, hide_at: nil)
     entries = []
-    entries << [BREAKPOINTS.index(show_at), display_class(show_at, display)] \
+    entries << [BREAKPOINTS.index(show_at), display_class(show_at, :block)] \
       if show_at
     entries << [BREAKPOINTS.index(hide_at), display_class(hide_at, :none)] \
       if hide_at
     entries.sort_by(&:first).map(&:last)
-  end
-
-  # Shorthand for the two most common visibility patterns across
-  # non-Column elements. `class_names("foo", mobile_hide_classes)`.
-  #
-  # Hidden at xs, visible from sm up (desktop-only; replaces bare
-  # BS3 `.hidden-xs`).
-  def self.mobile_hide_classes
-    visibility_classes(hide_at: :xs, show_at: :sm)
-  end
-
-  # Visible at xs only, hidden from sm up (mobile-only; replaces bare
-  # BS3 `.visible-xs`). Named to match the `:mobile_only` terminology
-  # already used at call sites like `Views::Layouts::Sidebar::
-  # CSS_CLASSES`.
-  def self.mobile_only_classes
-    visibility_classes(show_at: :xs, hide_at: :sm)
   end
 
   # `xs` is Bootstrap 3's mobile-first base -- there's no `d-xs-*` class,

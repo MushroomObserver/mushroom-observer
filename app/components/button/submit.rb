@@ -15,9 +15,7 @@
 #     variant: :outline, class: "px-2"
 #   ) do
 #     span(class: "d-sm-none") { render(Components::Icon.new(type: :search)) }
-#     span(class: class_names(Components::Column.mobile_hide_classes)) do
-#       plain(:search.ti)
-#     end
+#     span(class: "hidden-xs") { plain(:search.ti) }
 #   end
 #
 class Components::Button::Submit < Components::Button

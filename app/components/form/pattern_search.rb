@@ -58,8 +58,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
                "flex-grow-1 mb-0") do
       Icon(
         type: :search,
-        class: class_names("form-control-feedback",
-                           Components::Column.mobile_hide_classes)
+        class: "form-control-feedback hidden-xs"
       )
       # `label: false` skips the form-group wrap + auto-label so the
       # input nests directly inside the navbar flex row, matching
@@ -106,9 +105,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
         span(class: "d-sm-none") do
           Icon(type: :search)
         end
-        span(class: class_names(Components::Column.mobile_hide_classes)) do
-          plain(:app_search.l)
-        end
+        span(class: "hidden-xs") { plain(:app_search.l) }
       end
     end
   end

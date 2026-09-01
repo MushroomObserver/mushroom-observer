@@ -24,27 +24,6 @@ class ColumnTest < ComponentTestCase
                  Components::Column.classes_for(show_at: :lg))
   end
 
-  def test_visibility_classes_display_kwarg
-    assert_equal(%w[d-inline d-sm-none],
-                 Components::Column.visibility_classes(
-                   show_at: :xs, hide_at: :sm, display: :inline
-                 ))
-    assert_equal(%w[d-inline-block d-sm-none],
-                 Components::Column.visibility_classes(
-                   show_at: :xs, hide_at: :sm, display: :"inline-block"
-                 ))
-  end
-
-  def test_mobile_hide_classes_shorthand
-    assert_equal(%w[d-none d-sm-block],
-                 Components::Column.mobile_hide_classes)
-  end
-
-  def test_mobile_only_classes_shorthand
-    assert_equal(%w[d-block d-sm-none],
-                 Components::Column.mobile_only_classes)
-  end
-
   def test_default_renders_div_with_no_width_classes
     html = render_column
 
