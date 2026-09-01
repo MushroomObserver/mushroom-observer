@@ -12,7 +12,7 @@ module Views::Controllers::SpeciesLists::Observations
     def view_template
       add_page_title(:species_list_add_remove_title.t)
       add_context_nav(::Tab::SpeciesList::FormObservations.new(
-                        q_param: q_param
+                        index_filter: index_filter
                       ))
       # Sibling reference within the module.
       render(Form.new(

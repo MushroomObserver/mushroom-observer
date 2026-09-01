@@ -15,7 +15,8 @@ module Views::Controllers::HerbariumRecords
       add_edit_title(@herbarium_record)
       add_context_nav(
         Tab::HerbariumRecord::FormEdit.new(
-          back: @back, back_object: @back_object, q_param: q_param
+          back: @back, back_object: @back_object,
+          q_param: q_param, index_filter: index_filter
         )
       )
 

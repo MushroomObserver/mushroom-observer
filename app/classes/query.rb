@@ -507,6 +507,19 @@ class Query
     { model: model.name.to_sym, **params }
   end
 
+  # The query's filter attrs, for use as flat top-level URL params on
+  # a link to this model's index page (`?project=123`, not
+  # `?q[projects][]=123`). Unlike q_param, deliberately excludes
+  # :model -- the target index action infers its model from the
+  # controller (see ApplicationController::Indexes), so a link built
+  # from this only works for a query whose model matches the target
+  # controller. A link that crosses models (e.g. forwarding an
+  # RssLog query to an Observation's show page) still needs q_param,
+  # not this.
+  def index_filter
+    params
+  end
+
   # Merges an already-resolved `q` param value into a path's
   # existing query string (preserving other params, e.g. `flow=next`).
   # A plain utility, not tied to any Query instance -- shared by two
@@ -534,6 +547,20 @@ class Query
     uri = URI.parse(path)
     parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
     parsed["q"] = q_param_value
+    uri.query = parsed.to_query
+    uri.to_s
+  end
+
+  # Merges an index_filter hash into a path's existing query string
+  # as flat top-level params (not nested under q[...]), preserving
+  # other params already in the path. See merge_q_param_into_url for
+  # the cross-model, nested equivalent.
+  def self.merge_index_filters_into_url(path, filters)
+    return path if filters.blank?
+
+    uri = URI.parse(path)
+    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
+    parsed.merge!(filters.stringify_keys)
     uri.query = parsed.to_query
     uri.to_s
   end

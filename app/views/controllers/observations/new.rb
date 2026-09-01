@@ -40,7 +40,9 @@ module Views::Controllers::Observations
 
     def view_template
       add_new_title(:create_object, :observation)
-      add_context_nav(Tab::Observation::FormNew.new(q_param: q_param))
+      add_context_nav(Tab::Observation::FormNew.new(
+                        q_param: q_param, index_filter: index_filter
+                      ))
       container_class(:wide)
 
       render(Form.new(@observation, **form_attrs))

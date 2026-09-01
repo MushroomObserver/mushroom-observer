@@ -7,8 +7,7 @@
 #
 #  update_stored_query::    Saves a passed query and stores id in the session.
 #  clear_query_in_session:: Clears out Query stored in session below.
-#  store_query_in_session:: Stores Query in session for use by
-#                           create_species_list.
+#  store_query_in_session:: Stores Query in session for create_species_list.
 #  query_from_session::     Gets Query that was stored in the session above.
 #
 #  current_query::          Returns @query, #query_from_q_param or
@@ -17,6 +16,8 @@
 #  query_from_session::     Query instance from the session[:query_record]
 #  add_q_param::            Adds :q param to path or hash. Accepts passed query.
 #  q_param::                Returns :q param hash. Accepts passed query.
+#  add_index_filters::      Flat, same-model add_q_param -- see index_filter.
+#  index_filter::           Flat, same-model q_param -- see Query#index_filter.
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
@@ -24,7 +25,7 @@ module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_q_param, :q_param,
-      :find_or_create_query, :current_query
+      :add_index_filters, :index_filter, :find_or_create_query, :current_query
     )
   end
 
@@ -297,6 +298,21 @@ module ApplicationController::Queries
   end
   # helper_method :add_q_param
 
+  # Same as add_q_param, but flat top-level params (`?project=123`)
+  # for a link to a model's index page. Use only when path_or_params'
+  # target indexes the model `query` is for -- see Query#index_filter.
+  def add_index_filters(path_or_params, query = nil)
+    return path_or_params if browser.bot? || !(filters = index_filter(query))
+
+    if path_or_params.is_a?(String)
+      Query.merge_index_filters_into_url(path_or_params, filters)
+    else
+      path_or_params.merge!(filters)
+      path_or_params
+    end
+  end
+  # helper_method :add_index_filters
+
   private
 
   # Internal to query_from_q_param_hash: true only for a real Query subclass.
@@ -305,19 +321,31 @@ module ApplicationController::Queries
     klass.is_a?(Class) && klass < Query
   end
 
+  # Shared by q_param/index_filter: nil for bots, else the passed
+  # query (saved first if unsaved) or current_query.
+  def resolve_query_param(query)
+    return nil if browser.bot?
+
+    query.save if query && !query.id
+    query || current_query
+  end
+
   public
 
   # Allows us to add any passed query, or the current to a path helper:
   #   link_to(@object.show_link_args.merge(q: q_param))
   # Saves the query, but does not set session[:query_record]
   def q_param(query = nil)
-    return nil if browser.bot?
-
-    query.save if query && !query.id
-    query ||= current_query
-    query&.q_param
+    resolve_query_param(query)&.q_param
   end
   # helper_method :q_param # defined in application_controller.rb
+
+  # Same as q_param, but returns the flat filter hash (no :model) --
+  # see Query#index_filter.
+  def index_filter(query = nil)
+    resolve_query_param(query)&.index_filter
+  end
+  # helper_method :index_filter
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
   def redirect_with_query(args, query = nil)

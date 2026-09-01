@@ -159,9 +159,13 @@ module Tab::Observation
 
     def test_index
       tab = Tab::Observation::Index.new
+      with_filter = Tab::Observation::Index.new(
+        index_filter: { by_user: 1 }
+      )
 
       assert_equal(:cancel_to_index.t(type: :observation), tab.title)
       assert_equal(routes.observations_path, tab.path)
+      assert_equal(routes.observations_path(by_user: 1), with_filter.path)
     end
 
     def test_edit

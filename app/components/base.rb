@@ -53,6 +53,8 @@ class Components::Base < Phlex::HTML
   register_value_helper :url_for
   register_value_helper :add_q_param
   register_value_helper :q_param
+  register_value_helper :add_index_filters
+  register_value_helper :index_filter
   # The Query for "what the user is currently looking at" — pulled
   # from the controller's `@query` ivar, the URL's `q` param, or the
   # session's stored query_record (in that order, via
