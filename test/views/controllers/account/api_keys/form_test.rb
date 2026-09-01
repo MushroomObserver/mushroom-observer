@@ -17,6 +17,7 @@ module Views::Controllers::Account::APIKeys
         html, "label", text: :account_api_keys_notes_label.l
       )
       assert_html(html, "#api_key_notes")
+      assert_html(html, "input[name='full_page_form'][value='true']")
       assert_html(
         html,
         "button[type='submit']", text: :account_api_keys_create_button.l
@@ -85,12 +86,15 @@ module Views::Controllers::Account::APIKeys
       key = api_keys(:rolfs_api_key)
       html = render_edit_form(key)
 
-      # Update is a real submit button on the form.
+      # Update is a submit button on the form.
       assert_html(html, "button[type='submit']", text: :update.ti)
+      # Makes #update redirect instead of responding turbo_stream.
+      assert_html(html, "input[name='full_page_form'][value='true']")
       # Cancel is a navigation link back to the index — NOT a submit.
       # (Pre-Phlex was a submit, which paradoxically meant clicking
       # Cancel ran an update via the controller's update action.)
-      assert_html(html, "a[href='/account/api_keys']", text: :cancel.ti)
+      assert_html(html, "a[href='#{routes.account_api_keys_path}']",
+                  text: :cancel.ti)
       assert_no_html(html,
                      "button[type='submit']", text: :cancel.ti)
     end

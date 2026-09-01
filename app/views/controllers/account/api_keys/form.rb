@@ -83,6 +83,8 @@ module Views::Controllers::Account::APIKeys
     def render_standalone_layout
       text_field(:notes, label: :account_api_keys_notes_label,
                          wrap_class: "mt-3")
+      # Tells #create to redirect instead of responding turbo_stream.
+      hidden_field("full_page_form", value: "true")
 
       submit(submit_text, center: true, submits_with: submits_text,
                           id: "create_button")
@@ -91,6 +93,8 @@ module Views::Controllers::Account::APIKeys
     def render_edit_layout
       render_metadata_table
       text_field(:notes, label: :notes.ti, wrap_class: "mt-3")
+      # Tells #update to redirect instead of responding turbo_stream.
+      hidden_field("full_page_form", value: "true")
       div(class: "text-center mt-3") do
         submit(:update.ti)
         # A plain link (not a submit button) — Cancel should navigate

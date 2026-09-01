@@ -12,13 +12,13 @@ module Views::Controllers::Account::APIKeys
       add_page_title(:account_api_keys_title.t)
       add_context_nav(Tab::Account::APIActions.new)
       trusted_html(:account_api_keys_help.tp)
-      # Stays turbo: false (Turbo-off): see the comment in new.rb --
-      # same no-JS fallback, same turbo_stream-target mismatch.
+      # Form's full_page_form hidden field makes #update redirect
+      # here instead of responding turbo_stream -- see new.rb.
       render(Form.new(
                @key,
                action: account_api_key_path(id: @key.id),
                id: "account_edit_api_key_form",
-               turbo: false
+               turbo: true
              ))
     end
   end
