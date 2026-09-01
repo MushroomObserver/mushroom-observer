@@ -24,6 +24,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :append
 
+    public :between_slot, :append_slot
+
     attr_reader :wrapper_options
 
     def initialize(field, wrapper_options: {}, **attributes)
