@@ -90,8 +90,17 @@ counts.
 
 ## Producing the Article rows
 
+`script/prerelease.rb` (dry run by default; `--apply` to push) builds
+the pre-deploy changelog PR on the `changelog-pending` branch: the
+next CHANGELOG.md section (its heading names the deploy tag the
+deploy will create) plus `article_pending.textile` holding one
+Textile row per `article: yes` PR merged since the last deploy. The
+rows in that file are what the deploy publishes to the Article — edit
+them in the PR; blockless PRs are listed in the PR body for a
+verdict. Re-run after last-minute merges; merge the PR last, then
+deploy.
+
 `script/article_rows.rb --since YYYY-MM-DD [--until YYYY-MM-DD]`
-prints one Textile row per `article: yes` PR merged in the range,
-newest first, and lists the blockless PRs on stderr for a human
-verdict. Paste the rows into the Article by hand (they go under the
-blank separator row, newest first).
+prints rows for a date range (backfills, audits), newest first,
+blockless PRs on stderr. Hand-added rows go just below the
+`| +date+ | +what+ | +link+ |` header line, newest first.
