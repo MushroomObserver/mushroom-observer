@@ -177,10 +177,6 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def add_slots_to_field(field_component, &block)
-      # The caller's between content (block, between label row and
-      # field) passes straight through.
-      field_component.with_between { render(between_slot) } if between_slot
-
       # has-id-indicator + find/keep/edit buttons sit inline with the
       # label, inside the label row's flex container.
       field_component.with_label_appends { render_label_after }
@@ -190,6 +186,10 @@ class Components::ApplicationForm < Superform::Rails::Form
       # return true and forces the label row into the d-flex path
       # with an empty right side (see FieldLabelRow#render_label_row).
       field_component.with_label_end { render_label_end } if create_text
+
+      # The caller's between content (block, between label row and
+      # field) passes straight through.
+      field_component.with_between { render(between_slot) } if between_slot
 
       # Pass through help slot to inner field
       field_component.with_help { render(help_slot) } if help_slot
