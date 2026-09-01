@@ -22,8 +22,7 @@ module Views::Controllers::Herbaria::CuratorRequests
 
     def view_template
       div(class: "form-group mt-3") do
-        strong { "#{:herbarium.ti}:" }
-        whitespace
+        strong { append_colon(:herbarium.ti) }
         plain(@herbarium.name)
       end
 

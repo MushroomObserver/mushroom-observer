@@ -19,8 +19,8 @@ module Views::Controllers::SpeciesLists::Downloads
 
     def view_template
       super do
-        h3 { "#{:species_list_report_header.t}:" }
-        p { "#{:download_observations_format.t}:" }
+        h3 { append_colon(:species_list_report_header.t) }
+        p { append_colon(:download_observations_format.t) }
         div(class: "form-group") { render_format_radios }
         submit(:species_list_report_button.l, center: true)
       end

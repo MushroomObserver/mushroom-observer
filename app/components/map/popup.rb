@@ -149,14 +149,16 @@ class Components::Map::Popup < Components::Base
 
   def render_observation_header
     div(class: "map-popup-header") do
-      plain("#{@set.observations.length} #{:observations.ti} ")
+      plain("#{@set.observations.length} #{:observations.ti}")
+      whitespace
       render_associated_links(:observation)
     end
   end
 
   def render_location_header
     div(class: "map-popup-header") do
-      plain("#{@set.underlying_locations.length} #{:locations.ti} ")
+      plain("#{@set.underlying_locations.length} #{:locations.ti}")
+      whitespace
       render_associated_links(:location)
     end
   end

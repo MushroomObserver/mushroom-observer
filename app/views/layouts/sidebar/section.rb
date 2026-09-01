@@ -21,7 +21,7 @@ class Views::Layouts::Sidebar
 
     def view_template
       render(Components::ListGroup::Item.new(class: @classes[:heading])) do
-        plain("#{@heading_key.ti}:")
+        append_colon(@heading_key.ti)
       end
 
       @tabs.compact.each do |link|

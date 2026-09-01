@@ -67,16 +67,14 @@ module Views::Controllers::Locations
 
       def render_north
         div(class: "text-center my-4") do
-          b { "#{:north.ti}:" }
-          whitespace
+          b { append_colon(:north.ti) }
           plain("#{@location.north}°")
         end
       end
 
       def render_south
         div(class: "text-center my-4") do
-          b { "#{:south.ti}:" }
-          whitespace
+          b { append_colon(:south.ti) }
           plain("#{@location.south}°")
         end
       end
@@ -85,15 +83,13 @@ module Views::Controllers::Locations
         Row do
           Column(xs: 6) do
             span(class: "pull-left") do
-              b { "#{:west.ti}:" }
-              whitespace
+              b { append_colon(:west.ti) }
               plain("#{@location.west}°")
             end
           end
           Column(xs: 6) do
             span(class: "pull-right") do
-              b { "#{:east.ti}:" }
-              whitespace
+              b { append_colon(:east.ti) }
               plain("#{@location.east}°")
             end
           end
@@ -111,8 +107,9 @@ module Views::Controllers::Locations
         value = @location.send(attr)
         return unless value
 
-        b(class: "text-nowrap") { "#{label_key.l}:" }
-        plain(" #{value} #{:units_meters.l}")
+        b(class: "text-nowrap") { append_colon(label_key.l) }
+        whitespace
+        plain("#{value} #{:units_meters.l}")
         br
       end
 

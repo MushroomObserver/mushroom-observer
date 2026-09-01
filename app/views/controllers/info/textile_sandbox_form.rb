@@ -30,7 +30,7 @@ module Views::Controllers::Info
     # Render the Textile input, showing either rendered HTML or HTML codes
     def render_result_section
       div(class: "mb-4") do
-        strong { plain("#{:sandbox_look_like.l}:") }
+        strong { append_colon(:sandbox_look_like.l) }
         div(class: "sandbox mt-2") do
           if @submit_type == :sandbox_test.l
             # Render the textile code as HTML
@@ -72,14 +72,14 @@ module Views::Controllers::Info
     def render_quick_reference
       div(class: "mt-3") do
         p do
-          strong { plain("#{:sandbox_quick_ref.l}:") }
+          strong { append_colon(:sandbox_quick_ref.l) }
         end
         pre { raw(:sandbox_sample.l) } # rubocop:disable Rails/OutputSafety
       end
     end
 
     def render_more_help_links
-      strong { plain("#{:sandbox_more_help.l}:") }
+      strong { append_colon(:sandbox_more_help.l) }
       div(class: "pl-3") do
         # Translation not needed as document title is static
         Link(type: :external,
@@ -91,7 +91,7 @@ module Views::Controllers::Info
     end
 
     def render_web_reference_links
-      strong { plain("#{:sandbox_web_refs.l}:") }
+      strong { append_colon(:sandbox_web_refs.l) }
       div(class: "pl-3") do
         Link(type: :external,
              content: :sandbox_link_hobix_textile_reference.l,

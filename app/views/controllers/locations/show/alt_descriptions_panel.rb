@@ -43,7 +43,7 @@ module Views::Controllers::Locations
 
       def render_projects_list
         p do
-          plain("#{:show_name_create_draft.l}: ")
+          trusted_html(append_colon(:show_name_create_draft.l))
           @projects.each do |project|
             br
             tab = Tab::Description::NewForProject.new(

@@ -253,7 +253,8 @@ class Components::Matrix::Box < Components::Base
     if (link = target.import_link)
       render_external_credit_link(link)
     else
-      b { plain("#{:via.l} ") }
+      b { plain(:via.l) }
+      whitespace
       trusted_html(:"source_credit_#{target.source}".l.tl)
     end
   end

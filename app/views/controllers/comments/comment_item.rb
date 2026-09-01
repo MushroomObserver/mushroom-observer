@@ -119,7 +119,7 @@ module Views::Controllers::Comments
 
     def render_author_span
       span(class: "comment-author text-nowrap") do
-        plain("#{:by.ti}: ")
+        trusted_html(append_colon(:by.ti))
         if @editable
           Link(type: :user, user: @comment.user)
         else

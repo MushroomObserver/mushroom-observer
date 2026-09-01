@@ -69,7 +69,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
 
   def render_classification_row(node, approved)
     li(class: "hanging-indent") do
-      plain("#{rank_as_string(node.rank)}: ")
+      trusted_html(append_colon(rank_as_string(node.rank)))
       i do
         a(href: name_path(node.id)) do
           trusted_html(node.text_name.t)

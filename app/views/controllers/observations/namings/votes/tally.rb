@@ -128,7 +128,7 @@ module Views::Controllers::Observations::Namings::Votes
     # which prevents the surrounding `<td>` from collapsing (a
     # plain space lets auto-layout tables flatten the column).
     def render_nbsp
-      trusted_html("&nbsp;".html_safe)
+      nbsp
     end
   end
 end

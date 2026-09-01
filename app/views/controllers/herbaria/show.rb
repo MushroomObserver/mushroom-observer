@@ -88,7 +88,7 @@ module Views::Controllers::Herbaria
 
     def render_notes
       div(class: "mt-3") do
-        div(class: "font-weight-bold") { plain("#{:notes.ti}:") }
+        div(class: "font-weight-bold") { trusted_html(append_colon(:notes.ti)) }
         trusted_html(@herbarium.description.tpl)
       end
     end
@@ -96,7 +96,7 @@ module Views::Controllers::Herbaria
     def render_mailing_address
       div(class: "mt-3") do
         div(class: "font-weight-bold") do
-          plain("#{:herbarium_mailing_address.t}:")
+          trusted_html(append_colon(:herbarium_mailing_address.t))
         end
         trusted_html(@herbarium.mailing_address.tp)
       end

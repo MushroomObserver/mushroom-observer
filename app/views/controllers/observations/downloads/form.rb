@@ -43,14 +43,14 @@ module Views::Controllers::Observations::Downloads
     end
 
     def render_format_section
-      p { "#{:download_observations_format.l}:" }
+      p { append_colon(:download_observations_format.l) }
       div(class: "form-group") do
         radio_field(:format, *format_options)
       end
     end
 
     def render_encoding_section
-      p { "#{:download_observations_encoding.l}:" }
+      p { append_colon(:download_observations_encoding.l) }
       div(class: "form-group") do
         radio_field(:encoding, *encoding_options)
       end
@@ -64,7 +64,7 @@ module Views::Controllers::Observations::Downloads
 
     def render_print_labels_section
       p(class: "mt-5") do
-        "#{:download_observations_print_labels_header.l}:"
+        append_colon(:download_observations_print_labels_header.l)
       end
       submit(:download_observations_print_labels.l)
     end

@@ -41,7 +41,7 @@ module Views::Controllers::Descriptions::Moves
     end
 
     def view_template
-      h4 { "#{:merge_descriptions_move_header.t}:" }
+      h4 { append_colon(:merge_descriptions_move_header.t) }
       Help(element: :p,
            content: :merge_descriptions_move_help.t)
 

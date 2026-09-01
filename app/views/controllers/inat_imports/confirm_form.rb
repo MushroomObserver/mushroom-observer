@@ -150,14 +150,14 @@ module Views::Controllers::InatImports
       p { plain(:inat_import_confirm_nothing_to_import.l) }
     end
 
-    # Own-imports: an informational line about unlicensed obs (default MO
-    # license applied to their images). Import-others with create_skeletons
+    # Informational line about unlicensed obs.
+    # Import-others with create_skeletons
     # off: nothing here — that count lives in the ignored-total breakdown
-    # instead (see unlicensed_ignored_row). Import-others with
-    # create_skeletons on (the default, #4828): a skeleton-specific line,
-    # since those obs are imported too, just as lighter records.
+    # instead (see unlicensed_ignored_row).
     def render_unlicensed_line
       if import_others?
+        # Import-others with create_skeletons on.
+        # skeleton-specific line; those obs are imported as skeleton records.
         skeleton_obs_line if create_skeletons?
       else
         unlicensed_obs_line
@@ -214,17 +214,17 @@ module Views::Controllers::InatImports
 
     def render_buttons
       div(class: "mt-3") do
-        # data-turbo="false": this submit redirects to iNaturalist's
-        # OAuth authorize page (an external host). Turbo Drive's
-        # fetch-based form submission follows redirects as fetch
-        # requests, not full-page navigations -- a cross-origin redirect
-        # there doesn't land the browser on iNat's login page the way
-        # a plain form submit does. Opting this one button out of
-        # Turbo keeps the redirect a normal top-level navigation.
-        submit(:inat_import_confirm_proceed.l, as: :button,
-                                               name: "confirmed", value: "1",
-                                               disabled: nothing_to_import?,
-                                               data: { turbo: "false" })
+        # Submits redirects to iNaturalist's OAuth authorize page
+        submit(:inat_import_confirm_proceed.l,
+               as: :button, name: "confirmed", value: "1",
+               disabled: nothing_to_import?,
+               # Opt this button out of Turbo to keep the redirect
+               # a normal top-level navigation
+               # Turbo Drive's fetch-based form submission follows redirects as
+               # fetch requests, not full-page navigations -- a cross-origin
+               # redirect there doesn't land the browser on iNat's login page
+               # like a plain form submit does.
+               data: { turbo: "false" })
         whitespace
         submit(:inat_import_confirm_go_back.l, as: :button,
                                                name: "go_back", value: "1")

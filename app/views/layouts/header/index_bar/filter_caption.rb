@@ -165,7 +165,10 @@ module Views::Layouts
 
     # Subquery: `label: [ <nested params> ]` with span wrappers.
     def render_subquery(label, hash, truncate:)
-      span { plain("#{query_param_label(label)}: [ ") }
+      span do
+        plain(query_param_label(label))
+        plain(": [ ")
+      end
       render_params_joined(hash, truncate: truncate, wrap_tag: :span)
       span { plain(" ] ") }
     end
@@ -180,12 +183,12 @@ module Views::Layouts
 
       case label
       when :target
-        span { plain("#{query_param_label(label)}: ") }
+        span { append_colon(query_param_label(label)) }
         span { plain(lookup_comment_target_val(hash).to_s) }
       when :identify_filter
         render_identify_filter_val(hash)
       else
-        span { plain("#{query_param_label(label)}: ") }
+        span { append_colon(query_param_label(label)) }
         render_nested_params(compact, truncate: truncate)
       end
     end
@@ -205,7 +208,7 @@ module Views::Layouts
       type, term = hash.values_at(:type, :term)
       return if type.blank? || term.blank?
 
-      span { plain("#{query_param_label(type.to_sym)}: ") }
+      span { append_colon(query_param_label(type.to_sym)) }
       b { plain(term) }
     end
 
@@ -214,7 +217,7 @@ module Views::Layouts
       if val == true
         span { plain(label) }
       else
-        span { plain("#{label}: ") } unless CAPTION_IGNORE_KEYS.include?(key)
+        span { append_colon(label) } unless CAPTION_IGNORE_KEYS.include?(key)
         b { render_lookup_text_val(key, val, truncate: truncate) }
       end
     end
