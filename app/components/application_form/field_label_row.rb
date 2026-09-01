@@ -110,6 +110,20 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:label_end_slot) && label_end_slot
     end
 
+    # `between` (the .with_between slot) renders as a block, between
+    # the label row and the field -- shared here so every field type
+    # that declares slot :between calls the same one line, instead of
+    # each hand-rolled render_with_wrapper repeating (and drifting
+    # from) the same `render(between_slot) if between_slot`. Checkbox
+    # and radio fields intentionally don't call this -- their between
+    # content renders inside/beside the field itself (FieldWithHelp's
+    # render_between_slot), a different layout by design.
+    def render_between_block
+      return unless respond_to?(:between_slot) && between_slot
+
+      render(between_slot)
+    end
+
     # Content that sits inline WITH the label, inside the label row's
     # flex container — the help-collapse trigger icon, a short
     # `label_appends:` tag ("(required)"/"(optional)"/a custom

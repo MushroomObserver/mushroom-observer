@@ -48,10 +48,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
-    def between_present?
-      respond_to?(:between_slot) && between_slot
-    end
-
     # Only plain help renders an always-visible .help-block sibling
     # right after this div (what mb-0, above, is compensating for).
     # help_collapse: true renders a Collapsible that's hidden by
@@ -68,7 +64,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_with_wrapper(&block)
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
-        render(between_slot) if between_present?
+        render_between_block
         render_help_after_field if help_placement_above?
         render_wrapper_body(&block)
       end
