@@ -35,7 +35,9 @@ module Views::Controllers::Account::APIKeys
     private
 
     def render_table_layout
-      label(for: field(:notes).dom.id) { :account_api_keys_notes_label.t }
+      label(for: field(:notes).dom.id) do
+        append_colon(:account_api_keys_notes_label.t)
+      end
 
       InputGroup do
         render_cancel_button if @cancel_target
