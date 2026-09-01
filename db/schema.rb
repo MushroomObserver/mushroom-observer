@@ -805,7 +805,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
   end
 
-  create_table "solid_queue_batch_executions", charset: "utf8mb3", force: :cascade do |t|
+  create_table "solid_queue_batch_executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.bigint "batch_id", null: false
     t.datetime "created_at", null: false
@@ -813,7 +813,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
     t.index ["job_id"], name: "index_solid_queue_batch_executions_on_job_id", unique: true
   end
 
-  create_table "solid_queue_batches", charset: "utf8mb3", force: :cascade do |t|
+  create_table "solid_queue_batches", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "active_job_batch_id"
     t.string "description"
     t.text "on_finish"
