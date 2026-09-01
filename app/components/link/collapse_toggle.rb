@@ -106,12 +106,15 @@ class Components::Link::CollapseToggle < Components::Link
     # navigation when data-target is absent; fallback_href needs
     # data-target present so collapse.js can find the pane, so the
     # navigation has to be prevented explicitly instead. See
-    # app/javascript/controllers/collapse-fallback_controller.js.
+    # app/javascript/controllers/collapse-fallback_controller.js --
+    # no :prevent action modifier here, the controller itself decides
+    # whether to call preventDefault() (it skips it for a
+    # data-turbo-frame trigger, letting Turbo handle that case).
     extra_data.merge(target: "##{@target_id}",
                      controller: [extra_data[:controller],
                                   "collapse-fallback"].compact.join(" "),
                      action: [extra_data[:action],
-                              "click->collapse-fallback#intercept:prevent"].
+                              "click->collapse-fallback#intercept"].
                              compact.join(" "))
   end
 

@@ -1400,6 +1400,24 @@ class QueryTest < UnitTestCase
     assert_equal(query.q_param, { model: :Observation, **params })
   end
 
+  def test_index_filter
+    params = { by_users: [rolf.id], names: { lookup: ["Coprinus comatus"] } }
+    query = Query.lookup(:Observation, **params)
+    # Same params as q_param, but no :model.
+    assert_equal(query.index_filter, params)
+  end
+
+  def test_index_filter_excludes_routing_keys
+    query = Query.lookup(:Observation, by_users: [rolf.id])
+    # No query_attr is currently named these, but a future one could
+    # be -- defensively strip them so they can't clobber the route-
+    # helper args index_filter gets merged into.
+    query.params = query.params.merge(controller: "x", action: "y",
+                                      id: 1, format: "json")
+
+    assert_equal({ by_users: [rolf.id] }, query.index_filter)
+  end
+
   def test_merge_q_param_into_url
     assert_equal(
       "/observations", Query.merge_q_param_into_url("/observations", nil)
@@ -1427,6 +1445,34 @@ class QueryTest < UnitTestCase
       "q%5Blocations%5D%5B%5D=1&q%5Bmodel%5D=Observation",
       URI.parse(merged).query
     )
+  end
+
+  def test_merge_index_filters_into_url
+    assert_equal(
+      "/observations",
+      Query.merge_index_filters_into_url("/observations", nil)
+    )
+    assert_equal(
+      "/observations",
+      Query.merge_index_filters_into_url("/observations", {})
+    )
+    assert_equal(
+      "/observations?by_user=1",
+      Query.merge_index_filters_into_url("/observations", by_user: 1)
+    )
+    # Preserves an existing query param already on the path.
+    assert_equal(
+      "/observations?by_user=1&flow=next",
+      Query.merge_index_filters_into_url(
+        "/observations?flow=next", by_user: 1
+      )
+    )
+    # Flat, not nested under q[...] -- an array-valued filter still
+    # round-trips correctly via Hash#to_query.
+    merged = Query.merge_index_filters_into_url(
+      "/observations", locations: [1]
+    )
+    assert_equal("locations%5B%5D=1", URI.parse(merged).query)
   end
 
   ##############################################################################

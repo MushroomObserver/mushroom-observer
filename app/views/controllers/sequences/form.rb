@@ -26,7 +26,7 @@ module Views::Controllers::Sequences
       textarea_field(:locus,
                      rows: 1,
                      label: :locus.ti,
-                     between: :required,
+                     label_appends: :required,
                      wrap_class: "w-100")
     end
 
@@ -86,7 +86,7 @@ module Views::Controllers::Sequences
       textarea_field(:notes,
                      rows: 3,
                      label: :notes.ti,
-                     between: :optional)
+                     label_appends: :optional)
     end
 
     def render_notes_help
