@@ -347,14 +347,30 @@ class QueryTest < UnitTestCase
     # until permit_filters learned to tell enum hashes apart from
     # structural ones).
     assert_includes(filters, :location_undefined)
-    # Array-typed attrs permit via `attr: []`.
+    # Array-typed attrs permit both ways: bare symbol for the scalar
+    # URL form (`?projects=123`), `attr: []` for the array form
+    # (`?projects[]=123`). Array-only filters silently dropped the
+    # scalar form (the Name-show `?this_name=<id>` links).
     assert_equal([], containers[:by_users])
     assert_equal([], containers[:projects])
+    assert_includes(filters, :by_users)
+    assert_includes(filters, :projects)
+    assert_includes(filters, :this_name)
     # Structural hash-typed attrs, including subqueries, permit via
     # `attr: {}`.
     assert_equal({}, containers[:names])
     assert_equal({}, containers[:in_box])
     assert_equal({}, containers[:location_query])
+  end
+
+  def test_permit_filters_permits_array_typed_param_as_scalar
+    raw = ActionController::Parameters.new(this_name: "31346",
+                                           projects: "17")
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal("31346", permitted[:this_name])
+    assert_equal("17", permitted[:projects])
   end
 
   def test_permit_filters_permits_enum_hash_typed_param_as_scalar

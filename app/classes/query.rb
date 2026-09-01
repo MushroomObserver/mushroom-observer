@@ -382,7 +382,10 @@ class Query
   # ApplicationController::QueryParams#create_query_from_url_params use
   # to decide which top-level URL params are live index filters.
   # A scalar attr (or param_alias) permits as a bare symbol; an
-  # Array-typed attr permits via `attr: []`; a Hash-typed attr --
+  # Array-typed attr permits both as a bare symbol (its scalar URL
+  # form, wrapped into an array by
+  # QueryParams#resolve_scalar_query_param) and via `attr: []`; a
+  # Hash-typed attr --
   # including a subquery hash like `location_query: { subquery: :Location }`
   # -- permits via `attr: {}`, Rails' "allow this key with any nested
   # content" filter. Validating what's inside an Array/Hash value is
@@ -393,7 +396,13 @@ class Query
     scalars = []
     attribute_types.each do |attr, type|
       case type.accepts
-      when Array then containers[attr] = []
+      when Array
+        # Both forms: `?names=x` and `?names[]=x&names[]=y`. A bare
+        # `attr: []` filter makes strong params silently drop the
+        # scalar form, which turned the Name-show observation links
+        # (`?this_name=<id>`) into unfiltered indexes.
+        scalars << attr
+        containers[attr] = []
       when Hash
         if enum_hash?(type.accepts)
           scalars << attr

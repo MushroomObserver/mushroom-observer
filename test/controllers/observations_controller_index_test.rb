@@ -487,6 +487,28 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     end
   end
 
+  # The scalar form of an Array-typed attr (`?this_name=<id>`, the URL
+  # the Name-show observation links generate) must filter the index --
+  # an array-only permit filter dropped it silently, rendering the
+  # unfiltered index instead.
+  def test_index_this_name_scalar_param
+    name = names(:fungi)
+    ids = Observation.where(name: name).map(&:id)
+    assert(ids.length.positive?, "Test needs different fixture for 'name'")
+
+    login("zero")
+    get(:index, params: { this_name: name.id })
+
+    assert_response(:success)
+    assert_displayed_filters("#{:query_this_name.l}: #{name.text_name}")
+    ids.each do |id|
+      assert_select(
+        "a:match('href', ?)", %r{^/obs/#{id}}, true,
+        "Observations of this Name should link to each Observation"
+      )
+    end
+  end
+
   def test_index_user_by_known_user
     # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
