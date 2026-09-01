@@ -63,9 +63,9 @@ module Views::Layouts
     def test_menu_contains_mobile_only_sort_by_header
       html = render_sorter(query: query_with(num_results: 5))
 
-      # `menu_header:` slot — visible-xs `<li>` rendered above the
+      # `menu_header:` slot — mobile-only `<li>` rendered above the
       # section's links.
-      assert_html(html, "ul.dropdown-menu.sorts > li.visible-xs",
+      assert_html(html, "ul.dropdown-menu.sorts > li.d-block.d-sm-none",
                   text: "#{:sort_by_header.l}:")
     end
 

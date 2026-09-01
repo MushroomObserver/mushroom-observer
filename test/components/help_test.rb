@@ -40,7 +40,7 @@ class HelpTest < ComponentTestCase
     # is added on the up-pointing variant to leave room above for the
     # arrow tip.
     assert_html(html, "div.well.help-block.mt-3", text: "Help")
-    assert_html(html, "div.arrow-up.hidden-xs")
+    assert_html(html, "div.arrow-up.d-none.d-sm-block")
   end
 
   def test_arrow_down_omits_mt3
@@ -48,7 +48,7 @@ class HelpTest < ComponentTestCase
 
     # Down arrows hang below the well — no leading `mt-3`.
     assert_no_html(html, "div.mt-3")
-    assert_html(html, "div.arrow-down.hidden-xs")
+    assert_html(html, "div.arrow-down.d-none.d-sm-block")
   end
 
   def test_extra_class_appended_to_plain_block

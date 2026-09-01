@@ -76,12 +76,17 @@ module Views::Layouts
     end
 
     def render_page_label
-      render(Components::Navbar::Text.new(class: "mx-0 hidden-xs")) { :page.ti }
+      render(Components::Navbar::Text.new(
+               class: class_names("mx-0", Components::Column.mobile_hide_classes)
+             )) { :page.ti }
     end
 
     def render_max_page_link(max_page)
       max_url = pagination_link_url(max_page)
-      render(Components::Navbar::Text.new(class: "ml-0 mr-2 hidden-xs")) do
+      render(Components::Navbar::Text.new(
+               class: class_names("ml-0 mr-2",
+                                  Components::Column.mobile_hide_classes)
+             )) do
         :of.l
       end
       render(Components::Navbar::Text.new(class: "mx-0")) do

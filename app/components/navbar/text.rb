@@ -22,10 +22,10 @@
 #   render(Components::Navbar::Text.new(class: "mx-0")) { plain(:page.ti) }
 #
 # @example <li class="navbar-text"> wrapper
-#   render(Components::Navbar::Text.new(element: :li,
-#                                       class: "mx-0 hidden-xs")) do
-#     plain("Sort by:")
-#   end
+#   render(Components::Navbar::Text.new(
+#            element: :li,
+#            class: class_names("mx-0", Components::Column.mobile_hide_classes)
+#          )) { plain("Sort by:") }
 class Components::Navbar::Text < Components::Base
   prop :element, _Nilable(Symbol), default: nil
   prop :attributes, _Hash(Symbol, _Any), :**
