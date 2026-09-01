@@ -12,7 +12,7 @@ class Views::Controllers::Observations::Show::Namings::FooterLegend < Views::Bas
   def view_template
     Row do
       Column(sm: 11) do
-        div(class: "row") do
+        Row do
           Column(xs: 4, offset_xs: 4) do
             render_legend("vote-icon-yours", :show_namings_eye_help.t)
           end

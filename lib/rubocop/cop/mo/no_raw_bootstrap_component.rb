@@ -7,8 +7,8 @@ module RuboCop
       # top-level Bootstrap UI component MO already has a
       # `Components::*` wrapper for -- e.g. `div(class: "alert
       # alert-info")` instead of `Alert(level: :info)`. Detects a
-      # `div`/`ul`/`nav` tag call whose `class:` value is a string
-      # literal containing one of the known Bootstrap root classes
+      # `div`/`ul`/`nav`/`main` tag call whose `class:` value is a
+      # string literal containing one of the known root classes
       # below, and suggests the corresponding component.
       #
       # Scoped via this cop's Include/Exclude in .rubocop.yml -- the
@@ -30,7 +30,7 @@ module RuboCop
         MSG = "Don't hand-roll `.%<css_class>s` markup -- use " \
               "`%<component>s(...)` (Components::%<component>s) instead."
 
-        RESTRICT_ON_SEND = [:div, :ul, :nav].freeze
+        RESTRICT_ON_SEND = [:div, :ul, :nav, :main].freeze
 
         ROOT_CLASS_TO_COMPONENT = {
           "alert" => "Alert",
@@ -43,7 +43,14 @@ module RuboCop
           "panel" => "Panel",
           "carousel" => "Carousel",
           "input-group" => "InputGroup",
-          "btn-group" => "ButtonGroup"
+          "btn-group" => "ButtonGroup",
+          "row" => "Row",
+          # MO's fixed-width classes (see Components::Container), not
+          # Bootstrap's .container/.container-fluid mechanism.
+          "container-text" => "Container",
+          "container-text-image" => "Container",
+          "container-wide" => "Container",
+          "container-full" => "Container"
         }.freeze
 
         def on_send(node)

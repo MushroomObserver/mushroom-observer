@@ -15,7 +15,8 @@ module Views::Controllers::Names::Lifeforms
         t.column(nil) do |word|
           checkbox_field(word.to_sym, label: :"lifeform_#{word}")
         end
-        t.column(nil, class: "container-text") do |word|
+        t.column(nil,
+                 class: Components::Container.class_for(:text)) do |word|
           plain(lifeform_help_as_string(word))
         end
       end

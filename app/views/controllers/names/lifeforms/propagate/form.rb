@@ -28,7 +28,8 @@ module Views::Controllers::Names::Lifeforms::Propagate
         t.column(nil) do |word|
           checkbox_field(:"add_#{word}", label: :"lifeform_#{word}")
         end
-        t.column(nil, class: "container-text") do |word|
+        t.column(nil,
+                 class: Components::Container.class_for(:text)) do |word|
           plain(lifeform_help_as_string(word))
         end
       end
@@ -47,7 +48,8 @@ module Views::Controllers::Names::Lifeforms::Propagate
         t.column(nil) do |word|
           checkbox_field(:"remove_#{word}", label: :"lifeform_#{word}")
         end
-        t.column(nil, class: "container-text") do |word|
+        t.column(nil,
+                 class: Components::Container.class_for(:text)) do |word|
           plain(lifeform_help_as_string(word))
         end
       end
