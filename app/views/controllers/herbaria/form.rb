@@ -145,7 +145,8 @@ module Views::Controllers::Herbaria
         :place_name,
         type: :location,
         label: location_label,
-        between: :optional,
+        label_colon: false,
+        label_appends: :optional,
         controller_data: { map_target: "autocompleter" },
         controller_id: "herbarium_location_autocompleter",
         create_text: :form_observations_create_locality.l,
@@ -179,18 +180,18 @@ module Views::Controllers::Herbaria
 
     def render_contact_fields
       text_field(:email, label: :create_herbarium_email,
-                         between: :optional)
+                         label_appends: :optional)
       textarea_field(
         :mailing_address,
         label: :create_herbarium_mailing_address,
         rows: 5,
-        between: :optional
+        label_appends: :optional
       )
     end
 
     def render_notes_field
       textarea_field(:description, label: :notes.ti, rows: 10,
-                                   between: :optional)
+                                   label_appends: :optional)
     end
 
     def submit_text

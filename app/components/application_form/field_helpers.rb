@@ -11,9 +11,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Components::Button::Styling
 
     # Wrapper option keys that should not be passed to the field itself
-    WRAPPER_OPTIONS = [:label, :label_colon, :help, :help_collapse, :prefs,
-                       :inline, :wrap_class, :wrap_data, :between, :button,
-                       :button_data, :button_text, :button_href,
+    WRAPPER_OPTIONS = [:label, :label_colon, :help, :help_collapse,
+                       :help_placement, :prefs,
+                       :inline, :wrap_class, :wrap_data, :label_appends,
+                       :button, :button_data, :button_text, :button_href,
                        :button_variant, :button_size, :button_target,
                        :button_rel, :button_title, :button_icon, :addon,
                        :monospace, :label_class, :label_data, :label_aria,

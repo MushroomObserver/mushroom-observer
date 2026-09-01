@@ -177,17 +177,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def add_slots_to_field(field_component, &block)
-      # Add label_after buttons to between slot (after label)
-      # Also include user's custom between content if provided
-      field_component.with_between do
-        render(between_slot) if between_slot
-        render_label_after
-      end
+      # The caller's between content (block, between label row and
+      # field) passes straight through.
+      field_component.with_between { render(between_slot) } if between_slot
+
+      # has-id-indicator + find/keep/edit buttons sit inline with the
+      # label, inside the label row's flex container.
+      field_component.with_label_appends { render_label_after }
 
       # Add label_end buttons to label_end slot — only when content is
-      # actually present. Registering an empty slot makes
-      # `label_end_present?` return true and forces the label row into
-      # the d-flex path with an empty right side (see
+      # present. Registering an empty slot makes
+      # `label_appends_present?` return true and forces the label row
+      # into the d-flex path with an empty right side (see
       # FieldLabelRow#render_label_row).
       field_component.with_label_end { render_label_end } if create_text
 

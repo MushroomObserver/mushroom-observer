@@ -151,7 +151,7 @@ module Views::Controllers::Descriptions
     end
 
     def field_label(field)
-      append_colon(:"form_#{model_prefix}_#{field}".l)
+      :"form_#{model_prefix}_#{field}".l
     end
 
     def field_help(field)
