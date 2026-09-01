@@ -267,4 +267,44 @@ class ApplicationControllerTest < FunctionalTestCase
 
     assert_equal(1, @controller.send(:paginator_number, :page))
   end
+
+  # `index_filter`'s explicit `model:` argument guards against a
+  # stale/mismatched ambient current_query (session[:query_record]
+  # left over from browsing a different model) leaking that model's
+  # filter attrs onto an unrelated index link -- unlike q_param,
+  # which stays safe because it tags the mismatched query with
+  # :model for the receiving page to reconcile. Reproduces the
+  # scenario directly: an Observations query left in the session,
+  # then a page asking for a Name filter without one set for it.
+  def test_index_filter_rejects_mismatched_ambient_query
+    login("rolf")
+    get(:intro)
+    observation_query = Query.lookup_and_save(:Observation,
+                                              by_users: [rolf.id])
+    @controller.store_query_in_session(observation_query)
+
+    assert_nil(@controller.index_filter(:Name))
+  end
+
+  def test_index_filter_returns_filter_for_matching_ambient_query
+    login("rolf")
+    get(:intro)
+    name_query = Query.lookup_and_save(:Name, by_users: [rolf.id])
+    @controller.store_query_in_session(name_query)
+
+    assert_equal({ by_users: [rolf.id] }, @controller.index_filter(:Name))
+  end
+
+  def test_index_filter_with_explicit_query_checks_model_too
+    login("rolf")
+    get(:intro)
+    observation_query = Query.lookup_and_save(:Observation,
+                                              by_users: [rolf.id])
+
+    assert_nil(@controller.index_filter(:Name, observation_query))
+    assert_equal(
+      { by_users: [rolf.id] },
+      @controller.index_filter(:Observation, observation_query)
+    )
+  end
 end

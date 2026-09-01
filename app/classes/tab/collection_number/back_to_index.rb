@@ -3,10 +3,10 @@
 # "Back to collection_numbers index" link (used by the edit form
 # when arriving from the index). Carries the current Query through.
 class Tab::CollectionNumber::BackToIndex < Tab::Base
-  def initialize(collection_number:, q_param: nil)
+  def initialize(collection_number:, index_filter: nil)
     super()
     @collection_number = collection_number
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   def title
@@ -15,7 +15,7 @@ class Tab::CollectionNumber::BackToIndex < Tab::Base
 
   def path
     args = @collection_number.index_link_args
-    @q_param ? args.merge(q: @q_param) : args
+    @index_filter ? args.merge(@index_filter) : args
   end
 
   def model
