@@ -90,5 +90,16 @@ module Tab::CollectionNumber
       assert_equal(@collection_number.index_link_args, tab.path)
       assert_equal(@collection_number, tab.model)
     end
+
+    def test_back_to_index_with_index_filter
+      tab = Tab::CollectionNumber::BackToIndex.new(
+        collection_number: @collection_number, index_filter: { by_user: 1 }
+      )
+
+      assert_equal(1, tab.path[:by_user])
+      @collection_number.index_link_args.each do |k, v|
+        assert_equal(v, tab.path[k])
+      end
+    end
   end
 end
