@@ -7,8 +7,8 @@ module RuboCop
       # top-level Bootstrap UI component MO already has a
       # `Components::*` wrapper for -- e.g. `div(class: "alert
       # alert-info")` instead of `Alert(level: :info)`. Detects a
-      # `div`/`ul`/`nav`/`main` tag call whose `class:` value is a
-      # string literal containing one of the known root classes
+      # `div`/`ul`/`nav`/`main` tag call whose `class:`/`class!:` value
+      # is a string literal containing one of the known root classes
       # below, and suggests the corresponding component.
       #
       # Scoped via this cop's Include/Exclude in .rubocop.yml -- the
@@ -27,6 +27,8 @@ module RuboCop
       #   Alert(level: :info) { ... }
       #   Modal(id: "x") { ... }
       class NoRawBootstrapComponent < Base
+        include ClassKeywordPair
+
         MSG = "Don't hand-roll `.%<css_class>s` markup -- use " \
               "`%<component>s(...)` (Components::%<component>s) instead."
 
@@ -97,9 +99,7 @@ module RuboCop
           hash = node.arguments.find(&:hash_type?)
           return nil unless hash
 
-          pair = hash.pairs.find do |p|
-            p.key.sym_type? && p.key.value == :class
-          end
+          pair = hash.pairs.find { |p| class_keyword_pair?(p) }
           pair&.value
         end
 

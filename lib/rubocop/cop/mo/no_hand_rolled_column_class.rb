@@ -11,8 +11,8 @@ module RuboCop
       # parameterized by breakpoint and width, so this cop matches a
       # pattern instead of a fixed list.
       #
-      # Detects a string literal, used as a `class:` value or a
-      # `class_names(...)` argument, containing a `col-{breakpoint}-N`
+      # Detects a string literal, used as a `class:`/`class!:` value or
+      # a `class_names(...)` argument, containing a `col-{breakpoint}-N`
       # or `col-{breakpoint}-offset-N` token. Only plain string
       # literals are checked -- an interpolated class string
       # (`"col-lg-#{n}"`) isn't caught.
@@ -34,6 +34,8 @@ module RuboCop
       #   Column(xs: 12, sm: 6) { ... }
       #   Column(lg: 4, class: extra)
       class NoHandRolledColumnClass < Base
+        include ClassKeywordPair
+
         MSG = "Don't hand-roll `.col-*` grid classes -- use `Column(...)` " \
               "(Components::Column) instead."
 
@@ -54,11 +56,6 @@ module RuboCop
           return false unless parent
 
           class_keyword_pair?(parent) || class_names_argument?(parent)
-        end
-
-        def class_keyword_pair?(parent)
-          parent.pair_type? && parent.key.sym_type? &&
-            parent.key.value == :class
         end
 
         def class_names_argument?(parent)
