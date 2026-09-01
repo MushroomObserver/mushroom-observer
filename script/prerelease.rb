@@ -75,6 +75,8 @@ class Prerelease
          "(#{@pulls.size} PR(s) since #{@prev}) ===")
     puts
     puts(@section)
+    puts
+    puts
     puts("=== #{ARTICLE_FILE} (rows the deploy publishes to the " \
          "MO Article) ===")
     puts
