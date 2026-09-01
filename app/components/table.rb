@@ -28,6 +28,12 @@
 # etc.) are all plain kwargs forwarded to the `<table>` element.
 # `id:` is a first-class init arg.
 #
+# `t.footer { ... }` adds an optional `<tfoot>` row (one `<td
+# colspan="N">`, N = number of columns) after the body, independent
+# of column/row/body mode — use it for a table-level action row
+# that should turbo-stream-replace along with the rest of the table
+# rather than sit outside it as a separately-targeted element.
+#
 # @example Column mode (uniform rows)
 #   Table(@users, variant: :striped) do |t|
 #     t.column("Name") { |user| user.name }
@@ -94,6 +100,7 @@ class Components::Table < Components::Base
     @body_blocks = []
     @heading_block = nil
     @heading_attrs = {}
+    @footer_block = nil
     super
   end
 
@@ -106,6 +113,7 @@ class Components::Table < Components::Base
     table(**table_attributes) do
       render_thead if @show_headers
       render_tbody
+      render_tfoot if @footer_block
     end
   end
 
@@ -180,6 +188,20 @@ class Components::Table < Components::Base
     nil
   end
 
+  # Register a `<tfoot>` row rendered after the body — a single
+  # `<td>` with `colspan` = number of columns, for a table-level
+  # action row (a "create new" trigger + form, etc.) that gets
+  # swept up whenever the whole table is turbo-stream-replaced,
+  # instead of living as a separate element outside the table with
+  # a separate turbo-stream target.
+  #
+  # @yield block that renders the footer cell content
+  # @return [nil]
+  def footer(&block)
+    @footer_block = block
+    nil
+  end
+
   private
 
   def table_attributes
@@ -239,6 +261,12 @@ class Components::Table < Components::Base
       @columns.each do |column|
         td(**column[:attributes]) { column[:content].call(row) }
       end
+    end
+  end
+
+  def render_tfoot
+    tfoot do
+      tr { td(colspan: @columns.length, &@footer_block) }
     end
   end
 end

@@ -42,11 +42,8 @@ class Components::Form::Search < Components::ApplicationForm
   # Superform::Rails::Form constructor kwargs, no form_tag override
   # needed. This form is always Turbo-submitted (`turbo: true`,
   # unconditionally -- Searchable#create always redirects, so there's
-  # no same-URL-200 risk either way), via the base class's own
-  # `turbo:` prop rather than a hand-built `data:` hash -- which also
-  # lets ApplicationForm#around_template's own form-feedback
-  # controller merge in normally instead of being silently dropped by
-  # a data hash built from scratch.
+  # no same-URL-200 risk either way), via the base class's `turbo:`
+  # prop so `around_template` sets `data-turbo` correctly.
   def initialize(model, search_controller:, context: :page, **props)
     type = search_controller.search_type
     data = {

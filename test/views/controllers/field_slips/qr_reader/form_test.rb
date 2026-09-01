@@ -22,7 +22,6 @@ module Views::Controllers::FieldSlips::QRReader
 
     def test_form_has_default_id_and_data_controller
       assert_html(@html, "form#qr_reader_form")
-      # Token match: every ApplicationForm also carries form-feedback.
       assert_html(@html, "form[data-controller~='qr-reader']")
     end
 

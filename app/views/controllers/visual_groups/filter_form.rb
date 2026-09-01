@@ -20,7 +20,7 @@ module Views::Controllers::VisualGroups
     # FormObject internally.
     def initialize(_model = nil, visual_group:, status:, filter:, **)
       super(FormObject::VisualGroupFilter.new(status:, filter:),
-            visual_group: visual_group, turbo: false, **)
+            visual_group: visual_group, turbo: true, **)
     end
 
     def view_template
