@@ -383,6 +383,33 @@ module Account
       assert_flash(:runtime_prefs_success)
     end
 
+    def test_update_turbo_stream_theme_change_adds_refresh_stream
+      login("rolf")
+      rolf.update(theme: "Agaricus")
+
+      patch(:update,
+            params: { user: { theme: "Cyberland" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_select("turbo-stream[action='refresh']")
+      assert_equal("Cyberland", rolf.reload.theme)
+    end
+
+    def test_update_turbo_stream_no_theme_change_omits_refresh_stream
+      login("rolf")
+      rolf.update(theme: "Agaricus")
+
+      patch(:update,
+            params: { user: { theme: "Agaricus" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_select("turbo-stream[action='refresh']", count: 0)
+    end
+
     def test_update_turbo_stream_failure
       login("rolf")
 

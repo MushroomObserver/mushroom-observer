@@ -18,7 +18,9 @@ module Account
       success = prefs_changed_successfully
 
       respond_to do |format|
-        format.turbo_stream { render(turbo_stream: turbo_stream_flash_update) }
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream_update_response(success))
+        end
         format.html { render_update_response(success) }
       end
     end
@@ -188,6 +190,19 @@ module Account
         result = true
       end
       result
+    end
+
+    # The turbo_stream branch only patches the flash slot, so a theme
+    # change doesn't reach the <body class> / stylesheet <link> that
+    # apply it. `request_id: nil` is required -- Turbo skips a refresh
+    # whose request-id matches the request that just submitted the
+    # form, which `turbo_stream.refresh`'s default request-id would.
+    def turbo_stream_update_response(success)
+      streams = [turbo_stream_flash_update]
+      if success && @user.saved_change_to_theme?
+        streams << turbo_stream.refresh(request_id: nil)
+      end
+      streams
     end
 
     # Table for converting form value to object value
