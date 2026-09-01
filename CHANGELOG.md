@@ -16,6 +16,10 @@
 - Fix stale disabled/spinner submit button after browser Back; delete `form-feedback_controller.js` ([PR5278](https://github.com/MushroomObserver/mushroom-observer/pull/5278), @nimmolo)
 - SolidQueue batches migration ([PR5277](https://github.com/MushroomObserver/mushroom-observer/pull/5277), @JoeCohen)
 
+## 2026-09-01 (deploy-2026-09-01-07-49)
+
+- Changelog for `deploy-2026-09-01-11-59` ([PR5282](https://github.com/MushroomObserver/mushroom-observer/pull/5282), @mo-nathan)
+
 ## 2026-08-29 (deploy-2026-08-29-11-00)
 
 - Add Observation filter by external site (`Observation.external_sites`, search-form UI) ([PR5251](https://github.com/MushroomObserver/mushroom-observer/pull/5251), @nimmolo)
