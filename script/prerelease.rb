@@ -25,6 +25,7 @@
 
 require("json")
 require("open3")
+require("tempfile")
 require("tmpdir")
 require_relative("generate_changelog")
 require_relative("article_rows")
@@ -42,37 +43,57 @@ class Prerelease
   end
 
   def run
+    warn("Fetching tags and main from origin...")
     run_cmd("git", "fetch", "origin", "--tags")
-    # Local time, matching deploy.sh's `date "+deploy-%Y-%m-%d-%H-%M"`.
-    @tag = Time.now. # rubocop:disable Rails/TimeZone -- plain Ruby
-           strftime("deploy-%Y-%m-%d-%H-%M")
     generator = ChangelogGenerator.new([])
-    @prev, pulls = generator.pending_pulls(exclude_branch: BRANCH)
-    abort("No PRs merged since #{@prev}; nothing to prepare.") if pulls.empty?
-
-    @section = generator.pending_section(@tag, pulls)
-    @rows, @skipped, @blockless = ArticleRows.new.rows_for(pulls)
+    collect_pending(generator)
     @apply ? apply(generator) : preview
   end
 
   private
 
-  def preview
-    puts(@section)
-    puts("-- #{ARTICLE_FILE} --")
-    puts(@rows.empty? ? "(no article rows)" : @rows)
-    warn_blockless
-    warn("Dry run - nothing written. To apply: script/prerelease.rb --apply")
+  def collect_pending(generator)
+    # UTC: the server clock deploy.sh's `date` stamps tags with. A
+    # developer's local clock can run hours behind it, which would mint
+    # a name that sorts before the newest deployed tag.
+    @tag = Time.now.
+           utc.strftime("deploy-%Y-%m-%d-%H-%M")
+    warn("Collecting merged PRs from GitHub (several queries; ~10-20s)...")
+    @prev, @pulls = generator.pending_pulls(exclude_branch: BRANCH)
+    abort("No PRs merged since #{@prev}; nothing to prepare.") if
+      @pulls.empty?
+    warn("Found #{@pulls.size} PR(s) merged since #{@prev}.\n\n")
+
+    @section = generator.pending_section(@tag, @pulls)
+    @rows, @skipped, @blockless = ArticleRows.new.rows_for(@pulls)
   end
 
-  def warn_blockless
+  def preview
+    puts("Pending deploy: #{@tag}")
+    puts
+    puts("=== CHANGELOG.md section " \
+         "(#{@pulls.size} PR(s) since #{@prev}) ===")
+    puts
+    puts(@section)
+    puts("=== #{ARTICLE_FILE} (rows the deploy publishes to the " \
+         "MO Article) ===")
+    puts
+    puts(@rows.empty? ? "(none - no article: yes PRs)" : @rows)
+    puts
+    preview_blockless
+    puts("Dry run - nothing written. To apply: script/prerelease.rb --apply")
+  end
+
+  def preview_blockless
     return if @blockless.empty?
 
-    warn("#{@blockless.size} PR(s) with no changelog block " \
-         "(listed in the PR body for a verdict):")
+    puts("=== #{@blockless.size} PR(s) with no changelog block " \
+         "(need a verdict) ===")
+    puts
     @blockless.each do |pull|
-      warn("  PR##{pull["number"]} #{pull["title"]}")
+      puts("  PR##{pull["number"]} #{pull["title"]}")
     end
+    puts
   end
 
   def apply(generator)
@@ -81,6 +102,7 @@ class Prerelease
   end
 
   def push_branch(generator)
+    warn("Building #{BRANCH} in a temporary worktree...")
     Dir.mktmpdir("prerelease") do |tmp|
       dir = File.join(tmp, "wt")
       run_cmd("git", "worktree", "add", "--detach", dir, "origin/main")
@@ -106,15 +128,24 @@ class Prerelease
     end
   end
 
+  # The temp file must outlive the gh call; Tempfile.create's block
+  # guarantees that, then removes it.
   def upsert_pr
-    number = existing_pr
-    if number
+    Tempfile.create(["prerelease_pr_body", ".md"]) do |file|
+      file.write(pr_body)
+      file.flush
+      submit_pr(file.path)
+    end
+  end
+
+  def submit_pr(body_path)
+    if (number = existing_pr)
       run_cmd("gh", "pr", "edit", number.to_s, "--title", title,
-              "--body-file", body_file)
+              "--body-file", body_path)
       warn("Updated PR ##{number} (#{BRANCH}).")
     else
       out = run_cmd("gh", "pr", "create", "--draft", "--head", BRANCH,
-                    "--title", title, "--body-file", body_file)
+                    "--title", title, "--body-file", body_path)
       warn("Created #{out.strip}")
     end
   end
