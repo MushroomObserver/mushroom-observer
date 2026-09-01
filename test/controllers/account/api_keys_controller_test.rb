@@ -68,11 +68,9 @@ module Account
       assert_select("button[type='submit']")
       # Posts to the same `create` action as the inline form.
       assert_select("form[action='#{account_api_keys_path}']")
-      # Not Turbo-enabled -- see .claude/rules/turbo_submit_forms.md:
-      # #create only knows how to reply to a turbo_stream request by
-      # replacing #account_api_keys_table, which doesn't exist on
-      # this standalone page.
-      assert_select("form#new_api_key_form[data-turbo='false']")
+      assert_select("form#new_api_key_form[data-turbo='true']")
+      # Makes #create redirect instead of responding turbo_stream.
+      assert_select("input[name='full_page_form'][value='true']")
     end
 
     # No-JS fallback, same rationale as test_new_renders_standalone_create_form.
@@ -84,7 +82,8 @@ module Account
 
       assert_response(:success)
       assert_select("input[name='api_key[notes]']")
-      assert_select("form#account_edit_api_key_form[data-turbo='false']")
+      assert_select("form#account_edit_api_key_form[data-turbo='true']")
+      assert_select("input[name='full_page_form'][value='true']")
     end
 
     def test_update_api_key
@@ -125,6 +124,22 @@ module Account
       assert(mary.reload.api_keys.any? { |k| k.notes == "via turbo" })
     end
 
+    # The standalone form's hidden field must win even when the
+    # request carries a turbo_stream Accept header (as a Turbo-
+    # enabled form always does) -- #account_api_keys_table doesn't
+    # exist on the standalone page for that response to target.
+    def test_create_from_standalone_page_redirects
+      login("mary")
+
+      post(:create,
+           params: { api_key: { notes: "from standalone" },
+                     full_page_form: "true" },
+           format: :turbo_stream)
+
+      assert_redirected_to(account_api_keys_path)
+      assert(mary.reload.api_keys.any? { |k| k.notes == "from standalone" })
+    end
+
     def test_update_via_turbo_stream
       key = mary.api_keys.create(notes: "before")
       login("mary")
@@ -137,6 +152,20 @@ module Account
       assert_select(
         "turbo-stream[action='replace'][target='account_api_keys_table']"
       )
+      assert_equal("after", key.reload.notes)
+    end
+
+    # Same rationale as test_create_from_standalone_page_redirects.
+    def test_update_from_standalone_page_redirects
+      key = mary.api_keys.create(notes: "before")
+      login("mary")
+
+      patch(:update,
+            params: { id: key.id, api_key: { notes: "after" },
+                      full_page_form: "true" },
+            format: :turbo_stream)
+
+      assert_redirected_to(account_api_keys_path)
       assert_equal("after", key.reload.notes)
     end
 

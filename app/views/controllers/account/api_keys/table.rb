@@ -2,7 +2,11 @@
 
 module Views::Controllers::Account::APIKeys
   # Renders the account/api_keys index page table — the list of
-  # the user's keys plus the "+ Add Key" accordion below.
+  # the user's keys, with the "+ Add Key" accordion in a `<tfoot>`
+  # row so it turbo-stream-replaces along with the rest of the
+  # table instead of being left stale (still expanded, still
+  # showing the just-submitted value) when only the table used to
+  # be the turbo-stream target.
   # Shared between the index page render and the post-CUD
   # turbo_stream response (which replaces just this block).
   class Table < Views::Base
@@ -10,7 +14,6 @@ module Views::Controllers::Account::APIKeys
 
     def view_template
       render_keys_table
-      render_new_form_panel
     end
 
     private
@@ -41,6 +44,7 @@ module Views::Controllers::Account::APIKeys
                class: "table-striped"
              )) do |t|
         register_table_columns(t)
+        t.footer { render_new_form_panel }
       end
     end
 

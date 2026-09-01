@@ -112,7 +112,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
 
     # One filter form on the page, with form-inline shell.
     assert_select(
-      "form#visual_group_filters_form.form-inline[data-turbo='false']",
+      "form#visual_group_filters_form.form-inline[data-turbo='true']",
       count: 1
     ) do
       # Hidden status field carries the current status when the user
