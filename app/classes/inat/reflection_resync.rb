@@ -153,28 +153,22 @@ class Inat
     end
 
     # Is the MO importer the iNat observer?
-    # Compares to the account's login, not #collector -- a
-    # custom Collector observation field can name someone who does
-    # not the iNat observer.
     def importer_is_collector?(obs, inat_obs)
       obs.user.inat_username.present? &&
         obs.user.inat_username.casecmp?(inat_obs[:user][:login].to_s)
     end
 
-    # Rebuild the placeholder as a full import, in the same row.
-    # Change only the row's columns and Namings.
-    # Keep the id, Comments, and Occurrence.
-    #
-    # When the importer is the iNat collector, set import_others: false,
-    # as for a direct import -- unlicensed photos then import too. Else,
-    # when only the now-licensed trigger fired, keep import_others true.
-    # Per-photo license checks then decide each photo separately.
-    #
-    # Don't suppress notifications. A batch import has a digest to
-    # catch them. A lone sync doesn't.
+    # Rebuild the placeholder in place as a full import,
+    # retaining Id, Comments, Occurrence, and
+    # build a fresh set of Namings.
+    # Don't suppress notifications since a lone sync, unlike a batch import,
+    # has no digest to catch them.
     def upgrade_placeholder(obs, inat_obs)
       Inat::MoObservationBuilder.new(
         inat_obs: inat_obs, user: obs.user, observation: obs,
+        # If the importer is the iNat collector, set import_others: false
+        # so that unlicensed photos import.
+        # Else photo imports depend on per-photo license checks.
         import_others: !importer_is_collector?(obs, inat_obs)
       ).mo_observation
       mark_synced(obs)
