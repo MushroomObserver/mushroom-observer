@@ -68,7 +68,7 @@ module Views::Controllers::Translations
     def render_official_section
       div(id: "translation_official") do
         h4(class: "font-weight-bold") do
-          plain("#{Language.official.name}:")
+          append_colon(Language.official.name)
         end
         render_official_tags
         hr(class: "pb-1 pt-3")
@@ -85,7 +85,7 @@ module Views::Controllers::Translations
     end
 
     def render_official_tag(ttag, record)
-      span(class: "underline") { plain("#{ttag}:") }
+      span(class: "underline") { append_colon(ttag) }
       p do
         str = record.text.gsub("\\n", "\n")
         render_multiline_text(str)
@@ -103,7 +103,7 @@ module Views::Controllers::Translations
 
     def render_language_header
       h4(class: "font-weight-bold mt-3") do
-        plain("#{@lang.name}:")
+        append_colon(@lang.name)
       end
     end
 

@@ -27,7 +27,7 @@ module Views::Controllers::Descriptions::Merges
     end
 
     def view_template
-      h4 { "#{:merge_descriptions_merge_header.t}:" }
+      h4 { append_colon(:merge_descriptions_merge_header.t) }
       Help(element: :p,
            content: :merge_descriptions_merge_help.t)
 

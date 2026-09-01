@@ -88,7 +88,8 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
     title, url, opts = tab.to_a
     label, count = split_title_and_count(title)
     a(href: url, **link_attrs(opts)) { plain(label) }
-    plain(" #{count}")
+    whitespace
+    plain(count.to_s)
   end
 
   # `Tab::Name::ObsLink#title` is always `"label (N)"` — split into
@@ -104,7 +105,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
 
   def render_research_links_column
     Column(xs: 12, sm: 6) do
-      p(class: "m-0") { plain("#{:research_links.l}:") }
+      p(class: "m-0") { append_colon(:research_links.l) }
       ul(class: "list-unstyled pl-3") { render_research_links }
     end
   end

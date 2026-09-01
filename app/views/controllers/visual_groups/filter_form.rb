@@ -70,7 +70,7 @@ module Views::Controllers::VisualGroups
     def render_status_button_row
       div(class: "d-flex gap-2 align-items-center mb-3") do
         strong(class: "mb-0") do
-          plain("#{:edit_visual_group_filter_options.t}:")
+          append_colon(:edit_visual_group_filter_options.t)
         end
         ButtonGroup do
           STATUSES.each do |(value, label_key)|

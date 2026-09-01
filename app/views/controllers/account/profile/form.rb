@@ -78,7 +78,7 @@ module Views::Controllers::Account::Profile
 
     def image_file_label
       key = model.image_id ? :profile_image_change : :profile_image_create
-      "#{key.t}:"
+      append_colon(key.t)
     end
   end
 end

@@ -50,8 +50,7 @@ class Views::Layouts::Sidebar
              )) do |css_class|
         Link(type: :collapse_toggle, target_id: COLLAPSE_ID,
              id: TOGGLE_ID, class: css_class) do
-          plain("#{:app_languages.t}:")
-          whitespace
+          trusted_html(append_colon(:app_languages.t))
           span(class: "lang-flag-emoji") do
             plain(Components::LanguageSwitchButton.flag_for(I18n.locale))
           end

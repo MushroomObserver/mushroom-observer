@@ -54,8 +54,9 @@ module Views::Controllers::FieldSlips
 
     def render_existing_prefix_block
       div(class: "mt-3") do
-        b { plain("#{:show_project_field_slip_prefix.t}:") }
-        plain(" #{@project.field_slip_prefix} ")
+        b { trusted_html(append_colon(:show_project_field_slip_prefix.t)) }
+        plain(@project.field_slip_prefix.to_s)
+        whitespace
         if @project.member?(current_user)
           Button(
             type: :get,
@@ -115,7 +116,7 @@ module Views::Controllers::FieldSlips
     def row_prepend(field_slip)
       capture do
         h4 do
-          strong { plain("#{:field_slip_code.l}: ") }
+          strong { trusted_html(append_colon(:field_slip_code.l)) }
           Link(type: :get, name: field_slip.code, target: field_slip,
                class: "field_slip_link_#{field_slip.id}")
           br

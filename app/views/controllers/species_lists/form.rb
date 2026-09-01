@@ -102,7 +102,7 @@ module Views::Controllers::SpeciesLists
 
     def render_project_checkboxes
       div(class: "form-group") do
-        label(for: "project") { plain("#{:projects.ti}:") }
+        label(for: "project") { append_colon(:projects.ti) }
         Help(
           content: :form_species_lists_project_help.t
         )

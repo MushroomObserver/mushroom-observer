@@ -54,8 +54,7 @@ module Views::Controllers::Projects
 
     def render_meta_row
       div do
-        small { plain(append_colon(@project.created_at.web_time)) }
-        whitespace
+        small { trusted_html(append_colon(@project.created_at.web_time)) }
         Link(type: :user, user: @project.user)
       end
     end

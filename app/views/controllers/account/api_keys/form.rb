@@ -125,7 +125,7 @@ module Views::Controllers::Account::APIKeys
 
     def metadata_row(label_text, value)
       tr do
-        td { plain("#{label_text}: ") }
+        td { trusted_html(append_colon(label_text)) }
         td { plain(value) }
       end
     end

@@ -26,6 +26,8 @@ class Components::Form::Errors < Components::Base
   def error_count_message
     count = @model.errors.count
     word = pluralize_tag(:error, count).t
-    "#{count} #{word} #{:errors_prohibited_save.t(type: @model.type_tag.ti)}:"
+    append_colon(
+      "#{count} #{word} #{:errors_prohibited_save.t(type: @model.type_tag.ti)}"
+    )
   end
 end

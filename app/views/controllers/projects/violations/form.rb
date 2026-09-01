@@ -27,7 +27,7 @@ module Views::Controllers::Projects::Violations
 
     def view_template
       h4 do
-        trusted_html("#{:project.ti}: ")
+        trusted_html(append_colon(:project.ti))
         Link(type: :object, object: @project)
       end
 
@@ -76,7 +76,8 @@ module Views::Controllers::Projects::Violations
         class: "observation_link_#{obs.id}") do
         trusted_html(obs.text_name)
       end
-      plain(" (#{obs.id})")
+      whitespace
+      plain("(#{obs.id})")
     end
 
     def kind_label(kind)
