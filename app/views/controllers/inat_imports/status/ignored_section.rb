@@ -35,7 +35,7 @@ module Views::Controllers::InatImports
         return unless count.to_i.positive?
 
         div(class: "mb-1") do
-          b { plain("#{caption_key.l}: ") }
+          b { append_colon(caption_key.l) }
           plain(count.to_s)
         end
       end
@@ -46,7 +46,7 @@ module Views::Controllers::InatImports
 
         ids = @inat_import.date_missing_inat_ids
         div(class: "mb-1") do
-          b { plain("#{:inat_import_tracker_ignored_date_missing.l}: ") }
+          b { append_colon(:inat_import_tracker_ignored_date_missing.l) }
           plain(count.to_s)
           render_date_missing_reimport_link(ids) if ids.any?
         end
@@ -69,7 +69,7 @@ module Views::Controllers::InatImports
           h5 { plain(:inat_import_tracker_license_added_heading.l) }
           div do
             plain(:inat_import_tracker_license_added_note.t(count: ids.size))
-            plain(" ")
+            whitespace
             render_license_added_reimport_link(ids)
           end
         end

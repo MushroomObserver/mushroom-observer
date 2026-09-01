@@ -111,7 +111,7 @@ module Views::Controllers::InatImports
 
       def render_ignored_row(caption_key, count, url)
         div(class: "mb-1") do
-          b { plain("#{caption_key.l}: ") }
+          b { append_colon(caption_key.l) }
           if url
             render(Components::Link::External.new(content: count.to_s,
                                                   path: url))
@@ -130,7 +130,7 @@ module Views::Controllers::InatImports
       # distinguishable from a genuine zero.
       def unlicensed_ignored_row
         div(class: "mb-1") do
-          b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
+          b { append_colon(:inat_import_confirm_unlicensed_obs_caption.l) }
           span(id: "unlicensed_obs_count") { render_unlicensed_count }
           if @unlicensed_obs.to_i.positive?
             whitespace
