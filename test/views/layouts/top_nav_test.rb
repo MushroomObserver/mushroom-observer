@@ -212,7 +212,8 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
     # navbar-nav/navbar-right literals.
-    assert_html(html, "ul.nav.navbar-nav.navbar-right.hidden-xs.mr-0")
+    assert_html(html,
+                "ul.nav.navbar-nav.navbar-right.d-none.d-sm-block.mr-0")
   end
 
   private

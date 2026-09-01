@@ -72,7 +72,7 @@ module Views::Controllers::Images
         css = current == value ? "font-weight-bold" : ""
         Row do
           Column(xs: 12, sm: 6) { render_vote_link(value, css) }
-          Column(xs: 12, sm: 6, class: "hidden-xs") do
+          Column(xs: 12, sm: 6, hide_at: :xs, show_at: :sm) do
             render_vote_and_next_link(value, css)
           end
         end

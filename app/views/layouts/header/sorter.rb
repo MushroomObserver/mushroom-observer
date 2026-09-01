@@ -25,8 +25,11 @@ module Views::Layouts
       return unless visible?
 
       ul(class: "list-unstyled flex-bar pl-3 sorter") do
-        render(Components::Navbar::Text.new(element: :li,
-                                            class: "mx-0 hidden-xs")) do
+        render(Components::Navbar::Text.new(
+                 element: :li,
+                 class: class_names("mx-0",
+                                    Components::Column.mobile_hide_classes)
+               )) do
           append_colon(:sort_by_header.l)
         end
         Dropdown(
@@ -62,7 +65,7 @@ module Views::Layouts
     # `<ul>` via `trusted_html`.
     def mobile_header_html
       capture do
-        li(class: "visible-xs") do
+        li(class: class_names(Components::Column.mobile_only_classes)) do
           a(href: "#", disabled: true, class: "opacity-75") do
             append_colon(:sort_by_header.l)
           end
