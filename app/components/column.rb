@@ -27,8 +27,16 @@
 #   Column(show_at: :xs, hide_at: :sm) { render_mobile_only }
 #
 # @example Non-Column element needing only the visibility classes
-#   (replaces bare BS3 `.hidden-xs`)
-#   span(class: class_names("foo", Components::Column.mobile_hide_classes))
+#   (replaces bare BS3 `.hidden-xs` on a block-level element)
+#   div(class: class_names("foo", Components::Column.mobile_hide_classes))
+#
+# @example Same, on an inline element -- BS3's `.hidden-xs` did not set
+#   a display type on the visible side, so an inline element (a `span`,
+#   an `a`) needs the `display:` override; otherwise it becomes a block
+#   box from `sm` up.
+#   span(class: class_names(
+#     Components::Column.mobile_hide_classes(display: :inline)
+#   ))
 #
 # @example Non-Column element, a different visibility pattern
 #   (replaces BS3 `.visible-xs-inline`)
@@ -85,17 +93,21 @@ class Components::Column < Components::Base
   # non-Column elements. `class_names("foo", mobile_hide_classes)`.
   #
   # Hidden at xs, visible from sm up (desktop-only; replaces bare
-  # BS3 `.hidden-xs`).
-  def self.mobile_hide_classes
-    visibility_classes(hide_at: :xs, show_at: :sm)
+  # BS3 `.hidden-xs`). `display:` defaults to `:block`, matching a
+  # block-level caller (`div`, `li`, ...) -- pass `display: :inline`/
+  # `:"inline-block"` for a naturally-inline element (`span`, `a`):
+  # BS3's `.hidden-xs` did not set a display type on the visible side.
+  def self.mobile_hide_classes(display: :block)
+    visibility_classes(hide_at: :xs, show_at: :sm, display: display)
   end
 
   # Visible at xs only, hidden from sm up (mobile-only; replaces bare
   # BS3 `.visible-xs`). Named to match the `:mobile_only` terminology
   # already used at call sites like `Views::Layouts::Sidebar::
-  # CSS_CLASSES`.
-  def self.mobile_only_classes
-    visibility_classes(show_at: :xs, hide_at: :sm)
+  # CSS_CLASSES`. `display:` defaults to `:block`, matching BS3's
+  # bare `.visible-xs` (itself `display: block !important`).
+  def self.mobile_only_classes(display: :block)
+    visibility_classes(show_at: :xs, hide_at: :sm, display: display)
   end
 
   # `xs` is Bootstrap 3's mobile-first base -- there's no `d-xs-*` class,

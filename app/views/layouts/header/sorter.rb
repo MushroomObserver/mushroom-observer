@@ -27,7 +27,8 @@ module Views::Layouts
       ul(class: "list-unstyled flex-bar pl-3 sorter") do
         render(Components::Navbar::Text.new(
                  element: :li,
-                 class: class_names("mx-0", Components::Column.mobile_hide_classes)
+                 class: class_names("mx-0",
+                                    Components::Column.mobile_hide_classes)
                )) do
           append_colon(:sort_by_header.l)
         end

@@ -106,7 +106,9 @@ class Components::Form::PatternSearch < Components::ApplicationForm
         span(class: "d-sm-none") do
           Icon(type: :search)
         end
-        span(class: class_names(Components::Column.mobile_hide_classes)) do
+        span(class: class_names(
+          Components::Column.mobile_hide_classes(display: :inline)
+        )) do
           plain(:app_search.l)
         end
       end

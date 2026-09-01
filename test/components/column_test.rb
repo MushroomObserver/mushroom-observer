@@ -40,9 +40,21 @@ class ColumnTest < ComponentTestCase
                  Components::Column.mobile_hide_classes)
   end
 
+  def test_mobile_hide_classes_shorthand_display_override
+    assert_equal(%w[d-none d-sm-inline],
+                 Components::Column.mobile_hide_classes(display: :inline))
+  end
+
   def test_mobile_only_classes_shorthand
     assert_equal(%w[d-block d-sm-none],
                  Components::Column.mobile_only_classes)
+  end
+
+  def test_mobile_only_classes_shorthand_display_override
+    assert_equal(%w[d-inline-block d-sm-none],
+                 Components::Column.mobile_only_classes(
+                   display: :"inline-block"
+                 ))
   end
 
   def test_default_renders_div_with_no_width_classes

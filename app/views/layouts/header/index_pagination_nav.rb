@@ -77,7 +77,8 @@ module Views::Layouts
 
     def render_page_label
       render(Components::Navbar::Text.new(
-               class: class_names("mx-0", Components::Column.mobile_hide_classes)
+               class: class_names("mx-0",
+                                  Components::Column.mobile_hide_classes)
              )) { :page.ti }
     end
 

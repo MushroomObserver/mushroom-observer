@@ -15,7 +15,9 @@
 #     variant: :outline, class: "px-2"
 #   ) do
 #     span(class: "d-sm-none") { Icon(type: :search) }
-#     span(class: class_names(Components::Column.mobile_hide_classes)) do
+#     span(class: class_names(
+#            Components::Column.mobile_hide_classes(display: :inline)
+#          )) do
 #       plain(:search.ti)
 #     end
 #   end
