@@ -127,17 +127,19 @@ class Inat::ImportDigestTest < UnitTestCase
     end
 
     # Dick's digest should still be enqueued even though Katrina's
-    # mailer build raised. Rails.logger.error is stubbed silent here --
-    # ImportDigest#deliver_one deliberately logs the isolated failure
-    # (see import_digest.rb), and that log line printing during this
-    # test's intentional "boom" is expected output, not a test failure.
-    assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
-      Rails.logger.stub(:error, nil) do
+    # mailer build raised. Capture the rescue's Rails.logger.error call
+    # instead of letting it through -- the test logger writes to
+    # $stdout, so the deliberate "boom" otherwise dumps into the
+    # suite's console output looking like a failure elsewhere.
+    logged = nil
+    Rails.logger.stub(:error, ->(msg) { logged = msg }) do
+      assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
         InatImportDigestMailer.stub(:build, failing_build) do
           Inat::ImportDigest.deliver_for(@import)
         end
       end
     end
+    assert_includes(logged, "boom")
   end
 
   private

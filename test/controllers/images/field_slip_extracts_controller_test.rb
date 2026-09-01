@@ -67,9 +67,10 @@ module Images
     # slip was transcribed right.
     def test_edit_allowed_for_a_project_admin
       record_extract(fields: { "Collector" => "A" })
-      join_project_as_admin(mary)
+      join_project_as_admin(rolf)
 
-      assert(@project.is_admin?(mary), "premise: mary administers it")
+      assert(@obs.reload.can_edit?(rolf), "premise: rolf can edit the obs")
+      assert_not_equal(rolf, @image.user, "premise: not the image owner")
       get(:edit, params: { image_id: @image.id })
 
       assert_response(:success)
@@ -167,18 +168,15 @@ module Images
       assert_response(:success)
     end
 
-    # ...and can land before the observation is even in its project,
-    # when `permitted?` has nothing to check against. Waiting on your
-    # own upload needs only ownership; the review form still needs
-    # project admin-ship.
-    def test_owner_may_wait_on_their_own_upload_before_project_filing
+    # The collector may watch their read progress even before the
+    # observation has joined any project -- permission is edit rights
+    # on the observation, not the observation's project membership.
+    def test_owner_sees_their_pending_read
       owner = @obs.user
       login(owner.login)
 
-      assert_not(
-        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
-        "premise: ownership alone, no project admin-ship"
-      )
+      assert(@obs.can_edit?(owner), "premise: owner can edit the observation")
+      assert(FieldSlipExtract.permitted?(image: @image, user: owner))
 
       FieldSlipExtract.start!(image: @image, user: owner)
 
@@ -188,21 +186,21 @@ module Images
       assert_select("[data-controller='reload-poll']")
     end
 
-    def test_owner_alone_may_not_review_a_completed_extract
+    # The fix for the field-scanner lockout: a constraint-violating
+    # location kept the observation out of its project, and the old
+    # policy then denied the collector the review. The owner now reviews
+    # their completed read.
+    def test_owner_may_review_their_completed_extract
       owner = @obs.user
       login(owner.login)
 
-      assert_not(
-        FieldSlipExtract.permitted?(image: @image.reload, user: owner),
-        "premise: ownership alone, no project admin-ship"
-      )
-
-      record_extract(fields: { "Collector" => "A" })
+      assert(@obs.can_edit?(owner), "premise: owner can edit the observation")
+      record_extract(fields: { "Collector" => "Scott Shapiro" })
 
       get(:edit, params: { image_id: @image.id })
 
-      assert_redirected_to(image_path(@image.id))
-      assert_flash_error
+      assert_response(:success)
+      assert_select("input[name='value[Collector]'][value='Scott Shapiro']")
     end
 
     def test_edit_renders_the_rows_and_the_name_section
@@ -482,6 +480,32 @@ module Images
 
       assert_equal(slip.reload.occurrence, @obs.occurrence)
       assert_equal(@obs.id, @obs.occurrence.primary_observation_id)
+    end
+
+    # The reviewed observation already belongs to an occurrence (e.g. a
+    # reflection paired with its companion), and the slip is on another
+    # one: saving the ticked code merges the two (#4214), rather than
+    # doing nothing silently as it did before.
+    def test_update_merges_when_the_observation_already_has_an_occurrence
+      own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+      @obs.update!(occurrence: own)
+      other = observations(:coprinus_comatus_obs)
+      other.update!(occurrence: nil)
+      slip = FieldSlip.find_or_create_by_code("OPEN-0540", other.user)
+      other.field_slip = slip
+      other.save!
+      slip_occ = slip.reload.occurrence
+      record_extract(fields: { "Field Slip Code" => "OPEN-0540" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id,
+                             use: { "Field Slip Code" => "1" },
+                             value: { "Field Slip Code" => "OPEN-0540" } })
+
+      assert_flash_success
+      assert_equal(slip_occ.id, @obs.reload.occurrence_id)
+      assert_not(Occurrence.exists?(own.id))
+      assert_includes(slip_occ.reload.observations, other.reload)
     end
 
     def test_update_warns_when_the_ticked_code_cannot_attach

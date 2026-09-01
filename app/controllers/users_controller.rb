@@ -64,41 +64,8 @@ class UsersController < ApplicationController
     false
   end
 
-  def default_sort_order
-    ::Query::Users.default_order # :name
-  end
-
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by, :q, :id].freeze
-  end
-
   def sorted_index_permitted?
     index_query_authorized?
-  end
-
-  # Display list of Users whose name, notes, etc. match a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if (user = user_exact_match(pattern))
-      redirect_to(user_path(user.id))
-      [nil, {}]
-    else
-      query = create_query(:User, pattern: pattern)
-      [query, {}]
-    end
-  end
-
-  # This doesn't return direct hits on the user login or name, in case fuzzy.
-  def user_exact_match(pattern)
-    if ((pattern.match?(/^\d+$/) && (user = User.safe_find(pattern))) ||
-       # (user = User.find_by(login: pattern)) ||
-       # (user = User.find_by(name: pattern)) ||
-       (user = User.find_by(email: pattern))) && user.verified
-      return user
-    end
-
-    false
   end
 
   # Hook runs before template displayed. Must return query.

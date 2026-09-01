@@ -388,7 +388,7 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       new_naming = Naming.create(
         observation: obs.reload,
-        name: names(:agaricus_campestris),
+        name: names(:conocybe_filaris),
         vote_cache: 0,
         user: mary
       )
@@ -470,7 +470,7 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Naming.create(
         observation: observations(:coprinus_comatus_obs),
-        name: names(:agaricus_campestris),
+        name: names(:conocybe_filaris),
         vote_cache: 0,
         user: mary
       )
@@ -1504,6 +1504,16 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
+  # `this_name` backs Tab::Name::ObsLink::ThisName and the observations
+  # index's `name` subaction -- a bare `names(lookup:)` preset, no
+  # synonym/subtaxa expansion.
+  def test_scope_this_name
+    assert_includes(Observation.this_name(names(:peltigera).id),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.this_name(names(:fungi).id),
+                        observations(:peltigera_obs))
+  end
+
   def test_scope_clade
     assert_includes(Observation.clade("Agaricales"),
                     observations(:coprinus_comatus_obs))
@@ -1521,6 +1531,20 @@ class ObservationTest < UnitTestCase
     # test the scope can handle a name instance
     assert_includes(Observation.clade(names(:coprinus)),
                     observations(:coprinus_comatus_obs))
+  end
+
+  def test_scope_identify_filter
+    clade_result = Observation.identify_filter(type: "clade",
+                                               term: "Agaricales")
+    assert_includes(clade_result, observations(:coprinus_comatus_obs))
+    assert_equal(Observation.clade("Agaricales").to_a, clade_result.to_a)
+
+    region_result = Observation.identify_filter(type: "region",
+                                                term: "South America")
+    assert_equal(Observation.region("South America").to_a,
+                 region_result.to_a)
+
+    assert_empty(Observation.identify_filter(type: "bogus", term: "x"))
   end
 
   def test_scope_by_users
@@ -2217,6 +2241,49 @@ class ObservationTest < UnitTestCase
     obs.field_slip = nil
     assert_equal(starting_occurrence, obs.occurrence,
                  "Setting field_slip to nil should not alter occurrence")
+  end
+
+  # A reflection's Edit-companion sits in an occurrence with no slip.
+  # A new slip lands on that occurrence, so the reflection stays under
+  # it, instead of a second occurrence being built around the
+  # companion alone (which dissolved the shared one -- obs 670589).
+  def test_field_slip_setter_adopts_slipless_occurrence
+    companion = observations(:coprinus_comatus_obs)
+    reflection = observations(:minimal_unknown_obs)
+    [companion, reflection].each { |o| o.update_column(:occurrence_id, nil) }
+    shared = Occurrence.create!(user: companion.user,
+                                primary_observation: companion)
+    [companion, reflection].each { |o| o.update!(occurrence: shared) }
+    slip = field_slips(:field_slip_no_obs)
+    assert_nil(slip.occurrence, "premise: slip has no occurrence")
+
+    companion.field_slip = slip
+    companion.save!
+
+    assert_equal(shared.id, companion.reload.occurrence_id)
+    assert_equal(slip.id, shared.reload.field_slip_id)
+    assert_equal(shared.id, reflection.reload.occurrence_id)
+  end
+
+  # An occurrence that already carries a slip keeps it: a different
+  # new slip still moves the observation into a separate occurrence.
+  def test_field_slip_setter_leaves_occurrence_that_has_a_slip
+    obs = observations(:coprinus_comatus_obs)
+    other = observations(:minimal_unknown_obs)
+    [obs, other].each { |o| o.update_column(:occurrence_id, nil) }
+    old_slip = FieldSlip.find_or_create_by_code("EOL-7777", obs.user)
+    taken = Occurrence.create!(user: obs.user, primary_observation: other,
+                               field_slip: old_slip)
+    [obs, other].each { |o| o.update!(occurrence: taken) }
+    slip = field_slips(:field_slip_no_obs)
+
+    obs.field_slip = slip
+    obs.save!
+
+    assert_not_equal(taken.id, obs.reload.occurrence_id)
+    assert_equal(slip.id, obs.occurrence.field_slip_id)
+    assert_equal(old_slip.id, taken.reload.field_slip_id)
+    assert_equal(taken.id, other.reload.occurrence_id)
   end
 
   # destroy_orphaned_collection_numbers wipes any collection_number

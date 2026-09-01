@@ -6,6 +6,7 @@ class Inat
   # Inat::MoObservationBuilder to create an MO Observation.
   class ObservationImporter
     include Inat::Constants
+    include Writeback
 
     attr_reader :inat_import, :user, :job,
                 :unlicensed_obs_count, :skipped_images_count, :image_ids
@@ -216,45 +217,6 @@ class Inat
       )
       @observation&.destroy
       nil
-    end
-
-    # Stamp the MO observation's URL onto the source iNat observation. Only
-    # called when writing back: `finalize_import` gates this on
-    # `skip_inat_writeback?` (skipped by default in development so a local
-    # import never annotates a real iNat observation; production writes back,
-    # and the test suite is isolated from iNat by WebMock). Admins can override
-    # per import via a checkbox on the import form (InatImport#writeback).
-    def update_inat_observation
-      update_mushroom_observer_url_field
-      sleep(1) # Avoid hitting iNat API rate limits
-    end
-
-    def skip_inat_writeback?
-      return Rails.env.development? if @inat_import.writeback_default?
-
-      @inat_import.writeback_skip?
-    end
-
-    def update_mushroom_observer_url_field
-      update_inat_observation_field(
-        observation_id: @inat_obs[:id],
-        field_id: MO_URL_OBSERVATION_FIELD_ID,
-        value: "#{MO.http_domain}/#{@observation.id}"
-      )
-    end
-
-    def update_inat_observation_field(observation_id:, field_id:, value:)
-      payload = { observation_field_value: { observation_id: observation_id,
-                                             observation_field_id: field_id,
-                                             value: value } }
-      Inat::APIRequest.new(@inat_import.token).
-        request(method: :post,
-                path: "observation_field_values",
-                payload: payload)
-    rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, payload: payload }.to_json
-      log_with_response_error(error)
-      raise(e)
     end
 
     def increment_imported_counts

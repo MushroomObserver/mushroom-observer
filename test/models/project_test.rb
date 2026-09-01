@@ -151,13 +151,6 @@ class ProjectTest < UnitTestCase
     assert_equal(expect, project.in_range_observations.count)
   end
 
-  def test_out_of_area_observations
-    project = projects(:falmouth_2023_09_project)
-    assert_equal(2, project.out_of_area_observations.size)
-
-    assert_empty(projects(:unlimited_project).out_of_area_observations)
-  end
-
   def test_place_name
     proj = projects(:eol_project)
     loc = locations(:albion)
@@ -171,48 +164,6 @@ class ProjectTest < UnitTestCase
     loc = locations(:albion)
     proj.place_name = loc.display_name(roy)
     assert_equal(proj.location, loc)
-  end
-
-  def test_location_violations
-    proj = Project.create(
-      location: locations(:burbank),
-      title: "With Location Violations",
-      open_membership: true
-    )
-    geoloc_in_burbank = observations(:unknown_with_lat_lng)
-    geoloc_outside_burbank =
-      observations(:trusted_hidden) # lat/lon in Falmouth
-    geoloc_nil_burbank_contains_loc =
-      observations(:minimal_unknown_obs)
-    geoloc_nil_outside_burbank = observations(:reused_observation)
-
-    proj.observations = [
-      geoloc_in_burbank,
-      geoloc_nil_burbank_contains_loc,
-      geoloc_outside_burbank,
-      geoloc_nil_outside_burbank
-    ]
-
-    location_violations = proj.out_of_area_observations
-
-    assert_includes(
-      location_violations, geoloc_outside_burbank,
-      "Noncompliant Obss missing Obs with geoloc outside Proj location"
-    )
-    assert_includes(
-      location_violations, geoloc_nil_outside_burbank,
-      "Noncompliant Obss missing Obs w/o geoloc " \
-      "whose Loc is not contained in Proj location"
-    )
-    assert_not_includes(
-      location_violations, geoloc_in_burbank,
-      "Noncompliant Obss wrongly includes Obs with geoloc inside Proj location"
-    )
-    assert_not_includes(
-      location_violations, geoloc_nil_burbank_contains_loc,
-      "Noncompliant Obss wrongly includes Obs w/o geoloc " \
-      "whose Loc is contained in Proj location"
-    )
   end
 
   def test_add_and_remove_target_names
@@ -271,6 +222,120 @@ class ProjectTest < UnitTestCase
 
     empty = projects(:empty_project)
     assert_not(empty.has_targets?)
+  end
+
+  # A concurrent insert of the same target name/location can make
+  # find_or_create_by! raise RecordNotUnique instead of returning the
+  # existing record, skipping the line that would otherwise memoize
+  # target_names_present?/target_locations_present? as true.
+  def test_add_target_name_after_record_not_unique_race
+    proj = projects(:empty_project)
+    assert_not(proj.target_names_present?)
+
+    proj.project_target_names.stub(
+      :find_or_create_by!, ->(*) { raise(ActiveRecord::RecordNotUnique) }
+    ) do
+      proj.add_target_name(names(:agaricus))
+    end
+
+    assert(proj.target_names_present?,
+           "target_names_present? must not stay stale after a " \
+           "RecordNotUnique race")
+  end
+
+  def test_add_target_location_after_record_not_unique_race
+    proj = projects(:empty_project)
+    assert_not(proj.target_locations_present?)
+
+    proj.project_target_locations.stub(
+      :find_or_create_by!, ->(*) { raise(ActiveRecord::RecordNotUnique) }
+    ) do
+      proj.add_target_location(locations(:burbank))
+    end
+
+    assert(proj.target_locations_present?,
+           "target_locations_present? must not stay stale after a " \
+           "RecordNotUnique race")
+  end
+
+  # violates_target_name? memoizes expanded_target_name_id_set on the
+  # Project instance -- add/remove_target_name must invalidate it so a
+  # check made before the change doesn't leak into one made after.
+  def test_add_target_name_invalidates_stale_expanded_set
+    proj = projects(:rare_fungi_project)
+    peltigera_obs = observations(:peltigera_obs)
+
+    assert(proj.violates_target_name?(peltigera_obs),
+           "Test needs an obs whose name is not yet a target")
+
+    proj.add_target_name(names(:peltigera))
+
+    assert_not(
+      proj.violates_target_name?(peltigera_obs),
+      "violates_target_name? used a stale expanded_target_name_id_set " \
+      "memoized before the target name was added"
+    )
+  end
+
+  def test_remove_target_name_invalidates_stale_expanded_set
+    proj = projects(:rare_fungi_project)
+    peltigera_obs = observations(:peltigera_obs)
+    proj.add_target_name(names(:peltigera))
+
+    assert_not(proj.violates_target_name?(peltigera_obs),
+               "Test needs peltigera added as a target first")
+
+    proj.remove_target_name(names(:peltigera))
+
+    assert(
+      proj.violates_target_name?(peltigera_obs),
+      "violates_target_name? used a stale expanded_target_name_id_set " \
+      "memoized before the target name was removed"
+    )
+  end
+
+  # location_suffix_conditions/where_suffix_conditions read location
+  # names via project_target_locations, not the target_locations
+  # association, precisely so a caller that already loaded
+  # target_locations (as Projects::TargetLocationsController does)
+  # still sees an add/remove take effect immediately.
+  def test_add_target_location_reflects_even_if_association_preloaded
+    proj = projects(:rare_fungi_project)
+    albion = locations(:albion)
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location: albion)
+    proj.target_locations.load
+
+    assert(proj.violates_target_location?(obs),
+           "Test needs an obs whose Location is not yet a target")
+
+    proj.add_target_location(albion)
+
+    assert_not(
+      proj.violates_target_location?(obs),
+      "violates_target_location? must reflect the new target location " \
+      "even when target_locations was already loaded"
+    )
+  end
+
+  def test_remove_target_location_reflects_even_if_association_preloaded
+    proj = projects(:rare_fungi_project)
+    albion = locations(:albion)
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location: albion)
+    proj.add_target_location(albion)
+    proj.target_locations.load
+
+    assert_not(proj.violates_target_location?(obs),
+               "Test needs albion added as a target location first")
+
+    proj.remove_target_location(albion)
+
+    assert(
+      proj.violates_target_location?(obs),
+      "violates_target_location? must reflect the removed target " \
+      "location even when target_locations was already loaded"
+    )
   end
 
   def test_candidate_observations
@@ -612,6 +677,89 @@ class ProjectTest < UnitTestCase
     proj = projects(:falmouth_2023_09_project)
 
     assert_equal(proj.violations.size, proj.count_violations)
+  end
+
+  def test_violating_observations_matches_violations
+    proj = projects(:falmouth_2023_09_project)
+
+    assert_equal(proj.violations.map { |v| v.obs.id },
+                 proj.violating_observations.map(&:id),
+                 "violating_observations should match violations, in order")
+  end
+
+  # violation_kinds_for's bbox check (Location#found_here?) falls
+  # back to "violates" when an obs has neither geoloc nor a Location.
+  # Observation.project_violating_by_bbox must also cover this, or
+  # count_violations/violating_observations would disagree with
+  # violates_location? for these obs.
+  def test_bbox_violation_matches_found_here_with_no_geoloc_or_location
+    proj = Project.create!(title: "Bbox Missing Info #{SecureRandom.hex(4)}",
+                           user: users(:rolf), location: locations(:burbank))
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location_id: nil,
+                              lat: nil, lng: nil, where: "Nowhere specific")
+    proj.add_observation(obs)
+
+    assert(proj.violates_location?(obs),
+           "Test needs an obs with neither geoloc nor location")
+    assert_includes(proj.violating_observations.pluck(:id), obs.id,
+                    "Obs with no geoloc and no location should violate " \
+                    "the project's location constraint")
+  end
+
+  # Devs' verdict (2026-08-28): flagged as a violation, even though
+  # the obs is assigned to the project's Location -- violations are
+  # review flags, not a binding state, and imprecise GPS is worth a
+  # look regardless of the assigned Location name.
+  def test_bbox_violation_flags_imprecise_geoloc_even_when_location_matches
+    proj = Project.create!(title: "Bbox Matching Loc #{SecureRandom.hex(4)}",
+                           user: users(:rolf), location: locations(:burbank))
+    outside_burbank = proj.location.north + 5.0
+    obs = Observation.create!(user: users(:rolf), when: Date.current,
+                              name: names(:agaricus), location: proj.location,
+                              lat: outside_burbank, lng: proj.location.east)
+    proj.add_observation(obs)
+
+    assert(proj.violates_location?(obs),
+           "Test needs an obs whose location matches the project's, " \
+           "with geoloc outside that location's bbox")
+    assert_includes(proj.violating_observations.pluck(:id), obs.id,
+                    "Obs with geoloc outside the bbox should violate " \
+                    "even when its Location matches the project's")
+  end
+
+  # violating_observations is a relation, so a caller can paginate it
+  # with LIMIT/OFFSET instead of loading every violation into Ruby.
+  # Uses 3 target_name violations (not a fixture count, so this
+  # doesn't depend on fixture data staying in sync) to prove
+  # offset/limit slices the query.
+  def test_violating_observations_is_paginable_with_offset_and_limit
+    proj = Project.create!(title: "Paginable #{SecureRandom.hex(4)}",
+                           user: users(:rolf))
+    proj.add_target_name(names(:agaricus))
+    off_target = [observations(:peltigera_obs),
+                  observations(:california_obs),
+                  observations(:minimal_unknown_obs)]
+    off_target.each { |obs| proj.add_observation(obs) }
+
+    ordered_ids = proj.violations.map { |v| v.obs.id }
+    assert_equal(3, ordered_ids.size, "Test needs exactly 3 violations")
+
+    page = proj.violating_observations.offset(1).limit(1)
+    assert_equal([ordered_ids[1]], page.map(&:id),
+                 "offset(1).limit(1) should return only the 2nd violation")
+  end
+
+  def test_violations_for_skips_observations_that_are_not_violations
+    proj = projects(:falmouth_2023_09_project)
+    violating_obs = proj.violations.first.obs
+    visible = proj.visible_observations.to_a - [violating_obs]
+    passing_obs = visible.find { |obs| proj.violation_kinds_for(obs).empty? }
+    assert(passing_obs, "Test needs a visible obs that is not a violation")
+
+    result = proj.violations_for([violating_obs, passing_obs])
+
+    assert_equal([violating_obs.id], result.map { |v| v.obs.id })
   end
 
   def test_candidate_observations_respects_date_range

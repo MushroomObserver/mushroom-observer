@@ -8,7 +8,7 @@ class InatObsTest < UnitTestCase
   include InatStubHelpers
 
   # disable cop to facilitate typing/reading id's
-  # rubocop:disable Style/NumericLiterals
+  # rubocop:disable-next Style/NumericLiterals
   def test_complicated_public_obs
     # import of iNat 202555552 which is a mirror of MO 547126)
     # For easier to to read version see test/inat/somion_unicolor.json
@@ -118,7 +118,6 @@ class InatObsTest < UnitTestCase
     # then Somion unicolor suggested twice
     assert_equal(3, mock_inat_obs[:identifications].size)
   end
-  # rubocop:enable Style/NumericLiterals
 
   def test_snapshot_place_private_geoprivacy
     mock_inat_obs = mock_observation("somion_unicolor")
@@ -162,6 +161,38 @@ class InatObsTest < UnitTestCase
       each { |k| temp.delete(k) }
     mock_obs = Inat::Obs.new(JSON.generate(temp))
     assert_nil(mock_obs.when)
+  end
+
+  # MO's own "Mushroom Observer URL" back-link (field 5005) is excluded
+  # from the snapshot -- MO writes it onto the iNat obs after import, so
+  # keeping it would make the reflection's snapshot differ from its stored
+  # form on the first resync.
+  def test_obs_fields_excludes_mo_url_back_link
+    obs = Inat::Obs.new(JSON.generate(
+                          ofvs: [
+                            { field_id: MO_URL_OBSERVATION_FIELD_ID,
+                              name: "Mushroom Observer URL",
+                              value: "https://mushroomobserver.org/1" },
+                            { field_id: 42, name: "Voucher Number",
+                              value: "AN 0432" }
+                          ]
+                        ))
+    result = obs.obs_fields(obs.inat_obs_fields)
+
+    assert_not(result.include?("Mushroom Observer URL"),
+               "MO's own back-link must not appear in the snapshot")
+    assert(result.include?("Voucher Number: AN 0432"),
+           "other iNat fields are kept")
+  end
+
+  def test_obs_fields_none_when_only_mo_url_back_link
+    obs = Inat::Obs.new(JSON.generate(
+                          ofvs: [{ field_id: MO_URL_OBSERVATION_FIELD_ID,
+                                   name: "Mushroom Observer URL",
+                                   value: "https://mushroomobserver.org/1" }]
+                        ))
+
+    assert_equal(:none.t, obs.obs_fields(obs.inat_obs_fields))
   end
 
   def test_inat_observation_fields

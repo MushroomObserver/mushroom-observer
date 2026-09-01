@@ -50,6 +50,21 @@ module Views::Layouts
       )
     end
 
+    # Query::Comments has its own, unrelated `:types` attr (comment
+    # target model). Colliding with RssLog's `:types` by bare key name
+    # alone would run this through RssLog's tag vocabulary and
+    # silently blank any tag RssLog doesn't share, like
+    # `location_description` -- must fall through to the generic
+    # array-join branch instead.
+    def test_comments_types_param_does_not_use_rss_log_tag_vocabulary
+      html = render_for(
+        Query.lookup_and_save(:Comment, types: [:location_description])
+      )
+
+      assert_html(html, "#caption-truncated .small b",
+                  text: "location_description")
+    end
+
     def test_single_name_lookup_renders_italicized_inside_b
       # Names query: `names` is a grouped param wrapping the
       # `lookup:` lookup key. `:lookup` is in PARAM_LOOKUPS AND
@@ -94,11 +109,10 @@ module Views::Layouts
       assert_no_html(html, "#caption-truncated .small b i")
     end
 
-    # Both `editable_by_user` (SpeciesLists) and `needs_naming`
-    # (Observations) are User-typed query attrs. Before this PR
-    # they weren't in PARAM_LOOKUPS, so the caption fell through
-    # to the raw-value formatter and printed the user id
-    # ("editable_by_user: 1") instead of the user's title.
+    # `editable_by_user` is a User-typed query attr -- without it in
+    # PARAM_LOOKUPS, the caption falls through to the raw-value
+    # formatter and prints the user id ("editable_by_user: 1") instead
+    # of the user's title.
     def test_editable_by_user_renders_user_title_not_id
       user = users(:rolf)
       query = Query.lookup_and_save(:SpeciesList, editable_by_user: user.id)
@@ -109,14 +123,15 @@ module Views::Layouts
                   text: user.unique_text_name)
     end
 
-    def test_needs_naming_renders_user_title_not_id
-      user = users(:rolf)
-      query = Query.lookup_and_save(:Observation, needs_naming: user.id)
+    # `needs_naming` is a presence flag, not a User id -- it renders
+    # as a bare label, not a lookup.
+    def test_needs_naming_renders_bare_label
+      query = Query.lookup_and_save(:Observation, needs_naming: true)
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b",
-                  text: user.unique_text_name)
+      assert_html(html, "#caption-truncated .small span",
+                  text: :query_needs_naming.l)
     end
 
     def test_project_lookup_does_not_italicize
@@ -174,6 +189,22 @@ module Views::Layouts
       # the resolved title in a single `<span>` (not the nested
       # iteration path).
       assert_html(html, "#filters", text: :query_target.l)
+    end
+
+    def test_identify_filter_grouped_param_renders_type_label
+      query = Query.lookup_and_save(
+        :Observation, identify_filter: { type: "region", term: "California" }
+      )
+
+      html = render_for(query)
+
+      # `:identify_filter` triggers `render_identify_filter_val`,
+      # which labels the value with the selected type's own
+      # query_param label (`:query_region`) instead of the generic
+      # "Identify filter: Type: region, Term: ..." nested breakdown.
+      assert_html(html, "#filters", text: :query_region.l)
+      assert_html(html, "#filters", text: "California")
+      assert_no_html(html, "#filters", text: :query_identify_filter.l)
     end
 
     def test_subquery_wraps_nested_params_in_brackets

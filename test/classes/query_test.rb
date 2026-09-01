@@ -50,6 +50,19 @@ class QueryTest < UnitTestCase
     assert_equal(0, query3.record.access_count)
   end
 
+  # Regression test for #5188: an emoji in a query param crashed
+  # Query.lookup because QueryRecord#description was utf8mb3.
+  def test_lookup_and_save_with_emoji
+    query = Query.lookup_and_save(:Image, pattern: "🍄")
+    assert_not(query.record.new_record?,
+               "Query with an emoji param should save its QueryRecord")
+
+    found = Query.lookup(:Image, pattern: "🍄")
+    assert_equal(query.record.id, found.record.id,
+                 "Re-looking-up the same emoji pattern should find the " \
+                 "same QueryRecord instead of erroring or duplicating it")
+  end
+
   def assert_validation_errors(query)
     assert_false(query.valid)
     assert_not_empty(query.validation_errors)
@@ -108,9 +121,16 @@ class QueryTest < UnitTestCase
   end
 
   def test_validate_params_order_by_unsupported
-    assert_validation_errors(
-      Query.lookup(:Name, order_by: "totally_bogus_sort_key")
-    )
+    query = Query.lookup(:Name, order_by: "totally_bogus_sort_key")
+    assert_validation_errors(query)
+    # The bad value must not survive validation -- otherwise it reaches
+    # AbstractModel::OrderingScopes#order_by's dispatcher, which silently
+    # falls back to `all` (id: :desc) instead of the model's own
+    # default_order.
+    assert_nil(query.params[:order_by],
+               "Invalid order_by should be cleared, not left in params")
+    assert_equal(:name, query.default_order,
+                 "Should fall back to Query::Names.default_order")
   end
 
   def test_validate_params_instances_users
@@ -319,14 +339,30 @@ class QueryTest < UnitTestCase
     # Scalar attrs (and the :by alias) are bare symbols.
     assert_includes(filters, :order_by)
     assert_includes(filters, :by)
-    assert_includes(filters, :needs_naming) # scalar Class (User)
+    assert_includes(filters, :needs_naming) # scalar :truthy
+    # An "enum" hash (`{ boolean: [true] }`/`{ string: [...] }`) is a
+    # bare scalar from the URL's perspective, not a nested hash --
+    # permitting it as `attr: {}` would strip a request's scalar
+    # value entirely (confirmed: this broke Names#has_observations
+    # until permit_filters learned to tell enum hashes apart from
+    # structural ones).
+    assert_includes(filters, :location_undefined)
     # Array-typed attrs permit via `attr: []`.
     assert_equal([], containers[:by_users])
     assert_equal([], containers[:projects])
-    # Hash-typed attrs, including subqueries, permit via `attr: {}`.
+    # Structural hash-typed attrs, including subqueries, permit via
+    # `attr: {}`.
     assert_equal({}, containers[:names])
     assert_equal({}, containers[:in_box])
     assert_equal({}, containers[:location_query])
+  end
+
+  def test_permit_filters_permits_enum_hash_typed_param_as_scalar
+    raw = ActionController::Parameters.new(location_undefined: "true")
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal("true", permitted[:location_undefined])
   end
 
   def test_permit_filters_permits_array_typed_param
@@ -1196,6 +1232,51 @@ class QueryTest < UnitTestCase
     assert_equal(1, obs_queries[5].keys.length)
     assert_equal("california", obs_queries[6][:search_where])
     assert_equal(1, obs_queries[6].keys.length)
+  end
+
+  # An Observation query filtered by project or species_list defaults
+  # its converted Location subquery to is_collection_location: true --
+  # checks the resolved attr names (`projects`/`species_lists`), not
+  # their param_alias shortcuts (`project`/`species_list`), which don't
+  # appear in a Query's stored params. See
+  # Query::Modules::Subqueries#needs_is_collection_location.
+  def test_observation_subquery_of_location_defaults_collection_location
+    project = projects(:bolete_project)
+    species_list = species_lists(:first_species_list)
+
+    by_project = Query.lookup_and_save(:Observation, projects: [project.id])
+    by_species_list = Query.lookup_and_save(
+      :Observation, species_lists: [species_list.id]
+    )
+    unfiltered = Query.lookup_and_save(:Observation, order_by: :id)
+
+    project_location = by_project.subquery_of(:Location)
+    species_list_location = by_species_list.subquery_of(:Location)
+    unfiltered_location = unfiltered.subquery_of(:Location)
+
+    assert_equal(
+      true,
+      project_location.params[:observation_query][:is_collection_location]
+    )
+    assert_equal(
+      true,
+      species_list_location.
+        params[:observation_query][:is_collection_location]
+    )
+    assert_not(
+      unfiltered_location.params[:observation_query].
+        key?(:is_collection_location)
+    )
+
+    # An empty array is a present key, not a filter -- .present?, not
+    # truthiness, decides this.
+    empty_projects = Query.lookup_and_save(:Observation, projects: [])
+    empty_projects_location = empty_projects.subquery_of(:Location)
+
+    assert_not(
+      empty_projects_location.params[:observation_query].
+        key?(:is_collection_location)
+    )
   end
 
   def test_observation_subquery_of_name

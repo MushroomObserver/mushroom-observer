@@ -11,15 +11,17 @@ module RssLog::Scopes
     scope :order_by_default,
           -> { order_by(::Query::RssLogs.default_order) }
 
-    scope :type, lambda { |types|
-      return all if types.to_s == "all"
+    # Accepts a scalar (String/Symbol, optionally space-separated) or
+    # an Array of either -- `?type=a+b` (a legacy bookmark), `?types[]=a
+    # &types[]=b` (the type-filter form), and `Query::RssLogs`'s
+    # own `types: [...]` param all normalize to the same tag list here.
+    scope :types, lambda { |types|
+      tags = normalize_type_tags(types)
+      return all if tags == ["all"]
+      return none if tags.empty?
 
-      types = types.to_s.split unless types.is_a?(Array)
-      types &= ::RssLog::ALL_TYPE_TAGS.map(&:to_s)
-      return none if types.empty?
-
-      types.map! { |type| arel_table[:"#{type}_id"].not_eq(nil) }
-      where(or_clause(*types)).distinct
+      clauses = tags.map { |tag| arel_table[:"#{tag}_id"].not_eq(nil) }
+      where(or_clause(*clauses)).distinct
     }
 
     # Exclude RssLog entries for observations that belong to a
@@ -59,6 +61,18 @@ module RssLog::Scopes
   end
 
   module ClassMethods
+    # Normalizes a `types` scope/query-param value -- a scalar (String/
+    # Symbol, optionally space-separated) or an Array of either -- into
+    # a flat Array of valid tag strings (garbage/unknown tags dropped).
+    # `["all"]` is the sentinel for "every type"; an empty result means
+    # no valid tag survived.
+    def normalize_type_tags(types)
+      tags = Array(types).flat_map { |tag| tag.to_s.split }
+      return ["all"] if tags == ["all"]
+
+      tags & ::RssLog::ALL_TYPE_TAGS.map(&:to_s)
+    end
+
     private
 
     # class methods here, `self` included
@@ -84,14 +98,9 @@ module RssLog::Scopes
     # applied. Defaults to :all. Returns an array of model classes.
     def filterable_types_in_current_query(params)
       filterable_types = [:observation, :name, :location]
-      active_types = case params[:type]
-                     when nil, "", :all, "all"
-                       filterable_types
-                     when Array
-                       params[:type]
-                     when String
-                       params[:type].split
-                     end
+      tags = normalize_type_tags(params[:types])
+      active_types = tags.blank? || tags == ["all"] ? filterable_types : tags
+
       active_types.map { |type| type.to_s.camelize.constantize }
     end
 

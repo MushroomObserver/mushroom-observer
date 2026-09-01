@@ -7,15 +7,20 @@ module Views::Controllers::RssLogs
   class TypeFilters < Views::Base
     prop :query, _Nilable(::Query)
     prop :types, _Array(::String)
+    prop :user, _Nilable(::User), default: nil
 
-    # Not a Superform -- a multi-select checkbox filter (RssLogsController
-    # explicitly validates "array of types, from form checkboxes"), not a
+    # Only the Save-Defaults button needs this (its formmethod="post"
+    # override is a state-changing request); the Apply button's plain
+    # GET is exempt from CSRF checks entirely.
+    register_value_helper :form_authenticity_token
+
+    # Not a Superform -- a multi-select checkbox filter, not a
     # single-model-bound field set. Submitting the combined state of
-    # several independently-toggled checkboxes as one q[type][] array
+    # several independently-toggled checkboxes as one q[types][] array
     # needs a submit, unlike IndexPaginationNav's single-value goto
     # controls, which each fully specify their own destination and so
     # reduce to plain links.
-    # rubocop:disable MO/NoHandRolledFormTag
+    # rubocop:disable-next MO/NoHandRolledFormTag
     def view_template
       form(action: activity_logs_path, method: :get,
            class: "filter-form", id: "log_filter_form",
@@ -24,14 +29,27 @@ module Views::Controllers::RssLogs
         render_filter_buttons
       end
     end
-    # rubocop:enable MO/NoHandRolledFormTag
 
     private
 
     def render_hidden_fields
+      # `formmethod="post"` is the only verb HTML5 allows on a button
+      # override -- Rack::MethodOverride reads `_method` to route the
+      # Save-Defaults POST to Account::Preferences#update (PATCH).
+      # Inert for the Apply button's GET submission: MethodOverride
+      # only inspects `_method` on a POST request.
+      input(type: "hidden", name: "_method", value: "patch")
+      input(type: "hidden", name: "authenticity_token",
+            value: form_authenticity_token)
+      # Only reached by the plain-HTML fallback path (no JS/Turbo) --
+      # sends the user back to the activity log instead of the
+      # account prefs edit page. The Turbo path stays on this page
+      # regardless. `back` is an enum key, not a URL -- see
+      # Account::PreferencesController::BACK_DESTINATIONS.
+      input(type: "hidden", name: "back", value: "rss_logs")
       return unless @query
 
-      query_params_except_type.each do |key, value|
+      query_params_except_types.each do |key, value|
         input(type: "hidden", name: key, value: value)
       end
     end
@@ -49,6 +67,7 @@ module Views::Controllers::RssLogs
           render_everything_button
           render_type_buttons
           render_submit_button
+          render_save_default_button
         end
       end
     end
@@ -86,6 +105,21 @@ module Views::Controllers::RssLogs
       Button(type: :submit, name: :apply.ti, size: :sm)
     end
 
+    # A second submit button on the same form as "Apply," targeting a
+    # different action via `formaction`/`formmethod` -- whatever's
+    # checked at the moment of click is what gets saved, the same
+    # values "Apply" would filter by. `data-turbo="true"` opts just
+    # this button into Turbo, overriding the form's own
+    # `data-turbo="false"`, so the response is a flash-only
+    # confirmation with no page navigation.
+    def render_save_default_button
+      return unless show_make_default?
+
+      Button(type: :submit, name: :rss_make_default.t, variant: :outline,
+             size: :sm, formaction: account_preferences_path,
+             formmethod: "post", data: { turbo: "true" })
+    end
+
     # Individual type checkbox styled as a Bootstrap button. Routes
     # through `ButtonStyleCheckbox` so the markup stays in lockstep
     # with the rest of MO's button-style radio/checkbox helpers
@@ -94,7 +128,7 @@ module Views::Controllers::RssLogs
     # in `_form_elements.scss`.
     def render_type_checkbox(type)
       render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
-               name: "q[type][]", value: type,
+               name: "q[types][]", value: type,
                id: "type_#{type}", checked: type_checked?(type),
                variant: :outline, size: :sm,
                label: { class: "filter-checkbox my-0" },
@@ -109,7 +143,7 @@ module Views::Controllers::RssLogs
       label_text = :rss_all.t
       return plain(label_text) if @types == ["all"]
 
-      link = activity_logs_path(q: query_params_with_type("all"))
+      link = activity_logs_path(q: query_params_with_types(["all"]))
       a(href: link, title: :rss_all_help.t, class: "filter-only") do
         label_text
       end
@@ -120,7 +154,7 @@ module Views::Controllers::RssLogs
       label_text = :"rss_one_#{type}".t
       return plain(label_text) if @types == [type]
 
-      link = activity_logs_path(q: query_params_with_type(type))
+      link = activity_logs_path(q: query_params_with_types([type]))
       a(href: link,
         title: :rss_one_help.t(type: type.to_sym),
         class: "filter-only") { label_text }
@@ -132,10 +166,14 @@ module Views::Controllers::RssLogs
       @types.include?(type) || @types == ["all"]
     end
 
-    def query_params_except_type
+    def show_make_default?
+      @user && @user.default_rss_type.to_s.split.sort != @types
+    end
+
+    def query_params_except_types
       return {} unless @query
 
-      q = q_param(@query).except(:type)
+      q = q_param(@query).except(:types)
       # Convert { q: { model: "RssLog" } }.to_query to key/value pairs
       query_string = { q: q }.to_query
       pairs = query_string.split("&")
@@ -145,10 +183,10 @@ module Views::Controllers::RssLogs
       end
     end
 
-    def query_params_with_type(type)
-      return { type: type } unless @query
+    def query_params_with_types(types)
+      return { types: types } unless @query
 
-      q_param(@query).merge(type: type)
+      q_param(@query).merge(types: types)
     end
   end
 end

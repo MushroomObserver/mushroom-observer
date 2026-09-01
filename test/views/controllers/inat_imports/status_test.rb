@@ -281,6 +281,62 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{reimport_path}']")
     end
 
+    def test_over_cap_reimport_link_uses_stored_original_ui_url
+      original_url = "https://www.inaturalist.org/observations?taxon_id=48701"
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: InatImport::MAX_IMPORTABLE,
+        total_importables: InatImport::MAX_IMPORTABLE + 50,
+        original_inat_url: original_url
+      )
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(
+        inat_username: @import.inat_username,
+        inat_url: original_url
+      )
+      assert_html(html, "a[href='#{reimport_path}']")
+    end
+
+    def test_over_cap_reimport_link_uses_stored_original_api_url
+      original_url =
+        "https://api.inaturalist.org/v1/observations?taxon_id=48701"
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: InatImport::MAX_IMPORTABLE,
+        total_importables: InatImport::MAX_IMPORTABLE + 50,
+        original_inat_url: original_url
+      )
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(
+        inat_username: @import.inat_username,
+        inat_url: original_url
+      )
+      assert_html(html, "a[href='#{reimport_path}']")
+    end
+
+    def test_over_cap_reimport_link_falls_back_when_no_original_url
+      stored_query = "taxon_id=48701&user_login=katrina"
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: InatImport::MAX_IMPORTABLE,
+        total_importables: InatImport::MAX_IMPORTABLE + 50,
+        original_inat_url: nil,
+        inat_url: stored_query
+      )
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(
+        inat_username: @import.inat_username,
+        inat_url: "#{Inat::Constants::SITE}/observations?#{stored_query}"
+      )
+      assert_html(html, "a[href='#{reimport_path}']")
+    end
+
     def test_importables_count_uncapped_when_under_cap
       @import.update_columns(
         importables: 4, total_importables: 4, imported_count: 3

@@ -4,6 +4,24 @@ require("test_helper")
 
 module Locations
   class DescriptionsControllerTest < FunctionalTestCase
+    include QueryParamRoundTripTestHelpers
+
+    # See QueryParamRoundTripTestHelpers.
+    def test_create_query_from_url_params_recognizes_every_top_level_param
+      login
+
+      assert_all_top_level_params_survive(
+        Query::LocationDescriptions, :LocationDescription,
+        overrides: {
+          id_in_set: location_descriptions(:albion_desc).id,
+          by_users: rolf.id,
+          by_author: rolf.id,
+          by_editor: rolf.id,
+          locations: locations(:burbank).id
+        }
+      )
+    end
+
     ##########################################################################
     #
     #    SHOW
@@ -319,6 +337,11 @@ module Locations
       assert(LocationDescription.safe_find(desc.id))
     end
 
+    # Despite the name, this doesn't hit `save_if_changes_made_or_flash`'s
+    # `!@description.changed?` branch: `desc.gen_desc`/etc are `nil` in
+    # the fixture, but a form always submits `""`, so `nil -> ""`
+    # registers as a change and the save succeeds. See
+    # `test_update_description_unchanged_values` below for that branch.
     def test_update_description_no_changes
       desc = location_descriptions(:albion_desc)
       login("rolf")
@@ -335,6 +358,27 @@ module Locations
         [:runtime_description_public_write_wrong,
          [:runtime_edit_location_description_success, { id: desc.id }]]
       )
+    end
+
+    # The `!@description.changed?` branch itself: the submitted values
+    # have to byte-match the stored ones, so seed empty strings (not
+    # the fixture's `nil`) before resubmitting the same empty strings.
+    def test_update_description_unchanged_values
+      desc = location_descriptions(:albion_desc)
+      desc.update_columns(gen_desc: "", ecology: "", species: "")
+      login("rolf")
+      params = {
+        id: desc.id,
+        description: { gen_desc: "", ecology: "", species: "" }
+      }
+
+      put(:update, params: params)
+
+      assert_flash_warning(
+        [:runtime_description_public_write_wrong,
+         :runtime_edit_location_description_no_change]
+      )
+      assert_unprocessable
     end
 
     # Cover create with project source type

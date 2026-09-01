@@ -140,7 +140,7 @@ module Views::Controllers::Observations::Namings
 
     private
 
-    # rubocop:disable Metrics/ParameterLists
+    # rubocop:disable-next Metrics/ParameterLists
     def render_form(model:, vote:, context: "lightbox", turbo: false,
                     given_name: "", feedback: nil)
       render(Form.new(
@@ -155,6 +155,5 @@ module Views::Controllers::Observations::Namings
                turbo: turbo
              ))
     end
-    # rubocop:enable Metrics/ParameterLists
   end
 end

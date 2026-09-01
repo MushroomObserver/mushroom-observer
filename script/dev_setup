@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#
+# Thin OS-detecting dispatcher for script/dev_setup_components/dev_setup_macos
+# and .../dev_setup_ubuntu -- the single entry point onboarding docs and
+# curl-pipe instructions should name, instead of picking between two
+# similarly-named scripts. Detects the platform via `uname -s` and
+# hands off entirely; all the setup logic stays in the platform-
+# specific script.
+#
+# Usage (fresh machine, nothing cloned yet):
+#   curl -s https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup | bash
+# Usage (from an existing checkout):
+#   script/dev_setup
+# Usage (just (re)sync the private icon-library repo, skip everything else):
+#   script/dev_setup --icons-only
+
+if [ -f script/dev_setup_components/clone_repo.sh ]; then
+    source script/dev_setup_components/clone_repo.sh
+else
+    source <(curl -fsSL "https://raw.githubusercontent.com/MushroomObserver/mushroom-observer/HEAD/script/dev_setup_components/clone_repo.sh")
+fi
+mo_ensure_repo
+
+if [ "${EUID}" -ne 0 ]; then
+    if ! command -v sudo >/dev/null 2>&1; then
+        echo "This setup script must run as root, but sudo is not available." >&2
+        exit 1
+    fi
+    exec sudo script/dev_setup "$@"
+fi
+
+case "$(uname -s)" in
+    Darwin)
+        exec script/dev_setup_components/dev_setup_macos "$@"
+        ;;
+    Linux)
+        exec script/dev_setup_components/dev_setup_ubuntu "$@"
+        ;;
+    *)
+        echo "Unrecognized OS ($(uname -s)) -- this dispatcher only knows"
+        echo "macOS (Darwin) and Ubuntu (Linux). Run"
+        echo "script/dev_setup_components/dev_setup_macos or"
+        echo "script/dev_setup_components/dev_setup_ubuntu directly if one"
+        echo "of those fits."
+        exit 1
+        ;;
+esac

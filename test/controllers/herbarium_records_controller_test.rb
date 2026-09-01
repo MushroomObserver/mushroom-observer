@@ -3,6 +3,23 @@
 require("test_helper")
 
 class HerbariumRecordsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::HerbariumRecords, :HerbariumRecord,
+      overrides: {
+        id_in_set: herbarium_records(:coprinus_comatus_nybg_spec).id,
+        by_users: rolf.id,
+        herbaria: herbaria(:nybg_herbarium).id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
+  end
+
   ##############################################################################
   # INDEX
   #
@@ -15,6 +32,17 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
+  end
+
+  # Unfiltered index sorts by Query::HerbariumRecords.default_order.
+  def test_index_default_sort_order
+    login
+    get(:index)
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal(Query::HerbariumRecords.default_order.to_s,
+                 query.params[:order_by])
   end
 
   def test_index_pattern_with_multiple_matching_records
@@ -55,6 +83,17 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash(:runtime_no_matches, type: :herbarium_record)
   end
 
+  def test_index_herbarium_id_bad_id
+    bad_herbarium_id = Herbarium.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { herbarium: bad_herbarium_id })
+
+    assert_flash(:runtime_object_not_found, type: :herbarium,
+                                            id: bad_herbarium_id)
+    assert_redirected_to(herbarium_records_path)
+  end
+
   def test_index_observation_id
     obs = observations(:coprinus_comatus_obs)
 
@@ -75,6 +114,19 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     assert_page_title(:herbarium_records.ti)
     assert_flash(:runtime_no_matches, type: :herbarium_record)
+  end
+
+  # A bad observation id redirects to the observations index. See
+  # redirect_to: in query_attr (app/extensions/class.rb).
+  def test_index_observation_id_bad_id
+    bad_observation_id = Observation.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { observation: bad_observation_id })
+
+    assert_flash(:runtime_object_not_found, type: :observation,
+                                            id: bad_observation_id)
+    assert_redirected_to(observations_path)
   end
 
   ##############################################################################
@@ -276,6 +328,27 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_difference("HerbariumRecord.count", 1) do
       post(:create, params: herbarium_record_params, format: :turbo_stream)
     end
+  end
+
+  # A successful (non-duplicate) create submitted from the modal --
+  # `modal_submission?` routes it through
+  # `render_herbarium_records_section_update` instead of the redirect
+  # every other create test above exercises. Distinct from
+  # `test_create_herbarium_record_duplicate`'s modal case, which
+  # doesn't reach this branch (the duplicate path flashes-and-redirects
+  # earlier, before `save_herbarium_record_and_update_associations`).
+  def test_create_herbarium_record_modal_success_updates_section
+    login("rolf")
+    params = herbarium_record_params.deep_merge(
+      herbarium_record: { modal: "true" }
+    )
+
+    assert_difference("HerbariumRecord.count", 1) do
+      post(:create, params:, format: :turbo_stream)
+    end
+
+    assert_select("turbo-stream[action='replace']" \
+                  "[target='observation_herbarium_records']")
   end
 
   def test_create_herbarium_record_turbo_validation_error

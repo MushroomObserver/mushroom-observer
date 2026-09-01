@@ -54,7 +54,7 @@ module ObservationsController::FieldSlips
   # the review page would just sit on its scan button -- say why, and
   # that saving the review is what links this observation to the slip.
   def explain_in_use_slip(code)
-    slip = FieldSlip.find_by(code: code)
+    slip = FieldSlip.find_by(code: code.upcase)
     occurrence = slip&.occurrence
     return unless occurrence
     # Checked against the slip's freshly loaded occurrence, not

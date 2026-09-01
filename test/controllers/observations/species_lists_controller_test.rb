@@ -50,13 +50,32 @@ module Observations
              "other_lists must exclude the observation")
     end
 
+    # `params[:by]` reaches `Query.lookup` unguarded in `set_list_ivars`
+    # (no `order_by_or_flash_if_unknown` check) -- an invalid value must
+    # still fall back to the model's default_order rather than silently
+    # sorting by id: :desc.
+    def test_edit_invalid_by_falls_back_to_default_order
+      obs = observations(:coprinus_comatus_obs)
+      login
+
+      get(:edit, params: { id: obs.id, by: "totally_bogus_sort_key" })
+
+      assert_response(:success)
+      all_lists = assigns(:all_lists)
+      assert_nil(
+        all_lists.params[:order_by],
+        "Invalid `by` should be cleared, not passed through to Query"
+      )
+      assert_equal(Query::SpeciesLists.default_order, all_lists.default_order)
+    end
+
     def test_add_observation_to_species_list
       spl = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
       assert_not(spl.observations.member?(obs))
       params = { id: obs.id, species_list_id: spl.id, commit: "add" }
       requires_login(:update, params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert(spl.reload.observations.member?(obs))
     end
 
@@ -67,7 +86,7 @@ module Observations
       params = { id: obs.id, species_list_id: spl.id, commit: "add" }
       login("dick")
       put(:update, params: params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -92,14 +111,14 @@ module Observations
       assert_not_equal("rolf", owner)
 
       # Try with non-owner (can't use requires_user since failure is a redirect)
-      # effectively fails and gets redirected to show_species_list
+      # effectively fails and gets redirected to the observation
       requires_login(:update, params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert(spl.reload.observations.member?(obs))
 
       login(owner)
       put(:update, params: params)
-      assert_redirected_to(species_list_path(spl.id))
+      assert_redirected_to(permanent_observation_path(obs.id))
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -184,7 +203,7 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "add" })
-      assert_redirected_to(species_list_path(spl1.id))
+      assert_redirected_to(permanent_observation_path(obs2.id))
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
@@ -196,7 +215,7 @@ module Observations
 
       put(:update,
           params: { id: obs2.id, species_list_id: spl1.id, commit: "remove" })
-      assert_redirected_to(species_list_path(spl1.id))
+      assert_redirected_to(permanent_observation_path(obs2.id))
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,

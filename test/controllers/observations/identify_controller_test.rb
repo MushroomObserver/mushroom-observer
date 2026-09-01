@@ -14,7 +14,8 @@ module Observations
       obs_count = obs.count
       mary.update(layout_count: obs_count + 1)
 
-      query = Query.lookup_and_save(:Observation, needs_naming: mary)
+      query = Query.lookup_and_save(:Observation, needs_naming: true)
+      query.viewer = mary
       assert_equal(query.num_results, obs_count)
 
       get(:index)
@@ -27,21 +28,23 @@ module Observations
       # make a query, and test that the query results match obs scope
       aga_obs = Observation.needs_naming(mary).clade("Agaricales")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, clade: "Agaricales"
+        :Observation, needs_naming: true, clade: "Agaricales"
       )
+      query.viewer = mary
 
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       assert_equal(query.num_results, aga_obs.count)
       get(:index,
-          params: { filter: { type: :clade, term: "Agaricales" } })
+          params: { identify_filter: { type: :clade, term: "Agaricales" } })
       assert_no_flash
       assert_select(".matrix-box", aga_obs.count)
 
       bol_obs = Observation.needs_naming(mary).clade("Boletus")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, clade: "Boletus"
+        :Observation, needs_naming: true, clade: "Boletus"
       )
+      query.viewer = mary
       assert_equal(query.num_results, bol_obs.count)
 
       # REGION
@@ -49,20 +52,23 @@ module Observations
       # start with continent
       sam_obs = Observation.needs_naming(mary).region("South America")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, region: "South America"
+        :Observation, needs_naming: true, region: "South America"
       )
+      query.viewer = mary
       assert_equal(query.num_results, sam_obs.count)
 
       cal_obs = Observation.needs_naming(mary).region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
       query = Query.lookup_and_save(
-        :Observation, needs_naming: mary, region: "California, USA"
+        :Observation, needs_naming: true, region: "California, USA"
       )
+      query.viewer = mary
       assert_equal(query.num_results, cal_obs_count)
 
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
 
@@ -85,7 +91,8 @@ module Observations
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 5)
 
@@ -105,7 +112,8 @@ module Observations
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
-          params: { filter: { type: :region, term: "California, USA" } })
+          params: { identify_filter: { type: :region,
+                                       term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count - 6)
 
@@ -114,6 +122,17 @@ module Observations
       get(:index, params: { commit: :clear.ti })
       assert_no_flash
       assert_select(".matrix-box", obs_count - 6)
+    end
+
+    # A scalar `?identify_filter=x` used to crash. FormFilter renders
+    # in every identify page's top-nav. It called
+    # `params.dig(:identify_filter, :type)` directly on the raw
+    # param. String has no `#dig` method.
+    def test_identify_index_with_scalar_identify_filter_param
+      login("mary")
+      get(:index, params: { identify_filter: "x" })
+
+      assert_response(:success)
     end
   end
 end

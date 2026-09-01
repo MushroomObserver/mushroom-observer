@@ -3,6 +3,8 @@
 require("test_helper")
 
 class InatObservationImporterTest < UnitTestCase
+  include Inat::Constants
+
   # update_timings keeps a cumulative moving average (CMA) of per-observation
   # import time for the current job. After obs #1 with elapsed T: avg = T.
   # After obs #2 with elapsed S: avg = (T + S) / 2.
@@ -143,5 +145,153 @@ class InatObservationImporterTest < UnitTestCase
     ) do
       importer.import_page(page)
     end
+  end
+
+  # ---------- update_inat_observation_field: 503 writeback retry (#4589) ----
+
+  def test_writeback_ignores_503_when_field_already_written
+    importer, args = writeback_call_args
+    stub_writeback_post(status: 503)
+    stub_writeback_verification_get(args, written: true)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_requested(:post, writeback_post_url, times: 1)
+    assert_requested(:get, writeback_get_url(args[:observation_id]),
+                     times: 1)
+  end
+
+  def test_writeback_retries_503_with_default_backoff_then_succeeds
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503 }, { status: 200 })
+    stub_writeback_verification_get(args, written: false)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_requested(:post, writeback_post_url, times: 2)
+    assert_equal([2], sleeps,
+                 "First retry should use the default doubling backoff " \
+                 "when iNat sends no Retry-After header")
+  end
+
+  def test_writeback_honors_retry_after_within_budget
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503, headers: { "Retry-After" => "3" } },
+                { status: 200 })
+    stub_writeback_verification_get(args, written: false)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_equal([3], sleeps,
+                 "Should sleep iNat's Retry-After value when it's " \
+                 "within the retry budget, instead of the doubling default")
+  end
+
+  def test_writeback_ignores_retry_after_over_budget
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503, headers: { "Retry-After" => "30" } },
+                { status: 200 })
+    stub_writeback_verification_get(args, written: false)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_equal([2], sleeps,
+                 "A Retry-After above the retry budget should be " \
+                 "ignored in favor of the doubling default")
+  end
+
+  def test_writeback_raises_after_exhausting_retries
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_writeback_post(status: 503)
+    stub_writeback_verification_get(args, written: false)
+
+    assert_raises(RestClient::ServiceUnavailable,
+                  "Should give up and raise once retries are exhausted " \
+                  "and the field is still unconfirmed") do
+      importer.send(:update_inat_observation_field, **args)
+    end
+
+    assert_requested(
+      :post, writeback_post_url,
+      times: ::Inat::ObservationImporter::MAX_WRITEBACK_RETRIES + 1
+    )
+    assert_equal([2, 4, 8], sleeps,
+                 "Should back off 2s/4s/8s across the 3 retries")
+  end
+
+  def test_writeback_treats_failed_verification_as_unconfirmed
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503 }, { status: 200 })
+    stub_request(:get, writeback_get_url(args[:observation_id])).
+      to_return(status: 500)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_requested(:post, writeback_post_url, times: 2)
+    assert_equal([2], sleeps,
+                 "A failed verification GET should be treated as " \
+                 "unconfirmed and fall through to a normal retry")
+  end
+
+  def test_writeback_raises_immediately_on_non_retryable_error
+    importer, args = writeback_call_args
+    stub_writeback_post(status: 401)
+
+    assert_raises(RestClient::Unauthorized,
+                  "Non-retryable errors should raise without retrying " \
+                  "or checking iNat for the written field") do
+      importer.send(:update_inat_observation_field, **args)
+    end
+
+    assert_requested(:post, writeback_post_url, times: 1)
+    assert_not_requested(:get, writeback_get_url(args[:observation_id]))
+  end
+
+  private
+
+  def writeback_call_args
+    import = inat_imports(:rolf_inat_import)
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    args = { observation_id: 123, field_id: MO_URL_OBSERVATION_FIELD_ID,
+             value: "#{MO.http_domain}/456" }
+    [importer, args]
+  end
+
+  # Replace `sleep` on the importer instance with a spy that records the
+  # requested durations instead of sleeping the test thread.
+  def stub_sleep_spy(importer)
+    sleeps = []
+    importer.define_singleton_method(:sleep) { |secs| sleeps << secs }
+    importer.define_singleton_method(:warn) { |*| } # quiet retry logging
+    sleeps
+  end
+
+  def writeback_post_url
+    "#{API_BASE}/observation_field_values"
+  end
+
+  def writeback_get_url(observation_id)
+    "#{API_BASE}/observations/#{observation_id}"
+  end
+
+  def stub_writeback_post(status:)
+    stub_request(:post, writeback_post_url).to_return(status: status)
+  end
+
+  def stub_writeback_verification_get(args, written:)
+    ofvs = written ? [{ field_id: args[:field_id], value: args[:value] }] : []
+    body = { results: [{ id: args[:observation_id], ofvs: ofvs }] }.to_json
+
+    stub_request(:get, writeback_get_url(args[:observation_id])).
+      to_return(status: 200, body: body)
   end
 end

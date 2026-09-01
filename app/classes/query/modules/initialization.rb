@@ -109,9 +109,16 @@ module Query::Modules::Initialization
 
   # `:order_by` gets `viewer:` forwarded - it decides postal/scientific
   # location-name sort order, see AbstractModel::OrderingScopes.
+  # `:needs_naming` treats `val` as a presence flag, not an id -- `false`
+  # skips the scope (skippable_values doesn't skip `false` generally, so
+  # this has to check explicitly), `true` sends `viewer` instead of
+  # `val`. The URL can only mean "my queue", not an arbitrary user's --
+  # see Observation::Scopes#needs_naming.
   def apply_scope_param(param, val)
     if param == :order_by
       @scopes.send(param, val, viewer: viewer)
+    elsif param == :needs_naming
+      val ? @scopes.send(param, viewer) : @scopes
     elsif val.is_a?(Hash)
       @scopes.send(param, **val)
     else

@@ -68,8 +68,14 @@ module Views::Controllers::Projects::Violations
       end
     end
 
+    # q: threads the violations Query through so prev/next from this
+    # obs's show page stays within this project's violations, rather
+    # than falling back to session leftovers or an unscoped default.
     def render_obs_link(obs)
-      Link(type: :object, object: obs, name: obs.text_name)
+      a(href: observation_path(id: obs.id, q: q_param),
+        class: "observation_link_#{obs.id}") do
+        trusted_html(obs.text_name)
+      end
       plain(" (#{obs.id})")
     end
 

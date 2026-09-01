@@ -39,6 +39,7 @@ ACTIONS = {
     location_descriptions: {},
     names: {},
     name_descriptions: {},
+    namings: {},
     observations: {},
     occurrences: {},
     projects: {},

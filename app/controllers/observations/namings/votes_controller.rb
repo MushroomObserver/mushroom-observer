@@ -10,7 +10,7 @@ module Observations::Namings
     # Has its own route for non-js access and testing.
     # The HTML response renders the Phlex `Index` view (which
     # derives consensus internally from `naming.observation`); the
-    # turbo response renders the Phlex `Table` inside a Modal.
+    # turbo response renders the Phlex `Tally` inside a Modal.
     def index
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       return unless @naming
@@ -41,7 +41,8 @@ module Observations::Namings
       render(Views::Controllers::Observations::Namings::Votes::Modal.new(
                naming: display_naming, user: @user,
                modal_id: "modal_naming_votes_#{@naming.id}",
-               title: "#{:show_namings_consensus.t} "
+               title: "#{:show_namings_consensus.t} ",
+               consensus: consensus
              ))
     end
 

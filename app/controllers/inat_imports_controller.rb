@@ -288,6 +288,7 @@ class InatImportsController < ApplicationController
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
+      original_inat_url: params[:original_inat_url].presence,
       import_others: import_others?,
       create_skeletons: create_skeletons?,
       recheck_all: recheck_all?,

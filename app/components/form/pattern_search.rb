@@ -17,19 +17,21 @@
 #            )
 #          ))
 class Components::Form::PatternSearch < Components::ApplicationForm
-  SEARCH_TYPE_OPTIONS = [
-    [:comments, :comments],
-    [:glossary, :glossary_terms],
-    [:herbaria, :herbaria],
-    [:herbarium_records, :herbarium_records],
-    [:locations, :locations],
-    [:names, :names],
-    [:observations, :observations],
-    [:projects, :projects],
-    [:species_lists, :species_lists],
-    [:users, :users],
-    [:app_search_google, :google]
-  ].freeze
+  # Pattern-searchable on the backend (SearchController::
+  # PATTERN_SEARCHABLE_MODELS) but excluded from this dropdown:
+  # Image.pattern's join is too expensive to expose on the
+  # always-visible search bar. The backend stays working so the query
+  # can be revisited later.
+  DROPDOWN_EXCLUDED_TYPES = [:images].freeze
+
+  # A few types show a label that differs from their model symbol.
+  LABEL_OVERRIDES = { glossary_terms: :glossary }.freeze
+
+  SEARCH_TYPE_OPTIONS = (
+    (SearchController::PATTERN_SEARCHABLE_MODELS - DROPDOWN_EXCLUDED_TYPES).
+      map { |type| [LABEL_OVERRIDES.fetch(type, type), type] } +
+      [[:app_search_google, :google]]
+  ).freeze
 
   # The selectable `type` values — the set a stored
   # `session[:search_type]` must belong to for the select to be able

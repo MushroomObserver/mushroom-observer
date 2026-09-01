@@ -15,7 +15,7 @@ class NamingTest < UnitTestCase
       updated_at: now,
       observation_id: obs.id,
       name_id: names(:agaricus_campestris).id,
-      user_id: mary.id
+      user_id: dick.id
     )
     assert(naming.save,
            "Save failed: #{naming.errors.full_messages.join("; ")}")
@@ -201,7 +201,7 @@ class NamingTest < UnitTestCase
         observation: obs,
         name: name,
         vote_cache: 0,
-        user: mary
+        user: dick
       )
     end
   end
@@ -229,5 +229,78 @@ class NamingTest < UnitTestCase
     nrs[2].notes = nil
     nrs[1].delete
     assert_equal({ 2 => "", 3 => "test" }, naming.reasons)
+  end
+
+  # absorb folds another of a user's namings on the observation into this
+  # one and destroys it: the higher vote per voter is kept, and reasons
+  # merge -- a contained note is superseded, two distinct notes join on a
+  # line break (#5186). During a name merge `other` carries the old name
+  # (a different name_id), so folding it stays clear of the
+  # (obs, user, name) uniqueness rule.
+  def test_absorb_merges_votes_and_reasons
+    obs = observations(:coprinus_comatus_obs)
+    obs.namings.to_a.each do |n|
+      n.current_user = rolf
+      n.destroy
+    end
+
+    keeper = Naming.new(observation: obs, name: names(:coprinus_comatus),
+                        user: rolf,
+                        reasons: { 1 => "Fibrillose cap", 2 => "Grew on oak" })
+    keeper.current_user = rolf
+    keeper.save!
+    Vote.create!(naming: keeper, observation: obs, user: rolf, value: 1)
+
+    other = Naming.new(observation: obs, name: names(:agaricus_campestris),
+                       user: rolf,
+                       reasons: { 1 => "Fibrillose cap and fragile stem",
+                                  2 => "Bruised blue" })
+    other.current_user = rolf
+    other.save!
+    Vote.create!(naming: other, observation: obs, user: rolf, value: 3)
+
+    keeper.absorb(other)
+
+    assert_nil(Naming.find_by(id: other.id), "the absorbed naming is gone")
+    assert_equal({ 1 => "Fibrillose cap and fragile stem",
+                   2 => "Grew on oak\nBruised blue" },
+                 keeper.reload.reasons,
+                 "contained note superseded; distinct notes join on a newline")
+    assert_equal(3, keeper.votes.find_by(user: rolf).value,
+                 "the higher vote value is kept")
+  end
+
+  # A user can't propose the same name twice on one observation (#5186).
+  def test_duplicate_naming_for_same_user_is_invalid
+    existing = namings(:coprinus_comatus_naming)
+
+    dup = Naming.new(observation: existing.observation, name: existing.name,
+                     user: existing.user)
+    dup.current_user = existing.user
+
+    assert_not(dup.valid?)
+    assert_equal(:validate_naming_duplicate.t, dup.errors[:name].first)
+  end
+
+  # A different user proposing the same name is allowed -- the scope is
+  # (observation, user, name), not (observation, name).
+  def test_duplicate_naming_for_other_user_is_valid
+    existing = namings(:coprinus_comatus_naming)
+
+    other = Naming.new(observation: existing.observation, name: existing.name,
+                       user: mary)
+    other.current_user = mary
+
+    assert(other.valid?,
+           "other user re-propose: #{other.errors.full_messages.join("; ")}")
+  end
+
+  # Re-validating an already-saved naming doesn't flag it against itself.
+  def test_existing_naming_not_flagged_as_its_own_duplicate
+    naming = namings(:coprinus_comatus_naming)
+    naming.current_user = naming.user
+
+    assert(naming.valid?,
+           "not its own duplicate: #{naming.errors.full_messages.join("; ")}")
   end
 end

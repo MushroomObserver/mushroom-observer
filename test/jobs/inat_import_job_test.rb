@@ -170,15 +170,22 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions
     raiser = ->(*) { raise(ActiveRecord::RecordInvalid.new(ExternalLink.new)) }
-    ExternalLink.stub(:create!, raiser) do
-      assert_no_difference(
-        "Observation.count",
-        "A cross-referenced iNat obs is skipped even when the " \
-        "self-heal link fails"
-      ) do
-        InatImportJob.perform_now(@inat_import)
+    # Inat::ObservationImporter#create_crosslink logs the validation
+    # failure via Rails.logger.warn -- capture it instead of letting it
+    # print to the test suite's console.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      ExternalLink.stub(:create!, raiser) do
+        assert_no_difference(
+          "Observation.count",
+          "A cross-referenced iNat obs is skipped even when the " \
+          "self-heal link fails"
+        ) do
+          InatImportJob.perform_now(@inat_import)
+        end
       end
     end
+    assert_includes(logged, "failed to create remote_manual ExternalLink")
 
     assert_nil(
       ExternalLink.find_by(external_id: @parsed_results.first[:id].to_s,
@@ -558,6 +565,26 @@ class InatImportJobTest < ActiveJob::TestCase
     name = Name.find_by(text_name: "Leucocoprineae", rank: "Tribe")
     assert_not_nil(
       name, "Failed to create Name at iNat's declared rank Tribe"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
+  end
+
+  # A rank MO can't reliably infer from the name string: iNat's declared
+  # rank is authoritative, using the same trusted-rank fallback as the
+  # ambiguous-suffix case above.
+  def test_import_job_superorder_rank
+    create_ivars_from_filename("stemonitidia")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Stemonitidia", rank: "Superorder")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Superorder"
     )
     assert_equal(name, obs.name, "Wrong consensus id")
   end

@@ -32,13 +32,13 @@ end
 
 SimpleCov.start("rails") do
   # An always empty file which is always reported as a coverage decrease
-  add_filter("/channels/application_cable/channel.rb")
+  skip("/channels/application_cable/channel.rb")
 
-  # Custom RuboCop cops are lint-time tooling — loaded and exercised by
-  # RuboCop, never by the Rails test suite. The "rails" profile's
+  # Custom RuboCop cops are loaded and exercised by Rubocop
+  # not the Rails test suite. The "rails" profile's
   # track_files("{app,lib}/**/*.rb") otherwise pulls them into the report
   # as a permanent ~0% coverage drag.
-  add_filter("/lib/rubocop/")
+  skip("/lib/rubocop/")
 end
 
 # Allow test results to be reported back to runner IDEs.
@@ -66,7 +66,36 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# MiniExiftool caches its tag list in a pstore file on first use,
+# printing two lines to $stderr while generating it -- invisible on a
+# dev machine where the cache already exists from a prior run, but
+# guaranteed noise on a fresh CI runner. Parallel test workers fork
+# from this process, so warming the cache here (before parallelize
+# forks them) means every worker finds the file already on disk.
+MiniExiftool.all_tags
+
+# RefreshNameListerCacheJob writes this file from a DB query, but
+# nothing guarantees it exists on a fresh checkout -- a CI runner has
+# no name_list_data.js until something runs the job. Every layout
+# renders javascript_importmap_tags, which pins the whole
+# app/javascript/src directory, so any page render fails with
+# Sprockets::Rails::Helper::AssetNotPrecompiledError until it does. A
+# syntactically valid placeholder with empty data satisfies the pin
+# before parallelize forks workers, so every worker finds a file on
+# disk from the start; RefreshNameListerCacheJobTest overwrites it
+# with fixture-backed data when that job's own test runs.
+cache_file = MO.name_lister_cache_file
+unless File.exist?(cache_file)
+  FileUtils.mkpath(File.dirname(cache_file))
+  File.write(cache_file, <<~JS)
+    export let NL_GENERA = [];
+    export let NL_SPECIES = [];
+    export let NL_NAMES = [];
+  JS
+end
+
 %w[
+  no_test_console_noise
   bullet_helper
 
   general_extensions
@@ -202,19 +231,18 @@ module ActiveSupport
     # I18n.locale and Symbol.missing_tags) leak between tests
     # within a parallel worker. See #4238.
     setup do
-      # rubocop:disable Rails/I18nLocaleAssignment
+      # rubocop:disable-next Rails/I18nLocaleAssignment
       I18n.locale = :en if I18n.locale != :en
-      # rubocop:enable Rails/I18nLocaleAssignment
-      # rubocop:disable Rails/TimeZoneAssignment
+      # rubocop:disable-next Rails/TimeZoneAssignment
       Time.zone = "America/New_York"
-      # rubocop:enable Rails/TimeZoneAssignment
       clear_logs unless ActiveSupport::TestCase.cleared_logs
       Symbol.missing_tags = []
-      # Functional/integration tests reset this via ApplicationController's
-      # own before_action on every get/post; this covers unit tests that
-      # call UserGroup.all_users/reviewers/one_user directly, with no
+      # Functional/integration tests reset these via
+      # ApplicationController's before_actions on every get/post; this
+      # covers unit tests that call these methods directly, with no
       # request to trigger that reset.
       UserGroup.reset_request_cache
+      ExternalSite.reset_request_cache
     end
 
     # Otherwise WebMock accumulates every request made anywhere in this

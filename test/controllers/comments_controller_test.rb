@@ -3,14 +3,28 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
-  # Test of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  include QueryParamRoundTripTestHelpers
+
+  # Test of index: unfiltered index, then each recognized filter param.
   def test_index
     login
     get(:index)
     assert_response(:success)
     assert_select("body.comments__index")
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Comments, :Comment,
+      overrides: {
+        id_in_set: comments(:minimal_unknown_obs_comment_1).id,
+        by_users: rolf.id,
+        for_user: rolf.id
+      }
+    )
   end
 
   def test_index_by_non_default_sort_order
@@ -25,7 +39,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_has_comments
     target = observations(:minimal_unknown_obs)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
     comments = Comment.where(target_type: target.class.name, target: target)
 
     login
@@ -37,7 +51,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_valid_target_without_comments
     target = names(:conocybe_filaris)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
 
     login
     get(:index, params: params)
@@ -46,21 +60,43 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_invalid_target_type
     target = api_keys(:rolfs_api_key)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
 
     login
     get(:index, params: params)
-    assert_flash(:runtime_invalid, type: '"type"',
-                                   value: params[:type].to_s)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_invalid_polymorphic_type,
+        { param: "target", type: params[:target][:type] }]]
+    )
+    assert_select("#results tr", count: 0)
   end
 
   def test_index_target_for_non_model
-    params = { type: "Hacker", target: 666 }
+    params = { target: { type: "Hacker", id: 666 } }
 
     login
     get(:index, params: params)
-    assert_flash(:runtime_invalid, type: '"type"',
-                                   value: params[:type].to_s)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_invalid_polymorphic_type,
+        { param: "target", type: params[:target][:type] }]]
+    )
+    assert_select("#results tr", count: 0)
+  end
+
+  def test_index_target_nonexistent_id
+    bad_id = Name.maximum(:id).to_i + 1000
+    params = { target: { type: "Name", id: bad_id } }
+
+    login
+    get(:index, params: params)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_polymorphic_not_found,
+        { param: "target", type: :name, id: bad_id.to_s.inspect }]]
+    )
+    assert_select("#results tr", count: 0)
   end
 
   def test_index_pattern_search_str

@@ -61,11 +61,20 @@ module Location::Scopes
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|
-      cols = Location[:name] + LocationDescription.searchable_columns
-      joins_default_descriptions.search_columns(cols, phrase)
+      exact_match_or(phrase) do
+        cols = Location[:name] + LocationDescription.searchable_columns
+        joins_default_descriptions.search_columns(cols, phrase)
+      end
     }
     scope :regexp, lambda { |phrase|
       where(Location[:name] =~ phrase.to_s.strip.squeeze(" ")).distinct
+    }
+    # Locations whose name ends with the given country -- MO location
+    # names are formatted "City, State, Country". Named `in_country`,
+    # not `country`, to avoid colliding with `Location.country`
+    # (parses the country out of a location name string).
+    scope :in_country, lambda { |name|
+      regexp("#{name}$")
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
@@ -203,6 +212,10 @@ module Location::Scopes
       regions = hash.delete(:region)
       scope = scope.region(regions) if regions.present?
       scope.joins(:observations).subquery(:Observation, hash)
+    }
+    # Locations of observations attached to the given project(s).
+    scope :projects, lambda { |project_ids|
+      observation_query(projects: project_ids)
     }
 
     scope :show_includes, lambda {

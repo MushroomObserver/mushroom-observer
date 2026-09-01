@@ -44,10 +44,6 @@ class ImagesController < ApplicationController
     ].freeze
   end
 
-  def default_sort_order
-    ::Query::Images.default_order # :created_at
-  end
-
   private
 
   # Don't show the index if they're asking too much.
@@ -74,32 +70,6 @@ class ImagesController < ApplicationController
         And please stop hammering our server!
       TOO_MANY_RESULTS
     )
-  end
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display matrix of images by a given user.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: images_path
-    )
-    return unless user
-
-    query = create_query(:Image, by_users: user)
-    [query, {}]
-  end
-
-  # Display matrix of Image's attached to a given project.
-  def project
-    project = find_or_goto_index(Project, params[:project].to_s)
-    return unless project
-
-    query = create_query(:Image, projects: project)
-    [query, { always_index: true }]
   end
 
   # Hook runs before template displayed. Must return query.

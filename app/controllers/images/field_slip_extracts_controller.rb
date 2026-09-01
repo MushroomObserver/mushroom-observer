@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 module Images
-  # Machine-reads a field slip photo and lets a site admin review the
-  # result before any of it reaches the observation (see
-  # FieldSlip::Extractor).
+  # Machine-reads a field slip photo and lets the collector -- or a
+  # reviewer -- check the result before any of it reaches the
+  # observation (see FieldSlip::Extractor).
   #
-  # Open to site admins and to admins of a project the image's
-  # observations belong to (see `FieldSlipExtract.permitted?`), not to
-  # everyone: each call costs money and roughly a third of fields need
-  # correcting, so this wants people who know what a slip should say.
-  # `create` always re-reads -- extraction changes over time and a fresh
-  # read is the point of pressing the button again.
+  # Open to the image's owner (their photo, their record), to
+  # admins of a project the image's observations belong to, and to
+  # site admins (see `FieldSlipExtract.permitted?`) -- not to everyone,
+  # since each call costs money and writes to a record. `create` always
+  # re-reads -- extraction changes over time and a fresh read is the
+  # point of pressing the button again.
   class FieldSlipExtractsController < ApplicationController
     before_action :login_required
     before_action :find_image!
@@ -74,29 +74,15 @@ module Images
 
     # No return value: a `before_action` halts the chain when it
     # redirects, so signalling with true/false would be decoration.
-    # Runs after `find_image!` because the permission depends on the
-    # image's observations, not just on the user.
+    # Runs after `find_image!` because the permission needs the image
+    # (ownership and its observations' projects), not just the user.
     def permission_required
       return unless @image
       return if FieldSlipExtract.permitted?(image: @image, user: @user,
                                             site_admin: in_admin_mode?)
-      return if awaiting_own_upload?
 
       flash_error(:permission_denied.t)
       redirect_to(image_path(@image.id))
-    end
-
-    # The observation-create redirect can land here BEFORE the QR jobs
-    # have filed the observation into its project -- at which point
-    # `permitted?` has no project to check against. Waiting on your own
-    # freshly uploaded photo shows nothing but a status panel, so it
-    # only needs ownership; the review form itself stays behind
-    # `permitted?`, which holds by the time the extract completes.
-    def awaiting_own_upload?
-      return false unless request.get?
-      return false if FieldSlipExtract.find_by(image_id: @image.id)&.complete?
-
-      @image.observations.any? { |obs| obs.user_id == @user.id }
     end
 
     def find_image!
@@ -261,10 +247,11 @@ module Images
     def attach_ticked_code
       code_field = @extract.template.code_field
       return unless params.dig(:use, code_field) == "1"
-      return unless @observation.occurrence_id.nil?
 
       # Normalized once, so lookups, the attach, and the flash all
-      # speak the same canonical code.
+      # speak the same code. An observation that is already in an
+      # occurrence is handled too -- Attacher merges the occurrences
+      # when the slip is on a different one.
       code = params.dig(:value, code_field).to_s.strip.upcase
       return if code.blank?
 
@@ -286,6 +273,9 @@ module Images
         @observation.reload
       when :joined
         flash_notice(:field_slip_extract_joined.t(code: code))
+        @observation.reload
+      when :merged
+        flash_notice(:field_slip_extract_merged.t(code: code))
         @observation.reload
       else
         flash_warning(:field_slip_extract_attach_failed.t(

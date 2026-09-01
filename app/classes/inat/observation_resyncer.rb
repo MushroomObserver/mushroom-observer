@@ -3,8 +3,8 @@
 require "json"
 
 class Inat
-  # Refreshes every read-only reflection (#4214) in an observation's
-  # occurrence from its current iNaturalist data (#4215). Sync is an
+  # Refreshes every read-only reflection in an observation's
+  # occurrence from its current iNat data. Sync is an
   # occurrence-wide event: pressing "Sync now" on any member observation
   # refreshes all of the occurrence's reflections at essentially the same
   # time, in ONE rate-limited API call (`Inat::ObsFetcher#fetch_batch`
@@ -13,6 +13,11 @@ class Inat
   # re-fetched and updated in place. Only source-owned fields are touched;
   # namings, votes, comments, images and sequences are handled by later
   # slices.
+  #
+  # The per-reflection refresh itself lives in Inat::ReflectionResync,
+  # shared with the scheduled daily batch (Inat::ReflectionBatchResyncer);
+  # this class adds the occurrence-wide framing and the Turbo broadcast
+  # that updates the page live.
   #
   # Runs BELOW the read-only edit guard: that guard blocks the web/API
   # edit actions, while this service writes the records directly, so it
@@ -23,13 +28,15 @@ class Inat
   #   - id absent from results    -> :source_deleted, MO data kept, logged;
   #   - id present                -> :synced / :unchanged.
   class ObservationResyncer
-    # Per-reflection outcome; status is one of :synced, :unchanged,
-    # :source_deleted, :fetch_failed.
-    Result = Data.define(:status, :observation)
+    # Per-reflection outcomes come from Inat::ReflectionResync; re-exported
+    # here for callers and tests that reference the occurrence path.
+    Result = ReflectionResync::Result
 
-    def initialize(observation, fetcher: ObsFetcher.new)
+    def initialize(observation, fetcher: ObsFetcher.new,
+                   applier: ReflectionResync.new)
       @observation = observation
       @fetcher = fetcher
+      @applier = applier
     end
 
     # Returns the Array of per-reflection Results (empty when the
@@ -37,209 +44,20 @@ class Inat
     def resync
       return [] if targets.empty?
 
-      by_id, failed = @fetcher.fetch_batch(targets.map { |t| inat_id(t) })
-      results = targets.map { |target| target_result(target, by_id, failed) }
+      by_id, failed = @fetcher.fetch_batch(
+        targets.map { |t| ReflectionResync.inat_id(t) }
+      )
+      results = targets.map { |target| @applier.call(target, by_id, failed) }
       broadcast(results)
       results
     end
 
     private
 
-    def target_result(target, by_id, failed)
-      return Result.new(status: :fetch_failed, observation: target) if failed
-
-      raw = by_id[inat_id(target).to_s]
-      raw ? apply(target, Inat::Obs.new(JSON.generate(raw))) : deleted(target)
-    end
-
-    # The occurrence's reflections that have an iNat import link. Only
-    # read-only reflections are refreshable: the backlog of still-editable
-    # imports (reflected_at nil) is left alone so a resync can't clobber
-    # MO-side edits.
+    # The occurrence's reflections that have an iNat import link.
     def targets
       @targets ||= @observation.sync_reflections.
-                   select { |obs| inat_link(obs) }
-    end
-
-    def inat_link(obs)
-      link = obs.import_link
-      return nil unless link&.external_site&.name ==
-                        ExternalSite::INATURALIST_NAME
-
-      link
-    end
-
-    def inat_id(obs)
-      inat_link(obs).external_id
-    end
-
-    # Check saved_changes, not changed?, to detect an update. Setting
-    # `location` triggers a callback that rewrites `where` to match the
-    # location's name. So `changed?` stays true even with no update.
-    # Read `saved_changes` (minus the timestamp) to see what got saved.
-    #
-    # Save scalar attributes first. sync_placeholder_naming?'s consensus
-    # recalculation does its own separate save, only when the consensus
-    # itself changes -- so track each save's own "did it change" signal
-    # instead of reading saved_changes once at the end.
-    def apply(obs, inat_obs)
-      if upgrade_eligible?(obs, inat_obs)
-        return upgrade_placeholder(obs, inat_obs)
-      end
-
-      obs.assign_attributes(scalar_attributes(obs, inat_obs))
-      obs.save! if obs.changed?
-      scalar_changed = obs.saved_changes.except("updated_at").present?
-
-      naming_changed = obs.placeholder? &&
-                       sync_placeholder_naming?(obs, inat_obs)
-      changed = scalar_changed || naming_changed
-
-      mark_synced(obs)
-      log_resync(obs) if changed
-      Result.new(status: changed ? :synced : :unchanged, observation: obs)
-    end
-
-    def upgrade_eligible?(obs, inat_obs)
-      return false unless obs.placeholder?
-
-      inat_obs[:license_code].present? || importer_is_collector?(obs, inat_obs)
-    end
-
-    # Is the MO importer the iNat observer (the account that posted the
-    # obs)? Compares against the account's login, not #collector -- a
-    # custom Collector observation field can name someone else, which
-    # answers a different question (who collected the specimen) than
-    # this one (whose account is this).
-    def importer_is_collector?(obs, inat_obs)
-      obs.user.inat_username.present? &&
-        obs.user.inat_username.casecmp?(inat_obs[:user][:login].to_s)
-    end
-
-    # Rebuild the placeholder as a full import, in the same row.
-    # Change only the row's own columns and Namings.
-    # Keep the id, Comments, and Occurrence.
-    #
-    # When the importer is the iNat collector, treat this as their own
-    # import: set import_others: false. Then unlicensed photos import
-    # too, same as any import of a user's own observation.
-    # Else, when only the now-licensed trigger fired, keep import_others
-    # Per-photo license checks then decide each photo separately.
-    #
-    # Don't suppress notifications. A batch import has a digest to
-    # catch them. A lone sync doesn't.
-    def upgrade_placeholder(obs, inat_obs)
-      Inat::MoObservationBuilder.new(
-        inat_obs: inat_obs, user: obs.user, observation: obs,
-        import_others: !importer_is_collector?(obs, inat_obs)
-      ).mo_observation
-      mark_synced(obs)
-      Result.new(status: :synced, observation: obs)
-    end
-
-    # The source-owned scalar fields, from the fresh iNat data.
-    # `where` is set only if no Location resolves: a present Location
-    # drives `where` from its own name via a callback, so assigning
-    # `where` too would flip it back and forth and never converge.
-    #
-    # A placeholder gets a narrower sync than a normal reflection;
-    # only date/location change here.
-    # `notes` is excluded -- a placeholder includes a fixed message
-    # instead of the iNat source's Notes/description. So a resync must not
-    # change that. `specimen` is left alone too.
-    #
-    # The leading ID has its own handling in sync_placeholder_naming? below.
-    def scalar_attributes(obs, inat_obs)
-      location = inat_obs.location
-      attrs = { when: inat_obs.when, location: location, lat: inat_obs.lat,
-                lng: inat_obs.lng, gps_hidden: inat_obs.gps_hidden }
-      attrs[:where] = inat_obs.where if location.nil?
-      return attrs if obs.placeholder?
-
-      attrs.merge(specimen: inat_obs.specimen?, notes: inat_obs.notes)
-    end
-
-    # Revise MO's stand-in Naming if iNat's Leading ID changes and
-    # it's unlocked (no outside vote). Once locked, fork a new stand-in
-    # instead of touching the old one. Find the stand-in by
-    # obs.inat_stand_in_naming_id.
-    #
-    # Recalculate consensus on a change, so votes -- not iNat -- decide
-    # the observation's displayed name.
-    def sync_placeholder_naming?(obs, inat_obs)
-      resolver = Inat::LeadNameResolver.new(inat_obs: inat_obs, user: obs.user)
-      lead_name = resolver.leading_id_name
-      consensus = Observation::NamingConsensus.new(obs)
-      stand_in = stand_in_naming(obs)
-      return false unless stand_in
-      return false if lead_name == stand_in.name
-
-      revise_or_fork_naming(stand_in, lead_name, resolver, consensus,
-                            inat_obs)
-      consensus.calc_consensus(User.admin)
-      obs.reload
-      true
-    end
-
-    def stand_in_naming(obs)
-      return nil unless obs.inat_stand_in_naming_id
-
-      Naming.find_by(id: obs.inat_stand_in_naming_id)
-    end
-
-    # Revise the stand-in Naming in place while it's still unlocked; fork
-    # a new one instead once an outside vote has locked it.
-    def revise_or_fork_naming(stand_in, lead_name, resolver, consensus,
-                              inat_obs)
-      if consensus.editable?(stand_in)
-        stand_in.update!(name: lead_name,
-                         reasons: { 2 => resolver.reason_text })
-      else
-        fork_stand_in_naming(consensus, lead_name, resolver, inat_obs)
-        consensus.mark_obs_reviewed(consensus.observation.user)
-      end
-    end
-
-    # New stand-in Naming -- same shape as
-    # SkeletonObservationBuilder#add_naming_with_vote.
-    def fork_stand_in_naming(consensus, name, resolver, inat_obs)
-      obs = consensus.observation
-      naming = Naming.create(
-        observation: obs, user: obs.user, name: name,
-        reasons: { 2 => resolver.reason_text }
-      )
-      Vote.create(naming: naming, observation: obs, user: obs.user,
-                  value: placeholder_naming_vote(inat_obs))
-      obs.update!(inat_stand_in_naming_id: naming.id)
-    end
-
-    # Same confidence weight SkeletonObservationBuilder#naming_vote uses.
-    def placeholder_naming_vote(inat_obs)
-      if inat_obs[:quality_grade] == "research"
-        Vote::NEXT_BEST_VOTE
-      else
-        Vote::MIN_POS_VOTE
-      end
-    end
-
-    # The iNat obs is gone: keep every MO record intact, record the loss on
-    # the activity log, and still stamp last_synced_at so the check ran.
-    def deleted(obs)
-      mark_synced(obs)
-      obs.log(:log_observation_source_deleted, user: User.admin)
-      Result.new(status: :source_deleted, observation: obs)
-    end
-
-    def mark_synced(obs)
-      inat_link(obs).update!(last_synced_at: Time.zone.now)
-    end
-
-    # Sync is owned by the admin account: anyone logged in may trigger
-    # it, and the scheduled batch has no triggering user at all, so the
-    # log attributes every resync to the system actor rather than to
-    # whoever happened to press the button.
-    def log_resync(obs)
-      obs.log(:log_observation_resynced, user: User.admin)
+                   select { |obs| ReflectionResync.inat_link(obs) }
     end
 
     # Turbo Stream broadcast so "Sync now" updates pages live, no reload
@@ -271,11 +89,11 @@ class Inat
       [obs, :external_link_sync]
     end
 
-    # One aggregate message for the whole occurrence: refreshed count,
-    # missing-source count (called out explicitly -- the owner should
-    # notice), or a plain up-to-date/failed line. The worst outcome
-    # drives the alert level. MessageAlert (not a bare Components::
-    # Alert) -- see .claude/rules/phlex_reference.md's "Rendering Phlex
+    # Aggregate message for the whole occurrence: refreshed count,
+    # missing-source count, or a plain up-to-date/failed line.
+    # The worst outcome drives the alert level.
+    # MessageAlert (not a bare Components::Alert).
+    # See .claude/rules/phlex_reference.md's "Rendering Phlex
     # outside a request".
     def render_flash(results)
       level, message = flash_level_and_message(results)

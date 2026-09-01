@@ -4,9 +4,7 @@ require("test_helper")
 require("json")
 
 # Unit tests for Inat::ObservationResyncer. The iNat fetch is injected as
-# a fake so the tests exercise the resync logic (update / no-op / deleted
-# source / transient failure / occurrence-wide batching) without hitting
-# the API.
+# a fake so the tests exercise the resync logic without hitting the API.
 class Inat::ObservationResyncerTest < UnitTestCase
   include ActionCable::TestHelper
   include ActiveJob::TestHelper
@@ -29,15 +27,51 @@ class Inat::ObservationResyncerTest < UnitTestCase
     @fresh = Inat::Obs.new(JSON.generate(@raw))
   end
 
+  # calostoma_lutescens is open (obscured: false), so its precise public
+  # coordinate mirrors into MO along with date and notes.
   def test_synced_updates_scalar_core_and_stamps_last_synced_at
     result = resync(found: { @id => @raw }).first
 
     assert_equal(:synced, result.status)
     @obs.reload
     assert_equal(@fresh.when, @obs.when, "date should mirror the source")
-    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
     assert_equal(@fresh.notes, @obs.notes, "notes should mirror the source")
+    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
+    # MO rounds coordinates to 4 decimals (Location.parse_latitude).
+    assert_in_delta(@fresh.lat, @obs.lat.to_f, 1e-4, "lat mirrors the source")
+    assert_in_delta(@fresh.lng, @obs.lng.to_f, 1e-4, "lng mirrors the source")
+    assert_not(@obs.gps_hidden, "an open source is not gps_hidden")
     assert_not_nil(@link.reload.last_synced_at, "should stamp last_synced_at")
+  end
+
+  # An obscured source yields only iNat's blurred coordinate, so MO's
+  # accurate imported one is left intact; gps_hidden mirrors the obscuring
+  # so MO hides the coordinate it keeps (#4215).
+  def test_an_obscured_source_hides_gps_but_keeps_the_coordinate
+    @obs.update_columns(lat: 12.3456789, lng: -98.7654321, gps_hidden: false)
+    @obs.reload
+    original = @obs.slice(:lat, :lng, :where)
+    original_location = @obs.location
+
+    resync(found: { @id => obscured_raw })
+
+    @obs.reload
+    assert(@obs.gps_hidden, "gps_hidden mirrors the iNat obscuring")
+    assert_equal(original_location, @obs.location, "location left intact")
+    assert_equal(original["lat"], @obs.lat, "lat left intact")
+    assert_equal(original["lng"], @obs.lng, "lng left intact")
+    assert_equal(original["where"], @obs.where, "where left intact")
+  end
+
+  # specimen is MO-side (herbarium records / collection numbers a user may
+  # add to a reflection); iNat gives no reliable signal, so a resync must
+  # leave it alone rather than reset it to false.
+  def test_resync_does_not_unset_specimen
+    @obs.update_column(:specimen, true)
+
+    resync(found: { @id => @raw })
+
+    assert(@obs.reload.specimen, "resync must not unset a true specimen")
   end
 
   # Sync is owned by the admin account: anyone logged in may trigger it
@@ -112,7 +146,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
     naming = skeleton.namings.first
     original_reason = naming.reasons[2]
     link = skeleton.import_link
-    coprinus_raw = mock_raw("coprinus")
+    # obscured: false -- this test is about placeholder narrowing (date/
+    # location sync, notes/specimen don't), not the separate obscured-
+    # source gate (covered elsewhere); coprinus.txt itself is obscured,
+    # which would otherwise block location from syncing here.
+    coprinus_raw = mock_raw("coprinus").merge(obscured: false)
 
     result = Inat::ObservationResyncer.new(
       skeleton,
@@ -122,7 +160,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     assert_equal(:synced, result.status,
                  "date/location differ from the skeleton's fixed test " \
-                 "values, so this should count as a real change")
+                 "values, so this should count as a change")
     skeleton.reload
     fresh = Inat::Obs.new(JSON.generate(coprinus_raw))
     assert_equal(fresh.when, skeleton.when, "date should sync")
@@ -445,7 +483,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     skeleton = build_skeleton(name: names(:peltigera))
     fresh = licensed_upgrade_obs(license_code: "cc-by-nc", login: "someone")
 
-    resyncer = Inat::ObservationResyncer.new(skeleton)
+    resyncer = Inat::ReflectionResync.new
 
     assert(resyncer.send(:upgrade_eligible?, skeleton, fresh),
            "A now-licensed source should make a placeholder upgrade-eligible")
@@ -456,7 +494,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     skeleton.user.update!(inat_username: "someone")
     fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
 
-    resyncer = Inat::ObservationResyncer.new(skeleton)
+    resyncer = Inat::ReflectionResync.new
 
     assert(
       resyncer.send(:upgrade_eligible?, skeleton, fresh),
@@ -476,7 +514,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
           merge(ofvs: [{ name: "Collector", value: "A Different Person" }])
     fresh = Inat::Obs.new(JSON.generate(raw))
 
-    resyncer = Inat::ObservationResyncer.new(skeleton)
+    resyncer = Inat::ReflectionResync.new
 
     assert(
       resyncer.send(:upgrade_eligible?, skeleton, fresh),
@@ -490,7 +528,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     skeleton = build_skeleton(name: names(:peltigera))
     fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
 
-    resyncer = Inat::ObservationResyncer.new(skeleton)
+    resyncer = Inat::ReflectionResync.new
 
     assert_not(resyncer.send(:upgrade_eligible?, skeleton, fresh),
                "An unlicensed source with an unmatched collector should " \
@@ -501,7 +539,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     non_placeholder = observations(:coprinus_comatus_obs)
     fresh = licensed_upgrade_obs(license_code: "cc-by-nc", login: "someone")
 
-    resyncer = Inat::ObservationResyncer.new(non_placeholder)
+    resyncer = Inat::ReflectionResync.new
 
     assert_not(resyncer.send(:upgrade_eligible?, non_placeholder, fresh),
                "Only a placeholder is eligible for an upgrade")
@@ -816,5 +854,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
       JSON.generate(licensed_upgrade_raw(license_code: license_code,
                                          login: login))
     )
+  end
+
+  # The open calostoma raw, flipped to obscured -- the flag iNat sets when
+  # it blurs the public coordinate (user or taxon geoprivacy).
+  def obscured_raw
+    @raw.merge(obscured: true)
   end
 end

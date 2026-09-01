@@ -18,7 +18,6 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   # INDEX
   #
   def index
-    set_project_ivar
     build_index_with_query
   end
 
@@ -60,40 +59,14 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   private
 
-  # unused now. should be :date, maybe - AN
-  def default_sort_order
-    ::Query::SpeciesLists.default_order # :date
-  end
-
   def unfiltered_index_opts
     super.merge(query_args: { order_by: :date })
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display list of user's species_lists, sorted by date.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: species_lists_path
-    )
-    return unless user
-
-    query = create_query(:SpeciesList, by_users: user, order_by: :date)
-    [query, {}]
-  end
-
-  # Display list of SpeciesList's attached to a given project.
-  def project
-    project = find_or_goto_index(Project, params[:project].to_s)
-    return unless project
-
-    query = create_query(:SpeciesList, projects: project)
-    @project = project
-    [query, { always_index: true }]
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@project, query, :projects, Project)
+    query
   end
 
   def index_display_opts(opts, query)

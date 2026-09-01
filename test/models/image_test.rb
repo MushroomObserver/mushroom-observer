@@ -235,6 +235,25 @@ class ImageTest < UnitTestCase
     assert_equal(get, img.send(var))
   end
 
+  # Regression test for #4804: copyright_holder, original_name, and notes
+  # were utf8mb3 and rejected 4-byte characters (most emoji) outright.
+  def test_emoji_round_trips_in_searchable_fields
+    img = Image.new(user: rolf,
+                    copyright_holder: "🍄 Rolf",
+                    original_name: "🍄.jpg",
+                    notes: "Found under a 🍄 today")
+    assert(img.save,
+           "Image with emoji should save: #{img.errors.full_messages}")
+
+    img.reload
+    assert_equal("🍄 Rolf", img.copyright_holder,
+                 "Emoji in copyright_holder should round-trip")
+    assert_equal("🍄.jpg", img.original_name,
+                 "Emoji in original_name should round-trip")
+    assert_equal("Found under a 🍄 today", img.notes,
+                 "Emoji in notes should round-trip")
+  end
+
   def test_presence_of_critical_external_scripts
     assert_not(Rails.root.join("script/bogus_script").exist?,
                "script/bogus_script should not exist!")

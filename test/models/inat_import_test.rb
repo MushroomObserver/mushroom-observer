@@ -421,4 +421,52 @@ class InatImportTest < ActiveSupport::TestCase
       "Nil total_importables should cap to zero"
     )
   end
+
+  def test_reimport_url_returns_stored_original_ui_url
+    import = inat_imports(:rolf_inat_import)
+    original_url = "https://www.inaturalist.org/observations?taxon_id=48701"
+    import.update_columns(original_inat_url: original_url)
+
+    assert_equal(
+      original_url, import.reimport_url,
+      "reimport_url should return the stored original URL verbatim"
+    )
+  end
+
+  def test_reimport_url_returns_stored_original_api_url
+    import = inat_imports(:rolf_inat_import)
+    original_url =
+      "https://api.inaturalist.org/v1/observations?taxon_id=48701&d1=2020-01-01"
+    import.update_columns(original_inat_url: original_url)
+
+    assert_equal(
+      original_url, import.reimport_url,
+      "reimport_url should preserve the API host, not rewrite it to the " \
+      "UI host -- UI and API search params do not fully overlap"
+    )
+  end
+
+  def test_reimport_url_falls_back_to_inat_url_when_original_blank
+    import = inat_imports(:rolf_inat_import)
+    stored_query = "taxon_id=48701&user_login=rolf"
+    import.update_columns(original_inat_url: nil, inat_url: stored_query)
+
+    assert_equal(
+      "#{Inat::Constants::SITE}/observations?#{stored_query}",
+      import.reimport_url,
+      "reimport_url should rebuild a UI URL from inat_url for a record " \
+      "predating original_inat_url, so its reimport link still lands " \
+      "in URL mode instead of defaulting to \"import all\""
+    )
+  end
+
+  def test_reimport_url_nil_when_both_url_columns_blank
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(original_inat_url: nil, inat_url: nil)
+
+    assert_nil(
+      import.reimport_url,
+      "reimport_url should be nil when neither URL column was stored"
+    )
+  end
 end

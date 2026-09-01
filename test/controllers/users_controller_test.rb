@@ -7,6 +7,17 @@ require("test_helper")
 #  users_controller
 # ------------------------------------------------------------
 class UsersControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Users, :User, overrides: { id_in_set: rolf.id }
+    )
+  end
+
   def modified_generic_params(params, user)
     params[:username] = user.login
     params

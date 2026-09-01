@@ -22,15 +22,6 @@ class GlossaryTermsController < ApplicationController
            ))
   end
 
-  def default_sort_order
-    ::Query::GlossaryTerms.default_order # :name
-  end
-
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by, :q, :id].freeze
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 50,

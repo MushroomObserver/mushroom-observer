@@ -138,9 +138,10 @@ class ExternalLink < AbstractModel
     url
   end
 
-  # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
-  # causing FormatURL#url_exists? to fail. Skip the reachability check,
-  # validating the URL format against a regexp instead.
+  # An iNat observation link is its base_url followed by a numeric id and
+  # nothing more, so validate that shape directly rather than through
+  # FormatURL's looser host/path match (which would also accept trailing
+  # path segments).
   def inat_url?(base_url)
     url.to_s.match?(/\A#{Regexp.escape(base_url)}\d+\z/) && url
   end

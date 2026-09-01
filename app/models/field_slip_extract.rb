@@ -18,22 +18,19 @@ class FieldSlipExtract < AbstractModel
   validates :model, presence: true
   validates :image_id, uniqueness: true
 
-  # Who may read a slip and review the result: site admins, and the
-  # admins of any project the image's observations belong to. A foray's
-  # own organizers are exactly the people who can tell whether a slip
-  # was transcribed correctly, and they are already trusted with that
-  # project's data -- gating on site admin alone would put every foray's
-  # transcription through the same few people.
-  #
-  # Still not open to everyone: each read costs an API call, and a
-  # careless one writes to observations the reviewer may not own.
+  # Who may read a slip and review the result: site admins, and anyone
+  # who can edit an observation the image is on. The review writes the
+  # transcribed values straight onto that observation (see
+  # Applier#apply), so the permission to review is the permission to
+  # edit -- the collector, and the project admins the collector has
+  # trusted with editing (Observation#can_edit?), no wider. An image
+  # owner whose photo hangs on somebody else's observation cannot
+  # review a slip into a record they could not otherwise touch.
   def self.permitted?(image:, user:, site_admin: false)
     return false unless user
     return true if site_admin
 
-    image.observations.any? do |obs|
-      obs.projects.any? { |project| project.is_admin?(user) }
-    end
+    image.observations.any? { |obs| obs.can_edit?(user) }
   end
 
   # An extraction has a lifecycle now that it runs in the background:
@@ -135,7 +132,10 @@ class FieldSlipExtract < AbstractModel
   def code_mismatch
     read = value_for(template.code_field).to_s.strip
     attached = observation&.field_slip&.code.to_s.strip
-    return nil if read.blank? || attached.blank? || read == attached
+    # Field slip codes are case-insensitive (stored upcased), so a
+    # case-only difference -- e.g. a hand-made slip's "NAMAtest" vs the
+    # stored "NAMATEST" -- is not a mismatch.
+    return nil if read.blank? || attached.blank? || read.casecmp?(attached)
 
     [read, attached]
   end

@@ -93,6 +93,60 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_not(row_for(review, "Field Slip Code").savable)
   end
 
+  # The observation has its own occurrence (e.g. a reflection paired
+  # with its Edit-companion), and the read code names a slip on a
+  # different one: the code row is savable so the reviewer can merge
+  # the two (#4214).
+  def test_code_row_savable_to_merge_a_different_slip_occurrence
+    @obs.update!(occurrence: nil)
+    own = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+    @obs.update!(occurrence: own)
+    slip_obs = observations(:coprinus_comatus_obs)
+    slip = FieldSlip.find_or_create_by_code("NEMF-10333", slip_obs.user)
+    slip_obs.update!(occurrence: nil)
+    slip_obs.field_slip = slip
+    slip_obs.save!
+
+    review = build(fields: { "Field Slip Code" => "NEMF-10333" })
+    row = row_for(review, "Field Slip Code")
+
+    assert(row.savable)
+    assert(row.default_use?)
+  end
+
+  # The observation sits in an occurrence that carries no field slip (a
+  # reflection's Edit-companion), and the read code names a slip not
+  # attached anywhere: the code row is savable so the reviewer can
+  # attach it onto that shared occurrence (#4214).
+  def test_code_row_savable_to_attach_onto_a_slipless_occurrence
+    @obs.update!(occurrence: nil)
+    occ = Occurrence.create!(user: @obs.user, primary_observation: @obs)
+    @obs.update!(occurrence: occ)
+
+    assert_nil(occ.field_slip, "premise: occurrence has no slip")
+    assert_not(FieldSlip.exists?(code: "NEMF-10555"), "premise: new code")
+
+    review = build(fields: { "Field Slip Code" => "NEMF-10555" })
+    row = row_for(review, "Field Slip Code")
+
+    assert(row.savable)
+    assert(row.default_use?)
+  end
+
+  # The read code names the slip that the observation's occurrence
+  # already holds -- applying it would do nothing, so no tick is
+  # offered.
+  def test_code_row_review_only_when_the_occurrence_holds_the_slip
+    @obs.update!(occurrence: nil)
+    slip = FieldSlip.find_or_create_by_code("NEMF-10444", @obs.user)
+    @obs.field_slip = slip
+    @obs.save!
+
+    review = build(fields: { "Field Slip Code" => "NEMF-10444" })
+
+    assert_not(row_for(review, "Field Slip Code").savable)
+  end
+
   # ---------- current values ----------
 
   def test_current_value_reads_a_column

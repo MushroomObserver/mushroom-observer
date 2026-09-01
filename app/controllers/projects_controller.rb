@@ -38,27 +38,6 @@ class ProjectsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Projects.default_order # :updated_at
-  end
-
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :member, :by, :q].freeze
-  end
-
-  # Display list of projects with a given member, sorted by date.
-  def member
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:member].to_s,
-      index_path: projects_path
-    )
-    return unless user
-
-    query = create_query(:Project, members: user)
-    [query, {}]
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 50,

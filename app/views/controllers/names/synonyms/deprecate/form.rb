@@ -12,7 +12,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     prop :parent_deprecated, _Nilable(::Name), default: nil
     prop :user, ::User
 
-    # rubocop:disable Metrics/ParameterLists
+    # rubocop:disable-next Metrics/ParameterLists
     def initialize(name:, user:, proposed_name: nil, is_misspelling: false,
                    comment: nil, names: nil, valid_names: nil,
                    suggest_corrections: false, parent_deprecated: nil,
@@ -27,7 +27,6 @@ module Views::Controllers::Names::Synonyms::Deprecate
                          parent_deprecated: parent_deprecated, user: user,
                          **attrs)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       submit(:submit.ti, center: true)

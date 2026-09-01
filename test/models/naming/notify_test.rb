@@ -66,12 +66,12 @@ class Naming::NotifyTest < UnitTestCase
   # recipient is the name-interest holder we control.
   def watch_the_name
     NameTracker.all.map(&:destroy)
-    Interest.create!(target: names(:agaricus_campestris), user: katrina,
+    Interest.create!(target: names(:conocybe_filaris), user: katrina,
                      state: true)
   end
 
   def propose_naming
     Naming.create!(observation: observations(:coprinus_comatus_obs),
-                   name: names(:agaricus_campestris), user: mary)
+                   name: names(:conocybe_filaris), user: mary)
   end
 end
