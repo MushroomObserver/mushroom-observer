@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-01 (deploy-2026-09-01-11-59)
+
+- Adopt a field slip onto a slip-less occurrence in `Observation#field_slip=` ([PR5269](https://github.com/MushroomObserver/mushroom-observer/pull/5269), @mo-nathan)
+- Make `Project#violations` build a single query, eliminating N+1s ([PR5264](https://github.com/MushroomObserver/mushroom-observer/pull/5264), @nimmolo)
+- Make project violations a storable Query, for prev/next scoping ([PR5265](https://github.com/MushroomObserver/mushroom-observer/pull/5265), @nimmolo)
+- Convert `Tab::Name::ObsLink::*` to plain route-helper paths ([PR5270](https://github.com/MushroomObserver/mushroom-observer/pull/5270), @nimmolo)
+- Add `Superorder` rank ([PR5272](https://github.com/MushroomObserver/mushroom-observer/pull/5272), @JoeCohen)
+- Require root for dev setup dispatcher ([PR5274](https://github.com/MushroomObserver/mushroom-observer/pull/5274), @AlanRockefeller)
+- Changelog for `deploy-2026-08-29-11-00` ([PR5267](https://github.com/MushroomObserver/mushroom-observer/pull/5267), @mo-nathan)
+- Bundle update 20260831 ([PR5275](https://github.com/MushroomObserver/mushroom-observer/pull/5275), @JoeCohen)
+- Refill "search URL" field with complete URL ([PR5223](https://github.com/MushroomObserver/mushroom-observer/pull/5223), @JoeCohen)
+- Allow emoji in copyright holder ([PR5187](https://github.com/MushroomObserver/mushroom-observer/pull/5187), @JoeCohen)
+- Add `MO/NoHandRolledWhitespace` and `MO/NoHandRolledColonSuffix` cops, fix all violations ([PR5273](https://github.com/MushroomObserver/mushroom-observer/pull/5273), @nimmolo)
+- Fix stale disabled/spinner submit button after browser Back; delete `form-feedback_controller.js` ([PR5278](https://github.com/MushroomObserver/mushroom-observer/pull/5278), @nimmolo)
+- SolidQueue batches migration ([PR5277](https://github.com/MushroomObserver/mushroom-observer/pull/5277), @JoeCohen)
+
 ## 2026-08-29 (deploy-2026-08-29-11-00)
 
 - Add Observation filter by external site (`Observation.external_sites`, search-form UI) ([PR5251](https://github.com/MushroomObserver/mushroom-observer/pull/5251), @nimmolo)
