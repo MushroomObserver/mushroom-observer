@@ -35,6 +35,18 @@
 #   small(class: class_names(Components::Column.visibility_classes(
 #           show_at: :xs, hide_at: :sm, display: :inline
 #         ))) { render_mobile_label }
+#
+# IMPORTANT: `sm:`/`md:`/`lg:` (grid width, via bootstrap-sass's grid
+# engine) and `show_at:`/`hide_at:` (visibility, via the `.d-*` bridge
+# classes in `_utilities.scss`) use the same breakpoint names for
+# different pixel thresholds right now -- the grid still runs on
+# Bootstrap 3's values (sm=768px/md=992px/lg=1200px); the `.d-*`
+# bridge classes are deliberately kept on those same BS3 values too,
+# to stay consistent with the grid. Bootstrap 4's breakpoints are
+# shifted (sm=576px/md=768px/lg=992px/xl=1200px) -- do not redefine
+# the `.d-*` bridge classes to use BS4's pixel values without also
+# migrating the grid, or `sm:`/`show_at: :sm` would silently mean two
+# different widths in the same `Column` call.
 class Components::Column < Components::Base
   BREAKPOINTS = [:xs, :sm, :md, :lg, :xl].freeze
 
