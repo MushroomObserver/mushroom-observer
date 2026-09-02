@@ -515,7 +515,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     )
   end
 
-  # Regression: importer_is_collector? must compare the iNat account
+  # Regression: importer_is_observer? must compare the iNat account
   # login, not a custom Collector observation field -- that field can
   # name someone else entirely (e.g. who physically collected the
   # specimen), a different question from whose account this is.
