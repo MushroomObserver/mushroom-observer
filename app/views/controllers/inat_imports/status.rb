@@ -66,6 +66,7 @@ module Views::Controllers::InatImports
       render_ended_line
       render_error_line
       render_ignored_section
+      render_review_sections
     end
 
     def render_summary_paragraph
@@ -196,7 +197,6 @@ module Views::Controllers::InatImports
         render_date_missing_row
       end
       render_license_added_section
-      render_review_sections
     end
 
     def render_ignored_row(caption_key, count)

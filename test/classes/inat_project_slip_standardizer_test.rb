@@ -41,10 +41,13 @@ class InatProjectSlipStandardizerTest < UnitTestCase
 
   def test_bare_observation_joins_the_project
     obs = import_obs(:minimal_unknown_obs)
+    assert_not(@project.member?(@user), "premise: importer not a member")
 
     standardizer.standardize(obs, inat_id: "111222333")
 
     assert_includes(@project.observations.reload, obs)
+    assert(@project.member?(@user),
+           "Filing into the project enrolls the importer (#4932)")
   end
 
   def test_joins_native_partner_occurrence

@@ -220,6 +220,24 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  # #5259: the show page lists recorded constraint violations and
+  # unlicensed-photo events.
+  def test_show_renders_review_sections
+    import = inat_imports(:rolf_inat_import)
+    import.update!(
+      constraint_violation_obs_ids: [observations(:minimal_unknown_obs).id],
+      unlicensed_image_events: [{ "inat_id" => 123, "login" => "flick",
+                                  "license_code" => nil, "count" => 2 }]
+    )
+
+    login(import.user.login)
+    get(:show, params: { id: import.id })
+
+    assert_select("h5", text: :inat_import_tracker_constraint_violations.l)
+    assert_select("h5",
+                  text: :inat_import_tracker_unlicensed_images_heading.l)
+  end
+
   # #5259: Go Back keeps the chosen target project on the redisplayed
   # form.
   def test_create_go_back_keeps_project

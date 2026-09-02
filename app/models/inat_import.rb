@@ -167,9 +167,13 @@ class InatImport < ApplicationRecord
   end
 
   # An observation the standardizer kept out of the target project
-  # because it violates the project's constraints (#5259).
+  # because it violates the project's constraints (#5259). The inline
+  # pass and a later slip-attach reconcile can both record the same
+  # observation, so appends are deduplicated.
   def add_constraint_violation_obs(obs_id)
     reload
+    return if constraint_violation_obs_ids.include?(obs_id)
+
     update!(constraint_violation_obs_ids:
       constraint_violation_obs_ids + [obs_id])
   end

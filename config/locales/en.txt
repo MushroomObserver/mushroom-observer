@@ -2917,6 +2917,8 @@
   inat_import_tracker_constraint_violations: Not added to the project (constraint violations)
   inat_import_tracker_constraint_violations_link: view observations
   inat_import_tracker_unlicensed_images_heading: Photos skipped for missing iNat license
+  inat_import_tracker_unlicensed_images_row: iNat [inat_id] — [login] ([license]) — [count] photo(s)
+  inat_import_tracker_no_license: no license
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
   inat_import_confirm_expected_caption: Expected imports

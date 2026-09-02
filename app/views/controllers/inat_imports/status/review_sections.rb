@@ -41,10 +41,13 @@ module Views::Controllers::InatImports
       end
 
       def render_unlicensed_image_row(event)
-        license = event["license_code"].presence || "no license"
+        license = event["license_code"].presence ||
+                  :inat_import_tracker_no_license.l
         div(class: "mb-1") do
-          plain("iNat #{event["inat_id"]} — #{event["login"]} " \
-                "(#{license}) — #{event["count"]} photo(s)")
+          plain(:inat_import_tracker_unlicensed_images_row.t(
+                  inat_id: event["inat_id"], login: event["login"],
+                  license: license, count: event["count"]
+                ))
         end
       end
     end

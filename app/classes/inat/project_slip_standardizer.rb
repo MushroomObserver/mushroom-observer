@@ -155,11 +155,26 @@ class Inat
     def ensure_member(observation)
       return if member?(observation)
 
+      enroll_importer
       if admin_import? || !@project.violates_constraints?(observation)
         @project.add_observation(observation)
       else
         @import.add_constraint_violation_obs(observation.id)
       end
+    end
+
+    # Filing observations into a project enrolls the importer, the way
+    # the field-slip attach path's `apply_project` does (#4932
+    # invariant 4: whoever puts observations in a project is a
+    # member). The form gate already refused a project the user can
+    # neither join nor administer.
+    def enroll_importer
+      return if @enrolled
+
+      @enrolled = true
+      return if @project.member?(@import.user)
+
+      @project.join(@import.user)
     end
 
     def member?(observation)

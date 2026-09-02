@@ -477,7 +477,9 @@ class InatImportTest < ActiveSupport::TestCase
     assert_equal([], import.constraint_violation_obs_ids)
     import.add_constraint_violation_obs(123)
     import.add_constraint_violation_obs(456)
-    assert_equal([123, 456], import.reload.constraint_violation_obs_ids)
+    import.add_constraint_violation_obs(123)
+    assert_equal([123, 456], import.reload.constraint_violation_obs_ids,
+                 "A re-recorded observation must not duplicate")
 
     assert_equal([], import.unlicensed_image_events)
     import.add_unlicensed_image_event(inat_id: 987, login: "somebody",
