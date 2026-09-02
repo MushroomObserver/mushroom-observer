@@ -816,6 +816,27 @@ module Observations
       )
     end
 
+    # Blank lines between pasted names inflate the split array's raw
+    # length without adding non-blank entries -- multiple_value_count
+    # must compact_blank before counting, or this paste at the
+    # threshold would be rejected as "too many values".
+    def test_blank_lines_in_names_paste_not_counted_against_threshold
+      login
+      # Joining N names with "\n\n" produces N names + (N - 1) blank
+      # lines = 2N - 1 raw entries after a plain split("\n"). Pick N
+      # so the raw entry count is over MAX_NAME_LOOKUP_VALUES only if
+      # blanks are miscounted, but N itself is not.
+      real_count = (Searchable::MatchGuards::MAX_NAME_LOOKUP_VALUES / 2) + 1
+      test_names = create_test_names(real_count)
+      lookup = test_names.map(&:text_name).join("\n\n")
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      assert_no_flash
+    end
+
     # ---------------------------------------------------------------
     #  Names lookup id-substitution (between MAX_MULTIPLE_VALUES and
     #  MAX_NAME_LOOKUP_VALUES): resolve to ids instead of rejecting
