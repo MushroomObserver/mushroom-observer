@@ -63,11 +63,15 @@ module Searchable
     # Order matters: cheapest/most-actionable check first. A single
     # oversized field gets a field-specific message before falling
     # through to Query's validation errors or the generic aggregate-
-    # length guard.
+    # length guard. Resolving fields_preferring_ids to ids is a
+    # per-value DB lookup, so it only runs once too_many_multiple_values?
+    # has confirmed there isn't a pathologically large field to reject
+    # first.
     def search_input_invalid?
-      too_many_multiple_values? ||
-        !validate_search_instance? ||
-        index_filter_url_too_long?
+      return true if too_many_multiple_values?
+
+      resolve_fields_preferring_ids_to_ids
+      !validate_search_instance? || index_filter_url_too_long?
     end
 
     def save_search_query_and_redirect_to_index
@@ -85,7 +89,6 @@ module Searchable
       null_box_if_invalid
       null_region_if_overspecific_and_box_valid
       autocompleted_strings_to_ids
-      resolve_fields_preferring_ids_to_ids
       range_fields_to_arrays
       parse_date_ranges
       normalize_notes_fields
@@ -208,7 +211,10 @@ module Searchable
     # redirect: QueryParams#resolve_record_backed_value treats a
     # single-value record-backed field as a strict id-only lookup, no
     # name fallback. Already-resolved ids pass through Lookup
-    # unchanged, so this is safe to run on every search.
+    # unchanged. Called from search_input_invalid?, after
+    # too_many_multiple_values? -- each unresolved value costs a DB
+    # lookup, so this must not run against a field that guard would
+    # reject anyway.
     def resolve_fields_preferring_ids_to_ids
       fields_preferring_ids.each do |field|
         next if @query_params[field].blank?

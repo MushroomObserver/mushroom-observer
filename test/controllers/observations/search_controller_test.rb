@@ -775,6 +775,47 @@ module Observations
       assert_flash_error
     end
 
+    def test_server_rejects_too_many_by_users_values
+      login
+      too_many = (1..60).map { |i| "user#{i}" }.join("\n")
+      params = { by_users: too_many }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_redirected_to(action: :new)
+      assert_flash_error(
+        :runtime_search_too_many_values,
+        field: :query_by_users.l.humanize, count: 60,
+        max: Searchable::MAX_MULTIPLE_VALUES
+      )
+    end
+
+    # too_many_multiple_values? must count the pasted values BEFORE
+    # resolve_fields_preferring_ids_to_ids runs -- Herbarium.name_has
+    # is a fuzzy match, so if resolution ran first, these 60 identical
+    # strings would collapse (uniq) to a single id and slip under
+    # MAX_MULTIPLE_VALUES, silently accepting a paste the guard exists
+    # to reject.
+    def test_too_many_herbaria_values_rejected_before_resolution
+      login
+      herbarium = herbaria(:nybg_herbarium)
+      too_many = Array.new(60) { herbarium.name }.join("\n")
+      params = { herbaria: too_many }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_redirected_to(action: :new)
+      assert_flash_error(
+        :runtime_search_too_many_values,
+        field: :query_herbaria.l.humanize, count: 60,
+        max: Searchable::MAX_MULTIPLE_VALUES
+      )
+    end
+
     # ---------------------------------------------------------------
     #  Names lookup id-substitution (between MAX_MULTIPLE_VALUES and
     #  MAX_NAME_LOOKUP_VALUES): resolve to ids instead of rejecting
