@@ -1,6 +1,42 @@
 To deploy to production:
 
-ssh mushroomobserver.org
-sudo su mo
-cd /var/web/mo
-script/deploy.sh
+1. Pre-release (on your dev machine, in the repo, with gh logged in):
+
+     ruby script/prerelease.rb            # dry run: preview
+     ruby script/prerelease.rb --apply    # push branch + create/update PR
+
+   This builds a draft PR from the changelog-pending branch holding the
+   next CHANGELOG.md section (its heading names the tag the deploy will
+   create) and article_pending.textile (the rows the deploy publishes
+   to the MO Article changelog). PRs without a changelog block are
+   listed in the PR body for an article yes/no verdict.
+
+2. Review that PR. Edit the Article rows in article_pending.textile;
+   promote any listed blockless PRs by adding rows. If more PRs merge
+   before the deploy, run "ruby script/prerelease.rb --apply" again to
+   refresh it. Merge it as the LAST PR before deploying.
+
+3. Deploy:
+
+     ssh mushroomobserver.org
+     sudo su mo
+     cd /var/web/mo
+     script/deploy.sh
+
+   The deploy tags the release with the pre-release's tag name and
+   inserts the Article rows below the Article's table header. If the
+   Article step fails, the deploy still succeeds; retry on the server
+   with:
+
+     bundle exec rails runner script/update_article_changelog.rb --apply
+
+Deploying without a pre-release (urgent fix): deploy.sh warns and asks
+whether to force. Forcing deploys main as the script always did -- no
+CHANGELOG.md section, no MO Article update; the skipped PRs roll into
+the next pre-release/deploy cycle.
+
+Asset-only icon refresh: script/deploy.sh --icons-only (no code deploy,
+no pre-release needed); --icons bundles the refresh into a normal
+deploy.
+
+Design and history: issue #5155.
