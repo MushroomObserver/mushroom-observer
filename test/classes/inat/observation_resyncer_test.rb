@@ -134,7 +134,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
   end
 
   # ---------------------------------------------------------------
-  #  Placeholder (skeleton, #4828) resync: narrower than a full
+  #  Placeholder (skeleton) resync: narrower than a full
   #  reflection -- date/location sync automatically, notes/specimen
   #  never do, and a leading-ID change revises the existing Naming
   #  in place instead of adding a second one.
@@ -207,9 +207,6 @@ class Inat::ObservationResyncerTest < UnitTestCase
     )
   end
 
-  # Regression: a placeholder resync must track the pure Leading ID even
-  # when the iNat obs carries a "Species Name Override" observation
-  # field -- same rule as at initial import (#4828).
   def test_placeholder_resync_ignores_name_override
     skeleton = build_skeleton(name: names(:peltigera))
     link = skeleton.import_link
@@ -298,9 +295,6 @@ class Inat::ObservationResyncerTest < UnitTestCase
   #  proposed independently, including the importer, stays untouched.
   # ---------------------------------------------------------------
 
-  # Regression: the importer themselves can propose a second Naming at
-  # any time, same as any user. Resync must not mistake it for its own
-  # stand-in just because it's authored by the importer.
   def test_placeholder_resync_leaves_importers_own_second_naming_untouched
     skeleton = build_skeleton(name: names(:peltigera))
     importer = skeleton.user
@@ -364,9 +358,6 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "The stand-in pointer should repoint to the forked Naming")
   end
 
-  # A forked stand-in's own vote uses the same confidence weight a
-  # skeleton's initial Naming would get (SkeletonObservationBuilder#
-  # naming_vote): Promising for Research Grade, Could Be otherwise.
   def test_placeholder_resync_fork_vote_reflects_research_grade
     skeleton = build_skeleton(name: names(:peltigera))
     original = skeleton.namings.first
@@ -475,7 +466,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
   # ---------------------------------------------------------------
   #  Upgrading a placeholder to a full import on sync.
   #  If the iNat obs is now licensed, or the importer is the iNat observer,
-  #  Do a full import overwriting the existing Observation in place.
+  #   overwriting the existing Observation in place.
   # ---------------------------------------------------------------
 
   def test_upgrade_eligible_when_now_licensed
@@ -515,10 +506,6 @@ class Inat::ObservationResyncerTest < UnitTestCase
     )
   end
 
-  # Regression: importer_is_observer? must compare the iNat account
-  # login, not a custom Collector observation field -- that field can
-  # name someone else entirely (e.g. who physically collected the
-  # specimen), a different question from whose account this is.
   def test_upgrade_eligible_matches_account_despite_collector_field
     skeleton = build_skeleton(name: names(:peltigera))
     skeleton.user.update!(inat_username: "someone")
@@ -530,9 +517,8 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     assert(
       resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
-      "The importer's account login matches the iNat observer, so " \
-      "this should be upgrade-eligible even though a custom " \
-      "Collector field names someone else"
+      "Should be upgradeable because the importer is the iNat observer, " \
+      "although a custom Collector field names someone else"
     )
   end
 
