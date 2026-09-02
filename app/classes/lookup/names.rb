@@ -72,7 +72,10 @@ class Lookup::Names < Lookup
     elsif /^\d+$/.match?(val.to_s) # from an id
       Name.where(id: val).select(*minimal_name_columns)
     else # from a string
-      found = find_matching_names(val)
+      # Materialize before checking emptiness -- checking a
+      # still-unloaded Relation, then flattening it, would query
+      # twice (an EXISTS probe, then loading the records).
+      found = find_matching_names(val).to_a
       @unmatched << val if found.empty?
       found
     end

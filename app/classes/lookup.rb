@@ -114,18 +114,23 @@ class Lookup
 
   def evaluate_values_as_instances
     @unmatched = []
-    @vals.map do |val|
-      if val.is_a?(@model)
-        val
-      elsif val.is_a?(AbstractModel)
-        raise("Passed a #{val.class} to LookupIDs for #{@model}.")
-      elsif /^\d+$/.match?(val.to_s)
-        @model.find(val.to_i)
-      else
-        found = lookup_method(val)
-        @unmatched << val if found.blank?
-        found
-      end
-    end.flatten.uniq.compact
+    @vals.map { |val| match_one_instance(val) }.flatten.uniq.compact
+  end
+
+  def match_one_instance(val)
+    if val.is_a?(@model)
+      val
+    elsif val.is_a?(AbstractModel)
+      raise("Passed a #{val.class} to LookupIDs for #{@model}.")
+    elsif /^\d+$/.match?(val.to_s)
+      @model.find(val.to_i)
+    else
+      # Materialize before checking emptiness -- checking a
+      # still-unloaded Relation, then flattening it, would query
+      # twice (an EXISTS probe, then loading the records).
+      found = lookup_method(val).to_a
+      @unmatched << val if found.empty?
+      found
+    end
   end
 end
