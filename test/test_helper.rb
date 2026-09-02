@@ -100,6 +100,7 @@ end
 
   general_extensions
   flash_extensions
+  search_extensions
   controller_extensions
   capybara_session_extensions
   capybara_macros
