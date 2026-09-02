@@ -531,8 +531,52 @@ class Query
   # one of those names would silently clobber the routing key it's
   # merged over instead of raising.
   def index_filter
-    params.except(:controller, :action, :id, :format)
+    shrink_multi_value_filters(
+      collapse_names_to_this_name(
+        params.except(:controller, :action, :id, :format)
+      )
+    )
   end
+
+  # `?project=123` instead of `?projects[]=123`. Round-trips
+  # correctly, not just cosmetic -- `permit_filters` already permits
+  # a bare scalar for every Array-typed attr, and `array_validate`
+  # wraps it back into a one-element array.
+  def shrink_multi_value_filters(filters)
+    attr_to_alias = self.class.param_aliases.invert
+    filters.each_with_object({}) do |(attr, val), result|
+      if val.is_a?(Array) && val.length == 1
+        result[attr_to_alias[attr] || attr] = val.first
+      else
+        result[attr] = val
+      end
+    end
+  end
+
+  # Query::Observations-only: `names: {lookup: [x]}` with every
+  # modifier flag absent/false is identical to `this_name: [x]`
+  # (`Observation::Scopes#names` treats absent kwargs as falsy, same
+  # as `scope :this_name`'s bare call).
+  def collapse_names_to_this_name(filters)
+    return filters unless self.class.has_attribute?(:this_name)
+    # Don't clobber an already-present :this_name filter -- both keys
+    # are independently recognized top-level params, so a request can
+    # legitimately carry both at once.
+    return filters if filters.key?(:this_name)
+
+    names = filters[:names]
+    return filters unless collapsible_to_this_name?(names)
+
+    filters.except(:names).merge(this_name: names[:lookup])
+  end
+
+  def collapsible_to_this_name?(names)
+    names.is_a?(Hash) && names[:lookup].is_a?(Array) &&
+      names[:lookup].length == 1 &&
+      (names.keys - [:lookup]).all? { |k| names[k].blank? }
+  end
+  private :shrink_multi_value_filters, :collapse_names_to_this_name,
+          :collapsible_to_this_name?
 
   # Merges an already-resolved `q` param value into a path's
   # existing query string (preserving other params, e.g. `flow=next`).
