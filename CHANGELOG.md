@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-01 (deploy-2026-09-01-23-58)
+
+- Changelog for `deploy-2026-09-01-11-59` ([PR5282](https://github.com/MushroomObserver/mushroom-observer/pull/5282), @mo-nathan)
+- Fix theme change not applying until manual reload (`Account::PreferencesController#update`) ([PR5286](https://github.com/MushroomObserver/mushroom-observer/pull/5286), @nimmolo)
+- Add `MO/NoHandRolledColumnClass` cop; extend `NoRawBootstrapComponent` for Row/Container ([PR5280](https://github.com/MushroomObserver/mushroom-observer/pull/5280), @nimmolo)
+- Add flat top-level query params (`Query#index_filter`); migrate 6 same-model `Tab::*` links ([PR5279](https://github.com/MushroomObserver/mushroom-observer/pull/5279), @nimmolo)
+- Fix Turbo Frame badges silently swallowed by `collapse-fallback` ([PR5288](https://github.com/MushroomObserver/mushroom-observer/pull/5288), @nimmolo)
+- Fix form label row layout, `label_appends` slot, double-colon labels ([PR5287](https://github.com/MushroomObserver/mushroom-observer/pull/5287), @nimmolo)
+- Fix flaky EXIF lat/lng system tests with granular per-step waits ([PR5290](https://github.com/MushroomObserver/mushroom-observer/pull/5290), @nimmolo)
+- Permit the scalar URL form of Array-typed `query_attr`s (`?this_name=<id>`) ([PR5291](https://github.com/MushroomObserver/mushroom-observer/pull/5291), @mo-nathan)
+- Centralize BS3 responsive visibility helpers behind `Components::Column` ([PR5289](https://github.com/MushroomObserver/mushroom-observer/pull/5289), @nimmolo)
+
 ## 2026-09-01 (deploy-2026-09-01-11-59)
 
 - Adopt a field slip onto a slip-less occurrence in `Observation#field_slip=` ([PR5269](https://github.com/MushroomObserver/mushroom-observer/pull/5269), @mo-nathan)
