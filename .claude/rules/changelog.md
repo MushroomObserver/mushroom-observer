@@ -98,7 +98,11 @@ Textile row per `article: yes` PR merged since the last deploy. The
 rows in that file are what the deploy publishes to the Article — edit
 them in the PR; blockless PRs are listed in the PR body for a
 verdict. Re-run after last-minute merges; merge the PR last, then
-deploy.
+deploy. `deploy.sh` tags the deploy with the heading's tag name and
+publishes the rows (best-effort) via
+`script/update_article_changelog.rb`; with no pre-release it warns
+and offers a force deploy that skips both, rolling the PRs into the
+next cycle.
 
 `script/article_rows.rb --since YYYY-MM-DD [--until YYYY-MM-DD]`
 prints rows for a date range (backfills, audits), newest first,

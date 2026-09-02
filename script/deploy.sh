@@ -105,7 +105,7 @@ if [ "$(git branch | grep '^\*')" != "* main" ]; then
     exit 1
 fi
 
-echo Fetching latest from origin... && git fetch origin
+echo Fetching latest from origin... && git fetch --tags origin
 if [ $? -ne 0 ]; then
     echo git fetch failed.
     exit 1
@@ -120,6 +120,51 @@ if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
     echo "Please install and activate Ruby $EXPECTED_RUBY before deploying."
     echo "See README_RUBY_34_UPGRADE.md for instructions."
     exit 1
+fi
+
+# Pre-release changelog check (issue #5155). The pre-release PR wrote
+# the upcoming deploy's tag name into CHANGELOG.md's top heading; a
+# top heading whose tag already exists in git means no pre-release ran
+# for this deploy. Checked against origin/main (the code that will be
+# pulled below), before anything is paused or stopped.
+update_article=0
+pending_tag=`git show origin/main:CHANGELOG.md 2>/dev/null | \
+    grep -m1 -oE '^## [0-9-]+ \(deploy-[0-9-]+\)' | \
+    sed -E 's/.*\((deploy-[0-9-]+)\).*/\1/'`
+if [ -n "$pending_tag" ] && \
+   ! git rev-parse -q --verify "refs/tags/$pending_tag" >/dev/null; then
+    tag="$pending_tag"
+    update_article=1
+    echo "Pre-release found: tagging this deploy $tag and updating the"
+    echo "MO Article from article_pending.textile."
+else
+    echo ""
+    echo "WARNING: no pre-release changelog found for this deploy, so"
+    echo "CHANGELOG.md has no section for it and the MO Article will not"
+    echo "be updated."
+    echo ""
+    echo "The pre-release process (issue #5155):"
+    echo "  1. On a dev machine: ruby script/prerelease.rb --apply"
+    echo "     (builds the changelog-pending PR with the next CHANGELOG.md"
+    echo "      section and article_pending.textile's MO Article rows)"
+    echo "  2. Review and merge that PR as the last PR before deploying."
+    echo "  3. Run script/deploy.sh -- it tags the deploy with the"
+    echo "     pre-release's tag name and publishes the Article rows."
+    echo ""
+    echo "Forcing deploys main as-is (useful for an urgent fix); the"
+    echo "skipped PRs roll into the next pre-release/deploy cycle."
+    printf "Force the deploy without a changelog? [y/N] "
+    read -r answer
+    case "$answer" in
+        y|Y|yes|YES)
+            echo "Forcing deploy without changelog or MO Article update."
+            ;;
+        *)
+            echo "Deploy aborted. Run the pre-release, then deploy again."
+            exit 1
+            ;;
+    esac
+    tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 fi
 
 # Pause all queues so no NEW jobs start, then wait (up to the drain timeout)
@@ -148,7 +193,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-tag=`date "+deploy-%Y-%m-%d-%H-%M"`
 echo Going for it\!
 
 # Put up the maintenance page BEFORE stopping puma so users hit a
@@ -228,10 +272,7 @@ echo Precompiling assets... && rake assets:precompile && \
 echo Starting puma... && sudo service puma start && \
 echo Starting solidqueue... && sudo service solidqueue start && \
 echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb && \
-echo Taking down maintenance page... && rm -f public/maintenance.html && \
-echo Tagging repo with $tag... && git tag $tag && \
-echo Pushing new tag... && git push --tags && \
-echo SUCCESS\!
+echo Taking down maintenance page... && rm -f public/maintenance.html
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -239,5 +280,28 @@ if [ $? -ne 0 ]; then
     sudo service puma start
     sudo service solidqueue start
     echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
+    exit 1
+fi
+
+# Best-effort (#5155): a failure here warns and the deploy still
+# succeeds -- the Article is cosmetic; the site is already up.
+if [ "$update_article" = "1" ]; then
+    echo Updating the MO Article from article_pending.textile...
+    bundle exec rails runner script/update_article_changelog.rb --apply
+    if [ $? -ne 0 ]; then
+        echo "WARNING: MO Article update failed; the deploy continues."
+        echo "Retry by hand:"
+        echo "  bundle exec rails runner script/update_article_changelog.rb --apply"
+    fi
+fi
+
+echo Tagging repo with $tag... && git tag $tag && \
+echo Pushing new tag... && git push --tags && \
+echo SUCCESS\!
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Site is up, but tagging/pushing $tag failed. Fix and re-run:"
+    echo "  git tag $tag && git push --tags"
     exit 1
 fi
