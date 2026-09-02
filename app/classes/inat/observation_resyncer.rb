@@ -60,15 +60,12 @@ class Inat
                    select { |obs| ReflectionResync.inat_link(obs) }
     end
 
-    # Turbo Stream broadcast so "Sync now" updates pages live, no reload
-    # (#4215) -- see Observations::InatResyncsController#create for why
-    # the controller response itself is flash-only. The aggregate flash
-    # goes to EVERY member observation's channel (a viewer may be on the
-    # primary's page, not a reflection's); panel updates go to each
-    # changed reflection's own channel, since the DOM targets are that
-    # page's panels. Rendering uses no user -- the channel is shared by
-    # every viewer of the page, so the safe logged-out-equivalent view is
-    # the only one that's right for all of them.
+    # Turbo Stream broadcast so "Sync now" updates pages live
+    # The controller response itself is flash-only. The aggregate flash
+    # goes to EVERY member observation's channel; panel updates go to each
+    # changed reflection's channel.
+    # Rendering uses no user -- the channel is shared by
+    # every viewer of the page.
     def broadcast(results)
       flash_html = render_flash(results)
       members.each do |member|
@@ -76,8 +73,15 @@ class Inat
           channel(member), target: "page_flash", html: flash_html
         )
       end
-      results.select { |r| r.status == :synced }.
-        each { |r| broadcast_panels(r.observation) }
+      results.select { |r| r.status == :synced }.each do |r|
+        broadcast_panels(r.observation)
+        Turbo::StreamsChannel.broadcast_refresh_to(
+          channel(r.observation),
+          # request_id: nil, else Turbo's client-side dedup would skip
+          # refreshing whichever client clicked "Sync now".
+          request_id: nil
+        )
+      end
     end
 
     def members
@@ -129,20 +133,7 @@ class Inat
     # `:unchanged`/`:source_deleted`/`:fetch_failed` leave the
     # observation's own data untouched, so there's nothing to re-render
     # there.
-    #
-    # Deliberately NOT broadcasting the Proposed Name table
-    # (Views::Controllers::Observations::Show::Namings) or the page's own
-    # title here, even though a placeholder resync can revise the
-    # leading-ID Naming: Namings' row/footer sub-views require a real,
-    # non-nilable @user for permission-gated vote/edit/propose buttons,
-    # and this broadcast is rendered once for a channel shared by every
-    # viewer, with no per-viewer user available (the resync itself runs
-    # in a background job, InatObservationResyncJob, off the requesting
-    # user's session entirely). Reflecting that fully live would mean
-    # reworking Namings to tolerate user: nil, or adding a separate
-    # read-only display -- out of scope here; a page reload shows the
-    # revised name. NameInfoPanel ("About this taxon") is safe to
-    # broadcast because its own `user` prop is already nilable.
+    # Skips the Proposed Name table and page title: Namings' row
     def broadcast_panels(observation)
       broadcast_replace(observation, "observation_details",
                         Views::Controllers::Observations::Show::Details.new(

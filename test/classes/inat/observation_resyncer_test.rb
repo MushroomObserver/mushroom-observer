@@ -653,8 +653,9 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(1, primary_msgs.length,
                  "the primary's page gets the flash only")
     assert(primary_msgs.first.include?('target="page_flash"'))
-    assert_equal(4, obs_msgs.length,
-                 "the synced reflection's page gets flash + panels")
+    assert_equal(5, obs_msgs.length,
+                 "the synced reflection's page gets flash + panels + " \
+                 "a refresh stream")
   end
 
   # Mixed outcomes (rare) are reported honestly in one flash: refreshed
@@ -691,7 +692,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
       resync(found: { @id => @raw })
     end
 
-    assert_equal(4, messages.length)
+    assert_equal(5, messages.length)
     assert(messages.any? { |m| m.include?('target="page_flash"') })
     assert(
       messages.any? { |m| m.include?('target="observation_details"') }
@@ -704,6 +705,19 @@ class Inat::ObservationResyncerTest < UnitTestCase
     )
     flash = messages.find { |m| m.include?('target="page_flash"') }
     assert_includes(flash, :observation_resync_synced.t(count: 1))
+    refresh = messages.find { |m| m.include?('action="refresh"') }
+    assert_not_nil(
+      refresh,
+      "a synced reflection should also get a refresh stream, so " \
+      "namings/photos/sequences the panel broadcasts can't cover reach " \
+      "the page too"
+    )
+    assert_not_includes(
+      refresh, "request-id=",
+      "the refresh must omit request-id, else Turbo's client-side " \
+      "dedup would skip the client whose 'Sync now' click triggered " \
+      "this broadcast"
+    )
   end
 
   # No real change: just the flash, no point re-rendering panels whose
