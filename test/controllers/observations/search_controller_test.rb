@@ -757,8 +757,9 @@ module Observations
 
     def test_server_rejects_too_many_names
       login
-      # Well over MAX_MULTIPLE_VALUES -- caught by the field-specific
-      # guard before the aggregate-length one even runs.
+      # Well over MAX_NAME_LOOKUP_VALUES -- rejected outright, without
+      # attempting to resolve (resolution only happens between
+      # MAX_MULTIPLE_VALUES and MAX_NAME_LOOKUP_VALUES).
       long_names = (1..1000).map { |i| "Species#{i}" }.join("\n")
       params = {
         names: {
@@ -773,6 +774,99 @@ module Observations
 
       assert_redirected_to(action: :new)
       assert_flash_error
+    end
+
+    # ---------------------------------------------------------------
+    #  Names lookup id-substitution (between MAX_MULTIPLE_VALUES and
+    #  MAX_NAME_LOOKUP_VALUES): resolve to ids instead of rejecting
+    # ---------------------------------------------------------------
+
+    def test_names_lookup_over_threshold_resolves_to_ids
+      login
+      test_names = create_test_names(60)
+      lookup = test_names.map(&:text_name).join("\n")
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      redirect_params = parse_redirect_names_params
+      assert_equal(test_names.map { |n| n.id.to_s }.sort,
+                   redirect_params["lookup"].sort,
+                   "Redirect should carry resolved ids, not name text")
+      assert_equal("false", redirect_params["include_synonyms"],
+                   "Expansion modifier should be reset to false, since " \
+                   "expansion is already baked into the resolved ids")
+    end
+
+    def test_names_lookup_over_threshold_resets_expansion_modifiers
+      login
+      test_names = create_test_names(60)
+      lookup = test_names.map(&:text_name).join("\n")
+      params = {
+        names: {
+          lookup: lookup,
+          include_synonyms: "true",
+          include_subtaxa: "true"
+        }
+      }
+
+      post(:create, params: { query_observations: params })
+
+      redirect_params = parse_redirect_names_params
+      assert_equal("false", redirect_params["include_synonyms"])
+      assert_equal("false", redirect_params["include_subtaxa"])
+    end
+
+    def test_names_lookup_at_or_under_threshold_not_resolved
+      login
+      test_names = create_test_names(50)
+      lookup = test_names.map(&:text_name).join("\n")
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      redirect_params = parse_redirect_names_params
+      # Still the raw name text, not ids -- at the threshold, not over it.
+      assert_equal(test_names.map(&:text_name).sort,
+                   redirect_params["lookup"].sort)
+    end
+
+    def test_names_lookup_between_thresholds_that_fail_to_resolve
+      login
+      # None of these match anything, so resolution produces an empty
+      # id list -- should still redirect (not error), matching the
+      # existing silent-drop behavior for unmatched names.
+      unmatched = (1..60).map { |i| "Nonexistent Taxon #{i}" }.join("\n")
+      params = { names: { lookup: unmatched } }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_response(:redirect)
+    end
+
+    private
+
+    def create_test_names(count)
+      (1..count).map do |i|
+        Name.create!(
+          text_name: "Testus namus#{i}",
+          search_name: "Testus namus#{i}",
+          sort_name: "Testus namus#{i}",
+          display_name: "**__Testus namus#{i}__**",
+          author: "",
+          rank: "Species",
+          deprecated: false,
+          user: rolf
+        )
+      end
+    end
+
+    def parse_redirect_names_params
+      uri = URI.parse(@response.redirect_url)
+      Rack::Utils.parse_nested_query(uri.query)["names"]
     end
   end
 end
