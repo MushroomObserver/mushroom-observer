@@ -124,7 +124,7 @@ module Searchable::MatchGuards
       value =
         field.is_a?(Array) ? @query_params.dig(*field) : @query_params[field]
       return 0 if value.blank?
-      return value.length if value.is_a?(Array)
+      return value.compact_blank.length if value.is_a?(Array)
 
       value.to_s.split("\n").compact_blank.length
     end
