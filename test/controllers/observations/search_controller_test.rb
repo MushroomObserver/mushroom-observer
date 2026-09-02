@@ -176,14 +176,12 @@ module Observations
       post(:create, params: { query_observations: params })
 
       validated_params = {
-        by_users: [rolf.id],
+        by_user: rolf.id,
         has_notes: true,
         lichen: false # this should be preserved, not "compacted" out.
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa
@@ -198,8 +196,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
       # Should redirect to observations index with no names param
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: { q: { model: :Observation } })
+      assert_search_redirected_to(controller: "/observations",
+                                  params: {})
     end
 
     # Test reset_search_query creates a new blank query
@@ -279,13 +277,11 @@ module Observations
       post(:create, params: { query_observations: params })
 
       validated_params = {
-        region: ["Colorado, USA"],
+        region: "Colorado, USA",
         date: %w[2026-08-12 2026-08-16]
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     # A date the parser can't read must fail the search with an error,
@@ -314,10 +310,8 @@ module Observations
         has_field_slips: true,
         has_images: false
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     def test_create_observations_search_with_has_collection_numbers
@@ -332,10 +326,8 @@ module Observations
         has_collection_numbers: true,
         has_notes: false
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     def test_create_observations_search_nested
@@ -371,9 +363,9 @@ module Observations
         projects: projects.pluck(:id),
         date: ["2021-01-06", todate]
       }
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, **validated_params } }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: validated_params
       )
     end
 
@@ -389,9 +381,9 @@ module Observations
         in_box: location.bounding_box
       }
       post(:create, params: { query_observations: params })
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, **params.except(:names) } }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: params.except(:names)
       )
     end
 
@@ -410,9 +402,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, by_users: [user1.id, user2.id] } }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { by_users: [user1.id, user2.id] }
       )
     end
 
@@ -426,9 +418,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, projects: [proj1.id, proj2.id] } }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { projects: [proj1.id, proj2.id] }
       )
     end
 
@@ -442,9 +434,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, herbaria: [herb1.id, herb2.id] } }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { herbaria: [herb1.id, herb2.id] }
       )
     end
 
@@ -454,9 +446,9 @@ module Observations
       params = { external_sites: site.id.to_s }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { q: { model: :Observation, external_sites: [site.id] } }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { external_site: site.id }
       )
     end
 
@@ -464,21 +456,15 @@ module Observations
       login
       loc1 = locations(:burbank)
       loc2 = locations(:albion)
-      # NOTE: within_locations uses location names, not IDs
       params = {
         within_locations: "#{loc1.name}\n#{loc2.name}"
       }
       post(:create, params: { query_observations: params })
 
-      # Location names are passed as-is (not converted to IDs)
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: {
-            model: :Observation,
-            within_locations: ["#{loc1.name}\n#{loc2.name}"]
-          }
-        }
+      # Unresolved location names are looked up and redirected as ids.
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { within_locations: [loc1.id, loc2.id] }
       )
     end
 
@@ -492,11 +478,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, species_lists: [list1.id, list2.id] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { species_lists: [list1.id, list2.id] }
       )
     end
 
@@ -509,13 +493,10 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: {
-          q: {
-            model: :Observation,
-            names: { lookup: ["Agaricus campestris", "Coprinus comatus"] }
-          }
+          names: { lookup: ["Agaricus campestris", "Coprinus comatus"] }
         }
       )
     end
@@ -535,11 +516,9 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should be sorted as [low, high] = [-1.0, 2.0]
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [-1.0, 2.0] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { confidence: [-1.0, 2.0] }
       )
     end
 
@@ -553,11 +532,9 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should remain as [-1.0, 2.0]
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [-1.0, 2.0] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { confidence: [-1.0, 2.0] }
       )
     end
 
@@ -611,11 +588,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [2.0] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { confidence: 2.0 }
       )
     end
 
@@ -628,11 +603,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [1.0] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { confidence: 1.0 }
       )
     end
 
@@ -647,10 +620,10 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should create query without confidence parameter
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: {
-          q: { model: :Observation, has_images: true }
+          has_images: true
         }
       )
     end
@@ -669,11 +642,9 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [0.0] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { confidence: 0.0 }
       )
     end
 
@@ -716,11 +687,9 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Spaces should be converted to underscores, case preserved
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, has_notes_fields: ["INat_notes_field"] }
-        }
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { has_notes_fields: "INat_notes_field" }
       )
     end
 
@@ -731,44 +700,45 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should be split on newline, spaces converted to underscores
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: {
-          q: {
-            model: :Observation,
-            has_notes_fields: %w[Substrate Cap_Color Other_Field]
-          }
+          has_notes_fields: %w[Substrate Cap_Color Other_Field]
         }
       )
     end
 
     # ------- Server Handling of Long Inputs (POST method) -------
-    # These tests prove that when long inputs reach the server (if JS fails),
-    # the server can handle them without crashing since POST puts data in body
+    # These tests prove that when a long input reaches the server (e.g. if
+    # client-side JS validation fails or is bypassed), the server rejects
+    # it cleanly with a flash error and redirects back to the form --
+    # instead of building a redirect URL long enough for a front-end
+    # proxy to reject with a hard-to-diagnose error page (issue #5276).
 
-    def test_server_handles_very_long_input_without_error
+    def test_server_rejects_very_long_single_field
       login
-      # Create input that would exceed URL limits but is fine in POST body
-      # Well over MAX_SEARCH_INPUT_LENGTH limit
+      # A single scalar field (not a multi-value autocompleter, so
+      # too_many_multiple_values? doesn't apply) whose serialized
+      # redirect URL alone is well over MAX_INDEX_FILTER_URL_LENGTH --
+      # proves the aggregate-length guard catches it unassisted.
       long_text = "x" * 15_000
       params = {
         notes_has: long_text,
         has_specimen: true
       }
 
-      # Should not raise an error, even though JS validation would prevent this
       assert_nothing_raised do
         post(:create, params: { query_observations: params })
       end
 
-      # Should successfully create search and redirect
-      assert_response(:redirect)
-      assert_match(/observations/, response.redirect_url)
+      assert_redirected_to(action: :new)
+      assert_flash_error
     end
 
-    def test_server_handles_multiple_long_fields
+    def test_server_rejects_multiple_long_fields
       login
-      # Multiple long fields that collectively would be problematic in URL
+      # Two individually plausible scalar fields whose combined
+      # redirect URL is still too long.
       long_text1 = "a" * 8000
       long_text2 = "b" * 8000
       params = {
@@ -780,12 +750,15 @@ module Observations
         post(:create, params: { query_observations: params })
       end
 
-      assert_response(:redirect)
+      assert_redirected_to(action: :new)
+      assert_flash_error
     end
 
-    def test_server_handles_long_nested_params
+    def test_server_rejects_too_many_names
       login
-      # Test with long names lookup
+      # Well over MAX_NAME_LOOKUP_VALUES -- rejected outright, without
+      # attempting to resolve (resolution only happens between
+      # MAX_MULTIPLE_VALUES and MAX_NAME_LOOKUP_VALUES).
       long_names = (1..1000).map { |i| "Species#{i}" }.join("\n")
       params = {
         names: {
@@ -798,7 +771,163 @@ module Observations
         post(:create, params: { query_observations: params })
       end
 
+      assert_redirected_to(action: :new)
+      assert_flash_error
+    end
+
+    def test_server_rejects_too_many_by_users_values
+      login
+      too_many = (1..60).map { |i| "user#{i}" }.join("\n")
+      params = { by_users: too_many }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_redirected_to(action: :new)
+      assert_flash_error(
+        :runtime_search_too_many_values,
+        field: :query_by_users.l.humanize, count: 60,
+        max: Searchable::MatchGuards::MAX_MULTIPLE_VALUES
+      )
+    end
+
+    # too_many_multiple_values? must count the pasted values BEFORE
+    # resolve_fields_preferring_ids_to_ids runs -- Herbarium.name_has
+    # is a fuzzy match, so if resolution ran first, these 60 identical
+    # strings would collapse (uniq) to a single id and slip under
+    # MAX_MULTIPLE_VALUES, silently accepting a paste the guard exists
+    # to reject.
+    def test_too_many_herbaria_values_rejected_before_resolution
+      login
+      herbarium = herbaria(:nybg_herbarium)
+      too_many = Array.new(60) { herbarium.name }.join("\n")
+      params = { herbaria: too_many }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_redirected_to(action: :new)
+      assert_flash_error(
+        :runtime_search_too_many_values,
+        field: :query_herbaria.l.humanize, count: 60,
+        max: Searchable::MatchGuards::MAX_MULTIPLE_VALUES
+      )
+    end
+
+    # Blank lines between pasted names inflate the split array's raw
+    # length without adding non-blank entries -- multiple_value_count
+    # must compact_blank before counting, or this paste at the
+    # threshold would be rejected as "too many values".
+    def test_blank_lines_in_names_paste_not_counted_against_threshold
+      login
+      # Joining N names with "\n\n" produces N names + (N - 1) blank
+      # lines = 2N - 1 raw entries after a plain split("\n"). Pick N
+      # so the raw entry count is over MAX_NAME_LOOKUP_VALUES only if
+      # blanks are miscounted, but N itself is not.
+      real_count = (Searchable::MatchGuards::MAX_NAME_LOOKUP_VALUES / 2) + 1
+      test_names = create_test_names(real_count)
+      lookup = test_names.map(&:text_name).join("\n\n")
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
       assert_response(:redirect)
+      assert_no_flash
+    end
+
+    # ---------------------------------------------------------------
+    #  Names lookup id-substitution (between MAX_MULTIPLE_VALUES and
+    #  MAX_NAME_LOOKUP_VALUES): resolve to ids instead of rejecting
+    # ---------------------------------------------------------------
+
+    def test_names_lookup_over_threshold_resolves_to_ids
+      login
+      test_names = create_test_names(60)
+      lookup = test_names.map(&:text_name).join("\n")
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      redirect_params = parse_redirect_names_params
+      assert_equal(test_names.map { |n| n.id.to_s }.sort,
+                   redirect_params["lookup"].sort,
+                   "Redirect should carry resolved ids, not name text")
+      assert_equal("false", redirect_params["include_synonyms"],
+                   "Expansion modifier should be reset to false, since " \
+                   "expansion is already baked into the resolved ids")
+    end
+
+    def test_names_lookup_over_threshold_resets_expansion_modifiers
+      login
+      test_names = create_test_names(60)
+      lookup = test_names.map(&:text_name).join("\n")
+      params = {
+        names: {
+          lookup: lookup,
+          include_synonyms: "true",
+          include_subtaxa: "true"
+        }
+      }
+
+      post(:create, params: { query_observations: params })
+
+      redirect_params = parse_redirect_names_params
+      assert_equal("false", redirect_params["include_synonyms"])
+      assert_equal("false", redirect_params["include_subtaxa"])
+    end
+
+    def test_names_lookup_at_or_under_threshold_not_resolved
+      login
+      test_names = create_test_names(50)
+      lookup = test_names.map(&:text_name).join("\n")
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      redirect_params = parse_redirect_names_params
+      # Still the raw name text, not ids -- at the threshold, not over it.
+      assert_equal(test_names.map(&:text_name).sort,
+                   redirect_params["lookup"].sort)
+    end
+
+    def test_names_lookup_between_thresholds_that_fail_to_resolve
+      login
+      # None of these match anything, so resolution produces an empty
+      # id list -- should still redirect (not error), matching the
+      # existing silent-drop behavior for unmatched names.
+      unmatched = (1..60).map { |i| "Nonexistent Taxon #{i}" }.join("\n")
+      params = { names: { lookup: unmatched } }
+
+      assert_nothing_raised do
+        post(:create, params: { query_observations: params })
+      end
+
+      assert_response(:redirect)
+    end
+
+    private
+
+    def create_test_names(count)
+      (1..count).map do |i|
+        Name.create!(
+          text_name: "Testus namus#{i}",
+          search_name: "Testus namus#{i}",
+          sort_name: "Testus namus#{i}",
+          display_name: "**__Testus namus#{i}__**",
+          author: "",
+          rank: "Species",
+          deprecated: false,
+          user: rolf
+        )
+      end
+    end
+
+    def parse_redirect_names_params
+      uri = URI.parse(@response.redirect_url)
+      Rack::Utils.parse_nested_query(uri.query)["names"]
     end
   end
 end

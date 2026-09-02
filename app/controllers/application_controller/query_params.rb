@@ -25,6 +25,13 @@ module ApplicationController::QueryParams
     resolved, force_index = resolve_query_param_records(klass, permitted)
     return nil unless resolved
 
+    # `?always_index=1` -- not a query_attr, a marker any caller (e.g.
+    # Searchable#create's redirect) can add to guarantee an index page
+    # even when the query matches only one record. Without it, a
+    # search whose recognized attrs don't individually force
+    # always_index would otherwise redirect straight to that record's
+    # show page instead of the results list.
+    force_index ||= raw_params[:always_index].present?
     query = create_query(model_symbol, resolved)
     [query, { always_index: force_index }]
   end

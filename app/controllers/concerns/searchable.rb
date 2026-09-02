@@ -10,9 +10,20 @@
 
 module Searchable
   extend ActiveSupport::Concern
+  include Searchable::MatchGuards
 
   # Maximum allowed total length of all search input fields
   MAX_SEARCH_INPUT_LENGTH = 8000
+
+  # Maximum allowed length of the flat index-filter query string built
+  # for the post-search redirect. Front-end proxies commonly reject an
+  # overlong request line before it reaches Rails (nginx's compiled
+  # default is 8KB total) -- a pasted multi-value field (e.g. Names)
+  # can build a redirect URL well past that, which then shows up as a
+  # broken page or a generic error instead of a useful message. Kept
+  # well under 8KB to leave room for the rest of the request line and
+  # for tighter limits at other layers (CDN, WAF).
+  MAX_INDEX_FILTER_URL_LENGTH = 4000
 
   included do
     def create
@@ -22,11 +33,33 @@ module Searchable
       @query_params = params.require(search_object_name).permit(permittables)
 
       prepare_raw_params
-      redirect_to(action: :new) and return unless validate_search_instance?
+      redirect_to(action: :new) and return if search_input_invalid?
 
+      save_search_query_and_redirect_to_index
+    end
+
+    # Order matters: cheapest/most-actionable check first. A single
+    # oversized field gets a field-specific message before falling
+    # through to Query's validation errors or the generic aggregate-
+    # length guard. Resolving fields_preferring_ids to ids is a
+    # per-value DB lookup, so it only runs once too_many_multiple_values?
+    # has confirmed there isn't a pathologically large field to reject
+    # first.
+    def search_input_invalid?
+      return true if too_many_multiple_values?
+
+      resolve_fields_preferring_ids_to_ids
+      !validate_search_instance? || index_filter_url_too_long?
+    end
+
+    def save_search_query_and_redirect_to_index
       save_search_query
+      # always_index: 1 preserves MO's existing guarantee that a search
+      # submission lands on the results list, not a same-request
+      # auto-redirect to a single match -- see
+      # ApplicationController::QueryParams#create_query_from_url_params.
       redirect_to(controller: "/#{search_type}", action: :index,
-                  q: @query.q_param)
+                  always_index: 1, **@query.index_filter)
     end
 
     def prepare_raw_params
@@ -151,6 +184,32 @@ module Searchable
       end
     end
 
+    # A field autocompleted_strings_to_ids left as raw text (no
+    # matching client-side autocompleter match) breaks the post-search
+    # redirect: QueryParams#resolve_record_backed_value treats a
+    # single-value record-backed field as a strict id-only lookup, no
+    # name fallback. Already-resolved ids pass through Lookup
+    # unchanged. Called from search_input_invalid?, after
+    # too_many_multiple_values? -- each unresolved value costs a DB
+    # lookup, so this must not run against a field that guard would
+    # reject anyway.
+    def resolve_fields_preferring_ids_to_ids
+      fields_preferring_ids.each do |field|
+        next if @query_params[field].blank?
+
+        klass = lookup_class_for(field)
+        @query_params[field] = klass.new(@query_params[field]).ids.
+                               map(&:to_s)
+      end
+    end
+
+    def lookup_class_for(field)
+      query_class = "Query::#{query_model.to_s.pluralize}".constantize
+      accepts = query_class.attribute_types[field]&.accepts
+      model = accepts.is_a?(Array) ? accepts.first : accepts
+      "Lookup::#{model.name.pluralize}".constantize
+    end
+
     # Check for `fields_with_range`, and join them into array if range present.
     # Sorts values so the range is in correct order (min, max).
     def range_fields_to_arrays
@@ -229,6 +288,24 @@ module Searchable
       false
     end
 
+    # Guards against a redirect URL too long for a front-end proxy's
+    # request-line limit -- see MAX_INDEX_FILTER_URL_LENGTH above.
+    # Only called once `@search` (built in validate_search_instance?)
+    # is known valid, so `index_filter` matches the redirect built
+    # afterward.
+    def index_filter_url_too_long?
+      params = @search.index_filter.merge(always_index: 1)
+      length = params.to_query.bytesize
+      return false if length <= Searchable::MAX_INDEX_FILTER_URL_LENGTH
+
+      flash_error(
+        :runtime_search_string_too_long.t(
+          max: Searchable::MAX_INDEX_FILTER_URL_LENGTH, length: length
+        )
+      )
+      true
+    end
+
     def clear_relevant_query
       clear_query_in_session
       return if (@query = find_query(query_model))&.params.blank?
@@ -242,12 +319,6 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
-    def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
-
-    # def strings_with_commas
-    #   [:location, :region].freeze
-    # end
-
     def fields_preferring_ids = []
 
     def fields_with_range = []
@@ -260,17 +331,5 @@ module Searchable
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
     end
-
-    # Passing some fields will raise an error if the required field is missing,
-    # so just toss them. Not sure we have to do this, because Query will.
-    # def remove_invalid_field_combinations
-    #   return unless respond_to?(:fields_with_requirements)
-
-    #   fields_with_requirements.each do |req, fields|
-    #     next if @search[req].present?
-
-    #     fields.each { |field| @search.delete(field) }
-    #   end
-    # end
   end
 end
