@@ -1419,8 +1419,52 @@ class QueryTest < UnitTestCase
   def test_index_filter
     params = { by_users: [rolf.id], names: { lookup: ["Coprinus comatus"] } }
     query = Query.lookup(:Observation, **params)
-    # Same params as q_param, but no :model.
-    assert_equal(query.index_filter, params)
+    # Same params as q_param minus :model, but with each one-element
+    # array shrunk to a bare scalar -- by_users -> its param_alias
+    # by_user, and the one-name/no-modifiers names: hash collapsed to
+    # this_name (Query::Observations-only; see collapse_names_to_this_name).
+    assert_equal({ by_user: rolf.id, this_name: "Coprinus comatus" },
+                 query.index_filter)
+  end
+
+  def test_index_filter_multiple_values_keeps_bracket_array_form
+    list1 = species_lists(:first_species_list)
+    list2 = species_lists(:another_species_list)
+    query = Query.lookup(:Observation, species_lists: [list1.id, list2.id])
+
+    # More than one value: no alias substitution, stays an array.
+    assert_equal({ species_lists: [list1.id, list2.id] }, query.index_filter)
+  end
+
+  def test_index_filter_names_not_collapsed_with_multiple_lookup_values
+    query = Query.lookup(:Observation,
+                         names: { lookup: %w[Agaricus Boletus] })
+
+    # More than one lookup value: not collapsible to this_name.
+    assert_equal({ names: { lookup: %w[Agaricus Boletus] } },
+                 query.index_filter)
+  end
+
+  def test_index_filter_names_not_collapsed_with_modifier_set
+    query = Query.lookup(:Observation,
+                         names: { lookup: ["Agaricus"],
+                                  include_synonyms: true })
+
+    # A modifier flag is set: not semantically equivalent to
+    # this_name, which carries no synonym/subtaxa expansion.
+    assert_equal(
+      { names: { lookup: ["Agaricus"], include_synonyms: true } },
+      query.index_filter
+    )
+  end
+
+  def test_index_filter_names_not_collapsed_without_this_name_attr
+    # Query::Names has no :this_name attr -- collapse_names_to_this_name
+    # must no-op rather than emitting a param the class won't recognize.
+    assert_not(Query::Names.has_attribute?(:this_name))
+    query = Query.lookup(:Name, names: { lookup: ["Agaricus"] })
+
+    assert_equal({ names: { lookup: ["Agaricus"] } }, query.index_filter)
   end
 
   def test_index_filter_excludes_routing_keys
@@ -1431,7 +1475,7 @@ class QueryTest < UnitTestCase
     query.params = query.params.merge(controller: "x", action: "y",
                                       id: 1, format: "json")
 
-    assert_equal({ by_users: [rolf.id] }, query.index_filter)
+    assert_equal({ by_user: rolf.id }, query.index_filter)
   end
 
   def test_merge_q_param_into_url

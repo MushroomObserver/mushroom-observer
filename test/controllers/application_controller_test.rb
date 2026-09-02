@@ -292,7 +292,7 @@ class ApplicationControllerTest < FunctionalTestCase
     name_query = Query.lookup_and_save(:Name, by_users: [rolf.id])
     @controller.store_query_in_session(name_query)
 
-    assert_equal({ by_users: [rolf.id] }, @controller.index_filter(:Name))
+    assert_equal({ by_user: rolf.id }, @controller.index_filter(:Name))
   end
 
   def test_index_filter_with_explicit_query_checks_model_too
@@ -303,7 +303,7 @@ class ApplicationControllerTest < FunctionalTestCase
 
     assert_nil(@controller.index_filter(:Name, observation_query))
     assert_equal(
-      { by_users: [rolf.id] },
+      { by_user: rolf.id },
       @controller.index_filter(:Observation, observation_query)
     )
   end
