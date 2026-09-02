@@ -153,12 +153,12 @@ class Inat
       return false unless obs.placeholder?
 
       inat_obs[:license_code].present? ||
-        importer_is_observer?(obs, inat_obs, user)
+        upgradeable_by_user?(obs, inat_obs, user)
     end
 
     # Is the iNat observer either the MO user who ran the import
     # or the MO user who clicked "Sync now"?
-    def importer_is_observer?(obs, inat_obs, user)
+    def upgradeable_by_user?(obs, inat_obs, user)
       login = inat_obs[:user][:login].to_s
       [obs.user, user].compact.any? do |candidate|
         candidate.inat_username.present? &&
@@ -177,7 +177,7 @@ class Inat
         # If the importer or the syncing user is the iNat observer,
         # set import_others: false so that unlicensed photos import.
         # Else photo imports depend on per-photo licenses.
-        import_others: !importer_is_observer?(obs, inat_obs, user)
+        import_others: !upgradeable_by_user?(obs, inat_obs, user)
       ).mo_observation
       mark_synced(obs)
       Result.new(status: :synced, observation: obs)
