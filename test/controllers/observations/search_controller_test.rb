@@ -788,7 +788,7 @@ module Observations
       assert_flash_error(
         :runtime_search_too_many_values,
         field: :query_by_users.l.humanize, count: 60,
-        max: Searchable::MAX_MULTIPLE_VALUES
+        max: Searchable::MatchGuards::MAX_MULTIPLE_VALUES
       )
     end
 
@@ -812,7 +812,7 @@ module Observations
       assert_flash_error(
         :runtime_search_too_many_values,
         field: :query_herbaria.l.humanize, count: 60,
-        max: Searchable::MAX_MULTIPLE_VALUES
+        max: Searchable::MatchGuards::MAX_MULTIPLE_VALUES
       )
     end
 
@@ -875,8 +875,8 @@ module Observations
     def test_names_lookup_between_thresholds_that_fail_to_resolve
       login
       # None of these match anything, so resolution produces an empty
-      # id list -- should still redirect (not error), matching the
-      # existing silent-drop behavior for unmatched names.
+      # id list -- should still redirect (not error), with a warning
+      # listing (a truncated sample of) what didn't match.
       unmatched = (1..60).map { |i| "Nonexistent Taxon #{i}" }.join("\n")
       params = { names: { lookup: unmatched } }
 
@@ -885,6 +885,62 @@ module Observations
       end
 
       assert_response(:redirect)
+      shown = (1..10).map { |i| "Nonexistent Taxon #{i}" }.join(", ")
+      expected_list = "#{shown}, and 50 more"
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 60, list: expected_list
+      )
+    end
+
+    # ---------------------------------------------------------------
+    #  Unmatched-entry feedback (issue #5299)
+    # ---------------------------------------------------------------
+
+    def test_fields_preferring_ids_unmatched_entries_flashed
+      login
+      user = users(:mary)
+      params = { by_users: "#{user.login}\nnonexistent_login_xyz" }
+
+      post(:create, params: { query_observations: params })
+
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :query_by_users.l.humanize, count: 1,
+        list: "nonexistent_login_xyz"
+      )
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { by_user: user.id }
+      )
+    end
+
+    def test_names_lookup_unmatched_entries_flashed_under_threshold
+      login
+      name = names(:coprinus_comatus)
+      lookup = "#{name.text_name}\nNonexistent Taxon"
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1, list: "Nonexistent Taxon"
+      )
+      # Under threshold: raw text stays as-is, not resolved to ids.
+      redirect_params = parse_redirect_names_params
+      assert_equal([name.text_name, "Nonexistent Taxon"],
+                   redirect_params["lookup"])
+    end
+
+    def test_names_lookup_no_warning_when_all_match
+      login
+      name = names(:coprinus_comatus)
+      params = { names: { lookup: name.text_name } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_no_flash
     end
 
     private
