@@ -1287,6 +1287,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # code swaps it into "location_containing" like any other valid
   # point, and carries the exact (0-valued) params along.
   def test_zero_latitude_triggers_locality_lookup
+    # Autocomplete::ForLocationContaining rejects any location whose
+    # box exceeds MO.obs_location_max_area as "vague" -- without a
+    # small matching location, "contains this point" legitimately
+    # finds nothing and the autocompleter falls back to
+    # location_google (Location.contains?, same as
+    # test_autofill_location_from_geotagged_image's Part 2 setup).
+    null_island = Location.new(**NULL_ISLAND_BOX, user: katrina)
+    assert(null_island.contains?(0, 0.5))
+    null_island.save!
+
     login!(katrina)
     visit(new_observation_path)
     assert_selector("body.observations__new")
@@ -1615,6 +1625,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     year: 2006,
     month: 11,
     day: 20
+  }.freeze
+
+  # A small box around the Gulf of Guinea point (0, 0.5) used by
+  # test_zero_latitude_triggers_locality_lookup -- well under
+  # MO.obs_location_max_area, so it isn't rejected as "vague".
+  NULL_ISLAND_BOX = {
+    name: "Null Island",
+    north: 0.05,
+    south: -0.05,
+    east: 0.55,
+    west: 0.45
   }.freeze
 
   # The geotagged.jpg is from University Park, Florida.
