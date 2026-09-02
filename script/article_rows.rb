@@ -8,6 +8,10 @@
 # parseable block are listed on stderr for a human to judge. Nothing
 # is written anywhere -- paste the rows into the article by hand.
 #
+# For backfills and audits over a date range. The live flow runs
+# through script/prerelease.rb, which uses rows_for below and lets
+# the deploy publish the rows (see README_PRODUCTION_DEPLOY).
+#
 #   script/article_rows.rb --since 2026-08-22 [--until 2026-08-31]
 #
 # Rows come out newest first, in the article's table format, with the
