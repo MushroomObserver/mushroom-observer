@@ -38,6 +38,13 @@ module Searchable::MatchGuards
   # before falling back to "... and N more".
   MAX_UNMATCHED_VALUES_DISPLAYED = 10
 
+  # Length each displayed unmatched entry is truncated to. A paste
+  # with no newlines (values separated by commas/tabs/spaces instead)
+  # becomes one long "unmatched" entry -- unbounded, since nothing
+  # limits an individual line's length before it reaches here. session
+  # is cookie-backed, so embedding it whole risks CookieOverflow.
+  MAX_UNMATCHED_VALUE_LENGTH = 50
+
   included do
     private
 
@@ -166,10 +173,18 @@ module Searchable::MatchGuards
     end
 
     def truncated_unmatched_list(vals)
-      shown = vals.first(MAX_UNMATCHED_VALUES_DISPLAYED)
+      shown = vals.first(MAX_UNMATCHED_VALUES_DISPLAYED).map do |val|
+        truncate_unmatched_value(val)
+      end
       return shown.join(", ") if shown.length == vals.length
 
       "#{shown.join(", ")}, and #{vals.length - shown.length} more"
+    end
+
+    def truncate_unmatched_value(val)
+      return val if val.length <= MAX_UNMATCHED_VALUE_LENGTH
+
+      "#{val[0, MAX_UNMATCHED_VALUE_LENGTH]}..."
     end
 
     def multiple_value_count(field)

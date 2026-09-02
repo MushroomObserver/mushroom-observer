@@ -1027,6 +1027,26 @@ module Observations
       )
     end
 
+    # A paste with no newlines (values separated by commas/tabs/spaces
+    # instead) becomes one long unmatched "value" -- must not embed
+    # it whole in the flash. session is cookie-backed; an unbounded
+    # value there risks CookieOverflow.
+    def test_unmatched_long_unseparated_entry_truncated_in_flash
+      login
+      long_paste = "Species " * 200
+      params = { names: { lookup: long_paste } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      max = Searchable::MatchGuards::MAX_UNMATCHED_VALUE_LENGTH
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1,
+        list: "#{long_paste[0, max]}..."
+      )
+    end
+
     private
 
     def create_test_names(count)
