@@ -14,6 +14,29 @@ module Searchable
   # Maximum allowed total length of all search input fields
   MAX_SEARCH_INPUT_LENGTH = 8000
 
+  # Maximum allowed length of the flat index-filter query string built
+  # for the post-search redirect. Front-end proxies commonly reject an
+  # overlong request line before it reaches Rails (nginx's compiled
+  # default is 8KB total) -- a pasted multi-value field (e.g. Names)
+  # can build a redirect URL well past that, which then shows up as a
+  # broken page or a generic error instead of a useful message. Kept
+  # well under 8KB to leave room for the rest of the request line and
+  # for tighter limits at other layers (CDN, WAF). See issue #5276.
+  MAX_INDEX_FILTER_URL_LENGTH = 4000
+
+  # Maximum newline-separated values a single multi-value autocompleter
+  # field (Names, Users, Projects, ...) may submit. This does NOT by
+  # itself guarantee the redirect URL stays under
+  # MAX_INDEX_FILTER_URL_LENGTH -- Name.search_name in production
+  # ranges up to 133 characters (99.9th percentile: 97), so 50 unusually
+  # long entries can still total more than that guard allows, and
+  # there's no per-entry length cap. This check exists for the common
+  # case instead: a field-specific message ("Names: too many values")
+  # is far more actionable than the generic aggregate-length one when
+  # one field is the problem, which is what issue #5276 reported.
+  # MAX_INDEX_FILTER_URL_LENGTH stays the unconditional backstop.
+  MAX_MULTIPLE_VALUES = 50
+
   included do
     def create
       redirect_to(action: :new) and return if clear_form?
@@ -22,11 +45,25 @@ module Searchable
       @query_params = params.require(search_object_name).permit(permittables)
 
       prepare_raw_params
-      redirect_to(action: :new) and return unless validate_search_instance?
+      redirect_to(action: :new) and return if search_input_invalid?
 
+      save_search_query_and_redirect_to_index
+    end
+
+    # Order matters: cheapest/most-actionable check first. A single
+    # oversized field gets a field-specific message before falling
+    # through to Query's validation errors or the generic aggregate-
+    # length guard.
+    def search_input_invalid?
+      too_many_multiple_values? ||
+        !validate_search_instance? ||
+        index_filter_url_too_long?
+    end
+
+    def save_search_query_and_redirect_to_index
       save_search_query
       redirect_to(controller: "/#{search_type}", action: :index,
-                  q: @query.q_param)
+                  **@query.index_filter)
     end
 
     def prepare_raw_params
@@ -227,6 +264,72 @@ module Searchable
       messages = @search.validation_error_messages.compact_blank
       flash_error(*messages) if messages.present?
       false
+    end
+
+    # Guards against a single multi-value autocompleter field (Names,
+    # Users, Projects, ...) carrying more than MAX_MULTIPLE_VALUES
+    # pasted values. Runs on the raw (pre-Query) params, before
+    # validate_search_instance?, so it can name the offending field.
+    def too_many_multiple_values?
+      multiple_value_fields.each do |field|
+        count = multiple_value_count(field)
+        next if count <= Searchable::MAX_MULTIPLE_VALUES
+
+        flash_error(
+          :runtime_search_too_many_values.t(
+            field: multiple_value_field_label(field), count: count,
+            max: Searchable::MAX_MULTIPLE_VALUES
+          )
+        )
+        return true
+      end
+      false
+    end
+
+    # Every field this controller accepts as a newline-separated list
+    # of pasted values: the top-level `fields_preferring_ids`
+    # autocompleters, plus the nested Names lookup field when this
+    # controller has one (represented as a 2-element path for
+    # `@query_params.dig`).
+    def multiple_value_fields
+      fields = fields_preferring_ids.dup
+      fields << [:names, :lookup] if nested_names_params.include?(:lookup)
+      fields
+    end
+
+    def multiple_value_count(field)
+      value = if field.is_a?(Array)
+                @query_params.dig(*field)
+              else
+                @query_params[field]
+              end
+      return 0 if value.blank?
+      return value.length if value.is_a?(Array)
+
+      value.to_s.split("\n").compact_blank.length
+    end
+
+    def multiple_value_field_label(field)
+      return :names.t.to_s if field.is_a?(Array)
+
+      :"query_#{field}".l.humanize
+    end
+
+    # Guards against a redirect URL too long for a front-end proxy's
+    # request-line limit -- see MAX_INDEX_FILTER_URL_LENGTH above.
+    # Only called once `@search` (built in validate_search_instance?)
+    # is known valid, so `index_filter` matches the redirect built
+    # afterward.
+    def index_filter_url_too_long?
+      length = @search.index_filter.to_query.bytesize
+      return false if length <= Searchable::MAX_INDEX_FILTER_URL_LENGTH
+
+      flash_error(
+        :runtime_search_string_too_long.t(
+          max: Searchable::MAX_INDEX_FILTER_URL_LENGTH, length: length
+        )
+      )
+      true
     end
 
     def clear_relevant_query

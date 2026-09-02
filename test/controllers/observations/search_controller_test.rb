@@ -176,14 +176,12 @@ module Observations
       post(:create, params: { query_observations: params })
 
       validated_params = {
-        by_users: [rolf.id],
+        by_user: rolf.id,
         has_notes: true,
         lichen: false # this should be preserved, not "compacted" out.
       }
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+                           params: validated_params)
     end
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa
@@ -199,7 +197,7 @@ module Observations
       post(:create, params: { query_observations: params })
       # Should redirect to observations index with no names param
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: { q: { model: :Observation } })
+                           params: {})
     end
 
     # Test reset_search_query creates a new blank query
@@ -279,13 +277,11 @@ module Observations
       post(:create, params: { query_observations: params })
 
       validated_params = {
-        region: ["Colorado, USA"],
+        region: "Colorado, USA",
         date: %w[2026-08-12 2026-08-16]
       }
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+                           params: validated_params)
     end
 
     # A date the parser can't read must fail the search with an error,
@@ -315,9 +311,7 @@ module Observations
         has_images: false
       }
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+                           params: validated_params)
     end
 
     def test_create_observations_search_with_has_collection_numbers
@@ -333,9 +327,7 @@ module Observations
         has_notes: false
       }
       assert_redirected_to(controller: "/observations", action: :index,
-                           params: {
-                             q: { model: :Observation, **validated_params }
-                           })
+                           params: validated_params)
     end
 
     def test_create_observations_search_nested
@@ -373,7 +365,7 @@ module Observations
       }
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, **validated_params } }
+        params: validated_params
       )
     end
 
@@ -391,7 +383,7 @@ module Observations
       post(:create, params: { query_observations: params })
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, **params.except(:names) } }
+        params: params.except(:names)
       )
     end
 
@@ -412,7 +404,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, by_users: [user1.id, user2.id] } }
+        params: { by_users: [user1.id, user2.id] }
       )
     end
 
@@ -428,7 +420,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, projects: [proj1.id, proj2.id] } }
+        params: { projects: [proj1.id, proj2.id] }
       )
     end
 
@@ -444,7 +436,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, herbaria: [herb1.id, herb2.id] } }
+        params: { herbaria: [herb1.id, herb2.id] }
       )
     end
 
@@ -456,7 +448,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: { q: { model: :Observation, external_sites: [site.id] } }
+        params: { external_site: site.id }
       )
     end
 
@@ -473,12 +465,7 @@ module Observations
       # Location names are passed as-is (not converted to IDs)
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: {
-            model: :Observation,
-            within_locations: ["#{loc1.name}\n#{loc2.name}"]
-          }
-        }
+        params: { location: "#{loc1.name}\n#{loc2.name}" }
       )
     end
 
@@ -494,9 +481,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, species_lists: [list1.id, list2.id] }
-        }
+        params: { species_lists: [list1.id, list2.id] }
       )
     end
 
@@ -512,10 +497,7 @@ module Observations
       assert_redirected_to(
         controller: "/observations", action: :index,
         params: {
-          q: {
-            model: :Observation,
-            names: { lookup: ["Agaricus campestris", "Coprinus comatus"] }
-          }
+          names: { lookup: ["Agaricus campestris", "Coprinus comatus"] }
         }
       )
     end
@@ -537,9 +519,7 @@ module Observations
       # Should be sorted as [low, high] = [-1.0, 2.0]
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [-1.0, 2.0] }
-        }
+        params: { confidence: [-1.0, 2.0] }
       )
     end
 
@@ -555,9 +535,7 @@ module Observations
       # Should remain as [-1.0, 2.0]
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [-1.0, 2.0] }
-        }
+        params: { confidence: [-1.0, 2.0] }
       )
     end
 
@@ -613,9 +591,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [2.0] }
-        }
+        params: { confidence: 2.0 }
       )
     end
 
@@ -630,9 +606,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [1.0] }
-        }
+        params: { confidence: 1.0 }
       )
     end
 
@@ -650,7 +624,7 @@ module Observations
       assert_redirected_to(
         controller: "/observations", action: :index,
         params: {
-          q: { model: :Observation, has_images: true }
+          has_images: true
         }
       )
     end
@@ -671,9 +645,7 @@ module Observations
 
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, confidence: [0.0] }
-        }
+        params: { confidence: 0.0 }
       )
     end
 
@@ -718,9 +690,7 @@ module Observations
       # Spaces should be converted to underscores, case preserved
       assert_redirected_to(
         controller: "/observations", action: :index,
-        params: {
-          q: { model: :Observation, has_notes_fields: ["INat_notes_field"] }
-        }
+        params: { has_notes_fields: "INat_notes_field" }
       )
     end
 
@@ -734,41 +704,42 @@ module Observations
       assert_redirected_to(
         controller: "/observations", action: :index,
         params: {
-          q: {
-            model: :Observation,
-            has_notes_fields: %w[Substrate Cap_Color Other_Field]
-          }
+          has_notes_fields: %w[Substrate Cap_Color Other_Field]
         }
       )
     end
 
     # ------- Server Handling of Long Inputs (POST method) -------
-    # These tests prove that when long inputs reach the server (if JS fails),
-    # the server can handle them without crashing since POST puts data in body
+    # These tests prove that when a long input reaches the server (e.g. if
+    # client-side JS validation fails or is bypassed), the server rejects
+    # it cleanly with a flash error and redirects back to the form --
+    # instead of building a redirect URL long enough for a front-end
+    # proxy to reject with a hard-to-diagnose error page (issue #5276).
 
-    def test_server_handles_very_long_input_without_error
+    def test_server_rejects_very_long_single_field
       login
-      # Create input that would exceed URL limits but is fine in POST body
-      # Well over MAX_SEARCH_INPUT_LENGTH limit
+      # A single scalar field (not a multi-value autocompleter, so
+      # too_many_multiple_values? doesn't apply) whose serialized
+      # redirect URL alone is well over MAX_INDEX_FILTER_URL_LENGTH --
+      # proves the aggregate-length guard catches it unassisted.
       long_text = "x" * 15_000
       params = {
         notes_has: long_text,
         has_specimen: true
       }
 
-      # Should not raise an error, even though JS validation would prevent this
       assert_nothing_raised do
         post(:create, params: { query_observations: params })
       end
 
-      # Should successfully create search and redirect
-      assert_response(:redirect)
-      assert_match(/observations/, response.redirect_url)
+      assert_redirected_to(action: :new)
+      assert_flash_error
     end
 
-    def test_server_handles_multiple_long_fields
+    def test_server_rejects_multiple_long_fields
       login
-      # Multiple long fields that collectively would be problematic in URL
+      # Two individually plausible scalar fields whose combined
+      # redirect URL is still too long.
       long_text1 = "a" * 8000
       long_text2 = "b" * 8000
       params = {
@@ -780,12 +751,14 @@ module Observations
         post(:create, params: { query_observations: params })
       end
 
-      assert_response(:redirect)
+      assert_redirected_to(action: :new)
+      assert_flash_error
     end
 
-    def test_server_handles_long_nested_params
+    def test_server_rejects_too_many_names
       login
-      # Test with long names lookup
+      # Well over MAX_MULTIPLE_VALUES -- caught by the field-specific
+      # guard before the aggregate-length one even runs.
       long_names = (1..1000).map { |i| "Species#{i}" }.join("\n")
       params = {
         names: {
@@ -798,7 +771,8 @@ module Observations
         post(:create, params: { query_observations: params })
       end
 
-      assert_response(:redirect)
+      assert_redirected_to(action: :new)
+      assert_flash_error
     end
   end
 end
