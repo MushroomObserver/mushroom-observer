@@ -46,6 +46,43 @@ class InatObservationImporterTest < UnitTestCase
     assert_equal([123, 456], importer.image_ids)
   end
 
+  # #5259: the inline standardization files the new observation into
+  # the import's target project.
+  def test_standardize_for_project_adds_observation_to_project
+    import = inat_imports(:rolf_inat_import)
+    project = projects(:open_membership_project)
+    import.update!(project: project)
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    importer.instance_variable_set(:@inat_obs, { id: 424_242 })
+    importer.instance_variable_set(:@observation, obs)
+
+    importer.send(:standardize_for_project)
+
+    assert_includes(project.observations.reload, obs)
+  end
+
+  # A standardization failure is recorded and does not raise -- the
+  # observation's import still counts.
+  def test_standardize_for_project_logs_errors_and_continues
+    import = inat_imports(:rolf_inat_import)
+    import.update!(project: projects(:open_membership_project))
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    importer.instance_variable_set(:@inat_obs, { id: 424_243 })
+    importer.instance_variable_set(:@observation,
+                                   observations(:minimal_unknown_obs))
+    std = importer.send(:standardizer)
+    def std.standardize(*)
+      raise("boom")
+    end
+
+    importer.send(:standardize_for_project)
+
+    assert_match(/Standardization failed for iNat 424243/,
+                 import.reload.response_errors)
+  end
+
   def test_canceled
     import = inat_imports(:ollie_inat_import)
     assert(import.canceled?, "Test needs a canceled InatImport fixture")

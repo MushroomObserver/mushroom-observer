@@ -220,6 +220,53 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  # #5259: Go Back keeps the chosen target project on the redisplayed
+  # form.
+  def test_create_go_back_keeps_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    params = { inat_ids: "123", inat_username: user.inat_username,
+               consent: 1, go_back: "1",
+               inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action(action: :create)
+    assert_select("input[name=?][value=?]",
+                  "inat_import[inat_project_id]", project.id.to_s, true,
+                  "Go Back should keep the chosen project id")
+  end
+
+  # #5259: typed project text that resolves to no project is refused.
+  def test_create_with_unrecognized_project
+    user = users(:rolf)
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, inat_project: "No Such Project Anywhere" }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash(:inat_project_not_recognized)
+    assert_form_action(action: :create)
+  end
+
+  # #5259: a confirmed create stores the target project on the import.
+  def test_create_confirmed_stores_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, confirmed: 1,
+               inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_equal(project.id, created_import(user).project_id)
+  end
+
   def test_reload_preserves_checkbox_state
     user = users(:rolf)
     params = { inat_ids: "123", consent: "1", all: "1" }

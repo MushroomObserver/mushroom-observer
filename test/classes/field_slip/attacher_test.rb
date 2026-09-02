@@ -14,6 +14,22 @@ class FieldSlip::AttacherTest < UnitTestCase
     FieldSlip::Attacher.attach(observation: obs, code: code, user: user)
   end
 
+  # #5259: a slip landing on an import-created observation whose import
+  # has a target project gets reconciled with that project.
+  def test_attach_reconciles_import_target_project
+    import = inat_imports(:rolf_inat_import)
+    import.update!(project: @project)
+    @obs.update!(inat_import: import)
+
+    result = attach(code: "EOL-0777")
+
+    assert_equal(:attached, result)
+    slip = FieldSlip.find_by(code: "EOL-0777")
+    assert_equal(@project.id, slip.reload.project_id,
+                 "The wrong-prefix slip moves to the import's project")
+    assert_includes(@project.observations.reload, @obs)
+  end
+
   def test_attaches_a_new_slip_and_files_into_the_prefix_project
     user = @obs.user
 

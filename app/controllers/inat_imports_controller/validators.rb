@@ -15,7 +15,40 @@ module InatImportsController::Validators
   def params_valid?
     import_adequately_constrained? &&
       imports_valid? &&
+      project_valid? &&
       consented?
+  end
+
+  # Optional target project (#5259). Blank is fine. A chosen project
+  # must exist and be one the user may put observations into (admin,
+  # member, or joinable -- #4932 invariant 4). Typed text that resolves
+  # to no project is refused rather than silently dropped.
+  def project_valid?
+    return true if params[:inat_project_id].blank? &&
+                   params[:inat_project].blank?
+
+    project = resolve_project_param
+    if project.nil?
+      flash_warning(:inat_project_not_recognized.l)
+      false
+    elsif project_usable?(project)
+      true
+    else
+      flash_warning(:inat_project_not_allowed.t(title: project.title))
+      false
+    end
+  end
+
+  def project_usable?(project)
+    project.is_admin?(@user) || project.member?(@user) ||
+      project.can_join?(@user)
+  end
+
+  def resolve_project_param
+    project = Project.safe_find(params[:inat_project_id]) ||
+              Project.find_by(title: params[:inat_project].to_s.strip)
+    params[:inat_project_id] = project&.id&.to_s
+    project
   end
 
   # See InatImport.adequate_constraints?

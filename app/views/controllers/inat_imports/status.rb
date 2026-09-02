@@ -8,6 +8,8 @@ module Views::Controllers::InatImports
   class Status < Components::Base
     prop :inat_import, ::InatImport
 
+    include ReviewSections
+
     def view_template
       div(
         id: "inat_import_#{@inat_import.id}",
@@ -194,6 +196,7 @@ module Views::Controllers::InatImports
         render_date_missing_row
       end
       render_license_added_section
+      render_review_sections
     end
 
     def render_ignored_row(caption_key, count)
