@@ -180,8 +180,8 @@ module Observations
         has_notes: true,
         lichen: false # this should be preserved, not "compacted" out.
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: validated_params)
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa
@@ -196,8 +196,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
       # Should redirect to observations index with no names param
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: {})
+      assert_search_redirected_to(controller: "/observations",
+                                  params: {})
     end
 
     # Test reset_search_query creates a new blank query
@@ -280,8 +280,8 @@ module Observations
         region: "Colorado, USA",
         date: %w[2026-08-12 2026-08-16]
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: validated_params)
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     # A date the parser can't read must fail the search with an error,
@@ -310,8 +310,8 @@ module Observations
         has_field_slips: true,
         has_images: false
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: validated_params)
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     def test_create_observations_search_with_has_collection_numbers
@@ -326,8 +326,8 @@ module Observations
         has_collection_numbers: true,
         has_notes: false
       }
-      assert_redirected_to(controller: "/observations", action: :index,
-                           params: validated_params)
+      assert_search_redirected_to(controller: "/observations",
+                                  params: validated_params)
     end
 
     def test_create_observations_search_nested
@@ -363,8 +363,8 @@ module Observations
         projects: projects.pluck(:id),
         date: ["2021-01-06", todate]
       }
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: validated_params
       )
     end
@@ -381,8 +381,8 @@ module Observations
         in_box: location.bounding_box
       }
       post(:create, params: { query_observations: params })
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: params.except(:names)
       )
     end
@@ -402,8 +402,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { by_users: [user1.id, user2.id] }
       )
     end
@@ -418,8 +418,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { projects: [proj1.id, proj2.id] }
       )
     end
@@ -434,8 +434,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { herbaria: [herb1.id, herb2.id] }
       )
     end
@@ -446,8 +446,8 @@ module Observations
       params = { external_sites: site.id.to_s }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { external_site: site.id }
       )
     end
@@ -456,16 +456,15 @@ module Observations
       login
       loc1 = locations(:burbank)
       loc2 = locations(:albion)
-      # NOTE: within_locations uses location names, not IDs
       params = {
         within_locations: "#{loc1.name}\n#{loc2.name}"
       }
       post(:create, params: { query_observations: params })
 
-      # Location names are passed as-is (not converted to IDs)
-      assert_redirected_to(
-        controller: "/observations", action: :index,
-        params: { location: "#{loc1.name}\n#{loc2.name}" }
+      # Unresolved location names are looked up and redirected as ids.
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { within_locations: [loc1.id, loc2.id] }
       )
     end
 
@@ -479,8 +478,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { species_lists: [list1.id, list2.id] }
       )
     end
@@ -494,8 +493,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: {
           names: { lookup: ["Agaricus campestris", "Coprinus comatus"] }
         }
@@ -517,8 +516,8 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should be sorted as [low, high] = [-1.0, 2.0]
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { confidence: [-1.0, 2.0] }
       )
     end
@@ -533,8 +532,8 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should remain as [-1.0, 2.0]
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { confidence: [-1.0, 2.0] }
       )
     end
@@ -589,8 +588,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { confidence: 2.0 }
       )
     end
@@ -604,8 +603,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { confidence: 1.0 }
       )
     end
@@ -621,8 +620,8 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should create query without confidence parameter
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: {
           has_images: true
         }
@@ -643,8 +642,8 @@ module Observations
       }
       post(:create, params: { query_observations: params })
 
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { confidence: 0.0 }
       )
     end
@@ -688,8 +687,8 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Spaces should be converted to underscores, case preserved
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: { has_notes_fields: "INat_notes_field" }
       )
     end
@@ -701,8 +700,8 @@ module Observations
       post(:create, params: { query_observations: params })
 
       # Should be split on newline, spaces converted to underscores
-      assert_redirected_to(
-        controller: "/observations", action: :index,
+      assert_search_redirected_to(
+        controller: "/observations",
         params: {
           has_notes_fields: %w[Substrate Cap_Color Other_Field]
         }

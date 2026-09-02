@@ -49,9 +49,9 @@ module SpeciesLists
       post(:create, params: { query_species_lists: params })
 
       validated_params = params.except(:has_comments)
-      assert_redirected_to(
-        controller: "/species_lists", action: :index,
-        params: { q: { model: :SpeciesList, **validated_params } }
+      assert_search_redirected_to(
+        controller: "/species_lists",
+        params: validated_params
       )
     end
 

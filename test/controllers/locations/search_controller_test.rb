@@ -65,8 +65,8 @@ module Locations
       }
       post(:create, params: { query_locations: params })
 
-      assert_redirected_to(controller: "/locations", action: :index,
-                           params: { q: { model: :Location, **params } })
+      assert_search_redirected_to(controller: "/locations",
+                                  params: params)
     end
 
     def test_create_locations_search_nested
@@ -80,15 +80,18 @@ module Locations
       }
       post(:create, params: { query_locations: params })
 
-      # Query validation parses region as an array of region strings.
+      # Query validation parses region as an array of region strings;
+      # index_filter then shrinks each one-element array to a bare
+      # scalar, and by_users to its param_alias by_user. The raw
+      # "mary" string is resolved to her id before redirecting.
       validated_params = {
         in_box: box,
-        region: ["California, USA"],
-        by_users: %w[mary]
+        region: "California, USA",
+        by_user: users(:mary).id
       }
-      assert_redirected_to(
-        controller: "/locations", action: :index,
-        params: { q: { model: :Location, **validated_params } }
+      assert_search_redirected_to(
+        controller: "/locations",
+        params: validated_params
       )
     end
   end
