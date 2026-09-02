@@ -474,9 +474,8 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
   # ---------------------------------------------------------------
   #  Upgrading a placeholder to a full import on sync.
-  #  If the iNat obs is now licensed, or the importer is the collector,
-  #  skip the narrow placeholder sync above in favor of a full
-  #  rebuild, overwriting the existing Observation.
+  #  If the iNat obs is now licensed, or the importer is the iNat observer,
+  #  Do a full import overwriting the existing Observation in place.
   # ---------------------------------------------------------------
 
   def test_upgrade_eligible_when_now_licensed
@@ -485,11 +484,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     resyncer = Inat::ReflectionResync.new
 
-    assert(resyncer.send(:upgrade_eligible?, skeleton, fresh),
-           "A now-licensed source should make a placeholder upgrade-eligible")
+    assert(resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+           "A placeholder should be upgradeable if the sourcce is now-licensed")
   end
 
-  def test_upgrade_eligible_when_importer_is_collector
+  def test_upgrade_eligible_when_importer_is_observer
     skeleton = build_skeleton(name: names(:peltigera))
     skeleton.user.update!(inat_username: "someone")
     fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
@@ -497,9 +496,22 @@ class Inat::ObservationResyncerTest < UnitTestCase
     resyncer = Inat::ReflectionResync.new
 
     assert(
-      resyncer.send(:upgrade_eligible?, skeleton, fresh),
-      "The importer matching the iNat collector should make a " \
-      "placeholder upgrade-eligible even though the source is unlicensed"
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+      "A placeholder should be upgradeable if the importer is the iNat observer"
+    )
+  end
+
+  def test_upgrade_eligible_when_syncing_user_is_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+    syncing_user = users(:mary)
+    syncing_user.update!(inat_username: "someone")
+
+    assert(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, syncing_user),
+      "Placeholder should be upgradeable if syncing user is the iNat observer"
     )
   end
 
@@ -517,7 +529,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     resyncer = Inat::ReflectionResync.new
 
     assert(
-      resyncer.send(:upgrade_eligible?, skeleton, fresh),
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
       "The importer's account login matches the iNat observer, so " \
       "this should be upgrade-eligible even though a custom " \
       "Collector field names someone else"
@@ -530,9 +542,22 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     resyncer = Inat::ReflectionResync.new
 
-    assert_not(resyncer.send(:upgrade_eligible?, skeleton, fresh),
-               "An unlicensed source with an unmatched collector should " \
+    assert_not(resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+               "An unlicensed source with an unmatched observer should " \
                "leave the narrow placeholder sync unchanged")
+  end
+
+  def test_upgrade_ineligible_when_syncing_user_is_not_the_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert_not(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, users(:mary)),
+      "placeholder sync should be unchanged if syncing user has no matching " \
+      "user.inat_username"
+    )
   end
 
   def test_upgrade_ineligible_for_a_non_placeholder
@@ -541,7 +566,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     resyncer = Inat::ReflectionResync.new
 
-    assert_not(resyncer.send(:upgrade_eligible?, non_placeholder, fresh),
+    assert_not(resyncer.send(:upgrade_eligible?, non_placeholder, fresh, nil),
                "Only a placeholder is eligible for an upgrade")
   end
 
@@ -576,7 +601,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "Upgrade should not create a duplicate import ExternalLink")
   end
 
-  def test_placeholder_upgrades_to_full_import_when_importer_is_collector
+  def test_placeholder_upgrades_to_full_import_when_importer_is_observer
     skeleton = build_skeleton(name: names(:peltigera))
     skeleton.user.update!(inat_username: "devin189")
     link = skeleton.import_link
@@ -591,8 +616,30 @@ class Inat::ObservationResyncerTest < UnitTestCase
     skeleton.reload
     assert_not(
       skeleton.placeholder?,
-      "The Observation should upgrade from a placeholder if the importer " \
-      "is the collector, even if the iNat obs is unlicensed"
+      "The Observation should upgrade if the importer is the iNat observer"
+    )
+    assert_equal(names(:coprinus), skeleton.name)
+  end
+
+  # A superimporter creates the skeleton for someone else's iNat obs;
+  # the iNat observer logs into MO account and clicks Sync.
+  def test_placeholder_upgrades_to_full_import_when_syncing_user_is_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: nil, login: "devin189")
+    syncing_user = users(:mary)
+    syncing_user.update!(inat_username: "devin189")
+
+    fetcher = FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    result = Inat::ObservationResyncer.new(
+      skeleton, user: syncing_user, fetcher: fetcher
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    skeleton.reload
+    assert_not(
+      skeleton.placeholder?,
+      "A placeholder should upgrade if the syncing user is the iNat observer"
     )
     assert_equal(names(:coprinus), skeleton.name)
   end
@@ -851,7 +898,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
   # A raw iNat obs hash (calostoma_lutescens.txt has no photos, so an
   # upgrade doesn't trigger an image upload) with license_code and
-  # collector overridden, and its taxon swapped for one that already
+  # observer login overridden, and its taxon swapped for one that already
   # matches an MO Name fixture (Coprinus) so name resolution needs no
   # API call.
   def licensed_upgrade_raw(license_code:, login:)

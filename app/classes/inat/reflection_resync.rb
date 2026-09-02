@@ -48,11 +48,13 @@ class Inat
     # every id, so a missing one is gone from iNat -> :deleted. An
     # incremental fetch (updated_since) returns only changed ids, so a
     # missing one merely didn't change -> :unchanged, untouched.
-    def call(reflection, by_id, failed, absent: :deleted)
+    # `user:` is the person who clicked "Sync now", when known -- absent
+    # for the scheduled daily batch.
+    def call(reflection, by_id, failed, absent: :deleted, user: nil)
       return failed_result(reflection) if failed
 
       raw = by_id[self.class.inat_id(reflection).to_s]
-      return apply(reflection, Inat::Obs.new(JSON.generate(raw))) if raw
+      return apply(reflection, Inat::Obs.new(JSON.generate(raw)), user) if raw
 
       absent == :deleted ? deleted(reflection) : unchanged(reflection)
     end
@@ -74,11 +76,12 @@ class Inat
     # in-memory `changed?` doesn't converge. `saved_changes` (sans the
     # timestamp) reflects what persisted.
     #
-    # A placeholder eligible to become a full import (#4828) skips the
+    # A placeholder eligible to become a full import skips the
     # narrow scalar sync below entirely -- see upgrade_eligible?.
-    def apply(obs, inat_obs)
-      return upgrade_placeholder(obs, inat_obs) if upgrade_eligible?(obs,
-                                                                     inat_obs)
+    def apply(obs, inat_obs, user)
+      if upgrade_eligible?(obs, inat_obs, user)
+        return upgrade_placeholder(obs, inat_obs, user)
+      end
 
       obs.assign_attributes(scalar_attributes(obs, inat_obs))
       obs.save! if obs.changed?
@@ -143,19 +146,24 @@ class Inat
     end
 
     # A placeholder is eligible to upgrade to a full import once
-    # MO may import the whole record: the iNat obs is now
-    # licensed, or the importer turns out to be the iNat observer.
-    def upgrade_eligible?(obs, inat_obs)
+    # MO may import the whole record:
+    # the iNat obs is now licensed, or
+    # the importer or the person syncing is the iNat observer.
+    def upgrade_eligible?(obs, inat_obs, user)
       return false unless obs.placeholder?
 
       inat_obs[:license_code].present? ||
-        importer_is_collector?(obs, inat_obs)
+        importer_is_collector?(obs, inat_obs, user)
     end
 
-    # Is the MO importer the iNat observer?
-    def importer_is_collector?(obs, inat_obs)
-      obs.user.inat_username.present? &&
-        obs.user.inat_username.casecmp?(inat_obs[:user][:login].to_s)
+    # Is the iNat observer either the MO user who ran the import
+    # or the MO user who clicked "Sync now"?
+    def importer_is_collector?(obs, inat_obs, user)
+      login = inat_obs[:user][:login].to_s
+      [obs.user, user].compact.any? do |candidate|
+        candidate.inat_username.present? &&
+          candidate.inat_username.casecmp?(login)
+      end
     end
 
     # Rebuild the placeholder in place as a full import,
@@ -163,13 +171,13 @@ class Inat
     # build a fresh set of Namings.
     # Don't suppress notifications since a lone sync, unlike a batch import,
     # has no digest to catch them.
-    def upgrade_placeholder(obs, inat_obs)
+    def upgrade_placeholder(obs, inat_obs, user)
       Inat::MoObservationBuilder.new(
         inat_obs: inat_obs, user: obs.user, observation: obs,
-        # If the importer is the iNat collector, set import_others: false
-        # so that unlicensed photos import.
-        # Else photo imports depend on per-photo license checks.
-        import_others: !importer_is_collector?(obs, inat_obs)
+        # If the importer or the syncing user is the iNat observer,
+        # set import_others: false so that unlicensed photos import.
+        # Else photo imports depend on per-photo licenses.
+        import_others: !importer_is_collector?(obs, inat_obs, user)
       ).mo_observation
       mark_synced(obs)
       Result.new(status: :synced, observation: obs)

@@ -32,9 +32,12 @@ class Inat
     # here for callers and tests that reference the occurrence path.
     Result = ReflectionResync::Result
 
-    def initialize(observation, fetcher: ObsFetcher.new,
+    # `user:` is the person who clicked "Sync now", when known -- absent
+    # for the scheduled daily batch.
+    def initialize(observation, user: nil, fetcher: ObsFetcher.new,
                    applier: ReflectionResync.new)
       @observation = observation
+      @user = user
       @fetcher = fetcher
       @applier = applier
     end
@@ -47,7 +50,9 @@ class Inat
       by_id, failed = @fetcher.fetch_batch(
         targets.map { |t| ReflectionResync.inat_id(t) }
       )
-      results = targets.map { |target| @applier.call(target, by_id, failed) }
+      results = targets.map do |target|
+        @applier.call(target, by_id, failed, user: @user)
+      end
       broadcast(results)
       results
     end
