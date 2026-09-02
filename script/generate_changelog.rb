@@ -24,8 +24,9 @@
 # so a failure mid-run keeps what was already written, and a rerun
 # skips sections already present unless --replace is given.
 #
-# Standalone by design -- the deploy.sh hook comes later, once the
-# format has settled.
+# These CLI modes are for backfills and regeneration. The live flow
+# runs through script/prerelease.rb, which drives this class's
+# pending API to build the next deploy's section before the deploy.
 
 require("date")
 require("json")

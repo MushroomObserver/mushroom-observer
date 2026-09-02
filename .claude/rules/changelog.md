@@ -11,17 +11,20 @@ Add clustering and zoom to name list maps
 ```
 
 This is the PR-time half of the automated changelog (issue #5155).
-Two changelogs are generated from merged PRs at deploy time:
+Two changelogs are generated from merged PRs by the pre-release step
+(`script/prerelease.rb`, run before each deploy — see
+README_PRODUCTION_DEPLOY):
 
-- **`CHANGELOG.md`** — technical, lists every merged PR. Nothing to do
-  per-PR; the generator uses the PR title.
+- **`CHANGELOG.md`** — technical, lists every merged PR (except the
+  changelog PRs themselves). Nothing to do per-PR; the generator uses
+  the PR title.
 - **The MO Article changelog** (user-facing, curated) — fed by this
   block: `article:` decides whether the PR appears there, and the
-  sentence is what site users read.
+  sentence is what site users read. The deploy publishes the rows.
 
 Reviewers edit the block in place like any other part of the PR body.
-A PR with no block is excluded from the Article and flagged in the
-deploy output for manual review — the block is how a deliberate
+A PR with no block is excluded from the Article and listed in the
+pre-release PR's body for a verdict — the block is how a deliberate
 decision is told apart from an omission.
 
 ## Filling it in
