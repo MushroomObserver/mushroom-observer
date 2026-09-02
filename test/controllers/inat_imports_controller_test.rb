@@ -257,6 +257,26 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Go Back should keep the chosen project id")
   end
 
+  # #5259: a project the user can neither join nor administer is
+  # refused (#4932 invariant 4).
+  def test_create_with_unjoinable_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    project.update!(open_membership: false)
+    assert_not(project.is_admin?(user) || project.member?(user) ||
+               project.can_join?(user),
+               "premise: rolf cannot use this project")
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash(:inat_project_not_allowed, title: project.title)
+    assert_form_action(action: :create)
+  end
+
   # #5259: typed project text that resolves to no project is refused.
   def test_create_with_unrecognized_project
     user = users(:rolf)
