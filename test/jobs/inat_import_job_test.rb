@@ -52,6 +52,8 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
     assert_equal(loc, obs.location)
+    assert_not(obs.placeholder?,
+               "A full (non-skeleton) import must not be a placeholder")
     # casual grade, no sequence, no provisional name -> Could Be
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
@@ -775,27 +777,84 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
-  # Not-own superimporter import: an obs with no iNat license is skipped
-  # entirely, not just its images — see ObservationImporter#unlicensed_other?
+  # Not-own superimporter import with create_skeletons unchecked: an obs
+  # with no iNat license is skipped entirely, not just its images — see
+  # ObservationImporter#skip_unlicensed_other?. (With create_skeletons on,
+  # the default, it's imported as a skeleton instead — see
+  # test_job_creates_skeleton_for_unlicensed_obs_for_not_own_import.)
   def test_job_skips_unlicensed_obs_for_not_own_import
     @user = users(:dick) # Dick is a superimporter
     assert(InatImport.super_importer?(@user),
            "Test requires user to be a super_importer")
 
     create_ivars_from_filename("donadinia_PNW01")
-    @inat_import.update(import_others: true)
+    @inat_import.update(import_others: true, create_skeletons: false)
 
     stub_inat_interactions
 
     assert_no_difference(
       "Observation.count",
-      "Unlicensed obs must not be imported for not-own imports"
+      "Unlicensed obs must not be imported when create_skeletons is off"
     ) do
       InatImportJob.perform_now(@inat_import)
     end
 
     assert_equal(1, @inat_import.reload.ignored_unlicensed_count,
                  "Should count the unlicensed obs as ignored")
+    assert_equal(0, @inat_import.skeleton_imported_count,
+                 "Should not count any skeleton imports")
+  end
+
+  # Not-own superimporter import with create_skeletons on (the default,
+  # #4828): an obs with no iNat license is imported as a minimal skeleton
+  # counterpart instead of being skipped.
+  def test_job_creates_skeleton_for_unlicensed_obs_for_not_own_import
+    @user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(@user),
+           "Test requires user to be a super_importer")
+
+    create_ivars_from_filename("donadinia_PNW01")
+    @inat_import.update(import_others: true)
+    assert(@inat_import.create_skeletons?,
+           "Test requires create_skeletons to default to true")
+
+    stub_inat_interactions
+
+    assert_difference(
+      "Observation.count", 1,
+      "Unlicensed obs should be imported as a skeleton (create_skeletons on)"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    inat_id = @parsed_results.first[:id]
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find skeleton-imported Observation")
+
+    assert(obs.placeholder?, "Skeleton obs should be flagged placeholder")
+    assert_equal(0, obs.images.length, "Skeleton obs should have no images")
+    assert_equal(1, obs.namings.length, "Skeleton obs should have 1 naming")
+    inat_link = "\"iNat ##{inat_id}\":" \
+                "#{Inat::Constants::SITE}/observations/#{inat_id}"
+    assert(
+      obs.notes_part_value(Observation.other_notes_part).
+        start_with?("Placeholder for #{inat_link},"),
+      "Skeleton obs notes should be the placeholder text, linking to iNat"
+    )
+    assert(
+      ExternalLink.exists?(target: obs, external_site: ExternalSite.inaturalist,
+                           external_id: inat_id.to_s, relationship: :import),
+      "Skeleton obs should have an import ExternalLink to the iNat obs"
+    )
+
+    assert_equal(0, @inat_import.reload.ignored_unlicensed_count,
+                 "Should not count a skeleton import as ignored")
+    assert_equal(1, @inat_import.skeleton_imported_count,
+                 "Should count the skeleton import")
+    assert_equal([obs.id], @inat_import.skeleton_observation_ids,
+                 "Should record the skeleton observation's id")
+    assert_equal("", @inat_import.response_errors,
+                 "Skeleton imports must not populate response_errors")
   end
 
   # Not-own superimporter import: a *licensed* obs still imports even when

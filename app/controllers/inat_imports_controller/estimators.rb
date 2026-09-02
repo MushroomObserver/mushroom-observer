@@ -7,12 +7,14 @@ module InatImportsController::Estimators
 
   def fetch_expected_count
     # Short-circuit to 0 rather than issue a query that answers a different
-    # question when user's own request is entirely unlicensed
-    # (import-others never imports unlicensed obs)
-    return 0 if import_others? && licensed_explicitly_false?
+    # question when user's own request is entirely unlicensed and
+    # import-others won't build skeletons for them either (create_skeletons
+    # off — otherwise those unlicensed obs are still imported, as
+    # skeletons, #4828).
+    return 0 if import_others? && !create_skeletons? &&
+                licensed_explicitly_false?
 
-    response = inat_get(import_estimate_query_args)
-    JSON.parse(response.body)["total_results"]
+    fetch_and_adjust_expected_count
   rescue RestClient::UnprocessableEntity => e
     flash_warning(:inat_unknown_param.t(error: inat_error_text(e)))
     false
@@ -21,6 +23,11 @@ module InatImportsController::Estimators
       "iNat estimate request failed: #{e.class}: #{e.message}"
     )
     nil
+  end
+
+  def fetch_and_adjust_expected_count
+    response = inat_get(import_estimate_query_args)
+    subtract_previously_imported(JSON.parse(response.body)["total_results"])
   end
 
   def fetch_raw_requested_count
@@ -36,18 +43,32 @@ module InatImportsController::Estimators
   # Isolates "already imported" from "unlicensed" (see already_imported_count in
   # confirm_form.rb). Deliberately does not touch `licensed` at all.
   def fetch_not_yet_imported_count
-    inat_get_count(not_yet_imported_query_args)
+    subtract_previously_imported(inat_get_count(not_yet_imported_query_args))
   end
 
   def fetch_estimate_with_date_count
     # Short-circuit to 0 rather than issue a query that answers a different
-    # question when user's own request is entirely unlicensed
-    # (import-others never imports unlicensed obs)
-    return 0 if import_others? && licensed_explicitly_false?
+    # question when user's own request is entirely unlicensed and
+    # import-others won't build skeletons for them either (create_skeletons
+    # off — otherwise those unlicensed obs are still imported, as
+    # skeletons, #4828).
+    return 0 if import_others? && !create_skeletons? &&
+                licensed_explicitly_false?
 
     args = import_estimate_query_args
     args[:d1] ||= EARLIEST_DATE_FILTER
-    inat_get_count(args)
+    subtract_previously_imported(inat_get_count(args))
+  end
+
+  # iNat's own without_field filter is skipped for id lists (see
+  # estimate_without_field_filter), so the estimate must separately account
+  # for MO's own dedup check (PreviousImports#previously_imported_count) --
+  # otherwise "Expected imports" overstates what will actually be imported.
+  # A no-op outside id-list mode, since previously_imported_count is then 0.
+  def subtract_previously_imported(total)
+    return total if total.nil?
+
+    [total - previously_imported_count, 0].max
   end
 
   # Own-imports: count of obs in scope that carry no license.
@@ -57,7 +78,9 @@ module InatImportsController::Estimators
   end
 
   # Import-others: count of obs that are importable-taxa but not licensed.
-  # These will be skipped entirely.
+  # By default (create_skeletons) these are imported as skeleton
+  # counterparts, not skipped; skipped entirely only when that's
+  # unchecked (#4828).
   def fetch_unlicensed_others_count
     args = import_estimate_query_args.except(:licensed).
            merge(licensed: false)
@@ -138,12 +161,16 @@ module InatImportsController::Estimators
     BASE_FILTER_PARAMS
   end
 
+  # Own-imports: scope by user_login. Import-others with create_skeletons on
+  # (the default, #4828): no licensed filter — unlicensed obs are still
+  # imported, as skeletons, so the estimate must count them too.
+  # Import-others with create_skeletons off: only licensed obs will be
+  # imported, so filter to those.
   def ownership_filter_args
-    if import_others?
-      LICENSED_FILTER
-    else
-      { user_login: params[:inat_username]&.strip }
-    end
+    return { user_login: params[:inat_username]&.strip } unless import_others?
+    return {} if create_skeletons?
+
+    LICENSED_FILTER
   end
 
   # Strip MO-controlled params so estimates match actual import behavior.

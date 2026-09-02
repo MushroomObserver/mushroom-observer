@@ -17,13 +17,12 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
                "a non-reflection is left untouched (guard, no fetch)")
   end
 
-  # Sync is owned by the admin account (#4215) -- the job carries no
-  # user, so it hands the resyncer just the observation.
-  def test_perform_hands_resyncer_the_observation_only
+  # Every resync is still logged as the admin account;
+  # the scheduled batch has no triggering user, so
+  # the job defaults to nil when none is given.
+  def test_perform_hands_resyncer_the_observation_with_no_user_by_default
     obs = observations(:imported_inat_obs)
     received = nil
-    fake_resyncer = Object.new
-    def fake_resyncer.resync; end
 
     Inat::ObservationResyncer.stub(
       :new,
@@ -35,6 +34,36 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
       InatObservationResyncJob.perform_now(obs)
     end
 
-    assert_equal([obs, {}], received)
+    assert_equal([obs, { user: nil }], received,
+                 "the job user should be nil if no user is given")
+  end
+
+  def test_perform_hands_resyncer_the_syncing_user_when_given
+    obs = observations(:imported_inat_obs)
+    received = nil
+    syncing_user = users(:mary)
+
+    Inat::ObservationResyncer.stub(
+      :new,
+      lambda { |observation, **kwargs|
+        received = [observation, kwargs]
+        fake_resyncer
+      }
+    ) do
+      InatObservationResyncJob.perform_now(obs, syncing_user)
+    end
+
+    assert_equal(
+      [obs, { user: syncing_user }], received,
+      "the job user should be the syncing user for a user-initiated sync"
+    )
+  end
+
+  private
+
+  def fake_resyncer
+    resyncer = Object.new
+    def resyncer.resync; end
+    resyncer
   end
 end

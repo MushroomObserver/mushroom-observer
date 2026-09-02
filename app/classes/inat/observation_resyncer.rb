@@ -3,8 +3,8 @@
 require "json"
 
 class Inat
-  # Refreshes every read-only reflection (#4214) in an observation's
-  # occurrence from its current iNaturalist data (#4215). Sync is an
+  # Refreshes every read-only reflection in an observation's
+  # occurrence from its current iNat data. Sync is an
   # occurrence-wide event: pressing "Sync now" on any member observation
   # refreshes all of the occurrence's reflections at essentially the same
   # time, in ONE rate-limited API call (`Inat::ObsFetcher#fetch_batch`
@@ -32,9 +32,12 @@ class Inat
     # here for callers and tests that reference the occurrence path.
     Result = ReflectionResync::Result
 
-    def initialize(observation, fetcher: ObsFetcher.new,
+    # `user:` is the person who clicked "Sync now", when known -- absent
+    # for the scheduled daily batch.
+    def initialize(observation, user: nil, fetcher: ObsFetcher.new,
                    applier: ReflectionResync.new)
       @observation = observation
+      @user = user
       @fetcher = fetcher
       @applier = applier
     end
@@ -47,31 +50,27 @@ class Inat
       by_id, failed = @fetcher.fetch_batch(
         targets.map { |t| ReflectionResync.inat_id(t) }
       )
-      results = targets.map { |target| @applier.call(target, by_id, failed) }
+      results = targets.map do |target|
+        @applier.call(target, by_id, failed, user: @user)
+      end
       broadcast(results)
       results
     end
 
     private
 
-    # The occurrence's reflections that have an iNat import link. Only
-    # read-only reflections are refreshable: the backlog of still-editable
-    # imports (reflected_at nil) is left alone so a resync can't clobber
-    # MO-side edits.
+    # The occurrence's reflections that have an iNat import link.
     def targets
       @targets ||= @observation.sync_reflections.
                    select { |obs| ReflectionResync.inat_link(obs) }
     end
 
-    # Turbo Stream broadcast so "Sync now" updates pages live, no reload
-    # (#4215) -- see Observations::InatResyncsController#create for why
-    # the controller response itself is flash-only. The aggregate flash
-    # goes to EVERY member observation's channel (a viewer may be on the
-    # primary's page, not a reflection's); panel updates go to each
-    # changed reflection's own channel, since the DOM targets are that
-    # page's panels. Rendering uses no user -- the channel is shared by
-    # every viewer of the page, so the safe logged-out-equivalent view is
-    # the only one that's right for all of them.
+    # Turbo Stream broadcast so "Sync now" updates pages live
+    # The controller response itself is flash-only. The aggregate flash
+    # goes to EVERY member observation's channel; panel updates go to each
+    # changed reflection's channel.
+    # Rendering uses no user -- the channel is shared by
+    # every viewer of the page.
     def broadcast(results)
       flash_html = render_flash(results)
       members.each do |member|
@@ -79,8 +78,15 @@ class Inat
           channel(member), target: "page_flash", html: flash_html
         )
       end
-      results.select { |r| r.status == :synced }.
-        each { |r| broadcast_panels(r.observation) }
+      results.select { |r| r.status == :synced }.each do |r|
+        broadcast_panels(r.observation)
+        Turbo::StreamsChannel.broadcast_refresh_to(
+          channel(r.observation),
+          # request_id: nil, else Turbo's client-side dedup would skip
+          # refreshing whichever client clicked "Sync now".
+          request_id: nil
+        )
+      end
     end
 
     def members
@@ -92,11 +98,11 @@ class Inat
       [obs, :external_link_sync]
     end
 
-    # One aggregate message for the whole occurrence: refreshed count,
-    # missing-source count (called out explicitly -- the owner should
-    # notice), or a plain up-to-date/failed line. The worst outcome
-    # drives the alert level. MessageAlert (not a bare Components::
-    # Alert) -- see .claude/rules/phlex_reference.md's "Rendering Phlex
+    # Aggregate message for the whole occurrence: refreshed count,
+    # missing-source count, or a plain up-to-date/failed line.
+    # The worst outcome drives the alert level.
+    # MessageAlert (not a bare Components::Alert).
+    # See .claude/rules/phlex_reference.md's "Rendering Phlex
     # outside a request".
     def render_flash(results)
       level, message = flash_level_and_message(results)
@@ -127,10 +133,13 @@ class Inat
       parts
     end
 
-    # Only `:synced` changes anything these panels display (when /
-    # location / GPS / notes) -- `:unchanged`/`:source_deleted`/
-    # `:fetch_failed` leave the observation's own data untouched, so
-    # there's nothing to re-render there.
+    # Re-render Details, NotesPanel, NameInfoPanel with synced data.
+    #
+    # Skips the Proposed Name table and page title: they need a
+    # per-viewer user for permission-gated buttons, but this broadcast
+    # renders once, with no viewer, for a channel shared by every
+    # subscriber. #broadcast's accompanying refresh stream covers those
+    # two instead.
     def broadcast_panels(observation)
       broadcast_replace(observation, "observation_details",
                         Views::Controllers::Observations::Show::Details.new(
@@ -142,6 +151,12 @@ class Inat
                         Views::Controllers::Observations::Show::NotesPanel.new(
                           obs: observation, user: nil
                         ))
+      broadcast_replace(
+        observation, "observation_name_info",
+        Views::Controllers::Observations::Show::NameInfoPanel.new(
+          obs: observation, user: nil
+        )
+      )
     end
 
     # Same lookup `Observations::ExternalLinksController::Show` uses for

@@ -265,6 +265,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
     t.boolean "recheck_all", default: false, null: false
     t.integer "ignored_unlicensed_count", default: 0, null: false
     t.text "original_inat_url"
+    t.boolean "create_skeletons", default: true, null: false
+    t.integer "skeleton_imported_count", default: 0, null: false
+    t.text "skeleton_observation_ids"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -638,6 +641,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
     t.integer "collector_user_id"
     t.integer "inat_import_id"
     t.datetime "reflected_at"
+    t.boolean "placeholder", default: false, null: false
+    t.integer "inat_stand_in_naming_id"
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["created_at", "id"], name: "index_observations_on_created_at_and_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"

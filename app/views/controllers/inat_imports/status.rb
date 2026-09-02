@@ -8,6 +8,8 @@ module Views::Controllers::InatImports
   class Status < Components::Base
     prop :inat_import, ::InatImport
 
+    include IgnoredSection
+
     def view_template
       div(
         id: "inat_import_#{@inat_import.id}",
@@ -176,80 +178,8 @@ module Views::Controllers::InatImports
       span(class: "font-weight-bold") { append_colon(:errors.ti) }
     end
 
-    def show_ignored_section?
-      @inat_import.Done? && @inat_import.ignored_total_count.positive?
-    end
-
-    def render_ignored_section
-      return unless show_ignored_section?
-
-      Alert(level: :info, class: "mt-3") do
-        h5 { plain(:inat_import_tracker_ignored_heading.l) }
-        render_ignored_row(:inat_import_tracker_ignored_not_importable,
-                           @inat_import.ignored_not_importable_count)
-        render_ignored_row(:inat_import_tracker_ignored_already_imported,
-                           @inat_import.ignored_already_imported_count)
-        render_ignored_row(:inat_import_tracker_ignored_unlicensed,
-                           @inat_import.ignored_unlicensed_count)
-        render_date_missing_row
-      end
-      render_license_added_section
-    end
-
-    def render_ignored_row(caption_key, count)
-      return unless count.to_i.positive?
-
-      div(class: "mb-1") do
-        b { append_colon(caption_key.l) }
-        plain(count.to_s)
-      end
-    end
-
-    def render_date_missing_row
-      count = @inat_import.ignored_date_missing_count.to_i
-      return unless count.positive?
-
-      ids = @inat_import.date_missing_inat_ids
-      div(class: "mb-1") do
-        b { append_colon(:inat_import_tracker_ignored_date_missing.l) }
-        plain(count.to_s)
-        render_date_missing_reimport_link(ids) if ids.any?
-      end
-    end
-
-    def render_date_missing_reimport_link(ids)
-      label = :inat_import_tracker_date_missing_reimport.t(count: ids.size)
-      plain(" — ")
-      render(Components::Link::Get.new(
-               name: label,
-               target: new_inat_import_path(inat_ids: ids.join(","))
-             ))
-    end
-
-    def render_license_added_section
-      ids = @inat_import.license_added_inat_ids
-      return unless ids.any?
-
-      Alert(level: :info, class: "mt-3") do
-        h5 { plain(:inat_import_tracker_license_added_heading.l) }
-        div do
-          plain(:inat_import_tracker_license_added_note.t(count: ids.size))
-          whitespace
-          render_license_added_reimport_link(ids)
-        end
-      end
-    end
-
-    def render_license_added_reimport_link(ids)
-      label = :inat_import_tracker_license_added_reimport.t(count: ids.size)
-      render(Components::Link::Get.new(
-               name: label,
-               target: new_inat_import_path(inat_ids: ids.join(","))
-             ))
-    end
-
     def render_error_alert
-      errors = @inat_import.response_errors.to_s.split("\n").compact_blank
+      errors = response_error_lines
       return if errors.empty?
 
       Alert(level: :warning) do
@@ -261,7 +191,8 @@ module Views::Controllers::InatImports
     end
 
     def render_alert
-      Alert(message: alert_message, level: alert_level, class: "mt-3")
+      Alert(message: alert_message, level: alert_level, class: "mt-3",
+            id: "inat_import_final_alert")
     end
 
     def alert_message
@@ -283,7 +214,11 @@ module Views::Controllers::InatImports
     end
 
     def errors?
-      @inat_import.response_errors.present?
+      response_error_lines.any?
+    end
+
+    def response_error_lines
+      @inat_import.response_errors.to_s.split("\n").compact_blank
     end
 
     def remaining_time

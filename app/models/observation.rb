@@ -51,6 +51,12 @@
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?
 #  notes::                  Arbitrary text supplied by User and serialized.
+#  placeholder::            Minimal counterpart for another observation,
+#                           e.g., an unlicensed iNaturalist obs.
+#  inat_stand_in_naming_id:: Naming that mirrors a placeholder's iNat Leading ID
+#  needs_naming::           Does it need a name?
+#  lifeform::               Cached name.lifeform for content filtering.
+#  text_name::              Cached name.text_name for content filtering.
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index

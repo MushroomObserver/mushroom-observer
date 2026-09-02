@@ -290,6 +290,7 @@ class InatImportsController < ApplicationController
       inat_url: params[:inat_url].presence,
       original_inat_url: params[:original_inat_url].presence,
       import_others: import_others?,
+      create_skeletons: create_skeletons?,
       recheck_all: recheck_all?,
       writeback: writeback_policy
     }
@@ -331,6 +332,14 @@ class InatImportsController < ApplicationController
   # Explicit id lists always re-check regardless of this flag.
   def recheck_all?
     params[:recheck_all] == "1"
+  end
+
+  # Import-others only (#4828): build a minimal skeleton counterpart for an
+  # unlicensed obs instead of skipping it entirely. Defaults checked on the
+  # new form (see FormBuilders#initial_create_skeletons); unchecking it
+  # restores the original skip-entirely behavior.
+  def create_skeletons?
+    params[:create_skeletons] == "1"
   end
 
   # Admins can toggle the iNat write-back per import via a form checkbox

@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# User-initiated "Sync now" (#4215): enqueues a background refresh of
+# User-initiated "Sync now": enqueues a background refresh of
 # every read-only reflection in the observation's occurrence from its
-# iNaturalist source. The fetch is rate-limited, so the actual refresh
+# iNaturalist source. The fetch is rate-limited, so the refresh itself
 # runs in `InatObservationResyncJob`, not in the request. Any logged-in
-# user may trigger a sync — it applies no user input, converging on
-# source-canonical data, the same refresh the scheduled batch performs.
+# user may trigger a sync.
 module Observations
   class InatResyncsController < ApplicationController
     before_action :login_required
@@ -45,7 +44,9 @@ module Observations
     def start_sync(observation, reflections)
       Rails.cache.write(guard_key(reflections), true,
                         expires_in: SYNC_GUARD_PERIOD)
-      InatObservationResyncJob.perform_later(observation)
+      # Pass the clicking user so that a placeholder can tell
+      # if they are the iNat observer.
+      InatObservationResyncJob.perform_later(observation, @user)
     end
 
     # Keyed on the sorted reflection ids, not the clicked member, so

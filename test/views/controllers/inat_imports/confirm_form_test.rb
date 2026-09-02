@@ -192,6 +192,34 @@ module Views::Controllers::InatImports
       assert_html(html, "#unlicensed_obs_count")
     end
 
+    # create_skeletons on (the default, #4828): the unlicensed count gets
+    # its own informational line, not the "will be skipped" ignored row.
+    def test_skeleton_obs_line_when_import_others_with_create_skeletons
+      model = FormObject::InatImportConfirm.new(
+        inat_username: "rolf_inat_username", import_others: "1",
+        create_skeletons: "1"
+      )
+      html = render_form(form_model: model, unlicensed_obs: 2)
+
+      assert_html(html, "b",
+                  text: :inat_import_confirm_skeleton_obs_caption.l)
+      assert_no_html(html, "#total_ignored_count")
+    end
+
+    # create_skeletons off restores the original "ignored" behavior.
+    def test_unlicensed_ignored_row_when_create_skeletons_off
+      model = FormObject::InatImportConfirm.new(
+        inat_username: "rolf_inat_username", import_others: "1",
+        create_skeletons: "0"
+      )
+      html = render_form(form_model: model, unlicensed_obs: 2,
+                         breakdown: { requested: 10, after_taxon: 10 })
+
+      assert_html(html, "b",
+                  text: "#{:inat_import_confirm_unlicensed_obs_caption.l}: ")
+      assert_html(html, "#total_ignored_count")
+    end
+
     def test_time_estimate_from_base_constant_when_no_import
       html = render_form(inat_import: nil)
 

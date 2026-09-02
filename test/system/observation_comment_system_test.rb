@@ -16,8 +16,10 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     # Rolf logs in and goes to his obs.
     using_session("rolf_session") do
       login!(rolf)
-      assert_link("Your Observations")
-      click_on("Your Observations")
+      # Visit the filtered index directly (a plain GET, no nav click)
+      # instead of clicking the "Your Observations" link -- this test
+      # is about comments, not nav.
+      visit(observations_path(by_user: rolf.id))
 
       assert_selector("body.observations__index")
       assert_link(text: /#{obs.text_name}/)

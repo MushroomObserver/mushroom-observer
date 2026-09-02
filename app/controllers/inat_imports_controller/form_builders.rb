@@ -4,7 +4,7 @@ module InatImportsController::FormBuilders
   # Params carried verbatim from the new form through the confirm page.
   PASSTHROUGH_PARAM_KEYS = [
     :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
-    :recheck_all, :skip_inat_writeback
+    :recheck_all, :skip_inat_writeback, :create_skeletons
   ].freeze
 
   # Params that are literally "1" when checked/selected, absent or any
@@ -47,6 +47,7 @@ module InatImportsController::FormBuilders
       inat_url: reload_inat_url,
       choose_method: params[:choose_method] || derive_choose_method,
       skip_inat_writeback: initial_skip_writeback,
+      create_skeletons: initial_create_skeletons,
       **checkbox_flag_params
     )
   end
@@ -83,6 +84,15 @@ module InatImportsController::FormBuilders
       params.key?(:skip_inat_writeback)
 
     ("1" if params[:skip_inat_writeback] == "1")
+  end
+
+  # The fresh form (no :create_skeletons key) pre-checks the box — building
+  # a skeleton counterpart for an unlicensed import-others obs is the
+  # default (#4828). On reload, honor the submitted state.
+  def initial_create_skeletons
+    return "1" unless params.key?(:create_skeletons)
+
+    ("1" if params[:create_skeletons] == "1")
   end
 
   # Superform namespaces hidden fields under the model key.

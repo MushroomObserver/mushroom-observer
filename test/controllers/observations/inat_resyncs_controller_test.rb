@@ -8,14 +8,13 @@ module Observations
 
     tests Observations::InatResyncsController
 
-    # Anyone logged in may trigger a sync (#4215) — it applies no user
-    # input, converging on source-canonical data — and the job carries
-    # no user (sync is owned by the admin account).
+    # Anyone logged in may trigger a sync.
     def test_any_logged_in_user_enqueues_resync
       obs = reflection
-      login("mary") # not the owner, not a collector
+      login("mary") # not the owner, not the observer
 
-      assert_enqueued_with(job: InatObservationResyncJob, args: [obs]) do
+      assert_enqueued_with(job: InatObservationResyncJob,
+                           args: [obs, users(:mary)]) do
         post(:create, params: { id: obs.id })
       end
       assert_redirected_to(permanent_observation_path(obs.id))
@@ -46,7 +45,8 @@ module Observations
       obs.update!(occurrence: occ)
       login("mary")
 
-      assert_enqueued_with(job: InatObservationResyncJob, args: [primary]) do
+      assert_enqueued_with(job: InatObservationResyncJob,
+                           args: [primary, users(:mary)]) do
         post(:create, params: { id: primary.id })
       end
       assert_flash_success

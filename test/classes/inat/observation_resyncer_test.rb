@@ -4,11 +4,10 @@ require("test_helper")
 require("json")
 
 # Unit tests for Inat::ObservationResyncer. The iNat fetch is injected as
-# a fake so the tests exercise the resync logic (update / no-op / deleted
-# source / transient failure / occurrence-wide batching) without hitting
-# the API.
+# a fake so the tests exercise the resync logic without hitting the API.
 class Inat::ObservationResyncerTest < UnitTestCase
   include ActionCable::TestHelper
+  include ActiveJob::TestHelper
 
   # Stands in for Inat::ObsFetcher — returns a canned [by_id, failed?]
   # and records the ids it was asked for.
@@ -135,6 +134,517 @@ class Inat::ObservationResyncerTest < UnitTestCase
   end
 
   # ---------------------------------------------------------------
+  #  Placeholder (skeleton) resync: narrower than a full
+  #  reflection -- date/location sync automatically, notes/specimen
+  #  never do, and a leading-ID change revises the existing Naming
+  #  in place instead of adding a second one.
+  # ---------------------------------------------------------------
+
+  def test_placeholder_resync_syncs_date_location_not_notes_or_specimen
+    skeleton = build_skeleton(name: names(:coprinus))
+    original_notes = skeleton.notes
+    naming = skeleton.namings.first
+    original_reason = naming.reasons[2]
+    link = skeleton.import_link
+    # obscured: false -- this test is about placeholder narrowing (date/
+    # location sync, notes/specimen don't), not the separate obscured-
+    # source gate (covered elsewhere); coprinus.txt itself is obscured,
+    # which would otherwise block location from syncing here.
+    coprinus_raw = mock_raw("coprinus").merge(obscured: false)
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:synced, result.status,
+                 "date/location differ from the skeleton's fixed test " \
+                 "values, so this should count as a change")
+    skeleton.reload
+    fresh = Inat::Obs.new(JSON.generate(coprinus_raw))
+    assert_equal(fresh.when, skeleton.when, "date should sync")
+    assert_equal(fresh.location, skeleton.location, "location should sync")
+    assert_equal(original_notes, skeleton.notes,
+                 "placeholder notes must never be overwritten by source " \
+                 "data -- SkeletonObservationBuilder never copies iNat's " \
+                 "own notes in either")
+    assert_not(skeleton.specimen?,
+               "specimen should be left alone by a placeholder resync")
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "leading ID is unchanged, so the naming shouldn't move")
+    assert_equal(original_reason, naming.reload.reasons[2],
+                 "unchanged leading ID: the naming's reason shouldn't " \
+                 "be rewritten either")
+  end
+
+  def test_placeholder_resync_revises_naming_when_leading_id_changes
+    skeleton = build_skeleton(name: names(:peltigera))
+    naming = skeleton.namings.first
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    assert_equal(1, skeleton.reload.namings.count,
+                 "the existing Naming should be revised, not doubled")
+    assert_equal(names(:coprinus), skeleton.name,
+                 "leading ID changed on iNat: Observation#name should " \
+                 "follow it")
+    assert_equal(names(:coprinus).text_name, skeleton.text_name)
+    naming.reload
+    assert_equal(names(:coprinus), naming.name,
+                 "the skeleton's initial Naming should be revised in " \
+                 "place to the new leading ID")
+    assert_match(
+      /#{Time.zone.today.strftime("%Y-%m-%d")}\z/, naming.reasons[2],
+      "the naming's 'Used references' reason should cite today's date"
+    )
+  end
+
+  def test_placeholder_resync_ignores_name_override
+    skeleton = build_skeleton(name: names(:peltigera))
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus").merge(
+      ofvs: [{ name: "Species Name Override", value: "Boletus" }]
+    )
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Resync should track the community taxon (Coprinus), " \
+                 "not the 'Species Name Override' field (Boletus)")
+  end
+
+  # Regression: same rule for a "Provisional Species Name" field.
+  def test_placeholder_resync_ignores_provisional_name
+    skeleton = build_skeleton(name: names(:peltigera))
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus").merge(
+      ofvs: [{ name: "Provisional Species Name", value: "Boletus" }]
+    )
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Resync should track the community taxon (Coprinus), " \
+                 "not the 'Provisional Species Name' field (Boletus)")
+  end
+
+  # Defensive: a placeholder's sole Naming could in principle be removed
+  # later (namings may be freely added/destroyed on a reflection -- only
+  # the scalar edit form is locked). sync_placeholder_naming must not
+  # raise when there's nothing to revise; date/location still sync.
+  def test_placeholder_resync_with_no_naming_present
+    skeleton = build_skeleton(name: names(:coprinus))
+    skeleton.namings.first.destroy
+    link = skeleton.import_link
+    coprinus_raw = mock_raw("coprinus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    assert_empty(skeleton.reload.namings)
+  end
+
+  def test_placeholder_resync_leaves_non_placeholder_namings_alone
+    non_placeholder = observations(:coprinus_comatus_obs)
+    assert_not(non_placeholder.placeholder?,
+               "test fixture should not be a placeholder")
+    non_placeholder.update_column(:reflected_at, Time.zone.now)
+    link = ExternalLink.create!(
+      user: non_placeholder.user, target: non_placeholder,
+      external_site: external_sites(:inaturalist), relationship: :import,
+      external_id: 55_443_322,
+      url: "https://www.inaturalist.org/observations/55443322"
+    )
+
+    Inat::ObservationResyncer.new(
+      non_placeholder,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => @raw }, false])
+    ).resync
+
+    assert_equal(@fresh.notes, non_placeholder.reload.notes,
+                 "a non-placeholder reflection keeps syncing notes as " \
+                 "before -- the narrower rule is placeholder-only")
+  end
+
+  # ---------------------------------------------------------------
+  #  Placeholder resync respects MO-side Namings and Votes: it only
+  #  revises the Naming recorded in inat_stand_in_naming_id, only
+  #  while no outside vote has locked it. A locked stand-in gets a
+  #  new one instead, tracked by repointing that same column, not by
+  #  guessing from who proposed a Naming or when. A Naming anyone
+  #  proposed independently, including the importer, stays untouched.
+  # ---------------------------------------------------------------
+
+  def test_placeholder_resync_leaves_importers_own_second_naming_untouched
+    skeleton = build_skeleton(name: names(:peltigera))
+    importer = skeleton.user
+    second_naming = Naming.create!(observation: skeleton, user: importer,
+                                   name: names(:coprinus), reasons: { 1 => "" })
+    Vote.create!(naming: second_naming, observation: skeleton, user: importer,
+                 value: Vote::MAXIMUM_VOTE)
+    Observation::NamingConsensus.new(skeleton).calc_consensus(importer)
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "Test setup: the importer's confident vote should already " \
+                 "lead")
+
+    link = skeleton.import_link
+    stereum_raw = raw_for(names(:stereum))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => stereum_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:coprinus), skeleton.reload.name,
+                 "The importer's second Naming should still win " \
+                 "consensus after resync, not iNat's new Leading ID")
+    assert_equal(names(:coprinus), second_naming.reload.name,
+                 "Resync should not repoint a Naming the importer " \
+                 "proposed independently, after the original")
+    assert_equal(1, second_naming.votes.count,
+                 "The importer's vote on their second Naming should be " \
+                 "untouched")
+    assert_equal(skeleton.namings.order(:id).first.id,
+                 skeleton.inat_stand_in_naming_id,
+                 "The stand-in pointer should stay on the original " \
+                 "Naming, not shift to the importer's second one")
+  end
+
+  def test_placeholder_resync_forks_a_new_naming_when_the_stand_in_is_locked
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+
+    assert_equal(names(:peltigera), original.reload.name,
+                 "A locked Naming should not be revised by resync")
+    assert_equal(2, skeleton.reload.namings.count,
+                 "resync should add a new Naming instead of editing a " \
+                 "locked one")
+    forked = skeleton.namings.where.not(id: original.id).first
+    assert_equal(names(:coprinus), forked.name)
+    assert_equal(users(:rolf), forked.user,
+                 "The forked Naming should be attributed to the importer")
+    assert_equal(forked.id, skeleton.inat_stand_in_naming_id,
+                 "The stand-in pointer should repoint to the forked Naming")
+  end
+
+  def test_placeholder_resync_fork_vote_reflects_research_grade
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    research_raw = raw_for(names(:coprinus)).merge(quality_grade: "research")
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => research_raw },
+                                false])
+    ).resync
+
+    forked = skeleton.reload.namings.where.not(id: original.id).first
+    vote = forked.votes.find_by(user: users(:rolf))
+    assert_equal(Vote::NEXT_BEST_VOTE, vote.value,
+                 "A Research Grade source should give the forked stand-in " \
+                 "a Promising vote, not Could Be")
+  end
+
+  def test_placeholder_resync_forked_naming_is_the_new_stand_in
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync.first
+
+    assert_equal(:unchanged, result.status,
+                 "iNat's Leading ID hasn't moved since the fork, so no " \
+                 "further Naming should be added")
+    assert_equal(2, skeleton.reload.namings.count)
+  end
+
+  def test_placeholder_resync_forks_again_after_the_fork_is_locked
+    skeleton = build_skeleton(name: names(:peltigera))
+    original = skeleton.namings.first
+    Vote.create!(naming: original, observation: skeleton, user: mary,
+                 value: Vote::MAXIMUM_VOTE)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+    first_fork = skeleton.namings.where.not(id: original.id).first
+    Vote.create!(naming: first_fork, observation: skeleton, user: dick,
+                 value: Vote::MAXIMUM_VOTE)
+    stereum_raw = raw_for(names(:stereum))
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => stereum_raw },
+                                false])
+    ).resync
+    skeleton = Observation.find(skeleton.id)
+
+    assert_equal(3, skeleton.namings.count,
+                 "an outside vote locking the first fork should trigger " \
+                 "a second fork")
+    assert_equal(names(:peltigera), original.reload.name)
+    assert_equal(names(:coprinus), first_fork.reload.name)
+    second_fork = skeleton.namings.
+                  where.not(id: [original.id, first_fork.id]).first
+    assert_equal(names(:stereum), second_fork.name)
+    assert_equal(second_fork.id, skeleton.inat_stand_in_naming_id)
+  end
+
+  # Do not suppress sync-driven consensus recalculation. It sends the
+  # normal ConsensusChangeMailer notification -- to the interested
+  # user (Katrina) and to the observation's own owner (Rolf, the
+  # importer, opted into email_observations_consensus by default).
+  # Naming#create_emails (after_save callback) separately sends its
+  # own naming-proposal notification for the revised Naming, to
+  # Katrina -- three distinct, expected notifications.
+  def test_placeholder_resync_consensus_change_notifies_interested_users
+    skeleton = build_skeleton(name: names(:peltigera))
+    Interest.create!(target: skeleton, user: katrina, state: true)
+    link = skeleton.import_link
+    coprinus_raw = raw_for(names(:coprinus))
+
+    assert_enqueued_jobs(3, only: ActionMailer::MailDeliveryJob) do
+      Inat::ObservationResyncer.new(
+        skeleton,
+        fetcher: FakeFetcher.new([{ link.external_id.to_s => coprinus_raw },
+                                  false])
+      ).resync
+    end
+  end
+
+  # ---------------------------------------------------------------
+  #  Upgrading a placeholder to a full import on sync.
+  #  If the iNat obs is now licensed, or the importer is the iNat observer,
+  #   overwriting the existing Observation in place.
+  # ---------------------------------------------------------------
+
+  def test_upgrade_eligible_when_now_licensed
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: "cc-by-nc", login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert(resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+           "A placeholder should be upgradeable if the sourcce is now-licensed")
+  end
+
+  def test_upgrade_eligible_when_importer_is_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    skeleton.user.update!(inat_username: "someone")
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+      "A placeholder should be upgradeable if the importer is the iNat observer"
+    )
+  end
+
+  def test_upgrade_eligible_when_syncing_user_is_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+    syncing_user = users(:mary)
+    syncing_user.update!(inat_username: "someone")
+
+    assert(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, syncing_user),
+      "Placeholder should be upgradeable if syncing user is the iNat observer"
+    )
+  end
+
+  def test_upgrade_eligible_matches_account_despite_collector_field
+    skeleton = build_skeleton(name: names(:peltigera))
+    skeleton.user.update!(inat_username: "someone")
+    raw = licensed_upgrade_raw(license_code: nil, login: "someone").
+          merge(ofvs: [{ name: "Collector", value: "A Different Person" }])
+    fresh = Inat::Obs.new(JSON.generate(raw))
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+      "Should be upgradeable because the importer is the iNat observer, " \
+      "although a custom Collector field names someone else"
+    )
+  end
+
+  def test_upgrade_ineligible_when_neither_trigger_fires
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert_not(resyncer.send(:upgrade_eligible?, skeleton, fresh, nil),
+               "An unlicensed source with an unmatched observer should " \
+               "leave the narrow placeholder sync unchanged")
+  end
+
+  def test_upgrade_ineligible_when_syncing_user_is_not_the_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    fresh = licensed_upgrade_obs(license_code: nil, login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert_not(
+      resyncer.send(:upgrade_eligible?, skeleton, fresh, users(:mary)),
+      "placeholder sync should be unchanged if syncing user has no matching " \
+      "user.inat_username"
+    )
+  end
+
+  def test_upgrade_ineligible_for_a_non_placeholder
+    non_placeholder = observations(:coprinus_comatus_obs)
+    fresh = licensed_upgrade_obs(license_code: "cc-by-nc", login: "someone")
+
+    resyncer = Inat::ReflectionResync.new
+
+    assert_not(resyncer.send(:upgrade_eligible?, non_placeholder, fresh, nil),
+               "Only a placeholder is eligible for an upgrade")
+  end
+
+  def test_placeholder_upgrades_to_full_import_when_now_licensed
+    skeleton = build_skeleton(name: names(:peltigera))
+    comment = Comment.create!(user: users(:mary), target: skeleton,
+                              summary: "s", comment: "c")
+    occ = Occurrence.create!(user: skeleton.user, primary_observation: skeleton)
+    skeleton.update!(occurrence: occ)
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: "cc-by-nc", login: "mycoprimus")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    skeleton.reload
+    assert_not(skeleton.placeholder?,
+               "A now-licensed source should upgrade the placeholder")
+    assert_equal(names(:coprinus), skeleton.name,
+                 "Upgrade should build the full naming set from the " \
+                 "fetched taxon")
+    assert_equal(occ.id, skeleton.occurrence_id,
+                 "Upgrade should leave the Occurrence association in place")
+    assert_includes(skeleton.comments, comment,
+                    "Upgrade should leave existing comments in place")
+    assert_equal(1, ExternalLink.where(target: skeleton, target_type:
+                                       "Observation", relationship: :import).
+                   count,
+                 "Upgrade should not create a duplicate import ExternalLink")
+  end
+
+  def test_placeholder_upgrades_to_full_import_when_importer_is_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    skeleton.user.update!(inat_username: "devin189")
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: nil, login: "devin189")
+
+    result = Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    skeleton.reload
+    assert_not(
+      skeleton.placeholder?,
+      "The Observation should upgrade if the importer is the iNat observer"
+    )
+    assert_equal(names(:coprinus), skeleton.name)
+  end
+
+  # A superimporter creates the skeleton for someone else's iNat obs;
+  # the iNat observer logs into MO account and clicks Sync.
+  def test_placeholder_upgrades_to_full_import_when_syncing_user_is_observer
+    skeleton = build_skeleton(name: names(:peltigera))
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: nil, login: "devin189")
+    syncing_user = users(:mary)
+    syncing_user.update!(inat_username: "devin189")
+
+    fetcher = FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    result = Inat::ObservationResyncer.new(
+      skeleton, user: syncing_user, fetcher: fetcher
+    ).resync.first
+
+    assert_equal(:synced, result.status)
+    skeleton.reload
+    assert_not(
+      skeleton.placeholder?,
+      "A placeholder should upgrade if the syncing user is the iNat observer"
+    )
+    assert_equal(names(:coprinus), skeleton.name)
+  end
+
+  def test_placeholder_stays_narrow_synced_when_neither_trigger_fires
+    skeleton = build_skeleton(name: names(:coprinus))
+    link = skeleton.import_link
+    raw = licensed_upgrade_raw(license_code: nil, login: "someone_else")
+
+    Inat::ObservationResyncer.new(
+      skeleton,
+      fetcher: FakeFetcher.new([{ link.external_id.to_s => raw }, false])
+    ).resync
+
+    assert(skeleton.reload.placeholder?,
+           "Neither trigger fired, so the placeholder should not upgrade")
+  end
+
+  # ---------------------------------------------------------------
   #  Occurrence-wide sync (#4215): one fetch, aggregate reporting
   # ---------------------------------------------------------------
 
@@ -176,8 +686,9 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(1, primary_msgs.length,
                  "the primary's page gets the flash only")
     assert(primary_msgs.first.include?('target="page_flash"'))
-    assert_equal(3, obs_msgs.length,
-                 "the synced reflection's page gets flash + panels")
+    assert_equal(5, obs_msgs.length,
+                 "the synced reflection's page gets flash + panels + " \
+                 "a refresh stream")
   end
 
   # Mixed outcomes (rare) are reported honestly in one flash: refreshed
@@ -214,14 +725,32 @@ class Inat::ObservationResyncerTest < UnitTestCase
       resync(found: { @id => @raw })
     end
 
-    assert_equal(3, messages.length)
+    assert_equal(5, messages.length)
     assert(messages.any? { |m| m.include?('target="page_flash"') })
     assert(
       messages.any? { |m| m.include?('target="observation_details"') }
     )
     assert(messages.any? { |m| m.include?('target="observation_notes"') })
+    assert(
+      messages.any? { |m| m.include?('target="observation_name_info"') },
+      "NameInfoPanel should also refresh, so 'About this taxon' tracks " \
+      "any leading-ID change"
+    )
     flash = messages.find { |m| m.include?('target="page_flash"') }
     assert_includes(flash, :observation_resync_synced.t(count: 1))
+    refresh = messages.find { |m| m.include?('action="refresh"') }
+    assert_not_nil(
+      refresh,
+      "a synced reflection should also get a refresh stream, so " \
+      "namings/photos/sequences the panel broadcasts can't cover reach " \
+      "the page too"
+    )
+    assert_not_includes(
+      refresh, "request-id=",
+      "the refresh must omit request-id, else Turbo's client-side " \
+      "dedup would skip the client whose 'Sync now' click triggered " \
+      "this broadcast"
+    )
   end
 
   # No real change: just the flash, no point re-rendering panels whose
@@ -301,6 +830,77 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # A raw iNat obs hash whose taxon matches an existing MO Name fixture
+  # (genus rank), so leading-ID resolution needs no API call. Based on
+  # coprinus.txt (unlicensed, one photo -- irrelevant here since these
+  # tests only exercise placeholder naming/consensus sync).
+  def raw_for(name)
+    raw = mock_raw("coprinus")
+    raw.merge(taxon: raw[:taxon].merge(name: name.text_name, rank: "genus"))
+  end
+
+  # Minimal stand-in for an ::Inat::Obs, exposing only what
+  # Inat::SkeletonObservationBuilder and Inat::LeadNameResolver read --
+  # same shape as InatSkeletonObservationBuilderTest::FakeInatObs, kept
+  # local so this file doesn't depend on another test file's fixture.
+  class FakeSkeletonInatObs
+    FAKE_INAT_ID = 99_887_766
+
+    def initialize(name:)
+      @name = name
+    end
+
+    attr_reader :name
+
+    def collector = "A Collector"
+    def provisional_name = nil
+    def name_override = nil
+    def when = Date.new(2024, 4, 29)
+    def location = ::Location.find_by(name: "Albion, California, USA")
+    def where = "Albion, California, USA"
+    def lat = 44.0
+    def lng = -123.0
+    def gps_hidden = false # rubocop:disable Naming/PredicateMethod
+
+    def [](key)
+      { id: FAKE_INAT_ID, quality_grade: "needs_id", license_code: nil,
+        identifications: [],
+        user: { login: "danmorton", name: "Daniel Morton" } }[key]
+    end
+  end
+
+  # A real skeleton Observation (Inat::SkeletonObservationBuilder), so
+  # placeholder-resync tests exercise the real reflected_at/placeholder
+  # state instead of stubbing it.
+  def build_skeleton(name:)
+    fake = FakeSkeletonInatObs.new(name: name)
+    Inat::SkeletonObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf),
+      external_site: external_sites(:inaturalist)
+    ).mo_observation
+  end
+
+  # A raw iNat obs hash (calostoma_lutescens.txt has no photos, so an
+  # upgrade doesn't trigger an image upload) with license_code and
+  # observer login overridden, and its taxon swapped for one that already
+  # matches an MO Name fixture (Coprinus) so name resolution needs no
+  # API call.
+  def licensed_upgrade_raw(license_code:, login:)
+    raw = mock_raw("calostoma_lutescens")
+    raw.merge(
+      license_code: license_code,
+      taxon: raw[:taxon].merge(name: "Coprinus", rank: "genus"),
+      user: raw[:user].merge(login: login)
+    )
+  end
+
+  def licensed_upgrade_obs(license_code:, login:)
+    Inat::Obs.new(
+      JSON.generate(licensed_upgrade_raw(license_code: license_code,
+                                         login: login))
+    )
   end
 
   # The open calostoma raw, flipped to obscured -- the flag iNat sets when

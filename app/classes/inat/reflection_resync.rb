@@ -13,6 +13,10 @@ class Inat
   # fields touched and the logging stay identical no matter what started
   # the sync.
   #
+  # A placeholder (skeleton) gets narrower scalar treatment (no
+  # notes) and Naming/consensus handling and can upgrade to a full import
+  # outright; see #upgrade_eligible?.
+  #
   # Runs BELOW the read-only edit guard: that guard blocks the web/API
   # edit actions, while this writes the records directly, so it can
   # refresh reflections nobody is allowed to hand-edit.
@@ -44,11 +48,13 @@ class Inat
     # every id, so a missing one is gone from iNat -> :deleted. An
     # incremental fetch (updated_since) returns only changed ids, so a
     # missing one merely didn't change -> :unchanged, untouched.
-    def call(reflection, by_id, failed, absent: :deleted)
+    # `user:` is the person who clicked "Sync now", when known -- absent
+    # for the scheduled daily batch.
+    def call(reflection, by_id, failed, absent: :deleted, user: nil)
       return failed_result(reflection) if failed
 
       raw = by_id[self.class.inat_id(reflection).to_s]
-      return apply(reflection, Inat::Obs.new(JSON.generate(raw))) if raw
+      return apply(reflection, Inat::Obs.new(JSON.generate(raw)), user) if raw
 
       absent == :deleted ? deleted(reflection) : unchanged(reflection)
     end
@@ -67,12 +73,24 @@ class Inat
 
     # Detect a change from what persists, not from the assigned values:
     # setting `location` triggers a callback that rewrites `where`, so an
-    # in-memory `changed?` never converges. `saved_changes` (sans the
-    # timestamp) reflects what actually moved.
-    def apply(obs, inat_obs)
-      obs.assign_attributes(scalar_attributes(inat_obs))
+    # in-memory `changed?` doesn't converge. `saved_changes` (sans the
+    # timestamp) reflects what persisted.
+    #
+    # A placeholder eligible to become a full import skips the
+    # narrow scalar sync below entirely -- see upgrade_eligible?.
+    def apply(obs, inat_obs, user)
+      if upgrade_eligible?(obs, inat_obs, user)
+        return upgrade_placeholder(obs, inat_obs, user)
+      end
+
+      obs.assign_attributes(scalar_attributes(obs, inat_obs))
       obs.save! if obs.changed?
-      changed = obs.saved_changes.except("updated_at").present?
+      scalar_changed = obs.saved_changes.except("updated_at").present?
+
+      naming_changed = obs.placeholder? &&
+                       sync_placeholder_naming?(obs, inat_obs)
+      changed = scalar_changed || naming_changed
+
       mark_synced(obs)
       log_resync(obs) if changed
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
@@ -94,39 +112,151 @@ class Inat
     end
 
     # Sync is owned by the admin account: anyone logged in may trigger
-    # the button, and the scheduled batch has no triggering user at all,
-    # so every resync is attributed to the system actor.
+    # the button, and the scheduled batch has no triggering user, so
+    # every resync is attributed to the system actor.
     def log_resync(obs)
       obs.log(:log_observation_resynced, user: User.admin)
     end
 
-    # The source-owned scalar fields, straight off the fresh iNat data.
-    # `where` is only set when no Location resolves: a present Location
-    # drives `where` from its own name via a callback, so assigning
-    # `where` too would flip it back and forth and never converge.
-    # Date, notes and the obscured flag always mirror the source; specimen
-    # is MO-owned (see git history) and left alone. Coordinates sync only
-    # when iNat is NOT obscuring the location -- the resync fetches iNat
-    # unauthenticated (Inat::ApiToken is per-user; both the scheduled batch
-    # and "Sync now" run as no user), so an obscured observation yields
-    # only iNat's blurred public coordinate, which would overwrite the
-    # authenticated import's accurate one. The first run degraded 1,421
-    # reflections that way (#4215) before this gate was added.
-    def scalar_attributes(inat_obs)
-      attrs = { when: inat_obs.when, notes: inat_obs.notes,
-                gps_hidden: inat_obs.obscured? }
+    # Fields from the fresh iNat data.
+    # Date and the obscured flag always mirror the source;
+    # specimen is MO-owned and left alone.
+    # Coordinates sync only if iNat is NOT obscuring the location --
+    # an obscured observation yields only iNat's blurred public coordinate,
+    # which would overwrite the authenticated import's accurate one.
+    #
+    # A placeholder gets narrower treatment:
+    # a placeholder holds a fixed message instead of the iNat Notes/description
+    # A resync must not overwrite that with the source's notes.
+    def scalar_attributes(obs, inat_obs)
+      attrs = { when: inat_obs.when, gps_hidden: inat_obs.obscured? }
+      attrs[:notes] = inat_obs.notes unless obs.placeholder?
       attrs.merge!(location_attributes(inat_obs)) unless inat_obs.obscured?
       attrs
     end
 
-    # A present Location drives `where` from its own name via a callback,
-    # so `where` is set only when no Location resolves (otherwise the two
-    # flip back and forth without converging).
+    # A present Location drives `where` from the Location's name via a
+    # callback, so `where` is set only when no Location resolves
+    # (otherwise the two flip back and forth without settling).
     def location_attributes(inat_obs)
       location = inat_obs.location
       attrs = { location: location, lat: inat_obs.lat, lng: inat_obs.lng }
       attrs[:where] = inat_obs.where if location.nil?
       attrs
+    end
+
+    # A placeholder is eligible to upgrade to a full import once
+    # MO may import the whole record:
+    # the iNat obs is now licensed, or
+    # the importer or the person syncing is the iNat observer.
+    def upgrade_eligible?(obs, inat_obs, user)
+      return false unless obs.placeholder?
+
+      inat_obs[:license_code].present? ||
+        upgradeable_by_user?(obs, inat_obs, user)
+    end
+
+    # Is the iNat observer either the MO user who ran the import
+    # or the MO user who clicked "Sync now"?
+    def upgradeable_by_user?(obs, inat_obs, user)
+      login = inat_obs[:user][:login].to_s
+      [obs.user, user].compact.any? do |candidate|
+        candidate.inat_username.present? &&
+          candidate.inat_username.casecmp?(login)
+      end
+    end
+
+    # Rebuild the placeholder in place as a full import,
+    # retaining Id, Comments, Occurrence, and
+    # build a fresh set of Namings.
+    # Don't suppress notifications since a lone sync, unlike a batch import,
+    # has no digest to catch them.
+    def upgrade_placeholder(obs, inat_obs, user)
+      Inat::MoObservationBuilder.new(
+        inat_obs: inat_obs, user: obs.user, observation: obs,
+        # If the importer or the syncing user is the iNat observer,
+        # set import_others: false so that unlicensed photos import.
+        # Else photo imports depend on per-photo licenses.
+        import_others: !upgradeable_by_user?(obs, inat_obs, user)
+      ).mo_observation
+      mark_synced(obs)
+      Result.new(status: :synced, observation: obs)
+    end
+
+    # Revise MO's stand-in Naming if iNat's Leading ID changes and
+    # it's unlocked (no outside vote). Once locked, fork a new stand-in
+    # instead of touching the old one. Find the stand-in by
+    # obs.inat_stand_in_naming_id.
+    #
+    # Recalculate consensus on a change, so votes -- not iNat -- decide
+    # the observation's displayed name.
+    def sync_placeholder_naming?(obs, inat_obs)
+      resolver = Inat::LeadNameResolver.new(inat_obs: inat_obs, user: obs.user)
+      lead_name = resolver.leading_id_name
+      consensus = Observation::NamingConsensus.new(obs)
+      stand_in = stand_in_naming(obs)
+      return false unless stand_in
+      return false if lead_name == stand_in.name
+
+      revise_or_fork_naming(stand_in, lead_name, resolver, consensus,
+                            inat_obs)
+      consensus.calc_consensus(User.admin)
+      obs.reload
+      true
+    end
+
+    def stand_in_naming(obs)
+      return nil unless obs.inat_stand_in_naming_id
+
+      Naming.find_by(id: obs.inat_stand_in_naming_id)
+    end
+
+    # Revise the stand-in Naming in place while it's still unlocked --
+    # unless the importer already has a different Naming for the same
+    # lead name, which revising in place would collide with (namings has
+    # a unique index on observation/user/name, #5186). Either way, fork
+    # instead when that's blocked.
+    def revise_or_fork_naming(stand_in, lead_name, resolver, consensus,
+                              inat_obs)
+      if consensus.editable?(stand_in) &&
+         !other_naming_for?(stand_in, lead_name)
+        stand_in.update!(name: lead_name,
+                         reasons: { 2 => resolver.reason_text })
+      else
+        fork_stand_in_naming(consensus, lead_name, resolver, inat_obs)
+      end
+    end
+
+    def other_naming_for?(stand_in, lead_name)
+      stand_in.observation.namings.where(user: stand_in.user, name: lead_name).
+        where.not(id: stand_in.id).exists?
+    end
+
+    # New stand-in Naming for the Leading ID -- reusing the importer's
+    # existing Naming for that name when they already have one (same
+    # unique-index reasoning as MoObservationBuilder#add_naming_with_vote)
+    # instead of colliding with it. Otherwise the same shape as
+    # SkeletonObservationBuilder#add_naming_with_vote.
+    def fork_stand_in_naming(consensus, name, resolver, inat_obs)
+      obs = consensus.observation
+      naming = obs.namings.find_by(user: obs.user, name: name) ||
+               Naming.create!(
+                 observation: obs, user: obs.user, name: name,
+                 reasons: { 2 => resolver.reason_text }
+               )
+      Vote.find_or_initialize_by(naming: naming, user: obs.user).
+        update!(observation: obs, value: placeholder_naming_vote(inat_obs))
+      obs.update!(inat_stand_in_naming_id: naming.id)
+      consensus.mark_obs_reviewed(obs.user)
+    end
+
+    # Same confidence weight SkeletonObservationBuilder#naming_vote uses.
+    def placeholder_naming_vote(inat_obs)
+      if inat_obs[:quality_grade] == "research"
+        Vote::NEXT_BEST_VOTE
+      else
+        Vote::MIN_POS_VOTE
+      end
     end
   end
 end
