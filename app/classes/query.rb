@@ -559,6 +559,10 @@ class Query
   # as `scope :this_name`'s bare call).
   def collapse_names_to_this_name(filters)
     return filters unless self.class.has_attribute?(:this_name)
+    # Don't clobber an already-present :this_name filter -- both keys
+    # are independently recognized top-level params, so a request can
+    # legitimately carry both at once.
+    return filters if filters.key?(:this_name)
 
     names = filters[:names]
     return filters unless collapsible_to_this_name?(names)

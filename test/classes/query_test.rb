@@ -1467,6 +1467,18 @@ class QueryTest < UnitTestCase
     assert_equal({ names: { lookup: ["Agaricus"] } }, query.index_filter)
   end
 
+  def test_index_filter_does_not_clobber_explicit_this_name
+    # Both :this_name and :names are independently recognized
+    # top-level params -- a request can legitimately carry both, and
+    # collapse_names_to_this_name must not silently drop the explicit
+    # this_name filter in favor of the derived one.
+    query = Query.lookup(:Observation, this_name: ["Foo"],
+                                       names: { lookup: ["Bar"] })
+
+    assert_equal({ this_name: "Foo", names: { lookup: ["Bar"] } },
+                 query.index_filter)
+  end
+
   def test_index_filter_excludes_routing_keys
     query = Query.lookup(:Observation, by_users: [rolf.id])
     # No query_attr is currently named these, but a future one could
