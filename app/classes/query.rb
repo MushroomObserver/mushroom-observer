@@ -575,6 +575,8 @@ class Query
       names[:lookup].length == 1 &&
       (names.keys - [:lookup]).all? { |k| names[k].blank? }
   end
+  private :shrink_multi_value_filters, :collapse_names_to_this_name,
+          :collapsible_to_this_name?
 
   # Merges an already-resolved `q` param value into a path's
   # existing query string (preserving other params, e.g. `flow=next`).
