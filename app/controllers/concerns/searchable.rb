@@ -147,7 +147,8 @@ module Searchable
         return
       end
 
-      @query_params[:names][:lookup] = vals.split("\n").map(&:strip)
+      @query_params[:names][:lookup] =
+        vals.split("\n").map(&:strip).compact_blank
     end
 
     # Nested blank values will make for null query results,

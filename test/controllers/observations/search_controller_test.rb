@@ -964,6 +964,69 @@ module Observations
       assert_no_flash
     end
 
+    # Under-threshold unmatched-tracking calls original_names, not ids
+    # (skips subtaxa expansion) -- confirm it still finds the miss
+    # correctly with include_subtaxa on, the search form's default.
+    def test_names_lookup_unmatched_check_works_with_subtaxa_enabled
+      login
+      name = names(:macrolepiota)
+      params = {
+        names: {
+          lookup: "#{name.text_name}\nNonexistent Taxon",
+          include_subtaxa: "true"
+        }
+      }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1, list: "Nonexistent Taxon"
+      )
+    end
+
+    def test_names_lookup_unmatched_entries_deduped
+      login
+      lookup = "Nonexistent Taxon\nNonexistent Taxon"
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1, list: "Nonexistent Taxon"
+      )
+    end
+
+    # Two different fields with misses must land in the same flash,
+    # each as a separate paragraph -- neither call should overwrite
+    # the other's message. The Array form of assert_flash_warning
+    # checks the exact concatenated text, in order, so it fails if
+    # either message went missing or got clobbered.
+    def test_multiple_fields_with_unmatched_entries_flash_together
+      login
+      herbarium = herbaria(:nybg_herbarium)
+      name = names(:coprinus_comatus)
+      params = {
+        herbaria: "#{herbarium.name}\nNonexistent Herbarium XYZ",
+        names: { lookup: "#{name.text_name}\nNonexistent Taxon" }
+      }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      assert_flash_warning(
+        [
+          [:runtime_search_unmatched_values,
+           { field: :names.t.to_s, count: 1, list: "Nonexistent Taxon" }],
+          [:runtime_search_unmatched_values,
+           { field: :query_herbaria.l.humanize, count: 1,
+             list: "Nonexistent Herbarium XYZ" }]
+        ]
+      )
+    end
+
     private
 
     def create_test_names(count)

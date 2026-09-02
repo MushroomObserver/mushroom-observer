@@ -80,15 +80,19 @@ module Searchable::MatchGuards
     end
 
     # Below MAX_MULTIPLE_VALUES the raw text stays as-is (still short
-    # enough to be readable in the URL) -- lookup.ids is still called,
-    # just to find which entries didn't match anything.
+    # enough to be readable in the URL) -- original_names is still
+    # called, just to find which entries didn't match anything.
+    # original_names stops after the first resolution pass, skipping
+    # the synonym/subtaxa expansion .ids would trigger (expensive, and
+    # unneeded here since unmatched is already populated by that
+    # point).
     def check_names_lookup_matches(count)
       names = @query_params[:names]
       lookup = build_names_lookup(names)
       if count > MAX_MULTIPLE_VALUES
         resolve_names_lookup_to_ids!(names, lookup)
       else
-        lookup.ids
+        lookup.original_names
       end
       record_unmatched([:names, :lookup], lookup.unmatched)
     end
@@ -137,23 +141,28 @@ module Searchable::MatchGuards
       )
     end
 
+    # Dedup here, once, so the flashed count and list stay in sync --
+    # a repeated typo shouldn't inflate the "N value(s) didn't match"
+    # count or fill the truncated list with copies of itself.
     def record_unmatched(field, unmatched_vals)
       return if unmatched_vals.blank?
 
-      (@unmatched_lookups ||= []) << [field, unmatched_vals]
+      (@unmatched_lookups ||= []) << [field, unmatched_vals.uniq]
     end
 
+    # One flash_warning call, so multiple fields with misses land as
+    # separate paragraphs in a single flash box instead of one box per
+    # field.
     def flash_unmatched_lookups
       return if @unmatched_lookups.blank?
 
-      @unmatched_lookups.each do |field, vals|
-        flash_warning(
-          :runtime_search_unmatched_values.t(
-            field: multiple_value_field_label(field), count: vals.length,
-            list: truncated_unmatched_list(vals)
-          )
+      messages = @unmatched_lookups.map do |field, vals|
+        :runtime_search_unmatched_values.t(
+          field: multiple_value_field_label(field), count: vals.length,
+          list: truncated_unmatched_list(vals)
         )
       end
+      flash_warning(*messages)
     end
 
     def truncated_unmatched_list(vals)
