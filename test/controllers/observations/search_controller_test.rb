@@ -788,7 +788,7 @@ module Observations
       assert_flash_error(
         :runtime_search_too_many_values,
         field: :query_by_users.l.humanize, count: 60,
-        max: Searchable::MAX_MULTIPLE_VALUES
+        max: Searchable::MatchGuards::MAX_MULTIPLE_VALUES
       )
     end
 
@@ -812,7 +812,7 @@ module Observations
       assert_flash_error(
         :runtime_search_too_many_values,
         field: :query_herbaria.l.humanize, count: 60,
-        max: Searchable::MAX_MULTIPLE_VALUES
+        max: Searchable::MatchGuards::MAX_MULTIPLE_VALUES
       )
     end
 
