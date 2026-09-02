@@ -296,7 +296,8 @@ module Searchable
     # is known valid, so `index_filter` matches the redirect built
     # afterward.
     def index_filter_url_too_long?
-      length = @search.index_filter.to_query.bytesize
+      params = @search.index_filter.merge(always_index: 1)
+      length = params.to_query.bytesize
       return false if length <= Searchable::MAX_INDEX_FILTER_URL_LENGTH
 
       flash_error(

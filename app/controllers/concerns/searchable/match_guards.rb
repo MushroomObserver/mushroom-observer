@@ -93,13 +93,22 @@ module Searchable::MatchGuards
       record_unmatched([:names, :lookup], lookup.unmatched)
     end
 
+    # The names modifier selects submit literal "true"/"false" strings
+    # (Components::Form::NamesLookupFieldGroup) -- any non-nil String
+    # is truthy in Ruby, so "false" would otherwise be read as true.
+    def modifier_true?(value)
+      value.to_s.to_boolean == true
+    end
+
     def build_names_lookup(names)
       Lookup::Names.new(
         names[:lookup],
-        include_synonyms: names[:include_synonyms],
-        include_subtaxa: names[:include_subtaxa],
-        include_immediate_subtaxa: names[:include_immediate_subtaxa],
-        exclude_original_names: names[:exclude_original_names]
+        include_synonyms: modifier_true?(names[:include_synonyms]),
+        include_subtaxa: modifier_true?(names[:include_subtaxa]),
+        include_immediate_subtaxa:
+          modifier_true?(names[:include_immediate_subtaxa]),
+        exclude_original_names:
+          modifier_true?(names[:exclude_original_names])
       )
     end
 
@@ -164,9 +173,7 @@ module Searchable::MatchGuards
     end
 
     def multiple_value_field_label(field)
-      return :names.t.to_s if field.is_a?(Array)
-
-      :"query_#{field}".l.humanize
+      field.is_a?(Array) ? :names.t.to_s : :"query_#{field}".l.humanize
     end
   end
 end

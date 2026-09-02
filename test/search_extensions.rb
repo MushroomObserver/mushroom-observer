@@ -15,8 +15,9 @@ module SearchExtensions
   # Searchable#create's redirect always carries always_index: 1 (see
   # ApplicationController::QueryParams#create_query_from_url_params) --
   # this folds that in so call sites only need to state the filters.
+  # always_index: 1 is last so a caller can't accidentally override it.
   def assert_search_redirected_to(controller:, params: {})
     assert_redirected_to(controller: controller, action: :index,
-                         params: { always_index: 1, **params })
+                         params: { **params, always_index: 1 })
   end
 end
