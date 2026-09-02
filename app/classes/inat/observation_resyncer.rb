@@ -133,12 +133,13 @@ class Inat
       parts
     end
 
-    # Only `:synced` changes anything these panels display (when /
-    # location / GPS / notes / leading ID for a placeholder, #4828) --
-    # `:unchanged`/`:source_deleted`/`:fetch_failed` leave the
-    # observation's own data untouched, so there's nothing to re-render
-    # there.
-    # Skips the Proposed Name table and page title: Namings' row
+    # Re-render Details, NotesPanel, NameInfoPanel with synced data.
+    #
+    # Skips the Proposed Name table and page title: they need a
+    # per-viewer user for permission-gated buttons, but this broadcast
+    # renders once, with no viewer, for a channel shared by every
+    # subscriber. #broadcast's accompanying refresh stream covers those
+    # two instead.
     def broadcast_panels(observation)
       broadcast_replace(observation, "observation_details",
                         Views::Controllers::Observations::Show::Details.new(
