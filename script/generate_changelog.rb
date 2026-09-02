@@ -67,7 +67,53 @@ class ChangelogGenerator
     @since ? run_since(tags) : run_single(tags)
   end
 
+  # -- Pre-deploy (prerelease) API, driven by script/prerelease.rb --
+
+  # PRs merged since the last deploy tag up to origin/main, in commit
+  # order, minus the changelog PR's branch (the changelog PR is left
+  # out of the section it creates). Returns [previous_tag, pulls].
+  def pending_pulls(exclude_branch: nil)
+    tags = deploy_tags
+    abort("No deploy-* tags found.") if tags.empty?
+
+    @pool_from = tags.last
+    @pool_to = "origin/main"
+    pulls = merged_prs(tags.last, "origin/main")
+    pulls = pulls.reject { |pr| pr["headRefName"] == exclude_branch }
+    [tags.last, pulls]
+  end
+
+  # The section for a tag the prerelease run minted; the tag itself is
+  # created later, by the deploy that ships the section.
+  def pending_section(tag, pulls)
+    build_section(tag, pulls)
+  end
+
+  # Insert the pending section, first dropping any stale pending
+  # section -- a heading whose tag was minted by an earlier run and
+  # was not deployed (its tag does not exist in git).
+  def apply_pending(section, tag)
+    content = changelog_content
+    existing = deploy_tags
+    section_positions(content).map { |_pos, t| t }.
+      reject { |t| existing.include?(t) || t == tag }.
+      each { |t| content = drop_section(content, t) }
+    File.write(CHANGELOG, insert_sorted(content, section, tag))
+  end
+
   private
+
+  # Remove a section: its heading through the line before the next
+  # heading (or end of file).
+  def drop_section(content, tag)
+    positions = section_positions(content)
+    i = positions.index { |_pos, t| t == tag }
+    return content unless i
+
+    start = positions[i][0]
+    tail = positions[i + 1] ? content[positions[i + 1][0]..] : ""
+    "#{content[0...start]}#{tail}"
+  end
 
   def parse_args(argv)
     args = argv.dup
@@ -158,7 +204,9 @@ class ChangelogGenerator
       run_cmd("gh", "pr", "list", "--state", "merged",
               "--limit", SEARCH_CAP.to_s,
               "--search", "merged:#{from}..#{to}",
-              "--json", "number,title,author,url,mergeCommit")
+              "--json",
+              "number,title,author,url,mergeCommit,mergedAt,body," \
+              "headRefName")
     )
     if pulls.size >= SEARCH_CAP
       abort("#{pulls.size} PRs merged in #{from}..#{to} hits GitHub's " \
@@ -284,4 +332,4 @@ class ChangelogGenerator
   end
 end
 
-ChangelogGenerator.new(ARGV).run
+ChangelogGenerator.new(ARGV).run if $PROGRAM_NAME == __FILE__

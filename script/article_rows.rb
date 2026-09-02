@@ -28,9 +28,14 @@ class ArticleRows
   # Longer sentences wrap the article's table.
   MAX_SENTENCE = 60
 
-  def initialize(argv)
+  # With argv: the CLI (date-ranged, fetches PRs itself). Without:
+  # library use -- script/prerelease.rb hands rows_for a PR set it
+  # already holds.
+  def initialize(argv = nil)
     @since = nil
     @until = Date.today # rubocop:disable Rails/Date -- plain Ruby, no zone
+    return unless argv
+
     parse_args(argv)
     abort(USAGE) unless @since
     abort("--until #{@until} is before --since #{@since}.") if @until < @since
@@ -42,6 +47,11 @@ class ArticleRows
     puts(rows)
     warn("#{rows.size} row(s); #{skipped} PR(s) marked article: no.")
     report_blockless(blockless)
+  end
+
+  # [rows, article-no count, blockless pulls] for an explicit PR set.
+  def rows_for(pulls)
+    classify(pulls.sort_by { |pull| pull["mergedAt"].to_s }.reverse)
   end
 
   private
@@ -153,4 +163,4 @@ class ArticleRows
   end
 end
 
-ArticleRows.new(ARGV).run
+ArticleRows.new(ARGV).run if $PROGRAM_NAME == __FILE__
