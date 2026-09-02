@@ -8,13 +8,18 @@ To deploy to production:
    This builds a draft PR from the changelog-pending branch holding the
    next CHANGELOG.md section (its heading names the tag the deploy will
    create) and article_pending.textile (the rows the deploy publishes
-   to the MO Article changelog). PRs without a changelog block are
-   listed in the PR body for an article yes/no verdict.
+   to the MO Article changelog). The CHANGELOG.md section lists every
+   PR merged since the last deploy (except the changelog PRs
+   themselves); the Article rows come from the changelog blocks in the
+   PR bodies. PRs without a changelog block are listed in the PR body
+   for an article yes/no verdict.
 
-2. Review that PR. Edit the Article rows in article_pending.textile;
-   promote any listed blockless PRs by adding rows. If more PRs merge
-   before the deploy, run "ruby script/prerelease.rb --apply" again to
-   refresh it. Merge it as the LAST PR before deploying.
+2. Review that PR. The deploy publishes article_pending.textile as
+   merged, so any desired corrections or additions (e.g. promoting a
+   blockless PR) can be made to that file in the PR -- usually none
+   are needed. If more PRs merge before the deploy, run
+   "ruby script/prerelease.rb --apply" again to refresh it. Merge it
+   as the LAST PR before deploying.
 
 3. Deploy:
 
