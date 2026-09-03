@@ -59,28 +59,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   private
 
-  # unused now. should be :date, maybe - AN
-  def default_sort_order
-    ::Query::SpeciesLists.default_order # :date
-  end
-
   def unfiltered_index_opts
     super.merge(query_args: { order_by: :date })
-  end
-
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display list of user's species_lists, sorted by date.
-  def by_user
-    create_query_from_url_params(:SpeciesList, params)
-  end
-
-  # Display list of SpeciesList's attached to a given project.
-  def project
-    create_query_from_url_params(:SpeciesList, params)
   end
 
   # Hook runs before template displayed. Must return query.

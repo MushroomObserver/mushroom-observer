@@ -34,7 +34,6 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "input[type='password'][name='user[password]'][value='']")
     assert_html(html, "input[type='password']" \
                       "[name='user[password_confirmation]'][value='']")
-    # Each section has its own submit button (one of 6).
     assert_html(html, "button[type='submit']", text: :save_edits.ti)
   end
 
@@ -329,16 +328,6 @@ class Views::Controllers::Account::Preferences::FormTest <
     # textile-rendered, so the i18n string is a substring of the
     # rendered output.
     assert_includes(html, :prefs_email_note.l)
-  end
-
-  # ---- Multiple submits ----
-
-  def test_six_submit_buttons_one_per_section
-    html = render_form
-
-    # Each of login, privacy, appearance, filters, notes, email has
-    # its own submit so users don't have to scroll to the bottom.
-    assert_html(html, "button[type='submit']", count: 6)
   end
 
   private

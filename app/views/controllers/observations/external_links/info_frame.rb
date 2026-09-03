@@ -36,7 +36,7 @@ module Views::Controllers::Observations::ExternalLinks
     def render_body
       h5(class: "mt-0") do
         strong do
-          plain("#{:show_observation_on_site.l(site: @site_name)}:")
+          append_colon(:show_observation_on_site.l(site: @site_name))
         end
       end
       ul(class: "tight-list pl-3 mb-0") do

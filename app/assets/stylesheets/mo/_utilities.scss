@@ -870,8 +870,53 @@
   }
 }
 
+// display utilities at the remaining BS3 breakpoints -- Components::Column's
+// show_at:/hide_at: (app/components/column.rb) can target any of xs/sm/md/
+// lg, so all three need their .d-{bp}-* set defined, not just sm.
+@media screen and (min-width: $screen-md-min) {
+  .d-md-none {
+    display: none !important;
+  }
+
+  .d-md-block {
+    display: block !important;
+  }
+
+  .d-md-inline {
+    display: inline !important;
+  }
+
+  .d-md-inline-block {
+    display: inline-block !important;
+  }
+
+  .d-md-flex {
+    display: flex !important;
+  }
+}
+
 @media screen and (min-width: $screen-lg-min) {
   .mr-lg-5 {
     margin-right: 3rem !important;
+  }
+
+  .d-lg-none {
+    display: none !important;
+  }
+
+  .d-lg-block {
+    display: block !important;
+  }
+
+  .d-lg-inline {
+    display: inline !important;
+  }
+
+  .d-lg-inline-block {
+    display: inline-block !important;
+  }
+
+  .d-lg-flex {
+    display: flex !important;
   }
 }

@@ -115,7 +115,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
 
   def render_constraint_alert(level, projects, help_text)
     Alert(level: level) do
-      div { plain("#{:form_observations_projects_out_of_range.l}:") }
+      div { append_colon(:form_observations_projects_out_of_range.l) }
       ul do
         projects.each do |proj|
           li { "#{proj.title} (#{alert_reason_labels(proj)})" }

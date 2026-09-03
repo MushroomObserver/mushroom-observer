@@ -13,6 +13,12 @@ module Views::Controllers::Images::FieldSlipExtracts
     # back on the form action is what turns the resubmit into approval.
     prop :approved_name, _Nilable(String), default: nil
 
+    # The resolver's feedback for an unrecognized or ambiguous ID, set
+    # on the confirmation round-trip. Rendered inside this form (beside
+    # the ID field) so a radio choice submits with the Save button --
+    # rendered outside the form, the choice is dropped on submit.
+    prop :name_feedback, _Nilable(Hash), default: nil
+
     # Superform wants the form's data object as the first positional
     # arg; the review IS that object, so it goes to `super` rather than
     # being held as a separate prop -- `model` reaches it everywhere
@@ -203,11 +209,26 @@ module Views::Controllers::Images::FieldSlipExtracts
       Panel(panel_id: "field_slip_extract_name") do |p|
         p.with_body do
           render_name_field(row)
+          render_name_feedback if @name_feedback.present?
           render_name_use(row)
           render_vote_field
           Help(content: :field_slip_extract_id_help.l)
         end
       end
+    end
+
+    # The resolver's create/disambiguate UI, rendered inside the form so
+    # a radio choice (chosen_name) submits with the Save button.
+    def render_name_feedback
+      render(Components::Form::NameFeedback.new(
+               button_name: :field_slip_extract_save.l,
+               given_name: @approved_name.to_s,
+               names: @name_feedback[:names],
+               valid_names: @name_feedback[:valid_names],
+               suggest_corrections:
+                 @name_feedback[:suggest_corrections].present?,
+               parent_deprecated: @name_feedback[:parent_deprecated].presence
+             ))
     end
 
     def render_name_field(row)

@@ -57,7 +57,7 @@ class AutocompletersController < ApplicationController
   end
 
   def prepare_parameters
-    @type  = params[:type].to_s
+    @type = params[:type].to_s
   end
 
   def backtrace(exception)

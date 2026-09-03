@@ -11,17 +11,20 @@ Add clustering and zoom to name list maps
 ```
 
 This is the PR-time half of the automated changelog (issue #5155).
-Two changelogs are generated from merged PRs at deploy time:
+Two changelogs are generated from merged PRs by the pre-release step
+(`script/prerelease.rb`, run before each deploy — see
+README_PRODUCTION_DEPLOY):
 
-- **`CHANGELOG.md`** — technical, lists every merged PR. Nothing to do
-  per-PR; the generator uses the PR title.
+- **`CHANGELOG.md`** — technical, lists every merged PR (except the
+  changelog PRs themselves). Nothing to do per-PR; the generator uses
+  the PR title.
 - **The MO Article changelog** (user-facing, curated) — fed by this
   block: `article:` decides whether the PR appears there, and the
-  sentence is what site users read.
+  sentence is what site users read. The deploy publishes the rows.
 
 Reviewers edit the block in place like any other part of the PR body.
-A PR with no block is excluded from the Article and flagged in the
-deploy output for manual review — the block is how a deliberate
+A PR with no block is excluded from the Article and listed in the
+pre-release PR's body for a verdict — the block is how a deliberate
 decision is told apart from an omission.
 
 ## Filling it in
@@ -90,8 +93,21 @@ counts.
 
 ## Producing the Article rows
 
+`script/prerelease.rb` (dry run by default; `--apply` to push) builds
+the pre-deploy changelog PR on the `changelog-pending` branch: the
+next CHANGELOG.md section (its heading names the deploy tag the
+deploy will create) plus `article_pending.textile` holding one
+Textile row per `article: yes` PR merged since the last deploy. The
+rows in that file are what the deploy publishes to the Article — edit
+them in the PR; blockless PRs are listed in the PR body for a
+verdict. Re-run after last-minute merges; merge the PR last, then
+deploy. `deploy.sh` tags the deploy with the heading's tag name and
+publishes the rows (best-effort) via
+`script/update_article_changelog.rb`; with no pre-release it warns
+and offers a force deploy that skips both, rolling the PRs into the
+next cycle.
+
 `script/article_rows.rb --since YYYY-MM-DD [--until YYYY-MM-DD]`
-prints one Textile row per `article: yes` PR merged in the range,
-newest first, and lists the blockless PRs on stderr for a human
-verdict. Paste the rows into the Article by hand (they go under the
-blank separator row, newest first).
+prints rows for a date range (backfills, audits), newest first,
+blockless PRs on stderr. Hand-added rows go just below the
+`| +date+ | +what+ | +link+ |` header line, newest first.

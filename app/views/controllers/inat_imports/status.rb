@@ -76,12 +76,12 @@ module Views::Controllers::InatImports
     end
 
     def render_status_line
-      span(class: "font-weight-bold") { "#{:status.ti}: " }
+      span(class: "font-weight-bold") { append_colon(:status.ti) }
       span { plain(@inat_import.state.to_s) }
     end
 
     def render_imported_line
-      span(class: "font-weight-bold") { "#{:imported.l}: " }
+      span(class: "font-weight-bold") { append_colon(:imported.l) }
       span { plain(@inat_import.imported_count.to_s) }
       render_importables_count if @inat_import.total_importables.to_i.positive?
     end
@@ -106,7 +106,7 @@ module Views::Controllers::InatImports
 
       br
       span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_over_cap_caption.l}: "
+        append_colon(:inat_import_tracker_over_cap_caption.l)
       end
       span(id: "over_cap_count") { plain(over_cap_count.to_s) }
       render_over_cap_reimport if @inat_import.Done?
@@ -126,13 +126,13 @@ module Views::Controllers::InatImports
         all: ("1" if @inat_import.import_all),
         import_others: ("1" if @inat_import.import_others),
         inat_ids: @inat_import.inat_ids.presence,
-        inat_url: @inat_import.inat_url.presence
+        inat_url: @inat_import.reimport_url
       )
     end
 
     def render_started_line
       span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_started.l}: "
+        append_colon(:inat_import_tracker_started.l)
       end
       span do
         plain(@inat_import.started_at&.strftime("%Y-%m-%d %H:%M:%S %z").to_s)
@@ -142,7 +142,7 @@ module Views::Controllers::InatImports
 
     def render_elapsed_line
       span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_elapsed_time.l}: "
+        append_colon(:inat_import_tracker_elapsed_time.l)
       end
       span(data: { inat_import_target: "elapsed" }) do
         plain(format_seconds(@inat_import.elapsed_time))
@@ -152,7 +152,7 @@ module Views::Controllers::InatImports
 
     def render_remaining_line
       span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_estimated_remaining_time.l}: "
+        append_colon(:inat_import_tracker_estimated_remaining_time.l)
       end
       span(data: { inat_import_target: "remaining" }) do
         plain(format_seconds(remaining_time))
@@ -164,7 +164,7 @@ module Views::Controllers::InatImports
       return unless (ended = @inat_import.ended_at)
 
       span(class: "font-weight-bold") do
-        "#{:ended.l}: "
+        append_colon(:ended.l)
       end
       span { plain(ended.to_s) }
       br
@@ -173,7 +173,7 @@ module Views::Controllers::InatImports
     def render_error_line
       return if @inat_import.response_errors.blank?
 
-      span(class: "font-weight-bold") { plain("#{:errors.ti}: ") }
+      span(class: "font-weight-bold") { append_colon(:errors.ti) }
     end
 
     def show_ignored_section?
@@ -200,7 +200,7 @@ module Views::Controllers::InatImports
       return unless count.to_i.positive?
 
       div(class: "mb-1") do
-        b { plain("#{caption_key.l}: ") }
+        b { append_colon(caption_key.l) }
         plain(count.to_s)
       end
     end
@@ -211,7 +211,7 @@ module Views::Controllers::InatImports
 
       ids = @inat_import.date_missing_inat_ids
       div(class: "mb-1") do
-        b { plain("#{:inat_import_tracker_ignored_date_missing.l}: ") }
+        b { append_colon(:inat_import_tracker_ignored_date_missing.l) }
         plain(count.to_s)
         render_date_missing_reimport_link(ids) if ids.any?
       end
@@ -234,7 +234,7 @@ module Views::Controllers::InatImports
         h5 { plain(:inat_import_tracker_license_added_heading.l) }
         div do
           plain(:inat_import_tracker_license_added_note.t(count: ids.size))
-          plain(" ")
+          whitespace
           render_license_added_reimport_link(ids)
         end
       end

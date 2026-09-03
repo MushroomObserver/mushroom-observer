@@ -3,6 +3,24 @@
 require("test_helper")
 
 class SpeciesListsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::SpeciesLists, :SpeciesList,
+      overrides: {
+        id_in_set: species_lists(:first_species_list).id,
+        by_users: rolf.id,
+        editable_by_user: rolf.id,
+        locations: locations(:burbank).id,
+        projects: projects(:bolete_project).id
+      }
+    )
+  end
+
   # NOTE: I don't know how to grab the DEFAULT from the fixture set and
   #   User.find(ActiveRecord::FixtureSet.identify(:rolf)).contribution
   # blows up in CI with

@@ -40,12 +40,11 @@ module Views::Layouts
       by_editor: :Users,
       collectors: :Users,
       members: :Users,
-      # Both User-typed too — without these the caption fell
-      # through to the raw-value path and printed the user id
+      # User-typed too — without this the caption fell through to
+      # the raw-value path and printed the user id
       # ("editable_by_user: 1") instead of the proper title
       # ("editable_by_user: Nathan Wilson (nathan)").
-      editable_by_user: :Users,
-      needs_naming: :Users
+      editable_by_user: :Users
     }.freeze
     # The captions with these sub-params make more sense without keys:
     CAPTION_IGNORE_KEYS = [:lookup, :id].freeze
@@ -166,7 +165,10 @@ module Views::Layouts
 
     # Subquery: `label: [ <nested params> ]` with span wrappers.
     def render_subquery(label, hash, truncate:)
-      span { plain("#{query_param_label(label)}: [ ") }
+      span do
+        plain(query_param_label(label))
+        plain(": [ ")
+      end
       render_params_joined(hash, truncate: truncate, wrap_tag: :span)
       span { plain(" ] ") }
     end
@@ -181,12 +183,12 @@ module Views::Layouts
 
       case label
       when :target
-        span { plain("#{query_param_label(label)}: ") }
+        span { append_colon(query_param_label(label)) }
         span { plain(lookup_comment_target_val(hash).to_s) }
       when :identify_filter
         render_identify_filter_val(hash)
       else
-        span { plain("#{query_param_label(label)}: ") }
+        span { append_colon(query_param_label(label)) }
         render_nested_params(compact, truncate: truncate)
       end
     end
@@ -206,7 +208,7 @@ module Views::Layouts
       type, term = hash.values_at(:type, :term)
       return if type.blank? || term.blank?
 
-      span { plain("#{query_param_label(type.to_sym)}: ") }
+      span { append_colon(query_param_label(type.to_sym)) }
       b { plain(term) }
     end
 
@@ -215,7 +217,7 @@ module Views::Layouts
       if val == true
         span { plain(label) }
       else
-        span { plain("#{label}: ") } unless CAPTION_IGNORE_KEYS.include?(key)
+        span { append_colon(label) } unless CAPTION_IGNORE_KEYS.include?(key)
         b { render_lookup_text_val(key, val, truncate: truncate) }
       end
     end
@@ -274,9 +276,12 @@ module Views::Layouts
       string
     end
 
-    # The max number of named items is hardcoded to 3.
+    # The max number of named items is hardcoded to 3. `Array(...)` --
+    # a singular record-backed attr (e.g. look_alikes) stores a bare
+    # id, not a 1-element Array; `.first(n)` below needs an Array
+    # either way.
     def filter_lookup_strings(param, truncate:)
-      ids = @query.params.deep_find(param)
+      ids = Array(@query.params.deep_find(param))
       lookups = truncate ? ids.first(CAPTION_TRUNCATE) : ids
       subclass = PARAM_LOOKUPS[param]
       lookup = "Lookup::#{subclass}".constantize

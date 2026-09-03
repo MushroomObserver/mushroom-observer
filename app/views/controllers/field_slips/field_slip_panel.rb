@@ -35,8 +35,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_project_line
-      strong { plain("#{:project.ti}:") }
-      whitespace
+      strong { trusted_html(append_colon(:project.ti)) }
       if @field_slip.project
         Link(type: :object, object: @field_slip.project)
       else
@@ -47,7 +46,7 @@ module Views::Controllers::FieldSlips
     def render_observation_details
       obs = observation
       render_observation_top_lines(obs)
-      strong { plain("#{:notes.ti}:") }
+      strong { trusted_html(append_colon(:notes.ti)) }
       render_notes_block
       render_observation_id_lines(obs)
     end
@@ -85,7 +84,7 @@ module Views::Controllers::FieldSlips
     # `Other Codes` -- must come in pre-resolved as Strings, because
     # `.ti` would flatten them to "ID by" / "Other codes".
     def labeled(key)
-      strong { plain("#{key.is_a?(Symbol) ? key.ti : key}: ") }
+      strong { trusted_html(append_colon(key.is_a?(Symbol) ? key.ti : key)) }
       yield
       br
     end
@@ -100,7 +99,7 @@ module Views::Controllers::FieldSlips
         @field_slip.notes_fields.each do |field|
           next if field.value.blank?
 
-          strong { plain("#{field.label}: ") }
+          strong { trusted_html(append_colon(field.label)) }
           trusted_html(field.value.tl)
           br
         end
@@ -109,8 +108,7 @@ module Views::Controllers::FieldSlips
 
     def render_creator_line
       usr = @field_slip.user
-      strong { plain("#{:field_slip_creator.t}:") }
-      whitespace
+      strong { trusted_html(append_colon(:field_slip_creator.t)) }
       Link(type: :user, user: usr, name: usr.legal_name)
       br
     end
@@ -121,7 +119,7 @@ module Views::Controllers::FieldSlips
     # callers of `FieldSlipPanel` must preserve that contract.
     def render_observations_section
       all_obs = @field_slip.observations.to_a
-      strong { plain("#{:observations.ti}:") }
+      strong { trusted_html(append_colon(:observations.ti)) }
       if all_obs.any?
         render_observations_matrix(all_obs)
       else

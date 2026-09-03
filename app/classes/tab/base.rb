@@ -146,6 +146,13 @@ class Tab::Base
     Query.merge_q_param_into_url(path, q_param_value)
   end
 
+  # Same as with_q_param, but flat top-level params (`?project=123`),
+  # not nested under q[...]. Only use this when `path` is a link to
+  # the model `filters` came from -- see Query#index_filter.
+  def with_index_filter(path, filters)
+    Query.merge_index_filters_into_url(path, filters)
+  end
+
   # Stable key NavTabs matches against `current:` to decide `.active`.
   # Defaults to `alt_title` when set (the same short identifier used
   # for the selector class) — this aligns with the existing MO

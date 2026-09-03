@@ -310,6 +310,7 @@ class Name < AbstractModel
     Family: 600,    # -aceae
     Suborder: 650,  # -ineae
     Order: 700,     # -ales
+    Superorder: 720,
     Subclass: 750,  # -mycetidae
     Class: 800,     # -mycetes
     Subphylum: 850, # -mycotina
@@ -462,10 +463,10 @@ class Name < AbstractModel
   end
 
   # Resolves a name string or id to the ids of its parent taxa.
-  # Called from Query::Observations#validate_name_parents, for the
-  # "related taxa" page linked from a Name's show page. Matching goes
-  # through Lookup::Names, the same name-resolution every other
-  # name-lookup filter in the app uses.
+  # Called from Observation::Scopes#related_taxa, for the "related
+  # taxa" page linked from a Name's show page. Matching goes through
+  # Lookup::Names, the same name-resolution every other name-lookup
+  # filter in the app uses.
   def self.parent_ids_for(name_str)
     Lookup::Names.new(name_str).instances.
       map { |name| name.approved_name.parents }.flatten.map(&:id).uniq

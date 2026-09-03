@@ -18,7 +18,7 @@ module Views::Controllers::Licenses
     # "Editing: <display_name> #(id):"
     def edit_title
       capture do
-        plain("#{:editing.ti}: ")
+        trusted_html(append_colon(:editing.ti))
         trusted_html(show_title_html)
       end
     end
@@ -27,7 +27,9 @@ module Views::Controllers::Licenses
       [
         @license.display_name,
         capture do
-          span(class: "smaller") { span { "#(#{@license.id || "?"}):" } }
+          span(class: "smaller") do
+            span { append_colon("#(#{@license.id || "?"})") }
+          end
         end
       ].safe_join(" ")
     end

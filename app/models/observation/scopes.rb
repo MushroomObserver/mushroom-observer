@@ -209,16 +209,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # consensus'd -- the "look-alikes" page linked from a Name's show
     # page, and (same filter) the "Observations of other taxa where
     # this taxon was proposed" Name-page tab.
-    scope :look_alikes, lambda { |name_strs|
-      names(lookup: name_strs, include_synonyms: true,
+    scope :look_alikes, lambda { |name_id|
+      names(lookup: name_id, include_synonyms: true,
             include_all_name_proposals: true, exclude_consensus: true)
     }
-    # Observations of subtaxa of the parent of the given name. The
-    # query_attr resolves the searched name to its parent ids at
-    # validation time (Query::Observations#validate_name_parents), so
-    # this scope receives parent ids directly, not the searched name.
-    scope :related_taxa, lambda { |parent_ids|
-      names(lookup: parent_ids, include_subtaxa: true)
+    # Observations of subtaxa of the parent of the given name.
+    scope :related_taxa, lambda { |name_id|
+      names(lookup: Name.parent_ids_for(name_id), include_subtaxa: true)
     }
     # Observations of this taxon under any name -- the given
     # text_name/search_name/id or any of its synonyms. Named
@@ -619,17 +616,31 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:project_observations).
         where(project_observations: { project: project_ids }).distinct
     }
-    # Separate query_attr from `projects` -- see Query::Observations.
-    scope :project, ->(project) { projects(project) }
     scope :project_lists, lambda { |projects|
       project_ids = Lookup::Projects.new(projects).ids
       joins(species_lists: :project_species_lists).
         where(project_species_lists: { project: project_ids }).distinct
     }
+    # Every observation violating at least one of the given project's
+    # configured constraints (date range, bbox, target names, target
+    # locations). See the project_*_violation_ids class methods below
+    # for the per-kind logic.
+    scope :project_violations, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      return none unless project.constraints?
+
+      where(id: project_violation_ids(project)).includes(:name, :location).
+        order_by(:name)
+    }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(:species_list_observations).
         where(species_list_observations: { species_list: spl_ids }).distinct
+    }
+    scope :external_sites, lambda { |sites|
+      site_ids = Lookup::ExternalSites.new(sites).ids
+      joins(:external_links).
+        where(external_links: { external_site: site_ids }).distinct
     }
 
     scope :inat_import, lambda { |inat_import|
@@ -779,6 +790,115 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
                       (value + 1.0)
         Observation[:vote_cache].lt(next_higher)
       end
+    end
+
+    # ----- helpers for the project_violations scope -----
+    #
+    # Each helper runs a separate query plucking the ids of
+    # observations violating one constraint kind. project_violation_ids
+    # merges the four id sets in Ruby, rather than combining four
+    # relations into one query with Relation#or. Relation#or dedups
+    # the two sides' where clauses by comparing Arel nodes with ==,
+    # and for two predicates that are structurally similar but
+    # semantically different (see project_target_location_violation_ids)
+    # that == is wrong, so Relation#or can silently drop one of them.
+    #
+    # Public so Project#count_violations can take just the Set's size,
+    # skipping the includes/order_by/distinct project_violations adds
+    # for display -- a count doesn't need the observations sorted or
+    # their name/location eager-loaded.
+    def project_violation_ids(project)
+      ids = Set.new
+      ids.merge(project_date_violation_ids(project))
+      ids.merge(project_bbox_violation_ids(project))
+      ids.merge(project_target_name_violation_ids(project))
+      ids.merge(project_target_location_violation_ids(project))
+      ids
+    end
+
+    def project_date_violation_ids(project)
+      start_date = project.start_date
+      end_date = project.end_date
+      return [] unless start_date || end_date
+
+      project_date_violations(project.visible_observations,
+                              start_date, end_date).ids
+    end
+
+    def project_date_violations(base, start_date, end_date)
+      return base.where(Observation[:when].gt(end_date)) unless start_date
+      return base.where(Observation[:when].lt(start_date)) unless end_date
+
+      base.where(Observation[:when].gt(end_date)).
+        or(base.where(Observation[:when].lt(start_date)))
+    end
+
+    def project_bbox_violation_ids(project)
+      location = project.location
+      return [] unless location
+
+      base = project.visible_observations
+      geoloc_outside_bbox_ids(base, location) +
+        location_outside_bbox_ids(base, location) +
+        no_geoloc_no_location_ids(base)
+    end
+
+    # Location#found_here? only trusts GPS when both lat and lng are
+    # present -- match that here rather than keying off lat alone, so
+    # a row with one of the two set (blocked at the model layer by
+    # Observation#check_latitude/#check_longitude, but not something
+    # the DB itself forbids) can't fall through every branch below
+    # unclassified.
+    def incomplete_or_missing_geoloc
+      Observation[:lat].eq(nil).or(Observation[:lng].eq(nil))
+    end
+
+    def geoloc_outside_bbox_ids(base, location)
+      base.where.not(incomplete_or_missing_geoloc).
+        not_in_box(**location.bounding_box).ids
+    end
+
+    def location_outside_bbox_ids(base, location)
+      base.where(incomplete_or_missing_geoloc).where.not(location_id: nil).
+        left_joins(:location).
+        merge(Location.not_in_box(**location.bounding_box)).ids
+    end
+
+    def no_geoloc_no_location_ids(base)
+      base.where(incomplete_or_missing_geoloc).where(location_id: nil).ids
+    end
+
+    def project_target_name_violation_ids(project)
+      return [] unless project.target_names_present?
+
+      project.visible_observations.
+        where.not(name_id: project.expanded_target_name_id_set.to_a).ids
+    end
+
+    # An observation passes the target-location check if its
+    # Location's name matches a target location's name, or, lacking a
+    # Location, its where text matches. A name-suffix match, not a
+    # bounding box -- project_bbox_violation_ids covers that check.
+    # An observation with a Location violates when that name doesn't
+    # match; one without a Location violates when its where text
+    # doesn't match. The two branches partition on location_id, so
+    # concatenating their ids needs no dedup.
+    def project_target_location_violation_ids(project)
+      return [] unless project.target_locations_present?
+
+      base = project.visible_observations
+      with_location_violation_ids(base, project) +
+        no_location_violation_ids(base, project)
+    end
+
+    def with_location_violation_ids(base, project)
+      base.where.not(location_id: nil).left_joins(:location).
+        where.not(project.location_suffix_conditions).ids
+    end
+
+    def no_location_violation_ids(base, project)
+      base.where(location_id: nil).
+        where.not(project.where_suffix_conditions).ids
     end
   end
 end

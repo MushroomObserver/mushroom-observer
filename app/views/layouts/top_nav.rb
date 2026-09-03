@@ -95,8 +95,8 @@ class Views::Layouts::TopNav < Views::Base
     render_search_nav_toggle
     render_nav_scan_qr_code
     ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
-                          Components::Navbar::RIGHT_CLASS,
-                          "hidden-xs mr-0")) do
+                          Components::Navbar::RIGHT_CLASS, "mr-0",
+                          Components::Column.mobile_hide_classes)) do
       # `content_for(:context_nav)` (no-block) returns the previously
       # stashed SafeBuffer; `trusted_html` emits it into Phlex's
       # buffer (a no-op `content_for` call would only read it).
@@ -137,7 +137,10 @@ class Views::Layouts::TopNav < Views::Base
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
+    div(class: class_names("pr-3 pr-sm-4",
+                           Components::Column.visibility_classes(
+                             show_at: :xs, hide_at: :md
+                           ))) do
       Button(
         variant: :outline,
         class: "rounded-circle overflow-hidden p-0",

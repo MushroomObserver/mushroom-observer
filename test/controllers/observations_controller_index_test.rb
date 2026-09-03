@@ -3,6 +3,8 @@
 require("test_helper")
 
 class ObservationsControllerIndexTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   tests ObservationsController
 
   def setup
@@ -13,8 +15,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
 
   # First, test that the index does not require login - AN 20230923
@@ -401,7 +402,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(look_alikes > 1, "Test needs different fixture")
 
     setup_rolfs_index
-    get(:index, params: { look_alikes: "1", name: name.id })
+    get(:index, params: { look_alikes: name.id })
 
     assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_look_alikes.l}: #{name.text_name}")
@@ -417,11 +418,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(look_alikes.zero?, "Test needs different fixture")
 
     setup_rolfs_index
-    get(:index, params: { look_alikes: "1", name: name.id })
+    get(:index, params: { look_alikes: name.id })
 
     assert_response(:success)
     assert_page_title(:observations.ti)
     assert_results(count: look_alikes)
+  end
+
+  # look_alikes is record-backed (Name) -- a bad id flashes and
+  # redirects, same as any other record-backed shortcut.
+  def test_index_look_alikes_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { look_alikes: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
   end
 
   def test_index_related_taxa
@@ -435,10 +448,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       )
 
     setup_rolfs_index
-    get(:index, params: { related_taxa: "1", name: name.text_name })
+    get(:index, params: { related_taxa: name.id })
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_related_taxa.l}: #{parent.text_name}")
+    assert_displayed_filters("#{:query_related_taxa.l}: #{name.text_name}")
     assert_results(count: obss_of_related_taxa.count)
+  end
+
+  # related_taxa is record-backed (Name) -- a bad id flashes and
+  # redirects, same as look_alikes and any other record-backed
+  # shortcut.
+  def test_index_related_taxa_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { related_taxa: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
   end
 
   def test_index_name
@@ -457,6 +483,28 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       assert_select(
         "a:match('href', ?)", %r{^/obs/#{id}}, true,
         "Observations of Name should link to each Observation of Name"
+      )
+    end
+  end
+
+  # The scalar form of an Array-typed attr (`?this_name=<id>`, the URL
+  # the Name-show observation links generate) must filter the index --
+  # an array-only permit filter dropped it silently, rendering the
+  # unfiltered index instead.
+  def test_index_this_name_scalar_param
+    name = names(:fungi)
+    ids = Observation.where(name: name).map(&:id)
+    assert(ids.length.positive?, "Test needs different fixture for 'name'")
+
+    login("zero")
+    get(:index, params: { this_name: name.id })
+
+    assert_response(:success)
+    assert_displayed_filters("#{:query_this_name.l}: #{name.text_name}")
+    ids.each do |id|
+      assert_select(
+        "a:match('href', ?)", %r{^/obs/#{id}}, true,
+        "Observations of this Name should link to each Observation"
       )
     end
   end
@@ -724,20 +772,34 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
   end
 
-  # thumbnail_quality is this page's default sort, not a
-  # class-wide default_order on the shared `projects` query_attr
-  # (test_observation_names_in_species_lists_and_projects proves a
-  # bare `projects:` query elsewhere still needs the class default)
-  # -- an explicit `by` must still win.
+  # `project` is a plain param_alias for `projects` -- no attr-level
+  # default_order, so a bare `?project=X` (no `by`) falls through to
+  # the class default (:date). thumbnail_quality only applies via the
+  # explicit `by:` the project header's Observations tab sends (see
+  # Tab::Project::Observations) -- keeping the two orderings separate
+  # is what test_observation_names_in_species_lists_and_projects
+  # already relies on for a bare `projects:` query elsewhere.
+  def test_index_project_bare_url_uses_class_default_order
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_nil(query.params[:order_by])
+    assert_equal(:date, query.default_order)
+  end
+
   def test_index_project_explicit_by_respected
     project = projects(:bolete_project)
 
     login
-    get(:index, params: { project: project.id, by: "date" })
+    get(:index, params: { project: project.id, by: "thumbnail_quality" })
 
     assert_response(:success)
     query = @controller.instance_variable_get(:@query)
-    assert_equal("date", query.params[:order_by])
+    assert_equal("thumbnail_quality", query.params[:order_by])
   end
 
   # A bad project id redirects to the projects index. See redirect_to:
@@ -800,11 +862,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not(query.params.key?(:bogus_param))
   end
 
-  # Query::Observations' `project` attr is record-backed but not an
-  # alias for `projects` (see app/classes/query/observations.rb) --
-  # exercises create_query_from_url_params's `constantize` path with a
-  # directly-matching attr name, not just the lower-level
-  # resolve_query_param_records helper.
+  # `project` is a record-backed param_alias for `projects` -- exercises
+  # create_query_from_url_params's `constantize` path end to end.
   def test_create_query_from_url_params_sets_always_index_for_record_alias
     login
     project = projects(:bolete_project)
@@ -814,7 +873,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       :create_query_from_url_params, :Observation, raw_params
     )
 
-    assert_equal(project.id, query.params[:project])
+    assert_equal([project.id], query.params[:projects])
     assert_equal(true, display_opts[:always_index])
   end
 
@@ -831,6 +890,40 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_equal({ projects: [project.id] }, resolved)
     assert_equal(true, force_index)
+  end
+
+  # See QueryParamRoundTripTestHelpers -- proves every param
+  # Query::Observations recognizes survives the top-level URL round
+  # trip through create_query_from_url_params, not each attr's
+  # filtering behavior (test/classes/query/observations_test.rb
+  # already covers that via direct Query.lookup(:Observation,
+  # attr: value) calls). `identify_filter`, `names`, and the subquery
+  # attrs are structural Hashes, so the helper skips them
+  # automatically.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Observations, :Observation,
+      overrides: {
+        id_in_set: observations(:minimal_unknown_obs).id,
+        by_users: rolf.id,
+        look_alikes: names(:fungi).id,
+        related_taxa: names(:fungi).id,
+        locations: locations(:burbank).id,
+        within_locations: locations(:burbank).id,
+        herbaria: herbaria(:nybg_herbarium).id,
+        herbarium_records: herbarium_records(
+          :coprinus_comatus_nybg_spec
+        ).id,
+        projects: projects(:bolete_project).id,
+        project_lists: projects(:bolete_project).id,
+        project_violations: projects(:bolete_project).id,
+        species_lists: species_lists(:first_species_list).id,
+        inat_import: inat_imports(:rolf_inat_import).id,
+        external_sites: external_sites(:mycoportal).id
+      }
+    )
   end
 
   # Multiple ids submitted directly under the attr's name (not via a

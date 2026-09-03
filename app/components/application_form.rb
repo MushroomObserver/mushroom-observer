@@ -224,7 +224,6 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Turbo.config.forms.mode default.
     @attributes[:data] ||= {}
     @attributes[:data][:turbo] = @turbo ? "true" : "false"
-    add_form_feedback_controller
     super
   end
 
@@ -237,16 +236,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   def _method_field
     super unless _method_field_value.to_s.casecmp("post").zero?
     modal_hidden_field
-  end
-
-  # Every non-Turbo form disables its submit buttons once submitted
-  # (see form-feedback_controller.js; Turbo forms are skipped there,
-  # since Turbo manages its own in-flight state). Appended so a form's
-  # own Stimulus controllers keep working alongside it.
-  def add_form_feedback_controller
-    @attributes[:data] ||= {}
-    @attributes[:data][:controller] =
-      [@attributes[:data][:controller], "form-feedback"].compact.join(" ")
   end
 
   # Called automatically from `_method_field` on every form. Round-trips

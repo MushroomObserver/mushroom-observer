@@ -122,7 +122,7 @@ module Views::FullPageBase::Title
   def show_document_title(string, object)
     [
       object.type_tag.ti,
-      "#{object.id}:",
+      object.id.to_s.concat(":"),
       string
     ].safe_join(" ")
   end

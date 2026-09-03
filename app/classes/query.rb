@@ -377,11 +377,15 @@ class Query
   delegate :recognized_params, to: :class
 
   # The `params.permit(*filters)`-compatible filter list for this Query
-  # subclass's recognized_params -- replaces `index_active_params`'s
-  # allowlisting role (see
-  # ApplicationController::QueryParams#create_query_from_url_params).
+  # subclass's recognized_params -- the allowlist
+  # ApplicationController::Indexes#build_index_with_query and
+  # ApplicationController::QueryParams#create_query_from_url_params use
+  # to decide which top-level URL params are live index filters.
   # A scalar attr (or param_alias) permits as a bare symbol; an
-  # Array-typed attr permits via `attr: []`; a Hash-typed attr --
+  # Array-typed attr permits both as a bare symbol (its scalar URL
+  # form, wrapped into an array by
+  # QueryParams#resolve_scalar_query_param) and via `attr: []`; a
+  # Hash-typed attr --
   # including a subquery hash like `location_query: { subquery: :Location }`
   # -- permits via `attr: {}`, Rails' "allow this key with any nested
   # content" filter. Validating what's inside an Array/Hash value is
@@ -392,7 +396,13 @@ class Query
     scalars = []
     attribute_types.each do |attr, type|
       case type.accepts
-      when Array then containers[attr] = []
+      when Array
+        # Both forms: `?names=x` and `?names[]=x&names[]=y`. A bare
+        # `attr: []` filter makes strong params silently drop the
+        # scalar form, which turned the Name-show observation links
+        # (`?this_name=<id>`) into unfiltered indexes.
+        scalars << attr
+        containers[attr] = []
       when Hash
         if enum_hash?(type.accepts)
           scalars << attr
@@ -506,6 +516,68 @@ class Query
     { model: model.name.to_sym, **params }
   end
 
+  # The query's filter attrs, for use as flat top-level URL params on
+  # a link to this model's index page (`?project=123`, not
+  # `?q[projects][]=123`). Unlike q_param, deliberately excludes
+  # :model -- the target index action infers its model from the
+  # controller (see ApplicationController::Indexes), so a link built
+  # from this only works for a query whose model matches the target
+  # controller. A link that crosses models (e.g. forwarding an
+  # RssLog query to an Observation's show page) still needs q_param,
+  # not this.
+  # Excludes :controller/:action/:id/:format defensively -- merged
+  # directly onto a Rails route-helper args hash by Tab classes
+  # (`args.merge(@index_filter)`), and a future query_attr sharing
+  # one of those names would silently clobber the routing key it's
+  # merged over instead of raising.
+  def index_filter
+    shrink_multi_value_filters(
+      collapse_names_to_this_name(
+        params.except(:controller, :action, :id, :format)
+      )
+    )
+  end
+
+  # `?project=123` instead of `?projects[]=123`. Round-trips
+  # correctly, not just cosmetic -- `permit_filters` already permits
+  # a bare scalar for every Array-typed attr, and `array_validate`
+  # wraps it back into a one-element array.
+  def shrink_multi_value_filters(filters)
+    attr_to_alias = self.class.param_aliases.invert
+    filters.each_with_object({}) do |(attr, val), result|
+      if val.is_a?(Array) && val.length == 1
+        result[attr_to_alias[attr] || attr] = val.first
+      else
+        result[attr] = val
+      end
+    end
+  end
+
+  # Query::Observations-only: `names: {lookup: [x]}` with every
+  # modifier flag absent/false is identical to `this_name: [x]`
+  # (`Observation::Scopes#names` treats absent kwargs as falsy, same
+  # as `scope :this_name`'s bare call).
+  def collapse_names_to_this_name(filters)
+    return filters unless self.class.has_attribute?(:this_name)
+    # Don't clobber an already-present :this_name filter -- both keys
+    # are independently recognized top-level params, so a request can
+    # legitimately carry both at once.
+    return filters if filters.key?(:this_name)
+
+    names = filters[:names]
+    return filters unless collapsible_to_this_name?(names)
+
+    filters.except(:names).merge(this_name: names[:lookup])
+  end
+
+  def collapsible_to_this_name?(names)
+    names.is_a?(Hash) && names[:lookup].is_a?(Array) &&
+      names[:lookup].length == 1 &&
+      (names.keys - [:lookup]).all? { |k| names[k].blank? }
+  end
+  private :shrink_multi_value_filters, :collapse_names_to_this_name,
+          :collapsible_to_this_name?
+
   # Merges an already-resolved `q` param value into a path's
   # existing query string (preserving other params, e.g. `flow=next`).
   # A plain utility, not tied to any Query instance -- shared by two
@@ -530,12 +602,34 @@ class Query
   def self.merge_q_param_into_url(path, q_param_value)
     return path if q_param_value.blank?
 
+    merge_query_params_into_url(path) { |parsed| parsed["q"] = q_param_value }
+  end
+
+  # Merges an index_filter hash into a path's existing query string
+  # as flat top-level params (not nested under q[...]), preserving
+  # other params already in the path. See merge_q_param_into_url for
+  # the cross-model, nested equivalent.
+  def self.merge_index_filters_into_url(path, filters)
+    return path if filters.blank?
+
+    merge_query_params_into_url(path) do |parsed|
+      parsed.merge!(filters.stringify_keys)
+    end
+  end
+
+  # Shared by merge_q_param_into_url/merge_index_filters_into_url:
+  # parses path's existing query string, yields it for the caller to
+  # update, then rebuilds the URL. Uses Hash#to_query, not
+  # Rack::Utils.build_query -- see merge_q_param_into_url's history
+  # for why (a nested Hash value needs to recurse correctly).
+  def self.merge_query_params_into_url(path)
     uri = URI.parse(path)
     parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
-    parsed["q"] = q_param_value
+    yield(parsed)
     uri.query = parsed.to_query
     uri.to_s
   end
+  private_class_method :merge_query_params_into_url
 
   # Serialize the query params, adding the model, for saving to a QueryRecord.
   # We use this column of QueryRecord to identify an existing query record that

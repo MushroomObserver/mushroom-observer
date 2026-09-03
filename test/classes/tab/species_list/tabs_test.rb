@@ -124,12 +124,12 @@ module Tab::SpeciesList
 
     def test_observations_index_return
       bare = Tab::SpeciesList::ObservationsIndexReturn.new.path
-      with_q = Tab::SpeciesList::ObservationsIndexReturn.new(
-        q_param: "Z"
+      with_filter = Tab::SpeciesList::ObservationsIndexReturn.new(
+        index_filter: { by_user: 1 }
       ).path
 
       assert_equal(routes.observations_path, bare)
-      assert_equal(routes.observations_path(q: "Z"), with_q)
+      assert_equal(routes.observations_path(by_user: 1), with_filter)
     end
 
     def test_name_lister
@@ -141,11 +141,13 @@ module Tab::SpeciesList
 
     def test_index
       bare = Tab::SpeciesList::Index.new
-      with_q = Tab::SpeciesList::Index.new(q_param: "Y")
+      with_filter = Tab::SpeciesList::Index.new(
+        index_filter: { by_user: 1 }
+      )
 
       assert_equal(:cancel_to_index.t(type: :species_list), bare.title)
       assert_equal(routes.species_lists_path, bare.path)
-      assert_includes(with_q.path, "q=Y")
+      assert_includes(with_filter.path, "by_user=1")
     end
 
     def test_create

@@ -10,14 +10,13 @@ module Views::Controllers::Names::Classification::Inherit
     prop :message, _Nilable(Symbol), default: nil
     prop :user, ::User
 
-    # rubocop:disable Metrics/ParameterLists
+    # rubocop:disable-next Metrics/ParameterLists
     def initialize(name:, user:, parent: nil, candidates: nil, message: nil,
                    **attrs)
       form_object = FormObject::InheritClassification.new(parent: parent)
       super(form_object, name: name, candidates: candidates,
                          message: message, user: user, **attrs)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       render_candidates_alert if @candidates

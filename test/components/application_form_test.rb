@@ -14,15 +14,6 @@ class ApplicationFormTest < ComponentTestCase
     @collection_number = collection_numbers(:coprinus_comatus_coll_num)
   end
 
-  # Every form carries the form-feedback controller (disables the
-  # buttons once submitted -- see form-feedback_controller.js), and a
-  # form's own controller rides alongside rather than being replaced.
-  def test_form_wires_the_form_feedback_controller
-    form = render_form { text_field(:name, label: "Name") }
-
-    assert_html(form, "form[data-controller~='form-feedback']")
-  end
-
   def test_auto_label_for_prefs_returns_options_unchanged_when_no_prefs
     form = Components::ApplicationForm.new(@collection_number,
                                            action: "/test_form_path")

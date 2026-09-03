@@ -58,7 +58,10 @@ class Components::Link::Location < Components::Link::Object
     a(href: url_for(observations_path(where: @where)),
       class: "index_observations_at_where_link") do
       render_label(@where)
-      plain(" [#{:search.ti}]") if @click
+      if @click
+        whitespace
+        plain("[#{:search.ti}]")
+      end
     end
   end
 
@@ -72,7 +75,10 @@ class Components::Link::Location < Components::Link::Object
       span(class: "location-scientific") do
         plain(::Location.reverse_name(name))
       end
-      plain(" (#{@count})") if @count
+      if @count
+        whitespace
+        plain("(#{@count})")
+      end
     end
   end
 end

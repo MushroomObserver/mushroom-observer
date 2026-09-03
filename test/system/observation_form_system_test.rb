@@ -292,8 +292,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     alert_text = begin
-                   accept_alert(wait: 8) do
-                     within("#observation_form") { click_commit }
+                   # The forced process_image failure makes
+                   # Observations::Images::UploadsController log
+                   # UPLOAD_FAILED error -- expected here,
+                   # so stub it rather than let it print.
+                   Rails.logger.stub(:error, nil) do
+                     accept_alert(wait: 8) do
+                       within("#observation_form") { click_commit }
+                     end
                    end
                  ensure
                    Image.singleton_class.remove_method(:new)
@@ -1128,15 +1134,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami/University Park area - 25.7582, -80.3731)
     click_attach_file("geotagged.jpg")
 
-    # Verify EXIF coordinates were copied
-    #
-    # wait: 20, not 10 -- EXIF extraction is client-side FileReader +
-    # binary parsing (form-exif_controller.js), CPU-bound like the map
-    # readiness wait above. Flaked at 10s under full-file contention
-    # (16 preceding heavy tests), reliable alone. Same bump applied to
-    # every occurrence of this wait in this file.
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
-    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+    # Granular per-step waits (carousel item present -> EXIF text
+    # populated -> "use exif" button enabled -> geolocation collapse
+    # expanded -> field values set) instead of one wait on the final
+    # field value, which conflated several independent async steps
+    # (EXIF FileReader parsing, jQuery collapse animation) into a
+    # single timeout that flaked under full-suite contention.
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
 
     # Autocompleter should be in location_containing mode (MO location exists)
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -1373,7 +1377,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__new")
 
     click_attach_file("geotagged.jpg")
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 10)
+    # Granular per-step waits instead of one wait on the final field
+    # value -- see the comment on assert_image_gps_copied_to_obs's
+    # use in test_manual_lat_lng_overrides_exif_location above.
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
     assert_selector("[data-type='location_containing']", wait: 10)
     sleep(2)
 

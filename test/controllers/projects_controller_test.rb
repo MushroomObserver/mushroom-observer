@@ -3,6 +3,22 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Projects, :Project,
+      overrides: {
+        id_in_set: projects(:bolete_project).id,
+        by_users: rolf.id,
+        members: rolf.id
+      }
+    )
+  end
+
   def build_params(title, summary, start_date: nil, end_date: nil, **opts)
     {
       project: {

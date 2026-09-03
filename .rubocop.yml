@@ -13,12 +13,16 @@ plugins:
   - rubocop-rails
 
 require:
+  - ./lib/rubocop/cop/mo/mixin/class_keyword_pair
   - ./lib/rubocop/cop/mo/dry_test_render_helper
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_hand_rolled_colon_suffix
+  - ./lib/rubocop/cop/mo/no_hand_rolled_column_class
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
+  - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -105,6 +109,21 @@ MO/NoActiveRecordRelationProp:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
+MO/NoHandRolledColonSuffix:
+  Description: >-
+    Phlex views/components must not interpolate a trailing colon onto
+    a label string ("#{text}:") -- use append_colon(text) instead, so
+    an html_safe value isn't coerced back into an unsafe String -- see
+    lib/rubocop/cop/mo/no_hand_rolled_colon_suffix.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # append_colon's own definition -- legitimately builds the ":"
+    # suffix this cop exists to keep everywhere else.
+    - "app/components/localization.rb"
+
 MO/NoHandRolledFormTag:
   Description: >-
     Phlex views/components must not call the bare form(...) tag helper
@@ -133,6 +152,21 @@ MO/NoHandRolledMethodField:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
+MO/NoHandRolledWhitespace:
+  Description: >-
+    Phlex views/components must not hand-roll inter-element spacing
+    (plain(" "), a padded interpolated string) or a literal &nbsp;
+    entity -- use the whitespace/nbsp helpers instead -- see
+    lib/rubocop/cop/mo/no_hand_rolled_whitespace.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # nbsp's definition -- legitimately builds the &nbsp; entity this
+    # cop exists to keep everywhere else.
+    - "app/components/base.rb"
+
 MO/NoQuerySubclassMutation:
   Description: >-
     query_attr/attribute must not be called on a live Query/Query::*
@@ -154,7 +188,7 @@ MO/NoRawBootstrapComponent:
     Phlex views/components must not hand-roll the markup for a
     top-level Bootstrap UI component MO already has a Components::*
     wrapper for (Alert, Modal, Dropdown, ListGroup, NavTabs, Panel,
-    Navbar, Carousel, InputGroup, ButtonGroup) -- see
+    Navbar, Carousel, InputGroup, ButtonGroup, Row, Container) -- see
     lib/rubocop/cop/mo/no_raw_bootstrap_component.rb.
   Enabled: true
   Include:
@@ -173,6 +207,11 @@ MO/NoRawBootstrapComponent:
     # `<ul class="nav nav-tabs">` this cop exists to make everyone
     # else use NavTabs(...) for instead.
     - "app/components/nav_tabs.rb"
+    # Row's/Container's own implementations -- legitimately build the
+    # `.row`/`.container-*` markup this cop exists to make everyone
+    # else use Row(...)/Container(...) for instead.
+    - "app/components/row.rb"
+    - "app/components/container.rb"
     # Deliberate: the sidebar's `.list-group` wrapper holds several
     # independently `cache(...)`-wrapped sections that render
     # Components::ListGroup::Item/LinkItem directly, not via a
@@ -182,6 +221,25 @@ MO/NoRawBootstrapComponent:
     # caching (see list_group.rb's own docs, which name this file as
     # the deliberate exception).
     - "app/views/layouts/sidebar.rb"
+
+MO/NoHandRolledColumnClass:
+  Description: >-
+    Phlex views/components must not hand-roll Bootstrap grid column
+    classes (col-xs-6, col-sm-offset-4, etc.) -- use Column(...)
+    (Components::Column) instead. See
+    lib/rubocop/cop/mo/no_hand_rolled_column_class.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # Column's own implementation -- legitimately builds the col-*
+    # classes this cop exists to make everyone else use Column(...)
+    # for instead.
+    - "app/components/column.rb"
+    # Documented "keep the bug for visual parity" quirk -- see the
+    # comment at the call site.
+    - "app/views/layouts/header.rb"
 
 MO/NoRawLinkOrButtonTo:
   Description: >-

@@ -39,7 +39,7 @@ module Views::Controllers::FieldSlips
     # means the whole tag has to be built here in form_tag for that
     # branch, not passed as a constructor kwarg. The model.code branch
     # uses the base class's own default form_tag unchanged.
-    # rubocop:disable MO/NoHandRolledFormTag
+    # rubocop:disable-next MO/NoHandRolledFormTag
     def form_tag(&block)
       if model.code
         super
@@ -48,7 +48,6 @@ module Views::Controllers::FieldSlips
              **form_attributes, &block)
       end
     end
-    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_attributes
       # Forward @attributes[:data] so ApplicationForm's data-turbo
@@ -212,7 +211,7 @@ module Views::Controllers::FieldSlips
     # "Save with Selected Observations" submit.
     def render_new_action_matrix
       div(class: "mt-5") do
-        strong { "#{:field_slip_select_observations.t}:" }
+        strong { append_colon(:field_slip_select_observations.t) }
         render_observation_matrix(@recent_observations,
                                   checked_ids: [],
                                   primary_id: nil)
@@ -228,13 +227,13 @@ module Views::Controllers::FieldSlips
         current = current_observations
         primary_id = current_primary_id(current)
         if current.any?
-          strong { "#{:observations.ti}:" }
+          strong { append_colon(:observations.ti) }
           render_observation_matrix(current,
                                     checked_ids: current.map(&:id),
                                     primary_id: primary_id)
         end
         if @recent_observations.any?
-          strong { "#{:field_slip_select_observations.t}:" }
+          strong { append_colon(:field_slip_select_observations.t) }
           render_observation_matrix(@recent_observations,
                                     checked_ids: [],
                                     primary_id: primary_id)

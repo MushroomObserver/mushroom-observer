@@ -3,6 +3,23 @@
 require("test_helper")
 
 class HerbariumRecordsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::HerbariumRecords, :HerbariumRecord,
+      overrides: {
+        id_in_set: herbarium_records(:coprinus_comatus_nybg_spec).id,
+        by_users: rolf.id,
+        herbaria: herbaria(:nybg_herbarium).id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
+  end
+
   ##############################################################################
   # INDEX
   #
@@ -15,6 +32,17 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
+  end
+
+  # Unfiltered index sorts by Query::HerbariumRecords.default_order.
+  def test_index_default_sort_order
+    login
+    get(:index)
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal(Query::HerbariumRecords.default_order.to_s,
+                 query.params[:order_by])
   end
 
   def test_index_pattern_with_multiple_matching_records

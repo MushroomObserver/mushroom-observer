@@ -39,6 +39,8 @@ module Name::Parse
   F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi
   GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
 
+  # Abbrev prefix -> rank, for provisional genus-and-up names with no
+  # guessable suffix (e.g. a quoted, undescribed "Ord. 'Whateverales'").
   PROV_RANKS = {
     "Gen." => "Genus",
     "Subfam." => "Subfamily",
@@ -46,6 +48,7 @@ module Name::Parse
     "Subtrib." => "Subtribe",
     "Subord." => "Suborder",
     "Ord." => "Order",
+    "Superord." => "Superorder",
     "Subcl." => "Subclass",
     "Cl." => "Class",
     "Subphyl." => "Subphylum",

@@ -27,7 +27,10 @@ module Views::Controllers::Interests
     end
 
     def render_type_filter
-      ButtonGroup(class: "pb-1 hidden-xs text-nowrap mt-5") do
+      ButtonGroup(class: class_names(
+        "pb-1 text-nowrap mt-5",
+        Components::Column.mobile_hide_classes(display: :"inline-block")
+      )) do
         Button(
           name: :rss_show.l, tag: :span, size: :sm,
           class: "disabled"
@@ -73,9 +76,10 @@ module Views::Controllers::Interests
     def item_summary(item)
       return item.target.summary if item.target_type == "NameTracker"
 
-      "#{item.state ? :watching.ti : :ignoring.ti} " \
-      "#{item.target_type.underscore.to_sym.l}: " \
-      "#{item.target ? item.target_format_name : "--"}"
+      state = item.state ? :watching.ti : :ignoring.ti
+      type_label = append_colon(item.target_type.underscore.to_sym.l)
+      target = item.target ? item.target_format_name : "--"
+      "#{state} #{type_label}#{target}"
     end
 
     def actions_cell(item)

@@ -36,7 +36,6 @@ class Views::Controllers::Account::Preferences::Form <
     render_privacy_section
     render_appearance_section
     render_filters_section
-    render_notes_section
     render_email_section
   end
 
@@ -165,6 +164,7 @@ class Views::Controllers::Account::Preferences::Form <
     render_appearance_text_selects
     render_appearance_obs_options
     render_appearance_image_selects
+    render_notes_field
     submit(:save_edits.ti, center: true)
   end
 
@@ -241,6 +241,17 @@ class Views::Controllers::Account::Preferences::Form <
     ]
   end
 
+  def render_notes_field
+    textarea_field(:notes_template, prefs: true, rows: 1,
+                                    help_placement: :above) do |f|
+      f.with_help { render_notes_help }
+    end
+  end
+
+  def render_notes_help
+    trusted_html(:prefs_notes_template_explanation.t)
+  end
+
   # ====================================================================
   # Filters
   # ====================================================================
@@ -304,28 +315,13 @@ class Views::Controllers::Account::Preferences::Form <
   def render_string_filter(filter)
     text_field(filter.sym,
                label: :"prefs_filters_#{filter.sym}",
-               value: model.content_filter[filter.sym]) do |f|
-      f.with_between { render_string_filter_help(filter) }
+               value: model.content_filter[filter.sym],
+               help_placement: :above) do |f|
+      f.with_help { render_string_filter_help(filter) }
     end
   end
 
   def render_string_filter_help(filter)
-    div { trusted_html(:"prefs_filters_#{filter.sym}_help".t) }
-  end
-
-  # ====================================================================
-  # Notes
-  # ====================================================================
-
-  def render_notes_section
-    textarea_field(:notes_template, prefs: true, rows: 1) do |f|
-      f.with_between { render_notes_help }
-    end
-    submit(:save_edits.ti, center: true)
-  end
-
-  def render_notes_help
-    Help(element: :p,
-         content: :prefs_notes_template_explanation.t)
+    trusted_html(:"prefs_filters_#{filter.sym}_help".t)
   end
 end

@@ -103,13 +103,13 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   # Label with multiple span variants for different autocompleter states
   def location_label
     capture do
-      span(class: "unconstrained-label") { "#{:where.ti}:" }
-      whitespace
+      span(class: "unconstrained-label") { append_colon(:where.ti) }
       span(class: "constrained-label") do
-        "#{:form_observations_locality_contains.l}:"
+        append_colon(:form_observations_locality_contains.l)
       end
-      whitespace
-      span(class: "create-label") { "#{:form_observations_create_locality.l}:" }
+      span(class: "create-label") do
+        append_colon(:form_observations_create_locality.l)
+      end
     end
   end
 
@@ -199,6 +199,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
       @form.text_field(
         field,
         label: label_html,
+        label_colon: false,
         wrap_class: "mb-0",
         addon: addon,
         data: {
@@ -220,8 +221,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   # Label with responsive show/hide variants
   def coordinate_label(abbr_key, full_key)
     capture do
-      span(class: "d-none d-sm-inline") { "#{full_key.ti}:" }
-      span(class: "d-inline d-sm-none") { "#{abbr_key.ti}:" }
+      span(class: "d-none d-sm-inline") { append_colon(full_key.ti) }
+      span(class: "d-inline d-sm-none") { append_colon(abbr_key.ti) }
     end
   end
 

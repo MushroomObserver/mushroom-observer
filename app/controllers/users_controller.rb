@@ -64,15 +64,6 @@ class UsersController < ApplicationController
     false
   end
 
-  def default_sort_order
-    ::Query::Users.default_order # :name
-  end
-
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by, :q, :id].freeze
-  end
-
   def sorted_index_permitted?
     index_query_authorized?
   end

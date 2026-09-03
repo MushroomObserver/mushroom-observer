@@ -42,7 +42,7 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
   def render_note_part(key, value)
     return if key == :Other && value.to_s.blank?
 
-    trusted_html("+#{key.to_s.tr("_", " ")}+:".tl)
+    trusted_html(append_colon("+#{key.to_s.tr("_", " ")}+").tl)
     div(class: "indent") { trusted_html(value.to_s.tpl) }
   end
 end

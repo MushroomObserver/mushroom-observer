@@ -15,7 +15,7 @@ module Views::Controllers::Projects::Updates
       # GET form by hand, styled via FieldProxy + CheckboxField (the
       # established way to reuse ApplicationForm's field markup
       # outside a Superform-bound form).
-      # rubocop:disable MO/NoHandRolledFormTag
+      # rubocop:disable-next MO/NoHandRolledFormTag
       form(action: project_updates_path(project_id: @project.id),
            method: :get,
            class: "form-inline show-excluded-form",
@@ -23,7 +23,6 @@ module Views::Controllers::Projects::Updates
                    autosubmit_delay_value: "0" }) do
         render_show_excluded_checkbox
       end
-      # rubocop:enable MO/NoHandRolledFormTag
     end
 
     private

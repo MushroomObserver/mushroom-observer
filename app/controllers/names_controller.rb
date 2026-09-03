@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class NamesController < ApplicationController
   class RankWarning < RuntimeError; end
 
@@ -47,16 +47,6 @@ class NamesController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Names.default_order # :name
-  end
-
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :has_observations, :has_descriptions,
-     :needs_description, :by_user, :by_editor, :by, :q, :id].freeze
-  end
-
   def make_name_suggestions
     return unless @objects.empty? &&
                   params[:q].is_a?(ActionController::Parameters) &&
@@ -65,35 +55,6 @@ class NamesController < ApplicationController
     return unless original_spelling
 
     @name_suggestions = Name.suggest_alternate_spellings(original_spelling)
-  end
-
-  # Disabling the cop because subaction methods are going away soon
-  # rubocop:disable Naming/PredicatePrefix
-  # Display list of names that have observations.
-  def has_observations
-    create_query_from_url_params(:Name, params)
-  end
-
-  # Display list of names with descriptions that have authors.
-  def has_descriptions
-    create_query_from_url_params(:Name, params)
-  end
-  # rubocop:enable Naming/PredicatePrefix
-
-  # Display list of the most popular 100 names that don't have descriptions.
-  # NOTE: all this extra info and help will be lost if user re-sorts.
-  def needs_description
-    create_query_from_url_params(:Name, params)
-  end
-
-  # Display list of names that a given user is author on.
-  def by_user
-    create_query_from_url_params(:Name, params)
-  end
-
-  # Display list of names that a given user is editor on.
-  def by_editor
-    create_query_from_url_params(:Name, params)
   end
 
   # Hook runs before template displayed. Must return query.
@@ -452,11 +413,11 @@ class NamesController < ApplicationController
   end
 
   def set_locked_if_admin
-    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+    @name.locked = params[:name][:locked].to_s == "1" if in_admin_mode?
   end
 
   def set_icn_id_if_unlocked_or_admin
-    @name.icn_id   = params[:name][:icn_id] if editable_in_session?
+    @name.icn_id = params[:name][:icn_id] if editable_in_session?
   end
 
   # ------
@@ -824,4 +785,3 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
-# rubocop:enable Metrics/ClassLength

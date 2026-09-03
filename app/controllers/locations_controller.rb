@@ -16,7 +16,7 @@
 #  :destroy
 
 # Locations controller.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class LocationsController < ApplicationController
   include ::Locationable
 
@@ -46,36 +46,6 @@ class LocationsController < ApplicationController
   end
 
   private
-
-  def default_sort_order
-    ::Query::Locations.default_order # :name
-  end
-
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :country, :project, :by_user, :by_editor,
-     :by, :q, :id].freeze
-  end
-
-  # Displays a list of all locations whose country matches the param.
-  def country
-    create_query_from_url_params(:Location, params)
-  end
-
-  # Displays a list of locations of obs whose project matches the param.
-  def project
-    create_query_from_url_params(:Location, params)
-  end
-
-  # Display list of locations that a given user created.
-  def by_user
-    create_query_from_url_params(:Location, params)
-  end
-
-  # Display list of locations that a given user is editor on.
-  def by_editor
-    create_query_from_url_params(:Location, params)
-  end
 
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
@@ -622,4 +592,3 @@ class LocationsController < ApplicationController
              :notes, :hidden)
   end
 end
-# rubocop:enable Metrics/ClassLength

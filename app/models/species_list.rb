@@ -425,7 +425,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #     :specimen               => false
   #   )
   #
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable-next Metrics/MethodLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
@@ -471,7 +471,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
     observations << obs
   end
-  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
   #

@@ -33,7 +33,7 @@ class Components::Form::UploadGallery < Components::Base
       inner_id: "added_images",
       indicators_id: "added_thumbnails",
       indicators_class_extra: indicators_d_none,
-      controls_wrap_class: "carousel-control-wrap row",
+      controls_wrap_class: "carousel-control-wrap",
       extra_data: {
         form_images_target: "carousel",
         form_exif_target: "carousel"

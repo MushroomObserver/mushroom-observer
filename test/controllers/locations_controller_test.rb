@@ -3,12 +3,29 @@
 require("test_helper")
 
 class LocationsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   def setup
     @new_pts  = 10
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
     super
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Locations, :Location,
+      overrides: {
+        id_in_set: locations(:burbank).id,
+        by_users: rolf.id,
+        by_editor: rolf.id,
+        projects: projects(:bolete_project).id
+      }
+    )
   end
 
   # Init params based on existing location.
@@ -265,8 +282,7 @@ class LocationsControllerTest < FunctionalTestCase
   #    INDEX
 
   # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
   def test_index
     login

@@ -66,7 +66,7 @@
 #  languages::
 #  bonuses::
 #
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class UserStats < ApplicationRecord
   belongs_to :user
 
@@ -563,4 +563,3 @@ class UserStats < ApplicationRecord
     metric
   end
 end
-# rubocop:enable Metrics/ClassLength

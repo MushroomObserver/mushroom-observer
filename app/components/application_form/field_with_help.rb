@@ -73,8 +73,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # help_placement: :above drops the help block's default top margin
+    # -- see FieldLabelRow#label_class's matching mb-0 on the label,
+    # and FieldLabelRow#help_placement_above? for the shared check.
+    # respond_to? guards SelectRangeField, the one class that includes
+    # this module without FieldLabelRow.
     def render_plain_help_text
-      Help(id: help_id) { render(help_slot) }
+      above = respond_to?(:help_placement_above?) && help_placement_above?
+      extra_class = "mt-0" if above
+      Help(id: help_id, class: extra_class) { render(help_slot) }
     end
   end
 end

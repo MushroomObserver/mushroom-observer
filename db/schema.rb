@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -217,8 +217,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.string "content_type", limit: 100
     t.integer "user_id"
     t.date "when"
-    t.text "notes"
-    t.string "copyright_holder"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.string "copyright_holder", collation: "utf8mb4_general_ci"
     t.integer "license_id", default: 10, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
@@ -226,7 +226,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.integer "height"
     t.float "vote_cache"
     t.boolean "ok_for_export", default: true, null: false
-    t.string "original_name", limit: 120, default: ""
+    t.string "original_name", limit: 120, default: "", collation: "utf8mb4_general_ci"
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
     t.boolean "diagnostic", default: true, null: false
@@ -264,6 +264,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.text "license_added_inat_ids"
     t.boolean "recheck_all", default: false, null: false
     t.integer "ignored_unlicensed_count", default: 0, null: false
+    t.text "original_inat_url"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -763,7 +764,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
   create_table "query_records", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "updated_at", precision: nil
     t.integer "access_count"
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.boolean "permalink", default: false
   end
 
@@ -804,6 +805,33 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
   end
 
+  create_table "solid_queue_batch_executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.bigint "batch_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["batch_id"], name: "index_solid_queue_batch_executions_on_batch_id"
+    t.index ["job_id"], name: "index_solid_queue_batch_executions_on_job_id", unique: true
+  end
+
+  create_table "solid_queue_batches", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "active_job_batch_id"
+    t.string "description"
+    t.text "on_finish"
+    t.text "on_success"
+    t.text "on_failure"
+    t.text "metadata"
+    t.integer "total_jobs", default: 0, null: false
+    t.integer "completed_jobs", default: 0, null: false
+    t.integer "failed_jobs", default: 0, null: false
+    t.datetime "enqueued_at"
+    t.datetime "finished_at"
+    t.datetime "failed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active_job_batch_id"], name: "index_solid_queue_batches_on_active_job_batch_id", unique: true
+    t.index ["finished_at"], name: "index_solid_queue_batches_on_finished_at"
+  end
+
   create_table "solid_queue_blocked_executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.string "queue_name", null: false
@@ -842,7 +870,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
     t.string "concurrency_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "batch_id"
     t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id"
+    t.index ["batch_id"], name: "index_solid_queue_jobs_on_batch_id"
     t.index ["class_name"], name: "index_solid_queue_jobs_on_class_name"
     t.index ["finished_at"], name: "index_solid_queue_jobs_on_finished_at"
     t.index ["queue_name", "finished_at"], name: "index_solid_queue_jobs_for_filtering"
@@ -1103,6 +1133,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_26_114215) do
 
   add_foreign_key "observations", "users", column: "collector_user_id"
   add_foreign_key "project_aliases", "projects"
+  add_foreign_key "solid_queue_batch_executions", "solid_queue_batches", column: "batch_id", on_delete: :cascade
+  add_foreign_key "solid_queue_batch_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

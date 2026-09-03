@@ -62,13 +62,13 @@ module Views::Controllers::Descriptions
     end
 
     def render_title_row
-      plain("#{:title.ti}: ")
+      trusted_html(append_colon(:title.ti))
       trusted_html(description_title)
     end
 
     def render_parent_row
       parent = @description.parent
-      plain("#{parent.type_tag.ti}: ")
+      trusted_html(append_colon(parent.type_tag.ti))
       a(href: url_for(parent.show_link_args)) do
         trusted_html(parent.format_name.t)
       end
@@ -130,7 +130,7 @@ module Views::Controllers::Descriptions
     # "Create New Draft For: <project1> <project2> ..."
     def render_project_drafts(object)
       p do
-        plain("#{:show_name_create_draft.l}: ")
+        trusted_html(append_colon(:show_name_create_draft.l))
         br
         @projects.each do |project|
           span(class: "ml-3") do
@@ -170,7 +170,7 @@ module Views::Controllers::Descriptions
 
     def render_review_status_row
       div do
-        plain("#{:show_name_content_status.l}: ")
+        trusted_html(append_colon(:show_name_content_status.l))
         plain(review_as_string(@description.review_status))
         render_review_ui_row if reviewer?
       end

@@ -15,7 +15,7 @@ module Views::Controllers::Admin::BlockedIps
       def view_template
         Panel(panel_class: "my-3",
               panel_id: "ip_stats") do |panel|
-          panel.with_heading { plain("Stats for #{@ip}:") }
+          panel.with_heading { trusted_html(append_colon("Stats for #{@ip}")) }
           panel.with_heading_links { render_close_link }
           panel.with_body { render_body }
         end
@@ -82,6 +82,7 @@ module Views::Controllers::Admin::BlockedIps
 
       def render_activity_section
         plain("Activity:")
+        whitespace
         render_activity_count
         br
         render_activity_table
@@ -90,9 +91,9 @@ module Views::Controllers::Admin::BlockedIps
       def render_activity_count
         n = ip_stats[:activity].length
         if n > 50
-          plain(" (most recent 50 of #{n} requests)")
+          plain("(most recent 50 of #{n} requests)")
         else
-          plain(" (all of the most recent #{n} requests)")
+          plain("(all of the most recent #{n} requests)")
         end
       end
 

@@ -807,6 +807,8 @@
   rank_plural_order: orders
   rank_suborder: suborder
   rank_plural_suborder: suborders
+  rank_superorder: superorder
+  rank_plural_superorder: superorders
   rank_family: family
   rank_plural_family: families
   rank_subfamily: subfamily
@@ -2722,7 +2724,7 @@
 
   # Project Target Names
   project_target_name_add: Add
-  project_target_names_to_add_label: "Target Names to Add:"
+  project_target_names_to_add_label: "Target Names to Add"
   project_target_names_added: "Added target names: [names]."
   project_target_name_removed: Removed target name "[name]".
   project_target_name_not_found: No matching names found.
@@ -2731,7 +2733,7 @@
   # Project Target Locations
   project_target_locations_title: Target Locations
   project_target_location_add: Add
-  project_target_locations_to_add_label: "Target Locations to Add:"
+  project_target_locations_to_add_label: "Target Locations to Add"
   project_target_locations_added: "Added target locations: [names]."
   project_target_location_removed: Removed target location "[name]".
   project_target_location_not_found: No matching locations found.
@@ -2758,7 +2760,7 @@
   account_api_keys_active_column_label: Active
   account_api_keys_last_used_column_label: Last Used
   account_api_keys_num_uses_column_label: Uses
-  account_api_keys_notes_label: "Enter the name or a brief description of the application that will use this key:"
+  account_api_keys_notes_label: "Enter the name or a brief description of the application that will use this key"
   account_api_keys_create_button: Create a New Key
   account_api_keys_help: "API Keys are used by third-party applications to access the Mushroom Observer database directly. You may request as many API Keys as you like, and no restrictions are placed on these keys.\n\nEach key is attached to a single user. When posting observations or images, for example, your application will send this API Key in lieu of logging in. Therefore you should take some care to prevent other people or malicious agents from using your API Keys.\n\nNote that no key is required if you are only interested in _reading_ data; keys are only required if you wish to post or modify data."
   account_api_keys_create_success: Sucessfully created a new API Key.
@@ -3618,6 +3620,7 @@
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
   observation_term_herbaria: "[:observation_term_herbarium]"
+  observation_term_external_sites: Observation has an external link to this site.
   observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
   observation_term_locations: "[:observation_term_location]"
   observation_term_within_locations: "[:observation_term_location]"
@@ -3993,6 +3996,7 @@
   runtime_no_matches: No matching [types] found.
   runtime_no_more: There are no more [types].
   runtime_search_string_too_long: "Search string too long ([length] characters). Maximum is [max] characters."
+  runtime_search_too_many_values: "[field]: too many values ([count]). Maximum is [max]."
   runtime_no_parse: "Unable to parse: '[value]'"
   runtime_no_save: Unable to save [type].
   runtime_no_update: Unable to update [type].
@@ -4426,7 +4430,7 @@
   query_misspellings: misspellings
   query_name_has: name has
   query_needs_description: needs description
-  query_needs_naming: needing identification, user
+  query_needs_naming: needing identification
   query_nonpersonal: nonpersonal
   query_notes_has: notes has
   query_number_has: number has
@@ -4480,7 +4484,7 @@
   query_other_names: other names
 
   # records
-  query_external_sites: "[:sites]"
+  query_external_sites: "[:external_sites]"
   query_field_slips: "[:field_slips]"
   query_herbaria: "[:herbaria]"
   query_herbarium_records: "[:herbarium_records]"
@@ -4488,7 +4492,6 @@
   query_locations: "[:locations]"
   query_within_locations: "[:within_locations]"
   query_observations: "[:observations]"
-  query_project: "[:project]"
   query_project_lists: "[:project_lists]"
   query_projects: "[:projects]"
   query_species_lists: "[:species_lists]"

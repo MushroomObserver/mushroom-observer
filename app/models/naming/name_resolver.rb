@@ -47,7 +47,7 @@ class Naming
       resolve(user, given_name:, approved_name:, chosen_name:)
     end
 
-    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable-next Metrics/MethodLength
     def resolve(user, given_name:, approved_name:, chosen_name:)
       corrected = given_name.to_s.tr("_", " ").strip_squeeze
       approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
@@ -136,7 +136,6 @@ class Naming
         end
       end
     end
-    # rubocop:enable Metrics/MethodLength
 
     # Field slips are written by hand, and two habits keep an otherwise
     # findable name from ever reaching a lookup: one case throughout

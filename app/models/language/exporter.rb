@@ -22,7 +22,7 @@
 ################################################################################
 
 # Validation methods share mutable instance state; not worth splitting.
-# rubocop:disable Metrics/ModuleLength
+# rubocop:disable-next Metrics/ModuleLength
 module Language::Exporter
   extend ActiveSupport::Concern
 
@@ -526,4 +526,3 @@ module Language::Exporter
     pass
   end
 end
-# rubocop:enable Metrics/ModuleLength

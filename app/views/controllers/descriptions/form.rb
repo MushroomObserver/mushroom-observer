@@ -54,7 +54,9 @@ module Views::Controllers::Descriptions
 
     def render_source_fields
       div(class: "form-group mt-3") do
-        label(for: "description_source") { "#{:form_description_source.l}:" }
+        label(for: "description_source") do
+          append_colon(:form_description_source.l)
+        end
         render_source_type_field
         render_source_name_field
         hidden_field(:project_id)
@@ -71,7 +73,8 @@ module Views::Controllers::Descriptions
                      class: "form-control")
       else
         hidden_field(:source_type)
-        plain(" #{source_type_label}")
+        whitespace
+        plain(source_type_label.to_s)
       end
     end
 
@@ -101,7 +104,7 @@ module Views::Controllers::Descriptions
       return unless show_permissions?
 
       div(class: "form-group") do
-        b { "#{:form_description_permissions.l}:" }
+        b { append_colon(:form_description_permissions.l) }
         checkbox_field(:public_write,
                        label: :form_description_public_writable,
                        disabled: permissions_disabled?)
@@ -148,7 +151,7 @@ module Views::Controllers::Descriptions
     end
 
     def field_label(field)
-      "#{:"form_#{model_prefix}_#{field}".l}:"
+      :"form_#{model_prefix}_#{field}".l
     end
 
     def field_help(field)

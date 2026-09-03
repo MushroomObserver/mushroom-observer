@@ -22,16 +22,11 @@ class Query::Observations < Query
                        include_all_name_proposals: :boolean,
                        exclude_consensus: :boolean })
   # Each of these is a named preset of `names:` options, backed by a
-  # same-named Observation scope (Observation::Scopes) -- see there
-  # for what each preset means. `[:string]`, not `:string`, so the
-  # FilterCaption's Lookup-driven rendering (PARAM_LOOKUPS) applies --
-  # it expects an Array, matching every other name-lookup attr.
-  query_attr(:look_alikes, [:string], default_order: :confidence)
-  # `[:name_parents]`, not `[:string]` -- the stored value is the
-  # matched name's parent ids, not the searched name itself, so the
-  # filter caption shows the parent (see `validate_name_parents`
-  # below and Observation::Scopes#related_taxa).
-  query_attr(:related_taxa, [:name_parents], default_order: :confidence)
+  # same-named Observation scope (Observation::Scopes).
+  query_attr(:look_alikes, Name, default_order: :confidence,
+                                 always_index: false)
+  query_attr(:related_taxa, Name, default_order: :confidence,
+                                  always_index: false)
   # param_alias matches the URL shortcut (`?name=`) -- attr itself is
   # `any_name`, not `name`, to avoid colliding with `Observation.name`
   # (see Observation::Scopes#any_name).
@@ -41,7 +36,13 @@ class Query::Observations < Query
   query_attr(:this_name, [:string], default_order: :confidence)
   query_attr(:other_names, [:string], default_order: :confidence)
   query_attr(:confidence, [:float])
-  query_attr(:needs_naming, User)
+  # A presence flag, not a User id -- Query::Modules::Initialization's
+  # apply_scope_param sends `viewer` to the scope, ignoring this value's
+  # identity, so the URL can only mean "my queue". `:truthy`, not
+  # `:boolean`, so an old `needs_naming: <user_id>` bookmark still
+  # resolves to "flag on" instead of failing validation. default_order
+  # matches the identify page's default (Observations::IdentifyController).
+  query_attr(:needs_naming, :truthy, default_order: :rss_log)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
   # The identify page's clade/region autocompleter -- see
@@ -73,16 +74,16 @@ class Query::Observations < Query
   # query_attr(:has_specimen, :boolean) # content filter
   # query_attr(:has_images, :boolean) # content filter
 
-  query_attr(:herbaria, [Herbarium])
-  query_attr(:herbarium_records, [HerbariumRecord])
-  query_attr(:projects, [Project], redirect_to: :model_index)
-  # Separate attr, not aliased to `projects` -- its default_order would
-  # leak into `projects:`-filtered subqueries composed elsewhere.
-  query_attr(:project, Project, redirect_to: :model_index,
-                                default_order: :thumbnail_quality)
-  query_attr(:project_lists, [Project])
+  query_attr(:herbaria, [Herbarium], param_alias: :herbarium)
+  query_attr(:herbarium_records, [HerbariumRecord],
+             param_alias: :herbarium_record)
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
+  query_attr(:project_lists, [Project], param_alias: :project_list)
+  query_attr(:project_violations, Project)
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list,
                                             redirect_to: :model_index)
+  query_attr(:external_sites, [ExternalSite], param_alias: :external_site)
   # query_attr(:search_name, :string) # advanced search
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
@@ -118,17 +119,5 @@ class Query::Observations < Query
 
   def self.default_order
     :date
-  end
-
-  private
-
-  # Custom scalar type for `related_taxa` (a Symbol `accepts`, same
-  # dispatch convention as `validate_string`/`validate_boolean` --
-  # see Query::Modules::Validation#scalar_validate). Resolves the
-  # searched name string/id to its approved name's parent ids at
-  # validation time, so the stored query param is what the filter
-  # caption and `Observation.related_taxa` scope both need.
-  def validate_name_parents(_param, val)
-    Name.parent_ids_for(val)
   end
 end

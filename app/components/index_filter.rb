@@ -53,7 +53,7 @@ class Components::IndexFilter < Components::Base
   # index controller to read directly off request.params, not boxed
   # under a FormObject namespace the way every Superform GET filter
   # elsewhere in the app is.
-  # rubocop:disable MO/NoHandRolledFormTag
+  # rubocop:disable-next MO/NoHandRolledFormTag
   def view_template(&block)
     form(action: url_for(@to), method: "get",
          class: form_class, id: @form_id,
@@ -65,7 +65,6 @@ class Components::IndexFilter < Components::Base
       end
     end
   end
-  # rubocop:enable MO/NoHandRolledFormTag
 
   private
 

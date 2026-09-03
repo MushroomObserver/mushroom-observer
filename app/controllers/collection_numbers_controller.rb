@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying collection numbers.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
   before_action :store_location, except: [:destroy]
@@ -37,17 +37,11 @@ class CollectionNumbersController < ApplicationController
 
   private
 
+  # `Query::CollectionNumbers.default_order` is :name_and_number, but
+  # nil keeps this index titled "Collection Numbers Index" rather than
+  # "... by Name and Number" -- see the base class's doc.
   def default_sort_order
-    nil # Query::CollectionNumbers.default_order
-  end
-
-  def index_active_params
-    [:pattern, :observation, :by, :q, :id].freeze
-  end
-
-  # Display list of CollectionNumbers for an Observation
-  def observation
-    create_query_from_url_params(:CollectionNumber, params)
+    nil
   end
 
   # Hook runs before template displayed. Must return query.
@@ -480,4 +474,3 @@ class CollectionNumbersController < ApplicationController
                              }) and return true
   end
 end
-# rubocop:enable Metrics/ClassLength

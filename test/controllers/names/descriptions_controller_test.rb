@@ -4,6 +4,24 @@ require("test_helper")
 
 module Names
   class DescriptionsControllerTest < FunctionalTestCase
+    include QueryParamRoundTripTestHelpers
+
+    # See QueryParamRoundTripTestHelpers.
+    def test_create_query_from_url_params_recognizes_every_top_level_param
+      login
+
+      assert_all_top_level_params_survive(
+        Query::NameDescriptions, :NameDescription,
+        overrides: {
+          id_in_set: name_descriptions(:agaricus_campestras_desc).id,
+          by_users: rolf.id,
+          by_author: rolf.id,
+          by_editor: rolf.id,
+          projects: projects(:bolete_project).id
+        }
+      )
+    end
+
     def empty_notes
       NameDescription.all_note_fields.index_with do |_field|
         ""

@@ -59,7 +59,7 @@ class Components::Form::CameraInfo < Components::Base
 
   def render_date_field
     div do
-      strong { "#{:date.ti}: " }
+      strong { append_colon(:date.ti) }
       exif_to_image_date_button
     end
   end
@@ -84,14 +84,14 @@ class Components::Form::CameraInfo < Components::Base
 
   def render_filename
     div do
-      strong { "#{:image_file_name.l}: " }
+      strong { append_colon(:image_file_name.l) }
       span(class: "file_name") { @file_name }
     end
   end
 
   def render_filesize
     div do
-      strong { "#{:image_file_size.l}: " }
+      strong { append_colon(:image_file_size.l) }
       span(class: "file_size") { @file_size }
     end
   end
@@ -123,8 +123,7 @@ class Components::Form::CameraInfo < Components::Base
     label_key = field.upcase
     css_class = "exif_#{field}"
 
-    strong { "#{label_key.l}:" }
-    whitespace
+    strong { append_colon(label_key.l) }
     span(class: css_class) { value }
   end
 

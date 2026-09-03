@@ -64,8 +64,7 @@ module Views::Controllers::VisualGroups
     end
 
     def render_image_id_line
-      plain("#{:image_reuse_id.t}:")
-      whitespace
+      trusted_html(append_colon(:image_reuse_id.t))
       Link(type: :get, name: @image_id.to_s, target: image_path(id: @image_id))
     end
 

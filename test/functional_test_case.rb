@@ -16,6 +16,7 @@
 class FunctionalTestCase < ActionController::TestCase # rubocop:disable Rails/ActionControllerTestCase
   include GeneralExtensions
   include FlashExtensions
+  include SearchExtensions
   include ControllerExtensions
   include CheckForUnsafeHtml
   # Rails auto-includes this into ActionDispatch::IntegrationTest but not

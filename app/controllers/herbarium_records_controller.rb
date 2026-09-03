@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying herbarium records.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
   before_action :store_location, except: [:destroy]
@@ -38,23 +38,6 @@ class HerbariumRecordsController < ApplicationController
   end
 
   private
-
-  def default_sort_order
-    ::Query::Herbaria.default_order # :name
-  end
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
-  end
-
-  def herbarium
-    create_query_from_url_params(:HerbariumRecord, params)
-  end
-
-  def observation
-    create_query_from_url_params(:HerbariumRecord, params)
-  end
 
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
@@ -523,4 +506,3 @@ class HerbariumRecordsController < ApplicationController
                              }) and return true
   end
 end
-# rubocop:enable Metrics/ClassLength

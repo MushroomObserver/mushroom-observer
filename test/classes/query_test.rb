@@ -50,6 +50,19 @@ class QueryTest < UnitTestCase
     assert_equal(0, query3.record.access_count)
   end
 
+  # Regression test for #5188: an emoji in a query param crashed
+  # Query.lookup because QueryRecord#description was utf8mb3.
+  def test_lookup_and_save_with_emoji
+    query = Query.lookup_and_save(:Image, pattern: "🍄")
+    assert_not(query.record.new_record?,
+               "Query with an emoji param should save its QueryRecord")
+
+    found = Query.lookup(:Image, pattern: "🍄")
+    assert_equal(query.record.id, found.record.id,
+                 "Re-looking-up the same emoji pattern should find the " \
+                 "same QueryRecord instead of erroring or duplicating it")
+  end
+
   def assert_validation_errors(query)
     assert_false(query.valid)
     assert_not_empty(query.validation_errors)
@@ -326,7 +339,7 @@ class QueryTest < UnitTestCase
     # Scalar attrs (and the :by alias) are bare symbols.
     assert_includes(filters, :order_by)
     assert_includes(filters, :by)
-    assert_includes(filters, :needs_naming) # scalar Class (User)
+    assert_includes(filters, :needs_naming) # scalar :truthy
     # An "enum" hash (`{ boolean: [true] }`/`{ string: [...] }`) is a
     # bare scalar from the URL's perspective, not a nested hash --
     # permitting it as `attr: {}` would strip a request's scalar
@@ -334,14 +347,30 @@ class QueryTest < UnitTestCase
     # until permit_filters learned to tell enum hashes apart from
     # structural ones).
     assert_includes(filters, :location_undefined)
-    # Array-typed attrs permit via `attr: []`.
+    # Array-typed attrs permit both ways: bare symbol for the scalar
+    # URL form (`?projects=123`), `attr: []` for the array form
+    # (`?projects[]=123`). Array-only filters silently dropped the
+    # scalar form (the Name-show `?this_name=<id>` links).
     assert_equal([], containers[:by_users])
     assert_equal([], containers[:projects])
+    assert_includes(filters, :by_users)
+    assert_includes(filters, :projects)
+    assert_includes(filters, :this_name)
     # Structural hash-typed attrs, including subqueries, permit via
     # `attr: {}`.
     assert_equal({}, containers[:names])
     assert_equal({}, containers[:in_box])
     assert_equal({}, containers[:location_query])
+  end
+
+  def test_permit_filters_permits_array_typed_param_as_scalar
+    raw = ActionController::Parameters.new(this_name: "31346",
+                                           projects: "17")
+
+    permitted = raw.permit(*Query::Observations.permit_filters)
+
+    assert_equal("31346", permitted[:this_name])
+    assert_equal("17", permitted[:projects])
   end
 
   def test_permit_filters_permits_enum_hash_typed_param_as_scalar
@@ -1221,6 +1250,51 @@ class QueryTest < UnitTestCase
     assert_equal(1, obs_queries[6].keys.length)
   end
 
+  # An Observation query filtered by project or species_list defaults
+  # its converted Location subquery to is_collection_location: true --
+  # checks the resolved attr names (`projects`/`species_lists`), not
+  # their param_alias shortcuts (`project`/`species_list`), which don't
+  # appear in a Query's stored params. See
+  # Query::Modules::Subqueries#needs_is_collection_location.
+  def test_observation_subquery_of_location_defaults_collection_location
+    project = projects(:bolete_project)
+    species_list = species_lists(:first_species_list)
+
+    by_project = Query.lookup_and_save(:Observation, projects: [project.id])
+    by_species_list = Query.lookup_and_save(
+      :Observation, species_lists: [species_list.id]
+    )
+    unfiltered = Query.lookup_and_save(:Observation, order_by: :id)
+
+    project_location = by_project.subquery_of(:Location)
+    species_list_location = by_species_list.subquery_of(:Location)
+    unfiltered_location = unfiltered.subquery_of(:Location)
+
+    assert_equal(
+      true,
+      project_location.params[:observation_query][:is_collection_location]
+    )
+    assert_equal(
+      true,
+      species_list_location.
+        params[:observation_query][:is_collection_location]
+    )
+    assert_not(
+      unfiltered_location.params[:observation_query].
+        key?(:is_collection_location)
+    )
+
+    # An empty array is a present key, not a filter -- .present?, not
+    # truthiness, decides this.
+    empty_projects = Query.lookup_and_save(:Observation, projects: [])
+    empty_projects_location = empty_projects.subquery_of(:Location)
+
+    assert_not(
+      empty_projects_location.params[:observation_query].
+        key?(:is_collection_location)
+    )
+  end
+
   def test_observation_subquery_of_name
     burbank = locations(:burbank)
     query_a = []
@@ -1342,6 +1416,80 @@ class QueryTest < UnitTestCase
     assert_equal(query.q_param, { model: :Observation, **params })
   end
 
+  def test_index_filter
+    params = { by_users: [rolf.id], names: { lookup: ["Coprinus comatus"] } }
+    query = Query.lookup(:Observation, **params)
+    # Same params as q_param minus :model, but with each one-element
+    # array shrunk to a bare scalar -- by_users -> its param_alias
+    # by_user, and the one-name/no-modifiers names: hash collapsed to
+    # this_name (Query::Observations-only; see collapse_names_to_this_name).
+    assert_equal({ by_user: rolf.id, this_name: "Coprinus comatus" },
+                 query.index_filter)
+  end
+
+  def test_index_filter_multiple_values_keeps_bracket_array_form
+    list1 = species_lists(:first_species_list)
+    list2 = species_lists(:another_species_list)
+    query = Query.lookup(:Observation, species_lists: [list1.id, list2.id])
+
+    # More than one value: no alias substitution, stays an array.
+    assert_equal({ species_lists: [list1.id, list2.id] }, query.index_filter)
+  end
+
+  def test_index_filter_names_not_collapsed_with_multiple_lookup_values
+    query = Query.lookup(:Observation,
+                         names: { lookup: %w[Agaricus Boletus] })
+
+    # More than one lookup value: not collapsible to this_name.
+    assert_equal({ names: { lookup: %w[Agaricus Boletus] } },
+                 query.index_filter)
+  end
+
+  def test_index_filter_names_not_collapsed_with_modifier_set
+    query = Query.lookup(:Observation,
+                         names: { lookup: ["Agaricus"],
+                                  include_synonyms: true })
+
+    # A modifier flag is set: not semantically equivalent to
+    # this_name, which carries no synonym/subtaxa expansion.
+    assert_equal(
+      { names: { lookup: ["Agaricus"], include_synonyms: true } },
+      query.index_filter
+    )
+  end
+
+  def test_index_filter_names_not_collapsed_without_this_name_attr
+    # Query::Names has no :this_name attr -- collapse_names_to_this_name
+    # must no-op rather than emitting a param the class won't recognize.
+    assert_not(Query::Names.has_attribute?(:this_name))
+    query = Query.lookup(:Name, names: { lookup: ["Agaricus"] })
+
+    assert_equal({ names: { lookup: ["Agaricus"] } }, query.index_filter)
+  end
+
+  def test_index_filter_does_not_clobber_explicit_this_name
+    # Both :this_name and :names are independently recognized
+    # top-level params -- a request can legitimately carry both, and
+    # collapse_names_to_this_name must not silently drop the explicit
+    # this_name filter in favor of the derived one.
+    query = Query.lookup(:Observation, this_name: ["Foo"],
+                                       names: { lookup: ["Bar"] })
+
+    assert_equal({ this_name: "Foo", names: { lookup: ["Bar"] } },
+                 query.index_filter)
+  end
+
+  def test_index_filter_excludes_routing_keys
+    query = Query.lookup(:Observation, by_users: [rolf.id])
+    # No query_attr is currently named these, but a future one could
+    # be -- defensively strip them so they can't clobber the route-
+    # helper args index_filter gets merged into.
+    query.params = query.params.merge(controller: "x", action: "y",
+                                      id: 1, format: "json")
+
+    assert_equal({ by_user: rolf.id }, query.index_filter)
+  end
+
   def test_merge_q_param_into_url
     assert_equal(
       "/observations", Query.merge_q_param_into_url("/observations", nil)
@@ -1369,6 +1517,34 @@ class QueryTest < UnitTestCase
       "q%5Blocations%5D%5B%5D=1&q%5Bmodel%5D=Observation",
       URI.parse(merged).query
     )
+  end
+
+  def test_merge_index_filters_into_url
+    assert_equal(
+      "/observations",
+      Query.merge_index_filters_into_url("/observations", nil)
+    )
+    assert_equal(
+      "/observations",
+      Query.merge_index_filters_into_url("/observations", {})
+    )
+    assert_equal(
+      "/observations?by_user=1",
+      Query.merge_index_filters_into_url("/observations", by_user: 1)
+    )
+    # Preserves an existing query param already on the path.
+    assert_equal(
+      "/observations?by_user=1&flow=next",
+      Query.merge_index_filters_into_url(
+        "/observations?flow=next", by_user: 1
+      )
+    )
+    # Flat, not nested under q[...] -- an array-valued filter still
+    # round-trips correctly via Hash#to_query.
+    merged = Query.merge_index_filters_into_url(
+      "/observations", locations: [1]
+    )
+    assert_equal("locations%5B%5D=1", URI.parse(merged).query)
   end
 
   ##############################################################################

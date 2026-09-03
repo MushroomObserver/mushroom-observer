@@ -74,7 +74,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     html = render_row
 
     assert_html(html, "a.user_link_#{@user.id}")
-    assert_html(html, "small.visible-xs-inline",
+    assert_html(html, "small.d-inline.d-sm-none",
                 text: "#{:show_namings_user.t}: ")
   end
 

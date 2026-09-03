@@ -19,14 +19,13 @@ module Views::Controllers::Observations::ExternalLinks
     prop :user, ::User
     prop :back, _Nilable(String), default: nil
 
-    # rubocop:disable Metrics/ParameterLists
+    # rubocop:disable-next Metrics/ParameterLists
     def initialize(model, observation:, sites:, user:, site: nil,
                    back: nil, **attrs)
       super(model, observation: observation, sites: sites,
                    site: site || sites&.first, user: user, back: back,
                    **attrs)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       render_external_id_field

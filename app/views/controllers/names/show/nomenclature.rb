@@ -57,9 +57,12 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_status_line
     li(class: "hanging-indent") do
-      plain("#{:status.ti}: ")
+      trusted_html(append_colon(:status.ti))
       plain(name_deprecation_status)
-      plain(" (#{:misspelled.ti})") if @name.is_misspelling?
+      if @name.is_misspelling?
+        whitespace
+        plain("(#{:misspelled.ti})")
+      end
       if approve_link || deprecate_link
         span(class: "text-nowrap ml-3") do
           render_synonym_links_inline
@@ -96,7 +99,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_name_paragraph
     li(class: "hanging-indent") do
-      plain("#{:name.ti}: ")
+      trusted_html(append_colon(:name.ti))
       plain(@name.real_text_name(@user))
       span(class: "text-nowrap ml-3") { render(synonyms_link) } if synonyms_link
     end
@@ -104,14 +107,14 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_authority_paragraph
     li(class: "hanging-indent") do
-      plain("#{:authority.ti}: ")
+      trusted_html(append_colon(:authority.ti))
       trusted_html(@name.author.to_s.t)
     end
   end
 
   def render_citation_paragraph
     li(class: "hanging-indent") do
-      plain("#{:citation.ti}: ")
+      trusted_html(append_colon(:citation.ti))
       trusted_html(@name.citation.to_s.tl)
     end
   end
@@ -184,7 +187,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_registrable_links
     li do
-      plain("#{:icn_id.ti}: ")
+      trusted_html(append_colon(:icn_id.ti))
       em { plain(:show_name_icn_id_missing.l) }
     end
     li { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }
@@ -206,7 +209,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_misspelling_correct_link
     p(class: "hanging-indent") do
-      plain("#{:show_name_misspelling_correct.l}: ")
+      trusted_html(append_colon(:show_name_misspelling_correct.l))
       if @name.correct_spelling
         a(href: name_path(@name.correct_spelling_id)) do
           trusted_html(@name.correct_spelling.display_name(@user).t)
@@ -243,7 +246,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     return if names.blank?
 
     li(class: "hanging-indent") do
-      plain("#{label}: ")
+      trusted_html(append_colon(label))
       names.each_with_index do |n, idx|
         a(href: name_path(n.id)) do
           trusted_html(n.display_name(@user).t)

@@ -7,7 +7,7 @@ class Components::ObservationFragment::When < Components::Base
 
   def view_template
     li(class: "obs-when hanging-indent") do
-      plain("#{:when.ti}: ")
+      trusted_html(append_colon(:when.ti))
       b { @obs.when.web_date }
     end
   end

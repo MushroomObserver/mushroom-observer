@@ -11,7 +11,7 @@ module Views::Controllers::Names::Synonyms
     prop :new_names, _Nilable(_Array(String)), default: nil
     prop :user, ::User
 
-    # rubocop:disable Metrics/ParameterLists
+    # rubocop:disable-next Metrics/ParameterLists
     def initialize(name:, user:, synonym_members: nil, deprecate_all: true,
                    current_synonyms: [], proposed_synonyms: nil,
                    new_names: nil, **attrs)
@@ -23,7 +23,6 @@ module Views::Controllers::Names::Synonyms
                          proposed_synonyms: proposed_synonyms,
                          new_names: new_names, user: user, **attrs)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       Row do
@@ -47,7 +46,7 @@ module Views::Controllers::Names::Synonyms
       namespace(:existing_synonyms) do |field_namespace|
         div(class: "form-group") do
           div(class: "font-weight-bold my-3") do
-            plain("#{:form_synonyms_current_synonyms.l}:")
+            append_colon(:form_synonyms_current_synonyms.l)
           end
           Help(element: :p, content: :form_synonyms_current_synonyms_help.t)
 
@@ -67,7 +66,7 @@ module Views::Controllers::Names::Synonyms
       namespace(:proposed_synonyms) do |field_namespace|
         div(class: "form-group") do
           div(class: "font-weight-bold my-3") do
-            plain("#{:form_synonyms_proposed_synonyms.l}:")
+            append_colon(:form_synonyms_proposed_synonyms.l)
           end
           Help(element: :p, content: :form_synonyms_proposed_synonyms_help.t)
 

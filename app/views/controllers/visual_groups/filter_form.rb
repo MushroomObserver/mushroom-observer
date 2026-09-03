@@ -20,7 +20,7 @@ module Views::Controllers::VisualGroups
     # FormObject internally.
     def initialize(_model = nil, visual_group:, status:, filter:, **)
       super(FormObject::VisualGroupFilter.new(status:, filter:),
-            visual_group: visual_group, turbo: false, **)
+            visual_group: visual_group, turbo: true, **)
     end
 
     def view_template
@@ -45,12 +45,11 @@ module Views::Controllers::VisualGroups
     # rendering has started, which means the whole tag has to be
     # built here in form_tag, not passed as a constructor kwarg the
     # base class's own form_tag could use.
-    # rubocop:disable MO/NoHandRolledFormTag
+    # rubocop:disable-next MO/NoHandRolledFormTag
     def form_tag(&block)
       form(action: form_action, method: :get,
            **form_attributes, &block)
     end
-    # rubocop:enable MO/NoHandRolledFormTag
 
     def form_action
       edit_visual_group_path(@visual_group)
@@ -71,7 +70,7 @@ module Views::Controllers::VisualGroups
     def render_status_button_row
       div(class: "d-flex gap-2 align-items-center mb-3") do
         strong(class: "mb-0") do
-          plain("#{:edit_visual_group_filter_options.t}:")
+          append_colon(:edit_visual_group_filter_options.t)
         end
         ButtonGroup do
           STATUSES.each do |(value, label_key)|

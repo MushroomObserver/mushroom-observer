@@ -47,20 +47,19 @@ module Views::Controllers::Sequences
     def render_obs_line
       obs = @sequence.observation
       p do
-        strong { "#{:observation.ti}:" }
-        whitespace
+        strong { append_colon(:observation.ti) }
         obs_name = obs.name.display_name(current_user).t
         Link(type: :get, name: obs_name, target: obs.show_link_args) do
           trusted_html(obs_name)
         end
-        plain(" (#{obs.id})")
+        whitespace
+        plain("(#{obs.id})")
       end
     end
 
     def render_field(label_key, value)
       p do
-        strong { "#{label_key.ti}:" }
-        whitespace
+        strong { append_colon(label_key.ti) }
         value.is_a?(::Proc) ? value.call : plain(value.to_s)
       end
     end
@@ -70,16 +69,14 @@ module Views::Controllers::Sequences
     # so the locus line uses a `<div>` wrapper instead.
     def render_locus
       div(class: "mb-3") do
-        strong { "#{:locus.ti}:" }
-        whitespace
+        strong { append_colon(:locus.ti) }
         pre(class: "d-inline text-monospace") { plain(@sequence.locus) }
       end
     end
 
     def render_bases
       p do
-        strong { "#{:bases.ti}:" }
-        whitespace
+        strong { append_colon(:bases.ti) }
         render(::Components::Button::Clipboard.new(
                  text: @sequence.bases, name: :copy_this_sequence.ti,
                  class: "ml-1"
@@ -93,8 +90,7 @@ module Views::Controllers::Sequences
 
     def render_deposit
       p do
-        strong { "#{:deposit.ti}:" }
-        whitespace
+        strong { append_colon(:deposit.ti) }
         render_archive_link
         plain(": ")
         render_accession_link

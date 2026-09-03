@@ -833,8 +833,7 @@ export default class extends Controller {
 
   // Phlex renders submit buttons as <button>, not <input> -- setting
   // .value on a <button> is a no-op for its displayed text (.value is
-  // only its submitted form value there). Same tag check
-  // form-feedback_controller.js uses for the same reason.
+  // only its submitted form value there).
   setButtonLabel(button, text) {
     if (button.tagName === 'BUTTON') {
       button.textContent = text;

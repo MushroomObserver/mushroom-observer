@@ -102,16 +102,14 @@ module Tab::Observation
     def test_of_look_alikes
       tab = Tab::Observation::OfLookAlikes.new(name: @name)
 
-      assert_equal(routes.observations_path(name: @name.id,
-                                            look_alikes: "1"),
+      assert_equal(routes.observations_path(look_alikes: @name.id),
                    tab.path)
     end
 
     def test_of_related_taxa
       tab = Tab::Observation::OfRelatedTaxa.new(name: @name)
 
-      assert_equal(routes.observations_path(name: @name.id,
-                                            related_taxa: "1"),
+      assert_equal(routes.observations_path(related_taxa: @name.id),
                    tab.path)
     end
 
@@ -161,9 +159,23 @@ module Tab::Observation
 
     def test_index
       tab = Tab::Observation::Index.new
+      with_filter = Tab::Observation::Index.new(
+        index_filter: { by_user: 1 }
+      )
+      # Array-valued filters go through Query.merge_index_filters_into_url
+      # (via with_index_filter), a different code path than the plain
+      # Hash#merge the other migrated Tab classes use -- confirm it
+      # round-trips correctly too.
+      with_array_filter = Tab::Observation::Index.new(
+        index_filter: { by_users: [1, 2] }
+      )
 
       assert_equal(:cancel_to_index.t(type: :observation), tab.title)
       assert_equal(routes.observations_path, tab.path)
+      assert_equal(routes.observations_path(by_user: 1), with_filter.path)
+      assert_equal(
+        routes.observations_path(by_users: [1, 2]), with_array_filter.path
+      )
     end
 
     def test_edit

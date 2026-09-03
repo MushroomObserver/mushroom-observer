@@ -1573,6 +1573,11 @@ class InatImportsControllerTest < FunctionalTestCase
                          "Confirmed URL import should redirect to iNat auth")
     assert_equal(normalized, import.inat_url,
                  "Normalized URL query string should be saved on InatImport")
+    assert_equal(url, import.original_inat_url,
+                 "Literal submitted URL should be saved on InatImport, " \
+                 "so a later reimport link can use it instead of " \
+                 "reconstructing (and guessing the host of) a URL from " \
+                 "the normalized query string")
   end
 
   def test_url_mode_importables_is_nil

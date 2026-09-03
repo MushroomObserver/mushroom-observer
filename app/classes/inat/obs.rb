@@ -98,9 +98,8 @@ class Inat
     ########## MO attributes
 
     # disable cop because gps_hidden is a pseudo-attribute
-    # rubocop:disable Naming/PredicateMethod
+    # rubocop:disable-next Naming/PredicateMethod
     def gps_hidden = @obs[:geoprivacy].present?
-    # rubocop:enable Naming/PredicateMethod
 
     # True when iNat has blurred the public coordinate for any reason --
     # user geoprivacy OR automatic taxon geoprivacy (which #gps_hidden,

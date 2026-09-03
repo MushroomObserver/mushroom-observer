@@ -39,7 +39,7 @@ module Views::Controllers::Support
     end
 
     def render_other_amount_inputs
-      radio_field(:amount, ["other", "#{:donate_other.l}: "],
+      radio_field(:amount, ["other", append_colon(:donate_other.l)],
                   wrap_class: "d-inline-block",
                   data: { donate_target: "otherCheck" })
       text_field(:other_amount, size: 7, label: "$ ", inline: true,

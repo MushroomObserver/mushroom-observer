@@ -32,13 +32,13 @@ end
 
 SimpleCov.start("rails") do
   # An always empty file which is always reported as a coverage decrease
-  add_filter("/channels/application_cable/channel.rb")
+  skip("/channels/application_cable/channel.rb")
 
-  # Custom RuboCop cops are lint-time tooling — loaded and exercised by
-  # RuboCop, never by the Rails test suite. The "rails" profile's
+  # Custom RuboCop cops are loaded and exercised by Rubocop
+  # not the Rails test suite. The "rails" profile's
   # track_files("{app,lib}/**/*.rb") otherwise pulls them into the report
   # as a permanent ~0% coverage drag.
-  add_filter("/lib/rubocop/")
+  skip("/lib/rubocop/")
 end
 
 # Allow test results to be reported back to runner IDEs.
@@ -100,6 +100,7 @@ end
 
   general_extensions
   flash_extensions
+  search_extensions
   controller_extensions
   capybara_session_extensions
   capybara_macros
@@ -231,19 +232,18 @@ module ActiveSupport
     # I18n.locale and Symbol.missing_tags) leak between tests
     # within a parallel worker. See #4238.
     setup do
-      # rubocop:disable Rails/I18nLocaleAssignment
+      # rubocop:disable-next Rails/I18nLocaleAssignment
       I18n.locale = :en if I18n.locale != :en
-      # rubocop:enable Rails/I18nLocaleAssignment
-      # rubocop:disable Rails/TimeZoneAssignment
+      # rubocop:disable-next Rails/TimeZoneAssignment
       Time.zone = "America/New_York"
-      # rubocop:enable Rails/TimeZoneAssignment
       clear_logs unless ActiveSupport::TestCase.cleared_logs
       Symbol.missing_tags = []
-      # Functional/integration tests reset this via ApplicationController's
-      # own before_action on every get/post; this covers unit tests that
-      # call UserGroup.all_users/reviewers/one_user directly, with no
+      # Functional/integration tests reset these via
+      # ApplicationController's before_actions on every get/post; this
+      # covers unit tests that call these methods directly, with no
       # request to trigger that reset.
       UserGroup.reset_request_cache
+      ExternalSite.reset_request_cache
     end
 
     # Otherwise WebMock accumulates every request made anywhere in this

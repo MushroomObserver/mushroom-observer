@@ -25,7 +25,7 @@ class Views::Layouts::Sidebar < Views::Base
     heading: "disabled font-weight-bold",
     admin: "list-group-item-danger indent",
     indent: "indent",
-    mobile_only: "visible-xs"
+    mobile_only: Components::Column.mobile_only_classes.join(" ").freeze
   }.freeze
 
   prop :user, _Nilable(::User), default: nil

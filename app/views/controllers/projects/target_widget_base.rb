@@ -30,7 +30,7 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
         field_name,
         type: autocompleter_type,
         textarea: true,
-        label: label_key.l
+        label: label_key
       )
       submit(submit_key.l, class: "ml-2 mt-2")
     end

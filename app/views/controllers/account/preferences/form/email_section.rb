@@ -38,7 +38,7 @@ module Views::Controllers::Account::Preferences::Form::EmailSection
 
   def render_email_group(label_key, fields)
     div(class: "mt-4") do
-      plain("#{label_key.t}: ")
+      trusted_html(append_colon(label_key.t))
       Help(element: :span,
            content: ["(", :prefs_email_please_notify.t, ")"].safe_join)
     end
