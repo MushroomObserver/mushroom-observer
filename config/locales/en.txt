@@ -2910,8 +2910,8 @@
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
 
-  inat_project_label: Foray or event project
-  inat_project_help: Optional. Choose a project to file this import's observations into; field slips and duplicate foray records are reconciled automatically. Leave blank for a normal import.
+  inat_project_label: Project
+  inat_project_help: Optional. Choose a project to file this import's observations into — a foray or event, or an ongoing project such as a challenge. Field slips and duplicate records are reconciled automatically. Leave blank for a normal import.
   inat_project_not_recognized: That project was not recognized. Pick one from the suggestions, or leave the field blank.
   inat_project_not_allowed: You cannot add observations to "[title]".
   inat_import_tracker_constraint_violations: Not added to the project (constraint violations)
