@@ -38,8 +38,8 @@ class FieldSlip::AttacherTest < UnitTestCase
     @obs.update!(inat_import: import)
     boom = proc { raise("boom") }
 
-    result = Inat::ProjectSlipStandardizer.
-             stub(:reconcile_after_attach, boom) do
+    standardizer = Inat::ProjectSlipStandardizer
+    result = standardizer.stub(:reconcile_after_attach, boom) do
       attach(code: "OPEN-0778")
     end
 
