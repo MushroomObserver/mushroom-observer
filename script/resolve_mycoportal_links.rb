@@ -196,8 +196,11 @@ class ResolveMycoportalLinks
       "Original link: #{link.url}"
   end
 
+  # `end_with?("mycoportal.org")` alone would also match a host like
+  # "evilmycoportal.org" -- no dot boundary. Require an exact match or
+  # a proper subdomain.
   def mycoportal_host?(uri)
-    uri.host&.end_with?("mycoportal.org")
+    uri.host == "mycoportal.org" || uri.host&.end_with?(".mycoportal.org")
   end
 
   def list_search?(url)
