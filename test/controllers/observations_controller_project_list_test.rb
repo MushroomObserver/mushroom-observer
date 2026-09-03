@@ -144,6 +144,26 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
                           @proj2.id => :checked)
   end
 
+  # Copilot review on PR #5302: a project id on the observation that
+  # the current user isn't a member of has no checkbox to submit it,
+  # so it shouldn't count as a "change" and force a full member-project
+  # scan. Confirms a no-op project update leaves it untouched either way.
+  def test_update_projects_no_op_preserves_non_member_project
+    init_for_project_checkbox_tests
+    @proj1.add_observation(@obs1) # dick isn't a member of @proj1
+
+    login("dick")
+    put(:update,
+        params: {
+          id: @obs1.id,
+          observation: { good_image_ids: @obs1_img_ids.join(" "),
+                         project_ids: [@proj2.id.to_s] }
+        })
+
+    assert_response(:redirect)
+    assert_obj_arrays_equal([@proj1, @proj2], @obs1.reload.projects, :sort)
+  end
+
   def init_for_project_checkbox_tests
     @proj1 = projects(:eol_project)
     @proj2 = projects(:bolete_project)

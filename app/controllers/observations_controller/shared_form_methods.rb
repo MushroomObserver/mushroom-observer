@@ -359,10 +359,17 @@ module ObservationsController::SharedFormMethods
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    changed_ids = desired_change_ids(desired, @observation.project_ids)
+    member_projects = @user.projects_member
+    # A project id on the observation the user isn't a member of (e.g.
+    # an admin added it, or the user has since left) has no checkbox
+    # to submit it in `desired`. Intersecting keeps such ids out of
+    # the diff, so they don't mark the request "changed" and defeat
+    # the empty-diff return below.
+    current = @observation.project_ids & member_projects.map(&:id)
+    changed_ids = desired_change_ids(desired, current)
     return if changed_ids.empty?
 
-    @user.projects_member.each do |project|
+    member_projects.each do |project|
       next unless changed_ids.include?(project.id)
 
       if desired.include?(project.id)
