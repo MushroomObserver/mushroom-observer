@@ -280,9 +280,12 @@ form {
 // toggled via `form.inert = true/false` in form-images_controller.js.
 // `inert` blocks pointer/keyboard/focus interaction without excluding
 // fields from serialization the way `disabled` would, so this rule is
-// purely the visual signal.
+// purely the visual signal. Kept light (issue #5238) -- the disabled
+// submit button and the per-image upload overlays already carry most
+// of the "in progress" signal; a heavy dim on the rest of the page
+// read as the page having frozen or broken.
 form[inert] {
-  opacity: 0.6;
+  opacity: 0.85;
   cursor: progress;
 }
 
