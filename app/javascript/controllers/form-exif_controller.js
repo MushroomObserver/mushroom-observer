@@ -111,7 +111,14 @@ export default class extends Controller {
     if (itemElement.dataset.initialized == "true") return;
 
     itemElement.dataset.initialized = "true";
-    this.dispatch("populated", { detail: { target: itemElement } });
+    // target: itemElement, not just detail.target -- form-images'
+    // data-action="form-exif:populated->form-images#itemExifPopulated"
+    // is declared on the carousel item, and Stimulus events only
+    // bubble upward. Without an explicit target: this dispatches on
+    // this.element (the shared <form>, an ancestor of the item), so
+    // it would never reach that action -- form-images#itemExifPopulated
+    // would never fire and exif_populated would never be set.
+    this.dispatch("populated", { target: itemElement, detail: { target: itemElement } });
   }
 
   // Now that we've read the data from the loaded file, populate carousel-item
@@ -122,7 +129,8 @@ export default class extends Controller {
     this.populateExifDate(itemElement, exif_data);
 
     // emit an event that form-images listens for, to set item.exif_populated
-    this.dispatch("populated", { detail: { target: itemElement } });
+    // (target: itemElement -- see markExifSettled for why)
+    this.dispatch("populated", { target: itemElement, detail: { target: itemElement } });
 
     // If this is the first one, transfer the exif data to the obs fields
     // and set a flag so we don't do it again. Here because it's async.

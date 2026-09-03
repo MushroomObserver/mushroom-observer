@@ -194,9 +194,16 @@ export default class extends Controller {
   /*********************/
   // Container for the image files.
 
-  // Callback for form-exif event "populated", fired from the carousel-item
+  // Callback for form-exif event "populated", fired from the
+  // carousel-item -- reads detail.target rather than event.target
+  // since form-exif_controller.js's dispatch explicitly carries the
+  // item that way. Previously read event.target, which resolved to
+  // the shared <form> (the dispatching controller's own root, an
+  // ancestor of every item, not the item itself); exif_populated was
+  // never set on any item as a result, so submitWhenExifReady always
+  // hit its full timeout.
   itemExifPopulated(event) {
-    const _item = this.findFileStoreItem(event.target);
+    const _item = this.findFileStoreItem(event.detail.target);
     // The item may already be gone (user removed it, or EXIF finished
     // after `fileStore.items` drained past it during upload) -- `index`
     // is kept in sync with removals, so a miss here means "no longer
@@ -365,16 +372,8 @@ export default class extends Controller {
   // blocking submission. MAX_EXIF_WAIT_ATTEMPTS caps the wait at 3s;
   // past that it submits anyway, no worse than before this existed.
   submitWhenExifReady(attempt = 0) {
-    const _ready = this.areAllItemsExifPopulated();
-    if (_ready || attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
-      // TEMP instrumentation (#5238): remove before merge. attempt 0 =
-      // submitted immediately; ~30 with ready=false = full EXIF timeout.
-      const _unsettled = Object.values(this.fileStore.index)
-        .filter((i) => !i.exif_populated).length;
-      console.log(`[exif-timing] submit after ${attempt} attempts ` +
-        `(~${attempt * 100}ms); ready=${_ready}; ` +
-        `items=${Object.keys(this.fileStore.index).length}; ` +
-        `unsettled=${_unsettled}`);
+    if (this.areAllItemsExifPopulated() ||
+      attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
       this.block_form_submission = false;
       this.submitForm();
     } else {
