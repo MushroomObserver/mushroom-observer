@@ -2043,6 +2043,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # the old flash assertion did) for the reload to settle with `count`
   # space-separated image ids.
   def assert_images_uploaded(count)
+    raise(ArgumentError.new("count must be >= 1")) if count < 1
+
     pattern = /\A\d+(?: \d+){#{count - 1}}\z/
     assert_field("observation[good_image_ids]", type: :hidden,
                                                 with: pattern, wait: 8)
