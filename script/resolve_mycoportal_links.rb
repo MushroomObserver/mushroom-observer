@@ -7,8 +7,20 @@
 #   1. url already matches the individual/index.php?occid= shape -- set
 #      external_id (same case normalize_mycoportal_links.rb handles;
 #      kept here so this script alone is a complete pass over whatever
-#      remains unresolved).
-#   2. url is a MyCoPortal catalog-number search (list.php?catnum=...,
+#      remains unresolved). Checked first, ahead of the sibling check
+#      below, so a link's resolvable occid always wins over trusting a
+#      sibling -- a sibling's external_id is not assumed to match
+#      without this check (a target can legitimately carry more than
+#      one distinct MyCoPortal correspondence).
+#   2. the same target (observation/image) already has a different
+#      MyCoPortal link with an external_id set -- a bulk export-
+#      reconciliation import can resolve a target via a separate
+#      `export`-relationship link, leaving this one untouched.
+#      Confirmed on a fresh prod checkpoint: 1,491 of 1,695 unresolved
+#      links fell into this case. Treated the same as an unresolvable
+#      link (case 3's no-occids branch): convert to a Comment
+#      preserving the url, then delete.
+#   3. url is a MyCoPortal catalog-number search (list.php?catnum=...,
 #      any db=) -- fetch the page and read the occid(s) out of the
 #      results table's `onclick="return openIndPU(OCCID,...)"` links.
 #        one occid  -> resolved: set external_id, drop url.
@@ -18,12 +30,12 @@
 #        2+ occids  -> ambiguous: report only, no change.
 #        fetch error -> report only, no change -- a transient failure
 #                      isn't grounds to delete a link.
-#   3. url is "http://adolf" or points back at mushroomobserver.org --
+#   4. url is "http://adolf" or points back at mushroomobserver.org --
 #      junk (a stray paste, or the linked observation's MO url pasted
 #      in by mistake -- every observed case's target_id matches the id
 #      in the url). Delete without a comment: there's nothing worth
 #      keeping.
-#   4. url is on mycoportal.org but isn't a record search (taxon pages,
+#   5. url is on mycoportal.org but isn't a record search (taxon pages,
 #      etc.), or isn't on mycoportal.org: can't resolve to one record,
 #      so convert to a Comment and delete.
 #
@@ -99,10 +111,23 @@ class ResolveMycoportalLinks
   def process(link)
     occid = @site.id_from_url(link.url)
     return resolve!(link, occid) if occid
+
+    if resolved_sibling?(link)
+      return convert_to_comment!(link, "already resolved via a separate " \
+                                       "MyCoPortal link on this record")
+    end
+
     return crawl_and_resolve(link) if list_search?(link.url)
     return delete_without_comment!(link) if self_referential?(link.url)
 
     convert_to_comment!(link, unresolvable_reason(link.url))
+  end
+
+  def resolved_sibling?(link)
+    ExternalLink.
+      where(external_site_id: @site.id, target_type: link.target_type,
+            target_id: link.target_id).
+      where.not(id: link.id).where.not(external_id: nil).exists?
   end
 
   def resolve!(link, occid)
