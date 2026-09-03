@@ -4,7 +4,7 @@ module InatImportsController::FormBuilders
   # Params carried verbatim from the new form through the confirm page.
   PASSTHROUGH_PARAM_KEYS = [
     :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
-    :recheck_all, :skip_inat_writeback
+    :recheck_all, :skip_inat_writeback, :inat_project, :inat_project_id
   ].freeze
 
   # Params that are literally "1" when checked/selected, absent or any
@@ -47,6 +47,8 @@ module InatImportsController::FormBuilders
       inat_url: reload_inat_url,
       choose_method: params[:choose_method] || derive_choose_method,
       skip_inat_writeback: initial_skip_writeback,
+      inat_project: params[:inat_project],
+      inat_project_id: params[:inat_project_id],
       **checkbox_flag_params
     )
   end

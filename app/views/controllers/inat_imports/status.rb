@@ -8,6 +8,8 @@ module Views::Controllers::InatImports
   class Status < Components::Base
     prop :inat_import, ::InatImport
 
+    include ReviewSections
+
     def view_template
       div(
         id: "inat_import_#{@inat_import.id}",
@@ -64,6 +66,7 @@ module Views::Controllers::InatImports
       render_ended_line
       render_error_line
       render_ignored_section
+      render_review_sections
     end
 
     def render_summary_paragraph

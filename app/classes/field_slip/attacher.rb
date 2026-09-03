@@ -32,7 +32,17 @@ class FieldSlip
     end
 
     # Returns what happened, for the caller's log line.
+    ATTACHED_RESULTS = [:attached, :joined, :merged].freeze
+
     def attach
+      result = perform_attach
+      reconcile_import_project(result)
+      result
+    end
+
+    private
+
+    def perform_attach
       existing = FieldSlip.find_by(code: @code)
       return attach_with_occurrence(existing) if @observation.occurrence_id
       return join_or_refuse(existing) if existing&.occurrence
@@ -45,7 +55,17 @@ class FieldSlip
       :attached
     end
 
-    private
+    # Case-2 hook of the import standardization (#5259): a slip landing
+    # on an import-created observation whose import has a target
+    # project gets reconciled with that project. Best-effort -- the
+    # attach itself must not fail over it.
+    def reconcile_import_project(result)
+      return unless ATTACHED_RESULTS.include?(result)
+
+      Inat::ProjectSlipStandardizer.reconcile_after_attach(@observation)
+    rescue StandardError => e
+      Rails.logger.warn("Import project reconcile failed: #{e.message}")
+    end
 
     # The observation already belongs to an occurrence. Three shapes:
     # the code names a slip on a different occurrence (merge), the

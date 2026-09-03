@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_02_200000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -265,6 +265,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_08_31_223601) do
     t.boolean "recheck_all", default: false, null: false
     t.integer "ignored_unlicensed_count", default: 0, null: false
     t.text "original_inat_url"
+    t.integer "project_id"
+    t.text "constraint_violation_obs_ids"
+    t.text "unlicensed_image_events"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
