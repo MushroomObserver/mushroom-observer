@@ -180,12 +180,21 @@ class ChangelogGenerator
   end
 
   # PRs whose merge commit is in prev..target, in commit order.
+  # Changelog PRs are bookkeeping about this file and are left out of
+  # every section (#5155), the same way the pre-release PR leaves
+  # itself out of the section it creates.
   def merged_prs(prev_tag, target_tag)
     order = run_cmd("git", "rev-list", "--reverse",
                     "#{prev_tag}..#{target_tag}").
             split("\n").each_with_index.to_h
     pr_pool.select { |pull| order.key?(merge_sha(pull)) }.
+      reject { |pull| changelog_pr?(pull) }.
       sort_by { |pull| order[merge_sha(pull)] }
+  end
+
+  def changelog_pr?(pull)
+    pull["headRefName"] == "changelog-pending" ||
+      pull["title"].to_s.start_with?("Changelog for ")
   end
 
   def merge_sha(pull)
