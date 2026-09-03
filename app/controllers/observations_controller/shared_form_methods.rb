@@ -344,7 +344,13 @@ module ObservationsController::SharedFormMethods
   # the user wants the obs attached to. Only `@user.projects_member`
   # projects are toggled — non-member projects the obs belongs to are
   # preserved by omission (disabled checkboxes don't submit, and the
-  # iteration excludes them anyway).
+  # id-set comparison below excludes them anyway).
+  #
+  # Compares id arrays (one lightweight `project_ids` query) rather
+  # than loading every member project's `observations` to run
+  # `@observation.projects.include?` per project -- for a user in
+  # hundreds of projects that eager load dominated the request (#5245).
+  # Only the ids whose membership changed get touched.
   def update_projects
     submitted_ids =
       params.permit(observation: { project_ids: [] }).
@@ -352,18 +358,25 @@ module ObservationsController::SharedFormMethods
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    @user.projects_member(include: :observations).each do |project|
-      before = @observation.projects.include?(project)
-      after = desired.include?(project.id)
-      next unless before != after
+    changed_ids = desired_change_ids(desired, @observation.project_ids)
+    return if changed_ids.empty?
 
-      if after
+    @user.projects_member.each do |project|
+      next unless changed_ids.include?(project.id)
+
+      if desired.include?(project.id)
         project.add_observation(@observation)
         name_flash_for_project(@observation.name, project)
       else
         flash_project_removal(project, project.remove_observation(@observation))
       end
     end
+  end
+
+  # Ids that differ between `desired` and `current` -- the membership
+  # changes that still need to happen.
+  def desired_change_ids(desired, current)
+    (desired - current) | (current - desired)
   end
 
   # Unchecking one box can move up to Occurrence::MAX_OBSERVATIONS
@@ -380,6 +393,9 @@ module ObservationsController::SharedFormMethods
     end
   end
 
+  # See `update_projects` -- same id-set comparison, same reason: a
+  # user editable on hundreds of species lists no longer means loading
+  # hundreds of lists' `observations` (#5245).
   def update_species_lists
     submitted_ids =
       params.permit(observation: { species_list_ids: [] }).
@@ -387,13 +403,11 @@ module ObservationsController::SharedFormMethods
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    @user.all_editable_species_lists.includes(:observations).
-      find_each do |list|
-      before = @observation.species_lists.include?(list)
-      after = desired.include?(list.id)
-      next unless before != after
+    changed_ids = desired_change_ids(desired, @observation.species_list_ids)
+    return if changed_ids.empty?
 
-      if after
+    @user.all_editable_species_lists.where(id: changed_ids).find_each do |list|
+      if desired.include?(list.id)
         list.add_observation(@observation)
         flash_notice(:added_to_list.t(list: list.title))
       else
