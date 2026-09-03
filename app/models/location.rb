@@ -984,6 +984,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_elevation
     validate_user
     validate_name
+    validate_scientific_name
   end
 
   def check_hidden
@@ -1031,8 +1032,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def validate_name
     if name.to_s.size > 1024
       errors.add(:name, :validate_location_name_too_long)
-    elsif name.empty?
+    elsif name.to_s.empty?
       errors.add(:name, :validate_missing, field: :name)
+    end
+  end
+
+  # #5244: ~7 Locations were created with a nil scientific_name via
+  # direct console access, which bypasses this validation -- see the
+  # NOT NULL DB constraint (added in the same migration as this
+  # validation) for the enforcement that reaches that path too.
+  def validate_scientific_name
+    if scientific_name.to_s.size > 1024
+      errors.add(:scientific_name, :validate_too_long,
+                 field: :scientific_name, max: 1024)
+    elsif scientific_name.to_s.empty?
+      errors.add(:scientific_name, :validate_missing,
+                 field: :scientific_name)
     end
   end
 end

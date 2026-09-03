@@ -1621,6 +1621,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # The geotagged.jpg is from University Park, Florida.
   UNIVERSITY_PARK = {
     name: "University Park, Westchester, Miami-Dade Co., Florida, USA",
+    scientific_name:
+      "USA, Florida, Miami-Dade Co., Westchester, University Park",
     north: 25.762050,
     south: 25.733291,
     east: -80.351868,

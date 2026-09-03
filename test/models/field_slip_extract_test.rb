@@ -470,7 +470,9 @@ class FieldSlipExtractTest < UnitTestCase
   # abbreviation matches both.
   def twin_of(location)
     head, tail = location.name.split(",", 2)
-    twin = Location.new(user: rolf, name: "#{head} Annex,#{tail}",
+    twin_name = "#{head} Annex,#{tail}"
+    twin = Location.new(user: rolf, name: twin_name,
+                        scientific_name: Location.reverse_name(twin_name),
                         north: location.north, south: location.south,
                         east: location.east, west: location.west)
     twin.current_user = rolf

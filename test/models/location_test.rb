@@ -124,6 +124,7 @@ class LocationTest < UnitTestCase
   def test_versioning
     loc = Location.create!(
       name: "Anywhere",
+      scientific_name: "Anywhere",
       north: 60,
       south: 50,
       east: 40,
@@ -794,7 +795,8 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "left" side of loc
     overlaps_albion_west =
       Location.create(
-        name: "overlaps_albion_west", user: users(:rolf),
+        name: "overlaps_albion_west", scientific_name: "overlaps_albion_west",
+        user: users(:rolf),
         north: albion.north, south: albion.south, east: albion.east - 0.05,
         west: albion.west - 0.05
       )
@@ -803,7 +805,8 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "right" side of loc
     overlaps_albion_east =
       Location.create(
-        name: "overlaps_albion_east", user: users(:rolf),
+        name: "overlaps_albion_east", scientific_name: "overlaps_albion_east",
+        user: users(:rolf),
         north: albion.north, south: albion.south, west: albion.west + 0.05,
         east: albion.east + 0.05
       )
@@ -816,7 +819,7 @@ class LocationTest < UnitTestCase
     # loc straddles 180
     #   potential br entirely outside of loc
     russia = Location.create(
-      name: "russia", user: users(:rolf),
+      name: "russia", scientific_name: "russia", user: users(:rolf),
       north: 86.217, south: 38.083, west: 27.370116, east: -168.995128
     )
     do_contains_box(loc: wrangel, external_loc: albion,
@@ -824,7 +827,9 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "left" side of loc
     overlaps_wrangel_west =
       Location.create(
-        name: "overlaps_wrangel_west", user: users(:rolf),
+        name: "overlaps_wrangel_west",
+        scientific_name: "overlaps_wrangel_west",
+        user: users(:rolf),
         north: wrangel.north, south: wrangel.south, east: wrangel.east - 0.05,
         west: wrangel.west - 0.05
       )
@@ -833,7 +838,9 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "right" side of loc
     overlaps_wrangel_east =
       Location.create(
-        name: "overlaps_wrangel_east", user: users(:rolf),
+        name: "overlaps_wrangel_east",
+        scientific_name: "overlaps_wrangel_east",
+        user: users(:rolf),
         north: wrangel.north, south: wrangel.south, east: wrangel.east + 0.05,
         west: wrangel.west + 0.05
       )
@@ -907,6 +914,7 @@ class LocationTest < UnitTestCase
     loc = Location.create!(
       hidden: true,
       name: "Somewhere Hidden",
+      scientific_name: "Somewhere Hidden",
       north: high,
       south: low,
       east: high,
