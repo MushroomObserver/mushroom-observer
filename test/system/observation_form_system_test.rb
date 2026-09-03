@@ -1301,7 +1301,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       lngField.dispatchEvent(new Event('input', { bubbles: true }));
     JS
 
-    assert_selector("[data-type='location_containing']", wait: 10)
+    wait_for_autocompleter_request_params(lat: 0, lng: 0.5)
+    assert_selector("[data-type='location_containing']")
 
     request_params = evaluate_script(<<~JS)
       (() => {
@@ -1807,6 +1808,35 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
   private :wait_for_autocompleter_match
+
+  # The lat/lng -> "location_containing" swap is debounced (map
+  # controller's sendPointChanged, 1s) and re-runs on every input event,
+  # so a plain `assert_selector(wait:)` on the resulting `data-type` can
+  # observe an intermediate swap (or none yet) instead of the settled
+  # one carrying these request_params. Poll the autocompleter
+  # controller's state instead of the DOM attribute.
+  def wait_for_autocompleter_request_params(lat:, lng:)
+    Timeout.timeout(10) do
+      loop do
+        ready = evaluate_script(<<~JS)
+          (() => {
+            const el = document.getElementById(
+              'observation_location_autocompleter'
+            );
+            const c = window.Stimulus.getControllerForElementAndIdentifier(
+              el, 'autocompleter--location'
+            );
+            const p = c?.request_params;
+            return !!(p && p.lat === #{lat} && p.lng === #{lng});
+          })()
+        JS
+        break if ready
+
+        sleep(0.1)
+      end
+    end
+  end
+  private :wait_for_autocompleter_request_params
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)
