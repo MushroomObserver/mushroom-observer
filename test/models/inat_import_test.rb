@@ -469,4 +469,25 @@ class InatImportTest < ActiveSupport::TestCase
       "reimport_url should be nil when neither URL column was stored"
     )
   end
+
+  # #5259 review recorders: both JSON columns default to [] and append.
+  def test_constraint_violation_and_unlicensed_image_recording
+    import = inat_imports(:rolf_inat_import)
+
+    assert_equal([], import.constraint_violation_obs_ids)
+    import.add_constraint_violation_obs(123)
+    import.add_constraint_violation_obs(456)
+    import.add_constraint_violation_obs(123)
+    assert_equal([123, 456], import.reload.constraint_violation_obs_ids,
+                 "A re-recorded observation must not duplicate")
+
+    assert_equal([], import.unlicensed_image_events)
+    import.add_unlicensed_image_event(inat_id: 987, login: "somebody",
+                                      license_code: nil, count: 2)
+    event = import.reload.unlicensed_image_events.first
+    assert_equal(987, event["inat_id"])
+    assert_equal("somebody", event["login"])
+    assert_nil(event["license_code"])
+    assert_equal(2, event["count"])
+  end
 end

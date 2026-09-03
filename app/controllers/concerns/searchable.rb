@@ -53,6 +53,7 @@ module Searchable
     end
 
     def save_search_query_and_redirect_to_index
+      flash_unmatched_lookups
       save_search_query
       # always_index: 1 preserves MO's existing guarantee that a search
       # submission lands on the results list, not a same-request
@@ -146,7 +147,8 @@ module Searchable
         return
       end
 
-      @query_params[:names][:lookup] = vals.split("\n").map(&:strip)
+      @query_params[:names][:lookup] =
+        vals.split("\n").map(&:strip).compact_blank
     end
 
     # Nested blank values will make for null query results,
@@ -198,8 +200,9 @@ module Searchable
         next if @query_params[field].blank?
 
         klass = lookup_class_for(field)
-        @query_params[field] = klass.new(@query_params[field]).ids.
-                               map(&:to_s)
+        lookup = klass.new(@query_params[field])
+        @query_params[field] = lookup.ids.map(&:to_s)
+        record_unmatched(field, lookup.unmatched)
       end
     end
 

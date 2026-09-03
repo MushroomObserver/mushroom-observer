@@ -896,8 +896,8 @@ module Observations
     def test_names_lookup_between_thresholds_that_fail_to_resolve
       login
       # None of these match anything, so resolution produces an empty
-      # id list -- should still redirect (not error), matching the
-      # existing silent-drop behavior for unmatched names.
+      # id list -- should still redirect (not error), with a warning
+      # listing (a truncated sample of) what didn't match.
       unmatched = (1..60).map { |i| "Nonexistent Taxon #{i}" }.join("\n")
       params = { names: { lookup: unmatched } }
 
@@ -906,6 +906,145 @@ module Observations
       end
 
       assert_response(:redirect)
+      shown = (1..10).map { |i| "Nonexistent Taxon #{i}" }.join(", ")
+      expected_list = "#{shown}, and 50 more"
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 60, list: expected_list
+      )
+    end
+
+    # ---------------------------------------------------------------
+    #  Unmatched-entry feedback (issue #5299)
+    # ---------------------------------------------------------------
+
+    def test_fields_preferring_ids_unmatched_entries_flashed
+      login
+      user = users(:mary)
+      params = { by_users: "#{user.login}\nnonexistent_login_xyz" }
+
+      post(:create, params: { query_observations: params })
+
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :query_by_users.l.humanize, count: 1,
+        list: "nonexistent_login_xyz"
+      )
+      assert_search_redirected_to(
+        controller: "/observations",
+        params: { by_user: user.id }
+      )
+    end
+
+    def test_names_lookup_unmatched_entries_flashed_under_threshold
+      login
+      name = names(:coprinus_comatus)
+      lookup = "#{name.text_name}\nNonexistent Taxon"
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1, list: "Nonexistent Taxon"
+      )
+      # Under threshold: raw text stays as-is, not resolved to ids.
+      redirect_params = parse_redirect_names_params
+      assert_equal([name.text_name, "Nonexistent Taxon"],
+                   redirect_params["lookup"])
+    end
+
+    def test_names_lookup_no_warning_when_all_match
+      login
+      name = names(:coprinus_comatus)
+      params = { names: { lookup: name.text_name } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_no_flash
+    end
+
+    # Under-threshold unmatched-tracking calls original_names, not ids
+    # (skips subtaxa expansion) -- confirm it still finds the miss
+    # correctly with include_subtaxa on, the search form's default.
+    def test_names_lookup_unmatched_check_works_with_subtaxa_enabled
+      login
+      name = names(:macrolepiota)
+      params = {
+        names: {
+          lookup: "#{name.text_name}\nNonexistent Taxon",
+          include_subtaxa: "true"
+        }
+      }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1, list: "Nonexistent Taxon"
+      )
+    end
+
+    def test_names_lookup_unmatched_entries_deduped
+      login
+      lookup = "Nonexistent Taxon\nNonexistent Taxon"
+      params = { names: { lookup: lookup } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1, list: "Nonexistent Taxon"
+      )
+    end
+
+    # Two different fields with misses must land in the same flash,
+    # each as a separate paragraph -- neither call should overwrite
+    # the other's message. The Array form of assert_flash_warning
+    # checks the exact concatenated text, in order, so it fails if
+    # either message went missing or got clobbered.
+    def test_multiple_fields_with_unmatched_entries_flash_together
+      login
+      herbarium = herbaria(:nybg_herbarium)
+      name = names(:coprinus_comatus)
+      params = {
+        herbaria: "#{herbarium.name}\nNonexistent Herbarium XYZ",
+        names: { lookup: "#{name.text_name}\nNonexistent Taxon" }
+      }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      assert_flash_warning(
+        [
+          [:runtime_search_unmatched_values,
+           { field: :names.t.to_s, count: 1, list: "Nonexistent Taxon" }],
+          [:runtime_search_unmatched_values,
+           { field: :query_herbaria.l.humanize, count: 1,
+             list: "Nonexistent Herbarium XYZ" }]
+        ]
+      )
+    end
+
+    # A paste with no newlines (values separated by commas/tabs/spaces
+    # instead) becomes one long unmatched "value" -- must not embed
+    # it whole in the flash. session is cookie-backed; an unbounded
+    # value there risks CookieOverflow.
+    def test_unmatched_long_unseparated_entry_truncated_in_flash
+      login
+      long_paste = "Species " * 200
+      params = { names: { lookup: long_paste } }
+
+      post(:create, params: { query_observations: params })
+
+      assert_response(:redirect)
+      max = Searchable::MatchGuards::MAX_UNMATCHED_VALUE_LENGTH
+      assert_flash_warning(
+        :runtime_search_unmatched_values,
+        field: :names.t.to_s, count: 1,
+        list: "#{long_paste[0, max]}..."
+      )
     end
 
     private
