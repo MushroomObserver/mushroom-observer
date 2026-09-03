@@ -3997,6 +3997,7 @@
   runtime_no_more: There are no more [types].
   runtime_search_string_too_long: "Search string too long ([length] characters). Maximum is [max] characters."
   runtime_search_too_many_values: "[field]: too many values ([count]). Maximum is [max]."
+  runtime_search_unmatched_values: "[field]: [count] value(s) did not match anything: [list]."
   runtime_no_parse: "Unable to parse: '[value]'"
   runtime_no_save: Unable to save [type].
   runtime_no_update: Unable to update [type].
