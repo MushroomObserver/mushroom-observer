@@ -20,11 +20,8 @@ module Projects
       [groups, ungrouped]
     end
 
-    # `scientific_name` isn't guaranteed on legacy Location rows -- fall
-    # back to `name` so a nil doesn't blow up `sort_by`'s comparison
-    # against other locations' non-nil scientific names.
     def sort_key(loc)
-      loc.scientific_name || loc.name
+      loc.scientific_name
     end
 
     def sorted_targets(project)
