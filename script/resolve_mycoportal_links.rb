@@ -2,7 +2,12 @@
 # frozen_string_literal: true
 
 # Resolve MyCoPortal ExternalLinks whose stored `url` isn't a clean
-# individual-record permalink (#4591). Checked in order:
+# individual-record permalink (#4591). Every candidate ends in one of
+# two terminal states: `external_id` gets set, or the link is
+# converted to a Comment and deleted -- no link is left with a nil
+# `external_id` after a full apply run except one still stuck on a
+# fetch error, which needs manual resolution before `external_id` can
+# be made NOT NULL and `url` dropped. Checked in order:
 #
 #   1. url already matches the individual/index.php?occid= shape -- set
 #      external_id (same case normalize_mycoportal_links.rb handles;
@@ -27,7 +32,11 @@
 #        no occids  -> no matching record: convert the link to a Comment
 #                      on the target (preserving the url verbatim) and
 #                      delete the link.
-#        2+ occids  -> ambiguous: report only, no change.
+#        2+ occids  -> ambiguous: convert to a Comment listing every
+#                      candidate occid, then delete -- still logged
+#                      separately under "Needs human review" so a
+#                      human can pick the right occid and set it by
+#                      hand on the target if it matters.
 #        fetch error -> report only, no change -- a transient failure
 #                      isn't grounds to delete a link.
 #   4. url is "http://adolf" or points back at mushroomobserver.org --
@@ -157,9 +166,10 @@ class ResolveMycoportalLinks
 
   def handle_ambiguous(link, occids)
     @ambiguous << { id: link.id, url: link.url, occids: occids }
-    warn("##{link.id}: #{occids.size} candidate records " \
-         "(#{occids.join(", ")}), needs human review, skipping")
-    @counts[:ambiguous] += 1
+    convert_to_comment!(
+      link, "#{occids.size} candidate MyCoPortal records: " \
+            "#{occids.join(", ")}"
+    )
   end
 
   # "http://adolf", and every mushroomobserver.org self-link in this
