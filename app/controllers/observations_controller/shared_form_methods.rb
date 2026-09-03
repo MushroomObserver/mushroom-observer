@@ -26,6 +26,7 @@
 #    strip_images!
 #
 #    update_projects
+#    desired_change_ids
 #    update_species_lists
 #
 module ObservationsController::SharedFormMethods
