@@ -1124,6 +1124,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
     pasadena = Location.create!(
       name: "Pasadena, Los Angeles Co., California, USA",
+      scientific_name: "USA, California, Los Angeles Co., Pasadena",
       north: 34.25, south: 34.12, east: -118.07, west: -118.20,
       user: katrina
     )
@@ -1370,6 +1371,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
     pasadena = Location.create!(
       name: "Pasadena, Los Angeles Co., California, USA",
+      scientific_name: "USA, California, Los Angeles Co., Pasadena",
       north: 34.25, south: 34.12, east: -118.07, west: -118.20,
       user: katrina
     )
@@ -1464,11 +1466,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     alpha = Location.create!(
       name: "Test Location Alpha Extended Forest Preserve Area, " \
             "Testland Co., Testania, USA",
+      scientific_name: "USA, Testania, Testland Co., " \
+                       "Test Location Alpha Extended Forest Preserve Area",
       north: 40.05, south: 39.95, east: -77.30, west: -77.40,
       user: katrina
     )
     beta = Location.create!(
       name: "Test Location Beta, Testland",
+      scientific_name: "Testland, Test Location Beta",
       north: 10.05, south: 9.95, east: 10.40, west: 10.30,
       user: katrina
     )

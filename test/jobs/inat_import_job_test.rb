@@ -39,6 +39,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Add objects which are not included in fixtures
     loc = Location.create(user: @user,
                           name: "Sevier Co., Tennessee, USA",
+                          scientific_name: "USA, Tennessee, Sevier Co.",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
     before_total_imported_count = @inat_import.total_imported_count.to_i
@@ -115,6 +116,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -231,6 +233,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -263,6 +266,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Add objects which are not included in fixtures
     Location.create(user: user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -300,6 +304,7 @@ class InatImportJobTest < ActiveJob::TestCase
     loc = Location.create(
       user: @user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
+      scientific_name: "USA, Oregon, Multnomah Co., Troutdale",
       north: 45.5609, south: 45.5064,
       east: -122.367, west: -122.431
     )
@@ -953,6 +958,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -1015,6 +1021,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @user.update(inat_username: @inat_import.inat_username)
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -1516,6 +1523,7 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("calostoma_lutescens")
     @user.update(inat_username: @inat_import.inat_username)
     Location.create(user: @user, name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
     stub_inat_interactions
