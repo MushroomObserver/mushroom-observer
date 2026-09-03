@@ -195,15 +195,14 @@ export default class extends Controller {
   // Container for the image files.
 
   // Callback for form-exif event "populated", fired from the
-  // carousel-item -- reads detail.target rather than event.target
-  // since form-exif_controller.js's dispatch explicitly carries the
-  // item that way. Previously read event.target, which resolved to
-  // the shared <form> (the dispatching controller's own root, an
-  // ancestor of every item, not the item itself); exif_populated was
-  // never set on any item as a result, so submitWhenExifReady always
-  // hit its full timeout.
+  // carousel-item. form-exif_controller.js's dispatch explicitly sets
+  // target: itemElement -- without that, event.target would resolve
+  // to the shared <form> (the dispatching controller's own root, an
+  // ancestor of every item, not the item itself), exif_populated
+  // would never be set on any item, and submitWhenExifReady would
+  // always hit its full timeout.
   itemExifPopulated(event) {
-    const _item = this.findFileStoreItem(event.detail.target);
+    const _item = this.findFileStoreItem(event.target);
     // The item may already be gone (user removed it, or EXIF finished
     // after `fileStore.items` drained past it during upload) -- `index`
     // is kept in sync with removals, so a miss here means "no longer
@@ -330,7 +329,12 @@ export default class extends Controller {
       [this.goodImageIdsTarget.value || "", ..._ids].join(" ").trim();
 
     if (_failed.length > 0) {
-      this.handleUploadFailures(_failed);
+      // _failed is in completion order (runUploads' workers push as
+      // each settles), not selection order -- restore items' order so
+      // a retry re-uploads failed photos in the order they were
+      // picked, not scrambled by which one happened to fail first.
+      const _failedSet = new Set(_failed);
+      this.handleUploadFailures(items.filter((item) => _failedSet.has(item)));
     } else {
       this.submit_buttons.forEach((element) => {
         this.setButtonLabel(element,
@@ -723,8 +727,10 @@ export default class extends Controller {
   handleUploadFailures(items) {
     // Re-queue the failed items (their successful siblings already added
     // their ids to good_images) so clicking Create again retries only
-    // those, then unlock the form the batch had left inert.
-    items.forEach((item) => this.fileStore.items.unshift(item));
+    // those, then unlock the form the batch had left inert. One
+    // unshift(...items) call, not a per-item loop -- unshifting items
+    // one at a time reverses whatever order `items` arrived in.
+    this.fileStore.items.unshift(...items);
 
     this.form.inert = false;
     this.form.removeAttribute('aria-busy');
