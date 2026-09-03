@@ -32,7 +32,6 @@
 - Convert `Tab::Name::ObsLink::*` to plain route-helper paths ([PR5270](https://github.com/MushroomObserver/mushroom-observer/pull/5270), @nimmolo)
 - Add `Superorder` rank ([PR5272](https://github.com/MushroomObserver/mushroom-observer/pull/5272), @JoeCohen)
 - Require root for dev setup dispatcher ([PR5274](https://github.com/MushroomObserver/mushroom-observer/pull/5274), @AlanRockefeller)
-- Changelog for `deploy-2026-08-29-11-00` ([PR5267](https://github.com/MushroomObserver/mushroom-observer/pull/5267), @mo-nathan)
 - Bundle update 20260831 ([PR5275](https://github.com/MushroomObserver/mushroom-observer/pull/5275), @JoeCohen)
 - Refill "search URL" field with complete URL ([PR5223](https://github.com/MushroomObserver/mushroom-observer/pull/5223), @JoeCohen)
 - Allow emoji in copyright holder ([PR5187](https://github.com/MushroomObserver/mushroom-observer/pull/5187), @JoeCohen)
@@ -47,7 +46,6 @@
 - `Projects::ViolationsController#index`- no discarded query, paginate directly ([PR5255](https://github.com/MushroomObserver/mushroom-observer/pull/5255), @nimmolo)
 - Query params - Collapse `default_sort_order` to `controller_query_class.default_order` ([PR5257](https://github.com/MushroomObserver/mushroom-observer/pull/5257), @nimmolo)
 - Gate the observation-list panel on editable lists; redirect to the observation ([PR5260](https://github.com/MushroomObserver/mushroom-observer/pull/5260), @mo-nathan)
-- Changelog for `deploy-2026-08-27-23-19` and `deploy-2026-08-28-12-10` ([PR5253](https://github.com/MushroomObserver/mushroom-observer/pull/5253), @mo-nathan)
 - Render field slip name-approval radios inside the review form ([PR5262](https://github.com/MushroomObserver/mushroom-observer/pull/5262), @mo-nathan)
 - Attach a read field slip onto a companion occurrence ([PR5266](https://github.com/MushroomObserver/mushroom-observer/pull/5266), @mo-nathan)
 
@@ -63,7 +61,6 @@
 ## 2026-08-27 (deploy-2026-08-27-23-19)
 
 - Query params — Move complex params to scopes and set ivars in ApplicationController, part 1 ([PR5217](https://github.com/MushroomObserver/mushroom-observer/pull/5217), @nimmolo)
-- Changelog for `deploy-2026-08-25-22-30` ([PR5222](https://github.com/MushroomObserver/mushroom-observer/pull/5222), @mo-nathan)
 - Revert accidental direct push to `main` ([PR5227](https://github.com/MushroomObserver/mushroom-observer/pull/5227), @nimmolo)
 - Add spacing to Account preferences `InputGroupAddon` buttons with icons ([PR5226](https://github.com/MushroomObserver/mushroom-observer/pull/5226), @nimmolo)
 - Query params — Finish `index_active_params` -> `create_query_from_url_params` sweep ([PR5225](https://github.com/MushroomObserver/mushroom-observer/pull/5225), @nimmolo)
@@ -78,7 +75,6 @@
 
 ## 2026-08-25 (deploy-2026-08-25-22-30)
 
-- Changelog for `deploy-2026-08-25-12-00` and `deploy-2026-08-25-12-05` ([PR5219](https://github.com/MushroomObserver/mushroom-observer/pull/5219), @mo-nathan)
 - Stop the iNat resync from overwriting coordinates with obscured data (#4215) ([PR5220](https://github.com/MushroomObserver/mushroom-observer/pull/5220), @mo-nathan)
 - Query params — Migrate pass-thru `index_active_params` to `query_attr` alias ([PR5216](https://github.com/MushroomObserver/mushroom-observer/pull/5216), @nimmolo)
 - Namings endpoint ([PR5206](https://github.com/MushroomObserver/mushroom-observer/pull/5206), @JoeCohen)
@@ -89,7 +85,6 @@
 
 ## 2026-08-25 (deploy-2026-08-25-12-00)
 
-- Changelog for `deploy-2026-08-24-12-01`; fix pool timezone skew ([PR5191](https://github.com/MushroomObserver/mushroom-observer/pull/5191), @mo-nathan)
 - Changelog blocks: no UI jargon, capitalize MO object names ([PR5190](https://github.com/MushroomObserver/mushroom-observer/pull/5190), @mo-nathan)
 - Block deleting a read-only reflection (#5180) ([PR5193](https://github.com/MushroomObserver/mushroom-observer/pull/5193), @mo-nathan)
 - Add daily batch resync of read-only iNat reflections (#4215) ([PR5194](https://github.com/MushroomObserver/mushroom-observer/pull/5194), @mo-nathan)
@@ -758,7 +753,7 @@
 - .claude hooks: Run git commit before blocking a behind-branch push ([PR4742](https://github.com/MushroomObserver/mushroom-observer/pull/4742), @nimmolo)
 - Remove dead `@@last_update` class variable from Language ([PR4739](https://github.com/MushroomObserver/mushroom-observer/pull/4739), @nimmolo)
 - Delete `RunLevel` entirely ([PR4740](https://github.com/MushroomObserver/mushroom-observer/pull/4740), @nimmolo)
-- Halt daily "reviewed observation  (insert)" ([PR4702](https://github.com/MushroomObserver/mushroom-observer/pull/4702), @JoeCohen)
+- Halt daily "reviewed observation (insert)" ([PR4702](https://github.com/MushroomObserver/mushroom-observer/pull/4702), @JoeCohen)
 
 ## 2026-07-09 (deploy-2026-07-09-04-15)
 
@@ -933,7 +928,7 @@
 
 ## 2026-06-29 (deploy-2026-06-29-22-04)
 
-- Fix 500 on unauthenticated request to  engine controller  ([PR4622](https://github.com/MushroomObserver/mushroom-observer/pull/4622), @JoeCohen)
+- Fix 500 on unauthenticated request to engine controller ([PR4622](https://github.com/MushroomObserver/mushroom-observer/pull/4622), @JoeCohen)
 
 ## 2026-06-29 (deploy-2026-06-29-16-16)
 
