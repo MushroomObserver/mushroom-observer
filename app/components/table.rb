@@ -45,7 +45,9 @@
 #         variant: :striped,
 #         identifier: "user-list") do |t|
 #     t.column("Name", width: "33%") { |user| user.name }
-#     t.column("Actions", class: "text-right") { |u| destroy_button(u) }
+#     t.column("Actions", class: "text-right") do |u|
+#       Button(type: :delete, target: u)
+#     end
 #   end
 #
 # @example Row mode (Stimulus-rooted rows)
