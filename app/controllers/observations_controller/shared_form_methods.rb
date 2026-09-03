@@ -26,6 +26,7 @@
 #    strip_images!
 #
 #    update_projects
+#    desired_change_ids
 #    update_species_lists
 #
 module ObservationsController::SharedFormMethods
@@ -344,7 +345,13 @@ module ObservationsController::SharedFormMethods
   # the user wants the obs attached to. Only `@user.projects_member`
   # projects are toggled — non-member projects the obs belongs to are
   # preserved by omission (disabled checkboxes don't submit, and the
-  # iteration excludes them anyway).
+  # id-set comparison below excludes them anyway).
+  #
+  # Compares id arrays (one lightweight `project_ids` query) rather
+  # than loading every member project's `observations` to run
+  # `@observation.projects.include?` per project -- for a user in
+  # hundreds of projects that eager load dominated the request (#5245).
+  # Only the ids whose membership changed get touched.
   def update_projects
     submitted_ids =
       params.permit(observation: { project_ids: [] }).
@@ -352,18 +359,32 @@ module ObservationsController::SharedFormMethods
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    @user.projects_member(include: :observations).each do |project|
-      before = @observation.projects.include?(project)
-      after = desired.include?(project.id)
-      next unless before != after
+    member_projects = @user.projects_member
+    # A project id on the observation the user isn't a member of (e.g.
+    # an admin added it, or the user has since left) has no checkbox
+    # to submit it in `desired`. Intersecting keeps such ids out of
+    # the diff, so they don't mark the request "changed" and defeat
+    # the empty-diff return below.
+    current = @observation.project_ids & member_projects.map(&:id)
+    changed_ids = desired_change_ids(desired, current)
+    return if changed_ids.empty?
 
-      if after
+    member_projects.each do |project|
+      next unless changed_ids.include?(project.id)
+
+      if desired.include?(project.id)
         project.add_observation(@observation)
         name_flash_for_project(@observation.name, project)
       else
         flash_project_removal(project, project.remove_observation(@observation))
       end
     end
+  end
+
+  # Ids that differ between `desired` and `current` -- the membership
+  # changes that still need to happen.
+  def desired_change_ids(desired, current)
+    (desired - current) | (current - desired)
   end
 
   # Unchecking one box can move up to Occurrence::MAX_OBSERVATIONS
@@ -380,6 +401,9 @@ module ObservationsController::SharedFormMethods
     end
   end
 
+  # See `update_projects` -- same id-set comparison, same reason: a
+  # user editable on hundreds of species lists no longer means loading
+  # hundreds of lists' `observations` (#5245).
   def update_species_lists
     submitted_ids =
       params.permit(observation: { species_list_ids: [] }).
@@ -387,13 +411,19 @@ module ObservationsController::SharedFormMethods
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    @user.all_editable_species_lists.includes(:observations).
-      find_each do |list|
-      before = @observation.species_lists.include?(list)
-      after = desired.include?(list.id)
-      next unless before != after
+    # A species-list id on the observation the user can't edit (e.g. a
+    # list shared into a project the user has since left) has no
+    # checkbox to submit it in `desired`. Scope the "current" side to
+    # the editable subset of the observation's ids, not the user's
+    # full editable-lists set, so such an id doesn't mark the request
+    # "changed" and defeat the empty-diff return below.
+    current = @user.all_editable_species_lists.
+              where(id: @observation.species_list_ids).pluck(:id)
+    changed_ids = desired_change_ids(desired, current)
+    return if changed_ids.empty?
 
-      if after
+    @user.all_editable_species_lists.where(id: changed_ids).find_each do |list|
+      if desired.include?(list.id)
         list.add_observation(@observation)
         flash_notice(:added_to_list.t(list: list.title))
       else
