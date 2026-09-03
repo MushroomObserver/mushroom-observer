@@ -1280,13 +1280,28 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
-  # Bug fix: a latitude or longitude of exactly 0 (equator or
-  # prime meridian) used to be treated as "no coordinate" by a falsy
-  # check and silently rejected. Under the old bug, a latitude of 0
-  # would keep the autocompleter in plain "location" mode; the fixed
-  # code swaps it into "location_containing" like any other valid
-  # point, and carries the exact (0-valued) params along.
+  # Bug fix: a latitude or longitude of 0 (equator or prime meridian)
+  # used to be treated as "no coordinate" by a falsy check and
+  # silently rejected. Under the old bug, a latitude of 0 would keep
+  # the autocompleter in plain "location" mode; the fixed code swaps
+  # it into "location_containing" like any other valid point, and
+  # carries the 0-valued params along.
+  #
+  # Needs a fixture-independent location containing (0, 0.5): the
+  # only fixture location whose box geographically contains that
+  # point is the global "Earth" catch-all (unknown_location), and
+  # Autocomplete::ForLocationContaining rejects overly-broad boxes as
+  # "vague" (Mappable::BoxMethods#vague?), so a whole-globe box does
+  # not match. Without a small, specific location here, the lookup
+  # finds nothing and falls back to "location_google" instead.
   def test_zero_latitude_triggers_locality_lookup
+    equator_location = Location.create!(
+      name: "Null Island Vicinity, Gulf of Guinea",
+      scientific_name: "Gulf of Guinea, Null Island Vicinity",
+      north: 0.7, south: -0.3, east: 1.0, west: 0.0,
+      user: katrina
+    )
+
     login!(katrina)
     visit(new_observation_path)
     assert_selector("body.observations__new")
@@ -1315,6 +1330,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     JS
     assert_equal(0, request_params["lat"])
     assert_in_delta(0.5, request_params["lng"])
+  ensure
+    equator_location&.destroy
   end
 
   # Bug fix: iNat exports coordinates as a single
