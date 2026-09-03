@@ -357,6 +357,24 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :checked_but_disabled, @spl2.id => :checked)
   end
 
+  # Copilot review on PR #5302: a species-list id on the observation
+  # that the current user can't edit has no checkbox to submit it, so
+  # it shouldn't count as a "change" and defeat the no-op fast path.
+  def test_update_species_lists_no_op_preserves_non_editable_list
+    init_for_list_checkbox_tests
+    @spl1.add_observation(@obs2) # mary can't edit @spl1 (owned by rolf)
+
+    login("mary")
+    put(:update,
+        params: {
+          id: @obs2.id,
+          observation: { species_list_ids: [@spl2.id.to_s] }
+        })
+
+    assert_response(:redirect)
+    assert_obj_arrays_equal([@spl1, @spl2], @obs2.reload.species_lists, :sort)
+  end
+
   def init_for_list_checkbox_tests
     @spl1 = species_lists(:first_species_list)
     @spl2 = species_lists(:unknown_species_list)

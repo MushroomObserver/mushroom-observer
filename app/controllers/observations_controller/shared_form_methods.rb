@@ -411,7 +411,15 @@ module ObservationsController::SharedFormMethods
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    changed_ids = desired_change_ids(desired, @observation.species_list_ids)
+    # A species-list id on the observation the user can't edit (e.g. a
+    # list shared into a project the user has since left) has no
+    # checkbox to submit it in `desired`. Scope the "current" side to
+    # the editable subset of the observation's ids, not the user's
+    # full editable-lists set, so such an id doesn't mark the request
+    # "changed" and defeat the empty-diff return below.
+    current = @user.all_editable_species_lists.
+              where(id: @observation.species_list_ids).pluck(:id)
+    changed_ids = desired_change_ids(desired, current)
     return if changed_ids.empty?
 
     @user.all_editable_species_lists.where(id: changed_ids).find_each do |list|
