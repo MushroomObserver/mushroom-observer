@@ -2910,6 +2910,15 @@
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
 
+  inat_project_label: Project
+  inat_project_help: Optional. Choose a project to file this import's observations into — a foray or event, or an ongoing project such as a challenge. Field slips and duplicate records are reconciled automatically. Leave blank for a normal import.
+  inat_project_not_recognized: That project was not recognized. Pick one from the suggestions, or leave the field blank.
+  inat_project_not_allowed: You cannot add observations to "[title]".
+  inat_import_tracker_constraint_violations: Not added to the project (constraint violations)
+  inat_import_tracker_constraint_violations_link: view observations
+  inat_import_tracker_unlicensed_images_heading: Photos skipped for missing iNat license
+  inat_import_tracker_unlicensed_images_row: iNat [inat_id] — [login] ([license]) — [count] photo(s)
+  inat_import_tracker_no_license: no license
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
   inat_import_confirm_expected_caption: Expected imports

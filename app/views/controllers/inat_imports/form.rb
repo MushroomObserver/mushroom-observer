@@ -14,6 +14,7 @@ module Views::Controllers::InatImports
         render_import_others_field if @super_importer
         render_consent_checkbox
         render_choose_observations_section
+        render_project_field
         render_skip_writeback_field if @admin
         render_details_panel
         submit(:submit.ti)
@@ -98,6 +99,19 @@ module Views::Controllers::InatImports
                      label: :inat_recheck_all,
                      help: :inat_recheck_all_help.l,
                      wrap_class: "mt-4")
+    end
+
+    # Optional target project (#5259): the import files observations
+    # into it and reconciles field slips against it.
+    def render_project_field
+      autocompleter_field(
+        :inat_project, type: :project,
+                       hidden_name: :inat_project_id,
+                       hidden_value: model.inat_project_id,
+                       label: :inat_project_label,
+                       help: :inat_project_help.l,
+                       wrap_class: "mt-3"
+      )
     end
 
     def render_consent_checkbox

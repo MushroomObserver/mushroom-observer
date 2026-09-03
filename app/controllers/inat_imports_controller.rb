@@ -291,7 +291,8 @@ class InatImportsController < ApplicationController
       original_inat_url: params[:original_inat_url].presence,
       import_others: import_others?,
       recheck_all: recheck_all?,
-      writeback: writeback_policy
+      writeback: writeback_policy,
+      project_id: chosen_project_id
     }
   end
 
@@ -316,6 +317,12 @@ class InatImportsController < ApplicationController
     return nil if importing_all? || listing_url?
 
     inat_id_list.length
+  end
+
+  # Target project for the #5259 standardization; validated by
+  # `project_valid?`, which also fills in the id for a typed title.
+  def chosen_project_id
+    params[:inat_project_id].presence
   end
 
   # Returns whether this import covers other users' observations.

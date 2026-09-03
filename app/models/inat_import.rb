@@ -68,11 +68,16 @@ class InatImport < ApplicationRecord
   }, prefix: true
 
   belongs_to :user
+  # Target project for the import's project/field-slip standardization
+  # (#5259); blank for ordinary user-driven imports.
+  belongs_to :project, optional: true
   has_many :observations, dependent: :nullify
 
   serialize :log, type: Array, coder: YAML
   serialize :date_missing_inat_ids, coder: JSON
   serialize :license_added_inat_ids, coder: JSON
+  serialize :constraint_violation_obs_ids, coder: JSON
+  serialize :unlicensed_image_events, coder: JSON
 
   after_update_commit lambda { |inat_import|
     html = ApplicationController.renderer.render(
@@ -150,6 +155,37 @@ class InatImport < ApplicationRecord
   def add_license_added_obs(inat_id:)
     reload
     update!(license_added_inat_ids: license_added_inat_ids + [inat_id])
+  end
+
+  # Serialized-JSON columns are NULL until first written.
+  def constraint_violation_obs_ids
+    super || []
+  end
+
+  def unlicensed_image_events
+    super || []
+  end
+
+  # An observation the standardizer kept out of the target project
+  # because it violates the project's constraints (#5259). The inline
+  # pass and a later slip-attach reconcile can both record the same
+  # observation, so appends are deduplicated.
+  def add_constraint_violation_obs(obs_id)
+    reload
+    return if constraint_violation_obs_ids.include?(obs_id)
+
+    update!(constraint_violation_obs_ids:
+      constraint_violation_obs_ids + [obs_id])
+  end
+
+  # One imported observation whose photo(s) were skipped for lacking an
+  # iNat license -- recorded with the details needed to review the
+  # pattern (who, which license choice).
+  def add_unlicensed_image_event(inat_id:, login:, license_code:, count:)
+    reload
+    event = { "inat_id" => inat_id, "login" => login,
+              "license_code" => license_code, "count" => count }
+    update!(unlicensed_image_events: unlicensed_image_events + [event])
   end
 
   def reached_import_cap?

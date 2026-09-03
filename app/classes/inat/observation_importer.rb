@@ -22,6 +22,8 @@ class Inat
     attr_reader :inat_import, :user, :job,
                 :unlicensed_obs_count, :skipped_images_count, :image_ids
 
+    include Standardization
+
     def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
       @user = user
@@ -53,6 +55,7 @@ class Inat
       return unless @observation
 
       accumulate_counts(builder)
+      standardize_for_project
       finalize_import
     end
 
@@ -192,6 +195,7 @@ class Inat
       @unlicensed_obs_count += builder.unlicensed_obs
       @skipped_images_count += builder.skipped_images
       @image_ids.concat(builder.created_image_ids)
+      record_unlicensed_images(builder)
       return unless builder.unlicensed_obs == 1
 
       inat_import.add_license_added_obs(inat_id: @inat_obs[:id])

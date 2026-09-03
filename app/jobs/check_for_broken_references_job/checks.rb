@@ -73,6 +73,7 @@ class CheckForBrokenReferencesJob
       [Image,                        :license,              :alert],
       # [Image,                      :reviewer,             :alert],
       [Image,                        :user,                 :alert],
+      [InatImport,                   :project,              :nil],
       [InatImport,                   :user,                 :alert],
       [ImageVote,                    :image,                :delete],
       [ImageVote,                    :user,                 :delete],
