@@ -1,16 +1,17 @@
 # Changelog
 
-## 2026-09-01 (deploy-2026-09-01-23-58)
+## 2026-09-03 (deploy-2026-09-03-10-42)
 
-- Changelog for `deploy-2026-09-01-11-59` ([PR5282](https://github.com/MushroomObserver/mushroom-observer/pull/5282), @mo-nathan)
-- Fix theme change not applying until manual reload (`Account::PreferencesController#update`) ([PR5286](https://github.com/MushroomObserver/mushroom-observer/pull/5286), @nimmolo)
-- Add `MO/NoHandRolledColumnClass` cop; extend `NoRawBootstrapComponent` for Row/Container ([PR5280](https://github.com/MushroomObserver/mushroom-observer/pull/5280), @nimmolo)
-- Add flat top-level query params (`Query#index_filter`); migrate 6 same-model `Tab::*` links ([PR5279](https://github.com/MushroomObserver/mushroom-observer/pull/5279), @nimmolo)
-- Fix Turbo Frame badges silently swallowed by `collapse-fallback` ([PR5288](https://github.com/MushroomObserver/mushroom-observer/pull/5288), @nimmolo)
-- Fix form label row layout, `label_appends` slot, double-colon labels ([PR5287](https://github.com/MushroomObserver/mushroom-observer/pull/5287), @nimmolo)
-- Fix flaky EXIF lat/lng system tests with granular per-step waits ([PR5290](https://github.com/MushroomObserver/mushroom-observer/pull/5290), @nimmolo)
-- Permit the scalar URL form of Array-typed `query_attr`s (`?this_name=<id>`) ([PR5291](https://github.com/MushroomObserver/mushroom-observer/pull/5291), @mo-nathan)
-- Centralize BS3 responsive visibility helpers behind `Components::Column` ([PR5289](https://github.com/MushroomObserver/mushroom-observer/pull/5289), @nimmolo)
+- Add `script/prerelease.rb` to build the pre-deploy changelog PR ([PR5281](https://github.com/MushroomObserver/mushroom-observer/pull/5281), @mo-nathan)
+- Deploy from the pre-release changelog and publish the MO Article rows ([PR5294](https://github.com/MushroomObserver/mushroom-observer/pull/5294), @mo-nathan)
+- Document the pre-release step in `README_PRODUCTION_DEPLOY` ([PR5295](https://github.com/MushroomObserver/mushroom-observer/pull/5295), @mo-nathan)
+- Update stale references to the pre-prerelease changelog flow ([PR5296](https://github.com/MushroomObserver/mushroom-observer/pull/5296), @mo-nathan)
+- Shrink `Query#index_filter` URLs: bare scalars, `names`→`this_name` ([PR5297](https://github.com/MushroomObserver/mushroom-observer/pull/5297), @nimmolo)
+- Fix #5276: shrink, guard, and resolve oversized search-result redirect URLs ([PR5298](https://github.com/MushroomObserver/mushroom-observer/pull/5298), @nimmolo)
+- Fix `Lookup` classes not surfacing entries that fail to resolve (#5299) ([PR5300](https://github.com/MushroomObserver/mushroom-observer/pull/5300), @nimmolo)
+- Fold project/field-slip standardization into the iNat importer (#5259) ([PR5301](https://github.com/MushroomObserver/mushroom-observer/pull/5301), @mo-nathan)
+- Speed up observation creation and lighten the upload lock (#5238) ([PR5239](https://github.com/MushroomObserver/mushroom-observer/pull/5239), @mo-nathan)
+- Fix `update_projects`/`update_species_lists` N+1 for power users ([PR5302](https://github.com/MushroomObserver/mushroom-observer/pull/5302), @nimmolo)
 
 ## 2026-09-01 (deploy-2026-09-01-11-59)
 
