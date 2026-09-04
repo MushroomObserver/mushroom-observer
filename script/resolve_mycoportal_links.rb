@@ -44,8 +44,12 @@
 #      in by mistake -- every observed case's target_id matches the id
 #      in the url). Delete without a comment: there's nothing worth
 #      keeping.
-#   5. url is on mycoportal.org but isn't a record search (taxon pages,
-#      etc.), or isn't on mycoportal.org: can't resolve to one record,
+#   5. url is a MyCoPortal taxon page (taxa/index.php) -- every
+#      observation already shows an "About this Taxon" section linking
+#      to the same MyCoPortal taxon page, so this link is redundant.
+#      Delete without a comment.
+#   6. url is on mycoportal.org but isn't a record search or taxon
+#      page, or isn't on mycoportal.org: can't resolve to one record,
 #      so convert to a Comment and delete.
 #
 # A converted Comment is authored by the link's original creator,
@@ -127,9 +131,23 @@ class ResolveMycoportalLinks
     end
 
     return crawl_and_resolve(link) if list_search?(link.url)
-    return delete_without_comment!(link) if self_referential?(link.url)
+    return delete_junk!(link) if delete_reason(link.url)
 
     convert_to_comment!(link, unresolvable_reason(link.url))
+  end
+
+  def delete_reason(url)
+    return "self-referential junk" if self_referential?(url)
+    if taxon_page?(url)
+      return "MyCoPortal taxon page, already linked from About " \
+             "this Taxon"
+    end
+
+    nil
+  end
+
+  def delete_junk!(link)
+    delete_without_comment!(link, delete_reason(link.url))
   end
 
   def resolved_sibling?(link)
@@ -179,8 +197,8 @@ class ResolveMycoportalLinks
     url == "http://adolf" || url.match?(SELF_REFERENTIAL_RE)
   end
 
-  def delete_without_comment!(link)
-    warn("##{link.id}: #{link.url} -> delete, no comment")
+  def delete_without_comment!(link, reason)
+    warn("##{link.id}: #{reason} (#{link.url}) -> delete, no comment")
     link.destroy! if @apply
     @counts[:deleted_no_comment] += 1
   end
@@ -218,6 +236,13 @@ class ResolveMycoportalLinks
     return false unless uri && mycoportal_host?(uri)
 
     uri.path.end_with?("/list.php") && uri.query.to_s.include?("catnum=")
+  end
+
+  def taxon_page?(url)
+    uri = safe_parse(url)
+    return false unless uri && mycoportal_host?(uri)
+
+    uri.path.end_with?("/taxa/index.php")
   end
 
   def unresolvable_reason(url)
