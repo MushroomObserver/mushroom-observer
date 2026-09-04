@@ -530,8 +530,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     ExternalLink.create!(
       user: user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id
     )
     estimate_response = { total_results: 1 }.to_json
 
@@ -564,8 +563,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     ExternalLink.create!(
       user: user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id
     )
 
     fresh_id = "1123457"

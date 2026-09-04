@@ -187,6 +187,16 @@ class ExternalLinkTest < UnitTestCase
     assert(link.reload.import?, "Link should upgrade to import in place")
   end
 
+  def test_external_id_presence_required_except_for_export
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    link.external_id = nil
+    assert_not(link.valid?, "Non-export link needs an external_id")
+    assert(link.errors[:external_id].any?)
+
+    link.relationship = :export
+    assert(link.valid?, "Export link is allowed no external_id yet")
+  end
+
   def test_external_id_length_validation
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     link.external_id = "9" * 65

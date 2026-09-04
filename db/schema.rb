@@ -85,7 +85,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_04_020000) do
     t.integer "target_id"
     t.integer "external_site_id"
     t.string "target_type", limit: 64
-    t.string "external_id", limit: 64, null: false
+    t.string "external_id", limit: 64
     t.integer "relationship", default: 0, null: false
     t.datetime "last_synced_at"
     t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb3':',`target_id`) end)", stored: true

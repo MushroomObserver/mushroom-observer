@@ -280,8 +280,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     link = ExternalLink.create!(
       user: sib.user, target: sib,
       external_site: external_sites(:inaturalist),
-      relationship: :import, external_id: 67_890,
-      url: "https://www.inaturalist.org/observations/67890"
+      relationship: :import, external_id: 67_890
     )
     [sib, link]
   end

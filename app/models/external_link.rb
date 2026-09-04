@@ -21,9 +21,10 @@
 #  user::          User that created it.
 #  observation::   Observation the URL is attached to.
 #  external_site:: External site the URL points to.
-#  external_id::   This link's id on the external site. The single
-#                  source of identity -- the URL is derived on demand
-#                  via #link_url.
+#  external_id::   This link's id on the external site -- the URL is
+#                  derived on demand via #link_url. Required for every
+#                  relationship except :export, where it is unknown
+#                  until the external site assigns one (see #5315).
 #
 class ExternalLink < AbstractModel
   # The kind of relationship this link records between the target and the
@@ -60,7 +61,11 @@ class ExternalLink < AbstractModel
   validates :user, presence: true
   # Matches the column's varchar(64); without this a long paste 500s
   # with ActiveRecord::ValueTooLong instead of a form error.
-  validates :external_id, presence: true, length: { maximum: 64 }
+  validates :external_id, length: { maximum: 64 }
+  # Every other relationship identifies a specific record on the external
+  # site, so external_id is required. An export link is created before
+  # the external site has assigned one -- see issue #5315.
+  validates :external_id, presence: true, unless: :export?
   # No general one-link-per-(target, site) rule: an MO obs can legitimately
   # correspond to several iNat obs (iNat-side duplicates of one collection),
   # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
