@@ -63,7 +63,7 @@ module Views::Controllers::Observations::ExternalLinks
                    sibling_site_links: [sibling_link(link, sibling)])
       )
 
-      assert_html(html, "a[href='#{link.url}']")
+      assert_html(html, "a[href='#{link.link_url}']")
       assert_no_html(html, "button.destroy_external_link_link_#{link.id}")
     end
 

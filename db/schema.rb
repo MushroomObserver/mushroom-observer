@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_03_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_04_020000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -84,7 +84,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_03_120000) do
     t.integer "user_id"
     t.integer "target_id"
     t.integer "external_site_id"
-    t.string "url", limit: 100
     t.string "target_type", limit: 64
     t.string "external_id", limit: 64
     t.integer "relationship", default: 0, null: false
@@ -94,6 +93,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_03_120000) do
     t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
     t.index ["external_site_id", "target_type", "external_id"], name: "index_external_links_on_site_target_extid"
     t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
+    t.index ["target_type", "target_id", "external_site_id", "external_id"], name: "index_external_links_on_target_and_site_and_extid", unique: true
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"
   end
 

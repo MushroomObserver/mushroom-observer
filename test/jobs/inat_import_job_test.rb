@@ -994,8 +994,7 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     ExternalLink.create!(
       user: @user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id.to_s,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id.to_s
     )
 
     stub_inat_interactions
