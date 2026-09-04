@@ -52,6 +52,10 @@
 #      page, or isn't on mycoportal.org: can't resolve to one record,
 #      so convert to a Comment and delete.
 #
+# Separately, and app-wide (not scoped to MyCoPortal): any ExternalLink
+# with neither external_id nor url is deleted with no comment -- there's
+# nothing to resolve and nothing to preserve.
+#
 # A converted Comment is authored by the link's original creator,
 # falling back to the target's owner if that's somehow unavailable,
 # and preserves the url verbatim in its body.
@@ -102,10 +106,26 @@ class ResolveMycoportalLinks
 
   def run
     candidates.each { |link| process_safely(link) }
+    delete_blank_rows
     report_summary
   end
 
   private
+
+  # A row with neither `external_id` nor `url` carries no information --
+  # nothing to resolve, nothing to preserve in a comment. This happens
+  # app-wide, not just on MyCoPortal (confirmed: 2 MyCoPortal, 2
+  # iNaturalist rows on a fresh checkpoint), so this isn't scoped to
+  # `@site.id` like `candidates` is.
+  def delete_blank_rows
+    ExternalLink.where(external_id: nil, url: [nil, ""]).find_each do |link|
+      warn("##{link.id}: blank external_id and url (site=" \
+           "#{link.external_site_id}, target=#{link.target_type}" \
+           "##{link.target_id}) -> delete, no comment")
+      link.destroy! if @apply
+      @counts[:deleted_blank] += 1
+    end
+  end
 
   def candidates
     scope = ExternalLink.where(external_site_id: @site.id, external_id: nil).
