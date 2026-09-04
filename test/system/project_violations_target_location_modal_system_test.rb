@@ -51,6 +51,7 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
     #      next open picks it up.
     new_location = Location.create!(
       user: project.user, name: missing_suffix,
+      scientific_name: Location.reverse_name(missing_suffix),
       north: 42.89, south: 41.24, east: -69.93, west: -73.51
     )
 

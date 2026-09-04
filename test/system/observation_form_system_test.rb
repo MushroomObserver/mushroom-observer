@@ -1124,6 +1124,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
     pasadena = Location.create!(
       name: "Pasadena, Los Angeles Co., California, USA",
+      scientific_name: "USA, California, Los Angeles Co., Pasadena",
       north: 34.25, south: 34.12, east: -118.07, west: -118.20,
       user: katrina
     )
@@ -1280,13 +1281,25 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
-  # Bug fix: a latitude or longitude of exactly 0 (equator or
-  # prime meridian) used to be treated as "no coordinate" by a falsy
-  # check and silently rejected. Under the old bug, a latitude of 0
-  # would keep the autocompleter in plain "location" mode; the fixed
-  # code swaps it into "location_containing" like any other valid
-  # point, and carries the exact (0-valued) params along.
+  # A latitude or longitude of 0 (equator or prime meridian) is a
+  # valid coordinate: the autocompleter swaps into "location_containing"
+  # mode and carries the 0-valued params along, same as any other point.
+  #
+  # Needs a fixture-independent location containing (0, 0.5): the
+  # only fixture location whose box geographically contains that
+  # point is the global "Earth" catch-all (unknown_location), and
+  # Autocomplete::ForLocationContaining rejects overly-broad boxes as
+  # "vague" (Mappable::BoxMethods#vague?), so a whole-globe box does
+  # not match. Without a small, specific location here, the lookup
+  # finds nothing and falls back to "location_google" instead.
   def test_zero_latitude_triggers_locality_lookup
+    equator_location = Location.create!(
+      name: "Null Island Vicinity, Gulf of Guinea",
+      scientific_name: "Gulf of Guinea, Null Island Vicinity",
+      north: 0.7, south: -0.3, east: 1.0, west: 0.0,
+      user: katrina
+    )
+
     login!(katrina)
     visit(new_observation_path)
     assert_selector("body.observations__new")
@@ -1315,6 +1328,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     JS
     assert_equal(0, request_params["lat"])
     assert_in_delta(0.5, request_params["lng"])
+  ensure
+    equator_location&.destroy
   end
 
   # Bug fix: iNat exports coordinates as a single
@@ -1370,6 +1385,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park = Location.create!(**UNIVERSITY_PARK, user: katrina)
     pasadena = Location.create!(
       name: "Pasadena, Los Angeles Co., California, USA",
+      scientific_name: "USA, California, Los Angeles Co., Pasadena",
       north: 34.25, south: 34.12, east: -118.07, west: -118.20,
       user: katrina
     )
@@ -1464,11 +1480,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     alpha = Location.create!(
       name: "Test Location Alpha Extended Forest Preserve Area, " \
             "Testland Co., Testania, USA",
+      scientific_name: "USA, Testania, Testland Co., " \
+                       "Test Location Alpha Extended Forest Preserve Area",
       north: 40.05, south: 39.95, east: -77.30, west: -77.40,
       user: katrina
     )
     beta = Location.create!(
       name: "Test Location Beta, Testland",
+      scientific_name: "Testland, Test Location Beta",
       north: 10.05, south: 9.95, east: 10.40, west: 10.30,
       user: katrina
     )
@@ -1621,6 +1640,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # The geotagged.jpg is from University Park, Florida.
   UNIVERSITY_PARK = {
     name: "University Park, Westchester, Miami-Dade Co., Florida, USA",
+    scientific_name:
+      "USA, Florida, Miami-Dade Co., Westchester, University Park",
     north: 25.762050,
     south: 25.733291,
     east: -80.351868,

@@ -121,9 +121,44 @@ class LocationTest < UnitTestCase
     assert_not(Location.countries_in_continent("Europe").include?("Canada"))
   end
 
+  def test_understood_continents
+    assert_equal(Location::UNDERSTOOD_CONTINENTS,
+                 Location.understood_continents)
+  end
+
+  def test_understood_states
+    assert_equal(Location::UNDERSTOOD_STATES["USA"],
+                 Location.understood_states("USA"))
+  end
+
+  def test_title_display_name
+    loc = locations(:albion)
+    assert_equal(loc.name.split(", ").first, loc.title_display_name)
+  end
+
+  def test_textile_name
+    loc = locations(:albion)
+    assert_equal(loc.display_name, loc.textile_name)
+  end
+
+  def test_clean_name_leave_stars
+    assert_equal("albion california us*a",
+                 Location.clean_name("Albion, California, US*A!", true))
+  end
+
+  def test_validate_user_missing
+    loc = Location.new(
+      name: "Nowhere, USA", scientific_name: "USA, Nowhere",
+      north: 10, south: 0, east: 10, west: 0
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:user])
+  end
+
   def test_versioning
     loc = Location.create!(
       name: "Anywhere",
+      scientific_name: "Anywhere",
       north: 60,
       south: 50,
       east: 40,
@@ -161,6 +196,61 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.user_id)
     assert_equal(rolf.id, desc.versions.last.user_id)
     assert_equal(dick.id, desc.versions.first.user_id)
+  end
+
+  def test_derives_scientific_name_from_name
+    loc = Location.new(
+      name: "Albion, California, USA",
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    loc.valid?
+    assert_equal("USA, California, Albion", loc.scientific_name)
+  end
+
+  def test_derives_name_from_scientific_name
+    loc = Location.new(
+      scientific_name: "USA, California, Albion",
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    loc.valid?
+    assert_equal("Albion, California, USA", loc.name)
+  end
+
+  def test_does_not_override_explicit_name_or_scientific_name
+    loc = Location.new(
+      name: "Albion, California, USA",
+      scientific_name: "Somewhere Else",
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    loc.valid?
+    assert_equal("Somewhere Else", loc.scientific_name)
+  end
+
+  def test_validate_name_missing
+    loc = Location.new(
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:name])
+    assert_not_empty(loc.errors[:scientific_name])
+  end
+
+  def test_validate_name_too_long
+    loc = Location.new(
+      name: "Albion, California, USA" * 100,
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:name])
+  end
+
+  def test_validate_scientific_name_too_long
+    loc = Location.new(
+      scientific_name: "USA, California, Albion" * 100,
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:scientific_name])
   end
 
   # Method should populate location box_area, center_lat, center_lng
@@ -597,6 +687,61 @@ class LocationTest < UnitTestCase
     assert_equal(:log_location_merged, log1.parse_log[1][0])
   end
 
+  def test_merge_combines_non_conflicting_public_descriptions
+    loc1 = new_location_for_merge("Merge Source")
+    loc2 = new_location_for_merge("Merge Dest")
+    desc1 = LocationDescription.create!(
+      location: loc1, user: rolf, source_type: :public,
+      gen_desc: "General from source"
+    )
+    desc1.add_author(mary)
+    desc1.add_editor(katrina)
+    desc2 = LocationDescription.create!(
+      location: loc2, user: rolf, source_type: :public,
+      ecology: "Ecology from dest"
+    )
+    loc1.update!(description: desc1)
+    loc2.update!(description: desc2)
+
+    loc2.merge(rolf, loc1)
+
+    desc2.reload
+    assert_equal("General from source", desc2.gen_desc)
+    assert_equal("Ecology from dest", desc2.ecology)
+    assert_includes(desc2.authors, mary)
+    assert_includes(desc2.editors, katrina)
+    assert_not(LocationDescription.exists?(desc1.id))
+  end
+
+  def test_merge_leaves_conflicting_public_descriptions_unmerged
+    loc1 = new_location_for_merge("Merge Source")
+    loc2 = new_location_for_merge("Merge Dest")
+    desc1 = LocationDescription.create!(
+      location: loc1, user: rolf, source_type: :public,
+      gen_desc: "Source version"
+    )
+    desc2 = LocationDescription.create!(
+      location: loc2, user: rolf, source_type: :public,
+      gen_desc: "Dest version"
+    )
+    loc1.update!(description: desc1)
+    loc2.update!(description: desc2)
+
+    loc2.merge(rolf, loc1)
+
+    desc2.reload
+    assert_equal("Dest version", desc2.gen_desc)
+    assert(LocationDescription.exists?(desc1.id))
+    assert_equal(loc2.id, LocationDescription.find(desc1.id).location_id)
+  end
+
+  def new_location_for_merge(prefix)
+    Location.create!(
+      name: "#{prefix}, USA", scientific_name: "USA, #{prefix}",
+      north: 10, south: 0, east: 10, west: 0, user: rolf
+    )
+  end
+
   # test BoxMethods module `lat_lng_close?` method
   def test_lat_lng_close
     loc = locations(:east_lt_west_location)
@@ -794,7 +939,8 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "left" side of loc
     overlaps_albion_west =
       Location.create(
-        name: "overlaps_albion_west", user: users(:rolf),
+        name: "overlaps_albion_west", scientific_name: "overlaps_albion_west",
+        user: users(:rolf),
         north: albion.north, south: albion.south, east: albion.east - 0.05,
         west: albion.west - 0.05
       )
@@ -803,7 +949,8 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "right" side of loc
     overlaps_albion_east =
       Location.create(
-        name: "overlaps_albion_east", user: users(:rolf),
+        name: "overlaps_albion_east", scientific_name: "overlaps_albion_east",
+        user: users(:rolf),
         north: albion.north, south: albion.south, west: albion.west + 0.05,
         east: albion.east + 0.05
       )
@@ -816,7 +963,7 @@ class LocationTest < UnitTestCase
     # loc straddles 180
     #   potential br entirely outside of loc
     russia = Location.create(
-      name: "russia", user: users(:rolf),
+      name: "russia", scientific_name: "russia", user: users(:rolf),
       north: 86.217, south: 38.083, west: 27.370116, east: -168.995128
     )
     do_contains_box(loc: wrangel, external_loc: albion,
@@ -824,7 +971,9 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "left" side of loc
     overlaps_wrangel_west =
       Location.create(
-        name: "overlaps_wrangel_west", user: users(:rolf),
+        name: "overlaps_wrangel_west",
+        scientific_name: "overlaps_wrangel_west",
+        user: users(:rolf),
         north: wrangel.north, south: wrangel.south, east: wrangel.east - 0.05,
         west: wrangel.west - 0.05
       )
@@ -833,7 +982,9 @@ class LocationTest < UnitTestCase
     #   potential br overlaps only "right" side of loc
     overlaps_wrangel_east =
       Location.create(
-        name: "overlaps_wrangel_east", user: users(:rolf),
+        name: "overlaps_wrangel_east",
+        scientific_name: "overlaps_wrangel_east",
+        user: users(:rolf),
         north: wrangel.north, south: wrangel.south, east: wrangel.east + 0.05,
         west: wrangel.west + 0.05
       )
@@ -907,6 +1058,7 @@ class LocationTest < UnitTestCase
     loc = Location.create!(
       hidden: true,
       name: "Somewhere Hidden",
+      scientific_name: "Somewhere Hidden",
       north: high,
       south: low,
       east: high,

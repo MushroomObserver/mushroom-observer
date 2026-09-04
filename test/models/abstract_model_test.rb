@@ -163,6 +163,7 @@ class AbstractModelTest < UnitTestCase
 
     loc = Location.new(
       name: "Test Location",
+      scientific_name: "Test Location",
       north: 54,
       south: 53,
       west: -101,
