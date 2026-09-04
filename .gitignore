@@ -30,6 +30,10 @@ dump.rdb
 # Ignore development projects folder (only at top level)
 /projects/
 
+# One-time production scripts -- see script/run-once/README.md
+/script/run-once/*
+!/script/run-once/README.md
+
 # Ignore bundler config.
 .bundle
 vendor/bundle
