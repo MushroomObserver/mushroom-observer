@@ -164,6 +164,61 @@ class LocationTest < UnitTestCase
     assert_equal(dick.id, desc.versions.first.user_id)
   end
 
+  def test_derives_scientific_name_from_name
+    loc = Location.new(
+      name: "Albion, California, USA",
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    loc.valid?
+    assert_equal("USA, California, Albion", loc.scientific_name)
+  end
+
+  def test_derives_name_from_scientific_name
+    loc = Location.new(
+      scientific_name: "USA, California, Albion",
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    loc.valid?
+    assert_equal("Albion, California, USA", loc.name)
+  end
+
+  def test_does_not_override_explicit_name_or_scientific_name
+    loc = Location.new(
+      name: "Albion, California, USA",
+      scientific_name: "Somewhere Else",
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    loc.valid?
+    assert_equal("Somewhere Else", loc.scientific_name)
+  end
+
+  def test_validate_name_missing
+    loc = Location.new(
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:name])
+    assert_not_empty(loc.errors[:scientific_name])
+  end
+
+  def test_validate_name_too_long
+    loc = Location.new(
+      name: "Albion, California, USA" * 100,
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:name])
+  end
+
+  def test_validate_scientific_name_too_long
+    loc = Location.new(
+      scientific_name: "USA, California, Albion" * 100,
+      north: 60, south: 50, east: 40, west: 30, user: rolf
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:scientific_name])
+  end
+
   # Method should populate location box_area, center_lat, center_lng
   # and observation location_lat location_lng columns
   def test_update_box_area_and_center_columns

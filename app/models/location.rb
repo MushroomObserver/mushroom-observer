@@ -137,6 +137,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
+  before_validation :derive_missing_name_field
   before_save :calculate_box_area_and_center
   before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
@@ -1029,6 +1030,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     errors.add(:user, :validate_location_user_missing)
   end
 
+  def derive_missing_name_field
+    if name.present? && scientific_name.blank?
+      self.scientific_name = Location.reverse_name(name)
+    elsif scientific_name.present? && name.blank?
+      self.name = Location.reverse_name(scientific_name)
+    end
+  end
+
   def validate_name
     if name.to_s.size > 1024
       errors.add(:name, :validate_location_name_too_long)
@@ -1037,10 +1046,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # #5244: ~7 Locations were created with a nil scientific_name via
-  # direct console access, which bypasses this validation -- see the
-  # NOT NULL DB constraint (added in the same migration as this
-  # validation) for the enforcement that reaches that path too.
   def validate_scientific_name
     if scientific_name.to_s.size > 1024
       errors.add(:scientific_name, :validate_too_long,
