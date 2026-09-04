@@ -329,6 +329,7 @@ class InatObsTest < UnitTestCase
 
     Location.create(user: rolf,
                     name: "Unblurred Location",
+                    scientific_name: "Unblurred Location",
                     north: mock_inat_obs.lat + 0.001,
                     south: mock_inat_obs.lat - 0.001,
                     east: mock_inat_obs.lng + 0.001,
@@ -338,6 +339,7 @@ class InatObsTest < UnitTestCase
       Location.create(
         user: rolf,
         name: "Blurred Location",
+        scientific_name: "Blurred Location",
         north: mock_inat_obs.lat +
                mock_inat_obs.public_accuracy_in_degrees[:lat] / 2,
         south: mock_inat_obs.lat -
@@ -351,6 +353,7 @@ class InatObsTest < UnitTestCase
     Location.create(
       user: rolf,
       name: "Insufficiently Blurred Location",
+      scientific_name: "Insufficiently Blurred Location",
       north: mock_inat_obs.lat +
              mock_inat_obs.public_accuracy_in_degrees[:lat] - 0.001,
       south: mock_inat_obs.lat -

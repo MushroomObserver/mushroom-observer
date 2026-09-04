@@ -402,6 +402,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def create_new_mexico_location
     Location.create!(name: "Santa Fe, New Mexico, USA",
+                     scientific_name: "USA, New Mexico, Santa Fe",
                      north: 34.1865,
                      west: -116.924,
                      east: -116.88,
@@ -1241,6 +1242,7 @@ class LocationsControllerTest < FunctionalTestCase
     rolf = users(:rolf)
     location = Location.create!(
       name: "Destroyable Location, Oregon, USA",
+      scientific_name: "USA, Oregon, Destroyable Location",
       north: 45.0, south: 44.0, east: -122.0, west: -123.0,
       user: rolf
     )
@@ -1263,6 +1265,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_destroy_location_by_admin
     location = Location.create!(
       name: "Admin Destroyable Location, Oregon, USA",
+      scientific_name: "USA, Oregon, Admin Destroyable Location",
       north: 45.0, south: 44.0, east: -122.0, west: -123.0,
       user: users(:rolf)
     )

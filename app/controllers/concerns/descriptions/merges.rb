@@ -100,33 +100,11 @@ module Descriptions::Merges
     # if requested.  It will only do so if there is no conflict on any of the
     # description fields, i.e. one or the other is blank for any given field.
     def perform_merge
-      src_notes  = @src.all_notes
-      dest_notes = @dest.all_notes
-      result = false
+      return false unless @dest.mergeable_notes?(@src)
 
-      # Mergeable if there are no fields which are non-blank in
-      # both descriptions.
-      if @src.class.all_note_fields.none? \
-           { |f| src_notes[f].present? && dest_notes[f].present? }
-        result = true
-
-        # Copy over all non-blank descriptive fields.
-        src_notes.each do |f, val|
-          @dest.send(:"#{f}=", val) if val.present?
-        end
-
-        # Save changes to destination.
-        @dest.save
-
-        # Copy over authors and editors.
-        @src.authors.each { |user| @dest.add_author(user) }
-        @src.editors.each { |user| @dest.add_editor(user) }
-
-        # Delete old description if requested.
-        delete_src_description_and_update_parent if @delete_after
-      end
-
-      result
+      @dest.merge_notes_from(@src)
+      delete_src_description_and_update_parent if @delete_after
+      true
     end
 
     def log_the_merge_flash_and_redirect
