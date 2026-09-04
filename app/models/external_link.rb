@@ -219,6 +219,23 @@ class ExternalLink < AbstractModel
       external_site&.project&.member?(user)
   end
 
+  # Anchored to the start of the url, not just on "://mushroomobserver.org"
+  # -- an unanchored match would also catch a third-party url that merely
+  # carries a full MO url in a query value (e.g.
+  # "https://evil.example/track?next=https://mushroomobserver.org/N").
+  # Not matched on `uri.host` either, since a malformed double-scheme
+  # url like "http://https://mushroomobserver.org/N" parses with host
+  # "https", not the intended host -- the optional extra "https://"
+  # right after the scheme covers that case instead.
+  SELF_REFERENTIAL_RE =
+    %r{\Ahttps?://(?:https://)?(?:www\.)?mushroomobserver\.org(/|\z)}
+
+  # True when url points back at MushroomObserver -- a stray paste, or
+  # the linked target's MO url pasted in by mistake.
+  def self.self_referential_url?(url)
+    url == "http://adolf" || url.match?(SELF_REFERENTIAL_RE)
+  end
+
   def self.show_controller; end
   def self.show_action; end
   def self.edit_action; end

@@ -79,16 +79,6 @@ class ResolveMycoportalLinks
   MAX_REDIRECTS = 3
   OCCID_RE = /openIndPU\((\d+)/
   COMMENT_SUMMARY = "MyCoPortal link converted to comment"
-  # Anchored to the start of the url, not just on "://mushroomobserver.org"
-  # -- an unanchored match would also catch a third-party url that merely
-  # carries a full MO url in a query value (e.g.
-  # "https://evil.example/track?next=https://mushroomobserver.org/N").
-  # Not matched on `uri.host` either, since a malformed double-scheme
-  # url like "http://https://mushroomobserver.org/N" parses with host
-  # "https", not the intended host -- the optional extra "https://"
-  # right after the scheme covers that case instead.
-  SELF_REFERENTIAL_RE =
-    %r{\Ahttps?://(?:https://)?(?:www\.)?mushroomobserver\.org(/|\z)}
 
   def initialize(opts)
     @apply = opts.fetch(:apply, false)
@@ -161,15 +151,15 @@ class ResolveMycoportalLinks
                                        "MyCoPortal link on this record")
     end
 
-    return crawl_and_resolve(link) if list_search?(link.url)
+    return crawl_and_resolve(link) if @site.mycoportal_list_search?(link.url)
     return delete_junk!(link) if delete_reason(link.url)
 
     convert_to_comment!(link, unresolvable_reason(link.url))
   end
 
   def delete_reason(url)
-    return "self-referential junk" if self_referential?(url)
-    if taxon_page?(url)
+    return "self-referential junk" if ExternalLink.self_referential_url?(url)
+    if @site.mycoportal_taxon_page?(url)
       return "MyCoPortal taxon page, already linked from About " \
              "this Taxon"
     end
@@ -221,13 +211,6 @@ class ResolveMycoportalLinks
     )
   end
 
-  # "http://adolf", and every mushroomobserver.org self-link in this
-  # data set, has the linked observation's id right in the url -- not
-  # a record worth preserving as a comment.
-  def self_referential?(url)
-    url == "http://adolf" || url.match?(SELF_REFERENTIAL_RE)
-  end
-
   def delete_without_comment!(link, reason)
     warn("##{link.id}: #{reason} (#{link.url}) -> delete, no comment")
     link.destroy! if @apply
@@ -257,42 +240,15 @@ class ResolveMycoportalLinks
       "(#{reason}). Original link: #{link.url}"
   end
 
-  # `end_with?("mycoportal.org")` alone would also match a host like
-  # "evilmycoportal.org" -- no dot boundary. Require an exact match or
-  # a proper subdomain.
-  def mycoportal_host?(uri)
-    uri.host == "mycoportal.org" || uri.host&.end_with?(".mycoportal.org")
-  end
-
-  def list_search?(url)
-    uri = safe_parse(url)
-    return false unless uri && mycoportal_host?(uri)
-
-    uri.path.end_with?("/list.php") && uri.query.to_s.include?("catnum=")
-  end
-
-  def taxon_page?(url)
-    uri = safe_parse(url)
-    return false unless uri && mycoportal_host?(uri)
-
-    uri.path.end_with?("/taxa/index.php")
-  end
-
   def unresolvable_reason(url)
-    uri = safe_parse(url)
-    return "not a MyCoPortal URL" unless uri && mycoportal_host?(uri)
+    uri = ExternalSite.safe_parse_url(url)
+    return "not a MyCoPortal URL" unless uri && @site.mycoportal_host?(uri)
 
     "not a MyCoPortal record page (#{uri.path})"
   end
 
-  def safe_parse(url)
-    URI.parse(url)
-  rescue URI::InvalidURIError
-    nil
-  end
-
   def fetch(url, redirects_left: MAX_REDIRECTS)
-    uri = safe_parse(url)
+    uri = ExternalSite.safe_parse_url(url)
     return [nil, "unparseable URL"] unless uri
 
     uri.scheme = "https"

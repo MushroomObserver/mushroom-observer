@@ -106,6 +106,43 @@ class ExternalSite < AbstractModel
     /\A#{pattern}\z/.match(url)&.captures&.first
   end
 
+  # True when url is a MyCoPortal catalog-number search page
+  # (list.php?catnum=...) -- id-addressable only via a live crawl of the
+  # results page (see script/resolve_mycoportal_links.rb), not from the
+  # url alone the way `id_from_url`'s permalink shape is.
+  def mycoportal_list_search?(url)
+    return false unless name == MYCOPORTAL_NAME
+
+    uri = self.class.safe_parse_url(url)
+    return false unless uri && mycoportal_host?(uri)
+
+    uri.path.end_with?("/list.php") && uri.query.to_s.include?("catnum=")
+  end
+
+  # True when url is a MyCoPortal taxon page (taxa/index.php) -- not
+  # addressable to one record.
+  def mycoportal_taxon_page?(url)
+    return false unless name == MYCOPORTAL_NAME
+
+    uri = self.class.safe_parse_url(url)
+    return false unless uri && mycoportal_host?(uri)
+
+    uri.path.end_with?("/taxa/index.php")
+  end
+
+  # `end_with?("mycoportal.org")` alone would also match a host like
+  # "evilmycoportal.org" -- no dot boundary. Require an exact match or
+  # a proper subdomain.
+  def mycoportal_host?(uri)
+    uri.host == "mycoportal.org" || uri.host&.end_with?(".mycoportal.org")
+  end
+
+  def self.safe_parse_url(url)
+    URI.parse(url)
+  rescue URI::InvalidURIError
+    nil
+  end
+
   def member?(user)
     return false unless project
 
