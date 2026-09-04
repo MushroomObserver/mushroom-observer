@@ -99,13 +99,21 @@ class ResolveMycoportalLinks
             rescue ActiveRecord::RecordNotFound
               abort("No MyCoPortal external site found")
             end
+    # `ExternalSite#id_from_url` falls back to a loose `base_url + "{id}"`
+    # match when `url_template` is blank -- that pattern would treat a
+    # list.php search url's whole query string as an occid. Fail loudly
+    # instead of silently mis-resolving links.
+    if @site.url_template.blank?
+      abort("MyCoPortal's url_template is not set -- run " \
+            "script/normalize_mycoportal_links.rb first")
+    end
     @counts = Hash.new(0)
     @ambiguous = []
     @errors = []
   end
 
   def run
-    candidates.each { |link| process_safely(link) }
+    candidates.find_each { |link| process_safely(link) }
     delete_blank_rows
     report_summary
   end
@@ -129,7 +137,7 @@ class ResolveMycoportalLinks
 
   def candidates
     scope = ExternalLink.where(external_site_id: @site.id, external_id: nil).
-            where.not(url: [nil, ""]).order(:id)
+            where.not(url: [nil, ""])
     @limit ? scope.limit(@limit) : scope
   end
 
