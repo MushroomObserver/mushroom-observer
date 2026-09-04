@@ -56,6 +56,21 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
+  # Regression: Views::Controllers::GlossaryTerms::Index::Item called
+  # the removed `destroy_button` helper directly, 500ing for any admin
+  # who visited the index -- no test exercised the index in admin mode.
+  def test_index_admin_delete
+    login
+    make_admin
+    get(:index)
+
+    assert_response(:success)
+    assert_select("form input[value='delete']",
+                  { count: GlossaryTerm.count },
+                  "Page is missing a way for admin to destroy each " \
+                  "glossary term")
+  end
+
   def q_pattern(pattern)
     { q: { model: :GlossaryTerm, pattern: } }
   end

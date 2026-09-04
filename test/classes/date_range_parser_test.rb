@@ -58,6 +58,19 @@ class DateRangeParserTest < UnitTestCase
     assert_nil(parse(nil))
   end
 
+  # An out-of-range month (matches the "\d\d?" patterns' digit-count
+  # regex, since that doesn't check the value) used to reach Date.new
+  # unguarded and raise Date::Error instead of failing the search
+  # cleanly -- a production 500 on /observations/search.
+  def test_out_of_range_month_is_nil
+    assert_nil(parse("2026-99"))
+    assert_nil(parse("2026-00"))
+    assert_nil(parse("99"))
+    assert_nil(parse("99-15"))
+    assert_nil(parse("2026-13-2026-01"))
+    assert_nil(parse("2026-08-2026-99"))
+  end
+
   # Exactly two endpoints: a list of three dates is rejected, not
   # silently spanned first-to-last.
   def test_separators_do_not_nest
