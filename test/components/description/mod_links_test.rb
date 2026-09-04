@@ -52,7 +52,7 @@ class DescriptionModLinksTest < ComponentTestCase
   def test_renders_publish_for_admin_of_draft_name_description
     desc = name_descriptions(:draft_coprinus_comatus)
     skip("Need a non-public draft for this test") if
-      desc.source_type == :public
+      desc.source_type == "public"
     stub_admin_mode!
 
     html = render_mod_links(description: desc, user: users(:rolf))

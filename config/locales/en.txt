@@ -330,6 +330,7 @@
   regions: regions
   rss_log: activity log
   rss_logs: activity logs
+  scientific_name: scientific name
   sequence: DNA sequence
   sequences: DNA sequences
   shared_with: shared with

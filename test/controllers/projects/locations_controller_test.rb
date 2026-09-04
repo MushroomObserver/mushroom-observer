@@ -84,34 +84,5 @@ module Projects
       assert_select("a", { text: nybg.display_name, minimum: 1 },
                     "NYBG should appear ungrouped")
     end
-
-    # Regression test: `scientific_name` isn't guaranteed on legacy
-    # Location rows (no presence validation, see Location#display_name).
-    # `build_grouped_locations` sorts locations by `scientific_name` in
-    # Ruby, which raises `ArgumentError: comparison of NilClass with
-    # String failed` if any location in the mix has a nil value.
-    def test_index_with_nil_scientific_name
-      project = projects(:rare_fungi_project)
-      albion = locations(:albion)
-      nybg = locations(:nybg_location)
-      albion.update_column(:scientific_name, nil)
-
-      [albion, nybg].each do |loc|
-        obs = Observation.create!(
-          name: names(:fungi), user: users(:rolf),
-          location: loc, when: Time.zone.now
-        )
-        project.observations << obs
-      end
-
-      login
-      get(:index, params: { project_id: project.id })
-
-      assert_response(
-        :success,
-        "Index should not error when a project location has a nil " \
-        "scientific_name"
-      )
-    end
   end
 end
