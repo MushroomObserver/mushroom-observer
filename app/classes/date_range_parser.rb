@@ -89,24 +89,47 @@ class DateRangeParser
     match_date_patterns(parse_date_words)
   end
 
-  def yyyymmdd(from, to)
-    [format("%04<year>d-%02<month>d-%02<day>d",
-            year: from.first, month: from.second.to_i,
-            day: from.third.to_i),
-     format("%04<year>d-%02<month>d-%02<day>d",
-            year: to.first, month: to.second.to_i,
-            day: [to.third.to_i, eom(to.first, to.second).to_i].min)]
+  # A month digit-count matches the "\d\d?" patterns above for any
+  # value from 0 to 99, not just 1-12 -- garbage like "2024-99" has to
+  # be rejected here rather than reaching Date.new, which raises
+  # Date::Error on an out-of-range month instead of returning nil.
+  def valid_month?(month)
+    month.between?(1, 12)
   end
 
+  def yyyymmdd(from, to)
+    from_month = from.second.to_i
+    to_month = to.second.to_i
+    return nil unless valid_month?(from_month) && valid_month?(to_month)
+
+    [yyyymmdd_string(from.first, from_month, from.third.to_i),
+     yyyymmdd_string(to.first, to_month, clamped_day(to, to_month))]
+  end
+
+  def clamped_day(to, to_month)
+    [to.third.to_i, eom(to.first, to_month).to_i].min
+  end
+
+  def yyyymmdd_string(year, month, day)
+    format("%04<year>d-%02<month>d-%02<day>d",
+           year: year, month: month, day: day)
+  end
+
+  # `from`/`to` here are [month, day] pairs, unlike yyyymmdd's
+  # [year, month, day] -- the month is `.first`, not `.second`.
   def mmdd(from, to)
+    from_month = from.first.to_i
+    to_month = to.first.to_i
+    return nil unless valid_month?(from_month) && valid_month?(to_month)
+
     [format("%02<year>d-%02<month>d",
-            year: from.first.to_i, month: from.second.to_i),
+            year: from_month, month: from.second.to_i),
      format("%02<year>d-%02<month>d",
-            year: to.first.to_i, month: to.second.to_i)]
+            year: to_month, month: to.second.to_i)]
   end
 
   def eom(year, month)
-    Date.new(year.to_i, month.to_i).end_of_month.strftime("%d")
+    Date.new(year.to_i, month).end_of_month.strftime("%d")
   end
 
   # rubocop:disable Metrics/AbcSize
