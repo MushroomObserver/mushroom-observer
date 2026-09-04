@@ -75,39 +75,42 @@ class ResolveMycoportalLinks
   MAX_REDIRECTS = 3
   OCCID_RE = /openIndPU\((\d+)/
   COMMENT_SUMMARY = "MyCoPortal link converted to comment"
-  # Matches on "://mushroomobserver.org" rather than the bare
-  # substring, so a url that merely mentions the domain somewhere
-  # (e.g. as a query value on a third-party site) isn't caught -- and
-  # not on `uri.host`, since a malformed double-scheme url like
-  # "http://https://mushroomobserver.org/N" parses with host "https",
-  # not the intended host.
-  SELF_REFERENTIAL_RE = %r{://(?:www\.)?mushroomobserver\.org(/|\z)}
+  # Anchored to the start of the url, not just on "://mushroomobserver.org"
+  # -- an unanchored match would also catch a third-party url that merely
+  # carries a full MO url in a query value (e.g.
+  # "https://evil.example/track?next=https://mushroomobserver.org/N").
+  # Not matched on `uri.host` either, since a malformed double-scheme
+  # url like "http://https://mushroomobserver.org/N" parses with host
+  # "https", not the intended host -- the optional extra "https://"
+  # right after the scheme covers that case instead.
+  SELF_REFERENTIAL_RE =
+    %r{\Ahttps?://(?:https://)?(?:www\.)?mushroomobserver\.org(/|\z)}
 
   def initialize(opts)
     @apply = opts.fetch(:apply, false)
     @limit = opts[:limit]
     @delay = opts.fetch(:delay, 1.0)
-    @site = ExternalSite.where("base_url LIKE ?", "%mycoportal.org%").first
-    abort("No MyCoPortal external site found") unless @site
+    @site = begin
+              ExternalSite.mycoportal
+            rescue ActiveRecord::RecordNotFound
+              abort("No MyCoPortal external site found")
+            end
     @counts = Hash.new(0)
     @ambiguous = []
     @errors = []
   end
 
   def run
-    candidates.each_with_index do |link, i|
-      break if @limit && i >= @limit
-
-      process_safely(link)
-    end
+    candidates.each { |link| process_safely(link) }
     report_summary
   end
 
   private
 
   def candidates
-    ExternalLink.where(external_site_id: @site.id, external_id: nil).
-      where.not(url: [nil, ""]).order(:id)
+    scope = ExternalLink.where(external_site_id: @site.id, external_id: nil).
+            where.not(url: [nil, ""]).order(:id)
+    @limit ? scope.limit(@limit) : scope
   end
 
   # One bad row (an orphaned target, an unexpected DB constraint, ...)
@@ -219,9 +222,9 @@ class ResolveMycoportalLinks
   end
 
   def comment_body(link, reason)
-    "This observation had an external link to MyCoPortal that could " \
-      "not be resolved to a specific record (#{reason}). " \
-      "Original link: #{link.url}"
+    "This #{link.target_type.downcase} had an external link to " \
+      "MyCoPortal that could not be resolved to a specific record " \
+      "(#{reason}). Original link: #{link.url}"
   end
 
   # `end_with?("mycoportal.org")` alone would also match a host like
