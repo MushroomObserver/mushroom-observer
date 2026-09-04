@@ -7,6 +7,12 @@ database="mo_development"
 username="mo"
 password="mo"
 
+# Drop and recreate first -- a dump only emits DROP/CREATE for tables
+# present in the source, so a plain import onto an existing database
+# leaves any table absent from this snapshot (e.g. one dropped by a
+# migration since an older local run) sitting around indefinitely.
+mysql -u $username -p$password \
+  -e "DROP DATABASE IF EXISTS $database; CREATE DATABASE $database;"
 gunzip -c checkpoint.gz | mysql -u $username -p$password $database
 mysql -u $username -p$password $database < db/clean.sql
 # Uncomment this if there's a need to output a stripped checkpoint locally.
