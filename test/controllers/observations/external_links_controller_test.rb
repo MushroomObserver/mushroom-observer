@@ -56,12 +56,13 @@ module Observations
         "turbo-frame#external_link_frame_#{link.id} h5 strong",
         text: "#{:show_observation_on_site.t(site: "iNaturalist")}:"
       )
-      assert_select("a[href='#{link.url}']")
+      assert_select("a[href='#{link.link_url}']")
     end
 
-    # Own-link edit/destroy affordance (InlineCRUDLinks) inside the
-    # info frame -- a controller test rather than a system test since
-    # it only needs the rendered response, not actual pane visibility.
+    # Edit/destroy affordance for a link the viewer created
+    # (InlineCRUDLinks) inside the info frame -- a controller test
+    # rather than a system test since it only needs the rendered
+    # response, not pane visibility.
     def test_show_turbo_frame_shows_edit_and_destroy_for_own_link
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
@@ -108,7 +109,7 @@ module Observations
       assert_response(:not_modified)
     end
 
-    # ...but a real change to the underlying links (add/remove/edit)
+    # ...but a change to the underlying links (add/remove/edit)
     # invalidates the etag, so a stale client re-fetches fresh content
     # instead of getting stuck on a 304 forever.
     def test_show_turbo_frame_etag_changes_when_links_change
@@ -122,7 +123,7 @@ module Observations
       ExternalLink.create!(
         user: rolf, target: link.observation,
         external_site: link.external_site,
-        url: "#{link.external_site.base_url}555555"
+        external_id: "555555"
       )
 
       simulate_turbo_frame_request(link)
@@ -132,15 +133,15 @@ module Observations
       assert_response(:success)
     end
 
-    # A site with 2+ own links -- the frame lists every one, not just
-    # the link the route id happens to point at.
+    # A site with 2+ links created by the viewer -- the frame lists
+    # every one, not just the link the route id happens to point at.
     def test_show_turbo_frame_multiple_own_links_same_site
       obs = observations(:coprinus_comatus_obs)
       inat = external_sites(:inaturalist)
       link1 = external_links(:coprinus_comatus_obs_inaturalist_link)
       link2 = ExternalLink.create!(
         user: rolf, target: obs, external_site: inat,
-        url: "#{inat.base_url}999999"
+        external_id: "999999"
       )
 
       login
@@ -148,12 +149,12 @@ module Observations
       get(:show, params: { id: link1.id })
 
       assert_response(:success)
-      assert_select("a[href='#{link1.url}']")
-      assert_select("a[href='#{link2.url}']")
+      assert_select("a[href='#{link1.link_url}']")
+      assert_select("a[href='#{link2.link_url}']")
     end
 
-    # Own links are sorted by relationship_date, matching the
-    # pre-badge external-links list panel's row order.
+    # Links the viewer created are sorted by relationship_date, matching
+    # the pre-badge external-links list panel's row order.
     def test_show_turbo_frame_orders_own_links_by_relationship_date
       obs = observations(:coprinus_comatus_obs)
       inat = external_sites(:inaturalist)
@@ -161,7 +162,7 @@ module Observations
       link1.update!(external_created_on: 2.days.ago.to_date)
       link2 = ExternalLink.create!(
         user: rolf, target: obs, external_site: inat,
-        url: "#{inat.base_url}999999",
+        external_id: "999999",
         external_created_on: 1.day.ago.to_date
       )
 
@@ -171,11 +172,12 @@ module Observations
 
       assert_response(:success)
       hrefs = css_select("a[href]").pluck("href")
-      assert_operator(hrefs.index(link1.url), :<, hrefs.index(link2.url))
+      assert_operator(hrefs.index(link1.link_url), :<,
+                      hrefs.index(link2.link_url))
     end
 
-    # Sibling observation (same Occurrence) with its own link to the
-    # same site shows up in the frame with "(MO #N)" attribution.
+    # Sibling observation (same Occurrence) with a link to the same
+    # site shows up in the frame with "(MO #N)" attribution.
     def test_show_turbo_frame_includes_sibling_links
       obs1 = observations(:minimal_unknown_obs)
       obs2 = observations(:coprinus_comatus_obs)
@@ -185,7 +187,7 @@ module Observations
       inat = external_sites(:inaturalist)
       link1 = ExternalLink.create!(
         user: rolf, target: obs1, external_site: inat,
-        url: "#{inat.base_url}888888"
+        external_id: "888888"
       )
       sibling_link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
@@ -194,16 +196,16 @@ module Observations
       get(:show, params: { id: link1.id })
 
       assert_response(:success)
-      assert_select("a[href='#{link1.url}']")
-      assert_select("a[href='#{sibling_link.url}']")
+      assert_select("a[href='#{link1.link_url}']")
+      assert_select("a[href='#{sibling_link.link_url}']")
       assert_select(
         "small.text-muted a[href='#{permanent_observation_path(obs2.id)}']",
         text: "MO #{obs2.id}"
       )
     end
 
-    # Sibling links are sorted by relationship_date too, matching own
-    # links' order.
+    # Sibling links are sorted by relationship_date too, the same as
+    # the links the viewer created.
     def test_show_turbo_frame_orders_sibling_links_by_relationship_date
       obs1 = observations(:minimal_unknown_obs)
       obs2 = observations(:coprinus_comatus_obs)
@@ -215,14 +217,14 @@ module Observations
       inat = external_sites(:inaturalist)
       link1 = ExternalLink.create!(
         user: rolf, target: obs1, external_site: inat,
-        url: "#{inat.base_url}777777"
+        external_id: "777777"
       )
       older_sibling_link =
         external_links(:coprinus_comatus_obs_inaturalist_link)
       older_sibling_link.update!(external_created_on: 2.days.ago.to_date)
       newer_sibling_link = ExternalLink.create!(
         user: rolf, target: obs3, external_site: inat,
-        url: "#{inat.base_url}666666",
+        external_id: "666666",
         external_created_on: 1.day.ago.to_date
       )
 
@@ -232,8 +234,8 @@ module Observations
 
       assert_response(:success)
       hrefs = css_select("a[href]").pluck("href")
-      assert_operator(hrefs.index(older_sibling_link.url), :<,
-                      hrefs.index(newer_sibling_link.url))
+      assert_operator(hrefs.index(older_sibling_link.link_url), :<,
+                      hrefs.index(newer_sibling_link.link_url))
     end
 
     # A direct (non-frame) visit to the show URL -- no Turbo-Frame
@@ -256,10 +258,10 @@ module Observations
       obs  = observations(:agaricus_campestris_obs) # owned by rolf
       obs2 = observations(:agaricus_campestrus_obs) # owned by rolf
       site = ExternalSite.first
-      url  = "#{site.base_url}234236523"
+      url  = site.observation_url("234236523")
       params = {
         id: obs.id,
-        external_link: { external_site_id: site, url: url }
+        external_link: { external_site_id: site, external_id: url }
       }
       [obs, obs2, site, url, params]
     end
@@ -300,7 +302,7 @@ module Observations
       assert_users_equal(rolf, ExternalLink.last.user)
       assert_objs_equal(obs, ExternalLink.last.observation)
       assert_objs_equal(site, ExternalLink.last.external_site)
-      assert_equal(url, ExternalLink.last.url)
+      assert_equal(url, ExternalLink.last.link_url)
     end
 
     # And now with Turbo...
@@ -313,46 +315,15 @@ module Observations
       end
     end
 
-    # bad url
-    def test_create_external_link_bad_url
+    # url-shaped, but doesn't match any recognized site's format
+    def test_create_external_link_unrecognized_url
       _obs, _obs2, _site, _url, params = setup_create_test
       login("mary")
       params2 = params.dup
-      params2[:external_link][:url] = "bad_url"
+      params2[:external_link][:external_id] =
+        "https://not-a-known-site.example/x"
       post(:create, params: params2)
       assert_flash_error
-    end
-
-    # bad url
-    def test_create_external_link_404_response
-      _obs, _obs2, _site, _url, params = setup_create_test
-      login("mary")
-      params2 = params.dup
-      params2[:external_link][:url] = "bad_url"
-      stub_request(:any, /bad_url/).
-        to_return(status: 404, body: "", headers: {})
-      post(:create, params: params2)
-      assert_flash_error
-    end
-
-    def test_create_external_link_good_url_no_scheme
-      _obs, _obs2, _site, url, params = setup_create_test
-      login("mary")
-      params2 = params.dup
-      params2[:external_link][:url] = url.delete_prefix("https://")
-      post(:create, params: params2)
-      assert_flash_success
-      assert_equal(url, ExternalLink.last.url)
-    end
-
-    def test_create_external_link_good_url_no_www
-      _obs, _obs2, _site, url, params = setup_create_test
-      login("mary")
-      params2 = params.dup
-      params2[:external_link][:url] = url.delete_prefix("https://www.")
-      post(:create, params: params2)
-      assert_flash_success
-      assert_equal(url, ExternalLink.last.url)
     end
 
     # mary can because she's a member of the external site's project
@@ -367,7 +338,7 @@ module Observations
       assert_users_equal(mary, ExternalLink.last.user)
       assert_objs_equal(obs2, ExternalLink.last.observation)
       assert_objs_equal(site, ExternalLink.last.external_site)
-      assert_equal(url, ExternalLink.last.url)
+      assert_equal(url, ExternalLink.last.link_url)
     end
 
     def test_edit_external_link_form
@@ -394,8 +365,8 @@ module Observations
     def test_update_external_link
       # obs owned by rolf, mary created link and is member of site's project
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
-      new_url = "#{link.external_site.base_url}999999"
-      params = { id: link.id, external_link: { url: new_url } }
+      new_url = link.external_site.observation_url("999999")
+      params = { id: link.id, external_link: { external_id: new_url } }
 
       # not logged in
       put(:update, params:)
@@ -409,7 +380,7 @@ module Observations
       # mary can
       login("mary")
       put(:update, params:)
-      assert_equal(new_url, link.reload.url)
+      assert_equal(new_url, link.reload.link_url)
       assert_flash_success
 
       # rolf can, too
@@ -417,8 +388,9 @@ module Observations
       put(:update, params:)
       assert_flash_success
 
-      # bad url
-      params[:external_link][:url] = "bad_url"
+      # unrecognized url
+      params[:external_link][:external_id] =
+        "https://not-a-known-site.example/x"
       put(:update, params:)
       assert_flash_error
     end
@@ -433,26 +405,15 @@ module Observations
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       back_path = "/some/back/path"
       params = { id: link.id, back: back_path,
-                 external_link: { url: "bad_url" } }
+                 external_link: {
+                   external_id: "https://not-a-known-site.example/x"
+                 } }
 
       login("rolf")
       put(:update, params:)
 
       assert_redirected_to(edit_external_link_path(id: link.id,
                                                    back: back_path))
-    end
-
-    def test_update_external_id_clears_url
-      # url-bearing link; setting external_id drops the url (XOR invariant)
-      link = external_links(:coprinus_comatus_obs_inaturalist_link)
-      login("mary") # site-project member of the link's site
-
-      put(:update,
-          params: { id: link.id, external_link: { external_id: "424242" } })
-
-      link.reload
-      assert_equal("424242", link.external_id)
-      assert_nil(link.url)
     end
 
     def test_update_relationship
@@ -470,15 +431,15 @@ module Observations
     # covered at the controller layer, not just the system test.
     def test_update_external_link_turbo
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
-      new_url = "#{link.external_site.base_url}999999"
+      new_url = link.external_site.observation_url("999999")
       params = { id: link.id,
-                 external_link: { url: new_url, modal: "true" } }
+                 external_link: { external_id: new_url, modal: "true" } }
 
       login("mary")
       put(:update, params: params, format: :turbo_stream)
 
       assert_response(:success)
-      assert_equal(new_url, link.reload.url)
+      assert_equal(new_url, link.reload.link_url)
       assert_select("turbo-stream[target='observation_external_links']")
     end
 
@@ -497,7 +458,7 @@ module Observations
     end
 
     # Same, but the observation belongs to an occurrence: the sibling
-    # list handed to the re-rendered panel must be a real Array — a raw
+    # list handed to the re-rendered panel must be a plain Array — a raw
     # AssociationRelation trips the panel's typed prop and 500s the
     # delete (seen in prod-data testing on #4853).
     def test_remove_external_link_turbo_on_occurrence_member

@@ -52,7 +52,7 @@ class Components::Link::ExternalTest < ComponentTestCase
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     html = render_link(link: link)
 
-    assert_html(html, "a[href='#{link.url}']" \
+    assert_html(html, "a[href='#{link.link_url}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
                 text: "Manual link to iNaturalist")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
@@ -66,13 +66,10 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html, "button.badge-id[data-title='#{title}']")
   end
 
-  # Regression: import links store external_id with a nil url (url is derived).
-  # The component used to call link.url.sub(...) -> NoMethodError on nil.
-  def test_inat_import_link_with_nil_url_renders_derived_id_badge
+  def test_inat_import_link_renders_derived_id_badge
     site = external_sites(:inaturalist)
     link = ExternalLink.new(external_site: site, relationship: :import,
                             external_id: "372490529")
-    assert_nil(link.url, "Import links store external_id, not url")
 
     html = render_link(link: link)
 
@@ -87,7 +84,7 @@ class Components::Link::ExternalTest < ComponentTestCase
     html = render_link(link: link)
 
     assert_html(html,
-                "a[href='#{link.url}']" \
+                "a[href='#{link.link_url}']" \
                 "[target='_blank'][rel='noopener noreferrer']",
                 text: "Manual link to MyCoPortal")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
@@ -100,8 +97,7 @@ class Components::Link::ExternalTest < ComponentTestCase
   def test_site_with_no_id_accessor_renders_no_badge
     site = ExternalSite.new(name: "GenBank",
                             base_url: "https://genbank.example/")
-    link = ExternalLink.new(external_site: site,
-                            url: "https://genbank.example/123")
+    link = ExternalLink.new(external_site: site, external_id: "123")
 
     html = render_link(link: link)
 

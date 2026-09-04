@@ -277,11 +277,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find_link(:add_object.t(type: :external_link)).trigger("click")
     end
 
-    # external_id is active by default; the url field is grayed (readonly)
     assert_selector("#modal_external_link")
     within("#modal_external_link") do
-      assert_field("external_link_external_id", readonly: false)
-      assert_field("external_link_url", readonly: true)
       select(site.name, from: "external_link_external_site_id")
       fill_in("external_link_external_id", with: "12212326")
       click_commit
@@ -291,7 +288,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     mcp_link = ExternalLink.last
     assert_equal("12212326", mcp_link.external_id)
-    assert_nil(mcp_link.url, "an external_id link stores no url")
 
     # A second site's link, created directly (not via the UI) so the
     # accordion has two badges to switch between.

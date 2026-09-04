@@ -180,10 +180,10 @@ module Observations
       end
     end
 
-    # Editable on update by any editor: url + external_id (mutually exclusive —
-    # the model drops url when external_id is present) + relationship.
+    # Editable on update by any editor. external_id accepts either a bare
+    # id or a url -- the model resolves the latter server-side.
     def permitted_external_link_params
-      params.require(:external_link).permit(:url, :external_id, :relationship)
+      params.require(:external_link).permit(:external_id, :relationship)
     end
 
     def remove_external_link

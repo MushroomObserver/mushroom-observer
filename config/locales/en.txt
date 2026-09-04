@@ -2099,7 +2099,7 @@
   show_observation_manage_projects: Manage Projects
   show_observation_add_to_project: Add to a Project
   show_observation_send_question: Send Observer a Question
-  show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
+  show_observation_add_link_dialog: "Paste the full URL to this observation on the external site, or enter its id directly:"
   remove_object_confirm: Remove [type] from this [association]?
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run NCBI BLAST®
@@ -3860,6 +3860,9 @@
 
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
+  validate_external_link_list_search_url: This is a search results page, not a direct record link. Open the record you want and paste that page's URL instead.
+  validate_external_link_self_referential_url: This URL points back to Mushroom Observer, not [site].
+  validate_external_link_unrecognized_url: Couldn't match this URL to a [site] record.
   validate_invalid_url: Invalid URL.
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
@@ -4230,6 +4233,7 @@
   api_bad_species_list_parameter_value: Invalid or unknown observation list, "[val]", accept numerical id or observation list title.
   api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
   api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
+  api_bad_url_parameter_value: Invalid URL, "[val]".
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
   api_bad_version: Invalid version number "[version]".
   api_can_only_delete_your_own_account: Only the account owner can delete their account.
@@ -4458,7 +4462,6 @@
   query_text_name_has: name has
   query_title_has: title has
   query_types: types
-  query_url_has: url has
   query_in_country: country
 
   # in box

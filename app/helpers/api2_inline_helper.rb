@@ -60,11 +60,11 @@ module API2InlineHelper
 
   def json_external_link(external_link)
     strip_hash(id: external_link.id,
-               url: external_link.url.to_s)
+               url: external_link.link_url.to_s)
   end
 
   def xml_external_link(xml, external_link)
-    xml_string(xml, :url, external_link.url)
+    xml_string(xml, :url, external_link.link_url)
   end
 
   def json_external_site(external_site)

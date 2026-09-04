@@ -97,6 +97,17 @@ class ExternalSite < AbstractModel
   def id_from_url(url)
     return nil if url.blank?
 
+    id = id_from_url_unchecked(url)
+    # iNat's template is just base_url + "{id}" -- unlike MyCoPortal's
+    # query-param shape, its capture group would happily match trailing
+    # non-numeric junk (".../observations/notanumber") as if it were a
+    # valid id. iNat ids are always numeric, so enforce that here.
+    return nil if name == INATURALIST_NAME && !id.to_s.match?(/\A\d+\z/)
+
+    id
+  end
+
+  def id_from_url_unchecked(url)
     template = url_template.presence || "#{base_url}{id}"
     # -1 limit: {id} is usually the last token, and split drops trailing
     # empty strings by default -- losing the empty string after it means
@@ -105,6 +116,7 @@ class ExternalSite < AbstractModel
               map { |part| Regexp.escape(part) }.join("(.+)")
     /\A#{pattern}\z/.match(url)&.captures&.first
   end
+  private :id_from_url_unchecked
 
   # True when url is a MyCoPortal catalog-number search page
   # (list.php?catnum=...) -- id-addressable only via a live crawl of the
