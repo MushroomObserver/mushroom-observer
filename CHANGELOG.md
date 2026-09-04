@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-04 (deploy-2026-09-04-10-34)
+
+- Repair changelog sections from the transitional deploys ([PR5304](https://github.com/MushroomObserver/mushroom-observer/pull/5304), @mo-nathan)
+- Fix production 500 on `glossary_terms#index` for admins ([PR5306](https://github.com/MushroomObserver/mushroom-observer/pull/5306), @nimmolo)
+- Fix `Date::Error` crash on out-of-range month in date search ([PR5307](https://github.com/MushroomObserver/mushroom-observer/pull/5307), @nimmolo)
+- Require `Location#name`/`scientific_name` at model and DB level ([PR5308](https://github.com/MushroomObserver/mushroom-observer/pull/5308), @nimmolo)
+- Fix flaky `test_zero_latitude_triggers_locality_lookup` ([PR5309](https://github.com/MushroomObserver/mushroom-observer/pull/5309), @nimmolo)
+- Add script to resolve MyCoPortal `external_links` to occids (#4591) ([PR5305](https://github.com/MushroomObserver/mushroom-observer/pull/5305), @nimmolo)
+- Drop and recreate `mo_development` in `db/strip_checkpoint` ([PR5311](https://github.com/MushroomObserver/mushroom-observer/pull/5311), @nimmolo)
+
 ## 2026-09-03 (deploy-2026-09-03-12-00)
 
 - Add `script/prerelease.rb` to build the pre-deploy changelog PR ([PR5281](https://github.com/MushroomObserver/mushroom-observer/pull/5281), @mo-nathan)

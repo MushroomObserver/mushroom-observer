@@ -1,2 +1,1 @@
-|{white-space:nowrap}. 2026-09-03 | Speed up observation creation, lighten the upload lock | "PR#5239":https://github.com/MushroomObserver/mushroom-observer/pull/5239 |
-|{white-space:nowrap}. 2026-09-03 | Add Project choice and automatic filing to iNat imports | "PR#5301":https://github.com/MushroomObserver/mushroom-observer/pull/5301 |
+|{white-space:nowrap}. 2026-09-03 | Fix an error searching Observations by an invalid date | "PR#5307":https://github.com/MushroomObserver/mushroom-observer/pull/5307 |
