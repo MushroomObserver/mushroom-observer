@@ -1280,12 +1280,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
-  # Bug fix: a latitude or longitude of 0 (equator or prime meridian)
-  # used to be treated as "no coordinate" by a falsy check and
-  # silently rejected. Under the old bug, a latitude of 0 would keep
-  # the autocompleter in plain "location" mode; the fixed code swaps
-  # it into "location_containing" like any other valid point, and
-  # carries the 0-valued params along.
+  # A latitude or longitude of 0 (equator or prime meridian) is a
+  # valid coordinate: the autocompleter swaps into "location_containing"
+  # mode and carries the 0-valued params along, same as any other point.
   #
   # Needs a fixture-independent location containing (0, 0.5): the
   # only fixture location whose box geographically contains that
