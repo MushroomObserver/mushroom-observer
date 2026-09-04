@@ -211,7 +211,9 @@ class ResolveMycoportalLinks
     if @apply
       Comment.create!(target: link.target, user: comment_user(link),
                       summary: COMMENT_SUMMARY,
-                      comment: comment_body(link, reason))
+                      comment: comment_body(link, reason),
+                      created_at: link.created_at,
+                      updated_at: link.created_at)
       link.destroy!
     end
     @counts[:converted] += 1
