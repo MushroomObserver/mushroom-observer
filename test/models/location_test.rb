@@ -121,6 +121,44 @@ class LocationTest < UnitTestCase
     assert_not(Location.countries_in_continent("Europe").include?("Canada"))
   end
 
+  def test_understood_continents
+    assert_equal(Location::UNDERSTOOD_CONTINENTS,
+                 Location.understood_continents)
+  end
+
+  def test_understood_states
+    assert_equal(Location::UNDERSTOOD_STATES["USA"],
+                 Location.understood_states("USA"))
+  end
+
+  def test_countries_by_count
+    assert_kind_of(Array, Location.countries_by_count)
+  end
+
+  def test_title_display_name
+    loc = locations(:albion)
+    assert_equal(loc.name.split(", ").first, loc.title_display_name)
+  end
+
+  def test_textile_name
+    loc = locations(:albion)
+    assert_equal(loc.display_name, loc.textile_name)
+  end
+
+  def test_clean_name_leave_stars
+    assert_equal("albion, california, us*a",
+                 Location.clean_name("Albion, California, US*A!", true))
+  end
+
+  def test_validate_user_missing
+    loc = Location.new(
+      name: "Nowhere, USA", scientific_name: "USA, Nowhere",
+      north: 10, south: 0, east: 10, west: 0
+    )
+    assert_not(loc.valid?)
+    assert_not_empty(loc.errors[:user])
+  end
+
   def test_versioning
     loc = Location.create!(
       name: "Anywhere",
@@ -651,6 +689,61 @@ class LocationTest < UnitTestCase
     assert_not_nil(log2.reload.target_id)
     assert_equal(:log_orphan, log1.parse_log[0][0])
     assert_equal(:log_location_merged, log1.parse_log[1][0])
+  end
+
+  def test_merge_combines_non_conflicting_public_descriptions
+    loc1 = new_location_for_merge("Merge Source")
+    loc2 = new_location_for_merge("Merge Dest")
+    desc1 = LocationDescription.create!(
+      location: loc1, user: rolf, source_type: :public,
+      gen_desc: "General from source"
+    )
+    desc1.add_author(mary)
+    desc1.add_editor(katrina)
+    desc2 = LocationDescription.create!(
+      location: loc2, user: rolf, source_type: :public,
+      ecology: "Ecology from dest"
+    )
+    loc1.update!(description: desc1)
+    loc2.update!(description: desc2)
+
+    loc2.merge(rolf, loc1)
+
+    desc2.reload
+    assert_equal("General from source", desc2.gen_desc)
+    assert_equal("Ecology from dest", desc2.ecology)
+    assert_includes(desc2.authors, mary)
+    assert_includes(desc2.editors, katrina)
+    assert_not(LocationDescription.exists?(desc1.id))
+  end
+
+  def test_merge_leaves_conflicting_public_descriptions_unmerged
+    loc1 = new_location_for_merge("Merge Source")
+    loc2 = new_location_for_merge("Merge Dest")
+    desc1 = LocationDescription.create!(
+      location: loc1, user: rolf, source_type: :public,
+      gen_desc: "Source version"
+    )
+    desc2 = LocationDescription.create!(
+      location: loc2, user: rolf, source_type: :public,
+      gen_desc: "Dest version"
+    )
+    loc1.update!(description: desc1)
+    loc2.update!(description: desc2)
+
+    loc2.merge(rolf, loc1)
+
+    desc2.reload
+    assert_equal("Dest version", desc2.gen_desc)
+    assert(LocationDescription.exists?(desc1.id))
+    assert_equal(loc2.id, LocationDescription.find(desc1.id).location_id)
+  end
+
+  def new_location_for_merge(prefix)
+    Location.create!(
+      name: "#{prefix}, USA", scientific_name: "USA, #{prefix}",
+      north: 10, south: 0, east: 10, west: 0, user: rolf
+    )
   end
 
   # test BoxMethods module `lat_lng_close?` method

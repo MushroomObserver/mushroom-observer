@@ -726,15 +726,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     result
   end
 
-  def self.dubious_country?(name)
-    !understood_country?(country(name))
-  end
-
-  def self.fix_country(name)
-    c = country(name)
-    name[0..(name.rindex(c) - 1)] + COUNTRY_FIXES[c]
-  end
-
   def self.find_by_name_with_wildcards(str)
     find_using_wildcards("name", str)
   end
@@ -898,12 +889,20 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     move_remaining_descriptions(old_loc)
   end
 
+  # A conflict (both sides have a non-blank value for the same note
+  # field) is left alone -- old_loc's description survives the
+  # location merge as a secondary description (see
+  # `move_remaining_descriptions`) for manual resolution via the
+  # descriptions/merges UI, same as a controller-driven description
+  # merge (Descriptions::Merges#perform_merge) would leave it.
   def merge_primary_descriptions(old_loc)
     return unless description && old_loc.description
     return unless description.source_type == :public
     return unless old_loc.description.source_type == :public
+    return unless description.mergeable_notes?(old_loc.description)
 
-    description.merge(old_loc.description)
+    description.merge_notes_from(old_loc.description)
+    old_loc.description.destroy
   end
 
   def move_remaining_descriptions(old_loc)

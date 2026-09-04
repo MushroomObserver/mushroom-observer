@@ -480,6 +480,7 @@ Naming/PredicateMethod:
     - nonpersonal!
     - ok_field_slip_count
     - parsing
+    - perform_merge
     - public_write_was
     - redirect_non_admins!
     - redirect_to_referrer
