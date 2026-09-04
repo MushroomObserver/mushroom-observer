@@ -1280,22 +1280,24 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
-  # Bug fix: a latitude or longitude of exactly 0 (equator or
-  # prime meridian) used to be treated as "no coordinate" by a falsy
-  # check and silently rejected. Under the old bug, a latitude of 0
-  # would keep the autocompleter in plain "location" mode; the fixed
-  # code swaps it into "location_containing" like any other valid
-  # point, and carries the exact (0-valued) params along.
+  # A latitude or longitude of 0 (equator or prime meridian) is a
+  # valid coordinate: the autocompleter swaps into "location_containing"
+  # mode and carries the 0-valued params along, same as any other point.
+  #
+  # Needs a fixture-independent location containing (0, 0.5): the
+  # only fixture location whose box geographically contains that
+  # point is the global "Earth" catch-all (unknown_location), and
+  # Autocomplete::ForLocationContaining rejects overly-broad boxes as
+  # "vague" (Mappable::BoxMethods#vague?), so a whole-globe box does
+  # not match. Without a small, specific location here, the lookup
+  # finds nothing and falls back to "location_google" instead.
   def test_zero_latitude_triggers_locality_lookup
-    # Autocomplete::ForLocationContaining rejects any location whose
-    # box exceeds MO.obs_location_max_area as "vague" -- without a
-    # small matching location, "contains this point" legitimately
-    # finds nothing and the autocompleter falls back to
-    # location_google (Location.contains?, same as
-    # test_autofill_location_from_geotagged_image's Part 2 setup).
-    null_island = Location.new(**NULL_ISLAND_BOX, user: katrina)
-    assert(null_island.contains?(0, 0.5))
-    null_island.save!
+    equator_location = Location.create!(
+      name: "Null Island Vicinity, Gulf of Guinea",
+      scientific_name: "Gulf of Guinea, Null Island Vicinity",
+      north: 0.7, south: -0.3, east: 1.0, west: 0.0,
+      user: katrina
+    )
 
     login!(katrina)
     visit(new_observation_path)
@@ -1324,6 +1326,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     JS
     assert_equal(0, request_params["lat"])
     assert_in_delta(0.5, request_params["lng"])
+  ensure
+    equator_location&.destroy
   end
 
   # Bug fix: iNat exports coordinates as a single
@@ -1625,17 +1629,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     year: 2006,
     month: 11,
     day: 20
-  }.freeze
-
-  # A small box around the Gulf of Guinea point (0, 0.5) used by
-  # test_zero_latitude_triggers_locality_lookup -- well under
-  # MO.obs_location_max_area, so it isn't rejected as "vague".
-  NULL_ISLAND_BOX = {
-    name: "Null Island",
-    north: 0.05,
-    south: -0.05,
-    east: 0.55,
-    west: 0.45
   }.freeze
 
   # The geotagged.jpg is from University Park, Florida.
