@@ -567,10 +567,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     UNDERSTOOD_CONTINENTS[a_continent]
   end
 
-  def self.countries_by_count
-    CountryCounter.new.countries_by_count
-  end
-
   def self.location_name_cache
     Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
       (Location.pluck(:name) + Observation.pluck(:where) +
@@ -897,8 +893,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # merge (Descriptions::Merges#perform_merge) would leave it.
   def merge_primary_descriptions(old_loc)
     return unless description && old_loc.description
-    return unless description.source_type == :public
-    return unless old_loc.description.source_type == :public
+    return unless description.source_type == "public"
+    return unless old_loc.description.source_type == "public"
     return unless description.mergeable_notes?(old_loc.description)
 
     description.merge_notes_from(old_loc.description)

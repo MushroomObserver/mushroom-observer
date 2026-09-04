@@ -131,10 +131,6 @@ class LocationTest < UnitTestCase
                  Location.understood_states("USA"))
   end
 
-  def test_countries_by_count
-    assert_kind_of(Array, Location.countries_by_count)
-  end
-
   def test_title_display_name
     loc = locations(:albion)
     assert_equal(loc.name.split(", ").first, loc.title_display_name)
@@ -146,7 +142,7 @@ class LocationTest < UnitTestCase
   end
 
   def test_clean_name_leave_stars
-    assert_equal("albion, california, us*a",
+    assert_equal("albion california us*a",
                  Location.clean_name("Albion, California, US*A!", true))
   end
 

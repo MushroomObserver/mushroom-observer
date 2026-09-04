@@ -82,7 +82,7 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
   def list_descriptions_for(name)
     name.descriptions.count do |desc|
       desc.notes? || desc.user == @user ||
-        desc.source_type == :public
+        desc.source_type == "public"
     end
   end
 end
