@@ -250,6 +250,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_save :prefer_minimum_bounding_box_to_earth
   before_save :set_gps_dubious
   before_save :reconcile_collector_user
+  before_save :ensure_thumb_image_present
   before_create :default_collector_to_creator
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
@@ -285,8 +286,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # alternative below when the carousel feature lands.
   def self.matrix_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
-     # for matrix_box_carousels:
-     # { images: [:image_votes, :license, :projects, :user] },
+     # Fallback thumbnail for a null-thumb-but-has-images observation
+     # (#5314 follow-up); the box shows images.first when thumb_image
+     # is missing rather than a blank box.
+     { images: [:image_votes, :license, :projects, :user] },
      :collector_user,
      { external_links: :external_site }, :location, :name,
      { namings: :votes },
@@ -1045,6 +1048,23 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       reload
     end
     img
+  end
+
+  # An observation with images should always have a thumbnail. Before
+  # 2026-07-25 a newly attached image did not become the default
+  # thumbnail, so observations could be saved with images and a null
+  # `thumb_image_id`, which renders as a blank box in the indexes
+  # (#5314 follow-up). Self-heal here so no save can persist that
+  # state again. Only when the images are already loaded -- this must
+  # not add a query to the hot create path (where the first save
+  # happens before any image is attached), and must not lazy-load
+  # under the edit form's strict_loading.
+  def ensure_thumb_image_present
+    return if thumb_image_id.present?
+    return unless images.loaded?
+
+    first = images.min_by(&:id)
+    self.thumb_image_id = first.id if first
   end
 
   # List of images attached to this Observation, sorted

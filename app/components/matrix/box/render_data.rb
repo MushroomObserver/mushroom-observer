@@ -54,15 +54,27 @@ class Components::Matrix::Box
         time: @object.rss_log&.updated_at
       }
 
-      add_observation_image_data(data) if @object.thumb_image_id
+      add_observation_image_data(data) if observation_box_image
       data
     end
 
     def add_observation_image_data(data)
-      data[:image] = @object.thumb_image
+      data[:image] = observation_box_image
       data[:image_link] = @object.show_link_args
       data[:obs] = @object
       data[:full_width] = true
+    end
+
+    # The observation's thumbnail, or its first image when the
+    # thumbnail is missing (#5314 follow-up). `images` is eager-loaded
+    # by `Observation.matrix_box_includes`, so the fallback adds no
+    # query; `min_by` over the loaded set matches images_sorted's
+    # oldest-first order.
+    def observation_box_image
+      return @observation_box_image if defined?(@observation_box_image)
+
+      @observation_box_image =
+        @object.thumb_image || @object.images.min_by(&:id)
     end
 
     def extract_rss_log_data
