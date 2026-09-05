@@ -80,6 +80,47 @@ class ObservationTest < UnitTestCase
     assert_equal(last, obs.thumb_image)
   end
 
+  # #5314 follow-up: an observation should not be saved with images
+  # and a null thumbnail (which renders as a blank index box). The
+  # before_save self-heals when the images are loaded.
+  def test_ensure_thumb_image_present_on_save
+    img1 = images(:commercial_inquiry_image)
+    img2 = images(:disconnected_coprinus_comatus_image)
+    obs = observations(:minimal_unknown_obs)
+    obs.images = [img1, img2]
+    obs.thumb_image_id = nil
+
+    obs.save!
+
+    assert_equal([img1, img2].min_by(&:id).id, obs.reload.thumb_image_id,
+                 "Saving with images but no thumb should set the oldest " \
+                 "image as the thumbnail")
+  end
+
+  # A chosen thumbnail is left alone.
+  def test_ensure_thumb_image_present_keeps_existing_thumb
+    img1 = images(:commercial_inquiry_image)
+    img2 = images(:disconnected_coprinus_comatus_image)
+    obs = observations(:minimal_unknown_obs)
+    obs.images = [img1, img2]
+    obs.thumb_image = img2
+
+    obs.save!
+
+    assert_equal(img2.id, obs.reload.thumb_image_id)
+  end
+
+  # An imageless observation saves with a nil thumbnail, untouched.
+  def test_ensure_thumb_image_present_no_op_without_images
+    obs = observations(:minimal_unknown_obs)
+    obs.images = []
+    obs.thumb_image_id = nil
+
+    obs.save!
+
+    assert_nil(obs.reload.thumb_image_id)
+  end
+
   # ------------------------------------------
   #  Test owner id, favorites, NamingConsensus
   # ------------------------------------------
