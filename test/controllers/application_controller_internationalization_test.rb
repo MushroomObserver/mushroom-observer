@@ -52,39 +52,40 @@ class ApplicationControllerInternationalizationAccountPersistenceTest <
       FunctionalTestCase
   tests ObservationsController
 
-  # Issue #5074: a bare `?user_locale=` param (bookmark, crawler,
-  # remembered URL) must switch the current request/session locale
-  # but never silently overwrite the account's stored preference --
-  # only the Preferences form does that.
-  def test_params_locale_switches_request_but_not_account_preference
+  # Issue #5314: a `?user_locale=` param on a GET (bookmark, crawler
+  # index, legacy external link) is ignored entirely -- honoring it
+  # switched unsuspecting visitors' sessions to another language. Only
+  # the language picker's POST switches (see LocalesControllerTest).
+  def test_get_user_locale_param_is_ignored
     user = users(:rolf)
     user.update(locale: "en")
     login(user.login)
 
     get(:index, params: { user_locale: "pt" })
 
-    assert_equal("pt", I18n.locale.to_s)
-    assert_equal("pt", session[:locale])
-    assert_equal("en", user.reload.locale,
-                 "A bare user_locale param must not change @user.locale")
+    assert_equal("en", I18n.locale.to_s,
+                 "A GET user_locale param must not switch the locale")
+    assert_nil(session[:locale],
+               "A GET user_locale param must not write the session")
+    assert_equal("en", user.reload.locale)
   end
 
   # Issue #5074, second bug found in review: an explicit switch must
   # outrank the account's stored preference for the rest of the
-  # session, or it reverts on the visitor's very next page load --
-  # exactly what happened when @user.locale stopped being silently
-  # overwritten (the whole point of the fix above) without also
-  # fixing specified_locale's priority order.
+  # session, or it reverts on the visitor's very next page load. The
+  # switch itself is the picker's POST (LocalesControllerTest); its
+  # session write is injected here since this controller has no POST
+  # locale action.
   def test_explicit_switch_sticks_on_next_request_for_logged_in_user
     user = users(:rolf)
     user.update(locale: "en")
     login(user.login)
 
-    get(:index, params: { user_locale: "pt" })
+    get(:index, session: { locale: "pt" })
     assert_equal("pt", I18n.locale.to_s)
 
-    # Follow-up request, no user_locale param -- simulates the
-    # redirect back after the switcher POST.
+    # Follow-up request -- simulates the next page load after the
+    # switcher POST's redirect back.
     get(:index)
 
     assert_equal("pt", I18n.locale.to_s,
