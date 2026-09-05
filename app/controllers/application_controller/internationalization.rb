@@ -73,10 +73,13 @@ module ApplicationController::Internationalization
   def params_locale
     locale = string_param(:user_locale)
     return unless locale
-    # Only the language picker's POST switches (LocalesController).
-    # Legacy GET links (`?user_locale=pl` on pre-2021 URLs) survive in
+    # Honor the param on a POST only -- the language picker submits
+    # one (LocalesController#update). A GET carrying `?user_locale=pl`
+    # is ignored: legacy pre-2021 links of that shape survive in
     # crawler indexes and external pages, and honoring them switched
-    # unsuspecting visitors' sessions to another language (#5314).
+    # unsuspecting visitors' sessions to another language (#5314). A
+    # GET is the crawlable/linkable shape; a POST is not, so this is
+    # the property that matters, not the specific controller.
     return unless request.post?
 
     logger.debug("[I18n] loading locale: #{locale} from params")
