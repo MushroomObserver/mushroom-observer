@@ -110,6 +110,34 @@ class Inat
       else
         observation.update!(occurrence: native.occurrence)
       end
+      adopt_reflection_location(native, observation)
+    end
+
+    # The native was usually created in the id room with a rough
+    # default location; the reflection just linked to it carries
+    # iNaturalist's resolved location. Adopt it onto the native when
+    # iNat did not obscure it and it differs (#5317 follow-up).
+    # update_columns: a location correction on an existing observation
+    # should not email its watchers or churn its RssLog during an
+    # import. gps_dubious is copied -- the native adopts the
+    # reflection's coords and location, so it inherits its status.
+    def adopt_reflection_location(native, reflection)
+      return if reflection.gps_hidden || reflection.lat.nil?
+      return if same_location?(native, reflection)
+
+      native.update_columns(
+        lat: reflection.lat, lng: reflection.lng, alt: reflection.alt,
+        location_id: reflection.location_id, where: reflection.where,
+        gps_hidden: false, gps_dubious: reflection.gps_dubious,
+        updated_at: Time.zone.now
+      )
+    end
+
+    def same_location?(native, reflection)
+      native.location_id == reflection.location_id &&
+        native.lat && reflection.lat &&
+        (native.lat - reflection.lat).abs <= 0.0001 &&
+        (native.lng.to_f - reflection.lng.to_f).abs <= 0.0001
     end
 
     # Case 2. Set the column directly: `FieldSlip#project=` gates on

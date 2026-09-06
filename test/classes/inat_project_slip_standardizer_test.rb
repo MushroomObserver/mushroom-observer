@@ -66,6 +66,43 @@ class InatProjectSlipStandardizerTest < UnitTestCase
     assert_includes(@project.observations.reload, obs)
   end
 
+  # #5317: the native, created in the id room with a rough default,
+  # adopts its reflection's non-obscured iNat location on import.
+  def test_adopts_reflection_location_onto_native
+    inat_id = "987654322"
+    native = native_with_slip(:coprinus_comatus_obs, code: "OPEN-9010",
+                                                     citing: inat_id)
+    native.update!(lat: 39.25, lng: -123.75, location: locations(:albion))
+    obs = import_obs(:detailed_unknown_obs)
+    obs.update!(lat: 38.538, lng: -123.318, alt: 30,
+                location: locations(:gualala), gps_hidden: false)
+
+    standardizer.standardize(obs, inat_id: inat_id)
+
+    native.reload
+    assert_equal(locations(:gualala).id, native.location_id,
+                 "native should adopt the reflection's location")
+    assert_in_delta(38.538, native.lat, 0.0001)
+    assert_in_delta(-123.318, native.lng, 0.0001)
+  end
+
+  # An obscured reflection carries blurred coords; do not overwrite the
+  # native with them.
+  def test_does_not_adopt_obscured_reflection_location
+    inat_id = "987654323"
+    native = native_with_slip(:coprinus_comatus_obs, code: "OPEN-9011",
+                                                     citing: inat_id)
+    native.update!(lat: 39.25, lng: -123.75, location: locations(:albion))
+    obs = import_obs(:detailed_unknown_obs)
+    obs.update!(lat: 38.538, lng: -123.318,
+                location: locations(:gualala), gps_hidden: true)
+
+    standardizer.standardize(obs, inat_id: inat_id)
+
+    assert_equal(locations(:albion).id, native.reload.location_id,
+                 "an obscured reflection must not overwrite the location")
+  end
+
   def test_merges_reused_slip_occurrence_into_native
     inat_id = "987650001"
     native = native_with_slip(:coprinus_comatus_obs, code: "OPEN-9005",
