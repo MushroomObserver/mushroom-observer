@@ -83,11 +83,24 @@ class FormCameraInfoTest < ComponentTestCase
     assert_includes(html, "100")
   end
 
+  def test_renders_obscured_note_when_obscured
+    html = render_info(lat: "45.5231", lng: "-122.6765", obscured: true)
+
+    assert_html(html, "span.exif_obscured",
+                text: :image_gps_obscured_on_inat.l)
+  end
+
+  def test_no_obscured_note_by_default
+    html = render_info(lat: "45.5231", lng: "-122.6765")
+
+    assert_no_html(html, "span.exif_obscured")
+  end
+
   private
 
   # rubocop:disable-next Metrics/ParameterLists
   def render_info(lat: nil, lng: nil, alt: nil, date: "2024-01-15",
-                  file_name: nil, file_size: nil)
+                  file_name: nil, file_size: nil, obscured: false)
     render(Components::Form::CameraInfo.new(
              img_id: 123,
              lat: lat,
@@ -95,7 +108,8 @@ class FormCameraInfoTest < ComponentTestCase
              alt: alt,
              date: date,
              file_name: file_name,
-             file_size: file_size
+             file_size: file_size,
+             obscured: obscured
            ))
   end
 end

@@ -114,7 +114,7 @@ class Components::Form::UploadGallery < Components::Base
                image: image,
                upload: false,
                obs_thumb_id: @obs_thumb_id,
-               camera_info: {},
+               camera_info: @exif_data[image&.id] || {},
                sibling: true
              ))
     end
@@ -129,13 +129,17 @@ class Components::Form::UploadGallery < Components::Base
     # sibling-specific UI differences are gated by the `sibling: true`
     # prop on `Components::Form::UploadGallery::Item`, not by the
     # status string.
+    #
+    # geocode carries the sibling member's location so "Use this info"
+    # copies it onto the observation (a reflection's coordinates are the
+    # whole point of showing the panel -- #5317).
     {
       form_images_target: "item",
       form_exif_target: "item",
       action: "form-exif:populated->form-images#itemExifPopulated",
       image_uuid: img_id_for_dom,
       image_status: "good",
-      geocode: "{}"
+      geocode: (@exif_data[image&.id] || {}).to_json
     }
   end
 

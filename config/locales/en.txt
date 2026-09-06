@@ -1595,6 +1595,7 @@
   image_use_exif: Use this info
   image_camera_info: Camera info
   image_no_geolocation: No geolocation found
+  image_gps_obscured_on_inat: obscured on iNaturalist
   image_file_name: File name
   image_file_size: File size
 

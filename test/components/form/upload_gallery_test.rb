@@ -179,6 +179,24 @@ module Form
              "Should have thumbnail navigation")
     end
 
+    # A sibling slide carries its member's location: a read-only
+    # camera-info panel (with the obscured note when iNat blurred it)
+    # and a data-geocode the "Use this info" button copies onto the
+    # observation (#5317).
+    def test_sibling_slide_carries_geocode_and_camera_info
+      obs2 = observations(:two_img_obs)
+      sib = obs2.images.first
+      exif = { sib.id => { lat: 45.5231, lng: -122.6765, alt: 100,
+                           date: "01-January-2024", file_name: "sib.jpg",
+                           obscured: true } }
+
+      html = render_carousel(sibling_images: [sib], exif_data: exif)
+
+      assert_html(html, "#camera_info_#{sib.id} span.exif_obscured",
+                  text: :image_gps_obscured_on_inat.l)
+      assert_html(html, "#carousel_item_#{sib.id}[data-geocode*='45.5231']")
+    end
+
     # Per-slide id derived from the image — fixture image .id, NOT
     # the "img_id_missing" fallback. (Pre-A-pattern this assertion lived
     # in `Form::UploadGallery::ItemTest`; after the refactor, the slide's

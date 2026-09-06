@@ -199,6 +199,51 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("button[data-notes-action='adopt']", count: 0)
   end
 
+  # The edit form shows a read-only camera-info panel for an occurrence
+  # sibling's image (an iNat reflection), reporting the obscured note
+  # when iNat blurred the location, so the editor can copy it onto the
+  # native via "Use this info" (#5317).
+  def test_edit_shows_sibling_image_camera_info_panel
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    sibling.update_columns(lat: 45.5231, lng: -122.6765, gps_hidden: true)
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+    sib_image = sibling.images.first
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#camera_info_#{sib_image.id} span.exif_obscured",
+                  text: :image_gps_obscured_on_inat.l)
+  end
+
+  # An image attached to both the native and an occurrence sibling
+  # renders as the native's editable slide, not a duplicate read-only
+  # sibling panel keyed to the same image id (sibling_exif_data skips
+  # it).
+  def test_edit_skips_sibling_image_shared_with_native
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    shared = primary.images.first
+    sibling.add_image(shared)
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select(
+      "textarea[name='observation[good_image][#{shared.id}][notes]']"
+    )
+  end
+
   # A blank submitted for a sibling-held key is preserved (a deliberate
   # suppression of the inherited value); a blank for a key no sibling
   # holds is dropped as usual.

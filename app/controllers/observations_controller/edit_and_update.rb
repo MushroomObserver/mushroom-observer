@@ -3,6 +3,7 @@
 # see observations_controller.rb
 module ObservationsController::EditAndUpdate
   include ObservationsController::SharedFormMethods
+  include ObservationsController::SiblingEXIF
   include ObservationsController::Validators
   include ::Locationable
 
@@ -34,7 +35,7 @@ module ObservationsController::EditAndUpdate
     @images      = []
     @good_images = @observation.images_sorted
     @sibling_images = occurrence_sibling_images
-    @exif_data = get_exif_data(@good_images)
+    @exif_data = get_exif_data(@good_images).merge(sibling_exif_data)
     @location = @observation.location
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)

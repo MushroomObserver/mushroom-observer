@@ -37,6 +37,9 @@ class Components::Form::CameraInfo < Components::Base
   prop :date, _Nilable(String), default: ""
   prop :file_name, _Nilable(String), default: ""
   prop :file_size, _Nilable(String), default: ""
+  # iNat obscured the coordinates (geoprivacy): they are approximate, so
+  # the panel says so next to the GPS (#5317).
+  prop :obscured, _Boolean, default: false
 
   def view_template
     div(
@@ -68,7 +71,13 @@ class Components::Form::CameraInfo < Components::Base
     div do
       render_gps_info
       render_no_gps_message
+      render_obscured_note if @obscured
     end
+  end
+
+  def render_obscured_note
+    whitespace
+    span(class: "exif_obscured") { :image_gps_obscured_on_inat.l }
   end
 
   def render_transfer_button
