@@ -250,6 +250,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_save :prefer_minimum_bounding_box_to_earth
   before_save :set_gps_dubious
   before_save :reconcile_collector_user
+  before_save :ensure_thumb_image_present
   before_create :default_collector_to_creator
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
@@ -285,8 +286,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # alternative below when the carousel feature lands.
   def self.matrix_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
-     # for matrix_box_carousels:
-     # { images: [:image_votes, :license, :projects, :user] },
      :collector_user,
      { external_links: :external_site }, :location, :name,
      { namings: :votes },
@@ -1045,6 +1044,55 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       reload
     end
     img
+  end
+
+  # An observation with images should always have a thumbnail. Before
+  # 2026-07-25 a newly attached image did not become the default
+  # thumbnail, so observations could be saved with images and a null
+  # `thumb_image_id`, which renders as a blank box in the indexes
+  # (#5314 follow-up). Self-heal here so no save can persist that
+  # state again. Only when the images are already loaded -- this must
+  # not add a query to the hot create path (where the first save
+  # happens before any image is attached), and must not lazy-load
+  # under the edit form's strict_loading.
+  def ensure_thumb_image_present
+    return if thumb_image_id.present?
+
+    self.thumb_image_id = replacement_thumb_image_id
+  end
+
+  # The image to adopt as thumbnail for an observation saved without
+  # one. An observation's images are preferred; a member holding no
+  # image takes a sibling's image (the cross-observation thumbnail the
+  # show page already pools -- #5317). Kept query-free on the hot
+  # paths: a loaded image set is read in memory, and an observation
+  # with no occurrence (a plain create or edit) issues no query. The
+  # occurrence branch uses ObservationImage directly rather than the
+  # `images` association, so it is safe under the edit form's
+  # strict_loading.
+  def replacement_thumb_image_id
+    if images.loaded?
+      # In memory: an attached image if present (a loaded-empty set
+      # proves there are none, so no query), else a sibling's.
+      images.min_by(&:id)&.id || sibling_thumb_image_id
+    elsif occurrence_id
+      # Not loaded, but in an occurrence: attached image, then sibling.
+      ObservationImage.where(observation_id: id).minimum(:image_id) ||
+        sibling_thumb_image_id
+    end
+    # Not loaded and no occurrence (a plain create or edit): no query.
+  end
+
+  # The oldest image among this observation's occurrence siblings, by a
+  # direct ObservationImage query (strict_loading-safe), or nil when it
+  # has no occurrence.
+  def sibling_thumb_image_id
+    return nil unless occurrence_id
+
+    ObservationImage.where(
+      observation_id: Observation.where(occurrence_id: occurrence_id).
+                      where.not(id: id).select(:id)
+    ).minimum(:image_id)
   end
 
   # List of images attached to this Observation, sorted
