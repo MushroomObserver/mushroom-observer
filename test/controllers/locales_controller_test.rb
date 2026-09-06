@@ -9,6 +9,8 @@ class LocalesControllerTest < FunctionalTestCase
     post(:update, params: { user_locale: "pt" })
 
     assert_equal("pt", I18n.locale.to_s)
+    assert_equal("pt", session[:locale],
+                 "The POST switch persists for the rest of the session")
     assert_redirected_to("http://test.host/observations/1")
   end
 
