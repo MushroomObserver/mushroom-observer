@@ -54,36 +54,15 @@ class Components::Matrix::Box
         time: @object.rss_log&.updated_at
       }
 
-      add_observation_image_data(data) if observation_box_image
+      add_observation_image_data(data) if @object.thumb_image_id
       data
     end
 
     def add_observation_image_data(data)
-      data[:image] = observation_box_image
+      data[:image] = @object.thumb_image
       data[:image_link] = @object.show_link_args
       data[:obs] = @object
       data[:full_width] = true
-    end
-
-    # The observation's thumbnail, or its oldest image (min id, the
-    # order images_sorted uses) when the thumbnail is missing (#5314
-    # follow-up). The `thumb_image ||` short-circuit leaves `images`
-    # untouched in the common, thumb-present case, so `images` stays
-    # out of `matrix_box_includes`; only a null-thumb observation pays
-    # for the fallback, and then just a single LIMIT-1 row rather than
-    # the whole image set. Those observations are being eliminated (the
-    # model self-heals on save and the backfill repairs the existing
-    # ones), so this is a vanishing defensive path, not a per-render
-    # cost.
-    def observation_box_image
-      return @observation_box_image if defined?(@observation_box_image)
-
-      @observation_box_image = @object.thumb_image || oldest_image
-    end
-
-    def oldest_image
-      images = @object.images
-      images.loaded? ? images.min_by(&:id) : images.order(:id).first
     end
 
     def extract_rss_log_data

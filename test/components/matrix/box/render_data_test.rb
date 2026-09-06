@@ -50,7 +50,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     assert_nil(component.extract_image_data[:when])
   end
 
-  # An observation with a thumbnail uses it (the common case).
+  # An observation with a thumbnail uses it.
   def test_observation_uses_thumb_image
     obs = observations(:coprinus_comatus_obs)
     assert(obs.thumb_image_id, "fixture should have a thumb_image")
@@ -59,22 +59,12 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     assert_equal(obs.thumb_image, component.build_render_data[:image])
   end
 
-  # #5314 follow-up: an observation with images but a null thumbnail
-  # falls back to its oldest image so the box is not blank.
-  def test_observation_falls_back_to_first_image_when_thumb_missing
-    obs = observations(:coprinus_comatus_obs)
-    obs.update_columns(thumb_image_id: nil)
-    obs = Observation.find(obs.id)
-    assert(obs.images.any?, "fixture should have at least one image")
-    component = Components::Matrix::Box.new(user: @user, object: obs)
-
-    assert_equal(obs.images.min_by(&:id), component.build_render_data[:image])
-  end
-
-  # No images and no thumbnail: the box carries no image.
-  def test_observation_without_images_has_no_image_data
+  # No thumbnail: the box carries no image. The view does not query
+  # for a fallback (no queries in Phlex views); the model-layer
+  # guarantee (Observation#ensure_thumb_image_present) and the #5314
+  # backfill keep an images-but-null-thumb observation from existing.
+  def test_observation_without_thumb_has_no_image_data
     obs = observations(:minimal_unknown_obs)
-    obs.images = []
     obs.update_columns(thumb_image_id: nil)
     obs = Observation.find(obs.id)
     component = Components::Matrix::Box.new(user: @user, object: obs)
