@@ -1057,10 +1057,29 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # under the edit form's strict_loading.
   def ensure_thumb_image_present
     return if thumb_image_id.present?
-    return unless images.loaded?
 
-    first = images.min_by(&:id)
-    self.thumb_image_id = first.id if first
+    self.thumb_image_id = replacement_thumb_image_id
+  end
+
+  # The image to adopt as thumbnail for an observation saved without
+  # one. An observation's images are preferred; a member holding no
+  # image takes a sibling's image (the cross-observation thumbnail the
+  # show page already pools -- #5317). Kept query-free on the hot
+  # paths: a loaded image set is read in memory, and an observation
+  # with no occurrence (a plain create or edit) issues no query. The
+  # occurrence branch uses ObservationImage directly rather than the
+  # `images` association, so it is safe under the edit form's
+  # strict_loading.
+  def replacement_thumb_image_id
+    first_id = images.min_by(&:id)&.id if images.loaded?
+    return first_id if first_id
+    return nil unless occurrence_id
+
+    ObservationImage.where(observation_id: id).minimum(:image_id) ||
+      ObservationImage.where(
+        observation_id: Observation.where(occurrence_id: occurrence_id).
+                        where.not(id: id).select(:id)
+      ).minimum(:image_id)
   end
 
   # List of images attached to this Observation, sorted
