@@ -100,11 +100,12 @@ class Prerelease
     next_noon_utc
   end
 
-  # Today's 12:00 UTC if it is still ahead, otherwise tomorrow's.
+  # Today's 12:00 UTC if it hasn't passed (noon itself counts as not
+  # passed), otherwise tomorrow's.
   def next_noon_utc
     now = Time.now.utc
     noon = Time.utc(now.year, now.month, now.day, 12, 0)
-    now < noon ? noon : noon + (24 * 60 * 60)
+    now <= noon ? noon : noon + (24 * 60 * 60)
   end
 
   def collect_pending(generator)
