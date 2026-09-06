@@ -9,9 +9,16 @@
 #   Apply (pushes the changelog-pending branch, creates/updates the PR):
 #     script/prerelease.rb --apply
 #
+# Deploy-tag time (all UTC):
+#   default            the next 12:00 UTC (today's noon if it hasn't
+#                      passed, else tomorrow's)
+#   --now              the current date and time
+#   --at DATETIME      an explicit "YYYY-MM-DD" (noon) or
+#                      "YYYY-MM-DD HH:MM"
+#
 # What it does:
-# - mints the upcoming deploy tag name (deploy-YYYY-MM-DD-HH-MM, from
-#   the current time); deploy.sh tags with the name it finds in
+# - mints the upcoming deploy tag name (deploy-YYYY-MM-DD-HH-MM) for
+#   the target time above; deploy.sh tags with the name it finds in
 #   CHANGELOG.md's top heading
 # - builds the CHANGELOG.md section for every PR merged since the last
 #   deploy tag (the changelog PR is left out of the section it creates)
@@ -34,11 +41,15 @@ require_relative("article_rows")
 class Prerelease
   BRANCH = "changelog-pending"
   ARTICLE_FILE = "article_pending.textile"
-  USAGE = "Usage: script/prerelease.rb [--apply]"
+  USAGE = "Usage: script/prerelease.rb [--apply] " \
+          "[--now | --at 'YYYY-MM-DD[ HH:MM]']"
 
   def initialize(argv)
     args = argv.dup
     @apply = args.delete("--apply") ? true : false
+    @now = args.delete("--now") ? true : false
+    @at = extract_at(args)
+    abort("--now and --at are mutually exclusive.\n#{USAGE}") if @now && @at
     abort("Unknown arguments: #{args.join(" ")}\n#{USAGE}") if args.any?
   end
 
@@ -52,12 +63,53 @@ class Prerelease
 
   private
 
+  # Pulls `--at VALUE` (and its value) out of args, returning the
+  # parsed UTC Time or nil.
+  def extract_at(args)
+    i = args.index("--at")
+    return nil unless i
+
+    value = args[i + 1]
+    abort("--at needs a value.\n#{USAGE}") unless value
+    args.delete_at(i + 1)
+    args.delete_at(i)
+    parse_at(value)
+  end
+
+  # A bare date means noon UTC; a date+time is taken as UTC.
+  def parse_at(value)
+    case value
+    when /\A(\d{4})-(\d{2})-(\d{2})\z/
+      Time.utc(::Regexp.last_match(1).to_i, ::Regexp.last_match(2).to_i,
+               ::Regexp.last_match(3).to_i, 12, 0)
+    when /\A(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})\z/
+      Time.utc(*(1..5).map { |n| ::Regexp.last_match(n).to_i })
+    else
+      abort("Bad --at value: #{value.inspect}. Use YYYY-MM-DD or " \
+            "'YYYY-MM-DD HH:MM'.\n#{USAGE}")
+    end
+  end
+
+  # deploy.sh stamps tags with the server's UTC clock, so all of these
+  # are UTC -- a developer's local clock could otherwise mint a name
+  # that sorts before the newest deployed tag.
+  def deploy_time
+    return Time.now.utc if @now
+    return @at if @at
+
+    next_noon_utc
+  end
+
+  # Today's 12:00 UTC if it hasn't passed (noon itself counts as not
+  # passed), otherwise tomorrow's.
+  def next_noon_utc
+    now = Time.now.utc
+    noon = Time.utc(now.year, now.month, now.day, 12, 0)
+    now <= noon ? noon : noon + (24 * 60 * 60)
+  end
+
   def collect_pending(generator)
-    # UTC: the server clock deploy.sh's `date` stamps tags with. A
-    # developer's local clock can run hours behind it, which would mint
-    # a name that sorts before the newest deployed tag.
-    @tag = Time.now.
-           utc.strftime("deploy-%Y-%m-%d-%H-%M")
+    @tag = deploy_time.strftime("deploy-%Y-%m-%d-%H-%M")
     warn("Collecting merged PRs from GitHub (several queries; ~10-20s)...")
     @prev, @pulls = generator.pending_pulls(exclude_branch: BRANCH)
     abort("No PRs merged since #{@prev}; nothing to prepare.") if
