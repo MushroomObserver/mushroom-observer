@@ -286,10 +286,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # alternative below when the carousel feature lands.
   def self.matrix_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
-     # Fallback thumbnail for a null-thumb-but-has-images observation
-     # (#5314 follow-up); the box shows images.first when thumb_image
-     # is missing rather than a blank box.
-     { images: [:image_votes, :license, :projects, :user] },
      :collector_user,
      { external_links: :external_site }, :location, :name,
      { namings: :votes },
