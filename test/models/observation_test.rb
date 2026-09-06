@@ -121,6 +121,27 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.reload.thumb_image_id)
   end
 
+  # #5317: an imageless observation in an occurrence takes a sibling's
+  # image as its thumbnail, so it is not blank in the index.
+  def test_ensure_thumb_image_present_uses_occurrence_sibling
+    sibling = observations(:coprinus_comatus_obs)
+    assert(sibling.images.any?, "fixture sibling should have images")
+    imageless = observations(:minimal_unknown_obs)
+    imageless.images = []
+    imageless.update_columns(thumb_image_id: nil)
+    occ = Occurrence.create!(user: sibling.user, primary_observation: sibling)
+    sibling.update!(occurrence: occ)
+    imageless.update!(occurrence: occ)
+
+    imageless.thumb_image_id = nil
+    imageless.save!
+
+    assert_equal(sibling.images.min_by(&:id).id,
+                 imageless.reload.thumb_image_id,
+                 "An imageless occurrence member should adopt a sibling's " \
+                 "oldest image as its thumbnail")
+  end
+
   # ------------------------------------------
   #  Test owner id, favorites, NamingConsensus
   # ------------------------------------------

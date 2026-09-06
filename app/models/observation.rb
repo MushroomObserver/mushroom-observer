@@ -1057,10 +1057,42 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # under the edit form's strict_loading.
   def ensure_thumb_image_present
     return if thumb_image_id.present?
-    return unless images.loaded?
 
-    first = images.min_by(&:id)
-    self.thumb_image_id = first.id if first
+    self.thumb_image_id = replacement_thumb_image_id
+  end
+
+  # The image to adopt as thumbnail for an observation saved without
+  # one. An observation's images are preferred; a member holding no
+  # image takes a sibling's image (the cross-observation thumbnail the
+  # show page already pools -- #5317). Kept query-free on the hot
+  # paths: a loaded image set is read in memory, and an observation
+  # with no occurrence (a plain create or edit) issues no query. The
+  # occurrence branch uses ObservationImage directly rather than the
+  # `images` association, so it is safe under the edit form's
+  # strict_loading.
+  def replacement_thumb_image_id
+    if images.loaded?
+      # In memory: an attached image if present (a loaded-empty set
+      # proves there are none, so no query), else a sibling's.
+      images.min_by(&:id)&.id || sibling_thumb_image_id
+    elsif occurrence_id
+      # Not loaded, but in an occurrence: attached image, then sibling.
+      ObservationImage.where(observation_id: id).minimum(:image_id) ||
+        sibling_thumb_image_id
+    end
+    # Not loaded and no occurrence (a plain create or edit): no query.
+  end
+
+  # The oldest image among this observation's occurrence siblings, by a
+  # direct ObservationImage query (strict_loading-safe), or nil when it
+  # has no occurrence.
+  def sibling_thumb_image_id
+    return nil unless occurrence_id
+
+    ObservationImage.where(
+      observation_id: Observation.where(occurrence_id: occurrence_id).
+                      where.not(id: id).select(:id)
+    ).minimum(:image_id)
   end
 
   # List of images attached to this Observation, sorted
