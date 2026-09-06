@@ -1071,15 +1071,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # `images` association, so it is safe under the edit form's
   # strict_loading.
   def replacement_thumb_image_id
-    first_id = images.min_by(&:id)&.id if images.loaded?
-    return first_id if first_id
+    if images.loaded?
+      # In memory: an attached image if present (a loaded-empty set
+      # proves there are none, so no query), else a sibling's.
+      images.min_by(&:id)&.id || sibling_thumb_image_id
+    elsif occurrence_id
+      # Not loaded, but in an occurrence: attached image, then sibling.
+      ObservationImage.where(observation_id: id).minimum(:image_id) ||
+        sibling_thumb_image_id
+    end
+    # Not loaded and no occurrence (a plain create or edit): no query.
+  end
+
+  # The oldest image among this observation's occurrence siblings, by a
+  # direct ObservationImage query (strict_loading-safe), or nil when it
+  # has no occurrence.
+  def sibling_thumb_image_id
     return nil unless occurrence_id
 
-    ObservationImage.where(observation_id: id).minimum(:image_id) ||
-      ObservationImage.where(
-        observation_id: Observation.where(occurrence_id: occurrence_id).
-                        where.not(id: id).select(:id)
-      ).minimum(:image_id)
+    ObservationImage.where(
+      observation_id: Observation.where(occurrence_id: occurrence_id).
+                      where.not(id: id).select(:id)
+    ).minimum(:image_id)
   end
 
   # List of images attached to this Observation, sorted
