@@ -103,6 +103,26 @@ class InatProjectSlipStandardizerTest < UnitTestCase
                  "an obscured reflection must not overwrite the location")
   end
 
+  # When the native already carries the reflection's location and
+  # coordinates, same_location? short-circuits and adoption is skipped
+  # (exercises the coordinate comparison, not just the location_id one).
+  def test_skips_adoption_when_location_already_matches
+    inat_id = "987654324"
+    native = native_with_slip(:coprinus_comatus_obs, code: "OPEN-9012",
+                                                     citing: inat_id)
+    native.update!(lat: 38.538, lng: -123.318, location: locations(:gualala))
+    obs = import_obs(:detailed_unknown_obs)
+    obs.update!(lat: 38.538, lng: -123.318,
+                location: locations(:gualala), gps_hidden: false)
+
+    standardizer.standardize(obs, inat_id: inat_id)
+
+    native.reload
+    assert_equal(locations(:gualala).id, native.location_id)
+    assert_in_delta(38.538, native.lat, 0.0001)
+    assert_in_delta(-123.318, native.lng, 0.0001)
+  end
+
   def test_merges_reused_slip_occurrence_into_native
     inat_id = "987650001"
     native = native_with_slip(:coprinus_comatus_obs, code: "OPEN-9005",
