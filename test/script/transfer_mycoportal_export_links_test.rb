@@ -29,7 +29,7 @@ class TransferMycoportalExportLinksTest < UnitTestCase
 
   def test_export_excludes_non_export_relationship
     image = images(:in_situ_image)
-    make_link(target: image, relationship: :manual)
+    make_link(target: image, relationship: :manual, external_id: "1")
 
     path = run_export
 
@@ -42,7 +42,8 @@ class TransferMycoportalExportLinksTest < UnitTestCase
     image = images(:in_situ_image)
     other_site = external_sites(:inaturalist)
     ExternalLink.create!(user: User.admin, target: image,
-                         external_site: other_site, relationship: :export)
+                         external_site: other_site, relationship: :export,
+                         external_id: "1")
 
     path = run_export
 
@@ -78,9 +79,9 @@ class TransferMycoportalExportLinksTest < UnitTestCase
 
   def test_apply_skips_already_present_link
     image = images(:in_situ_image)
-    make_link(target: image)
+    make_link(target: image, external_id: "1")
 
-    subject = run_apply([export_row(target: image)])
+    subject = run_apply([export_row(target: image, external_id: "1")])
 
     assert_equal(
       1, subject.instance_variable_get(:@stats)[:already_present]
@@ -224,7 +225,7 @@ class TransferMycoportalExportLinksTest < UnitTestCase
 
   private
 
-  def make_link(target:, relationship: :export, external_id: nil,
+  def make_link(target:, external_id:, relationship: :export,
                 external_created_on: nil)
     ExternalLink.create!(user: User.admin, target: target,
                          external_site: @site, relationship: relationship,

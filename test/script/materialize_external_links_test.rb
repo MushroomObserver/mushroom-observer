@@ -96,17 +96,6 @@ class MaterializeExternalLinksTest < UnitTestCase
     assert_equal("manual", other.reload.relationship)
   end
 
-  # legacy url-only link (no external_id): dedup matches via the parsed url
-  def test_legacy_url_only_link_dedup
-    obs = obs_without_links(:minimal_unknown_obs)
-    link = make_link(obs, url: "#{INAT}654", relationship: :manual)
-    assert_nil(link.external_id)
-
-    run_script([[654, "2016-01-01", mo_url(obs)]])
-
-    assert_equal(1, obs.external_links.where(external_site: @site).count)
-  end
-
   # ---------- reports: missing, unparseable, multi-link ----------
 
   def test_mo_missing_and_unparseable

@@ -21,6 +21,11 @@
 # Re-running this script doubles as a reconciliation check:
 # in a dry run, a nonzero "would create" count means MCP has
 # observations/images MO doesn't think it exported.
+#
+# A target that already has a pre-send marker link (external_id nil,
+# left by Report::Mycoportal / Report::MycoportalImageList's
+# #mark_exported!) gets that marker resolved to the discovered occid
+# in place, instead of a second row being created alongside it.
 
 # USAGE:
 #
@@ -53,6 +58,9 @@ require "optparse"
 require "fileutils"
 require "zip"
 
+# rubocop:disable Metrics/ClassLength -- Options/ReportWriter/Stopwatch
+# nest here to keep this one-off script self-contained in one file;
+# splitting them out for a line-count metric isn't worth it.
 class BackfillMycoportalExportLinks
   # CLI option parsing, in its own nested class to avoid method collisions
   # with scripts which define top-level `parse`
@@ -243,9 +251,11 @@ class BackfillMycoportalExportLinks
     return record_skipped_observation(row, existing) if
       existing.key?([row[:mo_id], row[:occid]])
 
-    create_export_link(target_type: "Observation", target_id: row[:mo_id],
-                       external_id: row[:occid],
-                       external_created_on: row[:date_entered])
+    resolve_or_create_export_link(
+      target_type: "Observation", target_id: row[:mo_id],
+      external_id: row[:occid], external_created_on: row[:date_entered],
+      existing: existing
+    )
   end
 
   def record_missing_observation(row)
@@ -307,9 +317,11 @@ class BackfillMycoportalExportLinks
     return record_skipped_image(row, existing) if
       existing.key?([row[:image_id], row[:occid]])
 
-    create_export_link(target_type: "Image", target_id: row[:image_id],
-                       external_id: row[:occid],
-                       external_created_on: row[:metadata_date])
+    resolve_or_create_export_link(
+      target_type: "Image", target_id: row[:image_id],
+      external_id: row[:occid], external_created_on: row[:metadata_date],
+      existing: existing
+    )
   end
 
   def record_missing_image(row)
@@ -328,12 +340,53 @@ class BackfillMycoportalExportLinks
   # Keyed by [target_id, external_id] (the MCP occid), not just target_id
   # -- the same target can legitimately have more than one export link
   # when it's attached to multiple distinct MCP occurrence records (an
-  # image can appear under two different occids; #4819 follow-up).
+  # image can appear under two different occids; #4819 follow-up). A
+  # [target_id, nil] key is a pre-send marker link (Report::Mycoportal
+  # / Report::MycoportalImageList's #mark_exported!, created before
+  # this site had assigned an id) still waiting to be resolved.
   def existing_links(target_type:, ids:)
     ExternalLink.where(target_type: target_type, target_id: ids,
                        external_site: @site, relationship: :export).
       pluck(:target_id, :external_id, :id).
       each_with_object({}) { |(tid, eid, id), h| h[[tid, eid]] = id }
+  end
+
+  # A target with a pre-send marker (external_id nil) gets that marker
+  # resolved in place, rather than leaving it a dead row while a
+  # second, id-bearing row is created alongside it. A target with no
+  # marker -- already resolved under a different occid, or reconciled
+  # directly without going through mark_exported! -- gets a new row,
+  # same as before.
+  # existing.delete, not a plain read -- a target with two occids in the
+  # same batch must not have both rows resolve the same marker. The
+  # first row to run claims it here; the second sees no marker left and
+  # creates a new row, not a duplicate resolve (#4819 multi-occid case).
+  def resolve_or_create_export_link(target_type:, target_id:, external_id:,
+                                    external_created_on:, existing:)
+    marker_id = existing.delete([target_id, nil])
+    if marker_id
+      resolve_export_link_marker(marker_id, target_type, external_id,
+                                 external_created_on)
+    else
+      create_export_link(target_type: target_type, target_id: target_id,
+                         external_id: external_id,
+                         external_created_on: external_created_on)
+    end
+  end
+
+  def resolve_export_link_marker(marker_id, target_type, external_id,
+                                 external_created_on)
+    if @apply
+      begin
+        ExternalLink.find(marker_id).
+          update!(external_id: external_id,
+                  external_created_on: external_created_on)
+      rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
+        warn("  marker ##{marker_id}: #{e.message}")
+        return increment_stat(target_type, :invalid)
+      end
+    end
+    increment_stat(target_type, :marker_resolved)
   end
 
   def create_export_link(target_type:, target_id:, external_id: nil,
@@ -397,6 +450,7 @@ class BackfillMycoportalExportLinks
   def print_entity_summary(label, stats)
     puts("  #{label}:")
     puts("    created: #{stats[:created]}")
+    puts("    marker resolved: #{stats[:marker_resolved]}")
     puts("    already present (skipped): #{stats[:already_present]}")
     puts("    invalid (see warnings above): #{stats[:invalid]}")
     puts("    not found in MO: #{stats[:mo_missing]}")
@@ -462,6 +516,7 @@ class BackfillMycoportalExportLinks
     end
   end
 end
+# rubocop:enable Metrics/ClassLength
 
 if $PROGRAM_NAME == __FILE__
   BackfillMycoportalExportLinks.new(

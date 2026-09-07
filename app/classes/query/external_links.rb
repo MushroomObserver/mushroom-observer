@@ -7,9 +7,8 @@ class Query::ExternalLinks < Query
   query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
   query_attr(:external_sites, [ExternalSite], param_alias: :external_site)
   query_attr(:observations, [Observation], param_alias: :observation)
-  query_attr(:url_has, :string)
 
   def self.default_order
-    :url
+    :external_id
   end
 end

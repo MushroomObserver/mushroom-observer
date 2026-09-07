@@ -103,20 +103,6 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     assert_equal(Date.new(2019, 7, 22), link.external_created_on)
   end
 
-  def test_created_link_leaves_url_nil
-    image = images(:in_situ_image)
-
-    run_script([occurrence_row(1, "MUOB 1")],
-               [multimedia_row(1, image_url(image.id))])
-
-    assert_nil(
-      # The ExternalLink's url must point to the external site.
-      # MCP does not host images at MCP.
-      # So we cannot store image URL.
-      link_for(image).url, "Image export link url should stay nil."
-    )
-  end
-
   def test_created_link_leaves_last_synced_at_nil
     image = images(:in_situ_image)
 
@@ -140,6 +126,85 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     assert(link.reload.last_synced_at < 1.day.ago,
            "Re-running should not touch last_synced_at on an already " \
            "linked record")
+  end
+
+  # A pre-send marker (Report::MycoportalImageList#mark_exported!, no
+  # external_id yet) gets resolved in place -- not left behind while a
+  # second, id-bearing row is created alongside it.
+  def test_resolves_marker_link_for_image
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+
+    subject = run_script([occurrence_row(1, "MUOB 1")],
+                         [multimedia_row(1, image_url(image.id))])
+
+    assert_equal("1", marker.reload.external_id)
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:marker_resolved]
+    )
+    assert_equal(
+      1,
+      ExternalLink.where(target: image, external_site: @site,
+                         relationship: :export).count,
+      "Resolving a marker should not leave a second row behind"
+    )
+  end
+
+  # A target with a marker and two distinct occids in the same batch:
+  # the first row must claim the marker, the second must create a new
+  # link rather than re-resolving the same marker a second time, which
+  # would silently drop one of the two correspondences.
+  def test_marker_and_second_occid_in_same_batch_both_resolve
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+
+    subject = run_script([], [multimedia_row(101, image_url(image.id)),
+                              multimedia_row(102, image_url(image.id))])
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:marker_resolved]
+    )
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:created]
+    )
+    links = ExternalLink.where(target: image, external_site: @site,
+                               relationship: :export).order(:id)
+    assert_equal(%w[101 102], links.map(&:external_id))
+    assert_equal(marker.id, links.first.id,
+                 "The marker row should be the one resolved to the first " \
+                 "occid, not left behind")
+  end
+
+  def test_dry_run_does_not_resolve_marker
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))], apply: false)
+
+    assert_nil(marker.reload.external_id)
+  end
+
+  def test_marker_resolution_invalid_record_is_logged_and_skipped
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+    stubbed_error = lambda do |*|
+      link = ExternalLink.new
+      link.errors.add(:base, :invalid)
+      raise(ActiveRecord::RecordInvalid.new(link))
+    end
+
+    subject = nil
+    marker.stub(:update!, stubbed_error) do
+      ExternalLink.stub(:find, marker) do
+        subject = run_script([occurrence_row(1, "MUOB 1")],
+                             [multimedia_row(1, image_url(image.id))])
+      end
+    end
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:invalid]
+    )
   end
 
   # An MO image can legitimately be attached to more than one MCP
@@ -222,8 +287,6 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     assert_not_nil(link, "Expected an export ExternalLink for the obs")
     assert_equal("500", link.external_id,
                  "Observation links should store the occid as external_id")
-    assert_nil(link.url,
-               "url should be derived from external_id, not stored directly")
   end
 
   def test_observation_link_stores_date_entered_as_external_created_on
@@ -267,6 +330,27 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       ExternalLink.where(target: obs, external_site: @site,
                          relationship: :export).count,
       "Re-running should not create a duplicate export link"
+    )
+  end
+
+  def test_resolves_marker_link_for_observation
+    obs = observations(:coprinus_comatus_obs)
+    marker = ExternalLink.create!(user: User.admin, target: obs,
+                                  external_site: @site, relationship: :export,
+                                  external_id: nil)
+
+    subject = run_script([occurrence_row(500, "MUOB #{obs.id}")], [])
+
+    assert_equal("500", marker.reload.external_id)
+    assert_equal(
+      1,
+      subject.instance_variable_get(:@stats)[:observations][:marker_resolved]
+    )
+    assert_equal(
+      1,
+      ExternalLink.where(target: obs, external_site: @site,
+                         relationship: :export).count,
+      "Resolving a marker should not leave a second row behind"
     )
   end
 

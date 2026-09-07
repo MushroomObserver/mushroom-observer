@@ -17,14 +17,12 @@ module Views::Controllers::Observations::ExternalLinks
       @html = render_form
     end
 
-    def test_renders_form_with_url_field
-      assert_html(@html, "input[name='external_link[url]']")
-      assert_html(@html, "input[data-external-link-form-target='url']")
+    def test_renders_form_with_external_id_field
+      assert_html(@html, "input[name='external_link[external_id]']")
     end
 
     def test_renders_form_with_site_select
       assert_html(@html, "select[name='external_link[external_site_id]']")
-      assert_html(@html, "select[data-external-link-form-target='site']")
     end
 
     def test_renders_hidden_user_id_field
@@ -86,25 +84,11 @@ module Views::Controllers::Observations::ExternalLinks
       end
     end
 
-    def test_url_field_seeded_with_site_prefix
-      assert_includes(@html, @site.observation_url(""))
-    end
-
-    def test_passes_active_field_and_prefixes_to_stimulus
-      assert_html(@html,
-                  "form[data-external-link-form-active-value='external_id']")
-      assert_html(@html, "form[data-external-link-form-prefixes-value]")
-    end
-
-    def test_edit_form_renders_external_id_and_url_toggle
+    def test_edit_form_renders_external_id_field
       @external_link = external_links(:imported_inat_obs_inat_link)
       html = render_form
 
-      assert_html(html, "input[name='external_link[external_id]']" \
-                        "[data-external-link-form-target='externalId']")
-      assert_html(html, "input[name='external_link[url]']" \
-                        "[data-external-link-form-target='url']")
-      assert_html(html, "form[data-controller*='external-link-form']")
+      assert_html(html, "input[name='external_link[external_id]']")
     end
 
     def test_edit_form_renders_relationship_select
