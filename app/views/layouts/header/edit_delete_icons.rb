@@ -21,6 +21,11 @@ module Views::Layouts
   class Header::EditDeleteIcons < Views::Base
     prop :object, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
+    # When set, the edit icon toggles this modal (by DOM id) instead of
+    # navigating -- used for a non-primary occurrence member, whose edit
+    # opens the choice modal (#5317). The edit route stays as the href,
+    # so it degrades to a plain edit link without JS.
+    prop :edit_modal_target, _Nilable(String), default: nil
 
     def view_template
       div(class: "h4 my-0 d-flex align-items-center object_edit") do
@@ -37,8 +42,15 @@ module Views::Layouts
 
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
-        class: ::Components::InlineLinkBlock.item_class
+        class: ::Components::InlineLinkBlock.item_class,
+        **edit_modal_data
       )
+    end
+
+    def edit_modal_data
+      return {} unless @edit_modal_target
+
+      { data: { toggle: "modal", target: "##{@edit_modal_target}" } }
     end
 
     def delete_item

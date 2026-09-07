@@ -17,6 +17,40 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # A non-primary occurrence member's edit icon opens the choice modal
+  # (#5317): the modal is rendered and the edit icon toggles it.
+  def test_show_edit_modal_for_non_primary_member
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    occ = Occurrence.create!(user: user, primary_observation: reflection)
+    reflection.update_column(:occurrence_id, occ.id)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal")
+    assert_select(
+      "[data-toggle='modal'][data-target='#edit_occurrence_modal']"
+    )
+  end
+
+  # A standalone observation (no occurrence) gets no modal; its edit
+  # icon is a plain edit link.
+  def test_show_no_edit_modal_for_standalone_observation
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    login(obs.user.login)
+
+    get(:show, params: { id: obs.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal", count: 0)
+  end
+
   def test_show_no_login_with_flow
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id, flow: "next" })
