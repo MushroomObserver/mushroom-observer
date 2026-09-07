@@ -122,15 +122,24 @@ class Inat
     # import. gps_dubious is copied -- the native adopts the
     # reflection's coords and location, so it inherits its status.
     def adopt_reflection_location(native, reflection)
-      return if reflection.gps_hidden || reflection.lat.nil?
+      return if reflection.gps_hidden || reflection.lat.nil? ||
+                reflection.lng.nil?
       return if same_location?(native, reflection)
 
-      native.update_columns(
+      native.update_columns(adopted_location_attributes(reflection))
+    end
+
+    # update_columns bypasses check_hidden, which would force gps_hidden
+    # true for a hidden location; honor it here so a hidden adopted
+    # location can't leave gps_hidden false.
+    def adopted_location_attributes(reflection)
+      {
         lat: reflection.lat, lng: reflection.lng, alt: reflection.alt,
         location_id: reflection.location_id, where: reflection.where,
-        gps_hidden: false, gps_dubious: reflection.gps_dubious,
+        gps_hidden: reflection.location&.hidden || false,
+        gps_dubious: reflection.gps_dubious,
         updated_at: Time.zone.now
-      )
+      }
     end
 
     def same_location?(native, reflection)
