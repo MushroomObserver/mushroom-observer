@@ -108,7 +108,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                              occurrence: occurrence))
 
     assert_html(html, ".mo-icon-is-primary")
-    assert_html(html, ".mo-icon-read-only.icon-text-gap")
+    assert_html(html, "span.icon-text-gap > .mo-icon-read-only")
   end
 
   private

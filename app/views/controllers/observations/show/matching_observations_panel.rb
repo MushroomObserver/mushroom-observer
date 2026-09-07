@@ -80,18 +80,29 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   end
 
   # A second icon on the same row needs the same gap the trailing text
-  # gets, or it renders flush against the first icon.
+  # gets, or it renders flush against the first icon. icon-text-gap is
+  # padding-left, which shrinks a bare <svg>'s rendered content
+  # instead of adding space around it (see Components::Icon's
+  # `validate_no_padding_classes!`) -- wrap the icon in a span instead
+  # of passing the class straight into `Icon(...)`.
   def render_status_icons(types)
     types.each_with_index do |type, index|
-      gap_class = "icon-text-gap" if index.positive?
-      Icon(type: type, title: status_icon_title(type), class: gap_class)
+      if index.positive?
+        span(class: "icon-text-gap") { render_status_icon(type) }
+      else
+        render_status_icon(type)
+      end
     end
+  end
+
+  def render_status_icon(type)
+    Icon(type: type, title: status_icon_title(type))
   end
 
   def status_icon_title(type)
     case type
-    when :is_primary then :show_observation_occurrence_primary.t
-    when :read_only then :show_observation_reflection_read_only.t
+    when :is_primary then :show_observation_occurrence_primary.ti
+    when :read_only then :show_observation_reflection_read_only.ti
     end
   end
 end
