@@ -48,8 +48,10 @@ class Views::Layouts::Sidebar
       flag_index = children.index do |node|
         node.name == "span" && node[:class]&.include?("lang-flag-emoji")
       end
+      # The chevron Icon carries title:, so it wraps in a <span> now
+      # (Components::Icon moves tooltip attrs off the <svg>).
       caret_index = children.index do |node|
-        node.name == "svg" && node[:class]&.include?("mo-icon-chevron-down")
+        node.name == "span" && node.at_css("svg.mo-icon-chevron-down")
       end
       assert_operator(label_index, :<, flag_index)
       assert_operator(flag_index, :<, caret_index)
