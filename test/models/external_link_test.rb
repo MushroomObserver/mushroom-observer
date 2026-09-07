@@ -126,7 +126,7 @@ class ExternalLinkTest < UnitTestCase
       user: mary,
       observation: Observation.first,
       external_site: site,
-      external_id: "plus_id"
+      external_id: "222222"
     )
     assert_not_nil(link, "ExternalLink should be created")
     assert_empty(link.errors, "ExternalLink should have no errors")
@@ -155,7 +155,7 @@ class ExternalLinkTest < UnitTestCase
       user: mary,
       observation: link1.observation,
       external_site: site,
-      external_id: "another_id"
+      external_id: "333333"
     )
     assert_empty(link2.errors,
                  "A second link for the same observation+site should be valid")

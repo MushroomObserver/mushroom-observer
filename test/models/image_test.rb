@@ -933,7 +933,7 @@ class ImageTest < UnitTestCase
 
     link = ExternalLink.create!(
       user: img.user, target: img, external_site: ExternalSite.inaturalist,
-      relationship: :import, external_id: "p1"
+      relationship: :import, external_id: "111111"
     )
 
     # Not-loaded branch: queries only the import row.
