@@ -42,17 +42,18 @@ module Views::Layouts
       assert_html(html, "div.object_edit form[action='#{destroy_action}']")
     end
 
-    # A read-only reflection (#4214) keeps both icons: Edit opens a
-    # linked companion observation for the changes.
-    def test_reflection_keeps_edit_and_delete_icons
+    # A read-only reflection (#4214) keeps its edit icon: Edit opens a
+    # linked companion observation for the changes. The delete icon is
+    # hidden -- a reflection can't be destroyed (#5293).
+    def test_reflection_keeps_edit_icon_hides_delete_icon
       @obs.update_column(:reflected_at, Time.zone.now)
       html = render_icons(user: @owner)
       edit_href = routes.edit_observation_path(@obs.id)
       destroy_action = routes.observation_path(@obs.id)
 
-      assert_html(html, "div.object_edit .inline-icon-link", count: 2)
+      assert_html(html, "div.object_edit .inline-icon-link", count: 1)
       assert_html(html, "div.object_edit a[href='#{edit_href}']")
-      assert_html(html, "div.object_edit form[action='#{destroy_action}']")
+      assert_no_html(html, "div.object_edit form[action='#{destroy_action}']")
     end
 
     private

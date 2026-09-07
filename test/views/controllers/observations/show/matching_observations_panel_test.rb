@@ -25,12 +25,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
 
   def test_siblings_render_with_occurrence_link
     occurrence = occurrences(:occ_field_slip_one)
-    loc = locations(:obs_default_location)
-    Observation.create!(user: users(:rolf), when: Time.zone.now,
-                        location: loc, where: loc.name,
-                        name: names(:boletus_edulis),
-                        occurrence: occurrence)
-    siblings = occurrence.observations.reload.to_a
+    sibling = add_sibling_to(occurrence)
+    siblings = [sibling]
 
     html = render(panel_with(siblings: siblings, occurrence: occurrence))
 
@@ -43,11 +39,59 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     end
   end
 
+  def test_current_observation_renders_first_as_plain_text
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_no_html(
+      html, "a[href='#{routes.permanent_observation_path(current.id)}']",
+      "Current observation should render as plain text, not a link"
+    )
+    assert_html(html,
+                "a[href='#{routes.permanent_observation_path(sibling.id)}']")
+  end
+
+  def test_occurrence_primary_gets_star_icon
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: primary, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-is-primary")
+    assert_no_html(html, ".mo-icon-read-only")
+  end
+
+  def test_reflection_gets_read_only_icon
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+    sibling.update_column(:reflected_at, Time.zone.now)
+
+    html = render(panel_with(obs: primary, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-read-only")
+  end
+
   private
 
-  def panel_with(siblings:, occurrence:)
+  def add_sibling_to(occurrence)
+    loc = locations(:obs_default_location)
+    Observation.create!(user: users(:rolf), when: Time.zone.now,
+                        location: loc, where: loc.name,
+                        name: names(:boletus_edulis),
+                        occurrence: occurrence)
+  end
+
+  def panel_with(siblings:, occurrence:, obs: @obs)
     Views::Controllers::Observations::Show::MatchingObservationsPanel.new(
-      obs: @obs, occurrence: occurrence, siblings: siblings
+      obs: obs, occurrence: occurrence, siblings: siblings
     )
   end
 end

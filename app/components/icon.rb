@@ -35,7 +35,7 @@ class Components::Icon < Components::Base
     :chevron_right, :qrcode, :mobile, :project, :download, :attach,
     :new_window, :search, :prev, :next, :goto, :grid, :menu, :info,
     :fullscreen, :matrix, :info_circle, :user, :spinner, :reload,
-    :rotate_left, :rotate_right, :flip
+    :rotate_left, :rotate_right, :flip, :is_primary, :read_only
   ].freeze
 
   # vendor/assets/images/icons/mo-icons.svg only exists on disk when

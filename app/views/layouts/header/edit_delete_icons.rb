@@ -15,8 +15,9 @@
 # `Views::FullPageBase::Icons#add_edit_icons`.
 #
 # `Location` has a stricter destroy gate (model `destroyable?` + the
-# viewer owns the record or is in admin mode); other models follow
-# the edit-permission shape.
+# viewer owns the record or is in admin mode); `Observation` hides the
+# icon entirely for a read-only reflection (#5293); other models
+# follow the edit-permission shape.
 module Views::Layouts
   class Header::EditDeleteIcons < Views::Base
     prop :object, ::AbstractModel
@@ -56,6 +57,7 @@ module Views::Layouts
 
     def can_destroy_object?
       return can_destroy_location? if @object.is_a?(::Location)
+      return can_destroy_observation? if @object.is_a?(::Observation)
 
       can_edit_object?
     end
@@ -64,6 +66,15 @@ module Views::Layouts
       return false unless @object.destroyable?
 
       in_admin_mode? || @object.user == @user
+    end
+
+    # A read-only reflection can't be destroyed -- ObservationsController::
+    # Destroy blocks the action itself; this hides the icon that would
+    # otherwise offer it.
+    def can_destroy_observation?
+      return false if @object.reflection?
+
+      can_edit_object?
     end
   end
 end
