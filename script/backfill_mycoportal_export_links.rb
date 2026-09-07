@@ -357,9 +357,13 @@ class BackfillMycoportalExportLinks
   # marker -- already resolved under a different occid, or reconciled
   # directly without going through mark_exported! -- gets a new row,
   # same as before.
+  # existing.delete, not a plain read -- a target with two occids in the
+  # same batch must not have both rows resolve the same marker. The
+  # first row to run claims it here; the second sees no marker left and
+  # creates a new row, not a duplicate resolve (#4819 multi-occid case).
   def resolve_or_create_export_link(target_type:, target_id:, external_id:,
                                     external_created_on:, existing:)
-    marker_id = existing[[target_id, nil]]
+    marker_id = existing.delete([target_id, nil])
     if marker_id
       resolve_export_link_marker(marker_id, target_type, external_id,
                                  external_created_on)

@@ -150,6 +150,31 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
   end
 
+  # A target with a marker and two distinct occids in the same batch:
+  # the first row must claim the marker, the second must create a new
+  # link rather than re-resolving the same marker a second time, which
+  # would silently drop one of the two correspondences.
+  def test_marker_and_second_occid_in_same_batch_both_resolve
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+
+    subject = run_script([], [multimedia_row(101, image_url(image.id)),
+                              multimedia_row(102, image_url(image.id))])
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:marker_resolved]
+    )
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:created]
+    )
+    links = ExternalLink.where(target: image, external_site: @site,
+                               relationship: :export).order(:id)
+    assert_equal(%w[101 102], links.map(&:external_id))
+    assert_equal(marker.id, links.first.id,
+                 "The marker row should be the one resolved to the first " \
+                 "occid, not left behind")
+  end
+
   def test_dry_run_does_not_resolve_marker
     image = images(:in_situ_image)
     marker = make_link(image, external_id: nil)
