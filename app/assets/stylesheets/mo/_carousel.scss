@@ -104,7 +104,10 @@
     &:hover,
     &:focus {
       color: inherit;
-      text-shadow: 3px 3px 3px rgba($black, 0.5);
+      // text-shadow doesn't render on an SVG (Icon's chevron, not a
+      // glyphicon font character) -- filter: drop-shadow() is the
+      // SVG-compatible equivalent.
+      filter: drop-shadow(3px 3px 3px rgba($black, 0.5));
     }
   }
 
@@ -114,7 +117,14 @@
     opacity: 1;
   }
 
-  // Replaces Bootstrap's own .glyphicon-chevron-left/-right centering,
+  // Bootstrap's base .carousel-control text-shadow (bootstrap-sass)
+  // is likewise inert on the SVG chevron -- without this, the icon
+  // can disappear against a light or vertical image's background.
+  .mo-icon {
+    filter: drop-shadow($carousel-text-shadow);
+  }
+
+  // Replaces Bootstrap's .glyphicon-chevron-left/-right centering,
   // which no longer matches now that Icon renders <svg class="mo-icon
   // mo-icon-chevron-left">.
   .mo-icon-chevron-left,
