@@ -83,7 +83,9 @@ class ExternalLinkTest < UnitTestCase
       external_id: "http://mushroomobserver.org/#{obs.id}"
     )
     assert_not(link.valid?)
-    assert_not_empty(link.errors[:external_id])
+    # A single, specific error -- not also a "not numeric" error piled on
+    # top of the unresolved-url string still sitting in external_id.
+    assert_equal(1, link.errors[:external_id].size)
   end
 
   def test_resolve_submitted_external_id_rejects_mycoportal_list_search_url
@@ -195,6 +197,59 @@ class ExternalLinkTest < UnitTestCase
 
     link.relationship = :export
     assert(link.valid?, "Export link is allowed no external_id yet")
+  end
+
+  # A blank submitted external_id must normalize to nil, not stay "" --
+  # an empty string is not NULL to the unique index, so a second
+  # export-batch marker on the same target/site would collide instead
+  # of coexisting the way two nil ids do.
+  def test_external_id_must_be_numeric_for_inaturalist_and_mycoportal
+    obs = observations(:minimal_unknown_obs)
+
+    inat_link = ExternalLink.new(user: mary, target: obs,
+                                 external_site: external_sites(:inaturalist),
+                                 external_id: "notanumber")
+    assert_not(inat_link.valid?)
+    assert(inat_link.errors[:external_id].any?)
+
+    mcp_link = ExternalLink.new(user: mary, target: obs,
+                                external_site: external_sites(:mycoportal),
+                                external_id: "12345abc")
+    assert_not(mcp_link.valid?)
+    assert(mcp_link.errors[:external_id].any?)
+
+    inat_link.external_id = "234723"
+    assert(inat_link.valid?)
+  end
+
+  # id_from_url's numeric guard is iNaturalist-only (#4592) -- a crafted
+  # MyCoPortal url with a non-numeric occid still resolves via the
+  # generic template capture, so the model-level check above is what
+  # catches it.
+  def test_mycoportal_url_with_non_numeric_occid_rejected
+    obs = observations(:minimal_unknown_obs)
+    site = external_sites(:mycoportal)
+
+    link = ExternalLink.new(
+      user: mary, target: obs, external_site: site,
+      external_id: "#{site.observation_url("")}abc"
+    )
+    assert_not(link.valid?)
+    assert(link.errors[:external_id].any?)
+  end
+
+  def test_blank_external_id_normalizes_to_nil
+    obs = observations(:minimal_unknown_obs)
+    site = external_sites(:mycoportal)
+
+    link = ExternalLink.create!(user: mary, target: obs, external_site: site,
+                                relationship: :export, external_id: "")
+    assert_nil(link.external_id)
+
+    second = ExternalLink.new(user: mary, target: obs, external_site: site,
+                              relationship: :export, external_id: "")
+    assert(second.valid?)
+    assert_nothing_raised { second.save! }
   end
 
   # ExternalLink has neither a name nor title column, and no

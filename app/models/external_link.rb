@@ -71,7 +71,15 @@ class ExternalLink < AbstractModel
   # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
   # per target is still enforced (below + the import_target unique index).
   validate  :only_one_import_per_target, if: :import?
+  validate  :validate_external_id_numeric
   before_validation :resolve_submitted_external_id
+
+  # Both currently-configured sites assign purely numeric ids
+  # (iNaturalist observation ids, MyCoPortal occids) -- a future site
+  # with an alphanumeric id scheme (e.g. GenBank accessions) would need
+  # to be excluded here.
+  NUMERIC_ID_SITE_NAMES = [ExternalSite::INATURALIST_NAME,
+                           ExternalSite::MYCOPORTAL_NAME].freeze
 
   scope :order_by_default,
         -> { order_by(::Query::ExternalLinks.default_order) }
@@ -118,15 +126,34 @@ class ExternalLink < AbstractModel
   # unresolved (there's no url column left to hold it in). A url shape
   # that needs a live crawl to resolve, or that doesn't match this
   # site's format, fails validation instead of storing the raw url as
-  # if it were an id.
+  # if it were an id. A directly-submitted bare id skips this url
+  # resolution entirely and is stored unchecked against the site's
+  # expected format -- this field has always accepted a bare id as-is.
   def resolve_submitted_external_id
-    return if external_id.blank? || external_site.blank?
+    self.external_id = nil if external_id.blank?
+    return if external_id.nil? || external_site.blank?
     return unless external_id.include?("://")
 
     resolved = external_site.id_from_url(external_id)
     return self.external_id = resolved if resolved
 
     reject_unresolvable_url
+  end
+
+  # Catches a directly-submitted bare id that skips url resolution, and
+  # a crafted MyCoPortal url whose occid segment isn't numeric --
+  # id_from_url's numeric guard only applies to iNaturalist.
+  def validate_external_id_numeric
+    return if external_id.blank? || external_site.blank?
+    return unless NUMERIC_ID_SITE_NAMES.include?(external_site.name)
+    # An unresolved url is still sitting in external_id --
+    # reject_unresolvable_url already added the specific error for it; a
+    # numeric-format error on top would be redundant and confusing.
+    return if external_id.include?("://")
+    return if external_id.match?(/\A\d+\z/)
+
+    errors.add(:external_id, :validate_external_link_not_numeric_id,
+               site: external_site.name)
   end
 
   def reject_unresolvable_url

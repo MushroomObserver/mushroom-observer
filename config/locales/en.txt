@@ -3861,6 +3861,7 @@
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
   validate_external_link_list_search_url: This is a search results page, not a direct record link. Open the record you want and paste that page's URL instead.
+  validate_external_link_not_numeric_id: "[site] IDs are numeric. Check the ID and try again."
   validate_external_link_self_referential_url: This URL points back to Mushroom Observer, not [site].
   validate_external_link_unrecognized_url: Couldn't match this URL to a [site] record.
   validate_invalid_url: Invalid URL.

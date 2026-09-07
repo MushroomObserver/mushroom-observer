@@ -5,10 +5,11 @@
 # (ExternalLink#link_url). external_id stays nullable -- an export-batch
 # marker link legitimately has none until MyCoPortal assigns one (see
 # issue #5315) -- so this migration does not add a NOT NULL constraint.
-# Requires script/resolve_mycoportal_links.rb and
-# script/backfill_inaturalist_external_ids.rb to have run --apply against
-# production first, so every resolvable link is resolved before the
-# unique index goes on.
+# Requires resolve_mycoportal_links.rb and
+# backfill_inaturalist_external_ids.rb (see script/run-once/README.md --
+# neither is committed here) to have run --apply against production
+# first, so every resolvable link is resolved before the unique index
+# goes on.
 class AddUniqueIndexAndDropURLFromExternalLinks < ActiveRecord::Migration[7.2]
   def change
     # Exact-duplicate backstop (#4592). Multiple links per (target, site)
