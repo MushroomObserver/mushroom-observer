@@ -215,7 +215,6 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     ExternalLink.new(
       user: sibling.user, target: sibling,
       external_site: external_sites(:inaturalist), external_id: "998877",
-      url: "https://www.inaturalist.org/observations/998877",
       relationship: :import
     ).save(validate: false)
 
