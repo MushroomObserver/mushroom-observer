@@ -128,6 +128,60 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
            "linked record")
   end
 
+  # A pre-send marker (Report::MycoportalImageList#mark_exported!, no
+  # external_id yet) gets resolved in place -- not left behind while a
+  # second, id-bearing row is created alongside it.
+  def test_resolves_marker_link_for_image
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+
+    subject = run_script([occurrence_row(1, "MUOB 1")],
+                         [multimedia_row(1, image_url(image.id))])
+
+    assert_equal("1", marker.reload.external_id)
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:marker_resolved]
+    )
+    assert_equal(
+      1,
+      ExternalLink.where(target: image, external_site: @site,
+                         relationship: :export).count,
+      "Resolving a marker should not leave a second row behind"
+    )
+  end
+
+  def test_dry_run_does_not_resolve_marker
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))], apply: false)
+
+    assert_nil(marker.reload.external_id)
+  end
+
+  def test_marker_resolution_invalid_record_is_logged_and_skipped
+    image = images(:in_situ_image)
+    marker = make_link(image, external_id: nil)
+    stubbed_error = lambda do |*|
+      link = ExternalLink.new
+      link.errors.add(:base, :invalid)
+      raise(ActiveRecord::RecordInvalid.new(link))
+    end
+
+    subject = nil
+    marker.stub(:update!, stubbed_error) do
+      ExternalLink.stub(:find, marker) do
+        subject = run_script([occurrence_row(1, "MUOB 1")],
+                             [multimedia_row(1, image_url(image.id))])
+      end
+    end
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:invalid]
+    )
+  end
+
   # An MO image can legitimately be attached to more than one MCP
   # occurrence record (confirmed in real MCP data, #4819 follow-up) --
   # each occid it's seen under should get its own export link.
@@ -251,6 +305,27 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       ExternalLink.where(target: obs, external_site: @site,
                          relationship: :export).count,
       "Re-running should not create a duplicate export link"
+    )
+  end
+
+  def test_resolves_marker_link_for_observation
+    obs = observations(:coprinus_comatus_obs)
+    marker = ExternalLink.create!(user: User.admin, target: obs,
+                                  external_site: @site, relationship: :export,
+                                  external_id: nil)
+
+    subject = run_script([occurrence_row(500, "MUOB #{obs.id}")], [])
+
+    assert_equal("500", marker.reload.external_id)
+    assert_equal(
+      1,
+      subject.instance_variable_get(:@stats)[:observations][:marker_resolved]
+    )
+    assert_equal(
+      1,
+      ExternalLink.where(target: obs, external_site: @site,
+                         relationship: :export).count,
+      "Resolving a marker should not leave a second row behind"
     )
   end
 
