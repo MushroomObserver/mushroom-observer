@@ -22,6 +22,11 @@ class Query::HerbariaTest < UnitTestCase
     assert_query(expects, :Herbarium, order_by: :code)
   end
 
+  def test_herbarium_order_by_curator
+    expects = Herbarium.order_by(:curator)
+    assert_query(expects, :Herbarium, order_by: :curator)
+  end
+
   def test_herbarium_order_by_code_then_name
     expects = Herbarium.order_by(:code_then_name)
     assert_query(expects, :Herbarium, order_by: :code_then_name)

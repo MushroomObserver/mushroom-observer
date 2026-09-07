@@ -12,7 +12,7 @@ class API2
       [
         :collection_numbers,
         { comments: :user },
-        :external_links,
+        { external_links: :external_site },
         { occurrence: :field_slip },
         { herbarium_records: :herbarium },
         { images: [:license, :user] },

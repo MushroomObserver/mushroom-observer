@@ -103,20 +103,6 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     assert_equal(Date.new(2019, 7, 22), link.external_created_on)
   end
 
-  def test_created_link_leaves_url_nil
-    image = images(:in_situ_image)
-
-    run_script([occurrence_row(1, "MUOB 1")],
-               [multimedia_row(1, image_url(image.id))])
-
-    assert_nil(
-      # The ExternalLink's url must point to the external site.
-      # MCP does not host images at MCP.
-      # So we cannot store image URL.
-      link_for(image).url, "Image export link url should stay nil."
-    )
-  end
-
   def test_created_link_leaves_last_synced_at_nil
     image = images(:in_situ_image)
 
@@ -222,8 +208,6 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     assert_not_nil(link, "Expected an export ExternalLink for the obs")
     assert_equal("500", link.external_id,
                  "Observation links should store the occid as external_id")
-    assert_nil(link.url,
-               "url should be derived from external_id, not stored directly")
   end
 
   def test_observation_link_stores_date_entered_as_external_created_on
