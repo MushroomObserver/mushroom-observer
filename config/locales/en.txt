@@ -1595,7 +1595,9 @@
   image_use_exif: Use this info
   image_camera_info: Camera info
   image_no_geolocation: No geolocation found
-  image_gps_obscured_on_inat: obscured on iNaturalist
+  image_reflection_info: Reflection image
+  image_reflection_readonly_note: Read-only image from an imported observation. This information can only be changed at the source.
+  image_reflection_source_link: View the source observation
   image_file_name: File name
   image_file_size: File size
 

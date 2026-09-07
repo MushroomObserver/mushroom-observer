@@ -1,41 +1,68 @@
 # frozen_string_literal: true
 
-# Camera-info for an observation's occurrence sibling images -- images
-# that belong to another member of the same occurrence (usually an iNat
-# reflection). The edit form shows a read-only "Use this info" panel for
-# each, so the editor can copy the reflection's location onto the native
-# even though the reflection carries no editable image fields (#5317).
+# Camera-info for the edit form's occurrence-sibling images -- images
+# on a read-only iNat reflection member of the occurrence. The panel is
+# read-only: it shows the image's immutable metadata (date, copyright,
+# license) and a link to the source observation, and reads the image's
+# EXIF for location (iNat usually strips it). "Use this info" is offered
+# only when there is a location or a differing date to adopt onto the
+# primary (#5317).
 module ObservationsController::SiblingEXIF
   private
 
-  # Keyed by image id; same shape as get_exif_data, plus :obscured
-  # (iNat geoprivacy blurred the coordinates, so they are approximate).
+  # Keyed by image id: the image's EXIF (get_exif_data shape) merged
+  # with the read-only reflection metadata the panel displays.
   def sibling_exif_data
-    return {} unless @observation.occurrence
+    by_member = sibling_images_by_member
+    return {} if by_member.empty?
 
-    native_ids = @observation.image_ids
-    sibling_members.each_with_object({}) do |member, data|
-      member.images.each do |image|
-        next if native_ids.include?(image.id)
-
-        data[image.id] = member_camera_info(member, image)
-      end
+    exif = get_exif_data(by_member.keys)
+    by_member.each_with_object({}) do |(image, member), data|
+      data[image.id] = exif[image.id].merge(reflection_meta(member, image))
     end
   end
 
+  # { image => owning reflection member } for sibling images (leaving
+  # out the primary's images), de-duplicated by image id.
+  def sibling_images_by_member
+    native_ids = @observation.image_ids.to_set
+    seen = Set.new
+    map = {}
+    sibling_members.each do |member|
+      collect_member_images(member, native_ids, seen, map)
+    end
+    map
+  end
+
   def sibling_members
+    return [] unless @observation.occurrence
+
     @observation.occurrence.observations.
       where.not(id: @observation.id).includes(:images)
   end
 
-  # lat/lng/alt to_f so the geocode JSON serializes as JS numbers -- the
-  # form-exif controller calls `.toFixed` on them; a BigDecimal would
-  # serialize as a quoted string and break that.
-  def member_camera_info(member, image)
+  def collect_member_images(member, native_ids, seen, map)
+    member.images.each do |image|
+      next if native_ids.include?(image.id) || !seen.add?(image.id)
+
+      map[image] = member
+    end
+  end
+
+  def reflection_meta(member, image)
     {
-      lat: member.lat&.to_f, lng: member.lng&.to_f, alt: member.alt&.to_f,
-      date: member.when&.strftime("%d-%B-%Y"),
-      file_name: image.original_name, obscured: member.gps_hidden
+      read_only: true,
+      copyright_holder: image.copyright_holder,
+      license_name: image.license&.display_name,
+      source_url: reflection_source_url(member),
+      date_differs: image.when != @observation.when
     }
+  end
+
+  # The reflection's source-observation URL, built from its external
+  # link's id and the site's URL template (nil when absent).
+  def reflection_source_url(member)
+    link = member.external_links.find(&:external_id)
+    link&.external_site&.observation_url(link.external_id)
   end
 end

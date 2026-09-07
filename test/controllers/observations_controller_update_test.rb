@@ -207,18 +207,19 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:two_img_obs)
     [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
-    sibling.update_columns(lat: 45.5231, lng: -122.6765, gps_hidden: true)
     occ = Occurrence.create!(user: primary.user, primary_observation: primary)
     primary.update!(occurrence: occ)
     sibling.update!(occurrence: occ)
     login(primary.user.login)
     sib_image = sibling.images.first
+    sib_image.update_column(:copyright_holder, "(c) Reflection Source")
 
     get(:edit, params: { id: primary.id })
 
     assert_response(:success)
-    assert_select("#camera_info_#{sib_image.id} span.exif_obscured",
-                  text: :image_gps_obscured_on_inat.l)
+    assert_select("#camera_info_#{sib_image.id} div.reflection_readonly_note")
+    assert_select("#camera_info_#{sib_image.id} span.reflection_copyright",
+                  text: "(c) Reflection Source")
   end
 
   # An image attached to both the native and an occurrence sibling
