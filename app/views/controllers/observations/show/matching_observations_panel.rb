@@ -54,7 +54,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   end
 
   def render_member_row(member, link:)
-    gap_class = "icon-text-gap" if render_member_status_icons(member)
+    icon_types = member_status_icon_types(member)
+    render_status_icons(icon_types)
+    gap_class = "icon-text-gap" if icon_types.any?
     if link
       a(class: gap_class, href: permanent_observation_path(member.id)) do
         trusted_html(viewer_aware_unique_format_name(member).t)
@@ -66,21 +68,30 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     end
   end
 
-  # Renders 0, 1, or 2 status icons for `member`; returns whether any
-  # were rendered, so the caller knows whether the following text
-  # needs the icon-text gap. Compares against `@occurrence` directly
+  # `member`'s status icon types (0, 1, or 2): occurrence primary,
+  # read-only reflection. Compares against `@occurrence` directly
   # (not `member.occurrence_primary?`) to avoid an N+1 lookup per row
   # -- every member here already belongs to the same @occurrence.
-  def render_member_status_icons(member)
-    shown = false
-    if @occurrence.primary_observation_id == member.id
-      Icon(type: :is_primary, title: :show_observation_occurrence_primary.t)
-      shown = true
+  def member_status_icon_types(member)
+    types = []
+    types << :is_primary if @occurrence.primary_observation_id == member.id
+    types << :read_only if member.reflection?
+    types
+  end
+
+  # A second icon on the same row needs the same gap the trailing text
+  # gets, or it renders flush against the first icon.
+  def render_status_icons(types)
+    types.each_with_index do |type, index|
+      gap_class = "icon-text-gap" if index.positive?
+      Icon(type: type, title: status_icon_title(type), class: gap_class)
     end
-    if member.reflection?
-      Icon(type: :read_only, title: :show_observation_reflection_read_only.t)
-      shown = true
+  end
+
+  def status_icon_title(type)
+    case type
+    when :is_primary then :show_observation_occurrence_primary.t
+    when :read_only then :show_observation_reflection_read_only.t
     end
-    shown
   end
 end

@@ -79,6 +79,38 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     assert_html(html, ".mo-icon-read-only")
   end
 
+  # The star icon isn't tied to "is the current observation" -- a
+  # sibling that happens to be the occurrence's primary gets it too,
+  # on its link row.
+  def test_primary_as_sibling_gets_star_icon_on_link_row
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    current = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [primary],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-is-primary")
+    assert_html(html,
+                "a[href='#{routes.permanent_observation_path(primary.id)}']")
+  end
+
+  # Both icons apply when the occurrence primary is also a read-only
+  # reflection -- each icon needs a gap, or they render flush against
+  # each other.
+  def test_primary_and_reflection_icons_both_get_gap_class
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    primary.update_column(:reflected_at, Time.zone.now)
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: primary, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-is-primary")
+    assert_html(html, ".mo-icon-read-only.icon-text-gap")
+  end
+
   private
 
   def add_sibling_to(occurrence)
