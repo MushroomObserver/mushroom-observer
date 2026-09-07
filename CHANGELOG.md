@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-07 (deploy-2026-09-07-12-00)
+
+- Remove `script/resolve_mycoportal_links.rb` from the repo ([PR5316](https://github.com/MushroomObserver/mushroom-observer/pull/5316), @nimmolo)
+- Ignore `user_locale` params on GET requests (#5314) ([PR5318](https://github.com/MushroomObserver/mushroom-observer/pull/5318), @mo-nathan)
+- Guarantee a thumbnail for observations with images ([PR5319](https://github.com/MushroomObserver/mushroom-observer/pull/5319), @mo-nathan)
+- Show occurrence-sibling thumbnails in the Observation index (#5317) ([PR5320](https://github.com/MushroomObserver/mushroom-observer/pull/5320), @mo-nathan)
+- Let `prerelease.rb` target a deploy-tag time (default next noon UTC) ([PR5321](https://github.com/MushroomObserver/mushroom-observer/pull/5321), @mo-nathan)
+- Preserve reviewer edits on `prerelease.rb` re-run ([PR5323](https://github.com/MushroomObserver/mushroom-observer/pull/5323), @mo-nathan)
+- Adopt a non-obscured reflection location onto its native on import ([PR5325](https://github.com/MushroomObserver/mushroom-observer/pull/5325), @mo-nathan)
+
 ## 2026-09-04 (deploy-2026-09-04-10-34)
 
 - Repair changelog sections from the transitional deploys ([PR5304](https://github.com/MushroomObserver/mushroom-observer/pull/5304), @mo-nathan)
