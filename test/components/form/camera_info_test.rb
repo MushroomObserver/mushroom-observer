@@ -52,6 +52,16 @@ class FormCameraInfoTest < ComponentTestCase
     assert_includes(html, "2.5 MB")
   end
 
+  # File size row is dropped when there's no size (e.g. a reflection
+  # image), rather than showing an empty "File size:" label.
+  def test_hides_file_size_when_absent
+    html = render_info(file_name: "IMG_1234.jpg", file_size: nil)
+
+    assert_html(html, "span.file_name", text: "IMG_1234.jpg")
+    assert_no_html(html, "span.file_size")
+    assert_not_includes(html, :image_file_size.l)
+  end
+
   def test_always_renders_no_gps_message_with_d_none
     html = render_info(lat: "45.5231", lng: "-122.6765", alt: "100")
 

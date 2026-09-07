@@ -98,7 +98,7 @@ class Components::Form::CameraInfo < Components::Base
   def render_file_info
     div(class: "form-group mb-0 overflow-hidden") do
       render_filename if @file_name.present?
-      render_filesize
+      render_filesize if @file_size.present?
     end
   end
 
