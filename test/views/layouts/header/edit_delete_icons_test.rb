@@ -56,6 +56,19 @@ module Views::Layouts
       assert_no_html(html, "div.object_edit form[action='#{destroy_action}']")
     end
 
+    def test_reflection_shows_read_only_status_icon
+      @obs.update_column(:reflected_at, Time.zone.now)
+      html = render_icons(user: @owner)
+
+      assert_html(html, "div.object_edit .mo-icon-read-only")
+    end
+
+    def test_non_reflection_has_no_read_only_status_icon
+      html = render_icons(user: @owner)
+
+      assert_no_html(html, "div.object_edit .mo-icon-read-only")
+    end
+
     private
 
     def render_icons(**)

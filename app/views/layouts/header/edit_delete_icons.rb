@@ -16,7 +16,8 @@
 #
 # `Location` has a stricter destroy gate (model `destroyable?` + the
 # viewer owns the record or is in admin mode); `Observation` hides the
-# icon entirely for a read-only reflection (#5293); other models
+# icon entirely for a read-only reflection (#5293) and shows a
+# read-only status icon beside edit/delete instead; other models
 # follow the edit-permission shape.
 module Views::Layouts
   class Header::EditDeleteIcons < Views::Base
@@ -25,11 +26,21 @@ module Views::Layouts
 
     def view_template
       div(class: "h4 my-0 d-flex align-items-center object_edit") do
+        render_reflection_icon if reflection?
         InlineLinkBlock(items: [edit_item, delete_item].compact)
       end
     end
 
     private
+
+    def reflection?
+      @object.is_a?(::Observation) && @object.reflection?
+    end
+
+    def render_reflection_icon
+      Icon(type: :read_only, title: :show_observation_reflection_read_only.ti,
+           wrap_class: "mr-2")
+    end
 
     # A read-only reflection keeps its edit icon: Edit opens a linked
     # companion observation for the changes.

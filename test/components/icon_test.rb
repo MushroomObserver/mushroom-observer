@@ -35,17 +35,21 @@ class LinkIconTest < ComponentTestCase
     Components::Icon.const_set(:SPRITE_AVAILABLE, original)
   end
 
+  # title: wraps the icon in a <span> and puts tooltip/aria attrs
+  # there, not on the <svg> -- a Bootstrap tooltip anchored to an SVG
+  # trigger mispositions once the page scrolls (bootstrap-sass's
+  # tooltip.js skips $element.offset() for SVG elements).
   def test_title_adds_tooltip_and_accessible_name
     html = render_icon(type: :edit, title: :edit.ti, class: "text-primary")
 
     assert_html(html,
-                "svg.mo-icon.mo-icon-edit.text-primary" \
-                "[title='#{:edit.ti}'][data-tooltip-target='tip']" \
+                "span[title='#{:edit.ti}'][data-tooltip-target='tip']" \
                 "[aria-label='#{:edit.ti}']")
+    assert_html(html, "span > svg.mo-icon.mo-icon-edit.text-primary")
+    assert_no_html(html, "svg[title]")
     # No <title> child -- browsers render it as a second, native
-    # tooltip alongside the Bootstrap one triggered by
-    # data-tooltip-target. aria-label carries the accessible name
-    # instead without triggering any native tooltip.
+    # tooltip alongside the Bootstrap one. aria-label carries the
+    # accessible name instead without triggering a native tooltip.
     assert_no_html(html, "svg > title")
   end
 
@@ -54,14 +58,21 @@ class LinkIconTest < ComponentTestCase
                        data: { other: "v" })
 
     # Tooltip target still present alongside caller's custom data attr.
-    assert_html(html, "svg[data-tooltip-target='tip'][data-other='v']")
+    assert_html(html, "span[data-tooltip-target='tip'][data-other='v']")
   end
 
   def test_caller_aria_attrs_merge_with_accessible_name
     html = render_icon(type: :globe, title: "Tooltip text",
                        aria: { hidden: "false" })
 
-    assert_html(html, "svg[aria-label='Tooltip text'][aria-hidden='false']")
+    assert_html(html, "span[aria-label='Tooltip text'][aria-hidden='false']")
+  end
+
+  def test_title_with_wrap_class_applies_class_to_the_wrapping_span
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       wrap_class: "icon-text-gap")
+
+    assert_html(html, "span.icon-text-gap[title='Tooltip text']")
   end
 
   def test_extra_attrs_passed_through

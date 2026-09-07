@@ -1,19 +1,10 @@
 # frozen_string_literal: true
 
-# "Matching observations" panel on the observation show page. When
-# the observation's occurrence has siblings, the heading is the bare
-# "Matching Observations" title with an icon-only link to the occurrence
-# flush right, and the body lists every member of the occurrence
-# (current observation first, as plain text, then siblings as links)
-# as a tight ul. Each row leads with an `IDBadge` (non-interactive for
-# the current observation, matching its non-link name; interactive
-# copy-to-clipboard for siblings), then a status icon for the
-# occurrence's primary and any read-only reflection, then the name
-# via `format_name` (not `unique_format_name` -- the badge already
-# shows the id; current observation: plain text, tagged "(this
-# observation)"; siblings: a link). When there's no occurrence yet,
-# the whole heading is an icon+text "Add Matching Observations" link
-# (no body).
+# "Matching Observations" panel. Lists every occurrence member: an
+# IDBadge, a status icon (occurrence primary / read-only reflection),
+# then the name -- current observation as plain text tagged "(this
+# observation)"; siblings as links. No occurrence yet: just an "Add
+# Matching Observations" link, no body.
 #
 class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views::Base
   prop :obs, ::Observation
@@ -51,43 +42,49 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
          label: true)
   end
 
+  # position-relative anchors each row's tooltip (see
+  # render_status_icons) instead of it drifting elsewhere on the page.
   def render_body
     ul(class: "tight-list pl-0 mb-0") do
-      li { render_member_row(@obs, link: false) }
-      @siblings.each { |sibling| li { render_member_row(sibling, link: true) } }
+      li(class: "position-relative") { render_member_row(@obs, link: false) }
+      @siblings.each do |sibling|
+        li(class: "position-relative") do
+          render_member_row(sibling, link: true)
+        end
+      end
     end
   end
 
+  # Icons sit inside the <a> when the row is a link, so hovering or
+  # clicking an icon also hovers/clicks the link.
   def render_member_row(member, link:)
     IDBadge(object: member, size: :lg, interactive: link, extra_class: "mr-3")
     icon_types = member_status_icon_types(member)
-    render_status_icons(icon_types)
-    render_member_name(member, link: link, gap: icon_types.any?)
-  end
-
-  # `format_name`, not `unique_format_name` -- the latter appends the
-  # observation's id, which the IDBadge above already shows. Needs a
-  # gap only when a status icon precedes it -- otherwise the badge's
-  # trailing margin is already the gap.
-  def render_member_name(member, link:, gap:)
-    gap_class = "icon-text-gap" if gap
+    gap_class = "icon-text-gap" if icon_types.any?
     if link
-      a(class: gap_class, href: permanent_observation_path(member.id)) do
-        trusted_html(member.format_name(default_viewer).t)
+      a(href: permanent_observation_path(member.id)) do
+        render_status_icons(icon_types)
+        span(class: gap_class) do
+          trusted_html(member.format_name(default_viewer).t)
+        end
       end
     else
-      span(class: gap_class) do
-        trusted_html(member.format_name(default_viewer).t)
-        whitespace
-        plain("(#{:show_observation_this_observation.l})")
-      end
+      render_status_icons(icon_types)
+      render_current_observation_name(member, gap_class)
     end
   end
 
-  # `member`'s status icon types (0, 1, or 2): occurrence primary,
-  # read-only reflection. Compares against `@occurrence` directly
-  # (not `member.occurrence_primary?`) to avoid an N+1 lookup per row
-  # -- every member here already belongs to the same @occurrence.
+  # format_name, not unique_format_name -- the badge already shows the id.
+  def render_current_observation_name(member, gap_class)
+    span(class: gap_class) do
+      trusted_html(member.format_name(default_viewer).t)
+      whitespace
+      plain("(#{:show_observation_this_observation.l})")
+    end
+  end
+
+  # Compares against @occurrence directly, not
+  # member.occurrence_primary?, to avoid an N+1 lookup per row.
   def member_status_icon_types(member)
     types = []
     types << :is_primary if @occurrence.primary_observation_id == member.id
@@ -95,17 +92,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     types
   end
 
-  # The first icon follows the badge, whose trailing margin is already
-  # the gap; a second icon follows the first and needs a gap too --
-  # via wrap_class:, not class:, since a padding class landing on the
-  # bare <svg> shrinks it instead of adding space around it (see
-  # Components::Icon).
-  #
-  # data-tooltip-container: "li" -- Bootstrap's tooltip.js default
-  # (container: false) inserts the tooltip as the icon's tight inline
-  # sibling, where this row's cramped layout mis-renders it; appending
-  # it into the row's <li> instead fixes that (see the identical fix
-  # for the image vote button group in tooltip_controller.js).
+  # wrap_class:, not class: -- padding on a bare <svg> shrinks it
+  # (see Components::Icon). tooltip_container: "li" keeps the tooltip
+  # from mis-rendering in this row's tight layout (tooltip_controller.js).
   def render_status_icons(types)
     types.each_with_index do |type, index|
       wrap_class = "icon-text-gap" if index.positive?

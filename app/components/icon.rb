@@ -17,10 +17,12 @@
 #
 # @example With tooltip + accessible name + extra CSS
 #   Icon(type: :edit, title: :edit.ti, class: "text-primary")
+#   # => <span title="Edit" data-tooltip-target="tip" aria-label="Edit">
+#   #      <svg class="mo-icon mo-icon-edit text-primary">...</svg>
+#   #    </span>
 #
 # @example Spacing around the icon: use wrap_class:, not class:
 #   Icon(type: :read_only, wrap_class: "icon-text-gap")
-#   # => <span class="icon-text-gap"><svg class="mo-icon ...">...</svg></span>
 class Components::Icon < Components::Base
   # Valid icon keys. The sprite's own `<symbol id="...">` already
   # equals the key (see icon-library's script/build_sprite.rb), so
@@ -55,9 +57,15 @@ class Components::Icon < Components::Base
   prop :type, _Nilable(_Union(*GLYPHS.to_a)), default: nil
   prop :title, _Nilable(String), default: nil
   # Wraps the icon in a `<span class: wrap_class>` -- the sanctioned
-  # way to add spacing around an icon. See
-  # `validate_no_padding_classes!`: a padding class passed via
-  # `class:` lands on the `<svg>` itself and shrinks it instead.
+  # way to add spacing around an icon (a padding class passed via
+  # `class:` lands on the `<svg>` itself and shrinks it instead, see
+  # `validate_no_padding_classes!`). Whenever `title:` is also given,
+  # this wrap happens regardless -- with or without a `wrap_class` --
+  # and title/tooltip/aria move onto the `<span>`: bootstrap-sass's
+  # tooltip.js skips `$element.offset()` for an SVG trigger (the
+  # `isSvg` branch in tooltip.js), using viewport- instead of
+  # document-relative coordinates, which is off by ~the scroll offset
+  # once the page has scrolled.
   prop :wrap_class, _Nilable(String), default: nil
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar/Collapsible's pattern (plain `class:`/
@@ -81,7 +89,11 @@ class Components::Icon < Components::Base
     validate_no_padding_classes!
     return unless SPRITE_AVAILABLE && @type
 
-    if @wrap_class
+    if @title.present?
+      span(class: @wrap_class, title: @title, data: svg_data, aria: svg_aria) do
+        render_svg(title: nil, data: {}, aria: {})
+      end
+    elsif @wrap_class
       span(class: @wrap_class) { render_svg }
     else
       render_svg
@@ -90,9 +102,8 @@ class Components::Icon < Components::Base
 
   private
 
-  def render_svg
-    svg(class: svg_class, title: @title.presence, data: svg_data,
-        aria: svg_aria,
+  def render_svg(title: @title.presence, data: svg_data, aria: svg_aria)
+    svg(class: svg_class, title: title, data: data, aria: aria,
         **@attributes.except(:class, :data, :aria)) do |s|
       # width/height: "100%" -- without it, browsers inconsistently
       # default <use>'s size against an em-sized (not pixel-sized)
