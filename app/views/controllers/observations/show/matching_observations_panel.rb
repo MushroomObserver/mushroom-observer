@@ -5,10 +5,15 @@
 # "Matching Observations" title with an icon-only link to the occurrence
 # flush right, and the body lists every member of the occurrence
 # (current observation first, as plain text, then siblings as links)
-# as a tight ul, each row carrying a status icon for the occurrence's
-# primary and any read-only reflection. When there's no occurrence
-# yet, the whole heading is an icon+text "Add Matching Observations"
-# link (no body).
+# as a tight ul. Each row leads with an `IDBadge` (non-interactive for
+# the current observation, matching its non-link name; interactive
+# copy-to-clipboard for siblings), then a status icon for the
+# occurrence's primary and any read-only reflection, then the name
+# via `format_name` (not `unique_format_name` -- the badge already
+# shows the id; current observation: plain text, tagged "(this
+# observation)"; siblings: a link). When there's no occurrence yet,
+# the whole heading is an icon+text "Add Matching Observations" link
+# (no body).
 #
 class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views::Base
   prop :obs, ::Observation
@@ -54,16 +59,27 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   end
 
   def render_member_row(member, link:)
+    IDBadge(object: member, size: :lg, interactive: link, extra_class: "mr-3")
     icon_types = member_status_icon_types(member)
     render_status_icons(icon_types)
-    gap_class = "icon-text-gap" if icon_types.any?
+    render_member_name(member, link: link, gap: icon_types.any?)
+  end
+
+  # `format_name`, not `unique_format_name` -- the latter appends the
+  # observation's id, which the IDBadge above already shows. Needs a
+  # gap only when a status icon precedes it -- otherwise the badge's
+  # trailing margin is already the gap.
+  def render_member_name(member, link:, gap:)
+    gap_class = "icon-text-gap" if gap
     if link
       a(class: gap_class, href: permanent_observation_path(member.id)) do
-        trusted_html(viewer_aware_unique_format_name(member).t)
+        trusted_html(member.format_name(default_viewer).t)
       end
     else
       span(class: gap_class) do
-        trusted_html(viewer_aware_unique_format_name(member).t)
+        trusted_html(member.format_name(default_viewer).t)
+        whitespace
+        plain("(#{:show_observation_this_observation.l})")
       end
     end
   end
@@ -79,24 +95,16 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     types
   end
 
-  # A second icon on the same row needs the same gap the trailing text
-  # gets, or it renders flush against the first icon. icon-text-gap is
-  # padding-left, which shrinks a bare <svg>'s rendered content
-  # instead of adding space around it (see Components::Icon's
-  # `validate_no_padding_classes!`) -- wrap the icon in a span instead
-  # of passing the class straight into `Icon(...)`.
+  # The first icon follows the badge, whose trailing margin is already
+  # the gap; a second icon follows the first and needs a gap too --
+  # via wrap_class:, not class:, since a padding class landing on the
+  # bare <svg> shrinks it instead of adding space around it (see
+  # Components::Icon).
   def render_status_icons(types)
     types.each_with_index do |type, index|
-      if index.positive?
-        span(class: "icon-text-gap") { render_status_icon(type) }
-      else
-        render_status_icon(type)
-      end
+      wrap_class = "icon-text-gap" if index.positive?
+      Icon(type: type, title: status_icon_title(type), wrap_class: wrap_class)
     end
-  end
-
-  def render_status_icon(type)
-    Icon(type: type, title: status_icon_title(type))
   end
 
   def status_icon_title(type)

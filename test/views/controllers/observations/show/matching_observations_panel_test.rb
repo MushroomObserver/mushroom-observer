@@ -53,6 +53,35 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     )
     assert_html(html,
                 "a[href='#{routes.permanent_observation_path(sibling.id)}']")
+    assert_html(html, "li:first-child",
+                text: "(#{:show_observation_this_observation.l})")
+  end
+
+  def test_every_row_leads_with_id_badge
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".badge-id", text: current.id.to_s)
+    assert_html(html, ".badge-id", text: sibling.id.to_s)
+  end
+
+  # The current observation isn't a link, so its badge shouldn't be
+  # either -- only siblings get the interactive copy-to-clipboard
+  # button form.
+  def test_only_sibling_badges_are_interactive
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, "span.badge-id", text: current.id.to_s)
+    assert_html(html, "button.badge-id", text: sibling.id.to_s)
   end
 
   def test_occurrence_primary_gets_star_icon
@@ -96,9 +125,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
   end
 
   # Both icons apply when the occurrence primary is also a read-only
-  # reflection -- each icon needs a gap, or they render flush against
-  # each other.
-  def test_primary_and_reflection_icons_both_get_gap_class
+  # reflection. The first icon follows the badge (whose margin is the
+  # gap); the second follows the first icon and needs a gap too.
+  def test_primary_and_reflection_icons_both_render_with_second_gapped
     occurrence = occurrences(:occ_field_slip_one)
     primary = occurrence.primary_observation
     primary.update_column(:reflected_at, Time.zone.now)
@@ -108,6 +137,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                              occurrence: occurrence))
 
     assert_html(html, ".mo-icon-is-primary")
+    assert_no_html(html, "span.icon-text-gap > .mo-icon-is-primary")
     assert_html(html, "span.icon-text-gap > .mo-icon-read-only")
   end
 

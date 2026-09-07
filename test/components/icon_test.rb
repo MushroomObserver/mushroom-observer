@@ -88,6 +88,27 @@ class LinkIconTest < ComponentTestCase
     assert_html(html, "svg.mo-icon-globe.text-primary")
   end
 
+  def test_named_padding_class_raises
+    assert_raises(ArgumentError) do
+      render_icon(type: :globe, class: "icon-text-gap")
+    end
+  end
+
+  def test_padding_class_from_variable_raises
+    gap_class = "icon-text-gap"
+
+    assert_raises(ArgumentError) do
+      render_icon(type: :globe, class: gap_class)
+    end
+  end
+
+  def test_wrap_class_wraps_icon_in_span_leaving_svg_unpadded
+    html = render_icon(type: :globe, wrap_class: "icon-text-gap")
+
+    assert_html(html, "span.icon-text-gap > svg.mo-icon-globe")
+    assert_no_html(html, "svg.icon-text-gap")
+  end
+
   private
 
   def render_icon(**)
