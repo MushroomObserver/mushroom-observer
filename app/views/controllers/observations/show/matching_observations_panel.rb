@@ -100,10 +100,17 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   # via wrap_class:, not class:, since a padding class landing on the
   # bare <svg> shrinks it instead of adding space around it (see
   # Components::Icon).
+  #
+  # data-tooltip-container: "li" -- Bootstrap's tooltip.js default
+  # (container: false) inserts the tooltip as the icon's tight inline
+  # sibling, where this row's cramped layout mis-renders it; appending
+  # it into the row's <li> instead fixes that (see the identical fix
+  # for the image vote button group in tooltip_controller.js).
   def render_status_icons(types)
     types.each_with_index do |type, index|
       wrap_class = "icon-text-gap" if index.positive?
-      Icon(type: type, title: status_icon_title(type), wrap_class: wrap_class)
+      Icon(type: type, title: status_icon_title(type), wrap_class: wrap_class,
+           data: { tooltip_container: "li" })
     end
   end
 

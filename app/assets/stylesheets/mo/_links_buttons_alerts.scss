@@ -306,11 +306,16 @@ form.button_to {
   // so the active pane is visible at a glance. Bootstrap's
   // collapse.js itself toggles `.collapsed` on every trigger as its
   // target opens/closes -- no extra JS or markup needed here. Scoped
-  // to [data-toggle="collapse"] so plain (non-trigger) id badges --
-  // which never carry `.collapsed` at all -- don't match `:not
-  // (.collapsed)` and end up permanently "hover" styled.
-  &:hover,
-  &[data-toggle="collapse"]:not(.collapsed) {
+  // to [data-toggle="collapse"] so plain (non-trigger) id badges,
+  // which don't carry `.collapsed`, don't match `:not(.collapsed)`
+  // and end up permanently "hover" styled.
+  //
+  // `button&:hover`, not a bare `&:hover` -- Components::IDBadge's
+  // `interactive: false` form renders a plain `<span>`, not a
+  // `<button>`; a static, non-clickable badge shouldn't invert color
+  // on hover.
+  &[data-toggle="collapse"]:not(.collapsed),
+  button&:hover {
     background-color: $text-color;
     color: $body-bg;
   }
