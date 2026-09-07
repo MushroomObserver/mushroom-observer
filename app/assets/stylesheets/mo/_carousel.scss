@@ -104,10 +104,6 @@
     &:hover,
     &:focus {
       color: inherit;
-      // text-shadow doesn't render on an SVG (Icon's chevron, not a
-      // glyphicon font character) -- filter: drop-shadow() is the
-      // SVG-compatible equivalent.
-      filter: drop-shadow(3px 3px 3px rgba($black, 0.5));
     }
   }
 
@@ -117,9 +113,9 @@
     opacity: 1;
   }
 
-  // Bootstrap's base .carousel-control text-shadow (bootstrap-sass)
-  // is likewise inert on the SVG chevron -- without this, the icon
-  // can disappear against a light or vertical image's background.
+  // text-shadow (bootstrap-sass's default) doesn't render on an SVG.
+  // Keep constant on hover -- a filter change here would move the
+  // absolutely-positioned chevron below (new containing block).
   .mo-icon {
     filter: drop-shadow($carousel-text-shadow);
   }
