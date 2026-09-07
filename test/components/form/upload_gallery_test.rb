@@ -179,10 +179,6 @@ module Form
              "Should have thumbnail navigation")
     end
 
-    # A sibling slide carries its member's location: a read-only
-    # camera-info panel (with the obscured note when iNat blurred it)
-    # and a data-geocode the "Use this info" button copies onto the
-    # observation (#5317).
     # A sibling slide with an EXIF location carries a data-geocode (so
     # "Use this info" can adopt it) and a read-only reflection panel.
     def test_sibling_slide_with_location_carries_geocode

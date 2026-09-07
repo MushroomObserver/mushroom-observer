@@ -37,8 +37,12 @@ module ObservationsController::SiblingEXIF
   def sibling_members
     return [] unless @observation.occurrence
 
+    # Preload what the read-only panel reads per member/image: the
+    # image license, and the import external link + its site for the
+    # source URL -- otherwise N+1 per sibling image (#5317 review).
     @observation.occurrence.observations.
-      where.not(id: @observation.id).includes(:images)
+      where.not(id: @observation.id).
+      includes(images: :license, external_links: :external_site)
   end
 
   def collect_member_images(member, native_ids, seen, map)
@@ -61,8 +65,12 @@ module ObservationsController::SiblingEXIF
 
   # The reflection's source-observation URL, built from its external
   # link's id and the site's URL template (nil when absent).
+  # The reflection's iNat source URL, from its import link (external_id
+  # must be present -- ExternalLink allows it blank, and "" is truthy).
   def reflection_source_url(member)
-    link = member.external_links.find(&:external_id)
-    link&.external_site&.observation_url(link.external_id)
+    link = member.import_link
+    return nil if link&.external_id.blank?
+
+    link.external_site.observation_url(link.external_id)
   end
 end

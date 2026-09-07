@@ -150,7 +150,7 @@ class Components::Form::UploadGallery < Components::Base
   # coordinates alone.
   def sibling_geocode(image)
     info = @exif_data[image&.id] || {}
-    return "" if info[:lat].blank?
+    return "" if info[:lat].blank? || info[:lng].blank?
 
     { lat: info[:lat], lng: info[:lng], alt: info[:alt] }.to_json
   end

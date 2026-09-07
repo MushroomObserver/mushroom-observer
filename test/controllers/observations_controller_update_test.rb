@@ -199,10 +199,9 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("button[data-notes-action='adopt']", count: 0)
   end
 
-  # The edit form shows a read-only camera-info panel for an occurrence
-  # sibling's image (an iNat reflection), reporting the obscured note
-  # when iNat blurred the location, so the editor can copy it onto the
-  # native via "Use this info" (#5317).
+  # The edit form shows a read-only panel for an occurrence sibling's
+  # image (an iNat reflection): a read-only note plus the image's
+  # immutable copyright/license (#5317).
   def test_edit_shows_sibling_image_camera_info_panel
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:two_img_obs)
@@ -213,6 +212,12 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     login(primary.user.login)
     sib_image = sibling.images.first
     sib_image.update_column(:copyright_holder, "(c) Reflection Source")
+    ExternalLink.new(
+      user: sibling.user, target: sibling,
+      external_site: external_sites(:inaturalist), external_id: "998877",
+      url: "https://www.inaturalist.org/observations/998877",
+      relationship: :import
+    ).save(validate: false)
 
     get(:edit, params: { id: primary.id })
 
@@ -220,6 +225,10 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("#camera_info_#{sib_image.id} div.reflection_readonly_note")
     assert_select("#camera_info_#{sib_image.id} span.reflection_copyright",
                   text: "(c) Reflection Source")
+    assert_select(
+      "#camera_info_#{sib_image.id} a.reflection_source_link" \
+      "[href='https://www.inaturalist.org/observations/998877']"
+    )
   end
 
   # An image attached to both the native and an occurrence sibling
