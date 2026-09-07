@@ -131,17 +131,6 @@ class ExternalSite < AbstractModel
     uri.path.end_with?("/list.php") && uri.query.to_s.include?("catnum=")
   end
 
-  # True when url is a MyCoPortal taxon page (taxa/index.php) -- not
-  # addressable to one record.
-  def mycoportal_taxon_page?(url)
-    return false unless name == MYCOPORTAL_NAME
-
-    uri = self.class.safe_parse_url(url)
-    return false unless uri && mycoportal_host?(uri)
-
-    uri.path.end_with?("/taxa/index.php")
-  end
-
   # `end_with?("mycoportal.org")` alone would also match a host like
   # "evilmycoportal.org" -- no dot boundary. Require an exact match or
   # a proper subdomain.

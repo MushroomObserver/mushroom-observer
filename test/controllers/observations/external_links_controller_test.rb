@@ -26,6 +26,16 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
+    def test_new_no_permitted_sites
+      obs = observations(:coprinus_comatus_obs) # owned by rolf
+
+      login(users(:zero_user).login) # neither owner, admin, nor site member
+      get(:new, params: { id: obs.id })
+
+      assert_redirected_to(permanent_observation_path(obs))
+      assert_flash_warning
+    end
+
     def test_edit_in_admin_mode_with_nil_project_site
       # production's iNaturalist site has a nil project; an admin
       # (non-owner, non-member) editing such a link in admin mode must
@@ -313,6 +323,23 @@ module Observations
         post(:create, params: params,
                       format: :turbo_stream)
       end
+    end
+
+    # A modal submission that fails validation reloads the modal form in
+    # place, instead of the plain (non-modal) redirect-back path above.
+    def test_create_external_link_turbo_validation_failure
+      _obs, _obs2, _site, _url, params = setup_create_test
+      login("mary")
+      params2 = params.deep_merge(external_link: { modal: "true" })
+      params2[:external_link][:external_id] =
+        "https://not-a-known-site.example/x"
+
+      post(:create, params: params2, format: :turbo_stream)
+
+      assert_flash_error
+      assert_select(
+        "turbo-stream[action='replace'][target='external_link_form']"
+      )
     end
 
     # url-shaped, but doesn't match any recognized site's format

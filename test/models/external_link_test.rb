@@ -197,6 +197,20 @@ class ExternalLinkTest < UnitTestCase
     assert(link.valid?, "Export link is allowed no external_id yet")
   end
 
+  # ExternalLink has neither a name nor title column, and no
+  # order_external_links_by_name method -- order_by(:name) falls all the
+  # way through AbstractModel::OrderingScopes#order_other_models_by_name
+  # to order_by_default.
+  def test_index_includes_tree_matches_show_includes_tree
+    assert_equal(ExternalLink.show_includes_tree,
+                 ExternalLink.index_includes_tree)
+  end
+
+  def test_order_by_name_falls_back_to_default
+    assert_equal(ExternalLink.order_by_default.to_sql,
+                 ExternalLink.order_by(:name).to_sql)
+  end
+
   def test_external_id_length_validation
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     link.external_id = "9" * 65

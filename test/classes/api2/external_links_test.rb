@@ -88,6 +88,7 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_api_fail(params)
     @api_key.update!(user: rolf)
     assert_api_fail(params.merge(set_url: ""))
+    assert_api_fail(params.merge(set_url: "not-a-url"))
     assert_api_pass(params)
     assert_equal("222333", link.reload.external_id)
     @api_key.update!(user: mary)
