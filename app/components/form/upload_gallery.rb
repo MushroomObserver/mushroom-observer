@@ -114,7 +114,7 @@ class Components::Form::UploadGallery < Components::Base
                image: image,
                upload: false,
                obs_thumb_id: @obs_thumb_id,
-               camera_info: {},
+               camera_info: @exif_data[image&.id] || {},
                sibling: true
              ))
     end
@@ -129,14 +129,39 @@ class Components::Form::UploadGallery < Components::Base
     # sibling-specific UI differences are gated by the `sibling: true`
     # prop on `Components::Form::UploadGallery::Item`, not by the
     # status string.
+    #
+    # geocode carries the image's EXIF location (empty when it has
+    # none, so "Use this info" leaves the observation's coords alone);
+    # exif_date carries the reflection's date so the same button can
+    # adopt it (#5317).
     {
       form_images_target: "item",
       form_exif_target: "item",
       action: "form-exif:populated->form-images#itemExifPopulated",
       image_uuid: img_id_for_dom,
       image_status: "good",
-      geocode: "{}"
+      geocode: sibling_geocode(image),
+      exif_date: sibling_exif_date(image)
     }
+  end
+
+  # Only the image's EXIF location, and only when present -- an empty
+  # string tells the form-exif controller to leave the observation's
+  # coordinates alone.
+  def sibling_geocode(image)
+    info = @exif_data[image&.id] || {}
+    return "" if info[:lat].blank? || info[:lng].blank?
+
+    { lat: info[:lat], lng: info[:lng], alt: info[:alt] }.to_json
+  end
+
+  # The reflection's date as the SimpleDate the form-exif controller
+  # transfers onto the observation.
+  def sibling_exif_date(image)
+    date = image&.when
+    return "" unless date
+
+    { day: date.day, month: date.month, year: date.year }.to_json
   end
 
   def register_thumbnails(carousel)

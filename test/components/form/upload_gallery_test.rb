@@ -179,6 +179,35 @@ module Form
              "Should have thumbnail navigation")
     end
 
+    # A sibling slide with an EXIF location carries a data-geocode (so
+    # "Use this info" can adopt it) and a read-only reflection panel.
+    def test_sibling_slide_with_location_carries_geocode
+      obs2 = observations(:two_img_obs)
+      sib = obs2.images.first
+      exif = { sib.id => { lat: 45.5231, lng: -122.6765, alt: 100,
+                           date: "01-January-2024", read_only: true,
+                           copyright_holder: "(c) Jane",
+                           license_name: "CC BY-NC" } }
+
+      html = render_carousel(sibling_images: [sib], exif_data: exif)
+
+      assert_html(html, "#camera_info_#{sib.id} div.reflection_readonly_note")
+      assert_html(html, "#carousel_item_#{sib.id}[data-geocode*='45.5231']")
+    end
+
+    # A sibling slide with no EXIF location has an empty data-geocode, so
+    # "Use this info" leaves the observation's coordinates alone.
+    def test_sibling_slide_without_location_has_empty_geocode
+      obs2 = observations(:two_img_obs)
+      sib = obs2.images.first
+      exif = { sib.id => { lat: nil, lng: nil, alt: nil,
+                           date: "01-January-2024", read_only: true } }
+
+      html = render_carousel(sibling_images: [sib], exif_data: exif)
+
+      assert_html(html, "#carousel_item_#{sib.id}[data-geocode='']")
+    end
+
     # Per-slide id derived from the image — fixture image .id, NOT
     # the "img_id_missing" fallback. (Pre-A-pattern this assertion lived
     # in `Form::UploadGallery::ItemTest`; after the refactor, the slide's
