@@ -165,14 +165,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_options[:help_placement] == :above
     end
 
-    # autocompleter-label-row goes on the OUTER row div only -- when
+    # label-row-with-appends goes on the OUTER row div only -- when
     # label_end is present that's this div; render_label_with_appends
     # passes wrap_class: nil since it's nested content here, not the
     # outer row (see below for what the class does).
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
       div(class: "#{display} justify-content-between align-items-center " \
-                 "autocompleter-label-row") do
+                 "label-row-with-appends") do
         render_label_with_appends(label_text, wrap_class: nil)
         render_label_end_slot
       end
@@ -186,7 +186,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # sit on the text baseline the way a rendered glyph does -- see
     # autocompleter_field.rb).
     #
-    # wrap_class defaults to autocompleter-label-row -- Bootstrap's
+    # wrap_class defaults to label-row-with-appends -- Bootstrap's
     # label carries margin-bottom: 5px with no top margin, which
     # throws off align-items-center centering against append content
     # with no margin (see _autocomplete.scss). Inside .autocompleter,
@@ -195,7 +195,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # wrap_class: nil so the class lands once, on whichever div is the
     # outer row.
     def render_label_with_appends(label_text,
-                                  wrap_class: "autocompleter-label-row")
+                                  wrap_class: "label-row-with-appends")
       div(class: class_names("d-flex", "align-items-center", wrap_class)) do
         label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)

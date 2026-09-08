@@ -285,6 +285,18 @@ class SearchFormTest < ComponentTestCase
     )
   end
 
+  def test_date_field_renders_collapsible_help_without_well
+    # date is a valid Observations field in the "shown" section
+    html = render_form
+
+    assert_html(
+      html,
+      "a.info-collapse-trigger[aria-controls='query_observations_date_help']"
+    )
+    assert_html(html, "#query_observations_date_help.collapse")
+    assert_no_html(html, "#query_observations_date_help .well")
+  end
+
   def test_date_field_prefills_string_value
     query = Query::Observations.new(date: "2024-01-15")
     html = render_form_with_query(query)

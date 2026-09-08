@@ -12,7 +12,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Wrapper option keys that should not be passed to the field itself
     WRAPPER_OPTIONS = [:label, :label_colon, :help, :help_collapse,
-                       :help_placement, :prefs,
+                       :help_well, :help_placement, :prefs,
                        :inline, :wrap_class, :wrap_data, :label_appends,
                        :button, :button_data, :button_text, :button_href,
                        :button_variant, :button_size, :button_target,
