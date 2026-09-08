@@ -105,8 +105,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
 
   def status_icon_title(type)
     case type
-    when :is_primary then :show_observation_occurrence_primary.ti
-    when :read_only then :show_observation_reflection_read_only.ti
+    when :is_primary then :show_observation_occurrence_primary.l
+    when :read_only then :show_observation_reflection_read_only.l
     end
   end
 end

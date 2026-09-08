@@ -38,7 +38,7 @@ module Views::Layouts
     end
 
     def render_reflection_icon
-      Icon(type: :read_only, title: :show_observation_reflection_read_only.ti,
+      Icon(type: :read_only, title: :show_observation_reflection_read_only.l,
            wrap_class: "mr-2")
     end
 
