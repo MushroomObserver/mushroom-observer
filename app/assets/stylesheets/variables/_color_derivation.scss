@@ -26,3 +26,11 @@
 @function muted_border($text: $BODY_TEXT_COLOR) {
   @return rgba($text, 0.15);
 }
+
+// Between the page background and the panel background -- e.g. a
+// panel footer. Must be called after $PANEL_BG_COLOR is set (later in
+// each theme's "Panels" section), not right after $BODY_BG_COLOR like
+// the other functions here.
+@function panel_footer($bg: $BODY_BG_COLOR, $panel: $PANEL_BG_COLOR) {
+  @return mix($bg, $panel, 60%);
+}

@@ -168,4 +168,4 @@ $PROGRESS_TEXT_COLOR:               $black;
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $light_cream;
 $PANEL_BORDER_COLOR:                $muted_border;
-$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
+$PANEL_FOOTER_BG_COLOR:             panel_footer();
