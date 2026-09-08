@@ -137,8 +137,10 @@ class Components::Form::Search < Components::ApplicationForm
       collapsible:, collapse_target:, expanded:
     ) do |panel|
       panel.with_heading { :"search_term_group_#{heading}".l }
-      panel.with_body do
-        render_shown_fields(sections:)
+      if sections[:shown].present?
+        panel.with_body do
+          render_shown_fields(sections:)
+        end
       end
       if collapsible
         panel.with_body(collapse: true) do
@@ -218,7 +220,8 @@ class Components::Form::Search < Components::ApplicationForm
             end
     text_field(field_name,
                label: query_field_label(field_name),
-               value: value) do |f|
+               value: value,
+               help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -229,7 +232,8 @@ class Components::Form::Search < Components::ApplicationForm
                textarea: true,
                rows: 1,
                label: query_field_label(field_name),
-               value: value) do |f|
+               value: value,
+               help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -246,7 +250,8 @@ class Components::Form::Search < Components::ApplicationForm
     select_field(field_name, BOOL_OPTIONS[style],
                  label: query_field_label(field_name),
                  inline: true,
-                 selected: bool_to_string(field_value(field_name))) do |f|
+                 selected: bool_to_string(field_value(field_name)),
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -260,7 +265,8 @@ class Components::Form::Search < Components::ApplicationForm
     select_field(field_name, options,
                  label: query_field_label(field_name),
                  inline: true,
-                 selected: field_value(field_name)&.to_s) do |f|
+                 selected: field_value(field_name)&.to_s,
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -278,7 +284,8 @@ class Components::Form::Search < Components::ApplicationForm
     options = [["", ""]] + ExternalSite.select_options
     select_field(field_name, options,
                  label: query_field_label(field_name),
-                 selected: field_value(field_name)&.first) do |f|
+                 selected: field_value(field_name)&.first,
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -388,7 +395,8 @@ class Components::Form::Search < Components::ApplicationForm
                         textarea: true,
                         label: query_field_label(field_name),
                         value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids) do |f|
+                        hidden_value: ids,
+                        help_collapse: true, help_well: false) do |f|
       f.with_help { multiple_help(field_name) }
     end
   end

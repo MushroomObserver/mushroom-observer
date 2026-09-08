@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-08 (deploy-2026-09-08-12-00)
+
+- `external_id` becomes the identity for a resolved `ExternalLink`; drop `url` column ([PR5313](https://github.com/MushroomObserver/mushroom-observer/pull/5313), @nimmolo)
+- `backfill_mycoportal_export_links.rb`: update blank `ExternalLink` instead of duplicating ([PR5329](https://github.com/MushroomObserver/mushroom-observer/pull/5329), @nimmolo)
+- Undefined Locations - add whitespace between the merge link icon and text ([PR5330](https://github.com/MushroomObserver/mushroom-observer/pull/5330), @nimmolo)
+- Read-only info panel for reflection images on the Observation edit form ([PR5326](https://github.com/MushroomObserver/mushroom-observer/pull/5326), @mo-nathan)
+- Fix invisible carousel arrows: `text-shadow` doesn't render on an SVG icon ([PR5332](https://github.com/MushroomObserver/mushroom-observer/pull/5332), @nimmolo)
+
 ## 2026-09-07 (deploy-2026-09-07-12-00)
 
 - Remove `script/resolve_mycoportal_links.rb` from the repo ([PR5316](https://github.com/MushroomObserver/mushroom-observer/pull/5316), @nimmolo)
