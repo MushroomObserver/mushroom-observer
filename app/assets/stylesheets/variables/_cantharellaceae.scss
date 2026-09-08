@@ -8,6 +8,8 @@
 // - Craterellus cornucopioides (Black Trumpet)
 // ==================================================
 
+@import "color_derivation";
+
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
@@ -29,11 +31,11 @@ $dark_brown:    #4f4337; // cornucopioides_dark_cap
 $light_brown:   #826c57; // cornucopioides_light_cap
 $straw:         #e6c987; // cornucopioides_bright_margin
 
-// Derived colors (mixed from theme colors)
-$light_gray:    mix($black, $cream, 10%);
-$muted_border:   rgba($black, 0.2);
+// Derived colors (mixed from theme colors). $light_gray/$dark_gray/
+// $muted_border are defined below, after $BODY_TEXT_COLOR/$BODY_BG_COLOR
+// -- they're mixes of those two, via the shared functions in
+// color_derivation.scss.
 $input_border:  rgba($black, 0.5);
-$dark_gray:     mix($black, $cream, 50%);
 $muted_black:   scale-color($black, $lightness: 27%);
 $light_cream:   scale-color($cream, $lightness: 50%);
 
@@ -68,6 +70,10 @@ $DANGER_COLOR:    $vivid_red;
 
 $BODY_TEXT_COLOR:                   $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
+
+$light_gray:   panel_background();
+$dark_gray:    muted_text();
+$muted_border: muted_border();
 
 // --------------------------------------------------
 // Links

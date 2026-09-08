@@ -31,9 +31,16 @@
 // - All hex values and color functions go in Section 1 ONLY
 // - Sections 2 and 3 should only reference variables
 // - Use scale-color() for derived colors (not darken/lighten)
-// - Use mix() for grays derived from theme colors
+// - Use the shared functions in color_derivation.scss (panel_background,
+//   input_border, muted_text, muted_border) for grays/borders mixed
+//   from $BODY_TEXT_COLOR/$BODY_BG_COLOR -- they default to those two,
+//   so the same call works for a dark theme as for a light one. These
+//   have to be defined after $BODY_TEXT_COLOR/$BODY_BG_COLOR are set
+//   in Section 3, not in Section 1 with the rest of the palette.
 //
 // ==================================================
+
+@import "color_derivation";
 
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
@@ -57,12 +64,9 @@ $hover_primary:   scale-color($light_gill, $lightness: -30%);
 $hover_secondary: scale-color($dark_cap, $lightness: -20%);
 $light_secondary: scale-color($dark_cap, $lightness: 60%);
 $muted_dark:      scale-color($dark_gill, $lightness: 36%);
-$muted_border:    rgba($dark_gill, 0.2);
 
-// Derived grays (mix from theme colors for cohesive palette)
-$light_gray:      mix($dark_gill, $light_cap, 10%);
-$medium_gray:     mix($dark_gill, $light_cap, 25%);
-$dark_gray:       mix($dark_gill, $light_cap, 50%);
+// $light_gray/$medium_gray/$dark_gray/$muted_border are defined below,
+// after $BODY_TEXT_COLOR/$BODY_BG_COLOR -- see color_derivation.scss.
 
 // Alert state colors
 $info_blue:       #5BC0DE;
@@ -100,6 +104,11 @@ $DANGER_COLOR:                      $danger_red;
 
 $BODY_TEXT_COLOR:                   $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
+
+$light_gray:   panel_background();
+$medium_gray:  input_border();
+$dark_gray:    muted_text();
+$muted_border: muted_border();
 
 // --------------------------------------------------
 // Links

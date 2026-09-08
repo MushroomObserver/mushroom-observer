@@ -5,6 +5,8 @@
 // with subtle gray borders and accents
 // ==================================================
 
+@import "color_derivation";
+
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
@@ -13,13 +15,17 @@
 // the mix()/rgba() idiom the other themes use for their gray scale --
 // this theme was previously the one outlier defining these as flat
 // hex. Percentages chosen to land within ~1% of the prior flat values.
+// This is a finer-grained scale than the other themes' 10/25/50 steps,
+// so most of it stays as direct mix() calls rather than the shared
+// functions in color_derivation.scss -- $muted_border is the one value
+// that matches the shared formula, defined below after
+// $BODY_TEXT_COLOR/$BODY_BG_COLOR.
 $white:             #FFFFFF;
 $black:             #000000;
 
 $off_white:         mix($black, $white, 5%);
 $body_gray:         mix($black, $white, 4%);
 $light_gray:        mix($black, $white, 7%);
-$muted_border:      rgba($black, 0.15);
 $medium_gray:       mix($black, $white, 13%);
 $gray:              mix($black, $white, 20%);
 $dark_gray:         mix($black, $white, 47%);
@@ -68,6 +74,8 @@ $DANGER_COLOR:    $danger_red;
 
 $BODY_TEXT_COLOR:                   $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
+
+$muted_border: muted_border();
 
 // --------------------------------------------------
 // Links

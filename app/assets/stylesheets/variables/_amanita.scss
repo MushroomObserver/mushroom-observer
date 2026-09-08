@@ -10,6 +10,8 @@
 // - A. pachycolea
 // ==================================================
 
+@import "color_derivation";
+
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
@@ -35,10 +37,10 @@ $silver:       #cdcec9; // pachycolea_foreground (lightened)
 $tan:          #aa9a83; // pachycolea_light_stipe
 $chocolate:    #60412d; // pachycolea_dark_brown
 
-// Derived grays (mixed from theme colors)
-$light_silver:  mix($dark_brown, $silver, 10%);
-$medium_silver: mix($dark_brown, $silver, 25%);
-$dark_silver:   mix($dark_brown, $silver, 50%);
+// Derived grays (mixed from theme colors). $medium_silver/$dark_silver/
+// $muted_border are defined below, after $BODY_TEXT_COLOR/$BODY_BG_COLOR
+// -- they're mixes of those two, via the shared functions in
+// color_derivation.scss.
 $light_silver:  mix(white, $silver, 20%); // lighter silver for inputs/buttons
 $light_tan:     scale-color($tan, $lightness: 30%);
 
@@ -48,7 +50,6 @@ $deeper_dark_brown:  mix($dark_brown, black, 70%);
 $deepest_dark_brown: mix($dark_brown, black, 20%);
 
 // Semi-transparent colors
-$muted_border:  rgba($silver, 0.21); // panel border
 $muted_tan:     rgba($tan, 0.45);
 $panel_overlay: rgba($deep_dark_brown, 0.45);
 
@@ -83,6 +84,10 @@ $DANGER_COLOR:    $red;
 
 $BODY_TEXT_COLOR:                   $LIGHT_COLOR;
 $BODY_BG_COLOR:                     $DARK_COLOR;
+
+$medium_silver: input_border();
+$dark_silver:   muted_text();
+$muted_border:  muted_border(); // panel border
 
 // --------------------------------------------------
 // Links

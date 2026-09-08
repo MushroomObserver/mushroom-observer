@@ -8,6 +8,8 @@
 // - H. punicea (Scarlet Waxcap)
 // ==================================================
 
+@import "color_derivation";
+
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
@@ -30,11 +32,11 @@ $red:           #cc382a; // punicea_cap_light
 $mustard:       #e7bc3c; // punicea_dark_stipe
 $pale_cream:    #e9e3af; // punicea_light_stipe
 
-// Derived grays (mixed from theme colors)
-$light_gray:     mix($dark_olive, $pale_cream, 10%);
-$dark_gray:      mix($dark_olive, $pale_cream, 50%);
+// Derived grays (mixed from theme colors). $light_gray/$dark_gray/
+// $muted_border are defined below, after $BODY_TEXT_COLOR/$BODY_BG_COLOR
+// -- they're mixes of those two, via the shared functions in
+// color_derivation.scss.
 $gray_border:    rgba($dark_olive, 0.4);
-$muted_border:   rgba($dark_olive, 0.2);
 $muted_olive:    scale-color($dark_olive, $lightness: 38%);
 $lighter_cream:  scale-color($pale_cream, $lightness: 20%);
 $light_cream:    scale-color($pale_cream, $lightness: 50%);
@@ -71,6 +73,10 @@ $DANGER_COLOR:    $scarlet;
 
 $BODY_TEXT_COLOR:                   $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
+
+$light_gray:   panel_background();
+$dark_gray:    muted_text();
+$muted_border: muted_border();
 
 // --------------------------------------------------
 // Links
