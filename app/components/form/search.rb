@@ -137,7 +137,7 @@ class Components::Form::Search < Components::ApplicationForm
       collapsible:, collapse_target:, expanded:
     ) do |panel|
       panel.with_heading { :"search_term_group_#{heading}".l }
-      if sections.is_a?(Hash) && sections[:shown].present?
+      if sections[:shown].present?
         panel.with_body do
           render_shown_fields(sections:)
         end
