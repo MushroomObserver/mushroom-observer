@@ -1,0 +1,1404 @@
+---
+openapi: 3.1.0
+info:
+  title: Mushroom Observer API
+  version: '2.0'
+  description: REST-ish API for creating, reading, and modifying Mushroom Observer
+    records. Authentication uses an API key. XML output is deprecated and undocumented
+    here; use JSON.
+servers:
+- url: https://mushroomobserver.org
+paths:
+  "/api2/observations":
+    get:
+      summary: Search / read observations
+      parameters:
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: when seen
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: observer
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: herbarium_record
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: is_collection_location
+        in: query
+        required: false
+        description: is this location where mushroom was found?
+        schema:
+          type: boolean
+      - name: gps_hidden
+        in: query
+        required: false
+        description: hide exact coordinates?
+        schema:
+          type: boolean
+      - name: has_images
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_public_lat_lng
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_name
+        in: query
+        required: false
+        description: group or genus or better
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_specimen
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes_field
+        in: query
+        required: false
+        description: is given observation notes template field filled in?
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: region
+        in: query
+        required: false
+        description: matches locations which end in this, e.g. "California, USA"
+        schema:
+          type: string
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Matching observations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        latitude:
+                          type: number
+                        longitude:
+                          type: number
+                        altitude:
+                          type: number
+                        gps_hidden:
+                          type: boolean
+                        specimen_available:
+                          type: boolean
+                        is_collection_location:
+                          type: boolean
+                        confidence:
+                          type: number
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+    post:
+      summary: Create observation
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                vote:
+                  type: number
+                log:
+                  type: boolean
+                  description: log this action on main page activity log and RSS feed?
+                code:
+                  type: string
+                notes:
+                  type: string
+                  description: set value of notes field using square braces, e.g.,
+                    set_notes%5BCap%5D=red"
+                reason_1:
+                  type: string
+                reason_2:
+                  type: string
+                reason_3:
+                  type: string
+                reason_4:
+                  type: string
+                herbarium:
+                  type: string
+                collectors_name:
+                  type: string
+                collection_number:
+                  type: string
+                initial_det:
+                  type: string
+                  description: initial determination
+                accession_number:
+                  type: string
+                  description: unique fungarium id
+                has_specimen:
+                  type: boolean
+                location:
+                  type: string
+                latitude:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                longitude:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                altitude:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a image
+                thumbnail:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                is_collection_location:
+                  type: boolean
+                  description: is this location where mushroom was found?
+                gps_hidden:
+                  type: boolean
+                  description: hide exact coordinates?
+                source:
+                  type: string
+                projects:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a project
+                species_lists:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a species_list
+      responses:
+        '200':
+          description: Matching observations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        latitude:
+                          type: number
+                        longitude:
+                          type: number
+                        altitude:
+                          type: number
+                        gps_hidden:
+                          type: boolean
+                        specimen_available:
+                          type: boolean
+                        is_collection_location:
+                          type: boolean
+                        confidence:
+                          type: number
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+    patch:
+      summary: Update observations
+      security:
+      - api_key: []
+      parameters:
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: when seen
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: observer
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: herbarium_record
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: is_collection_location
+        in: query
+        required: false
+        description: is this location where mushroom was found?
+        schema:
+          type: boolean
+      - name: has_images
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_public_lat_lng
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_name
+        in: query
+        required: false
+        description: group or genus or better
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_specimen
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes_field
+        in: query
+        required: false
+        description: is given observation notes template field filled in?
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: region
+        in: query
+        required: false
+        description: matches locations which end in this, e.g. "California, USA"
+        schema:
+          type: string
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gps_hidden:
+                  type: boolean
+                  description: hide exact coordinates?
+                log:
+                  type: boolean
+                  description: log this action on main page activity log and RSS feed?
+                set_latitude:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                set_longitude:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                set_altitude:
+                  type: string
+                set_thumbnail:
+                  type: string
+                add_images:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a image
+                remove_images:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a image
+                add_to_project:
+                  type: string
+                remove_from_project:
+                  type: string
+                add_to_species_list:
+                  type: string
+                remove_from_species_list:
+                  type: string
+                set_notes:
+                  type: string
+                  description: set value of notes field using square braces, e.g.,
+                    set_notes%5BCap%5D=red"
+                set_date:
+                  type: string
+                  format: date
+                set_location:
+                  type: string
+                set_has_specimen:
+                  type: boolean
+                set_is_collection_location:
+                  type: boolean
+                  description: is this location where mushroom was found?
+      responses:
+        '200':
+          description: Matching observations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        latitude:
+                          type: number
+                        longitude:
+                          type: number
+                        altitude:
+                          type: number
+                        gps_hidden:
+                          type: boolean
+                        specimen_available:
+                          type: boolean
+                        is_collection_location:
+                          type: boolean
+                        confidence:
+                          type: number
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+    delete:
+      summary: Delete observations
+      security:
+      - api_key: []
+      parameters:
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: when seen
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: observer
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: herbarium_record
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: is_collection_location
+        in: query
+        required: false
+        description: is this location where mushroom was found?
+        schema:
+          type: boolean
+      - name: gps_hidden
+        in: query
+        required: false
+        description: hide exact coordinates?
+        schema:
+          type: boolean
+      - name: has_images
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_public_lat_lng
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_name
+        in: query
+        required: false
+        description: group or genus or better
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_specimen
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes_field
+        in: query
+        required: false
+        description: is given observation notes template field filled in?
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: region
+        in: query
+        required: false
+        description: matches locations which end in this, e.g. "California, USA"
+        schema:
+          type: string
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Deleted
+  "/api2/names":
+    get:
+      summary: Search / read names
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: is_deprecated
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: misspellings
+        in: query
+        required: false
+        description: include misspellings? "include" means do not care and "only"
+          means only show misspelt names
+        schema:
+          type: string
+      - name: has_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: rank
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: has_author
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_citation
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_classification
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_description
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: text_name_has
+        in: query
+        required: false
+        description: search within name
+        schema:
+          type: string
+      - name: author_has
+        in: query
+        required: false
+        description: search within author
+        schema:
+          type: string
+      - name: citation_has
+        in: query
+        required: false
+        description: search within citation
+        schema:
+          type: string
+      - name: classification_has
+        in: query
+        required: false
+        description: search within classification
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Matching names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        author:
+                          type: string
+                        rank:
+                          type: string
+                        deprecated:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+    post:
+      summary: Create name
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                citation:
+                  type: string
+                classification:
+                  type: string
+                notes:
+                  type: string
+                name:
+                  type: string
+                author:
+                  type: string
+                rank:
+                  type: string
+                deprecated:
+                  type: boolean
+                log:
+                  type: boolean
+                  description: log this action on main page activity log and RSS feed?
+      responses:
+        '200':
+          description: Matching names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        author:
+                          type: string
+                        rank:
+                          type: string
+                        deprecated:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+    patch:
+      summary: Update names
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: is_deprecated
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: misspellings
+        in: query
+        required: false
+        description: include misspellings? "include" means do not care and "only"
+          means only show misspelt names
+        schema:
+          type: string
+      - name: has_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: rank
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: has_author
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_citation
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_classification
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_description
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: text_name_has
+        in: query
+        required: false
+        description: search within name
+        schema:
+          type: string
+      - name: author_has
+        in: query
+        required: false
+        description: search within author
+        schema:
+          type: string
+      - name: citation_has
+        in: query
+        required: false
+        description: search within citation
+        schema:
+          type: string
+      - name: classification_has
+        in: query
+        required: false
+        description: search within classification
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_name:
+                  type: string
+                set_author:
+                  type: string
+                set_rank:
+                  type: string
+                set_deprecated:
+                  type: boolean
+                synonymize_with:
+                  type: string
+                clear_synonyms:
+                  type: boolean
+                  description: make it so this name is not synonymized with anything
+                    but leave everything it used to be synonymized with synonyms of
+                    each other
+                set_correct_spelling:
+                  type: string
+                  description: mark this as misspelt and deprecated and synonymize
+                    with the correct spelling
+                set_notes:
+                  type: string
+                set_citation:
+                  type: string
+                set_classification:
+                  type: string
+      responses:
+        '200':
+          description: Matching names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        author:
+                          type: string
+                        rank:
+                          type: string
+                        deprecated:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
