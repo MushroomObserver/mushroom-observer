@@ -15,15 +15,17 @@ class AddDispatchController < ApplicationController
     # This is how the Project context gets passed if it is relevant.
     @project = find_project
     @field_slip_code = find_code(@project, params[:field_slip])
-    url = if @field_slip_code
-            "#{MO.http_domain}/qr/#{@field_slip_code}"
-          else
-            new_observation_path
-          end
     new_params = dispatch_params
-    url = "#{url}?#{new_params}" if new_params.present?
 
-    redirect_to(url, allow_other_host: true)
+    if @field_slip_code
+      url = "#{MO.http_domain}/qr/#{@field_slip_code}"
+      url = "#{url}?#{new_params}" if new_params.present?
+      redirect_to(url, allow_other_host: true)
+    else
+      url = new_observation_path
+      url = "#{url}?#{new_params}" if new_params.present?
+      redirect_to(url)
+    end
   end
 
   private
