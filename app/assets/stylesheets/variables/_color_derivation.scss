@@ -1,0 +1,35 @@
+//
+// Shared color-derivation formulas. Interpolate explicitly between a
+// theme's $BODY_TEXT_COLOR and $BODY_BG_COLOR (the defaults here)
+// rather than a generic dark/light pair, so the same call works
+// unmodified for a dark theme (Amanita) as for a light one -- the
+// mix direction follows the theme's text/background assignment, not
+// an absolute lightness value, so nothing needs to flip per theme.
+// --------------------------------------------------
+
+// A subtle background-tinted fill -- e.g. a list header background.
+@function panel_background($text: $BODY_TEXT_COLOR, $bg: $BODY_BG_COLOR) {
+  @return mix($text, $bg, 10%);
+}
+
+// Roughly midway between text and background -- e.g. an input border.
+@function input_border($text: $BODY_TEXT_COLOR, $bg: $BODY_BG_COLOR) {
+  @return mix($text, $bg, 25%);
+}
+
+// A muted, secondary text tone -- e.g. a list header's text color.
+@function muted_text($text: $BODY_TEXT_COLOR, $bg: $BODY_BG_COLOR) {
+  @return mix($text, $bg, 50%);
+}
+
+// A low-opacity text color, usable as a border against the background.
+@function muted_border($text: $BODY_TEXT_COLOR) {
+  @return rgba($text, 0.15);
+}
+
+// Between the page background and the panel background -- e.g. a
+// panel footer. Call after $PANEL_BG_COLOR is set, not alongside
+// $BODY_BG_COLOR like the other functions here.
+@function panel_footer($bg: $BODY_BG_COLOR, $panel: $PANEL_BG_COLOR) {
+  @return mix($bg, $panel, 60%);
+}

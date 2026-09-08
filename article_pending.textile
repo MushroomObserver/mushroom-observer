@@ -1,3 +1,2 @@
-|{white-space:nowrap}. 2026-09-06 | Show a thumbnail for Observations whose photos were added later | "PR#5319":https://github.com/MushroomObserver/mushroom-observer/pull/5319, "PR#5320":https://github.com/MushroomObserver/mushroom-observer/pull/5320 |
-|{white-space:nowrap}. 2026-09-06 | Stop old links from switching your language | "PR#5318":https://github.com/MushroomObserver/mushroom-observer/pull/5318 |
-|{white-space:nowrap}. 2026-09-07 | Fix imported Observation location on records first entered by hand | "PR#5325":https://github.com/MushroomObserver/mushroom-observer/pull/5325 |
+|{white-space:nowrap}. 2026-09-08 | Show a read-only info panel for reflection photos on the Observation form | "PR#5326":https://github.com/MushroomObserver/mushroom-observer/pull/5326 |
+|{white-space:nowrap}. 2026-09-08 | Fix invisible carousel arrows on some images and themes | "PR#5332":https://github.com/MushroomObserver/mushroom-observer/pull/5332 |

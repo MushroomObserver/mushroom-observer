@@ -5,21 +5,31 @@
 // with subtle gray borders and accents
 // ==================================================
 
+@import "color_derivation";
+
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
 
-// Core grayscale
+// Core grayscale. Derived from $black/$white (issue #5341), matching
+// the mix()/rgba() idiom the other themes use for their gray scale --
+// this theme was previously the one outlier defining these as flat
+// hex. Percentages chosen to land within ~1% of the prior flat values.
+// This is a finer-grained scale than the other themes' 10/25/50 steps,
+// so most of it stays as direct mix() calls rather than the shared
+// functions in color_derivation.scss -- $muted_border is the one value
+// that matches the shared formula, defined below after
+// $BODY_TEXT_COLOR/$BODY_BG_COLOR.
 $white:             #FFFFFF;
-$body_gray:         #F6F6F6;
-$off_white:         #F2F2F2;
-$light_gray:        #EEEEEE;
-$muted_border:      #D9D9D9;
-$medium_gray:       #DDDDDD;
-$gray:              #CCCCCC;
-$dark_gray:         #888888;
-$medium_dark_gray:  #777777;
 $black:             #000000;
+
+$off_white:         mix($black, $white, 5%);
+$body_gray:         mix($black, $white, 4%);
+$light_gray:        mix($black, $white, 7%);
+$medium_gray:       mix($black, $white, 13%);
+$gray:              mix($black, $white, 20%);
+$dark_gray:         mix($black, $white, 47%);
+$medium_dark_gray:  mix($black, $white, 53%);
 
 // Accent colors
 $blue:          #2050E0;
@@ -64,6 +74,8 @@ $DANGER_COLOR:    $danger_red;
 
 $BODY_TEXT_COLOR:                   $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
+
+$muted_border: muted_border();
 
 // --------------------------------------------------
 // Links
@@ -158,4 +170,4 @@ $PROGRESS_TEXT_COLOR:               $black;
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $white;
 $PANEL_BORDER_COLOR:                $muted_border;
-$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
+$PANEL_FOOTER_BG_COLOR:             panel_footer();
