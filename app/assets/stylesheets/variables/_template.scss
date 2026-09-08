@@ -28,15 +28,17 @@
 //   (descriptive names) (meaning-based)   (specific uses)
 //
 // IMPORTANT:
-// - All hex values and color functions go in Section 1 ONLY
-// - Sections 2 and 3 should only reference variables
-// - Use scale-color() for derived colors (not darken/lighten)
-// - Use the shared functions in color_derivation.scss (panel_background,
-//   input_border, muted_text, muted_border) for grays/borders mixed
-//   from $BODY_TEXT_COLOR/$BODY_BG_COLOR -- they default to those two,
-//   so the same call works for a dark theme as for a light one. These
-//   have to be defined after $BODY_TEXT_COLOR/$BODY_BG_COLOR are set
-//   in Section 3, not in Section 1 with the rest of the palette.
+// - Hex values and scale-color()/mix() calls against the palette
+//   colors go in Section 1.
+// - Sections 2 and 3 mostly just reference variables, with one
+//   exception: the shared functions in color_derivation.scss
+//   (panel_background, input_border, muted_text, muted_border,
+//   panel_footer) belong in Section 3, called right after
+//   $BODY_TEXT_COLOR/$BODY_BG_COLOR (and $PANEL_BG_COLOR for
+//   panel_footer) are set, not in Section 1 with the rest of the
+//   palette -- they default to those variables, so the same call
+//   works for a dark theme as for a light one.
+// - Use scale-color() for derived colors (not darken/lighten).
 //
 // ==================================================
 
