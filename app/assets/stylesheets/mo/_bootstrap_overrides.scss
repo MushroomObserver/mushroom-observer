@@ -7,19 +7,11 @@
 // same-`!important` rules.
 //
 // Do NOT delete these at the Bootstrap 4 cutover as "duplicates" of
-// BS4's utilities of the same name -- BS4 ships all 4 of these names
+// BS4's utilities of the same name -- BS4 ships all 3 of these names
 // too, with different values than MO's. Keeping the class name
 // unchanged is the point: any markup using it keeps MO's value
 // instead of picking up BS4's.
 // --------------------------------------------------
-
-// BS4: font-weight: 700. The bump to 800 compensates for Verdana (the
-// current base font) rendering 700 as too weak to read as bold. This
-// may not be needed once BS4's cutover switches the base font to a
-// system-font stack -- re-check then rather than assuming this stays.
-.font-weight-bold {
-  font-weight: 800 !important;
-}
 
 // BS4: also sets a gray border-color.
 .border-top {
