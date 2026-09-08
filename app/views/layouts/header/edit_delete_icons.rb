@@ -47,10 +47,16 @@ module Views::Layouts
       )
     end
 
+    # `data-turbo="false"` keeps Turbo Drive from navigating the edit
+    # href in the background when the icon is a modal toggle (Bootstrap
+    # opens the modal and prevents the native click; without it Turbo
+    # would visit the edit page and swap it in under the open modal).
+    # The href stays a no-JS fallback.
     def edit_modal_data
       return {} unless @edit_modal_target
 
-      { data: { toggle: "modal", target: "##{@edit_modal_target}" } }
+      { data: { turbo: "false", toggle: "modal",
+                target: "##{@edit_modal_target}" } }
     end
 
     def delete_item
