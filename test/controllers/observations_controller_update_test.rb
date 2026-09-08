@@ -199,6 +199,60 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("button[data-notes-action='adopt']", count: 0)
   end
 
+  # The edit form shows a read-only panel for an occurrence sibling's
+  # image (an iNat reflection): a read-only note plus the image's
+  # immutable copyright/license (#5317).
+  def test_edit_shows_sibling_image_camera_info_panel
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+    sib_image = sibling.images.first
+    sib_image.update_column(:copyright_holder, "(c) Reflection Source")
+    ExternalLink.new(
+      user: sibling.user, target: sibling,
+      external_site: external_sites(:inaturalist), external_id: "998877",
+      relationship: :import
+    ).save(validate: false)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#camera_info_#{sib_image.id} div.reflection_readonly_note")
+    assert_select("#camera_info_#{sib_image.id} span.reflection_copyright",
+                  text: "(c) Reflection Source")
+    assert_select(
+      "#camera_info_#{sib_image.id} a.reflection_source_link" \
+      "[href='https://www.inaturalist.org/observations/998877']"
+    )
+  end
+
+  # An image attached to both the native and an occurrence sibling
+  # renders as the native's editable slide, not a duplicate read-only
+  # sibling panel keyed to the same image id (sibling_exif_data skips
+  # it).
+  def test_edit_skips_sibling_image_shared_with_native
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    shared = primary.images.first
+    sibling.add_image(shared)
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select(
+      "textarea[name='observation[good_image][#{shared.id}][notes]']"
+    )
+  end
+
   # A blank submitted for a sibling-held key is preserved (a deliberate
   # suppression of the inherited value); a blank for a key no sibling
   # holds is dropped as usual.

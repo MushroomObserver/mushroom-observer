@@ -26,13 +26,18 @@ module Form
                           "div.form-panel")
       end
 
-      # Sibling slides (cross-observation thumbnail reuse) suppress the
-      # form column AND the remove button so the user can't edit fields
-      # that don't belong to this observation.
-      def test_sibling_suppresses_form_column_and_remove_button
+      # Sibling slides (cross-observation thumbnail reuse) render the
+      # read-only camera-info panel -- so its location can be adopted
+      # via "Use this info" (#5317) -- but suppress the editable image
+      # fields and the remove button, which belong to the other
+      # observation.
+      def test_sibling_renders_readonly_panel_suppresses_edit_fields
         html = render_item(sibling: true)
 
-        assert_no_html(html, "div.form-panel")
+        assert_html(html, "div.form-panel #camera_info_#{@image.id}")
+        assert_no_html(
+          html, "textarea[name='observation[good_image][#{@image.id}][notes]']"
+        )
         assert_no_html(html, ".remove_image_button")
       end
 
