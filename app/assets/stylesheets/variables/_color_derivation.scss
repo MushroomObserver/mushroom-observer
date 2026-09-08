@@ -28,9 +28,8 @@
 }
 
 // Between the page background and the panel background -- e.g. a
-// panel footer. Must be called after $PANEL_BG_COLOR is set (later in
-// each theme's "Panels" section), not right after $BODY_BG_COLOR like
-// the other functions here.
+// panel footer. Call after $PANEL_BG_COLOR is set, not alongside
+// $BODY_BG_COLOR like the other functions here.
 @function panel_footer($bg: $BODY_BG_COLOR, $panel: $PANEL_BG_COLOR) {
   @return mix($bg, $panel, 60%);
 }
