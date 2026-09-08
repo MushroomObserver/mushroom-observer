@@ -236,6 +236,10 @@
 
   .form-panel {
     padding: 1rem 1.5rem;
+    // .carousel-inner sets white-space: nowrap to lay the slides out in
+    // a row; reset it here so the panel's text (e.g. the read-only
+    // reflection note) wraps instead of overflowing and being clipped.
+    white-space: normal;
 
     @media screen and (min-width: $screen-md-min) {
       padding-top: 4.5rem;
