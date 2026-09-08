@@ -180,6 +180,6 @@ $PROGRESS_TEXT_COLOR:               $tan;
 // --------------------------------------------------
 
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
-$PANEL_BG_COLOR:                    $panel_overlay;
+$PANEL_BG_COLOR:                    $LEFT_BAR_BG_COLOR; // darker, opaque
 $PANEL_BORDER_COLOR:                $muted_border;
 $PANEL_FOOTER_BG_COLOR:             panel_footer();
