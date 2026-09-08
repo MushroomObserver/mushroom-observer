@@ -24,7 +24,15 @@ mo_ensure_repo
 case "$(uname -s)" in
     Darwin)
         # Homebrew refuses to run under root, and dev_setup_macos never
-        # needs elevated privileges -- no re-exec here.
+        # needs elevated privileges -- no re-exec here. If the caller
+        # invoked this via `sudo` themselves, fail fast with a clear
+        # message instead of letting it die deep inside `brew install`.
+        if [ "${EUID}" -eq 0 ]; then
+            echo "Don't run this as root/sudo on macOS -- Homebrew refuses" >&2
+            echo "to install under root, and this script doesn't need" >&2
+            echo "elevated privileges on macOS. Re-run without sudo." >&2
+            exit 1
+        fi
         exec script/dev_setup_components/dev_setup_macos "$@"
         ;;
     Linux)
