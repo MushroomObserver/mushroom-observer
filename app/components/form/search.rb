@@ -219,7 +219,7 @@ class Components::Form::Search < Components::ApplicationForm
     text_field(field_name,
                label: query_field_label(field_name),
                value: value,
-               help_collapse: true) do |f|
+               help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -231,7 +231,7 @@ class Components::Form::Search < Components::ApplicationForm
                rows: 1,
                label: query_field_label(field_name),
                value: value,
-               help_collapse: true) do |f|
+               help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -249,7 +249,7 @@ class Components::Form::Search < Components::ApplicationForm
                  label: query_field_label(field_name),
                  inline: true,
                  selected: bool_to_string(field_value(field_name)),
-                 help_collapse: true) do |f|
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -264,7 +264,7 @@ class Components::Form::Search < Components::ApplicationForm
                  label: query_field_label(field_name),
                  inline: true,
                  selected: field_value(field_name)&.to_s,
-                 help_collapse: true) do |f|
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -283,7 +283,7 @@ class Components::Form::Search < Components::ApplicationForm
     select_field(field_name, options,
                  label: query_field_label(field_name),
                  selected: field_value(field_name)&.first,
-                 help_collapse: true) do |f|
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -394,7 +394,7 @@ class Components::Form::Search < Components::ApplicationForm
                         label: query_field_label(field_name),
                         value: prefilled_autocompleter_value(ids, type),
                         hidden_value: ids,
-                        help_collapse: true) do |f|
+                        help_collapse: true, help_well: false) do |f|
       f.with_help { multiple_help(field_name) }
     end
   end
