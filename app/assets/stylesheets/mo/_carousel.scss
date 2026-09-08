@@ -104,7 +104,6 @@
     &:hover,
     &:focus {
       color: inherit;
-      text-shadow: 3px 3px 3px rgba($black, 0.5);
     }
   }
 
@@ -114,7 +113,14 @@
     opacity: 1;
   }
 
-  // Replaces Bootstrap's own .glyphicon-chevron-left/-right centering,
+  // text-shadow (bootstrap-sass's default) doesn't render on an SVG.
+  // Keep constant on hover -- a filter change here would move the
+  // absolutely-positioned chevron below (new containing block).
+  .mo-icon {
+    filter: drop-shadow($carousel-text-shadow);
+  }
+
+  // Replaces Bootstrap's .glyphicon-chevron-left/-right centering,
   // which no longer matches now that Icon renders <svg class="mo-icon
   // mo-icon-chevron-left">.
   .mo-icon-chevron-left,
