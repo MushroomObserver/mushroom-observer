@@ -2,9 +2,6 @@
 // useful classes. many use the names of Bootstrap 4 utilities
 // All duplicates should be deleted here if updating to 4.
 // These are not meant as overrides, just to facilitate update.
-// The 3 classes that ARE deliberate overrides of a same-named BS4
-// utility (different value on purpose) live in
-// _bootstrap_overrides.scss instead, so that intent stays visible.
 // --------------------------------------------------
 
 .d-none {
@@ -217,6 +214,16 @@
 
 .border-none {
   border: none !important;
+}
+
+// $border-color (Bootstrap 4's variable name for this) is set in
+// _map_theme_vars_to_bootstrap_vars.scss, per theme.
+.border-top {
+  border-top: 1px solid $border-color !important;
+}
+
+.border-bottom {
+  border-bottom: 1px solid $border-color !important;
 }
 
 .rounded-0 {
@@ -694,6 +701,18 @@
     &:active,
     &:focus {
       background-color: transparent;
+    }
+  }
+}
+
+.list-group-flush {
+  border-radius: 0;
+
+  > .list-group-item {
+    border-width: 0 0 1px;
+
+    &:last-child {
+      border-bottom-width: 0;
     }
   }
 }
