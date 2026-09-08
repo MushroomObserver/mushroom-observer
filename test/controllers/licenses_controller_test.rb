@@ -123,7 +123,7 @@ class LicensesControllerTest < FunctionalTestCase
       "a[href = '#{licenses_path}']", true, "License page missing link to Index"
     )
     assert_select(
-      "input[type=checkbox][name='deprecated'][checked='checked']", false,
+      "input[type=checkbox][name='deprecated'][checked]", false,
       "New License form `deprecated` checkbox should be unchecked"
     )
     # Turbo-conversion prototype (issue #5052): the plain GET render

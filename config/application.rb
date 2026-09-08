@@ -36,6 +36,12 @@ module MushroomObserver
     # config/initializers/new_framework_defaults_7_1.rb
     # config.load_defaults(7.1)
 
+    # New cache-entry format from new_framework_defaults_7_1.rb -- must be
+    # set here, not in the initializer, per Rails' requirement. MO's
+    # single-process stop/start deploy (script/deploy.sh) means there's no
+    # window where old and new code read the cache at the same time.
+    config.active_support.cache_format_version = 7.1
+
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names.

@@ -23,7 +23,7 @@ class AddDispatchController < ApplicationController
     new_params = dispatch_params
     url = "#{url}?#{new_params}" if new_params.present?
 
-    redirect_to(url)
+    redirect_to(url, allow_other_host: true)
   end
 
   private

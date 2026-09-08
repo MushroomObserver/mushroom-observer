@@ -12,7 +12,8 @@ module FieldSlips
       field_slip_params = permitted_qr_params
       return unless check_for_qr_code(field_slip_params)
 
-      redirect_to("#{MO.http_domain}/qr/#{@qr_code.strip}")
+      redirect_to("#{MO.http_domain}/qr/#{@qr_code.strip}",
+                  allow_other_host: true)
     end
 
     private

@@ -35,12 +35,10 @@ Rails.application.config.action_dispatch.default_headers = {
 }
 
 ###
-# Do not treat an `ActionController::Parameters` instance
-# as equal to an equivalent `Hash` by default.
-# No-op for MO: no `params ==` comparisons in the codebase.
+# allow_deprecated_parameters_hash_equality: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-Rails.application.config.action_controller.
-  allow_deprecated_parameters_hash_equality = false
 
 ###
 # Active Record Encryption now uses SHA-256 as its hash digest algorithm.
@@ -86,27 +84,16 @@ Rails.application.config.active_record.
   sqlite3_adapter_strict_strings_by_default = true
 
 ###
-# Disable deprecated singular associations names.
-# No-op for MO: no belongs_to/has_one names matching this deprecated pattern.
+# allow_deprecated_singular_associations_name: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-Rails.application.config.active_record.
-  allow_deprecated_singular_associations_name = false
 
 ###
-# Enable the Active Job `BigDecimal` argument serializer, which guarantees
-# roundtripping. Without this serializer, some queue adapters may serialize
-# `BigDecimal` arguments as simple (non-roundtrippable) strings.
-#
-# When deploying an application with multiple replicas, old (pre-Rails 7.1)
-# replicas will not be able to deserialize `BigDecimal` arguments from this
-# serializer. Therefore, this setting should only be enabled after all replicas
-# have been successfully upgraded to Rails 7.1.
-#
-# DEFERRED with the other rolling-deploy-sensitive settings below --
-# confirm MO's deploy model (single-process restart vs. multiple replicas)
-# before enabling this group.
+# active_job.use_big_decimal_serializer: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-# Rails.application.config.active_job.use_big_decimal_serializer = true
 
 ###
 # Specify if an `ArgumentError` should be raised if `Rails.cache` `fetch` or
@@ -145,10 +132,11 @@ Rails.application.config.active_support.
 # cannot be read by older versions of Rails. However, messages that use the old
 # format can still be read, regardless of whether this optimization is enabled.
 #
-# DEFERRED with the other rolling-deploy-sensitive settings above.
+# See the deploy-model note above -- MO's single-process stop/start deploy
+# means this is safe to turn on directly.
 #++
-# Rails.application.config.active_support.
-#   use_message_serializer_for_metadata = true
+Rails.application.config.active_support.
+  use_message_serializer_for_metadata = true
 
 ###
 # Set the maximum size for Rails log files.
@@ -200,9 +188,10 @@ Rails.application.config.active_record.default_column_serializer = nil
 # Enable a performance optimization that serializes Active Record models
 # in a faster and more compact way.
 #
-# DEFERRED with the other rolling-deploy-sensitive settings above.
+# See the deploy-model note above -- MO's single-process stop/start deploy
+# means this is safe to turn on directly.
 #++
-# Rails.application.config.active_record.marshalling_format_version = 7.1
+Rails.application.config.active_record.marshalling_format_version = 7.1
 
 ###
 # Run `after_commit` and `after_*_commit` callbacks in the order they are
@@ -213,14 +202,10 @@ Rails.application.config.active_record.
   run_after_transaction_callbacks_in_order_defined = true
 
 ###
-# Whether a `transaction` block is committed or rolled back when exited via
-# `return`, `break` or `throw`.
-# No-op for MO today: none of the app's 5 `.transaction do` blocks exit early
-# via return/break/throw (checked directly), so this changes nothing now --
-# it matters for any transaction block written this way in the future.
+# commit_transaction_on_non_local_return: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-Rails.application.config.active_record.
-  commit_transaction_on_non_local_return = true
 
 ###
 # Controls when to generate a value for <tt>has_secure_token</tt> declarations.
@@ -236,9 +221,8 @@ Rails.application.config.active_record.generate_secure_token_on = :initialize
 # will have a different format that is not supported by Rails 7.0
 # applications.
 #
-# DEFERRED with the other rolling-deploy-sensitive settings above.
-# When ready, add this to `config/application.rb` (NOT this file):
-#   config.active_support.cache_format_version = 7.1
+# See the deploy-model note above -- set in config/application.rb (NOT this
+# file) as config.active_support.cache_format_version = 7.1.
 
 ###
 # Configure Action View to use HTML5 standards-compliant sanitizers when they

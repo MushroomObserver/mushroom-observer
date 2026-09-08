@@ -100,8 +100,8 @@ Rails.application.config.active_support.use_rfc4122_namespaced_uuids = true
 # this file):
 #  config.active_support.cache_format_version = 7.0
 #
-# DEFERRED alongside the other rolling-deploy-sensitive settings in
-# new_framework_defaults_7_1.rb -- see that file's note.
+# Superseded by new_framework_defaults_7_1.rb's note -- set to 7.1 there
+# (config/application.rb), not 7.0, since both bumps land together.
 
 # Cookie serializer: 2 options
 #
