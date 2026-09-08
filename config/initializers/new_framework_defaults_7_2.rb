@@ -13,11 +13,13 @@
 
 ###
 # Defer Active Job's `perform_later` enqueue until the enclosing Active
-# Record transaction commits, when the queue adapter supports it.
+# Record transaction commits, when the queue adapter supports it and a
+# `perform_later` call happens inside a transaction. A call outside any
+# transaction still enqueues immediately, same as before.
 #
 # Solid Queue's adapter always returns true for
 # `enqueue_after_transaction_commit?`, so :default defers every
-# `perform_later` call to after commit.
+# transaction-enclosed `perform_later` call to after commit.
 #
 # Only one call site in the app runs inside a transaction:
 # Image#strip_gps! enqueues TransferImagesJob inside a `with_lock` block.
