@@ -54,6 +54,22 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#edit_occurrence_modal", count: 0)
   end
 
+  # A reflection with no occurrence has no primary to steer toward, so
+  # no modal (#5328 review) -- it would just bounce back otherwise.
+  def test_show_no_edit_modal_for_reflection_without_occurrence
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal", count: 0)
+  end
+
   def test_show_no_login_with_flow
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id, flow: "next" })

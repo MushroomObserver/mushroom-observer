@@ -18,6 +18,7 @@ class Views::Controllers::Observations::Show::EditModalTest <
 
     html = render_modal(other, occ)
 
+    assert_includes(html, :edit_occurrence_not_primary.l)
     assert_html(html, "a[href='#{edit_path(other, target: :primary)}']",
                 text: :edit_occurrence_edit_primary.l)
     assert_html(html, "a[href='#{edit_path(other)}']",
@@ -42,7 +43,9 @@ class Views::Controllers::Observations::Show::EditModalTest <
     assert_includes(html, :edit_occurrence_is_reflection.l)
   end
 
-  # Reflection with no editable sibling: Create Editable Primary.
+  # Reflection with no editable sibling: Create Editable Primary. It is
+  # its occurrence's current primary, so the "not primary" line is
+  # omitted; only the read-only-reflection line shows.
   def test_lone_reflection_offers_create
     reflection = make_editable(:coprinus_comatus_obs)
     reflection.update_column(:reflected_at, Time.zone.now)
@@ -53,6 +56,32 @@ class Views::Controllers::Observations::Show::EditModalTest <
     assert_html(html, "a[href='#{edit_path(reflection, target: :primary)}']",
                 text: :edit_occurrence_create_primary.l)
     assert_no_html(html, "a[href='#{edit_path(reflection)}']")
+    assert_includes(html, :edit_occurrence_is_reflection.l)
+    assert_not_includes(html, :edit_occurrence_not_primary.l)
+  end
+
+  # Admin mode grants edit rights, so a sibling the user can't edit
+  # still counts as an editable sibling -- the label is Edit Primary,
+  # not Create Editable Primary.
+  def test_admin_mode_counts_non_editable_sibling
+    reflection = make_editable(:coprinus_comatus_obs)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    native = observations(:detailed_unknown_obs)
+    native.update_columns(user_id: users(:mary).id, collector_user_id: nil,
+                          occurrence_id: nil)
+    assert_not(native.can_edit?(@user), "premise: native not editable by user")
+    occ = occurrence_for(reflection, [reflection, native])
+
+    without_admin = render_modal(reflection, occ)
+    assert_html(without_admin,
+                "a[href='#{edit_path(reflection, target: :primary)}']",
+                text: :edit_occurrence_create_primary.l)
+
+    stub_admin_mode!
+    with_admin = render_modal(reflection, occ)
+    assert_html(with_admin,
+                "a[href='#{edit_path(reflection, target: :primary)}']",
+                text: :edit_occurrence_edit_primary.l)
   end
 
   private

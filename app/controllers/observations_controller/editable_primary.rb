@@ -44,12 +44,18 @@ module ObservationsController::EditablePrimary
 
   def editable_primary?(occ)
     primary = occ.primary_observation
-    primary && !primary.reflection? && primary.can_edit?(@user)
+    primary && !primary.reflection? && editable_member?(primary)
   end
 
   def oldest_editable_member(occ)
     occ.observations.reject(&:reflection?).
-      select { |obs| obs.can_edit?(@user) }.min_by(&:id)
+      select { |obs| editable_member?(obs) }.min_by(&:id)
+  end
+
+  # Admin mode grants edit rights the same way the controller's
+  # permission check does, so honor it here too (#5328 review).
+  def editable_member?(obs)
+    in_admin_mode? || obs.can_edit?(@user)
   end
 
   def promote_to_primary(occ, obs)

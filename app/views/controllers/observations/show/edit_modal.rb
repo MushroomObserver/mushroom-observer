@@ -30,8 +30,15 @@ module Views::Controllers::Observations
     private
 
     def render_explanation
-      p { :edit_occurrence_not_primary.l }
+      # A lone reflection is its occurrence's current primary until an
+      # editable one is created, so the "not primary" line only applies
+      # when this observation is not the primary (#5328 review).
+      p { :edit_occurrence_not_primary.l } unless primary?
       p { :edit_occurrence_is_reflection.l } if @observation.reflection?
+    end
+
+    def primary?
+      @occurrence && @occurrence.primary_observation_id == @observation.id
     end
 
     def render_buttons
@@ -69,7 +76,7 @@ module Views::Controllers::Observations
       return false unless @occurrence
 
       @occurrence.observations.any? do |obs|
-        !obs.reflection? && obs.can_edit?(@user)
+        !obs.reflection? && (in_admin_mode? || obs.can_edit?(@user))
       end
     end
   end

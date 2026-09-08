@@ -335,6 +335,27 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(edit_observation_path(oldest.id))
   end
 
+  # In admin mode the resolver honors admin edit rights: it edits the
+  # existing (admin-editable) primary rather than creating a companion.
+  def test_edit_target_primary_honors_admin_editability
+    make_admin("rolf")
+    admin = users(:rolf)
+    primary = observations(:detailed_unknown_obs)
+    primary.update_columns(user_id: users(:mary).id, collector_user_id: nil,
+                           occurrence_id: nil)
+    assert_not(primary.can_edit?(admin), "premise: not editable sans admin")
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(occurrence_id: nil, reflected_at: Time.zone.now)
+    occ = Occurrence.create!(user: admin, primary_observation: primary)
+    [primary, reflection].each { |o| o.update_column(:occurrence_id, occ.id) }
+
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: reflection.id, target: "primary" })
+    end
+
+    assert_redirected_to(edit_observation_path(primary.id))
+  end
+
   # A blank submitted for a sibling-held key is preserved (a deliberate
   # suppression of the inherited value); a blank for a key no sibling
   # holds is dropped as usual.
