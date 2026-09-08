@@ -180,7 +180,8 @@ Rails.application.config.active_record.before_committed_on_all_records = true
 
 ###
 # Disable automatic column serialization into YAML.
-# No-op for MO: no `serialize` calls on any model column.
+# MO's `serialize` calls (Naming, InatImport, Observation, User, UserStats)
+# each specify a `coder:`, so none fall back to this app-wide default.
 #++
 Rails.application.config.active_record.default_column_serializer = nil
 

@@ -680,9 +680,14 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        # NodeSet has no #join; map(&:to_s) converts to String array first
-        actual_val = elements.first.children.map(&:to_s).join.as_displayed # rubocop:disable Style/MapJoin
-        expect_val = expect_val.to_s.as_displayed
+        # NodeSet has no #join; map(&:to_s) converts to String array first.
+        # Textarea content is plain text, not HTML -- unescape entities and
+        # normalize line endings (as an HTML5 parser does), but don't run
+        # it through as_displayed's strip_html: a literal "<...>" typed
+        # into the textarea is content the user typed, not a tag to strip.
+        actual_val = elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
+                     join.unescape_html.gsub(/\r\n?/, "\n").strip
+        expect_val = expect_val.to_s.gsub(/\r\n?/, "\n").strip
         message = if actual_val != expect_val
                     "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
