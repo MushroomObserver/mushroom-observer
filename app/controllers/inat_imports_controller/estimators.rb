@@ -90,10 +90,7 @@ module InatImportsController::Estimators
     args = listing_url? ? url_query_args : {}
     args[:only_id] = true
     args[:id] = params[:inat_ids] if listing_ids?
-    unless import_others?
-      args[:user_login] =
-        params[:inat_username]&.strip&.downcase
-    end
+    args[:user_login] = normalized_inat_username unless import_others?
     args
   end
 
@@ -103,11 +100,13 @@ module InatImportsController::Estimators
     args[:only_id] = true
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
     args[:id] = params[:inat_ids] if listing_ids?
-    unless import_others?
-      args[:user_login] =
-        params[:inat_username]&.strip&.downcase
-    end
+    args[:user_login] = normalized_inat_username unless import_others?
     args
+  end
+
+  # iNat logins are lowercase; send iNat the form it stores.
+  def normalized_inat_username
+    params[:inat_username]&.strip&.downcase
   end
 
   # Obs that will actually be imported: taxon + without_field
@@ -148,7 +147,7 @@ module InatImportsController::Estimators
     if import_others?
       LICENSED_FILTER
     else
-      { user_login: params[:inat_username]&.strip&.downcase }
+      { user_login: normalized_inat_username }
     end
   end
 

@@ -73,11 +73,7 @@ class InatImport < ApplicationRecord
   belongs_to :project, optional: true
   has_many :observations, dependent: :nullify
 
-  # iNat logins are canonically lowercase; normalize so comparisons
-  # against values from iNat match however the user typed it.
-  def inat_username=(val)
-    super(val.is_a?(String) ? val.strip.downcase : val)
-  end
+  include NormalizesInatUsername
 
   serialize :log, type: Array, coder: YAML
   serialize :date_missing_inat_ids, coder: JSON

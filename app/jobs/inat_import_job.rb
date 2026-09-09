@@ -85,7 +85,7 @@ class InatImportJob < ApplicationJob
     log("inat_logged_in_user: #{inat_logged_in_user}")
     # casecmp: records saved before inat_username was normalized to
     # lowercase can still hold the login with different case.
-    return if inat_logged_in_user.casecmp?(inat_username.to_s)
+    return if inat_logged_in_user.to_s.casecmp?(inat_username.to_s)
 
     wrong_inat_user_error(inat_logged_in_user)
   end
