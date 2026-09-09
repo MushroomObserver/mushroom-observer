@@ -13,7 +13,6 @@
 #
 class API2Controller < ApplicationController
   require("xmlrpc/client")
-  require_relative("../classes/api2")
 
   disable_filters
 

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require_relative("../../app/mailers/application_mailer")
 
 class ApplicationMailerTest < UnitTestCase
   def setup
