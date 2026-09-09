@@ -24,3 +24,26 @@ test:
   username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
   port: 3306
+
+# Same TCP/env-var shape as development/test above -- the app container
+# reaches MySQL over the network under this address either way,
+# whether that's the host, a Kamal accessory container, or a managed
+# service (#5345's own decision, not this file's).
+production:
+  primary:
+    database: <%= ENV.fetch("DATABASE_NAME", "mo_production") %>
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    # Must exceed Solid Queue's own thread need -- see
+    # test/jobs/queue_config_test.rb and config/database.yml's own
+    # comment on this same pool setting.
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS", 10) %>
+  cache:
+    database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    migrations_paths: "db/cache/migrate"
