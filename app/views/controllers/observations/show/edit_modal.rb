@@ -26,15 +26,15 @@ module Views::Controllers::Observations
       end
     end
 
-    # The create case (a reflection with no editable sibling) is about
-    # making a matching observation; the others are about which existing
-    # one to edit.
+    # Title by case: create a match (reflection, no editable sibling);
+    # edit the one matching native (a reflection whose sibling is
+    # editable -- a single option); or, for an editable non-primary,
+    # choose which of two to edit.
     def modal_title
-      if create_target?
-        :edit_occurrence_create_title.l
-      else
-        :edit_occurrence_modal_title.l
-      end
+      return :edit_occurrence_create_title.l if create_target?
+      return :edit_occurrence_edit_match_title.l if @observation.reflection?
+
+      :edit_occurrence_modal_title.l
     end
 
     private

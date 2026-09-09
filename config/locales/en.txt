@@ -1500,6 +1500,7 @@
   edit_observation_promoted_primary: The oldest editable observation in this occurrence is now its primary observation, and you are editing it.
   edit_occurrence_modal_title: Edit which observation?
   edit_occurrence_create_title: Create Matching Observation?
+  edit_occurrence_edit_match_title: Edit Matching Observation?
   edit_occurrence_not_primary: This observation is not the primary observation of its occurrence.
   edit_occurrence_is_reflection: This is a read-only reflection imported from another source, so it can't be edited here.
   edit_occurrence_edit_primary: Edit Primary Observation
