@@ -165,16 +165,21 @@ in their name.  The app will then use the user's new API key for all subsequent
 POST requests.  The app will be responsible for remembering and keeping secure
 each user's API key.
 
-Apparently, it should also be possible for an app to create an account for a
-new user, too.  I don't remember writing this, but it apparently has extensive
-unit tests to guarantee that it works correctly(!)  Presumably the new user
-will have to verify their email address like usual before the app can create an
-API key for them and post observations.
+An app can also create the account itself: POST to /api2/users with login,
+name, email and password, adding create_key=&lt;your app name&gt; to create an
+API key for the new account in the same request.  The new account starts
+unverified, and the user must confirm their email address as usual before
+the account and its key can be used.
 
-All of this is still very unsecure.  If anyone gets hold of a user's API key
-they can readily POST things in their name.  Anyone interested in hooking us up
-with a more sophisticated authentication process is welcome to contribute.
-We'd be happy to help.
+API keys are bearer credentials, the same widely used pattern as most API
+authentication: anyone holding a key can act as its user.  Treat a key like
+a password — keep it out of shared code and logs, and send it as POST data
+rather than in the URL (URLs can end up in server logs).  A user can revoke
+any of their keys at any time from
+<https://mushroomobserver.org/account/api_keys>.  Contributions that
+harden this further are welcome — per-key scopes, key expiry/rotation,
+accepting the key via the Authorization header, or an OAuth flow for
+third-party apps.
 
 Database Tables
 ---------------
