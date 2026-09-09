@@ -4,6 +4,8 @@ require("test_helper")
 
 module Views::Controllers::Admin::BlockedIps
   class ManagerTest < ComponentTestCase
+    EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
     def setup
       super
       IpStats.reset!
@@ -101,8 +103,8 @@ module Views::Controllers::Admin::BlockedIps
         "[href='#blocked_ips_body']"
       )
 
-      # Body is expanded by default (has "in" class)
-      assert_html(html, ".panel-collapse.collapse.in")
+      # Body is expanded by default
+      assert_html(html, ".panel-collapse.collapse.#{EXPANDED}")
     end
 
     private

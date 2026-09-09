@@ -2,10 +2,12 @@
 
 require("application_system_test_case")
 
-# System tests for Components::Accordion — the Bootstrap 3 multi-pane
-# collapse component. Uses the account API keys page as the fixture,
-# which renders an Accordion for each key's inline notes editor.
+# System tests for Components::Accordion — the multi-pane collapse
+# component. Uses the account API keys page as the fixture, which
+# renders an Accordion for each key's inline notes editor.
 class AccordionSystemTest < ApplicationSystemTestCase
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   def setup
     super
     @mary = users("mary")
@@ -25,28 +27,28 @@ class AccordionSystemTest < ApplicationSystemTestCase
     edit_pane_id = "edit_notes_#{key_id}_container"
 
     # Initial state: view pane open, edit pane collapsed (hidden).
-    assert_selector("##{view_pane_id}.collapse.in")
+    assert_selector("##{view_pane_id}.collapse.#{EXPANDED}")
     assert_selector("##{edit_pane_id}.collapse", visible: :hidden)
-    assert_no_selector("##{edit_pane_id}.in")
+    assert_no_selector("##{edit_pane_id}.#{EXPANDED}")
 
     # 1. Click "Edit" — edit pane opens, view pane collapses.
     within("#notes_#{key_id}") { click_on(:edit.ti) }
 
-    assert_selector("##{edit_pane_id}.collapse.in")
-    assert_no_selector("##{view_pane_id}.in")
+    assert_selector("##{edit_pane_id}.collapse.#{EXPANDED}")
+    assert_no_selector("##{view_pane_id}.#{EXPANDED}")
 
     # 2. Click Cancel — view pane reopens, edit pane collapses.
     within("##{edit_pane_id}") do
       find("a[href='##{view_pane_id}']").click
     end
 
-    assert_selector("##{view_pane_id}.collapse.in")
-    assert_no_selector("##{edit_pane_id}.in")
+    assert_selector("##{view_pane_id}.collapse.#{EXPANDED}")
+    assert_no_selector("##{edit_pane_id}.#{EXPANDED}")
 
     # 3. Click "Edit" again — edit pane opens again.
     within("#notes_#{key_id}") { click_on(:edit.ti) }
 
-    assert_selector("##{edit_pane_id}.collapse.in")
+    assert_selector("##{edit_pane_id}.collapse.#{EXPANDED}")
 
     # 4. Change the notes and submit.
     within("#edit_api_key_#{key_id}_form") do
@@ -59,8 +61,8 @@ class AccordionSystemTest < ApplicationSystemTestCase
     assert_selector("body.api_keys__index")
     assert_flash_success(:account_api_keys_updated)
 
-    assert_selector("##{view_pane_id}.collapse.in")
-    assert_no_selector("##{edit_pane_id}.in")
+    assert_selector("##{view_pane_id}.collapse.#{EXPANDED}")
+    assert_no_selector("##{edit_pane_id}.#{EXPANDED}")
     assert_selector("#notes_#{key_id} span.current_notes",
                     text: "Updated notes for accordion test")
   end

@@ -3,6 +3,8 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   def test_create_minimal_observation
     browser = page.driver.browser
     user = users(:zero_user)
@@ -64,7 +66,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Test naming reason checkbox/textarea interaction
     # The Vote/Reasons collapse should have expanded when valid name was entered
     assert_selector(
-      "[data-autocompleter--name-target='collapseFields'].in", wait: 4
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}", wait: 4
     )
 
     # Find reason 2 checkbox ("Used references") and check it
@@ -74,7 +76,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Check the reason checkbox (click the label to toggle collapse)
     reason_checkbox_label.click
-    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
 
     # Fill in the reason notes textarea
     reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
@@ -83,20 +85,20 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Uncheck the reason checkbox - should collapse and clear the input
     reason_checkbox_label.click
-    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     # Wait for the collapse animation to complete and trigger clearInput
     sleep(0.5)
 
     # Re-check the reason checkbox - should expand but be empty
     reason_checkbox_label.click
-    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
     assert_equal("", reason_notes.value,
                  "Textarea should be empty after toggle")
 
     # Uncheck again before submitting (we want no reason 2 stored)
     reason_checkbox_label.click
-    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     sleep(0.5)
 
     within("#observation_form") { click_commit }
@@ -912,7 +914,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Agaricus campestris")
     assert_field("observation_naming_name", with: "Agaricus campestris")
     # Vote/reasons collapse should expand when name is filled
-    assert_selector("[data-autocompleter--name-target='collapseFields'].in")
+    assert_selector(
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"
+    )
     select(Vote.confidence_string(Vote.next_best_vote),
            from: "observation_naming_vote_value")
     assert_select("observation_naming_vote_value",
@@ -1060,7 +1064,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Open the map
     click_button(:form_observations_open_map.l)
-    assert_selector("#observation_form_map.in", wait: 10)
+    assert_selector("#observation_form_map.#{EXPANDED}", wait: 10)
 
     # Wait for Google Maps to load (map controller sets data-map="connected")
     assert_selector("[data-map='connected']", wait: 10)
@@ -1913,7 +1917,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Wait for geolocation collapse to expand
-    assert_selector("#observation_geolocation.in", wait: 10)
+    assert_selector("#observation_geolocation.#{EXPANDED}", wait: 10)
 
     # Verify GPS fields are populated. wait: 20, not 10 -- same
     # contention-sensitive EXIF-extraction dependency as the GEOTAGGED_EXIF

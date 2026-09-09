@@ -3,6 +3,8 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   setup do
     @obs = observations(:peltigera_obs)
   end
@@ -307,7 +309,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
 
     # Clicking iNat opens its pane, Turbo-fetching the frame content.
-    assert_selector("#pane_#{inat_link.id}.in", wait: 6)
+    assert_selector("#pane_#{inat_link.id}.#{EXPANDED}", wait: 6)
     within("#pane_#{inat_link.id}") { assert_text(/iNaturalist/) }
 
     within("#observation_external_links") do
@@ -315,8 +317,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     end
 
     # Clicking MCP closes iNat's pane (accordion) and opens MCP's own.
-    assert_selector("#pane_#{mcp_link.id}.in", wait: 6)
+    assert_selector("#pane_#{mcp_link.id}.#{EXPANDED}", wait: 6)
     within("#pane_#{mcp_link.id}") { assert_text(/MyCoPortal/) }
-    assert_no_selector("#pane_#{inat_link.id}.in")
+    assert_no_selector("#pane_#{inat_link.id}.#{EXPANDED}")
   end
 end

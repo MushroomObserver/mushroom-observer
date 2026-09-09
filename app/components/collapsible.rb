@@ -43,6 +43,11 @@
 #     render_sub_rows
 #   end
 class Components::Collapsible < Components::Base
+  # The class Bootstrap adds to an initially-open collapse pane.
+  # Tests assert against this constant instead of the literal string,
+  # so a future Bootstrap version's rename only needs updating here.
+  EXPANDED_CLASS = "show"
+
   # `module_function`-style dual access, matching
   # `Components::Button::Styling`'s `btn_class`/`size_class`: callable
   # as `Components::Collapsible.collapse_classes(...)` for callers that
@@ -55,7 +60,7 @@ class Components::Collapsible < Components::Base
   def self.collapse_classes(expanded: nil, panel: false, html_class: nil)
     [
       "collapse",
-      ("show" if expanded),
+      (EXPANDED_CLASS if expanded),
       ("panel-collapse" if panel),
       html_class
     ].compact_blank.join(" ")

@@ -4,6 +4,8 @@ require("test_helper")
 
 module Views::Controllers::Projects::Aliases
   class FormTest < ComponentTestCase
+    EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
     def setup
       super
       @user = users(:rolf)
@@ -33,7 +35,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "#{panel}[data-type-switch-type='location']")
 
       # User panel hidden by default, location panel visible
-      assert_no_html(html, "[data-type-switch-type='user'].in")
+      assert_no_html(html, "[data-type-switch-type='user'].#{EXPANDED}")
     end
 
     def test_edit_form_with_user_target
@@ -45,7 +47,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='RS']")
 
       # Location panel hidden when editing user target
-      assert_no_html(html, "[data-type-switch-type='location'].in")
+      assert_no_html(html, "[data-type-switch-type='location'].#{EXPANDED}")
     end
 
     def test_edit_form_with_location_target
@@ -57,7 +59,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='Walk 1']")
 
       # User panel hidden when editing location target
-      assert_no_html(html, "[data-type-switch-type='user'].in")
+      assert_no_html(html, "[data-type-switch-type='user'].#{EXPANDED}")
     end
 
     def test_form_with_errors

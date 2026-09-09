@@ -192,7 +192,7 @@
 // Bootstrap collapse sets display:block, which breaks
 // table-row-group semantics on <tbody>. Override so
 // collapsed tbody rows render correctly when expanded.
-tbody.collapse.in {
+tbody.collapse.show {
   display: table-row-group;
 }
 
