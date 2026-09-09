@@ -47,14 +47,16 @@ module Views::Layouts
       )
     end
 
-    # A plain <button> (no href) that opens the static choice modal via
-    # Bootstrap data-toggle. Deliberately not a link: an edit href here
-    # was navigable/prefetchable, so Turbo Drive would visit the edit
-    # page in the background and swap it in under the open modal (#5317).
+    # Opens the static choice modal via Bootstrap data-toggle. Uses an
+    # href of "#" rather than the edit route: a same-page hash is not a
+    # Turbo visit (or prefetch), so the edit page can't load in the
+    # background under the open modal (#5317), while the anchor still
+    # gets the icon-link styling and link color the delete icon's
+    # sibling <a> has.
     def edit_modal_toggle
-      ::Components::Button.new(
-        icon: :edit, variant: :strip,
-        icon_title: :edit_object.t(type: @object.type_tag),
+      ::Components::Button::Get.new(
+        name: :edit_object.t(type: @object.type_tag),
+        target: "#", icon: :edit, variant: :strip,
         class: ::Components::InlineLinkBlock.item_class,
         data: { toggle: "modal", target: "##{@edit_modal_target}" }
       )

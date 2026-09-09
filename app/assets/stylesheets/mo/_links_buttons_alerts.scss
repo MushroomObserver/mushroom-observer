@@ -352,15 +352,6 @@ form.button_to {
   background-color: transparent;
   text-decoration: none;
   vertical-align: middle;
-  // Reset user-agent button chrome so a <button> carrying this class
-  // (e.g. the occurrence edit-modal toggle) matches the <a> icon links
-  // -- no border, padding, or shadow. No-ops on an <a>.
-  padding: 0;
-  border: 0;
-  box-shadow: none;
-  -webkit-appearance: none;
-  appearance: none;
-  color: inherit;
 
   &:hover {
     text-decoration: none;
