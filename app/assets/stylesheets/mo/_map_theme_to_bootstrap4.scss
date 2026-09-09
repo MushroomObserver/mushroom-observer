@@ -2,22 +2,17 @@
 // BOOTSTRAP 4 THEME VARIABLE MAPPING
 // ==================================================
 //
-// FUTURE USE: This file will be used during Bootstrap 4 migration
-// (Phase 3 of the comprehensive modernization plan, weeks 8-11).
-//
-// This file maps MO's standardized theme variables to Bootstrap 4's
-// variable system. It should be imported AFTER theme variables but
-// BEFORE Bootstrap 4 itself.
+// Imported from mushroom_observer.scss, between the theme variable
+// file and `@import "bootstrap"` (issue #5348). Maps MO's
+// standardized theme variables to Bootstrap 4's variable system.
 //
 // Import order:
 //   1. app/assets/stylesheets/variables/{theme}.scss
 //   2. app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss  (this file)
-//   3. bootstrap (from gem or node_modules)
+//   3. bootstrap (gem)
 //
-// NOTE: This file contains NO hardcoded values. All values come from
+// NOTE: This file contains NO hardcoded colors. All colors come from
 // theme variables defined in app/assets/stylesheets/variables/
-//
-// See: doc/Bootstrap Upgrade Plan for MO.md
 //
 // ==================================================
 
@@ -63,10 +58,16 @@ $theme-colors: (
 $white:    #fff !default;
 $black:    #000 !default;
 
-// Use theme colors for grays where applicable
-$gray-100: $LIGHT_COLOR !default;
-$gray-600: $SECONDARY_COLOR !default;
-$gray-900: $DARK_COLOR !default;
+// $BODY_TEXT_COLOR/$BODY_BG_COLOR (not $LIGHT_COLOR/$DARK_COLOR)
+// already resolve light/dark per theme -- see color_derivation.scss --
+// so gray-900 (BS4's high-contrast-text extreme) and gray-100 (its
+// near-background extreme) don't need a per-theme conditional here.
+// A dark theme like Amanita gets this right automatically: its
+// $BODY_TEXT_COLOR is light, so $gray-900 ends up light there too,
+// matching the role BS4 components expect from the darkest step.
+$gray-100: $BODY_BG_COLOR !default;
+$gray-600: muted_text() !default;
+$gray-900: $BODY_TEXT_COLOR !default;
 
 // ==================================================
 // SECTION 3: TYPOGRAPHY
@@ -101,6 +102,9 @@ $headings-color: $BODY_TEXT_COLOR !default;
 $border-radius:    5px !default;
 $border-radius-sm: 5px !default;
 $border-radius-lg: 5px !default;
+
+// Bootstrap 4's name for this; bootstrap-sass does not read it.
+$border-color: $PANEL_BORDER_COLOR !default;
 
 // ==================================================
 // SECTION 5: BUTTONS
@@ -298,7 +302,7 @@ $list-group-action-hover-color: $LINK_HOVER_TEXT_COLOR !default;
 $card-bg:           $LIST_BG_COLOR !default;
 $card-border-color: $LIST_BORDER_COLOR !default;
 
-$card-cap-bg: darken($LIST_BG_COLOR, 3%) !default;
+$card-cap-bg: scale-color($LIST_BG_COLOR, $lightness: -3%) !default;
 
 // ==================================================
 // SECTION 17: MISCELLANEOUS COMPONENTS

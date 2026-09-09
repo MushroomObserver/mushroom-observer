@@ -196,10 +196,6 @@
   font-family: monospace !important;
 }
 
-.font-weight-bold {
-  font-weight: 700 !important;
-}
-
 .font-weight-normal {
   font-weight: normal !important;
 }
@@ -214,16 +210,6 @@
 
 .border-none {
   border: none !important;
-}
-
-// $border-color (Bootstrap 4's variable name for this) is set in
-// _map_theme_vars_to_bootstrap_vars.scss, per theme.
-.border-top {
-  border-top: 1px solid $border-color !important;
-}
-
-.border-bottom {
-  border-bottom: 1px solid $border-color !important;
 }
 
 .rounded-0 {
@@ -701,18 +687,6 @@
     &:active,
     &:focus {
       background-color: transparent;
-    }
-  }
-}
-
-.list-group-flush {
-  border-radius: 0;
-
-  > .list-group-item {
-    border-width: 0 0 1px;
-
-    &:last-child {
-      border-bottom-width: 0;
     }
   }
 }
