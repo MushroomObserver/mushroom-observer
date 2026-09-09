@@ -1,6 +1,20 @@
 Mushroom Observer API
 =====================
 
+Interactive Documentation
+-------------------------
+
+Browsable, per-endpoint documentation — every resource, its supported
+methods, and every accepted parameter with its description — lives at:
+
+* <https://mushroomobserver.org/api-docs/>
+
+It is generated from the API code itself (`bin/rails api:openapi`, an
+OpenAPI 3.1 spec at [/api-docs/openapi.yaml](https://mushroomobserver.org/api-docs/openapi.yaml)),
+so it stays current as the API changes. This file covers the context the
+generated docs don't: intended use, bulk-data alternatives, rate limits,
+and how the request styles and API keys work.
+
 Intended Use
 ------------
 
@@ -45,9 +59,9 @@ GET requests are read-only and do not require authentication.  POST (create),
 PATCH (update) and DELETE (destroy) requests require authentication via an API
 key (see below).
 
-Responses can be requested in either JSON (default) or XML. You can either
-set the appropriate HTTP request header, or you can request it explicitly with
-a parameter (see below).
+Responses are JSON by default. XML output still works (via the Accept
+header or `format=xml`) but is deprecated and no longer documented; use
+JSON.
 
 Rate and Load Restrictions
 --------------------------
@@ -71,7 +85,7 @@ Combinations are of course welcome.
 In addition to these filter parameters a few special pseudoparameters are
 accepted:
 
-* help=1 -- Resturn a list of accepted parameters.
+* help=1 -- Return a list of accepted parameters.
 * detail=none -- Return only record ids (default).
 * detail=low -- Return some basic data with each record.
 * detail=high -- Return a great deal of data with each record.
@@ -103,8 +117,9 @@ the new record in parameters.  Example:
 
 The response will include the id of the new record.
 
-Attach the image as POST data or URL.  See script/test_api for an example of how
-to attach an image in the POST data.
+Attach an image as POST data or by URL — see the `upload_file` and
+`upload_url` parameters on the images endpoint in the
+[interactive docs](https://mushroomobserver.org/api-docs/).
 
 PATCH Requests
 --------------
@@ -167,26 +182,33 @@ Database Tables
 Most of the important database tables have entry points:
 
 * api_keys (POST only)
+* collection_numbers
 * comments
 * external_links
 * external_sites (GET only)
+* field_slips
 * herbaria (GET only)
+* herbarium_records
 * images
 * locations (not DELETE)
+* location_descriptions (GET only)
 * names (not DELETE)
+* name_descriptions (GET only)
+* namings
 * observations
+* occurrences
 * projects (not DELETE)
 * sequences
 * species_lists
-* users (not DELETE)
+* users
 
-Use the special "help=1" parameter to request a set of parameters supported for
-each table.  Detailed documentation doesn't exist; we're relying on things
-being simplistic enough to be more or less self-explanatory.  Note that it is
-safe to mess around with strange parameters and see what they do.  Note that
-XML responses include a copy of the SQL query used.  This can be a very
-effective way of discovering exactly how unfamiliar parameters work.  Here's
-the SQL query from one of the examples above:
+The [interactive docs](https://mushroomobserver.org/api-docs/) list every
+parameter each of these supports, with descriptions; the same information
+is available in-band via the special "help=1" parameter.  It is safe to
+mess around with strange parameters and see what they do.  Responses also
+include a copy of the SQL query used ("query"), which can be an effective
+way of discovering how unfamiliar parameters work.  Here's the SQL query
+from one of the examples above:
 
 ```sql
 SELECT DISTINCT observations.id
@@ -210,8 +232,8 @@ Change Log
 v1 -- First version 2016.
 v2 -- Latest version 2020.
 
-The endpoint is now "api2" instead of "api".  The old endpoint will be phased
-out some time in 2021.  The default format is now JSON not XML, since JSON is
+The endpoint is now "api2" instead of "api".  The old endpoint has been
+removed.  The default format is now JSON not XML, since JSON is
 significantly faster.  And a few result structures have been tweaked slightly:
 
 api_keys -- field names were wrong (created_at, last_used, num_uses)
