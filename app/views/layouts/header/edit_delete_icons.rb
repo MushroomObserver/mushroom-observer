@@ -39,24 +39,25 @@ module Views::Layouts
     # companion observation for the changes.
     def edit_item
       return nil unless can_edit_object?
+      return edit_modal_toggle if @edit_modal_target
 
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
-        class: ::Components::InlineLinkBlock.item_class,
-        **edit_modal_data
+        class: ::Components::InlineLinkBlock.item_class
       )
     end
 
-    # `data-turbo="false"` keeps Turbo Drive from navigating the edit
-    # href in the background when the icon is a modal toggle (Bootstrap
-    # opens the modal and prevents the native click; without it Turbo
-    # would visit the edit page and swap it in under the open modal).
-    # The href stays a no-JS fallback.
-    def edit_modal_data
-      return {} unless @edit_modal_target
-
-      { data: { turbo: "false", toggle: "modal",
-                target: "##{@edit_modal_target}" } }
+    # A plain <button> (no href) that opens the static choice modal via
+    # Bootstrap data-toggle. Deliberately not a link: an edit href here
+    # was navigable/prefetchable, so Turbo Drive would visit the edit
+    # page in the background and swap it in under the open modal (#5317).
+    def edit_modal_toggle
+      ::Components::Button.new(
+        icon: :edit, variant: :strip,
+        icon_title: :edit_object.t(type: @object.type_tag),
+        class: ::Components::InlineLinkBlock.item_class,
+        data: { toggle: "modal", target: "##{@edit_modal_target}" }
+      )
     end
 
     def delete_item

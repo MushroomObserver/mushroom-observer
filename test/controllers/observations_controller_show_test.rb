@@ -33,11 +33,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("#edit_occurrence_modal")
-    # The toggle opts out of Turbo Drive so the edit href isn't visited
-    # in the background under the open modal (#5317).
+    # The toggle is a <button> (no href), so Turbo Drive can't visit an
+    # edit page in the background under the open modal (#5317).
     assert_select(
-      "[data-toggle='modal'][data-target='#edit_occurrence_modal']" \
-      "[data-turbo='false']"
+      "button[data-toggle='modal'][data-target='#edit_occurrence_modal']"
+    )
+    assert_select(
+      "a[data-target='#edit_occurrence_modal'][href]", count: 0
     )
   end
 
