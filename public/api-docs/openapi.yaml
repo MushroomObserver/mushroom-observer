@@ -3,9 +3,10 @@ openapi: 3.1.0
 info:
   title: Mushroom Observer API
   version: '2.0'
-  description: REST-ish API for creating, reading, and modifying Mushroom Observer
-    records. Authentication uses an [API key](/account/api_keys). XML output is deprecated
-    and undocumented here; use JSON.
+  description: |-
+    REST-ish API for creating, reading, and modifying Mushroom Observer records. Authentication uses an [API key](/account/api_keys). XML output is deprecated and undocumented here; use JSON.
+
+    The API is not the right tool for bulk data: for large downloads (nightly CSV dumps of the database), rate limits, and other data-access needs beyond these endpoints, see [README_API.md](https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md).
 servers:
 - url: https://mushroomobserver.org
 paths:

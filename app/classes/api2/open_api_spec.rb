@@ -75,32 +75,11 @@ class API2
       :license
     ].freeze
 
-    # Global params (parsed for every endpoint in API2#parse_core_params)
-    # documented once and $ref'd from each operation that returns records.
-    SHARED_PARAMETERS = {
-      "detail" => {
-        "name" => "detail",
-        "in" => "query",
-        "required" => false,
-        "description" =>
-          "response detail level: `none` (the default) returns matching " \
-          "ids only; `low` returns the top-level fields documented here; " \
-          "`high` adds nested objects (owner, images, namings and votes, " \
-          "comments, etc.)",
-        "schema" => { "type" => "string", "enum" => %w[none low high],
-                      "default" => "none" }
-      },
-      "page" => {
-        "name" => "page",
-        "in" => "query",
-        "required" => false,
-        "description" => "page of results to return, starting at 1",
-        "schema" => { "type" => "integer", "default" => 1 }
-      }
-    }.freeze
+    README_URL = "https://github.com/MushroomObserver/mushroom-observer/" \
+                 "blob/main/README_API.md"
 
     def shared_parameter_refs
-      SHARED_PARAMETERS.keys.map do |name|
+      SharedParameters::DEFS.keys.map do |name|
         { "$ref" => "#/components/parameters/#{name}" }
       end
     end
@@ -116,7 +95,7 @@ class API2
             "api_key" => { "type" => "apiKey", "in" => "query",
                            "name" => "api_key" }
           },
-          "parameters" => SHARED_PARAMETERS
+          "parameters" => SharedParameters::DEFS
         }
       }
     end
@@ -135,7 +114,11 @@ class API2
           "REST-ish API for creating, reading, and modifying Mushroom " \
           "Observer records. Authentication uses an " \
           "[API key](/account/api_keys). XML output " \
-          "is deprecated and undocumented here; use JSON."
+          "is deprecated and undocumented here; use JSON.\n\n" \
+          "The API is not the right tool for bulk data: for large " \
+          "downloads (nightly CSV dumps of the database), rate limits, " \
+          "and other data-access needs beyond these endpoints, see " \
+          "[README_API.md](#{README_URL})."
       }
     end
 
