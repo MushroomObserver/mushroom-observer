@@ -719,11 +719,10 @@
 }
 
 // Bootstrap 4's contextual badge color variant -- BS3's .badge has
-// none of its own. Reuses the same theme-mapped warning colors as
-// .alert-warning.
+// none. Uses the same soft-warning colors as .alert-warning.
 .badge-warning {
-  background-color: $alert-warning-bg;
-  color: $alert-warning-text;
+  background-color: rgba($warning, 0.2);
+  color: $body-color;
   font-weight: normal;
 }
 

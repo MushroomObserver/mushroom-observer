@@ -49,7 +49,8 @@
 // `min-height` / `margin-bottom` are explicitly zeroed below, but
 // both are already no-ops today: #top_nav's own `.mb-2` utility
 // (`!important`) already beats `.navbar`'s margin-bottom, and both
-// landmarks' real content always exceeds $navbar-height. Set here
+// landmarks' content already exceeds the height Bootstrap would
+// otherwise impose. Set here
 // anyway so BS4's actual (zero) values hold once `.navbar`'s own
 // rule stops needing this bridge, rather than leaving them to
 // whatever BS3 happened to set.
@@ -74,12 +75,12 @@
 
   a:not(.clear-button, .btn, .dropdown-item),
   a:visited:not(.clear-button, .btn, .dropdown-item) {
-    color: $navbar-default-color;
-    background-color: $navbar-default-link-active-bg;
+    color: $TOP_BAR_TEXT_COLOR;
+    background-color: $TOP_BAR_LINK_BG_COLOR;
 
     &:hover {
-      color: $navbar-default-link-hover-color;
-      background-color: $navbar-default-link-hover-bg;
+      color: $TOP_BAR_LINK_HOVER_TEXT_COLOR;
+      background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
     }
   }
 
@@ -88,15 +89,15 @@
   }
 
   .dropdown > a {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
+    color: $TOP_BAR_TEXT_COLOR !important;
+    background-color: $TOP_BAR_BG_COLOR !important;
     padding-left: 8px;
     padding-right: 8px;
     font-weight: bold !important;
 
     &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
+      color: $TOP_BAR_LINK_HOVER_TEXT_COLOR !important;
+      background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
     }
   }
 
@@ -145,7 +146,7 @@
 }
 
 // If sorter is on the right:
-// @media screen and (min-width: $screen-sm-min) {
+// @media screen and (min-width: breakpoint-min(md)) {
 //   .sorter {
 //     .dropdown-menu {
 //       right: 0;
@@ -154,7 +155,7 @@
 //   }
 // }
 
-@media screen and (max-width: $screen-sm-max) {
+@media screen and (max-width: breakpoint-max(md)) {
   #top_nav {
     h4 {
       font-size: 14px;
@@ -185,7 +186,9 @@
 // (`btn-success`, see #3930) keeps its solid green styling on
 // phones too — losing it here would re-create the unclear-CTA
 // problem that motivated the redesign.
-@media screen and (max-width: $screen-xs-min) {
+// 480px: a sub-breakpoint within Bootstrap 4's xs range (0-575px);
+// BS4 has no named tier at this width, so it stays a literal here.
+@media screen and (max-width: 480px) {
   #top_nav {
     .top_nav_button {
       padding-left: 0.5rem;
@@ -219,5 +222,5 @@
 
 #index_bar {
   @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
-  border-bottom-color: $navbar-default-border;
+  border-bottom-color: $TOP_BAR_BORDER_COLOR;
 }

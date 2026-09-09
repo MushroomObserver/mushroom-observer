@@ -26,14 +26,14 @@
 .btn-outline-default {
   color: $input-color;
   background-color: $input-bg;
-  border-color: $input-border;
+  border-color: $input-border-color;
 
   &:hover,
   &:focus,
   &.focus {
     color: $input-color;
     background-color: darken($input-bg, 5%);
-    border-color: darken($input-border, 10%);
+    border-color: darken($input-border-color, 10%);
     text-decoration: none;
   }
 
@@ -41,7 +41,7 @@
   &.active {
     color: $input-color;
     background-color: darken($input-bg, 10%);
-    border-color: darken($input-border, 12%);
+    border-color: darken($input-border-color, 12%);
     background-image: none;
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
@@ -271,8 +271,8 @@ form.button_to {
 .badge-id {
   font-weight: normal;
   background-color: transparent;
-  color: $text-color;
-  border: 1px solid $text-color;
+  color: $body-color;
+  border: 1px solid $body-color;
   border-radius: 3px;
   flex-shrink: 0;
   // align-self: self-start;
@@ -311,7 +311,7 @@ form.button_to {
   // (.collapsed)` and end up permanently "hover" styled.
   &:hover,
   &[data-toggle="collapse"]:not(.collapsed) {
-    background-color: $text-color;
+    background-color: $body-color;
     color: $body-bg;
   }
 }
@@ -416,9 +416,9 @@ button:disabled {
 }
 
 .nav-tabs .nav-link {
-  color: $navbar-inverse-link-color;
+  color: $LEFT_BAR_TEXT_COLOR;
   font-size: 125%;
-  background-color: $navbar-inverse-bg;
+  background-color: $LEFT_BAR_BG_COLOR;
   border: 1px solid #dee2e6;
 }
 
@@ -429,8 +429,8 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning {
-  color: $alert-warning-text;
-  background-color: $alert-warning-bg;
+  color: $body-color;
+  background-color: rgba($warning, 0.2);
 }
 
 .nav-tabs .nav-link.text-warning:hover {
@@ -438,6 +438,6 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning.active {
-  color: $alert-warning-text;
+  color: $body-color;
   border-color: #ffc107 #ffc107 #fff;
 }

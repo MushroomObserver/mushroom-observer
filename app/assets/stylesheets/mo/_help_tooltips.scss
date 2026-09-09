@@ -17,11 +17,11 @@ $help-block-max-width: 600px;
 // (e.g. a field label). Used by `Components::Help`'s `element: :span`
 // shape -- do not merge this back into `.help-block`.
 .help-note {
-  color: $panel-default-text;
+  color: $card-color;
 }
 
 .help-block {
-  color: $panel-default-text;
+  color: $card-color;
   // max-width: $help-block-max-width;
 }
 

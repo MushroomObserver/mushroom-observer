@@ -117,7 +117,7 @@
   // Keep constant on hover -- a filter change here would move the
   // absolutely-positioned chevron below (new containing block).
   .mo-icon {
-    filter: drop-shadow($carousel-text-shadow);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6));
   }
 
   // Replaces Bootstrap's .glyphicon-chevron-left/-right centering,
@@ -153,9 +153,9 @@
 }
 
 .carousel-heading {
-  // border-top: 1px solid $panel-inner-border;
-  border-bottom: 1px solid $panel-inner-border;
-  background-color: $panel-default-heading-bg;
+  // border-top: 1px solid $card-border-color;
+  border-bottom: 1px solid $card-border-color;
+  background-color: $card-cap-bg;
 }
 
 .carousel-indicators {
@@ -213,12 +213,12 @@
   .image-position {
     position: relative;
     padding-bottom: 100%;
-    border-bottom: 1px solid $panel-inner-border;
+    border-bottom: 1px solid $card-border-color;
 
     @media screen and (min-width: breakpoint-min(lg)) {
       // padding-bottom: 50%;
       border-bottom: none;
-      border-right: 1px solid $panel-inner-border;
+      border-right: 1px solid $card-border-color;
     }
   }
 

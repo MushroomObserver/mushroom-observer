@@ -314,8 +314,14 @@ $list-group-action-hover-color: $LINK_HOVER_TEXT_COLOR !default;
 
 $card-bg:           $LIST_BG_COLOR !default;
 $card-border-color: $LIST_BORDER_COLOR !default;
+$card-color:        $PANEL_TEXT_COLOR !default;
 
 $card-cap-bg: scale-color($LIST_BG_COLOR, $lightness: -3%) !default;
+
+// bootstrap-sass's panel used 12px all around; keep that instead of
+// BS4's wider 1.25rem horizontal default.
+$card-spacer-y: 12px !default;
+$card-spacer-x: 12px !default;
 
 // ==================================================
 // SECTION 17: MISCELLANEOUS COMPONENTS

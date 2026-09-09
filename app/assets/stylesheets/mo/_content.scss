@@ -90,16 +90,16 @@ ul.tight-list {
 }
 
 .panel {
-  color: $panel-default-text;
+  color: $card-color;
 
   .table-responsive {
     border-color: transparent;
   }
   .border-top {
-    border-top: 1px solid $panel-inner-border;
+    border-top: 1px solid $card-border-color;
   }
   .border-bottom {
-    border-bottom: 1px solid $panel-inner-border;
+    border-bottom: 1px solid $card-border-color;
   }
 }
 
@@ -117,6 +117,6 @@ ul.tight-list {
 
   small {
     @extend .ml-3;
-    color: $text-color;
+    color: $body-color;
   }
 }
