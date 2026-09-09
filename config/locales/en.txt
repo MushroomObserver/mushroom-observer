@@ -1497,6 +1497,15 @@
   destroy_observation_is_reflection: This observation is a read-only reflection of its imported source and can't be deleted here. To remove it, delete it at the source and resync.
   edit_observation_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created this companion observation for your changes and linked the two as one occurrence. Edit the companion here; the reflection keeps the imported data.
   edit_observation_companion_existing: That observation is a read-only reflection of its imported source. You are editing its linked companion observation instead.
+  edit_observation_promoted_primary: The oldest editable observation in this occurrence is now its primary observation, and you are editing it.
+  edit_occurrence_modal_title: Edit which observation?
+  edit_occurrence_create_title: Create Matching Observation?
+  edit_occurrence_edit_match_title: Edit Matching Observation?
+  edit_occurrence_not_primary: This observation is not the primary observation of its occurrence.
+  edit_occurrence_is_reflection: This is a read-only reflection imported from another source, so it can't be edited here.
+  edit_occurrence_edit_primary: Edit Primary Observation
+  edit_occurrence_edit_this: Edit This Observation
+  edit_occurrence_create_primary: Create Editable Match
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   create_observation_field_slip_full: 'Observation created, but field slip "[code]" already has [max] observations, the maximum allowed, so it was not attached.'
   form_observations_specimen_available: Specimen Available
