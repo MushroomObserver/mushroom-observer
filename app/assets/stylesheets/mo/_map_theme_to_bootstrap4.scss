@@ -94,10 +94,14 @@ $link-hover-color:      $LINK_HOVER_TEXT_COLOR !default;
 $link-decoration:       none !default;
 $link-hover-decoration: underline !default;
 
-// Font settings
-$font-family-sans-serif: Verdana, Arial, Helvetica, sans-serif !default;
-$font-family-base:       $font-family-sans-serif !default;
-$font-size-base:         0.8125rem !default;  // 13px at 16px root
+// Font settings -- family left at Bootstrap's stock
+// $font-family-sans-serif default (a system-font stack), not pinned
+// to a specific typeface list.
+$font-size-base:         0.875rem !default;  // 14px at 16px root
+// Bootstrap 4's stock default is 1.5; matches Bootstrap 3's old
+// default (20px/14px) instead, which is what MO's typography was
+// built against.
+$line-height-base:       1.428571429 !default;
 
 // Headings
 $headings-color: $BODY_TEXT_COLOR !default;
@@ -113,7 +117,7 @@ $border-radius:    0.3125rem !default;
 $border-radius-sm: 0.3125rem !default;
 $border-radius-lg: 0.3125rem !default;
 
-// mo/_matrix_box.scss reads this directly too.
+// mo/_grid_box.scss reads this directly too.
 $grid-gutter-width: 24px !default;
 
 // Bootstrap 4's name for this; bootstrap-sass does not read it.
@@ -316,7 +320,9 @@ $card-bg:           $LIST_BG_COLOR !default;
 $card-border-color: $LIST_BORDER_COLOR !default;
 $card-color:        $PANEL_TEXT_COLOR !default;
 
-$card-cap-bg: scale-color($LIST_BG_COLOR, $lightness: -3%) !default;
+// A visible step between the card and the page it sits on, not a
+// small darken of the card's color.
+$card-cap-bg: mix($LIST_BG_COLOR, $BODY_BG_COLOR, 50%) !default;
 
 // bootstrap-sass's panel used 12px (0.75rem) all around. BS4's stock
 // $card-spacer-y already matches; only the wider horizontal default

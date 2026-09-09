@@ -1009,40 +1009,40 @@
 
   # Rss log messages.
   log_ancient: "[String]"
-  log_approved_by: Approved by [user].
+  log_approved_by: Approved by [user]
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
-  log_consensus_changed: "Consensus changed from: [old]."
-  log_consensus_created: Initial name [name].
+  log_consensus_changed: "Consensus changed from: [old]"
+  log_consensus_created: Initial name [name]
   log_consensus_created_at: "[:log_consensus_created]"
   log_consensus_reached: "Consensus established: [name]"
-  log_deprecated_by: Deprecated by [user].
+  log_deprecated_by: Deprecated by [user]
   log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
-  log_changed_default_description: Default description changed to [name] by [user].
+  log_changed_default_description: Default description changed to [name] by [user]
   log_changed_permissions: "Permissions modified by [user]: [name]"
-  log_name_approved: Approved by [user] over [other].
+  log_name_approved: Approved by [user] over [other]
   log_name_approved_with_comment: "[:log_name_approved] [comment]"
-  log_name_deprecated: Deprecated by [user] in favor of [other].
+  log_name_deprecated: Deprecated by [user] in favor of [other]
   log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
   log_object_accessioned: "[name] accessioned by [user]"
-  log_object_added_by_user: "[Type] added by [user]."
+  log_object_added_by_user: "[Type] added by [user]"
   log_object_added_by_user_with_name: "[Type] added by [user]: [name]"
-  log_object_created_by_user: "[Type] created by [user]."
+  log_object_created_by_user: "[Type] created by [user]"
   log_object_created_by_user_with_name: "[Type] created by [user]: [name]"
   log_naming_proposed_by_user: "Name proposed by [user]: [name]"
-  log_object_destroyed_by_user: "[Type] deleted by [user]."
+  log_object_destroyed_by_user: "[Type] deleted by [user]"
   log_object_destroyed_by_user_with_name: "[Type] deleted by [user]: [name]"
   log_naming_destroyed_by_user: "Proposed name deleted by [user]: [name]"
-  log_object_merged_by_user: "[Type] merged into [that] by [user]."
-  log_object_moved_by_user: "[Type] moved to [to] by [user]."
-  log_object_removed_by_user: "[Type] removed by [user]."
+  log_object_merged_by_user: "[Type] merged into [that] by [user]"
+  log_object_moved_by_user: "[Type] moved to [to] by [user]"
+  log_object_removed_by_user: "[Type] removed by [user]"
   log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]"
-  log_object_removed_no_user: "[Type] removed."
-  log_naming_updated_by_user: "Proposed name updated by [user]: [name]."
-  log_object_updated_by_user: "[Type] updated by [user]."
+  log_object_removed_no_user: "[Type] removed"
+  log_naming_updated_by_user: "Proposed name updated by [user]: [name]"
+  log_object_updated_by_user: "[Type] updated by [user]"
   log_object_updated_by_user_with_name: "[Type] updated by [user]: [name]"
   log_orphan: "[Title]"
   log_published_description: "Description published by [user]: [name]"
-  log_updated_by: Updated by [user].
+  log_updated_by: Updated by [user]
 
   # These should not need any translation.
   log_article_created: "[:log_object_created_by_user(type=:article)]"
@@ -1054,10 +1054,10 @@
   log_collection_number_updated: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
   log_collection_number_updated_at: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
   log_collection_number_removed: "[:log_object_removed_by_user_with_name(type=:collection_number)]"
-  log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
-  log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
-  log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
-  log_comment_updated_at: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+  log_comment_added: "Comment added by [user]:<br>[summary]"
+  log_comment_destroyed: "Comment deleted by [user]:<br>[summary]"
+  log_comment_updated: "Comment updated by [user]:<br>[summary]"
+  log_comment_updated_at: "[:log_comment_updated]"
   log_description_created: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_created_at: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_destroyed: "[:log_object_destroyed_by_user_with_name(type=:description)]"
@@ -1072,12 +1072,12 @@
   log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_updated_at: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
-  log_occurrence_added: "Added to occurrence by [user]."
-  log_occurrence_removed: "Removed from occurrence by [user]."
-  log_occurrence_updated: "Occurrence updated by [user]."
-  log_field_slip_added: "Added to field slip [name] by [user]."
-  log_field_slip_removed: "Removed from field slip [name] by [user]."
-  log_field_slip_updated: "Field slip [name] updated by [user]."
+  log_occurrence_added: "Added to occurrence by [user]"
+  log_occurrence_removed: "Removed from occurrence by [user]"
+  log_occurrence_updated: "Occurrence updated by [user]"
+  log_field_slip_added: "Added to field slip [name] by [user]"
+  log_field_slip_removed: "Removed from field slip [name] by [user]"
+  log_field_slip_updated: "Field slip [name] updated by [user]"
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
@@ -1108,8 +1108,8 @@
   log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
   log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
   log_observation_updated_at: "[:log_object_updated_by_user(type=:observation)]"
-  log_observation_resynced: Resynced from imported source by [user].
-  log_observation_source_deleted: Imported source no longer exists; Mushroom Observer record kept.
+  log_observation_resynced: Resynced from imported source by [user]
+  log_observation_source_deleted: Imported source no longer exists; Mushroom Observer record kept
   log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
   log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
   log_project_created: "[:log_object_created_by_user(type=:project)]"

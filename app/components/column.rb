@@ -3,9 +3,10 @@
 # Renders a Bootstrap grid column `<div>`, composing `col-{bp}-N` classes
 # from breakpoint-keyed width kwargs instead of scattering literal
 # `"col-sm-6 col-md-4"` strings -- or the old fixed-shape `Grid::` constants
-# -- across every caller. All values are Bootstrap 3 syntax
-# (`col-xs-N`/`col-xs-offset-N`); migrating to Bootstrap 4 (`col-N`/
-# `offset-N`) touches this one mapping, not every call site.
+# -- across every caller. Bootstrap 4 syntax: the `xs` tier has no
+# breakpoint infix (`col-N`, `offset-N`, per Bootstrap's
+# `breakpoint-infix()` returning "" for the smallest breakpoint);
+# `sm`/`md`/`lg`/`xl` keep their name (`col-sm-N`, etc.).
 #
 # @example A responsive half/half split
 #   Column(sm: 6) { render_left }
@@ -59,16 +60,22 @@ class Components::Column < Components::Base
 
   # Callable without instantiating -- for call sites that need a raw class
   # string merged into an existing element's `class:` rather than a full
-  # Column-wrapped element (Components::Matrix::Box's `columns:` prop
+  # Column-wrapped element (Components::Grid::Box's `columns:` prop
   # default, Views::Layouts::Header#title_cols).
   def self.classes_for(col: false, offset_xs: nil, show_at: nil, hide_at: nil,
                        **widths)
     [
       ("col" if col),
-      *BREAKPOINTS.filter_map { |bp| "col-#{bp}-#{widths[bp]}" if widths[bp] },
-      ("col-xs-offset-#{offset_xs}" if offset_xs),
+      *BREAKPOINTS.filter_map { |bp| col_class(bp, widths[bp]) if widths[bp] },
+      ("offset-#{offset_xs}" if offset_xs),
       *visibility_classes(show_at: show_at, hide_at: hide_at)
     ].compact.join(" ")
+  end
+
+  # Bootstrap 4 has no breakpoint infix for the smallest tier --
+  # `col-8`, not `col-xs-8`.
+  def self.col_class(breakpoint, width)
+    breakpoint == :xs ? "col-#{width}" : "col-#{breakpoint}-#{width}"
   end
 
   # `show_at:`/`hide_at:` each name the breakpoint where that state takes

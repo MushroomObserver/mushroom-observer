@@ -66,8 +66,8 @@ module Observations::Namings
     # when namings_table (show_observation)
     #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
     #   and stimulus naming-vote_controller, which handles <select> bindings
-    # when matrix_box (help_identify)
-    #   updates the lightbox and matrix_box
+    # when grid_box (help_identify)
+    #   updates the lightbox and grid_box
 
     # Split this into create and update, because the caller should know
     # if this user has cast a vote on this naming already or not. Adjust tests.
@@ -131,7 +131,7 @@ module Observations::Namings
           case params[:context]
           when "namings_table"
             render_namings_section_update
-          when "matrix_box"
+          when "grid_box"
             render_matrix_box_naming_update
           end
         end
@@ -160,7 +160,7 @@ module Observations::Namings
     end
 
     # Successful-vote-change response when the request came from
-    # the lightbox / matrix-box context: swap the obs title in
+    # the lightbox / grid-box context: swap the obs title in
     # both places, dismiss any open naming / progress modals, and
     # clear the identify strip. Mirrors `NamingsController`'s
     # version — same 7 turbo-stream actions, same shape.
@@ -176,7 +176,7 @@ module Observations::Namings
                ),
                turbo_stream.replace(
                  "box_title_#{obs_id}",
-                 Components::Matrix::Box::Title.new(
+                 Components::Grid::Box::Title.new(
                    id: obs_id,
                    name: @observation.format_name(@user).
                          t.break_name.small_author,

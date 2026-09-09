@@ -94,7 +94,7 @@ class ExternalLink < AbstractModel
   # external site (rendered as a link). The target is loaded shallowly — a
   # polymorphic association can't nest a per-type subtree in `includes`, so
   # a consumer that needs the target's own associations (e.g. the edit
-  # page's matrix-box card) loads the typed record separately with its own
+  # page's grid-box card) loads the typed record separately with its own
   # includes (see Observations::ExternalLinksController#set_ivars_for_edit).
   # That keeps this scope strict-loaded.
   def self.show_includes_tree

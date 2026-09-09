@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# Tests for Components::Matrix::Box::Footer, the mixin included by
-# Components::Matrix::Box that owns all footer slot rendering.
+# Tests for Components::Grid::Box::Footer, the mixin included by
+# Components::Grid::Box that owns all footer slot rendering.
 #
 # Content methods (render_footer_detail, render_footer_time,
 # render_user_detail) are tested by creating a minimal anonymous
@@ -13,7 +13,7 @@ require("test_helper")
 # Slot-level methods (render_log_footer, render_identify_footer,
 # render_project_admin_footer) are tested through a full Box render
 # so the Panel slot machinery is exercised.
-class MatrixBoxFooterTest < ComponentTestCase
+class Components::Grid::Box::FooterTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -37,7 +37,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   def test_footer_detail_array_renders_resolved_tag
     html = render_detail([:rss_created_at, { type: :observation }])
 
-    assert_html(html, "div.rss-detail.small",
+    assert_html(html, "li.log-detail",
                 text: :rss_created_at.t(type: :observation).as_displayed)
   end
 
@@ -49,7 +49,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     user = users(:rolf)
     html = render_detail(user)
 
-    assert_html(html, "div.rss-detail.small")
+    assert_html(html, "li.log-detail")
     assert_html(html,
                 "a[href='#{routes.observations_path(by_user: user.id)}']",
                 text: :observations.ti.as_displayed)
@@ -109,13 +109,13 @@ class MatrixBoxFooterTest < ComponentTestCase
   private
 
   def render_box(**)
-    render(Components::Matrix::Box.new(**))
+    render(Components::Grid::Box.new(**))
   end
 
   # Renders render_footer_detail(detail) in a Phlex context.
   def render_detail(detail)
     render(Class.new(Components::Base) do
-      include Components::Matrix::Box::Footer
+      include Components::Grid::Box::Footer
 
       define_method(:view_template) { render_footer_detail(detail) }
     end.new)
@@ -124,7 +124,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   # Renders render_footer_time(time) in a Phlex context.
   def render_time(time)
     render(Class.new(Components::Base) do
-      include Components::Matrix::Box::Footer
+      include Components::Grid::Box::Footer
 
       define_method(:view_template) { render_footer_time(time) }
     end.new)

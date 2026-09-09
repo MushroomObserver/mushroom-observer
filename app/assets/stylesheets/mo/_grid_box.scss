@@ -2,11 +2,14 @@
 // rss log
 // --------------------------------------------------
 
-.matrix-box {
+.grid-box {
+  // On the <li>, not the card: the card has `h-100` (fills the
+  // row's stretched height), so a margin-bottom on the card itself
+  // pushes it past the <li>'s box instead of creating visible space.
+  margin-bottom: $grid-gutter-width;
 
   .card {
     // min-height: 200px;
-    margin-bottom: $grid-gutter-width;
 
     .thumbnail-container {
       min-height: 30px;
@@ -27,8 +30,19 @@
   }
 }
 
-.rss-box-details {
+// Shared size for .log-details and .log-footer -- one declaration
+// instead of each wrap repeating the same value.
+.log-text {
+  font-size: 0.85rem;
+}
 
+// Tighter than BS4's stock .card-footer padding ($card-spacer-y
+// $card-spacer-x).
+.log-footer {
+  padding: 0.5rem 0.75rem;
+}
+
+.log-details {
   a {
     color: inherit !important;
 
@@ -41,54 +55,59 @@
 }
 
 // To make way for floating ID
-.rss-heading {
+.log-heading {
   @extend .d-flex, .justify-content-between, .align-items-start, .gap-3;
 
   // Flex items don't shrink below their content's min-content width by
   // default -- without this, a long nowrap author line below (see the
-  // `.rss-name small.text-nowrap` override) forces this whole row,
+  // `.log-name small.text-nowrap` override) forces this whole row,
   // badge included, past the box's edge instead of wrapping.
-  > a {
+  > h5 {
     min-width: 0;
   }
 }
 
 // `.text-nowrap` (`String#small_author`, see app/extensions/string.rb)
 // keeps an author citation from splitting mid-phrase when it shares a
-// line with the name elsewhere in the app. In a matrix box,
+// line with the name elsewhere in the app. In a grid box,
 // `String#break_name` already forces the author onto its own line
 // below the name -- so here the citation itself needs to be free to
 // wrap across multiple lines, or a long one overflows the box.
-.rss-name small.text-nowrap {
+.log-name small.text-nowrap {
   white-space: normal !important;
 }
 
-h5.rss-heading {
-  font-size: 14px;
+// BS3 muted small text inside any heading automatically via
+// $headings-small-color; BS4 dropped that mechanism, so the author
+// citation needs it restored explicitly here.
+.log-heading small {
+  opacity: 0.65;
 }
 
-.rss-detail {
-  // margin-top: 5px;
-  margin-bottom: 5px;
-  // text-align: center;
+.log-heading h5 {
+  font-size: 0.9375rem; // 15px at 16px root
 }
 
-// .rss-where,
-// .rss-what,
-// .rss-when,
-// .rss-fancy-time {
-  // text-align: center;
-// }
+// Each `li` in the details/footer `ul.list-unstyled` carries the
+// existing `.hanging-indent` utility (mo/_content.scss) for the
+// indent itself; that class sets `margin: 0`, so the shared bottom
+// margin between lines needs a more specific selector to win over
+// it, rather than duplicating the class name here.
+.log-details li,
+.log-footer li {
+  margin-bottom: 0.3125rem; // 5px at 16px root
+}
 
-.rss-what,
-.rss-when,
-.rss-fancy-time {
+.log-what,
+.log-when,
+.log-when-who,
+.log-fancy-time {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 @media screen and (max-width: breakpoint-max(sm)) {
-  .rss-box-details {
+  .log-details {
     height: auto !important;
   }
 }

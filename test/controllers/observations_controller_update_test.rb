@@ -1143,7 +1143,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
   end
 
   # Issue #4737: the JS uploader creates the Image before the form
-  # submits, so at update time the chosen thumb_image_id is a real image
+  # submits, so at update time the chosen thumb_image_id is an image
   # that isn't attached to the observation yet. It must survive the
   # update instead of being reverted to an already-attached image.
   def test_update_observation_new_image_can_be_thumbnail

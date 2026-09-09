@@ -2,7 +2,7 @@
 
 # Action template for `HerbariumRecordsController#new`. Wraps
 # the existing `Form` Phlex component with page chrome + the
-# observation header + a side-column MatrixBox preview.
+# observation header + a side-column Grid::Box preview.
 module Views::Controllers::HerbariumRecords
   class New < Views::FullPageBase
     prop :herbarium_record, ::HerbariumRecord
@@ -38,7 +38,7 @@ module Views::Controllers::HerbariumRecords
 
     def render_observation_box
       Row(element: :ul, class: "list-unstyled") do
-        render(Components::Matrix::Box.new(
+        render(Components::Grid::Box.new(
                  user: @user,
                  object: @observation.rss_log || @observation,
                  columns: Components::Column.classes_for(xs: 12)

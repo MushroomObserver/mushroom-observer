@@ -26,20 +26,20 @@ module Observations
       "Observation"
     end
 
-    # `MatrixTable` always renders in `identify: true` mode here, which
+    # `Grid` always renders in `identify: true` mode here, which
     # bypasses the fragment cache — the per-user vote selector and
     # footer chrome can't be cached. The pre-check in
     # `Indexes#objects_with_only_needed_eager_loads` must agree,
     # otherwise the controller would skip eager-loading rows it
     # thinks are cache hits and then render uncached boxes → N+1.
-    def matrix_caches_in_this_request?
+    def grid_caches_in_this_request?
       false
     end
 
     private
 
     def index_display_opts(opts, _query)
-      { matrix: true, cache: true,
+      { grid: true, cache: true,
         include: observation_identify_index_includes }.merge(opts)
     end
 

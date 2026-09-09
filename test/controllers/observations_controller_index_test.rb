@@ -195,7 +195,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
     assert_select("body.observations__index", true)
     assert_select(
-      "#results .rss-heading a[href ^= '/obs/#{obs.id}'] .rss-name",
+      "#results .log-heading a[href ^= '/obs/#{obs.id}'] .log-name",
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )
@@ -1100,7 +1100,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # everything-is-a-miss behavior) is what eager-loads it anyway.
     real_store = ActiveSupport::Cache::MemoryStore.new
     real_store.write(
-      Components::Matrix::Table.cache_key_for(cached_obs, I18n.locale),
+      Components::Grid.cache_key_for(cached_obs, I18n.locale),
       ["<li>already cached</li>", {}]
     )
 
@@ -1147,7 +1147,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # a hit/miss split.
     real_store = ActiveSupport::Cache::MemoryStore.new
     real_store.write(
-      Components::Matrix::Table.cache_key_for(cached_obs, I18n.locale),
+      Components::Grid.cache_key_for(cached_obs, I18n.locale),
       ["<li>already cached</li>", {}]
     )
 
@@ -1204,7 +1204,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal([obs.id], ids)
   end
 
-  # `uncached_object_ids` batches the MatrixBox cache-key pre-check
+  # `uncached_object_ids` batches the Grid::Box cache-key pre-check
   # into one `read_multi` instead of one `Rails.cache.exist?` per
   # object -- verify it still resolves each object correctly (one
   # already cached, one not, one uncacheable) with a single round trip.
@@ -1218,7 +1218,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     untransferred_obs.thumb_image&.update_column(:transferred, false)
 
     locale = I18n.locale
-    cached_key = Components::Matrix::Table.cache_key_for(cached_obs, locale)
+    cached_key = Components::Grid.cache_key_for(cached_obs, locale)
 
     real_store = ActiveSupport::Cache::MemoryStore.new
     real_store.write(cached_key, ["<li>already cached</li>", {}])

@@ -1,6 +1,9 @@
 .thumbnail-container {
   background-color: rgba(0,0,0, 0.33);
   // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
+  // Clips the contained <img> to the `card-img-top` top-corner
+  // rounding on this div -- the image itself has square corners.
+  overflow: hidden;
 }
 
 //
@@ -93,7 +96,7 @@ svg.placeholder {
 // `.btn-group-xs > .btn` sizing never applies -- padding/font-size
 // are custom instead.
 .vote-btn-group {
-  font-size: 1.1rem;
+  font-size: 0.75rem; // 12px at 16px root
 
   > form.button_to,
   > .image-vote {
@@ -115,7 +118,7 @@ svg.placeholder {
   // <form.button_to> wrapper.
   form.button_to button[type=submit].image-vote-link {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.125rem 0.25rem;
     color: white !important;
     transition: color 0.3s ease, background-color 0.3s ease;
 

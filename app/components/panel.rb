@@ -173,8 +173,12 @@ class Components::Panel < Components::Base
   end
 
   def render_thumbnail(classes:, id:, data:, &content)
-    # `classes` entirely replaceable here. .thumbnail-container is the default
-    classes ||= "thumbnail-container"
+    # `classes` entirely replaceable here. `card-img-top` rounds this
+    # div's top corners to match the card (BS4 -- see
+    # mo/_images.scss's matching `overflow: hidden` on
+    # `.thumbnail-container`, needed since the contained <img> itself
+    # isn't rounded).
+    classes ||= "thumbnail-container card-img-top"
     args = { class: classes, id:, data: }.compact
     div(**args, &content)
   end

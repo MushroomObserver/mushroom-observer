@@ -82,7 +82,7 @@ module Views::Layouts
     # there is operating on a boolean, so when `:left_columns` IS set
     # the LHS is `true` and `cols` becomes the literal `true`. Then
     # `class_names(Components::Column.classes_for(xs: 12), true)`
-    # evaluates to `"col-xs-12"`. Keep the bug for visual parity; fix
+    # evaluates to `"col-12"`. Keep the bug for visual parity; fix
     # in a separate PR if needed.
     def title_cols
       cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"

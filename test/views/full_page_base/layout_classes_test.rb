@@ -77,8 +77,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:nine_three)
     end
 
-    assert_equal("col-xs-12 col-md-9 col-lg-8", left)
-    assert_equal("col-xs-12 col-md-3 col-lg-4", right)
+    assert_equal("col-12 col-md-9 col-lg-8", left)
+    assert_equal("col-12 col-md-3 col-lg-4", right)
   end
 
   def test_column_classes_default_writes_full_width_both_sides
@@ -86,8 +86,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes
     end
 
-    assert_equal("col-xs-12", left)
-    assert_equal("col-xs-12", right)
+    assert_equal("col-12", left)
+    assert_equal("col-12", right)
   end
 
   def test_column_classes_six_even_writes_half_width_both_sides
@@ -95,8 +95,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:six_even)
     end
 
-    assert_equal("col-xs-12 col-lg-6", left)
-    assert_equal("col-xs-12 col-lg-6", right)
+    assert_equal("col-12 col-lg-6", left)
+    assert_equal("col-12 col-lg-6", right)
   end
 
   def test_column_classes_eight_four_writes_split_left_right
@@ -104,8 +104,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:eight_four)
     end
 
-    assert_equal("col-xs-12 col-md-8 col-lg-7", left)
-    assert_equal("col-xs-12 col-md-4 col-lg-5", right)
+    assert_equal("col-12 col-md-8 col-lg-7", left)
+    assert_equal("col-12 col-md-4 col-lg-5", right)
   end
 
   def test_column_classes_seven_five_writes_split_left_right
@@ -113,8 +113,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:seven_five)
     end
 
-    assert_equal("col-xs-12 col-md-7", left)
-    assert_equal("col-xs-12 col-md-5", right)
+    assert_equal("col-12 col-md-7", left)
+    assert_equal("col-12 col-md-5", right)
   end
 
   def test_column_classes_six_writes_split_left_right
@@ -122,8 +122,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:six)
     end
 
-    assert_equal("col-xs-12 col-md-6 col-lg-8", left)
-    assert_equal("col-xs-12 col-md-6 col-lg-4", right)
+    assert_equal("col-12 col-md-6 col-lg-8", left)
+    assert_equal("col-12 col-md-6 col-lg-4", right)
   end
 
   def test_column_classes_explicit_then_default_does_not_aggregate
@@ -132,8 +132,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       default_column_classes
     end
 
-    assert_equal("col-xs-12 col-md-9 col-lg-8", left)
-    assert_equal("col-xs-12 col-md-3 col-lg-4", right)
+    assert_equal("col-12 col-md-9 col-lg-8", left)
+    assert_equal("col-12 col-md-3 col-lg-4", right)
   end
 
   # ----- content_padding setter ----------------------------------

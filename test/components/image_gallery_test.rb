@@ -66,7 +66,7 @@ class ImageGalleryTest < ComponentTestCase
   # malformed Phlex and silently no-op'd so the lightbox / carousel never
   # showed votes.
   # #4895: the vote section is a lazy-loading Turbo Frame now (not
-  # rendered inline), so Matrix::Box's fragment cache (no user in its
+  # rendered inline), so Grid::Box's fragment cache (no user in its
   # key) can't bake one viewer's vote state into shared HTML.
   def test_carousel_item_renders_vote_section
     image = @images.first
@@ -233,7 +233,7 @@ class ImageGalleryTest < ComponentTestCase
   # condition is met — that's a separate user-facing feature
   # pinned by `LurkerIntegrationTest#test_show_observation`.
   #
-  # The original bug (caught by the matrix-box tryout): the abstract
+  # The original bug (caught by the grid-box tryout): the abstract
   # `Components::Carousel::Item#render_carousel_caption` gated the
   # image-info block on `image_info_html.present?`. That predicate
   # called `image_info_html`, which called `copyright` / `notes` /

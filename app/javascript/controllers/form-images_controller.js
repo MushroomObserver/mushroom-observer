@@ -779,13 +779,13 @@ export default class extends Controller {
   }
 
   // Point the carousel-item's thumb radio (its value, id, and the
-  // wrapping label's `for=`) at the real image id from the server.
+  // wrapping label's `for=`) at the image id from the server.
   // good_images is assembled separately, in selection order, by
   // uploadBatch -- so it is not touched here.
   //
   // At render time the radio's `value` was `"true"` and its `id`
   // was `thumb_image_id_<UUID>` (UUID generated client-side per
-  // upload). Once we have a real image id from the server, we
+  // upload). Once we have a image id from the server, we
   // switch to `value="<image.id>"` and `id="thumb_image_id_<image.id>"`
   // so:
   //   - the submitted `observation[thumb_image_id]` value is real,

@@ -2,14 +2,14 @@
 
 require("test_helper")
 
-# `Components::Matrix::Carousel::Item` is a thin subclass of
+# `Components::Grid::Box::Carousel::Item` is a thin subclass of
 # `Components::Carousel::Item` (the shared image-slide DOM) that only
-# customizes `initialize`'s defaults for the per-matrix-box context.
+# customizes `initialize`'s defaults for the per-box context.
 # The rendered DOM contract is inherited from the base; this test
 # just pins the defaults so a future tweak to the base or a
 # careless `initialize` rewrite can't silently regress the perf
-# budget the matrix-box-carousel guidance establishes.
-class MatrixCarouselItemTest < ComponentTestCase
+# budget the box-carousel guidance establishes.
+class Components::Grid::Box::Carousel::ItemTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -17,7 +17,7 @@ class MatrixCarouselItemTest < ComponentTestCase
     @observation = observations(:detailed_unknown_obs)
   end
 
-  # `:medium` (640px) is the matrix-box budget. `:large` (960px) is
+  # `:medium` (640px) is the box budget. `:large` (960px) is
   # what `ImageGallery::Item` uses for the show page; if this slide
   # ends up there by accident, an obs-index of N boxes ships
   # N·full-resolution images and we re-hit the perf landmine the
@@ -59,7 +59,7 @@ class MatrixCarouselItemTest < ComponentTestCase
   private
 
   def render_item(**overrides)
-    render(Components::Matrix::Carousel::Item.new(
+    render(Components::Grid::Box::Carousel::Item.new(
              user: @user, image: @image, object: @observation, **overrides
            ))
   end

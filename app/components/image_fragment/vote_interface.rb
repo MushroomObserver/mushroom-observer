@@ -14,7 +14,7 @@
 #   ImageFragment(type: :vote_interface, user: @user, image: @image,
 #                 votes: true)
 #
-# @example Show-page / matrix-box carousel
+# @example Show-page / grid-box carousel
 #   ImageFragment(type: :vote_interface, user: @user, image: @image,
 #                 votes: true, context: :carousel)
 #

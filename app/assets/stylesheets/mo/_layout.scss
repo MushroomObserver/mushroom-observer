@@ -5,21 +5,21 @@
 
 // layout: sidebar offcanvas and right_side
 // --------------------------------------------------
-$sidebar-max-width: 18rem;
+// Fixed width at every breakpoint -- not a Bootstrap grid column
+// (`col-*`/`Components::Column`) sized as a fraction of the row.
+$sidebar-max-width: 9.9rem;
 
 .sidebar-offcanvas {
-  max-width: $sidebar-max-width;
+  width: $sidebar-max-width;
+  // Replaces the gutter a Bootstrap grid column would have supplied
+  // (`.col-*` padding + `.row`'s negative margin) -- this element is
+  // no longer part of the grid system.
+  margin-right: $grid-gutter-width;
 }
 
-// https://stackoverflow.com/questions/17982111/sass-variable-in-css-calc-function
-@media screen and (min-width: breakpoint-min(lg)) {
-  .sidebar-offcanvas {
-    width: $sidebar-max-width !important;
-  }
-
-  #right_side {
-    width: calc(100% - #{$sidebar-max-width}) !important;
-  }
+// Accounts for the sidebar's width plus its margin-right gutter.
+#right_side {
+  width: calc(100% - #{$sidebar-max-width} - #{$grid-gutter-width}) !important;
 }
 
 //
@@ -86,7 +86,6 @@ $sidebar-max-width: 18rem;
   .sidebar-offcanvas {
     position: absolute;
     top: 0;
-    width: $sidebar-max-width;
   }
 
   .hidden-overflow-x {

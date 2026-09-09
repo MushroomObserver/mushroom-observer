@@ -121,7 +121,10 @@ module Views::Layouts
     end
 
     def render_right_side(content_classes, banner:, &block)
-      Column(id: "right_side", xs: 12, md: 10) do
+      # Fixed width via `#right_side` in mo/_layout.scss (calc'd
+      # against the sidebar's fixed `$sidebar-max-width`), not a
+      # Bootstrap grid column.
+      div(id: "right_side") do
         render(Views::Layouts::TopNav.new(user: current_user,
                                           query: current_query,
                                           banner: banner))

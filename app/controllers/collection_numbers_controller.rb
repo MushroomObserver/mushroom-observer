@@ -154,7 +154,7 @@ class CollectionNumbersController < ApplicationController
 
   # Uses `CollectionNumber.show_includes` so the show / edit views
   # don't re-query when iterating `@collection_number.observations`
-  # (the MatrixTable / MatrixBox render walks down through
+  # (the Grid / Grid::Box render walks down through
   # `Observation::NamingConsensus` into votes + naming.name).
   def find_collection_number_for_show
     CollectionNumber.show_includes.find_by(id: params[:id]) ||

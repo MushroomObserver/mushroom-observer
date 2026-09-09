@@ -40,13 +40,13 @@ module Views::Controllers::GlossaryTerms::Images
     end
 
     def render_image_matrix
-      render(Components::Matrix::Table.new) do
+      Grid() do
         model.images.each { |image| render_image_cell(image) }
       end
     end
 
     def render_image_cell(image)
-      render(Components::Matrix::Box.new(id: image.id)) do
+      render(Components::Grid::Box.new(id: image.id)) do
         div(class: "py-3 text-center") { render_image_preview(image) }
         div(class: "pb-3 text-center") { render_select_checkbox(image) }
       end

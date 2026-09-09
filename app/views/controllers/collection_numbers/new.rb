@@ -2,7 +2,7 @@
 
 # Action template for `CollectionNumbersController#new`. Wraps
 # the existing `Form` Phlex component with the page chrome + a
-# side-column MatrixBox preview of the observation.
+# side-column Grid::Box preview of the observation.
 module Views::Controllers::CollectionNumbers
   class New < Views::FullPageBase
     prop :collection_number, ::CollectionNumber
@@ -31,7 +31,7 @@ module Views::Controllers::CollectionNumbers
 
     def render_observation_box
       Row(element: :ul, class: "list-unstyled") do
-        render(Components::Matrix::Box.new(
+        render(Components::Grid::Box.new(
                  user: @user,
                  object: @observation.rss_log || @observation,
                  columns: Components::Column.classes_for(xs: 12)

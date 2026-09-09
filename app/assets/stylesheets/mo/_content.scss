@@ -1,3 +1,11 @@
+// Bootstrap 4's reboot hardcodes `small { font-size: 80%; }` (not
+// driven by a variable) -- overridden to match Bootstrap 3's old
+// ~85% ratio (`ceil($font-size-base * .85) / $font-size-base`).
+small,
+.small {
+  font-size: 85%;
+}
+
 // Cached content display/hide
 // location format, when both are printed
 
@@ -104,16 +112,12 @@ ul.tight-list {
 }
 
 .card-title {
-  font-size: 13px;
+  font-size: 1rem;
   font-weight: bold;
 }
 
 .h3.page-title {
-  font-size: 22px;
-
-  .badge-id {
-    font-size: 66% !important
-  }
+  // font-size: $h3-font-size;
 
   small {
     @extend .ml-3;

@@ -6,11 +6,11 @@ class Views::Controllers::Observations::Show::Namings::FooterLegendTest <
   ComponentTestCase
   def test_renders_two_centered_legend_columns
     # Legend columns sit centered in the leftmost 11 of 12 — the
-    # `col-xs-offset-4` on the first col centers the pair.
+    # `offset-4` on the first col centers the pair.
     html = render_legend
 
-    assert_html(html, ".col-sm-11 > .row > .col-xs-4.col-xs-offset-4")
-    assert_html(html, ".col-sm-11 > .row > .col-xs-4:not(.col-xs-offset-4)")
+    assert_html(html, ".col-sm-11 > .row > .col-4.offset-4")
+    assert_html(html, ".col-sm-11 > .row > .col-4:not(.offset-4)")
   end
 
   def test_renders_yours_eye_with_its_help_text

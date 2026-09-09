@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# First panel-footer row of the namings sub-panel: the
+# First card-footer row of the namings sub-panel: the
 # "Propose new name" button on the left and the consensus-help
 # blurb on the right. Admins / image-model beta testers also see
 # a "Suggest names" button stacked under the propose button.

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-class Components::Matrix::Box
-  # Footer rendering methods for Components::Matrix::Box.
+class Components::Grid::Box
+  # Footer rendering methods for Components::Grid::Box.
   #
-  # Included by Box to keep the footer slot logic in its own file.
+  # Included by Box to keep the footer slot logic in a separate file.
   # Methods here call `panel.with_footer(classes:) { ... }` on the
   # Panel passed in from `render_object_layout`.
   module Footer
@@ -12,9 +12,11 @@ class Components::Matrix::Box
     def render_log_footer(panel)
       return unless @data[:detail].present? || @data[:time].present?
 
-      panel.with_footer(classes: "log-footer") do
-        render_footer_detail(@data[:detail])
-        render_footer_time(@data[:time])
+      panel.with_footer(classes: "log-footer log-text") do
+        ul(class: "list-unstyled") do
+          render_footer_detail(@data[:detail])
+          render_footer_time(@data[:time])
+        end
       end
     end
 
@@ -33,7 +35,7 @@ class Components::Matrix::Box
       tag, args = detail
       return unless tag
 
-      div(class: "rss-detail small") do
+      li(class: "log-detail hanging-indent") do
         trusted_html(resolve_rss_detail(tag, args))
       end
     end
@@ -50,8 +52,8 @@ class Components::Matrix::Box
     def render_footer_time(time)
       return unless time
 
-      div(
-        class: "rss-what rss-updated-at small",
+      li(
+        class: "log-what log-updated-at hanging-indent",
         data: { controller: "local-time",
                 local_time_utc_value: time.utc.iso8601 }
       ) do
@@ -60,7 +62,7 @@ class Components::Matrix::Box
     end
 
     def render_user_detail(user)
-      div(class: "rss-detail small") do
+      li(class: "log-detail hanging-indent") do
         plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
         br
         plain("#{:list_users_contribution.l}: #{user.contribution}")

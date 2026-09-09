@@ -164,7 +164,7 @@ class CarouselTest < ComponentTestCase
 
   # Default: first registered slide gets `.active`. Explicit
   # `active: true` on any other slide shifts the active state to it
-  # (and the first slide stops being active). `Matrix::Carousel` uses
+  # (and the first slide stops being active). `Grid::Box::Carousel` uses
   # this for its `top_img` semantics.
   def test_explicit_active_kwarg_overrides_default_first_active
     html = render_carousel(
@@ -193,7 +193,7 @@ class CarouselTest < ComponentTestCase
   end
 
   # `show_indicators: false` suppresses the indicator `<ol>` entirely.
-  # Registered thumbs are silently dropped (the matrix-box carousel
+  # Registered thumbs are silently dropped (the grid-box carousel
   # uses this — no thumbnail strip per-box).
   def test_show_indicators_false_suppresses_indicator_strip
     html = render_carousel(

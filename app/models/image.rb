@@ -301,7 +301,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # has no way to know which page-specific image_link/votes/
   # extra_classes/identify props a given subscriber originally
   # rendered with, so replaying the *whole* Interactive with defaults
-  # would silently change those (e.g. a matrix-box thumbnail's
+  # would silently change those (e.g. a grid-box thumbnail's
   # image_link falls back to the image's own show page instead of the
   # parent Observation it was actually pointing at). The link/votes/
   # overlays stay exactly as the page first rendered them; only the
@@ -1200,7 +1200,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       end
     end
     # update +updated_at+ for any associated observations, in order to update
-    # the cached interactive_image in the matrix_box (contrast with the above)
+    # the cached interactive_image in the grid_box (contrast with the above)
     observations&.touch_all
 
     value

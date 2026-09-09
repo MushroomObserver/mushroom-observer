@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
   end
 
   def test_name_column_is_block_on_xs
-    # First column (panel-title column) is `d-block` not
+    # First column (card-title column) is `d-block` not
     # `d-none` — visible on `xs` so the panel always shows its
     # title.
     html = render_header
@@ -70,7 +70,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # — there the footer-buttons row owns the propose CTA.
     html = render_header
 
-    assert_html(html, ".col-xs-2.col-sm-1 .float-right.d-sm-none")
+    assert_html(html, ".col-2.col-sm-1 .float-right.d-sm-none")
     assert_html(html, "a[data-modal='modal_obs_#{@obs.id}_naming']")
     assert_html(html, "a[data-controller='modal-toggle']")
   end
