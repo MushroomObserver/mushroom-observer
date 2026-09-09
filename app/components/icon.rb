@@ -17,6 +17,12 @@
 #
 # @example With tooltip + accessible name + extra CSS
 #   Icon(type: :edit, title: :edit.ti, class: "text-primary")
+#   # => <span title="Edit" data-tooltip-target="tip" aria-label="Edit">
+#   #      <svg class="mo-icon mo-icon-edit text-primary">...</svg>
+#   #    </span>
+#
+# @example Spacing around the icon: use wrap_class:, not class:
+#   Icon(type: :read_only, wrap_class: "icon-text-gap")
 class Components::Icon < Components::Base
   # Valid icon keys. The sprite's own `<symbol id="...">` already
   # equals the key (see icon-library's script/build_sprite.rb), so
@@ -35,7 +41,7 @@ class Components::Icon < Components::Base
     :chevron_right, :qrcode, :mobile, :project, :download, :attach,
     :new_window, :search, :prev, :next, :goto, :grid, :menu, :info,
     :fullscreen, :matrix, :info_circle, :user, :spinner, :reload,
-    :rotate_left, :rotate_right, :flip
+    :rotate_left, :rotate_right, :flip, :is_primary, :read_only
   ].freeze
 
   # vendor/assets/images/icons/mo-icons.svg only exists on disk when
@@ -50,6 +56,17 @@ class Components::Icon < Components::Base
 
   prop :type, _Nilable(_Union(*GLYPHS.to_a)), default: nil
   prop :title, _Nilable(String), default: nil
+  # Wraps the icon in a `<span class: wrap_class>` -- the sanctioned
+  # way to add spacing around an icon (a padding class passed via
+  # `class:` lands on the `<svg>` itself and shrinks it instead, see
+  # `validate_no_padding_classes!`). Whenever `title:` is also given,
+  # this wrap happens regardless -- with or without a `wrap_class` --
+  # and title/tooltip/aria move onto the `<span>`: bootstrap-sass's
+  # tooltip.js skips `$element.offset()` for an SVG trigger (the
+  # `isSvg` branch in tooltip.js), using viewport- instead of
+  # document-relative coordinates, which is off by ~the scroll offset
+  # once the page has scrolled.
+  prop :wrap_class, _Nilable(String), default: nil
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar/Collapsible's pattern (plain `class:`/
   # `data:` in, no separate `html_class:`/`data:` props needed).
@@ -61,13 +78,32 @@ class Components::Icon < Components::Base
   # `p-*`/`pl-*`/`pr-*`/`pt-*`/`pb-*`/`px-*`/`py-*` -- Bootstrap's
   # padding utilities.
   PADDING_CLASS_RE = /\Ap[lrtbxy]?-\d+\z/
+  # MO's spacing classes that declare padding under a name that
+  # doesn't match PADDING_CLASS_RE (see _icons.scss) -- caught here by
+  # name since the naming pattern above can't see them coming. Add to
+  # this set as new ones turn up (found this way once already: PR
+  # #5331 passed icon-text-gap straight into an Icon's class:).
+  NAMED_PADDING_CLASSES = Set["icon-text-gap"].freeze
 
   def view_template
     validate_no_padding_classes!
     return unless SPRITE_AVAILABLE && @type
 
-    svg(class: svg_class, title: @title.presence, data: svg_data,
-        aria: svg_aria,
+    if @title.present?
+      span(class: @wrap_class, title: @title, data: svg_data, aria: svg_aria) do
+        render_svg(title: nil, data: {}, aria: {})
+      end
+    elsif @wrap_class
+      span(class: @wrap_class) { render_svg }
+    else
+      render_svg
+    end
+  end
+
+  private
+
+  def render_svg(title: @title.presence, data: svg_data, aria: svg_aria)
+    svg(class: svg_class, title: title, data: data, aria: aria,
         **@attributes.except(:class, :data, :aria)) do |s|
       # width/height: "100%" -- without it, browsers inconsistently
       # default <use>'s size against an em-sized (not pixel-sized)
@@ -78,24 +114,28 @@ class Components::Icon < Components::Base
     end
   end
 
-  private
-
   # Padding on a bare <svg> (a "replaced element", like <img>) eats
-  # into the element's own rendered content instead of adding space
+  # into the element's rendered content instead of adding space
   # around it -- the icon artwork renders smaller than its width/
-  # height alone would suggest, silently, no error. Wrap the icon in
-  # a span/div and put the padding class there instead.
+  # height alone would suggest, silently, no error. Checked against
+  # the fully resolved class string, so this catches a padding class
+  # arriving via a local variable or another method's return value,
+  # not just a literal string at the call site. Use wrap_class:
+  # instead.
   def validate_no_padding_classes!
     return if @attributes[:class].blank?
 
-    offenders = @attributes[:class].to_s.split.grep(PADDING_CLASS_RE)
+    classes = @attributes[:class].to_s.split
+    offenders = classes.select do |cls|
+      cls.match?(PADDING_CLASS_RE) || NAMED_PADDING_CLASSES.include?(cls)
+    end
     return if offenders.empty?
 
     raise(ArgumentError.new(
             "Icon can't take padding classes (#{offenders.join(", ")}) " \
             "-- padding on a bare <svg> shrinks its rendered content " \
-            "instead of adding space around it. Wrap the icon in a " \
-            "span/div and put the padding class there instead."
+            "instead of adding space around it. Use wrap_class: instead " \
+            "-- it wraps the icon in a span and applies the class there."
           ))
   end
 

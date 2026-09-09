@@ -2701,6 +2701,9 @@
   naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations
+  show_observation_occurrence_primary: Primary observation of this occurrence
+  show_observation_reflection_read_only: Read-only reflection of an imported source
+  show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   edit_occurrence_submit: Save Changes
   edit_occurrence_add_heading: Add Recently Viewed Observations

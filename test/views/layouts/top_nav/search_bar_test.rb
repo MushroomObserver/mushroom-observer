@@ -30,7 +30,9 @@ class Views::Layouts::TopNav
                   "[aria-expanded='false']")
       assert_html(html,
                   "a[data-search-type-target='helpToggle'] " \
-                  "svg.mo-icon-info[aria-label='#{:search_bar_help.t}']")
+                  "span[aria-label='#{:search_bar_help.t}']")
+      assert_html(html,
+                  "a[data-search-type-target='helpToggle'] svg.mo-icon-info")
       assert_no_html(html,
                      "a[data-search-type-target='helpToggle'].d-none")
       # Rendered via CollapseToggle's button:/size: kwarg, not via raw
@@ -58,8 +60,9 @@ class Views::Layouts::TopNav
                   "[aria-expanded='false']")
       assert_html(html,
                   "a[data-search-type-target='formToggle'] " \
-                  "svg.mo-icon-plus" \
-                  "[aria-label='#{:search_bar_more_options.l}']")
+                  "span[aria-label='#{:search_bar_more_options.l}']")
+      assert_html(html,
+                  "a[data-search-type-target='formToggle'] svg.mo-icon-plus")
       assert_no_html(html,
                      "a[data-search-type-target='formToggle'].d-none")
       assert_html(html,
