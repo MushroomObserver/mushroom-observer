@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-09 (deploy-2026-09-09-12-00)
+
+- Standardize `_utilities.scss` for the BS4 cutover, converge theme color derivation ([PR5340](https://github.com/MushroomObserver/mushroom-observer/pull/5340), @nimmolo)
+- Fix `Components::Form::Search` help icon/collapsible help -- missing `help_collapse: true` ([PR5343](https://github.com/MushroomObserver/mushroom-observer/pull/5343), @nimmolo)
+- Add a non-primary edit modal for occurrence members ([PR5328](https://github.com/MushroomObserver/mushroom-observer/pull/5328), @mo-nathan)
+- Refine the Professional Direct output style (drop "Let me" prefaces, a filler intensifier) ([PR5346](https://github.com/MushroomObserver/mushroom-observer/pull/5346), @mo-nathan)
+- Show occurrence-primary/read-only icons in Matching Observations; hide delete for reflections ([PR5331](https://github.com/MushroomObserver/mushroom-observer/pull/5331), @nimmolo)
+- Enable Rails 7.0/7.1 low-risk framework defaults ([PR5336](https://github.com/MushroomObserver/mushroom-observer/pull/5336), @nimmolo)
+- Fix `dev_setup` requiring sudo for `--icons-only` and on macOS ([PR5339](https://github.com/MushroomObserver/mushroom-observer/pull/5339), @nimmolo)
+
+## 2026-09-08 (deploy-2026-09-08-12-00)
+
+- `external_id` becomes the identity for a resolved `ExternalLink`; drop `url` column ([PR5313](https://github.com/MushroomObserver/mushroom-observer/pull/5313), @nimmolo)
+- `backfill_mycoportal_export_links.rb`: update blank `ExternalLink` instead of duplicating ([PR5329](https://github.com/MushroomObserver/mushroom-observer/pull/5329), @nimmolo)
+- Undefined Locations - add whitespace between the merge link icon and text ([PR5330](https://github.com/MushroomObserver/mushroom-observer/pull/5330), @nimmolo)
+- Read-only info panel for reflection images on the Observation edit form ([PR5326](https://github.com/MushroomObserver/mushroom-observer/pull/5326), @mo-nathan)
+- Fix invisible carousel arrows: `text-shadow` doesn't render on an SVG icon ([PR5332](https://github.com/MushroomObserver/mushroom-observer/pull/5332), @nimmolo)
+
 ## 2026-09-07 (deploy-2026-09-07-12-00)
 
 - Remove `script/resolve_mycoportal_links.rb` from the repo ([PR5316](https://github.com/MushroomObserver/mushroom-observer/pull/5316), @nimmolo)

@@ -46,7 +46,7 @@ class SearchController < ApplicationController
       redirect_to("/")
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
-      redirect_to("https://google.com/search?#{search}")
+      redirect_to("https://google.com/search?#{search}", allow_other_host: true)
     end
   end
 

@@ -19,10 +19,16 @@
 # explicitly rather than relying on an implicit default:
 #   :xl -- project/species-list listing row title badges
 #          (Projects::ListItem, SpeciesLists::Listing)
-#   :lg -- copy-to-clipboard external-site record id (Link::External)
+#   :lg -- copy-to-clipboard external-site record id (Link::External),
+#          Matching Observations panel row ids
 #   :md -- matrix box title and other index-row id badges (Matrix::Box,
 #          Names::Index::Row, Occurrences::Projects::Form)
 #   :sm -- sitting next to a large page-title heading
+#
+# `interactive:` (default true) is the copy-to-clipboard `<button>`
+# described above. Pass `false` for a plain, non-clickable `<span>` --
+# e.g. next to an object that isn't itself a link either (Matching
+# Observations' current-observation row).
 class Components::IDBadge < Components::Base
   SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",
                    md: "badge-md", sm: "badge-sm" }.freeze
@@ -32,11 +38,22 @@ class Components::IDBadge < Components::Base
   prop :size, _Union(*SIZE_CLASSES.keys)
   prop :title, _Nilable(String), default: nil
   prop :extra_class, _Nilable(String), default: "mr-4"
+  prop :interactive, _Boolean, default: true
 
   def view_template
+    if @interactive
+      render_interactive_badge
+    else
+      span(class: badge_class) { plain(display_value) }
+    end
+  end
+
+  private
+
+  def render_interactive_badge
     button(
       type: "button",
-      class: class_names("badge badge-id", SIZE_CLASSES[@size], @extra_class),
+      class: badge_class,
       role: "button",
       data: {
         tooltip_target: "tip", placement: "bottom",
@@ -50,7 +67,9 @@ class Components::IDBadge < Components::Base
     end
   end
 
-  private
+  def badge_class
+    class_names("badge badge-id", SIZE_CLASSES[@size], @extra_class)
+  end
 
   def display_value
     (@object&.id || @value)&.to_s || "?"

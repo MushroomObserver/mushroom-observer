@@ -219,7 +219,8 @@ class ApplicationController < ActionController::Base
   def fix_bad_domains
     if (request.method == "GET") &&
        MO.bad_domains.include?(request.env["HTTP_HOST"])
-      redirect_to("#{MO.http_domain}#{request.fullpath}")
+      redirect_to("#{MO.http_domain}#{request.fullpath}",
+                  allow_other_host: true)
     end
   end
 

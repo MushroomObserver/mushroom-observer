@@ -335,7 +335,7 @@ class ProjectsControllerTest < FunctionalTestCase
     )
 
     assert_select(
-      "input[type=radio][id=project_dates_any_true][checked=checked]",
+      "input[type=radio][id=project_dates_any_true][checked]",
       { count: 1 },
       "'Any' dates radio button should be checked by default"
     )

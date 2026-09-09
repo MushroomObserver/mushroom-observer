@@ -92,8 +92,9 @@ class SearchFormTest < ComponentTestCase
                 "[data-search-type-target='barToggle']")
     assert_html(html,
                 "a[data-search-type-target='barToggle'] " \
-                "svg.mo-icon-minus" \
-                "[aria-label='#{:search_bar_fewer_options.l}']")
+                "span[aria-label='#{:search_bar_fewer_options.l}']")
+    assert_html(html,
+                "a[data-search-type-target='barToggle'] svg.mo-icon-minus")
     # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
     # literal.
     assert_html(html,
@@ -283,6 +284,18 @@ class SearchFormTest < ComponentTestCase
       "label[for='query_observations_date']",
       text: :query_date.l.humanize
     )
+  end
+
+  def test_date_field_renders_collapsible_help_without_well
+    # date is a valid Observations field in the "shown" section
+    html = render_form
+
+    assert_html(
+      html,
+      "a.info-collapse-trigger[aria-controls='query_observations_date_help']"
+    )
+    assert_html(html, "#query_observations_date_help.collapse")
+    assert_no_html(html, "#query_observations_date_help .well")
   end
 
   def test_date_field_prefills_string_value

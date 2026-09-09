@@ -1,5 +1,27 @@
 // form elements and inputs
 
+// FieldLabelRow's row shape for a label with appended content (a
+// help-collapse question-mark icon, or an autocompleter's
+// has-id-indicator/find/keep/edit icons) -- see
+// render_label_flex_row/render_label_with_appends.
+//
+// Bootstrap's `label { margin-bottom: 5px; }` (bootstrap-sass
+// _forms.scss, not a variable -- it's a hardcoded literal there too)
+// sits on only one side of the label's margin box, so it throws off
+// the row's align-items-center: centering the label's margin box
+// against append content that carries no margin shifts the label
+// text off the append content's visual center. Zero it here and move
+// the same bottom spacing onto the whole row instead, so only the
+// *source* of the spacing changes, not the total spacing below the
+// row.
+.label-row-with-appends label {
+  margin-bottom: 0;
+}
+
+.label-row-with-appends {
+  margin-bottom: 5px;
+}
+
 .checkbox,
 .radio {
   label {

@@ -17,6 +17,66 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # A non-primary occurrence member's edit icon opens the choice modal
+  # (#5317): the modal is rendered and the edit icon toggles it.
+  def test_show_edit_modal_for_non_primary_member
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    occ = Occurrence.create!(user: user, primary_observation: reflection)
+    reflection.update_column(:occurrence_id, occ.id)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal")
+    # The toggle's href is "#" (a same-page hash Turbo won't visit), so
+    # the edit page can't load in the background under the modal (#5317).
+    assert_select(
+      "a[href='#'][data-toggle='modal']" \
+      "[data-target='#edit_occurrence_modal']"
+    )
+    assert_select(
+      "[data-target='#edit_occurrence_modal'][href*='/edit']", count: 0
+    )
+  end
+
+  # A standalone observation (no occurrence) gets no modal; its edit
+  # icon is a plain edit link.
+  def test_show_no_edit_modal_for_standalone_observation
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    login(obs.user.login)
+
+    get(:show, params: { id: obs.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal", count: 0)
+  end
+
+  # A reflection with no occurrence has no primary to steer toward, so
+  # no modal (#5328 review) -- it would just bounce back otherwise.
+  # A read-only reflection with no occurrence yet still gets the modal:
+  # "Create Editable Primary" creates the native and links an occurrence
+  # (#5317). It must not silently create a companion on icon click.
+  def test_show_edit_modal_for_reflection_without_occurrence
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal")
+    assert_select("a[href='#'][data-target='#edit_occurrence_modal']")
+  end
+
   def test_show_no_login_with_flow
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id, flow: "next" })
@@ -959,9 +1019,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("body.observations__show")
     assert_select("form#naming_vote_form_#{naming1.id} " \
                   "select#vote_value_#{naming1.id}>" \
-                  "option[selected=selected][value='#{vote1.value}']")
+                  "option[selected][value='#{vote1.value}']")
     assert_select("form#naming_vote_form_#{naming2.id} " \
                   "select#vote_value_#{naming2.id}>" \
-                  "option[selected=selected][value='#{vote2.value}']")
+                  "option[selected][value='#{vote2.value}']")
   end
 end

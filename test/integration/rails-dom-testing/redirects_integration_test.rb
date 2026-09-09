@@ -224,7 +224,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
 
     # The observation checkbox should be checked
     assert_select("input[type='checkbox'][name='q[types][]']" \
-                  "[value='observation'][checked='checked']")
+                  "[value='observation'][checked]")
 
     # Other checkboxes should NOT be checked
     assert_select("input[type='checkbox'][name='q[types][]']" \
