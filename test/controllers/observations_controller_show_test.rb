@@ -59,7 +59,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
   # A reflection with no occurrence has no primary to steer toward, so
   # no modal (#5328 review) -- it would just bounce back otherwise.
-  def test_show_no_edit_modal_for_reflection_without_occurrence
+  # A read-only reflection with no occurrence yet still gets the modal:
+  # "Create Editable Primary" creates the native and links an occurrence
+  # (#5317). It must not silently create a companion on icon click.
+  def test_show_edit_modal_for_reflection_without_occurrence
     user = users(:rolf)
     reflection = observations(:coprinus_comatus_obs)
     reflection.update_columns(user_id: user.id, collector_user_id: user.id,
@@ -70,7 +73,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: reflection.id })
 
     assert_response(:success)
-    assert_select("#edit_occurrence_modal", count: 0)
+    assert_select("#edit_occurrence_modal")
+    assert_select("a[href='#'][data-target='#edit_occurrence_modal']")
   end
 
   def test_show_no_login_with_flow

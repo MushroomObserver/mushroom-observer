@@ -72,14 +72,15 @@ module Views::Controllers::Observations
     # The edit icon opens the choice modal for a non-primary occurrence
     # member (a read-only reflection, or an editable non-primary), so the
     # editor is steered to the primary rather than the wrong member.
-    # Only for an occurrence member: a reflection with no occurrence has
-    # no primary to steer toward, and the resolver can't promote/create
-    # anything, so it would just bounce back (#5328 review).
+    # A read-only reflection always qualifies -- even with no occurrence
+    # yet, "Create Editable Primary" creates the native and links an
+    # occurrence (Companion#join_occurrence). An editable observation
+    # only qualifies when it's a non-primary occurrence member.
     def show_edit_modal?
-      return false unless @user && @occurrence && can_edit_observation?
+      return false unless @user && can_edit_observation?
+      return true if @observation.reflection?
 
-      @observation.reflection? ||
-        @occurrence.primary_observation_id != @observation.id
+      @occurrence && @occurrence.primary_observation_id != @observation.id
     end
 
     def can_edit_observation?

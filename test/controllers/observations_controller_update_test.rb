@@ -335,6 +335,19 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(edit_observation_path(oldest.id))
   end
 
+  # target=primary on a reflection with no occurrence redirects to the
+  # reflection's edit, which then creates the companion (companion flow).
+  def test_edit_target_primary_on_occurrenceless_reflection
+    user = users(:rolf)
+    reflection = editable_member(:coprinus_comatus_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    login(user.login)
+
+    get(:edit, params: { id: reflection.id, target: "primary" })
+
+    assert_redirected_to(edit_observation_path(reflection.id))
+  end
+
   # In admin mode the resolver honors admin edit rights: it edits the
   # existing (admin-editable) primary rather than creating a companion.
   def test_edit_target_primary_honors_admin_editability

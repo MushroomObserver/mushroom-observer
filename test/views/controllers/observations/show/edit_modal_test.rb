@@ -60,6 +60,20 @@ class Views::Controllers::Observations::Show::EditModalTest <
     assert_not_includes(html, :edit_occurrence_not_primary.l)
   end
 
+  # A reflection with no occurrence yet still offers Create Editable
+  # Primary; only the read-only line shows (no "not primary").
+  def test_reflection_without_occurrence_offers_create
+    reflection = make_editable(:coprinus_comatus_obs)
+    reflection.update_column(:reflected_at, Time.zone.now)
+
+    html = render_modal(reflection, nil)
+
+    assert_html(html, "a[href='#{edit_path(reflection, target: :primary)}']",
+                text: :edit_occurrence_create_primary.l)
+    assert_includes(html, :edit_occurrence_is_reflection.l)
+    assert_not_includes(html, :edit_occurrence_not_primary.l)
+  end
+
   # Admin mode grants edit rights, so a sibling the user can't edit
   # still counts as an editable sibling -- the label is Edit Primary,
   # not Create Editable Primary.
