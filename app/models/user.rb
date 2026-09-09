@@ -287,6 +287,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # go through +change_password+.)
   before_create :crypt_password
 
+  include NormalizesInatUsername
+
   before_update :update_image_copyright_holder
   before_update :expire_caches_of_associated_observations
 

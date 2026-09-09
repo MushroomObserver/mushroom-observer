@@ -73,6 +73,8 @@ class InatImport < ApplicationRecord
   belongs_to :project, optional: true
   has_many :observations, dependent: :nullify
 
+  include NormalizesInatUsername
+
   serialize :log, type: Array, coder: YAML
   serialize :date_missing_inat_ids, coder: JSON
   serialize :license_added_inat_ids, coder: JSON

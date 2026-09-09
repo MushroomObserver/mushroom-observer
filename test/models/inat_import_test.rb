@@ -3,6 +3,15 @@
 require "test_helper"
 
 class InatImportTest < ActiveSupport::TestCase
+  def test_inat_username_normalized_to_lowercase
+    import = inat_imports(:rolf_inat_import)
+    import.update(inat_username: " MixedCase ")
+
+    assert_equal("mixedcase", import.inat_username,
+                 "inat_username should be stripped and downcased " \
+                 "(iNat logins are lowercase)")
+  end
+
   def test_total_expected_time_tabula_rasa
     zero_out_prior_import_records
     import = inat_imports(:rolf_inat_import)
