@@ -31,6 +31,37 @@ class API2
           end }
       end
 
+      # The results.json.jbuilder envelope every 200 response is wrapped
+      # in. `results` holds ids at detail=none, the SCHEMAS objects at
+      # low, and their nested-detail variants at high.
+      ENVELOPE_FIELDS = {
+        "version" => { "type" => "number" },
+        "run_date" => { "type" => "string", "format" => "date-time" },
+        "user" => { "type" => "integer" },
+        "query" => { "type" => "string" },
+        "number_of_records" => { "type" => "integer" },
+        "number_of_pages" => { "type" => "integer" },
+        "page_number" => { "type" => "integer" },
+        "run_time" => { "type" => "number" }
+      }.freeze
+
+      def envelope(action)
+        {
+          "type" => "object",
+          "properties" => ENVELOPE_FIELDS.merge(
+            "results" => {
+              "description" =>
+                "matching ids at `detail=none` (the default); the " \
+                "objects documented here at `low`, with nested detail " \
+                "at `high`",
+              "type" => "array",
+              "items" => { "oneOf" => [{ "type" => "integer" },
+                                       SCHEMAS.fetch(action)] }
+            }
+          )
+        }
+      end
+
       SCHEMAS = {
         api_key: object_of(
           id: :integer, type: :string, key: :string, notes: :string,

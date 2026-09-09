@@ -75,6 +75,36 @@ class API2
       :license
     ].freeze
 
+    # Global params (parsed for every endpoint in API2#parse_core_params)
+    # documented once and $ref'd from each operation that returns records.
+    SHARED_PARAMETERS = {
+      "detail" => {
+        "name" => "detail",
+        "in" => "query",
+        "required" => false,
+        "description" =>
+          "response detail level: `none` (the default) returns matching " \
+          "ids only; `low` returns the top-level fields documented here; " \
+          "`high` adds nested objects (owner, images, namings and votes, " \
+          "comments, etc.)",
+        "schema" => { "type" => "string", "enum" => %w[none low high],
+                      "default" => "none" }
+      },
+      "page" => {
+        "name" => "page",
+        "in" => "query",
+        "required" => false,
+        "description" => "page of results to return, starting at 1",
+        "schema" => { "type" => "integer", "default" => 1 }
+      }
+    }.freeze
+
+    def shared_parameter_refs
+      SHARED_PARAMETERS.keys.map do |name|
+        { "$ref" => "#/components/parameters/#{name}" }
+      end
+    end
+
     def generate(resources: RESOURCES.keys)
       {
         "openapi" => "3.1.0",
@@ -85,7 +115,8 @@ class API2
           "securitySchemes" => {
             "api_key" => { "type" => "apiKey", "in" => "query",
                            "name" => "api_key" }
-          }
+          },
+          "parameters" => SHARED_PARAMETERS
         }
       }
     end
@@ -132,7 +163,7 @@ class API2
 
       {
         "summary" => "Search / read #{RESOURCES.fetch(action)}",
-        "parameters" => query_parameters(decls),
+        "parameters" => shared_parameter_refs + query_parameters(decls),
         "responses" => ok_response(action)
       }
     end
@@ -144,6 +175,7 @@ class API2
       {
         "summary" => "Create #{action}",
         "security" => [{ "api_key" => [] }],
+        "parameters" => shared_parameter_refs,
         "requestBody" => request_body(body_schema(decls)),
         "responses" => ok_response(action)
       }
@@ -159,7 +191,7 @@ class API2
       {
         "summary" => "Update #{RESOURCES.fetch(action)}",
         "security" => [{ "api_key" => [] }],
-        "parameters" => query_parameters(query),
+        "parameters" => shared_parameter_refs + query_parameters(query),
         "requestBody" => request_body(body_schema(updates)),
         "responses" => ok_response(action)
       }
@@ -263,7 +295,7 @@ class API2
       value.to_s.start_with?("api_help_") ? nil : value
     end
 
-    # ---- responses (hand-wired for the PoC) -------------------------
+    # ---- responses --------------------------------------------------
 
     def request_body(schema)
       { "required" => true,
@@ -275,20 +307,8 @@ class API2
         "200" => {
           "description" => "Matching #{RESOURCES.fetch(action)}",
           "content" => { "application/json" => {
-            "schema" => results_envelope(action)
+            "schema" => ResponseSchemas.envelope(action)
           } }
-        }
-      }
-    end
-
-    def results_envelope(action)
-      {
-        "type" => "object",
-        "properties" => {
-          "results" => {
-            "type" => "array",
-            "items" => ResponseSchemas::SCHEMAS.fetch(action)
-          }
         }
       }
     end

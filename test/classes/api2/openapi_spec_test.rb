@@ -21,6 +21,33 @@ class API2
       assert_equal(20, spec["paths"].size)
     end
 
+    def test_detail_and_page_are_documented
+      detail = spec.dig("components", "parameters", "detail")
+      assert_equal(%w[none low high], detail.dig("schema", "enum"))
+      assert(detail["description"].present?)
+
+      %w[get post patch].each do |method|
+        params = spec.dig("paths", "/api2/observations", method,
+                          "parameters")
+        assert_includes(params,
+                        { "$ref" => "#/components/parameters/detail" },
+                        "#{method} should reference the detail param")
+        assert_includes(params,
+                        { "$ref" => "#/components/parameters/page" })
+      end
+    end
+
+    def test_results_envelope_covers_detail_none_and_low
+      schema = spec.dig("paths", "/api2/observations", "get", "responses",
+                        "200", "content", "application/json", "schema")
+
+      assert(schema.dig("properties", "number_of_records").present?)
+      items = schema.dig("properties", "results", "items")
+      assert_equal([{ "type" => "integer" },
+                    API2::OpenapiSpec::ResponseSchemas::SCHEMAS[:observation]],
+                   items["oneOf"])
+    end
+
     def test_security_scheme_is_defined
       scheme = spec.dig("components", "securitySchemes", "api_key")
 

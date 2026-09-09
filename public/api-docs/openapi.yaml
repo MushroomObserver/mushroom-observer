@@ -14,6 +14,9 @@ paths:
       summary: Create api_key
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -39,34 +42,57 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        key:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        last_used:
-                          type: string
-                          format: date-time
-                        verified:
-                          type: string
-                          format: date-time
-                        num_uses:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          key:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          last_used:
+                            type: string
+                            format: date-time
+                          verified:
+                            type: string
+                            format: date-time
+                          num_uses:
+                            type: integer
   "/api2/collection_numbers":
     get:
       summary: Search / read collection_numbers
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -139,31 +165,55 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        collector:
-                          type: string
-                        number:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          collector:
+                            type: string
+                          number:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          user_id:
+                            type: integer
     post:
       summary: Create collection_number
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -187,32 +237,55 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        collector:
-                          type: string
-                        number:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          collector:
+                            type: string
+                          number:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          user_id:
+                            type: integer
     patch:
       summary: Update collection_numbers
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -310,27 +383,48 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        collector:
-                          type: string
-                        number:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          collector:
+                            type: string
+                          number:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          user_id:
+                            type: integer
     delete:
       summary: Delete collection_numbers
       security:
@@ -407,6 +501,8 @@ paths:
     get:
       summary: Search / read comments
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: target
         in: query
         required: false
@@ -472,35 +568,59 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        summary:
-                          type: string
-                        content:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        object_type:
-                          type: string
-                        object_id:
-                          type: integer
-                        owner_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          summary:
+                            type: string
+                          content:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          object_type:
+                            type: string
+                          object_id:
+                            type: integer
+                          owner_id:
+                            type: integer
     post:
       summary: Create comment
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -522,36 +642,59 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        summary:
-                          type: string
-                        content:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        object_type:
-                          type: string
-                        object_id:
-                          type: integer
-                        owner_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          summary:
+                            type: string
+                          content:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          object_type:
+                            type: string
+                          object_id:
+                            type: integer
+                          owner_id:
+                            type: integer
     patch:
       summary: Update comments
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: target
         in: query
         required: false
@@ -628,31 +771,52 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        summary:
-                          type: string
-                        content:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        object_type:
-                          type: string
-                        object_id:
-                          type: integer
-                        owner_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          summary:
+                            type: string
+                          content:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          object_type:
+                            type: string
+                          object_id:
+                            type: integer
+                          owner_id:
+                            type: integer
     delete:
       summary: Delete comments
       security:
@@ -722,6 +886,8 @@ paths:
     get:
       summary: Search / read external_links
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -778,36 +944,60 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        url:
-                          type: string
-                          format: uri
-                        external_id:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_id:
-                          type: integer
-                        owner_id:
-                          type: integer
-                        external_site_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          url:
+                            type: string
+                            format: uri
+                          external_id:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_id:
+                            type: integer
+                          owner_id:
+                            type: integer
+                          external_site_id:
+                            type: integer
     post:
       summary: Create external_link
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -829,37 +1019,60 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        url:
-                          type: string
-                          format: uri
-                        external_id:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_id:
-                          type: integer
-                        owner_id:
-                          type: integer
-                        external_site_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          url:
+                            type: string
+                            format: uri
+                          external_id:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_id:
+                            type: integer
+                          owner_id:
+                            type: integer
+                          external_site_id:
+                            type: integer
     patch:
       summary: Update external_links
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -925,32 +1138,53 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        url:
-                          type: string
-                          format: uri
-                        external_id:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_id:
-                          type: integer
-                        owner_id:
-                          type: integer
-                        external_site_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          url:
+                            type: string
+                            format: uri
+                          external_id:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_id:
+                            type: integer
+                          owner_id:
+                            type: integer
+                          external_site_id:
+                            type: integer
     delete:
       summary: Delete external_links
       security:
@@ -1011,6 +1245,8 @@ paths:
     get:
       summary: Search / read external_sites
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -1033,23 +1269,46 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        project_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          project_id:
+                            type: integer
   "/api2/field_slips":
     get:
       summary: Search / read field_slips
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -1112,35 +1371,59 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        code:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_ids:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
                             type: integer
-                        project_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                          type:
+                            type: string
+                          code:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_ids:
+                            type: array
+                            items:
+                              type: integer
+                          project_id:
+                            type: integer
+                          user_id:
+                            type: integer
     post:
       summary: Create field_slip
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -1163,36 +1446,59 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        code:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_ids:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
                             type: integer
-                        project_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                          type:
+                            type: string
+                          code:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_ids:
+                            type: array
+                            items:
+                              type: integer
+                          project_id:
+                            type: integer
+                          user_id:
+                            type: integer
     patch:
       summary: Update field_slips
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -1269,31 +1575,52 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        code:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_ids:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
                             type: integer
-                        project_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                          type:
+                            type: string
+                          code:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_ids:
+                            type: array
+                            items:
+                              type: integer
+                          project_id:
+                            type: integer
+                          user_id:
+                            type: integer
     delete:
       summary: Delete field_slips
       security:
@@ -1360,6 +1687,8 @@ paths:
     get:
       summary: Search / read herbaria
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -1410,39 +1739,62 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        code:
-                          type: string
-                        name:
-                          type: string
-                        email:
-                          type: string
-                        address:
-                          type: string
-                        description:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        location_id:
-                          type: integer
-                        personal_user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          code:
+                            type: string
+                          name:
+                            type: string
+                          email:
+                            type: string
+                          address:
+                            type: string
+                          description:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          location_id:
+                            type: integer
+                          personal_user_id:
+                            type: integer
   "/api2/herbarium_records":
     get:
       summary: Search / read herbarium_records
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -1535,35 +1887,59 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        initial_determination:
-                          type: string
-                        accession_number:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        herbarium_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          initial_determination:
+                            type: string
+                          accession_number:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          herbarium_id:
+                            type: integer
+                          user_id:
+                            type: integer
     post:
       summary: Create herbarium_record
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -1591,36 +1967,59 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        initial_determination:
-                          type: string
-                        accession_number:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        herbarium_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          initial_determination:
+                            type: string
+                          accession_number:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          herbarium_id:
+                            type: integer
+                          user_id:
+                            type: integer
     patch:
       summary: Update herbarium_records
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -1742,31 +2141,52 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        initial_determination:
-                          type: string
-                        accession_number:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        herbarium_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          initial_determination:
+                            type: string
+                          accession_number:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          herbarium_id:
+                            type: integer
+                          user_id:
+                            type: integer
     delete:
       summary: Delete herbarium_records
       security:
@@ -1863,6 +2283,8 @@ paths:
     get:
       summary: Search / read images
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -2030,58 +2452,82 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        copyright_holder:
-                          type: string
-                        notes:
-                          type: string
-                        quality:
-                          type: number
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        original_name:
-                          type: string
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        license:
-                          type: string
-                        content_type:
-                          type: string
-                        md5sum:
-                          type: string
-                        width:
-                          type: integer
-                        height:
-                          type: integer
-                        original_url:
-                          type: string
-                          format: uri
-                        owner_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          copyright_holder:
+                            type: string
+                          notes:
+                            type: string
+                          quality:
+                            type: number
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          original_name:
+                            type: string
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          license:
+                            type: string
+                          content_type:
+                            type: string
+                          md5sum:
+                            type: string
+                          width:
+                            type: integer
+                          height:
+                            type: integer
+                          original_url:
+                            type: string
+                            format: uri
+                          owner_id:
+                            type: integer
     post:
       summary: Create image
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -2130,59 +2576,82 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        copyright_holder:
-                          type: string
-                        notes:
-                          type: string
-                        quality:
-                          type: number
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        original_name:
-                          type: string
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        license:
-                          type: string
-                        content_type:
-                          type: string
-                        md5sum:
-                          type: string
-                        width:
-                          type: integer
-                        height:
-                          type: integer
-                        original_url:
-                          type: string
-                          format: uri
-                        owner_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          copyright_holder:
+                            type: string
+                          notes:
+                            type: string
+                          quality:
+                            type: number
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          original_name:
+                            type: string
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          license:
+                            type: string
+                          content_type:
+                            type: string
+                          md5sum:
+                            type: string
+                          width:
+                            type: integer
+                          height:
+                            type: integer
+                          original_url:
+                            type: string
+                            format: uri
+                          owner_id:
+                            type: integer
     patch:
       summary: Update images
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -2372,54 +2841,75 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        copyright_holder:
-                          type: string
-                        notes:
-                          type: string
-                        quality:
-                          type: number
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        original_name:
-                          type: string
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        license:
-                          type: string
-                        content_type:
-                          type: string
-                        md5sum:
-                          type: string
-                        width:
-                          type: integer
-                        height:
-                          type: integer
-                        original_url:
-                          type: string
-                          format: uri
-                        owner_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          copyright_holder:
+                            type: string
+                          notes:
+                            type: string
+                          quality:
+                            type: number
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          original_name:
+                            type: string
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          license:
+                            type: string
+                          content_type:
+                            type: string
+                          md5sum:
+                            type: string
+                          width:
+                            type: integer
+                          height:
+                            type: integer
+                          original_url:
+                            type: string
+                            format: uri
+                          owner_id:
+                            type: integer
     delete:
       summary: Delete images
       security:
@@ -2591,6 +3081,8 @@ paths:
     get:
       summary: Search / read locations
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: north
         in: query
         required: false
@@ -2662,48 +3154,72 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        latitude_north:
-                          type: number
-                        latitude_south:
-                          type: number
-                        longitude_east:
-                          type: number
-                        longitude_west:
-                          type: number
-                        altitude_maximum:
-                          type: number
-                        altitude_minimum:
-                          type: number
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          latitude_north:
+                            type: number
+                          latitude_south:
+                            type: number
+                          longitude_east:
+                            type: number
+                          longitude_west:
+                            type: number
+                          altitude_maximum:
+                            type: number
+                          altitude_minimum:
+                            type: number
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
     post:
       summary: Create location
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -2745,49 +3261,72 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        latitude_north:
-                          type: number
-                        latitude_south:
-                          type: number
-                        longitude_east:
-                          type: number
-                        longitude_west:
-                          type: number
-                        altitude_maximum:
-                          type: number
-                        altitude_minimum:
-                          type: number
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          latitude_north:
+                            type: number
+                          latitude_south:
+                            type: number
+                          longitude_east:
+                            type: number
+                          longitude_west:
+                            type: number
+                          altitude_maximum:
+                            type: number
+                          altitude_minimum:
+                            type: number
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
     patch:
       summary: Update locations
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: north
         in: query
         required: false
@@ -2892,48 +3431,71 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        latitude_north:
-                          type: number
-                        latitude_south:
-                          type: number
-                        longitude_east:
-                          type: number
-                        longitude_west:
-                          type: number
-                        altitude_maximum:
-                          type: number
-                        altitude_minimum:
-                          type: number
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          latitude_north:
+                            type: number
+                          latitude_south:
+                            type: number
+                          longitude_east:
+                            type: number
+                          longitude_west:
+                            type: number
+                          altitude_maximum:
+                            type: number
+                          altitude_minimum:
+                            type: number
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
   "/api2/location_descriptions":
     get:
       summary: Search / read location_descriptions
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -2981,54 +3543,77 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        location_id:
-                          type: integer
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        source_type:
-                          type: string
-                        source_name:
-                          type: string
-                        license:
-                          type: string
-                        public:
-                          type: boolean
-                        locale:
-                          type: string
-                        gen_desc:
-                          type: string
-                        ecology:
-                          type: string
-                        species:
-                          type: string
-                        notes:
-                          type: string
-                        refs:
-                          type: string
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          location_id:
+                            type: integer
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          source_type:
+                            type: string
+                          source_name:
+                            type: string
+                          license:
+                            type: string
+                          public:
+                            type: boolean
+                          locale:
+                            type: string
+                          gen_desc:
+                            type: string
+                          ecology:
+                            type: string
+                          species:
+                            type: string
+                          notes:
+                            type: string
+                          refs:
+                            type: string
   "/api2/names":
     get:
       summary: Search / read names
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -3196,52 +3781,76 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        author:
-                          type: string
-                        rank:
-                          type: string
-                        deprecated:
-                          type: boolean
-                        misspelled:
-                          type: boolean
-                        citation:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        parents:
-                          type: array
-                          items:
-                            type: object
-                        synonym_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          author:
+                            type: string
+                          rank:
+                            type: string
+                          deprecated:
+                            type: boolean
+                          misspelled:
+                            type: boolean
+                          citation:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          parents:
+                            type: array
+                            items:
+                              type: object
+                          synonym_id:
+                            type: integer
     post:
       summary: Create name
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -3274,53 +3883,76 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        author:
-                          type: string
-                        rank:
-                          type: string
-                        deprecated:
-                          type: boolean
-                        misspelled:
-                          type: boolean
-                        citation:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        parents:
-                          type: array
-                          items:
-                            type: object
-                        synonym_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          author:
+                            type: string
+                          rank:
+                            type: string
+                          deprecated:
+                            type: boolean
+                          misspelled:
+                            type: boolean
+                          citation:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          parents:
+                            type: array
+                            items:
+                              type: object
+                          synonym_id:
+                            type: integer
     patch:
       summary: Update names
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -3520,52 +4152,75 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name:
-                          type: string
-                        author:
-                          type: string
-                        rank:
-                          type: string
-                        deprecated:
-                          type: boolean
-                        misspelled:
-                          type: boolean
-                        citation:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        parents:
-                          type: array
-                          items:
-                            type: object
-                        synonym_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name:
+                            type: string
+                          author:
+                            type: string
+                          rank:
+                            type: string
+                          deprecated:
+                            type: boolean
+                          misspelled:
+                            type: boolean
+                          citation:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          parents:
+                            type: array
+                            items:
+                              type: object
+                          synonym_id:
+                            type: integer
   "/api2/name_descriptions":
     get:
       summary: Search / read name_descriptions
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -3623,62 +4278,85 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        name_id:
-                          type: integer
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        ok_for_export:
-                          type: boolean
-                        source_type:
-                          type: string
-                        source_name:
-                          type: string
-                        license:
-                          type: string
-                        public:
-                          type: boolean
-                        locale:
-                          type: string
-                        gen_desc:
-                          type: string
-                        diag_desc:
-                          type: string
-                        distribution:
-                          type: string
-                        habitat:
-                          type: string
-                        look_alikes:
-                          type: string
-                        uses:
-                          type: string
-                        notes:
-                          type: string
-                        refs:
-                          type: string
-                        classification:
-                          type: string
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          name_id:
+                            type: integer
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          ok_for_export:
+                            type: boolean
+                          source_type:
+                            type: string
+                          source_name:
+                            type: string
+                          license:
+                            type: string
+                          public:
+                            type: boolean
+                          locale:
+                            type: string
+                          gen_desc:
+                            type: string
+                          diag_desc:
+                            type: string
+                          distribution:
+                            type: string
+                          habitat:
+                            type: string
+                          look_alikes:
+                            type: string
+                          uses:
+                            type: string
+                          notes:
+                            type: string
+                          refs:
+                            type: string
+                          classification:
+                            type: string
   "/api2/namings":
     get:
       summary: Search / read namings
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -3744,37 +4422,61 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        confidence:
-                          type: number
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        name:
-                          type: object
-                        owner_id:
-                          type: integer
-                        observation_id:
-                          type: integer
-                        reasons:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          confidence:
+                            type: number
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          name:
                             type: object
+                          owner_id:
+                            type: integer
+                          observation_id:
+                            type: integer
+                          reasons:
+                            type: array
+                            items:
+                              type: object
     post:
       summary: Create naming
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -3804,38 +4506,61 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        confidence:
-                          type: number
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        name:
-                          type: object
-                        owner_id:
-                          type: integer
-                        observation_id:
-                          type: integer
-                        reasons:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          confidence:
+                            type: number
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          name:
                             type: object
+                          owner_id:
+                            type: integer
+                          observation_id:
+                            type: integer
+                          reasons:
+                            type: array
+                            items:
+                              type: object
     patch:
       summary: Update namings
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -3920,33 +4645,54 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        confidence:
-                          type: number
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        name:
-                          type: object
-                        owner_id:
-                          type: integer
-                        observation_id:
-                          type: integer
-                        reasons:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          confidence:
+                            type: number
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          name:
                             type: object
+                          owner_id:
+                            type: integer
+                          observation_id:
+                            type: integer
+                          reasons:
+                            type: array
+                            items:
+                              type: object
     delete:
       summary: Delete namings
       security:
@@ -4016,6 +4762,8 @@ paths:
     get:
       summary: Search / read observations
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: north
         in: query
         required: false
@@ -4233,65 +4981,89 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        latitude:
-                          type: number
-                        longitude:
-                          type: number
-                        altitude:
-                          type: number
-                        gps_hidden:
-                          type: boolean
-                        specimen_available:
-                          type: boolean
-                        occurrence_id:
-                          type: integer
-                        is_collection_location:
-                          type: boolean
-                        confidence:
-                          type: number
-                        notes:
-                          type: string
-                        notes_fields:
-                          type: object
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        owner_id:
-                          type: integer
-                        consensus_id:
-                          type: integer
-                        consensus_name:
-                          type: string
-                        location_id:
-                          type: integer
-                        location_name:
-                          type: string
-                        primary_image_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          latitude:
+                            type: number
+                          longitude:
+                            type: number
+                          altitude:
+                            type: number
+                          gps_hidden:
+                            type: boolean
+                          specimen_available:
+                            type: boolean
+                          occurrence_id:
+                            type: integer
+                          is_collection_location:
+                            type: boolean
+                          confidence:
+                            type: number
+                          notes:
+                            type: string
+                          notes_fields:
+                            type: object
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          owner_id:
+                            type: integer
+                          consensus_id:
+                            type: integer
+                          consensus_name:
+                            type: string
+                          location_id:
+                            type: integer
+                          location_name:
+                            type: string
+                          primary_image_id:
+                            type: integer
     post:
       summary: Create observation
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -4382,66 +5154,89 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        latitude:
-                          type: number
-                        longitude:
-                          type: number
-                        altitude:
-                          type: number
-                        gps_hidden:
-                          type: boolean
-                        specimen_available:
-                          type: boolean
-                        occurrence_id:
-                          type: integer
-                        is_collection_location:
-                          type: boolean
-                        confidence:
-                          type: number
-                        notes:
-                          type: string
-                        notes_fields:
-                          type: object
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        owner_id:
-                          type: integer
-                        consensus_id:
-                          type: integer
-                        consensus_name:
-                          type: string
-                        location_id:
-                          type: integer
-                        location_name:
-                          type: string
-                        primary_image_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          latitude:
+                            type: number
+                          longitude:
+                            type: number
+                          altitude:
+                            type: number
+                          gps_hidden:
+                            type: boolean
+                          specimen_available:
+                            type: boolean
+                          occurrence_id:
+                            type: integer
+                          is_collection_location:
+                            type: boolean
+                          confidence:
+                            type: number
+                          notes:
+                            type: string
+                          notes_fields:
+                            type: object
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          owner_id:
+                            type: integer
+                          consensus_id:
+                            type: integer
+                          consensus_name:
+                            type: string
+                          location_id:
+                            type: integer
+                          location_name:
+                            type: string
+                          primary_image_id:
+                            type: integer
     patch:
       summary: Update observations
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: north
         in: query
         required: false
@@ -4710,61 +5505,82 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        latitude:
-                          type: number
-                        longitude:
-                          type: number
-                        altitude:
-                          type: number
-                        gps_hidden:
-                          type: boolean
-                        specimen_available:
-                          type: boolean
-                        occurrence_id:
-                          type: integer
-                        is_collection_location:
-                          type: boolean
-                        confidence:
-                          type: number
-                        notes:
-                          type: string
-                        notes_fields:
-                          type: object
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        number_of_views:
-                          type: integer
-                        last_viewed:
-                          type: string
-                          format: date-time
-                        owner_id:
-                          type: integer
-                        consensus_id:
-                          type: integer
-                        consensus_name:
-                          type: string
-                        location_id:
-                          type: integer
-                        location_name:
-                          type: string
-                        primary_image_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          latitude:
+                            type: number
+                          longitude:
+                            type: number
+                          altitude:
+                            type: number
+                          gps_hidden:
+                            type: boolean
+                          specimen_available:
+                            type: boolean
+                          occurrence_id:
+                            type: integer
+                          is_collection_location:
+                            type: boolean
+                          confidence:
+                            type: number
+                          notes:
+                            type: string
+                          notes_fields:
+                            type: object
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          number_of_views:
+                            type: integer
+                          last_viewed:
+                            type: string
+                            format: date-time
+                          owner_id:
+                            type: integer
+                          consensus_id:
+                            type: integer
+                          consensus_name:
+                            type: string
+                          location_id:
+                            type: integer
+                          location_name:
+                            type: string
+                          primary_image_id:
+                            type: integer
     delete:
       summary: Delete observations
       security:
@@ -4986,6 +5802,8 @@ paths:
     get:
       summary: Search / read occurrences
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -5041,37 +5859,61 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        primary_observation_id:
-                          type: integer
-                        has_specimen:
-                          type: boolean
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_ids:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
                             type: integer
-                        owner_id:
-                          type: integer
-                        field_slip_id:
-                          type: integer
+                          type:
+                            type: string
+                          primary_observation_id:
+                            type: integer
+                          has_specimen:
+                            type: boolean
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_ids:
+                            type: array
+                            items:
+                              type: integer
+                          owner_id:
+                            type: integer
+                          field_slip_id:
+                            type: integer
     post:
       summary: Create occurrence
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -5094,38 +5936,61 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        primary_observation_id:
-                          type: integer
-                        has_specimen:
-                          type: boolean
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_ids:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
                             type: integer
-                        owner_id:
-                          type: integer
-                        field_slip_id:
-                          type: integer
+                          type:
+                            type: string
+                          primary_observation_id:
+                            type: integer
+                          has_specimen:
+                            type: boolean
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_ids:
+                            type: array
+                            items:
+                              type: integer
+                          owner_id:
+                            type: integer
+                          field_slip_id:
+                            type: integer
     patch:
       summary: Update occurrences
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -5200,33 +6065,54 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        primary_observation_id:
-                          type: integer
-                        has_specimen:
-                          type: boolean
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_ids:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
                             type: integer
-                        owner_id:
-                          type: integer
-                        field_slip_id:
-                          type: integer
+                          type:
+                            type: string
+                          primary_observation_id:
+                            type: integer
+                          has_specimen:
+                            type: boolean
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_ids:
+                            type: array
+                            items:
+                              type: integer
+                          owner_id:
+                            type: integer
+                          field_slip_id:
+                            type: integer
     delete:
       summary: Delete occurrences
       security:
@@ -5286,6 +6172,8 @@ paths:
     get:
       summary: Search / read projects
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -5374,31 +6262,55 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        title:
-                          type: string
-                        summary:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        creator_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          title:
+                            type: string
+                          summary:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          creator_id:
+                            type: integer
     post:
       summary: Create project
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -5430,32 +6342,55 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        title:
-                          type: string
-                        summary:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        creator_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          title:
+                            type: string
+                          summary:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          creator_id:
+                            type: integer
     patch:
       summary: Update projects
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -5607,31 +6542,54 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        title:
-                          type: string
-                        summary:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        creator_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          title:
+                            type: string
+                          summary:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          creator_id:
+                            type: integer
   "/api2/sequences":
     get:
       summary: Search / read sequences
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -5870,39 +6828,63 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        locus:
-                          type: string
-                        bases:
-                          type: string
-                        archive:
-                          type: string
-                        accession:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          locus:
+                            type: string
+                          bases:
+                            type: string
+                          archive:
+                            type: string
+                          accession:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_id:
+                            type: integer
+                          user_id:
+                            type: integer
     post:
       summary: Create sequence
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -5930,40 +6912,63 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        locus:
-                          type: string
-                        bases:
-                          type: string
-                        archive:
-                          type: string
-                        accession:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          locus:
+                            type: string
+                          bases:
+                            type: string
+                          archive:
+                            type: string
+                          accession:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_id:
+                            type: integer
+                          user_id:
+                            type: integer
     patch:
       summary: Update sequences
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -6219,35 +7224,56 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        locus:
-                          type: string
-                        bases:
-                          type: string
-                        archive:
-                          type: string
-                        accession:
-                          type: string
-                        notes:
-                          type: string
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        observation_id:
-                          type: integer
-                        user_id:
-                          type: integer
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          locus:
+                            type: string
+                          bases:
+                            type: string
+                          archive:
+                            type: string
+                          accession:
+                            type: string
+                          notes:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          observation_id:
+                            type: integer
+                          user_id:
+                            type: integer
     delete:
       summary: Delete sequences
       security:
@@ -6490,6 +7516,8 @@ paths:
     get:
       summary: Search / read species_lists
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -6601,38 +7629,62 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        title:
-                          type: string
-                        notes:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        owner_id:
-                          type: integer
-                        location_id:
-                          type: integer
-                        location_name:
-                          type: string
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          title:
+                            type: string
+                          notes:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          owner_id:
+                            type: integer
+                          location_id:
+                            type: integer
+                          location_name:
+                            type: string
     post:
       summary: Create species_list
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -6657,39 +7709,62 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        title:
-                          type: string
-                        notes:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        owner_id:
-                          type: integer
-                        location_id:
-                          type: integer
-                        location_name:
-                          type: string
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          title:
+                            type: string
+                          notes:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          owner_id:
+                            type: integer
+                          location_id:
+                            type: integer
+                          location_name:
+                            type: string
     patch:
       summary: Update species_lists
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -6827,34 +7902,55 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        title:
-                          type: string
-                        notes:
-                          type: string
-                        date:
-                          type: string
-                          format: date
-                        created_at:
-                          type: string
-                          format: date-time
-                        updated_at:
-                          type: string
-                          format: date-time
-                        owner_id:
-                          type: integer
-                        location_id:
-                          type: integer
-                        location_name:
-                          type: string
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
+                            type: string
+                          title:
+                            type: string
+                          notes:
+                            type: string
+                          date:
+                            type: string
+                            format: date
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          owner_id:
+                            type: integer
+                          location_id:
+                            type: integer
+                          location_name:
+                            type: string
     delete:
       summary: Delete species_lists
       security:
@@ -6970,6 +8066,8 @@ paths:
     get:
       summary: Search / read users
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -6999,49 +8097,73 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        login_name:
-                          type: string
-                        legal_name:
-                          type: string
-                        joined:
-                          type: string
-                          format: date-time
-                        verified:
-                          type: string
-                          format: date-time
-                        last_login:
-                          type: string
-                          format: date-time
-                        last_activity:
-                          type: string
-                          format: date-time
-                        contribution:
-                          type: integer
-                        notes:
-                          type: string
-                        notes_template:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
                             type: string
-                        mailing_address:
-                          type: string
-                        location_id:
-                          type: integer
-                        image_id:
-                          type: integer
+                          login_name:
+                            type: string
+                          legal_name:
+                            type: string
+                          joined:
+                            type: string
+                            format: date-time
+                          verified:
+                            type: string
+                            format: date-time
+                          last_login:
+                            type: string
+                            format: date-time
+                          last_activity:
+                            type: string
+                            format: date-time
+                          contribution:
+                            type: integer
+                          notes:
+                            type: string
+                          notes_template:
+                            type: array
+                            items:
+                              type: string
+                          mailing_address:
+                            type: string
+                          location_id:
+                            type: integer
+                          image_id:
+                            type: integer
     post:
       summary: Create user
       security:
       - api_key: []
+      parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       requestBody:
         required: true
         content:
@@ -7082,50 +8204,73 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        login_name:
-                          type: string
-                        legal_name:
-                          type: string
-                        joined:
-                          type: string
-                          format: date-time
-                        verified:
-                          type: string
-                          format: date-time
-                        last_login:
-                          type: string
-                          format: date-time
-                        last_activity:
-                          type: string
-                          format: date-time
-                        contribution:
-                          type: integer
-                        notes:
-                          type: string
-                        notes_template:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
                             type: string
-                        mailing_address:
-                          type: string
-                        location_id:
-                          type: integer
-                        image_id:
-                          type: integer
+                          login_name:
+                            type: string
+                          legal_name:
+                            type: string
+                          joined:
+                            type: string
+                            format: date-time
+                          verified:
+                            type: string
+                            format: date-time
+                          last_login:
+                            type: string
+                            format: date-time
+                          last_activity:
+                            type: string
+                            format: date-time
+                          contribution:
+                            type: integer
+                          notes:
+                            type: string
+                          notes_template:
+                            type: array
+                            items:
+                              type: string
+                          mailing_address:
+                            type: string
+                          location_id:
+                            type: integer
+                          image_id:
+                            type: integer
     patch:
       summary: Update users
       security:
       - api_key: []
       parameters:
+      - "$ref": "#/components/parameters/detail"
+      - "$ref": "#/components/parameters/page"
       - name: id
         in: query
         required: false
@@ -7174,45 +8319,66 @@ paths:
               schema:
                 type: object
                 properties:
+                  version:
+                    type: number
+                  run_date:
+                    type: string
+                    format: date-time
+                  user:
+                    type: integer
+                  query:
+                    type: string
+                  number_of_records:
+                    type: integer
+                  number_of_pages:
+                    type: integer
+                  page_number:
+                    type: integer
+                  run_time:
+                    type: number
                   results:
+                    description: matching ids at `detail=none` (the default); the
+                      objects documented here at `low`, with nested detail at `high`
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        type:
-                          type: string
-                        login_name:
-                          type: string
-                        legal_name:
-                          type: string
-                        joined:
-                          type: string
-                          format: date-time
-                        verified:
-                          type: string
-                          format: date-time
-                        last_login:
-                          type: string
-                          format: date-time
-                        last_activity:
-                          type: string
-                          format: date-time
-                        contribution:
-                          type: integer
-                        notes:
-                          type: string
-                        notes_template:
-                          type: array
-                          items:
+                      oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          id:
+                            type: integer
+                          type:
                             type: string
-                        mailing_address:
-                          type: string
-                        location_id:
-                          type: integer
-                        image_id:
-                          type: integer
+                          login_name:
+                            type: string
+                          legal_name:
+                            type: string
+                          joined:
+                            type: string
+                            format: date-time
+                          verified:
+                            type: string
+                            format: date-time
+                          last_login:
+                            type: string
+                            format: date-time
+                          last_activity:
+                            type: string
+                            format: date-time
+                          contribution:
+                            type: integer
+                          notes:
+                            type: string
+                          notes_template:
+                            type: array
+                            items:
+                              type: string
+                          mailing_address:
+                            type: string
+                          location_id:
+                            type: integer
+                          image_id:
+                            type: integer
     delete:
       summary: Delete users
       security:
@@ -7248,3 +8414,26 @@ components:
       type: apiKey
       in: query
       name: api_key
+  parameters:
+    detail:
+      name: detail
+      in: query
+      required: false
+      description: 'response detail level: `none` (the default) returns matching ids
+        only; `low` returns the top-level fields documented here; `high` adds nested
+        objects (owner, images, namings and votes, comments, etc.)'
+      schema:
+        type: string
+        enum:
+        - none
+        - low
+        - high
+        default: none
+    page:
+      name: page
+      in: query
+      required: false
+      description: page of results to return, starting at 1
+      schema:
+        type: integer
+        default: 1
