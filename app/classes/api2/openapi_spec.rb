@@ -241,23 +241,39 @@ class API2
         "required" => false,
         "description" => description_for(decl),
         "schema" => param_schema(decl)
-      }.compact
+      }.merge(list_serialization(decl)).compact
+    end
+
+    # API2 parses a list as ONE comma-separated value
+    # (Parsers::Base#parse_array), not repeated params -- form +
+    # explode:false is how OpenAPI says that, so generated clients
+    # serialize "a,b,c" instead of "?x=a&x=b".
+    def list_serialization(decl)
+      return {} unless decl.args[:list]
+
+      { "style" => "form", "explode" => false }
     end
 
     def body_schema(decls)
       props = decls.to_h do |decl|
-        [decl.key.to_s, param_schema(decl).
-          merge("description" => description_for(decl)).
-          compact]
+        schema = param_schema(decl, in_body: true)
+        desc = description_for(decl)
+        schema = schema.merge("description" => desc) if desc
+        [decl.key.to_s, schema]
       end
       { "type" => "object", "properties" => props }
     end
 
     # ---- type mapping -----------------------------------------------
 
-    def param_schema(decl)
+    # A JSON body property has no style/explode to express API2's
+    # comma-joined lists, so list params are declared there as the
+    # comma-separated string API2 parses.
+    def param_schema(decl, in_body: false)
       base = base_schema(decl)
-      return array_of(base) if decl.args[:list]
+      if decl.args[:list]
+        return in_body ? comma_separated(base) : array_of(base)
+      end
       return range_of(base) if decl.args[:range]
 
       base
@@ -277,6 +293,11 @@ class API2
     def array_of(base)
       { "type" => "array", "items" => base,
         "description" => "comma-separated list" }
+    end
+
+    def comma_separated(base)
+      { "type" => "string",
+        "description" => "comma-separated list of #{base["type"]} values" }
     end
 
     # MO ranges are submitted as "min-max" (or "min-" / "-max").

@@ -94,6 +94,22 @@ class API2
       assert_equal(-90, north.dig("schema", "minimum"))
     end
 
+    # API2 parses lists as one comma-separated value, so query lists
+    # must carry form/explode:false and body lists must be strings.
+    def test_list_params_serialize_comma_separated
+      get = spec.dig("paths", "/api2/observations", "get")
+      name = get["parameters"].find { |p| p["name"] == "name" }
+      assert_equal("array", name.dig("schema", "type"))
+      assert_equal("form", name["style"])
+      assert_equal(false, name["explode"])
+
+      projects = spec.dig("paths", "/api2/observations", "post",
+                          "requestBody", "content", "application/json",
+                          "schema", "properties", "projects")
+      assert_equal("string", projects["type"])
+      assert_match(/comma-separated/, projects["description"])
+    end
+
     def test_post_has_request_body_with_create_params
       post = spec.dig("paths", "/api2/observations", "post")
       props = post.dig("requestBody", "content", "application/json",

@@ -17,8 +17,12 @@ module ApiDocsTasks
 
   def stamp_index(yaml)
     index = dir.join("index.html")
-    File.write(index, File.read(index).
-                      sub(/openapi\.yaml\?v=\w*/, version_stamp(yaml)))
+    html = File.read(index)
+    unless html.match?(/openapi\.yaml\?v=\w*/)
+      abort("#{index} has no openapi.yaml?v= token to stamp -- restore " \
+            "the ?v= query on the spec-url.")
+    end
+    File.write(index, html.sub(/openapi\.yaml\?v=\w*/, version_stamp(yaml)))
   end
 
   def fresh?(yaml)

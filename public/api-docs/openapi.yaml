@@ -102,6 +102,8 @@ paths:
             type: string
             description: id or name of a collection_number
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -124,6 +126,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -133,6 +137,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: collector
         in: query
         required: false
@@ -223,6 +229,7 @@ paths:
               properties:
                 observation:
                   type: string
+                  description: id or name of a observation
                 collector:
                   type: string
                   description: collector's name
@@ -295,6 +302,8 @@ paths:
             type: string
             description: id or name of a collection_number
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -317,6 +326,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -326,6 +337,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: collector
         in: query
         required: false
@@ -358,16 +371,10 @@ paths:
               type: object
               properties:
                 add_observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
                   description: attach the record to these observations
                 remove_observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
                   description: detach the record from these observations
                 set_collector:
                   type: string
@@ -439,6 +446,8 @@ paths:
             type: string
             description: id or name of a collection_number
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -461,6 +470,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -470,6 +481,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: collector
         in: query
         required: false
@@ -518,6 +531,8 @@ paths:
             type: string
             description: id or name of a comment
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -540,6 +555,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: type
         in: query
         required: false
@@ -548,6 +565,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: summary_has
         in: query
         required: false
@@ -710,6 +729,8 @@ paths:
             type: string
             description: id or name of a comment
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -732,6 +753,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: type
         in: query
         required: false
@@ -740,6 +763,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: summary_has
         in: query
         required: false
@@ -837,6 +862,8 @@ paths:
             type: string
             description: id or name of a comment
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -859,6 +886,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: type
         in: query
         required: false
@@ -867,6 +896,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: summary_has
         in: query
         required: false
@@ -896,6 +927,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -918,6 +951,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -927,6 +962,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: external_site
         in: query
         required: false
@@ -936,6 +973,8 @@ paths:
             type: string
             description: id or name of a external_site
           description: comma-separated list
+        style: form
+        explode: false
       responses:
         '200':
           description: Matching external_links
@@ -1007,8 +1046,10 @@ paths:
               properties:
                 observation:
                   type: string
+                  description: id or name of a observation
                 external_site:
                   type: string
+                  description: id or name of a external_site
                 url:
                   type: string
       responses:
@@ -1081,6 +1122,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1103,6 +1146,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -1112,6 +1157,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: external_site
         in: query
         required: false
@@ -1121,6 +1168,8 @@ paths:
             type: string
             description: id or name of a external_site
           description: comma-separated list
+        style: form
+        explode: false
       requestBody:
         required: true
         content:
@@ -1198,6 +1247,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1220,6 +1271,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -1229,6 +1282,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: external_site
         in: query
         required: false
@@ -1238,6 +1293,8 @@ paths:
             type: string
             description: id or name of a external_site
           description: comma-separated list
+        style: form
+        explode: false
       responses:
         '200':
           description: Deleted
@@ -1256,6 +1313,8 @@ paths:
             type: string
             description: id or name of a external_site
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -1317,6 +1376,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1339,6 +1400,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: code
         in: query
         required: false
@@ -1433,11 +1496,13 @@ paths:
               properties:
                 observation:
                   type: string
+                  description: id or name of a observation
                 code:
                   type: string
                   description: code printed on the field slip, e.g. "NEMF-00821"
                 project:
                   type: string
+                  description: id or name of a project
       responses:
         '200':
           description: Matching field_slips
@@ -1507,6 +1572,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1529,6 +1596,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: code
         in: query
         required: false
@@ -1562,11 +1631,13 @@ paths:
               properties:
                 set_observation:
                   type: string
+                  description: id or name of a observation
                 set_code:
                   type: string
                   description: change the field slip code
                 set_project:
                   type: string
+                  description: id or name of a project
       responses:
         '200':
           description: Matching field_slips
@@ -1634,6 +1705,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1656,6 +1729,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: code
         in: query
         required: false
@@ -1698,6 +1773,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1804,6 +1881,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -1826,6 +1905,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -1835,6 +1916,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -1844,6 +1927,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -1949,8 +2034,10 @@ paths:
               properties:
                 observation:
                   type: string
+                  description: id or name of a observation
                 herbarium:
                   type: string
+                  description: id or name of a herbarium
                 initial_det:
                   type: string
                   description: initial determination
@@ -2029,6 +2116,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -2051,6 +2140,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -2060,6 +2151,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -2069,6 +2162,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -2112,19 +2207,14 @@ paths:
               type: object
               properties:
                 add_observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
                   description: attach the record to these observations
                 remove_observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
                   description: detach the record from these observations
                 set_herbarium:
                   type: string
+                  description: id or name of a herbarium
                 set_initial_det:
                   type: string
                   description: change the initial determination
@@ -2201,6 +2291,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -2223,6 +2315,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -2232,6 +2326,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -2241,6 +2337,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -2294,6 +2392,8 @@ paths:
             type: string
             description: id or name of a image
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -2323,6 +2423,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -2332,6 +2434,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -2341,6 +2445,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -2350,6 +2456,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -2359,6 +2467,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_observation
         in: query
         required: false
@@ -2380,6 +2490,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -2434,6 +2546,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -2536,10 +2650,8 @@ paths:
               type: object
               properties:
                 observations:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 vote:
                   type: string
                 upload_url:
@@ -2558,16 +2670,15 @@ paths:
                   type: string
                 license:
                   type: string
+                  description: id or name of a license
                 original_name:
                   type: string
                   description: original file name or other private identifier
                 md5sum:
                   type: string
                 projects:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a project
+                  type: string
+                  description: comma-separated list of string values
       responses:
         '200':
           description: Matching images
@@ -2661,6 +2772,8 @@ paths:
             type: string
             description: id or name of a image
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -2690,6 +2803,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -2699,6 +2814,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -2708,6 +2825,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -2717,6 +2836,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -2726,6 +2847,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_observation
         in: query
         required: false
@@ -2747,6 +2870,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -2801,6 +2926,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -2830,6 +2957,7 @@ paths:
                   type: string
                 set_license:
                   type: string
+                  description: id or name of a license
                 set_original_name:
                   type: string
                   description: original file name or other private identifier
@@ -2924,6 +3052,8 @@ paths:
             type: string
             description: id or name of a image
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -2953,6 +3083,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -2962,6 +3094,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -2971,6 +3105,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -2980,6 +3116,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -2989,6 +3127,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_observation
         in: query
         required: false
@@ -3010,6 +3150,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -3064,6 +3206,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -3124,6 +3268,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -3146,6 +3292,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       responses:
         '200':
           description: Matching locations
@@ -3368,6 +3516,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -3390,6 +3540,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       requestBody:
         required: true
         content:
@@ -3504,6 +3656,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -3526,6 +3680,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -3535,6 +3691,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       responses:
         '200':
           description: Matching location_descriptions
@@ -3623,6 +3781,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -3645,6 +3805,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -3654,6 +3816,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: is_deprecated
         in: query
         required: false
@@ -3755,6 +3919,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -3763,6 +3929,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -3962,6 +4130,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -3984,6 +4154,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -3993,6 +4165,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: is_deprecated
         in: query
         required: false
@@ -4094,6 +4268,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -4102,6 +4278,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -4129,6 +4307,7 @@ paths:
                   type: boolean
                 synonymize_with:
                   type: string
+                  description: id or name of a name
                 clear_synonyms:
                   type: boolean
                   description: make it so this name is not synonymized with anything
@@ -4229,6 +4408,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -4251,6 +4432,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -4260,6 +4443,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -4366,6 +4551,8 @@ paths:
             type: string
             description: id or name of a naming
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -4388,6 +4575,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -4398,6 +4587,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -4408,6 +4599,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -4496,8 +4689,10 @@ paths:
                   type: string
                 observation:
                   type: string
+                  description: id or name of a observation
                 name:
                   type: string
+                  description: id or name of a name
       responses:
         '200':
           description: Matching namings
@@ -4570,6 +4765,8 @@ paths:
             type: string
             description: id or name of a naming
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -4592,6 +4789,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -4602,6 +4801,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -4612,6 +4813,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -4635,6 +4838,7 @@ paths:
                   type: string
                 set_name:
                   type: string
+                  description: id or name of a name
                 set_vote:
                   type: string
       responses:
@@ -4707,6 +4911,8 @@ paths:
             type: string
             description: id or name of a naming
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -4729,6 +4935,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -4739,6 +4947,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -4749,6 +4959,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -4805,6 +5017,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -4834,6 +5048,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -4843,6 +5059,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -4852,6 +5070,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -4861,6 +5081,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium_record
         in: query
         required: false
@@ -4870,6 +5092,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -4879,6 +5103,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -4888,6 +5114,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -4945,6 +5173,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: notes_has
         in: query
         required: false
@@ -5073,6 +5303,7 @@ paths:
               properties:
                 name:
                   type: string
+                  description: id or name of a name
                 vote:
                   type: number
                 log:
@@ -5094,6 +5325,7 @@ paths:
                   type: string
                 herbarium:
                   type: string
+                  description: id or name of a herbarium
                 collectors_name:
                   type: string
                 collection_number:
@@ -5119,12 +5351,11 @@ paths:
                 altitude:
                   type: string
                 images:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a image
+                  type: string
+                  description: comma-separated list of string values
                 thumbnail:
                   type: string
+                  description: id or name of a image
                 date:
                   type: string
                   format: date
@@ -5137,15 +5368,11 @@ paths:
                 source:
                   type: string
                 projects:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a project
+                  type: string
+                  description: comma-separated list of string values
                 species_lists:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a species_list
+                  type: string
+                  description: comma-separated list of string values
       responses:
         '200':
           description: Matching observations
@@ -5278,6 +5505,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -5307,6 +5536,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -5316,6 +5547,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -5325,6 +5558,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -5334,6 +5569,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium_record
         in: query
         required: false
@@ -5343,6 +5580,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -5352,6 +5591,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -5361,6 +5602,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -5412,6 +5655,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: notes_has
         in: query
         required: false
@@ -5465,24 +5710,25 @@ paths:
                   type: string
                 set_thumbnail:
                   type: string
+                  description: id or name of a image
                 add_images:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a image
+                  type: string
+                  description: comma-separated list of string values
                 remove_images:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a image
+                  type: string
+                  description: comma-separated list of string values
                 add_to_project:
                   type: string
+                  description: id or name of a project
                 remove_from_project:
                   type: string
+                  description: id or name of a project
                 add_to_species_list:
                   type: string
+                  description: id or name of a species_list
                 remove_from_species_list:
                   type: string
+                  description: id or name of a species_list
                 set_notes:
                   type: string
                   description: set value of notes field using square braces, e.g.,
@@ -5627,6 +5873,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -5656,6 +5904,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -5665,6 +5915,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -5674,6 +5926,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -5683,6 +5937,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium_record
         in: query
         required: false
@@ -5692,6 +5948,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -5701,6 +5959,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -5710,6 +5970,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -5767,6 +6029,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: notes_has
         in: query
         required: false
@@ -5812,6 +6076,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -5834,6 +6100,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -5843,6 +6111,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: field_slip
         in: query
         required: false
@@ -5851,6 +6121,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       responses:
         '200':
           description: Matching occurrences
@@ -5922,12 +6194,11 @@ paths:
               type: object
               properties:
                 observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 primary_observation:
                   type: string
+                  description: id or name of a observation
       responses:
         '200':
           description: Matching occurrences
@@ -5999,6 +6270,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -6021,6 +6294,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -6030,6 +6305,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: field_slip
         in: query
         required: false
@@ -6038,6 +6315,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       requestBody:
         required: true
         content:
@@ -6046,17 +6325,14 @@ paths:
               type: object
               properties:
                 add_observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 remove_observation:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 set_primary_observation:
                   type: string
+                  description: id or name of a observation
       responses:
         '200':
           description: Matching occurrences
@@ -6126,6 +6402,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -6148,6 +6426,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: observation
         in: query
         required: false
@@ -6157,6 +6437,8 @@ paths:
             type: string
             description: id or name of a observation
           description: comma-separated list
+        style: form
+        explode: false
       - name: field_slip
         in: query
         required: false
@@ -6165,6 +6447,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       responses:
         '200':
           description: Deleted
@@ -6183,6 +6467,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -6205,6 +6491,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_images
         in: query
         required: false
@@ -6319,15 +6607,11 @@ paths:
               type: object
               properties:
                 admins:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a user
+                  type: string
+                  description: comma-separated list of string values
                 members:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a user
+                  type: string
+                  description: comma-separated list of string values
                 title:
                   type: string
                 summary:
@@ -6400,6 +6684,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -6422,6 +6708,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_images
         in: query
         required: false
@@ -6479,55 +6767,35 @@ paths:
               type: object
               properties:
                 add_admins:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a user
+                  type: string
+                  description: comma-separated list of string values
                 remove_admins:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a user
+                  type: string
+                  description: comma-separated list of string values
                 add_members:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a user
+                  type: string
+                  description: comma-separated list of string values
                 remove_members:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a user
+                  type: string
+                  description: comma-separated list of string values
                 add_images:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a image
+                  type: string
+                  description: comma-separated list of string values
                 remove_images:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a image
+                  type: string
+                  description: comma-separated list of string values
                 add_observations:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 remove_observations:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 add_species_lists:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a species_list
+                  type: string
+                  description: comma-separated list of string values
                 remove_species_lists:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a species_list
+                  type: string
+                  description: comma-separated list of string values
                 set_title:
                   type: string
                 set_summary:
@@ -6599,6 +6867,8 @@ paths:
             type: string
             description: id or name of a sequence
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -6621,6 +6891,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: locus
         in: query
         required: false
@@ -6629,6 +6901,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: archive
         in: query
         required: false
@@ -6637,6 +6911,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: accession
         in: query
         required: false
@@ -6645,6 +6921,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: locus_has
         in: query
         required: false
@@ -6711,6 +6989,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -6720,6 +7000,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -6729,6 +7011,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -6738,6 +7022,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium_record
         in: query
         required: false
@@ -6747,6 +7033,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -6756,6 +7044,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -6765,6 +7055,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -6894,6 +7186,7 @@ paths:
               properties:
                 observation:
                   type: string
+                  description: id or name of a observation
                 locus:
                   type: string
                 bases:
@@ -6978,6 +7271,8 @@ paths:
             type: string
             description: id or name of a sequence
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -7000,6 +7295,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: locus
         in: query
         required: false
@@ -7008,6 +7305,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: archive
         in: query
         required: false
@@ -7016,6 +7315,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: accession
         in: query
         required: false
@@ -7024,6 +7325,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: locus_has
         in: query
         required: false
@@ -7090,6 +7393,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -7099,6 +7404,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -7108,6 +7415,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -7117,6 +7426,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium_record
         in: query
         required: false
@@ -7126,6 +7437,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -7135,6 +7448,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -7144,6 +7459,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -7288,6 +7605,8 @@ paths:
             type: string
             description: id or name of a sequence
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -7310,6 +7629,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: locus
         in: query
         required: false
@@ -7318,6 +7639,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: archive
         in: query
         required: false
@@ -7326,6 +7649,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: accession
         in: query
         required: false
@@ -7334,6 +7659,8 @@ paths:
           items:
             type: string
           description: comma-separated list
+        style: form
+        explode: false
       - name: locus_has
         in: query
         required: false
@@ -7400,6 +7727,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: name
         in: query
         required: false
@@ -7409,6 +7738,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -7418,6 +7749,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium
         in: query
         required: false
@@ -7427,6 +7760,8 @@ paths:
             type: string
             description: id or name of a herbarium
           description: comma-separated list
+        style: form
+        explode: false
       - name: herbarium_record
         in: query
         required: false
@@ -7436,6 +7771,8 @@ paths:
             type: string
             description: id or name of a herbarium_record
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -7445,6 +7782,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: species_list
         in: query
         required: false
@@ -7454,6 +7793,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: confidence
         in: query
         required: false
@@ -7527,6 +7868,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -7556,6 +7899,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -7565,6 +7910,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -7574,6 +7921,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -7611,6 +7960,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -7774,6 +8125,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -7803,6 +8156,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -7812,6 +8167,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -7821,6 +8178,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -7858,6 +8217,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -7876,15 +8237,11 @@ paths:
               type: object
               properties:
                 add_observations:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 remove_observations:
-                  type: array
-                  items:
-                    type: string
-                    description: id or name of a observation
+                  type: string
+                  description: comma-separated list of string values
                 set_title:
                   type: string
                 set_date:
@@ -7965,6 +8322,8 @@ paths:
             type: string
             description: id or name of a species_list
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -7994,6 +8353,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: location
         in: query
         required: false
@@ -8003,6 +8364,8 @@ paths:
             type: string
             description: id or name of a location
           description: comma-separated list
+        style: form
+        explode: false
       - name: project
         in: query
         required: false
@@ -8012,6 +8375,8 @@ paths:
             type: string
             description: id or name of a project
           description: comma-separated list
+        style: form
+        explode: false
       - name: has_notes
         in: query
         required: false
@@ -8049,6 +8414,8 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
+        style: form
+        explode: false
       - name: include_synonyms
         in: query
         required: false
@@ -8077,6 +8444,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -8192,10 +8561,13 @@ paths:
                   type: string
                 license:
                   type: string
+                  description: id or name of a license
                 location:
                   type: string
+                  description: id or name of a location
                 image:
                   type: string
+                  description: id or name of a image
       responses:
         '200':
           description: Matching users
@@ -8280,6 +8652,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
@@ -8307,10 +8681,13 @@ paths:
                   type: string
                 set_license:
                   type: string
+                  description: id or name of a license
                 set_location:
                   type: string
+                  description: id or name of a location
                 set_image:
                   type: string
+                  description: id or name of a image
       responses:
         '200':
           description: Matching users
@@ -8393,6 +8770,8 @@ paths:
             type: string
             description: id or name of a user
           description: comma-separated list
+        style: form
+        explode: false
       - name: created_at
         in: query
         required: false
