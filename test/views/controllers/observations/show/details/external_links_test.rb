@@ -26,7 +26,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     html = render(panel_with(obs))
 
     # Badge row supplies its own padding/border -- the parent
-    # panel-body (rendered by Details, not this view) is `.p-0`.
+    # card-body (rendered by Details, not this view) is `.p-0`.
     assert_html(html, "div.p-3.border-bottom")
     assert_html(
       html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
@@ -95,7 +95,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs))
 
-    # Each pane supplies its own padding -- the parent panel-body
+    # Each pane supplies its own padding -- the parent card-body
     # (rendered by Details, not this view) is `.p-0`.
     assert_html(html, "#pane_#{inat_link.id}.collapse.p-3")
     assert_html(html, "#pane_#{mcp_link.id}.collapse.p-3")

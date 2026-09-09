@@ -58,7 +58,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   end
 
   def render_panel_title
-    h4(class: "panel-title") { trusted_html(:show_namings_proposed_names.t) }
+    h4(class: "card-title") { trusted_html(:show_namings_proposed_names.t) }
   end
 
   # Mobile-only icon button: tucked in the right gutter where the

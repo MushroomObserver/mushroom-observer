@@ -28,7 +28,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # (do + instead of ~)
     first(".image-link").ancestor(".matrix-box~.matrix-box").
       first(".rss-detail", text: "Observation Created").
-      ancestor(".panel").first(".rss-box-details").first("a").click
+      ancestor(".card").first(".rss-box-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).

@@ -23,11 +23,10 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, 'data-interval="false"')
 
     # Panel structure
-    assert_includes(html, "panel")
-    assert_includes(html, "panel-default")
+    assert_includes(html, "card")
     assert_nested(
       html,
-      parent_selector: ".panel.panel-default",
+      parent_selector: ".card",
       child_selector: ".carousel"
     )
 
@@ -96,26 +95,26 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "carousel-indicators")
 
     # Panel heading structure
-    assert_includes(html, "panel-heading")
+    assert_includes(html, "card-header")
     assert_nested(
       html,
-      parent_selector: ".panel",
-      child_selector: ".panel-heading"
+      parent_selector: ".card",
+      child_selector: ".card-header"
     )
 
     # Thumbnail indicators as panel footer
-    assert_includes(html, "panel-footer")
+    assert_includes(html, "card-footer")
     assert_nested(
       html,
-      parent_selector: ".carousel-indicators.panel-footer",
+      parent_selector: ".carousel-indicators.card-footer",
       child_selector: "li"
     )
 
     # Verify proper order: panel > heading > carousel > footer
     assert_nested(
       html,
-      parent_selector: ".panel",
-      child_selector: ".carousel-indicators.panel-footer"
+      parent_selector: ".card",
+      child_selector: ".carousel-indicators.card-footer"
     )
   end
 
@@ -124,7 +123,7 @@ class ImageGalleryTest < ComponentTestCase
 
     # Should not have thumbnail navigation or heading
     assert_not_includes(html, "carousel-indicators")
-    assert_not_includes(html, "panel-heading")
+    assert_not_includes(html, "card-header")
   end
 
   def test_renders_with_custom_options
@@ -140,15 +139,15 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "Custom Gallery Title")
     assert_nested(
       html,
-      parent_selector: ".panel-heading",
-      child_selector: ".panel-title",
+      parent_selector: ".card-header",
+      child_selector: ".card-title",
       text: "Custom Gallery Title"
     )
 
     # Custom links in panel heading
     assert_includes(html, "Test Link")
     assert_includes(html, "/test")
-    assert_includes(html, "panel-heading-links")
+    assert_includes(html, "card-header-links")
 
     # Custom panel ID
     assert_includes(html, "custom_panel_id")
@@ -187,11 +186,10 @@ class ImageGalleryTest < ComponentTestCase
     assert_not_includes(html, "carousel-control-prev")
 
     # Panel structure
-    assert_includes(html, "panel")
-    assert_includes(html, "panel-default")
+    assert_includes(html, "card")
     assert_nested(
       html,
-      parent_selector: ".panel.panel-default",
+      parent_selector: ".card",
       child_selector: ".text-muted"
     )
   end
@@ -202,11 +200,11 @@ class ImageGalleryTest < ComponentTestCase
 
     # Title in panel heading
     assert_includes(html, "Custom Gallery Title")
-    assert_includes(html, "panel-heading")
+    assert_includes(html, "card-header")
     assert_nested(
       html,
-      parent_selector: ".panel-heading",
-      child_selector: ".panel-title",
+      parent_selector: ".card-header",
+      child_selector: ".card-title",
       text: "Custom Gallery Title"
     )
   end
@@ -215,7 +213,7 @@ class ImageGalleryTest < ComponentTestCase
     html = render_gallery(images: [], thumbnails: false)
 
     # Should not have panel heading
-    assert_not_includes(html, "panel-heading")
+    assert_not_includes(html, "card-header")
   end
 
   def test_panel_id_is_passed_through

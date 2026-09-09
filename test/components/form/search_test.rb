@@ -46,7 +46,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form
 
     # Should have panels based on FIELD_COLUMNS
-    assert_html(html, ".panel")
+    assert_html(html, ".card")
   end
 
   def test_renders_submit_button
@@ -213,7 +213,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form_with_query(query)
 
     # The dates panel's collapse div should be expanded
-    assert_html(html, "#observations_dates.panel-collapse.#{EXPANDED}")
+    assert_html(html, "#observations_dates.card-collapse.#{EXPANDED}")
   end
 
   # TDD test: Panel collapse should NOT be expanded when no collapsed fields
@@ -226,7 +226,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form_with_query(query)
 
     # The dates panel's collapse div should NOT be expanded
-    assert_html(html, "#observations_dates.panel-collapse:not(.#{EXPANDED})")
+    assert_html(html, "#observations_dates.card-collapse:not(.#{EXPANDED})")
   end
 
   # TDD test: Modifier collapse should be expanded when lookup has value

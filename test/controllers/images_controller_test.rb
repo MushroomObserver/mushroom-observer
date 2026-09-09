@@ -334,14 +334,14 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
 
     # First check that the image panel heading is working
-    assert_select("#image_panel .panel-heading") do |elements|
+    assert_select("#image_panel .card-header") do |elements|
       assert_equal(1, elements.size, "Should find image panel heading")
       # Should contain the control links
       assert_match(/Show Original Image/, elements.first.text)
     end
 
     # Now check that the info panel heading "Notes:" is present
-    assert_select("#info_panel .panel-heading") do |elements|
+    assert_select("#info_panel .card-header") do |elements|
       assert_equal(1, elements.size, "Should find info panel heading")
       assert_match(/Notes:/, elements.first.text)
     end

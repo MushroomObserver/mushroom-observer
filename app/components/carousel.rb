@@ -145,7 +145,7 @@ class Components::Carousel < Components::Base
   def render_indicators
     ol(id: @indicators_id,
        class: class_names(
-         "carousel-indicators panel-footer py-2 px-0 mb-0",
+         "carousel-indicators card-footer py-2 px-0 mb-0",
          @indicators_class_extra
        )) do
       @thumbs.each_with_index { |thumb, i| render_thumb(thumb, i) }

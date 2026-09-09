@@ -61,11 +61,11 @@ module Form
       assert_includes(html, "carousel-indicators")
       assert_includes(html, "added_thumbnails")
 
-      # Thumbnail list has panel-footer class
-      assert_includes(html, "panel-footer")
+      # Thumbnail list has card-footer class
+      assert_includes(html, "card-footer")
       assert_nested(
         html,
-        parent_selector: ".carousel-indicators.panel-footer",
+        parent_selector: ".carousel-indicators.card-footer",
         child_selector: "li"
       )
 

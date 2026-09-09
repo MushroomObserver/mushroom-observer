@@ -85,9 +85,9 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:show, params: { id: article.id })
     assert_response(:success)
     # Phlex `Articles::Show` pins the article body in
-    # `#article_body .panel-body` (was `assert_template(:show)` + a
+    # `#article_body .card-body` (was `assert_template(:show)` + a
     # `/#{article.body}/ =~ @response.body` regex on the rendered HTML).
-    assert_select("#article_body .panel-body",
+    assert_select("#article_body .card-body",
                   text: /#{Regexp.escape(article.body)}/,
                   count: 1)
 

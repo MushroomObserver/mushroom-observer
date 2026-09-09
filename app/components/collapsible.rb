@@ -14,7 +14,7 @@
 #     render_fields
 #   end
 #
-# @example Inside a Panel (adds panel-collapse class)
+# @example Inside a Panel (adds card-collapse class)
 #   Collapsible(id: "obs_body", expanded: @expanded,
 #               panel: true, class: "fade-not-slide") do
 #     render_body
@@ -61,7 +61,7 @@ class Components::Collapsible < Components::Base
     [
       "collapse",
       (EXPANDED_CLASS if expanded),
-      ("panel-collapse" if panel),
+      ("card-collapse" if panel),
       html_class
     ].compact_blank.join(" ")
   end

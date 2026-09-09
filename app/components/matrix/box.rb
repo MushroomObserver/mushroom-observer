@@ -21,7 +21,7 @@
 #
 # @example Custom block content
 #   render MatrixBox.new(id: 123, extra_class: "text-center") do
-#     tag.div(class: "panel panel-default") { "Custom content" }
+#     tag.div(class: "card") { "Custom content" }
 #   end
 class Components::Matrix::Box < Components::Base
   include Components::Matrix::Box::RenderData
@@ -70,7 +70,7 @@ class Components::Matrix::Box < Components::Base
       # subscription (plus a solid_cable MAX(id) query) per thumbnail
       # for an event that can't happen from this page; it catches up
       # on the next load via the #4808 cache-busting URL token.
-      Panel(sizing: true) do |panel|
+      Panel do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)
         render_log_footer(panel)

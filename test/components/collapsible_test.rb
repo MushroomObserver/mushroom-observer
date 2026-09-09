@@ -10,9 +10,9 @@ class CollapsibleTest < ComponentTestCase
     assert_equal("collapse", Components::Collapsible.collapse_classes)
     assert_equal("collapse #{EXPANDED}",
                  Components::Collapsible.collapse_classes(expanded: true))
-    assert_equal("collapse panel-collapse",
+    assert_equal("collapse card-collapse",
                  Components::Collapsible.collapse_classes(panel: true))
-    assert_equal("collapse #{EXPANDED} panel-collapse custom-class",
+    assert_equal("collapse #{EXPANDED} card-collapse custom-class",
                  Components::Collapsible.collapse_classes(
                    expanded: true, panel: true, html_class: "custom-class"
                  ))
@@ -23,7 +23,7 @@ class CollapsibleTest < ComponentTestCase
 
     assert_html(html, "div.collapse#foo")
     assert_no_html(html, "div.#{EXPANDED}")
-    assert_no_html(html, "div.panel-collapse")
+    assert_no_html(html, "div.card-collapse")
   end
 
   def test_expanded_adds_the_expanded_class
@@ -35,7 +35,7 @@ class CollapsibleTest < ComponentTestCase
   def test_panel_adds_panel_collapse_class
     html = render_collapsible(id: "foo", panel: true)
 
-    assert_html(html, "div.collapse.panel-collapse#foo")
+    assert_html(html, "div.collapse.card-collapse#foo")
     assert_no_html(html, "div.#{EXPANDED}")
   end
 
@@ -44,7 +44,7 @@ class CollapsibleTest < ComponentTestCase
                               class: "custom-class")
 
     assert_html(html,
-                "div.collapse.#{EXPANDED}.panel-collapse.custom-class#foo")
+                "div.collapse.#{EXPANDED}.card-collapse.custom-class#foo")
   end
 
   def test_nil_id_omits_id_attr

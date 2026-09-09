@@ -184,7 +184,7 @@ form {
     padding-top: 1rem;
     padding-bottom: 1rem;
 
-    .panel-title {
+    .card-title {
       padding-bottom: 1.5rem;
     }
   }
@@ -279,20 +279,20 @@ form {
   }
 }
 
-.panel-body {
+.card-body {
   .row:last-child .form-group,
   > .autocompleter:last-child .form-group.dropdown:last-child,
   // Help now renders as a sibling after .form-group (#4911), so an
   // autocompleter with help text has .help-block, not .form-group, as
-  // its actual last child.
+  // its last child.
   > .autocompleter:last-child .help-block:last-child,
   > .form-group:last-child
   {
     margin-bottom: 0.25rem;
   }
 
-  + .panel-collapse {
-    .panel-body {
+  + .card-collapse {
+    .card-body {
       padding-top: 0 !important;
     }
   }

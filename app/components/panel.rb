@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Component for rendering Bootstrap panels (cards).
+# Component for rendering a Bootstrap 4 card (`.card`/`.card-header`/
+# `.card-body`/`.card-footer`). The prop/method names still say "panel"
+# throughout (`panel_class:`, `panel_id:`, `Panel(...)`) — that naming
+# is this component's identity, independent of the emitted CSS class.
 #
 # Accepts slots for panel subcomponents:
 #   heading, heading_links, thumbnail, body, footer
@@ -63,10 +66,6 @@ class Components::Panel < Components::Base
   prop :collapse_target, _Nilable(String), default: nil
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
-  # Special for matrix boxes, for Bootstrap 3 "grid" effect via Stimulus:
-  # Wrap thumbnail and body in .panel-sizing div, equalized per row.
-  # Remove this when migrating to Bootstrap >= 4.
-  prop :sizing, _Boolean, default: false
 
   slot :heading, lambda { |classes: nil, title: true, &content|
     render_heading(classes:, title:, &content)
@@ -84,7 +83,7 @@ class Components::Panel < Components::Base
   }, collection: true
 
   def view_template
-    classes = class_names("panel panel-default", @panel_class)
+    classes = class_names("card", @panel_class)
     define_collapse_target
     div(
       class: classes,
@@ -92,7 +91,7 @@ class Components::Panel < Components::Base
       **@attributes
     ) do
       render(heading_slot) if heading_slot?
-      render_thumbnail_and_body
+      render_middle_sections
       footer_slots.each { |slot| render(slot) } if footer_slots?
     end
   end
@@ -109,8 +108,8 @@ class Components::Panel < Components::Base
 
   def render_heading(classes:, title:, &content)
     if title
-      classes = classes.presence || "h4 panel-title"
-      div(class: "panel-heading") do
+      classes = classes.presence || "h4 card-title"
+      div(class: "card-header") do
         div(class: classes) do
           span(&content)
           whitespace
@@ -118,7 +117,7 @@ class Components::Panel < Components::Base
         end
       end
     else
-      div(class: class_names("panel-heading", classes)) do
+      div(class: class_names("card-header", classes)) do
         yield if block_given?
       end
     end
@@ -126,7 +125,7 @@ class Components::Panel < Components::Base
 
   # May contain passed-in links, a collapse trigger, or both
   def render_heading_links
-    span(class: "panel-heading-links float-right") do
+    span(class: "card-header-links float-right") do
       render(heading_links_slot) if heading_links_slot?
       render_collapse_icons if @collapsible
     end
@@ -168,15 +167,6 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_thumbnail_and_body
-    # Special .panel-sizing div for matrix boxes, in Bootstrap 3 only
-    if @sizing
-      div(class: "panel-sizing") { render_middle_sections }
-    else
-      render_middle_sections
-    end
-  end
-
   def render_middle_sections
     render(thumbnail_slot) if thumbnail_slot?
     body_slots.each { |slot| render(slot) } if body_slots?
@@ -200,7 +190,7 @@ class Components::Panel < Components::Base
   def render_plain_body(classes:, id:, data:, wrapper:, &content)
     return yield if wrapper == false
 
-    classes = class_names("panel-body", classes)
+    classes = class_names("card-body", classes)
     div(class: classes, id:, data:, &content)
   end
 
@@ -214,7 +204,7 @@ class Components::Panel < Components::Base
   end
 
   def render_footer(classes:)
-    classes = class_names("panel-footer", classes)
+    classes = class_names("card-footer", classes)
     div(class: classes) do
       yield if block_given?
     end

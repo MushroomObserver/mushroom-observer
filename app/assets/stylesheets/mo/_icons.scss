@@ -145,8 +145,8 @@
 // (Button / Link::Get families). Deliberately em-based, not one of
 // _utilities.scss's rem-based .pl-* scale -- this gap sits right
 // after an icon glyph inline with the label text, so it needs to
-// scale WITH that text's own font-size (e.g. noticeably more gap in
-// a bold .panel-title heading than in small body text) rather than
+// scale WITH the label text's font-size (e.g. noticeably more gap in
+// a bold .card-title heading than in small body text) rather than
 // stay a fixed absolute size regardless of context.
 .icon-text-gap {
   padding-left: 0.5em !important;

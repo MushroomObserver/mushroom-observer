@@ -115,25 +115,11 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Should have li.matrix-box containing div.panel
+    # Should have li.matrix-box containing div.card
     assert_nested(
       html,
       parent_selector: "li.matrix-box",
-      child_selector: "div.panel"
-    )
-  end
-
-  def test_panel_has_sizing_wrapper
-    obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
-    html = render(component)
-
-    # Panel should have panel-sizing wrapper (from sizing: true)
-    assert_includes(html, "panel-sizing")
-    assert_nested(
-      html,
-      parent_selector: "div.panel-sizing",
-      child_selector: "div.thumbnail-container"
+      child_selector: "div.card"
     )
   end
 
@@ -142,10 +128,10 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Thumbnail should be in thumbnail-container within panel-sizing
+    # Thumbnail should be in thumbnail-container within the card
     assert_nested(
       html,
-      parent_selector: "div.panel-sizing",
+      parent_selector: "div.card",
       child_selector: "div.thumbnail-container"
     )
     # Should contain the image
@@ -165,7 +151,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_includes(html, "rss-box-details")
     assert_nested(
       html,
-      parent_selector: "div.panel-body.rss-box-details",
+      parent_selector: "div.card-body.rss-box-details",
       child_selector: "div.rss-what"
     )
   end
@@ -175,16 +161,16 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Should have what section in panel-body
+    # Should have what section in card-body
     assert_nested(
       html,
-      parent_selector: "div.panel-body.rss-box-details",
+      parent_selector: "div.card-body.rss-box-details",
       child_selector: "div.rss-what"
     )
-    # Should have where section in panel-body
+    # Should have where section in card-body
     assert_nested(
       html,
-      parent_selector: "div.panel-body.rss-box-details",
+      parent_selector: "div.card-body.rss-box-details",
       child_selector: "div.rss-where"
     )
     # Should have when/who info (rendered with rss-when and rss-who classes)
@@ -227,8 +213,8 @@ class MatrixBoxTest < ComponentTestCase
     assert_includes(html, "log-footer")
     assert_nested(
       html,
-      parent_selector: "div.panel",
-      child_selector: "div.panel-footer.log-footer"
+      parent_selector: "div.card",
+      child_selector: "div.card-footer.log-footer"
     )
   end
 
@@ -261,11 +247,11 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: image)
     html = render(component)
 
-    # Should have panel structure
+    # Should have card structure
     assert_nested(
       html,
       parent_selector: "li#box_#{image.id}",
-      child_selector: "div.panel"
+      child_selector: "div.card"
     )
     # Should have thumbnail
     assert_nested(
@@ -280,16 +266,16 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: user)
     html = render(component)
 
-    # Should have panel structure
+    # Should have card structure
     assert_nested(
       html,
       parent_selector: "li#box_#{user.id}",
-      child_selector: "div.panel"
+      child_selector: "div.card"
     )
     # Should have user info in body
     assert_nested(
       html,
-      parent_selector: "div.panel-body",
+      parent_selector: "div.card-body",
       child_selector: "div.rss-what"
     )
   end
@@ -307,7 +293,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_not_includes(html, "vote-select-container")
     assert_not_includes(html, "context=matrix_box")
     # Should not have identify footer
-    assert_not_includes(html, "panel-active")
+    assert_not_includes(html, "card-active")
     assert_not_includes(html, "box_reviewed")
   end
 
@@ -329,7 +315,7 @@ class MatrixBoxTest < ComponentTestCase
       "Expected identify UI to be rendered"
     )
     # Should have identify footer
-    assert_includes(html, "panel-active")
+    assert_includes(html, "card-active")
     assert_includes(html, "box_reviewed")
   end
 
