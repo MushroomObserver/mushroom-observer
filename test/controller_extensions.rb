@@ -635,10 +635,10 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{try_id}'."
       elsif elements.length == 1
-        message = if elements.first.to_s.start_with?("<select")
+        message = if elements.first.name == "select"
                     check_select_value(elements.first, expect_val, try_id)
                   else
-                    check_input_value(elements.first.to_s, expect_val, try_id)
+                    check_input_value(elements.first, expect_val, try_id)
                   end
       end
       break if message.nil?
@@ -654,15 +654,19 @@ module ControllerExtensions
     else
       assert_select(elem, "option[selected]", { count: 1 },
                     "Expected :#{id} to have one option selected") do |opts|
-        return check_input_value(opts.first.to_s, expect_val, id)
+        return check_input_value(opts.first, expect_val, id)
       end
     end
   end
 
+  # `elem` is the Nokogiri node, not a string serialization of it -- a
+  # bare boolean attribute (Phlex's `checked`) round-trips as
+  # `checked=""` under HTML5 parsing but bare `checked` under HTML4, so
+  # checking presence via Nokogiri's attribute API (`key?`) is the form
+  # stable across both.
   def check_input_value(elem, expect_val, id)
-    match = elem.match(/value=('[^']*'|"[^"]*")/)
-    actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
-    actual_val = "" if elem =~ /type=['"]?checkbox/ && elem !~ / checked[ >]/
+    actual_val = elem["value"].to_s
+    actual_val = "" if elem["type"] == "checkbox" && !elem.key?("checked")
     return if actual_val == expect_val.to_s
 
     "Input '#{id}' has wrong value, " \
@@ -676,10 +680,15 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        # NodeSet has no #join; map(&:to_s) converts to String array first
-        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
-                         join).strip
-        message = if actual_val != expect_val.to_s
+        # NodeSet has no #join; map(&:to_s) converts to String array first.
+        # Textarea content is plain text, not HTML -- unescape entities and
+        # normalize line endings (as an HTML5 parser does), but don't run
+        # it through as_displayed's strip_html: a literal "<...>" typed
+        # into the textarea is content the user typed, not a tag to strip.
+        actual_val = elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
+                     join.unescape_html.gsub(/\r\n?/, "\n").strip
+        expect_val = expect_val.to_s.gsub(/\r\n?/, "\n").strip
+        message = if actual_val != expect_val
                     "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
                   end
