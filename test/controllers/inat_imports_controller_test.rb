@@ -617,8 +617,8 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_response(:redirect)
     assert_equal(
-      user.name, created_import(user).inat_username,
-      "It should strip leading/trailing whitespace from inat_username"
+      user.name.downcase, created_import(user).inat_username,
+      "It should strip whitespace and downcase inat_username"
     )
   end
 

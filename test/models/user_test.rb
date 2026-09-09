@@ -3,6 +3,15 @@
 require("test_helper")
 
 class UserTest < UnitTestCase
+  def test_inat_username_normalized_to_lowercase
+    user = users(:rolf)
+    user.update(inat_username: " Lothlin ")
+
+    assert_equal("lothlin", user.inat_username,
+                 "inat_username should be stripped and downcased " \
+                 "(iNat logins are lowercase)")
+  end
+
   def test_auth
     assert_equal(rolf,
                  User.authenticate(login: "rolf", password: "testpassword"))
