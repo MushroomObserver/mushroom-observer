@@ -121,9 +121,9 @@ $btn-border-radius:   5px !default;
 $btn-padding-y:       0.3125rem !default;  // ~5px
 $btn-padding-x:       0.625rem !default;   // ~10px
 
-// Link buttons
-$btn-link-color:           $LINK_TEXT_COLOR !default;
-$btn-link-hover-color:     $LINK_HOVER_TEXT_COLOR !default;
+// `.btn-link` reads `$link-color`/`$link-hover-color` directly (set
+// in Section 3 above) -- BS4 has no separate $btn-link-color/
+// $btn-link-hover-color, unlike bootstrap-sass.
 $btn-link-disabled-color:  mix($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, 75%) !default;
 
 // Active/focus states
