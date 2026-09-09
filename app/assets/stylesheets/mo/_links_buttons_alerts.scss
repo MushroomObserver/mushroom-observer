@@ -240,7 +240,7 @@ form.button_to {
 // Only the button form hovers -- not the static span form.
 // button& isn't valid Sass, so this stays a standalone rule.
 button.badge-id:hover {
-  background-color: $text-color;
+  background-color: $body-color;
   color: $body-bg;
 }
 
