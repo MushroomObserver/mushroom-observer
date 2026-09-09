@@ -1057,8 +1057,9 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJob.perform_now(@inat_import)
 
     assert_equal(
-      updated_inat_username, @user.reload.inat_username,
-      "Failed to update User's inat_username after successful import"
+      updated_inat_username.downcase, @user.reload.inat_username,
+      "Failed to update User's inat_username (normalized to lowercase) " \
+      "after successful import"
     )
   end
 
@@ -1241,6 +1242,31 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_nil(@user.reload.inat_username,
                "A username that failed the own-obs verification " \
                "must not be persisted")
+  end
+
+  # A record saved before inat_username was normalized to lowercase can
+  # hold the login with different case; the logged-in-user check must
+  # not treat it as a different account (iNat logins are lowercase).
+  def test_import_mixed_case_username_matches_logged_in_user
+    create_ivars_from_filename("calostoma_lutescens")
+    lowercase_login = @inat_import.inat_username
+    @inat_import.update_columns(inat_username: lowercase_login.capitalize)
+
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+    stub_inat_interactions(login: lowercase_login)
+
+    assert_difference(
+      "Observation.count", 1,
+      "The same iNat account differing only by case should import"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+    assert_equal(lowercase_login, @user.reload.inat_username,
+                 "Persisted username should be normalized to lowercase")
   end
 
   def test_super_importer_anothers_observation
