@@ -545,9 +545,12 @@ class String
   end
 
   # For integration test comparisons: no tags and no special char encodings
-  # i.e., the whole string as a human would encounter it in the browser
+  # i.e., the whole string as a human would encounter it in the browser.
+  # \r\n -> \n: a browser (and an HTML5 parser reading a rendered
+  # textarea back) shows both the same way, so a raw DB value stored
+  # with CRLF still compares equal to what's on the page.
   def as_displayed
-    strip_html.unescape_html.strip_squeeze
+    strip_html.unescape_html.strip_squeeze.gsub(/\r\n?/, "\n")
   end
 
   # Rails generates an id for a nested field like "foo[bar]" that's snake_case

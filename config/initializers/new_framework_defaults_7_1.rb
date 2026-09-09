@@ -35,11 +35,10 @@ Rails.application.config.action_dispatch.default_headers = {
 }
 
 ###
-# Do not treat an `ActionController::Parameters` instance
-# as equal to an equivalent `Hash` by default.
+# allow_deprecated_parameters_hash_equality: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-# Rails.application.config.action_controller.
-#   allow_deprecated_parameters_hash_equality = false
 
 ###
 # Active Record Encryption now uses SHA-256 as its hash digest algorithm.
@@ -79,36 +78,22 @@ Rails.application.config.active_record.
 
 ###
 # Configures SQLite with a strict strings mode, which disables double-quoted
-# string literals.
-#
-# SQLite has some quirks around double-quoted string literals.
-# It first tries to consider double-quoted strings as identifier names, but if
-# they don't exist it then considers them as string literals. Because of this,
-# typos can silently go unnoticed.
-# For example, it is possible to create an index for a non existing column.
-# See https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted
-# for more details.
+# string literals. No-op for MO: uses Trilogy (MySQL), not SQLite.
 #++
 Rails.application.config.active_record.
   sqlite3_adapter_strict_strings_by_default = true
 
 ###
-# Disable deprecated singular associations names.
+# allow_deprecated_singular_associations_name: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-# Rails.application.config.active_record.
-#   allow_deprecated_singular_associations_name = false
 
 ###
-# Enable the Active Job `BigDecimal` argument serializer, which guarantees
-# roundtripping. Without this serializer, some queue adapters may serialize
-# `BigDecimal` arguments as simple (non-roundtrippable) strings.
-#
-# When deploying an application with multiple replicas, old (pre-Rails 7.1)
-# replicas will not be able to deserialize `BigDecimal` arguments from this
-# serializer. Therefore, this setting should only be enabled after all replicas
-# have been successfully upgraded to Rails 7.1.
+# active_job.use_big_decimal_serializer: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-# Rails.application.config.active_job.use_big_decimal_serializer = true
 
 ###
 # Specify if an `ArgumentError` should be raised if `Rails.cache` `fetch` or
@@ -137,24 +122,6 @@ Rails.application.config.active_record.query_log_tags_format = :sqlcommenter
 # In Rails 7.1, the new default is `:json_allow_marshal` which serializes and
 # deserializes with `ActiveSupport::JSON`, but can fall back to deserializing
 # with `Marshal` so that legacy messages can still be read.
-#
-# In Rails 7.2, the default will become `:json` which serializes and
-# deserializes with `ActiveSupport::JSON` only.
-#
-# Alternatively, you can choose `:message_pack` or
-# `:message_pack_allow_marshal`, which serialize with
-# `ActiveSupport::MessagePack`.
-# `ActiveSupport::MessagePack` can roundtrip some Ruby types that are not
-# supported by JSON, and may provide improved performance, but it requires the
-# `msgpack` gem.
-#
-# For more information, see
-# https://guides.rubyonrails.org/v7.1/configuring.html#config-active-support-message-serializer
-#
-# If you are performing a rolling deploy of a Rails 7.1 upgrade, wherein servers
-# that have not yet been upgraded must be able to read messages from upgraded
-# servers, first deploy without changing the serializer, then set the serializer
-# in a subsequent deploy.
 #++
 Rails.application.config.active_support.
   message_serializer = :json_allow_marshal
@@ -165,13 +132,11 @@ Rails.application.config.active_support.
 # cannot be read by older versions of Rails. However, messages that use the old
 # format can still be read, regardless of whether this optimization is enabled.
 #
-# To perform a rolling deploy of a Rails 7.1 upgrade, wherein servers that have
-# not yet been upgraded must be able to read messages from upgraded servers,
-# leave this optimization off on the first deploy, then enable it on a
-# subsequent deploy.
+# See the deploy-model note above -- MO's single-process stop/start deploy
+# means this is safe to turn on directly.
 #++
-# Rails.application.config.active_support.
-#   use_message_serializer_for_metadata = true
+Rails.application.config.active_support.
+  use_message_serializer_for_metadata = true
 
 ###
 # Set the maximum size for Rails log files.
@@ -215,22 +180,19 @@ Rails.application.config.active_record.before_committed_on_all_records = true
 
 ###
 # Disable automatic column serialization into YAML.
-# To keep the historic behavior, you can set it to `YAML`, however it is
-# recommended to explicitly define the serialization method for each column
-# rather than to rely on a global default.
+# MO's `serialize` calls (Naming, InatImport, Observation, User, UserStats)
+# each specify a `coder:`, so none fall back to this app-wide default.
 #++
-# Rails.application.config.active_record.default_column_serializer = nil
+Rails.application.config.active_record.default_column_serializer = nil
 
 ###
 # Enable a performance optimization that serializes Active Record models
 # in a faster and more compact way.
 #
-# To perform a rolling deploy of a Rails 7.1 upgrade, wherein servers that have
-# not yet been upgraded must be able to read caches from upgraded servers,
-# leave this optimization off on the first deploy, then enable it on a
-# subsequent deploy.
+# See the deploy-model note above -- MO's single-process stop/start deploy
+# means this is safe to turn on directly.
 #++
-# Rails.application.config.active_record.marshalling_format_version = 7.1
+Rails.application.config.active_record.marshalling_format_version = 7.1
 
 ###
 # Run `after_commit` and `after_*_commit` callbacks in the order they are
@@ -241,11 +203,10 @@ Rails.application.config.active_record.
   run_after_transaction_callbacks_in_order_defined = true
 
 ###
-# Whether a `transaction` block is committed or rolled back when exited via
-# `return`, `break` or `throw`.
+# commit_transaction_on_non_local_return: dead on Rails 7.2.3.2 -- the
+# getter/setter are bare deprecation-warning shims now, so setting it does
+# nothing but log a warning. Not set.
 #++
-# Rails.application.config.active_record.
-#   commit_transaction_on_non_local_return = true
 
 ###
 # Controls when to generate a value for <tt>has_secure_token</tt> declarations.
@@ -261,11 +222,8 @@ Rails.application.config.active_record.generate_secure_token_on = :initialize
 # will have a different format that is not supported by Rails 7.0
 # applications.
 #
-# Only change this value after your application is fully deployed to Rails 7.1
-# and you have no plans to rollback.
-# When you're ready to change format, add this to `config/application.rb` (NOT
-# this file):
-#   config.active_support.cache_format_version = 7.1
+# See the deploy-model note above -- set in config/application.rb (NOT this
+# file) as config.active_support.cache_format_version = 7.1.
 
 ###
 # Configure Action View to use HTML5 standards-compliant sanitizers when they
@@ -274,26 +232,9 @@ Rails.application.config.active_record.generate_secure_token_on = :initialize
 # `Rails::HTML::Sanitizer.best_supported_vendor` will cause Action View to use
 # HTML5-compliant sanitizers if they are supported, else fall back to HTML4
 # sanitizers.
-#
-# In previous versions of Rails, Action View always used
-# `Rails::HTML4::Sanitizer` as its vendor.
 #++
 Rails.application.config.action_view.sanitizer_vendor =
   Rails::HTML::Sanitizer.best_supported_vendor
-
-###
-# Configure Action Text to use an HTML5 standards-compliant sanitizer when it is
-# supported on your platform.
-#
-# `Rails::HTML::Sanitizer.best_supported_vendor` will cause Action Text to use
-# HTML5-compliantsanitizers if they are supported, else fall back to HTML4
-# sanitizers.
-#
-# In previous versions of Rails, Action Text always used
-# `Rails::HTML4::Sanitizer` as its vendor.
-#++
-# Rails.application.config.action_text.sanitizer_vendor =
-#   Rails::HTML::Sanitizer.best_supported_vendor
 
 ###
 # Configure the log level used by the DebugExceptions middleware when logging
@@ -303,11 +244,12 @@ Rails.application.config.action_dispatch.debug_exception_log_level = :error
 
 ###
 # Configure the test helpers in Action View, Action Dispatch, and
-# rails-dom-testing to use HTML5parsers.
-#
-# Nokogiri::HTML5 isn't supported on JRuby, so JRuby applications must set this
-# to :html4.
+# rails-dom-testing to use HTML5 parsers.
 #
 # In previous versions of Rails, these test helpers always used an HTML4 parser.
+#
+# Widest-impact setting in this file: changes how every assert_select /
+# Capybara HTML assertion in the suite parses markup. Run the full test suite
+# after enabling this, before merging.
 #++
-# Rails.application.config.dom_testing_default_html_version = :html5
+Rails.application.config.dom_testing_default_html_version = :html5

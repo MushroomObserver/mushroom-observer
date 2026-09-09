@@ -94,8 +94,9 @@ class SearchFormTest < ComponentTestCase
                 "[data-search-type-target='barToggle']")
     assert_html(html,
                 "a[data-search-type-target='barToggle'] " \
-                "svg.mo-icon-minus" \
-                "[aria-label='#{:search_bar_fewer_options.l}']")
+                "span[aria-label='#{:search_bar_fewer_options.l}']")
+    assert_html(html,
+                "a[data-search-type-target='barToggle'] svg.mo-icon-minus")
     # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
     # literal.
     assert_html(html,

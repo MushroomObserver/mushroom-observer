@@ -217,11 +217,14 @@ tbody.collapse.show {
 }
 
 // Baseline correction for icon+text pairs that aren't framed as a
-// .btn: plain Link::Get (excludes .inline-icon-link, which sets its
-// own top: 0) and the sidebar heading icons (Icon directly inside a
-// ListGroup::Item div, next to a text span).
+// .btn: plain Link::Get (.inline-icon-link sets top: 0 instead) and
+// the sidebar heading icons. The `> span >` variants cover
+// Components::Icon's title: wrap (moves tooltip attrs off the <svg>
+// onto a wrapping <span>).
 a:not(.btn):not(.inline-icon-link) > .mo-icon,
-.list-group-item > .mo-icon {
+a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
+.list-group-item > .mo-icon,
+.list-group-item > span > .mo-icon {
   top: 2px;
 }
 

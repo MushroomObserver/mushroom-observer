@@ -429,7 +429,7 @@ module Observations
       params = { observation_id: nam.observation_id, id: nam.id.to_s }
       login(nam.user.login)
       get(:edit, params: params)
-      assert_select('option[selected="selected"][value="3.0"]',
+      assert_select('option[selected][value="3.0"]',
                     text: "I'd Call It That")
     end
 
@@ -495,7 +495,7 @@ module Observations
         naming: { name: new_name }
       }
       put(:update, params: params)
-      assert_select('option[selected="selected"][value="3.0"]',
+      assert_select('option[selected][value="3.0"]',
                     text: "I'd Call It That")
     end
 

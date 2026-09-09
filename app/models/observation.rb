@@ -793,9 +793,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # True only for the primary observation of an occurrence that has more
   # than one member -- the one case where the show page merges notes.
   def shows_merged_notes?
+    occurrence_primary? && occurrence.observations.many?
+  end
+
+  # True when this observation is the primary of its occurrence.
+  def occurrence_primary?
     occ = occurrence
-    occ.present? && occ.primary_observation_id == id &&
-      occ.observations.many?
+    occ.present? && occ.primary_observation_id == id
   end
 
   # Key used for general Observation.notes

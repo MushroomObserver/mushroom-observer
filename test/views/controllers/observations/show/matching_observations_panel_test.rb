@@ -25,12 +25,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
 
   def test_siblings_render_with_occurrence_link
     occurrence = occurrences(:occ_field_slip_one)
-    loc = locations(:obs_default_location)
-    Observation.create!(user: users(:rolf), when: Time.zone.now,
-                        location: loc, where: loc.name,
-                        name: names(:boletus_edulis),
-                        occurrence: occurrence)
-    siblings = occurrence.observations.reload.to_a
+    sibling = add_sibling_to(occurrence)
+    siblings = [sibling]
 
     html = render(panel_with(siblings: siblings, occurrence: occurrence))
 
@@ -43,11 +39,121 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     end
   end
 
+  def test_current_observation_renders_first_as_plain_text
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_no_html(
+      html, "a[href='#{routes.permanent_observation_path(current.id)}']",
+      "Current observation should render as plain text, not a link"
+    )
+    assert_html(html,
+                "a[href='#{routes.permanent_observation_path(sibling.id)}']")
+    assert_html(html, "li:first-child",
+                text: "(#{:show_observation_this_observation.l})")
+  end
+
+  def test_every_row_leads_with_id_badge
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".badge-id", text: current.id.to_s)
+    assert_html(html, ".badge-id", text: sibling.id.to_s)
+  end
+
+  # The current observation isn't a link, so its badge shouldn't be
+  # either -- only siblings get the interactive copy-to-clipboard
+  # button form.
+  def test_only_sibling_badges_are_interactive
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, "span.badge-id", text: current.id.to_s)
+    assert_html(html, "button.badge-id", text: sibling.id.to_s)
+  end
+
+  def test_occurrence_primary_gets_star_icon
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: primary, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-is-primary")
+    assert_no_html(html, ".mo-icon-read-only")
+  end
+
+  def test_reflection_gets_read_only_icon
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+    sibling.update_column(:reflected_at, Time.zone.now)
+
+    html = render(panel_with(obs: primary, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-read-only")
+  end
+
+  # The star icon isn't tied to "is the current observation" -- a
+  # sibling that happens to be the occurrence's primary gets it too,
+  # on its link row.
+  def test_primary_as_sibling_gets_star_icon_on_link_row
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    current = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [primary],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-is-primary")
+    assert_html(html,
+                "a[href='#{routes.permanent_observation_path(primary.id)}']")
+  end
+
+  # Both icons apply when the occurrence primary is also a read-only
+  # reflection. The first icon follows the badge (whose margin is the
+  # gap); the second follows the first icon and needs a gap too.
+  def test_primary_and_reflection_icons_both_render_with_second_gapped
+    occurrence = occurrences(:occ_field_slip_one)
+    primary = occurrence.primary_observation
+    primary.update_column(:reflected_at, Time.zone.now)
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: primary, siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_html(html, ".mo-icon-is-primary")
+    assert_no_html(html, "span.icon-text-gap > .mo-icon-is-primary")
+    assert_html(html, "span.icon-text-gap > .mo-icon-read-only")
+  end
+
   private
 
-  def panel_with(siblings:, occurrence:)
+  def add_sibling_to(occurrence)
+    loc = locations(:obs_default_location)
+    Observation.create!(user: users(:rolf), when: Time.zone.now,
+                        location: loc, where: loc.name,
+                        name: names(:boletus_edulis),
+                        occurrence: occurrence)
+  end
+
+  def panel_with(siblings:, occurrence:, obs: @obs)
     Views::Controllers::Observations::Show::MatchingObservationsPanel.new(
-      obs: @obs, occurrence: occurrence, siblings: siblings
+      obs: obs, occurrence: occurrence, siblings: siblings
     )
   end
 end
