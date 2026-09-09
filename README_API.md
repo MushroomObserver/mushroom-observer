@@ -1,6 +1,29 @@
 Mushroom Observer API
 =====================
 
+Intended Use
+------------
+
+Our API is intended for individual MO users to create and modify their and other users' MO Observations (and other objects)
+and for developing applications to support them.
+It is not intended for data scraping or for generalized experimentation with AI, image recognition or large data sets.
+For those purposes you should use the [CSV files](#csv-files) described below.
+
+We're an all-volunteer organization with a tiny budget and scarce resources.
+Using the API to obtain large amounts of data puts an unnecessary strain on those resources and adversely impacts other users.
+If we notice improper usage of the API or usage that seriously impacts our performance we may institute blocks without notification.
+
+Rate and Load Restrictions
+--------------------------
+
+We limit anonymous traffic to MO, including API traffic, by restricting the
+rate of requests to 20 per minute (1 request every 5 seconds on average), and
+less than 50% of the resoures of a single server instance.  A good rule of
+thumb would be to read the "run_time" from the response, and make sure you wait
+at least 5 seconds or the last run_time before making a new request.  If you
+get locked out, please contact us and we can discuss your needs and perhaps
+better ways of achieving them.
+
 Interactive Documentation
 -------------------------
 
@@ -14,18 +37,6 @@ OpenAPI 3.1 spec at [/api-docs/openapi.yaml](https://mushroomobserver.org/api-do
 so it stays current as the API changes. This file covers the context the
 generated docs don't: intended use, bulk-data alternatives, rate limits,
 and how the request styles and API keys work.
-
-Intended Use
-------------
-
-Our API is intended for individual MO users to create and modify their and other users' MO Observations (and other objects)
-and for developing applications to support them.
-It is not intended for data scraping or for generalized experimentation with AI, image recognition or large data sets.
-For those purposes you should use the CSV files described below.
-
-We're an all-volunteer organization with a tiny budget and scarce resources.
-Using the API to obtain large amounts of data puts an unnecessary strain on those resources and adversely impacts other users.
-If we notice improper usage of the API or usage that seriously impacts our performance we may institute blocks without notification.
 
 CSV files
 ---------
@@ -62,17 +73,6 @@ key (see below).
 Responses are JSON by default. XML output still works (via the Accept
 header or `format=xml`) but is deprecated and no longer documented; use
 JSON.
-
-Rate and Load Restrictions
---------------------------
-
-We limit anonymous traffic to MO, including API traffic, by restricting the
-rate of requests to 20 per minute (1 request every 5 seconds on average), and
-less than 50% of the resoures of a single server instance.  A good rule of
-thumb would be to read the "run_time" from the response, and make sure you wait
-at least 5 seconds or the last run_time before making a new request.  If you
-get locked out, please contact us and we can discuss your needs and perhaps
-better ways of achieving them.
 
 GET Requests
 ------------

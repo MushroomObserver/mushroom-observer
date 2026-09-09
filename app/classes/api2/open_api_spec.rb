@@ -19,7 +19,7 @@ class API2
   # Methods a resource does not support (its API2 subclass raises
   # NoMethodForAction) yield no HelpMessage and are omitted from the
   # spec automatically.
-  module OpenapiSpec
+  module OpenAPISpec
     module_function
 
     # action(singular) => url path segment(plural), one per routed

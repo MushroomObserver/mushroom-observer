@@ -39,17 +39,17 @@ namespace :api do
   task openapi: :environment do
     require "fileutils"
     FileUtils.mkdir_p(ApiDocsTasks.dir)
-    yaml = API2::OpenapiSpec.to_yaml
+    yaml = API2::OpenAPISpec.to_yaml
     File.write(ApiDocsTasks.dir.join("openapi.yaml"), yaml)
     ApiDocsTasks.stamp_index(yaml)
     puts("Wrote #{ApiDocsTasks.dir.join("openapi.yaml")} " \
-         "(#{API2::OpenapiSpec::RESOURCES.size} resources, " \
+         "(#{API2::OpenAPISpec::RESOURCES.size} resources, " \
          "#{ApiDocsTasks.version_stamp(yaml)}).")
   end
 
   desc "Fail if public/api-docs/ is stale vs the code"
   task openapi_check: :environment do
-    if ApiDocsTasks.fresh?(API2::OpenapiSpec.to_yaml)
+    if ApiDocsTasks.fresh?(API2::OpenAPISpec.to_yaml)
       puts("api-docs are up to date.")
     else
       abort("api-docs are stale. Run `bin/rails api:openapi` and commit.")

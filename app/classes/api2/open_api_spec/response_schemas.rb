@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class API2
-  module OpenapiSpec
+  module OpenAPISpec
     # Representative top-level response fields per resource, hand-wired
     # from the non-detail branches of the jbuilder partials
     # (app/views/controllers/api2/_*.json.jbuilder). Capturing full

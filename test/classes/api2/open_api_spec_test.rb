@@ -3,11 +3,11 @@
 require("test_helper")
 
 class API2
-  class OpenapiSpecTest < UnitTestCase
+  class OpenAPISpecTest < UnitTestCase
     # Generating the spec introspects every resource/method pair, so
     # build it once and share it across the assertions below.
     def self.spec
-      @spec ||= API2::OpenapiSpec.generate
+      @spec ||= API2::OpenAPISpec.generate
     end
 
     delegate :spec, to: :class
@@ -15,7 +15,7 @@ class API2
     def test_top_level_shape
       assert_equal("3.1.0", spec["openapi"])
       assert_equal("Mushroom Observer API", spec.dig("info", "title"))
-      expected = API2::OpenapiSpec::RESOURCES.values.
+      expected = API2::OpenAPISpec::RESOURCES.values.
                  map { |plural| "/api2/#{plural}" }
       assert_equal(expected, spec["paths"].keys)
       assert_equal(20, spec["paths"].size)
@@ -44,7 +44,7 @@ class API2
       assert(schema.dig("properties", "number_of_records").present?)
       items = schema.dig("properties", "results", "items")
       assert_equal([{ "type" => "integer" },
-                    API2::OpenapiSpec::ResponseSchemas::SCHEMAS[:observation]],
+                    API2::OpenAPISpec::ResponseSchemas::SCHEMAS[:observation]],
                    items["oneOf"])
     end
 
@@ -56,8 +56,8 @@ class API2
     end
 
     def test_response_schemas_cover_every_resource
-      assert_equal(API2::OpenapiSpec::RESOURCES.keys,
-                   API2::OpenapiSpec::ResponseSchemas::SCHEMAS.keys)
+      assert_equal(API2::OpenAPISpec::RESOURCES.keys,
+                   API2::OpenAPISpec::ResponseSchemas::SCHEMAS.keys)
     end
 
     # Resources whose API2 subclass raises NoMethodForAction for a
@@ -137,7 +137,7 @@ class API2
     end
 
     def test_to_yaml_is_alias_free_and_parses
-      yaml = API2::OpenapiSpec.to_yaml(resources: [:observation])
+      yaml = API2::OpenAPISpec.to_yaml(resources: [:observation])
 
       assert_no_match(/ &\d| \*\d/, yaml, "YAML should have no anchors")
       parsed = YAML.safe_load(yaml)
@@ -146,7 +146,7 @@ class API2
 
     def test_generator_leaves_no_temp_api_keys
       before = APIKey.where(notes: "openapi-spec-generator").count
-      API2::OpenapiSpec.generate(resources: [:name])
+      API2::OpenAPISpec.generate(resources: [:name])
       after = APIKey.where(notes: "openapi-spec-generator").count
 
       assert_equal(before, after, "temp keys must be cleaned up")
