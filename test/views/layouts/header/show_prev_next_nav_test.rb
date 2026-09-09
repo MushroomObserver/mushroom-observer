@@ -158,9 +158,9 @@ module Views::Layouts
       assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")
-      # navbar-left comes from Components::Navbar::LEFT_CLASS, not a
+      # mr-auto comes from Components::Navbar::LEFT_CLASS, not a
       # raw literal.
-      assert_html(html, "a.prev_object_link.navbar-left")
+      assert_html(html, "a.prev_object_link.mr-auto")
     end
 
     def test_links_have_tooltips

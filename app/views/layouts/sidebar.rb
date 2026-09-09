@@ -45,12 +45,12 @@ class Views::Layouts::Sidebar < Views::Base
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo
-        Navbar(variant: :inverse, element: :div, class: "sidebar-nav",
+        Navbar(variant: :dark, element: :div, class: "sidebar-nav",
                data_controller: "nav-active") do
-          # `w-100`: `.navbar.navbar-flex`'s BS4 bridge rule makes this
-          # element's parent `display: flex`; without an explicit
-          # width this direct child would shrink to content size
-          # instead of staying full width.
+          # `w-100`: this element's parent is `.navbar`, which BS4
+          # makes `display: flex`; without an explicit width this
+          # direct child would shrink to content size instead of
+          # staying full width.
           div(class: "list-group w-100") do
             render_top_section
             render_context_nav_mobile if @user
