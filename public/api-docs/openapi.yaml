@@ -9,6 +9,4009 @@ info:
 servers:
 - url: https://mushroomobserver.org
 paths:
+  "/api2/api_keys":
+    post:
+      summary: Create api_key
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                for_user:
+                  type: string
+                  description: user you are creating api key for
+                app:
+                  type: string
+                  description: identifier used to help user distinguish which api
+                    key belongs to which app
+                password:
+                  type: string
+                  description: password of the user you are creating an API key for
+      responses:
+        '200':
+          description: Matching api_keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        key:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        last_used:
+                          type: string
+                          format: date-time
+                        verified:
+                          type: string
+                          format: date-time
+                        num_uses:
+                          type: integer
+  "/api2/collection_numbers":
+    get:
+      summary: Search / read collection_numbers
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a collection_number
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: collector
+        in: query
+        required: false
+        description: collector's name
+        schema:
+          type: string
+      - name: number
+        in: query
+        required: false
+        description: collector's number
+        schema:
+          type: string
+      - name: collector_has
+        in: query
+        required: false
+        description: search within collector's name
+        schema:
+          type: string
+      - name: number_has
+        in: query
+        required: false
+        description: search within collector's number
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Matching collection_numbers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        collector:
+                          type: string
+                        number:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        user_id:
+                          type: integer
+    post:
+      summary: Create collection_number
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                observation:
+                  type: string
+                collector:
+                  type: string
+                  description: collector's name
+                number:
+                  type: string
+                  description: collector's number
+      responses:
+        '200':
+          description: Matching collection_numbers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        collector:
+                          type: string
+                        number:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        user_id:
+                          type: integer
+    patch:
+      summary: Update collection_numbers
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a collection_number
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: collector
+        in: query
+        required: false
+        description: collector's name
+        schema:
+          type: string
+      - name: number
+        in: query
+        required: false
+        description: collector's number
+        schema:
+          type: string
+      - name: collector_has
+        in: query
+        required: false
+        description: search within collector's name
+        schema:
+          type: string
+      - name: number_has
+        in: query
+        required: false
+        description: search within collector's number
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add_observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                  description: attach the record to these observations
+                remove_observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                  description: detach the record from these observations
+                set_collector:
+                  type: string
+                  description: change the collector name
+                set_number:
+                  type: string
+                  description: change the collector number
+      responses:
+        '200':
+          description: Matching collection_numbers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        collector:
+                          type: string
+                        number:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        user_id:
+                          type: integer
+    delete:
+      summary: Delete collection_numbers
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a collection_number
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: collector
+        in: query
+        required: false
+        description: collector's name
+        schema:
+          type: string
+      - name: number
+        in: query
+        required: false
+        description: collector's number
+        schema:
+          type: string
+      - name: collector_has
+        in: query
+        required: false
+        description: search within collector's name
+        schema:
+          type: string
+      - name: number_has
+        in: query
+        required: false
+        description: search within collector's number
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Deleted
+  "/api2/comments":
+    get:
+      summary: Search / read comments
+      parameters:
+      - name: target
+        in: query
+        required: false
+        description: 'e.g. "observation #1234" or "name #5678"'
+        schema:
+          type: string
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a comment
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: summary_has
+        in: query
+        required: false
+        description: search within summary
+        schema:
+          type: string
+      - name: content_has
+        in: query
+        required: false
+        description: search within body
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Matching comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        summary:
+                          type: string
+                        content:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        object_type:
+                          type: string
+                        object_id:
+                          type: integer
+                        owner_id:
+                          type: integer
+    post:
+      summary: Create comment
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+                summary:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Matching comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        summary:
+                          type: string
+                        content:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        object_type:
+                          type: string
+                        object_id:
+                          type: integer
+                        owner_id:
+                          type: integer
+    patch:
+      summary: Update comments
+      security:
+      - api_key: []
+      parameters:
+      - name: target
+        in: query
+        required: false
+        description: 'e.g. "observation #1234" or "name #5678"'
+        schema:
+          type: string
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a comment
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: summary_has
+        in: query
+        required: false
+        description: search within summary
+        schema:
+          type: string
+      - name: content_has
+        in: query
+        required: false
+        description: search within body
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_summary:
+                  type: string
+                set_content:
+                  type: string
+      responses:
+        '200':
+          description: Matching comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        summary:
+                          type: string
+                        content:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        object_type:
+                          type: string
+                        object_id:
+                          type: integer
+                        owner_id:
+                          type: integer
+    delete:
+      summary: Delete comments
+      security:
+      - api_key: []
+      parameters:
+      - name: target
+        in: query
+        required: false
+        description: 'e.g. "observation #1234" or "name #5678"'
+        schema:
+          type: string
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a comment
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: summary_has
+        in: query
+        required: false
+        description: search within summary
+        schema:
+          type: string
+      - name: content_has
+        in: query
+        required: false
+        description: search within body
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Deleted
+  "/api2/external_links":
+    get:
+      summary: Search / read external_links
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: external_site
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a external_site
+          description: comma-separated list
+      responses:
+        '200':
+          description: Matching external_links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        url:
+                          type: string
+                          format: uri
+                        external_id:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_id:
+                          type: integer
+                        owner_id:
+                          type: integer
+                        external_site_id:
+                          type: integer
+    post:
+      summary: Create external_link
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                observation:
+                  type: string
+                external_site:
+                  type: string
+                url:
+                  type: string
+      responses:
+        '200':
+          description: Matching external_links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        url:
+                          type: string
+                          format: uri
+                        external_id:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_id:
+                          type: integer
+                        owner_id:
+                          type: integer
+                        external_site_id:
+                          type: integer
+    patch:
+      summary: Update external_links
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: external_site
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a external_site
+          description: comma-separated list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_url:
+                  type: string
+      responses:
+        '200':
+          description: Matching external_links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        url:
+                          type: string
+                          format: uri
+                        external_id:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_id:
+                          type: integer
+                        owner_id:
+                          type: integer
+                        external_site_id:
+                          type: integer
+    delete:
+      summary: Delete external_links
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: external_site
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a external_site
+          description: comma-separated list
+      responses:
+        '200':
+          description: Deleted
+  "/api2/external_sites":
+    get:
+      summary: Search / read external_sites
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a external_site
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Matching external_sites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        project_id:
+                          type: integer
+  "/api2/field_slips":
+    get:
+      summary: Search / read field_slips
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: code
+        in: query
+        required: false
+        description: code printed on the field slip, e.g. "NEMF-00821"
+        schema:
+          type: string
+      - name: code_has
+        in: query
+        required: false
+        description: search within field slip codes
+        schema:
+          type: string
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a observation
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a project
+      responses:
+        '200':
+          description: Matching field_slips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_ids:
+                          type: array
+                          items:
+                            type: integer
+                        project_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    post:
+      summary: Create field_slip
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                observation:
+                  type: string
+                code:
+                  type: string
+                  description: code printed on the field slip, e.g. "NEMF-00821"
+                project:
+                  type: string
+      responses:
+        '200':
+          description: Matching field_slips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_ids:
+                          type: array
+                          items:
+                            type: integer
+                        project_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    patch:
+      summary: Update field_slips
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: code
+        in: query
+        required: false
+        description: code printed on the field slip, e.g. "NEMF-00821"
+        schema:
+          type: string
+      - name: code_has
+        in: query
+        required: false
+        description: search within field slip codes
+        schema:
+          type: string
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a observation
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_observation:
+                  type: string
+                set_code:
+                  type: string
+                  description: change the field slip code
+                set_project:
+                  type: string
+      responses:
+        '200':
+          description: Matching field_slips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_ids:
+                          type: array
+                          items:
+                            type: integer
+                        project_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    delete:
+      summary: Delete field_slips
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: code
+        in: query
+        required: false
+        description: code printed on the field slip, e.g. "NEMF-00821"
+        schema:
+          type: string
+      - name: code_has
+        in: query
+        required: false
+        description: search within field slip codes
+        schema:
+          type: string
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a observation
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a project
+      responses:
+        '200':
+          description: Deleted
+  "/api2/herbaria":
+    get:
+      summary: Search / read herbaria
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: description
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: address
+        in: query
+        required: false
+        description: postal address
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Matching herbaria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        name:
+                          type: string
+                        email:
+                          type: string
+                        address:
+                          type: string
+                        description:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        location_id:
+                          type: integer
+                        personal_user_id:
+                          type: integer
+  "/api2/herbarium_records":
+    get:
+      summary: Search / read herbarium_records
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: initial_det
+        in: query
+        required: false
+        description: initial determination
+        schema:
+          type: string
+      - name: accession_number
+        in: query
+        required: false
+        description: unique fungarium id
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: initial_det_has
+        in: query
+        required: false
+        description: search within initial determination
+        schema:
+          type: string
+      - name: accession_number_has
+        in: query
+        required: false
+        description: search within accession number
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Matching herbarium_records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        initial_determination:
+                          type: string
+                        accession_number:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        herbarium_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    post:
+      summary: Create herbarium_record
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                observation:
+                  type: string
+                herbarium:
+                  type: string
+                initial_det:
+                  type: string
+                  description: initial determination
+                accession_number:
+                  type: string
+                  description: unique fungarium id
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Matching herbarium_records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        initial_determination:
+                          type: string
+                        accession_number:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        herbarium_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    patch:
+      summary: Update herbarium_records
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: initial_det
+        in: query
+        required: false
+        description: initial determination
+        schema:
+          type: string
+      - name: accession_number
+        in: query
+        required: false
+        description: unique fungarium id
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: initial_det_has
+        in: query
+        required: false
+        description: search within initial determination
+        schema:
+          type: string
+      - name: accession_number_has
+        in: query
+        required: false
+        description: search within accession number
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add_observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                  description: attach the record to these observations
+                remove_observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                  description: detach the record from these observations
+                set_herbarium:
+                  type: string
+                set_initial_det:
+                  type: string
+                  description: change the initial determination
+                set_accession_number:
+                  type: string
+                  description: change the fungarium accession number
+                set_notes:
+                  type: string
+      responses:
+        '200':
+          description: Matching herbarium_records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        initial_determination:
+                          type: string
+                        accession_number:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        herbarium_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    delete:
+      summary: Delete herbarium_records
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: initial_det
+        in: query
+        required: false
+        description: initial determination
+        schema:
+          type: string
+      - name: accession_number
+        in: query
+        required: false
+        description: unique fungarium id
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: initial_det_has
+        in: query
+        required: false
+        description: search within initial determination
+        schema:
+          type: string
+      - name: accession_number_has
+        in: query
+        required: false
+        description: search within accession number
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Deleted
+  "/api2/images":
+    get:
+      summary: Search / read images
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a image
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: when photo taken
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: who uploaded the photo
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: has_observation
+        in: query
+        required: false
+        description: is attached to an observation?
+        schema:
+          type: boolean
+      - name: size
+        in: query
+        required: false
+        description: width or height at least 160 for thumbnail, 320 for small, 640
+          for medium, 960 for large, 1280 for huge
+        schema:
+          type: string
+      - name: content_type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: copyright_holder_has
+        in: query
+        required: false
+        description: search within copyright holder
+        schema:
+          type: string
+      - name: license
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a license
+      - name: has_votes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: quality
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Matching images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        copyright_holder:
+                          type: string
+                        notes:
+                          type: string
+                        quality:
+                          type: number
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        original_name:
+                          type: string
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        license:
+                          type: string
+                        content_type:
+                          type: string
+                        md5sum:
+                          type: string
+                        width:
+                          type: integer
+                        height:
+                          type: integer
+                        original_url:
+                          type: string
+                          format: uri
+                        owner_id:
+                          type: integer
+    post:
+      summary: Create image
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                observations:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                vote:
+                  type: string
+                upload_url:
+                  type: string
+                upload_file:
+                  type: string
+                upload:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                  description: when photo taken
+                notes:
+                  type: string
+                copyright_holder:
+                  type: string
+                license:
+                  type: string
+                original_name:
+                  type: string
+                  description: original file name or other private identifier
+                md5sum:
+                  type: string
+                projects:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a project
+      responses:
+        '200':
+          description: Matching images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        copyright_holder:
+                          type: string
+                        notes:
+                          type: string
+                        quality:
+                          type: number
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        original_name:
+                          type: string
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        license:
+                          type: string
+                        content_type:
+                          type: string
+                        md5sum:
+                          type: string
+                        width:
+                          type: integer
+                        height:
+                          type: integer
+                        original_url:
+                          type: string
+                          format: uri
+                        owner_id:
+                          type: integer
+    patch:
+      summary: Update images
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a image
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: when photo taken
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: who uploaded the photo
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: has_observation
+        in: query
+        required: false
+        description: is attached to an observation?
+        schema:
+          type: boolean
+      - name: size
+        in: query
+        required: false
+        description: width or height at least 160 for thumbnail, 320 for small, 640
+          for medium, 960 for large, 1280 for huge
+        schema:
+          type: string
+      - name: content_type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: copyright_holder_has
+        in: query
+        required: false
+        description: search within copyright holder
+        schema:
+          type: string
+      - name: license
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a license
+      - name: has_votes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: quality
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_dhash:
+                  type: integer
+                set_date:
+                  type: string
+                  format: date
+                  description: when photo taken
+                set_notes:
+                  type: string
+                set_copyright_holder:
+                  type: string
+                set_license:
+                  type: string
+                set_original_name:
+                  type: string
+                  description: original file name or other private identifier
+      responses:
+        '200':
+          description: Matching images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        copyright_holder:
+                          type: string
+                        notes:
+                          type: string
+                        quality:
+                          type: number
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        original_name:
+                          type: string
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        license:
+                          type: string
+                        content_type:
+                          type: string
+                        md5sum:
+                          type: string
+                        width:
+                          type: integer
+                        height:
+                          type: integer
+                        original_url:
+                          type: string
+                          format: uri
+                        owner_id:
+                          type: integer
+    delete:
+      summary: Delete images
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a image
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: when photo taken
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: who uploaded the photo
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: has_observation
+        in: query
+        required: false
+        description: is attached to an observation?
+        schema:
+          type: boolean
+      - name: size
+        in: query
+        required: false
+        description: width or height at least 160 for thumbnail, 320 for small, 640
+          for medium, 960 for large, 1280 for huge
+        schema:
+          type: string
+      - name: content_type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: copyright_holder_has
+        in: query
+        required: false
+        description: search within copyright holder
+        schema:
+          type: string
+      - name: license
+        in: query
+        required: false
+        schema:
+          type: string
+          description: id or name of a license
+      - name: has_votes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: quality
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Deleted
+  "/api2/locations":
+    get:
+      summary: Search / read locations
+      parameters:
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      responses:
+        '200':
+          description: Matching locations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        latitude_north:
+                          type: number
+                        latitude_south:
+                          type: number
+                        longitude_east:
+                          type: number
+                        longitude_west:
+                          type: number
+                        altitude_maximum:
+                          type: number
+                        altitude_minimum:
+                          type: number
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+    post:
+      summary: Create location
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: in postal format with country last regardless of user
+                    preference
+                north:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                south:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                east:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                west:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                high:
+                  type: string
+                low:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Matching locations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        latitude_north:
+                          type: number
+                        latitude_south:
+                          type: number
+                        longitude_east:
+                          type: number
+                        longitude_west:
+                          type: number
+                        altitude_maximum:
+                          type: number
+                        altitude_minimum:
+                          type: number
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+    patch:
+      summary: Update locations
+      security:
+      - api_key: []
+      parameters:
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_name:
+                  type: string
+                  description: in postal format with country last regardless of user
+                    preference
+                set_north:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                set_south:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                set_east:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                set_west:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                set_high:
+                  type: string
+                set_low:
+                  type: string
+                set_notes:
+                  type: string
+      responses:
+        '200':
+          description: Matching locations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        latitude_north:
+                          type: number
+                        latitude_south:
+                          type: number
+                        longitude_east:
+                          type: number
+                        longitude_west:
+                          type: number
+                        altitude_maximum:
+                          type: number
+                        altitude_minimum:
+                          type: number
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+  "/api2/location_descriptions":
+    get:
+      summary: Search / read location_descriptions
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      responses:
+        '200':
+          description: Matching location_descriptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        location_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        source_type:
+                          type: string
+                        source_name:
+                          type: string
+                        license:
+                          type: string
+                        public:
+                          type: boolean
+                        locale:
+                          type: string
+                        gen_desc:
+                          type: string
+                        ecology:
+                          type: string
+                        species:
+                          type: string
+                        notes:
+                          type: string
+                        refs:
+                          type: string
+  "/api2/names":
+    get:
+      summary: Search / read names
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: is_deprecated
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: misspellings
+        in: query
+        required: false
+        description: include misspellings? "include" means do not care and "only"
+          means only show misspelt names
+        schema:
+          type: string
+      - name: has_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: rank
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: has_author
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_citation
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_classification
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_description
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: text_name_has
+        in: query
+        required: false
+        description: search within name
+        schema:
+          type: string
+      - name: author_has
+        in: query
+        required: false
+        description: search within author
+        schema:
+          type: string
+      - name: citation_has
+        in: query
+        required: false
+        description: search within citation
+        schema:
+          type: string
+      - name: classification_has
+        in: query
+        required: false
+        description: search within classification
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Matching names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        author:
+                          type: string
+                        rank:
+                          type: string
+                        deprecated:
+                          type: boolean
+                        misspelled:
+                          type: boolean
+                        citation:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        parents:
+                          type: array
+                          items:
+                            type: object
+                        synonym_id:
+                          type: integer
+    post:
+      summary: Create name
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                citation:
+                  type: string
+                classification:
+                  type: string
+                notes:
+                  type: string
+                name:
+                  type: string
+                author:
+                  type: string
+                rank:
+                  type: string
+                deprecated:
+                  type: boolean
+                log:
+                  type: boolean
+                  description: log this action on main page activity log and RSS feed?
+      responses:
+        '200':
+          description: Matching names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        author:
+                          type: string
+                        rank:
+                          type: string
+                        deprecated:
+                          type: boolean
+                        misspelled:
+                          type: boolean
+                        citation:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        parents:
+                          type: array
+                          items:
+                            type: object
+                        synonym_id:
+                          type: integer
+    patch:
+      summary: Update names
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: is_deprecated
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: misspellings
+        in: query
+        required: false
+        description: include misspellings? "include" means do not care and "only"
+          means only show misspelt names
+        schema:
+          type: string
+      - name: has_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: rank
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: has_author
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_citation
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_classification
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_description
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: text_name_has
+        in: query
+        required: false
+        description: search within name
+        schema:
+          type: string
+      - name: author_has
+        in: query
+        required: false
+        description: search within author
+        schema:
+          type: string
+      - name: citation_has
+        in: query
+        required: false
+        description: search within citation
+        schema:
+          type: string
+      - name: classification_has
+        in: query
+        required: false
+        description: search within classification
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: ok_for_export
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_name:
+                  type: string
+                set_author:
+                  type: string
+                set_rank:
+                  type: string
+                set_deprecated:
+                  type: boolean
+                synonymize_with:
+                  type: string
+                clear_synonyms:
+                  type: boolean
+                  description: make it so this name is not synonymized with anything
+                    but leave everything it used to be synonymized with synonyms of
+                    each other
+                set_correct_spelling:
+                  type: string
+                  description: mark this as misspelt and deprecated and synonymize
+                    with the correct spelling
+                set_notes:
+                  type: string
+                set_citation:
+                  type: string
+                set_classification:
+                  type: string
+      responses:
+        '200':
+          description: Matching names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        author:
+                          type: string
+                        rank:
+                          type: string
+                        deprecated:
+                          type: boolean
+                        misspelled:
+                          type: boolean
+                        citation:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        parents:
+                          type: array
+                          items:
+                            type: object
+                        synonym_id:
+                          type: integer
+  "/api2/name_descriptions":
+    get:
+      summary: Search / read name_descriptions
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator / first to use
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Matching name_descriptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        name_id:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        ok_for_export:
+                          type: boolean
+                        source_type:
+                          type: string
+                        source_name:
+                          type: string
+                        license:
+                          type: string
+                        public:
+                          type: boolean
+                        locale:
+                          type: string
+                        gen_desc:
+                          type: string
+                        diag_desc:
+                          type: string
+                        distribution:
+                          type: string
+                        habitat:
+                          type: string
+                        look_alikes:
+                          type: string
+                        uses:
+                          type: string
+                        notes:
+                          type: string
+                        refs:
+                          type: string
+                        classification:
+                          type: string
+  "/api2/namings":
+    get:
+      summary: Search / read namings
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a naming
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        description: namings on these observations
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        description: namings that propose any of these names
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      responses:
+        '200':
+          description: Matching namings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        confidence:
+                          type: number
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        name:
+                          type: object
+                        owner_id:
+                          type: integer
+                        observation_id:
+                          type: integer
+                        reasons:
+                          type: array
+                          items:
+                            type: object
+    post:
+      summary: Create naming
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vote:
+                  type: string
+                reason_1:
+                  type: string
+                reason_2:
+                  type: string
+                reason_3:
+                  type: string
+                reason_4:
+                  type: string
+                observation:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Matching namings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        confidence:
+                          type: number
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        name:
+                          type: object
+                        owner_id:
+                          type: integer
+                        observation_id:
+                          type: integer
+                        reasons:
+                          type: array
+                          items:
+                            type: object
+    patch:
+      summary: Update namings
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a naming
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        description: namings on these observations
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        description: namings that propose any of these names
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_reason_1:
+                  type: string
+                set_reason_2:
+                  type: string
+                set_reason_3:
+                  type: string
+                set_reason_4:
+                  type: string
+                set_name:
+                  type: string
+                set_vote:
+                  type: string
+      responses:
+        '200':
+          description: Matching namings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        confidence:
+                          type: number
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        name:
+                          type: object
+                        owner_id:
+                          type: integer
+                        observation_id:
+                          type: integer
+                        reasons:
+                          type: array
+                          items:
+                            type: object
+    delete:
+      summary: Delete namings
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a naming
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        description: namings on these observations
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        description: namings that propose any of these names
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      responses:
+        '200':
+          description: Deleted
   "/api2/observations":
     get:
       summary: Search / read observations
@@ -252,12 +4255,16 @@ paths:
                           type: boolean
                         specimen_available:
                           type: boolean
+                        occurrence_id:
+                          type: integer
                         is_collection_location:
                           type: boolean
                         confidence:
                           type: number
                         notes:
                           type: string
+                        notes_fields:
+                          type: object
                         created_at:
                           type: string
                           format: date-time
@@ -265,6 +4272,21 @@ paths:
                           type: string
                           format: date-time
                         number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        owner_id:
+                          type: integer
+                        consensus_id:
+                          type: integer
+                        consensus_name:
+                          type: string
+                        location_id:
+                          type: integer
+                        location_name:
+                          type: string
+                        primary_image_id:
                           type: integer
     post:
       summary: Create observation
@@ -382,12 +4404,16 @@ paths:
                           type: boolean
                         specimen_available:
                           type: boolean
+                        occurrence_id:
+                          type: integer
                         is_collection_location:
                           type: boolean
                         confidence:
                           type: number
                         notes:
                           type: string
+                        notes_fields:
+                          type: object
                         created_at:
                           type: string
                           format: date-time
@@ -395,6 +4421,21 @@ paths:
                           type: string
                           format: date-time
                         number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        owner_id:
+                          type: integer
+                        consensus_id:
+                          type: integer
+                        consensus_name:
+                          type: string
+                        location_id:
+                          type: integer
+                        location_name:
+                          type: string
+                        primary_image_id:
                           type: integer
     patch:
       summary: Update observations
@@ -691,12 +4732,16 @@ paths:
                           type: boolean
                         specimen_available:
                           type: boolean
+                        occurrence_id:
+                          type: integer
                         is_collection_location:
                           type: boolean
                         confidence:
                           type: number
                         notes:
                           type: string
+                        notes_fields:
+                          type: object
                         created_at:
                           type: string
                           format: date-time
@@ -704,6 +4749,21 @@ paths:
                           type: string
                           format: date-time
                         number_of_views:
+                          type: integer
+                        last_viewed:
+                          type: string
+                          format: date-time
+                        owner_id:
+                          type: integer
+                        consensus_id:
+                          type: integer
+                        consensus_name:
+                          type: string
+                        location_id:
+                          type: integer
+                        location_name:
+                          type: string
+                        primary_image_id:
                           type: integer
     delete:
       summary: Delete observations
@@ -922,9 +4982,9 @@ paths:
       responses:
         '200':
           description: Deleted
-  "/api2/names":
+  "/api2/occurrences":
     get:
-      summary: Search / read names
+      summary: Search / read occurrences
       parameters:
       - name: id
         in: query
@@ -933,7 +4993,6 @@ paths:
           type: array
           items:
             type: string
-            description: id or name of a name
           description: comma-separated list
       - name: created_at
         in: query
@@ -950,7 +5009,744 @@ paths:
       - name: user
         in: query
         required: false
-        description: creator / first to use
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: field_slip
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      responses:
+        '200':
+          description: Matching occurrences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        primary_observation_id:
+                          type: integer
+                        has_specimen:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_ids:
+                          type: array
+                          items:
+                            type: integer
+                        owner_id:
+                          type: integer
+                        field_slip_id:
+                          type: integer
+    post:
+      summary: Create occurrence
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                primary_observation:
+                  type: string
+      responses:
+        '200':
+          description: Matching occurrences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        primary_observation_id:
+                          type: integer
+                        has_specimen:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_ids:
+                          type: array
+                          items:
+                            type: integer
+                        owner_id:
+                          type: integer
+                        field_slip_id:
+                          type: integer
+    patch:
+      summary: Update occurrences
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: field_slip
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add_observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                remove_observation:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                set_primary_observation:
+                  type: string
+      responses:
+        '200':
+          description: Matching occurrences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        primary_observation_id:
+                          type: integer
+                        has_specimen:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_ids:
+                          type: array
+                          items:
+                            type: integer
+                        owner_id:
+                          type: integer
+                        field_slip_id:
+                          type: integer
+    delete:
+      summary: Delete occurrences
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: observation
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a observation
+          description: comma-separated list
+      - name: field_slip
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      responses:
+        '200':
+          description: Deleted
+  "/api2/projects":
+    get:
+      summary: Search / read projects
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: has_images
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_observations
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_species_lists
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_summary
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: title_has
+        in: query
+        required: false
+        description: search within title
+        schema:
+          type: string
+      - name: summary_has
+        in: query
+        required: false
+        description: search within summary
+        schema:
+          type: string
+      - name: field_slip_prefix_has
+        in: query
+        required: false
+        description: search within field slip prefix
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Matching projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        creator_id:
+                          type: integer
+    post:
+      summary: Create project
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admins:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a user
+                members:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a user
+                title:
+                  type: string
+                summary:
+                  type: string
+                field_slip_prefix:
+                  type: string
+      responses:
+        '200':
+          description: Matching projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        creator_id:
+                          type: integer
+    patch:
+      summary: Update projects
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: has_images
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_observations
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_species_lists
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_summary
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: title_has
+        in: query
+        required: false
+        description: search within title
+        schema:
+          type: string
+      - name: summary_has
+        in: query
+        required: false
+        description: search within summary
+        schema:
+          type: string
+      - name: field_slip_prefix_has
+        in: query
+        required: false
+        description: search within field slip prefix
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add_admins:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a user
+                remove_admins:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a user
+                add_members:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a user
+                remove_members:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a user
+                add_images:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a image
+                remove_images:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a image
+                add_observations:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                remove_observations:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                add_species_lists:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a species_list
+                remove_species_lists:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a species_list
+                set_title:
+                  type: string
+                set_summary:
+                  type: string
+                set_field_slip_prefix:
+                  type: string
+      responses:
+        '200':
+          description: Matching projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        creator_id:
+                          type: integer
+  "/api2/sequences":
+    get:
+      summary: Search / read sequences
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a sequence
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: locus
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: archive
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: accession
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: locus_has
+        in: query
+        required: false
+        description: search within locus
+        schema:
+          type: string
+      - name: accession_has
+        in: query
+        required: false
+        description: search within accession number
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: obs_date
+        in: query
+        required: false
+        description: observation date
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: observer
+        in: query
+        required: false
         schema:
           type: array
           items:
@@ -966,99 +5762,6 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
-      - name: is_deprecated
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: misspellings
-        in: query
-        required: false
-        description: include misspellings? "include" means do not care and "only"
-          means only show misspelt names
-        schema:
-          type: string
-      - name: has_synonyms
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: rank
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: has_author
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: has_citation
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: has_classification
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: has_notes
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: has_comments
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: has_description
-        in: query
-        required: false
-        schema:
-          type: boolean
-      - name: text_name_has
-        in: query
-        required: false
-        description: search within name
-        schema:
-          type: string
-      - name: author_has
-        in: query
-        required: false
-        description: search within author
-        schema:
-          type: string
-      - name: citation_has
-        in: query
-        required: false
-        description: search within citation
-        schema:
-          type: string
-      - name: classification_has
-        in: query
-        required: false
-        description: search within classification
-        schema:
-          type: string
-      - name: notes_has
-        in: query
-        required: false
-        description: search within notes
-        schema:
-          type: string
-      - name: comments_has
-        in: query
-        required: false
-        description: search within comments summary and body
-        schema:
-          type: string
-      - name: ok_for_export
-        in: query
-        required: false
-        schema:
-          type: boolean
       - name: location
         in: query
         required: false
@@ -1066,6 +5769,34 @@ paths:
           type: array
           items:
             type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: herbarium_record
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
           description: comma-separated list
       - name: species_list
         in: query
@@ -1074,7 +5805,53 @@ paths:
           type: array
           items:
             type: string
+            description: id or name of a species_list
           description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: is_collection_location
+        in: query
+        required: false
+        description: is this location where mushroom was found?
+        schema:
+          type: boolean
+      - name: has_images
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_name
+        in: query
+        required: false
+        description: group or genus or better
+        schema:
+          type: boolean
+      - name: has_specimen
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_obs_notes
+        in: query
+        required: false
+        description: observation has notes?
+        schema:
+          type: boolean
+      - name: has_notes_field
+        in: query
+        required: false
+        description: is given observation notes template field filled in?
+        schema:
+          type: string
+      - name: obs_notes_has
+        in: query
+        required: false
+        description: search within observation notes
+        schema:
+          type: string
       - name: include_synonyms
         in: query
         required: false
@@ -1087,7 +5864,7 @@ paths:
           type: boolean
       responses:
         '200':
-          description: Matching names
+          description: Matching sequences
           content:
             application/json:
               schema:
@@ -1102,22 +5879,28 @@ paths:
                           type: integer
                         type:
                           type: string
-                        name:
+                        locus:
                           type: string
-                        author:
+                        bases:
                           type: string
-                        rank:
+                        archive:
                           type: string
-                        deprecated:
-                          type: boolean
+                        accession:
+                          type: string
+                        notes:
+                          type: string
                         created_at:
                           type: string
                           format: date-time
                         updated_at:
                           type: string
                           format: date-time
+                        observation_id:
+                          type: integer
+                        user_id:
+                          type: integer
     post:
-      summary: Create name
+      summary: Create sequence
       security:
       - api_key: []
       requestBody:
@@ -1127,26 +5910,21 @@ paths:
             schema:
               type: object
               properties:
-                citation:
+                observation:
                   type: string
-                classification:
+                locus:
+                  type: string
+                bases:
+                  type: string
+                archive:
+                  type: string
+                accession:
                   type: string
                 notes:
                   type: string
-                name:
-                  type: string
-                author:
-                  type: string
-                rank:
-                  type: string
-                deprecated:
-                  type: boolean
-                log:
-                  type: boolean
-                  description: log this action on main page activity log and RSS feed?
       responses:
         '200':
-          description: Matching names
+          description: Matching sequences
           content:
             application/json:
               schema:
@@ -1161,22 +5939,28 @@ paths:
                           type: integer
                         type:
                           type: string
-                        name:
+                        locus:
                           type: string
-                        author:
+                        bases:
                           type: string
-                        rank:
+                        archive:
                           type: string
-                        deprecated:
-                          type: boolean
+                        accession:
+                          type: string
+                        notes:
+                          type: string
                         created_at:
                           type: string
                           format: date-time
                         updated_at:
                           type: string
                           format: date-time
+                        observation_id:
+                          type: integer
+                        user_id:
+                          type: integer
     patch:
-      summary: Update names
+      summary: Update sequences
       security:
       - api_key: []
       parameters:
@@ -1187,7 +5971,7 @@ paths:
           type: array
           items:
             type: string
-            description: id or name of a name
+            description: id or name of a sequence
           description: comma-separated list
       - name: created_at
         in: query
@@ -1204,7 +5988,97 @@ paths:
       - name: user
         in: query
         required: false
-        description: creator / first to use
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: locus
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: archive
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: accession
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: locus_has
+        in: query
+        required: false
+        description: search within locus
+        schema:
+          type: string
+      - name: accession_has
+        in: query
+        required: false
+        description: search within accession number
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: obs_date
+        in: query
+        required: false
+        description: observation date
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: observer
+        in: query
+        required: false
         schema:
           type: array
           items:
@@ -1220,43 +6094,458 @@ paths:
             type: string
             description: id or name of a name
           description: comma-separated list
-      - name: is_deprecated
+      - name: location
         in: query
         required: false
         schema:
-          type: boolean
-      - name: misspellings
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: herbarium
         in: query
         required: false
-        description: include misspellings? "include" means do not care and "only"
-          means only show misspelt names
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: herbarium_record
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
         schema:
           type: string
-      - name: has_synonyms
+      - name: is_collection_location
+        in: query
+        required: false
+        description: is this location where mushroom was found?
+        schema:
+          type: boolean
+      - name: has_images
         in: query
         required: false
         schema:
           type: boolean
-      - name: rank
+      - name: has_name
+        in: query
+        required: false
+        description: group or genus or better
+        schema:
+          type: boolean
+      - name: has_specimen
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_obs_notes
+        in: query
+        required: false
+        description: observation has notes?
+        schema:
+          type: boolean
+      - name: has_notes_field
+        in: query
+        required: false
+        description: is given observation notes template field filled in?
+        schema:
+          type: string
+      - name: obs_notes_has
+        in: query
+        required: false
+        description: search within observation notes
+        schema:
+          type: string
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_locus:
+                  type: string
+                set_bases:
+                  type: string
+                set_archive:
+                  type: string
+                set_accession:
+                  type: string
+                set_notes:
+                  type: string
+      responses:
+        '200':
+          description: Matching sequences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        locus:
+                          type: string
+                        bases:
+                          type: string
+                        archive:
+                          type: string
+                        accession:
+                          type: string
+                        notes:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        observation_id:
+                          type: integer
+                        user_id:
+                          type: integer
+    delete:
+      summary: Delete sequences
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a sequence
+          description: comma-separated list
+      - name: created_at
         in: query
         required: false
         schema:
           type: string
-      - name: has_author
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: locus
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: archive
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: accession
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: comma-separated list
+      - name: locus_has
+        in: query
+        required: false
+        description: search within locus
+        schema:
+          type: string
+      - name: accession_has
+        in: query
+        required: false
+        description: search within accession number
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: north
+        in: query
+        required: false
+        description: max latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: south
+        in: query
+        required: false
+        description: min latitude
+        schema:
+          type: number
+          minimum: -90
+          maximum: 90
+      - name: east
+        in: query
+        required: false
+        description: max longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: west
+        in: query
+        required: false
+        description: min longitude
+        schema:
+          type: number
+          minimum: -180
+          maximum: 180
+      - name: obs_date
+        in: query
+        required: false
+        description: observation date
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: observer
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: herbarium
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium
+          description: comma-separated list
+      - name: herbarium_record
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a herbarium_record
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: species_list
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: confidence
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: is_collection_location
+        in: query
+        required: false
+        description: is this location where mushroom was found?
+        schema:
+          type: boolean
+      - name: has_images
         in: query
         required: false
         schema:
           type: boolean
-      - name: has_citation
+      - name: has_name
+        in: query
+        required: false
+        description: group or genus or better
+        schema:
+          type: boolean
+      - name: has_specimen
         in: query
         required: false
         schema:
           type: boolean
-      - name: has_classification
+      - name: has_obs_notes
+        in: query
+        required: false
+        description: observation has notes?
+        schema:
+          type: boolean
+      - name: has_notes_field
+        in: query
+        required: false
+        description: is given observation notes template field filled in?
+        schema:
+          type: string
+      - name: obs_notes_has
+        in: query
+        required: false
+        description: search within observation notes
+        schema:
+          type: string
+      - name: include_synonyms
         in: query
         required: false
         schema:
           type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Deleted
+  "/api2/species_lists":
+    get:
+      summary: Search / read species_lists
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: this date can mean anything you want
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
       - name: has_notes
         in: query
         required: false
@@ -1267,33 +6556,10 @@ paths:
         required: false
         schema:
           type: boolean
-      - name: has_description
+      - name: title_has
         in: query
         required: false
-        schema:
-          type: boolean
-      - name: text_name_has
-        in: query
-        required: false
-        description: search within name
-        schema:
-          type: string
-      - name: author_has
-        in: query
-        required: false
-        description: search within author
-        schema:
-          type: string
-      - name: citation_has
-        in: query
-        required: false
-        description: search within citation
-        schema:
-          type: string
-      - name: classification_has
-        in: query
-        required: false
-        description: search within classification
+        description: search within title
         schema:
           type: string
       - name: notes_has
@@ -1308,11 +6574,160 @@ paths:
         description: search within comments summary and body
         schema:
           type: string
-      - name: ok_for_export
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: include_synonyms
         in: query
         required: false
         schema:
           type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Matching species_lists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        title:
+                          type: string
+                        notes:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        owner_id:
+                          type: integer
+                        location_id:
+                          type: integer
+                        location_name:
+                          type: string
+    post:
+      summary: Create species_list
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                location:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Matching species_lists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        title:
+                          type: string
+                        notes:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        owner_id:
+                          type: integer
+                        location_id:
+                          type: integer
+                        location_name:
+                          type: string
+    patch:
+      summary: Update species_lists
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: this date can mean anything you want
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
       - name: location
         in: query
         required: false
@@ -1320,14 +6735,53 @@ paths:
           type: array
           items:
             type: string
+            description: id or name of a location
           description: comma-separated list
-      - name: species_list
+      - name: project
         in: query
         required: false
         schema:
           type: array
           items:
             type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: title_has
+        in: query
+        required: false
+        description: search within title
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
           description: comma-separated list
       - name: include_synonyms
         in: query
@@ -1346,34 +6800,28 @@ paths:
             schema:
               type: object
               properties:
-                set_name:
+                add_observations:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                remove_observations:
+                  type: array
+                  items:
+                    type: string
+                    description: id or name of a observation
+                set_title:
                   type: string
-                set_author:
+                set_date:
                   type: string
-                set_rank:
+                  format: date
+                set_location:
                   type: string
-                set_deprecated:
-                  type: boolean
-                synonymize_with:
-                  type: string
-                clear_synonyms:
-                  type: boolean
-                  description: make it so this name is not synonymized with anything
-                    but leave everything it used to be synonymized with synonyms of
-                    each other
-                set_correct_spelling:
-                  type: string
-                  description: mark this as misspelt and deprecated and synonymize
-                    with the correct spelling
                 set_notes:
-                  type: string
-                set_citation:
-                  type: string
-                set_classification:
                   type: string
       responses:
         '200':
-          description: Matching names
+          description: Matching species_lists
           content:
             application/json:
               schema:
@@ -1388,17 +6836,415 @@ paths:
                           type: integer
                         type:
                           type: string
-                        name:
+                        title:
                           type: string
-                        author:
+                        notes:
                           type: string
-                        rank:
+                        date:
                           type: string
-                        deprecated:
-                          type: boolean
+                          format: date
                         created_at:
                           type: string
                           format: date-time
                         updated_at:
                           type: string
                           format: date-time
+                        owner_id:
+                          type: integer
+                        location_id:
+                          type: integer
+                        location_name:
+                          type: string
+    delete:
+      summary: Delete species_lists
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a species_list
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: date
+        in: query
+        required: false
+        description: this date can mean anything you want
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: user
+        in: query
+        required: false
+        description: creator
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a location
+          description: comma-separated list
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a project
+          description: comma-separated list
+      - name: has_notes
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: has_comments
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: title_has
+        in: query
+        required: false
+        description: search within title
+        schema:
+          type: string
+      - name: notes_has
+        in: query
+        required: false
+        description: search within notes
+        schema:
+          type: string
+      - name: comments_has
+        in: query
+        required: false
+        description: search within comments summary and body
+        schema:
+          type: string
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a name
+          description: comma-separated list
+      - name: include_synonyms
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: include_subtaxa
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Deleted
+  "/api2/users":
+    get:
+      summary: Search / read users
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      responses:
+        '200':
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        login_name:
+                          type: string
+                        legal_name:
+                          type: string
+                        joined:
+                          type: string
+                          format: date-time
+                        verified:
+                          type: string
+                          format: date-time
+                        last_login:
+                          type: string
+                          format: date-time
+                        last_activity:
+                          type: string
+                          format: date-time
+                        contribution:
+                          type: integer
+                        notes:
+                          type: string
+                        notes_template:
+                          type: array
+                          items:
+                            type: string
+                        mailing_address:
+                          type: string
+                        location_id:
+                          type: integer
+                        image_id:
+                          type: integer
+    post:
+      summary: Create user
+      security:
+      - api_key: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                create_key:
+                  type: string
+                  description: if you pass in your app name here it will create an
+                    api key for the user for your app to use
+                login:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                locale:
+                  type: string
+                notes:
+                  type: string
+                mailing_address:
+                  type: string
+                license:
+                  type: string
+                location:
+                  type: string
+                image:
+                  type: string
+      responses:
+        '200':
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        login_name:
+                          type: string
+                        legal_name:
+                          type: string
+                        joined:
+                          type: string
+                          format: date-time
+                        verified:
+                          type: string
+                          format: date-time
+                        last_login:
+                          type: string
+                          format: date-time
+                        last_activity:
+                          type: string
+                          format: date-time
+                        contribution:
+                          type: integer
+                        notes:
+                          type: string
+                        notes_template:
+                          type: array
+                          items:
+                            type: string
+                        mailing_address:
+                          type: string
+                        location_id:
+                          type: integer
+                        image_id:
+                          type: integer
+    patch:
+      summary: Update users
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                set_locale:
+                  type: string
+                set_notes:
+                  type: string
+                set_mailing_address:
+                  type: string
+                set_license:
+                  type: string
+                set_location:
+                  type: string
+                set_image:
+                  type: string
+      responses:
+        '200':
+          description: Matching users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        type:
+                          type: string
+                        login_name:
+                          type: string
+                        legal_name:
+                          type: string
+                        joined:
+                          type: string
+                          format: date-time
+                        verified:
+                          type: string
+                          format: date-time
+                        last_login:
+                          type: string
+                          format: date-time
+                        last_activity:
+                          type: string
+                          format: date-time
+                        contribution:
+                          type: integer
+                        notes:
+                          type: string
+                        notes_template:
+                          type: array
+                          items:
+                            type: string
+                        mailing_address:
+                          type: string
+                        location_id:
+                          type: integer
+                        image_id:
+                          type: integer
+    delete:
+      summary: Delete users
+      security:
+      - api_key: []
+      parameters:
+      - name: id
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            description: id or name of a user
+          description: comma-separated list
+      - name: created_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      - name: updated_at
+        in: query
+        required: false
+        schema:
+          type: string
+          description: range, submitted as `min-max`
+      responses:
+        '200':
+          description: Deleted
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: query
+      name: api_key

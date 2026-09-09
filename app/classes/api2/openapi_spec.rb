@@ -12,17 +12,40 @@ class API2
   # lives next to the code, not in a separate doc that can rot.
   #
   # The response side is hand-wired per resource for now (see
-  # RESPONSE_SCHEMAS); capturing full response schemas from the API2
+  # ResponseSchemas); capturing full response schemas from the API2
   # test suite is the planned follow-up. XML output is deprecated and is
   # intentionally not described here.
   #
-  # This is a proof of concept scoped to two resources; it is built to
-  # extend to all of API2::ACTIONS.
+  # Methods a resource does not support (its API2 subclass raises
+  # NoMethodForAction) yield no HelpMessage and are omitted from the
+  # spec automatically.
   module OpenapiSpec
     module_function
 
-    # action(singular) => url path segment(plural). PoC: two resources.
-    RESOURCES = { observation: "observations", name: "names" }.freeze
+    # action(singular) => url path segment(plural), one per routed
+    # api2 resource (config/routes.rb).
+    RESOURCES = {
+      api_key: "api_keys",
+      collection_number: "collection_numbers",
+      comment: "comments",
+      external_link: "external_links",
+      external_site: "external_sites",
+      field_slip: "field_slips",
+      herbarium: "herbaria",
+      herbarium_record: "herbarium_records",
+      image: "images",
+      location: "locations",
+      location_description: "location_descriptions",
+      name: "names",
+      name_description: "name_descriptions",
+      naming: "namings",
+      observation: "observations",
+      occurrence: "occurrences",
+      project: "projects",
+      sequence: "sequences",
+      species_list: "species_lists",
+      user: "users"
+    }.freeze
 
     # Meta params handled globally, not per-endpoint.
     META_PARAMS = [:method, :action, :version, :api_key, :page, :detail,
@@ -57,7 +80,13 @@ class API2
         "openapi" => "3.1.0",
         "info" => info,
         "servers" => [{ "url" => "https://mushroomobserver.org" }],
-        "paths" => build_paths(resources)
+        "paths" => build_paths(resources),
+        "components" => {
+          "securitySchemes" => {
+            "api_key" => { "type" => "apiKey", "in" => "query",
+                           "name" => "api_key" }
+          }
+        }
       }
     end
 
@@ -97,28 +126,32 @@ class API2
     end
 
     def get_operation(action)
-      params = query_parameters(introspect(action, "GET"))
+      decls = introspect(action, "GET")
+      return nil if decls.nil?
+
       {
         "summary" => "Search / read #{RESOURCES.fetch(action)}",
-        "parameters" => params,
+        "parameters" => query_parameters(decls),
         "responses" => ok_response(action)
       }
     end
 
     def post_operation(action)
-      body = body_schema(introspect(action, "POST", auth: true))
-      return nil if body.nil?
+      decls = introspect(action, "POST", auth: true)
+      return nil if decls.blank?
 
       {
         "summary" => "Create #{action}",
         "security" => [{ "api_key" => [] }],
-        "requestBody" => request_body(body),
+        "requestBody" => request_body(body_schema(decls)),
         "responses" => ok_response(action)
       }
     end
 
     def patch_operation(action)
       decls = introspect(action, "PATCH", auth: true)
+      return nil if decls.nil?
+
       updates, query = decls.partition(&:set_parameter?)
       return nil if updates.empty?
 
@@ -133,7 +166,7 @@ class API2
 
     def delete_operation(action)
       decls = introspect(action, "DELETE", auth: true)
-      return nil if decls.empty?
+      return nil if decls.blank?
 
       {
         "summary" => "Delete #{RESOURCES.fetch(action)}",
@@ -146,14 +179,16 @@ class API2
     # ---- param introspection ----------------------------------------
 
     # Declared, non-meta, non-deprecated params for one endpoint/method,
-    # pulled from the HelpMessage the `help` request raises.
+    # pulled from the HelpMessage the `help` request raises. Returns nil
+    # when the endpoint yields no HelpMessage -- i.e. the resource does
+    # not support the method (NoMethodForAction raises before help).
     def introspect(action, method, auth: false)
       key = auth ? temp_api_key : nil
       begin
         api = API2.execute({ method: method, action: action.to_s,
                              help: "1", api_key: key&.key }.compact)
         help = api.errors.find { |e| e.is_a?(API2::HelpMessage) }
-        return [] unless help
+        return nil unless help
 
         help.params.values.reject(&:deprecated?).
           reject { |p| META_PARAMS.include?(p.key) }
@@ -251,49 +286,11 @@ class API2
         "properties" => {
           "results" => {
             "type" => "array",
-            "items" => RESPONSE_SCHEMAS.fetch(action)
+            "items" => ResponseSchemas::SCHEMAS.fetch(action)
           }
         }
       }
     end
-
-    # Representative top-level response fields, hand-wired from the
-    # jbuilder partials. Full/detail schemas are the test-capture
-    # follow-up.
-    RESPONSE_SCHEMAS = {
-      observation: {
-        "type" => "object",
-        "properties" => {
-          "id" => { "type" => "integer" },
-          "type" => { "type" => "string" },
-          "date" => { "type" => "string", "format" => "date" },
-          "latitude" => { "type" => "number" },
-          "longitude" => { "type" => "number" },
-          "altitude" => { "type" => "number" },
-          "gps_hidden" => { "type" => "boolean" },
-          "specimen_available" => { "type" => "boolean" },
-          "is_collection_location" => { "type" => "boolean" },
-          "confidence" => { "type" => "number" },
-          "notes" => { "type" => "string" },
-          "created_at" => { "type" => "string", "format" => "date-time" },
-          "updated_at" => { "type" => "string", "format" => "date-time" },
-          "number_of_views" => { "type" => "integer" }
-        }
-      },
-      name: {
-        "type" => "object",
-        "properties" => {
-          "id" => { "type" => "integer" },
-          "type" => { "type" => "string" },
-          "name" => { "type" => "string" },
-          "author" => { "type" => "string" },
-          "rank" => { "type" => "string" },
-          "deprecated" => { "type" => "boolean" },
-          "created_at" => { "type" => "string", "format" => "date-time" },
-          "updated_at" => { "type" => "string", "format" => "date-time" }
-        }
-      }
-    }.freeze
 
     # A verified, throwaway key so write-method help gets past
     # authentication (the help raises before any object is written).
