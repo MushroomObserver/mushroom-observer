@@ -387,11 +387,11 @@ form.button_to {
 .banner-message {
   font-size: 1em;
 
-  @media screen and (min-width: $screen-sm-min) {
+  @media screen and (min-width: breakpoint-min(md)) {
     font-size: 1.2em;
   }
 
-  @media screen and (min-width: $screen-md-min) {
+  @media screen and (min-width: breakpoint-min(lg)) {
     font-size: 1.5em;
   }
 }

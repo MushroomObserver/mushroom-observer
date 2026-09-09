@@ -2,9 +2,7 @@
 
 # Renders a Bootstrap collapse target `<div>`.
 #
-# Centralises the one Bootstrap 3→4 migration risk: Bootstrap 3 uses the
-# class `"in"` for the initially-open state; Bootstrap 4 uses `"show"`.
-# Change the `expanded:` branch here when upgrading.
+# Bootstrap 4 uses the class `"show"` for the initially-open state.
 #
 # @example Basic (initially closed)
 #   Collapsible(id: "my_section") do
@@ -57,7 +55,7 @@ class Components::Collapsible < Components::Base
   def self.collapse_classes(expanded: nil, panel: false, html_class: nil)
     [
       "collapse",
-      ("in" if expanded), # Bootstrap 4: change "in" → "show"
+      ("show" if expanded),
       ("panel-collapse" if panel),
       html_class
     ].compact_blank.join(" ")

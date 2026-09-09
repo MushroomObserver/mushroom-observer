@@ -91,7 +91,7 @@ h5.rss-heading {
   text-overflow: ellipsis;
 }
 
-@media screen and (max-width: $screen-xs-max) {
+@media screen and (max-width: breakpoint-max(sm)) {
   .rss-box-details {
     height: auto !important;
   }

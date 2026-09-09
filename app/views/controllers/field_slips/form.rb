@@ -270,10 +270,7 @@ module Views::Controllers::FieldSlips
     end
 
     def matrix_data
-      {
-        controller: "matrix-table field-slip-form",
-        action: "resize@window->matrix-table#rearrange"
-      }
+      { controller: "field-slip-form" }
     end
 
     def render_observation_row(obs)

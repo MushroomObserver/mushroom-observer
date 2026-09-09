@@ -822,21 +822,6 @@ export default class extends Controller {
   /*      Helpers      */
   /*********************/
 
-  // notice this is for block-level
-  show(element) {
-    if (element !== undefined) {
-      element.style.display = 'block';
-      element.classList.add('in');
-    }
-  }
-
-  hide(element) {
-    if (element !== undefined) {
-      element.classList.remove('in');
-      window.setTimeout(() => { element.style.display = 'none'; }, 600);
-    }
-  }
-
   // Phlex renders submit buttons as <button>, not <input> -- setting
   // .value on a <button> is a no-op for its displayed text (.value is
   // only its submitted form value there).

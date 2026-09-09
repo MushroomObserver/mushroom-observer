@@ -13,7 +13,6 @@ class MatrixTableTest < ComponentTestCase
     html = render(component)
 
     assert_includes(html, "list-unstyled")
-    assert_includes(html, "matrix-table")
   end
 
   def test_renders_observations_without_caching

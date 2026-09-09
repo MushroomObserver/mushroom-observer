@@ -778,7 +778,7 @@
 // larger devices
 // --------------------------------------------------
 
-@media screen and (min-width: $screen-sm-min) {
+@media screen and (min-width: breakpoint-min(sm)) {
   .d-sm-none {
     display: none !important;
   }
@@ -855,7 +855,7 @@
 // display utilities at the remaining BS3 breakpoints -- Components::Column's
 // show_at:/hide_at: (app/components/column.rb) can target any of xs/sm/md/
 // lg, so all three need their .d-{bp}-* set defined, not just sm.
-@media screen and (min-width: $screen-md-min) {
+@media screen and (min-width: breakpoint-min(md)) {
   .d-md-none {
     display: none !important;
   }
@@ -877,7 +877,7 @@
   }
 }
 
-@media screen and (min-width: $screen-lg-min) {
+@media screen and (min-width: breakpoint-min(lg)) {
   .mr-lg-5 {
     margin-right: 3rem !important;
   }
@@ -899,6 +899,30 @@
   }
 
   .d-lg-flex {
+    display: flex !important;
+  }
+}
+
+// MO's widened tier -- see $grid-breakpoints in
+// mo/map_theme_to_bootstrap4.scss.
+@media screen and (min-width: breakpoint-min(xl)) {
+  .d-xl-none {
+    display: none !important;
+  }
+
+  .d-xl-block {
+    display: block !important;
+  }
+
+  .d-xl-inline {
+    display: inline !important;
+  }
+
+  .d-xl-inline-block {
+    display: inline-block !important;
+  }
+
+  .d-xl-flex {
     display: flex !important;
   }
 }

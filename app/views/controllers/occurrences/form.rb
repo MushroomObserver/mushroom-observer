@@ -87,8 +87,7 @@ module Views::Controllers::Occurrences
         element: :ul,
         class: "list-unstyled mt-3",
         data: {
-          controller: "matrix-table occurrence-form",
-          action: "resize@window->matrix-table#rearrange",
+          controller: "occurrence-form",
           "occurrence-form-fallback-value": "source"
         }
       ) do
@@ -142,15 +141,7 @@ module Views::Controllers::Occurrences
     end
 
     def render_matrix_ul(&block)
-      Row(
-        element: :ul,
-        class: "list-unstyled mt-3",
-        data: {
-          controller: "matrix-table",
-          action: "resize@window->matrix-table#rearrange"
-        },
-        &block
-      )
+      Row(element: :ul, class: "list-unstyled mt-3", &block)
     end
 
     # Primary-obs inline edit section (edit mode only). Fields ride

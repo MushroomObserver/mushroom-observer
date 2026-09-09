@@ -58,6 +58,16 @@ $theme-colors: (
 $white:    #fff !default;
 $black:    #000 !default;
 
+// MO's widest layout tier is wider than Bootstrap's stock $xl
+// (1200px) -- everything else stays at Bootstrap's default.
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1320px
+) !default;
+
 // $BODY_TEXT_COLOR/$BODY_BG_COLOR (not $LIGHT_COLOR/$DARK_COLOR)
 // already resolve light/dark per theme -- see color_derivation.scss --
 // so gray-900 (BS4's high-contrast-text extreme) and gray-100 (its
@@ -102,6 +112,9 @@ $headings-color: $BODY_TEXT_COLOR !default;
 $border-radius:    5px !default;
 $border-radius-sm: 5px !default;
 $border-radius-lg: 5px !default;
+
+// mo/_matrix_box.scss reads this directly too.
+$grid-gutter-width: 24px !default;
 
 // Bootstrap 4's name for this; bootstrap-sass does not read it.
 $border-color: $PANEL_BORDER_COLOR !default;

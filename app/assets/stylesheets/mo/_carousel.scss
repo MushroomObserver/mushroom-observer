@@ -146,7 +146,7 @@
 // .carousel-control's font-size (via .btn { font-size: inherit }
 // above) and sizes itself in em, so bumping font-size here scales
 // the icon the same way without a separate .mo-icon override.
-@media screen and (min-width: $screen-sm-min) {
+@media screen and (min-width: breakpoint-min(md)) {
   .carousel-control {
     font-size: 3rem;
   }
@@ -192,7 +192,7 @@
 .image-form-carousel {
   // padding-bottom: 100%;
 
-  // @media screen and (min-width: $screen-sm-min) {
+  // @media screen and (min-width: breakpoint-min(md)) {
   //   padding-bottom: 50%;
   // }
 
@@ -215,7 +215,7 @@
     padding-bottom: 100%;
     border-bottom: 1px solid $panel-inner-border;
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: breakpoint-min(lg)) {
       // padding-bottom: 50%;
       border-bottom: none;
       border-right: 1px solid $panel-inner-border;
@@ -247,7 +247,7 @@
     // reflection note) wraps instead of overflowing and being clipped.
     white-space: normal;
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: breakpoint-min(lg)) {
       padding-top: 4.5rem;
       padding-right: 1.5rem;
     }
@@ -262,7 +262,7 @@
     width: 100%;
     padding-bottom: calc(50% - 12rem);
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: breakpoint-min(lg)) {
       width: 50%;
       bottom: 6rem;
     }
