@@ -165,7 +165,10 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html,
                 "button.top_nav_button.top_nav_icon_button" \
                 "[data-banner-target='showButton'] " \
-                "svg.mo-icon-interests[aria-label='#{:banner_show_tooltip.t}']")
+                "span[aria-label='#{:banner_show_tooltip.t}']")
+    assert_html(html,
+                "button.top_nav_button.top_nav_icon_button" \
+                "[data-banner-target='showButton'] svg.mo-icon-interests")
   end
 
   # ---- nav-toggles (mobile chrome) ----------------------------------

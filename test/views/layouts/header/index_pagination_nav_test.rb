@@ -104,7 +104,7 @@ module Views::Layouts
       html = render_nav(pagination_data: paginated(50, 2))
 
       assert_html(
-        html, "a[data-page-input-target='goToLink'] svg",
+        html, "a[data-page-input-target='goToLink'] span",
         attribute: { title: :goto_page_tooltip.t(number: 2) }
       )
     end

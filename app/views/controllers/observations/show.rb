@@ -47,6 +47,7 @@ module Views::Controllers::Observations
       render_main_row
       render_secondary_row
       render_footer if @user
+      render_edit_modal if show_edit_modal?
     end
 
     private
@@ -57,10 +58,38 @@ module Views::Controllers::Observations
       if @user
         add_pager_for(@observation)
         add_interest_icons(@user, @observation)
-        add_edit_icons(@observation, @user)
+        add_edit_icons(@observation, @user,
+                       edit_modal_target: edit_modal_target)
       end
       container_class(:double)
       column_classes(:eight_four)
+    end
+
+    def edit_modal_target
+      Show::EditModal::MODAL_ID if show_edit_modal?
+    end
+
+    # The edit icon opens the choice modal for a non-primary occurrence
+    # member (a read-only reflection, or an editable non-primary), so the
+    # editor is steered to the primary rather than the wrong member.
+    # A read-only reflection always qualifies -- even with no occurrence
+    # yet, "Create Editable Primary" creates the native and links an
+    # occurrence (Companion#join_occurrence). An editable observation
+    # only qualifies when it's a non-primary occurrence member.
+    def show_edit_modal?
+      return false unless @user && can_edit_observation?
+      return true if @observation.reflection?
+
+      @occurrence && @occurrence.primary_observation_id != @observation.id
+    end
+
+    def can_edit_observation?
+      in_admin_mode? || @observation.can_edit?(@user)
+    end
+
+    def render_edit_modal
+      render(Show::EditModal.new(observation: @observation,
+                                 occurrence: @occurrence, user: @user))
     end
 
     # ---- main row: carousel | obs details / name / lists -----

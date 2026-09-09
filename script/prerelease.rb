@@ -150,11 +150,26 @@ class Prerelease
   end
 
   def existing_rows_merged(existing_rows)
-    return @rows if existing_rows.nil?
+    return sort_rows_by_date(@rows) if existing_rows.nil?
 
     mentioned = pr_numbers(existing_rows.join("\n"))
     additions = @rows.reject { |row| mentioned.include?(pr_number(row)) }
-    existing_rows + additions
+    sort_rows_by_date(existing_rows + additions)
+  end
+
+  # Keep the article rows newest-first by their date cell (matching
+  # ArticleRows and the changelog convention) so appended PRs don't land
+  # out of order. Stable within a date, and rows with no parseable date
+  # sort to the end.
+  def sort_rows_by_date(rows)
+    rows.each_with_index.sort do |(row_a, idx_a), (row_b, idx_b)|
+      by_date = row_date(row_b) <=> row_date(row_a)
+      by_date.zero? ? (idx_a <=> idx_b) : by_date
+    end.map(&:first)
+  end
+
+  def row_date(row)
+    row[/\{white-space:nowrap\}\.\s*(\d{4}-\d{2}-\d{2})/, 1].to_s
   end
 
   # The changelog-pending branch's pending bullets and article rows, or

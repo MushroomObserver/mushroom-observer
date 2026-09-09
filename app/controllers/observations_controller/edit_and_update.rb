@@ -4,6 +4,7 @@
 module ObservationsController::EditAndUpdate
   include ObservationsController::SharedFormMethods
   include ObservationsController::SiblingEXIF
+  include ObservationsController::EditablePrimary
   include ObservationsController::Validators
   include ::Locationable
 
@@ -63,7 +64,11 @@ module ObservationsController::EditAndUpdate
       redirect_to(action: :show, id: @observation.id)
       return false
     end
-    return false if companion ? redirect_to_companion! : redirect_if_reflection!
+    if companion
+      return false if redirect_for_companion_or_primary!
+    elsif redirect_if_reflection!
+      return false
+    end
 
     true
   end
