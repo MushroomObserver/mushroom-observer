@@ -4,8 +4,8 @@ info:
   title: Mushroom Observer API
   version: '2.0'
   description: REST-ish API for creating, reading, and modifying Mushroom Observer
-    records. Authentication uses an API key. XML output is deprecated and undocumented
-    here; use JSON.
+    records. Authentication uses an [API key](/account/api_keys). XML output is deprecated
+    and undocumented here; use JSON.
 servers:
 - url: https://mushroomobserver.org
 paths:

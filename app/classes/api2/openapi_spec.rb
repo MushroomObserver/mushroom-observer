@@ -102,7 +102,8 @@ class API2
         "version" => API2.version.to_s,
         "description" =>
           "REST-ish API for creating, reading, and modifying Mushroom " \
-          "Observer records. Authentication uses an API key. XML output " \
+          "Observer records. Authentication uses an " \
+          "[API key](/account/api_keys). XML output " \
           "is deprecated and undocumented here; use JSON."
       }
     end
