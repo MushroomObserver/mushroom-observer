@@ -223,11 +223,7 @@ AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%De
 ORDER BY observations.id ASC
 ```
 
-See also the database diagram here:
-
-* [DATA_STRUCTURE.gif](DATA_STRUCTURE.gif)
-
-and the database schema here:
+See also the database schema here:
 
 * [db/schema.rb](db/schema.rb)
 
