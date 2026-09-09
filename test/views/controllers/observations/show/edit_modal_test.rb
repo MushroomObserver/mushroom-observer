@@ -18,6 +18,7 @@ class Views::Controllers::Observations::Show::EditModalTest <
 
     html = render_modal(other, occ)
 
+    assert_includes(html, :edit_occurrence_modal_title.l)
     assert_includes(html, :edit_occurrence_not_primary.l)
     assert_html(html, "a[href='#{edit_path(other, target: :primary)}']",
                 text: :edit_occurrence_edit_primary.l)
@@ -53,6 +54,7 @@ class Views::Controllers::Observations::Show::EditModalTest <
 
     html = render_modal(reflection, occ)
 
+    assert_includes(html, :edit_occurrence_create_title.l)
     assert_html(html, "a[href='#{edit_path(reflection, target: :primary)}']",
                 text: :edit_occurrence_create_primary.l)
     assert_no_html(html, "a[href='#{edit_path(reflection)}']")

@@ -20,10 +20,20 @@ module Views::Controllers::Observations
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      Modal(id: MODAL_ID, title: :edit_occurrence_modal_title.l,
-            user: @user) do |m|
+      Modal(id: MODAL_ID, title: modal_title, user: @user) do |m|
         m.with_body { render_explanation }
         m.with_footer { render_buttons }
+      end
+    end
+
+    # The create case (a reflection with no editable sibling) is about
+    # making a matching observation; the others are about which existing
+    # one to edit.
+    def modal_title
+      if create_target?
+        :edit_occurrence_create_title.l
+      else
+        :edit_occurrence_modal_title.l
       end
     end
 
@@ -65,11 +75,15 @@ module Views::Controllers::Observations
     end
 
     def primary_button_label
-      if @observation.reflection? && !editable_sibling?
+      if create_target?
         :edit_occurrence_create_primary.l
       else
         :edit_occurrence_edit_primary.l
       end
+    end
+
+    def create_target?
+      @observation.reflection? && !editable_sibling?
     end
 
     def editable_sibling?
