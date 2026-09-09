@@ -33,8 +33,16 @@ Rails.application.config.active_support.key_generator_hash_digest_class =
 # Change the digest class for ActiveSupport::Digest.
 # Changing this default means that for example Etags change and
 # various cache keys leading to cache invalidation.
-# Rails.application.config.active_support.hash_digest_class =
-#   OpenSSL::Digest::SHA256
+#
+# No-op for MO: Phlex's fragment caching (Components::Base#cache/
+# #low_level_cache) builds its keys from app_version_key + class/method/
+# line, not ActiveSupport::Digest -- checked against the phlex gem
+# source. The one fresh_when(etag:) call in
+# Observations::ExternalLinksController::Show recomputes its ETag per
+# request; an old client-held ETag just misses instead of matching
+# after this flips, same as any other conditional-GET cache miss.
+Rails.application.config.active_support.hash_digest_class =
+  OpenSSL::Digest::SHA256
 
 # Don't override ActiveSupport::TimeWithZone.name and use the default Ruby
 # implementation.
@@ -120,9 +128,10 @@ Rails.application.config.action_dispatch.cookies_serializer = :hybrid
 Rails.application.config.action_dispatch.
   return_only_request_media_type_on_content_type = false
 
-# ** Please read carefully, this must be configured in config/application.rb
-#    (NOT this file) **
 # Disables the deprecated #to_s override in some Ruby core classes. See
 # https://guides.rubyonrails.org/configuring.html#config-active-support-disable-to-s-conversion
 # for more information.
-# config.active_support.disable_to_s_conversion = true
+#
+# Set in config/application.rb, not here, per the instructions above.
+# No-op on this Rails version -- the underlying mechanism was removed
+# in Rails 7.2.0, so nothing reads this key any more.
