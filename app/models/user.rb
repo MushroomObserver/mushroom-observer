@@ -287,6 +287,12 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # go through +change_password+.)
   before_create :crypt_password
 
+  # iNat logins are canonically lowercase; normalize so comparisons
+  # against values from iNat match however the user typed it.
+  def inat_username=(val)
+    super(val.is_a?(String) ? val.strip.downcase : val)
+  end
+
   before_update :update_image_copyright_holder
   before_update :expire_caches_of_associated_observations
 

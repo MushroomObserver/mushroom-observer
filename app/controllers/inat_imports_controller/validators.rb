@@ -172,7 +172,9 @@ module InatImportsController::Validators
     # entered is their actual iNat username. However, iNat authentication
     # requires them to know the password for that iNat username.
     return true if @user.inat_username.nil? ||
-                   params[:inat_username] == @user.inat_username
+                   params[:inat_username].to_s.strip.casecmp?(
+                     @user.inat_username
+                   )
 
     flash_warning(:inat_importing_all_anothers.t)
     false

@@ -90,7 +90,10 @@ module InatImportsController::Estimators
     args = listing_url? ? url_query_args : {}
     args[:only_id] = true
     args[:id] = params[:inat_ids] if listing_ids?
-    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    unless import_others?
+      args[:user_login] =
+        params[:inat_username]&.strip&.downcase
+    end
     args
   end
 
@@ -100,7 +103,10 @@ module InatImportsController::Estimators
     args[:only_id] = true
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
     args[:id] = params[:inat_ids] if listing_ids?
-    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    unless import_others?
+      args[:user_login] =
+        params[:inat_username]&.strip&.downcase
+    end
     args
   end
 
@@ -142,7 +148,7 @@ module InatImportsController::Estimators
     if import_others?
       LICENSED_FILTER
     else
-      { user_login: params[:inat_username]&.strip }
+      { user_login: params[:inat_username]&.strip&.downcase }
     end
   end
 
