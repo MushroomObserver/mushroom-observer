@@ -23,7 +23,7 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
     assert_html(html, "div.carousel.slide[data-ride='false']" \
                       "[data-interval='false']" \
                       "[id='observation_#{@observation.id}_carousel']")
-    assert_html(html, "div.carousel.slide > div.carousel-inner.bg-light" \
+    assert_html(html, "div.carousel.slide > div.carousel-inner" \
                       "[role='listbox']")
     # No Panel wrapper, no indicator strip — those are contracts
     # specific to the box context (the box itself owns the
@@ -66,8 +66,8 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
 
     html = render_carousel
 
-    assert_html(html, "a.left.carousel-control")
-    assert_html(html, "a.right.carousel-control")
+    assert_html(html, "button.carousel-control-prev")
+    assert_html(html, "button.carousel-control-next")
   end
 
   # Item slide does NOT pull a `:large`/original image — the

@@ -70,7 +70,12 @@ class Components::Grid < Components::Base
   # template with a `<br>` before the summary instead of delegating
   # to the shared `log_object_*_by_user_with_name` keys; fragments
   # cached under v9 embed the old text.
-  CACHE_VERSION = "v10"
+  # v11: (superseded by v12 below; not shipped separately.)
+  # v12: the glossary-term image-removal grid now wraps its cells'
+  # content in `Panel do |panel| panel.with_body { ... } end`, giving
+  # them card styling they didn't have before; fragments cached under
+  # v11 or earlier embed the unstyled markup.
+  CACHE_VERSION = "v12"
 
   # The cache key Grid::Box fragments are stored under, used by both
   # the write inside this component and the controller's batched

@@ -46,15 +46,12 @@ class ImageGalleryTest < ComponentTestCase
       )
     end
 
-    # Controls only show with multiple images. Bootstrap 3 markup
-    # is `a.left.carousel-control` / `a.right.carousel-control` —
-    # `Components::Carousel::Controls#render_control` builds that
-    # shape, not the Bootstrap 4 `carousel-control-prev/next` form.
+    # Controls only show with multiple images.
     if @images.length > 1
-      assert_html(html, "a.left.carousel-control")
-      assert_html(html, "a.right.carousel-control")
+      assert_html(html, "button.carousel-control-prev")
+      assert_html(html, "button.carousel-control-next")
     else
-      assert_no_html(html, "a.carousel-control")
+      assert_no_html(html, ".carousel-control-prev")
     end
   end
 
@@ -83,9 +80,8 @@ class ImageGalleryTest < ComponentTestCase
 
     assert_includes(html, "carousel")
     assert_includes(html, "carousel-item")
-    # Single image → no prev/next controls. Bootstrap 3 markup is
-    # `a.carousel-control`, so assert absence of that selector.
-    assert_no_html(html, "a.carousel-control")
+    # Single image → no prev/next controls.
+    assert_no_html(html, ".carousel-control-prev")
   end
 
   def test_thumbnail_navigation_when_enabled

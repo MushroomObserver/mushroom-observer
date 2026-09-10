@@ -707,6 +707,12 @@
   background: none !important;
 }
 
+// The theme-aware page background. Named to match Bootstrap 5.3's
+// .bg-body so it's a no-op rename at upgrade.
+.bg-body {
+  background-color: $body-bg !important;
+}
+
 // Locks column widths to the first row's natural content. Use when
 // later rows can swap in wider content (e.g. an inline edit form)
 // and you don't want the columns to reflow on every state change.

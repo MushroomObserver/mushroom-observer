@@ -91,25 +91,28 @@
   }
 }
 
-.carousel-control {
+// Direct children of .carousel (siblings of .carousel-inner),
+// positioned via .carousel's `position: relative` -- no wrapping
+// element, no BS3-style .left/.right modifier. Matches Bootstrap 4's
+// carousel markup and its .carousel-control-prev/-next selector
+// pair: https://getbootstrap.com/docs/4.6/components/carousel/
+.carousel-control-prev,
+.carousel-control-next {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   margin-top: 5rem; // to let overlays through
   margin-bottom: 5rem; // fullscreen and caption/voting
+  border: 0;
   background: none !important;
-  font-size: 2rem;
+  // Matches Bootstrap 3's $carousel-control-font-size (20px / 1.25rem;
+  // 30px / 1.875rem at md+, below).
+  font-size: 1.25rem;
   color: $white;
   opacity: 0.75;
 
-  .btn {
-    font-size: inherit;
-    &:hover,
-    &:focus {
-      color: inherit;
-    }
-  }
-
   &:hover,
   &:focus {
-    // color: rgba($white, 1);
     opacity: 1;
   }
 
@@ -141,14 +144,34 @@
   }
 }
 
-// Bootstrap's own .carousel-control scales its glyph 1.5x here
-// ($carousel-control-font-size 20px -> 30px). .mo-icon inherits
-// .carousel-control's font-size (via .btn { font-size: inherit }
-// above) and sizes itself in em, so bumping font-size here scales
-// the icon the same way without a separate .mo-icon override.
+.carousel-control-prev {
+  left: 0;
+}
+
+.carousel-control-next {
+  right: 0;
+}
+
+// The indicator strip is a sibling of .carousel-inner, below it in
+// normal flow -- without this, the controls' bottom:0 spans the
+// photo + indicators combined, centering the icon over both instead
+// of just the photo. 6vw + 1rem matches .carousel-indicators li's
+// height plus its .py-2 padding.
+// .image-form-carousel is excluded -- its controls use a separate
+// top/bottom band (below) unrelated to indicator height.
+.carousel:not(.image-form-carousel):has(.carousel-indicators) {
+  .carousel-control-prev,
+  .carousel-control-next {
+    bottom: calc(6vw + 1rem);
+  }
+}
+
+// .mo-icon sizes itself in em, so bumping font-size here scales the
+// icon the same way without a separate .mo-icon override.
 @media screen and (min-width: breakpoint-min(md)) {
-  .carousel-control {
-    font-size: 3rem;
+  .carousel-control-prev,
+  .carousel-control-next {
+    font-size: 1.875rem;
   }
 }
 
@@ -204,7 +227,8 @@
     // &:not(:has(.item)) {
     //   display: none;
 
-    //   .carousel-control-wrap {
+    //   .carousel-control-prev,
+    //   .carousel-control-next {
     //     display: none;
     //   }
     // }
@@ -253,18 +277,22 @@
     }
   }
 
-  // This keeps the carousel controls on top of the image, not the form
-  .carousel-control-wrap {
-    position: absolute;
+  // Keeps the controls over the image, not the form panel below it
+  // (mobile) / beside it (lg) -- .carousel-inner stacks the image
+  // above the form panel on mobile, side-by-side at lg.
+  .carousel-control-prev,
+  .carousel-control-next {
     top: 6rem;
     bottom: calc(50% - 6rem);
-    left: 0;
-    width: 100%;
-    padding-bottom: calc(50% - 12rem);
 
     @media screen and (min-width: breakpoint-min(lg)) {
-      width: 50%;
       bottom: 6rem;
+    }
+  }
+
+  .carousel-control-next {
+    @media screen and (min-width: breakpoint-min(lg)) {
+      right: 50%;
     }
   }
 

@@ -10,6 +10,9 @@
 
   .card {
     // min-height: 200px;
+    // h-100 fills the row's stretched height -- the <li>'s
+    // margin-bottom above provides the spacing instead.
+    margin-bottom: 0;
 
     .thumbnail-container {
       min-height: 30px;

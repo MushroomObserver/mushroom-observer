@@ -82,6 +82,13 @@ class Components::Panel < Components::Base
     render_footer(classes:, &content)
   }, collection: true
 
+  # `h-100` (passed via `panel_class:`) needs the card to be a
+  # distinct child of the stretched flex item, not the stretched item
+  # itself -- `height: 100%` on the same element being stretched by
+  # `align-items: stretch` doesn't resolve the way it does against a
+  # parent with a definite height. `Components::Grid::Box` wraps this
+  # card in a separate `<li>` for that reason -- don't collapse them
+  # into one element.
   def view_template
     classes = class_names("card", @panel_class)
     define_collapse_target

@@ -22,9 +22,8 @@ module Form
       assert_includes(html, "carousel-item")
 
       # Should have carousel controls
-      assert_includes(html, "carousel-control-wrap")
-      assert_includes(html, "carousel-control")
-      # FormCarousel uses different control classes (left/right)
+      assert_includes(html, "carousel-control-prev")
+      assert_includes(html, "carousel-control-next")
       assert_includes(html, 'data-slide="prev"')
       assert_includes(html, 'data-slide="next"')
 
@@ -101,7 +100,7 @@ module Form
       # But no carousel items
       assert_not_includes(html, "carousel-item")
       # Still has controls
-      assert_includes(html, "carousel-control-wrap")
+      assert_includes(html, "carousel-control-prev")
     end
 
     def test_renders_with_nil_images
@@ -142,11 +141,13 @@ module Form
         child_selector: ".carousel-inner"
       )
 
-      # Carousel inner contains items and controls
+      # Controls are siblings of carousel-inner, not nested inside it
+      # -- Bootstrap 4's carousel markup has no wrapping element
+      # around the two buttons.
       assert_nested(
         html,
-        parent_selector: "#added_images",
-        child_selector: ".carousel-control-wrap"
+        parent_selector: ".carousel.image-form-carousel",
+        child_selector: ".carousel-control-prev"
       )
 
       # Thumbnails at same level as carousel-inner

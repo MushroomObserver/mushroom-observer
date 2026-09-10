@@ -98,6 +98,11 @@ ul.tight-list {
 }
 
 .card {
+  // Bootstrap 3's .panel had this built in; Bootstrap 4's .card
+  // leaves spacing between stacked cards to the caller. .grid-box
+  // resets this to 0 and puts the margin on its <li> instead -- see
+  // that rule's comment for why.
+  margin-bottom: $grid-gutter-width;
   color: $card-color;
 
   .table-responsive {
@@ -111,7 +116,21 @@ ul.tight-list {
   }
 }
 
+// .card-header shares $card-spacer-y with .card-body/.card-footer,
+// but a heading needs less vertical room than a body of content --
+// matches Bootstrap 3's $panel-heading-padding vertical value (10px).
+.card-header {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+// Bootstrap's .card-title default is margin-bottom: $card-spacer-y,
+// spacing a title from following card-body content. MO's .card-header
+// titles have nothing to space from within the header, so a heading
+// carrying this class (h3.card-title, h4.card-title, etc.) needs it
+// zeroed, matching Bootstrap 3's .panel-title (margin: 0).
 .card-title {
+  margin-bottom: 0;
   font-size: 1rem;
   font-weight: bold;
 }

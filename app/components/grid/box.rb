@@ -2,6 +2,11 @@
 
 # One item in a Grid -- a wrapper for a Panel component.
 #
+# The `<li>` and the Panel's `<div class="card h-100">` stay two
+# separate elements deliberately: `height: 100%` on the card needs a
+# distinct parent (the stretched `<li>`) to resolve against -- see
+# `Components::Panel#view_template`'s comment.
+#
 # This component can be used in two ways:
 # 1. With an object - calculates everything it needs from the @object and
 #    renders a standard layout for Image, Observation, RssLog, or User
@@ -20,7 +25,9 @@
 #
 # @example Custom block content
 #   render Components::Grid::Box.new(id: 123, extra_class: "text-center") do
-#     tag.div(class: "card") { "Custom content" }
+#     Panel do |panel|
+#       panel.with_body { "Custom content" }
+#     end
 #   end
 class Components::Grid::Box < Components::Base
   include Components::Grid::Box::RenderData
