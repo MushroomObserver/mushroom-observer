@@ -9,6 +9,15 @@
 // (`col-*`/`Components::Column`) sized as a fraction of the row.
 $sidebar-max-width: 9.9rem;
 
+// Sits inside .row-offcanvas alongside #right_side. Not a Bootstrap
+// `.row` -- that class's negative margins fought #main_container's
+// padding, pushing content past its edge. Only the flex layout that
+// keeps the two side by side is needed here.
+.row-offcanvas {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .sidebar-offcanvas {
   width: $sidebar-max-width;
   // Replaces the gutter a Bootstrap grid column would have supplied
