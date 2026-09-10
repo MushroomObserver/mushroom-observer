@@ -182,9 +182,12 @@ class Components::Modal < Components::Base
     @body_id || "#{@id}_body"
   end
 
+  # Title before the close button: .modal-header is a flex container
+  # (justify-content: space-between), which spaces DOM children apart
+  # without reordering them -- the title has to come first in markup
+  # to land on the left.
   def render_header
     div(class: "modal-header") do
-      close_button
       h4(class: "modal-title", id: resolved_title_id) do
         if title_content_slot
           render(title_content_slot)
@@ -196,6 +199,7 @@ class Components::Modal < Components::Base
           trusted_html(@title)
         end
       end
+      close_button
     end
   end
 

@@ -18,6 +18,10 @@ class ModalTest < ComponentTestCase
     assert_html(html, ".modal-header > h4.modal-title#modal_thing_title",
                 text: "Pick a thing")
     assert_html(html, ".modal-header > button.close[data-dismiss='modal']")
+    # .modal-header is a flex row (justify-content: space-between) --
+    # DOM order determines left-to-right position, so the title has
+    # to precede the close button to land on the left.
+    assert_html(html, ".modal-title + button.close")
 
     # Body + footer rendered from slot content
     assert_html(html, ".modal-body#modal_thing_body > p",
