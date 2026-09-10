@@ -101,8 +101,8 @@ ul.tight-list {
   font-size: 1.375rem;
 
   small {
-    @extend .ml-3;
-    font-size: 65%;
+    @extend .ml-2;
+    font-size: $font-size-base;
     color: $body-color;
   }
 }

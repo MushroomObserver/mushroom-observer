@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-# Rich-HTML page-title piece (id badge + title span) rendered into
+# Rich-HTML page-title piece (id badge + title span, plus an
+# optional owner-naming line under the title) rendered into
 # `content_for(:title)` by `Views::FullPageBase#add_show_title` /
 # `#add_edit_title` for show and edit pages.
 #
-# `mode: :show` emits `<flex><IDBadge/> <span>{title}</span></flex>`;
+# `mode: :show` emits
+# `<flex><IDBadge/> <div><span>{title}</span>{owner_naming}</div></flex>`;
 # `mode: :edit` emits
 # `<flex><IDBadge/> <span>Edit {Type}: {title}</span></flex>`.
 # The title piece itself is:
@@ -24,12 +26,27 @@ module Views::Layouts
     # object-specific format like `@sequence.unique_format_name`
     # instead of letting the view dispatch through `page_title`.
     prop :title, _Nilable(::String), default: nil
+    # Show-obs only: the observer's preferred naming, a second line
+    # under the title (still to the right of the id badge, not a
+    # full-width line below the whole title bar). Pre-rendered HTML
+    # from `Views::Controllers::Observations::OwnerNamingLine` --
+    # `add_show_title` computes this so this view stays agnostic
+    # about any one object type.
+    prop :owner_naming, _Nilable(::String), default: nil
 
     def view_template
-      div(class: "d-flex align-items-center") do
-        IDBadge(object: @object, size: :sm)
+      div(class: "d-flex align-items-start") do
+        IDBadge(object: @object, size: :md)
         whitespace
-        span { render_title_span }
+        div do
+          span { render_title_span }
+          if @owner_naming
+            br
+            span(id: "owner_naming", class: "h5") do
+              trusted_html(@owner_naming)
+            end
+          end
+        end
       end
     end
 

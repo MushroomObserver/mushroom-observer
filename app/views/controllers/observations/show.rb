@@ -6,9 +6,9 @@
 # `MatchingObservationsPanel`, namings partial, comments partial,
 # `Views::Layouts::ObjectFooter`) into a two-column layout.
 #
-# Renders `add_show_title` + owner-naming line + pager / interest /
-# edit icons (logged-in only) into the page chrome, then a `.row`
-# with the carousel on the left and observation details / name
+# Renders `add_show_title` (with the owner-naming line) + pager /
+# interest / edit icons (logged-in only) into the page chrome, then a
+# `.row` with the carousel on the left and observation details / name
 # info / species lists / projects / matching obs on the right.
 # Second `.row` below: namings table + comments on the left,
 # notes panel on the right.
@@ -16,8 +16,9 @@
 # `owner_naming_line` is now `Observations::OwnerNamingLine`;
 # `link_to_display_name_brief_authors` is now
 # `Observations::DisplayNameBriefAuthorsLink`. The PORO callsites
-# are inside `add_owner_naming` (`title_helper.rb`) and the
-# obs-title chain in `observations_helper.rb`.
+# are inside `add_show_title`'s `owner_naming:` handling
+# (`title_helper.rb`) and the obs-title chain in
+# `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::FullPageBase
     prop :observation, ::Observation
@@ -53,8 +54,7 @@ module Views::Controllers::Observations
     private
 
     def add_chrome
-      add_show_title(@observation, user: @user)
-      add_owner_naming(observation: @observation, user: @user)
+      add_show_title(@observation, user: @user, owner_naming: true)
       if @user
         add_pager_for(@observation)
         add_interest_icons(@user, @observation)

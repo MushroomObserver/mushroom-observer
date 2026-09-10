@@ -3,9 +3,10 @@
 # Page-title strip below the top nav, rendered on non-index actions.
 # Two columns:
 #
-#   - left: `<h1 id="title">` (consensus title from content_for(:title))
-#     plus the edit-icons strip; on obs show, the owner-naming line
-#     (separate content_for(:owner_naming)) hangs below the h1.
+#   - left: `<h1 id="title">` (consensus title from content_for(:title),
+#     including the id badge and, on obs show, the owner-naming line --
+#     see `Views::Layouts::Header::ObjectTitle`) plus the edit-icons
+#     strip.
 #   - right (show-only, non-project): interest-icons strip and the
 #     prev/index/next pager.
 #
@@ -33,7 +34,6 @@ module Views::Layouts
           end
           trusted_html(content_for(:edit_icons))
         end
-        trusted_html(content_for(:owner_naming)) if content_for?(:owner_naming)
       end
     end
 
