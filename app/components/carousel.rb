@@ -105,7 +105,7 @@ class Components::Carousel < Components::Base
   # .carousel-inner.
   def render_inner
     div(id: @inner_id,
-        class: class_names("carousel-inner bg-body", @inner_class_extra),
+        class: class_names("carousel-inner bg-card", @inner_class_extra),
         role: "listbox") do
       @slides.each_with_index { |slide, i| render_slide(slide, i) }
     end

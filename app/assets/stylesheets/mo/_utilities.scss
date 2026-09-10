@@ -220,6 +220,10 @@
   background-color: $body-bg !important;
 }
 
+.bg-card {
+  background-color: $card-bg !important;
+}
+
 // Locks column widths to the first row's natural content. Use when
 // later rows can swap in wider content (e.g. an inline edit form)
 // and you don't want the columns to reflow on every state change.
