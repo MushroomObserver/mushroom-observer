@@ -102,6 +102,7 @@ ul.tight-list {
 
   small {
     @extend .ml-3;
+    font-size: 65%;
     color: $body-color;
   }
 }
