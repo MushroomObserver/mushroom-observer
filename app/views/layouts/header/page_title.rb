@@ -29,7 +29,7 @@ module Views::Layouts
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
         nav(class: SHOW_TITLE_CLASSES) do
-          h1(class: "h3 page-title mt-2 mb-2", id: "title") do
+          h1(class: "h3 page-title mt-1 mb-2", id: "title") do
             trusted_html(content_for(:title))
           end
           trusted_html(content_for(:edit_icons))

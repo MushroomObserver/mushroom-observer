@@ -92,7 +92,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     Link(type: :collapse_toggle,
          target_id: "pane_#{link.id}",
          fallback_href: external_link_path(link.id),
-         class: "badge badge-id badge-xl text-uppercase",
+         class: "badge badge-id badge-xl ml-2 text-uppercase",
          data: {
            parent: "#external_links_accordion",
            turbo_frame: "external_link_frame_#{link.id}",

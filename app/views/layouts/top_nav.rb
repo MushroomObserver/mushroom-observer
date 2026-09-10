@@ -87,7 +87,7 @@ class Views::Layouts::TopNav < Views::Base
 
   def render_left
     render_left_nav_toggle
-    h4(class: "font-weight-bold mr-2", id: "rubric") { render_rubric }
+    h4(class: "font-weight-bold mb-0 mr-2", id: "rubric") { render_rubric }
     div(class: "mr-3 mr-sm-4 mr-lg-5") { render_nav_create }
   end
 
