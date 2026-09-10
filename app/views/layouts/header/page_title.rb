@@ -14,7 +14,7 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-between pl-3"
+      "show_title_nav d-flex justify-content-between align-items-start pl-3"
 
     def view_template
       Row(id: "title_bar") do
@@ -28,7 +28,7 @@ module Views::Layouts
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
         nav(class: SHOW_TITLE_CLASSES) do
-          h1(class: "h3 page-title mt-3 mb-4", id: "title") do
+          h1(class: "h3 page-title mt-2 mb-2", id: "title") do
             trusted_html(content_for(:title))
           end
           trusted_html(content_for(:edit_icons))
@@ -40,7 +40,8 @@ module Views::Layouts
     def render_right_column
       div(class: class_names(content_for(:right_columns),
                              "hidden-print text-right")) do
-        nav(class: "show_object_nav d-flex justify-content-between pr-3") do
+        nav(class: "show_object_nav d-flex justify-content-between " \
+                   "align-items-start pr-3") do
           trusted_html(content_for(:interest_icons))
           trusted_html(content_for(:prev_next_object))
         end
