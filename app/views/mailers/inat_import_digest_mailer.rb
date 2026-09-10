@@ -87,7 +87,7 @@ class Views::Mailers::InatImportDigestMailer < Views::Mailers::Base
   # html_to_ascii would otherwise drop the href (matching how the shared
   # links section renders "label: url" in text).
   def emit_observation_row(obs, namings)
-    url = "#{MO.http_domain}/#{obs.id}"
+    url = obs.show_url
     if html?
       link_to("##{obs.id}", url)
       plain(": ")
