@@ -284,6 +284,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   # Swap the `thumb_image:` hash for the matrix_box_carousels
   # alternative below when the carousel feature lands.
+  # The /obs/ form is the shareable one: logged-out visitors get a 403
+  # on the /:id and /observations/:id forms (the spider block in
+  # ApplicationController::Indexes#check_for_spider_block allows only
+  # this form), so every URL that leaves the site must use it (#5357).
+  def self.show_url(id)
+    "#{MO.http_domain}/obs/#{id}"
+  end
+
   def self.matrix_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
      :collector_user,

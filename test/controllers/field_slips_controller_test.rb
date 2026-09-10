@@ -196,7 +196,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
     slip = FieldSlip.find_by(code: code)
     assert_equal(rolf.unique_text_name, slip.collector)
-    assert_redirected_to(observation_url(slip.observation))
+    assert_redirected_to(permanent_observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
@@ -223,7 +223,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # rolf is not the owner, so his supplied collector is ignored and the
     # observation's existing collector is preserved.
     assert_equal("Original Collector", slip.collector)
-    assert_redirected_to(observation_url(slip.observation))
+    assert_redirected_to(permanent_observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(rolf.id))
   end
 
@@ -322,7 +322,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     fs = FieldSlip.find_by(code: code)
     assert(fs.user)
     obs = fs.observation
-    assert_redirected_to(observation_url(obs))
+    assert_redirected_to(permanent_observation_url(obs))
     assert(project.member?(user))
     assert(project.observations.member?(obs))
     assert(species_list.observations.member?(obs))
@@ -392,7 +392,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_equal(date, obs.when)
-    assert_redirected_to(observation_url(obs.id))
+    assert_redirected_to(permanent_observation_url(obs.id))
   end
 
   def test_should_create_obs_with_link_to_inat
@@ -455,7 +455,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not_nil(field_slip, "Cannot find FieldSlip for code #{code}")
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
-    assert_redirected_to(observation_url(obs.id))
+    assert_redirected_to(permanent_observation_url(obs.id))
     assert_equal("Fungi", obs.text_name)
   end
 
@@ -478,7 +478,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not_nil(field_slip, "Cannot find FieldSlip for code #{code}")
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
-    assert_redirected_to(observation_url(obs.id))
+    assert_redirected_to(permanent_observation_url(obs.id))
   end
 
   def test_should_create_field_slip_in_project_from_code
@@ -532,7 +532,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_take_admin_to_edit
     login(@field_slip.user.login)
     get(:show, params: { id: @field_slip.code })
-    assert_redirected_to(observation_url(@field_slip.observation))
+    assert_redirected_to(permanent_observation_url(@field_slip.observation))
     # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
@@ -602,7 +602,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_show_field_slip_by_code
     get(:show, params: { id: @field_slip.code })
-    assert_redirected_to(observation_url(@field_slip.observation))
+    assert_redirected_to(permanent_observation_url(@field_slip.observation))
   end
 
   # A code with no field slip goes straight to the observation form with

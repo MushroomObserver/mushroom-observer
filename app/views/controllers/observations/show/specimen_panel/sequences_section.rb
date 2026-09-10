@@ -6,7 +6,7 @@
 #
 # `Components::InlineCRUDLinks` handles the archive/edit/destroy
 # group — sequences are a real-DELETE target with a
-# `back: observation_path(obs)` query string so the controller
+# `back: permanent_observation_path(obs)` query string so the controller
 # redirects to the obs after destroy.
 class Views::Controllers::Observations::Show::SpecimenPanel
   class SequencesSection < Views::Base

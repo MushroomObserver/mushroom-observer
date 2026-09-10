@@ -72,7 +72,7 @@ module Views::Controllers::Projects::Violations
     # obs's show page stays within this project's violations, rather
     # than falling back to session leftovers or an unscoped default.
     def render_obs_link(obs)
-      a(href: observation_path(id: obs.id, q: q_param),
+      a(href: permanent_observation_path(id: obs.id, q: q_param),
         class: "observation_link_#{obs.id}") do
         trusted_html(obs.text_name)
       end

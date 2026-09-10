@@ -639,7 +639,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # With back param set to observation ID, redirects to that observation.
     delete(:destroy, params: { id: nums[0].id, back: obs.id.to_s })
-    assert_redirected_to(observation_path(obs))
+    assert_redirected_to(permanent_observation_path(obs))
 
     # With back: "index", explicitly requests redirect to index.
     delete(:destroy, params: { id: nums[1].id, back: "index", q: })
@@ -684,7 +684,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Should successfully destroy and redirect to the observation
     assert_equal(collection_number_count - 1, CollectionNumber.count)
-    assert_redirected_to(observation_path(obs))
+    assert_redirected_to(permanent_observation_path(obs))
   end
 
   # -------- Remove from observation (destroy with observation_id) ------------

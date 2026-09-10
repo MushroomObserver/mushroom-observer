@@ -367,7 +367,7 @@ class HerbariumRecordsController < ApplicationController
 
   def destroy_html_response
     if @observation
-      redirect_to(observation_path(@observation.id))
+      redirect_to(permanent_observation_path(@observation.id))
     else
       redirect_with_query(action: :index)
     end

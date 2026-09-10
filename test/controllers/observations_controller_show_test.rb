@@ -849,8 +849,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     # Test that prev/next links do not have :q, and index link does
     get(:show, params: { id: o_chron.third.id })
-    next_href = observation_path(o_chron.fourth.id)
-    prev_href = observation_path(o_chron.second.id)
+    next_href = permanent_observation_path(o_chron.fourth.id)
+    prev_href = permanent_observation_path(o_chron.second.id)
     index_href = observations_path(params: { id: o_chron.third.id, q: })
     assert_select("a.next_object_link[href='#{next_href}']")
     assert_select("a.prev_object_link[href='#{prev_href}']")

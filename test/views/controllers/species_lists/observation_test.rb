@@ -18,7 +18,7 @@ module Views::Controllers::SpeciesLists
       html = render_row
 
       assert_html(html, ".row")
-      obs_path = routes.observation_path(id: @observation.id)
+      obs_path = routes.permanent_observation_path(id: @observation.id)
       assert_html(html, "a[href='#{obs_path}']")
       # Always renders the who+when line.
       assert_html(html,

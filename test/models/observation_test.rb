@@ -22,6 +22,14 @@ class ObservationTest < UnitTestCase
   ##############################################################################
 
   # Add an observation to the database
+  def test_show_url_uses_permanent_obs_form
+    obs = observations(:minimal_unknown_obs)
+
+    assert_equal("#{MO.http_domain}/obs/#{obs.id}", obs.show_url,
+                 "Observation URLs that leave the site must use the " \
+                 "/obs/ form, the only one open to logged-out visitors")
+  end
+
   def test_create
     create_new_objects
     assert_kind_of(Observation, observations(:minimal_unknown_obs))

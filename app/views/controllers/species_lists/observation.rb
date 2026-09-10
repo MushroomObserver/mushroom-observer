@@ -34,7 +34,7 @@ module Views::Controllers::SpeciesLists
         InteractiveImage(
           user: @user,
           image: @observation.thumb_image,
-          image_link: observation_path(id: @observation.id),
+          image_link: permanent_observation_path(id: @observation.id),
           votes: true
         )
       end
@@ -59,7 +59,7 @@ module Views::Controllers::SpeciesLists
       div(class: "font-weight-bold") do
         Link(type: :get,
              name: viewer_aware_unique_format_name(@observation).t,
-             target: observation_path(id: @observation.id))
+             target: permanent_observation_path(id: @observation.id))
       end
     end
 

@@ -42,6 +42,9 @@ module Views::Layouts
 
     def adjacent_path(id)
       return activity_log_path(id: id) if type_tag == :rss_log
+      # Observation show links use the logged-out-accessible /obs/ form
+      # (see Observation.show_url).
+      return permanent_observation_path(id: id) if type_tag == :observation
 
       send(:"#{type_tag}_path", id: id)
     end
