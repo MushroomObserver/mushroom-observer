@@ -29,6 +29,10 @@
   // background-color: $modal-content-bg !important;
 }
 
+.modal-title {
+  font-weight: $font-weight-bold;
+}
+
 // Bootstrap's default .close opacity (0.5) makes the X hard to see in
 // dark themes like Amanita. Use the theme's danger color for a clear
 // dismiss button visible regardless of theme background.
