@@ -115,7 +115,9 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
       visible_sites.map(&:last).each do |link|
         accordion.with_pane(id: "pane_#{link.id}",
                             class: "p-3 border-bottom") do
-          turbo_frame_tag("external_link_frame_#{link.id}")
+          turbo_frame_tag("external_link_frame_#{link.id}",
+                          src: external_link_path(link.id),
+                          loading: "lazy")
         end
       end
     end

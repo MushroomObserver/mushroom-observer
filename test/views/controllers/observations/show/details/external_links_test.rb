@@ -88,24 +88,33 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     )
   end
 
-  def test_renders_accordion_pane_and_empty_turbo_frame_per_site
+  def test_renders_accordion_pane_and_lazy_turbo_frame_per_site
     inat_link = external_links(:coprinus_comatus_obs_inaturalist_link)
     mcp_link = external_links(:coprinus_comatus_obs_mycoportal_link)
     obs = inat_link.observation
 
     html = render(panel_with(obs))
 
-    # Each pane supplies its own padding -- the parent card-body
+    # Each pane supplies its padding -- the parent card-body
     # (rendered by Details, not this view) is `.p-0`.
     assert_html(html, "#pane_#{inat_link.id}.collapse.p-3")
     assert_html(html, "#pane_#{mcp_link.id}.collapse.p-3")
+    # `src` + `loading="lazy"`, not a bare empty frame: Bootstrap 4's
+    # collapse data-API click handler calls preventDefault()/
+    # stopPropagation() unconditionally, which blocks Turbo's
+    # click-driven frame navigation on the same trigger link -- the
+    # frame has to fetch itself once the pane becomes visible instead.
     assert_html(
       html,
-      "#pane_#{inat_link.id} turbo-frame#external_link_frame_#{inat_link.id}"
+      "#pane_#{inat_link.id} " \
+      "turbo-frame#external_link_frame_#{inat_link.id}" \
+      "[src='#{routes.external_link_path(inat_link.id)}'][loading='lazy']"
     )
     assert_html(
       html,
-      "#pane_#{mcp_link.id} turbo-frame#external_link_frame_#{mcp_link.id}"
+      "#pane_#{mcp_link.id} " \
+      "turbo-frame#external_link_frame_#{mcp_link.id}" \
+      "[src='#{routes.external_link_path(mcp_link.id)}'][loading='lazy']"
     )
   end
 
