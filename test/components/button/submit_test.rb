@@ -6,7 +6,7 @@ class Components::Button::SubmitTest < ComponentTestCase
   def test_renders_button_with_submit_type_and_default_style
     html = render_submit(name: "Save")
 
-    assert_html(html, "button[type='submit'].btn.btn-default", text: "Save")
+    assert_html(html, "button[type='submit'].btn.btn-secondary", text: "Save")
   end
 
   def test_default_disable_with_matches_name
@@ -32,13 +32,13 @@ class Components::Button::SubmitTest < ComponentTestCase
     html = render_submit(name: "Create", variant: :primary)
 
     assert_html(html, "button[type='submit'].btn-primary")
-    assert_no_html(html, "button.btn-default")
+    assert_no_html(html, "button.btn-secondary")
   end
 
   def test_accepts_size
     html = render_submit(name: "Go", size: :sm)
 
-    assert_html(html, "button.btn.btn-default.btn-sm[type='submit']")
+    assert_html(html, "button.btn.btn-secondary.btn-sm[type='submit']")
   end
 
   def test_html_name_overrides_the_name_attribute

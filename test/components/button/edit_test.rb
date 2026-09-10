@@ -8,7 +8,7 @@ class ButtonEditTest < ComponentTestCase
     html = render_edit(target: herbarium)
 
     path = routes.edit_herbarium_path(herbarium.id)
-    assert_html(html, "a.btn.btn-default[href='#{path}']")
+    assert_html(html, "a.btn.btn-secondary[href='#{path}']")
   end
 
   def test_variant_overrides_default_framing

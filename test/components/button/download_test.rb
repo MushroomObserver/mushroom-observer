@@ -8,7 +8,7 @@ class ButtonDownloadTest < ComponentTestCase
     path = routes.new_download_species_list_path(id: sl.id)
     html = render_download(target: path)
 
-    assert_html(html, "a.btn.btn-default[href='#{path}']")
+    assert_html(html, "a.btn.btn-secondary[href='#{path}']")
   end
 
   def test_variant_overrides_default_framing

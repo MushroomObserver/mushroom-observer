@@ -140,12 +140,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button svg.mo-icon-remove")
   end
 
-  # Default renders the standard btn-default frame.
+  # Default renders the standard btn-secondary frame.
   def test_delete_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Delete, target: herbarium)
 
-    assert_html(html, "button.btn.btn-default")
+    assert_html(html, "button.btn.btn-secondary")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
   end
@@ -230,12 +230,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
-  # Default renders the standard btn-default frame.
+  # Default renders the standard btn-secondary frame.
   def test_edit_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Edit, target: herbarium)
 
-    assert_html(html, "a.btn.btn-default")
+    assert_html(html, "a.btn.btn-secondary")
   end
 
   # `variant: :outline` produces the outline button frame — the common
@@ -309,12 +309,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
-  # Default renders the standard btn-default frame.
+  # Default renders the standard btn-secondary frame.
   def test_new_default_btn_frame
     html = render_button(Components::Button::New,
                          target: routes.new_herbarium_path)
 
-    assert_html(html, "a.btn.btn-default")
+    assert_html(html, "a.btn.btn-secondary")
   end
 
   # `variant: :outline` produces the outline button frame.
@@ -380,12 +380,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button", text: "Replace")
   end
 
-  # Post defaults to `btn btn-default`.
+  # Post defaults to `btn btn-secondary`.
   def test_post_default_btn_frame
     html = render_button(Components::Button::Post,
                          name: "Submit", target: "/items")
 
-    assert_html(html, "button.btn.btn-default")
+    assert_html(html, "button.btn.btn-secondary")
   end
 
   # Explicit `variant:` overrides the default.
@@ -396,7 +396,7 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_html(html, "button.btn.btn-primary")
-    assert_no_html(html, "button.btn-default")
+    assert_no_html(html, "button.btn-secondary")
   end
 
   # `variant: :strip` suppresses the frame entirely (icon-only inline buttons).
@@ -409,12 +409,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
-  # Patch defaults to `btn btn-default`.
+  # Patch defaults to `btn btn-secondary`.
   def test_patch_default_btn_frame
     html = render_button(Components::Button::Patch,
                          name: "Update", target: "/items/1")
 
-    assert_html(html, "button.btn.btn-default")
+    assert_html(html, "button.btn.btn-secondary")
   end
 
   # `variant: :strip` suppresses the frame (icon-only / inline patches).
@@ -427,12 +427,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
-  # Put defaults to `btn btn-default`.
+  # Put defaults to `btn btn-secondary`.
   def test_put_default_btn_frame
     html = render_button(Components::Button::Put,
                          name: "Replace", target: "/items/1")
 
-    assert_html(html, "button.btn.btn-default")
+    assert_html(html, "button.btn.btn-secondary")
   end
 
   # `variant: :strip` suppresses the frame (icon-only / inline puts).
@@ -455,7 +455,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "form[action='/items/1']")
     assert_html(html, "input[name='_method'][value='patch']")
     assert_html(html, "button.btn.btn-primary", text: "Update")
-    assert_no_html(html, "button.btn-default")
+    assert_no_html(html, "button.btn-secondary")
   end
 
   # --- Button::Get --------------------------------------------------
@@ -466,7 +466,7 @@ class ButtonSubclassesTest < ComponentTestCase
                          name: "View", target: herbarium)
 
     expected_href = routes.herbarium_path(herbarium)
-    assert_html(html, "a.btn.btn-default[href='#{expected_href}']",
+    assert_html(html, "a.btn.btn-secondary[href='#{expected_href}']",
                 text: "View")
     assert_no_html(html, "form")
   end
@@ -481,7 +481,7 @@ class ButtonSubclassesTest < ComponentTestCase
 
     # `variant: :strip` → no btn classes; still an anchor with the path
     assert_html(html, "a[href*='merge=42']", text: "Merge")
-    assert_no_html(html, "a.btn-default")
+    assert_no_html(html, "a.btn-secondary")
   end
 
   def test_get_button_accepts_size
@@ -503,7 +503,7 @@ class ButtonSubclassesTest < ComponentTestCase
                 "[data-action='modal-toggle#showModal:prevent']" \
                 "[data-modal='modal_trust_settings']" \
                 "[href='/trust/path']")
-    assert_html(html, "a.btn.btn-default", text: "Open Trust Settings")
+    assert_html(html, "a.btn.btn-secondary", text: "Open Trust Settings")
   end
 
   def test_modal_toggle_plain_text_style
@@ -516,7 +516,7 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_html(html, "a[data-controller='modal-toggle'][href='/edit/path']")
-    assert_no_html(html, "a.btn-default")
+    assert_no_html(html, "a.btn-secondary")
   end
 
   # --- Button::CollapseToggle -------------------------------------------

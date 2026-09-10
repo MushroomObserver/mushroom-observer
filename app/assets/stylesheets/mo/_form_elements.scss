@@ -63,10 +63,10 @@
 // background, not a hardcoded white, so a light variant background
 // (e.g. a pale warning color) still gets readable dark text.
 //
-// Sass `@extend .btn-default.active` won't work — compound
+// Sass `@extend .btn-secondary.active` won't work — compound
 // selectors are no longer extendable.
 $btn-active-variants: (
-  default: ($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, $BUTTON_BORDER_COLOR),
+  secondary: ($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, $BUTTON_BORDER_COLOR),
   primary: (color-yiq($primary), $primary, darken($primary, 5%)),
   success: (color-yiq($success), $success, darken($success, 5%)),
   info: (color-yiq($info), $info, darken($info, 5%)),
