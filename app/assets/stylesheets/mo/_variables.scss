@@ -841,9 +841,7 @@ $jumbotron-bg:                      $gray-200 !default;
 
 // Cards
 
-// Matches Bootstrap 3's $panel-body-padding (15px), converged to one
-// value on both axes rather than keeping BS3's separate, smaller
-// $panel-heading-padding vertical value (10px).
+// One value (15px) on both axes.
 $card-spacer-y:                     0.9375rem !default;
 $card-spacer-x:                     0.9375rem !default;
 
