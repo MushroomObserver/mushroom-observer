@@ -64,6 +64,10 @@
   border: none !important;
 }
 
+.p-card {
+  padding: $card-spacer-y $card-spacer-x;
+}
+
 // Bootstrap generates .m-*/.p-*/.mx-*/.my-*/.mt-*/.mb-*/.ml-*/.mr-*/
 // .px-*/.py-*/.pt-*/.pb-*/.pl-*/.pr-*/.mx-auto natively now -- the
 // hand-written duplicates of those are deleted, including the ones
@@ -267,20 +271,6 @@
 // --------------------------------------------------
 
 @media screen and (min-width: breakpoint-min(sm)) {
-  .mx-sm-2 {
-    margin-right: 0.5em !important;
-    margin-left: 0.5em !important;
-  }
-
-  .mx-sm-3 {
-    margin-right: 1em !important;
-    margin-left: 1em !important;
-  }
-
-  .mr-sm-4 {
-    margin-right: 1.5em !important;
-  }
-
   .table {
     overflow-x: scroll;
   }

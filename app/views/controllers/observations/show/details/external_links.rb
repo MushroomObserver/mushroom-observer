@@ -33,7 +33,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   def view_template
     return if visible_sites.empty? && !show_new_link?
 
-    div(class: class_names(wrapper_class, "p-3 border-bottom")) do
+    div(class: class_names(wrapper_class, "p-card border-bottom")) do
       if visible_sites.any?
         render_badges
       else
@@ -114,7 +114,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     Accordion(id: "external_links_accordion", class: "m-0") do |accordion|
       visible_sites.map(&:last).each do |link|
         accordion.with_pane(id: "pane_#{link.id}",
-                            class: "p-3 border-bottom") do
+                            class: "p-card border-bottom") do
           turbo_frame_tag("external_link_frame_#{link.id}",
                           src: external_link_path(link.id),
                           loading: "lazy")
