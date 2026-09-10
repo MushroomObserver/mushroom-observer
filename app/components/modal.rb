@@ -71,7 +71,7 @@ class Components::Modal < Components::Base
   # When `true`, the modal is shown immediately on page load
   # (server-rendered for a redirect-like response, e.g.
   # `OccurrenceResolveModal`'s auto-open pattern). Adds the
-  # backdrop, the `fade in` class, and the `display: block` style.
+  # backdrop, the `fade show` class, and the `display: block` style.
   prop :auto_open, _Boolean, default: false
   prop :user, _Nilable(User), default: nil
   # Extra CSS class(es) appended to the modal root, e.g. `modal-form`
@@ -157,12 +157,12 @@ class Components::Modal < Components::Base
   private
 
   def render_backdrop
-    div(class: "modal-backdrop fade in")
+    div(class: "modal-backdrop fade show")
   end
 
   def modal_class
     classes = ["modal"]
-    classes << "fade in" if @auto_open
+    classes << "fade show" if @auto_open
     classes << "fade" unless @auto_open
     classes << @extra_class if @extra_class.present?
     classes.join(" ")

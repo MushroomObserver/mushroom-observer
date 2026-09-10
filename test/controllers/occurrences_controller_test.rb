@@ -290,7 +290,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_select("#modal_resolve_projects", text: /Add All/)
     # Components::Modal wrapping markup (auto-open, modal-lg, id) —
     # proves the create-mode view file's modal composition rendered.
-    assert_select("div#modal_resolve_projects.modal.fade.in")
+    assert_select("div#modal_resolve_projects.modal.fade.show")
     assert_select("div.modal-dialog.modal-lg")
     assert_select("#modal_resolve_projects form[data-turbo='true']")
     # Both Skip and Add All buttons post under the FormObject's

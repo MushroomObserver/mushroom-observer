@@ -154,7 +154,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
 
     Button(
       size: :sm,
-      class: "remove_image_button fade in",
+      class: "remove_image_button fade show",
       data: data
     ) do
       span { :image_remove_remove.l }

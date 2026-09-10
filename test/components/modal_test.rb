@@ -27,7 +27,7 @@ class ModalTest < ComponentTestCase
     # Default modal Stimulus controller
     assert_html(html, ".modal[data-controller='modal']")
 
-    # Default styling: fade in (not auto-open)
+    # Default styling: fade, not shown (not auto-open)
     assert_includes(html, "class=\"modal fade\"")
     assert_not_includes(html, "modal-backdrop")
   end
@@ -48,8 +48,8 @@ class ModalTest < ComponentTestCase
   def test_auto_open_adds_backdrop_and_display_block
     html = render_modal(id: "modal_auto", title: "Auto", auto_open: true)
 
-    assert_html(html, ".modal-backdrop.fade.in")
-    assert_includes(html, "class=\"modal fade in\"")
+    assert_html(html, ".modal-backdrop.fade.show")
+    assert_includes(html, "class=\"modal fade show\"")
     assert_includes(html, "style=\"display: block;\"")
   end
 
