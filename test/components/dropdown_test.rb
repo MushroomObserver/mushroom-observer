@@ -103,9 +103,6 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "[data-placement]")
   end
 
-  # Bootstrap 4 renames the divider class from `.divider` to
-  # `.dropdown-divider`; MO's old panel-only class has no styling
-  # under the Bootstrap 4 gem. Regression guard for that rename.
   def test_multiple_sections_separated_by_dropdown_divider
     html = render_dropdown(id: "multi_toggle", menu_id: "multi_menu") do |menu|
       menu.section(Tab::Project::Summary.new(project: @project))

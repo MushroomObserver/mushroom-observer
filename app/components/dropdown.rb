@@ -91,12 +91,9 @@ class Components::Dropdown < Components::Base
 
   private
 
-  # No manual caret span -- Bootstrap 4 draws it automatically via a
-  # `::after` pseudo-element on `.dropdown-toggle` (`@include caret()`,
-  # bootstrap/_dropdown.scss). Bootstrap 3 had no such default and
-  # needed the span; under Bootstrap 4 that span rendered empty
-  # (`.caret` carries no styling in this gem), duplicating the caret
-  # the toggle already draws.
+  # No manual caret span -- Bootstrap draws one automatically via a
+  # `::after` pseudo-element on `.dropdown-toggle` itself
+  # (`@include caret()`, bootstrap/_dropdown.scss).
   def render_toggle
     a(class: toggle_link_class,
       id: @id, role: "button", href: "#",
