@@ -514,7 +514,8 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Location, "/locations")
     assert_show_url(Name, "/names")
     # assert_show_url(Naming, "/observations/show_naming") # there is no show
-    assert_show_url(Observation, "/observations")
+    # Observation overrides show_url to the logged-out-accessible form.
+    assert_show_url(Observation, "/obs")
     assert_show_url(Project, "/projects")
     assert_show_url(Sequence, "/sequences")
     assert_show_url(SpeciesList, "/species_lists")
