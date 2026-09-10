@@ -64,6 +64,43 @@ class SequencesControllerTest < FunctionalTestCase
     assert_empty(obs.reload.sequences, "the reflection gains no sequence")
   end
 
+  def test_new_on_reflection_reuses_existing_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    companion = Observation::Companion.new(obs, obs.user).create
+    login(obs.user.login)
+
+    assert_no_difference("Observation.count") do
+      get(:new, params: { observation_id: obs.id })
+    end
+
+    assert_redirected_to(new_sequence_path(observation_id: companion.id))
+    assert_flash_success(:sequence_on_reflection_companion_existing)
+  end
+
+  def test_new_on_reflection_reports_companion_creation_failure
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+    invalid = Observation.new
+    invalid.errors.add(:base, :occurrence_max_observations_exceeded,
+                       max: Occurrence::MAX_OBSERVATIONS)
+    failing = Struct.new(:record) do
+      def existing = nil
+
+      def create
+        raise(ActiveRecord::RecordInvalid.new(record))
+      end
+    end.new(invalid)
+
+    Observation::Companion.stub(:new, ->(*) { failing }) do
+      get(:new, params: { observation_id: obs.id })
+    end
+
+    assert_flash_error
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+  end
+
   def reflection_companion(obs)
     occurrence = obs.reload.occurrence
     return nil unless occurrence

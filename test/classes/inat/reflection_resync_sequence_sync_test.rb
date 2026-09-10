@@ -98,6 +98,19 @@ class Inat::ReflectionResyncSequenceSyncTest < UnitTestCase
                  "removed on iNat is removed from the mirror")
   end
 
+  def test_invalid_update_is_rejected_with_alert
+    seq = @obs.sequences.create!(user: @obs.user, locus: ITS_LOCUS,
+                                 bases: LSU_BASES)
+
+    outcome = sync(fields: [dna_field(value: "!!!not-a-sequence-99!!!")])
+
+    assert_equal(0, outcome.updated)
+    assert_equal(1, outcome.alerts.length)
+    assert_match(/update rejected/, outcome.alerts.first)
+    assert_equal(LSU_BASES, seq.reload.bases,
+                 "a rejected update must leave the sequence alone")
+  end
+
   def test_invalid_inat_value_is_rejected_with_alert
     outcome = sync(fields: [dna_field(value: "!!!not-a-sequence-99!!!")])
 
