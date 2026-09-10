@@ -12,7 +12,9 @@ class RssLogTest < UnitTestCase
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
-      assert(rss_log.url.include?("#{model(type).show_controller}/#{id}"),
+      # Observation.show_url uses the /obs/ form, not show_controller.
+      path = type == :observation ? "/obs" : model(type).show_controller
+      assert(rss_log.url.include?("#{path}/#{id}"),
              "rss_log.url incorrect for #{model(type)}")
     end
   end

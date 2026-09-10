@@ -16,7 +16,7 @@ module Views::Mailers::ObservationLinks
   private
 
   def show_object_url
-    "#{MO.http_domain}/#{@observation.id}"
+    @observation.show_url
   end
 
   def post_comment_url

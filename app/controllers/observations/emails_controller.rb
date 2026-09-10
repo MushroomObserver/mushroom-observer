@@ -64,7 +64,7 @@ module Observations
     def show_flash_and_send_back(observation)
       respond_to do |format|
         format.html do
-          redirect_to(observation_path(observation.id)) and return
+          redirect_to(permanent_observation_path(observation.id)) and return
         end
         format.turbo_stream do
           render_modal_close_and_flash("observation_email") and return

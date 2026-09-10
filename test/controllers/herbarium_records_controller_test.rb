@@ -708,7 +708,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     # Should successfully destroy and redirect to observation
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
-    assert_redirected_to(observation_path(observation))
+    assert_redirected_to(permanent_observation_path(observation))
   end
 
   # Bug: Destroy button on show page uses turbo_stream format, causing error

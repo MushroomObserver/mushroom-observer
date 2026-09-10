@@ -57,7 +57,7 @@ class ReportTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     expect = [
       obs.id.to_s,
-      "#{MO.http_domain}/#{obs.id}",
+      "#{MO.http_domain}/obs/#{obs.id}",
       "HumanObservation",
       "#{obs.updated_at.api_time} UTC",
       "MushroomObserver",

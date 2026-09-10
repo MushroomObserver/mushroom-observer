@@ -13,7 +13,7 @@ class NamingTrackerMailerTest < MailerTestCase
     assert_html_mail(mail)
     body = mail.body.to_s
     assert_includes(
-      body, "https://mushroomobserver.org/#{naming.observation_id}"
+      body, "https://mushroomobserver.org/obs/#{naming.observation_id}"
     )
     assert_includes(
       body, "https://mushroomobserver.org/names/#{naming.name_id}"
@@ -28,7 +28,7 @@ class NamingTrackerMailerTest < MailerTestCase
 
     assert_text_mail(mail)
     assert_includes(mail.body.to_s,
-                    "https://mushroomobserver.org/#{naming.observation_id}")
+                    "https://mushroomobserver.org/obs/#{naming.observation_id}")
   end
 
   # Covers specimen_line's "available" branch (fixture's observation
