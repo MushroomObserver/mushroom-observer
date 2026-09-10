@@ -21,6 +21,15 @@ class Inat
     # :source_deleted, :fetch_failed.
     Result = Data.define(:status, :observation)
 
+    # Messages from sequence syncs that declined to act (ambiguous
+    # locus pairings, invalid iNat values); the batch job sends them
+    # to #alerts alongside the back-link mismatches.
+    attr_reader :sequence_alerts
+
+    def initialize
+      @sequence_alerts = []
+    end
+
     # The reflection's iNaturalist import link, or nil when it has none.
     def self.inat_link(reflection)
       link = reflection.import_link
@@ -72,10 +81,23 @@ class Inat
     def apply(obs, inat_obs)
       obs.assign_attributes(scalar_attributes(inat_obs))
       obs.save! if obs.changed?
-      changed = obs.saved_changes.except("updated_at").present?
+      scalars_changed = obs.saved_changes.except("updated_at").present?
+      sequences = sync_sequences(obs, inat_obs)
       mark_synced(obs)
-      log_resync(obs) if changed
+      log_resync(obs) if scalars_changed
+      changed = scalars_changed || sequences.changed?
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
+    end
+
+    # Sequence adds/updates do their logging through Sequence's model
+    # callbacks; here we only collect the declined-to-act messages.
+    def sync_sequences(obs, inat_obs)
+      outcome = SequenceSync.new.call(obs, inat_obs)
+      outcome.alerts.each do |message|
+        @sequence_alerts << "Reflection obs #{obs.id} (iNat " \
+                            "#{self.class.inat_id(obs)}): #{message}"
+      end
+      outcome
     end
 
     # The iNat obs is gone: keep every MO record intact, record the loss

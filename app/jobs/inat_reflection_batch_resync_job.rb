@@ -15,6 +15,9 @@ class InatReflectionBatchResyncJob < ApplicationJob
     Rails.logger.info("InatReflectionBatchResyncJob: #{counts.inspect}")
     # A back-link pointing at the wrong MO obs is rare and needs a human
     # look, not an auto-repair (#5196 discussion) -- route each to #alerts.
+    # Sequence syncs that declined to act (ambiguous locus pairings,
+    # invalid iNat values) get the same treatment.
     resyncer.back_link_alerts.each { |message| alert(message) }
+    resyncer.sequence_alerts.each { |message| alert(message) }
   end
 end
