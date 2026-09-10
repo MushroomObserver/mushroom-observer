@@ -252,9 +252,8 @@ button.badge-id:hover {
 }
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
-// vertical-align: middle avoids stretching the line for a text
-// descender the icon doesn't have. mo-icon's usual top offset and
-// 1.12em size are tuned for looser contexts -- undone/shrunk here.
+// mo-icon's usual top offset and 1.12em size are tuned for looser
+// contexts -- undone/shrunk here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -262,7 +261,6 @@ button.badge-id:hover {
   line-height: 1;
   background-color: transparent;
   text-decoration: none;
-  vertical-align: middle;
 
   &:hover {
     text-decoration: none;

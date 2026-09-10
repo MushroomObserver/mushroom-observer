@@ -155,7 +155,7 @@
 // `.stateful-link` is added by `Link::Get` only when it renders an
 // active_icon:/active_content: swap pair. Shows/hides each pair based
 // on an `.active`/`.collapsed` class toggled on the trigger by JS
-// (not yet written -- no real caller uses this yet).
+// (not yet written -- no caller uses this yet).
 .stateful-link,
 .panel-collapse-trigger {
   text-decoration: none;
@@ -216,19 +216,7 @@ tbody.collapse.show {
   }
 }
 
-// Baseline correction for icon+text pairs that aren't framed as a
-// .btn: plain Link::Get (.inline-icon-link sets top: 0 instead) and
-// the sidebar heading icons. The `> span >` variants cover
-// Components::Icon's title: wrap (moves tooltip attrs off the <svg>
-// onto a wrapping <span>).
-a:not(.btn):not(.inline-icon-link) > .mo-icon,
-a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
-.list-group-item > .mo-icon,
-.list-group-item > span > .mo-icon {
-  top: 2px;
-}
-
-// A real "filled/bordered" .btn's icon reads small next to the
+// A "filled/bordered" .btn's icon reads small next to the
 // button's bold label text (e.g. the location-map "Show map"
 // toggle). .btn-link buttons look like plain links, not framed
 // buttons, so they're excluded and keep the default 1.12em size.
