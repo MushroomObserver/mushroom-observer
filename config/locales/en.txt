@@ -4145,6 +4145,7 @@
   runtime_profile_success: "[:runtime_updated_at(type=:profile)]"
   runtime_profile_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_sequence_success: "[:runtime_created_id(type=:SEQUENCE,value=id)]"
+  sequence_on_reflection_not_editable: This observation is a read-only reflection of its imported source. Sequences for it are added to its companion observation, which only the observer (or a project manager they trust) can do.
   sequence_on_reflection_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created a linked companion observation for your sequence. The two are grouped as one occurrence for the same specimen.
   sequence_on_reflection_companion_existing: That observation is a read-only reflection of its imported source, so your sequence goes on its linked companion observation for the same specimen.
   runtime_sequence_update_success: "[:runtime_updated_id(type=:sequence,value=id)]"

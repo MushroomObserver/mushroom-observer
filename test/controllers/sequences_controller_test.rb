@@ -25,8 +25,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_create_on_reflection_lands_sequence_on_companion
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)
-    adder = users(:zero_user) # anyone may add; the adder owns the sequence
-    login(adder.login)
+    login(obs.user.login)
     params = { observation_id: obs.id,
                sequence: { locus: "ITS", bases: ITS_BASES } }
 
@@ -35,11 +34,30 @@ class SequencesControllerTest < FunctionalTestCase
     companion = reflection_companion(obs)
     seq = Sequence.find_by(observation: companion, locus: "ITS")
     assert_not_nil(seq, "the sequence should land on the companion")
-    assert_users_equal(adder, seq.user)
+    assert_users_equal(obs.user, seq.user)
     assert_users_equal(obs.user, companion.user,
-                       "the companion belongs to the reflection's owner, " \
-                       "not the sequence adder")
+                       "the companion belongs to the actor, as in the " \
+                       "Edit flow")
     assert_empty(obs.reload.sequences, "the reflection gains no sequence")
+  end
+
+  # Attaching a sequence to a reflection is an edit-like act (it
+  # materializes the companion), so it takes the same permission as
+  # Edit; a user with no edit rights is refused.
+  def test_create_on_reflection_requires_edit_permission
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(users(:zero_user).login)
+    params = { observation_id: obs.id,
+               sequence: { locus: "ITS", bases: ITS_BASES } }
+
+    assert_no_difference("Sequence.count") do
+      post(:create, params: params)
+    end
+
+    assert_flash_error(:sequence_on_reflection_not_editable)
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+    assert_nil(obs.reload.occurrence, "no companion should be created")
   end
 
   def reflection_companion(obs)
