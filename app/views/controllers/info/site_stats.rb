@@ -30,7 +30,7 @@ module Views::Controllers::Info
           InteractiveImage(
             user: current_user,
             image: obs.thumb_image,
-            image_link: observation_path(obs.id),
+            image_link: permanent_observation_path(obs.id),
             votes: true
           )
           br

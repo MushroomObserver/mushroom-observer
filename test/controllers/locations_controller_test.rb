@@ -758,7 +758,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     post(:create, params: params)
 
-    assert_redirected_to(observation_path(obs))
+    assert_redirected_to(permanent_observation_path(obs))
   end
 
   def test_create_location_already_exists

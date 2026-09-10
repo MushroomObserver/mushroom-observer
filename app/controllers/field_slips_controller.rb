@@ -225,7 +225,7 @@ class FieldSlipsController < ApplicationController
         # isn't fully resolved until the user handles the project gaps.
         render_new_view_invalid
       elsif obs
-        redirect_to(observation_url(obs), notice: msg)
+        redirect_to(permanent_observation_url(obs), notice: msg)
       else
         redirect_to(field_slip_url(@field_slip), notice: msg)
       end
