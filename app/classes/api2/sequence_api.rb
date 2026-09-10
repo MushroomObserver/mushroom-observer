@@ -54,7 +54,7 @@ class API2
 
     def create_params
       {
-        observation: parse(:observation, :observation),
+        observation: sequence_target(parse(:observation, :observation)),
         locus: parse(:string, :locus),
         bases: parse(:string, :bases),
         archive: parse(:archive, :archive),
@@ -77,14 +77,20 @@ class API2
     def validate_create_params!(params)
       raise(MissingParameter.new(:observation)) unless params[:observation]
       raise(MissingParameter.new(:locus))       if params[:locus].blank?
-      # Sequences on a reflection are source-owned (mirrored from iNat
-      # by the resync); native sequences belong on the occurrence
-      # companion (#4214).
-      return unless params[:observation].reflection?
-
-      raise(ObservationIsReadOnly.new(params[:observation]))
-
       # Sequence validators handle the rest, it's too complicated to repeat.
+    end
+
+    # Sequences on a reflection are source-owned (mirrored from iNat by
+    # the resync), but anyone may sequence the specimen -- so the add
+    # lands on the occurrence companion instead (#4214): the actor's
+    # when they may edit the reflection, else the importer's. Same rule
+    # as SequencesController::ReflectionRouting.
+    def sequence_target(obs)
+      return obs unless obs&.reflection?
+
+      companion_user = obs.can_edit?(@user) ? @user : obs.user
+      builder = Observation::Companion.new(obs, companion_user)
+      builder.existing || builder.create
     end
   end
 end

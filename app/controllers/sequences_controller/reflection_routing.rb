@@ -8,16 +8,14 @@
 module SequencesController::ReflectionRouting
   private
 
-  # Attaching a sequence to a reflection is an edit-like act on the
-  # occurrence -- it materializes or reuses the companion -- so it
-  # takes the same permission as Edit (`can_edit?`: the owner, or a
-  # project admin the owner trusts). The companion belongs to the
-  # ACTOR, as in the Edit flow. A GET redirects to the companion's
-  # form; a POST re-targets in place so the submitted sequence is not
-  # lost. Returns truthy when it handled the request.
+  # Anyone may add a sequence to the specimen an observation
+  # describes (labs sequence other people's collections), so a
+  # reflection does not block the add -- it routes to the occurrence
+  # companion. A GET redirects to the companion's form; a POST
+  # re-targets in place so the submitted sequence is not lost.
+  # Returns truthy when it handled the request.
   def route_reflection_to_companion!
     return false unless @observation.reflection?
-    return reject_reflection_sequence! unless @observation.can_edit?(@user)
 
     companion, notice = find_or_create_sequence_companion
     flash_notice(notice.t)
@@ -31,23 +29,25 @@ module SequencesController::ReflectionRouting
     companion_creation_failed(e)
   end
 
-  def reject_reflection_sequence!
-    flash_error(:sequence_on_reflection_not_editable.t)
-    redirect_to(permanent_observation_path(id: @observation.id))
-  end
-
   def companion_creation_failed(error)
     flash_error(error.record.errors.full_messages.join("; "))
     redirect_to(permanent_observation_path(id: @observation.id))
   end
 
-  # [companion, flash tag]
+  # [companion, flash tag]. An actor with edit rights gets (or
+  # reuses) a companion they hold, as in the Edit flow; anyone
+  # else's sequence lands on the IMPORTER's companion -- the sequence
+  # itself is owned by the adder either way, as on any native obs.
   def find_or_create_sequence_companion
-    builder = Observation::Companion.new(@observation, @user)
+    builder = Observation::Companion.new(@observation, companion_user)
     if (companion = builder.existing)
       [companion, :sequence_on_reflection_companion_existing]
     else
       [builder.create, :sequence_on_reflection_companion_created]
     end
+  end
+
+  def companion_user
+    @observation.can_edit?(@user) ? @user : @observation.user
   end
 end

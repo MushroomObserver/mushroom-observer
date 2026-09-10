@@ -41,23 +41,27 @@ class SequencesControllerTest < FunctionalTestCase
     assert_empty(obs.reload.sequences, "the reflection gains no sequence")
   end
 
-  # Attaching a sequence to a reflection is an edit-like act (it
-  # materializes the companion), so it takes the same permission as
-  # Edit; a user with no edit rights is refused.
-  def test_create_on_reflection_requires_edit_permission
+  # Anyone may sequence the specimen (labs add sequences to other
+  # people's collections): a non-editor's sequence lands on the
+  # IMPORTER's companion; the sequence itself belongs to the adder.
+  def test_create_on_reflection_by_non_editor_uses_importers_companion
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)
-    login(users(:zero_user).login)
+    adder = users(:zero_user)
+    login(adder.login)
     params = { observation_id: obs.id,
                sequence: { locus: "ITS", bases: ITS_BASES } }
 
-    assert_no_difference("Sequence.count") do
-      post(:create, params: params)
-    end
+    assert_difference("Sequence.count", 1) { post(:create, params: params) }
 
-    assert_flash_error(:sequence_on_reflection_not_editable)
-    assert_redirected_to(permanent_observation_path(id: obs.id))
-    assert_nil(obs.reload.occurrence, "no companion should be created")
+    companion = reflection_companion(obs)
+    seq = Sequence.find_by(observation: companion, locus: "ITS")
+    assert_not_nil(seq, "the sequence should land on the companion")
+    assert_users_equal(adder, seq.user, "the adder owns their sequence")
+    assert_users_equal(obs.user, companion.user,
+                       "a non-editor's add creates the companion as " \
+                       "the importer's")
+    assert_empty(obs.reload.sequences, "the reflection gains no sequence")
   end
 
   def reflection_companion(obs)
