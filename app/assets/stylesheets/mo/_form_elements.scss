@@ -1,5 +1,9 @@
 // form elements and inputs
 
+label {
+  font-weight: $font-weight-bold;
+}
+
 // FieldLabelRow's row shape for a label with appended content (a
 // help-collapse question-mark icon, or an autocompleter's
 // has-id-indicator/find/keep/edit icons) -- see
