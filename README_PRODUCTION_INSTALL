@@ -433,9 +433,9 @@ mrtg> crontab -e
 root> iptables-save
 
 # Make sure all the critical processes started automatically.
-# Look for sshd, nginx, puma, postfix. mysqld runs on the separate
-# database droplet, not here -- check it there if following the
-# "If installing database locally" alternative instead.
+# Look for sshd, nginx, puma, postfix. If using a remote database (current production shape),
+# mysqld runs on the separate database droplet; if installing the database locally,
+# also look for mysqld/mysql here.
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
 root> ps -ef | grep puma
