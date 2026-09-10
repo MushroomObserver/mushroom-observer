@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Bootstrap 3 collapse-trigger `<a>`. Renders an `href="#target_id"`
+# Bootstrap collapse-trigger `<a>`. Renders an `href="#target_id"`
 # link with `data-toggle="collapse"` and the matching ARIA attrs.
 # The default `collapsed: true` adds the `.collapsed` class (Bootstrap uses
 # this to flip chevron icons via CSS when the pane is hidden). Pass
