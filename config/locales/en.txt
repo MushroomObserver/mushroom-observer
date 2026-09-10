@@ -4317,6 +4317,7 @@
   api_user_not_verified: The user "[login]" is not verified yet; you can request another verification email on the website.
   api_user_account_blocked: The account "[login]" has been disabled and can no longer be used.
 
+  api_help_add_observation: attach the record to these observations
   api_help_accession_has: search within accession number
   api_help_accession_number: unique fungarium id
   api_help_accession_number_has: search within accession number
@@ -4326,6 +4327,8 @@
   api_help_app: identifier used to help user distinguish which api key belongs to which app
   api_help_author_has: search within author
   api_help_citation_has: search within citation
+  api_help_code: code printed on the field slip, e.g. "NEMF-00821"
+  api_help_code_has: search within field slip codes
   api_help_classification_has: search within classification
   api_help_clear_synonyms: make it so this name is not synonymized with anything but leave everything it used to be synonymized with synonyms of each other
   api_help_collector: collector's name
@@ -4348,6 +4351,7 @@
   api_help_locus_has: search within locus
   api_help_log: log this action on main page activity log and RSS feed?
   api_help_mailing_address: postal address
+  api_help_name: namings that propose any of these names
   api_help_min_rank: group or genus or better
   api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
   api_help_misspellings: include misspellings? "include" means do not care and "only" means only show misspelt names
@@ -4356,15 +4360,22 @@
   api_help_notes_has: search within notes
   api_help_number: collector's number
   api_help_number_has: search within collector's number
+  api_help_observation: namings on these observations
   api_help_obs_date: observation date
   api_help_obs_notes_has: search within observation notes
   api_help_observer: observer
   api_help_original_name: original file name or other private identifier
   api_help_postal: in postal format with country last regardless of user preference
+  api_help_remove_observation: detach the record from these observations
   api_help_region: matches locations which end in this, e.g. "California, USA"
+  api_help_set_accession_number: change the fungarium accession number
+  api_help_set_code: change the field slip code
+  api_help_set_collector: change the collector name
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_set_gps_hidden: hide exact coordinates?
+  api_help_set_initial_det: change the initial determination
+  api_help_set_number: change the collector number
   api_help_south: min latitude
   api_help_summary_has: search within summary
   api_help_target: "e.g. \"observation #1234\" or \"name #5678\""
