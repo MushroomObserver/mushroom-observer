@@ -4,90 +4,6 @@
 // These are not meant as overrides, just to facilitate update.
 // --------------------------------------------------
 
-.d-none {
-  display: none !important;
-}
-
-.d-inline {
-  display: inline !important;
-}
-
-.d-inline-block {
-  display: inline-block !important;
-}
-
-.d-block {
-  display: block !important;
-}
-
-.d-flex {
-  display: flex !important;
-}
-
-.d-inline-flex {
-  display: inline-flex !important;
-}
-
-.flex-column {
-  flex-direction: column;
-}
-
-.flex-row {
-  flex-direction: row;
-}
-
-.flex-grow-1 {
-  flex-grow: 1 !important;
-}
-
-.flex-shrink-0 {
-  flex-shrink: 0 !important;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
-.align-items-start {
-  align-items: flex-start !important;
-}
-
-.align-items-center {
-  align-items: center !important;
-}
-
-.align-items-end {
-  align-items: flex-end !important;
-}
-
-.justify-content-start {
-  justify-content: start !important;
-}
-
-.justify-content-between {
-  justify-content: space-between !important;
-}
-
-.justify-content-center {
-  justify-content: center !important;
-}
-
-.justify-content-end {
-  justify-content: end !important;
-}
-
-.w-auto {
-  width: auto !important;
-}
-
-.w-100 {
-  width: 100% !important;
-}
-
-.w-50 {
-  width: 50% !important;
-}
-
 .min-w-100 {
   min-width: 100% !important;
 }
@@ -96,44 +12,12 @@
   max-width: 100% !important;
 }
 
-.h-auto {
-  height: auto !important;
-}
-
-.h-100 {
-  height: 100% !important;
-}
-
 .min-h-100 {
   min-height: 100% !important;
 }
 
 .max-h-100 {
   max-height: 100% !important;
-}
-
-.position-relative {
-  position: relative !important;
-}
-
-.position-absolute {
-  position: absolute !important;
-}
-
-.position-fixed {
-  position: fixed !important;
-}
-
-.float-right {
-  float: right !important;
-}
-
-.float-left {
-  float: left !important;
-}
-
-.float-none {
-  float: none !important;
 }
 
 // Combine with `.table` on the same <table> element to cascade
@@ -154,18 +38,6 @@
   }
 }
 
-.align-bottom {
-  vertical-align: bottom !important;
-}
-
-.align-top {
-  vertical-align: top !important;
-}
-
-.align-text-top {
-  vertical-align: text-top !important;
-}
-
 .object-fit-cover {
   @extend .w-100, .h-100;
   object-fit: cover;
@@ -176,32 +48,8 @@
   object-fit: contain;
 }
 
-.flex-grow-1 {
-  flex-grow: 1 !important;
-}
-
 .text-larger {
   font-size: larger !important;
-}
-
-.text-left {
-  text-align: left !important;
-}
-
-.text-center {
-  text-align: center !important;
-}
-
-.text-right {
-  text-align: right !important;
-}
-
-.text-monospace {
-  font-family: monospace !important;
-}
-
-.font-weight-normal {
-  font-weight: normal !important;
 }
 
 .smaller {
@@ -216,330 +64,14 @@
   border: none !important;
 }
 
-.rounded-0 {
-  border-radius: 0 !important;
-}
-
-.m-0 {
-  margin: 0 !important;
-}
-
-.mx-0 {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-.mx-1 {
-  margin-left: 0.25rem !important;
-  margin-right: 0.25rem !important;
-}
-
-.mx-2 {
-  margin-left: 0.5rem !important;
-  margin-right: 0.5rem !important;
-}
-
-.m-3 {
-  margin: 1rem !important;
-}
-
-.my-1 {
-  margin-top: 0.25rem !important;
-  margin-bottom: 0.25rem !important;
-}
-
-.my-2 {
-  margin-top: 0.5rem !important;
-  margin-bottom: 0.5rem !important;
-}
-
-.my-3 {
-  margin-top: 1rem !important;
-  margin-bottom: 1rem !important;
-}
-
-.my-4 {
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
-}
-
-.my-5 {
-  margin-top: 3rem !important;
-  margin-bottom: 3rem !important;
-}
-
-.my-0 {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.my-4 {
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
-}
-
-.my-5px {
-  margin-top: 5px !important;
-  margin-bottom: 5px !important;
-}
-
-.mt-0 {
-  margin-top: 0 !important;
-}
-
-.mt-1 {
-  margin-top: 0.25rem !important;
-}
-
-.mt-2 {
-  margin-top: 0.5rem !important;
-}
-
-.mt-3 {
-  margin-top: 1rem !important;
-}
-
-.mt-4 {
-  margin-top: 1.5rem !important;
-}
-
-.mt-5 {
-  margin-top: 2rem !important;
-}
-
-.mt-n2 {
-  margin-top: -0.5rem !important;
-}
-
-.mb-0 {
-  margin-bottom: 0 !important;
-}
-
-.mb-1 {
-  margin-bottom: 0.25rem !important;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem !important;
-}
-
-.mb-3 {
-  margin-bottom: 1rem !important;
-}
-
-.mb-4 {
-  margin-bottom: 1.5rem !important;
-}
-
-.mb-n3 {
-  margin-bottom: -1rem !important;
-}
-
-.mb-5 {
-  margin-bottom: 2rem !important;
-}
-
-.mx-auto {
-  margin-right: auto !important;
-  margin-left: auto !important;
-}
-
-.mx-0 {
-  margin-right: 0 !important;
-  margin-left: 0 !important;
-}
-
-.mx-3 {
-  margin-right: 1rem !important;
-  margin-left: 1rem !important;
-}
-
-.mr-0 {
-  margin-right: 0 !important;
-}
-
-.mr-2 {
-  margin-right: 0.5rem !important;
-}
-
-.mr-3 {
-  margin-right: 1rem !important;
-}
-
-.mr-4 {
-  margin-right: 1.5rem !important;
-}
-
-.mr-5 {
-  margin-right: 3rem !important;
-}
-
-.ml-0 {
-  margin-left: 0 !important;
-}
-
-.ml-1 {
-  margin-left: 0.25rem !important;
-}
-
-.ml-2 {
-  margin-left: 0.5rem !important;
-}
-
-.ml-3 {
-  margin-left: 1rem !important;
-}
-
-.ml-4 {
-  margin-left: 1.5rem !important;
-}
-
-.ml-5 {
-  margin-left: 3rem !important;
-}
-
-.p-0 {
-  padding: 0 !important;
-}
-
-.p-1 {
-  padding: 0.25rem !important;
-}
-
-.p-2 {
-  padding: 0.5rem !important;
-}
-
-.p-3 {
-  padding: 1rem !important;
-}
-
-.p-4 {
-  padding: 1.5rem !important;
-}
-
-.p-5 {
-  padding: 3rem !important;
-}
-
-.py-0 {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.py-1 {
-  padding-top: 0.25rem !important;
-  padding-bottom: 0.25rem !important;
-}
-
-.py-2 {
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
-}
-
-.py-3 {
-  padding-top: 1rem !important;
-  padding-bottom: 1rem !important;
-}
-
-.pt-0 {
-  padding-top: 0 !important;
-}
-
-.pt-2 {
-  padding-top: 0.5rem !important;
-}
-
-.pt-3 {
-  padding-top: 1rem !important;
-}
-
-.pt-4 {
-  padding-top: 1.5rem !important;
-}
-
-.pb-1 {
-  padding-bottom: .25rem !important;
-}
-
-.pb-2 {
-  padding-bottom: 0.5rem !important;
-}
-
-.pb-3 {
-  padding-bottom: 1rem !important;
-}
-
-.pb-4 {
-  padding-bottom: 1.5rem !important;
-}
-
-.pb-5 {
-  padding-bottom: 2rem !important;
-}
-
+// Bootstrap generates .m-*/.p-*/.mx-*/.my-*/.mt-*/.mb-*/.ml-*/.mr-*/
+// .px-*/.py-*/.pt-*/.pb-*/.pl-*/.pr-*/.mx-auto natively now -- the
+// hand-written duplicates of those are deleted, including the ones
+// that sat at a different value (.mt-5/.mb-5/.pb-5 at 2rem instead
+// of Bootstrap's 3rem, .my-0 missing !important). .indent is a
+// custom, non-Bootstrap class -- stays.
 .indent {
   padding-left: 1rem !important;
-}
-
-.px-0 {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-.px-1 {
-  padding-left: 0.25rem !important;
-  padding-right: 0.25rem !important;
-}
-
-.px-2 {
-  padding-left: 0.5rem !important;
-  padding-right: 0.5rem !important;
-}
-
-.px-3 {
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-}
-
-.pl-0 {
-  padding-left: 0 !important;
-}
-
-.pl-2 {
-  padding-left: 0.5rem !important;
-}
-
-.pl-3 {
-  padding-left: 1rem !important;
-}
-
-.pl-4 {
-  padding-left: 1.5rem !important;
-}
-
-.pr-0 {
-  padding-right: 0 !important;
-}
-
-.pr-3 {
-  padding-right: 1rem !important;
-}
-
-.pr-4 {
-  padding-right: 1.5rem !important;
-}
-
-.pr-5 {
-  padding-right: 3rem !important;
-}
-
-.text-nowrap {
-  white-space: nowrap !important;
-}
-
-.text-wrap {
-  white-space: normal !important;
 }
 
 .overflow-visible {
@@ -575,10 +107,6 @@
 
 .dotted-border {
   border: 1px dotted;
-}
-
-.rounded-circle {
-  border-radius: 50%;
 }
 
 .img-fluid {
@@ -788,48 +316,8 @@
 // --------------------------------------------------
 
 @media screen and (min-width: breakpoint-min(sm)) {
-  .d-sm-none {
-    display: none !important;
-  }
-
-  .d-sm-block {
-    display: block !important;
-  }
-
-  .d-sm-inline {
-    display: inline !important;
-  }
-
-  .d-sm-inline-block {
-    display: inline-block !important;
-  }
-
-  .d-sm-flex {
-    display: flex !important;
-  }
-
-  .float-sm-left {
-    float: left !important;
-  }
-
-  .float-sm-right {
-    float: right !important;
-  }
-
-  .float-sm-none {
-    float: none !important;
-  }
-
-  .mt-sm-3 {
-    margin-top: 1em !important;
-  }
-
   .mx-sm-2 {
     margin-right: 0.5em !important;
-    margin-left: 0.5em !important;
-  }
-
-  .ml-sm-2 {
     margin-left: 0.5em !important;
   }
 
@@ -842,96 +330,7 @@
     margin-right: 1.5em !important;
   }
 
-  .px-sm-0 {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .px-sm-3 {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-
-  .pr-sm-4 {
-    padding-right: 1.5rem !important;
-  }
-
   .table {
     overflow-x: scroll;
-  }
-}
-
-// display utilities at the remaining BS3 breakpoints -- Components::Column's
-// show_at:/hide_at: (app/components/column.rb) can target any of xs/sm/md/
-// lg, so all three need their .d-{bp}-* set defined, not just sm.
-@media screen and (min-width: breakpoint-min(md)) {
-  .d-md-none {
-    display: none !important;
-  }
-
-  .d-md-block {
-    display: block !important;
-  }
-
-  .d-md-inline {
-    display: inline !important;
-  }
-
-  .d-md-inline-block {
-    display: inline-block !important;
-  }
-
-  .d-md-flex {
-    display: flex !important;
-  }
-}
-
-@media screen and (min-width: breakpoint-min(lg)) {
-  .mr-lg-5 {
-    margin-right: 3rem !important;
-  }
-
-  .d-lg-none {
-    display: none !important;
-  }
-
-  .d-lg-block {
-    display: block !important;
-  }
-
-  .d-lg-inline {
-    display: inline !important;
-  }
-
-  .d-lg-inline-block {
-    display: inline-block !important;
-  }
-
-  .d-lg-flex {
-    display: flex !important;
-  }
-}
-
-// MO's widened tier -- see $grid-breakpoints in
-// mo/map_theme_to_bootstrap4.scss.
-@media screen and (min-width: breakpoint-min(xl)) {
-  .d-xl-none {
-    display: none !important;
-  }
-
-  .d-xl-block {
-    display: block !important;
-  }
-
-  .d-xl-inline {
-    display: inline !important;
-  }
-
-  .d-xl-inline-block {
-    display: inline-block !important;
-  }
-
-  .d-xl-flex {
-    display: flex !important;
   }
 }
