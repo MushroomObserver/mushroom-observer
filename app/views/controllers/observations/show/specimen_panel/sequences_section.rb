@@ -10,6 +10,8 @@
 # redirects to the obs after destroy.
 class Views::Controllers::Observations::Show::SpecimenPanel
   class SequencesSection < Views::Base
+    include Views::Controllers::Observations::Show::OccurrenceStatusIcons
+
     prop :obs, ::Observation
     prop :user, _Nilable(::User), default: nil
     prop :has_sibling_records, _Boolean, default: false
@@ -31,14 +33,21 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     # A sequence describes the specimen, and the occurrence is the
     # specimen-level grouping -- a reflection's native sequences live
     # on its companion (see SequencesController::ReflectionRouting) --
-    # so the panel lists the whole occurrence's sequences.
-    def sequences
-      @sequences ||=
+    # so the panel lists the whole occurrence's sequences. Each row
+    # keeps its member observation for the status icons.
+    def sequence_rows
+      @sequence_rows ||=
         if @obs.occurrence
-          @obs.occurrence.observations.flat_map(&:sequences)
+          @obs.occurrence.observations.flat_map do |member|
+            member.sequences.map { |seq| [seq, member] }
+          end
         else
-          @obs.sequences.to_a
+          @obs.sequences.map { |seq| [seq, @obs] }
         end
+    end
+
+    def sequences
+      sequence_rows.map(&:first)
     end
 
     def render_header
@@ -65,13 +74,19 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     def render_list
       ul(class: "tight-list") do
-        sequences.each { |seq| render_row(seq) }
+        sequence_rows.each { |seq, member| render_row(seq, member) }
       end
     end
 
-    def render_row(sequence)
+    # Same star/lock member-status icons as the Matching Observations
+    # panel, so a rolled-up sequence shows whose record it sits on.
+    def render_row(sequence, member)
       li(id: "sequence_#{sequence.id}") do
-        render_show_link(sequence)
+        icon_types = member_status_icon_types(member, @obs.occurrence)
+        render_status_icons(icon_types)
+        span(class: ("icon-text-gap" if icon_types.any?)) do
+          render_show_link(sequence)
+        end
         InlineCRUDLinks(
           target: sequence, user: @user,
           extras: [archive_link(sequence), copy_link(sequence)].compact
