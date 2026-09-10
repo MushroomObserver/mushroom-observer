@@ -2,31 +2,34 @@
 
 class Inat
   class ReflectionResync
-    # Syncs DNA sequences from a fetched iNat observation onto its
-    # reflection (#4215). The iNat side comes from the shared
-    # SequenceFieldDetector, so import and sync agree on what counts as
-    # a sequence; the MO side is compared by the model's identity
-    # notion, Sequence#bases_nucleotides (description line, digits and
-    # whitespace stripped):
+    # Mirrors DNA sequences from a fetched iNat observation onto its
+    # reflection (#4215). Sequences on a reflection are source-owned --
+    # native sequence adds are routed to the occurrence companion, like
+    # every other native contribution -- so the sync is authoritative:
+    # after it runs, the reflection's sequences are iNat's.
     #
-    #   - matching bases                    -> already synced, no-op;
-    #   - new on iNat, no stale counterpart -> create, owned by the
-    #     observation's owner (as an import would be);
-    #   - one iNat variant and one stale MO sequence sharing a locus
-    #     -> edited on iNat: update the bases in place;
-    #   - several variants or candidates sharing a locus -> ambiguous:
-    #     touch nothing, report for the batch's alert digest.
+    # The iNat side comes from the shared SequenceFieldDetector, so
+    # import and sync agree on what counts as a sequence; the MO side is
+    # compared by the model's identity notion, Sequence#bases_nucleotides
+    # (description line, digits and whitespace stripped):
     #
-    # No deletions: sequences stay community-editable on reflections,
-    # so an MO-only sequence may be user-added.
+    #   - matching bases -> kept as is;
+    #   - one iNat variant and one stale MO sequence sharing a locus ->
+    #     edited on iNat: bases updated in place (keeps the record's
+    #     id and history);
+    #   - other stale MO sequences -> removed from iNat: deleted;
+    #   - remaining iNat variants -> created, owned by the observation's
+    #     owner (as an import would be);
+    #   - an iNat value Sequence validation rejects -> skipped and
+    #     reported for the batch's alert digest.
     #
-    # Activity logging rides on Sequence's model callbacks
-    # (log_sequence_added / log_sequence_updated), so synced changes
-    # appear in the log the same way hand-entered ones do.
+    # All writes log through Sequence's model callbacks
+    # (log_sequence_added / _updated / _destroyed), attributed to the
+    # owner for adds and the admin actor for updates and deletions.
     class SequenceSync
-      Outcome = Data.define(:added, :updated, :alerts) do
+      Outcome = Data.define(:added, :updated, :removed, :alerts) do
         def changed?
-          added.positive? || updated.positive?
+          added.positive? || updated.positive? || removed.positive?
         end
       end
 
@@ -34,20 +37,23 @@ class Inat
         @obs = obs
         @added = 0
         @updated = 0
+        @removed = 0
         @alerts = []
         sync(inat_obs.sequences)
-        Outcome.new(added: @added, updated: @updated, alerts: @alerts)
+        Outcome.new(added: @added, updated: @updated, removed: @removed,
+                    alerts: @alerts)
       end
 
       private
 
       def sync(desired)
-        return if desired.empty?
-
         @existing = @obs.sequences.to_a
+        return if desired.empty? && @existing.empty?
+
         @desired_norms = desired.map { |d| normalize(d[:bases]) }
-        new_variants(desired).group_by { |d| d[:locus] }.
-          each { |locus, wants| reconcile_locus(locus, wants) }
+        loci = (new_variants(desired).pluck(:locus) +
+                stale_sequences.map(&:locus)).uniq
+        loci.each { |locus| reconcile_locus(locus, desired) }
       end
 
       # iNat sequences with no bases match anywhere on the reflection.
@@ -58,24 +64,25 @@ class Inat
         end
       end
 
-      # MO sequences on this locus whose bases match nothing on iNat.
-      def stale_for(locus)
+      # MO sequences whose bases match nothing on iNat.
+      def stale_sequences
         @existing.select do |s|
-          s.locus == locus && @desired_norms.exclude?(s.bases_nucleotides)
+          @desired_norms.exclude?(s.bases_nucleotides)
         end
       end
 
-      def reconcile_locus(locus, wants)
-        stale = stale_for(locus)
-        if stale.empty?
-          wants.each { |d| create_sequence(d) }
-        elsif wants.one? && stale.one?
-          update_sequence(stale.first, wants.first)
-        else
-          @alerts << "ambiguous sequence sync for locus #{locus.inspect}: " \
-                     "#{wants.size} new iNat variant(s) vs #{stale.size} " \
-                     "stale MO sequence(s) - left untouched"
-        end
+      def reconcile_locus(locus, desired)
+        wants = new_variants(desired).select { |d| d[:locus] == locus }
+        stale = stale_sequences.select { |s| s.locus == locus }
+        reconcile_pairing(wants, stale)
+      end
+
+      def reconcile_pairing(wants, stale)
+        return update_sequence(stale.first, wants.first) if
+          wants.one? && stale.one?
+
+        stale.each { |s| remove_sequence(s) }
+        wants.each { |d| create_sequence(d) }
       end
 
       def create_sequence(desired)
@@ -94,16 +101,26 @@ class Inat
       end
 
       def update_sequence(seq, desired)
-        # Sequence's update callback logs as observation.current_user;
-        # the resync is the system actor.
-        seq.observation = @obs
-        @obs.current_user = User.admin
+        as_system_actor(seq)
         seq.update!(bases: desired[:bases])
         @updated += 1
       rescue ActiveRecord::RecordInvalid => e
         @alerts << "sequence update rejected (locus " \
                    "#{desired[:locus].inspect}, sequence #{seq.id}): " \
                    "#{e.message}"
+      end
+
+      def remove_sequence(seq)
+        as_system_actor(seq)
+        seq.destroy!
+        @removed += 1
+      end
+
+      # Sequence's update/destroy callbacks log as
+      # observation.current_user; the resync is the system actor.
+      def as_system_actor(seq)
+        seq.observation = @obs
+        @obs.current_user = User.admin
       end
 
       # Sequence#bases_nucleotides for a raw iNat value.

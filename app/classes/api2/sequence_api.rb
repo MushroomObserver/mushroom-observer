@@ -77,6 +77,13 @@ class API2
     def validate_create_params!(params)
       raise(MissingParameter.new(:observation)) unless params[:observation]
       raise(MissingParameter.new(:locus))       if params[:locus].blank?
+      # Sequences on a reflection are source-owned (mirrored from iNat
+      # by the resync); native sequences belong on the occurrence
+      # companion (#4214).
+      return unless params[:observation].reflection?
+
+      raise(ObservationIsReadOnly.new(params[:observation]))
+
       # Sequence validators handle the rest, it's too complicated to repeat.
     end
   end

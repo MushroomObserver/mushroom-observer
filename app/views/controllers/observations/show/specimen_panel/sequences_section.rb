@@ -28,8 +28,17 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     private
 
+    # A sequence describes the specimen, and the occurrence is the
+    # specimen-level grouping -- a reflection's native sequences live
+    # on its companion (see SequencesController::ReflectionRouting) --
+    # so the panel lists the whole occurrence's sequences.
     def sequences
-      @sequences ||= @obs.sequences
+      @sequences ||=
+        if @obs.occurrence
+          @obs.occurrence.observations.flat_map(&:sequences)
+        else
+          @obs.sequences.to_a
+        end
     end
 
     def render_header

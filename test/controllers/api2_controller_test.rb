@@ -545,6 +545,26 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("sequence notes", sequence.notes)
   end
 
+  # Sequences on a reflection are source-owned (#4214); the API
+  # rejects a native add the way it rejects locked-field edits.
+  def test_post_sequence_to_reflection_is_rejected
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg"
+    }
+
+    assert_no_difference("Sequence.count") do
+      post(:sequences, params: params)
+    end
+    assert_api_failed
+    assert(assigns(:api).errors.any?(API2::ObservationIsReadOnly),
+           "Expected an ObservationIsReadOnly error")
+  end
+
   # Prove user can add a Naming to someone else's Observation
   def test_post_naming
     obs = observations(:coprinus_comatus_obs)

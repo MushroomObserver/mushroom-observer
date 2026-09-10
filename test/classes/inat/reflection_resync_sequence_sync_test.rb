@@ -69,7 +69,7 @@ class Inat::ReflectionResyncSequenceSyncTest < UnitTestCase
                  "an unambiguous locus pairing updates in place")
   end
 
-  def test_ambiguous_locus_pairing_touches_nothing_and_alerts
+  def test_unpairable_locus_resolves_by_delete_and_create
     @obs.sequences.create!(user: @obs.user, locus: ITS_LOCUS,
                            bases: LSU_BASES)
     @obs.sequences.create!(user: @obs.user, locus: ITS_LOCUS,
@@ -77,23 +77,25 @@ class Inat::ReflectionResyncSequenceSyncTest < UnitTestCase
 
     outcome = sync(fields: [dna_field(value: ITS_BASES)])
 
-    assert_not(outcome.changed?)
-    assert_equal(1, outcome.alerts.length)
-    assert_match(/ambiguous sequence sync/, outcome.alerts.first)
-    assert_equal([LSU_BASES, LSU_BASES.reverse].sort,
-                 @obs.sequences.reload.map(&:bases).sort,
-                 "an ambiguous pairing must leave both sequences alone")
+    assert_equal(2, outcome.removed)
+    assert_equal(1, outcome.added)
+    assert_empty(outcome.alerts)
+    assert_equal([ITS_BASES], @obs.sequences.reload.map(&:bases),
+                 "the mirror resolves an unpairable locus by " \
+                 "replacing its sequences with iNat's")
   end
 
-  def test_mo_only_sequence_is_not_deleted
-    @obs.sequences.create!(user: @obs.user, locus: "user-entered ITS",
+  def test_sequence_absent_from_inat_is_deleted
+    @obs.sequences.create!(user: @obs.user, locus: ITS_LOCUS,
                            bases: LSU_BASES)
 
     outcome = sync(fields: [])
 
-    assert_not(outcome.changed?)
-    assert_equal(1, @obs.sequences.reload.count,
-                 "a sequence absent from iNat must not be deleted")
+    assert_equal(1, outcome.removed)
+    assert(outcome.changed?)
+    assert_empty(@obs.sequences.reload,
+                 "sequences on a reflection are source-owned: one " \
+                 "removed on iNat is removed from the mirror")
   end
 
   def test_invalid_inat_value_is_rejected_with_alert

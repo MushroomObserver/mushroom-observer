@@ -30,6 +30,8 @@
 # show_sequence (get)               show (get)
 #
 class SequencesController < ApplicationController
+  include ReflectionRouting
+
   before_action :login_required
   before_action :store_location, except: :destroy
 
@@ -101,6 +103,7 @@ class SequencesController < ApplicationController
     return if params[:observation_id].blank?
 
     return unless find_observation!
+    return if route_reflection_to_companion!
 
     @sequence = Sequence.new
 
@@ -112,6 +115,7 @@ class SequencesController < ApplicationController
 
   def create
     return unless find_observation!
+    return if route_reflection_to_companion!
 
     build_sequence
   end
