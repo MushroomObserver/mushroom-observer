@@ -5,10 +5,10 @@ require("test_helper")
 # `Components::Dropdown` is exercised in production via several
 # consumers (`Views::Layouts::Header::Sorter`,
 # `Views::Layouts::TopNav::ContextNav`, etc.); their tests
-# indirectly cover the Bootstrap-3 dropdown chrome and the
-# `Tab::Collection` / `Array` section shapes. This file focuses on
-# the two branches in `#normalize_section` that those consumer
-# tests don't reach: the `Tab::Base` case and the catch-all `else`.
+# indirectly cover the dropdown chrome and the `Tab::Collection` /
+# `Array` section shapes. This file focuses on the two branches in
+# `#normalize_section` that those consumer tests don't reach: the
+# `Tab::Base` case and the catch-all `else`.
 class DropdownTest < ComponentTestCase
   def setup
     super
@@ -101,6 +101,19 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "[data-tooltip-target='tip']")
     assert_no_html(html, "[data-title]")
     assert_no_html(html, "[data-placement]")
+  end
+
+  # Bootstrap 4 renames the divider class from `.divider` to
+  # `.dropdown-divider`; MO's old panel-only class has no styling
+  # under the Bootstrap 4 gem. Regression guard for that rename.
+  def test_multiple_sections_separated_by_dropdown_divider
+    html = render_dropdown(id: "multi_toggle", menu_id: "multi_menu") do |menu|
+      menu.section(Tab::Project::Summary.new(project: @project))
+      menu.section(Tab::Project::Summary.new(project: @project))
+    end
+
+    assert_html(html, "ul.dropdown-menu li.dropdown-divider")
+    assert_no_html(html, "li.divider")
   end
 
   # Sections that are `nil` (or any unrecognized type) normalize to

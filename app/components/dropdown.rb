@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Bootstrap 3 nav-style dropdown menu. Renders the
+# Bootstrap nav-style dropdown menu. Renders the
 # `<li class="dropdown d-inline-block">` + `<a class="dropdown-toggle">` +
 # `<ul class="dropdown-menu">` triple that the top-nav's Actions
 # dropdown, user dropdown, and similar menus all share.
@@ -11,8 +11,8 @@
 # is what `Header::ContextNavHelper#add_context_nav` hands its
 # downstream renderers after normalizing — no live caller passes
 # raw tuple arrays directly anymore). Multiple sections are
-# separated by a `<li class="divider">`. Empty sections are
-# skipped (no spurious divider).
+# separated by a `<li class="dropdown-divider">`. Empty sections
+# are skipped (no spurious divider).
 #
 # @example Single-section (Actions dropdown)
 #   Dropdown(
@@ -81,7 +81,7 @@ class Components::Dropdown < Components::Base
 
   # Register one section of items. Block-evaluation collects via
   # the vanish pattern above; consecutive sections get a Bootstrap
-  # `<li class="divider">` between them.
+  # `<li class="dropdown-divider">` between them.
   #
   # @return [nil] so the call doesn't accidentally emit anything
   def section(items)
@@ -91,13 +91,18 @@ class Components::Dropdown < Components::Base
 
   private
 
+  # No manual caret span -- Bootstrap 4 draws it automatically via a
+  # `::after` pseudo-element on `.dropdown-toggle` (`@include caret()`,
+  # bootstrap/_dropdown.scss). Bootstrap 3 had no such default and
+  # needed the span; under Bootstrap 4 that span rendered empty
+  # (`.caret` carries no styling in this gem), duplicating the caret
+  # the toggle already draws.
   def render_toggle
     a(class: toggle_link_class,
       id: @id, role: "button", href: "#",
       data: { toggle: "dropdown" },
       aria: { haspopup: "true", expanded: "false" }) do
       span { plain(@label) }
-      span(class: "caret ml-2")
     end
   end
 
@@ -117,7 +122,7 @@ class Components::Dropdown < Components::Base
        aria: { labelledby: @id }) do
       trusted_html(@menu_header) if @menu_header
       sections.each_with_index do |tuples, idx|
-        li(class: "divider") if idx.positive?
+        li(class: "dropdown-divider") if idx.positive?
         tuples.each { |tuple| li { render_link(tuple) } }
       end
     end
