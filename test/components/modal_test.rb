@@ -11,7 +11,7 @@ class ModalTest < ComponentTestCase
 
     # Modal nesting
     assert_html(html, ".modal#modal_thing[role='dialog']")
-    assert_html(html, ".modal-dialog[role='document']")
+    assert_html(html, ".modal-dialog.modal-dialog-centered[role='document']")
     assert_html(html, ".modal-content")
 
     # Default chrome
@@ -71,6 +71,24 @@ class ModalTest < ComponentTestCase
     assert_html(html, "h4.modal-title#modal_x_header")
     assert_html(html, ".modal-body#modal_x_body")
     assert_html(html, ".modal[aria-labelledby='modal_x_header']")
+  end
+
+  def test_size_adds_modal_size_class
+    html = render_modal(id: "modal_lg", title: "T", size: :lg) do |m|
+      m.with_body { "b".html_safe }
+    end
+
+    assert_html(html, ".modal-dialog.modal-dialog-centered.modal-lg")
+  end
+
+  def test_no_size_omits_modal_size_class
+    html = render_modal(id: "modal_default", title: "T") do |m|
+      m.with_body { "b".html_safe }
+    end
+
+    assert_html(html, ".modal-dialog.modal-dialog-centered")
+    assert_no_html(html, ".modal-sm")
+    assert_no_html(html, ".modal-lg")
   end
 
   def test_title_content_slot_overrides_title_prop

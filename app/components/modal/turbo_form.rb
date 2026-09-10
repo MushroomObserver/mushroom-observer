@@ -89,7 +89,7 @@ class Components::Modal::TurboForm < Components::Base
     Modal(
       id: modal_id,
       title: @title,
-      dialog_class: "modal-dialog modal-lg",
+      size: :lg,
       user: @user,
       extra_class: "modal-form",
       extra_data: turbo_modal_data,

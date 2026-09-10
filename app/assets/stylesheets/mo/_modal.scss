@@ -2,28 +2,6 @@
 // modals, plus naming vote popup
 // --------------------------------------------------
 
-// BS3 only vertical centering
-.modal {
-  text-align: center;
-}
-
-// centers the modal vertically for bootstrap 3
-.modal:before {
-  content: '';
-  display: inline-block;
-  height: 100%;
-  vertical-align: middle;
-  margin-right: -4px;
-}
-
-// centers the modal vertically for bootstrap 3. z-index not getting set by BS?
-.modal-dialog {
-  display: inline-block;
-  text-align: left;
-  vertical-align: middle;
-  z-index: $zindex-modal;
-}
-
 .modal-content {
   color: $dropdown-link-color !important;
   // background-color: $modal-content-bg !important;

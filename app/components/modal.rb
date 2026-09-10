@@ -65,9 +65,9 @@ class Components::Modal < Components::Base
 
   prop :id, String
   prop :title, _Nilable(String), default: nil
-  # Bootstrap modal-dialog size variants: "modal-dialog",
-  # "modal-dialog modal-lg", "modal-dialog modal-sm".
-  prop :dialog_class, String, default: "modal-dialog"
+  # Bootstrap modal-dialog size variant.
+  SIZES = [:sm, :lg].freeze
+  prop :size, _Nilable(_Union(*SIZES)), default: nil
   # When `true`, the modal is shown immediately on page load
   # (server-rendered for a redirect-like response, e.g.
   # `OccurrenceResolveModal`'s auto-open pattern). Adds the
@@ -145,7 +145,7 @@ class Components::Modal < Components::Base
         style: (@auto_open ? "display: block;" : nil),
         aria: { labelledby: resolved_title_id },
         data: modal_data) do
-      div(class: @dialog_class, role: "document") do
+      div(class: dialog_class, role: "document") do
         div(class: "modal-content") do
           render_header if @header
           render_content
@@ -166,6 +166,10 @@ class Components::Modal < Components::Base
     classes << "fade" unless @auto_open
     classes << @extra_class if @extra_class.present?
     classes.join(" ")
+  end
+
+  def dialog_class
+    class_names("modal-dialog modal-dialog-centered", @size && "modal-#{@size}")
   end
 
   def modal_data
