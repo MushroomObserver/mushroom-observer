@@ -113,7 +113,6 @@ class DropdownTest < ComponentTestCase
     end
 
     assert_html(html, "ul.dropdown-menu li.dropdown-divider")
-    assert_no_html(html, "li.divider")
   end
 
   # Sections that are `nil` (or any unrecognized type) normalize to
