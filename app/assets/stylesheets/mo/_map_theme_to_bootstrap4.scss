@@ -79,6 +79,18 @@ $gray-100: $BODY_BG_COLOR !default;
 $gray-600: muted_text() !default;
 $gray-900: $BODY_TEXT_COLOR !default;
 
+// `color-yiq()` picks between `$yiq-text-dark`/`$yiq-text-light` to
+// contrast a `$theme-colors` background (`.btn-success`, `.badge-*`,
+// etc.), defaulting to `$gray-900`/`$white`. Left at that default,
+// a dark theme's `$gray-900` (remapped above to its light body text)
+// isn't a dark option any more, so a medium-brightness background
+// color like `$success` gets light-on-light instead of the dark
+// text its luminance calls for. Pinning both poles to literal
+// black/white keeps `color-yiq()`'s contrast choice correct
+// regardless of theme.
+$yiq-text-dark:  $black !default;
+$yiq-text-light: $white !default;
+
 // ==================================================
 // SECTION 3: TYPOGRAPHY
 // ==================================================
