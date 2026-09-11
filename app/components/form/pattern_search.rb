@@ -60,13 +60,15 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   end
 
   def view_template
-    div(class: "form-group has-feedback has-search d-flex " \
-               "flex-grow-1 mb-0") do
-      Icon(
-        type: :search,
-        class: class_names("form-control-feedback",
-                           Components::Column.mobile_hide_classes)
-      )
+    # BS4 dropped BS3's `.has-feedback`/`.form-control-feedback`
+    # icon-overlay pattern -- the documented replacement is an
+    # `.input-group` with the icon in a prepended
+    # `.input-group-text`, not an icon floated inside the input.
+    InputGroup(class: "flex-grow-1") do
+      render(Components::InputGroup::Addon.new(
+               variant: :addon, position: :prepend,
+               class: Components::Column.mobile_hide_classes(display: :flex)
+             )) { Icon(type: :search) }
       # `label: false` skips the form-group wrap + auto-label so the
       # input nests directly inside the navbar flex row, matching
       # the bare `<input>` Rails `f_s.text_field` emitted.

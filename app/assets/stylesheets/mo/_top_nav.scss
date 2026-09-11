@@ -93,11 +93,6 @@
     }
   }
 
-  .navbar_right {
-    >ul.ml-auto>li {
-      @extend .ml-4;
-    }
-  }
 }
 
 // If sorter is on the right:

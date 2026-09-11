@@ -10,7 +10,7 @@
 # strip (`show_title_nav`/`show_object_nav` are plain `<div>`s).
 module Views::Layouts
   class Header::ShowPrevNextNav < Views::Base
-    BTN_CLASSES = Components::Navbar::LINK_CLASSES.freeze
+    BTN_CLASSES = ["px-0"].freeze
 
     prop :object, _Nilable(::AbstractModel), default: nil
     prop :query, _Nilable(::Query), default: nil

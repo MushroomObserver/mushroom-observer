@@ -6,7 +6,7 @@
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
 class Views::Layouts::TopNav::SearchBar < Views::Base
-  BAR_TOGGLE_CLASSES = [Components::Navbar::LINK_CLASS, "px-2"].freeze
+  BAR_TOGGLE_CLASSES = ["px-2"].freeze
 
   # Search types that have a per-type help expander. Mirrors
   # `Views::Layouts::TopNav::SEARCH_HELP_TYPES`; passed through
@@ -58,7 +58,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # controller populates with whichever advanced-search form
   # matches the selected search type.
   def render_advanced_form_target
-    Collapsible(id: "search_nav_form", class: "w-100 border-top",
+    Collapsible(id: "search_nav_form", class: "w-100 border-top mt-2",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end

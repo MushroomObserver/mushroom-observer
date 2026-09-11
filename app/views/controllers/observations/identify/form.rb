@@ -81,13 +81,14 @@ module Views::Controllers::Observations::Identify
 
     # --- Autocompleter section ---
 
-    # Term input lives inside a `d-flex flex-grow-1` form-group so it
-    # expands to fill the row; the type select and submit buttons keep
-    # their natural width.
+    # Term input lives inside an input-group that grows to fill the
+    # row; the type select and submit buttons keep their natural
+    # width. `.dropdown` is added alongside `.input-group` so the
+    # autocomplete suggestion list (`render_dropdown`, `position:
+    # absolute`) anchors to this element.
     def render_autocompleter_wrap
-      div(class: "form-group has-feedback has-search d-flex " \
-                 "flex-grow-1 mb-0 dropdown",
-          data: dual_target("wrap")) do
+      InputGroup(class: "flex-grow-1 dropdown",
+                 data: dual_target("wrap")) do
         render_search_icon
         render_hidden_field
         render_term_field
@@ -96,9 +97,9 @@ module Views::Controllers::Observations::Identify
     end
 
     def render_search_icon
-      Icon(type: :search,
-           title: :search.ti,
-           class: "form-control-feedback")
+      render(Components::InputGroup::Addon.new(
+               variant: :addon, position: :prepend
+             )) { Icon(type: :search, title: :search.ti) }
     end
 
     def render_hidden_field

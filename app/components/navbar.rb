@@ -20,24 +20,14 @@ module Components
   #
   # Also holds several plain string/array constants (not renderable
   # shapes) for other `navbar-*` patterns that recur across the same
-  # files but don't share one fixed DOM shape: `.navbar-link`
-  # icon-buttons (sometimes a raw `<a>`, sometimes routed through
-  # `Link(type: :icon, ...)`), `.navbar-form` (sometimes a `<form>`
-  # tag, sometimes a plain `<div>` wrapper, sometimes just a
-  # `wrapper_class:` string handed to another component like
-  # `Dropdown`), and the `.navbar-nav`/`.navbar-right`/`.navbar-left`
-  # trio that shapes the nav-item list inside a `.navbar` landmark. A
-  # single Phlex tag-emitting component can't cover all these shapes,
-  # so callers compose the constants with `class_names` instead.
-  #
-  # `LINK_CLASS`/`LINK_CLASSES` intentionally do NOT include
-  # `btn`/`btn-lg` — `Components::Link::Get` (the shape every current
-  # caller renders through) accepts `button:`/`size:` kwargs directly,
-  # so callers pass `button: :link, size: :lg` instead of baking
-  # Bootstrap button classes into a raw string constant. `LINK_CLASS`
-  # is the bare `"navbar-link"` token for callers that need a
-  # different spacing utility than `LINK_CLASSES`'s bundled `px-0`
-  # (e.g. `search_bar.rb`, which wants `px-2`).
+  # files but don't share one fixed DOM shape: `.navbar-form`
+  # (sometimes a `<form>` tag, sometimes a plain `<div>` wrapper,
+  # sometimes just a `wrapper_class:` string handed to another
+  # component like `Dropdown`), and the `.navbar-nav`/`.navbar-right`/
+  # `.navbar-left` trio that shapes the nav-item list inside a
+  # `.navbar` landmark. A single Phlex tag-emitting component can't
+  # cover all these shapes, so callers compose the constants with
+  # `class_names` instead.
   #
   # `FORM_CLASS` (`.navbar-form`) is an MO-owned CSS hook — Bootstrap
   # has no such class, but `mo/_layout.scss`/`_icons.scss`/
@@ -55,14 +45,10 @@ module Components
   #          data_controller: "nav-active") { ... }
   #
   # @example The class-string constants
-  #   a(href: url, class: class_names(Components::Navbar::LINK_CLASSES,
-  #                                   Components::Navbar::LEFT_CLASS))
-  #   form(class: class_names(Components::Navbar::FORM_CLASS, "px-0"))
   #   ul(class: class_names(Components::Navbar::NAV_CLASS,
   #                         Components::Navbar::RIGHT_CLASS))
+  #   form(class: class_names(Components::Navbar::FORM_CLASS, "px-0"))
   class Navbar < Base
-    LINK_CLASS = "navbar-link"
-    LINK_CLASSES = [LINK_CLASS, "px-0"].freeze
     FORM_CLASS = "navbar-form"
     NAV_CLASS = "navbar-nav"
     RIGHT_CLASS = "ml-auto"

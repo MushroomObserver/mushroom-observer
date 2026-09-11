@@ -97,10 +97,6 @@ class SearchFormTest < ComponentTestCase
                 "span[aria-label='#{:search_bar_fewer_options.l}']")
     assert_html(html,
                 "a[data-search-type-target='barToggle'] svg.mo-icon-minus")
-    # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
-    # literal.
-    assert_html(html,
-                "a[data-search-type-target='barToggle'].navbar-link")
   end
 
   def test_does_not_render_header_when_page_context
