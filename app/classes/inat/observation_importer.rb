@@ -235,7 +235,7 @@ class Inat
       update_inat_observation_field(
         observation_id: @inat_obs[:id],
         field_id: MO_URL_OBSERVATION_FIELD_ID,
-        value: "#{MO.http_domain}/#{@observation.id}"
+        value: @observation.show_url
       )
     end
 
