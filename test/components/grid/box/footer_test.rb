@@ -68,7 +68,7 @@ class Components::Grid::Box::FooterTest < ComponentTestCase
     html = render_time(time)
 
     assert_html(html,
-                "div[data-controller='local-time']" \
+                "li[data-controller='local-time']" \
                 "[data-local-time-utc-value='#{time.utc.iso8601}']")
   end
 

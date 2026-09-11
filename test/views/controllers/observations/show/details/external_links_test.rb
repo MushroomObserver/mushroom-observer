@@ -27,7 +27,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     # Badge row supplies its own padding/border -- the parent
     # card-body (rendered by Details, not this view) is `.p-0`.
-    assert_html(html, "div.p-3.border-bottom")
+    assert_html(html, "div.p-card.border-bottom")
     assert_html(
       html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
       text: "iNat"
@@ -97,8 +97,8 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     # Each pane supplies its padding -- the parent card-body
     # (rendered by Details, not this view) is `.p-0`.
-    assert_html(html, "#pane_#{inat_link.id}.collapse.p-3")
-    assert_html(html, "#pane_#{mcp_link.id}.collapse.p-3")
+    assert_html(html, "#pane_#{inat_link.id}.collapse.p-card")
+    assert_html(html, "#pane_#{mcp_link.id}.collapse.p-card")
     # `src` + `loading="lazy"`, not a bare empty frame: Bootstrap 4's
     # collapse data-API click handler calls preventDefault()/
     # stopPropagation() unconditionally, which blocks Turbo's
@@ -138,7 +138,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites))
 
-    assert_html(html, "div.p-3.border-bottom",
+    assert_html(html, "div.p-card.border-bottom",
                 text: :no_objects.t(type: :external_link).as_displayed)
     assert_no_html(html, "a.badge.badge-id")
     assert_html(html, "a[data-modal='modal_external_link']")
@@ -183,7 +183,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites, user: nil))
 
-    assert_html(html, "div.p-3.border-bottom")
+    assert_html(html, "div.p-card.border-bottom")
     assert_no_html(html, "a[data-modal='modal_external_link']")
   end
 
