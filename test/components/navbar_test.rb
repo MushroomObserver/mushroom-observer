@@ -25,6 +25,17 @@ class NavbarTest < ComponentTestCase
                 text: "Content")
   end
 
+  def test_padding_prop_overrides_default_zero_padding
+    html = render_component(
+      Components::Navbar.new(variant: :light, id: "top_nav",
+                             padding: "py-2 px-0")
+    ) { "Content" }
+
+    assert_html(html, "nav.navbar.navbar-light.py-2.px-0#top_nav",
+                text: "Content")
+    assert_no_html(html, ".p-0")
+  end
+
   def test_link_class_constant
     assert_equal("navbar-link", Components::Navbar::LINK_CLASS)
   end

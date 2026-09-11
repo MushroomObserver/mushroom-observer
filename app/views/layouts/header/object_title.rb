@@ -36,7 +36,7 @@ module Views::Layouts
 
     def view_template
       div(class: "d-flex align-items-start") do
-        IDBadge(object: @object, size: :md, extra_class: "mr-3")
+        IDBadge(object: @object, size: :sm, extra_class: "mr-3")
         whitespace
         div do
           span { render_title_span }

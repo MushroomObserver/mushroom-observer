@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 module Components
-  # The outer `.navbar` landmark wrapper — a real `<nav class="navbar
+  # The outer `.navbar` landmark wrapper — a `<nav class="navbar
   # navbar-{variant}">` element (top nav), or occasionally a `<div>`
   # used purely for background/text-color theming (the sidebar's
-  # inverse-styled wrapper, nested *inside* the sidebar's own real
+  # inverse-styled wrapper, nested *inside* the sidebar's
   # `<nav id="sidebar">` landmark — nesting a second `<nav>` there for
-  # pure theming would be a redundant landmark, so that caller
-  # explicitly overrides `element:` back to `:div`).
+  # theming would be a redundant landmark, so that caller explicitly
+  # overrides `element:` back to `:div`).
   #
   # `variant:` (`:light` or `:dark`) is required — there's no
   # "no variant" fallback shape here. The inline `.navbar-text` label
-  # pattern that sits *inside* a navbar is a different concept
-  # entirely, not a `.navbar` despite the shared name prefix — see
+  # pattern that sits *inside* a navbar is a different concept, not a
+  # `.navbar` despite the shared name prefix — see
   # `Components::Navbar::Text`.
   #
   # `element:` defaults to `:nav`, matching the common case; override
@@ -22,8 +22,8 @@ module Components
   # shapes) for other `navbar-*` patterns that recur across the same
   # files but don't share one fixed DOM shape: `.navbar-link`
   # icon-buttons (sometimes a raw `<a>`, sometimes routed through
-  # `Link(type: :icon, ...)`), `.navbar-form` (sometimes a real
-  # `<form>` tag, sometimes a plain `<div>` wrapper, sometimes just a
+  # `Link(type: :icon, ...)`), `.navbar-form` (sometimes a `<form>`
+  # tag, sometimes a plain `<div>` wrapper, sometimes just a
   # `wrapper_class:` string handed to another component like
   # `Dropdown`), and the `.navbar-nav`/`.navbar-right`/`.navbar-left`
   # trio that shapes the nav-item list inside a `.navbar` landmark. A
@@ -39,15 +39,12 @@ module Components
   # different spacing utility than `LINK_CLASSES`'s bundled `px-0`
   # (e.g. `search_bar.rb`, which wants `px-2`).
   #
-  # `FORM_CLASS` (`.navbar-form`) is an MO-owned CSS hook now — BS4
-  # drops the class entirely, but `mo/_layout.scss`/`_icons.scss`/
-  # `_top_nav.scss` still style it directly, so the string value is
-  # unchanged. `RIGHT_CLASS`/`LEFT_CLASS` hold BS4's margin-auto
-  # utilities (`.ml-auto`/`.mr-auto`), replacing BS3's float-based
-  # `.navbar-right`/`.navbar-left`. `NAV_CLASS` (`.navbar-nav`) is a
-  # real Bootstrap class in both versions, flex-based under BS4
-  # instead of float-based under BS3 — nothing to swap here beyond
-  # BS4's own `.navbar-nav` rule already applying.
+  # `FORM_CLASS` (`.navbar-form`) is an MO-owned CSS hook — Bootstrap
+  # has no such class, but `mo/_layout.scss`/`_icons.scss`/
+  # `_top_nav.scss` style it directly. `RIGHT_CLASS`/`LEFT_CLASS` hold
+  # Bootstrap's margin-auto utilities (`.ml-auto`/`.mr-auto`) for
+  # aligning nav items to either end. `NAV_CLASS` (`.navbar-nav`) is a
+  # Bootstrap class, flex-based, shaping the nav-item list.
   #
   # @example The outer <nav class="navbar navbar-light"> landmark
   #   Navbar(variant: :light, id: "top_nav") { ... }
@@ -73,6 +70,9 @@ module Components
 
     prop :element, Symbol, default: :nav
     prop :variant, _Union(:light, :dark)
+    # Overrides the default zero padding -- see `base_class` below for
+    # why this needs a dedicated prop instead of a class override.
+    prop :padding, String, default: "p-0"
     # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
     # so a caller passing an explicit `key: nil` (not just omitting the
     # key) would otherwise raise a Literal::TypeError.
@@ -91,16 +91,12 @@ module Components
       }
     end
 
-    # `p-0` is baked in (rather than left for each caller to add)
-    # because Bootstrap's `.navbar` padding isn't zero by default -
-    # every current caller wants zero, so callers shouldn't have to
-    # remember it. `.p-0` is `!important` (`mo/_utilities.scss`), so a
-    # future caller wanting different padding can't just add another
-    # padding utility class alongside it and expect a predictable
-    # winner - that'll need a dedicated mechanism (e.g. a `padding:`
-    # prop), not a class override.
+    # `p-0` default since Bootstrap's `.navbar` padding isn't zero and
+    # most callers want zero. Bootstrap padding utilities are all
+    # `!important`, so a caller needing different padding must
+    # override via `padding:`, not by adding another class alongside it.
     def base_class
-      "navbar navbar-#{@variant} p-0"
+      "navbar navbar-#{@variant} #{@padding}"
     end
   end
 end

@@ -70,7 +70,8 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    Navbar(variant: :light, class: "hidden-print mb-2", id: "top_nav") do
+    Navbar(variant: :light, class: "hidden-print mb-2", id: "top_nav",
+           padding: "py-2 px-0") do
       render_top_row
       render_search_row
     end
