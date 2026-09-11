@@ -436,7 +436,7 @@ class LocationsController < ApplicationController
   # issuing no redirect at all for a stale or tampered set_* id.
   def return_to_caller
     if (observation = Observation.safe_find(@set_observation))
-      redirect_to(observation_path(observation))
+      redirect_to(permanent_observation_path(observation))
     elsif (species_list = SpeciesList.safe_find(@set_species_list))
       redirect_to(species_list_path(species_list))
     elsif (herbarium = Herbarium.safe_find(@set_herbarium))

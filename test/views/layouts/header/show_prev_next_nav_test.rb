@@ -87,7 +87,7 @@ module Views::Layouts
       html = render_nav(object: @middle_obs, query: @query)
 
       # Get the prev_id from the query
-      expected_href = "/observations/#{@query.prev_id}"
+      expected_href = "/obs/#{@query.prev_id}"
       assert_html(html, "a.prev_object_link",
                   attribute: { href: expected_href })
     end
@@ -98,7 +98,7 @@ module Views::Layouts
       html = render_nav(object: @middle_obs, query: @query)
 
       # Get the next_id from the query
-      expected_href = "/observations/#{@query.next_id}"
+      expected_href = "/obs/#{@query.next_id}"
       assert_html(html, "a.next_object_link",
                   attribute: { href: expected_href })
     end

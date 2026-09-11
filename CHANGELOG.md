@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-10 (deploy-2026-09-10-12-00)
+
+- Keep `prerelease.rb` article rows in date order ([PR5350](https://github.com/MushroomObserver/mushroom-observer/pull/5350), @mo-nathan)
+- Normalize `inat_username` to lowercase; match logged-in iNat user case-insensitively ([PR5353](https://github.com/MushroomObserver/mushroom-observer/pull/5353), @mo-nathan)
+- Enable Rails 7.2 framework defaults ([PR5337](https://github.com/MushroomObserver/mushroom-observer/pull/5337), @nimmolo)
+- API docs: generate OpenAPI 3.1 from `API2` metadata (all 20 resources) ([PR5334](https://github.com/MushroomObserver/mushroom-observer/pull/5334), @mo-nathan)
+- Emit the logged-out-accessible `/obs/` form for every Observation URL that leaves the site ([PR5359](https://github.com/MushroomObserver/mushroom-observer/pull/5359), @mo-nathan)
+
 ## 2026-09-09 (deploy-2026-09-09-12-00)
 
 - Standardize `_utilities.scss` for the BS4 cutover, converge theme color derivation ([PR5340](https://github.com/MushroomObserver/mushroom-observer/pull/5340), @nimmolo)

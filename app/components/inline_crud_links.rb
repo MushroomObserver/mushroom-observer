@@ -325,11 +325,11 @@ class Components::InlineCRUDLinks < Components::Base
          @target.id, observation_id: @observation.id)
   end
 
-  # Sequence destroy keeps a `back: observation_path(obs)` query so
+  # Sequence destroy keeps a `back: permanent_observation_path(obs)` query so
   # the controller redirects to the obs after destroying.
   def path_sequence_with_back
     sequence_path(id: @target.id,
-                  back: observation_path(@target.observation))
+                  back: permanent_observation_path(@target.observation))
   end
 
   # Namings are nested under observations in routing; no top-level

@@ -60,9 +60,9 @@ class InlineCRUDLinksTest < ComponentTestCase
 
     assert_html(html,
                 "a[data-modal='modal_sequence_#{seq.id}']")
-    # `back: observation_path(obs)` is encoded as a query parameter
+    # `back: permanent_observation_path(obs)` is encoded as a query parameter
     expected_path = routes.sequence_path(
-      id: seq.id, back: routes.observation_path(obs)
+      id: seq.id, back: routes.permanent_observation_path(obs)
     )
     assert_html(html, "form[action='#{expected_path}']")
     assert_html(html, "button.destroy_sequence_link_#{seq.id}")

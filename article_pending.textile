@@ -1,3 +1,3 @@
-|{white-space:nowrap}. 2026-09-09 | Ask which Observation to edit for a non-primary member | "PR#5328":https://github.com/MushroomObserver/mushroom-observer/pull/5328 |
-|{white-space:nowrap}. 2026-09-09 | Show occurrence-primary and read-only status with icons on Observations | "PR#5331":https://github.com/MushroomObserver/mushroom-observer/pull/5331 |
-|{white-space:nowrap}. 2026-09-08 | Fix missing help icons on the search form | "PR#5343":https://github.com/MushroomObserver/mushroom-observer/pull/5343 |
+|{white-space:nowrap}. 2026-09-10 | Fix emailed and shared Observation links for logged-out visitors | "PR#5359":https://github.com/MushroomObserver/mushroom-observer/pull/5359 |
+|{white-space:nowrap}. 2026-09-09 | Add browsable documentation for the MO API | "PR#5334":https://github.com/MushroomObserver/mushroom-observer/pull/5334 |
+|{white-space:nowrap}. 2026-09-09 | Fix iNat import rejecting usernames typed with capitals | "PR#5353":https://github.com/MushroomObserver/mushroom-observer/pull/5353 |
