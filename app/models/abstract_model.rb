@@ -182,18 +182,11 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-  # This is called just before a new object is validated.
+  # This is called just before an object is created.
   # 1) It fills in 'created_at' and 'user' for new records.
   # 2) And it creates a new RssLog if this model accepts one, and logs its
   #    creation.
-  #
-  # Runs in before_validation, not before_create: belongs_to associations
-  # (rss_log, and user via the current_user fallback below) validate
-  # presence before before_create fires, so setting them there was too
-  # late once belongs_to_required_by_default is enabled. RssLog itself
-  # doesn't need this record's id yet -- only the reverse pointer set in
-  # attach_rss_log_final_step (after_create) does.
-  before_validation :set_user_and_autolog, on: :create
+  before_create :set_user_and_autolog
   def set_user_and_autolog
     self.user_id ||= current_user&.id if respond_to?(:user_id=)
     autolog_created if has_rss_log?

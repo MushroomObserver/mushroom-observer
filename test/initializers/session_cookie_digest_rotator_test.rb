@@ -4,16 +4,27 @@ require("test_helper")
 
 # config/initializers/session_cookie_digest_rotator.rb registers a
 # rotation so a session cookie encrypted under the pre-SHA256
-# key_generator_hash_digest_class still decrypts. MO has no
-# config.load_defaults call, so the session cookie goes through the
-# legacy (non-GCM) cipher path -- this pins that the rotation targets
-# the salts that path uses.
+# key_generator_hash_digest_class still decrypts. This is layered on
+# top of a second, independent transition load_defaults(7.2) also
+# turns on: action_dispatch.use_authenticated_cookie_encryption,
+# which switches the primary cipher from AES-256-CBC to AES-256-GCM.
+# Rails' EncryptedKeyRotatingCookieJar registers a built-in upgrade
+# rotation for that transition, alongside the one this file registers
+# for the digest-class transition -- both are tried in turn, so a
+# cookie encrypted under the original (SHA1, non-GCM) combination
+# still decrypts -- see the pre-flip decrypt test below for the
+# empirical check.
 class SessionCookieDigestRotatorTest < UnitTestCase
   def test_digest_class_is_sha256
     assert_equal(
       OpenSSL::Digest::SHA256,
       Rails.application.config.active_support.key_generator_hash_digest_class
     )
+  end
+
+  def test_authenticated_cookie_encryption_is_on
+    dispatch = Rails.application.config.action_dispatch
+    assert(dispatch.use_authenticated_cookie_encryption)
   end
 
   def test_pre_flip_cookie_still_decrypts_through_the_live_jar
@@ -26,6 +37,33 @@ class SessionCookieDigestRotatorTest < UnitTestCase
     )
 
     assert_equal({ "user_id" => 42 }, encrypted_jar["_test_cookie"])
+  end
+
+  # Confirms the authenticated_cookie_encryption flip is in effect for
+  # new cookies, not just that old ones still decrypt.
+  def test_fresh_writes_round_trip_through_the_live_jar
+    env = Rack::MockRequest.env_for("/").merge(Rails.application.env_config)
+    request = ActionDispatch::Request.new(env)
+    jar = ActionDispatch::Cookies::CookieJar.build(request, {})
+    request.cookie_jar = jar
+    encrypted_jar = ActionDispatch::Cookies::EncryptedKeyRotatingCookieJar.new(jar)
+
+    encrypted_jar["_test_cookie"] = { value: { "user_id" => 99 } }
+
+    assert_equal({ "user_id" => 99 }, encrypted_jar["_test_cookie"])
+    raw_value = jar["_test_cookie"]
+    dispatch = Rails.application.config.action_dispatch
+    key_len = ActiveSupport::MessageEncryptor.key_len("aes-256-gcm")
+    gcm_secret = Rails.application.key_generator.generate_key(
+      dispatch.authenticated_encrypted_cookie_salt, key_len
+    )
+    gcm_encryptor = ActiveSupport::MessageEncryptor.new(
+      gcm_secret, cipher: "aes-256-gcm",
+                  serializer: ActiveSupport::MessageEncryptor::NullSerializer
+    )
+    assert_nothing_raised do
+      gcm_encryptor.decrypt_and_verify(raw_value)
+    end
   end
 
   def test_fresh_writes_use_the_new_digest_not_the_old_secret
