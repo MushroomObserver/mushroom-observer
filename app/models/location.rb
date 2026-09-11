@@ -90,7 +90,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   include Scopes
 
-  belongs_to :description, class_name: "LocationDescription" # (main one)
+  belongs_to :description, class_name: "LocationDescription", # (main one)
+                           optional: true
   belongs_to :rss_log
   belongs_to :user
 

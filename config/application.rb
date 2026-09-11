@@ -35,7 +35,18 @@ module MushroomObserver
     # Every setting from new_framework_defaults_7_0.rb/_7_1.rb/_7_2.rb has
     # been individually audited and enabled (or confirmed no-op/N-A for
     # MO) -- those three files are deleted, this replaces them.
+    # belongs_to_required_by_default is the one exception, overridden
+    # back to false immediately below.
     config.load_defaults(7.2)
+
+    # load_defaults(5.0) sets belongs_to_required_by_default = true. A
+    # full test-suite run with it enabled found 1,500+ failures across
+    # dozens of models -- associations like Observation#location,
+    # Observation#thumb_image, Name#rss_log, etc. are legitimately
+    # absent on a new record and weren't enforced before. Auditing
+    # every belongs_to in the app is a project -- see issue #5363.
+    # Left off for now so this PR doesn't couple to that audit.
+    config.active_record.belongs_to_required_by_default = false
 
     # load_defaults(7.0) sets action_dispatch.cookies_serializer = :json;
     # override back to :hybrid so existing marshal-serialized cookies
