@@ -2,6 +2,12 @@
 
 require("test_helper")
 
+# Force Zeitwerk to autoload the app's `Textile < String` before
+# reopening it below -- reopening first would define a bare `Textile
+# < Object`, and a later autoload of app/classes/textile.rb would then
+# raise a superclass mismatch.
+Textile.name
+
 class Textile
   def send_private(method, ...)
     send(method, ...)
