@@ -9,13 +9,60 @@
 // (`col-*`/`Components::Column`) sized as a fraction of the row.
 $sidebar-max-width: 9.9rem;
 
+// Mobile-first: .sidebar-offcanvas starts off-screen, slid in via
+// .row-offcanvas-*.active. The min-width(lg) block below undoes the
+// absolute positioning once the sidebar has room to sit in-flow next
+// to #right_side, at which point the offsets here are inert (CSS
+// offset properties have no effect on a statically positioned box).
 .row-offcanvas {
   display: flex;
   flex-wrap: wrap;
+  position: relative;
+  transition: all .25s ease-out;
+  // NOTE: Do not add `transform:` (or `filter:` / `perspective:`)
+  // to .row-offcanvas. Any of those creates a CSS containing block
+  // for descendants, which breaks `position: fixed` on BS3 modals
+  // — the modal becomes positioned relative to .row-offcanvas
+  // instead of the viewport, ending up inline in document flow
+  // while the backdrop (which is appended to <body>, outside
+  // .row-offcanvas) still fills the viewport on top. Result: modal
+  // is visible but unclickable at narrow widths. Previously we had
+  // `-webkit-transform: translate3d(0,0,0)` here as a hardware-
+  // acceleration hack for the offcanvas slide; modern browsers
+  // composite without that, and the side-effect was breaking the
+  // project-violations target-location modal on mobile.
+}
+
+.row-offcanvas-right {
+  right: 0;
+}
+
+.row-offcanvas-left {
+  left: 0;
+}
+
+.row-offcanvas-right
+.sidebar-offcanvas {
+  right: -$sidebar-max-width;
+}
+
+.row-offcanvas-left
+.sidebar-offcanvas {
+  left: -$sidebar-max-width;
+}
+
+.row-offcanvas-right.active {
+  right: $sidebar-max-width;
+}
+
+.row-offcanvas-left.active {
+  left: $sidebar-max-width;
 }
 
 // Sits inside .row-offcanvas alongside #right_side.
 .sidebar-offcanvas {
+  position: absolute;
+  top: 0;
   width: $sidebar-max-width;
   // Replaces the gutter a Bootstrap grid column would have supplied
   // (`.col-*` padding + `.row`'s negative margin) -- this element is
@@ -23,9 +70,16 @@ $sidebar-max-width: 9.9rem;
   margin-right: $grid-gutter-width;
 }
 
-// Accounts for the sidebar's width plus its margin-right gutter.
-#right_side {
-  width: calc(100% - #{$sidebar-max-width} - #{$grid-gutter-width}) !important;
+@media screen and (min-width: breakpoint-min(lg)) {
+  // In-flow next to #right_side instead of sliding in from off-screen.
+  .sidebar-offcanvas {
+    position: static;
+  }
+
+  // Accounts for the sidebar's width plus its margin-right gutter.
+  #right_side {
+    width: calc(100% - #{$sidebar-max-width} - #{$grid-gutter-width}) !important;
+  }
 }
 
 //
@@ -43,56 +97,6 @@ $sidebar-max-width: 9.9rem;
 // --------------------------------------------------
 
 @media screen and (max-width: breakpoint-max(md)) {
-
-  .row-offcanvas {
-    position: relative;
-    -webkit-transition: all .25s ease-out;
-    -o-transition: all .25s ease-out;
-    transition: all .25s ease-out;
-    // NOTE: Do not add `transform:` (or `filter:` / `perspective:`)
-    // to .row-offcanvas. Any of those creates a CSS containing block
-    // for descendants, which breaks `position: fixed` on BS3 modals
-    // — the modal becomes positioned relative to .row-offcanvas
-    // instead of the viewport, ending up inline in document flow
-    // while the backdrop (which is appended to <body>, outside
-    // .row-offcanvas) still fills the viewport on top. Result: modal
-    // is visible but unclickable at narrow widths. Previously we had
-    // `-webkit-transform: translate3d(0,0,0)` here as a hardware-
-    // acceleration hack for the offcanvas slide; modern browsers
-    // composite without that, and the side-effect was breaking the
-    // project-violations target-location modal on mobile.
-  }
-
-  .row-offcanvas-right {
-    right: 0;
-  }
-
-  .row-offcanvas-left {
-    left: 0;
-  }
-
-  .row-offcanvas-right
-  .sidebar-offcanvas {
-    right: -$sidebar-max-width;
-  }
-
-  .row-offcanvas-left
-  .sidebar-offcanvas {
-    left: -$sidebar-max-width;
-  }
-
-  .row-offcanvas-right.active {
-    right: $sidebar-max-width;
-  }
-
-  .row-offcanvas-left.active {
-    left: $sidebar-max-width;
-  }
-
-  .sidebar-offcanvas {
-    position: absolute;
-    top: 0;
-  }
 
   .hidden-overflow-x {
     overflow-x: hidden !important;
