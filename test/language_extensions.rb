@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# stop-gap fix for
-# TypeError: superclass mismatch for class Language
-#   /vagrant/mushroom-observer/app/models/language.rb:27:in `<top (required)>'
-# when running rake
-require("language")
+# Force Zeitwerk to autoload the app's `Language < AbstractModel`
+# before reopening it below -- reopening first would define a bare
+# `Language < Object`, and a later autoload of app/models/language.rb
+# would then raise a superclass mismatch.
+Language.name
 
 class Language
   @verbose_messages = []

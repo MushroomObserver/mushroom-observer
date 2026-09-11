@@ -5,15 +5,17 @@
 # The session cookie is the only thing this touches -- see the PR
 # description for what was checked to confirm that.
 #
-# MO does not call `config.load_defaults`, so
-# action_dispatch.use_authenticated_cookie_encryption is still false (its
-# absolute framework default) -- the session cookie goes through the
-# legacy, non-GCM cipher path (encrypted_cookie_salt +
-# encrypted_signed_cookie_salt, "aes-256-cbc"), not
-# authenticated_encrypted_cookie_salt. Deriving the rotation secret with
-# the wrong salt would silently fail to decrypt any pre-flip cookie --
-# see ActionDispatch::Cookies::EncryptedKeyRotatingCookieJar for the
-# derivation this mirrors.
+# The pre-flip session cookie was encrypted via the legacy, non-GCM
+# cipher path (encrypted_cookie_salt + encrypted_signed_cookie_salt,
+# "aes-256-cbc"), not authenticated_encrypted_cookie_salt -- this
+# derives the rotation secret from that same pair of salts, mirroring
+# ActionDispatch::Cookies::EncryptedKeyRotatingCookieJar's derivation.
+# load_defaults(7.2) separately turns on
+# use_authenticated_cookie_encryption, switching new cookies to the
+# GCM cipher -- a second transition layered on top of this one.
+# Rails registers a separate upgrade rotation for that transition
+# alongside this file's, so a pre-flip cookie still decrypts (see
+# test/initializers/session_cookie_digest_rotator_test.rb).
 #
 # legacy_session_cookie_probe.rb is the companion file that tells us
 # when it's safe to delete this one.

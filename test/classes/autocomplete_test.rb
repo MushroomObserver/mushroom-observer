@@ -2,8 +2,6 @@
 
 require("test_helper")
 
-require("autocomplete")
-
 # These empty classes and methods are required for the test to work.
 # rubocop:disable Lint/UselessMethodDefinition
 class AutocompleteMock < Autocomplete::ByString
