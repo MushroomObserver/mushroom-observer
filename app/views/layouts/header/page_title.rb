@@ -12,6 +12,11 @@
 #
 # `show_page_edit_icons` / `show_page_interest_icons` are private
 # methods on this view — the only caller of either.
+#
+# Neither `.show_title_nav` (title + edit-icons) nor `.show_object_nav`
+# (interest-icons + pager) is a `<nav>` landmark -- neither holds only
+# navigation content. The `<nav>` landmark in this strip is supplied
+# by `Views::Layouts::Header::ShowPrevNextNav`, around the pager alone.
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
@@ -28,7 +33,7 @@ module Views::Layouts
 
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
-        nav(class: SHOW_TITLE_CLASSES) do
+        div(class: SHOW_TITLE_CLASSES) do
           h1(class: "h3 page-title mt-1 mb-2", id: "title") do
             trusted_html(content_for(:title))
           end
@@ -40,7 +45,7 @@ module Views::Layouts
     def render_right_column
       div(class: class_names(content_for(:right_columns),
                              "hidden-print text-right")) do
-        nav(class: "show_object_nav d-flex justify-content-between " \
+        div(class: "show_object_nav d-flex justify-content-between " \
                    "align-items-start pr-3") do
           trusted_html(content_for(:interest_icons))
           trusted_html(content_for(:prev_next_object))

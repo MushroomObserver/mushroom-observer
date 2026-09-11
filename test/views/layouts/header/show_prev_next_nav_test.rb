@@ -36,11 +36,12 @@ module Views::Layouts
 
       html = render_nav(object: @middle_obs, query: @query)
 
-      # Main container
-      assert_includes(html, 'class="nav flex-bar object_pager"')
+      # Root is a labeled <nav> landmark wrapping the button group.
+      assert_html(html, "nav[aria-label='#{:app_object_pager_label.l}']")
+      assert_html(html, "nav > div.btn-group.object_pager[role='group']")
 
-      # Three li elements
-      assert_html(html, "ul.object_pager > li", count: 3)
+      # Three direct button-group children
+      assert_html(html, "div.btn-group.object_pager > a", count: 3)
 
       # Prev, index, and next links
       assert_includes(html, "prev_object_link")
@@ -176,11 +177,11 @@ module Views::Layouts
 
       html = render_nav(object: @middle_obs, query: @query)
 
-      # Links should be nested in li elements
+      # Links are direct children of the button group -- no wrapping <li>
       assert_nested(
         html,
-        parent_selector: "ul.object_pager",
-        child_selector: "li"
+        parent_selector: "div.object_pager",
+        child_selector: "a.prev_object_link"
       )
 
       # Icon should be nested in link

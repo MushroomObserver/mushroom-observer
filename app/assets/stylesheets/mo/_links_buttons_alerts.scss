@@ -180,47 +180,11 @@ form.button_to {
   }
 }
 
-// BS3's .input-group is table/table-cell layout, which doesn't
-// stretch an icon-bearing flex .btn (.btn:has(.mo-icon), _icons.scss)
-// to match its cell's height. Switched to flex, mirroring BS4's fix,
-// same approach as the .btn-group supplement above.
-//
-// .navbar-form .input-group needs the override too: BS3's
-// `@media (min-width: 768px)` rule sets display: inline-table there,
-// out-specifying a bare .input-group rule -- desktop-only, hence
-// this breaking on desktop widths but not mobile.
-.input-group,
-.navbar-form .input-group {
-  display: flex;
-  align-items: stretch;
-
-  > .form-control {
-    flex: 1 1 auto;
-    // min-width: 0 lets it shrink below its content width when a
-    // sibling addon needs the room.
-    min-width: 0;
-  }
-
-  > .input-group-addon,
-  > .input-group-btn {
-    // BS3's width: 1% relies on table shrink-to-content sizing; under
-    // flex that's a literal 1%, overflowing the box. Back to
-    // content-driven sizing.
-    flex: 0 0 auto;
-    width: auto;
-    display: flex;
-    // stretch, not center -- a .btn child (e.g. the pagination goto
-    // icon) needs to fill this span's full height, confirmed
-    // empirically short by ~2px with center.
-    align-items: stretch;
-
-    > .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-}
+// BS4's .input-group/.input-group-append/.input-group-prepend
+// (bootstrap/_input-group.scss) handle flex + stretch already --
+// `Components::InputGroup::Addon` emits those classes directly, so no
+// supplement is needed here (unlike .btn-group above, which has no
+// BS4-native flex fix for a form-wrapped button).
 
 // badges
 

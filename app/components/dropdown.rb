@@ -41,10 +41,14 @@ class Components::Dropdown < Components::Base
   prop :id, ::String
   prop :menu_id, ::String
   prop :label, ::String
-  # Extra classes on the outer `<li class="dropdown d-inline-block">`,
-  # the toggle `<a>`, and the menu `<ul>`. Defaults are nil — only
-  # the index sort-bar (`Views::Layouts::Header::Sorter`) currently
-  # passes any of these.
+  # Outer wrapper tag. `:li` (the default) is correct inside a
+  # `<ul>`-based nav (top-nav's Actions/user dropdowns); a caller
+  # placing the dropdown outside a list (the index sort-bar) passes
+  # `element: :div` instead.
+  prop :element, ::Symbol, default: :li
+  # Extra classes on the outer wrapper, the toggle `<a>`, and the
+  # menu `<ul>`. Defaults are nil — only the index sort-bar
+  # (`Views::Layouts::Header::Sorter`) currently passes any of these.
   prop :wrapper_class, _Nilable(::String), default: nil
   # `toggle_variant:` / `toggle_size:` add Bootstrap btn styling to the
   # toggle `<a>`. Extra non-btn classes (e.g. "font-weight-normal") still
@@ -73,7 +77,8 @@ class Components::Dropdown < Components::Base
     rendered = @sections.map { |s| normalize_section(s) }.reject(&:empty?)
     return if rendered.empty?
 
-    li(class: class_names("dropdown d-inline-block", @wrapper_class)) do
+    send(@element,
+         class: class_names("dropdown d-inline-block", @wrapper_class)) do
       render_toggle
       render_menu(rendered)
     end

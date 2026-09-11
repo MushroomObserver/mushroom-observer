@@ -142,9 +142,11 @@ $border-color: $PANEL_BORDER_COLOR !default;
 $btn-font-weight:     bold !default;
 $btn-border-radius:   0.3125rem !default;
 
-// Default/secondary button uses our standard button colors
-$btn-padding-y:       0.3125rem !default;  // ~5px
-$btn-padding-x:       0.625rem !default;   // ~10px
+// Button padding intentionally left at BS4's default
+// ($input-btn-padding-x/-y, shared with $input-padding-x/-y) so a
+// button and a form-control/input-group render the same height --
+// see Header::Sorter's dropdown toggle vs. IndexPaginationNav's goto
+// input-group, which need to line up in the same row.
 
 // `.btn-link` reads `$link-color`/`$link-hover-color` directly (set
 // in Section 3 above) -- BS4 has no separate $btn-link-color/

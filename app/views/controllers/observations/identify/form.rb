@@ -49,10 +49,13 @@ module Views::Controllers::Observations::Identify
     def form_attributes
       {
         id: @attributes[:id],
-        # Match the top-nav search bar layout: flexbox row with `gap-2`
-        # between items, no padding on the form so it sits flush in
-        # its `#search_nav` container.
-        class: class_names("flex-bar flex-grow-1",
+        # Match the top-nav search bar layout: flexbox row with
+        # `gap-2` between items, no padding on the form so it sits
+        # flush in its `#search_nav` container. `.form-inline` gives
+        # flex + flex-wrap behavior; the term field's `flex-grow-1`
+        # consumes all leftover main-axis space, so no `.flex-bar`
+        # (`justify-content`) is needed here.
+        class: class_names("flex-grow-1 form-inline",
                            Components::Navbar::FORM_CLASS, "px-0 gap-2"),
         # Merge in @attributes[:data] (set by ApplicationForm's
         # around_template -- carries the data-turbo="true" key when

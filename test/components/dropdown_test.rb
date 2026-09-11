@@ -112,6 +112,28 @@ class DropdownTest < ComponentTestCase
     assert_html(html, "ul.dropdown-menu li.dropdown-divider")
   end
 
+  # `element:` controls the outer wrapper tag -- `:li` by default
+  # (correct inside a `<ul>`-based nav), `:div` for a caller placing
+  # the dropdown outside a list (Views::Layouts::Header::Sorter).
+  def test_element_prop_controls_outer_wrapper
+    html = render_dropdown(id: "li_toggle", menu_id: "li_menu") do |menu|
+      menu.section(Tab::Project::Summary.new(project: @project))
+    end
+
+    assert_html(html, "li.dropdown")
+    assert_no_html(html, "div.dropdown")
+
+    html = render(
+      Components::Dropdown.new(id: "div_toggle", menu_id: "div_menu",
+                               label: "Menu", element: :div)
+    ) do |menu|
+      menu.section(Tab::Project::Summary.new(project: @project))
+    end
+
+    assert_html(html, "div.dropdown")
+    assert_no_html(html, "li.dropdown")
+  end
+
   # Sections that are `nil` (or any unrecognized type) normalize to
   # `[]` and get filtered out by `reject(&:empty?)`. With nothing
   # left to render, the entire dropdown wrapper is suppressed.

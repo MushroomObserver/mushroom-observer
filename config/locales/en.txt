@@ -1220,6 +1220,12 @@
   app_search_google: Site (via google)
   app_context_actions: Actions
 
+  # ARIA labels distinguishing multiple <nav> landmarks on one page.
+  app_top_nav_label: Contextual navigation
+  app_sidebar_nav_label: Site navigation
+  app_object_pager_label: Results navigation
+  app_interest_icons_label: Notification actions
+
   # This shows up at the bottom of every page. We recommend something like: \n
   # "Translated into <Language> by _user your-login_"
   app_translators_credit: Translated into English by

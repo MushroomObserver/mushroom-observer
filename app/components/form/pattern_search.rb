@@ -38,8 +38,14 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   # to show it (see `Views::Layouts::TopNav::SearchBar`).
   TYPE_VALUES = SEARCH_TYPE_OPTIONS.map(&:last).freeze
 
-  FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \
-               "px-0 gap-2".freeze
+  # `.form-inline` gives this `<form>` flex + flex-wrap behavior.
+  # `flex-grow-1` on the search field consumes all leftover main-axis
+  # space, so a `justify-content` value has nothing left to
+  # distribute -- no `.flex-bar` needed here. `Components::
+  # Navbar::FORM_CLASS` supplies small padding/margin/border tweaks
+  # (_top_nav.scss, _layout.scss).
+  FORM_CLASS = "flex-grow-1 form-inline " \
+               "#{Components::Navbar::FORM_CLASS} px-0 gap-2".freeze
 
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"

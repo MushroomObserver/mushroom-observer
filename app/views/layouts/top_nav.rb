@@ -39,12 +39,13 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   # Container classes shared by the top-nav row and the search-nav
-  # row. `w-100` is load-bearing since #top_nav is now `display: flex`
-  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it these two
-  # rows would share one line instead of each getting its own.
-  # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
-  # between` + `align-items-center` alias.
-  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
+  # row. `w-100` is load-bearing since `#top_nav` is `display: flex`
+  # -- without it these two rows would share a single line instead
+  # of each landing on a separate line. `container-fluid` is already
+  # flex + `justify-content: space-between` + `align-items: center`
+  # as a descendant of `.navbar` (BS4's `.navbar .container-fluid`
+  # rule) -- no `flex-bar` needed here.
+  CONTAINER_CLASSES = %w[container-fluid px-3 w-100].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
@@ -71,7 +72,8 @@ class Views::Layouts::TopNav < Views::Base
 
   def view_template
     Navbar(variant: :light, class: "hidden-print mb-2", id: "top_nav",
-           padding: "py-2 px-0") do
+           padding: "py-2 px-0",
+           aria: { label: :app_top_nav_label.l }) do
       render_top_row
       render_search_row
     end

@@ -42,7 +42,8 @@ class Views::Layouts::Sidebar < Views::Base
   def view_template
     # Fixed width (mo/_layout.scss's `$sidebar-max-width`), not a
     # Bootstrap grid column -- no `col-*` sizing here.
-    nav(id: "sidebar", class: "sidebar-offcanvas hidden-print") do
+    nav(id: "sidebar", class: "sidebar-offcanvas hidden-print",
+        aria: { label: :app_sidebar_nav_label.l }) do
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo

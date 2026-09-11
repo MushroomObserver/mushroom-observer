@@ -28,7 +28,7 @@ module Views::Controllers::Account::APIKeys
       html = render_form_with_cancel
 
       assert_html(html, ".input-group")
-      assert_html(html, ".input-group-btn")
+      assert_html(html, ".input-group-append")
       assert_html(html, "#api_key_notes")
       assert_html(html, "a[data-toggle='collapse']")
       assert_html(html, "a span[aria-label='#{:cancel.ti}']")
@@ -131,7 +131,7 @@ module Views::Controllers::Account::APIKeys
       key = api_keys(:rolfs_api_key)
       html = render_inline_edit_form(key)
 
-      assert_html(html, ".input-group .input-group-btn")
+      assert_html(html, ".input-group .input-group-append")
       # Cancel button (button, not submit) with the per-row collapse
       # data attributes to swap back to the view pane.
       assert_html(html,
