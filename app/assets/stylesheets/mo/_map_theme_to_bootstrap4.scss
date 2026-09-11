@@ -248,10 +248,11 @@ $table-head-color: $LIST_HEADER_TEXT_COLOR !default;
 $alert-border-width:  2px !default;
 $alert-border-radius: 0.3125rem !default;
 
-// Alert colors use our theme's alert variables
-$alert-bg-level:     0 !default;  // Don't darken backgrounds
-$alert-border-level: 0 !default;  // Don't darken borders
-$alert-color-level:  0 !default;  // Don't darken text
+// `.alert-success`/`.alert-info`/`.alert-warning`/`.alert-danger` get
+// translucent backgrounds instead of Bootstrap's default bg/border/
+// text mix -- see `mo/_links_buttons_alerts.scss`. `$alert-*-level`
+// stays at Bootstrap's defaults so any other generated variant
+// (`.alert-primary`, etc.) stays legible.
 
 // ==================================================
 // SECTION 12: MODALS

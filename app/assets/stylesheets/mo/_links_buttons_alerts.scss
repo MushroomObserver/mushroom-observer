@@ -290,6 +290,27 @@ button.badge-id:hover {
   }
 }
 
+// Translucent backgrounds (matching .badge-warning's treatment) for
+// the four levels Components::Alert supports, instead of Bootstrap's
+// default bg/border/text mix -- a mix toward white/black doesn't
+// track a dark theme's page background, and at $alert-bg-level: 0
+// (mo/_map_theme_to_bootstrap4.scss) bg/border/text were all the
+// same color.
+$alert-variant-colors: (
+  success: $success,
+  info:    $info,
+  warning: $warning,
+  danger:  $danger
+);
+
+@each $name, $color in $alert-variant-colors {
+  .alert-#{$name} {
+    background-color: rgba($color, 0.15);
+    border-color: rgba($color, 0.4);
+    color: $body-color;
+  }
+}
+
 // Responsive message text, kept separate from .message-banner's
 // layout classes.
 .banner-message {
