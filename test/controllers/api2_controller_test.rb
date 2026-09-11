@@ -575,6 +575,41 @@ class API2ControllerTest < FunctionalTestCase
                        "the importer's")
   end
 
+  # Companion creation can fail (e.g. the occurrence is full); the API
+  # surfaces that as a structured CreateFailed error, not a 500.
+  def test_post_sequence_to_reflection_companion_failure_is_structured
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    # The error's message renders via unique_text_name, so the stub
+    # record needs a name, as a failed companion would have.
+    invalid = Observation.new(name: names(:fungi))
+    invalid.errors.add(:base, :occurrence_max_observations_exceeded,
+                       max: Occurrence::MAX_OBSERVATIONS)
+    failing = Struct.new(:record) do
+      def existing = nil
+
+      def create
+        raise(ActiveRecord::RecordInvalid.new(record))
+      end
+    end.new(invalid)
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg"
+    }
+
+    Observation::Companion.stub(:new, ->(*) { failing }) do
+      assert_no_difference("Sequence.count") do
+        post(:sequences, params: params)
+      end
+    end
+
+    assert_api_failed
+    assert(assigns(:api).errors.any?(API2::CreateFailed),
+           "Expected a structured CreateFailed error")
+  end
+
   # Prove user can add a Naming to someone else's Observation
   def test_post_naming
     obs = observations(:coprinus_comatus_obs)

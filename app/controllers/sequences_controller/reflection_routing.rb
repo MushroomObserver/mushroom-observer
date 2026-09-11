@@ -24,9 +24,11 @@ module SequencesController::ReflectionRouting
       false
     else
       redirect_to(new_sequence_path(observation_id: companion.id))
+      true # redirect_to's return value is not contractually truthy
     end
   rescue ActiveRecord::RecordInvalid => e
     companion_creation_failed(e)
+    true
   end
 
   def companion_creation_failed(error)

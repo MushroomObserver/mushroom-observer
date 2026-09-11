@@ -91,6 +91,10 @@ class API2
       companion_user = obs.can_edit?(@user) ? @user : obs.user
       builder = Observation::Companion.new(obs, companion_user)
       builder.existing || builder.create
+    rescue ActiveRecord::RecordInvalid => e
+      # e.g. the occurrence is full -- surface as a structured API
+      # error rather than a 500 (API2 only rescues API2::Error).
+      raise(CreateFailed.new(e.record))
     end
   end
 end
