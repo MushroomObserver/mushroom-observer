@@ -5,8 +5,9 @@
 # on a bind mount for the app code, not a COPY, so edits don't need a
 # rebuild. `docker build --target production` (or Kamal's
 # `builder.target: production` in config/deploy.yml) adds
-# RAILS_ENV=production, a deployment-mode bundle install excluding
-# dev/test gems, and an asset precompile baked into the image.
+# RAILS_ENV=production and a deployment-mode bundle install excluding
+# dev/test gems. Assets precompile at container start, not here -- see
+# docker/entrypoint.production.sh.
 FROM ruby:3.4.9-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \

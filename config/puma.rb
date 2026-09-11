@@ -24,8 +24,10 @@ when "production"
   if ENV["PORT"]
     # Running under Docker/Kamal (#5345) -- the proxy reaches the
     # container over the network, not a shared filesystem socket, and
-    # Docker's restart policy tracks the process, not a pidfile. Logs
-    # go to STDOUT, captured by `docker logs`/Kamal.
+    # Docker's restart policy tracks the process, not a pidfile. Both
+    # Puma's process output and the Rails app logger (see
+    # config/environments/production.rb) go to STDOUT here, captured
+    # by `docker logs`/Kamal.
     app_path = ENV.fetch("PWD", ".")
     bind("tcp://0.0.0.0:#{ENV.fetch("PORT")}")
   else

@@ -36,10 +36,15 @@ production:
     username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
     password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
     port: 3306
-    # Must exceed Solid Queue's own thread need -- see
+    # Independent of RAILS_MAX_THREADS (Puma's web-thread count) --
+    # this image also runs as the worker role (bin/jobs), whose
+    # thread need doesn't shrink just because the web role's Puma
+    # runs single-threaded. Must exceed Solid Queue's own thread need
+    # (config/queue.yml's largest single worker pool, plus 2 for that
+    # worker's own thread and heartbeat) -- see
     # test/jobs/queue_config_test.rb and config/database.yml's own
     # comment on this same pool setting.
-    pool: <%= ENV.fetch("RAILS_MAX_THREADS", 10) %>
+    pool: <%= ENV.fetch("DATABASE_POOL", 10) %>
   cache:
     database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
     host: <%= ENV.fetch("DATABASE_HOST", "db") %>

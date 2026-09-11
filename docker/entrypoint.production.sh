@@ -5,6 +5,14 @@ set -e
 # docker/entrypoint.sh's dev/test convention, extended to production.
 cp db/docker/database.yml config/database.yml
 
+# The Rails application logger goes to STDOUT under Docker (see
+# config/environments/production.rb), but MO.email_debug_log_path
+# (app/mailers/application_mailer.rb) still writes log/email-debug.log
+# unconditionally on every mail send. Nothing else creates log/ under
+# Docker, and both roles can trigger a mail send, so this isn't gated
+# on the server-role check below.
+mkdir -p log
+
 # Only the server role prepares the database and precompiles assets. A
 # second role sharing this same image with a different start command
 # (e.g. `bin/jobs` for Solid Queue, matching
