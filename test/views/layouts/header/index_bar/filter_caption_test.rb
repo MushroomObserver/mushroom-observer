@@ -15,16 +15,34 @@ module Views::Layouts
 
       # No params (after stripping :order_by) → both truncated and
       # full collapses render `:all.ti` directly, no <b>/<span> tree.
-      assert_html(html, "#caption-truncated .small", text: :all.ti)
-      assert_html(html, "#caption-full .small", text: :all.ti)
+      assert_html(html, "#caption-truncated", text: :all.ti)
+      assert_html(html, "#caption-full", text: :all.ti)
+    end
+
+    # Regression: a blank-valued param (e.g. an empty search field
+    # submitted as `pattern: ""`) must not count as a filter --
+    # `filters_present?` has to strip blanks the same way
+    # `render_params_joined` does, or an effectively-unfiltered query
+    # renders the index bar while the caption body itself has nothing
+    # to show.
+    def test_blank_valued_param_does_not_count_as_filter
+      query = Query.lookup_and_save(:Observation, pattern: "")
+
+      assert_not(
+        Views::Layouts::Header::IndexBar::FilterCaption.filters_present?(query)
+      )
+
+      html = render_for(query)
+
+      assert_html(html, "#caption-truncated", text: :all.ti)
     end
 
     def test_pattern_param_renders_label_and_value
       html = render_for(Query.lookup_and_save(:Name, pattern: "Coprinus"))
 
       assert_html(html, "#filters", text: "Coprinus")
-      assert_html(html, "#caption-truncated .small b", text: "Coprinus")
-      assert_html(html, "#caption-truncated .small span",
+      assert_html(html, "#caption-truncated b", text: "Coprinus")
+      assert_html(html, "#caption-truncated span",
                   text: :query_pattern.l)
     end
 
@@ -32,9 +50,9 @@ module Views::Layouts
       html = render_for(Query.lookup_and_save(:Observation, has_images: true))
 
       # Boolean true → just `<span>label</span>`, no `<b>value</b>`.
-      assert_html(html, "#caption-truncated .small span",
+      assert_html(html, "#caption-truncated span",
                   text: :query_has_images.l)
-      assert_no_html(html, "#caption-truncated .small b")
+      assert_no_html(html, "#caption-truncated b")
     end
 
     def test_type_tags_param_localizes_via_helper
@@ -45,7 +63,7 @@ module Views::Layouts
 
       # `type_tags_to_label` joins localized labels with ", ".
       assert_html(
-        html, "#caption-truncated .small b",
+        html, "#caption-truncated b",
         text: "#{:observations.ti}, #{:species_lists.ti}"
       )
     end
@@ -61,7 +79,7 @@ module Views::Layouts
         Query.lookup_and_save(:Comment, types: [:location_description])
       )
 
-      assert_html(html, "#caption-truncated .small b",
+      assert_html(html, "#caption-truncated b",
                   text: "location_description")
     end
 
@@ -76,7 +94,7 @@ module Views::Layouts
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b i",
+      assert_html(html, "#caption-truncated b i",
                   text: names(:coprinus_comatus).text_name)
     end
 
@@ -88,10 +106,10 @@ module Views::Layouts
 
       # The first 3 (CAPTION_TRUNCATE) names are joined then ", ..."
       # is appended in the truncated collapse.
-      assert_html(html, "#caption-truncated .small b i",
+      assert_html(html, "#caption-truncated b i",
                   text: ", ...")
       # The full collapse joins all 5 without truncation.
-      assert_html(html, "#caption-full .small b i")
+      assert_html(html, "#caption-full b i")
     end
 
     def test_user_lookup_does_not_italicize
@@ -104,9 +122,9 @@ module Views::Layouts
       # `:by_users` is in PARAM_LOOKUPS but NOT in
       # ITALICIZE_LOOKUP_KEYS — value renders inside `<b>` without
       # `<i>` wrapping.
-      assert_html(html, "#caption-truncated .small b",
+      assert_html(html, "#caption-truncated b",
                   text: users(:rolf).legal_name)
-      assert_no_html(html, "#caption-truncated .small b i")
+      assert_no_html(html, "#caption-truncated b i")
     end
 
     # `editable_by_user` is a User-typed query attr -- without it in
@@ -119,7 +137,7 @@ module Views::Layouts
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b",
+      assert_html(html, "#caption-truncated b",
                   text: user.unique_text_name)
     end
 
@@ -130,7 +148,7 @@ module Views::Layouts
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small span",
+      assert_html(html, "#caption-truncated span",
                   text: :query_needs_naming.l)
     end
 
@@ -140,15 +158,15 @@ module Views::Layouts
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b", text: project.title)
-      assert_no_html(html, "#caption-truncated .small b i")
+      assert_html(html, "#caption-truncated b", text: project.title)
+      assert_no_html(html, "#caption-truncated b i")
     end
 
     def test_confidence_single_value_renders_as_label
       html = render_for(Query.lookup_and_save(:Observation,
                                               confidence: [2.0]))
 
-      assert_html(html, "#caption-truncated .small b",
+      assert_html(html, "#caption-truncated b",
                   text: Vote.confidence_string(2.0))
     end
 
@@ -157,7 +175,7 @@ module Views::Layouts
                                               confidence: [-1.0, 2.0]))
 
       assert_html(
-        html, "#caption-truncated .small b",
+        html, "#caption-truncated b",
         text: "#{Vote.confidence_string(-1.0)} – #{Vote.confidence_string(2.0)}"
       )
     end
@@ -246,7 +264,7 @@ module Views::Layouts
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b", text: "1, 2, 3")
+      assert_html(html, "#caption-truncated b", text: "1, 2, 3")
     end
 
     def test_array_value_param_above_truncate_adds_ellipsis
@@ -258,10 +276,10 @@ module Views::Layouts
 
       html = render_for(query)
 
-      assert_html(html, "#caption-truncated .small b",
+      assert_html(html, "#caption-truncated b",
                   text: "1, 2, 3, ...")
       # The full collapse joins all 5 with no truncation marker.
-      assert_html(html, "#caption-full .small b",
+      assert_html(html, "#caption-full b",
                   text: "1, 2, 3, 4, 5")
     end
 
@@ -278,7 +296,7 @@ module Views::Layouts
       html = render_for(query)
 
       truncated = Nokogiri::HTML(html).at_css(
-        "#caption-truncated .small b i"
+        "#caption-truncated b i"
       )&.text
       skip("setup didn't produce a >100-char join") unless
         truncated && truncated.length > 90
