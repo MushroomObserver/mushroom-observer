@@ -42,6 +42,16 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("a.observations_by_num_views_link", false)
   end
 
+  # An unfiltered index has nothing worth a caption for -- the bar
+  # would just say "All".
+  def test_index_unfiltered_hides_index_bar
+    login
+    get(:index)
+
+    assert_select("#index_bar", false)
+    assert_select("#filters", false)
+  end
+
   def test_index_filtered_offers_all_sorts
     login(rolf.login)
     get(:index, params: { by_user: rolf.id })
