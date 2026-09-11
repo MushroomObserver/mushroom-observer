@@ -20,7 +20,13 @@ class QueueConfigTest < UnitTestCase
   def test_actionmailer_deliver_later_queue_is_covered_by_a_worker
     skip if all_queues_covered?
 
-    mailer_queue = ActionMailer::Base.deliver_later_queue_name.to_s
+    # `deliver_later_queue_name` defaults to nil since Rails 6.1 --
+    # ActiveJob::QueueName#queue_name_from_part then falls back to
+    # ActiveJob::Base.default_queue_name, matching what
+    # ActionMailer::MailDeliveryJob's queue_as block resolves to.
+    mailer_queue =
+      (ActionMailer::Base.deliver_later_queue_name ||
+       ActiveJob::Base.default_queue_name).to_s
     assert_includes(configured_worker_queues, mailer_queue,
                     "No worker in config/queue.yml listens to the " \
                     "ActionMailer deliver_later queue " \

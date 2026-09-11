@@ -133,11 +133,18 @@ class MatrixTableTest < ComponentTestCase
     end
   end
 
-  # cache_key_for folds in the thumb image record so the expanded key
-  # tracks the thumb's updated_at (its cache_key embeds the timestamp)
-  # -- reprocessing bumps it, and the cached HTML embeds a URL token
-  # derived from it (#4808). Nothing touches an RssLog when its thumb
-  # finishes processing, so the thumb must appear in the key itself.
+  # cache_key_for folds in the thumb image record so a cache read/write
+  # tracks the thumb's updated_at -- reprocessing bumps it, and the
+  # cached HTML embeds a URL token derived from it (#4808). Nothing
+  # touches an RssLog when its thumb finishes processing, so the thumb
+  # must appear in the key itself.
+  #
+  # With cache_versioning on (the Rails default), an AR object's
+  # updated_at moves the cache *version*, not the *key* string --
+  # ActiveSupport::Cache::Store#read/#write compare both, so a stale
+  # version is a miss even though the key itself is unchanged. Assert
+  # that behavior directly via a read/write round-trip, not by
+  # inspecting the private normalize_key string.
   def test_cache_key_for_includes_the_thumb_image_record
     obs = observations(:coprinus_comatus_obs)
 
@@ -149,17 +156,15 @@ class MatrixTableTest < ComponentTestCase
       key
     )
 
-    # The expanded key must change when the thumb's updated_at does --
-    # this is the mechanism the fragment busting relies on.
     store = ActiveSupport::Cache::MemoryStore.new
-    old_expanded = store.send(:normalize_key, key, {})
-    obs.thumb_image.updated_at += 1.hour
-    new_expanded = store.send(
-      :normalize_key,
-      Components::Matrix::Table.cache_key_for(obs, I18n.locale), {}
-    )
+    store.write(key, "cached value")
+    assert_equal("cached value", store.read(key))
 
-    assert_not_equal(old_expanded, new_expanded)
+    obs.thumb_image.updated_at += 1.hour
+    assert_nil(
+      store.read(Components::Matrix::Table.cache_key_for(obs, I18n.locale)),
+      "Bumping the thumb's updated_at should invalidate the cached entry"
+    )
   end
 
   # A bare Image object IS its own thumb: it has no thumb_image, and
