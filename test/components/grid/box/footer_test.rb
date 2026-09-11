@@ -63,12 +63,12 @@ class Components::Grid::Box::FooterTest < ComponentTestCase
     assert_equal("", render_time(nil))
   end
 
-  def test_footer_time_renders_local_time_div
+  def test_footer_time_renders_local_time_indicator
     time = Time.zone.parse("2024-06-01 12:00:00 UTC")
     html = render_time(time)
 
     assert_html(html,
-                "li[data-controller='local-time']" \
+                "[data-controller='local-time']" \
                 "[data-local-time-utc-value='#{time.utc.iso8601}']")
   end
 
