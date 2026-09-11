@@ -104,7 +104,12 @@ root> echo '/swap none swap sw 0 0' | tee -a /etc/fstab
 # zbar-tools provides zbarimg, used to read field slip QR codes out of
 # uploaded photos (see FieldSlip::QRDecoder); MO runs fine without it,
 # that one feature just stays off.
-root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
+# No mysql-server here -- production MySQL runs on a separate droplet
+# (see the remote-database section below); mysql-client is for the CLI
+# tools and gem compilation only. Only install mysql-server on this box
+# if following the "If installing database locally" section further
+# down instead.
+root> apt-get install -y mysql-client libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev \
           exiftool mrtg zbar-tools
@@ -163,6 +168,9 @@ mo> echo blahblahblah > config/master.key
   # grab "blahblahblah" from the old server
 # Ping the database to make sure everything's working right.
 # (You will have to add the new IP address to the database server!)
+# Current production shape: MySQL on a separate droplet, reached over
+# the network -- this is the section that matches it, not the
+# "If installing database locally" alternative further down.
 database_server_root> mysql -u root -p
   # For each remote user:
   CREATE USER 'mo'@'$WEB_SERVER' IDENTIFIED BY '$DB_PASSWORD';
@@ -425,11 +433,12 @@ mrtg> crontab -e
 root> iptables-save
 
 # Make sure all the critical processes started automatically.
-# Look for sshd, nginx, puma, mysqld, postfix.
+# Look for sshd, nginx, puma, postfix. If using a remote database (current production shape),
+# mysqld runs on the separate database droplet; if installing the database locally,
+# also look for mysqld/mysql here.
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
 root> ps -ef | grep puma
-root> ps -ef | grep mysql
 root> ps -ef | grep postfix
 
 # To enable or disable startup of a service:
