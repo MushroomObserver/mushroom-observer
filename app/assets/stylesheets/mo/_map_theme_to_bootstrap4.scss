@@ -34,6 +34,14 @@ $danger:     $DANGER_COLOR !default;
 $light:      $LIGHT_COLOR !default;
 $dark:       $DARK_COLOR !default;
 
+// $success is a light green -- fine for alerts (a translucent tint
+// under $body-color text) and form-feedback text, but too light for
+// white text/icons on a solid `.btn-success` background. Darkened
+// separately here so those other consumers of $success keep their
+// colors unchanged; see `mo/_links_buttons_alerts.scss` for the
+// override.
+$btn-success-bg: scale-color($success, $lightness: -38%) !default;
+
 // Bootstrap 4 uses a theme-colors map for generating variants
 // This creates .btn-primary, .btn-success, .alert-warning, etc.
 $theme-colors: (
@@ -78,18 +86,6 @@ $grid-breakpoints: (
 $gray-100: $BODY_BG_COLOR !default;
 $gray-600: muted_text() !default;
 $gray-900: $BODY_TEXT_COLOR !default;
-
-// `color-yiq()` picks between `$yiq-text-dark`/`$yiq-text-light` to
-// contrast a `$theme-colors` background (`.btn-success`, `.badge-*`,
-// etc.), defaulting to `$gray-900`/`$white`. Left at that default,
-// a dark theme's `$gray-900` (remapped above to its light body text)
-// isn't a dark option any more, so a medium-brightness background
-// color like `$success` gets light-on-light instead of the dark
-// text its luminance calls for. Pinning both poles to literal
-// black/white keeps `color-yiq()`'s contrast choice correct
-// regardless of theme.
-$yiq-text-dark:  $black !default;
-$yiq-text-light: $white !default;
 
 // ==================================================
 // SECTION 3: TYPOGRAPHY
