@@ -56,18 +56,43 @@ refresh_icon_library() {
     fi
 }
 
-# --icons-only is a manual, opt-in icon-library refresh -- deliberately
-# NOT part of a standard deploy (the icon-library repo has its own
-# release cadence, unrelated to app code). Exits here rather than
-# falling through to the code-deploy flow below, since none of that
-# (git branch check, maintenance page, puma/solidqueue stop,
-# db:migrate, lang:update) applies to a licensed-asset-only refresh.
+# Glyph keys Components::Icon::GLYPHS references that the current
+# sprite checkout lacks (one per line; empty when in sync). A missing
+# or unreadable sprite counts every glyph as lacking, so a wiped
+# checkout heals itself via the auto-refresh below (#5365).
+missing_icon_glyphs() {
+    ruby -e '
+      code = begin
+        File.read("app/components/icon.rb")[/GLYPHS = Set\[(.*?)\]/m, 1].
+          scan(/:(\w+)/).flatten
+      rescue StandardError
+        []
+      end
+      sprite = begin
+        File.read("vendor/assets/images/icons/mo-icons.svg").
+          scan(/symbol id="(\w+)"/).flatten
+      rescue StandardError
+        []
+      end
+      puts(code - sprite)
+    '
+}
+
+# A standard deploy refreshes the icon library AUTOMATICALLY when the
+# pulled code's Icon::GLYPHS references symbols the sprite checkout
+# lacks (see missing_icon_glyphs / the auto-detect before the
+# icons_flag check further down, #5365). The flags cover what
+# auto-detection can't:
 #
-# --icons bundles the same refresh into a normal code deploy (see the
-# icons_flag check further down, right before the single
-# assets:precompile that deploy already does) -- one precompile
-# instead of two separate ones from running --icons-only and a plain
-# deploy back to back.
+# --icons forces the refresh during a normal code deploy -- for
+# artwork-only icon-library changes whose symbol ids didn't change,
+# which the glyph diff can't see.
+#
+# --icons-only is the same forced refresh WITHOUT a code deploy. It
+# exits here rather than falling through to the code-deploy flow
+# below, since none of that (git branch check, maintenance page,
+# puma/solidqueue stop, db:migrate, lang:update) applies to a
+# licensed-asset-only refresh.
 icons_flag=0
 case "$1" in
     --icons-only)
@@ -247,11 +272,36 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     fi
 fi
 
+# Auto-detect icon-library skew (#5365): when the just-pulled code's
+# Icon::GLYPHS references symbols the sprite checkout lacks, the
+# refresh happens as part of this deploy -- shipping code whose icons
+# render blank is not an acceptable default. --icons still forces a
+# refresh for changes auto-detection can't see (reworked artwork
+# whose symbol ids didn't change).
+missing_glyphs=$(missing_icon_glyphs)
+if [ -n "$missing_glyphs" ]; then
+    echo "Icon sprite lacks glyph(s) the code references:" $missing_glyphs
+    echo "Refreshing the icon library as part of this deploy."
+    icons_flag=1
+fi
+
 if [ "$icons_flag" = "1" ]; then
     refresh_icon_library
     if [ $? -ne 0 ]; then
         echo ""
         echo "Deploy failed. Restarting puma and solidqueue with existing code..."
+        sudo service puma start
+        sudo service solidqueue start
+        echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
+        exit 1
+    fi
+    still_missing=$(missing_icon_glyphs)
+    if [ -n "$still_missing" ]; then
+        echo ""
+        echo "Icon library refreshed, but the sprite still lacks:" $still_missing
+        echo "icon-library main is behind the app code (CI should have"
+        echo "caught this -- see test/classes/icon_glyph_sync_test.rb)."
+        echo "Deploy aborted. Restarting puma and solidqueue with existing code..."
         sudo service puma start
         sudo service solidqueue start
         echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
