@@ -62,7 +62,7 @@ module Views::Layouts
     # sort order -- used by `Views::FullPageBase#add_query_filters` to
     # decide whether to render the index bar.
     def self.filters_present?(query)
-      query.params.except(:order_by).present?
+      query.params.except(:order_by).compact_blank.present?
     end
 
     def view_template
