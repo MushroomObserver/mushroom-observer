@@ -60,7 +60,7 @@ module FieldSlipsController::Show
   end
 
   def field_slip_redirect(obs_id)
-    redirect_to(observation_url(id: obs_id))
+    redirect_to(permanent_observation_url(id: obs_id))
   end
 
   # Context carried from a scanned slip into the observation form.

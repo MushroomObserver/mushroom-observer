@@ -15,6 +15,9 @@ class LegacySessionCookieProbe
 
   def initialize(app)
     @app = app
+    # Key derivation (PBKDF2) is nontrivial CPU work -- derive the
+    # legacy encryptor once here, at boot, instead of on every request.
+    @legacy_encryptor = SessionCookieDigestMigration.legacy_encryptor
   end
 
   def call(env)
@@ -28,7 +31,7 @@ class LegacySessionCookieProbe
     raw_value = Rack::Request.new(env).cookies[SESSION_COOKIE_KEY]
     return unless raw_value
 
-    SessionCookieDigestMigration.legacy_encryptor.decrypt_and_verify(raw_value)
+    @legacy_encryptor.decrypt_and_verify(raw_value)
     Rails.cache.write(SessionCookieDigestMigration::CACHE_KEY, Time.current,
                       expires_in: 1.year)
   rescue ActiveSupport::MessageEncryptor::InvalidMessage,
