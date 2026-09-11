@@ -107,6 +107,13 @@ module MushroomObserver
     # receiver's timezone offset instead of converting to system local).
     config.active_support.to_time_preserves_timezone = true
 
+    # Rails 7.0 default from new_framework_defaults_7_0.rb -- must be set
+    # here, not in the initializer, per that file's instructions. No-op
+    # on this Rails version: the underlying mechanism was removed in
+    # Rails 7.2.0 (activesupport CHANGELOG), so nothing reads this key
+    # any more -- set for completeness, not because it changes behavior.
+    config.active_support.disable_to_s_conversion = true
+
     # Set up memcached as the cache store everywhere
     # config.cache_store = :mem_cache_store
     config.cache_store = :solid_cache_store
