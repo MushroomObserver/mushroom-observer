@@ -7,7 +7,7 @@ class ButtonTest < ComponentTestCase
     html = render_button(name: "Click me")
 
     assert_html(html, "button[type='button']", text: "Click me")
-    assert_html(html, "button.btn.btn-default")
+    assert_html(html, "button.btn.btn-secondary")
   end
 
   def test_custom_variant
@@ -25,7 +25,7 @@ class ButtonTest < ComponentTestCase
   def test_extra_class_merged
     html = render_button(name: "Sized", size: :sm)
 
-    assert_html(html, "button.btn.btn-default.btn-sm")
+    assert_html(html, "button.btn.btn-secondary.btn-sm")
   end
 
   def test_icon_only_with_sr_only_name

@@ -13,12 +13,12 @@
 # silently when there's nothing to show and no eligible site to add a
 # link to; when there's an eligible site but no badges yet, shows a
 # "No external links" caption alongside the add link instead of an
-# unlabeled "+". `Details` renders this inside a `.panel-body.p-0` (own id +
-# section-update wiring live on that panel-body, not here) so the
-# badge row and the accordion below it can each supply their own
-# padding and be genuinely full-width against the panel edge -- see
+# unlabeled "+". `Details` renders this inside a `.card-body.p-0` (id +
+# section-update wiring live on that card-body, not here) so the
+# badge row and the accordion below it can each supply padding and
+# reach full width against the card edge -- see
 # `app/views/controllers/images/show/vote_panel.rb` for the same
-# `panel-body.p-0` + self-padding-children pattern.
+# `card-body.p-0` + self-padding-children pattern.
 class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -33,7 +33,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   def view_template
     return if visible_sites.empty? && !show_new_link?
 
-    div(class: class_names(wrapper_class, "p-3 border-bottom")) do
+    div(class: class_names(wrapper_class, "p-card border-bottom")) do
       if visible_sites.any?
         render_badges
       else
@@ -92,7 +92,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     Link(type: :collapse_toggle,
          target_id: "pane_#{link.id}",
          fallback_href: external_link_path(link.id),
-         class: "badge badge-id badge-xl text-uppercase",
+         class: "badge badge-id badge-xl ml-2 text-uppercase",
          data: {
            parent: "#external_links_accordion",
            turbo_frame: "external_link_frame_#{link.id}",
@@ -114,8 +114,10 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     Accordion(id: "external_links_accordion", class: "m-0") do |accordion|
       visible_sites.map(&:last).each do |link|
         accordion.with_pane(id: "pane_#{link.id}",
-                            class: "p-3 border-bottom") do
-          turbo_frame_tag("external_link_frame_#{link.id}")
+                            class: "p-card border-bottom") do
+          turbo_frame_tag("external_link_frame_#{link.id}",
+                          src: external_link_path(link.id),
+                          loading: "lazy")
         end
       end
     end

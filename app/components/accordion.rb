@@ -10,26 +10,19 @@
 # pane — callers' `data-target` / `href` must point at it. Pass
 # `expanded: true` on the one that starts visible; the rest start
 # collapsed. Pass `class:` on a pane for styling specific to that
-# pane's own content (e.g. `class: "p-3"` when the accordion itself
-# sits inside a zero-padding parent) -- separate from the `class:`
-# passed to `Accordion` itself, which styles the shared `.panel` wrapper.
+# pane (e.g. `class: "p-3"` when the accordion sits inside a
+# zero-padding parent) -- separate from the `class:` passed to
+# `Accordion` itself, which styles the shared inner wrapper.
 #
-# The inner wrapper's `.panel` class is REQUIRED, not decorative --
-# verified against Bootstrap 3.4.1's actual `js/collapse.js` on
-# GitHub. `Collapse.prototype.show` finds the currently-open sibling
-# pane to auto-close via the literal selector
-# `this.$parent.children('.panel').children('.in, .collapsing')` --
-# i.e. it walks `data-parent` -> `.panel` child -> `.in`/`.collapsing`
-# child. Drop `.panel` and that lookup finds nothing, so the
-# mutual-exclusion (only one pane open at a time) silently breaks --
-# confirmed in the browser, not just from reading the source.
-# `border-none`/`bg-none` strip its visual chrome (border,
-# background); its `margin-bottom: ~20px` is left as the default
-# spacing below an accordion instance, e.g. between successive rows
-# in `account/api_keys/table.rb`. Pass `class:` (via the `attributes:`
-# catch-all) to add to it -- e.g. `class: "m-0"` when the caller
-# already supplies its own spacing -- but `.panel` itself always
-# renders.
+# Bootstrap 4's `collapse.js` (`Collapse#_getParent`) closes sibling
+# panes via `[data-toggle="collapse"][data-parent="..."]`, a plain
+# attribute selector -- the inner wrapper needs no Bootstrap component
+# class for this to work. `border-none`/`bg-none` strip its visual
+# chrome (border, background); `margin-bottom: ~20px` on the outer div
+# is the default spacing below an accordion instance, e.g. between
+# successive rows in `account/api_keys/table.rb`. Pass `class:` (via
+# the `attributes:` catch-all) for spacing overrides -- e.g.
+# `class: "m-0"`.
 #
 # @example Inline notes editor in a table row
 #   Accordion(id: "notes_#{key.id}") do |accordion|
@@ -56,7 +49,7 @@ class Components::Accordion < Components::Base
   # Bootstrap's own default slide transition instead.
   prop :slide, _Boolean, default: false
   # Catch-all for class:, data:, aria:, and any other HTML attrs on
-  # the inner `.panel` wrapper -- matches Icon/Collapsible's pattern.
+  # the inner wrapper -- matches Icon/Collapsible's pattern.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   slot :pane, lambda { |id:, expanded: false, class: nil, &content|
@@ -77,6 +70,6 @@ class Components::Accordion < Components::Base
   private
 
   def inner_class
-    class_names("panel border-none bg-none", @attributes[:class])
+    class_names("border-none bg-none", @attributes[:class])
   end
 end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Index-page sort-bar. Two list items in a horizontal nav:
-# `<ul class="flex-bar pl-3 sorter">` with a `<li>` `Sort by:`
-# label + a `<li>` `Components::Dropdown` whose menu lists every
-# available sort option plus a `Reverse` entry. Stashed in
+# Index-page sort-bar. `<div class="flex-bar pl-3 sorter">` with a
+# `Sort by:` label + `Components::Dropdown` (`element: :div`, since
+# this isn't a `<ul>`-based nav) whose menu lists every available
+# sort option plus a `Reverse` entry. Stashed in
 # `content_for(:sorter)` by `add_sorter` in the index view.
 #
 # `sorts` is `[[order_by_key, label_translation_symbol], ...]`, the
@@ -24,10 +24,9 @@ module Views::Layouts
     def view_template
       return unless visible?
 
-      ul(class: "list-unstyled flex-bar pl-3 sorter") do
+      div(class: "flex-bar pl-3 sorter") do
         render(Components::Navbar::Text.new(
-                 element: :li,
-                 class: class_names("mx-0",
+                 class: class_names("mx-0 pr-2",
                                     Components::Column.mobile_hide_classes)
                )) do
           append_colon(:sort_by_header.l)
@@ -36,8 +35,9 @@ module Views::Layouts
           id: "sort_nav_toggle",
           menu_id: "sort_nav_menu",
           label: toggle_title.to_s,
-          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-2"),
-          toggle_variant: :outline, toggle_size: :sm,
+          element: :div,
+          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-0"),
+          toggle_variant: :outline,
           toggle_class: "font-weight-normal",
           menu_class: "sorts",
           menu_header: mobile_header_html

@@ -78,7 +78,7 @@ class UsersController < ApplicationController
     {
       letters: true,
       include: [:user_groups, :image, :location],
-      matrix: !in_admin_mode?
+      grid: !in_admin_mode?
     }.merge(opts)
   end
 

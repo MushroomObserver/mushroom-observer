@@ -49,10 +49,13 @@ module Views::Controllers::Observations::Identify
     def form_attributes
       {
         id: @attributes[:id],
-        # Match the top-nav search bar layout: flexbox row with `gap-2`
-        # between items, no padding on the form so it sits flush in
-        # its `#search_nav` container.
-        class: class_names("flex-bar flex-grow-1",
+        # Match the top-nav search bar layout: flexbox row with
+        # `gap-2` between items, no padding on the form so it sits
+        # flush in its `#search_nav` container. `.form-inline` gives
+        # flex + flex-wrap behavior; the term field's `flex-grow-1`
+        # consumes all leftover main-axis space, so no `.flex-bar`
+        # (`justify-content`) is needed here.
+        class: class_names("flex-grow-1 form-inline",
                            Components::Navbar::FORM_CLASS, "px-0 gap-2"),
         # Merge in @attributes[:data] (set by ApplicationForm's
         # around_template -- carries the data-turbo="true" key when
@@ -78,13 +81,14 @@ module Views::Controllers::Observations::Identify
 
     # --- Autocompleter section ---
 
-    # Term input lives inside a `d-flex flex-grow-1` form-group so it
-    # expands to fill the row; the type select and submit buttons keep
-    # their natural width.
+    # Term input lives inside an input-group that grows to fill the
+    # row; the type select and submit buttons keep their natural
+    # width. `.dropdown` is added alongside `.input-group` so the
+    # autocomplete suggestion list (`render_dropdown`, `position:
+    # absolute`) anchors to this element.
     def render_autocompleter_wrap
-      div(class: "form-group has-feedback has-search d-flex " \
-                 "flex-grow-1 mb-0 dropdown",
-          data: dual_target("wrap")) do
+      InputGroup(class: "flex-grow-1 dropdown",
+                 data: dual_target("wrap")) do
         render_search_icon
         render_hidden_field
         render_term_field
@@ -93,9 +97,9 @@ module Views::Controllers::Observations::Identify
     end
 
     def render_search_icon
-      Icon(type: :search,
-           title: :search.ti,
-           class: "form-control-feedback")
+      render(Components::InputGroup::Addon.new(
+               variant: :addon, position: :prepend
+             )) { Icon(type: :search, title: :search.ti) }
     end
 
     def render_hidden_field

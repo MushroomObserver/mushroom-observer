@@ -1,0 +1,55 @@
+//
+// Bootstrap 4 card styling
+// --------------------------------------------------
+
+.card {
+  // .grid-box (mo/_grid_box.scss) resets this to 0 and puts the
+  // margin on its <li> instead -- see that rule's comment for why.
+  margin-bottom: $grid-gutter-width;
+  color: $card-color;
+
+  .table-responsive {
+    border-color: transparent;
+  }
+  .border-top {
+    border-top: 1px solid $card-border-color;
+  }
+  .border-bottom {
+    border-bottom: 1px solid $card-border-color;
+  }
+}
+
+// .card-header shares $card-spacer-y with .card-body/.card-footer,
+// but a heading needs less vertical room than a body of content.
+.card-header {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+// Bootstrap's .card-title default is margin-bottom: $card-spacer-y,
+// spacing a title from following card-body content. MO's .card-header
+// titles have nothing to space from within the header, so a heading
+// carrying this class (h3.card-title, h4.card-title, etc.) needs it
+// zeroed.
+.card-title {
+  margin-bottom: 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.p-card {
+  padding: $card-spacer-y $card-spacer-x;
+}
+
+// Card padding for list-group-flush, which appears within cards generally.
+.list-group-flush .list-group-item {
+  @extend .p-card;
+}
+
+.list-group-item.none-yet {
+  display: none;
+
+  &:only-child {
+    display: block;
+  }
+}

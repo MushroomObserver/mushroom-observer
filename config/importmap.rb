@@ -8,8 +8,8 @@
 # (which is for React and similar), or else `$` will not be available globally
 pin "jquery", preload: true # @3.7.1
 
-pin "bootstrap", to: "bootstrap.min.js", preload: true
-# pin "bootstrap" # @3.4.1
+pin "bootstrap", preload: true # @4.6.2
+pin "popper.js" # @1.16.1
 
 pin "application", preload: true
 pin "@rails/request.js", to: "requestjs.js", preload: true

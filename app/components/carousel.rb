@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Bootstrap-3 carousel primitive — the bare skeleton (`<div class="carousel
+# Bootstrap 4 carousel primitive — the bare skeleton (`<div class="carousel
 # slide">` + `<div class="carousel-inner">` + optional controls + optional
 # indicator strip) every carousel-shaped component in MO composes.
 # Items + thumbnails are registered via `c.item(...) { … }` /
@@ -14,7 +14,7 @@
 #   (show-page IMAGES section).
 # - `Components::Form::UploadGallery` — editable image-upload carousel
 #   for the observation form.
-# - `Components::Matrix::Carousel` — per-matrix-box mini-carousel, not
+# - `Components::Grid::Box::Carousel` — per-grid-box mini-carousel, not
 #   yet consumed by the obs-index (see that class for details).
 #
 # @example
@@ -40,12 +40,6 @@ class Components::Carousel < Components::Base
   prop :indicators_class_extra, ::String, default: ""
   prop :show_controls, _Boolean, default: true
   prop :show_indicators, _Boolean, default: true
-  # Wraps the controls strip in a div with this class.
-  # `Form::UploadGallery` puts the prev/next arrows inside a
-  # `.carousel-control-wrap.row` outside `.carousel-inner`; default
-  # nil renders the controls inline as `ImageGallery` and the
-  # matrix-box caller do.
-  prop :controls_wrap_class, _Nilable(::String), default: nil
   # Arbitrary `data-*` attributes merged onto the outer `<div>` (after
   # the always-emitted `data-ride="false"` / `data-interval="false"`).
   # Keys are symbols (Phlex/Rails dasherizes them — `:form_images_target`
@@ -62,7 +56,7 @@ class Components::Carousel < Components::Base
   # Register a slide. `class:` / `id:` / arbitrary attrs flow onto the
   # wrapping `<div class="item …">` (mirroring `ListGroup#item`).
   # `active: true` overrides the default first-slide-active behavior
-  # (`Matrix::Carousel` uses this to active the slide matching its
+  # (`Grid::Box::Carousel` uses this to active the slide matching its
   # `top_img`); when no slide is marked active, the first one gets it.
   #
   # @return [nil] so the call doesn't accidentally emit anything
@@ -96,18 +90,24 @@ class Components::Carousel < Components::Base
         class: class_names("carousel slide", @wrapper_class),
         data: { ride: "false", interval: "false", **@extra_data }) do
       render_inner
+      render_controls if @show_controls
       render_indicators if @show_indicators
     end
   end
 
   private
 
+  # Siblings of .carousel-inner, not children of it -- matches
+  # Bootstrap 4's carousel markup
+  # (https://getbootstrap.com/docs/4.6/components/carousel/), where
+  # .carousel-control-prev/-next position via `.carousel`'s
+  # `position: relative`, not a wrapping element inside
+  # .carousel-inner.
   def render_inner
     div(id: @inner_id,
-        class: class_names("carousel-inner bg-light", @inner_class_extra),
+        class: class_names("carousel-inner bg-card", @inner_class_extra),
         role: "listbox") do
       @slides.each_with_index { |slide, i| render_slide(slide, i) }
-      render_controls if @show_controls
     end
   end
 
@@ -145,7 +145,7 @@ class Components::Carousel < Components::Base
   def render_indicators
     ol(id: @indicators_id,
        class: class_names(
-         "carousel-indicators panel-footer py-2 px-0 mb-0",
+         "carousel-indicators card-footer py-2 px-0 mb-0",
          @indicators_class_extra
        )) do
       @thumbs.each_with_index { |thumb, i| render_thumb(thumb, i) }
@@ -153,14 +153,6 @@ class Components::Carousel < Components::Base
   end
 
   def render_controls
-    if @controls_wrap_class
-      Row(class: @controls_wrap_class) { render_controls_inner }
-    else
-      render_controls_inner
-    end
-  end
-
-  def render_controls_inner
     render(Components::Carousel::Controls.new(carousel_id: @carousel_id))
   end
 end

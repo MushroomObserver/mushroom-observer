@@ -17,7 +17,9 @@ class Views::Layouts::TopNav::UserNav < Views::Base
     Dropdown(
       id: "user_nav_toggle",
       menu_id: "user_drop_down",
-      label: @user.login
+      label: @user.login,
+      wrapper_class: "ml-2",
+      menu_class: "dropdown-menu-right"
     ) do |menu|
       menu.section(::Tab::UserNav::LoggedIn.new(user: @user))
       menu.section(::Tab::UserNav::LogOut.new(

@@ -5,10 +5,10 @@ require("test_helper")
 # `Components::Dropdown` is exercised in production via several
 # consumers (`Views::Layouts::Header::Sorter`,
 # `Views::Layouts::TopNav::ContextNav`, etc.); their tests
-# indirectly cover the Bootstrap-3 dropdown chrome and the
-# `Tab::Collection` / `Array` section shapes. This file focuses on
-# the two branches in `#normalize_section` that those consumer
-# tests don't reach: the `Tab::Base` case and the catch-all `else`.
+# indirectly cover the dropdown chrome and the `Tab::Collection` /
+# `Array` section shapes. This file focuses on the two branches in
+# `#normalize_section` that those consumer tests don't reach: the
+# `Tab::Base` case and the catch-all `else`.
 class DropdownTest < ComponentTestCase
   def setup
     super
@@ -101,6 +101,37 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "[data-tooltip-target='tip']")
     assert_no_html(html, "[data-title]")
     assert_no_html(html, "[data-placement]")
+  end
+
+  def test_multiple_sections_separated_by_dropdown_divider
+    html = render_dropdown(id: "multi_toggle", menu_id: "multi_menu") do |menu|
+      menu.section(Tab::Project::Summary.new(project: @project))
+      menu.section(Tab::Project::Summary.new(project: @project))
+    end
+
+    assert_html(html, "ul.dropdown-menu li.dropdown-divider")
+  end
+
+  # `element:` controls the outer wrapper tag -- `:li` by default
+  # (correct inside a `<ul>`-based nav), `:div` for a caller placing
+  # the dropdown outside a list (Views::Layouts::Header::Sorter).
+  def test_element_prop_controls_outer_wrapper
+    html = render_dropdown(id: "li_toggle", menu_id: "li_menu") do |menu|
+      menu.section(Tab::Project::Summary.new(project: @project))
+    end
+
+    assert_html(html, "li.dropdown")
+    assert_no_html(html, "div.dropdown")
+
+    html = render(
+      Components::Dropdown.new(id: "div_toggle", menu_id: "div_menu",
+                               label: "Menu", element: :div)
+    ) do |menu|
+      menu.section(Tab::Project::Summary.new(project: @project))
+    end
+
+    assert_html(html, "div.dropdown")
+    assert_no_html(html, "li.dropdown")
   end
 
   # Sections that are `nil` (or any unrecognized type) normalize to

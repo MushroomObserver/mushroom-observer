@@ -108,7 +108,7 @@ module Views::Layouts
     def render_page_link(direction, disabled:)
       page = instance_variable_get(:"@#{direction}_page")
       classes = class_names(
-        Components::Navbar::LINK_CLASSES, "#{direction}_page_link",
+        "px-2", "#{direction}_page_link",
         ("disabled opacity-0" if disabled)
       )
       url = pagination_link_url(page)

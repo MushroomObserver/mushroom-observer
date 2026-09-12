@@ -49,7 +49,7 @@
       // (shrink-wrapped, centered by the text-align above) so it
       // doesn't stretch full-width along with the positioning box.
       .caption-content {
-        @extend .bg-legible, .py-2;
+        @extend .bg-legible, .py-1;
         display: inline-block;
       }
 
@@ -91,25 +91,26 @@
   }
 }
 
-.carousel-control {
+// Direct children of .carousel (siblings of .carousel-inner),
+// positioned via .carousel's `position: relative` -- no wrapping
+// element. Matches Bootstrap 4's carousel markup and its
+// .carousel-control-prev/-next selector pair:
+// https://getbootstrap.com/docs/4.6/components/carousel/
+.carousel-control-prev,
+.carousel-control-next {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   margin-top: 5rem; // to let overlays through
   margin-bottom: 5rem; // fullscreen and caption/voting
+  border: 0;
   background: none !important;
-  font-size: 2rem;
+  font-size: 1.25rem;
   color: $white;
   opacity: 0.75;
 
-  .btn {
-    font-size: inherit;
-    &:hover,
-    &:focus {
-      color: inherit;
-    }
-  }
-
   &:hover,
   &:focus {
-    // color: rgba($white, 1);
     opacity: 1;
   }
 
@@ -117,7 +118,7 @@
   // Keep constant on hover -- a filter change here would move the
   // absolutely-positioned chevron below (new containing block).
   .mo-icon {
-    filter: drop-shadow($carousel-text-shadow);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6));
   }
 
   // Replaces Bootstrap's .glyphicon-chevron-left/-right centering,
@@ -141,21 +142,41 @@
   }
 }
 
-// Bootstrap's own .carousel-control scales its glyph 1.5x here
-// ($carousel-control-font-size 20px -> 30px). .mo-icon inherits
-// .carousel-control's font-size (via .btn { font-size: inherit }
-// above) and sizes itself in em, so bumping font-size here scales
-// the icon the same way without a separate .mo-icon override.
-@media screen and (min-width: $screen-sm-min) {
-  .carousel-control {
-    font-size: 3rem;
+.carousel-control-prev {
+  left: 0;
+}
+
+.carousel-control-next {
+  right: 0;
+}
+
+// The indicator strip is a sibling of .carousel-inner, below it in
+// normal flow -- without this, the controls' bottom:0 spans the
+// photo + indicators combined, centering the icon over both instead
+// of just the photo. 6vw + 1rem matches .carousel-indicators li's
+// height plus its .py-2 padding.
+// .image-form-carousel is excluded -- its controls use a separate
+// top/bottom band (below) unrelated to indicator height.
+.carousel:not(.image-form-carousel):has(.carousel-indicators) {
+  .carousel-control-prev,
+  .carousel-control-next {
+    bottom: calc(6vw + 1rem);
+  }
+}
+
+// .mo-icon sizes itself in em, so bumping font-size here scales the
+// icon the same way without a separate .mo-icon override.
+@media screen and (min-width: breakpoint-min(md)) {
+  .carousel-control-prev,
+  .carousel-control-next {
+    font-size: 1.875rem;
   }
 }
 
 .carousel-heading {
-  // border-top: 1px solid $panel-inner-border;
-  border-bottom: 1px solid $panel-inner-border;
-  background-color: $panel-default-heading-bg;
+  // border-top: 1px solid $card-border-color;
+  border-bottom: 1px solid $card-border-color;
+  background-color: $card-cap-bg;
 }
 
 .carousel-indicators {
@@ -192,7 +213,7 @@
 .image-form-carousel {
   // padding-bottom: 100%;
 
-  // @media screen and (min-width: $screen-sm-min) {
+  // @media screen and (min-width: breakpoint-min(md)) {
   //   padding-bottom: 50%;
   // }
 
@@ -204,7 +225,8 @@
     // &:not(:has(.item)) {
     //   display: none;
 
-    //   .carousel-control-wrap {
+    //   .carousel-control-prev,
+    //   .carousel-control-next {
     //     display: none;
     //   }
     // }
@@ -213,12 +235,12 @@
   .image-position {
     position: relative;
     padding-bottom: 100%;
-    border-bottom: 1px solid $panel-inner-border;
+    border-bottom: 1px solid $card-border-color;
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: breakpoint-min(lg)) {
       // padding-bottom: 50%;
       border-bottom: none;
-      border-right: 1px solid $panel-inner-border;
+      border-right: 1px solid $card-border-color;
     }
   }
 
@@ -247,24 +269,28 @@
     // reflection note) wraps instead of overflowing and being clipped.
     white-space: normal;
 
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: breakpoint-min(lg)) {
       padding-top: 4.5rem;
       padding-right: 1.5rem;
     }
   }
 
-  // This keeps the carousel controls on top of the image, not the form
-  .carousel-control-wrap {
-    position: absolute;
+  // Keeps the controls over the image, not the form panel below it
+  // (mobile) / beside it (lg) -- .carousel-inner stacks the image
+  // above the form panel on mobile, side-by-side at lg.
+  .carousel-control-prev,
+  .carousel-control-next {
     top: 6rem;
     bottom: calc(50% - 6rem);
-    left: 0;
-    width: 100%;
-    padding-bottom: calc(50% - 12rem);
 
-    @media screen and (min-width: $screen-md-min) {
-      width: 50%;
+    @media screen and (min-width: breakpoint-min(lg)) {
       bottom: 6rem;
+    }
+  }
+
+  .carousel-control-next {
+    @media screen and (min-width: breakpoint-min(lg)) {
+      right: 50%;
     }
   }
 

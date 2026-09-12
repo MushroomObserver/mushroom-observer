@@ -48,7 +48,7 @@ class TextFieldTest < ComponentTestCase
     end
 
     assert_includes(form, "input-group")
-    assert_includes(form, "input-group-btn")
+    assert_includes(form, "input-group-append")
     assert_includes(form, "Go")
   end
 

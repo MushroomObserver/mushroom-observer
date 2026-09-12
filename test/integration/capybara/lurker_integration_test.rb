@@ -12,7 +12,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     visit("/activity_logs")
     rss_log = RssLog.where.not(observation_id: nil).reorder(:updated_at).last
     # For RSS logs with observation targets, the box ID is the observation ID
-    assert_selector("#box_#{rss_log.observation_id} .badge-md",
+    assert_selector("#box_#{rss_log.observation_id} .badge",
                     text: rss_log.observation_id)
 
     # This is a bad test.  It doesn't handle adding new observations
@@ -22,13 +22,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Search for "lurker issue: in the rss_log fixtures.
 
     # Click on first obs immediately after one that has images.
-    # NOTE: BS3 matrix-box are a bit harder to find siblings
-    # because the layout clearfix boxes interrupt the matrix boxes.
-    # This selects next matching peer, but you can do adjacent in bs4
-    # (do + instead of ~)
-    first(".image-link").ancestor(".matrix-box~.matrix-box").
-      first(".rss-detail", text: "Observation Created").
-      ancestor(".panel").first(".rss-box-details").first("a").click
+    first(".image-link").ancestor(".grid-box+.grid-box").
+      first(".log-detail", text: "Observation Created").
+      ancestor(".card").first(".log-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
@@ -247,9 +243,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     within("#identify_filter") { click_button("Search") }
     assert_selector("#filters", text: /#{:query_needs_naming.l}/)
     assert_selector("#filters", text: /#{:query_region.l}/)
-    # Note that .rss-where now gets both postal and scientific addresses as a
+    # Note that .log-where now gets both postal and scientific addresses as a
     # single mashed up string, because they're shown/hidden by css.
-    where_ats = find_all(".rss-where .location-postal").map(&:text)
+    where_ats = find_all(".log-where .location-postal").map(&:text)
     assert(where_ats.all? { |wa| wa.match(place) },
            "Expected only obs from #{place}" \
            "Found these: #{where_ats.inspect}")

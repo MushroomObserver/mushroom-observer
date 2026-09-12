@@ -6,7 +6,8 @@ class ButtonNewTest < ComponentTestCase
   def test_target_renders_btn_default_framing
     html = render_new(target: routes.new_herbarium_path)
 
-    assert_html(html, "a.btn.btn-default[href='#{routes.new_herbarium_path}']")
+    assert_html(html,
+                "a.btn.btn-secondary[href='#{routes.new_herbarium_path}']")
   end
 
   def test_variant_overrides_default_framing

@@ -65,13 +65,13 @@ class Components::Modal < Components::Base
 
   prop :id, String
   prop :title, _Nilable(String), default: nil
-  # Bootstrap modal-dialog size variants: "modal-dialog",
-  # "modal-dialog modal-lg", "modal-dialog modal-sm".
-  prop :dialog_class, String, default: "modal-dialog"
+  # Bootstrap modal-dialog size variant.
+  SIZES = [:sm, :lg].freeze
+  prop :size, _Nilable(_Union(*SIZES)), default: nil
   # When `true`, the modal is shown immediately on page load
   # (server-rendered for a redirect-like response, e.g.
   # `OccurrenceResolveModal`'s auto-open pattern). Adds the
-  # backdrop, the `fade in` class, and the `display: block` style.
+  # backdrop, the `fade show` class, and the `display: block` style.
   prop :auto_open, _Boolean, default: false
   prop :user, _Nilable(User), default: nil
   # Extra CSS class(es) appended to the modal root, e.g. `modal-form`
@@ -145,7 +145,7 @@ class Components::Modal < Components::Base
         style: (@auto_open ? "display: block;" : nil),
         aria: { labelledby: resolved_title_id },
         data: modal_data) do
-      div(class: @dialog_class, role: "document") do
+      div(class: dialog_class, role: "document") do
         div(class: "modal-content") do
           render_header if @header
           render_content
@@ -157,15 +157,19 @@ class Components::Modal < Components::Base
   private
 
   def render_backdrop
-    div(class: "modal-backdrop fade in")
+    div(class: "modal-backdrop fade show")
   end
 
   def modal_class
     classes = ["modal"]
-    classes << "fade in" if @auto_open
+    classes << "fade show" if @auto_open
     classes << "fade" unless @auto_open
     classes << @extra_class if @extra_class.present?
     classes.join(" ")
+  end
+
+  def dialog_class
+    class_names("modal-dialog modal-dialog-centered", @size && "modal-#{@size}")
   end
 
   def modal_data
@@ -182,9 +186,12 @@ class Components::Modal < Components::Base
     @body_id || "#{@id}_body"
   end
 
+  # Title before the close button: .modal-header is a flex container
+  # (justify-content: space-between), which spaces DOM children apart
+  # without reordering them -- the title has to come first in markup
+  # to land on the left.
   def render_header
     div(class: "modal-header") do
-      close_button
       h4(class: "modal-title", id: resolved_title_id) do
         if title_content_slot
           render(title_content_slot)
@@ -196,6 +203,7 @@ class Components::Modal < Components::Base
           trusted_html(@title)
         end
       end
+      close_button
     end
   end
 

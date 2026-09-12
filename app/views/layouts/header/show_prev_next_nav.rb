@@ -4,10 +4,13 @@
 # `content_for(:prev_next_object)` by
 # `Header::ShowPrevNextHelper#add_pager_for`. Renders nothing when
 # either prop is nil — the helper already gates on the same.
+#
+# Wraps the button group in a `<nav aria-label="...">` landmark --
+# the only navigation landmark inside `Header::PageTitle`'s title
+# strip (`show_title_nav`/`show_object_nav` are plain `<div>`s).
 module Views::Layouts
   class Header::ShowPrevNextNav < Views::Base
-    BTN_CLASSES = (Components::Navbar::LINK_CLASSES +
-                   [Components::Navbar::LEFT_CLASS]).freeze
+    BTN_CLASSES = ["px-0"].freeze
 
     prop :object, _Nilable(::AbstractModel), default: nil
     prop :query, _Nilable(::Query), default: nil
@@ -15,10 +18,12 @@ module Views::Layouts
     def view_template
       return unless @object && @query
 
-      ul(class: "nav flex-bar object_pager") do
-        li { render_adjacent_link(:prev) }
-        li { render_index_link }
-        li { render_adjacent_link(:next) }
+      nav(aria: { label: :app_object_pager_label.l }) do
+        ButtonGroup(class: "object_pager") do
+          render_adjacent_link(:prev)
+          render_index_link
+          render_adjacent_link(:next)
+        end
       end
     end
 

@@ -5,6 +5,7 @@
 .sidebar-nav {
   border-width: 1px;
   border-style: solid;
+  border-color: $LEFT_BAR_BORDER_COLOR;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-bottom-left-radius: 5px;
@@ -37,33 +38,33 @@
     &:hover a.dropdown-toggle,
     &:focus a.dropdown-toggle,
     a.dropdown-toggle:hover {
-      color: $navbar-inverse-link-hover-color;
-      background-color: $navbar-inverse-link-hover-bg;
+      color: $LEFT_BAR_HOVER_TEXT_COLOR;
+      background-color: $LEFT_BAR_HOVER_BG_COLOR;
     }
 
     // These are the headers
     &.disabled,
     &.disabled:hover,
     &.disabled:focus {
-      color: $navbar-inverse-link-disabled-color;
-      background-color: $navbar-inverse-link-disabled-bg;
+      color: $LEFT_BAR_HEADER_TEXT_COLOR;
+      background-color: $LEFT_BAR_HEADER_BG_COLOR;
       cursor: default;
       padding-left: 5px;
     }
 
     &#nav_bug_report_link {
-      color: $navbar-inverse-link-disabled-color;
+      color: $LEFT_BAR_HEADER_TEXT_COLOR;
       &:hover,
       &:focus {
-        color: $navbar-inverse-link-color;
+        color: $LEFT_BAR_TEXT_COLOR;
       }
     }
   }
 
   .list-group-item,
   a.dropdown-toggle {
-    color: $navbar-inverse-link-color;
-    background-color: $navbar-inverse-bg;
+    color: $LEFT_BAR_TEXT_COLOR;
+    background-color: $LEFT_BAR_BG_COLOR;
   }
 }
 
@@ -77,14 +78,14 @@
 }
 
 // The language collapse's rows use the plain (light) list-group
-// palette rather than the sidebar's own dark `$navbar-inverse-*`
-// theme colors — reads as a "panel" island against the dark nav,
-// and stays correct across theme switches since these Bootstrap
-// defaults aren't remapped to any of MO's theme variables the way
-// `$navbar-inverse-bg` is. ID selector wins over `.sidebar-nav
+// palette rather than the sidebar's dark `$LEFT_BAR_*` theme colors
+// — reads as a "panel" island against the dark nav, and stays
+// correct across theme switches since these Bootstrap defaults
+// aren't remapped to any of MO's theme variables the way
+// `$LEFT_BAR_BG_COLOR` is. ID selector wins over `.sidebar-nav
 // .list-group-item`'s specificity without needing `!important`.
 #language_dropdown_collapse .list-group-item {
-  color: $panel-default-text;
+  color: $card-color;
   background-color: $list-group-bg;
 
   // `$list-group-hover-bg` maps to the same theme variable as
@@ -93,7 +94,7 @@
   // darken the base color directly instead.
   &:hover,
   &:focus {
-    color: $panel-default-text;
+    color: $card-color;
     background-color: darken($list-group-bg, 5%);
   }
 }

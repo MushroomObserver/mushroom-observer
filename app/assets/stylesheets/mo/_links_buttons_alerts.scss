@@ -23,14 +23,14 @@
 .btn-outline-default {
   color: $input-color;
   background-color: $input-bg;
-  border-color: $input-border;
+  border-color: $input-border-color;
 
   &:hover,
   &:focus,
   &.focus {
     color: $input-color;
     background-color: darken($input-bg, 5%);
-    border-color: darken($input-border, 10%);
+    border-color: darken($input-border-color, 10%);
     text-decoration: none;
   }
 
@@ -38,7 +38,7 @@
   &.active {
     color: $input-color;
     background-color: darken($input-bg, 10%);
-    border-color: darken($input-border, 12%);
+    border-color: darken($input-border-color, 12%);
     background-image: none;
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
@@ -51,6 +51,33 @@
     color: $input-color;
     opacity: 1;
     cursor: not-allowed;
+  }
+}
+
+// $success is too light for white text/icons on a solid button
+// background -- $btn-success-bg (mo/_map_theme_to_bootstrap4.scss)
+// is a darker green, keeping $success itself unchanged for alerts,
+// badges, and form-feedback text.
+.btn-success {
+  color: $white;
+  background-color: $btn-success-bg;
+  border-color: $btn-success-bg;
+
+  &:hover,
+  &:focus,
+  &.focus {
+    color: $white;
+    background-color: darken($btn-success-bg, 7.5%);
+    border-color: darken($btn-success-bg, 10%);
+  }
+
+  &:active,
+  &.active {
+    color: $white;
+    background-color: darken($btn-success-bg, 10%);
+    border-color: darken($btn-success-bg, 12.5%);
+    background-image: none;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
 }
 
@@ -153,47 +180,11 @@ form.button_to {
   }
 }
 
-// BS3's .input-group is table/table-cell layout, which doesn't
-// stretch an icon-bearing flex .btn (.btn:has(.mo-icon), _icons.scss)
-// to match its cell's height. Switched to flex, mirroring BS4's fix,
-// same approach as the .btn-group supplement above.
-//
-// .navbar-form .input-group needs the override too: BS3's
-// `@media (min-width: 768px)` rule sets display: inline-table there,
-// out-specifying a bare .input-group rule -- desktop-only, hence
-// this breaking on desktop widths but not mobile.
-.input-group,
-.navbar-form .input-group {
-  display: flex;
-  align-items: stretch;
-
-  > .form-control {
-    flex: 1 1 auto;
-    // min-width: 0 lets it shrink below its content width when a
-    // sibling addon needs the room.
-    min-width: 0;
-  }
-
-  > .input-group-addon,
-  > .input-group-btn {
-    // BS3's width: 1% relies on table shrink-to-content sizing; under
-    // flex that's a literal 1%, overflowing the box. Back to
-    // content-driven sizing.
-    flex: 0 0 auto;
-    width: auto;
-    display: flex;
-    // stretch, not center -- a .btn child (e.g. the pagination goto
-    // icon) needs to fill this span's full height, confirmed
-    // empirically short by ~2px with center.
-    align-items: stretch;
-
-    > .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-}
+// BS4's .input-group/.input-group-append/.input-group-prepend
+// (bootstrap/_input-group.scss) handle flex + stretch already --
+// `Components::InputGroup::Addon` emits those classes directly, so no
+// supplement is needed here (unlike .btn-group above, which has no
+// BS4-native flex fix for a form-wrapped button).
 
 // badges
 
@@ -201,9 +192,10 @@ form.button_to {
 // of the .badge-* sizes below.
 .badge-id {
   font-weight: normal;
+  letter-spacing: 0.021rem;
   background-color: transparent;
-  color: $text-color;
-  border: 1px solid $text-color;
+  color: $body-color;
+  border: 1px solid $body-color;
   border-radius: 3px;
   flex-shrink: 0;
   // align-self: self-start;
@@ -221,18 +213,18 @@ form.button_to {
 
   // rss-feed-style contexts (matrix box title, list rows).
   &.badge-md {
-    font-size: 80% !important;
+    font-size: 81% !important;
   }
 
   // Sitting next to a large page-title heading.
   &.badge-sm {
-    font-size: 60% !important;
+    font-size: 72% !important;
   }
 
   // Accordion triggers stay "hovered" while their pane is open.
   // Scoped to [data-toggle="collapse"] so plain badges don't match.
   &[data-toggle="collapse"]:not(.collapsed) {
-    background-color: $text-color;
+    background-color: $body-color;
     color: $body-bg;
   }
 }
@@ -240,7 +232,7 @@ form.button_to {
 // Only the button form hovers -- not the static span form.
 // button& isn't valid Sass, so this stays a standalone rule.
 button.badge-id:hover {
-  background-color: $text-color;
+  background-color: $body-color;
   color: $body-bg;
 }
 
@@ -251,9 +243,8 @@ button.badge-id:hover {
 }
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
-// vertical-align: middle avoids stretching the line for a text
-// descender the icon doesn't have. mo-icon's usual top offset and
-// 1.12em size are tuned for looser contexts -- undone/shrunk here.
+// mo-icon's usual top offset and 1.12em size are tuned for looser
+// contexts -- undone/shrunk here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -261,7 +252,6 @@ button.badge-id:hover {
   line-height: 1;
   background-color: transparent;
   text-decoration: none;
-  vertical-align: middle;
 
   &:hover {
     text-decoration: none;
@@ -291,16 +281,37 @@ button.badge-id:hover {
   }
 }
 
+// Translucent backgrounds (matching .badge-warning's treatment) for
+// the four levels Components::Alert supports, instead of Bootstrap's
+// default bg/border/text mix -- a mix toward white/black doesn't
+// track a dark theme's page background, and at $alert-bg-level: 0
+// (mo/_map_theme_to_bootstrap4.scss) bg/border/text were all the
+// same color.
+$alert-variant-colors: (
+  success: $success,
+  info:    $info,
+  warning: $warning,
+  danger:  $danger
+);
+
+@each $name, $color in $alert-variant-colors {
+  .alert-#{$name} {
+    background-color: rgba($color, 0.15);
+    border-color: rgba($color, 0.4);
+    color: $body-color;
+  }
+}
+
 // Responsive message text, kept separate from .message-banner's
 // layout classes.
 .banner-message {
   font-size: 1em;
 
-  @media screen and (min-width: $screen-sm-min) {
+  @media screen and (min-width: breakpoint-min(md)) {
     font-size: 1.2em;
   }
 
-  @media screen and (min-width: $screen-md-min) {
+  @media screen and (min-width: breakpoint-min(lg)) {
     font-size: 1.5em;
   }
 }
@@ -325,9 +336,9 @@ button:disabled {
 }
 
 .nav-tabs .nav-link {
-  color: $navbar-inverse-link-color;
+  color: $LEFT_BAR_TEXT_COLOR;
   font-size: 125%;
-  background-color: $navbar-inverse-bg;
+  background-color: $LEFT_BAR_BG_COLOR;
   border: 1px solid #dee2e6;
 }
 
@@ -338,8 +349,8 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning {
-  color: $alert-warning-text;
-  background-color: $alert-warning-bg;
+  color: $body-color;
+  background-color: rgba($warning, 0.2);
 }
 
 .nav-tabs .nav-link.text-warning:hover {
@@ -347,6 +358,6 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning.active {
-  color: $alert-warning-text;
+  color: $body-color;
   border-color: #ffc107 #ffc107 #fff;
 }

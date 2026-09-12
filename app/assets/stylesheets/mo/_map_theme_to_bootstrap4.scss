@@ -2,22 +2,17 @@
 // BOOTSTRAP 4 THEME VARIABLE MAPPING
 // ==================================================
 //
-// FUTURE USE: This file will be used during Bootstrap 4 migration
-// (Phase 3 of the comprehensive modernization plan, weeks 8-11).
-//
-// This file maps MO's standardized theme variables to Bootstrap 4's
-// variable system. It should be imported AFTER theme variables but
-// BEFORE Bootstrap 4 itself.
+// Imported from mushroom_observer.scss, between the theme variable
+// file and `@import "bootstrap"` (issue #5348). Maps MO's
+// standardized theme variables to Bootstrap 4's variable system.
 //
 // Import order:
 //   1. app/assets/stylesheets/variables/{theme}.scss
 //   2. app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss  (this file)
-//   3. bootstrap (from gem or node_modules)
+//   3. bootstrap (gem)
 //
-// NOTE: This file contains NO hardcoded values. All values come from
+// NOTE: This file contains NO hardcoded colors. All colors come from
 // theme variables defined in app/assets/stylesheets/variables/
-//
-// See: doc/Bootstrap Upgrade Plan for MO.md
 //
 // ==================================================
 
@@ -38,6 +33,14 @@ $warning:    $WARNING_COLOR !default;
 $danger:     $DANGER_COLOR !default;
 $light:      $LIGHT_COLOR !default;
 $dark:       $DARK_COLOR !default;
+
+// $success is a light green -- fine for alerts (a translucent tint
+// under $body-color text) and form-feedback text, but too light for
+// white text/icons on a solid `.btn-success` background. Darkened
+// separately here so those other consumers of $success keep their
+// colors unchanged; see `mo/_links_buttons_alerts.scss` for the
+// override.
+$btn-success-bg: scale-color($success, $lightness: -38%) !default;
 
 // Bootstrap 4 uses a theme-colors map for generating variants
 // This creates .btn-primary, .btn-success, .alert-warning, etc.
@@ -63,10 +66,34 @@ $theme-colors: (
 $white:    #fff !default;
 $black:    #000 !default;
 
-// Use theme colors for grays where applicable
-$gray-100: $LIGHT_COLOR !default;
-$gray-600: $SECONDARY_COLOR !default;
-$gray-900: $DARK_COLOR !default;
+// MO's widest layout tier is wider than Bootstrap's stock $xl
+// (1200px) -- everything else stays at Bootstrap's default.
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1320px
+) !default;
+
+// $BODY_TEXT_COLOR/$BODY_BG_COLOR (not $LIGHT_COLOR/$DARK_COLOR)
+// already resolve light/dark per theme -- see color_derivation.scss --
+// so gray-900 (BS4's high-contrast-text extreme) and gray-100 (its
+// near-background extreme) don't need a per-theme conditional here.
+// A dark theme like Amanita gets this right automatically: its
+// $BODY_TEXT_COLOR is light, so $gray-900 ends up light there too,
+// matching the role BS4 components expect from the darkest step.
+$gray-100: $BODY_BG_COLOR !default;
+$gray-600: muted_text() !default;
+$gray-900: $BODY_TEXT_COLOR !default;
+
+// `color-yiq()` picks text color per arbitrary button background --
+// left at defaults ($gray-900/$white) it inherits $gray-900's remap
+// above, which is light in Amanita, so light-bg buttons got light
+// text. $DARK_COLOR/$LIGHT_COLOR stay dark/light regardless of which
+// plays "text" vs. "background" for the theme.
+$yiq-text-dark:  $DARK_COLOR !default;
+$yiq-text-light: $LIGHT_COLOR !default;
 
 // ==================================================
 // SECTION 3: TYPOGRAPHY
@@ -83,10 +110,14 @@ $link-hover-color:      $LINK_HOVER_TEXT_COLOR !default;
 $link-decoration:       none !default;
 $link-hover-decoration: underline !default;
 
-// Font settings
-$font-family-sans-serif: Verdana, Arial, Helvetica, sans-serif !default;
-$font-family-base:       $font-family-sans-serif !default;
-$font-size-base:         0.8125rem !default;  // 13px at 16px root
+// Font settings -- family left at Bootstrap's stock
+// $font-family-sans-serif default (a system-font stack), not pinned
+// to a specific typeface list.
+$font-size-base:         0.875rem !default;  // 14px at 16px root
+// Bootstrap 4's stock default is 1.5; matches Bootstrap 3's old
+// default (20px/14px) instead, which is what MO's typography was
+// built against.
+$line-height-base:       1.428571429 !default;
 
 // Headings
 $headings-color: $BODY_TEXT_COLOR !default;
@@ -98,9 +129,15 @@ $headings-color: $BODY_TEXT_COLOR !default;
 // Bootstrap 4 uses a consistent spacing scale and border settings
 //
 
-$border-radius:    5px !default;
-$border-radius-sm: 5px !default;
-$border-radius-lg: 5px !default;
+$border-radius:    0.3125rem !default;
+$border-radius-sm: 0.3125rem !default;
+$border-radius-lg: 0.3125rem !default;
+
+// mo/_grid_box.scss reads this directly too.
+$grid-gutter-width: 24px !default;
+
+// Bootstrap 4's name for this; bootstrap-sass does not read it.
+$border-color: $PANEL_BORDER_COLOR !default;
 
 // ==================================================
 // SECTION 5: BUTTONS
@@ -111,15 +148,17 @@ $border-radius-lg: 5px !default;
 //
 
 $btn-font-weight:     bold !default;
-$btn-border-radius:   5px !default;
+$btn-border-radius:   0.3125rem !default;
 
-// Default/secondary button uses our standard button colors
-$btn-padding-y:       0.3125rem !default;  // ~5px
-$btn-padding-x:       0.625rem !default;   // ~10px
+// Button padding intentionally left at BS4's default
+// ($input-btn-padding-x/-y, shared with $input-padding-x/-y) so a
+// button and a form-control/input-group render the same height --
+// see Header::Sorter's dropdown toggle vs. IndexPaginationNav's goto
+// input-group, which need to line up in the same row.
 
-// Link buttons
-$btn-link-color:           $LINK_TEXT_COLOR !default;
-$btn-link-hover-color:     $LINK_HOVER_TEXT_COLOR !default;
+// `.btn-link` reads `$link-color`/`$link-hover-color` directly (set
+// in Section 3 above) -- BS4 has no separate $btn-link-color/
+// $btn-link-hover-color, unlike bootstrap-sass.
 $btn-link-disabled-color:  mix($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, 75%) !default;
 
 // Active/focus states
@@ -137,7 +176,7 @@ $input-bg:                 $INPUT_BG_COLOR !default;
 $input-color:              $INPUT_TEXT_COLOR !default;
 $input-border-color:       $INPUT_BORDER_COLOR !default;
 $input-border-width:       1px !default;
-$input-border-radius:      5px !default;
+$input-border-radius:      0.3125rem !default;
 
 $input-focus-border-color: $PRIMARY_COLOR !default;
 $input-focus-box-shadow:   none !default;
@@ -225,12 +264,13 @@ $table-head-color: $LIST_HEADER_TEXT_COLOR !default;
 //
 
 $alert-border-width:  2px !default;
-$alert-border-radius: 5px !default;
+$alert-border-radius: 0.3125rem !default;
 
-// Alert colors use our theme's alert variables
-$alert-bg-level:     0 !default;  // Don't darken backgrounds
-$alert-border-level: 0 !default;  // Don't darken borders
-$alert-color-level:  0 !default;  // Don't darken text
+// `.alert-success`/`.alert-info`/`.alert-warning`/`.alert-danger` get
+// translucent backgrounds instead of Bootstrap's default bg/border/
+// text mix -- see `mo/_links_buttons_alerts.scss`. `$alert-*-level`
+// stays at Bootstrap's defaults so any other generated variant
+// (`.alert-primary`, etc.) stays legible.
 
 // ==================================================
 // SECTION 12: MODALS
@@ -297,8 +337,16 @@ $list-group-action-hover-color: $LINK_HOVER_TEXT_COLOR !default;
 
 $card-bg:           $LIST_BG_COLOR !default;
 $card-border-color: $LIST_BORDER_COLOR !default;
+$card-color:        $PANEL_TEXT_COLOR !default;
 
-$card-cap-bg: darken($LIST_BG_COLOR, 3%) !default;
+// A visible step between the card and the page it sits on, not a
+// small darken of the card's color.
+$card-cap-bg: mix($LIST_BG_COLOR, $BODY_BG_COLOR, 50%) !default;
+
+// bootstrap-sass's panel used 12px (0.75rem) all around. BS4's stock
+// $card-spacer-y already matches; only the wider horizontal default
+// (1.25rem) needs narrowing.
+$card-spacer-x: 0.75rem !default;
 
 // ==================================================
 // SECTION 17: MISCELLANEOUS COMPONENTS
@@ -306,10 +354,6 @@ $card-cap-bg: darken($LIST_BG_COLOR, 3%) !default;
 
 // Horizontal rule
 $hr-border-color: $LIST_BORDER_COLOR !default;
-
-// Wells (deprecated in BS4, but keep for reference)
-// Note: Wells don't exist in Bootstrap 4, but bg-light utility can be used
-// $well-bg would map to a custom .well class if needed
 
 // Close button (X in modals, alerts, etc.)
 $close-color: $BODY_TEXT_COLOR !default;

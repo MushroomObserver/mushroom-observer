@@ -39,7 +39,7 @@ class LiveDataFilterFormTest < ComponentTestCase
     html = render_filter_form(page: 1, total_pages: 5)
 
     # Prev button has opacity-0 class (hidden)
-    assert_includes(html, 'class="btn btn-default btn-sm opacity-0"')
+    assert_includes(html, 'class="btn btn-secondary btn-sm opacity-0"')
     # Check prev link is disabled
     assert_html(html, "a[disabled]", text: "Prev")
   end

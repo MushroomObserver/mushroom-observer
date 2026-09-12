@@ -9,8 +9,7 @@ class Views::Controllers::Names::Show::LifeformPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(panel_id: "name_lifeform",
-          attributes: { data: { name_panels_target: "lifeform" } }) do |panel|
+    Panel(panel_id: "name_lifeform") do |panel|
       panel.with_heading { plain(:show_name_lifeform.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { render_body }

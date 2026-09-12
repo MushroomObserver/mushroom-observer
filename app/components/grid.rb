@@ -1,37 +1,36 @@
 # frozen_string_literal: true
 
-# Matrix table component for displaying grids of matrix boxes.
-#
-# Renders a responsive grid layout with Stimulus controller for dynamic
-# resizing. Can render a collection of objects or accept a block for
-# custom content.
+# Responsive grid layout for displaying a collection of Grid::Box
+# items. Renders as a `<ul>` with Bootstrap 4's `row-cols-*`
+# utilities (see ROW_COLS_CLASSES) -- can render a collection of
+# objects or accept a block for custom content.
 #
 # @example With block
-#   render(MatrixTable.new) do |table|
-#     table.render(MatrixBox.new(id: 1) { "Content" })
-#     table.render(MatrixBox.new(id: 2) { "Content" })
+#   render(Grid.new) do |grid|
+#     grid.render(Grid::Box.new(id: 1) { "Content" })
+#     grid.render(Grid::Box.new(id: 2) { "Content" })
 #   end
 #
 # @example With collection of objects
-#   render(MatrixTable.new(objects: @observations, user: @user))
+#   render(Grid.new(objects: @observations, user: @user))
 #
 # @example With caching enabled
-#   render(MatrixTable.new(
+#   render(Grid.new(
 #     objects: @observations,
 #     user: @user,
 #     cached: true
 #   ))
 #
 # @example With identify mode enabled
-#   render(MatrixTable.new(
+#   render(Grid.new(
 #     objects: @observations,
 #     user: @user,
 #     identify: true
 #   ))
-class Components::Matrix::Table < Components::Base
-  # Bump when the rendered MatrixBox HTML changes (or any
+class Components::Grid < Components::Base
+  # Bump when the rendered Grid::Box HTML changes (or any
   # observable behavior the cached fragment captures). This is the
-  # invalidation lever for cached `MatrixBox` fragments — both the
+  # invalidation lever for cached `Grid::Box` fragments — both the
   # write site (`render_cached_boxes`) and the controller's
   # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
   # read this through `cache_key_for`. Phlex's automatic class +
@@ -40,9 +39,45 @@ class Components::Matrix::Table < Components::Base
   # v2: image URLs in the fragment now carry a cache-busting
   # ?<updated_at> token (#4808) -- fragments cached under v1 embed
   # tokenless URLs and must be regenerated.
-  CACHE_VERSION = "v2"
+  # v3: Bootstrap 4 cutover -- Components::Panel now renders
+  # `.card`/`.card-header`/`.card-body`/`.card-footer` instead of
+  # `.panel`/`.panel-heading`/`.panel-body`/`.panel-footer`; fragments
+  # cached under v2 embed the old classes and must be regenerated.
+  # v4: the box's `.rss-*` classes (rss-box-details, rss-what,
+  # rss-heading, etc.) are renamed to `.log-*`; fragments cached
+  # under v3 embed the old class names and must be regenerated.
+  # v5: source-credit markup flattened to a single
+  # `.log-source-credit` div (was `.small` > `.source-credit` >
+  # `small`); fragments cached under v4 embed the old nesting.
+  # v6: `Matrix::Box` renamed to `Grid::Box` (`.matrix-box` -> `.grid-box`,
+  # `context: "matrix_box"` -> `"grid_box"`), and the `small`/`.small`
+  # wraps on log-where/log-what/source-credit/occurrence-link/
+  # log-detail/log-updated-at were dropped in favor of a single
+  # `.log-text` class on the details/footer wrap; fragments cached
+  # under v5 embed the old class names and nesting.
+  # v7: the details/footer lines (log-where, log-when-who [renamed
+  # from log-what], log-source-credit, occurrence-link, log-detail,
+  # log-updated-at) moved from bare `div`s to `li.hanging-indent`
+  # inside a `ul.list-unstyled`; fragments cached under v6 embed the
+  # old div-based markup.
+  # v8: the title's `IDBadge` moved out of the `<h5>` into a sibling
+  # `div.log-heading` wrapping both; fragments cached under v7 embed
+  # the badge inside the heading tag.
+  # v9: the title's `IDBadge` size changed from `:md` to `:lg`;
+  # fragments cached under v8 embed the smaller badge class.
+  # v10: trailing periods removed from the `log_*` rss-detail
+  # translations, and `log_comment_*` now render a dedicated literal
+  # template with a `<br>` before the summary instead of delegating
+  # to the shared `log_object_*_by_user_with_name` keys; fragments
+  # cached under v9 embed the old text.
+  # v11: (superseded by v12 below; not shipped separately.)
+  # v12: the glossary-term image-removal grid now wraps its cells'
+  # content in `Panel do |panel| panel.with_body { ... } end`, giving
+  # them card styling they didn't have before; fragments cached under
+  # v11 or earlier embed the unstyled markup.
+  CACHE_VERSION = "v12"
 
-  # The cache key MatrixBox fragments are stored under, used by both
+  # The cache key Grid::Box fragments are stored under, used by both
   # the write inside this component and the controller's batched
   # `read_multi` pre-check in
   # `ApplicationController::Indexes#uncached_object_ids`. Keeping
@@ -55,13 +90,13 @@ class Components::Matrix::Table < Components::Base
   # tokened on that same updated_at (#4808), so the fragment must bust
   # whenever it changes. `object` alone isn't enough:
   # Verifier#mark_transferred touch_all's related Observations when a
-  # transfer completes, but RssLogs are never touched, so an RssLog
+  # transfer completes, but RssLogs don't get touched, so an RssLog
   # box cached before a rotate would otherwise serve the pre-rotate
-  # URL token indefinitely. (An `Image` object IS its own thumb and
-  # already keys on its own timestamp via `object` --
+  # URL token indefinitely. (An `Image` object IS its thumb and
+  # already keys on that timestamp via `object` --
   # `try(:thumb_image)` is nil there, which is fine.)
   def self.cache_key_for(object, locale)
-    ["MatrixBox", CACHE_VERSION, locale, object, object.try(:thumb_image)]
+    ["Grid::Box", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end
 
   # Per-object predicate the render path uses to decide whether to
@@ -71,8 +106,8 @@ class Components::Matrix::Table < Components::Base
   # Objects with an untransferred thumb_image are skipped — the
   # rendered HTML embeds the image URL, which would be wrong (and
   # wrongly cached) until the transfer completes. An `Image` object
-  # itself (images/index) has no `thumb_image` to defer to -- it IS
-  # the thumb -- so check its own `transferred` directly instead of
+  # (images/index) has no `thumb_image` to defer to -- it IS
+  # the thumb -- so check its `transferred` directly instead of
   # falling through the `respond_to?` guard to an unconditional true.
   def self.should_cache_object?(object)
     return object.transferred != false if object.is_a?(::Image)
@@ -86,25 +121,29 @@ class Components::Matrix::Table < Components::Base
   prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
   prop :identify, _Boolean, default: false
-  # Project context — passed through to each MatrixBox so a project admin
+  # Project context — passed through to each Grid::Box so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
+
+  # Matches the breakpoint/count mapping the old BS4 prototype used
+  # (`origin/nimmo-bootstrap-4-reboot:app/views/shared/
+  # _matrix_grid.html.erb`) -- BS4's `row-cols-{bp}-{n}` utilities size
+  # every direct child of the row equally, so `Components::Grid::Box`
+  # doesn't need a per-breakpoint width class -- just the bare `.col`
+  # default (see its `columns` prop).
+  ROW_COLS_CLASSES = "row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4"
 
   def view_template(&block)
     Row(
       element: :ul,
-      class: "list-unstyled mt-3",
-      data: {
-        controller: "matrix-table",
-        action: "resize@window->matrix-table#rearrange"
-      }
+      class: class_names(ROW_COLS_CLASSES, "list-unstyled mt-3")
     ) do
       if block
         yield
       elsif @cached && @objects
         render_cached_boxes
       elsif @objects
-        render_matrix_boxes
+        render_boxes
       end
     end
 
@@ -131,9 +170,9 @@ class Components::Matrix::Table < Components::Base
         # batched wrapper rather than Rails.cache directly.
         low_level_cache(
           self.class.cache_key_for(object, I18n.locale)
-        ) { render(Components::Matrix::Box.new(user: @user, object: object)) }
+        ) { render(Components::Grid::Box.new(user: @user, object: object)) }
       else
-        render(Components::Matrix::Box.new(
+        render(Components::Grid::Box.new(
                  user: @user, object: object,
                  identify: @identify, project: @project
                ))
@@ -151,8 +190,8 @@ class Components::Matrix::Table < Components::Base
 
   # Skip the batched store (and its upfront read_multi) entirely when
   # caching is off -- `low_level_cache` (phlex-rails) already yields
-  # unconditionally in that case and never touches `cache_store`, so
-  # building it here would be a pure-waste DB round trip.
+  # unconditionally in that case and doesn't touch `cache_store`, so
+  # building it here would be a wasted DB round trip.
   def build_batched_store
     return unless Rails.application.config.action_controller.perform_caching
 
@@ -164,7 +203,7 @@ class Components::Matrix::Table < Components::Base
       map { |object| self.class.cache_key_for(object, I18n.locale) }
   end
 
-  # Mirrors the controller's `matrix_caches_in_this_request?` AND
+  # Mirrors the controller's `grid_caches_in_this_request?` AND
   # `should_cache_object?` gates. Project admins see the admin-only
   # Exclude button; identify mode renders the vote selector. Both
   # diverge from the cached non-admin / non-identify markup, so the
@@ -178,9 +217,9 @@ class Components::Matrix::Table < Components::Base
     @project&.is_admin?(@user)
   end
 
-  def render_matrix_boxes
+  def render_boxes
     @objects.each do |object|
-      render(Components::Matrix::Box.new(
+      render(Components::Grid::Box.new(
                user: @user, object: object,
                identify: @identify, project: @project
              ))

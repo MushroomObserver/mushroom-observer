@@ -67,7 +67,7 @@ gem("sprockets", "~>4.2.1")
 # Compile SCSS for stylesheets
 gem("dartsass-sprockets")
 # Use bootstrap style generator
-gem("bootstrap-sass")
+gem("bootstrap", "~> 4.6")
 # Use Terser as compressor for JavaScript assets
 gem("terser")
 

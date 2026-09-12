@@ -1,6 +1,9 @@
 .thumbnail-container {
   background-color: rgba(0,0,0, 0.33);
   // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
+  // Clips the contained <img> to the `card-img-top` top-corner
+  // rounding on this div -- the image itself has square corners.
+  overflow: hidden;
 }
 
 //
@@ -67,7 +70,7 @@ svg.placeholder {
 
 .vote-section,
 .vote-section-lightbox {
-  padding: 0.5em 0.25em;
+  padding: 0.5rem 0.25rem;
 }
 
 .vote-section {
@@ -93,7 +96,7 @@ svg.placeholder {
 // `.btn-group-xs > .btn` sizing never applies -- padding/font-size
 // are custom instead.
 .vote-btn-group {
-  font-size: 1.1rem;
+  font-size: 0.75rem; // 12px at 16px root
 
   > form.button_to,
   > .image-vote {
@@ -101,21 +104,29 @@ svg.placeholder {
     margin: 0;
 
     &:not(:first-child) {
-      border-left: 1px solid rgba($white, 0.5);
+      border-left: 1px solid rgba($white, 0.75);
     }
   }
 
   > .image-vote {
-    padding: 0.25rem 0.5rem;
-    border-top: 1px solid rgba($white, 0.5);
-    border-bottom: 1px solid rgba($white, 0.5);
+    padding: 0.21rem 0.3rem;
+    border-top: 1px solid rgba($white, 0.75);
+    border-bottom: 1px solid rgba($white, 0.75);
+
+    &:last-child {
+      border-right: 1px solid rgba($white, 0.75);
+    }
   }
 
   // Padding/color/hover live on the inner <button>, not the
-  // <form.button_to> wrapper.
+  // <form.button_to> wrapper. Padding and border-width match
+  // `.image-vote` (the selected-vote span), transparent border
+  // instead of visible, so voting doesn't change row height.
   form.button_to button[type=submit].image-vote-link {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.21rem 0.3rem;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     color: white !important;
     transition: color 0.3s ease, background-color 0.3s ease;
 
@@ -173,8 +184,8 @@ svg.placeholder {
 }
 
 .banner-image-text {
-  background: $body_bg;
-  color: $text_color;
+  background: $body-bg;
+  color: $body-color;
   padding: 0.5em;
   margin-left: 18px;
 }

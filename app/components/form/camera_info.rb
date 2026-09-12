@@ -44,9 +44,9 @@ class Components::Form::CameraInfo < Components::Base
   prop :date_differs, _Boolean, default: false
 
   def view_template
-    div(
+    Well(
       id: "camera_info_#{@img_id}",
-      class: "well well-sm position-relative"
+      class: "position-relative"
     ) do
       label(for: "camera_info_#{@img_id}") { panel_label }
       render_reflection_note if @read_only

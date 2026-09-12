@@ -38,8 +38,14 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   # to show it (see `Views::Layouts::TopNav::SearchBar`).
   TYPE_VALUES = SEARCH_TYPE_OPTIONS.map(&:last).freeze
 
-  FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \
-               "px-0 gap-2".freeze
+  # `.form-inline` gives this `<form>` flex + flex-wrap behavior.
+  # `flex-grow-1` on the search field consumes all leftover main-axis
+  # space, so a `justify-content` value has nothing left to
+  # distribute -- no `.flex-bar` needed here. `Components::
+  # Navbar::FORM_CLASS` supplies small padding/margin/border tweaks
+  # (_top_nav.scss, _layout.scss).
+  FORM_CLASS = "flex-grow-1 form-inline " \
+               "#{Components::Navbar::FORM_CLASS} px-0 gap-2".freeze
 
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"
@@ -54,13 +60,15 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   end
 
   def view_template
-    div(class: "form-group has-feedback has-search d-flex " \
-               "flex-grow-1 mb-0") do
-      Icon(
-        type: :search,
-        class: class_names("form-control-feedback",
-                           Components::Column.mobile_hide_classes)
-      )
+    # BS4 dropped BS3's `.has-feedback`/`.form-control-feedback`
+    # icon-overlay pattern -- the documented replacement is an
+    # `.input-group` with the icon in a prepended
+    # `.input-group-text`, not an icon floated inside the input.
+    InputGroup(class: "flex-grow-1") do
+      render(Components::InputGroup::Addon.new(
+               variant: :addon, position: :prepend,
+               class: Components::Column.mobile_hide_classes(display: :flex)
+             )) { Icon(type: :search) }
       # `label: false` skips the form-group wrap + auto-label so the
       # input nests directly inside the navbar flex row, matching
       # the bare `<input>` Rails `f_s.text_field` emitted.

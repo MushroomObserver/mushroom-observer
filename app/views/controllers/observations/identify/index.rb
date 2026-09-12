@@ -6,7 +6,7 @@
 # Composes the page chrome (container width, index title,
 # pagination), flashes the no-matches error when the query
 # returned nothing, renders the intro blurb, then paginates a
-# `Components::Matrix::Table` in `identify: true` mode (each row
+# `Components::Grid` in `identify: true` mode (each row
 # carries the vote-select / footer-buttons identify chrome).
 #
 # `Observations::IdentifyController#render_index_view` overrides
@@ -36,12 +36,12 @@ module Views::Controllers::Observations::Identify
     private
 
     def render_matrix
-      render(Components::Matrix::Table.new(
-               objects: @objects,
-               user: @user,
-               identify: true,
-               cached: true
-             ))
+      Grid(
+        objects: @objects,
+        user: @user,
+        identify: true,
+        cached: true
+      )
     end
   end
 end

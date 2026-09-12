@@ -39,17 +39,36 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   # Container classes shared by the top-nav row and the search-nav
-  # row. `w-100` is load-bearing since #top_nav is now `display: flex`
-  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it these two
-  # rows would share one line instead of each getting its own.
-  # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
-  # between` + `align-items-center` alias.
-  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
+  # row. `w-100` is load-bearing since `#top_nav` is `display: flex`
+  # -- without it these two rows would share a single line instead
+  # of each landing on a separate line. `container-fluid` is already
+  # flex + `justify-content: space-between` + `align-items: center`
+  # as a descendant of `.navbar` (BS4's `.navbar .container-fluid`
+  # rule) -- no `flex-bar` needed here.
+  CONTAINER_CLASSES = %w[container-fluid px-3 w-100].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
+  # `navbar-expand` (BS4's un-collapsed-navbar recipe, bare/no
+  # breakpoint so it's unconditional) supplies `position: absolute`
+  # on `.navbar-nav .dropdown-menu`. Without it, BS4's default
+  # `.navbar-nav .dropdown-menu { position: static }` applies (meant
+  # for a collapsed/stacked navbar-nav), so an open Actions/user
+  # dropdown pushes #top_nav's height instead of floating over the
+  # page. #top_nav doesn't collapse via BS4's mechanism -- the
+  # offcanvas sidebar is the mobile nav -- so it's always in the
+  # "expanded" state `.navbar-expand` describes. Scoped to this div,
+  # not `#top_nav` itself: `.navbar-expand`'s `flex-flow: row nowrap`
+  # would break the `w-100` two-row stacking CONTAINER_CLASSES relies
+  # on if applied to the outer nav.
+  #
+  # No `justify-content-end` here -- `render_right`'s `<ul>` carries
+  # `Components::Navbar::RIGHT_CLASS` (`ml-auto`), and an auto margin
+  # consumes all leftover main-axis space before `justify-content`
+  # gets to distribute any, so a `justify-content` value on this div
+  # would be inert either way.
   RIGHT_CLASSES = %w[
-    d-flex flex-row align-items-center justify-content-end navbar_right
+    d-flex flex-row align-items-center navbar_right navbar-expand
   ].freeze
 
   # Controllers whose index pages are linkable from the rubric.
@@ -70,7 +89,9 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav") do
+    Navbar(variant: :light, class: "hidden-print mb-2", id: "top_nav",
+           padding: "py-2 px-0",
+           aria: { label: :app_top_nav_label.l }) do
       render_top_row
       render_search_row
     end
@@ -87,13 +108,15 @@ class Views::Layouts::TopNav < Views::Base
 
   def render_left
     render_left_nav_toggle
-    h4(class: "font-weight-bold mr-2", id: "rubric") { render_rubric }
+    h4(class: "font-weight-bold mb-0 mr-2", id: "rubric") { render_rubric }
     div(class: "mr-3 mr-sm-4 mr-lg-5") { render_nav_create }
   end
 
   def render_right
-    render_search_nav_toggle
-    render_nav_scan_qr_code
+    div(class: "btn-toolbar") do
+      render_search_nav_toggle
+      render_nav_scan_qr_code
+    end
     ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
                           Components::Navbar::RIGHT_CLASS, "mr-0",
                           Components::Column.mobile_hide_classes)) do
@@ -109,7 +132,7 @@ class Views::Layouts::TopNav < Views::Base
 
   def render_search_row
     div(class: class_names(CONTAINER_CLASSES)) do
-      Collapsible(id: "search_nav", class: "w-100",
+      Collapsible(id: "search_nav", class: "w-100 mt-2",
                   data: {
                     controller: "search-type",
                     # Stimulus Array values must be JSON. Rails' tag
@@ -137,7 +160,7 @@ class Views::Layouts::TopNav < Views::Base
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: class_names("pr-3 pr-sm-4",
+    div(class: class_names("pr-2 pr-sm-3",
                            Components::Column.visibility_classes(
                              show_at: :xs, hide_at: :md
                            ))) do
@@ -156,18 +179,16 @@ class Views::Layouts::TopNav < Views::Base
   end
 
   # The magnifying-glass that toggles the collapsible search-bar
-  # row below the top nav.
+  # row below the top nav. Shares a `.btn-toolbar` wrap with
+  # `render_nav_scan_qr_code` (see `render_right`).
   def render_search_nav_toggle
-    div(class: class_names(Components::Navbar::FORM_CLASS,
-                           "px-2 px-sm-3")) do
-      Button(
-        type: :collapse_toggle,
-        target_id: "search_nav",
-        variant: :outline, size: :sm,
-        class: "top_nav_button top_nav_icon_button",
-        aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
-    end
+    Button(
+      type: :collapse_toggle,
+      target_id: "search_nav",
+      variant: :outline, size: :sm,
+      class: "px-2 top_nav_button top_nav_icon_button",
+      aria: { expanded: "false", controls: "search_nav" }
+    ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
   end
 
   # The page title in the navbar. Becomes a link to the
@@ -275,7 +296,7 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "mx-0 mx-sm-2 top_nav_button top_nav_icon_button",
+      class: "mx-2 ml-sm-4 top_nav_button top_nav_icon_button",
       data: { placement: :bottom }
     )
   end

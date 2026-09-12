@@ -290,7 +290,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_select("#modal_resolve_projects", text: /Add All/)
     # Components::Modal wrapping markup (auto-open, modal-lg, id) —
     # proves the create-mode view file's modal composition rendered.
-    assert_select("div#modal_resolve_projects.modal.fade.in")
+    assert_select("div#modal_resolve_projects.modal.fade.show")
     assert_select("div.modal-dialog.modal-lg")
     assert_select("#modal_resolve_projects form[data-turbo='true']")
     # Both Skip and Add All buttons post under the FormObject's
@@ -343,8 +343,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     get(:show, params: { id: occ.id })
     assert_response(:success)
-    # Observation name is rendered inside a MatrixBox title link.
-    assert_select(".matrix-box",
+    # Observation name is rendered inside a Grid::Box title link.
+    assert_select(".grid-box",
                   text: /#{Regexp.escape(@obs1.format_name.t.html_to_ascii)}/)
   end
 

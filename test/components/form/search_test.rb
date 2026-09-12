@@ -3,6 +3,8 @@
 require "test_helper"
 
 class SearchFormTest < ComponentTestCase
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   def setup
     super
     @query = Query::Observations.new
@@ -44,7 +46,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form
 
     # Should have panels based on FIELD_COLUMNS
-    assert_html(html, ".panel")
+    assert_html(html, ".card")
   end
 
   def test_renders_submit_button
@@ -95,10 +97,6 @@ class SearchFormTest < ComponentTestCase
                 "span[aria-label='#{:search_bar_fewer_options.l}']")
     assert_html(html,
                 "a[data-search-type-target='barToggle'] svg.mo-icon-minus")
-    # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
-    # literal.
-    assert_html(html,
-                "a[data-search-type-target='barToggle'].navbar-link")
   end
 
   def test_does_not_render_header_when_page_context
@@ -196,10 +194,10 @@ class SearchFormTest < ComponentTestCase
 
     html = render_form_with_query(query)
 
-    # The collapse div should have class "in" to be expanded
+    # The collapse div should be expanded
     assert_html(
       html,
-      "[data-autocompleter--name-target='collapseFields'].in"
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"
     )
   end
 
@@ -211,8 +209,8 @@ class SearchFormTest < ComponentTestCase
 
     html = render_form_with_query(query)
 
-    # The dates panel's collapse div should have class "in"
-    assert_html(html, "#observations_dates.panel-collapse.in")
+    # The dates panel's collapse div should be expanded
+    assert_html(html, "#observations_dates.card-collapse.#{EXPANDED}")
   end
 
   # TDD test: Panel collapse should NOT be expanded when no collapsed fields
@@ -224,8 +222,8 @@ class SearchFormTest < ComponentTestCase
 
     html = render_form_with_query(query)
 
-    # The dates panel's collapse div should NOT have class "in"
-    assert_html(html, "#observations_dates.panel-collapse:not(.in)")
+    # The dates panel's collapse div should NOT be expanded
+    assert_html(html, "#observations_dates.card-collapse:not(.#{EXPANDED})")
   end
 
   # TDD test: Modifier collapse should be expanded when lookup has value
@@ -240,10 +238,10 @@ class SearchFormTest < ComponentTestCase
 
     html = render_form_with_query(query)
 
-    # The collapse div SHOULD have class "in" because lookup has a value
+    # The collapse div SHOULD be expanded because lookup has a value
     assert_html(
       html,
-      "[data-autocompleter--name-target='collapseFields'].in"
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"
     )
   end
 
@@ -254,10 +252,10 @@ class SearchFormTest < ComponentTestCase
 
     html = render_form_with_query(query)
 
-    # The collapse div should NOT have class "in"
+    # The collapse div should NOT be expanded
     assert_html(
       html,
-      "[data-autocompleter--name-target='collapseFields']:not(.in)"
+      "[data-autocompleter--name-target='collapseFields']:not(.#{EXPANDED})"
     )
   end
 
@@ -371,7 +369,7 @@ class SearchFormTest < ComponentTestCase
     # Collapse should be expanded because modifier has value
     assert_html(
       html,
-      "[data-autocompleter--name-target='collapseFields'].in"
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"
     )
   end
 
