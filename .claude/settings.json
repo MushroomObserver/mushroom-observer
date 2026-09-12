@@ -91,6 +91,11 @@
           },
           {
             "type": "command",
+            "command": "test -x .claude/hooks/block_cosmetic_class_assertions.sh && exec .claude/hooks/block_cosmetic_class_assertions.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "test -x .claude/hooks/block_raw_component_classes.sh && exec .claude/hooks/block_raw_component_classes.sh || exit 0",
             "timeout": 15
           },

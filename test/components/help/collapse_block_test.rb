@@ -9,7 +9,7 @@ class CollapseHelpBlockTest < ComponentTestCase
     ) { "This is help text" }
 
     assert_html(html, "div.collapse#help_1")
-    assert_html(html, "div.well.well-sm.mb-3.help-block.position-relative")
+    assert_html(html, "div.well.help-block")
     assert_html(html, "div.collapse#help_1", text: "This is help text")
   end
 
@@ -29,7 +29,6 @@ class CollapseHelpBlockTest < ComponentTestCase
     ) { "Content" }
 
     assert_html(html, "div.arrow-down.d-none.d-sm-block")
-    assert_not_includes(html, "mt-3")
   end
 
   def test_renders_with_arrow_up_when_direction_up
@@ -38,7 +37,7 @@ class CollapseHelpBlockTest < ComponentTestCase
     ) { "Content" }
 
     assert_html(html, "div.arrow-up.d-none.d-sm-block")
-    assert_html(html, "div.well.well-sm.mb-3.help-block.position-relative.mt-3")
+    assert_html(html, "div.well.help-block")
   end
 
   def test_renders_arrow_visible_on_mobile_when_mobile_true

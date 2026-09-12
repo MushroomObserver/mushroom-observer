@@ -355,10 +355,6 @@ $card-spacer-x: 0.75rem !default;
 // Horizontal rule
 $hr-border-color: $LIST_BORDER_COLOR !default;
 
-// Wells (deprecated in BS4, but keep for reference)
-// Note: Wells don't exist in Bootstrap 4, but bg-light utility can be used
-// $well-bg would map to a custom .well class if needed
-
 // Close button (X in modals, alerts, etc.)
 $close-color: $BODY_TEXT_COLOR !default;
 
