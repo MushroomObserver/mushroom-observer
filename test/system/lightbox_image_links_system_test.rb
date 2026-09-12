@@ -36,11 +36,14 @@ class LightboxImageLinksSystemTest < ApplicationSystemTestCase
       assert_no_selector(".vote-section", visible: :all)
     end
 
-    # EXIF link opens the EXIF modal.
+    # EXIF link opens the EXIF modal; the header itself loads lazily
+    # via EXIFDataJob (#5369), broadcast once the modal's Action Cable
+    # subscription connects.
     within(".lg-sub-html") do
       find("a", text: :image_show_exif.t).click
     end
     assert_selector("#modal_image_exif_#{image.id}", wait: 9)
+    wait_for_exif_data_broadcast(image)
     assert_selector("#modal_image_exif_#{image.id} #exif_data_table")
     within("#modal_image_exif_#{image.id}") do
       first("[data-dismiss='modal']").click
@@ -66,5 +69,20 @@ class LightboxImageLinksSystemTest < ApplicationSystemTestCase
     file = image.full_filepath("orig")
     FileUtils.mkdir_p(File.dirname(file))
     FileUtils.cp(fixture, file)
+  end
+
+  # The test queue adapter leaves EXIFDataJob sitting enqueued rather
+  # than running it, and a broadcast sent before the modal's Action
+  # Cable subscription connects is lost -- poll by re-running the job
+  # against the live page instead of guessing how long that takes.
+  def wait_for_exif_data_broadcast(image)
+    Timeout.timeout(10) do
+      loop do
+        EXIFDataJob.perform_now(image.id)
+        break if page.has_selector?("#exif_data_table", wait: 0.3)
+
+        sleep(0.2)
+      end
+    end
   end
 end
