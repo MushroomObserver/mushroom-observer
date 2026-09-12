@@ -7,6 +7,8 @@
 # Matching Observations" link, no body.
 #
 class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views::Base
+  include Views::Controllers::Observations::Show::OccurrenceStatusIcons
+
   prop :obs, ::Observation
   prop :occurrence, _Nilable(::Occurrence), default: nil
   prop :siblings, _Array(::Observation), default: -> { [] }
@@ -59,7 +61,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   # clicking an icon also hovers/clicks the link.
   def render_member_row(member, link:)
     IDBadge(object: member, size: :lg, interactive: link, extra_class: "mr-3")
-    icon_types = member_status_icon_types(member)
+    icon_types = member_status_icon_types(member, @occurrence)
     gap_class = "icon-text-gap" if icon_types.any?
     if link
       a(href: permanent_observation_path(member.id)) do
@@ -83,30 +85,5 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     end
   end
 
-  # Compares against @occurrence directly, not
-  # member.occurrence_primary?, to avoid an N+1 lookup per row.
-  def member_status_icon_types(member)
-    types = []
-    types << :is_primary if @occurrence.primary_observation_id == member.id
-    types << :read_only if member.reflection?
-    types
-  end
-
-  # wrap_class:, not class: -- padding on a bare <svg> shrinks it
-  # (see Components::Icon). tooltip_container: "li" keeps the tooltip
-  # from mis-rendering in this row's tight layout (tooltip_controller.js).
-  def render_status_icons(types)
-    types.each_with_index do |type, index|
-      wrap_class = "icon-text-gap" if index.positive?
-      Icon(type: type, title: status_icon_title(type), wrap_class: wrap_class,
-           data: { tooltip_container: "li" })
-    end
-  end
-
-  def status_icon_title(type)
-    case type
-    when :is_primary then :show_observation_occurrence_primary.l
-    when :read_only then :show_observation_reflection_read_only.l
-    end
-  end
+  # Icon logic lives in the shared OccurrenceStatusIcons concern.
 end

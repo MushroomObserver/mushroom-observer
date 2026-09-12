@@ -323,7 +323,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
      :observation_views,
      :project_observations,
      :species_list_observations,
-     { occurrence: [:field_slip, :observations] },
+     # Members' sequences: the Specimen panel lists the whole
+     # occurrence's sequences (they describe the shared specimen).
+     { occurrence: [:field_slip, { observations: { sequences: :user } }] },
      { projects: [{ admin_group: :users }, :image] },
      :rss_log,
      { sequences: :user },

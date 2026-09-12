@@ -142,6 +142,11 @@ class Inat
                         Views::Controllers::Observations::Show::NotesPanel.new(
                           obs: observation, user: nil
                         ))
+      broadcast_replace(
+        observation, "observation_sequences",
+        Views::Controllers::Observations::Show::SpecimenPanel::
+          SequencesSection.new(obs: observation, user: nil)
+      )
     end
 
     # Same lookup `Observations::ExternalLinksController::Show` uses for
