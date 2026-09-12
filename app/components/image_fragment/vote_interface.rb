@@ -111,7 +111,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
   end
 
   def render_vote_buttons(vote_percentage)
-    div(class: "vote-buttons mt-2") do
+    div(class: "vote-buttons") do
       ButtonGroup(
         class: "vote-btn-group",
         id: vote_html_id("image_vote_links")
