@@ -39,6 +39,11 @@ class ProjectAlias < AbstractModel
     self[:target_type] = type.capitalize
   end
 
+  # Returns nil on success (also setting `target=` as a side effect
+  # when a User match is found), or an unresolved [tag, args] pair on
+  # failure -- the controller resolves it via `.t` when flashing.
+  # Moved the resolution itself out (#4901); its only caller flashes
+  # the result, a render-facing concern the model shouldn't own.
   def verify_target(term)
     return nil if target_id
 
@@ -49,6 +54,6 @@ class ProjectAlias < AbstractModel
         return nil
       end
     end
-    :project_alias_no_match.t(target_type:, term:)
+    [:project_alias_no_match, { target_type: target_type, term: term }]
   end
 end

@@ -94,13 +94,13 @@
     {
       "warning_type": "Command Injection",
       "warning_code": 14,
-      "fingerprint": "1c4dceb31ac90677da674e42525855dd50e3b289599e177ed7be5a7c174125cf",
+      "fingerprint": "968f1042f74deaf7c5c6c6c7a05580f8185a8fb9223e8ce90204ae3330026c2c",
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/image/dhash.rb",
       "line": 75,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Open3.capture3(\"convert\", \"#{path}[0]\", \"-auto-orient\", \"-colorspace\", \"Gray\", \"-resize\", \"#{9}x#{8}!\", \"-depth\", \"8\", \"gray:-\")",
+      "code": "Open3.capture3(magick_binary, \"#{path}[0]\", \"-auto-orient\", \"-colorspace\", \"Gray\", \"-resize\", \"#{9}x#{8}!\", \"-depth\", \"8\", \"gray:-\")",
       "render_path": null,
       "location": {
         "type": "method",

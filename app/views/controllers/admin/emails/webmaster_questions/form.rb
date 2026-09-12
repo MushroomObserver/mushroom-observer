@@ -7,13 +7,12 @@ module Views::Controllers::Admin::Emails::WebmasterQuestions
   # ModalTurboForm call.
   # Creates its own FormObject internally from the provided kwargs.
   class Form < ::Components::ApplicationForm
+    prop :email_error, _Nilable(_Boolean), default: nil
+
     # Accept optional model arg for ModalForm compatibility (ignored
     # — we create our own FormObject). This is Pattern B: form
     # creates FormObject internally.
-    def initialize(_model = nil, reply_to: nil, message: nil,
-                   email_error: false, **)
-      @email_error = email_error
-
+    def initialize(_model = nil, reply_to: nil, message: nil, **)
       form_object = FormObject::EmailRequest.new(
         reply_to: reply_to,
         message: message

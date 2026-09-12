@@ -63,9 +63,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     sites = ::ExternalSite.all.to_a
     skip("Need at least one ExternalSite fixture") if sites.empty?
 
-    html = render(Views::Controllers::Observations::Show::Details.new(
-                    obs: obs, user: nil, sites: sites, siblings: []
-                  ))
+    html = render(panel_with(obs, nil, sites: sites))
 
     assert_no_html(html, "#observation_external_links")
   end
@@ -79,14 +77,52 @@ class Views::Controllers::Observations::Show::DetailsTest <
     sites = ::ExternalSite.all.to_a
     skip("Need at least one ExternalSite fixture") if sites.empty?
 
-    html = render(Views::Controllers::Observations::Show::Details.new(
-                    obs: obs, user: @user, sites: sites, siblings: []
-                  ))
+    html = render(panel_with(obs, sites: sites))
 
     bodies = Nokogiri::HTML5.fragment(html).css(
       "#observation_details > .panel-body"
     )
     assert_equal("observation_external_links", bodies.last["id"])
+  end
+
+  # --- Thumbnail map (#4967) ---
+
+  # The map renders as a line of the details panel, under the location
+  # info (after the where/GPS lines, before "Who:").
+  def test_renders_thumbnail_map_under_location_info
+    @obs.lat = 34.1622
+    @obs.lng = -118.3444
+
+    html = render(panel_with(@obs))
+
+    lis = Nokogiri::HTML5.fragment(html).css("#observation_details li")
+    class_tokens = lis.map { |li| (li["id"] || li["class"]).to_s.split }
+    where_index = class_tokens.index { |c| c.include?("obs-where") }
+    gps_index = class_tokens.index { |c| c.include?("obs-where-gps") }
+    map_index = class_tokens.index do |c|
+      c.include?("observation_thumbnail_map")
+    end
+    who_index = class_tokens.index { |c| c.include?("obs-who") }
+
+    assert_not_nil(gps_index, "expected the GPS line in the panel")
+    assert_not_nil(map_index, "expected the thumbnail map in the panel")
+    assert_operator(where_index, :<, gps_index)
+    assert_operator(gps_index, :<, map_index)
+    assert_operator(map_index, :<, who_index)
+  end
+
+  def test_does_not_render_thumbnail_map_when_pref_off
+    @user.thumbnail_maps = false
+
+    html = render(panel_with(@obs))
+
+    assert_no_html(html, "#observation_thumbnail_map")
+  end
+
+  def test_does_not_render_thumbnail_map_for_logged_out_viewer
+    html = render(panel_with(@obs, nil))
+
+    assert_no_html(html, "#observation_thumbnail_map")
   end
 
   # --- Collector / Entered by (#4211) ---
@@ -161,15 +197,135 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_html(html, ".obs-who a[data-controller='modal-toggle']")
   end
 
+  # --- Field slip ---
+
+  def test_renders_existing_field_slip_link
+    obs = observations(:minimal_unknown_obs)
+    assert_not_nil(obs.field_slip, "Need obs fixture with a field slip")
+
+    html = render(panel_with(obs))
+    path = routes.field_slip_path(obs.field_slip.id)
+
+    assert_html(html, "#observation_field_slips a[href='#{path}']")
+  end
+
+  def test_renders_attach_link_when_no_field_slip_and_can_edit
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.field_slip)
+    assert(obs.can_edit?(@user), "Need obs fixture the user can edit")
+
+    html = render(panel_with(obs))
+
+    assert_html(
+      html,
+      "#observation_field_slips a.inline-icon-link" \
+      ".attach_observation_to_field_slip_link_#{obs.id}" \
+      "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
+    )
+  end
+
+  def test_no_field_slip_section_when_no_field_slip_and_cannot_edit
+    obs = observations(:coprinus_comatus_obs)
+    viewer = users(:mary)
+    assert_nil(obs.field_slip)
+    assert_not(obs.can_edit?(viewer))
+
+    html = render(panel_with(obs, viewer))
+
+    assert_no_html(html, "#observation_field_slips")
+  end
+
+  def test_renders_attach_link_in_admin_mode_even_when_cannot_edit
+    obs = observations(:coprinus_comatus_obs)
+    viewer = users(:mary)
+    assert_nil(obs.field_slip)
+    assert_not(obs.can_edit?(viewer))
+    stub_admin_mode!
+
+    html = render(panel_with(obs, viewer))
+
+    assert_html(
+      html,
+      "#observation_field_slips a" \
+      "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
+    )
+  end
+
+  def test_no_field_slip_section_for_logged_out_viewer
+    obs = observations(:minimal_unknown_obs)
+
+    html = render(panel_with(obs, nil))
+
+    assert_no_html(html, "#observation_field_slips")
+  end
+
+  # --- Field slip scan page link ---
+
+  # Same gate as the scan page itself: admin of one of the
+  # observation's projects. Rendered alongside the existing slip link,
+  # since a read that landed unseen at Create needs a way back.
+  def test_renders_scan_link_for_project_admin
+    obs = observations(:minimal_unknown_obs)
+    viewer = users(:mary)
+    obs.images << images(:in_situ_image) unless obs.images.any?
+    project = projects(:eol_project)
+    project.observations << obs unless project.observations.include?(obs)
+    assert(project.is_admin?(viewer), "premise: mary administers it")
+
+    html = render(panel_with(obs, viewer))
+
+    assert_html(html, "#observation_field_slips a" \
+                      "[href='#{routes.field_slip_path(obs.field_slip.id)}']")
+    assert_html(html, scan_link_selector(obs))
+  end
+
+  def test_renders_scan_link_in_admin_mode
+    obs = observations(:coprinus_comatus_obs)
+    obs.images << images(:in_situ_image) unless obs.images.any?
+    stub_admin_mode!
+
+    html = render(panel_with(obs))
+
+    assert_html(html, scan_link_selector(obs))
+  end
+
+  def test_no_scan_link_for_editor_who_is_not_project_admin
+    obs = observations(:coprinus_comatus_obs)
+    obs.images << images(:in_situ_image) unless obs.images.any?
+    assert(obs.can_edit?(@user), "premise: rolf can edit it")
+    assert_not(obs.projects.any? { |p| p.is_admin?(@user) })
+
+    html = render(panel_with(obs))
+
+    assert_html(html, "#observation_field_slips")
+    assert_no_html(html, scan_link_selector(obs))
+  end
+
+  def test_no_scan_link_without_photos
+    obs = observations(:coprinus_comatus_obs)
+    obs.images.clear
+    stub_admin_mode!
+
+    html = render(panel_with(obs))
+
+    assert_no_html(html, scan_link_selector(obs))
+  end
+
   private
+
+  def scan_link_selector(obs)
+    "#observation_field_slips a.inline-icon-link" \
+      ".scan_observation_field_slip_link_#{obs.id}" \
+      "[href='#{routes.field_slip_scan_observation_path(obs.id)}']"
+  end
 
   def who_text(html)
     Nokogiri::HTML.fragment(html).at_css(".obs-who").text
   end
 
-  def panel_with(obs, user = @user)
+  def panel_with(obs, user = @user, sites: [])
     Views::Controllers::Observations::Show::Details.new(
-      obs: obs, user: user, sites: [], siblings: []
+      obs: obs, user: user, sites: sites, siblings: []
     )
   end
 end

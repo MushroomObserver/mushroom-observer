@@ -95,35 +95,32 @@ module Views::FullPageBase::Title
   # Index-only caption explaining what filters the current Query
   # applies. The caption HTML is built by
   # `Views::Layouts::Header::IndexBar::FilterCaption`. Skips the wrap
-  # when there's no query to caption.
+  # when there's no query, or the query has no filters to caption --
+  # an unfiltered index has nothing worth a caption row for.
   def add_query_filters(query)
-    return unless query&.params
+    klass = ::Views::Layouts::Header::IndexBar::FilterCaption
+    return unless query&.params && klass.filters_present?(query)
 
     content_for(:filters) do
-      capture do
-        render(::Views::Layouts::Header::IndexBar::FilterCaption.new(
-                 query: query
-               ))
-      end
+      capture { render(klass.new(query: query)) }
     end
   end
 
   private
 
-  # Models without `document_title` fall back to their localized type
-  # tag (`observation`, `location`, etc.). The browser-tab text renders
-  # as plain text, so textile / HTML must NOT leak through.
+  # Models with no `Title::` subclass (see app/classes/title.rb) fall
+  # back to their localized type tag (`observation`, `location`, etc.).
+  # The browser-tab text renders as plain text, so textile / HTML must
+  # NOT leak through.
   def document_title_for(object)
-    return object.type_tag.ti unless object.respond_to?(:document_title)
-
-    object.document_title
+    Title.for(object).document_title
   end
 
   # `Observation 23435: Amanita novinupta`
   def show_document_title(string, object)
     [
       object.type_tag.ti,
-      "#{object.id}:",
+      object.id.to_s.concat(":"),
       string
     ].safe_join(" ")
   end

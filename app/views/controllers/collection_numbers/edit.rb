@@ -17,7 +17,7 @@ module Views::Controllers::CollectionNumbers
         Tab::CollectionNumber::FormEdit.new(
           collection_number: @collection_number,
           back: @back, back_object: @back_object,
-          q_param: q_param
+          index_filter: index_filter(:CollectionNumber)
         )
       )
 
@@ -30,7 +30,7 @@ module Views::Controllers::CollectionNumbers
     private
 
     def render_form
-      render(Form.new(@collection_number, back: @back))
+      render(Form.new(@collection_number, back: @back, turbo: true))
     end
 
     def render_observation_boxes

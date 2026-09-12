@@ -3,6 +3,8 @@
 require("test_helper")
 
 class CollectionNumbersControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ##############################################################################
   # INDEX
   #
@@ -11,6 +13,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index)
 
     assert_page_title(:collection_numbers.ti)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::CollectionNumbers, :CollectionNumber,
+      overrides: {
+        id_in_set: collection_numbers(:minimal_unknown_coll_num).id,
+        by_users: rolf.id,
+        observations: observations(:minimal_unknown_obs).id
+      }
+    )
   end
 
   def test_index_with_query
@@ -76,7 +92,22 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_page_title(:collection_numbers.ti)
-    assert_flash_text(/no matching collection numbers found/i)
+    assert_flash(:runtime_no_matches, type: :collection_number)
+  end
+
+  # A bad observation id flashes and redirects to the observations
+  # index. This matches by_user-style shortcuts elsewhere, which
+  # redirect to the looked-up model's own index (see redirect_to:
+  # :model_index in Query::CollectionNumbers).
+  def test_index_observation_id_bad_id
+    bad_observation_id = Observation.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { observation: bad_observation_id })
+
+    assert_flash(:runtime_object_not_found, type: :observation,
+                                            id: bad_observation_id)
+    assert_redirected_to(observations_path)
   end
 
   def test_index_pattern_str_matching_multiple_collection_numbers
@@ -95,6 +126,29 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # a show link, and (because logged in user created the numbers)
     # an edit link
     assert_equal(numbers.count * 2, collection_number_links.count)
+  end
+
+  def test_index_pattern_param_builds_query_directly
+    pattern = "Singer"
+    numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
+    assert(numbers.many?,
+           "Test needs a pattern matching many collection numbers")
+
+    login
+    get(:index, params: { pattern: pattern })
+
+    assert_response(:success)
+    assert_page_title(:collection_numbers.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+  end
+
+  def test_index_pattern_param_matching_id_redirects_to_show
+    number = collection_numbers(:coprinus_comatus_coll_num)
+
+    login
+    get(:index, params: { pattern: number.id })
+
+    assert_redirected_to(collection_number_path(number.id))
   end
 
   ##############################################################################
@@ -242,18 +296,18 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
 
     login("rolf")
     post(:create,
          params: { observation_id: obs.id,
                    collection_number: params.except(:name) })
-    assert_flash_text(/missing.*name/i)
+    assert_flash(:create_collection_number_missing_name)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create,
          params: { observation_id: obs.id,
                    collection_number: params.except(:number) })
-    assert_flash_text(/missing.*number/i)
+    assert_flash(:create_collection_number_missing_number)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
@@ -294,7 +348,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Missing number should cause validation error
     params = {
       observation_id: obs.id,
-      collection_number: { name: obs.user.legal_name, number: "" }
+      collection_number: { name: obs.user.legal_name, number: "",
+                           modal: "true" }
     }
 
     assert_no_difference("CollectionNumber.count") do
@@ -327,7 +382,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
-    assert_flash_text(/shared/i)
+    assert_flash(:edit_collection_number_already_used)
     assert_obj_arrays_equal([number], obs.reload.collection_numbers)
   end
 
@@ -348,7 +403,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs2.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_flash_text(/shared/i)
+    assert_flash(:edit_collection_number_already_used)
     assert_equal(1, obs1.reload.collection_numbers.count)
     assert_equal(3, obs2.reload.collection_numbers.count)
     assert_equal(2, number.reload.observations.count)
@@ -409,20 +464,22 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     login("mary")
     patch(:update, params:)
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
 
-    # Test turbo shows flash warning
-    patch(:update, params:, format: :turbo_stream)
-    assert_flash_text(/permission denied/i)
+    # Test turbo (modal) shows flash warning
+    patch(:update,
+          params: params.deep_merge(collection_number: { modal: "true" }),
+          format: :turbo_stream)
+    assert_flash(:permission_denied)
     assert_select("turbo-stream[action='update'][target$='_flash']")
 
     login("rolf")
     patch(:update, params: params.deep_merge(collection_number: { name: "" }))
-    assert_flash_text(/missing.*name/i)
+    assert_flash(:create_collection_number_missing_name)
     assert_not_equal("new number", number.reload.number)
 
     patch(:update, params: params.deep_merge(collection_number: { number: "" }))
-    assert_flash_text(/missing.*number/i)
+    assert_flash(:create_collection_number_missing_number)
     assert_not_equal("New Name", number.reload.name)
 
     patch(:update, params:)
@@ -451,7 +508,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       back: observation.id.to_s,
       collection_number: {
         name: collection_number.name,
-        number: "updated-number"
+        number: "updated-number",
+        modal: "true"
       }
     }
 
@@ -482,13 +540,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     patch(:update,
           params: { id: num2.id, collection_number: params })
-    assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
+    assert_flash(:edit_collection_numbers_merged,
+                 this: num2.format_name, that: num1.format_name)
     assert_equal(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
     assert_obj_arrays_equal([new_num], obs1.collection_numbers)
     assert_obj_arrays_equal([new_num], obs2.reload.collection_numbers)
     assert_equal("Joe Schmoe", new_num.name)
-    assert_equal("07-123a", new_num.number)
+    assert_equal("07-456a", new_num.number)
     # Make sure it updates the herbarium record which shared the old
     # collection number.
     assert_equal(
@@ -580,7 +639,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # With back param set to observation ID, redirects to that observation.
     delete(:destroy, params: { id: nums[0].id, back: obs.id.to_s })
-    assert_redirected_to(observation_path(obs))
+    assert_redirected_to(permanent_observation_path(obs))
 
     # With back: "index", explicitly requests redirect to index.
     delete(:destroy, params: { id: nums[1].id, back: "index", q: })
@@ -625,7 +684,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Should successfully destroy and redirect to the observation
     assert_equal(collection_number_count - 1, CollectionNumber.count)
-    assert_redirected_to(observation_path(obs))
+    assert_redirected_to(permanent_observation_path(obs))
   end
 
   # -------- Remove from observation (destroy with observation_id) ------------

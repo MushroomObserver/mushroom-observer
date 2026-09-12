@@ -25,6 +25,12 @@ module Views::Layouts
       names: :Names,
       lookup: :Names,
       clade: :Names,
+      look_alikes: :Names,
+      related_taxa: :Names,
+      any_name: :Names,
+      name_proposed: :Names,
+      this_name: :Names,
+      other_names: :Names,
       projects: :Projects,
       project_lists: :ProjectSpeciesLists,
       species_lists: :SpeciesLists,
@@ -34,12 +40,11 @@ module Views::Layouts
       by_editor: :Users,
       collectors: :Users,
       members: :Users,
-      # Both User-typed too — without these the caption fell
-      # through to the raw-value path and printed the user id
+      # User-typed too — without this the caption fell through to
+      # the raw-value path and printed the user id
       # ("editable_by_user: 1") instead of the proper title
       # ("editable_by_user: Nathan Wilson (nathan)").
-      editable_by_user: :Users,
-      needs_naming: :Users
+      editable_by_user: :Users
     }.freeze
     # The captions with these sub-params make more sense without keys:
     CAPTION_IGNORE_KEYS = [:lookup, :id].freeze
@@ -47,9 +52,18 @@ module Views::Layouts
     CAPTION_TRUNCATE = 3
     # Lookup keys whose joined string is italicized inside the `<b>`
     # tag (Latin / taxonomic names).
-    ITALICIZE_LOOKUP_KEYS = [:names, :lookup].freeze
+    ITALICIZE_LOOKUP_KEYS = [:names, :lookup, :look_alikes, :related_taxa,
+                             :any_name, :name_proposed, :this_name,
+                             :other_names].freeze
 
     prop :query, ::Query
+
+    # Whether `query` has any filter params to caption, beyond the
+    # sort order -- used by `Views::FullPageBase#add_query_filters` to
+    # decide whether to render the index bar.
+    def self.filters_present?(query)
+      query.params.except(:order_by).compact_blank.present?
+    end
 
     def view_template
       div(id: "filters", class: "position-relative pr-5",
@@ -107,7 +121,7 @@ module Views::Layouts
     end
 
     def render_caption_param_text(truncate:)
-      if @query.params.except(:order_by).present?
+      if self.class.filters_present?(@query)
         wrap_tag = truncate ? :span : :div
         render_params_joined(@query.params, truncate: truncate,
                                             wrap_tag: wrap_tag)
@@ -158,22 +172,30 @@ module Views::Layouts
 
     # Subquery: `label: [ <nested params> ]` with span wrappers.
     def render_subquery(label, hash, truncate:)
-      span { plain("#{query_param_label(label)}: [ ") }
+      span do
+        plain(query_param_label(label))
+        plain(": [ ")
+      end
       render_params_joined(hash, truncate: truncate, wrap_tag: :span)
       span { plain(" ] ") }
     end
 
-    # Nested params on one line separated by comma. The `:target`
-    # key gets a Lookup-driven single-string val rather than nested
-    # iteration.
+    # Nested params on one line separated by comma. The `:target` key
+    # gets a Lookup-driven single-string val; `:identify_filter` gets
+    # its own type-labeled val (see `render_identify_filter_val`) --
+    # both rather than the generic nested key/val iteration.
     def render_grouped_params(label, hash, truncate:)
       compact = hash.compact_blank
       return if compact.empty?
 
-      span { plain("#{query_param_label(label)}: ") }
-      if label == :target
+      case label
+      when :target
+        span { append_colon(query_param_label(label)) }
         span { plain(lookup_comment_target_val(hash).to_s) }
+      when :identify_filter
+        render_identify_filter_val(hash)
       else
+        span { append_colon(query_param_label(label)) }
         render_nested_params(compact, truncate: truncate)
       end
     end
@@ -185,12 +207,24 @@ module Views::Layouts
       end
     end
 
+    # `identify_filter`'s `type` (clade/region) picks which existing
+    # query_param label describes `term`, so this reads "Region:
+    # California, USA" instead of exposing the internal type/term
+    # hash shape ("Identify filter: Type: region, Term: ...").
+    def render_identify_filter_val(hash)
+      type, term = hash.values_at(:type, :term)
+      return if type.blank? || term.blank?
+
+      span { append_colon(query_param_label(type.to_sym)) }
+      b { plain(term) }
+    end
+
     def render_plain_param(key, val, truncate:)
       label = query_param_label(key)
       if val == true
         span { plain(label) }
       else
-        span { plain("#{label}: ") } unless CAPTION_IGNORE_KEYS.include?(key)
+        span { append_colon(label) } unless CAPTION_IGNORE_KEYS.include?(key)
         b { render_lookup_text_val(key, val, truncate: truncate) }
       end
     end
@@ -224,11 +258,16 @@ module Views::Layouts
     # the array form (`[2.0]`) at validation time, so the array
     # branch is always taken; no scalar fallback needed.
     def confidence_val_as_label(val)
-      val.map { |v| Vote.confidence(v.to_f) }.join(" – ")
+      val.map { |v| Vote.confidence_string(v.to_f) }.join(" – ")
     end
 
+    # `:types` isn't unique to RssLog -- Query::Comments has its own,
+    # unrelated `:types` attr (comment target model). Gate on model,
+    # not just the key name, or a Comments query's `:types` renders
+    # through RssLog's tag vocabulary and silently drops any Comment
+    # type tag RssLog doesn't share (`location_description`, etc).
     def param_val_itself(key, val, truncate:)
-      if key == :type
+      if key == :types && @query.model == RssLog
         type_tags_to_label(val)
       elsif val.is_a?(Array)
         join_array_val(val, truncate: truncate)
@@ -244,9 +283,12 @@ module Views::Layouts
       string
     end
 
-    # The max number of named items is hardcoded to 3.
+    # The max number of named items is hardcoded to 3. `Array(...)` --
+    # a singular record-backed attr (e.g. look_alikes) stores a bare
+    # id, not a 1-element Array; `.first(n)` below needs an Array
+    # either way.
     def filter_lookup_strings(param, truncate:)
-      ids = @query.params.deep_find(param)
+      ids = Array(@query.params.deep_find(param))
       lookups = truncate ? ids.first(CAPTION_TRUNCATE) : ids
       subclass = PARAM_LOOKUPS[param]
       lookup = "Lookup::#{subclass}".constantize
@@ -268,12 +310,12 @@ module Views::Layouts
       end
     end
 
-    # Space-separated RssLog type tag list ("species_list project") →
-    # localized labels joined by ", ". `SENTINEL_TYPE_TAGS` covers
-    # `"all"` / `"none"` (which have no plural); everything else
-    # goes through `tag.pluralize.to_sym.ti`.
+    # `types` param (Array, each entry possibly space-separated --
+    # see `RssLog.normalize_type_tags`) → localized labels joined by
+    # ", ". `SENTINEL_TYPE_TAGS` covers `"all"` / `"none"` (which have
+    # no plural); everything else goes through `tag.pluralize.to_sym.ti`.
     def type_tags_to_label(val)
-      val.split.map do |tag|
+      ::RssLog.normalize_type_tags(val).map do |tag|
         (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.to_sym).ti
       end.join(", ")
     end

@@ -4,11 +4,8 @@
 # `Projects::MembersController#edit`.
 module Views::Controllers::Projects::Members
   class Groups < Views::Base
-    def initialize(project:, user:)
-      super()
-      @project = project
-      @user = user
-    end
+    prop :project, ::Project
+    prop :user, ::User
 
     def view_template
       render_group(:change_member_status_members,
@@ -23,7 +20,7 @@ module Views::Controllers::Projects::Members
 
     def render_group(label_key, users, show_edit:)
       p(class: "mb-0") do
-        b { plain("#{label_key.t}:") }
+        b { append_colon(label_key.t) }
       end
       p(class: "ml-3") do
         users.each do |u|

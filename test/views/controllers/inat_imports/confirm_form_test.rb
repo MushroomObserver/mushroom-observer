@@ -26,6 +26,19 @@ module Views::Controllers::InatImports
       assert_html(html, "#as_of")
     end
 
+    # "Proceed" redirects to iNaturalist's external OAuth page --
+    # Turbo Drive's fetch-based submission doesn't navigate the
+    # browser there correctly on a cross-origin redirect, so this one
+    # button opts out of Turbo. "Go Back" stays Turbo-managed (it
+    # reloads the New form in place, already forced to a non-2xx
+    # status).
+    def test_proceed_button_opts_out_of_turbo
+      html = render_form
+
+      assert_html(html, "button[name='confirmed'][data-turbo='false']")
+      assert_no_html(html, "button[name='go_back'][data-turbo]")
+    end
+
     def test_carries_inat_username_through_hidden_field
       html = render_form
 
@@ -91,6 +104,19 @@ module Views::Controllers::InatImports
       )
 
       assert_html(html, "#total_ignored_count")
+    end
+
+    def test_ignored_total_includes_over_cap_excess
+      requested = InatImport::MAX_IMPORTABLE + 100
+      estimate_with_date = InatImport::MAX_IMPORTABLE + 50
+      excess = InatImport.excess_over_cap(estimate_with_date)
+      html = render_form(
+        breakdown: { requested: requested,
+                     estimate_with_date: estimate_with_date }
+      )
+
+      assert_html(html, "#total_ignored_count",
+                  text: (requested - estimate_with_date + excess).to_s)
     end
 
     def test_overlap_note_absent_with_single_ignored_row
@@ -170,6 +196,48 @@ module Views::Controllers::InatImports
       html = render_form(inat_import: nil)
 
       assert_html(html, "#estimated_time")
+    end
+
+    def test_expected_count_capped_at_max_importable
+      html = render_form(expected: InatImport::MAX_IMPORTABLE + 100)
+
+      assert_html(html, "#expected_count",
+                  text: InatImport::MAX_IMPORTABLE.to_s)
+    end
+
+    def test_expected_count_uncapped_when_under_max_importable
+      html = render_form(expected: InatImport::MAX_IMPORTABLE - 1)
+
+      assert_html(html, "#expected_count",
+                  text: (InatImport::MAX_IMPORTABLE - 1).to_s)
+    end
+
+    def test_over_cap_line_absent_when_under_cap
+      html = render_form(expected: InatImport::MAX_IMPORTABLE)
+
+      assert_no_html(html, "#over_cap_count")
+      assert_no_html(html, "#over_cap_note")
+    end
+
+    def test_over_cap_line_present_when_over_cap
+      excess = 100
+      html = render_form(expected: InatImport::MAX_IMPORTABLE + excess)
+
+      assert_html(html, "#over_cap_count", text: excess.to_s)
+      assert_html(html, "#over_cap_note",
+                  text: :inat_import_confirm_over_cap_note.l)
+    end
+
+    def test_estimated_time_capped_at_max_importable
+      html = render_form(inat_import: nil,
+                         expected: InatImport::MAX_IMPORTABLE + 100)
+      seconds =
+        InatImport::MAX_IMPORTABLE * InatImport::BASE_AVG_IMPORT_SECONDS
+      expected_time = Kernel.format(
+        "%02d:%02d:%02d", seconds / 3600, seconds % 3600 / 60, seconds % 60
+      )
+
+      assert_html(html, "#estimated_time", text: expected_time)
     end
 
     private

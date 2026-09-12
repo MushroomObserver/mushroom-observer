@@ -46,8 +46,9 @@ module Views::Controllers::Observations
       submitted_list_ids: nil,
       error_checked_projects: [],
       suspect_checked_projects: [],
-      field_code: nil,
-      field_code_locked: false
+      cross_prefix_projects: [],
+      slip_target_project: nil,
+      field_code: nil
     }.freeze
 
     def initialize(model, **attrs)
@@ -65,7 +66,7 @@ module Views::Controllers::Observations
     end
 
     def view_template
-      submit(button_name, center: true)
+      submit(button_name, center: true, disable_with: :submitting.ti)
       render_images_details_panel
       render_naming_specimen_panel
       render_notes_panel
@@ -239,14 +240,12 @@ module Views::Controllers::Observations
     end
 
     def render_specimen_column
-      code = @field_code_locked ? @field_code : editable_field_code
       Column(xs: 12, md: 6) do
         render(Specimen.new(
                  form: self,
                  observation: model,
                  mode: @mode,
-                 field_code: code,
-                 field_code_locked: @field_code_locked,
+                 field_code: editable_field_code,
                  collectors_name: @collectors_name,
                  collectors_number: @collectors_number,
                  herbarium_name: @herbarium_name,
@@ -256,10 +255,9 @@ module Views::Controllers::Observations
       end
     end
 
-    # Field code for the editable input. Nil when locked (QR workflow).
+    # Value for the field-code input: the incoming param (a QR scan, or a
+    # failed submit being re-rendered) else the slip already on the record.
     def editable_field_code
-      return nil if @field_code_locked
-
       @field_code || (model.persisted? ? model.field_slip&.code : nil)
     end
 
@@ -269,7 +267,7 @@ module Views::Controllers::Observations
 
     def show_projects?
       @projects.any? || @error_checked_projects.any? ||
-        @suspect_checked_projects.any?
+        @suspect_checked_projects.any? || @cross_prefix_projects.any?
     end
 
     def render_projects_panel
@@ -281,7 +279,9 @@ module Views::Controllers::Observations
                projects: @projects,
                submitted_project_ids: @submitted_project_ids,
                error_checked_projects: @error_checked_projects,
-               suspect_checked_projects: @suspect_checked_projects
+               suspect_checked_projects: @suspect_checked_projects,
+               cross_prefix_projects: @cross_prefix_projects,
+               slip_target_project: @slip_target_project
              ))
     end
 

@@ -14,9 +14,7 @@ class API2::LocationsTest < UnitTestCase
   #  :section: Location Requests
   # ------------------------------
 
-  def params_get(**)
-    { method: :get, action: :location }.merge(**)
-  end
+  def api2_model = Location
 
   def loc_sample
     @loc_sample ||= Location.all.sample
@@ -68,6 +66,16 @@ class API2::LocationsTest < UnitTestCase
     assert_api_results(locs)
   end
 
+  # All four edges present (passes all_edges?) but geometrically invalid
+  # (south > north) -- Mappable::Box#valid? rejects it, hitting the
+  # second NeedAllFourEdges raise in parse_bounding_box!, distinct from
+  # the missing-edge case above.
+  def test_getting_locations_in_invalid_box
+    assert_api_fail(
+      params_get(north: 39, south: 40, east: -123, west: -124)
+    )
+  end
+
   def test_posting_locations
     name1  = "Reno, Nevada, USA"
     name2  = "Sparks, Nevada, USA"
@@ -83,19 +91,9 @@ class API2::LocationsTest < UnitTestCase
     @low   = 1350
     @notes = "Biggest Little City"
     @user  = rolf
-    params = {
-      method: :post,
-      action: :location,
-      api_key: @api_key.key,
-      name: @name,
-      north: @north,
-      south: @south,
-      east: @east,
-      west: @west,
-      high: @high,
-      low: @low,
-      notes: @notes
-    }
+    params = params_post(name: @name, north: @north, south: @south,
+                         east: @east, west: @west, high: @high, low: @low,
+                         notes: @notes)
     assert_api_pass(params)
     assert_last_location_correct
     assert_api_fail(params)
@@ -115,23 +113,28 @@ class API2::LocationsTest < UnitTestCase
     assert_last_location_correct
   end
 
+  # Location.check_for_* return unresolved [tag, args] pairs (#4901);
+  # API2::Helpers#make_sure_location_isnt_dubious! resolves them into
+  # the DubiousLocationName error text. Confirm the resolved text
+  # actually made it through, not just that the request failed.
+  def test_posting_location_with_dubious_name_reports_resolved_reason
+    params = params_post(name: "Evil Lair, Latveria", north: 39.64,
+                         south: 39.39, east: -119.70, west: -119.94)
+
+    assert_api_fail(params)
+    message = @api.errors.first.to_s
+    assert_match(/Latveria/, message)
+    assert_match(/Unknown country/, message)
+  end
+
   def test_patching_locations
     albion = locations(:albion)
     burbank = locations(:burbank)
-    params = {
-      method: :patch,
-      action: :location,
-      api_key: @api_key.key,
-      id: albion.id,
-      set_name: "Reno, Nevada, USA",
-      set_north: 39.64,
-      set_south: 39.39,
-      set_east: -119.70,
-      set_west: -119.94,
-      set_high: 1700,
-      set_low: 1350,
-      set_notes: "Biggest Little City"
-    }
+    params = params_patch(id: albion.id, set_name: "Reno, Nevada, USA",
+                          set_north: 39.64, set_south: 39.39,
+                          set_east: -119.70, set_west: -119.94,
+                          set_high: 1700, set_low: 1350,
+                          set_notes: "Biggest Little City")
 
     # Just to be clear about the starting point, the only objects attached to
     # this location at first are some versions and a description, all owned by
@@ -215,12 +218,7 @@ class API2::LocationsTest < UnitTestCase
 
   def test_deleting_locations
     loc = rolf.locations.sample
-    params = {
-      method: :delete,
-      action: :location,
-      api_key: @api_key.key,
-      id: loc.id
-    }
+    params = params_delete(id: loc.id)
     # No DELETE requests should be allowed at all.
     assert_api_fail(params)
   end

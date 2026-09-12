@@ -191,7 +191,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!
-  has_many :namings
+  #
+  # Order by id (creation order): consensus tie-breaking and dump_votes
+  # read this association in order, so it must be deterministic and not
+  # left to whichever index MySQL picks. The (observation_id, user_id,
+  # name_id) unique index (#5186) otherwise sorts these rows by user.
+  has_many :namings, -> { order(:id) }, inverse_of: :observation
 
   has_many :observation_images, dependent: :destroy
   has_many :images, through: :observation_images
@@ -218,22 +223,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Backward-compatible writer: creates/reuses an occurrence to
-  # link this observation to the given field slip.
+  # link this observation to the given field slip. Detaching is done
+  # by clearing the occurrence, so nil is a no-op here.
   def field_slip=(slip)
-    if slip.nil?
-      # Detach: handled by clearing occurrence
-      return
-    end
+    return if slip.nil?
 
-    old_occ = occurrence
-    occ = slip.occurrence
-    occ ||= Occurrence.create!(
-      user: user || current_user,
-      primary_observation: self,
-      field_slip: slip
-    )
-    self.occurrence = occ
-    cleanup_old_occurrence(old_occ, occ)
+    self.occurrence = slip.occurrence ||
+                      adopt_slip_onto_occurrence(slip) ||
+                      Occurrence.create!(user: user || current_user,
+                                         primary_observation: self,
+                                         field_slip: slip)
   end
 
   has_many :observation_herbarium_records, dependent: :destroy
@@ -251,11 +250,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_save :prefer_minimum_bounding_box_to_earth
   before_save :set_gps_dubious
   before_save :reconcile_collector_user
+  before_save :ensure_thumb_image_present
   before_create :default_collector_to_creator
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   after_update :update_occurrence_specimen_cache
+  after_update :cleanup_abandoned_occurrence
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -283,10 +284,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   # Swap the `thumb_image:` hash for the matrix_box_carousels
   # alternative below when the carousel feature lands.
+  # The /obs/ form is the shareable one: logged-out visitors get a 403
+  # on the /:id and /observations/:id forms (the spider block in
+  # ApplicationController::Indexes#check_for_spider_block allows only
+  # this form), so every URL that leaves the site must use it (#5357).
+  def self.show_url(id)
+    "#{MO.http_domain}/obs/#{id}"
+  end
+
   def self.matrix_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
-     # for matrix_box_carousels:
-     # { images: [:image_votes, :license, :projects, :user] },
      :collector_user,
      { external_links: :external_site }, :location, :name,
      { namings: :votes },
@@ -316,7 +323,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
      :observation_views,
      :project_observations,
      :species_list_observations,
-     { occurrence: [:field_slip, :observations] },
+     # Members' sequences: the Specimen panel lists the whole
+     # occurrence's sequences (they describe the shared specimen).
+     { occurrence: [:field_slip, { observations: { sequences: :user } }] },
      { projects: [{ admin_group: :users }, :image] },
      :rss_log,
      { sequences: :user },
@@ -776,7 +785,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     value = read_attribute(:notes)
     return Observation.no_notes unless value.is_a?(Hash)
 
-    NormalizedHash.new(value)
+    NotesHash.new(value)
   end
 
   # Notes to render on this observation's show page. For the primary
@@ -794,9 +803,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # True only for the primary observation of an occurrence that has more
   # than one member -- the one case where the show page merges notes.
   def shows_merged_notes?
+    occurrence_primary? && occurrence.observations.many?
+  end
+
+  # True when this observation is the primary of its occurrence.
+  def occurrence_primary?
     occ = occurrence
-    occ.present? && occ.primary_observation_id == id &&
-      occ.observations.many?
+    occ.present? && occ.primary_observation_id == id
   end
 
   # Key used for general Observation.notes
@@ -841,8 +854,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   notes: { Other: abc }
   #   observation.notes_part_value("Other") #=> "abc"
   #   observation.notes_part_value(:Other)  #=> "abc"
+  #
+  # Falls back to a case-insensitive match on the stored key.
+  # `notes_orphaned_parts` dedups case-insensitively, so a template
+  # heading legitimately owns a stored key differing only in case (a
+  # user with "odor/taste" in their template and a field slip's stored
+  # :"Odor/Taste"). Without the fallback that part renders blank and
+  # the stored value is silently dropped.
   def notes_part_value(part)
-    notes.blank? ? "" : notes[notes_normalized_key(part)]
+    return "" if notes.blank?
+
+    key = notes_normalized_key(part)
+    return notes[key] if notes.key?(key)
+
+    other = notes_key_matching(key)
+    other ? notes[other] : nil
+  end
+
+  # The stored notes key equal to `key` ignoring case, if any.
+  def notes_key_matching(key)
+    target = key.to_s.downcase
+    notes.keys.find { |stored| stored.to_s.downcase == target }
   end
 
   # Change spaces to underscores in keys
@@ -864,11 +896,38 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   ["orphaned_part", "Other"]
   #   ["template_1st_part", "template_2nd_part", "Other"]
   #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
-  def form_notes_parts(user)
-    return user.notes_template_parts + [other_notes_part] if notes.blank?
+  #
+  # `extra` holds headings a caller wants shown whether or not this
+  # observation has values for them yet — the field-slip headings on the
+  # observation form (#4932). They sit after the template and orphaned
+  # parts, and drop out entirely when an earlier part already claims the
+  # same heading, so one the user configured keeps its own position.
+  def form_notes_parts(user, extra: [])
+    parts = user.notes_template_parts
+    parts += notes_orphaned_parts(user) if notes.present?
+    parts + unclaimed_notes_parts(extra, parts) + [other_notes_part]
+  end
 
-    user.notes_template_parts + notes_orphaned_parts(user) +
-      [other_notes_part]
+  # Those of `extra` no earlier part (or "Other") already claims.
+  def unclaimed_notes_parts(extra, existing)
+    return [] if extra.blank?
+
+    seen = (existing + [other_notes_part]).
+           to_set { |part| notes_comparison_key(part) }
+    extra.each_with_object([]) do |part, result|
+      key = notes_comparison_key(part)
+      next if seen.include?(key)
+
+      result << part
+      seen << key
+    end
+  end
+
+  # How two note headings are told apart: underscores and spaces are
+  # interchangeable, case is not significant. Shared by every dedup below
+  # so they can't drift out of agreement.
+  def notes_comparison_key(part)
+    normalize_for_display(part).downcase
   end
 
   # Array of notes parts (Strings) which are
@@ -877,14 +936,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    # Normalization for comparison (lowercase)
-    normalize_for_comparison = ->(key) { normalize_for_display(key).downcase }
-
     known_keys = (user.notes_template_parts + [other_notes_part]).
-                 map(&normalize_for_comparison).
-                 to_set
+                 to_set { |part| notes_comparison_key(part) }
     notes.keys.each_with_object([]) do |key, result|
-      normalized_key = normalize_for_comparison.call(key)
+      normalized_key = notes_comparison_key(key)
       next if known_keys.include?(normalized_key)
 
       result << normalize_for_display(key)
@@ -952,18 +1007,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     name.observation_name(user)
   end
 
-  # Plain-text title for the browser tab `<title>`. `text_name` is
-  # the denormalized binomial-only column — no author, no id, no
-  # markup. The title helper prepends "OBSERVATION <id>:" so we
-  # don't need those here. (The visible page heading is built by
-  # `header/title_helper#page_title_for` via
-  # `Observations::ConsensusNameLink` — wraps the consensus name
-  # in a link, which is view-layer work that can't live cleanly on
-  # the model.)
-  def document_title
-    text_name
-  end
-
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name(user = nil)
     string_with_id(name.observation_name(user))
@@ -1005,13 +1048,65 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def add_image(img)
     unless images.include?(img)
       images << img
-      self.thumb_image = img unless thumb_image
+      # Check the FK, not the association: reading `thumb_image` after
+      # the form assigned a new thumb_image_id would lazy-load, which
+      # strict_loading (edit_includes) forbids.
+      self.thumb_image = img unless thumb_image_id
       self.updated_at = Time.zone.now
       track_change(:added_image)
       save
       reload
     end
     img
+  end
+
+  # An observation with images should always have a thumbnail. Before
+  # 2026-07-25 a newly attached image did not become the default
+  # thumbnail, so observations could be saved with images and a null
+  # `thumb_image_id`, which renders as a blank box in the indexes
+  # (#5314 follow-up). Self-heal here so no save can persist that
+  # state again. Only when the images are already loaded -- this must
+  # not add a query to the hot create path (where the first save
+  # happens before any image is attached), and must not lazy-load
+  # under the edit form's strict_loading.
+  def ensure_thumb_image_present
+    return if thumb_image_id.present?
+
+    self.thumb_image_id = replacement_thumb_image_id
+  end
+
+  # The image to adopt as thumbnail for an observation saved without
+  # one. An observation's images are preferred; a member holding no
+  # image takes a sibling's image (the cross-observation thumbnail the
+  # show page already pools -- #5317). Kept query-free on the hot
+  # paths: a loaded image set is read in memory, and an observation
+  # with no occurrence (a plain create or edit) issues no query. The
+  # occurrence branch uses ObservationImage directly rather than the
+  # `images` association, so it is safe under the edit form's
+  # strict_loading.
+  def replacement_thumb_image_id
+    if images.loaded?
+      # In memory: an attached image if present (a loaded-empty set
+      # proves there are none, so no query), else a sibling's.
+      images.min_by(&:id)&.id || sibling_thumb_image_id
+    elsif occurrence_id
+      # Not loaded, but in an occurrence: attached image, then sibling.
+      ObservationImage.where(observation_id: id).minimum(:image_id) ||
+        sibling_thumb_image_id
+    end
+    # Not loaded and no occurrence (a plain create or edit): no query.
+  end
+
+  # The oldest image among this observation's occurrence siblings, by a
+  # direct ObservationImage query (strict_loading-safe), or nil when it
+  # has no occurrence.
+  def sibling_thumb_image_id
+    return nil unless occurrence_id
+
+    ObservationImage.where(
+      observation_id: Observation.where(occurrence_id: occurrence_id).
+                      where.not(id: id).select(:id)
+    ).minimum(:image_id)
   end
 
   # List of images attached to this Observation, sorted
@@ -1100,22 +1195,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     mo_api: 4
   }
 
-  # Message to use to credit the source of this observation.
-  # External imports take precedence over the entry agent: an obs
-  # synced from iNat surfaces as "Imported from iNaturalist" even if
-  # the user originally created it via mo_website. Returns nil only
-  # when neither an import_link nor a source enum value is present.
-  # Intended for use with .tpl to render as HTML:
-  #   <%= observation.source_credit.tpl %>
-  def source_credit
-    if (link = import_link)
-      :source_credit_external.l(name: link.external_site.name,
-                                url: link.link_url)
-    elsif source.present?
-      :"source_credit_#{source}"
-    end
-  end
-
   # The ExternalLink (if any) recording where this observation was imported
   # from — the external-source axis of #4208 (#4299). At most one per obs.
   # Uses the loaded `external_links` association when present (matrix box,
@@ -1128,19 +1207,35 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Structured form of source_credit for external imports — returns
-  # { text:, url: } so renderers can build the link element with
-  # whatever attributes they need (e.g. target="_blank" for off-site).
-  # Returns nil for non-imported observations; callers fall back to
-  # source_credit (textile / enum) in that case.
-  def external_credit_link
-    return nil unless (link = import_link)
+  # True when this observation is a read-only reflection of an imported
+  # source (#4214): its scalar core (date/location/GPS/notes) mirrors the
+  # source and is refreshed from it by resync (#4215), so MO-side edits to
+  # those fields are blocked. The name is deliberately not in that list --
+  # iNat's identifications are mirrored at import time only, and tracking
+  # them afterwards waits on the identification-sync slice of #4215.
+  # `reflected_at` is stamped at import time for new imports (clean by
+  # construction) and by the #4585 resolution engine for the verified
+  # backlog; NULL means editable (not a reflection).
+  def reflection?
+    reflected_at.present?
+  end
 
-    {
-      text: :source_credit_external_text.l(name: link.external_site.name),
-      url: link.link_url,
-      external_id: link.external_id
-    }
+  # All read-only reflections in this observation's occurrence -- the
+  # set an occurrence-wide resync (#4215) refreshes. Sync is an
+  # occurrence-level event: users want every mirrored record current at
+  # once, not per-record control. An observation with no occurrence is
+  # treated as an occurrence of one.
+  def sync_reflections
+    members = occurrence ? occurrence.observations : [self]
+    members.select(&:reflection?)
+  end
+
+  # Whether this observation's page offers a Sync button. Any logged-in
+  # user may trigger a sync -- it applies no user input, converging on
+  # source-canonical data, the same refresh the scheduled batch performs
+  # with no user at all (#4215).
+  def syncable?
+    sync_reflections.any?
   end
 
   # Do we want to prominently advertise the source of this observation?
@@ -1238,16 +1333,70 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     occ.destroy_if_incomplete!
   end
 
-  # When an observation moves to a new occurrence, clean up the old one.
-  def cleanup_old_occurrence(old_occ, new_occ)
-    return unless old_occ && old_occ.id != new_occ.id
+  # When an observation moves to a different occurrence, fix up both
+  # sides. Old occurrence: repoint the primary if it was this
+  # observation, destroy the occurrence if it emptied or dropped below
+  # 2 members, and refresh its has_specimen cache. Must run after save
+  # -- before it, this observation still counts as a member of the old
+  # occurrence, so the primary could be "reassigned" right back to the
+  # departing record. New occurrence: refresh its has_specimen cache
+  # too -- update_occurrence_specimen_cache only fires when `specimen`
+  # itself changed, not when the membership did. Detaching
+  # (occurrence -> nil) is excluded; those flows (dissolve, field slip
+  # sync, occurrence edit) do their own cleanup.
+  def cleanup_abandoned_occurrence
+    old_id, new_id = saved_change_to_occurrence_id
+    return unless old_id && new_id
 
-    old_occ.reload
+    cleanup_old_occurrence_after_move(old_id)
+    reset_thumbnail_left_behind
+    occurrence&.recompute_has_specimen!
+  end
+
+  def cleanup_old_occurrence_after_move(old_id)
+    old_occ = Occurrence.find_by(id: old_id)
+    return unless old_occ
+
     reassign_occurrence_primary(old_occ) if old_occ.primary_observation_id == id
-    return unless Occurrence.exists?(old_occ.id)
+    return if old_occ.destroyed?
 
+    old_occ.reassign_thumbnails_from(self)
     old_occ.reload
     old_occ.destroy_if_incomplete!
+    old_occ.recompute_has_specimen! unless old_occ.destroyed?
+  end
+
+  # A thumbnail borrowed from a sibling in the old occurrence is not
+  # reachable from the new one. update_columns: an after_update
+  # callback must not re-enter the save callbacks.
+  def reset_thumbnail_left_behind
+    return if thumb_image_id.nil? || thumb_image_reachable?
+
+    update_columns(thumb_image_id: next_thumb_image&.id,
+                   updated_at: Time.zone.now)
+  end
+
+  def thumb_image_reachable?
+    return true if image_ids.include?(thumb_image_id)
+    return false unless occurrence
+
+    ObservationImage.exists?(image_id: thumb_image_id,
+                             observation_id: occurrence.observation_ids)
+  end
+
+  # An occurrence this observation already sits in that carries no
+  # slip -- a reflection's Edit-companion occurrence -- takes the slip,
+  # so its other members stay under it instead of being stranded when
+  # a fresh occurrence is built around this observation alone.
+  def adopt_slip_onto_occurrence(slip)
+    return nil unless occurrence && occurrence.field_slip_id.nil?
+
+    # update! on purpose: the validations that can fail here (slip on
+    # another occurrence, primary not a member, over the member cap)
+    # mean the occurrence is already inconsistent, and a slip must not
+    # be written onto it silently.
+    occurrence.update!(field_slip: slip)
+    occurrence
   end
 
   def reassign_occurrence_primary(occ)
@@ -1373,15 +1522,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # After defining a location, update any lists using old "where" name.
+  # After defining a location, update any observations using old "where"
+  # name. The bulk update can deadlock against concurrent observation
+  # saves; one retry after MySQL rolls the victim back is enough.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE observations
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    retried = false
+    begin
+      Observation.where(where: old_name).
+        update_all(where: location.name, location_id: location.id)
+    rescue ActiveRecord::Deadlocked
+      raise if retried
+
+      retried = true
+      retry
+    end
   end
 
   ##############################################################################
@@ -1470,9 +1624,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       Date.parse(@when_str)
     rescue ArgumentError
       if /^\d{4}-\d{1,2}-\d{1,2}$/.match?(@when_str)
-        errors.add(:when_str, :runtime_date_invalid.t)
+        errors.add(:when_str, :runtime_date_invalid)
       else
-        errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
+        errors.add(:when_str, :runtime_date_should_be_yyyymmdd)
       end
     end
   end
@@ -1484,16 +1638,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     if where.to_s.blank? && !location_id
       self.location = Location.unknown
-      # errors.add(:where, :validate_observation_where_missing.t)
+      # errors.add(:where, :validate_observation_where_missing)
     elsif where.to_s.size > 1024
-      errors.add(:where, :validate_observation_where_too_long.t)
+      errors.add(:where, :validate_observation_where_too_long)
     end
   end
 
   def check_user
     return if user || @current_user
 
-    errors.add(:user, :validate_observation_user_missing.t)
+    errors.add(:user, :validate_observation_user_missing)
   end
 
   def check_coordinates
@@ -1505,14 +1659,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def check_latitude
     if lat.blank? && lng.present? ||
        lat.present? && !Location.parse_latitude(lat)
-      errors.add(:lat, :runtime_lat_long_error.t)
+      errors.add(:lat, :runtime_lat_long_error)
     end
   end
 
   def check_longitude
     if lat.present? && lng.blank? ||
        lng.present? && !Location.parse_longitude(lng)
-      errors.add(:lng, :runtime_lat_long_error.t)
+      errors.add(:lng, :runtime_lat_long_error)
     end
   end
 
@@ -1521,7 +1675,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # As of July 5, 2020 this statement appears to be unreachable
     # because .to_i returns 0 for unparsable strings.
-    errors.add(:alt, :runtime_altitude_error.t)
+    errors.add(:alt, :runtime_altitude_error)
   end
 
   def check_hidden

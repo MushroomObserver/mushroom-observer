@@ -8,6 +8,8 @@
 #  Observation's to spring into existence.
 #
 class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
+  include ::Locationable
+
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
   before_action :store_location, only: [:show]
@@ -16,7 +18,6 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   # INDEX
   #
   def index
-    set_project_ivar
     build_index_with_query
   end
 
@@ -58,40 +59,14 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   private
 
-  # unused now. should be :date, maybe - AN
-  def default_sort_order
-    ::Query::SpeciesLists.default_order # :date
-  end
-
   def unfiltered_index_opts
     super.merge(query_args: { order_by: :date })
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display list of user's species_lists, sorted by date.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: species_lists_path
-    )
-    return unless user
-
-    query = create_query(:SpeciesList, by_users: user, order_by: :date)
-    [query, {}]
-  end
-
-  # Display list of SpeciesList's attached to a given project.
-  def project
-    project = find_or_goto_index(Project, params[:project].to_s)
-    return unless project
-
-    query = create_query(:SpeciesList, projects: project)
-    @project = project
-    [query, { always_index: true }]
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@project, query, :projects, Project)
+    query
   end
 
   def index_display_opts(opts, query)
@@ -124,14 +99,14 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     end
 
     init_ivars_for_show
-    render_phlex_show
+    render_show_view
   end
 
   def new
     @species_list = SpeciesList.new
     init_project_vars_for_create
     init_list_for_clone(params[:clone]) if params[:clone].present?
-    render_phlex_new
+    render_new_view
   end
 
   def edit
@@ -140,7 +115,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     if permission!(@species_list)
       @place_name = @species_list.place_name(@user)
       init_project_vars_for_edit(@species_list)
-      render_phlex_edit
+      render_edit_view
     else
       redirect_to(species_list_path(@species_list))
     end
@@ -213,7 +188,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     # Matches for the list-search autocompleter
     @object_names = @species_list.observations.joins(:name).
                     select(Name[:text_name], Name[:id]).distinct.
-                    order(Name[:text_name])
+                    order(Name[:text_name]).to_a
   end
 
   ##############################################################################
@@ -247,9 +222,9 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
     init_project_vars_for_reload(@species_list)
     if create_or_update == :create
-      render_phlex_new
+      render_new_view_invalid
     else
-      render_phlex_edit
+      render_edit_view_invalid
     end
   end
 
@@ -265,7 +240,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
       user: @user }
   end
 
-  def render_phlex_show
+  def render_show_view
     render(Views::Controllers::SpeciesLists::Show.new(
              species_list: @species_list, user: @user, query: @query,
              pagination_data: @pagination_data, objects: @objects,
@@ -274,16 +249,16 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
            ))
   end
 
-  def render_phlex_new
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::SpeciesLists::New.new(
              **species_list_form_view, clone_id: @clone_id
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_phlex_edit
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::SpeciesLists::Edit.new(
              **species_list_form_view
-           ))
+           ), status: status, **render_opts)
   end
 
   def validate_place_name
@@ -297,9 +272,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     @dubious_where_reasons = []
     return if @species_list.location_id
 
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @place_name,
-      approved: params.dig(:species_list, :approved_where)
+    @dubious_where_reasons = dubious_where_reasons_for(
+      @place_name, param_key: :species_list
     )
   end
 
@@ -334,11 +308,19 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   def update_redirect_and_flash_notices(create_or_update)
     log_and_flash_notices(create_or_update)
-    update_projects(@species_list, params.dig(:species_list, :project_ids))
+    update_projects(
+      @species_list,
+      params.permit(species_list: { project_ids: [] }).
+        dig(:species_list, :project_ids)
+    )
 
     if @species_list.location_id.nil?
+      flash_warning(:runtime_location_not_found.t(name: @place_name))
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @place_name,
-                                    set_species_list: @species_list.id))
+                                    set_species_list: @species_list.id,
+                                    format: :html))
     else
       redirect_to(species_list_path(@species_list))
     end

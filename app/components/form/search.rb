@@ -10,10 +10,10 @@
 #   <%= render(Components::Form::Search.new(
 #         @search,
 #         search_controller: self,
-#         local: false
+#         context: :dropdown
 #       )) %>
 #
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class Components::Form::Search < Components::ApplicationForm
   include ApplicationForm::AutocompleterPrefill
 
@@ -26,24 +26,43 @@ class Components::Form::Search < Components::ApplicationForm
   # Additional wrapper options for search-specific fields
   SEARCH_WRAPPER_OPTIONS = [:selected, :between].freeze
 
-  # NOTE: Using regular initialization instead of Literal props because
-  # Superform::Rails::Form has its own initialization pattern
-  # @param search [Query] the query model
-  # @param search_controller [Object] controller with FIELD_COLUMNS
-  # @param local [Boolean] if true, don't render header
-  # @param action [String] optional explicit form action URL
-  attr_reader :form_action_url
+  # `context:` decides which of the two places this form renders (the
+  # standalone search page, or the nav-dropdown, loaded via a
+  # turbo_stream swap) -- whether the in-form header/collapse-toggle
+  # renders and whether the nav-dropdown's turbo_stream swap-target
+  # marker is added.
+  prop :search_controller, _Interface(:search_type)
+  prop :context, _Union(:page, :dropdown), default: :page
 
-  def initialize(search, search_controller:, local: true, form_action_url: nil,
-                 **)
-    @search_controller = search_controller
-    @local = local
-    @form_action_url = form_action_url
-    super(search, **)
+  # `search_type`/`context` don't need a route helper (every search
+  # controller nests under `namespace :<search_type> do resource
+  # :search, only: [:new, :create] end`, so the action is always
+  # `/<search_type>/search`, built by hand) -- so action/method/id/
+  # class/data all pass straight through as ordinary
+  # Superform::Rails::Form constructor kwargs, no form_tag override
+  # needed. This form is always Turbo-submitted (`turbo: true`,
+  # unconditionally -- Searchable#create always redirects, so there's
+  # no same-URL-200 risk either way), via the base class's `turbo:`
+  # prop so `around_template` sets `data-turbo` correctly.
+  def initialize(model, search_controller:, context: :page, **props)
+    type = search_controller.search_type
+    data = {
+      controller: "search-length-validator",
+      search_length_validator_max_length_value:
+        Searchable::MAX_SEARCH_INPUT_LENGTH,
+      search_length_validator_search_type_value: type
+    }
+    data[:turbo_stream] = "true" if context == :dropdown
+    super(model, search_controller:, context:, turbo: true,
+                 action: "/#{type}/search", method: :post,
+                 id: "#{type}_search_form",
+                 class: "faceted-search-form pb-4",
+                 data:,
+                 **props)
   end
 
   def view_template
-    render_header unless @local
+    render_header if dropdown?
     div(id: "search_#{search_type}_flash") # turbo_stream update target
     render_form_columns
     render_form_buttons
@@ -51,33 +70,12 @@ class Components::Form::Search < Components::ApplicationForm
 
   private
 
-  # Form configuration
+  def dropdown? = @context == :dropdown
 
-  def form_tag(&block)
-    form(action: form_action, method: :post, **form_attributes, &block)
-  end
-
-  def form_action
-    @form_action_url || url_for(action: :create)
-  end
-
-  def form_attributes
-    attrs = {
-      id: "#{search_type}_search_form",
-      class: "faceted-search-form pb-4",
-      data: {
-        controller: "search-length-validator",
-        search_length_validator_max_length_value:
-          Searchable::MAX_SEARCH_INPUT_LENGTH,
-        search_length_validator_search_type_value: search_type
-      }
-    }
-    attrs[:data].merge!(turbo_stream_data) unless @local
-    attrs
-  end
-
-  # When not local (nav dropdown), use turbo_stream for in-place updates.
-  # When local (search page), #search_nav_form doesn't exist, so skip it.
+  # Only affects how *loading* this form is negotiated (swaps
+  # #search_nav_form in place on the nav-dropdown link click) --
+  # submitting still does a normal Turbo Drive visit, not an
+  # in-place result update.
   def turbo_stream_data
     { turbo_stream: "true" }
   end
@@ -92,7 +90,7 @@ class Components::Form::Search < Components::ApplicationForm
     @search_controller.search_type
   end
 
-  # Header (shown when not local/inline)
+  # Header (shown in dropdown context only)
 
   def render_header
     div(class: "flex-bar w-100") do
@@ -139,8 +137,10 @@ class Components::Form::Search < Components::ApplicationForm
       collapsible:, collapse_target:, expanded:
     ) do |panel|
       panel.with_heading { :"search_term_group_#{heading}".l }
-      panel.with_body do
-        render_shown_fields(sections:)
+      if sections[:shown].present?
+        panel.with_body do
+          render_shown_fields(sections:)
+        end
       end
       if collapsible
         panel.with_body(collapse: true) do
@@ -220,7 +220,8 @@ class Components::Form::Search < Components::ApplicationForm
             end
     text_field(field_name,
                label: query_field_label(field_name),
-               value: value) do |f|
+               value: value,
+               help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -231,7 +232,8 @@ class Components::Form::Search < Components::ApplicationForm
                textarea: true,
                rows: 1,
                label: query_field_label(field_name),
-               value: value) do |f|
+               value: value,
+               help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -248,7 +250,8 @@ class Components::Form::Search < Components::ApplicationForm
     select_field(field_name, BOOL_OPTIONS[style],
                  label: query_field_label(field_name),
                  inline: true,
-                 selected: bool_to_string(field_value(field_name))) do |f|
+                 selected: bool_to_string(field_value(field_name)),
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -262,7 +265,27 @@ class Components::Form::Search < Components::ApplicationForm
     select_field(field_name, options,
                  label: query_field_label(field_name),
                  inline: true,
-                 selected: field_value(field_name)&.to_s) do |f|
+                 selected: field_value(field_name)&.to_s,
+                 help_collapse: true, help_well: false) do |f|
+      f.with_help { field_help(field_name) }
+    end
+  end
+
+  # Query wraps a scalar into a 1-element array, so a bare submitted
+  # id validates fine even though external_sites is Array-typed.
+  #
+  # ExternalSite.select_options queries the DB, so this still hits it
+  # during render, just not on every render -- a deliberate tradeoff,
+  # not an oversight. Threading the options through as a prop instead
+  # would avoid that entirely, but ExternalSite is 2 rows and barely
+  # changes, and select_options memoizes per request (see the comment
+  # there), so this is at most one query per request, not per render.
+  def render_select_external_sites(field_name:)
+    options = [["", ""]] + ExternalSite.select_options
+    select_field(field_name, options,
+                 label: query_field_label(field_name),
+                 selected: field_value(field_name)&.first,
+                 help_collapse: true, help_well: false) do |f|
       f.with_help { field_help(field_name) }
     end
   end
@@ -354,12 +377,12 @@ class Components::Form::Search < Components::ApplicationForm
 
   # NOTE: `SearchFieldUI` returns `:single_value_autocompleter` for
   # Class-typed `query_attr` definitions (e.g.
-  # `query_attr(:needs_naming, User)`). No current search-form
+  # `query_attr(:editable_by_user, User)`). No current search-form
   # `FIELD_COLUMNS` exposes such a field, and the few existing
-  # Class-typed attrs' names (`needs_naming`, `for_user`,
-  # `by_author`, `editable_by_user`) don't map to a supported
-  # autocompleter `type` via `AutocompleterPrefill#autocompleter_type`
-  # either. The dispatcher in `render_search_field` would raise
+  # Class-typed attrs' names (`for_user`, `by_author`,
+  # `editable_by_user`) don't map to a supported autocompleter `type`
+  # via `AutocompleterPrefill#autocompleter_type` either. The
+  # dispatcher in `render_search_field` would raise
   # `NoMethodError` if a future FIELD_COLUMNS added one — loud and
   # actionable. Add `render_single_value_autocompleter` back here
   # when that day comes.
@@ -372,7 +395,8 @@ class Components::Form::Search < Components::ApplicationForm
                         textarea: true,
                         label: query_field_label(field_name),
                         value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids) do |f|
+                        hidden_value: ids,
+                        help_collapse: true, help_well: false) do |f|
       f.with_help { multiple_help(field_name) }
     end
   end
@@ -455,7 +479,7 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   def render_clear_button
-    data_attrs = @local ? {} : turbo_stream_data
+    data_attrs = dropdown? ? turbo_stream_data : {}
     Button(
       type: :get,
       name: :clear.ti,
@@ -466,12 +490,6 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   def clear_url
-    if @form_action_url
-      # Derive clear URL from action URL (replace /search with /search/new)
-      "#{@form_action_url.sub(%r{/search$}, "/search/new")}?clear=true"
-    else
-      url_for(action: :new, clear: true)
-    end
+    "/#{search_type}/search/new?clear=true"
   end
 end
-# rubocop:enable Metrics/ClassLength

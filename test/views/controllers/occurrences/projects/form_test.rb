@@ -68,8 +68,8 @@ module Views::Controllers::Occurrences::Projects
       assert_html(html,
                   "button[type='submit']" \
                   "[name='occurrence_projects[resolution]']" \
-                  "[value='skip']",
-                  text: :skip.ti)
+                  "[value='cancel']",
+                  text: :cancel.ti)
 
       # Add All button
       assert_html(html,
@@ -110,8 +110,8 @@ module Views::Controllers::Occurrences::Projects
       assert_html(html,
                   "button[type='submit']" \
                   "[name='occurrence_projects[resolution]']" \
-                  "[value='skip']",
-                  text: :skip.ti)
+                  "[value='cancel']",
+                  text: :cancel.ti)
 
       # Add All button
       assert_html(html,
@@ -221,8 +221,8 @@ module Views::Controllers::Occurrences::Projects
                   "form > .modal-footer > button[value='add_all']",
                   text: :add_all.ti)
       assert_html(html,
-                  "form > .modal-footer > button[value='skip']",
-                  text: :skip.ti)
+                  "form > .modal-footer > button[value='cancel']",
+                  text: :cancel.ti)
       assert_html(html, "form > .modal-footer > a[data-dismiss='modal']",
                   text: :cancel.ti)
     end

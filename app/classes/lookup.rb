@@ -32,6 +32,8 @@
 # instances:  Array of instances of those records
 # titles:     Array of names of those records, via @title_column set in subclass
 #             (A `names` method seemed too confusing, because Lookup::Names...)
+# unmatched:  Array of the input vals that matched no record. Populated as a
+#             side effect of `ids`/`instances` -- call one of those first.
 #
 # Class constants:
 #   (defined in subclass)
@@ -40,7 +42,7 @@
 # TITLE_METHOD:
 #
 class Lookup
-  attr_reader :vals, :params
+  attr_reader :vals, :params, :unmatched
 
   def initialize(vals, params = {})
     unless defined?(self.class::MODEL)
@@ -51,6 +53,7 @@ class Lookup
     @title_method = self.class::TITLE_METHOD
     @vals = prepare_vals(vals)
     @params = params
+    @unmatched = []
   end
 
   def prepare_vals(vals)
@@ -93,6 +96,7 @@ class Lookup
   end
 
   def evaluate_values_as_ids
+    @unmatched = []
     @vals.map do |val|
       if val.is_a?(@model)
         val.id
@@ -101,22 +105,32 @@ class Lookup
       elsif /^\d+$/.match?(val.to_s)
         val
       else
-        lookup_method(val).map(&:id) # each lookup returns an array
+        found = lookup_method(val).map(&:id) # each lookup returns an array
+        @unmatched << val if found.empty?
+        found
       end
     end.flatten.uniq.compact
   end
 
   def evaluate_values_as_instances
-    @vals.map do |val|
-      if val.is_a?(@model)
-        val
-      elsif val.is_a?(AbstractModel)
-        raise("Passed a #{val.class} to LookupIDs for #{@model}.")
-      elsif /^\d+$/.match?(val.to_s)
-        @model.find(val.to_i)
-      else
-        lookup_method(val)
-      end
-    end.flatten.uniq.compact
+    @unmatched = []
+    @vals.map { |val| match_one_instance(val) }.flatten.uniq.compact
+  end
+
+  def match_one_instance(val)
+    if val.is_a?(@model)
+      val
+    elsif val.is_a?(AbstractModel)
+      raise("Passed a #{val.class} to LookupIDs for #{@model}.")
+    elsif /^\d+$/.match?(val.to_s)
+      @model.find(val.to_i)
+    else
+      # Materialize before checking emptiness -- checking a
+      # still-unloaded Relation, then flattening it, would query
+      # twice (an EXISTS probe, then loading the records).
+      found = lookup_method(val).to_a
+      @unmatched << val if found.empty?
+      found
+    end
   end
 end

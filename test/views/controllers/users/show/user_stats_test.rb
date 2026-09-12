@@ -30,8 +30,7 @@ module Views::Controllers::Users
             count: nil, points: 0 },
           { label: "Bonus reason", count: nil, points: 10 }
         ]
-        html = render(UserStats.new(show_user: @user, name: @user.login,
-                                    rows: rows))
+        html = render_stats(rows: rows)
         link_path = routes.observations_path(by_user: @user.id)
         assert_html(html, "tr td a[href='#{link_path}']")
         assert_includes(html, "Unlinked Field")
@@ -46,10 +45,15 @@ module Views::Controllers::Users
           { field: :observations, label: "Observations", count: 0,
             weight: 1, points: 0 }
         ]
-        html = render(UserStats.new(show_user: @user, name: @user.login,
-                                    rows: rows))
+        html = render_stats(rows: rows)
         # Empty body still has the panel header but no hr/total tr.
         assert_no_html(html, "tr td hr")
+      end
+
+      private
+
+      def render_stats(**)
+        render(UserStats.new(show_user: @user, name: @user.login, **))
       end
     end
   end

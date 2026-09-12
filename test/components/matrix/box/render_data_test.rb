@@ -50,6 +50,28 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     assert_nil(component.extract_image_data[:when])
   end
 
+  # An observation with a thumbnail uses it.
+  def test_observation_uses_thumb_image
+    obs = observations(:coprinus_comatus_obs)
+    assert(obs.thumb_image_id, "fixture should have a thumb_image")
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+
+    assert_equal(obs.thumb_image, component.build_render_data[:image])
+  end
+
+  # No thumbnail: the box carries no image. The view does not query
+  # for a fallback (no queries in Phlex views); the model-layer
+  # guarantee (Observation#ensure_thumb_image_present) and the #5314
+  # backfill keep an images-but-null-thumb observation from existing.
+  def test_observation_without_thumb_has_no_image_data
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(thumb_image_id: nil)
+    obs = Observation.find(obs.id)
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+
+    assert_nil(component.build_render_data[:image])
+  end
+
   # ---------------------------------------------------------------
   # extract_rss_log_name
   # ---------------------------------------------------------------
@@ -78,5 +100,49 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     name = component.extract_rss_log_name(nil)
 
     assert_equal(rss_log.format_name.t.break_name.small_author, name)
+  end
+
+  # ---------------------------------------------------------------
+  # rss_log_detail_tag
+  # ---------------------------------------------------------------
+
+  # #parse_log can return [] when notes is blank -- target_recently_
+  # created?'s `log.last[2]` (and friends) then indexes into a nil,
+  # raising. RssLog#detail used to rescue exactly this same selection
+  # logic (dev: degrade silently; production: raise) before it moved
+  # here (#4868 follow-up) -- confirm the same protection survived
+  # the move. Hard to construct a real RssLog that naturally reaches
+  # this state (see the file-level comment), so stub the pieces
+  # directly.
+  def test_rss_log_detail_tag_degrades_gracefully_on_malformed_log
+    rss_log = rss_logs(:coprinus_comatus_obs_rss_log)
+    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+
+    result = rss_log.stub(:parse_log, []) do
+      rss_log.stub(:created_at, nil) do
+        rss_log.stub(:orphan?, false) do
+          component.rss_log_detail_tag(rss_log)
+        end
+      end
+    end
+
+    assert_nil(result)
+  end
+
+  def test_rss_log_detail_tag_raises_in_production
+    rss_log = rss_logs(:coprinus_comatus_obs_rss_log)
+    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+
+    Rails.env.stub(:production?, true) do
+      rss_log.stub(:parse_log, []) do
+        rss_log.stub(:created_at, nil) do
+          rss_log.stub(:orphan?, false) do
+            assert_raises(NoMethodError) do
+              component.rss_log_detail_tag(rss_log)
+            end
+          end
+        end
+      end
+    end
   end
 end

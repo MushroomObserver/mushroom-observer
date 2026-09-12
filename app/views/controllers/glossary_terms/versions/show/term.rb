@@ -10,8 +10,7 @@ module Views::Controllers::GlossaryTerms
 
         def view_template
           p(class: "mt-3") do
-            b { trusted_html("#{:glossary_term_name.t}:") }
-            whitespace
+            b { trusted_html(append_colon(:glossary_term_name.t)) }
             trusted_html(@glossary_term.name.t)
           end
 

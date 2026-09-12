@@ -604,7 +604,7 @@ module Name::Taxonomy
     #   Order: _Agaricales_\r\n
     #   Family: _Agaricaceae_\r\n
     #
-    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable-next Metrics/MethodLength
     def validate_classification(rank, text)
       result = text
       if text
@@ -662,7 +662,6 @@ module Name::Taxonomy
       end
       result
     end
-    # rubocop:enable Metrics/MethodLength
 
     # Parses the Classification String to eturns an Array of pairs of values.
     #

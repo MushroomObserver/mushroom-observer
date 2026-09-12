@@ -33,7 +33,7 @@ module Views::Controllers::Observations::Namings::Votes
 
       # Stimulus root + Turbo on so the controller can intercept
       # change events and submit via turbo without a full page nav.
-      assert_html(html, "form[data-controller='naming-vote']")
+      assert_html(html, "form[data-controller~='naming-vote']")
       assert_html(html, "form[data-turbo='true']")
       # `naming_id` and `localization` (JSON-encoded) are read by
       # the JS to talk back to the correct row and pick localized
@@ -115,15 +115,6 @@ module Views::Controllers::Observations::Namings::Votes
       # "earned" the confidence-menu shortcut.
       other_user = users(:dick) # not the proposer
       html = render_form(user: other_user,
-                         vote: ::Vote.new(naming: @naming, value: 2.0))
-
-      assert_html(html, "select option[value='0']",
-                  text: :vote_no_opinion.l)
-    end
-
-    def test_opinion_menu_when_no_user
-      # Anonymous viewer (no `user:`) → opinion menu always.
-      html = render_form(user: nil,
                          vote: ::Vote.new(naming: @naming, value: 2.0))
 
       assert_html(html, "select option[value='0']",

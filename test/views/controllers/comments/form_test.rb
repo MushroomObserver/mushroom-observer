@@ -36,7 +36,7 @@ module Views::Controllers::Comments
     def test_omits_turbo_when_local_true
       html = render_form_local
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_auto_determines_url_for_new_comment
@@ -60,14 +60,14 @@ module Views::Controllers::Comments
       render(Form.new(@comment,
                       action: "/test_action",
                       id: "comment_form",
-                      local: false))
+                      turbo: true))
     end
 
     def render_form_local
       render(Form.new(@comment,
                       action: "/test_action",
                       id: "comment_form",
-                      local: true))
+                      turbo: false))
     end
 
     def render_form_without_action

@@ -8,10 +8,10 @@ module Views::Controllers::Sequences
 
     def view_template
       div(class: "mt-3") do
-        strong { "#{:observation.ti}:" }
-        whitespace
+        strong { append_colon(:observation.ti) }
         trusted_html(@observation.name.display_name(current_user).t)
-        plain(" (#{@observation.id})")
+        whitespace
+        plain("(#{@observation.id})")
       end
     end
   end

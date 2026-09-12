@@ -1,5 +1,27 @@
 // form elements and inputs
 
+// FieldLabelRow's row shape for a label with appended content (a
+// help-collapse question-mark icon, or an autocompleter's
+// has-id-indicator/find/keep/edit icons) -- see
+// render_label_flex_row/render_label_with_appends.
+//
+// Bootstrap's `label { margin-bottom: 5px; }` (bootstrap-sass
+// _forms.scss, not a variable -- it's a hardcoded literal there too)
+// sits on only one side of the label's margin box, so it throws off
+// the row's align-items-center: centering the label's margin box
+// against append content that carries no margin shifts the label
+// text off the append content's visual center. Zero it here and move
+// the same bottom spacing onto the whole row instead, so only the
+// *source* of the spacing changes, not the total spacing below the
+// row.
+.label-row-with-appends label {
+  margin-bottom: 0;
+}
+
+.label-row-with-appends {
+  margin-bottom: 5px;
+}
+
 .checkbox,
 .radio {
   label {
@@ -130,43 +152,8 @@ select.has-error {
   }
 }
 
-// Specific text elements
-
-form.button_to {
-  display: inline;
-  margin: 0;
-  padding: 0;
-
-  div {
-    display: inline;
-  }
-
-  input[type=submit]:not(.btn),
-  button[type=submit]:not(.btn) {
-    margin: 0;
-    padding: 0;
-    // -webkit-appearance: caret;
-    background: none;
-    border: none;
-    font-size: inherit;
-    font-family: inherit;
-    font-weight: normal;
-    cursor: pointer;
-    // Note: Use a text-info type utility class to color the button text
-
-    &:not(.text-danger) {
-      color: $link-color;
-
-      &:hover {
-        color: $link-hover-color;
-      }
-    }
-  }
-
-  input[type=submit]:hover {
-    text-decoration: underline;
-  }
-}
+// form.button_to's base styling lives with buttons, not form elements
+// -- see _links_buttons_alerts.scss.
 
 // activity log filters inside btn-group
 a.filter-only {
@@ -295,6 +282,10 @@ form {
 .panel-body {
   .row:last-child .form-group,
   > .autocompleter:last-child .form-group.dropdown:last-child,
+  // Help now renders as a sibling after .form-group (#4911), so an
+  // autocompleter with help text has .help-block, not .form-group, as
+  // its actual last child.
+  > .autocompleter:last-child .help-block:last-child,
   > .form-group:last-child
   {
     margin-bottom: 0.25rem;
@@ -304,5 +295,39 @@ form {
     .panel-body {
       padding-top: 0 !important;
     }
+  }
+}
+
+// Locks a form's remaining fields while a deferred submit is pending,
+// toggled via `form.inert = true/false` in form-images_controller.js.
+// `inert` blocks pointer/keyboard/focus interaction without excluding
+// fields from serialization the way `disabled` would, so this rule is
+// purely the visual signal. Kept light (issue #5238) -- the disabled
+// submit button and the per-image upload overlays already carry most
+// of the "in progress" signal; a heavy dim on the rest of the page
+// read as the page having frozen or broken.
+form[inert] {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+// Take Photo opens the camera via capture= on touch devices; desktop
+// browsers ignore capture, so there the button would only duplicate
+// the file picker. hover/pointer media is the standard touch-first
+// signal (phones and tablets match; laptops, including touchscreen
+// ones with a mouse, don't).
+.take-photo-field {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .take-photo-field {
+    display: block;
+  }
+
+  // No drag source on a touch device, so the drop/paste hint would
+  // only mislead there.
+  .drop-paste-hint {
+    display: none;
   }
 }

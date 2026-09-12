@@ -8,7 +8,7 @@ class Tab::CollectionNumber::Destroy < Tab::Base
   end
 
   def title
-    :delete_collection_number.l
+    :destroy_object.t(type: :collection_number)
   end
 
   def path

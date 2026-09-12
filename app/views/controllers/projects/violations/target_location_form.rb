@@ -8,9 +8,9 @@
 #
 # The form posts `do=add_target_location`, `obs_id=<id>`, and
 # `location_id=<id>` (the radio selection — the comma-suffix the
-# user picked) to `project_violations_update_path` with PUT. The
-# route only accepts PUT, not PATCH, so we override Superform's
-# default `_method` value via `method: :put` in the initializer.
+# user picked) to `resolve_project_violations_path` with PATCH
+# (Superform's default for a persisted model) — the route also
+# accepts PUT, for the legacy button_to callers in `Form`.
 #
 # Two render modes inside `.modal-body`:
 #
@@ -83,24 +83,26 @@ module Views::Controllers::Projects::Violations
       (0..(parts.length - 1)).map { |i| parts[i..].join(", ") }
     end
 
-    def initialize(obs:, project:, existing_locations:, **)
-      @obs = obs
-      @project = project
-      # `name => Location` for every suffix that already has a row;
-      # pre-loaded by `Projects::ViolationsController#target_location_modal`.
-      @existing_locations = existing_locations
+    prop :obs, ::Observation
+    prop :project, ::Project
+    # `name => Location` for every suffix that already has a row;
+    # pre-loaded by `Projects::ViolationsController#target_location_modal`.
+    prop :existing_locations, _Hash(String, ::Location)
+
+    def initialize(obs:, project:, existing_locations:, **attrs)
       # The project is the thing being mutated (a target_location
       # entry is added to its target_locations list), so it's the
       # natural Superform "model" for dom.id. No fields bind to it —
       # every input is named explicitly. Superform picks PATCH for
-      # the persisted Project model; `project_violations_update_path`
+      # the persisted Project model; `resolve_project_violations_path`
       # accepts both PATCH and PUT (the legacy button_to calls still
       # use PUT).
-      super(project, **)
+      super(project, obs: obs, project: project,
+                     existing_locations: existing_locations, **attrs)
     end
 
     def form_action
-      project_violations_update_path(project_id: @project.id)
+      resolve_project_violations_path(@project.id)
     end
 
     # Callers (Projects::Violations::Form) check `applicable?(obs)`

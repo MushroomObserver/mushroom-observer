@@ -65,7 +65,10 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
         notes: inat_obs.notes,
-        inat_import_id: @inat_import&.id }.merge(collector_attrs)
+        inat_import_id: @inat_import&.id,
+        # A fresh import is a clean reflection by construction, so mark it
+        # read-only now (#4214). The #4585 engine stamps the backlog later.
+        reflected_at: Time.zone.now }.merge(collector_attrs)
     end
 
     # Link the collector to an MO user when the iNat collector (a custom
@@ -236,12 +239,28 @@ class Inat
                  name: name,
                  rank: rank }
       api = API2.execute(params)
-      if api.errors.any?
-        raise("Failed to create name #{name.inspect}: " \
-              "#{api.errors.join(", ")}")
-      end
+      return api.results.first unless api.errors.any?
+      return name_with_trusted_rank(name, rank) if rank_parse_error?(api)
 
-      api.results.first
+      raise("Failed to create name #{name.inspect}: " \
+            "#{api.errors.join(", ")}")
+    end
+
+    def rank_parse_error?(api)
+      api.errors.any? do |e|
+        e.is_a?(API2::NameDoesntParse) || e.is_a?(API2::NameWrongForRank)
+      end
+    end
+
+    # iNat's declared rank is authoritative even when the name string
+    # conflicts with MO's rank-guessing heuristic (e.g. suffix collisions
+    # like "-ineae" matching Suborder before Tribe, as with
+    # "Leucocoprineae"). This bypasses only this internal fallback; the
+    # public Name-creation API's parse check is unchanged for other
+    # callers.
+    def name_with_trusted_rank(name, rank)
+      Name.create_with_trusted_rank(user, name, rank) ||
+        raise("Failed to create name #{name.inspect} at rank #{rank}")
     end
 
     def user_api_key
@@ -253,19 +272,23 @@ class Inat
     end
 
     def add_naming_with_vote(name:, namer:, value:)
-      used_references = 2
-      explanation = used_references_explanation(name)
-      naming = Naming.create(
-        observation: @observation,
-        user: namer, name: name,
-        reasons: { used_references => explanation }
-      )
+      # Reuse the namer's existing naming for this name rather than stacking
+      # a duplicate -- a re-import (or a re-run of this builder) otherwise
+      # left the observation with identical namings (#5186).
+      naming = @observation.namings.find_by(user: namer, name: name) ||
+               Naming.create!(
+                 observation: @observation, user: namer, name: name,
+                 reasons: { 2 => used_references_explanation(name) }
+               )
 
-      vote = Vote.create(naming: naming, observation: @observation,
-                         user: user, value: value)
-      # We need an ObservationView, but noone has actually viewed this Obs.
-      ObservationView.create!(observation: @observation, user: user,
-                              last_view: vote.updated_at, reviewed: 1)
+      vote = Vote.find_or_initialize_by(naming: naming, user: user)
+      vote.update!(observation: @observation, value: value)
+      # An ObservationView is needed even though noone has viewed this obs.
+      ObservationView.find_or_create_by(observation: @observation,
+                                        user: user) do |view|
+        view.last_view = vote.updated_at
+        view.reviewed = 1
+      end
     end
 
     def suggested?(name)
@@ -314,17 +337,21 @@ class Inat
       inat_obs[:quality_grade] == "research"
     end
 
+    # Direct creation, not API2: sequences on a reflection are
+    # source-owned, so the API rejects native adds
+    # (ObservationIsReadOnly) -- the import, like the resync, is the
+    # source writing its data. An invalid iNat value is skipped, as
+    # the API2 path silently did.
     def add_inat_sequences
       inat_obs.sequences.each do |sequence|
-        params = { action: :sequence, method: :post,
-                   api_key: user_api_key,
-                   observation: @observation.id,
-                   locus: sequence[:locus],
-                   bases: sequence[:bases],
-                   archive: sequence[:archive],
-                   accession: sequence[:accession],
-                   notes: sequence[:notes] }
-        API2.execute(params)
+        @observation.sequences.create(
+          user: @observation.user,
+          locus: sequence[:locus],
+          bases: sequence[:bases],
+          archive: sequence[:archive],
+          accession: sequence[:accession].to_s,
+          notes: sequence[:notes].to_s
+        )
       end
     end
   end

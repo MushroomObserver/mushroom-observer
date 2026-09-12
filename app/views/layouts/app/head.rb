@@ -71,7 +71,7 @@ module Views::Layouts::App
       # plain `'` was concat-escaped to `&#39;`. `plain(...)` would
       # then re-escape the `&` to `&amp;`. Write the safe piece raw.
       title do
-        plain("#{:app_title.l}: ")
+        trusted_html(append_colon(:app_title.l))
         trusted_html(content_for(:document_title))
       end
     end

@@ -63,6 +63,26 @@ class Views::Controllers::Names::Show::NomenclatureTest < ComponentTestCase
     assert_includes(html, dangling_id.to_s)
   end
 
+  # Was Name::Synonymy#status, unit-tested directly on the model --
+  # moved here (#4901) since its only real caller was this render.
+  def test_status_line_shows_accepted_for_non_deprecated_name
+    name = names(:coprinus_comatus)
+    assert_not(name.deprecated)
+
+    html = render_nomenclature(name: name)
+
+    assert_html(html, "li.hanging-indent", text: :accepted.ti.as_displayed)
+  end
+
+  def test_status_line_shows_deprecated_for_deprecated_name
+    name = names(:petigera)
+    assert(name.deprecated)
+
+    html = render_nomenclature(name: name)
+
+    assert_html(html, "li.hanging-indent", text: :deprecated.ti.as_displayed)
+  end
+
   def routes
     Rails.application.routes.url_helpers
   end

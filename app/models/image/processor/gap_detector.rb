@@ -35,6 +35,7 @@ class Image
         @gaps = []
         @regenerated = []
         @unregenerable = []
+        @unchecked = []
         @image_server_data = Processor.image_server_data
         @image_servers = @image_server_data.keys - [:local]
       end
@@ -49,7 +50,7 @@ class Image
         end
         advance_checkpoint(scope) if images.nil?
         { gaps: @gaps, regenerated: @regenerated,
-          unregenerable: @unregenerable }
+          unregenerable: @unregenerable, unchecked: @unchecked }
       end
 
       private
@@ -71,18 +72,39 @@ class Image
       end
 
       def gaps_on_server(server, images)
-        image_for = {}
-        images.each do |image|
+        image_for = image_by_path(server, images)
+        image_for.keys.each_slice(REMOTE_CHECK_BATCH).flat_map do |chunk|
+          chunk_gaps(server, chunk, image_for)
+        end
+      end
+
+      def image_by_path(server, images)
+        images.each_with_object({}) do |image, image_for|
           paths_for_server(server, paths_for(image)).each do |path|
             image_for[path] = image
           end
         end
-        image_for.keys.each_slice(REMOTE_CHECK_BATCH).flat_map do |chunk|
-          remote = remote_sizes_for(server, chunk)
-          chunk.filter_map do |path|
-            [image_for[path], server, path] if remote[path].nil?
-          end
+      end
+
+      def chunk_gaps(server, chunk, image_for)
+        remote = remote_sizes_for(server, chunk)
+        # nil: the check itself failed (see RemoteFiles) -- reporting
+        # every path in the chunk as a gap would trigger a mass
+        # regeneration + re-upload of files that are actually fine
+        # (#4974). Record the images as unchecked instead; the held
+        # checkpoint re-examines them next run.
+        return record_unchecked(server, chunk, image_for) if remote.nil?
+
+        chunk.filter_map do |path|
+          [image_for[path], server, path] if remote[path].nil?
         end
+      end
+
+      def record_unchecked(server, chunk, image_for)
+        ids = chunk.map { |path| image_for[path].id }.uniq
+        @unchecked |= ids
+        log("Could not check #{server} - skipping #{ids.size} image(s)")
+        []
       end
 
       def paths_for(image)
@@ -125,13 +147,15 @@ class Image
       end
 
       # Advance the mark past everything examined and verified/regenerated,
-      # but hold below the lowest image we couldn't repair so it keeps
-      # being re-checked (and re-alerted) next run.
+      # but hold below the lowest image we couldn't repair -- or couldn't
+      # even check -- so it keeps being re-checked (and re-alerted) next
+      # run.
       def advance_checkpoint(scope)
         max_id = scope.maximum(:id)
         return unless max_id
 
-        ceiling = @unregenerable.min ? @unregenerable.min - 1 : max_id
+        blocked = (@unregenerable + @unchecked).min
+        ceiling = blocked ? blocked - 1 : max_id
         ImageGapCheckpoint.advance_to(ceiling)
       end
 

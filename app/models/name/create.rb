@@ -175,4 +175,26 @@ module Name::Create
   def new_name_from_parsed_name(parsed_name)
     new_name(parsed_name.params)
   end
+
+  # Find or create a Name at an explicit rank, bypassing the
+  # rank-guessing consistency check in +parse_name+ (see
+  # Name::Parse#parse_genus_or_up's +force_rank+). Intended for callers
+  # that receive +rank+ from an authoritative external taxonomy (e.g.
+  # iNat) rather than user-entered text.
+  # Returns a Name (existing or newly-saved), or nil if the string still
+  # doesn't parse for reasons unrelated to the rank mismatch.
+  def create_with_trusted_rank(user, name, rank)
+    parse = parse_name(name, rank: rank, force_rank: true)
+    return nil unless parse
+
+    existing = Name.where(text_name: parse.text_name).first
+    return existing if existing
+
+    new_name = Name.new(parse.params.merge(user: user))
+    new_name.current_user = user
+    return nil unless new_name.save
+
+    new_name.log(:log_name_created, user: user)
+    new_name
+  end
 end

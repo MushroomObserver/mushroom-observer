@@ -88,15 +88,6 @@ class License < AbstractModel
     License.where(deprecated: false)
   end
 
-  def copyright_text(year, name)
-    if url.match?(%r{/(publicdomain|cc0)/?})
-      "#{"".html_safe}#{:image_show_public_domain.t} #{name}"
-    else
-      "".html_safe + :image_show_copyright.t.to_s + " &copy;".html_safe +
-        " #{year} " + name
-    end
-  end
-
   def in_use?
     images.any? || users.any? ||
       location_descriptions.any? || name_descriptions.any?
@@ -155,7 +146,7 @@ class License < AbstractModel
   def prevent_destruction_of_license_in_use
     return unless in_use?
 
-    errors.add(:base, "Cannot delete License that's in use")
+    errors.add(:base, :validate_license_in_use)
     throw(:abort)
   end
 end

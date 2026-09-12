@@ -38,6 +38,29 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_select("#nomenclature")
   end
 
+  # `@has_name_tracker`'s `@user ? ... : false` branch requires `@user`
+  # nil inside `show` -- unreachable through a request, since
+  # `login_required` redirects to the login page before `show` runs
+  # whenever `@user` would end up nil (autologin clears an invalid
+  # session's `user_id` before `login_required` even checks it). Stub
+  # out both auth before_actions for the scope of this test to reach
+  # that state directly.
+  def test_show_name_without_user_has_name_tracker_false
+    name = names(:coprinus_comatus)
+    NamesController.define_method(:autologin) { true }
+    NamesController.define_method(:login_required) { true }
+
+    get(:show, params: { id: name.id })
+
+    assert_response(:success)
+    assert_equal(
+      false, @controller.instance_variable_get(:@has_name_tracker)
+    )
+  ensure
+    NamesController.remove_method(:autologin)
+    NamesController.remove_method(:login_required)
+  end
+
   # Regression for #4491: name text (author, synonyms, classification
   # rows) is textile-safe HTML. The Phlex conversion emitted it via
   # `plain`, which re-escaped the entities, so panels showed literal
@@ -428,35 +451,37 @@ class NamesControllerShowTest < FunctionalTestCase
     # No interest in this name yet.
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Name",
-                                                id: peltigera.id, state: 1))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Name",
-                                                id: peltigera.id, state: -1))
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: peltigera, user: rolf, state: true)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Name",
-                                                id: peltigera.id, state: 0))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Name",
-                                                id: peltigera.id, state: -1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(peltigera.id)
+    )
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch, path: interest_path(peltigera.id),
+                         state: -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.create(target: peltigera, user: rolf, state: false)
     get(:show, params: { id: peltigera.id })
     assert_response(:success)
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Name",
-                                                id: peltigera.id, state: 0))
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Name",
-                                                id: peltigera.id, state: 1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(peltigera.id)
+    )
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch, path: interest_path(peltigera.id),
+                        state: 1
+    )
   end
 
   def test_next_and_prev
@@ -493,7 +518,7 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_redirected_to(name_path(name4.id, params:))
     get(:show, params: params.merge(id: name4.id, flow: :next))
     assert_redirected_to(name_path(name4.id, params:))
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :name)
 
     get(:show, params: params.merge(id: name4.id, flow: :prev))
     assert_redirected_to(name_path(name3.id, params:))
@@ -501,6 +526,6 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_redirected_to(name_path(name1.id, params:))
     get(:show, params: params.merge(id: name1.id, flow: :prev))
     assert_redirected_to(name_path(name1.id, params:))
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :name)
   end
 end

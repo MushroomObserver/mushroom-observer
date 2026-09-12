@@ -6,10 +6,7 @@
 # notification templates.
 module Views::Controllers::Names::Trackers
   class Form < ::Components::ApplicationForm
-    def initialize(model, note_template: nil, **)
-      @note_template = note_template
-      super(model, **)
-    end
+    prop :note_template, _Nilable(String), default: nil
 
     def view_template
       super do

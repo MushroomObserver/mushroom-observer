@@ -41,15 +41,15 @@ module Observations::Namings
       obs = Observation.naming_includes.find(nam.observation_id)
       consensus = ::Observation::NamingConsensus.new(obs)
       table = consensus.calc_vote_table(nam)
-      str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
-      str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
-      table.each_key do |str|
-        if str == str1 && str1 == str2
-          assert_equal(2, table[str][:num])
-        elsif str == str1 || str == str2
-          assert_equal(1, table[str][:num])
+      val1 = Vote.confidence_value(votes(:coprinus_comatus_owner_vote).value)
+      val2 = Vote.confidence_value(votes(:coprinus_comatus_other_vote).value)
+      table.each_key do |val|
+        if val == val1 && val1 == val2
+          assert_equal(2, table[val][:num])
+        elsif val == val1 || val == val2
+          assert_equal(1, table[val][:num])
         else
-          assert_equal(0, table[str][:num])
+          assert_equal(0, table[val][:num])
         end
       end
     end

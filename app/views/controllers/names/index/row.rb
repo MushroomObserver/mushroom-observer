@@ -9,8 +9,8 @@
 #     copy-button so users can clipboard the name string)
 #   - the observations count badge (per-name count derived in
 #     bulk by the Index view via `Name.count_observations`)
-#   - on the `has_descriptions` subaction only, three extra
-#     `<span>`s with the description's authors / note status /
+#   - when the active query filters on `has_descriptions`, three
+#     extra `<span>`s with the description's authors / note status /
 #     review status
 class Views::Controllers::Names::Index::Row < Views::Base
   prop :name, ::Name

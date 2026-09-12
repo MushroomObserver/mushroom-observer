@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying herbarium records.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
   before_action :store_location, except: [:destroy]
@@ -39,28 +39,10 @@ class HerbariumRecordsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Herbaria.default_order # :name
-  end
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
-  end
-
-  def herbarium
-    query = create_query(:HerbariumRecord,
-                         herbaria: params[:herbarium].to_s,
-                         order_by: :herbarium_label)
-    [query, { always_index: true }]
-  end
-
-  def observation
-    @observation = Observation.find(params[:observation])
-    query = create_query(:HerbariumRecord,
-                         observations: params[:observation].to_s,
-                         order_by: :herbarium_label)
-    [query, { always_index: true }]
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@observation, query, :observations, Observation)
+    query
   end
 
   def index_display_opts(opts, _query)
@@ -100,7 +82,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html { render_new_phlex }
+      format.html { render_new_view }
     end
   end
 
@@ -121,7 +103,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html { render_edit_phlex }
+      format.html { render_edit_view }
     end
   end
 
@@ -160,14 +142,14 @@ class HerbariumRecordsController < ApplicationController
     find_herbarium_record!
   end
 
-  def render_new_phlex
+  def render_new_view
     render(Views::Controllers::HerbariumRecords::New.new(
              herbarium_record: @herbarium_record,
              observation: @observation, user: @user
            ))
   end
 
-  def render_edit_phlex
+  def render_edit_view
     render(Views::Controllers::HerbariumRecords::Edit.new(
              herbarium_record: @herbarium_record, user: @user,
              back: @back, back_object: @back_object
@@ -227,13 +209,10 @@ class HerbariumRecordsController < ApplicationController
       :runtime_added_to.t(type: :herbarium_record, name: :observation)
     )
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record)
-      end
-      format.turbo_stream do
-        render_herbarium_records_section_update
-      end
+    if modal_submission?(:herbarium_record)
+      render_herbarium_records_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @herbarium_record)
     end
   end
 
@@ -272,14 +251,11 @@ class HerbariumRecordsController < ApplicationController
       @herbarium_record.herbarium != old_herbarium
     flash_notice(:runtime_updated_at.t(type: :herbarium_record))
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record)
-      end
+    if modal_submission?(:herbarium_record)
       @observation = @back_object # if we're here, we're on an obs page
-      format.turbo_stream do
-        render_herbarium_records_section_update
-      end
+      render_herbarium_records_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @herbarium_record)
     end
   end
 
@@ -307,13 +283,10 @@ class HerbariumRecordsController < ApplicationController
                       end
     redirect_params[:back] = @back if @back.present?
 
-    respond_to do |format|
-      format.html do
-        redirect_to(redirect_params)
-      end
-      format.turbo_stream do
-        reload_herbarium_record_modal_form_and_flash
-      end
+    if modal_submission?(:herbarium_record)
+      reload_herbarium_record_modal_form_and_flash
+    else
+      redirect_to(redirect_params)
     end
   end
 
@@ -362,7 +335,7 @@ class HerbariumRecordsController < ApplicationController
   # Determine @observation for redirect after destroy.
   # Must be called before destroy since we need to check observations.
   def figure_out_destroy_redirect
-    back = params[:back].to_s
+    back = params.permit(:back)[:back].to_s
     @observation = nil
     return if back == "index"
 
@@ -394,7 +367,7 @@ class HerbariumRecordsController < ApplicationController
 
   def destroy_html_response
     if @observation
-      redirect_to(observation_path(@observation.id))
+      redirect_to(permanent_observation_path(@observation.id))
     else
       redirect_with_query(action: :index)
     end
@@ -449,7 +422,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back].to_s
+    @back = params.permit(:back)[:back].to_s
     @back_object = nil
     if @back == "show"
       @back_object = @herbarium_record
@@ -466,15 +439,10 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def show_flash_and_send_back
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @herbarium_record) and
-          return
-      end
-      format.turbo_stream do
-        # renders the flash in the modal via js
-        render_modal_flash_update(modal_identifier) and return
-      end
+    if modal_submission?(:herbarium_record)
+      render_modal_flash_update(modal_identifier)
+    else
+      redirect_to_back_object_or_object(@back_object, @herbarium_record)
     end
   end
 
@@ -538,4 +506,3 @@ class HerbariumRecordsController < ApplicationController
                              }) and return true
   end
 end
-# rubocop:enable Metrics/ClassLength

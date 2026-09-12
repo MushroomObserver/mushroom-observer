@@ -20,12 +20,8 @@ module Views::Controllers::Names
   class Show < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
-    # `best_images` comes from `Name::Observations#best_images` —
-    # an `ActiveRecord::Relation` of `Image` in production; accept
-    # plain `Array` for tests that pass a stubbed list.
-    prop :best_images,
-         _Nilable(_Union(Array, ::ActiveRecord::Relation)),
-         default: nil
+    # Matches Views::Controllers::Users::Show's own best_images prop.
+    prop :best_images, _Array(_Nilable(::Image)), default: -> { [] }
     # The `Description` record (eager-loaded via
     # `Name.show_includes`). Forwarded to `BestDescriptionPanel`,
     # which derives both the body text and the permission gates
@@ -84,7 +80,7 @@ module Views::Controllers::Names
 
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
-        render_best_images_carousel if @best_images&.length&.positive?
+        render_best_images_carousel if @best_images.length.positive?
         render(Show::BestDescriptionPanel.new(
                  name: @name, description: @description, user: @user
                ))

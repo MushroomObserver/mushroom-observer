@@ -16,7 +16,8 @@ class Components::ImageFragment < Components::Base
     lightbox_caption: :LightboxCaption,
     original_link: :OriginalLink,
     reuse_form: :ReuseForm,
-    vote_interface: :VoteInterface
+    vote_interface: :VoteInterface,
+    vote_interface_streams: :VoteInterfaceStreams
   }.freeze
 
   def self.new(**kwargs, &block)

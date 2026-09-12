@@ -10,10 +10,10 @@
 # The title piece itself is:
 # - Observation → `Views::Controllers::Observations::ConsensusNameLink`
 #   (wraps the consensus name in a link to the name page).
-# - Any other model → its `#page_title` (arity-aware so models can
-#   alias to a zero-arg method). `AbstractModel#page_title` defaults
-#   to the type-tag label, so models that don't override still get a
-#   sensible string.
+# - Any other model → `Title.for(object).page_title` (see
+#   app/classes/title.rb). Models with no `Title::` subclass get
+#   `Title`'s own default, the type-tag label, so models that don't
+#   need bespoke title logic still get a sensible string.
 module Views::Layouts
   class Header::ObjectTitle < Views::Base
     prop :object, ::AbstractModel
@@ -36,7 +36,9 @@ module Views::Layouts
     private
 
     def render_title_span
-      plain("#{:edit_object.t(type: @object.type_tag)}: ") if @mode == :edit
+      if @mode == :edit
+        trusted_html(append_colon(:edit_object.t(type: @object.type_tag)))
+      end
       render_title
     end
 
@@ -52,15 +54,8 @@ module Views::Layouts
       end
     end
 
-    # Models can alias `page_title` to a zero-arg accessor (e.g.
-    # `alias page_title title`) instead of writing a one-line wrapper
-    # that ignores `user`. The arity check lets both shapes work.
     def model_page_title
-      if @object.method(:page_title).arity.zero?
-        @object.page_title
-      else
-        @object.page_title(@user)
-      end
+      Title.for(@object).page_title(@user)
     end
   end
 end

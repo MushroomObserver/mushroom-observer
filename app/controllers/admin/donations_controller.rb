@@ -10,6 +10,11 @@ module Admin
 
     def create
       @donation = create_donation(params)
+      flash_notice(:create_donation_success.t)
+      # A same-URL non-redirect response on a Turbo-enabled form hangs
+      # Turbo Drive (see turbo_submit_forms.md); redirect back to the
+      # form instead of implicitly rendering a blank 204.
+      redirect_to(new_admin_donations_path)
     end
 
     # Review donations
@@ -22,10 +27,10 @@ module Admin
 
     def update
       update_donations(params[:reviewed])
-      @donations = Donation.order(created_at: :desc)
-      render(Views::Controllers::Admin::Donations::Edit.new(
-               donations: @donations.to_a
-             ))
+      flash_notice(:review_donations_success.t)
+      # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+      # (see turbo_submit_forms.md) -- redirect instead of re-rendering.
+      redirect_to(edit_admin_donations_path)
     end
 
     private

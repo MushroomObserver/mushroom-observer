@@ -28,9 +28,13 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
   # prop.
   CSS_CLASSES = ::Views::Layouts::Sidebar::CSS_CLASSES
 
+  prop :links, _Array(Array)
+
+  # links: arrives as `[text, url, args]` tuples (see
+  # Views::FullPageBase::ContextNav#add_context_nav) -- compact here
+  # is a defensive extra pass, not a transform callers rely on.
   def initialize(links:)
-    super()
-    @links = links.compact
+    super(links: links.compact)
   end
 
   def view_template
@@ -45,7 +49,7 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
   def render_heading
     modifier = class_names(CSS_CLASSES[:heading], CSS_CLASSES[:mobile_only])
     render(Components::ListGroup::Item.new(class: modifier)) do
-      plain("#{:app_context_actions.t}:")
+      append_colon(:app_context_actions.t)
     end
   end
 

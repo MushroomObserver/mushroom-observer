@@ -1,94 +1,72 @@
 # frozen_string_literal: true
 
-# Renders a Bootstrap 3 Glyphicon `<span>` with the MO `link-icon`
-# class added. Optionally adds a tooltip + screen-reader title.
+# Renders an SVG icon via `<use>` against the MO icon sprite
+# (vendor/assets/images/icons/mo-icons.svg, built by the private
+# MushroomObserver/icon-library repo). Always carries `mo-icon` plus
+# a per-type `mo-icon-<kebab-type>` class (e.g. `mo-icon-chevron-down`)
+# -- tests and CSS should target the type class, not the `<use>`
+# `href`: it asserts "this is the icon picked for :chevron_down",
+# not which underlying sprite symbol currently backs that pick.
+# Optionally adds a Bootstrap tooltip + an `aria-label` accessible name.
 #
 # @example Just the glyph
 #   Icon(type: :globe)
-#   # => <span class="glyphicon glyphicon-globe link-icon"></span>
+#   # => <svg class="mo-icon mo-icon-globe">
+#   #      <use href="...mo-icons-HASH.svg#globe"/>
+#   #    </svg>
 #
-# @example With tooltip + screen-reader title + extra CSS
+# @example With tooltip + accessible name + extra CSS
 #   Icon(type: :edit, title: :edit.ti, class: "text-primary")
-#   # => <span class="glyphicon glyphicon-edit link-icon text-primary"
-#   #          title="Edit" data-tooltip-target="tip">
-#   #      <span class="sr-only">Edit</span>
+#   # => <span title="Edit" data-tooltip-target="tip" aria-label="Edit">
+#   #      <svg class="mo-icon mo-icon-edit text-primary">...</svg>
 #   #    </span>
+#
+# @example Spacing around the icon: use wrap_class:, not class:
+#   Icon(type: :read_only, wrap_class: "icon-text-gap")
 class Components::Icon < Components::Base
-  # Glyph name lookup — `Components::Icon.new(type: :edit)` resolves
-  # `:edit` to the Bootstrap glyphicon class suffix `edit`, emitted as
-  # `glyphicon glyphicon-edit`. Callers across the codebase pass the
-  # semantic symbol; this table is the only place the glyphicon name
-  # is hardcoded.
-  GLYPHS = {
-    edit: "edit",
-    delete: "remove-circle",
-    add: "plus",
-    back: "step-backward",
-    show: "eye-open",
-    hide: "eye-close",
-    reuse: "share",
-    x: "remove",
-    remove: "remove-circle",
-    send: "send",
-    log_in: "log-in",
-    log_out: "log-out",
-    admin: "text-background",
-    inbox: "inbox",
-    interests: "bullhorn",
-    settings: "cog",
-    ban: "ban-circle",
-    plus: "plus-sign",
-    minus: "minus-sign",
-    trash: "trash",
-    cancel: "remove",
-    email: "envelope",
-    question: "question-sign",
-    alert: "alert",
-    list: "list",
-    copy: "copy",
-    clone: "duplicate",
-    merge: "transfer",
-    move: "random",
-    adjust: "resize-vertical",
-    make_default: "star",
-    publish: "upload",
-    check: "ok-circle",
-    deprecate: "ok-circle", # approved name needs to look "approved"
-    approve: "exclamation-sign", # deprecated name needs to look "deprecated"
-    synonyms: "random",
-    tracking: "bullhorn",
-    manage_lists: "indent-left",
-    observations: "tags",
-    print: "print",
-    globe: "globe",
-    map: "globe",
-    place: "map-marker",
-    find_on_map: "screenshot",
-    apply: "check",
-    chevron_down: "chevron-down",
-    chevron_up: "chevron-up",
-    chevron_left: "chevron-left",
-    chevron_right: "chevron-right",
-    qrcode: "qrcode",
-    mobile: "phone",
-    project: "th-list",
-    download: "download-alt",
-    new_window: "new-window",
-    search: "search",
-    prev: "triangle-left",
-    next: "triangle-right",
-    goto: "share-alt",
-    grid: "th",
-    menu: "align-justify",
-    info: "question-sign",
-    fullscreen: "fullscreen",
-    matrix: "th-large",
-    info_circle: "info-sign",
-    user: "user"
-  }.freeze
+  # Valid icon keys. The sprite's own `<symbol id="...">` already
+  # equals the key (see icon-library's script/build_sprite.rb), so
+  # there's nothing left to map each key *to* -- this exists to
+  # validate `type:` here, and for
+  # test/classes/icon_glyph_sync_test.rb to check every key has real
+  # artwork in the built sprite.
+  GLYPHS = Set[
+    :edit, :delete, :add, :back, :show, :hide, :reuse, :x, :remove,
+    :send, :log_in, :log_out, :admin, :inbox, :interests, :settings,
+    :ban, :plus, :minus, :trash, :cancel, :email, :question, :alert,
+    :list, :copy, :clone, :merge, :move, :adjust, :make_default,
+    :publish, :check, :deprecate, :approve, :synonyms, :tracking,
+    :manage_lists, :observations, :print, :globe, :map, :place,
+    :find_on_map, :apply, :chevron_down, :chevron_up, :chevron_left,
+    :chevron_right, :qrcode, :mobile, :project, :download, :attach,
+    :new_window, :search, :prev, :next, :goto, :grid, :menu, :info,
+    :fullscreen, :matrix, :info_circle, :user, :spinner, :reload,
+    :rotate_left, :rotate_right, :flip, :is_primary, :read_only
+  ].freeze
 
-  prop :type, _Nilable(Symbol), default: nil
+  # vendor/assets/images/icons/mo-icons.svg only exists on disk when
+  # fetched (CI's ICON_LIBRARY_PAT, or a dev's mo_sync_icon_library
+  # sync) -- it's never committed (licensed derivative, kept out of
+  # this public repo). Checked once at load time, not per-render: a
+  # missing sprite means every icon renders nothing for the rest of
+  # this process, same as an unrecognized `type:` already does, so a
+  # transiently-absent file can't turn into a per-request 500.
+  SPRITE_PATH = Rails.root.join("vendor/assets/images/icons/mo-icons.svg")
+  SPRITE_AVAILABLE = File.exist?(SPRITE_PATH)
+
+  prop :type, _Nilable(_Union(*GLYPHS.to_a)), default: nil
   prop :title, _Nilable(String), default: nil
+  # Wraps the icon in a `<span class: wrap_class>` -- the sanctioned
+  # way to add spacing around an icon (a padding class passed via
+  # `class:` lands on the `<svg>` itself and shrinks it instead, see
+  # `validate_no_padding_classes!`). Whenever `title:` is also given,
+  # this wrap happens regardless -- with or without a `wrap_class` --
+  # and title/tooltip/aria move onto the `<span>`: bootstrap-sass's
+  # tooltip.js skips `$element.offset()` for an SVG trigger (the
+  # `isSvg` branch in tooltip.js), using viewport- instead of
+  # document-relative coordinates, which is off by ~the scroll offset
+  # once the page has scrolled.
+  prop :wrap_class, _Nilable(String), default: nil
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar/Collapsible's pattern (plain `class:`/
   # `data:` in, no separate `html_class:`/`data:` props needed).
@@ -97,27 +75,89 @@ class Components::Icon < Components::Base
   # key) would otherwise raise a Literal::TypeError.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
-  def view_template
-    glyph = GLYPHS[@type]
-    return unless glyph
+  # `p-*`/`pl-*`/`pr-*`/`pt-*`/`pb-*`/`px-*`/`py-*` -- Bootstrap's
+  # padding utilities.
+  PADDING_CLASS_RE = /\Ap[lrtbxy]?-\d+\z/
+  # MO's spacing classes that declare padding under a name that
+  # doesn't match PADDING_CLASS_RE (see _icons.scss) -- caught here by
+  # name since the naming pattern above can't see them coming. Add to
+  # this set as new ones turn up (found this way once already: PR
+  # #5331 passed icon-text-gap straight into an Icon's class:).
+  NAMED_PADDING_CLASSES = Set["icon-text-gap"].freeze
 
-    span(class: span_class(glyph),
-         title: @title.presence,
-         data: span_data,
-         **@attributes.except(:class, :data)) do
-      span(class: "sr-only") { plain(@title) } if @title.present?
+  def view_template
+    validate_no_padding_classes!
+    return unless SPRITE_AVAILABLE && @type
+
+    if @title.present?
+      span(class: @wrap_class, title: @title, data: svg_data, aria: svg_aria) do
+        render_svg(title: nil, data: {}, aria: {})
+      end
+    elsif @wrap_class
+      span(class: @wrap_class) { render_svg }
+    else
+      render_svg
     end
   end
 
   private
 
-  def span_class(glyph)
-    base = "glyphicon glyphicon-#{glyph} link-icon"
-    class_names(base, @attributes[:class])
+  def render_svg(title: @title.presence, data: svg_data, aria: svg_aria)
+    svg(class: svg_class, title: title, data: data, aria: aria,
+        **@attributes.except(:class, :data, :aria)) do |s|
+      # width/height: "100%" -- without it, browsers inconsistently
+      # default <use>'s size against an em-sized (not pixel-sized)
+      # parent <svg>, so CSS width/height changes on .mo-icon don't
+      # reliably scale the referenced <symbol>.
+      s.use(href: "#{asset_path("icons/mo-icons.svg")}##{@type}",
+            width: "100%", height: "100%")
+    end
   end
 
-  def span_data
+  # Padding on a bare <svg> (a "replaced element", like <img>) eats
+  # into the element's rendered content instead of adding space
+  # around it -- the icon artwork renders smaller than its width/
+  # height alone would suggest, silently, no error. Checked against
+  # the fully resolved class string, so this catches a padding class
+  # arriving via a local variable or another method's return value,
+  # not just a literal string at the call site. Use wrap_class:
+  # instead.
+  def validate_no_padding_classes!
+    return if @attributes[:class].blank?
+
+    classes = @attributes[:class].to_s.split
+    offenders = classes.select do |cls|
+      cls.match?(PADDING_CLASS_RE) || NAMED_PADDING_CLASSES.include?(cls)
+    end
+    return if offenders.empty?
+
+    raise(ArgumentError.new(
+            "Icon can't take padding classes (#{offenders.join(", ")}) " \
+            "-- padding on a bare <svg> shrinks its rendered content " \
+            "instead of adding space around it. Use wrap_class: instead " \
+            "-- it wraps the icon in a span and applies the class there."
+          ))
+  end
+
+  def svg_class
+    class_names("mo-icon", "mo-icon-#{@type.to_s.tr("_", "-")}",
+                @attributes[:class])
+  end
+
+  def svg_data
     data = @attributes[:data] || {}
     @title.present? ? { tooltip_target: "tip" }.merge(data) : data
+  end
+
+  # No `<title>` child -- browsers render an SVG's own `<title>` as a
+  # native hover tooltip independently of Bootstrap's JS tooltip
+  # (`svg_data`'s `tooltip_target`), which duplicated it. `title:` (the
+  # HTML attribute above) stays for Bootstrap's tooltip text source --
+  # its `fixTitle()` neutralizes that attribute as a native tooltip on
+  # init. `aria-label` carries the persistent accessible name instead;
+  # unlike `<title>` or `title=`, it never triggers a native tooltip.
+  def svg_aria
+    aria = @attributes[:aria] || {}
+    @title.present? ? { label: @title }.merge(aria) : aria
   end
 end

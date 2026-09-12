@@ -17,6 +17,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   end
   class SelectRangeField < Components::Base
     include Phlex::Slotable
+    include FieldWithHelp
 
     prop :form, ::Components::ApplicationForm
     prop :field_name, Symbol
@@ -45,18 +46,37 @@ class Components::ApplicationForm < Superform::Rails::Form
           @form.select_field(@field_name, @options,
                              label: @label,
                              inline: true,
-                             selected: @value) do |f|
-            f.with_help { render(help_slot) } if help_slot
-          end
+                             selected: @value,
+                             wrap_class: "mb-0")
         end
         div(class: "d-inline-block") do
           @form.select_field(:"#{@field_name}_range", @options,
                              label: :to,
                              label_colon: false,
                              inline: true,
-                             selected: @range_value)
+                             selected: @range_value,
+                             wrap_class: "mb-0")
         end
       end
+      render_help_after_field
+    end
+
+    private
+
+    # FieldWithHelp#help_id wants the single field it's attached to --
+    # use the first (non-range) select, matching where help rendered
+    # before this class threaded its own help_slot into that field
+    # directly.
+    def field
+      @form.field(@field_name)
+    end
+
+    # FieldWithHelp#render_help_after_field checks
+    # wrapper_options[:help_collapse] -- this class doesn't support
+    # collapsible help (no caller has ever needed it), so a plain
+    # empty hash always takes the plain-help branch.
+    def wrapper_options
+      {}
     end
   end
 end

@@ -44,10 +44,6 @@ class ImagesController < ApplicationController
     ].freeze
   end
 
-  def default_sort_order
-    ::Query::Images.default_order # :created_at
-  end
-
   private
 
   # Don't show the index if they're asking too much.
@@ -74,32 +70,6 @@ class ImagesController < ApplicationController
         And please stop hammering our server!
       TOO_MANY_RESULTS
     )
-  end
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display matrix of images by a given user.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: images_path
-    )
-    return unless user
-
-    query = create_query(:Image, by_users: user)
-    [query, {}]
-  end
-
-  # Display matrix of Image's attached to a given project.
-  def project
-    project = find_or_goto_index(Project, params[:project].to_s)
-    return unless project
-
-    query = create_query(:Image, projects: project)
-    [query, { always_index: true }]
   end
 
   # Hook runs before template displayed. Must return query.
@@ -160,9 +130,23 @@ class ImagesController < ApplicationController
     # Update view stats on image we're actually showing.
     update_view_stats(@image)
 
+    render_show_view
+  end
+
+  def render_show_view
     render(Views::Controllers::Images::Show.new(
-             image: @image, size: @size, default_size: @default_size
+             image: @image, size: @size, default_size: @default_size,
+             field_slip_extract: field_slip_extract_for_show
            ))
+  end
+
+  # Same gate as the view's scan-state button, so nobody who can't see
+  # it pays for the lookup.
+  def field_slip_extract_for_show
+    return unless FieldSlipExtract.permitted?(image: @image, user: @user,
+                                              site_admin: in_admin_mode?)
+
+    FieldSlipExtract.find_by(image_id: @image.id)
   end
 
   # Phlex action template — explicit render per the conversion rule.
@@ -223,7 +207,7 @@ class ImagesController < ApplicationController
     val = nil if val == "0"
     cur = @image.users_vote(@user)
     if cur != val
-      anon = @user.votes_anonymous == :yes
+      anon = @user.votes_anonymous == "yes"
       @image.change_vote(@user, val, anon: anon)
     end
 

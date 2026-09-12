@@ -11,9 +11,7 @@ module Views::Controllers::Projects::Members
 
     def test_renders_member_and_admin_groups
       project = projects(:eol_project)
-      html = render(Groups.new(
-                      project: project, user: @user
-                    ))
+      html = render_groups(project: project, user: @user)
 
       # Member heading
       assert_includes(html, :change_member_status_members.t)
@@ -24,13 +22,17 @@ module Views::Controllers::Projects::Members
     def test_admin_sees_edit_links
       project = projects(:eol_project)
       # rolf is the project owner/admin
-      html = render(Groups.new(
-                      project: project, user: project.user
-                    ))
+      html = render_groups(project: project, user: project.user)
 
       assert_includes(html, :change_member_status_change_status.t)
       assert_html(html,
                   "a[href*='edit'][href*='project']")
+    end
+
+    private
+
+    def render_groups(**)
+      render(Groups.new(**))
     end
   end
 end

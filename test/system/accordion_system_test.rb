@@ -57,7 +57,7 @@ class AccordionSystemTest < ApplicationSystemTestCase
 
     # 5. After a successful submit, the view pane is back with the new notes.
     assert_selector("body.api_keys__index")
-    assert_flash_success(:account_api_keys_updated.t.as_displayed)
+    assert_flash_success(:account_api_keys_updated)
 
     assert_selector("##{view_pane_id}.collapse.in")
     assert_no_selector("##{edit_pane_id}.in")

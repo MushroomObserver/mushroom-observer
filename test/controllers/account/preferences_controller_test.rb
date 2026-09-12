@@ -78,16 +78,10 @@ module Account
       patch(:update,
             params: { user: params.merge(password_confirmation: "bogus") })
       assert_flash_error
-      assert_response(:success)
-      # Rails gives a 204 response to the patch request here, and that response
-      # has no message body. 204 means patch not accepted, but form not changed,
-      # keep editing. The lack of response body means the following assertions
-      # cannot work unless the edit form is re-rendered by the :update action.
-      # Rails only tests against the current response. Solution: re-render form.
-      # Incidentally rails.ujs disables the button on submit, and does not
-      # re-enable it after the 204.
-      # We now reenable submit button manually (on form input change) in main.js
-      #
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
+      # 422 re-renders the edit form with the submitted values still
+      # filled in, so the following assertions check that re-render.
       assert_input_value(:user_password, "")
       assert_input_value(:user_password_confirmation, "")
       assert_input_value(:user_email, "new@email.com")
@@ -136,7 +130,7 @@ module Account
 
       # Now do it correctly, and make sure changes were made.
       patch(:update, params: { user: params })
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       user = rolf.reload
       assert_equal("new@email.com", user.email)
       assert_equal(true, user.email_comments_owner)
@@ -222,7 +216,7 @@ module Account
       # I don't know if we need all the PARAMS, but
       patch(:update, params: { user: params })
 
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       assert_equal("new@email.com", user.reload.email)
     end
 
@@ -231,7 +225,7 @@ module Account
       login("rolf")
 
       patch(:update, params: { user: params })
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       assert_equal("trim@this.com", rolf.reload.email)
     end
 
@@ -250,7 +244,7 @@ module Account
       # I don't know if we need all the PARAMS, but
       patch(:update, params: { user: params })
 
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       assert_equal("California, USA", user.reload.content_filter[:region])
     end
 
@@ -296,6 +290,168 @@ module Account
                       "Preferences should be unchanged when user.save fails")
         end
       end
+    end
+
+    # "Save these as my defaults" on the RSS-logs filter form submits
+    # q[types][], not user[default_rss_type] directly.
+    def test_normalize_rss_type_list_param
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[name observation] } },
+            format: :turbo_stream)
+
+      assert_equal("name observation", rolf.reload.default_rss_type)
+    end
+
+    # Selecting "Everything" checks every type box (type_checked? in
+    # type_filters.rb treats @types == ["all"] as "check them all"),
+    # so Save Defaults submits every individual type tag. Collapses
+    # back to "all" instead of storing every tag individually.
+    def test_update_selecting_everything_collapses_to_all
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: RssLog::ALL_TYPE_TAGS.map(&:to_s) },
+                      back: "rss_logs" })
+
+      assert_response(:redirect)
+      assert_equal("all", rolf.reload.default_rss_type)
+    end
+
+    # Not just "select everything" -- any 5+ types selected (out of
+    # the 7 tags) is long enough to exceed the old limit: 40 column,
+    # even for a deliberate manual selection that isn't literally
+    # "all" and so doesn't collapse to that value.
+    def test_update_selecting_all_but_one_does_not_exceed_column_limit
+      login("rolf")
+      types = RssLog::ALL_TYPE_TAGS.map(&:to_s) - ["name"]
+
+      patch(:update, params: { q: { types: types }, back: "rss_logs" })
+
+      assert_response(:redirect)
+      assert_equal(types.join(" "), rolf.reload.default_rss_type)
+    end
+
+    # E.g. unchecking every type box before clicking Save Defaults,
+    # which submits no q[types]. No user[...] fields either, so
+    # params[:user] stays nil; update_password/update_prefs_from_form
+    # must not crash on that.
+    def test_update_with_empty_params
+      login("rolf")
+
+      patch(:update, params: {}, format: :turbo_stream)
+
+      assert_response(:success)
+    end
+
+    def test_normalize_rss_type_list_param_rejects_malformed_shape
+      login("rolf")
+      default_rss_type = rolf.default_rss_type
+
+      patch(:update,
+            params: { q: { types: { foo: "bar" } } },
+            format: :turbo_stream)
+
+      assert_equal(default_rss_type, rolf.reload.default_rss_type)
+    end
+
+    def test_update_partial_submission_preserves_other_prefs
+      login("rolf")
+      assert_equal(true, rolf.thumbnail_maps)
+      assert_equal(true, rolf.email_html)
+
+      patch(:update,
+            params: { q: { types: %w[observation] } },
+            format: :turbo_stream)
+
+      user = rolf.reload
+      assert_equal("observation", user.default_rss_type)
+      assert_equal(true, user.thumbnail_maps)
+      assert_equal(true, user.email_html)
+    end
+
+    def test_update_turbo_stream_success
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_flash(:runtime_prefs_success)
+    end
+
+    def test_update_turbo_stream_theme_change_adds_refresh_stream
+      login("rolf")
+      rolf.update(theme: "Agaricus")
+
+      patch(:update,
+            params: { user: { theme: "Cyberland" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_select("turbo-stream[action='refresh']")
+      assert_equal("Cyberland", rolf.reload.theme)
+    end
+
+    def test_update_turbo_stream_no_theme_change_omits_refresh_stream
+      login("rolf")
+      rolf.update(theme: "Agaricus")
+
+      patch(:update,
+            params: { user: { theme: "Agaricus" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_select("turbo-stream[action='refresh']", count: 0)
+    end
+
+    def test_update_turbo_stream_failure
+      login("rolf")
+
+      patch(:update,
+            params: { user: { login: "mary" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_flash_error
+      assert_equal("rolf", rolf.reload.login)
+    end
+
+    def test_update_html_redirects_to_back_destination
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] }, back: "rss_logs" })
+
+      assert_redirected_to(activity_logs_path(q: { types: %w[observation] }))
+    end
+
+    def test_update_html_unknown_back_falls_back_to_edit
+      login("rolf")
+
+      patch(:update,
+            params: { q: { types: %w[observation] }, back: "bogus" })
+
+      assert_redirected_to(action: :edit)
+    end
+
+    # Unchecking every type box before clicking Save Defaults submits
+    # no q[types] (normalize_rss_type_list_param leaves params[:user]
+    # unset) -- combined with the plain-HTML fallback path and
+    # back: "rss_logs", confirms back_url's activity_logs_path(q: {
+    # types: nil }) call does not raise.
+    def test_update_html_no_types_with_back_redirects_cleanly
+      login("rolf")
+
+      patch(:update, params: { back: "rss_logs" })
+
+      assert_redirected_to(activity_logs_path(q: { types: nil }))
     end
   end
 end

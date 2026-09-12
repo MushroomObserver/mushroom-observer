@@ -3,6 +3,8 @@
 # see observations_controller.rb
 module ObservationsController::EditAndUpdate
   include ObservationsController::SharedFormMethods
+  include ObservationsController::SiblingEXIF
+  include ObservationsController::EditablePrimary
   include ObservationsController::Validators
   include ::Locationable
 
@@ -25,12 +27,7 @@ module ObservationsController::EditAndUpdate
   #   @good_images                      list of images already attached
   #
   def edit
-    return unless find_observation!
-
-    # Make sure user owns this observation!
-    unless permission!(@observation)
-      redirect_to(action: :show, id: @observation.id) and return
-    end
+    return unless editable_or_redirect?(companion: true)
 
     init_license_var
     init_new_image_var(@observation.when)
@@ -39,7 +36,7 @@ module ObservationsController::EditAndUpdate
     @images      = []
     @good_images = @observation.images_sorted
     @sibling_images = occurrence_sibling_images
-    @exif_data = get_exif_data(@good_images)
+    @exif_data = get_exif_data(@good_images).merge(sibling_exif_data)
     @location = @observation.location
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)
@@ -51,6 +48,64 @@ module ObservationsController::EditAndUpdate
   def find_observation!
     @observation = Observation.edit_includes.safe_find(params[:id]) ||
                    flash_error_and_goto_index(Observation, params[:id])
+  end
+
+  # Both edit and update bail early on a missing obs, a permission
+  # failure, or a read-only reflection (#4214 — change it at the source
+  # and resync). Permission is checked first so a non-owner gets the
+  # standard permission-denied error; only users who could otherwise
+  # edit see the reflection warning. Returns true only when the request
+  # may proceed; each guard performs its own redirect when it stops the
+  # request.
+  def editable_or_redirect?(companion: false)
+    return false unless find_observation!
+
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id)
+      return false
+    end
+    if companion
+      return false if redirect_for_companion_or_primary!
+    elsif redirect_if_reflection!
+      return false
+    end
+
+    true
+  end
+
+  # A read-only reflection can't have its scalar core edited on MO.
+  # Adding namings/comments/images is still allowed, so the guard is on
+  # the edit form itself, not a blanket record lock. Returns the redirect
+  # (truthy) when it stops the request, nil otherwise.
+  def redirect_if_reflection!
+    return unless @observation.reflection?
+
+    flash_warning(:edit_observation_is_reflection.t)
+    redirect_to(action: :show, id: @observation.id)
+  end
+
+  # Edit on a reflection opens its companion instead (#4214): the
+  # occurrence's existing editable member, or a new one copying the
+  # snapshot. Returns the redirect when it stops the request.
+  def redirect_to_companion!
+    return unless @observation.reflection?
+
+    companion, notice = find_or_create_companion
+    flash_notice(notice.t)
+    redirect_to(edit_observation_path(companion.id))
+  rescue ActiveRecord::RecordInvalid => e
+    flash_error(e.record.errors.full_messages.join("; "))
+    redirect_to(action: :show, id: @observation.id)
+  end
+
+  # [companion, flash tag]
+  def find_or_create_companion
+    builder = Observation::Companion.new(@observation, @user)
+    if (companion = builder.existing)
+      [companion, :edit_observation_companion_existing]
+    else
+      [builder.create, :edit_observation_companion_created]
+    end
   end
 
   # Edit-mode: just build the union of projects to display. The
@@ -75,10 +130,9 @@ module ObservationsController::EditAndUpdate
   public
 
   def update
-    return unless find_observation!
-    return redirect_to(action: :show, id: @observation.id) \
-      unless permission!(@observation)
+    return unless editable_or_redirect?
 
+    normalize_observation_param
     init_update
     apply_observation_changes
     reload_edit_form and return if @any_errors
@@ -98,20 +152,32 @@ module ObservationsController::EditAndUpdate
   def init_update
     init_license_var
     init_new_image_var(@observation.when)
+    # Snapshotted so the post-save redirect can tell which photos THIS
+    # update added -- only those get the slip-review detour.
+    @image_ids_before_update = @observation.image_ids
     @any_errors = false
   end
 
   def apply_observation_changes
     update_permitted_observation_attributes
-    create_location_object_if_new(@observation)
+    # Notes first: `notes_to_sym_and_compact` rebuilds the hash from the
+    # raw params, so anything `resolve_project_aliases` writes into
+    # `notes` has to come after it or it is silently discarded. Create
+    # already assigns notes before resolving (see `rough_cut`); update
+    # did not, which cost the iNat-link wrap and the Id-by resolution on
+    # every edit. See #4932.
     @observation.notes = notes_to_sym_and_compact
+    resolve_project_aliases
+    create_location_object_if_new(@observation)
     warn_if_unchecking_specimen_with_records_present!
     strip_images! if @observation.gps_hidden
 
     validate_place_name
     validate_projects
+    validate_field_slip
     detach_removed_images
     try_to_upload_images
+    ensure_thumb_image
     try_to_save_location_if_new(@observation)
     try_to_update_observation_if_there_are_changes
   end
@@ -140,12 +206,14 @@ module ObservationsController::EditAndUpdate
       img.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: img.id))
     end
-    ensure_thumb_image
   end
 
   # Fix for issue #3995: update_permitted_observation_attributes runs before
   # detach_removed_images, so the form's blank thumb_image_id overwrites the
   # real value before remove_image can detect it needs reassignment.
+  # Must run after attach_good_images: a just-uploaded image isn't in
+  # image_ids until then, and validating earlier discarded it as the
+  # chosen thumbnail (issue #4737).
   def ensure_thumb_image
     return if @observation.thumb_image_id.present? &&
               valid_thumb_image_ids.include?(@observation.thumb_image_id)
@@ -201,12 +269,21 @@ module ObservationsController::EditAndUpdate
     end
   end
 
-  # On edit, an invalid field-slip code halts the save and re-renders the
-  # form so the user can correct it.
+  # `validate_field_slip` has already rejected a code we can't use, so
+  # reaching either branch here means the slip changed underneath us
+  # between validation and application. Rare, but it would otherwise fail
+  # silently.
   def update_field_slip_or_flag_error
-    return unless update_field_slip == :invalid
-
-    flash_error(:edit_observation_field_slip_invalid.t(code: field_code))
+    case update_field_slip
+    when :invalid
+      flash_error(:observation_field_slip_invalid.t(code: field_code))
+    when :too_many
+      flash_error(:observation_field_slip_full.t(
+                    code: field_code, max: Occurrence::MAX_OBSERVATIONS
+                  ))
+    else
+      return
+    end
     @any_errors = true
   end
 
@@ -217,14 +294,20 @@ module ObservationsController::EditAndUpdate
     @exif_data    ||= get_exif_data(@good_images)
     @location     ||= @observation.location
     @field_code     = params[:field_code]
+    # See init_location_var_for_reload: the approved_where round-trip
+    # needs @place_name set on a dubious-name re-render.
+    if @dubious_where_reasons.present?
+      @place_name = @observation.place_name(@user)
+    end
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render_edit_view
+    render_edit_view_invalid
   end
 
-  def render_edit_view
-    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs))
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs),
+           status: status, **render_opts)
   end
 
   def edit_view_attrs
@@ -236,7 +319,8 @@ module ObservationsController::EditAndUpdate
   def edit_view_obs_attrs
     {
       observation: @observation, user: @user, location: @location,
-      dubious_where_reasons: @dubious_where_reasons
+      dubious_where_reasons: @dubious_where_reasons,
+      place_name: @place_name
     }
   end
 
@@ -254,7 +338,9 @@ module ObservationsController::EditAndUpdate
       submitted_project_ids: @submitted_project_ids,
       lists: @lists || [], submitted_list_ids: @submitted_list_ids,
       error_checked_projects: @error_checked_projects || [],
-      suspect_checked_projects: @suspect_checked_projects || []
+      suspect_checked_projects: @suspect_checked_projects || [],
+      cross_prefix_projects: @cross_prefix_projects || [],
+      slip_target_project: @slip_target_project
     }
   end
 
@@ -262,10 +348,34 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
+      flash_warning(
+        :runtime_location_not_found.t(name: @observation.place_name(@user))
+      )
+      # Explicit `format: :html`: see the matching comment in
+      # ObservationsController::Create#redirect_to_next_page.
       redirect_to(new_location_path(where: @observation.place_name(@user),
-                                    set_observation: @observation.id))
+                                    set_observation: @observation.id,
+                                    format: :html))
     else
+      return if redirected_to_new_photo_slip_review?
+
       redirect_to(permanent_observation_path(@observation.id))
     end
+  end
+
+  # A slip photographed into an existing observation gets the same
+  # review handoff Create gives (reported: a photo added on edit read
+  # the slip invisibly -- no redirect, no link -- so the observation
+  # sat unnamed and the collector rescanned by hand). Only photos this
+  # update added are candidates, so routine edits of a slip
+  # observation never detour.
+  def redirected_to_new_photo_slip_review?
+    new_ids = @observation.image_ids - @image_ids_before_update
+    return false if new_ids.empty?
+
+    new_images = @observation.images.select do |image|
+      new_ids.include?(image.id)
+    end
+    redirected_to_field_slip_review?(new_images)
   end
 end

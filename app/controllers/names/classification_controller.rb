@@ -10,7 +10,7 @@ module Names
     def edit
       return unless find_name!
 
-      render_edit
+      render_edit_view
     end
 
     # PUT callback
@@ -19,7 +19,7 @@ module Names
 
       @name.classification =
         params.dig(:name, :classification).to_s.strip_html.strip_squeeze
-      return render_edit unless validate_classification!
+      return render_edit_view_invalid unless validate_classification!
 
       @name.change_classification(@name.classification)
       redirect_to(@name.show_link_args)
@@ -27,11 +27,13 @@ module Names
 
     private
 
-    def render_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Names::Classification::Edit.new(
                name: @name
              ),
-             location: edit_classification_of_name_path(@name))
+             status: status,
+             location: edit_classification_of_name_path(@name),
+             **render_opts)
     end
 
     include Names::Classification::SharedPrivateMethods

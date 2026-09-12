@@ -13,19 +13,14 @@ module Views::Controllers::Info
                            "blob/main/config/locales/en.txt"
                    ))
 
-      ul { @languages.each { |lang| render_lang(lang) } }
+      @languages.each { |lang| render_lang(lang) }
     end
 
     private
 
     def render_lang(lang)
-      li do
-        Link(type: :get, name: lang.name,
-             target: reload_with_args(user_locale: lang.locale))
-        if lang.beta
-          whitespace
-          span { "(beta)" }
-        end
+      render(Components::ListGroup::LinkItem.new) do |css_class|
+        LanguageSwitchButton(language: lang, class: css_class)
       end
     end
   end

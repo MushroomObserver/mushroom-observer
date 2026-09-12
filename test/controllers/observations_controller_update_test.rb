@@ -46,6 +46,89 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # The Geolocation section opens when the observation has coordinates,
+  # so its checkbox has to agree -- it rendered unchecked over an open
+  # section full of coordinates, and clicking it to "fix" that collapsed
+  # the section instead (#5002).
+  def test_edit_checks_geolocation_when_the_observation_has_coordinates
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[type=checkbox][name='observation[has_geolocation]']" \
+                  "[checked]")
+  end
+
+  def test_edit_leaves_geolocation_unchecked_without_coordinates
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(lat: nil, lng: nil)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[type=checkbox][name='observation[has_geolocation]']" \
+                  "[checked]", count: 0)
+  end
+
+  # Unchecking the box has to release the locality autocompleter from
+  # "localities containing this point", so the box carries a map action
+  # as well as the EXIF one.
+  def test_edit_wires_the_geolocation_checkbox_to_the_map
+    obs = observations(:unknown_with_lat_lng)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_select("input[name='observation[has_geolocation]']" \
+                  "[data-map-target='geolocationCheck']" \
+                  "[data-action~='map#geolocationToggled']")
+    assert_select("#observation_geolocation" \
+                  "[data-map-target='geolocationFields']")
+  end
+
+  # Unchecking Geolocation is the user saying the observation has no
+  # coordinates. The map sits outside the section the box collapses, so
+  # the inputs can still hold the very point being discarded.
+  def test_update_drops_coordinates_when_geolocation_is_unchecked
+    obs = observations(:unknown_with_lat_lng)
+    assert(obs.lat.present?, "fixture needs coordinates")
+    login(obs.user.login)
+
+    put(:update, params: geolocation_params(obs, has_geolocation: "0"))
+
+    obs.reload
+    assert_nil(obs.lat)
+    assert_nil(obs.lng)
+    assert_nil(obs.alt)
+  end
+
+  def test_update_keeps_coordinates_when_geolocation_is_checked
+    obs = observations(:unknown_with_lat_lng)
+    login(obs.user.login)
+
+    put(:update, params: geolocation_params(obs, has_geolocation: "1"))
+
+    obs.reload
+    assert_in_delta(34.1622, obs.lat.to_f)
+    assert_in_delta(-118.3521, obs.lng.to_f)
+    assert_equal(123, obs.alt, "the update itself should have gone through")
+  end
+
+  # A caller with no such checkbox -- the API -- must be left alone.
+  def test_update_keeps_coordinates_when_geolocation_is_not_submitted
+    obs = observations(:unknown_with_lat_lng)
+    login(obs.user.login)
+
+    put(:update, params: geolocation_params(obs))
+
+    obs.reload
+    assert_in_delta(34.1622, obs.lat.to_f)
+    assert_in_delta(-118.3521, obs.lng.to_f)
+    assert_equal(123, obs.alt)
+  end
+
   # Editing the primary of a multi-member occurrence, a sibling key it
   # doesn't store is an :inherit row -- a disabled textarea plus buttons
   # with Inherit active and the sibling value as an adopt button.
@@ -116,6 +199,176 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("button[data-notes-action='adopt']", count: 0)
   end
 
+  # The edit form shows a read-only panel for an occurrence sibling's
+  # image (an iNat reflection): a read-only note plus the image's
+  # immutable copyright/license (#5317).
+  def test_edit_shows_sibling_image_camera_info_panel
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+    sib_image = sibling.images.first
+    sib_image.update_column(:copyright_holder, "(c) Reflection Source")
+    ExternalLink.new(
+      user: sibling.user, target: sibling,
+      external_site: external_sites(:inaturalist), external_id: "998877",
+      relationship: :import
+    ).save(validate: false)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#camera_info_#{sib_image.id} div.reflection_readonly_note")
+    assert_select("#camera_info_#{sib_image.id} span.reflection_copyright",
+                  text: "(c) Reflection Source")
+    assert_select(
+      "#camera_info_#{sib_image.id} a.reflection_source_link" \
+      "[href='https://www.inaturalist.org/observations/998877']"
+    )
+  end
+
+  # An image attached to both the native and an occurrence sibling
+  # renders as the native's editable slide, not a duplicate read-only
+  # sibling panel keyed to the same image id (sibling_exif_data skips
+  # it).
+  def test_edit_skips_sibling_image_shared_with_native
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    shared = primary.images.first
+    sibling.add_image(shared)
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select(
+      "textarea[name='observation[good_image][#{shared.id}][notes]']"
+    )
+  end
+
+  # target=primary from an editable non-primary member edits the
+  # occurrence's existing editable primary.
+  def test_edit_target_primary_edits_existing_primary
+    user = users(:rolf)
+    primary = editable_member(:coprinus_comatus_obs, user)
+    other = editable_member(:detailed_unknown_obs, user)
+    occ = make_occurrence(user, primary, [primary, other])
+    login(user.login)
+
+    get(:edit, params: { id: other.id, target: "primary" })
+
+    assert_redirected_to(edit_observation_path(primary.id))
+    assert_equal(primary.id, occ.reload.primary_observation_id)
+  end
+
+  # target=primary from a reflection whose occurrence has no editable
+  # primary promotes the oldest editable sibling and edits it.
+  def test_edit_target_primary_promotes_editable_sibling
+    user = users(:rolf)
+    reflection = editable_member(:detailed_unknown_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    native = editable_member(:coprinus_comatus_obs, user)
+    occ = make_occurrence(user, reflection, [reflection, native])
+
+    login(user.login)
+    get(:edit, params: { id: reflection.id, target: "primary" })
+
+    assert_equal(native.id, occ.reload.primary_observation_id)
+    assert_redirected_to(edit_observation_path(native.id))
+  end
+
+  # target=primary from a lone read-only reflection creates a companion
+  # native, makes it primary, and edits it.
+  def test_edit_target_primary_creates_companion_for_lone_reflection
+    user = users(:rolf)
+    reflection = editable_member(:coprinus_comatus_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    occ = make_occurrence(user, reflection, [reflection])
+
+    login(user.login)
+    assert_difference("Observation.count", 1) do
+      get(:edit, params: { id: reflection.id, target: "primary" })
+    end
+
+    companion = occ.reload.primary_observation
+    assert_not(companion.reflection?, "companion is an editable native")
+    assert_redirected_to(edit_observation_path(companion.id))
+  end
+
+  # A companion that can't be created (here, invalid coordinates copied
+  # from the reflection) flashes an error and returns to the show page.
+  def test_edit_target_primary_flashes_when_companion_invalid
+    user = users(:rolf)
+    reflection = editable_member(:coprinus_comatus_obs, user)
+    reflection.update_columns(reflected_at: Time.zone.now,
+                              lat: 40.0, lng: nil)
+    make_occurrence(user, reflection, [reflection])
+    login(user.login)
+
+    get(:edit, params: { id: reflection.id, target: "primary" })
+
+    assert_flash_error
+    assert_redirected_to(action: :show, id: reflection.id)
+  end
+
+  # Guard: editable siblings but no primary set -- target=primary
+  # promotes the oldest editable member.
+  def test_edit_target_primary_promotes_oldest_when_no_primary
+    user = users(:rolf)
+    older = editable_member(:coprinus_comatus_obs, user)
+    newer = editable_member(:detailed_unknown_obs, user)
+    occ = make_occurrence(user, older, [older, newer])
+    occ.update_column(:primary_observation_id, nil)
+
+    login(user.login)
+    get(:edit, params: { id: newer.id, target: "primary" })
+
+    oldest = [older, newer].min_by(&:id)
+    assert_equal(oldest.id, occ.reload.primary_observation_id)
+    assert_redirected_to(edit_observation_path(oldest.id))
+  end
+
+  # target=primary on a reflection with no occurrence redirects to the
+  # reflection's edit, which then creates the companion (companion flow).
+  def test_edit_target_primary_on_occurrenceless_reflection
+    user = users(:rolf)
+    reflection = editable_member(:coprinus_comatus_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    login(user.login)
+
+    get(:edit, params: { id: reflection.id, target: "primary" })
+
+    assert_redirected_to(edit_observation_path(reflection.id))
+  end
+
+  # In admin mode the resolver honors admin edit rights: it edits the
+  # existing (admin-editable) primary rather than creating a companion.
+  def test_edit_target_primary_honors_admin_editability
+    make_admin("rolf")
+    admin = users(:rolf)
+    primary = observations(:detailed_unknown_obs)
+    primary.update_columns(user_id: users(:mary).id, collector_user_id: nil,
+                           occurrence_id: nil)
+    assert_not(primary.can_edit?(admin), "premise: not editable sans admin")
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(occurrence_id: nil, reflected_at: Time.zone.now)
+    occ = Occurrence.create!(user: admin, primary_observation: primary)
+    [primary, reflection].each { |o| o.update_column(:occurrence_id, occ.id) }
+
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: reflection.id, target: "primary" })
+    end
+
+    assert_redirected_to(edit_observation_path(primary.id))
+  end
+
   # A blank submitted for a sibling-held key is preserved (a deliberate
   # suppression of the inherited value); a blank for a key no sibling
   # holds is dropped as usual.
@@ -166,6 +419,137 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     params = { id: obs.id }
     get(:edit, params: params)
     assert_response(:redirect)
+  end
+
+  # Edit on a read-only reflection (#4214) creates a companion
+  # observation in a shared occurrence -- copying the snapshot, sharing
+  # the images, joining the reflection's projects -- and lands on the
+  # companion's edit form. The reflection itself is untouched.
+  def test_edit_reflection_creates_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    obs.images << images(:in_situ_image)
+    obs.update_column(:thumb_image_id, images(:in_situ_image).id)
+    project = projects(:eol_project)
+    project.add_observation(obs)
+    login(obs.user.login)
+
+    assert_difference("Observation.count", 1) do
+      get(:edit, params: { id: obs.id })
+    end
+
+    companion = obs.reload.occurrence.observations.where.not(id: obs.id).first
+    assert_not_nil(companion, "Cannot find the companion observation")
+    assert_redirected_to(edit_observation_path(companion.id))
+    assert_flash_success
+    assert_not(companion.reflection?)
+    assert_equal(obs.user_id, companion.user_id)
+    assert_equal(obs.name_id, companion.name_id)
+    assert_equal(obs.when, companion.when)
+    assert_equal(obs.where, companion.where)
+    assert_equal(obs.notes, companion.notes)
+    assert_empty(companion.image_ids, "images stay on the reflection")
+    assert_equal(obs.thumb_image_id, companion.thumb_image_id)
+    assert_equal(obs.project_ids.sort, companion.project_ids.sort)
+    occurrence = companion.occurrence
+    assert_not_nil(occurrence)
+    assert_equal(obs.reload.occurrence_id, occurrence.id)
+    assert_equal(companion.id, occurrence.primary_observation_id,
+                 "the native companion is the primary")
+    assert(obs.reflection?, "the reflection must stay a reflection")
+  end
+
+  # A second Edit goes to the companion that already exists.
+  def test_edit_reflection_reuses_existing_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+    get(:edit, params: { id: obs.id })
+    companion = obs.reload.occurrence.observations.where.not(id: obs.id).first
+    assert_not_nil(companion, "Cannot find the companion observation")
+
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: obs.id })
+    end
+
+    assert_redirected_to(edit_observation_path(companion.id))
+    assert_flash_success
+  end
+
+  # When the companion can't be made -- the reflection's occurrence is
+  # already full -- Edit flashes the error and returns to Show rather
+  # than 500ing.
+  def test_edit_reflection_flashes_when_the_companion_cannot_be_created
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    occ = Occurrence.create!(user: obs.user, primary_observation: obs)
+    obs.update!(occurrence: occ)
+    login(obs.user.login)
+
+    original = Occurrence::MAX_OBSERVATIONS
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, 1)
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: obs.id })
+    end
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_error
+  ensure
+    Occurrence.send(:remove_const, :MAX_OBSERVATIONS)
+    Occurrence.const_set(:MAX_OBSERVATIONS, original)
+  end
+
+  # A non-owner hitting edit on a reflection gets the same
+  # permission-denied error as on any observation they can't edit —
+  # not the reflection warning (Copilot review on #4852).
+  def test_edit_reflection_as_non_owner_gets_permission_error
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    non_owner = users(:mary)
+    assert_not_equal(obs.user_id, non_owner.id)
+    login(non_owner.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_error
+  end
+
+  # Regression: a request sending a bare scalar for the whole
+  # `observation` param instead of the expected nested hash used to
+  # crash deep in the call chain (e.g. notes_param_present?'s
+  # `params.dig(:observation, :notes)`, TypeError: String does not
+  # have #dig method) instead of failing gracefully. Same shape as
+  # the ObservationsControllerCreateTest regression -- Copilot
+  # flagged the sibling issue on PR #5051's
+  # collection_number_params/herbarium_record_params.
+  def test_update_observation_with_malformed_observation_param
+    obs = observations(:detailed_unknown_obs)
+    login(obs.user.login)
+
+    put(:update, params: { id: obs.id, observation: "abc" })
+
+    assert_not_equal(500, @response.status,
+                     "Malformed observation param should not 500")
+  end
+
+  def test_update_reflection_is_blocked
+    obs = observations(:imported_inat_obs)
+    original_notes = obs.notes
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: { place_name: "Somewhere Else, Japan",
+                         notes: { other: "changed on MO" } }
+        })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_warning
+    assert_equal(original_notes, obs.reload.notes,
+                 "a reflection's notes must not change through update")
   end
 
   def test_update_observation
@@ -312,7 +696,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       params,
       "mary"
     )
-    assert_response(:success) # Which really means failure
+    assert_unprocessable
   end
 
   def test_update_observation_with_another_users_image
@@ -385,11 +769,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     login("mary")
     put(:update, params: params)
 
-    # 200 :success means means failure!
-    assert_response(
-      :success,
-      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
-    )
+    assert_unprocessable
     assert_flash_error
   end
 
@@ -607,6 +987,47 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Regression (#3032): validate_place_name never passed approved: to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name on edit looped forever showing the same flash instead of
+  # accepting it.
+  def test_update_observation_dubious_place_name_approved
+    params = {
+      location: { north: 35, south: 34, east: -117, west: -118 }
+    }
+    where = "Mt. Molehill, Iowa, USA"
+
+    # First submission: dubious ("Mt." should be "Mount"), rejected.
+    generic_update_observation(
+      params.merge({ observation: { place_name: where, location_id: -1 } }),
+      0
+    )
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, update succeeds.
+    generic_update_observation(
+      params.merge(observation: { place_name: where, location_id: -1 },
+                   approved_where: where),
+      1
+    )
+  end
+
+  # The render half of the approval round-trip (see the companion
+  # validator test above): the dubious reload must embed approved_where
+  # in the form action, or the browser never sends the approval and
+  # the confirmation loops forever (reported at the 2026 SMHF event).
+  def test_update_dubious_place_rerender_embeds_approved_where
+    generic_update_observation(
+      { location: { north: 35, south: 34, east: -117, west: -118 },
+        observation: { place_name: "Mt. Molehill, Iowa, USA",
+                       location_id: -1 } },
+      0
+    )
+
+    assert_select("form#observation_form[action*=?]", "approved_where",
+                  true, "the reloaded form must carry the approval")
+  end
+
   # --------------------------------------------------------------------
   #  Test notes with template
   # --------------------------------------------------------------------
@@ -721,6 +1142,37 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Issue #4737: the JS uploader creates the Image before the form
+  # submits, so at update time the chosen thumb_image_id is a real image
+  # that isn't attached to the observation yet. It must survive the
+  # update instead of being reverted to an already-attached image.
+  def test_update_observation_new_image_can_be_thumbnail
+    obs = observations(:detailed_unknown_obs)
+    new_image = images(:disconnected_coprinus_comatus_image)
+    # The JS uploader creates the image as the logged-in user.
+    new_image.update_columns(user_id: obs.user_id)
+    assert_not_includes(obs.image_ids, new_image.id)
+
+    login(obs.user.login)
+    put(:update, params: {
+          id: obs.id,
+          observation: {
+            place_name: obs.place_name,
+            when: obs.when,
+            notes: obs.notes.to_h,
+            specimen: obs.specimen,
+            thumb_image_id: new_image.id.to_s,
+            good_image_ids: (obs.image_ids + [new_image.id]).join(" ")
+          }
+        })
+
+    obs.reload
+    assert_includes(obs.image_ids, new_image.id,
+                    "New image should be attached to the observation")
+    assert_equal(new_image.id, obs.thumb_image_id,
+                 "Newly uploaded image chosen as thumbnail should stick")
+  end
+
   # ---------- field slip code on update ----------
 
   def test_update_adds_field_slip_code
@@ -782,9 +1234,9 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       end
     end
 
-    assert_flash_text(:runtime_no_save_observation.t)
+    assert_flash(:runtime_no_save_observation)
     # Re-renders the edit form rather than redirecting.
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_update_invalid_field_slip_code
@@ -804,7 +1256,341 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                  "Observation should remain unchanged")
   end
 
+  # `validate_field_slip` rejects both of these before the save, so the
+  # post-save branches only fire when the slip changed underneath us
+  # between validation and application. A real race can't be staged, so
+  # the status is stubbed — the point is that the branch reports rather
+  # than failing silently.
+  def test_update_flags_field_slip_that_turns_invalid_after_validation
+    assert_field_slip_race_reported(:invalid)
+  end
+
+  def test_update_flags_field_slip_that_fills_after_validation
+    assert_field_slip_race_reported(:too_many)
+  end
+
+  # A project's field_slip_prefix is unique but reassignable: freeing it
+  # from its original project and giving it to a different
+  # project must not make that new project a target for an observation
+  # whose slip code still belongs to the
+  # original project. See #5150.
+  def test_update_unchanged_field_slip_code_ignores_reassigned_prefix
+    obs = observations(:minimal_unknown_obs)
+    slip = field_slips(:field_slip_one)
+    original_project = projects(:eol_project)
+    reassigned_project = projects(:current_project)
+    assert_equal(original_project, slip.project,
+                 "Test fixture setup: obs's field slip should still " \
+                 "belong to its own project")
+    assert_equal(slip, obs.field_slip,
+                 "Test fixture setup: obs should carry this field slip")
+
+    original_project.update!(field_slip_prefix: nil)
+    reassigned_project.update!(
+      field_slip_prefix: FieldSlip.prefix_for_code(slip.code)
+    )
+
+    login(obs.user.login)
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    collector: "Ashley Laman"
+                  ),
+                  field_code: slip.code })
+
+    assert_flash_success(
+      on_fail: "Editing an observation without changing its field " \
+               "slip code should not warn about constraint violations " \
+               "of whichever project now happens to own the slip's " \
+               "prefix -- only the slip's own (unchanged) project " \
+               "matters"
+    )
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_equal("Ashley Laman", obs.reload.collector,
+                 "Update should still have gone through")
+  end
+
+  # The prefix-reassignment scenario above must not swallow a conflict
+  # the user explicitly opts into by checking the box themselves.
+  def test_update_explicit_project_check_still_flags_constraint_violation
+    obs = observations(:minimal_unknown_obs)
+    slip = field_slips(:field_slip_one)
+    original_project = projects(:eol_project)
+    reassigned_project = projects(:current_project)
+
+    original_project.update!(field_slip_prefix: nil)
+    reassigned_project.update!(
+      field_slip_prefix: FieldSlip.prefix_for_code(slip.code)
+    )
+
+    login(obs.user.login)
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    project_ids: [reassigned_project.id.to_s]
+                  ),
+                  field_code: slip.code })
+
+    assert_flash_error(
+      on_fail: "Explicitly checking a project that violates its " \
+               "constraints should still be flagged, even though an " \
+               "unchanged field-slip code no longer implicates it " \
+               "automatically"
+    )
+    assert_not_includes(obs.reload.project_ids, reassigned_project.id,
+                        "A non-admin's violating checked project " \
+                        "should not have been added")
+  end
+
+  # Unchecking one project box moves every observation of the occurrence,
+  # so the flash has to say how many rather than letting the rest go
+  # unmentioned. See #4932.
+  def test_unchecking_a_project_reports_the_whole_collection
+    project = projects(:bolete_project)
+    obs = observations(:minimal_unknown_obs)
+    sibling = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: mary, primary_observation: obs)
+    [obs, sibling].each do |o|
+      o.update!(occurrence: occ)
+      project.add_observation(o)
+    end
+
+    login("mary") # a bolete member, so the checkbox is hers to change
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(project_ids: [""]) })
+
+    assert_not_includes(project.reload.observations, obs)
+    assert_not_includes(project.observations, sibling)
+    assert_includes(get_last_flash.to_s.as_displayed,
+                    :removed_from_project_with_siblings.t(
+                      count: 2, project: project.title
+                    ).as_displayed)
+  end
+
+  # An image edit that fails to save reports the image's own errors
+  # rather than silently dropping the edit. Image validations are
+  # self-correcting (they truncate rather than reject), so the failure
+  # has to be forced.
+  def test_failed_image_edit_reports_the_images_errors
+    obs = observations(:coprinus_comatus_obs)
+    image = obs.images.first
+    image.define_singleton_method(:save) do |*|
+      errors.add(:base, :validate_image_user_missing)
+      false
+    end
+    login(obs.user.login)
+
+    Image.stub(:safe_find, image) do
+      put(:update,
+          params: { id: obs.id,
+                    observation: obs_params(obs).merge(
+                      good_image: { image.id.to_s => { notes: "revised" } }
+                    ) })
+    end
+
+    assert_flash_error
+  end
+
+  # Update assigned `notes` from the raw params AFTER resolving them, so
+  # every field-slip note resolution was computed and then thrown away.
+  # Create never had the bug (it assigns notes first). See #4932.
+  def test_update_wraps_other_codes_when_flagged
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id, inat: "1",
+                  observation: obs_params(obs).merge(
+                    notes: { Other_Codes: "123456" }
+                  ) })
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("123456"),
+                 obs.reload.notes[:Other_Codes])
+  end
+
+  # The checkbox submits "0" when unticked (its hidden sidecar), which
+  # has to put the value back to the bare code -- otherwise unticking
+  # looks broken, since the box re-renders checked off a stored link.
+  def test_update_unwraps_other_codes_when_unflagged
+    obs = observations(:minimal_unknown_obs)
+    stored = FieldSlipNotesBuilder.inat_link("123456")
+    obs.update!(notes: { Other_Codes: stored })
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id, inat: "0",
+                  observation: obs_params(obs).merge(
+                    notes: { Other_Codes: stored }
+                  ) })
+
+    assert_equal("123456", obs.reload.notes[:Other_Codes])
+  end
+
+  # No `inat` param at all means the checkbox was never rendered (no
+  # field code in play); a stored link must survive untouched.
+  def test_update_without_inat_param_leaves_other_codes_alone
+    obs = observations(:minimal_unknown_obs)
+    stored = FieldSlipNotesBuilder.inat_link("123456")
+    obs.update!(notes: { Other_Codes: stored })
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    notes: { Other_Codes: stored }
+                  ) })
+
+    assert_equal(stored, obs.reload.notes[:Other_Codes])
+  end
+
+  # "Id by" resolves through the project's aliases on edit, not just on
+  # create -- "RS" is an eol_project alias for rolf.
+  def test_update_resolves_id_by_through_project_aliases
+    obs = observations(:minimal_unknown_obs)
+    project = projects(:eol_project)
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    project_ids: [project.id.to_s],
+                    notes: { Field_Slip_ID_By: "RS" }
+                  ) })
+
+    assert_equal(rolf.textile_name, obs.reload.notes[:Field_Slip_ID_By])
+  end
+
+  # ----------------------------------------------------------------
+  #  Slip-review handoff for photos added on edit (#5024 pipeline)
+  # ----------------------------------------------------------------
+
+  # A slip photographed into an existing observation gets the same
+  # review detour Create gives. Reported: a phone upload failed during
+  # create, the photo was added on edit instead, and the completed
+  # read sat invisible -- no redirect, no link -- so the observation
+  # stayed unnamed and got rescanned by hand (obs 664471).
+  def test_update_adding_a_slip_photo_detours_to_the_review
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil, location: locations(:burbank),
+                where: locations(:burbank).name)
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_not_includes(obs.images, image, "premise: the photo is new")
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0920") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+  end
+
+  # Location creation still wins over the slip-review detour: an
+  # unresolved locality has to become a Location before anything else.
+  def test_update_location_creation_outranks_the_slip_review_detour
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil)
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_nil(obs.location_id, "premise: locality unresolved")
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0923") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(
+      new_location_path(where: obs.reload.place_name(rolf),
+                        set_observation: obs.id, format: :html)
+    )
+  end
+
+  # Routine edits of a slip observation never detour: only photos THIS
+  # update added are candidates.
+  def test_update_without_new_photos_does_not_detour
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil, location: locations(:burbank),
+                where: locations(:burbank).name)
+    project = projects(:open_membership_project)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+
+    assert_not_empty(obs.images, "premise: existing photos to re-decode")
+
+    login("rolf")
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0921") do
+        put(:update, params: { id: obs.id, observation: obs_params(obs) })
+      end
+    end
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+  end
+
+  def test_update_adding_a_photo_does_not_detour_a_non_reviewer
+    obs = observations(:coprinus_comatus_obs)
+    obs.update!(occurrence: nil, location: locations(:burbank),
+                where: locations(:burbank).name)
+    image = images(:in_situ_image)
+
+    Project.where.not(field_slip_prefix: nil).find_each do |proj|
+      proj.admin_group.users.delete(rolf)
+    end
+
+    assert_not(
+      Project.where.not(field_slip_prefix: nil).
+        exists?(admin_group_id: rolf.reload.user_group_ids),
+      "premise: rolf reviews no slip projects"
+    )
+
+    login("rolf")
+    params = { id: obs.id,
+               observation: obs_params(obs).merge(
+                 good_image_ids: (obs.image_ids + [image.id]).join(" ")
+               ) }
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, "OPEN-0922") do
+        put(:update, params: params)
+      end
+    end
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+  end
+
   private
+
+  def assert_field_slip_race_reported(status)
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+
+    @controller.define_singleton_method(:update_field_slip) { |*| status }
+    begin
+      put(:update,
+          params: { id: obs.id, observation: obs_params(obs) })
+    ensure
+      @controller.singleton_class.remove_method(:update_field_slip)
+    end
+
+    assert_flash_error
+  end
 
   def obs_params(obs)
     {
@@ -816,5 +1602,31 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       thumb_image_id: obs.thumb_image_id.to_s,
       good_image_ids: obs.image_ids.join(" ")
     }
+  end
+
+  # Resubmits the observation's own coordinates, so a kept lat/lng is
+  # unchanged rather than merely plausible. The altitude is new, which
+  # is what proves the update went through at all.
+  def geolocation_params(obs, has_geolocation: nil)
+    args = obs_params(obs).merge(
+      lat: obs.lat.to_s, lng: obs.lng.to_s, alt: "123"
+    )
+    args[:has_geolocation] = has_geolocation unless has_geolocation.nil?
+    { id: obs.id, observation: args }
+  end
+
+  # A fixture observation detached from any occurrence and made editable
+  # by `user` (owner + collector), for the edit-primary resolver tests.
+  def editable_member(fixture, user)
+    obs = observations(fixture)
+    obs.update_columns(user_id: user.id, collector_user_id: user.id,
+                       occurrence_id: nil)
+    obs
+  end
+
+  def make_occurrence(user, primary, members)
+    occ = Occurrence.create!(user: user, primary_observation: primary)
+    members.each { |m| m.update_column(:occurrence_id, occ.id) }
+    occ
   end
 end

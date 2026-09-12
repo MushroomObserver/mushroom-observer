@@ -38,7 +38,7 @@ def report_update_usage
     "-2345 Verpa conica # Exclude specific image\n" \
     "3456 # Move image to current name\n" \
     "- Bad name # Delete a visual group\n" \
-    "= Clitocybe nuda, Lepista nuda # Merge groups into first group\n" \
+    "= Clitocybe nuda, Lepista nuda # Merge groups into first group\n"
   )
   exit
 end

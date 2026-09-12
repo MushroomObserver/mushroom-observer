@@ -30,7 +30,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
 
     assert_html(html, "a[data-modal='modal_obs_#{@obs.id}_naming']")
     assert_no_html(html, "a[data-modal='modal_obs_#{@obs.id}_naming'] " \
-                        "span.glyphicon-plus")
+                        "svg.mo-icon-add")
   end
 
   def test_propose_button_is_modal_trigger_link

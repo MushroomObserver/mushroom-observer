@@ -18,7 +18,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   prop :button_name, String
   prop :location, _Nilable(Location), default: nil
   prop :default_place_name, _Nilable(String), default: nil
-  prop :dubious_where_reasons, _Nilable(_Array(String)), default: nil
+  prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+       default: nil
 
   def view_template
     Row do
@@ -78,7 +79,10 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_location_autocompleter
     render(@form.field(:place_name).autocompleter(
              type: :location,
-             wrapper_options: { label: location_label },
+             # label_colon: false -- location_label already embeds its
+             # own colon per span (each state's text differs), so the
+             # default auto-appended colon would double up.
+             wrapper_options: { label: location_label, label_colon: false },
              value: @default_place_name || @location&.name,
              hidden_name: :location_id,
              hidden_value: @location&.id,
@@ -99,13 +103,13 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   # Label with multiple span variants for different autocompleter states
   def location_label
     capture do
-      span(class: "unconstrained-label") { "#{:where.ti}:" }
-      whitespace
+      span(class: "unconstrained-label") { append_colon(:where.ti) }
       span(class: "constrained-label") do
-        "#{:form_observations_locality_contains.l}:"
+        append_colon(:form_observations_locality_contains.l)
       end
-      whitespace
-      span(class: "create-label") { "#{:form_observations_create_locality.l}:" }
+      span(class: "create-label") do
+        append_colon(:form_observations_create_locality.l)
+      end
     end
   end
 
@@ -159,7 +163,11 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              attributes: {
                help: :form_observations_lat_long_help.t,
                help_collapse: true,
-               data: { form_exif_target: "collapseCheck" }
+               data: {
+                 form_exif_target: "collapseCheck",
+                 map_target: "geolocationCheck",
+                 action: "map#geolocationToggled"
+               }
              }
            ))
   end
@@ -168,7 +176,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     Collapsible(
       id: "observation_geolocation",
       expanded: @observation.lat.present?,
-      data: { form_exif_target: "collapseFields" }
+      data: { form_exif_target: "collapseFields",
+              map_target: "geolocationFields" }
     ) do
       p { :form_observations_click_point.l }
       render_lat_lng_alt_row
@@ -190,21 +199,30 @@ class Views::Controllers::Observations::Form::Details < Views::Base
       @form.text_field(
         field,
         label: label_html,
+        label_colon: false,
         wrap_class: "mb-0",
         addon: addon,
         data: {
           map_target: "#{field}Input",
-          action: "map#bufferInputs"
+          action: coordinate_field_action(field)
         }
       )
     end
   end
 
+  # Lat/lng also split a pasted "lat, lng" pair (e.g. from iNat) across
+  # both fields -- see GeocodeController#splitPastedCoordinates.
+  def coordinate_field_action(field)
+    return "map#bufferInputs" unless [:lat, :lng].include?(field)
+
+    "map#bufferInputs paste->map#splitPastedCoordinates"
+  end
+
   # Label with responsive show/hide variants
   def coordinate_label(abbr_key, full_key)
     capture do
-      span(class: "d-none d-sm-inline") { "#{full_key.ti}:" }
-      span(class: "d-inline d-sm-none") { "#{abbr_key.ti}:" }
+      span(class: "d-none d-sm-inline") { append_colon(full_key.ti) }
+      span(class: "d-inline d-sm-none") { append_colon(abbr_key.ti) }
     end
   end
 
@@ -226,7 +244,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_map
     render(Components::Form::LocationMap.new(
-             id: "observation_form_map", map_type: "observation"
+             id: "observation_form_map", map_type: "observation",
+             announce_point: update? && @observation.lat.present?
            ))
   end
 

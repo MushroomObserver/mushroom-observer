@@ -12,7 +12,7 @@ module Names::Synonyms
       return if abort_if_name_locked!(@name)
 
       init_ivars_for_new
-      render_new
+      render_new_view
     end
 
     def create
@@ -41,7 +41,7 @@ module Names::Synonyms
         # TODO: Flash a custom message about ambiguous name?
         # :api_ambiguous_name.l is kind of similar
         flash_warning(:api_ambiguous_name.t)
-        render_new
+        render_new_view_invalid
       end
     end
 
@@ -51,11 +51,11 @@ module Names::Synonyms
       return true if @given_name.present?
 
       flash_error(:runtime_name_deprecate_must_choose.t)
-      render_new
+      render_new_view_invalid
       false
     end
 
-    def render_new
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Names::Synonyms::Deprecate::New.new(
                name: @name,
                given_name: @given_name,
@@ -66,13 +66,15 @@ module Names::Synonyms
                suggest_corrections: @suggest_corrections || false,
                parent_deprecated: @parent_deprecated
              ),
-             location: form_to_deprecate_synonym_of_name_path)
+             status: status,
+             location: form_to_deprecate_synonym_of_name_path,
+             **render_opts)
     end
 
     def suggest_alternate_spellings
       @valid_names = Name.suggest_alternate_spellings(@given_name)
       @suggest_corrections = true
-      render_new
+      render_new_view_invalid
     end
 
     def init_ivars_for_new

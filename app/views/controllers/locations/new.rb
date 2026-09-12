@@ -7,15 +7,16 @@ module Views::Controllers::Locations
     prop :location, ::Location
     prop :display_name, _Nilable(::String), default: nil
     prop :original_name, _Nilable(::String), default: nil
-    prop :set_observation,
-         _Nilable(_Union(::String, ::Integer)), default: nil
-    prop :set_species_list,
-         _Nilable(_Union(::String, ::Integer)), default: nil
-    prop :set_user,
-         _Nilable(_Union(::String, ::Integer)), default: nil
-    prop :set_herbarium,
-         _Nilable(_Union(::String, ::Integer)), default: nil
-    prop :dubious_where_reasons, _Nilable(_Array(::String)), default: nil
+    # All four come from params[...] (always a String, or absent) --
+    # coerced to Integer so a non-numeric value fails loudly here
+    # instead of round-tripping into the create-URL's query string.
+    prop :set_observation, _Nilable(Integer), default: nil, &TO_ID
+    prop :set_species_list, _Nilable(Integer), default: nil, &TO_ID
+    prop :set_user, _Nilable(Integer), default: nil, &TO_ID
+    prop :set_herbarium, _Nilable(Integer), default: nil, &TO_ID
+    prop :set_project, _Nilable(Integer), default: nil, &TO_ID
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
     def view_template
       container_class(:full)
       add_new_title(:create_object, :location)
@@ -29,7 +30,9 @@ module Views::Controllers::Locations
                set_species_list: @set_species_list,
                set_user: @set_user,
                set_herbarium: @set_herbarium,
-               dubious_where_reasons: @dubious_where_reasons
+               set_project: @set_project,
+               dubious_where_reasons: @dubious_where_reasons,
+               turbo: true
              ))
     end
   end

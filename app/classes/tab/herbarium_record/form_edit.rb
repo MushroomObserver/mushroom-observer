@@ -5,11 +5,12 @@
 # the herbarium_records index; otherwise → return to `back_object`
 # (typically the parent Observation).
 class Tab::HerbariumRecord::FormEdit < Tab::Collection
-  def initialize(back:, back_object:, q_param: nil)
+  def initialize(back:, back_object:, q_param: nil, index_filter: nil)
     super()
     @back = back
     @back_object = back_object
     @q_param = q_param
+    @index_filter = index_filter
   end
 
   private
@@ -23,8 +24,11 @@ class Tab::HerbariumRecord::FormEdit < Tab::Collection
   end
 
   def back_link
-    return Tab::HerbariumRecord::BackToIndex.new(q_param: @q_param) \
-      if @back == "index"
+    if @back == "index"
+      return Tab::HerbariumRecord::BackToIndex.new(
+        index_filter: @index_filter
+      )
+    end
     return Tab::Object::Return.new(object: @back_object) if @back_object
 
     nil

@@ -44,7 +44,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
 
     Row do
       render_image_column
-      render_form_column unless @sibling
+      render_form_column
       render_control_buttons
     end
   end
@@ -60,19 +60,39 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
           class: @data[:img_class],
           data: @data[:img_data]
         )
+        render_upload_status_overlay if @upload
       end
     end
   end
 
+  # Hidden until the image-upload JS shows it (issue #5068 option 1):
+  # a spinner while this item's own upload POST is in flight, swapped
+  # to a checkmark on success. Both icons are pre-rendered server-side
+  # and toggled by class -- JS only flips visibility, it doesn't
+  # construct icon markup (the sprite URL is build-hashed).
+  def render_upload_status_overlay
+    div(class: "upload-status-overlay ab-fab d-none",
+        data: { form_images_target: "uploadStatus" }) do
+      Icon(type: :spinner, class: "spinner-right upload-status-spinner")
+      Icon(type: :check, class: "upload-status-check d-none")
+    end
+  end
+
+  # A sibling image belongs to another occurrence member (an iNat
+  # reflection); its fields aren't editable here, but the read-only
+  # camera-info panel still shows so the editor can copy the
+  # reflection's location onto the native via "Use this info" (#5317).
   def render_form_column
     Column(xs: 12, md: 6) do
       div(class: "form-panel") do
-        render(Components::Form::UploadGallery::Fields.new(
-                 user: @user,
-                 image: @img_instance,
-                 img_id: @img_id,
-                 upload: @upload
-               ))
+        unless @sibling
+          render(Components::Form::UploadGallery::Fields.new(
+                   user: @user,
+                   image: @img_instance,
+                   img_id: @img_id,
+                   upload: @upload
+                 ))
+        end
 
         render(Components::Form::CameraInfo.new(
                  img_id: @img_id,

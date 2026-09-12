@@ -21,7 +21,7 @@ module Views::Controllers::Sequences
 
     def render_form_column
       render(ObservationTitle.new(observation: @observation))
-      render(Form.new(@sequence, observation: @observation))
+      render(Form.new(@sequence, observation: @observation, turbo: true))
     end
 
     def render_matrix_column

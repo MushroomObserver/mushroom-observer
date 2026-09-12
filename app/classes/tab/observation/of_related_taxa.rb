@@ -11,7 +11,7 @@ class Tab::Observation::OfRelatedTaxa < Tab::Base
   end
 
   def path
-    observations_path(name: @name.id, related_taxa: "1")
+    observations_path(related_taxa: @name.id)
   end
 
   def model

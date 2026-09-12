@@ -7,11 +7,8 @@
 # alongside the action views (edit, index, new, show).
 module Views::Controllers::Projects::Aliases
   class Widget < Views::Base
-    def initialize(project:, target:)
-      super()
-      @project = project
-      @target = target
-    end
+    prop :project, ::Project
+    prop :target, _Union(::User, ::Location)
 
     def view_template
       div(id: "target_project_alias_#{@target.id}") do

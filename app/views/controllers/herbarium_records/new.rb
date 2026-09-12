@@ -29,9 +29,11 @@ module Views::Controllers::HerbariumRecords
     def render_form_column
       span(class: "text-larger mb-3") do
         trusted_html(:observation.ti)
-        plain(" ##{@observation.id}")
+        whitespace
+        plain("##{@observation.id}")
       end
-      render(Form.new(@herbarium_record, observation: @observation))
+      render(Form.new(@herbarium_record, observation: @observation,
+                                         turbo: true))
     end
 
     def render_observation_box

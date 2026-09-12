@@ -28,7 +28,7 @@ class CollapseHelpBlockTest < ComponentTestCase
                                           direction: "down")
     ) { "Content" }
 
-    assert_html(html, "div.arrow-down.hidden-xs")
+    assert_html(html, "div.arrow-down.d-none.d-sm-block")
     assert_not_includes(html, "mt-3")
   end
 
@@ -37,7 +37,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       Components::Help::CollapseBlock.new(target_id: "help_4", direction: "up")
     ) { "Content" }
 
-    assert_html(html, "div.arrow-up.hidden-xs")
+    assert_html(html, "div.arrow-up.d-none.d-sm-block")
     assert_html(html, "div.well.well-sm.mb-3.help-block.position-relative.mt-3")
   end
 
@@ -51,7 +51,7 @@ class CollapseHelpBlockTest < ComponentTestCase
     ) { "Mobile content" }
 
     assert_html(html, "div.arrow-up")
-    assert_not_includes(html, "hidden-xs")
+    assert_not_includes(html, "d-none")
   end
 
   def test_renders_arrow_hidden_on_mobile_when_mobile_false
@@ -63,7 +63,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       )
     ) { "Desktop content" }
 
-    assert_html(html, "div.arrow-down.hidden-xs")
+    assert_html(html, "div.arrow-down.d-none.d-sm-block")
   end
 
   def test_yields_block_content
@@ -86,7 +86,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       )
     ) { "Left" }
     assert_html(html_left, "div.arrow-left")
-    assert_not_includes(html_left, "hidden-xs")
+    assert_not_includes(html_left, "d-none")
 
     # Test right arrow without mobile
     html_right = render_component(
@@ -96,6 +96,6 @@ class CollapseHelpBlockTest < ComponentTestCase
         mobile: false
       )
     ) { "Right" }
-    assert_html(html_right, "div.arrow-right.hidden-xs")
+    assert_html(html_right, "div.arrow-right.d-none.d-sm-block")
   end
 end

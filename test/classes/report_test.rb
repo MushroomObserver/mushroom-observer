@@ -57,7 +57,7 @@ class ReportTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     expect = [
       obs.id.to_s,
-      "#{MO.http_domain}/#{obs.id}",
+      "#{MO.http_domain}/obs/#{obs.id}",
       "HumanObservation",
       "#{obs.updated_at.api_time} UTC",
       "MushroomObserver",
@@ -968,7 +968,7 @@ class ReportTest < UnitTestCase
     warnings = []
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
+      link.errors.add(:base, :invalid)
       raise(ActiveRecord::RecordInvalid.new(link))
     end
 
@@ -998,11 +998,18 @@ class ReportTest < UnitTestCase
     report.body
 
     site_lookup_fails = -> { raise(ActiveRecord::RecordNotFound) }
-    ExternalSite.stub(:mycoportal, site_lookup_fails) do
-      assert_nothing_raised do
-        report.mark_exported!
+    log = with_captured_logger do
+      ExternalSite.stub(:mycoportal, site_lookup_fails) do
+        assert_nothing_raised do
+          report.mark_exported!
+        end
       end
     end
+
+    assert_includes(
+      log, "MyCoPortal export-tracking failed: ActiveRecord::RecordNotFound",
+      "mark_exported! should log the swallowed lookup failure"
+    )
   end
 
   def hashed_expect(obs)

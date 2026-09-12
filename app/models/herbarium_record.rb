@@ -85,10 +85,12 @@ class HerbariumRecord < AbstractModel
         ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
 
   scope :pattern, lambda { |phrase|
-    cols = (HerbariumRecord[:initial_det] +
-            HerbariumRecord[:accession_number] +
-            HerbariumRecord[:notes].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (HerbariumRecord[:initial_det] +
+              HerbariumRecord[:accession_number] +
+              HerbariumRecord[:notes].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   # Eager-loads the show / edit page (HR record + its herbarium,
@@ -123,13 +125,6 @@ class HerbariumRecord < AbstractModel
   def format_name(_user = nil)
     herbarium_label
   end
-
-  # Page heading uses the textilized herbarium_label (binomial inside
-  # gets italicized). Doc title uses the plain accession string.
-  def page_title(_user = nil)
-    herbarium_label.t
-  end
-  alias document_title herbarium_label
 
   def accession_at_herbarium
     # Use the loaded association when available (no extra query on

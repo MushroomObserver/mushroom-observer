@@ -17,12 +17,9 @@
   font-weight: normal !important;
 }
 
-// Custom variant (not in BS3) that mirrors form-input styling, so
-// it visually plays nicely with input groups. Defines the full set
-// of interactive states using BS3's `darken()` step pattern (same
-// math `button-variant` uses for `.btn-{variant}`), pulling from
-// the theme-mapped `$input-*` vars so dark themes get dark hover/
-// active visuals automatically.
+// Custom variant (not in BS3) that mirrors form-input styling, using
+// BS3's darken() step pattern and $input-* vars so dark themes get
+// dark hover/active for free.
 .btn-outline-default {
   color: $input-color;
   background-color: $input-bg;
@@ -46,11 +43,8 @@
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
 
-  // Override BS3's default `.btn.disabled` opacity dim. For outline
-  // buttons, the disabled state usually IS the selected/current
-  // state (e.g. the active status button in a filter group), so the
-  // label still describes what the user is looking at — we want it
-  // legible, not greyed out. Cursor still signals non-clickability.
+  // Disabled here often means "currently selected" (e.g. an active
+  // filter button) -- keep it legible, not greyed out.
   &.disabled,
   &[disabled],
   &[aria-disabled="true"] {
@@ -64,11 +58,147 @@
   color: black;
 }
 
+// Components::Button::CRUDBase's mutation-button form -- sitewide
+// base (inline flow, submit reset to look like a plain link).
+// .btn-group below overrides the inline-flow default.
+form.button_to {
+  display: inline;
+  margin: 0;
+  padding: 0;
+
+  input[type=submit]:not(.btn),
+  button[type=submit]:not(.btn) {
+    margin: 0;
+    padding: 0;
+    // -webkit-appearance: caret;
+    background: none;
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    cursor: pointer;
+    // Note: Use a text-info type utility class to color the button text
+
+    &:not(.text-danger) {
+      color: $link-color;
+
+      &:hover {
+        color: $link-hover-color;
+      }
+    }
+  }
+
+  input[type=submit]:hover {
+    text-decoration: underline;
+  }
+}
+
+// A form-wrapped button (Components::Button::CRUDBase) gets none of
+// `.btn-group`'s border-radius squaring or margin collapse -- BS3's
+// CSS only reaches a `.btn` that's a direct child. Reimplemented
+// generically below for every `.btn-group`.
+//
+// `.vote-btn-group` (_images.scss) overrides this on its elements via
+// higher selector specificity and import order -- no extra override
+// needed here.
+.btn-group {
+  // BS4's fix: flex stretches every child (form-wrapped or not) to
+  // the same height.
+  display: inline-flex;
+
+  // The form must also be flex, or the stretch above only grows the
+  // invisible form box, not the button inside it.
+  > form.button_to {
+    display: flex;
+    margin: 0;
+
+    button {
+      flex: 1;
+      // Matches .btn:has(.mo-icon)'s centering (_icons.scss) once the
+      // group stretches the button taller than its content.
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Non-icon buttons need the same centering once stretched taller by
+  // an icon-bearing sibling (.btn:has(.mo-icon) only centers icon
+  // pairs -- see _icons.scss).
+  > .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Keyed by position, not by adjacent .btn matching, so a
+  // form-wrapped member is treated the same as a bare .btn.
+  > *:not(:first-child) {
+    margin-left: -1px;
+  }
+
+  > *:not(:first-child):not(:last-child),
+  > form.button_to:not(:first-child):not(:last-child) button {
+    border-radius: 0;
+  }
+
+  > *:first-child:not(:last-child),
+  > form.button_to:first-child:not(:last-child) button {
+    @include border-right-radius(0);
+  }
+
+  > *:last-child:not(:first-child),
+  > form.button_to:last-child:not(:first-child) button {
+    @include border-left-radius(0);
+  }
+}
+
+// BS3's .input-group is table/table-cell layout, which doesn't
+// stretch an icon-bearing flex .btn (.btn:has(.mo-icon), _icons.scss)
+// to match its cell's height. Switched to flex, mirroring BS4's fix,
+// same approach as the .btn-group supplement above.
+//
+// .navbar-form .input-group needs the override too: BS3's
+// `@media (min-width: 768px)` rule sets display: inline-table there,
+// out-specifying a bare .input-group rule -- desktop-only, hence
+// this breaking on desktop widths but not mobile.
+.input-group,
+.navbar-form .input-group {
+  display: flex;
+  align-items: stretch;
+
+  > .form-control {
+    flex: 1 1 auto;
+    // min-width: 0 lets it shrink below its content width when a
+    // sibling addon needs the room.
+    min-width: 0;
+  }
+
+  > .input-group-addon,
+  > .input-group-btn {
+    // BS3's width: 1% relies on table shrink-to-content sizing; under
+    // flex that's a literal 1%, overflowing the box. Back to
+    // content-driven sizing.
+    flex: 0 0 auto;
+    width: auto;
+    display: flex;
+    // stretch, not center -- a .btn child (e.g. the pagination goto
+    // icon) needs to fill this span's full height, confirmed
+    // empirically short by ~2px with center.
+    align-items: stretch;
+
+    > .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
 // badges
 
-// Used for record id in title. No inherent font-size of its own --
-// every caller (Components::IDBadge's size: prop) states one of the
-// sibling .badge-* modifiers below explicitly.
+// Record id badge. No inherent font-size -- every caller states one
+// of the .badge-* sizes below.
 .badge-id {
   font-weight: normal;
   background-color: transparent;
@@ -84,9 +214,7 @@
     letter-spacing: 0.03em;
   }
 
-  // Copy-to-clipboard external-site record id, inline next to its
-  // link (Components::Link::External) -- just digits, so smaller and
-  // tighter than .badge-xl's uppercase-label sizing.
+  // Copy-to-clipboard external-site id (Components::Link::External).
   &.badge-lg {
     font-size: 90% !important;
   }
@@ -101,43 +229,31 @@
     font-size: 60% !important;
   }
 
-  // [data-toggle="collapse"]:not(.collapsed) -- an accordion-trigger
-  // badge (e.g. the external-links "Shared with [iNat]" badges) keeps
-  // this same filled look while its pane is open, not just on hover,
-  // so the active pane is visible at a glance. Bootstrap's
-  // collapse.js itself toggles `.collapsed` on every trigger as its
-  // target opens/closes -- no extra JS or markup needed here. Scoped
-  // to [data-toggle="collapse"] so plain (non-trigger) id badges --
-  // which never carry `.collapsed` at all -- don't match `:not
-  // (.collapsed)` and end up permanently "hover" styled.
-  &:hover,
+  // Accordion triggers stay "hovered" while their pane is open.
+  // Scoped to [data-toggle="collapse"] so plain badges don't match.
   &[data-toggle="collapse"]:not(.collapsed) {
     background-color: $text-color;
     color: $body-bg;
   }
 }
 
-// Icon-only inline mod/add links (Components::InlineCRUDLinks'
-// edit/destroy/add links, applied directly to each link/button's own
-// element -- not a wrapper, see Components::InlineLinkBlock). No
-// padding of its own on the icon -- Components::InlineLinkBlock
-// separates multiple items with a non-breaking space instead;
-// margin-right here adds a little further breathing room against
-// non-icon-link neighbors.
-//
-// vertical-align: middle -- an inline-block sitting on the text
-// baseline (the default) leaves room below it for a descender it
-// doesn't have, which stretches the surrounding line's height and
-// throws off spacing vs. sibling lines with no icon-link on them.
-// The icon glyph and any visible text (e.g. an "Add" label) get the
-// same treatment so they line up with EACH OTHER too, instead of
-// each defaulting to its own baseline (which put visible text below
-// the icon).
-//
-// .glyphicon's `top: 3px` (see _icons.scss) is a relative offset
-// tuned for glyphicons in their usual (untethered) contexts; inside
-// this tight a box it just pushes the icon toward the bottom, so
-// it's undone here specifically.
+// Only the button form hovers -- not the static span form.
+// button& isn't valid Sass, so this stays a standalone rule.
+button.badge-id:hover {
+  background-color: $text-color;
+  color: $body-bg;
+}
+
+// Floors badge-id column width so digit-count variance doesn't drift
+// the title column's left edge row to row.
+.id-badge-col {
+  min-width: 6rem;
+}
+
+// Icon-only inline mod/add links (Components::InlineCRUDLinks).
+// vertical-align: middle avoids stretching the line for a text
+// descender the icon doesn't have. mo-icon's usual top offset and
+// 1.12em size are tuned for looser contexts -- undone/shrunk here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -151,18 +267,11 @@
     text-decoration: none;
   }
 
-  .glyphicon {
+  .mo-icon {
     top: 0;
-    vertical-align: middle;
+    width: 1em;
+    height: 1em;
   }
-
-  // The plus glyph reads visually heavier/bigger than other
-  // glyphicons at the same font-size (bold, symmetric shape) --
-  // scoped down specifically here, not globally, since it looks
-  // fine at full size elsewhere.
-  // .glyphicon-plus {
-  //   font-size: 90%;
-  // }
 }
 
 //
@@ -178,24 +287,24 @@
   // message banner at top
   // --------------------------------------------------
   &.message-banner {
-    font-size: 150%;
     text-align: center;
   }
 }
 
+// Responsive message text, kept separate from .message-banner's
+// layout classes.
+.banner-message {
+  font-size: 1em;
 
-/* Chevron icon */
-.show_banner_icon {
-  color: green;          /* Default color of the chevron */
-
-  &:hover {
-    color: darkgreen;      /* Change color on hover */
+  @media screen and (min-width: $screen-sm-min) {
+    font-size: 1.2em;
   }
 
-  .glyphicon-chevron-down {
-     display: block;
-   }
+  @media screen and (min-width: $screen-md-min) {
+    font-size: 1.5em;
+  }
 }
+
 
 button:not(:disabled) {
   .when-disabled {

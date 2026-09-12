@@ -8,6 +8,9 @@ class Inat
     # provenance — source + iNat photo id — directly on the created image.
     # Mixed into MoObservationBuilder.
     module ImageHandling
+      MAX_UPLOAD_RETRIES = 3       # per image, on transient download failure
+      UPLOAD_RETRY_BASE_SLEEP = 2  # seconds; doubles each retry (2, 4, 8)
+
       private
 
       def add_inat_images(inat_obs_photos)
@@ -45,16 +48,41 @@ class Inat
       # (read by ObservationImporter, then InatImportJob) so a
       # TransferImagesJob can be enqueued for the whole import batch at
       # once, rather than image-by-image.
-      def upload_inat_image(params, external_id)
+      def upload_inat_image(params, external_id, attempt: 1)
         api = API2.execute(params)
-        if api.errors.any?
-          raise("Failed to import image #{external_id}: " \
-                "#{api.errors.join(", ")}")
-        end
+        return finish_upload(api) if api.errors.empty?
 
+        retry_or_raise_upload(api, params, external_id, attempt)
+      end
+
+      def finish_upload(api)
         image = api.results.first
         @created_image_ids << image.id
         image
+      end
+
+      # AWS/S3 is occasionally unavailable for a moment (#5183); retry a
+      # download failure before giving up on the whole observation.
+      def retry_or_raise_upload(api, params, external_id, attempt)
+        if retryable_upload_failure?(api.errors) &&
+           attempt <= MAX_UPLOAD_RETRIES
+          backoff_for_upload_retry(external_id, attempt)
+          return upload_inat_image(params, external_id, attempt: attempt + 1)
+        end
+
+        raise("Failed to import image #{external_id}: " \
+              "#{api.errors.join(", ")}")
+      end
+
+      def retryable_upload_failure?(errors)
+        errors.any?(API2::CouldntDownloadURL)
+      end
+
+      def backoff_for_upload_retry(external_id, attempt)
+        backoff = UPLOAD_RETRY_BASE_SLEEP * (2**(attempt - 1))
+        warn("  iNat image #{external_id} download failed; " \
+             "retry #{attempt}/#{MAX_UPLOAD_RETRIES} in #{backoff}s")
+        sleep(backoff)
       end
 
       # Recorded directly on the image so it survives regardless of the

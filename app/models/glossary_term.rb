@@ -51,8 +51,10 @@ class GlossaryTerm < AbstractModel
         ->(str) { search_columns(GlossaryTerm[:description], str) }
 
   scope :pattern, lambda { |phrase|
-    cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   scope :show_includes, lambda {
@@ -84,16 +86,6 @@ class GlossaryTerm < AbstractModel
   end
 
   def format_name(_user = nil)
-    name
-  end
-
-  # Page heading + browser tab title — both just `name` (plain text).
-  # (Can't `alias` to AR column — accessor not defined at class-load.)
-  def page_title(_user = nil)
-    name
-  end
-
-  def document_title
     name
   end
 
@@ -136,6 +128,6 @@ class GlossaryTerm < AbstractModel
   def must_have_description_or_image
     return if description.present? || thumb_image.present?
 
-    errors.add(:base, :glossary_error_description_or_image.t)
+    errors.add(:base, :glossary_error_description_or_image)
   end
 end

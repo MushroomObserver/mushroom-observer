@@ -36,16 +36,49 @@ class Query::CommentsTest < UnitTestCase
                        :Comment, target: { type: :Observation, id: obs.id })
   end
 
-  # Query currently raises on invalid params, so we can't test this yet.
-  # def test_comment_for_invalid_target
-  #   glo = glossary_terms(:convex_glossary_term)
-  #   scope = Comment.target(glo)
-  #   assert_query_scope([], scope,
-  #                      :Comment, target: { type: :GlossaryTerm, id: glo.id })
-  #   scope = Comment.target(type: "GlossaryTerm", id: glo.id)
-  #   assert_query_scope([], scope,
-  #                      :Comment, target: { type: :GlossaryTerm, id: glo.id })
-  # end
+  # An unrecognized `target` type is caught at validation time
+  # (Query::Modules::HashValidation#validate_polymorphic): the query
+  # is invalid, and must still produce zero results rather than an
+  # unfiltered one -- the attr stays present (not skipped as absent)
+  # so `Comment.target`'s own guard turns it into `none`.
+  def test_comment_for_invalid_target
+    glo = glossary_terms(:convex_glossary_term)
+    query = Query.lookup(:Comment, target: { type: "GlossaryTerm",
+                                             id: glo.id })
+
+    assert_not(query.valid)
+    assert_not_empty(query.validation_errors)
+    assert_empty(query.results)
+  end
+
+  # `target:` also accepts a live instance directly, not just the
+  # `{ type:, id: }` hash the URL shortcut sends -- exercises
+  # Query::Modules::HashValidation#validate_polymorphic_instance.
+  def test_comment_for_target_as_instance
+    obs = observations(:minimal_unknown_obs)
+    expects = [comments(:minimal_unknown_obs_comment_2),
+               comments(:minimal_unknown_obs_comment_1)]
+    scope = Comment.order_by_default.target(obs).distinct
+    assert_query_scope(expects, scope, :Comment, target: obs)
+  end
+
+  def test_comment_for_target_as_instance_of_unsupported_type
+    glo = glossary_terms(:convex_glossary_term)
+    query = Query.lookup(:Comment, target: glo)
+
+    assert_not(query.valid)
+    assert_not_empty(query.validation_errors)
+    assert_empty(query.results)
+  end
+
+  def test_comment_for_target_as_unsaved_instance
+    obs = Observation.new
+    query = Query.lookup(:Comment, target: obs)
+
+    assert_not(query.valid)
+    assert_not_empty(query.validation_errors)
+    assert_empty(query.results)
+  end
 
   def test_comment_types
     expects = [comments(:fungi_comment)]

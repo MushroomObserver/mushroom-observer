@@ -107,9 +107,8 @@ def process_observation(obs)
   vote_on_new_name      unless @new_vote
   # No operations should have been performed on @@olc_vote,
   # so floating point comparison should be valid.
-  # rubocop:disable Lint/FloatComparison
+  # rubocop:disable-next Lint/FloatComparison
   vote_against_old_name unless @old_vote == -3.0
-  # rubocop:enable Lint/FloatComparison
   @consensus.calc_consensus    if @any_changes
   print_result
 end

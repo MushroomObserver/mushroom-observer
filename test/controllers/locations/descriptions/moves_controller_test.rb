@@ -65,7 +65,10 @@ module Locations::Descriptions
         description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/Sorry, the location you tried to display/)
+      assert_flash(
+        [[:runtime_object_not_found, { id: "bogus", type: :location }],
+         [:runtime_invalid, { type: '"target"', value: "bogus" }]]
+      )
     end
 
     def test_move_description_replacing_default
@@ -102,7 +105,7 @@ module Locations::Descriptions
         }
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_description_private.t)
+      assert_flash_error(:runtime_description_private)
       assert_redirected_to(location_path(private_desc.parent_id))
     end
 
@@ -119,7 +122,7 @@ module Locations::Descriptions
       desc = LocationDescription.new(
         location: burbank_location, user: dick
       )
-      desc.errors.add(:base, "Test validation error")
+      desc.errors.add(:base, :invalid, message: "Test validation error")
 
       desc.stub(:save, false) do
         LocationDescription.stub(:new, desc) do
@@ -128,6 +131,11 @@ module Locations::Descriptions
       end
 
       assert_flash_error
+      # Must redirect -- previously fell through with no render or
+      # redirect at all (see .claude/rules/turbo_submit_forms.md).
+      assert_redirected_to(
+        new_move_location_description_path(id: public_desc.id)
+      )
     end
 
     # Cover check_src_exists! returning false

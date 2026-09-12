@@ -27,7 +27,8 @@ class InfoControllerTest < FunctionalTestCase
     post(:textile_sandbox_create,
          params: { textile_sandbox: { code: "**bold**" },
                    commit: :sandbox_test.l })
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_normal_permissions
@@ -38,7 +39,7 @@ class InfoControllerTest < FunctionalTestCase
     assert_equal(200, @response.status)
     post(:textile_sandbox_create,
          params: { textile_sandbox: { code: "test" } })
-    assert_equal(200, @response.status)
+    assert_equal(422, @response.status)
   end
 
   def test_allowed_robot_permissions

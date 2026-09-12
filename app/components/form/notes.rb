@@ -66,6 +66,11 @@ class Components::Form::Notes < Components::Base
   # so rendering is deferred to the right buffer. A plain
   # String/SafeBuffer also works for static content.
   prop :above_help, _Nilable(_Union(String, Proc)), default: nil
+  # Fields that belong in the notes area but aren't plain textareas — the
+  # field slip's "Id by" and "Other Codes" (#4932). Deferred like
+  # `above_help` so the DSL emits into this component's buffer, and given
+  # the `:notes` namespace so those fields submit alongside the parts.
+  prop :extra_fields, _Nilable(Proc), default: nil
 
   def view_template
     render(panel) do |p|
@@ -91,6 +96,7 @@ class Components::Form::Notes < Components::Base
       Help(content: :form_observations_notes_inherited_help.l) if adopt_rows?
       @form.namespace(:notes) do |notes_ns|
         @parts.each { |part| render_part(notes_ns, part) }
+        instance_exec(notes_ns, &@extra_fields) if @extra_fields
       end
       render_textile_help
     end

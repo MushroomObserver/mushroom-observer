@@ -5,40 +5,27 @@
 #
 #  This is a module of reusable methods included by controllers that handle
 #  "faceted" query searches per model, with separate inputs for each keyword.
-#  It also handles rendering help for the pattern search bar, via `:show` action
 #
 ################################################################################
 
 module Searchable
   extend ActiveSupport::Concern
+  include Searchable::MatchGuards
 
   # Maximum allowed total length of all search input fields
   MAX_SEARCH_INPUT_LENGTH = 8000
 
+  # Maximum allowed length of the flat index-filter query string built
+  # for the post-search redirect. Front-end proxies commonly reject an
+  # overlong request line before it reaches Rails (nginx's compiled
+  # default is 8KB total) -- a pasted multi-value field (e.g. Names)
+  # can build a redirect URL well past that, which then shows up as a
+  # broken page or a generic error instead of a useful message. Kept
+  # well under 8KB to leave room for the rest of the request line and
+  # for tighter limits at other layers (CDN, WAF).
+  MAX_INDEX_FILTER_URL_LENGTH = 4000
+
   included do
-    # Render help for the pattern search bar (if available), for current model
-    def show
-      respond_to do |format|
-        format.turbo_stream do
-          render(turbo_stream: turbo_stream.update(
-            :search_bar_help, # id of element to update contents of
-            partial: "#{search_type}/search/help"
-          ))
-        end
-        format.html
-      end
-    end
-
-    def new
-      @local = params[:local] != "false"
-      set_up_form_field_groupings
-      @search = build_search_query
-      respond_to do |format|
-        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
-        format.html
-      end
-    end
-
     def create
       redirect_to(action: :new) and return if clear_form?
 
@@ -46,11 +33,34 @@ module Searchable
       @query_params = params.require(search_object_name).permit(permittables)
 
       prepare_raw_params
-      redirect_to(action: :new) and return unless validate_search_instance?
+      redirect_to(action: :new) and return if search_input_invalid?
 
+      save_search_query_and_redirect_to_index
+    end
+
+    # Order matters: cheapest/most-actionable check first. A single
+    # oversized field gets a field-specific message before falling
+    # through to Query's validation errors or the generic aggregate-
+    # length guard. Resolving fields_preferring_ids to ids is a
+    # per-value DB lookup, so it only runs once too_many_multiple_values?
+    # has confirmed there isn't a pathologically large field to reject
+    # first.
+    def search_input_invalid?
+      return true if too_many_multiple_values?
+
+      resolve_fields_preferring_ids_to_ids
+      !validate_search_instance? || index_filter_url_too_long?
+    end
+
+    def save_search_query_and_redirect_to_index
+      flash_unmatched_lookups
       save_search_query
+      # always_index: 1 preserves MO's existing guarantee that a search
+      # submission lands on the results list, not a same-request
+      # auto-redirect to a single match -- see
+      # ApplicationController::QueryParams#create_query_from_url_params.
       redirect_to(controller: "/#{search_type}", action: :index,
-                  q: @query.q_param)
+                  always_index: 1, **@query.index_filter)
     end
 
     def prepare_raw_params
@@ -100,7 +110,7 @@ module Searchable
         Components::Form::Search.new(
           @search,
           search_controller: self,
-          local: false
+          context: :dropdown
         )
       )
     end
@@ -137,7 +147,8 @@ module Searchable
         return
       end
 
-      @query_params[:names][:lookup] = vals.split("\n").map(&:strip)
+      @query_params[:names][:lookup] =
+        vals.split("\n").map(&:strip).compact_blank
     end
 
     # Nested blank values will make for null query results,
@@ -173,6 +184,33 @@ module Searchable
         @query_params[key] = @query_params[:"#{key}_id"].split(",")
         @query_params.delete(:"#{key}_id")
       end
+    end
+
+    # A field autocompleted_strings_to_ids left as raw text (no
+    # matching client-side autocompleter match) breaks the post-search
+    # redirect: QueryParams#resolve_record_backed_value treats a
+    # single-value record-backed field as a strict id-only lookup, no
+    # name fallback. Already-resolved ids pass through Lookup
+    # unchanged. Called from search_input_invalid?, after
+    # too_many_multiple_values? -- each unresolved value costs a DB
+    # lookup, so this must not run against a field that guard would
+    # reject anyway.
+    def resolve_fields_preferring_ids_to_ids
+      fields_preferring_ids.each do |field|
+        next if @query_params[field].blank?
+
+        klass = lookup_class_for(field)
+        lookup = klass.new(@query_params[field])
+        @query_params[field] = lookup.ids.map(&:to_s)
+        record_unmatched(field, lookup.unmatched)
+      end
+    end
+
+    def lookup_class_for(field)
+      query_class = "Query::#{query_model.to_s.pluralize}".constantize
+      accepts = query_class.attribute_types[field]&.accepts
+      model = accepts.is_a?(Array) ? accepts.first : accepts
+      "Lookup::#{model.name.pluralize}".constantize
     end
 
     # Check for `fields_with_range`, and join them into array if range present.
@@ -213,13 +251,28 @@ module Searchable
     end
 
     def parse_date_ranges
+      @unparsed_dates = []
       [:date, :created_at, :updated_at].each { |field| parse_date_range(field) }
     end
 
+    # A date the parser doesn't understand must fail the search, not
+    # silently broaden it -- dropping the nil here used to run the
+    # query with the date filter quietly gone.
     def parse_date_range(field)
       return if (date = @query_params[field]).blank?
 
-      @query_params[field] = ::DateRangeParser.new(date).range
+      parsed = ::DateRangeParser.new(date).range
+      @unparsed_dates << date if parsed.nil?
+      @query_params[field] = parsed
+    end
+
+    def dates_parseable?
+      return true if @unparsed_dates.blank?
+
+      @unparsed_dates.each do |value|
+        flash_error(:search_term_date_unparseable.t(value: value))
+      end
+      false
     end
 
     # Note that this @search query instance is not the one that gets saved and
@@ -227,13 +280,33 @@ module Searchable
     # NOTE: We can't call @query_params.compact_blank, because we need to
     # preserve `false` values.
     def validate_search_instance?
+      return false unless dates_parseable?
+
       @query_params.reject! { |_k, v| v == "" }
       @search = Query.create_query(query_model, @query_params)
       return true unless @search.invalid?
 
-      messages = @search.validation_errors.compact_blank
-      flash_error(messages) if messages
+      messages = @search.validation_error_messages.compact_blank
+      flash_error(*messages) if messages.present?
       false
+    end
+
+    # Guards against a redirect URL too long for a front-end proxy's
+    # request-line limit -- see MAX_INDEX_FILTER_URL_LENGTH above.
+    # Only called once `@search` (built in validate_search_instance?)
+    # is known valid, so `index_filter` matches the redirect built
+    # afterward.
+    def index_filter_url_too_long?
+      params = @search.index_filter.merge(always_index: 1)
+      length = params.to_query.bytesize
+      return false if length <= Searchable::MAX_INDEX_FILTER_URL_LENGTH
+
+      flash_error(
+        :runtime_search_string_too_long.t(
+          max: Searchable::MAX_INDEX_FILTER_URL_LENGTH, length: length
+        )
+      )
+      true
     end
 
     def clear_relevant_query
@@ -249,12 +322,6 @@ module Searchable
       @query = Query.lookup_and_save(query_model, **@search.params)
     end
 
-    def escape_location_string(location) = "\"#{location.tr(",", "\\,")}\""
-
-    # def strings_with_commas
-    #   [:location, :region].freeze
-    # end
-
     def fields_preferring_ids = []
 
     def fields_with_range = []
@@ -267,17 +334,5 @@ module Searchable
       @query_params[:has_notes_fields] =
         val.split("\n").map { |f| f.strip.tr(" ", "_") }.compact_blank
     end
-
-    # Passing some fields will raise an error if the required field is missing,
-    # so just toss them. Not sure we have to do this, because Query will.
-    # def remove_invalid_field_combinations
-    #   return unless respond_to?(:fields_with_requirements)
-
-    #   fields_with_requirements.each do |req, fields|
-    #     next if @search[req].present?
-
-    #     fields.each { |field| @search.delete(field) }
-    #   end
-    # end
   end
 end

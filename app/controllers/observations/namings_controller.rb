@@ -31,7 +31,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html { render_phlex_new }
+        format.html { render_new_view }
       end
     end
 
@@ -67,7 +67,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html { render_phlex_edit }
+        format.html { render_edit_view }
       end
     end
 
@@ -156,9 +156,9 @@ module Observations
       {
         model: @naming,
         observation: @observation,
-        local: false,
+        turbo: true,
         show_reasons: true,
-        context: params[:context],
+        context: params.permit(:context)[:context],
         vote: @vote,
         given_name: @given_name,
         reasons: @reasons,
@@ -177,16 +177,18 @@ module Observations
       }
     end
 
-    def render_phlex_new
+    def render_new_view(status: :ok, **render_opts)
       render(Views::Controllers::Observations::Namings::New.new(
                **naming_phlex_props
-             ))
+             ),
+             status: status, **render_opts)
     end
 
-    def render_phlex_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Observations::Namings::Edit.new(
                **naming_phlex_props
-             ))
+             ),
+             status: status, **render_opts)
     end
 
     # Successful-create response when the form was opened from the
@@ -305,17 +307,10 @@ module Observations
     end
 
     def respond_to_successful_create
-      respond_to do |format|
-        format.turbo_stream do
-          case params[:context]
-          when "lightgallery", "matrix_box"
-            render_update_matrix_box_streams
-          else
-            redirect_to_obs(@observation)
-          end
-          return
-        end
-        format.html { redirect_to_obs(@observation) }
+      if params[:context].in?(%w[lightgallery matrix_box])
+        render_update_matrix_box_streams
+      else
+        redirect_to_obs(@observation)
       end
     end
 
@@ -331,22 +326,19 @@ module Observations
       return false if @name && @given_name.present?
 
       @naming.errors.
-        add(:name, :form_observations_there_is_a_problem_with_name.t)
+        add(:name, :form_observations_there_is_a_problem_with_name)
       true
     end
 
     def respond_to_form_errors
-      respond_to do |format|
-        format.html do
-          case action_name
-          when "create" then render_phlex_new
-          when "update" then render_phlex_edit
-          end and return
-        end
-        format.turbo_stream do
-          render_modal_form_reload(
-            identifier: modal_identifier, form_locals: naming_form_locals
-          ) and return true
+      if modal_submission?(:naming)
+        render_modal_form_reload(
+          identifier: modal_identifier, form_locals: naming_form_locals
+        )
+      else
+        case action_name
+        when "create" then render_new_view_invalid
+        when "update" then render_edit_view_invalid
         end
       end
     end

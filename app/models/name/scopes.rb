@@ -248,7 +248,7 @@ module Name::Scopes
     # }
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
-      search_columns(Name.searchable_columns, phrase)
+      exact_match_or(phrase) { search_columns(Name.searchable_columns, phrase) }
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is `Name[:id].eq(NameDescription[:name_id])`

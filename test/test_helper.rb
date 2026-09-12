@@ -32,13 +32,13 @@ end
 
 SimpleCov.start("rails") do
   # An always empty file which is always reported as a coverage decrease
-  add_filter("/channels/application_cable/channel.rb")
+  skip("/channels/application_cable/channel.rb")
 
-  # Custom RuboCop cops are lint-time tooling — loaded and exercised by
-  # RuboCop, never by the Rails test suite. The "rails" profile's
+  # Custom RuboCop cops are loaded and exercised by Rubocop
+  # not the Rails test suite. The "rails" profile's
   # track_files("{app,lib}/**/*.rb") otherwise pulls them into the report
   # as a permanent ~0% coverage drag.
-  add_filter("/lib/rubocop/")
+  skip("/lib/rubocop/")
 end
 
 # Allow test results to be reported back to runner IDEs.
@@ -66,11 +66,41 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# MiniExiftool caches its tag list in a pstore file on first use,
+# printing two lines to $stderr while generating it -- invisible on a
+# dev machine where the cache already exists from a prior run, but
+# guaranteed noise on a fresh CI runner. Parallel test workers fork
+# from this process, so warming the cache here (before parallelize
+# forks them) means every worker finds the file already on disk.
+MiniExiftool.all_tags
+
+# RefreshNameListerCacheJob writes this file from a DB query, but
+# nothing guarantees it exists on a fresh checkout -- a CI runner has
+# no name_list_data.js until something runs the job. Every layout
+# renders javascript_importmap_tags, which pins the whole
+# app/javascript/src directory, so any page render fails with
+# Sprockets::Rails::Helper::AssetNotPrecompiledError until it does. A
+# syntactically valid placeholder with empty data satisfies the pin
+# before parallelize forks workers, so every worker finds a file on
+# disk from the start; RefreshNameListerCacheJobTest overwrites it
+# with fixture-backed data when that job's own test runs.
+cache_file = MO.name_lister_cache_file
+unless File.exist?(cache_file)
+  FileUtils.mkpath(File.dirname(cache_file))
+  File.write(cache_file, <<~JS)
+    export let NL_GENERA = [];
+    export let NL_SPECIES = [];
+    export let NL_NAMES = [];
+  JS
+end
+
 %w[
+  no_test_console_noise
   bullet_helper
 
   general_extensions
   flash_extensions
+  search_extensions
   controller_extensions
   capybara_session_extensions
   capybara_macros
@@ -234,20 +264,33 @@ module ActiveSupport
     # I18n.locale and Symbol.missing_tags) leak between tests
     # within a parallel worker. See #4238.
     setup do
-      # rubocop:disable Rails/I18nLocaleAssignment
+      # rubocop:disable-next Rails/I18nLocaleAssignment
       I18n.locale = :en if I18n.locale != :en
-      # rubocop:enable Rails/I18nLocaleAssignment
-      # rubocop:disable Rails/TimeZoneAssignment
+      # rubocop:disable-next Rails/TimeZoneAssignment
       Time.zone = "America/New_York"
-      # rubocop:enable Rails/TimeZoneAssignment
       clear_logs unless ActiveSupport::TestCase.cleared_logs
       Symbol.missing_tags = []
-      # Functional/integration tests reset this via ApplicationController's
-      # own before_action on every get/post; this covers unit tests that
-      # call UserGroup.all_users/reviewers/one_user directly, with no
+      # Functional/integration tests reset these via
+      # ApplicationController's before_actions on every get/post; this
+      # covers unit tests that call these methods directly, with no
       # request to trigger that reset.
       UserGroup.reset_request_cache
+      ExternalSite.reset_request_cache
     end
+
+    # Otherwise WebMock accumulates every request made anywhere in this
+    # worker process, so `assert_requested`/`assert_not_requested`
+    # answer "did ANY test make that call?" rather than "did this
+    # one?" -- passing or failing on test order. Clears the request log
+    # only, not stubs a test registered in `setup`.
+    #
+    # A `teardown do` callback rather than the `def teardown` below,
+    # for the same reason `setup do` is used above: several classes
+    # override `def teardown` without calling `super`
+    # (application_system_test_case, image_loader_job_test,
+    # images/originals_controller_test among them), and those are
+    # exactly the WebMock-using tests this needs to cover.
+    teardown { WebMock.reset_executed_requests! }
 
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
@@ -285,6 +328,35 @@ module ActiveSupport
         File.truncate(path, 0)
       end
       ActiveSupport::TestCase.cleared_logs = true
+    end
+
+    # I18n.available_locales only reflects locales with a generated
+    # config/locales/*.yml, which `rails lang:update` only creates for
+    # locales that have a Language row in whatever DB it ran against --
+    # CI's test DB only has the fixture Language set, so a locale
+    # available on a full local dev DB may not be available there. Use
+    # these when a test needs I18n.with_locale(:xx)/available_locales
+    # to include a locale outside the fixture set, purely to exercise
+    # "the ambient locale differs from the one under test" -- not to
+    # assert on that locale's actual translated content, since the
+    # locale's real translation file may not even be present.
+    def expand_available_locales(*locales)
+      @original_available_locales ||= I18n.available_locales
+      I18n.available_locales = (I18n.available_locales + locales).uniq
+    end
+
+    def restore_available_locales
+      return unless @original_available_locales
+
+      I18n.available_locales = @original_available_locales
+      @original_available_locales = nil
+    end
+
+    def with_expanded_locales(*locales)
+      expand_available_locales(*locales)
+      yield
+    ensure
+      restore_available_locales
     end
   end
 end

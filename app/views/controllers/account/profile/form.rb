@@ -7,16 +7,14 @@ module Views::Controllers::Account::Profile
   # fields are nested under user[upload][...] via ApplicationForm's
   # upload_fields helper (namespace(:upload) inside the user form).
   class Form < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(model, copyright_holder:, copyright_year:,
-                   licenses:, upload_license_id:, **)
-      @copyright_holder = copyright_holder
-      @copyright_year = copyright_year
-      @licenses = licenses
-      @upload_license_id = upload_license_id
+    prop :copyright_holder, String
+    prop :copyright_year, Integer
+    prop :licenses, _Array(_Tuple(String, Integer))
+    prop :upload_license_id, _Nilable(Integer)
+
+    def initialize(model, **)
       super(model, id: "account_profile_form", **)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def around_template
       @attributes[:enctype] = "multipart/form-data"
@@ -48,12 +46,12 @@ module Views::Controllers::Account::Profile
     def render_place_name_field
       autocompleter_field(:place_name, type: :location,
                                        label: :profile_location,
-                                       between: "(33%)")
+                                       label_appends: "(33%)")
     end
 
     def render_notes_field
       textarea_field(:notes, label: :profile_notes,
-                             rows: 10, between: "(33%)")
+                             rows: 10, label_appends: "(33%)")
     end
 
     def render_upload_fields
@@ -80,7 +78,7 @@ module Views::Controllers::Account::Profile
 
     def image_file_label
       key = model.image_id ? :profile_image_change : :profile_image_create
-      "#{key.t}:"
+      key.t
     end
   end
 end

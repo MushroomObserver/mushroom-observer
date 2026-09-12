@@ -10,12 +10,18 @@ class FieldSlip < AbstractModel
   belongs_to :project
   belongs_to :user
 
+  # A slip's project implies its observations are in that project, so
+  # changing the project has to move them. Both `code=` (which re-derives
+  # the project from the new prefix) and the form's project dropdown get
+  # here. See #4932.
+  after_update :cascade_project_change, if: :saved_change_to_project_id?
+
   validates :user_id, presence: true
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
     unless field_slip.code.match?(/[^\d.-]/)
-      errors.add(:code, :format, message: :field_slip_code_format_error.t)
+      errors.add(:code, :field_slip_code_format_error)
     end
   end
 
@@ -68,11 +74,6 @@ class FieldSlip < AbstractModel
     observation_ids = Lookup::Observations.new(observation).ids
     joins(occurrence: :observations).
       where(observations: { id: observation_ids }).distinct
-  }
-
-  scope :project, lambda { |project|
-    project_ids = Lookup::Projects.new(project).ids
-    where(project: project_ids)
   }
 
   scope :projects, lambda { |projects|
@@ -162,6 +163,18 @@ class FieldSlip < AbstractModel
     update(user: obs.user)
   end
 
+  # The event this slip was printed for: its own project, or -- once a
+  # spare-slip release has cleared that -- the project its printed
+  # prefix names. Alias resolution and prompt building key off the
+  # event, which is a fact of the printed slip, not of current project
+  # membership.
+  def event_project
+    return project if project
+
+    prefix = FieldSlip.prefix_for_code(code)
+    prefix && Project.find_by(field_slip_prefix: prefix)
+  end
+
   def update_project
     prefix = self.class.prefix_for_code(code)
     return unless prefix
@@ -200,9 +213,15 @@ class FieldSlip < AbstractModel
   # Used by Mycoportal report
   TREES_SHRUBS = :"Trees/Shrubs"
 
+  # The standard headings printed on a field slip, in slip order. The
+  # observation form injects these too whenever a field code is in play,
+  # so a slip's data has somewhere to go there (#4932).
+  # Should we figure out a way to internationalize these tags?
+  NOTE_HEADINGS = [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit,
+                   :Other].freeze
+
   def notes_fields
-    # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit, :Other].map do |field|
+    NOTE_HEADINGS.map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end
@@ -226,21 +245,39 @@ class FieldSlip < AbstractModel
     location&.id
   end
 
+  # Default location, strongest signal first: this slip's own
+  # observation, then the user's latest slip in this project, then the
+  # project location, then their latest located observation. The
+  # project outranks the observation because a user traveling to a
+  # foray likely hasn't entered anything located at the foray site
+  # yet, while the project location should contain it (issue #4907).
   def calc_location
-    result = observation&.location || users_last_location
-    return result if result
-
-    project&.location
+    observation&.location || users_last_location ||
+      project&.location || users_last_observation_location
   end
 
+  # Location of the user's most recently updated field slip in this
+  # project that has a located observation (slips without one are
+  # skipped). Requires a project: a nil here would match every
+  # project-less slip the user owns -- an orphaned-spares bucket, not
+  # an event cohort -- and resurrect whatever location a batch job
+  # last touched (a fresh "2026-NAMA-0001" slip once defaulted to a
+  # year-old spare's site this way).
   def users_last_location
-    user = @current_user
-    return nil unless user
+    return nil unless @current_user && project
 
-    field_slip = user.field_slips.where(project:).
-                 order(updated_at: :desc).last
-    obs = field_slip&.observation
-    obs&.location
+    Location.joins(observations: { occurrence: :field_slip }).
+      where(field_slips: { user_id: @current_user.id,
+                           project_id: project.id }).
+      order(FieldSlip.arel_table[:updated_at].desc,
+            FieldSlip.arel_table[:id].desc).first
+  end
+
+  def users_last_observation_location
+    return nil unless @current_user
+
+    @current_user.observations.where.not(location_id: nil).
+      order(created_at: :desc, id: :desc).first&.location
   end
 
   # Plain collector string for the form's autocompleter input (the
@@ -268,6 +305,40 @@ class FieldSlip < AbstractModel
 
   def other_codes
     observation&.other_codes || ""
+  end
+
+  # Leaving a project takes the observations out; joining one brings them
+  # in.
+  #
+  # `Project#remove_observation` also clears a slip's project, but only
+  # when the slip still points at *that* project, so the value we just
+  # saved survives. It uses `update_all`, which skips callbacks, so this
+  # can't re-enter.
+  def cascade_project_change
+    members = occurrence&.observations&.to_a
+    return if members.blank?
+
+    old_id, new_id = saved_change_to_project_id
+    Project.find_by(id: old_id)&.remove_observation(members.first)
+    join_project(Project.find_by(id: new_id), members)
+  end
+
+  # All or nothing. Adding only the members a project's constraints
+  # accept would leave the slip claiming a project some of its own
+  # observations aren't in — the exact gap this cascade exists to
+  # prevent. A project that can't take every member is declined instead,
+  # which leaves the slip project-less, and a project-less slip confers
+  # nothing. `update_column` skips callbacks, so declining can't
+  # re-enter this.
+  def join_project(project, members)
+    return unless project
+
+    if members.any? { |obs| project.violates_constraints?(obs) }
+      update_column(:project_id, nil)
+      return
+    end
+
+    members.each { |obs| project.add_observation(obs) }
   end
 
   def can_edit?(editor)

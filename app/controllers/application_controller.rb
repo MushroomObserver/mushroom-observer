@@ -32,8 +32,10 @@ class ApplicationController < ActionController::Base
   include FlashNotices
   include NameValidation
   include Queries
+  include QueryParams
   include ControllerLabels
   include Indexes
+  include PatternSearchState
   include SectionUpdater
   include ModalUpdater
   include ViewerAwareFormat
@@ -57,6 +59,7 @@ class ApplicationController < ActionController::Base
   before_action :apply_user_theme_change
   before_action :reset_user_group_cache
   before_action :reset_textile_cache
+  before_action :reset_external_site_cache
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
@@ -131,23 +134,14 @@ class ApplicationController < ActionController::Base
     change_theme_to(change) if change.present?
   end
 
-  # UserGroup.all_users/reviewers/one_user memoize per request
-  # (Thread.current[...], not a class ivar) -- reset it here so a
-  # request that never touches these doesn't inherit stale groups
-  # left behind by whatever request ran on this same pooled thread
-  # before it. See UserGroup::THREAD_KEYS.
-  def reset_user_group_cache
-    UserGroup.reset_request_cache
-  end
+  # See UserGroup::THREAD_KEYS.
+  def reset_user_group_cache = UserGroup.reset_request_cache
 
-  # Textile::THREAD_KEYS's name-lookup cache is thread-local -- isolated
-  # across concurrent requests, but not auto-reset between sequential
-  # requests pooled onto the same thread. Without this, a request that
-  # primes the cache (Textile.register_name) leaks its abbreviations
-  # into whatever request runs next on that same thread. See #3589.
-  def reset_textile_cache
-    Textile.clear_textile_cache
-  end
+  # See Textile::THREAD_KEYS.
+  def reset_textile_cache = Textile.clear_textile_cache
+
+  # See ExternalSite.select_options.
+  def reset_external_site_cache = ExternalSite.reset_request_cache
 
   def change_theme_to(change)
     if MO.themes.member?(change)
@@ -225,7 +219,8 @@ class ApplicationController < ActionController::Base
   def fix_bad_domains
     if (request.method == "GET") &&
        MO.bad_domains.include?(request.env["HTTP_HOST"])
-      redirect_to("#{MO.http_domain}#{request.fullpath}")
+      redirect_to("#{MO.http_domain}#{request.fullpath}",
+                  allow_other_host: true)
     end
   end
 
@@ -326,6 +321,9 @@ class ApplicationController < ActionController::Base
     tab = controller_name
     # Checklist page with location_id is really a locations tab
     tab = "locations" if tab == "checklists" && params.include?("location_id")
+    # A species-list checklist is really an observation-lists tab
+    tab = "species_lists" if tab == "checklists" &&
+                             params.include?("species_list_id")
     tab
   end
   helper_method :active_project_tab
@@ -353,6 +351,28 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   private
+
+  # Turbo requires a non-2xx status on a failed form submission's
+  # re-render; a 200 there is a silent no-op under Turbo instead of a
+  # redisplay. Dispatches to the including controller's own
+  # `render_new_view`/`render_edit_view` (status: :ok default) --
+  # every controller with `new`/`edit`/`create`/`update` actions
+  # defines those two, so this pair needs no per-controller override.
+  # Doesn't pass status: into render_new_view/render_edit_view --
+  # several not-yet-converted controllers (ArticlesController,
+  # LocationsController, PublicationsController) still define a
+  # zero-arg render_new_view/render_edit_view, which would raise
+  # ArgumentError on a forced status: kwarg. Setting status after
+  # render works regardless of the subclass method's signature.
+  def render_new_view_invalid(**)
+    render_new_view(**)
+    self.status = :unprocessable_content
+  end
+
+  def render_edit_view_invalid(**)
+    render_edit_view(**)
+    self.status = :unprocessable_content
+  end
 
   # defined here because used by both images_controller and
   # observations_controller

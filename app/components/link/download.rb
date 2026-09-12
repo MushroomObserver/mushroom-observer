@@ -10,11 +10,9 @@
 #     target: new_download_species_list_path(id: @sl.id)
 #   ))
 class Components::Link::Download < Components::Link::Get
-  def initialize(target:, name: nil, icon: :download, **)
-    super(target: target,
-          name: name.presence || :download.ti,
-          action: :download,
-          icon: icon,
-          **)
+  def initialize(target: nil, tab: nil, name: nil, icon: :download, **)
+    name = name.presence || :download.ti unless tab
+    super(target: target, tab: tab, name: name, action: :download,
+          icon: icon, **)
   end
 end

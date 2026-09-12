@@ -22,9 +22,7 @@ class API2::OccurrencesTest < UnitTestCase
     @obs2.update!(occurrence: @occ)
   end
 
-  def params_get(**)
-    { method: :get, action: :occurrence }.merge(**)
-  end
+  def api2_model = Occurrence
 
   # GET tests
 
@@ -56,13 +54,10 @@ class API2::OccurrencesTest < UnitTestCase
   def test_posting_occurrence
     obs1 = observations(:coprinus_comatus_obs)
     obs2 = observations(:agaricus_campestris_obs)
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key,
+    params = params_post(
       observation: "#{obs1.id},#{obs2.id}",
       primary_observation: obs1.id
-    }
+    )
     assert_api_pass(params)
     occ = Occurrence.find_by(primary_observation_id: obs1.id)
     assert_not_nil(occ, "Occurrence should have been created")
@@ -71,22 +66,16 @@ class API2::OccurrencesTest < UnitTestCase
   end
 
   def test_posting_occurrence_requires_auth
-    params = {
-      method: :post,
-      action: :occurrence,
+    params = params_post(
+      api_key: nil,
       observation: "#{@obs1.id},#{@obs2.id}"
-    }
+    )
     assert_api_fail(params)
   end
 
   def test_posting_occurrence_requires_two_observations
     obs1 = observations(:coprinus_comatus_obs)
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key,
-      observation: obs1.id.to_s
-    }
+    params = params_post(observation: obs1.id.to_s)
     assert_api_fail(params)
   end
 
@@ -94,63 +83,37 @@ class API2::OccurrencesTest < UnitTestCase
 
   def test_patching_occurrence_add_observation
     obs3 = observations(:coprinus_comatus_obs)
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      add_observation: obs3.id
-    }
+    params = params_patch(id: @occ.id, add_observation: obs3.id)
     assert_api_pass(params)
     @occ.reload
     assert_includes(@occ.observation_ids, obs3.id)
   end
 
   def test_patching_occurrence_remove_observation
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      remove_observation: @obs2.id
-    }
+    params = params_patch(id: @occ.id, remove_observation: @obs2.id)
     assert_api_pass(params)
     # Occurrence should be destroyed (< 2 observations)
     assert_nil(Occurrence.find_by(id: @occ.id))
   end
 
   def test_patching_occurrence_set_primary
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      set_primary_observation: @obs2.id
-    }
+    params = params_patch(
+      id: @occ.id, set_primary_observation: @obs2.id
+    )
     assert_api_pass(params)
     @occ.reload
     assert_equal(@obs2.id, @occ.primary_observation_id)
   end
 
   def test_patching_occurrence_without_params
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id
-    }
+    params = params_patch(id: @occ.id)
     assert_api_fail(params)
   end
 
   # DELETE tests
 
   def test_deleting_occurrence
-    params = {
-      method: :delete,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id
-    }
+    params = params_delete(id: @occ.id)
     assert_api_pass(params)
     assert_nil(Occurrence.find_by(id: @occ.id))
     @obs1.reload
@@ -158,11 +121,7 @@ class API2::OccurrencesTest < UnitTestCase
   end
 
   def test_deleting_occurrence_requires_auth
-    params = {
-      method: :delete,
-      action: :occurrence,
-      id: @occ.id
-    }
+    params = params_delete(api_key: nil, id: @occ.id)
     assert_api_fail(params)
   end
 
@@ -204,13 +163,10 @@ class API2::OccurrencesTest < UnitTestCase
   def test_post_with_explicit_primary
     obs_a = observations(:peltigera_obs)
     obs_b = observations(:strobilurus_diminutivus_obs)
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key,
+    params = params_post(
       observation: "#{obs_a.id},#{obs_b.id}",
       primary_observation: obs_b.id
-    }
+    )
     assert_api_pass(params)
     occ = Occurrence.find_by(primary_observation_id: obs_b.id)
     assert_not_nil(occ, "Should create with explicit primary")
@@ -220,12 +176,7 @@ class API2::OccurrencesTest < UnitTestCase
   def test_post_without_explicit_primary_picks_oldest
     obs_a = observations(:peltigera_obs)
     obs_b = observations(:strobilurus_diminutivus_obs)
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key,
-      observation: "#{obs_a.id},#{obs_b.id}"
-    }
+    params = params_post(observation: "#{obs_a.id},#{obs_b.id}")
     assert_api_pass(params)
     oldest = [obs_a, obs_b].min_by(&:created_at)
     occ = Occurrence.where(
@@ -246,13 +197,7 @@ class API2::OccurrencesTest < UnitTestCase
     @obs3.update!(occurrence: occ2)
     @obs4.update!(occurrence: occ2)
 
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      add_observation: @obs3.id
-    }
+    params = params_patch(id: @occ.id, add_observation: @obs3.id)
     assert_api_pass(params)
     @occ.reload
 
@@ -265,26 +210,14 @@ class API2::OccurrencesTest < UnitTestCase
 
   def test_patch_add_observation_no_merge
     obs_new = observations(:peltigera_obs)
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      add_observation: obs_new.id
-    }
+    params = params_patch(id: @occ.id, add_observation: obs_new.id)
     assert_api_pass(params)
     @occ.reload
     assert_includes(@occ.observation_ids, obs_new.id)
   end
 
   def test_patch_add_already_included_observation
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      add_observation: @obs1.id
-    }
+    params = params_patch(id: @occ.id, add_observation: @obs1.id)
     assert_api_pass(params)
     @occ.reload
     assert_equal(2, @occ.observations.count,
@@ -294,13 +227,7 @@ class API2::OccurrencesTest < UnitTestCase
   # == Coverage: PATCH remove triggers destroy ==
 
   def test_patch_remove_triggers_destroy_if_incomplete
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      remove_observation: @obs2.id
-    }
+    params = params_patch(id: @occ.id, remove_observation: @obs2.id)
     assert_api_pass(params)
     assert_nil(Occurrence.find_by(id: @occ.id),
                "Should destroy when < 2 obs remain")
@@ -309,13 +236,9 @@ class API2::OccurrencesTest < UnitTestCase
   # == Coverage: PATCH set_primary ==
 
   def test_patch_set_primary
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      set_primary_observation: @obs2.id
-    }
+    params = params_patch(
+      id: @occ.id, set_primary_observation: @obs2.id
+    )
     assert_api_pass(params)
     @occ.reload
     assert_equal(@obs2.id, @occ.primary_observation_id)
@@ -335,25 +258,14 @@ class API2::OccurrencesTest < UnitTestCase
     )
     obs_other.update!(occurrence: occ2)
 
-    params = {
-      method: :patch,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id,
-      add_observation: obs_other.id
-    }
+    params = params_patch(id: @occ.id, add_observation: obs_other.id)
     assert_api_fail(params)
   end
 
   # == Coverage: DELETE with dissolve ==
 
   def test_delete_dissolves_occurrence
-    params = {
-      method: :delete,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id
-    }
+    params = params_delete(id: @occ.id)
     assert_api_pass(params)
     assert_nil(Occurrence.find_by(id: @occ.id))
     @obs1.reload
@@ -363,12 +275,7 @@ class API2::OccurrencesTest < UnitTestCase
   def test_delete_with_field_slip_keeps_occurrence
     fs = field_slips(:field_slip_no_obs)
     @occ.update!(field_slip: fs)
-    params = {
-      method: :delete,
-      action: :occurrence,
-      api_key: @api_key.key,
-      id: @occ.id
-    }
+    params = params_delete(id: @occ.id)
     assert_api_pass(params)
     # Occurrence should survive with field_slip
     assert(Occurrence.exists?(@occ.id),
@@ -393,23 +300,14 @@ class API2::OccurrencesTest < UnitTestCase
     obs_c = observations(:owner_only_favorite_ne_consensus)
     obs_c.update!(occurrence: occ_b)
 
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key,
-      observation: "#{obs_a.id},#{obs_b.id}"
-    }
+    params = params_post(observation: "#{obs_a.id},#{obs_b.id}")
     assert_raises(ActiveRecord::RecordInvalid) do
       API2.execute(params)
     end
   end
 
   def test_post_requires_observations
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key
-    }
+    params = params_post
     assert_api_fail(params)
   end
 
@@ -442,12 +340,7 @@ class API2::OccurrencesTest < UnitTestCase
 
   def test_posting_single_observation_error_message
     obs1 = observations(:peltigera_obs)
-    params = {
-      method: :post,
-      action: :occurrence,
-      api_key: @api_key.key,
-      observation: obs1.id.to_s
-    }
+    params = params_post(observation: obs1.id.to_s)
     api = API2.execute(params)
     assert(api.errors.any?,
            "Should fail with only one observation")

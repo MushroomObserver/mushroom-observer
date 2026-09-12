@@ -139,7 +139,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     login(user.login)
     put(:update, params: params)
 
-    assert_flash_text(:runtime_no_changes.l)
+    assert_flash(:runtime_no_changes)
     assert_redirected_to(name_path(name.id))
     assert_equal(text_name, name.reload.text_name)
     assert_equal(author, name.author)
@@ -756,7 +756,8 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     assert_redirected_to(
       new_admin_emails_name_change_requests_path(
-        name_id: name.id, new_name_with_icn_id: "Superboletus [#]"
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]",
+        format: :html
       ),
       "User should be unable to change text_name of Name with dependents"
     )
@@ -786,7 +787,8 @@ class NamesControllerUpdateTest < FunctionalTestCase
     end
 
     assert_flash_success(
-      "User should be able to make minor changes to Name that has offspring"
+      on_fail: "User should be able to make minor changes to Name that " \
+               "has offspring"
     )
     name.reload
     assert_equal(params[:name][:icn_id], name.icn_id.to_s)
@@ -912,7 +914,8 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(
       new_admin_emails_name_change_requests_path(
         name_id: name.id,
-        new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
+        new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]",
+        format: :html
       ),
       "Editing id# of Name w/dependents should show Name Change Request form"
     )
@@ -936,7 +939,11 @@ class NamesControllerUpdateTest < FunctionalTestCase
     login
     put(:update, params: params)
 
-    assert_flash_error(:name_error_unregistrable.l)
+    assert_flash_error(
+      :name_error_unregistrable,
+      rank: name.rank.to_s,
+      name: ERB::Util.html_escape(name.real_search_name(nil))
+    )
   end
 
   def test_update_icn_id_non_numeric
@@ -954,11 +961,14 @@ class NamesControllerUpdateTest < FunctionalTestCase
         icn_id: "MB12345"
       }
     }
-    default_validates_numericality_of_error_message = "is not a number"
     login
     put(:update, params: params)
 
-    assert_flash_text(/#{default_validates_numericality_of_error_message}/)
+    assert_flash_error(
+      :not_a_number,
+      object_error_type: :name,
+      object_error_attribute: :icn_id
+    )
   end
 
   def test_update_name_admin_rank_warning_then_force
@@ -979,7 +989,9 @@ class NamesControllerUpdateTest < FunctionalTestCase
     name.reload
     assert_equal("Order", name.rank,
                  "Rank should not change on first submit when rank conflicts")
-    assert_flash_warning("Should flash rank warning to admin")
+    assert_flash_warning(on_fail: "Should flash rank warning to admin")
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_select("input[type=hidden][name=approved_rank]",
                   { count: 1 },
                   "Form should include approved_rank hidden field")
@@ -1012,6 +1024,10 @@ class NamesControllerUpdateTest < FunctionalTestCase
     login
     put(:update, params: params)
 
-    assert_flash_error(:name_error_icn_id_in_use.l)
+    assert_flash_error(
+      :name_error_icn_id_in_use,
+      number: name_with_icn_id.icn_id,
+      name: ERB::Util.html_escape(name_with_icn_id.real_search_name(nil))
+    )
   end
 end

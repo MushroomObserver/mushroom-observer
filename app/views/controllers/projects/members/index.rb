@@ -3,14 +3,10 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the project members index page.
   class Index < Views::FullPageBase
-    def initialize(project:, users:, project_member:,
-                   user:)
-      super()
-      @project = project
-      @users = users
-      @project_member = project_member
-      @user = user
-    end
+    prop :project, ::Project
+    prop :users, _Array(::User)
+    prop :project_member, ::ProjectMember
+    prop :user, ::User
 
     def view_template
       add_project_banner(@project)
@@ -20,7 +16,7 @@ module Views::Controllers::Projects::Members
                project: @project, current_subtab: "members"
              ))
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project
+               @project_member, project: @project, turbo: true
              ))
       render_table
     end
@@ -48,9 +44,19 @@ module Views::Controllers::Projects::Members
         render_aliases(u)
       end
       table.column(:status.ti, class: "align-middle") do |u|
-        plain(@project.member_status(u))
+        plain(member_status(u))
       end
       table.column(nil, class: "align-middle") { |u| render_edit_link(u) }
+    end
+
+    # Was Project#member_status -- moved here (#4901) since its only
+    # caller is this one render call site.
+    def member_status(user)
+      return :owner.ti if user == @project.user
+      return :admin.ti if @project.is_admin?(user)
+      return :member.ti if @project.member?(user)
+
+      nil
     end
 
     def render_avatar(user)

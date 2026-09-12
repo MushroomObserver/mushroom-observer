@@ -21,21 +21,37 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
                    "Expected no list when obs has no species_lists")
   end
 
-  def test_no_species_lists_and_no_owned_lists_renders_nothing
+  def test_no_species_lists_and_no_editable_lists_renders_nothing
     obs = observations(:imageless_unvouchered_obs)
     user = users(:dick)
     assert(obs.species_lists.none?,
            "Need obs fixture obs without species lists")
-    assert(user.species_list_ids.none?,
-           "Need user fixture who owns no species lists")
 
-    html = render(
-      Views::Controllers::Observations::Show::SpeciesListsPanel.new(
-        obs: obs, user: user
-      )
-    )
+    html = user.stub(:all_editable_species_lists, []) do
+      render(panel_with(obs, user))
+    end
 
     assert_equal("", html)
+  end
+
+  # A recorder who owns no lists but can edit one (a project list) still
+  # gets the "add to a list" link -- the gate is editable, not owned.
+  def test_no_species_lists_but_can_edit_a_list_renders_add_link
+    obs = observations(:imageless_unvouchered_obs)
+    user = users(:dick)
+    assert(user.species_list_ids.none?,
+           "premise: dick owns no species lists")
+    assert(user.all_editable_species_lists.any?,
+           "premise: dick can edit at least one species list")
+
+    html = render(panel_with(obs, user))
+
+    assert_html(
+      html,
+      "a[href='#{routes.edit_observation_species_lists_path(obs.id)}']",
+      text: :show_observation_add_to_species_list.l
+    )
+    assert_no_html(html, "ul")
   end
 
   def test_no_species_lists_but_user_owns_lists_renders_add_link
@@ -46,11 +62,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     assert(user.species_list_ids.any?,
            "Need user fixture who owns at least one species list")
 
-    html = render(
-      Views::Controllers::Observations::Show::SpeciesListsPanel.new(
-        obs: obs, user: user
-      )
-    )
+    html = render(panel_with(obs, user))
 
     assert_html(
       html,
@@ -82,7 +94,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     form_selector = "form[action='#{routes.observation_species_list_path(
       id: @obs.id, species_list_id: spl.id, commit: "remove"
     )}']"
-    assert_html(html, "#{form_selector} button span.glyphicon-remove-circle")
+    assert_html(html, "#{form_selector} button svg.mo-icon-remove")
     assert_html(html, "#{form_selector} button span.sr-only",
                 text: :remove.ti)
   end
@@ -93,9 +105,9 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     Rails.application.routes.url_helpers
   end
 
-  def panel_with(obs)
+  def panel_with(obs, user = @user)
     Views::Controllers::Observations::Show::SpeciesListsPanel.new(
-      obs: obs, user: @user
+      obs: obs, user: user
     )
   end
 end

@@ -20,7 +20,7 @@ module Projects
     def index
       return unless find_project!
 
-      users = @project.user_group.users.includes(:image)
+      users = @project.user_group.users.includes(:image).to_a
       project_member = ProjectMember.new(project: @project)
       render(Views::Controllers::Projects::Members::Index.new(
                project: @project, users: users,

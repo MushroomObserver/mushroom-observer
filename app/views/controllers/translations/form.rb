@@ -6,17 +6,22 @@ module Views::Controllers::Translations
   # Creates its own FormObject internally (Pattern B). Uses
   # FieldProxy for dynamic textarea fields with flat param names.
   class Form < ::Components::ApplicationForm
-    def initialize(lang:, tag:, edit_tags:,
-                   strings:, **options)
-      @lang = lang
-      @tag = tag
-      @edit_tags = edit_tags
-      @strings = strings
-      @for_page = options.delete(:for_page)
-      @official_records = options.delete(:official_records)
+    prop :lang, ::Language
+    prop :tag, _Nilable(String), default: nil
+    prop :edit_tags, _Array(String), default: -> { [] }
+    prop :strings, _Hash(String, String), default: -> { {} }
+    prop :for_page, _Nilable(String), default: nil
+    prop :official_records, _Hash(String, ::TranslationString)
 
+    def initialize(lang:, tag:, edit_tags:, strings:, **attrs)
       form_object = FormObject::Translation.new(tag: tag)
-      super(form_object, **options)
+      # Permanently turbo: true -- both callers (TranslationsController's
+      # standalone render and Index's embedded ui-panel) need this form
+      # Turbo-submitted, so it forces its own state rather than relying
+      # on every caller to remember to pass it. turbo: true comes after
+      # **attrs so no caller can override it.
+      super(form_object, lang: lang, tag: tag, edit_tags: edit_tags,
+                         strings: strings, **attrs, turbo: true)
     end
 
     def around_template(&block)
@@ -49,7 +54,6 @@ module Views::Controllers::Translations
 
     def form_dataset
       {
-        turbo: "true",
         controller: :translation,
         locale: @lang.locale,
         confirm_string:
@@ -64,7 +68,7 @@ module Views::Controllers::Translations
     def render_official_section
       div(id: "translation_official") do
         h4(class: "font-weight-bold") do
-          plain("#{Language.official.name}:")
+          append_colon(Language.official.name)
         end
         render_official_tags
         hr(class: "pb-1 pt-3")
@@ -81,7 +85,7 @@ module Views::Controllers::Translations
     end
 
     def render_official_tag(ttag, record)
-      span(class: "underline") { plain("#{ttag}:") }
+      span(class: "underline") { append_colon(ttag) }
       p do
         str = record.text.gsub("\\n", "\n")
         render_multiline_text(str)
@@ -99,7 +103,7 @@ module Views::Controllers::Translations
 
     def render_language_header
       h4(class: "font-weight-bold mt-3") do
-        plain("#{@lang.name}:")
+        append_colon(@lang.name)
       end
     end
 
@@ -187,7 +191,7 @@ module Views::Controllers::Translations
 
     def render_save_button
       submit(:save.ti, as: :button,
-                       name: :commit, value: :submit,
+                       name: "commit", value: "submit",
                        id: "save_button", data: save_button_data)
     end
 

@@ -2,9 +2,9 @@
 
 # "Cancel to species list index" action-nav link.
 class Tab::SpeciesList::Index < Tab::Base
-  def initialize(q_param: nil)
+  def initialize(index_filter: nil)
     super()
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   def title
@@ -12,6 +12,6 @@ class Tab::SpeciesList::Index < Tab::Base
   end
 
   def path
-    with_q_param(species_lists_path, @q_param)
+    with_index_filter(species_lists_path, @index_filter)
   end
 end

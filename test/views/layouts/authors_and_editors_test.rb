@@ -58,11 +58,7 @@ module Views::Layouts
         editors: [dick]
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: nil
-                              ))
+      html = render_component(obj: desc, versions: [], user: nil)
 
       assert_includes(html, "Rolf")
       assert_includes(html, "Mary")
@@ -87,11 +83,7 @@ module Views::Layouts
         true
       end
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: rolf
-                              ))
+      html = render_component(obj: desc, versions: [], user: rolf)
 
       assert_includes(html, "Mary")
       # Component should render successfully for admin users
@@ -108,11 +100,7 @@ module Views::Layouts
         id: 123
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: rolf
-                              ))
+      html = render_component(obj: desc, versions: [], user: rolf)
 
       assert_includes(html, "Mary")
       # Component should render successfully for non-author users
@@ -129,11 +117,7 @@ module Views::Layouts
         id: 123
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: rolf
-                              ))
+      html = render_component(obj: desc, versions: [], user: rolf)
 
       assert_includes(html, "Rolf")
       assert_includes(html, "Mary")
@@ -147,11 +131,7 @@ module Views::Layouts
         editors: [users(:dick)]
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: nil
-                              ))
+      html = render_component(obj: desc, versions: [], user: nil)
 
       # Should render without error even with no authors
       assert_not_nil(html)
@@ -172,11 +152,7 @@ module Views::Layouts
         TestVersion.new(user_id: katrina.id)
       ]
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: obj,
-                                versions: versions,
-                                user: nil
-                              ))
+      html = render_component(obj: obj, versions: versions, user: nil)
 
       assert_includes(html, "Rolf")
       assert_includes(html, "Mary")
@@ -190,11 +166,7 @@ module Views::Layouts
       rolf = users(:rolf)
       obj = TestObject.new(user: rolf, type_tag: :location)
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: obj,
-                                versions: [],
-                                user: nil
-                              ))
+      html = render_component(obj: obj, versions: [], user: nil)
 
       assert_includes(html, "Rolf")
       # Should show user who defined/created the object
@@ -213,11 +185,7 @@ module Views::Layouts
         TestVersion.new(user_id: mary.id)
       ]
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: obj,
-                                versions: versions,
-                                user: nil
-                              ))
+      html = render_component(obj: obj, versions: versions, user: nil)
 
       assert_includes(html, "Rolf")
       # Rolf should only appear once as creator, not as editor
@@ -230,11 +198,7 @@ module Views::Layouts
       name = names(:fungi)
       versions = name.versions.to_a
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: name,
-                                versions: versions,
-                                user: users(:rolf)
-                              ))
+      html = render_component(obj: name, versions: versions, user: users(:rolf))
 
       assert_not_nil(html)
       # Should render without errors
@@ -244,11 +208,8 @@ module Views::Layouts
       location = locations(:albion)
       versions = location.versions.to_a
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: location,
-                                versions: versions,
-                                user: users(:rolf)
-                              ))
+      html = render_component(obj: location, versions: versions,
+                              user: users(:rolf))
 
       assert_not_nil(html)
     end
@@ -260,11 +221,7 @@ module Views::Layouts
         type_tag: :name_description
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: nil
-                              ))
+      html = render_component(obj: desc, versions: [], user: nil)
 
       assert_includes(html, "Rolf")
     end
@@ -275,11 +232,7 @@ module Views::Layouts
         type_tag: :glossary_term
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: obj,
-                                versions: [],
-                                user: nil
-                              ))
+      html = render_component(obj: obj, versions: [], user: nil)
 
       assert_includes(html, "Rolf")
     end
@@ -294,15 +247,17 @@ module Views::Layouts
         editors: []
       )
 
-      html = render_component(AuthorsAndEditors.new(
-                                obj: desc,
-                                versions: [],
-                                user: nil
-                              ))
+      html = render_component(obj: desc, versions: [], user: nil)
 
       # Should render "User #<id>" when given an integer
       assert_includes(html, "User ##{user_id}")
       assert_includes(html, "user_link_#{user_id}")
+    end
+
+    private
+
+    def render_component(**)
+      render(AuthorsAndEditors.new(**))
     end
   end
 end

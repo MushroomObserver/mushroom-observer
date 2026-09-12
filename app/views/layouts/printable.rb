@@ -59,16 +59,20 @@ module Views::Layouts
       trusted_html(auto_discovery_link_tag(
                      :rss, activity_logs_rss_path, { title: :app_rss.l }
                    ))
-      title do
-        plain("#{:app_title.l}: ")
-        trusted_html(content_for(:document_title))
-      end
+      render_title
       link(rel: "SHORTCUT ICON", href: "/favicon.ico?20220116")
       meta(property: "og:image",
            content: "https://mushroomobserver.org/images/facebook_icon.png")
       meta(property: "og:title", content: "Mushroom Observer")
       meta(property: "og:description", content: OG_DESCRIPTION)
       style { trusted_html(::ActiveSupport::SafeBuffer.new(PRINT_STYLE)) }
+    end
+
+    def render_title
+      title do
+        trusted_html(append_colon(:app_title.l))
+        trusted_html(content_for(:document_title))
+      end
     end
   end
 end

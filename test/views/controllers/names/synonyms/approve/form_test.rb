@@ -42,7 +42,8 @@ module Views::Controllers::Names::Synonyms::Approve
     def render_form(name:, approved_names: nil)
       model = FormObject::ApproveSynonym.new
       render(Form.new(
-               model, name: name, approved_names: approved_names
+               model, name: name, approved_names: approved_names,
+                      user: users(:rolf)
              ))
     end
   end

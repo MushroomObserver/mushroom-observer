@@ -11,6 +11,8 @@ class API2::APIKeysTest < UnitTestCase
   #  :section: APIKey Requests
   # ----------------------------
 
+  def api2_model = APIKey
+
   def test_page_length_methods
     api = API2::APIKeyAPI.new
     assert_equal(1000, api.high_detail_page_length)
@@ -20,12 +22,7 @@ class API2::APIKeysTest < UnitTestCase
   end
 
   def test_getting_api_keys
-    params = {
-      method: :get,
-      action: :api_key,
-      api_key: @api_key.key,
-      user: rolf.id
-    }
+    params = params_get(api_key: @api_key.key, user: rolf.id)
     # No GET requests allowed now.
     assert_api_fail(params)
   end
@@ -34,12 +31,7 @@ class API2::APIKeysTest < UnitTestCase
     @for_user = rolf
     @app = "  Mushroom  Mapper  "
     @verified = true
-    params = {
-      method: :post,
-      action: :api_key,
-      api_key: @api_key.key,
-      app: @app
-    }
+    params = params_post(app: @app)
     # No email sent when creating key for yourself (verified immediately)
     assert_no_enqueued_jobs do
       api = API2.execute(params)
@@ -55,12 +47,7 @@ class API2::APIKeysTest < UnitTestCase
     @for_user = rolf.email
     @app = "  Mushroom  Mapper  "
     @verified = true
-    params = {
-      method: :post,
-      action: :api_key,
-      api_key: @api_key.key,
-      app: @app
-    }
+    params = params_post(app: @app)
     # No email sent when creating key for yourself (verified immediately)
     assert_no_enqueued_jobs do
       api = API2.execute(params)
@@ -75,13 +62,7 @@ class API2::APIKeysTest < UnitTestCase
     @for_user = katrina
     @app = "  Mushroom  Mapper  "
     @verified = false
-    params = {
-      method: :post,
-      action: :api_key,
-      api_key: @api_key.key,
-      app: @app,
-      for_user: @for_user.id
-    }
+    params = params_post(app: @app, for_user: @for_user.id)
     # Email sent when creating key for another user without their password
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       api = API2.execute(params)
@@ -99,14 +80,8 @@ class API2::APIKeysTest < UnitTestCase
     @for_user = katrina
     @app = "  Mushroom  Mapper  "
     @verified = true
-    params = {
-      method: :post,
-      action: :api_key,
-      api_key: @api_key.key,
-      app: @app,
-      for_user: @for_user.id,
-      password: "testpassword"
-    }
+    params = params_post(app: @app, for_user: @for_user.id,
+                         password: "testpassword")
     # No email sent when password provided (verified immediately)
     assert_no_enqueued_jobs do
       api = API2.execute(params)
@@ -122,14 +97,8 @@ class API2::APIKeysTest < UnitTestCase
     @for_user = rolf
     @app = api_key.notes
     @verified = true
-    params = {
-      method: :post,
-      action: :api_key,
-      api_key: @api_key.key,
-      app: @app,
-      for_user: @for_user.id,
-      password: "testpassword"
-    }
+    params = params_post(app: @app, for_user: @for_user.id,
+                         password: "testpassword")
     # No email sent - returns existing verified key
     assert_no_enqueued_jobs do
       api = API2.execute(params)
@@ -146,24 +115,13 @@ class API2::APIKeysTest < UnitTestCase
   end
 
   def test_patching_api_keys
-    params = {
-      method: :patch,
-      action: :api_key,
-      api_key: @api_key.key,
-      id: @api_key.id,
-      set_app: "new app"
-    }
+    params = params_patch(id: @api_key.id, set_app: "new app")
     # No PATCH requests allowed now.
     assert_api_fail(params)
   end
 
   def test_deleting_api_keys
-    params = {
-      method: :delete,
-      action: :api_key,
-      api_key: @api_key.key,
-      id: @api_key.id
-    }
+    params = params_delete(id: @api_key.id)
     # No DELETE requests allowed now.
     assert_api_fail(params)
   end

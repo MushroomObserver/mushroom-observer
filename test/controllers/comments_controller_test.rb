@@ -3,14 +3,28 @@
 require("test_helper")
 
 class CommentsControllerTest < FunctionalTestCase
-  # Test of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  include QueryParamRoundTripTestHelpers
+
+  # Test of index: unfiltered index, then each recognized filter param.
   def test_index
     login
     get(:index)
     assert_response(:success)
     assert_select("body.comments__index")
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Comments, :Comment,
+      overrides: {
+        id_in_set: comments(:minimal_unknown_obs_comment_1).id,
+        by_users: rolf.id,
+        for_user: rolf.id
+      }
+    )
   end
 
   def test_index_by_non_default_sort_order
@@ -25,7 +39,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_has_comments
     target = observations(:minimal_unknown_obs)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
     comments = Comment.where(target_type: target.class.name, target: target)
 
     login
@@ -37,30 +51,52 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_index_target_valid_target_without_comments
     target = names(:conocybe_filaris)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_target_invalid_target_type
     target = api_keys(:rolfs_api_key)
-    params = { type: target.class.name, target: target.id }
+    params = { target: { type: target.class.name, id: target.id } }
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_invalid_polymorphic_type,
+        { param: "target", type: params[:target][:type] }]]
+    )
+    assert_select("#results tr", count: 0)
   end
 
   def test_index_target_for_non_model
-    params = { type: "Hacker", target: 666 }
+    params = { target: { type: "Hacker", id: 666 } }
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_invalid_polymorphic_type,
+        { param: "target", type: params[:target][:type] }]]
+    )
+    assert_select("#results tr", count: 0)
+  end
+
+  def test_index_target_nonexistent_id
+    bad_id = Name.maximum(:id).to_i + 1000
+    params = { target: { type: "Name", id: bad_id } }
+
+    login
+    get(:index, params: params)
+    assert_flash(
+      [[:runtime_no_matches, { type: :comment }],
+       [:query_validation_polymorphic_not_found,
+        { param: "target", type: :name, id: bad_id.to_s.inspect }]]
+    )
+    assert_select("#results tr", count: 0)
   end
 
   def test_index_pattern_search_str
@@ -117,7 +153,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_by_user_nonexistent_user
@@ -126,7 +162,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: id })
 
-    assert_flash_text(:runtime_object_not_found.l(type: :user, id: id))
+    assert_flash(:runtime_object_not_found, type: :user, id: id)
     assert_redirected_to(comments_path)
   end
 
@@ -164,7 +200,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: user.id })
 
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_for_user_nonexistent_user
@@ -173,7 +209,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: id })
 
-    assert_flash_text(:runtime_object_not_found.l(type: :user, id: id))
+    assert_flash(:runtime_object_not_found, type: :user, id: id)
     assert_redirected_to(comments_path)
   end
 
@@ -265,8 +301,10 @@ class CommentsControllerTest < FunctionalTestCase
     login(:katrina)
 
     get(:new, params:)
-    assert_flash_error("MO should flash if trying to comment on object" \
-                       "for which user lacks read privileges")
+    assert_flash_error(
+      on_fail: "MO should flash if trying to comment on object" \
+               "for which user lacks read privileges"
+    )
 
     # Test turbo shows flash error
     get(:new, params:, format: :turbo_stream)
@@ -341,40 +379,61 @@ class CommentsControllerTest < FunctionalTestCase
                           comment: comment.comment } }
     login("rolf")
     put(:update, params: params)
-    assert_flash_text(:runtime_no_changes.t)
+    assert_flash(:runtime_no_changes)
   end
 
   def test_update_comment_with_invalid_params_re_renders_form
     # `comment_updated?` `!@comment.save` branch + reload_form
-    # HTML path.
+    # HTML path. Regression: reload_form used to always render the
+    # New template regardless of which action called it -- assert
+    # the Edit page specifically, not just "a comment form somewhere".
     comment = comments(:minimal_unknown_obs_comment_1)
     params = { id: comment.id,
                comment: { summary: "", comment: "Body" } }
     login("rolf")
     put(:update, params: params)
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("body.comments__edit")
     assert_select("form#comment_form")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_create_comment_turbo_invalid_reloads_modal_form
     # `reload_form` turbo_stream branch → `reload_modal_form`.
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id, type: "Observation",
-               comment: { summary: "", comment: "Body" } }
+               comment: { summary: "", comment: "Body", modal: "true" } }
     login
     post(:create, params: params, format: :turbo_stream)
     assert_response(:success)
+    assert_select("turbo-stream[action='replace'][target='comment_form']")
+    assert_flash_error
+  end
+
+  def test_update_comment_turbo_invalid_reloads_modal_form
+    # `reload_form` turbo_stream branch → `reload_modal_form`, update
+    # side -- symmetric with the create case above.
+    comment = comments(:minimal_unknown_obs_comment_1)
+    params = { id: comment.id,
+               comment: { summary: "", comment: "Body", modal: "true" } }
+    login("rolf")
+    put(:update, params: params, format: :turbo_stream)
+    assert_response(:success)
+    assert_select(
+      "turbo-stream[action='replace'][target='comment_#{comment.id}_form']"
+    )
+    assert_flash_error
   end
 
   def test_create_comment_with_invalid_params_re_renders_form
     # `reload_form` HTML branch: missing summary fails save and
-    # falls through to `render_phlex_new`.
+    # falls through to `render_new_view`.
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id, type: "Observation",
                comment: { summary: "", comment: "Body" } }
     login
     post(:create, params: params)
-    assert_response(:success)
+    assert_unprocessable
     assert_select("body.comments__new")
     assert_select("form#comment_form")
   end
@@ -417,7 +476,7 @@ class CommentsControllerTest < FunctionalTestCase
     params = { target: obs.id,
                type: "Observation",
                comment: { summary: "Turbo Test",
-                          comment: "Some text." } }
+                          comment: "Some text.", modal: "true" } }
     login
     post(:create, params: params, as: :turbo_stream)
     assert_response(:success)
@@ -443,7 +502,7 @@ class CommentsControllerTest < FunctionalTestCase
     params = { target: obs.id,
                type: "Observation",
                comment: { summary: "Turbo Prepend Test",
-                          comment: "Some text." } }
+                          comment: "Some text.", modal: "true" } }
     login
     post(:create, params: params, as: :turbo_stream)
     assert_response(:success)
@@ -469,7 +528,7 @@ class CommentsControllerTest < FunctionalTestCase
     login_for(comment)
     params = { id: comment.id,
                comment: { summary: "Updated Summary",
-                          comment: "Updated body." } }
+                          comment: "Updated body.", modal: "true" } }
     put(:update, params: params, as: :turbo_stream)
     assert_response(:success)
     target_id = "modal_comment_#{comment.id}"
@@ -486,7 +545,7 @@ class CommentsControllerTest < FunctionalTestCase
     login_for(comment)
     params = { id: comment.id,
                comment: { summary: "Updated Summary",
-                          comment: "Updated body." } }
+                          comment: "Updated body.", modal: "true" } }
     put(:update, params: params, as: :turbo_stream)
     assert_response(:success)
 

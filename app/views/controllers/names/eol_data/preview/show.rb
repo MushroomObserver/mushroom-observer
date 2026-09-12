@@ -19,7 +19,7 @@ class Views::Controllers::Names::EolData::Preview::Show < Views::FullPageBase
     odd_or_even = 0
     @names.select(&:ok_for_export).each do |name|
       odd_or_even = 1 - odd_or_even
-      div(class: "ListLine#{odd_or_even} py-10px") do
+      div(class: "ListLine#{odd_or_even} py-3") do
         # Preserve textile-rendered italics/bold for scientific
         # names — `display_name.t` emits HTML, so trusted_html is
         # required (plain text would double-escape the tags).

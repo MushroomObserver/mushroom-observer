@@ -6,7 +6,8 @@ module Views::Controllers::Locations
   class Edit < Views::FullPageBase
     prop :location, ::Location
     prop :display_name, _Nilable(::String), default: nil
-    prop :dubious_where_reasons, _Nilable(_Array(::String)), default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
 
     def view_template
       add_edit_title(@location)
@@ -16,7 +17,8 @@ module Views::Controllers::Locations
       render(Form.new(
                @location,
                display_name: @display_name,
-               dubious_where_reasons: @dubious_where_reasons
+               dubious_where_reasons: @dubious_where_reasons,
+               turbo: true
              ))
     end
   end

@@ -39,7 +39,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                           type: :Name, old_id: old_name.id,
+                           new_id: new_name.id, format: :html
                          ))
     assert(Name.find(old_name.id))
     assert(new_name.reload)
@@ -162,7 +163,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     login(rolf.login)
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                           type: :Name, old_id: old_name.id,
+                           new_id: new_name.id, format: :html
                          ))
 
     # Try again as an admin.
@@ -578,7 +580,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     login(rolf.login)
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Name, old_id: old_name.id, new_id: new_name.id
+                           type: :Name, old_id: old_name.id,
+                           new_id: new_name.id, format: :html
                          ))
     assert(old_name.reload)
     assert(new_name.reload)
@@ -710,7 +713,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     name4.skip_notify = true
     name4.save
     assert(name1.correct_spelling)
-    assert(name1.correct_spelling != name4)
+    assert_not_equal(name1.correct_spelling, name4)
     assert(name1.deprecated)
     assert_not(name4.correct_spelling)
     assert_not(name4.deprecated)
@@ -851,9 +854,10 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     assert_redirected_to(name_path(survivor.id))
 
-    expect = "Successfully merged name #{destroyed_real_search_name} " \
-             "into #{survivor.real_search_name(user)}"
-    assert_flash_text(/#{expect}/, "Merger success flash is incorrect")
+    assert_flash(:runtime_edit_name_merge_success,
+                 on_fail: "Merger success flash is incorrect",
+                 this: destroyed_real_search_name,
+                 that: survivor.real_search_name(user))
 
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
@@ -915,10 +919,16 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     login(rolf.login)
     make_admin
 
+    matches = (Name.where(search_name: new_name.search_name) - [old_name]).
+              map(&:unique_search_name).join(" / ")
+
     assert_no_difference("Name.count") do
       put(:update, params: params)
     end
-    assert_response(:success) # form reloaded
-    assert_flash_error(:edit_name_multiple_names_match.l)
+    assert_unprocessable # form reloaded
+    assert_flash_error(:edit_name_multiple_names_match,
+                       str: new_name.real_search_name(rolf),
+                       matches: matches)
+    assert_select("form[data-turbo='true']")
   end
 end

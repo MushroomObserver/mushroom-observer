@@ -5,7 +5,6 @@ class ObservationsController
   module Index
     def index
       make_name_suggestions
-      set_project_ivar
       build_index_with_query
     end
 
@@ -34,7 +33,43 @@ class ObservationsController
 
     # Sort options for the index page. Read by `add_sorter` in the
     # view. Each key must resolve to `Observation.order_by_<key>`.
+    # An unfiltered index (browsing the whole table) only offers
+    # plain-column sorts with no join/aggregate -- name/user/
+    # confidence/thumbnail_quality/num_views all cost a join or
+    # aggregate over the full table otherwise.
     def index_sort_options
+      if unfiltered_index_for_sort?
+        unfiltered_index_sort_options
+      else
+        filtered_index_sort_options
+      end
+    end
+
+    private
+
+    # A bookmarked/permalinked unfiltered index can still carry an
+    # `order_by` that isn't in the unfiltered allowlist (e.g.
+    # `q[order_by]=name` with no other params) -- treat that as
+    # filtered for the dropdown too, or `Sorter#toggle_title` can't
+    # find a label for the current sort and the toggle goes blank.
+    def unfiltered_index_for_sort?
+      @query.params.except(:order_by).blank? && current_order_sort_safe?
+    end
+
+    def current_order_sort_safe?
+      order = @query.params[:order_by].to_s.sub(/^reverse_/, "")
+      order.blank? || unfiltered_index_sort_options.map(&:first).include?(order)
+    end
+
+    def unfiltered_index_sort_options
+      [
+        ["rss_log",    :sort_by_activity.l],
+        ["date",       :sort_by_date.l],
+        ["created_at", :sort_by_posted.l]
+      ].freeze
+    end
+
+    def filtered_index_sort_options
       [
         ["rss_log",           :sort_by_activity.l],
         ["date",              :sort_by_date.l],
@@ -47,26 +82,9 @@ class ObservationsController
       ].freeze
     end
 
-    private
-
-    # Default on home is :rss_log (:log_updated_at), not :date.
-    # Maybe other filters should explicitly specify :date?
-    # Then we could use default_sort_order above.
-    # Or, set an "unfiltered sort order" method that defaults to this.
-    def default_sort_order
-      ::Query::Observations.default_order # :date
-    end
-
     # Note all other filters of the obs index are sorted by date.
     def unfiltered_index_opts
       super.merge(query_args: { order_by: :rss_log })
-    end
-
-    # Searches come 1st because they may have the other params
-    def index_active_params
-      [:pattern, :look_alikes, :related_taxa, :name,
-       :by_user, :location, :where, :project, :species_list,
-       :by, :q, :id].freeze
     end
 
     # Different from NamesController. Returns arrays of [name, count]
@@ -83,99 +101,10 @@ class ObservationsController
       end
     end
 
-    # Displays matrix of Observations with the given name proposed but not
-    # actually that name.
-    def look_alikes
-      query = create_query(
-        :Observation, names: { lookup: [params[:name]],
-                               include_synonyms: true,
-                               include_all_name_proposals: true,
-                               exclude_consensus: true },
-                      order_by: :confidence
-      )
-      [query, {}]
-    end
-
-    # Displays matrix of Observations of subtaxa of the parent of given name.
-    def related_taxa
-      query = create_query(
-        :Observation, names: { lookup: parents(params[:name]),
-                               include_subtaxa: true },
-                      order_by: :confidence
-      )
-      [query, {}]
-    end
-
-    # Displays matrix of Observations with the given text_name (or search_name).
-    def name
-      query = create_query(
-        :Observation, names: { lookup: [params[:name]],
-                               include_synonyms: true },
-                      order_by: :confidence
-      )
-      [query, {}]
-    end
-
-    def parents(name_str)
-      names = Name.where(id: name_str).to_a
-      names = Name.where(search_name: name_str).to_a if names.empty?
-      names = Name.where(text_name: name_str).to_a if names.empty?
-      names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
-    end
-
-    # Displays matrix of User's Observations, by date.
-    def by_user
-      return unless (user = find_or_goto_index(User, params[:by_user]))
-
-      query = create_query(:Observation, by_users: user)
-      [query, {}]
-    end
-
-    # Displays matrix of Observations at a Location, by date.
-    def location
-      return unless (
-        location = find_or_goto_index(Location, params[:location].to_s)
-      )
-
-      query = create_query(:Observation, within_locations: location)
-      [query, {}]
-    end
-
-    # Display matrix of Observations whose "where" matches a string.
-    # NOTE: We're passing the `search_where` param from advanced search to
-    # AbstractModel's scope `search_where`, which searches two tables
-    # (obs and loc) for the fuzzy match.
-    def where
-      where = params[:where].to_s
-      query = create_query(:Observation, search_where: where)
-      [query, { always_index: true }]
-    end
-
-    # Display matrix of Observations attached to a given project.
-    def project
-      return unless (
-        project = find_or_goto_index(Project, params[:project].to_s)
-      )
-
-      query = create_query(:Observation, projects: project,
-                                         order_by: "thumbnail_quality")
-      @project = project
-      [query, { always_index: true }]
-    end
-
-    # Display matrix of Observations attached to a given species_list.
-    def species_list
-      return unless (
-        spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
-      )
-
-      query = create_query(:Observation, species_lists: spl)
-      [query, { always_index: true }]
-    end
-
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
+      derive_ivar_from_query(:@project, query, :projects, Project)
       query
     end
 

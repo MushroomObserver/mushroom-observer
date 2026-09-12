@@ -66,17 +66,35 @@ module Tab::HerbariumRecord
       )
     end
 
-    def test_back_to_index_without_q_param
+    def test_back_to_index_without_index_filter
       tab = Tab::HerbariumRecord::BackToIndex.new
 
       assert_equal(:edit_herbarium_record_back_to_index.l, tab.title)
       assert_equal(routes.herbarium_records_path, tab.path)
     end
 
-    def test_back_to_index_with_q_param
-      tab = Tab::HerbariumRecord::BackToIndex.new(q_param: "ABCDE")
+    def test_back_to_index_with_index_filter
+      tab = Tab::HerbariumRecord::BackToIndex.new(
+        index_filter: { by_user: 1 }
+      )
 
-      assert_equal(routes.herbarium_records_path(q: "ABCDE"), tab.path)
+      assert_equal(
+        routes.herbarium_records_path(by_user: 1), tab.path
+      )
+    end
+
+    # Array-valued filters (the common shape for most query_attrs,
+    # e.g. by_users:) go through the same **@index_filter splat as a
+    # scalar one -- confirm it round-trips correctly, not just the
+    # scalar case above.
+    def test_back_to_index_with_array_valued_index_filter
+      tab = Tab::HerbariumRecord::BackToIndex.new(
+        index_filter: { by_users: [1, 2] }
+      )
+
+      assert_equal(
+        routes.herbarium_records_path(by_users: [1, 2]), tab.path
+      )
     end
   end
 end

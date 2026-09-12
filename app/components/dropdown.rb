@@ -139,13 +139,27 @@ class Components::Dropdown < Components::Base
     render_crud_button_or_link(str, url, args, kwargs.compact_blank)
   end
 
+  # A `button_to` form's `class:` html_options land on the inner
+  # <button>, not the <form> -- so for button-type items,
+  # "dropdown-item" goes on the form itself (via `form:`) instead of
+  # the button's own class, letting the row's hover/padding treatment
+  # apply to the same element that has the row's padding.
   def build_link_kwargs(args, active:)
     kwargs = merge_context_nav_link_args(args, {})
     kwargs = mix(kwargs, class: "active") if active
     kwargs[:disabled] = true if active
-    kwargs = mix(kwargs, class: "dropdown-item")
-    if args[:button].present? && kwargs[:class].present?
-      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
+    if args[:button].present?
+      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip if
+        kwargs[:class].present?
+      # Rails' `button_to` only falls back to its default "button_to"
+      # form class when `form: { class: }` is absent (`||=`) -- passing
+      # our own class here means we must include "button_to" ourselves
+      # or the form silently loses it, along with every selector
+      # (including _form_elements.scss's browser-chrome reset) keyed
+      # on `form.button_to`.
+      kwargs[:form] = { class: "button_to dropdown-item" }
+    else
+      kwargs = mix(kwargs, class: "dropdown-item")
     end
     strip_tooltip_data(kwargs)
   end
@@ -153,13 +167,30 @@ class Components::Dropdown < Components::Base
   # Tooltip data attrs are meaningful on icon links in the top-nav
   # but are redundant and noisy inside a dropdown menu — the item
   # label is already visible, and Bootstrap's tooltip JS can
-  # interfere with dropdown click handling.
+  # interfere with dropdown click handling. Also strips a top-level
+  # `title:` (Tab::Base::ALLOWED_HTML_OPTION_KEYS allows one) --
+  # `merge_context_nav_link_args` doesn't exclude it since it's
+  # shared with ContextNav/Profile, which don't have this problem,
+  # but a bare `title=` attribute alone still triggers the browser's
+  # native tooltip even with no Bootstrap JS wiring.
+  #
+  # Explicit `nil`s rather than just omitting the keys:
+  # Button::Post/Put/Patch/Delete (Button::CRUDBase) compute their
+  # own `data: { tooltip_target: "tip", placement: "top",
+  # title: @name }` internally in `button_html_options`, independent
+  # of anything passed in here -- merely removing the keys from these
+  # kwargs does nothing, since CRUDBase's own defaults were never in
+  # them to begin with. Explicit `nil`s deep_merge over those
+  # defaults and actually suppress them. Must be `nil`, not `false`
+  # -- Phlex omits a `nil` data value's attribute entirely, but
+  # renders `false` as the literal string "false", which is still a
+  # present attribute a presence-only JS check would treat as "has a
+  # tooltip target".
   def strip_tooltip_data(kwargs)
-    data = kwargs[:data]
-    return kwargs unless data.is_a?(Hash) && data[:tooltip_target] == "tip"
-
-    stripped = data.except(:tooltip_target, :title, :placement)
-    stripped.empty? ? kwargs.except(:data) : kwargs.merge(data: stripped)
+    kwargs = kwargs.except(:title)
+    data = (kwargs[:data] || {}).except(:tooltip_target, :title, :placement)
+    kwargs.merge(data: data.merge(tooltip_target: nil, placement: nil,
+                                  title: nil))
   end
 
   def normalize_section(section)

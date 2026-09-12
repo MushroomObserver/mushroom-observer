@@ -68,6 +68,23 @@ class ImageTest < UnitTestCase
     assert_nil(img.users_vote(rolf))
   end
 
+  # updated_at feeds the cache-busting URL token: a vote must not flip
+  # it, or every browser's cached renditions of the image die.
+  def test_change_vote_does_not_bump_updated_at
+    img = images(:in_situ_image)
+    img.update_columns(updated_at: 1.week.ago)
+    original = img.reload.updated_at
+
+    img.change_vote(mary, 3)
+
+    assert_equal(3, img.reload.users_vote(mary))
+    assert_equal(original.to_i, img.updated_at.to_i)
+    assert(img.record_timestamps,
+           "instance record_timestamps must be restored after the vote")
+    assert(Image.record_timestamps,
+           "class-level record_timestamps must never be touched")
+  end
+
   def test_copyright_logging
     license_one = licenses(:ccnc25)
     license_two = licenses(:ccwiki30)
@@ -133,6 +150,68 @@ class ImageTest < UnitTestCase
     assert_true(img.can_edit?(dick))
   end
 
+  def test_can_transform_site_admin_bypasses_everything
+    img = images(:commercial_inquiry_image)
+
+    assert_true(img.can_transform?(katrina, site_admin: true),
+                "Site admin mode should permit transforming any image")
+  end
+
+  def test_can_transform_own_image
+    img = images(:commercial_inquiry_image)
+    assert_equal(rolf, img.user, "Fixture expectation: rolf owns this image")
+
+    assert_true(img.can_transform?(rolf),
+                "Image owner should be able to transform their own image")
+  end
+
+  def test_can_transform_via_project_admin_of_image_itself
+    img = images(:in_situ_image)
+    assert_equal(mary, img.user, "Fixture expectation: mary owns this image")
+
+    assert_true(img.can_transform?(dick),
+                "Admin of a project the image is directly " \
+                "attached to should be able to transform it")
+  end
+
+  def test_can_transform_via_project_admin_of_observation
+    img = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    assert_equal(mary, obs.user,
+                 "Fixture expectation: mary owns this observation")
+    img.observations << obs
+
+    assert_true(img.can_transform?(dick),
+                "Admin of a project the image's observation belongs to " \
+                "should be able to transform the image")
+  end
+
+  def test_can_transform_via_project_admin_regardless_of_owner_trust
+    img = images(:commercial_inquiry_image)
+    obs = observations(:agaricus_campestris_obs)
+    assert_equal(rolf, obs.user,
+                 "Fixture expectation: rolf owns this observation")
+    project = projects(:one_genus_two_species_project)
+    assert_nil(ProjectMember.find_by(project:, user: rolf),
+               "Fixture expectation: rolf has no trust relationship with " \
+               "this project")
+    img.observations << obs
+
+    assert_true(img.can_transform?(dick),
+                "Project admin should be able to transform images of " \
+                "the project's observations regardless of owner trust")
+  end
+
+  def test_can_transform_denies_unrelated_user
+    img = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    img.observations << obs
+
+    assert_false(img.can_transform?(katrina),
+                 "User without ownership/admin/collector tie to the " \
+                 "Image or its Obss should be unable to transform it")
+  end
+
   def test_validation
     img = Image.new
     assert_false(img.valid?)
@@ -154,6 +233,25 @@ class ImageTest < UnitTestCase
     img.send(:"#{var}=", set)
     img.valid?
     assert_equal(get, img.send(var))
+  end
+
+  # Regression test for #4804: copyright_holder, original_name, and notes
+  # were utf8mb3 and rejected 4-byte characters (most emoji) outright.
+  def test_emoji_round_trips_in_searchable_fields
+    img = Image.new(user: rolf,
+                    copyright_holder: "🍄 Rolf",
+                    original_name: "🍄.jpg",
+                    notes: "Found under a 🍄 today")
+    assert(img.save,
+           "Image with emoji should save: #{img.errors.full_messages}")
+
+    img.reload
+    assert_equal("🍄 Rolf", img.copyright_holder,
+                 "Emoji in copyright_holder should round-trip")
+    assert_equal("🍄.jpg", img.original_name,
+                 "Emoji in original_name should round-trip")
+    assert_equal("Found under a 🍄 today", img.notes,
+                 "Emoji in notes should round-trip")
   end
 
   def test_presence_of_critical_external_scripts
@@ -239,10 +337,83 @@ class ImageTest < UnitTestCase
     end
   end
 
+  # -- retry_failed_gps_strips --
+
+  def test_retry_failed_gps_strips_dry_run_reports_without_stripping
+    img = unstripped_hidden_image
+
+    Open3.stub(:capture2e, ->(*) { raise("must not shell out") }) do
+      msgs = Image.retry_failed_gps_strips(dry_run: true, min_id: img.id)
+      assert_includes(msgs, "Image ##{img.id}: would retry GPS strip")
+    end
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_retry_failed_gps_strips_strips_and_flags
+    img = unstripped_hidden_image
+    failures = []
+
+    Open3.stub(:capture2e, ["", stub_status(true)]) do
+      msgs = Image.retry_failed_gps_strips(min_id: img.id) do |failure|
+        failures << failure
+      end
+      assert_includes(msgs, "Image ##{img.id}: GPS strip retried")
+    end
+
+    assert_empty(failures)
+    assert_true(img.reload.gps_stripped)
+  end
+
+  def test_retry_failed_gps_strips_yields_failures_and_continues
+    img = unstripped_hidden_image
+    failures = []
+
+    Open3.stub(:capture2e, ["boom", stub_status(false)]) do
+      msgs = Image.retry_failed_gps_strips(min_id: img.id) do |failure|
+        failures << failure
+      end
+      assert_includes(msgs,
+                      "Image ##{img.id}: GPS strip retry failed - boom")
+    end
+
+    assert_includes(failures,
+                    "Image ##{img.id}: GPS strip retry failed - boom")
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_retry_failed_gps_strips_skips_ids_below_min_id
+    img = unstripped_hidden_image
+
+    msgs = Image.retry_failed_gps_strips(dry_run: true, min_id: img.id + 1)
+
+    assert_not(msgs.any? { |m| m.include?("##{img.id}:") },
+               "Images below min_id should be out of scope")
+  end
+
+  def test_retry_failed_gps_strips_caps_per_run_and_reports_remainder
+    img = unstripped_hidden_image
+
+    msgs = Image.retry_failed_gps_strips(dry_run: true, min_id: img.id,
+                                         limit: 0)
+
+    assert_equal(1, msgs.size)
+    assert_match(%r{capped at 0/\d+; the rest run on later nights},
+                 msgs.first)
+  end
+
   def stub_status(success)
     status = Object.new
     status.define_singleton_method(:success?) { success }
     status
+  end
+
+  # A transferred, unstripped image attached to a gps_hidden observation
+  # -- the shape retry_failed_gps_strips sweeps for.
+  def unstripped_hidden_image
+    img = images(:in_situ_image)
+    img.observations.first.update_columns(gps_hidden: true)
+    img.update_columns(gps_stripped: false, transferred: true)
+    img
   end
 
   # dHash is computed from the small local rendition — never the full-size
@@ -437,11 +608,19 @@ class ImageTest < UnitTestCase
     # looking like a real failure. Capturing also pins the logging
     # contract itself, which the old passthrough never asserted.
     logged = nil
+    notified = []
     img.stub(:move_original, true) do
       Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
           Rails.logger.stub(:error, ->(msg) { logged = msg }) do
-            assert_not(img.process_image)
+            ExceptionNotifier.stub(:notifiers, [:slack]) do
+              ExceptionNotifier.stub(
+                :notify_exception,
+                ->(exception, **_o) { notified << exception }
+              ) do
+                assert_not(img.process_image)
+              end
+            end
           end
         end
       end
@@ -449,6 +628,10 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
     assert_includes(logged, "Image::Processor failed for image #{img.id}")
     assert_includes(logged, "boom")
+    # A processing failure happens while a user is watching, yet used to
+    # alert nobody (#4974) -- it must reach the same pipeline job
+    # failures do.
+    assert_equal(["boom"], notified.map(&:message))
   end
 
   # Transfer-to-image-server is no longer part of Image::Processor#process
@@ -750,7 +933,7 @@ class ImageTest < UnitTestCase
 
     link = ExternalLink.create!(
       user: img.user, target: img, external_site: ExternalSite.inaturalist,
-      relationship: :import, external_id: "p1"
+      relationship: :import, external_id: "111111"
     )
 
     # Not-loaded branch: queries only the import row.

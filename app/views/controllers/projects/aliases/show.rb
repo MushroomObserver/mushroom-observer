@@ -3,11 +3,8 @@
 module Views::Controllers::Projects::Aliases
   # Phlex view for the project alias show page.
   class Show < Views::FullPageBase
-    def initialize(project:, project_alias:)
-      super()
-      @project = project
-      @project_alias = project_alias
-    end
+    prop :project, ::Project
+    prop :project_alias, ::ProjectAlias
 
     def view_template
       add_project_banner(@project)

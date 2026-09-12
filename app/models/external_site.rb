@@ -35,10 +35,26 @@ class ExternalSite < AbstractModel
     where(project: Project.user_is_member(user_id))
   }
 
+  # Request-scoped memo (Thread.current, not a class ivar) for the
+  # select-options list -- matches UserGroup::THREAD_KEYS's pattern,
+  # isolated per request/thread rather than persisting stale data
+  # across requests pooled onto the same thread. Reset once per HTTP
+  # request via ApplicationController#reset_external_site_cache, and
+  # once per unit test (test_helper.rb's setup) for tests that call
+  # this directly without going through a request.
+  def self.select_options
+    Thread.current[:mo_external_site_select_options] ||=
+      order(:name).pluck(:name, :id)
+  end
+
+  def self.reset_request_cache
+    Thread.current[:mo_external_site_select_options] = nil
+  end
+
   def check_url_syntax
     return if format_base_url
 
-    errors.add(:base_url, :validate_invalid_url.t)
+    errors.add(:base_url, :validate_invalid_url)
   end
 
   def format_base_url
@@ -81,6 +97,17 @@ class ExternalSite < AbstractModel
   def id_from_url(url)
     return nil if url.blank?
 
+    id = id_from_url_unchecked(url)
+    # iNat's template is just base_url + "{id}" -- unlike MyCoPortal's
+    # query-param shape, its capture group would happily match trailing
+    # non-numeric junk (".../observations/notanumber") as if it were a
+    # valid id. iNat ids are always numeric, so enforce that here.
+    return nil if name == INATURALIST_NAME && !id.to_s.match?(/\A\d+\z/)
+
+    id
+  end
+
+  def id_from_url_unchecked(url)
     template = url_template.presence || "#{base_url}{id}"
     # -1 limit: {id} is usually the last token, and split drops trailing
     # empty strings by default -- losing the empty string after it means
@@ -88,6 +115,33 @@ class ExternalSite < AbstractModel
     pattern = template.split("{id}", -1).
               map { |part| Regexp.escape(part) }.join("(.+)")
     /\A#{pattern}\z/.match(url)&.captures&.first
+  end
+  private :id_from_url_unchecked
+
+  # True when url is a MyCoPortal catalog-number search page
+  # (list.php?catnum=...) -- id-addressable only via a live crawl of the
+  # results page (see script/resolve_mycoportal_links.rb), not from the
+  # url alone the way `id_from_url`'s permalink shape is.
+  def mycoportal_list_search?(url)
+    return false unless name == MYCOPORTAL_NAME
+
+    uri = self.class.safe_parse_url(url)
+    return false unless uri && mycoportal_host?(uri)
+
+    uri.path.end_with?("/list.php") && uri.query.to_s.include?("catnum=")
+  end
+
+  # `end_with?("mycoportal.org")` alone would also match a host like
+  # "evilmycoportal.org" -- no dot boundary. Require an exact match or
+  # a proper subdomain.
+  def mycoportal_host?(uri)
+    uri.host == "mycoportal.org" || uri.host&.end_with?(".mycoportal.org")
+  end
+
+  def self.safe_parse_url(url)
+    URI.parse(url)
+  rescue URI::InvalidURIError
+    nil
   end
 
   def member?(user)
@@ -107,6 +161,6 @@ class ExternalSite < AbstractModel
       all
     else
       user_is_site_project_member(user.id)
-    end
+    end.to_a
   end
 end

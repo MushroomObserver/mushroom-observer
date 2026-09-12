@@ -4,7 +4,18 @@ require("test_helper")
 
 # functional tests of glossary controller and views
 class GlossaryTermsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ESSENTIAL_ATTRIBUTES = %w[name description].freeze
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::GlossaryTerms, :GlossaryTerm, overrides: { by_users: rolf.id }
+    )
+  end
 
   # ---------- Test actions that Display data (index, show, etc.) --------------
 
@@ -43,6 +54,21 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       "a[href *= '#{glossary_term_path(term.id)}']", true,
       "Glossary Index at `P` missing link to #{term.unique_text_name})"
     )
+  end
+
+  # Regression: Views::Controllers::GlossaryTerms::Index::Item called
+  # the removed `destroy_button` helper directly, 500ing for any admin
+  # who visited the index -- no test exercised the index in admin mode.
+  def test_index_admin_delete
+    login
+    make_admin
+    get(:index)
+
+    assert_response(:success)
+    assert_select("form input[value='delete']",
+                  { count: GlossaryTerm.count },
+                  "Page is missing a way for admin to destroy each " \
+                  "glossary term")
   end
 
   def q_pattern(pattern)
@@ -264,8 +290,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("GlossaryTerm.count") do
       post(:create, params: params)
     end
-    assert_flash(/#{:glossary_error_name_blank.t}/)
-    assert_response(:success)
+    assert_flash(:glossary_error_name_blank)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_create_glossary_term_no_description_or_image
@@ -276,7 +303,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("GlossaryTerm.count") do
       post(:create, params: params)
     end
-    assert_flash(/#{:glossary_error_description_or_image.t}/)
+    assert_flash(:glossary_error_description_or_image)
   end
 
   def test_create_glossary_term_duplicate_name
@@ -288,10 +315,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("GlossaryTerm.count") do
       post(:create, params: params)
     end
-    assert_flash(
-      # Must be quoted because it contains Regexp metacharacters "(" and ")"
-      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
-    )
+    assert_flash(:glossary_error_duplicate_name)
   end
 
   def test_create_glossary_term_invalid_name_with_image
@@ -304,7 +328,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         post(:create, params: params)
       end
     end
-    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_flash(:glossary_error_name_blank)
   end
 
   def test_create_glossary_term_image_save_failure
@@ -396,7 +420,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     post(:create, params: params)
-    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_flash(:glossary_error_name_blank)
   end
 
   def test_update_glossary_term_no_description_or_image
@@ -405,7 +429,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     post(:create, params: params)
-    assert_flash(/#{:glossary_error_description_or_image.t}/)
+    assert_flash(:glossary_error_description_or_image)
   end
 
   def test_update_glossary_term_duplicate_name
@@ -415,10 +439,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     post(:update, params: params)
-    assert_flash(
-      # Must be quoted because it contains Regexp metacharacters "(" and ")"
-      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
-    )
+    assert_flash(:glossary_error_duplicate_name)
   end
 
   # ***** destroy *****
@@ -462,7 +483,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     delete(:destroy, params: { id: term.id })
 
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_response(:redirect)
     assert(GlossaryTerm.exists?(term.id),
            "Non-admin should not be able to destroy glossary term")

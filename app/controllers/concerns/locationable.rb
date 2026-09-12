@@ -88,7 +88,7 @@ module Locationable
     # was trying to create a new Location with the existing name, use the
     # existing location and flash that we did that, returning `true` so we can
     # bail on creating a "new" location, but go ahead with the observation save.
-    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable-next Metrics/CyclomaticComplexity
     def place_name_exists?(object)
       name = Location.user_format(@user, object.place_name(@user))
       location = Location.find_by(name: name)
@@ -103,12 +103,30 @@ module Locationable
 
       false
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def try_to_save_location_if_new(object)
       return if @any_errors || !@location&.new_record? || save_location(object)
 
       @any_errors = true
+    end
+
+    # Reasons `place_name` looks dubious (typo, wrong country, reversed
+    # name, bad terms, etc -- see Location.dubious_reasons_for), skipped
+    # once the caller has already confirmed it via an `approved_where`
+    # param. Reads the bare top-level `params[:approved_where]` (a
+    # form_action query param, or an unnamespaced hidden field) first,
+    # falling back to `params[param_key][:approved_where]` (a
+    # namespaced Superform hidden field) when `param_key` is given.
+    #
+    # Centralizes a pattern that lived duplicated (and, in two of its
+    # four copies, incompletely -- missing `approved:` entirely) across
+    # LocationsController, SpeciesListsController,
+    # SpeciesLists::WriteInController, and
+    # ObservationsController::Validators.
+    def dubious_where_reasons_for(place_name, param_key: nil)
+      approved = params[:approved_where] ||
+                 (param_key && params.dig(param_key, :approved_where))
+      Location.dubious_reasons_for(user: @user, place_name:, approved:)
     end
 
     # Save location only (at this point rest of form is okay).

@@ -3,6 +3,24 @@
 require("test_helper")
 
 class SpeciesListsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::SpeciesLists, :SpeciesList,
+      overrides: {
+        id_in_set: species_lists(:first_species_list).id,
+        by_users: rolf.id,
+        editable_by_user: rolf.id,
+        locations: locations(:burbank).id,
+        projects: projects(:bolete_project).id
+      }
+    )
+  end
+
   # NOTE: I don't know how to grab the DEFAULT from the fixture set and
   #   User.find(ActiveRecord::FixtureSet.identify(:rolf)).contribution
   # blows up in CI with
@@ -163,6 +181,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
+  def test_index_by_user_single_match_redirects
+    user = lone_wolf
+    spl = SpeciesList.where(user: user).first
+    assert(SpeciesList.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(species_list_path(spl.id))
+  end
+
   def test_index_by_user_with_no_species_lists
     user = users(:zero_user)
 
@@ -182,9 +211,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert_redirected_to(species_lists_path)
     assert_displayed_title("")
-    assert_flash_text(
-      :runtime_object_not_found.l(type: :user, id: user.id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: user.id)
   end
 
   def test_index_for_project
@@ -210,7 +237,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:species_lists.ti)
-    assert_flash_text(:runtime_no_matches.l(types: :species_lists))
+    assert_flash(:runtime_no_matches, type: :species_list)
   end
 
   def test_index_for_project_that_does_not_exist
@@ -221,9 +248,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)
-    assert_flash_text(
-      :runtime_object_not_found.l(type: :project, id: project.id)
-    )
+    assert_flash(:runtime_object_not_found, type: :project, id: project.id)
   end
 
   def test_show_species_list_non_owner_logged_in
@@ -275,6 +300,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
                   text: /#{Regexp.escape(project.title)}/)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id, project: project.id),
+      { count: 1 },
+      "Names button should carry the project context to the checklist"
+    )
   end
 
   # Regression test for bug where params[:q] as a String (saved query ID)
@@ -458,10 +489,11 @@ class SpeciesListsControllerTest < FunctionalTestCase
          })
     # No save (validation re-renders the form).
     assert_nil(SpeciesList.find_by(title: "Dubious place test"))
-    assert_response(:success)
+    assert_unprocessable
     # `@dubious_where_reasons` was populated and is now in the
     # FormLocationFeedback component.
     assert_select("#dubious_location_messages")
+    assert_select("form[data-turbo='true']")
   end
 
   # Cover the `redirect_to(new_location_path(...))` branch in
@@ -489,7 +521,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_nil(spl.location_id,
                "Test scenario requires unresolved location_id")
     assert_redirected_to(new_location_path(where: novel,
-                                           set_species_list: spl.id))
+                                           set_species_list: spl.id,
+                                           format: :html))
+    assert_flash_warning
   end
 
   # Test constructing species_lists in various ways.
@@ -675,6 +709,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")

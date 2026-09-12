@@ -17,6 +17,7 @@ module Views::Controllers::Images
     # `VotePanel#vote_link_args` only compares them for inequality.
     prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
     prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil
+    prop :field_slip_extract, _Nilable(::FieldSlipExtract), default: nil
 
     def view_template
       add_show_title(@image)
@@ -47,10 +48,33 @@ module Views::Controllers::Images
 
     def render_right_column
       render(InfoPanel.new(image: @image))
+      render_field_slip_extract_button
       render_reviewer_export_controls if reviewer?
       div(id: "image_votes_container") do
         render(VotePanel.new(image: @image,
                              size: @size, default_size: @default_size))
+      end
+    end
+
+    # Offered on every image rather than only where a slip looks likely:
+    # a plausibility test that guessed wrong would hide the button on
+    # exactly the slips someone wants to read (#4932 follow-up). Who may
+    # press it is `FieldSlipExtract.permitted?`, shared with the
+    # controller so the button and the endpoint can't disagree.
+    def render_field_slip_extract_button
+      return unless ::FieldSlipExtract.permitted?(
+        image: @image, user: current_user, site_admin: in_admin_mode?
+      )
+
+      # The Read button always re-reads, so an existing read gets its
+      # own button back to the review/status page; Read doubles as the
+      # retry for a failed one.
+      div(class: "mb-3 text-center") do
+        FieldSlipScanState(image: @image, extract: @field_slip_extract,
+                           offer_retry: false)
+        Button(type: :post, name: :field_slip_extract_button.l,
+               class: ("ml-2" if @field_slip_extract),
+               target: image_field_slip_extract_path(@image.id))
       end
     end
 
@@ -81,7 +105,7 @@ module Views::Controllers::Images
         div do
           ImageFragment(type: :copyright, user: current_user, image: @image)
         end
-        div(class: "py-5px mb-3") do
+        div(class: "py-2 mb-3") do
           LicenseBadge(license: @image.license)
         end
       end

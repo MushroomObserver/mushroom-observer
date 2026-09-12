@@ -62,10 +62,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     # optional `:button_icon` (rendered after a space via the
     # `Components::Icon` component).
     def render_addon_label
-      plain(wrapper_options[:button])
+      span { plain(wrapper_options[:button]) }
       return unless wrapper_options[:button_icon]
 
-      whitespace
+      span(class: "icon-text-gap")
       Icon(type: wrapper_options[:button_icon])
     end
   end

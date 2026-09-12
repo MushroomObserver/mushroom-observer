@@ -13,6 +13,8 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
+      # Permanently exempt -- see .claude/rules/turbo_submit_forms.md.
+      assert_select("form[data-turbo='false']")
       assert_select(
         "input[type=radio][id=download_format_mycoportal]", false,
         "Missing a MyCoPortal radio button"
@@ -43,6 +45,23 @@ module Observations
         "[id=download_format_mycoportal_image_list]", true,
         "Missing a MyCoPortal Images radio button"
       )
+    end
+
+    # `params[:by]` reaches `find_or_create_query` unguarded (no
+    # `order_by_or_flash_if_unknown` check, unlike a controller's own
+    # sorted_index) -- an invalid value must still fall back to the
+    # model's default_order rather than silently sorting by id: :desc.
+    def test_new_invalid_by_falls_back_to_default_order
+      login(:rolf)
+      get(:new, params: { by: "totally_bogus_sort_key" })
+
+      assert_response(:success)
+      query = @controller.instance_variable_get(:@query)
+      assert_nil(
+        query.params[:order_by],
+        "Invalid `by` should be cleared, not passed through to Query"
+      )
+      assert_equal(Query::Observations.default_order, query.default_order)
     end
 
     def test_download_observation_index
@@ -199,15 +218,19 @@ module Observations
       assert_no_flash
       assert_response(:success)
 
-      format = "nonexistent"
-      assert_raises("Invalid download type: #{format}") do
-        post(:create,
-             params: {
-               q:,
-               download: { format: format },
-               commit: "Download"
-             })
-      end
+      # Regression: an invalid format falls back to the default ("raw")
+      # instead of raising -- unvalidated params shouldn't be able to
+      # 500 this action.
+      post(
+        :create,
+        params: {
+          q:,
+          download: { format: "nonexistent" },
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
     end
 
     def test_download_too_many_observations

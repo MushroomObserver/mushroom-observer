@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 module Name::Synonymy
-  # Returns "Deprecated" or "Valid" in the local language.
-  def status
-    deprecated ? :deprecated.ti : :accepted.ti
-  end
-
   # Returns an Array of all synonym Name's including itself at front of list.
   # (This looks screwy, but I think it is the safest way to handle it.
   # Note that synonym.names does include self, but it's a different instance.

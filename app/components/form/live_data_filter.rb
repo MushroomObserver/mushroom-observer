@@ -13,26 +13,30 @@
 #       )) %>
 #
 class Components::Form::LiveDataFilter < Components::ApplicationForm
-  # @param filter [FormObject::TextFilter] the filter form object
-  # @param turbo_frame [String] the turbo frame ID to target
-  # @param page [Integer] current page number
-  # @param total_pages [Integer] total number of pages
-  # @param filter_path [String] path for form submission and pagination
-  # @param placeholder [String] placeholder text for the filter input
-  # @param page_param [String] param name for page number (default: "page")
-  # @param filter_param [String] param namespace for filter
-  #   (default: "text_filter")
-  def initialize(filter, turbo_frame:, page:, total_pages:, filter_path:, # rubocop:disable Metrics/ParameterLists
-                 placeholder: "Filter...", page_param: "page",
-                 filter_param: "text_filter", **)
-    @turbo_frame = turbo_frame
-    @page = page
-    @total_pages = total_pages
-    @filter_path = filter_path
-    @placeholder = placeholder
-    @page_param = page_param
-    @filter_param = filter_param
-    super(filter, **)
+  # `filter` (positional) is the base class's own `model` prop --
+  # never referenced under its own name here, only forwarded to
+  # `super`.
+  prop :turbo_frame, String
+  prop :page, Integer
+  prop :total_pages, Integer
+  prop :filter_path, String
+  prop :placeholder, String, default: "Filter..."
+  prop :page_param, String, default: "page"
+  prop :filter_param, String, default: "text_filter"
+
+  # `action:`/`method:`/`id:`/`class:`/`data:` are ordinary
+  # Superform::Rails::Form constructor kwargs, extracted by
+  # ApplicationForm#after_initialize -- unlike the route-helper-backed
+  # forms elsewhere in this sweep, `filter_path` is already a resolved
+  # path string supplied by the caller, so there's no
+  # HelpersCalledBeforeRenderError risk computing these here.
+  def initialize(model, turbo_frame:, filter_path:, **props)
+    super(model, turbo_frame:, filter_path:,
+                 action: filter_path, method: :get,
+                 id: "#{turbo_frame.tr("_", "-")}-filter-form",
+                 class: "d-inline-block",
+                 data: { controller: "autosubmit", turbo_frame: turbo_frame },
+                 **props)
   end
 
   def around_template(&block)
@@ -56,21 +60,6 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
   end
 
   private
-
-  def form_tag(&block)
-    form(action: @filter_path, method: :get, **form_attributes, &block)
-  end
-
-  def form_attributes
-    {
-      id: "#{@turbo_frame.tr("_", "-")}-filter-form",
-      class: "d-inline-block",
-      data: {
-        controller: "autosubmit",
-        turbo_frame: @turbo_frame
-      }
-    }
-  end
 
   # GET forms don't need authenticity tokens or _method fields
   def authenticity_token_field; end

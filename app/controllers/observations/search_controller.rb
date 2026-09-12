@@ -32,7 +32,7 @@ module Observations
       if params[:advanced_retired].present?
         flash_notice(:search_advanced_retired_notice.t)
       end
-      @local = params[:local] != "false"
+      @context = params[:local] == "false" ? :dropdown : :page
       set_up_form_field_groupings
       @search = build_search_query
       respond_to do |format|
@@ -41,37 +41,40 @@ module Observations
       end
     end
 
+    PERMITTED_SEARCH_PARAMS = [
+      :date,
+      :created_at,
+      :updated_at,
+      :names,
+      :confidence,
+      :has_name,
+      :lichen,
+      :within_locations,
+      :has_public_lat_lng,
+      :is_collection_location,
+      :region,
+      :in_box,
+      :has_specimen,
+      :has_sequences,
+      :has_images,
+      :has_field_slips,
+      :has_occurrence,
+      :has_collection_numbers,
+      :has_notes,
+      :has_notes_fields,
+      :notes_has,
+      :has_comments,
+      :comments_has,
+      :by_users,
+      :projects,
+      :herbaria,
+      :species_lists,
+      :project_lists,
+      :external_sites
+    ].freeze
+
     def permitted_search_params
-      [
-        :date,
-        :created_at,
-        :updated_at,
-        :names,
-        :confidence,
-        :has_name,
-        :lichen,
-        :within_locations,
-        :has_public_lat_lng,
-        :is_collection_location,
-        :region,
-        :in_box,
-        :has_specimen,
-        :has_sequences,
-        :has_images,
-        :has_field_slips,
-        :has_occurrence,
-        :has_collection_numbers,
-        :has_notes,
-        :has_notes_fields,
-        :notes_has,
-        :has_comments,
-        :comments_has,
-        :by_users,
-        :projects,
-        :herbaria,
-        :species_lists,
-        :project_lists
-      ].freeze
+      PERMITTED_SEARCH_PARAMS
     end
 
     def nested_names_params
@@ -133,7 +136,8 @@ module Observations
         },
         connected: {
           shown: [:by_users, :projects],
-          collapsed: [:herbaria, :species_lists, :project_lists]
+          collapsed: [:herbaria, :species_lists, :external_sites,
+                      :project_lists]
         }
       }
     ].freeze
@@ -142,7 +146,7 @@ module Observations
 
     def new_phlex_view
       Views::Controllers::Observations::Search::New.new(
-        search: @search, local: @local
+        search: @search, context: @context
       )
     end
 

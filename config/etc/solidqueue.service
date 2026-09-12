@@ -13,6 +13,7 @@ ExecStart=/var/web/mo/bin/run bundle exec rake solid_queue:start
 #Environment=MALLOC_ARENA_MAX=2
 
 Environment="RAILS_ENV=production"
+Environment=RUBY_MANAGER=chruby
 
 Restart=always
 

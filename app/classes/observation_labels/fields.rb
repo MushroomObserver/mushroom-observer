@@ -46,8 +46,7 @@ class ObservationLabels::Fields
     # Add iNaturalist URL if observation was imported from iNat
     inat_link = observation.import_link
     if inat_link &&
-       inat_link.external_site.name == ExternalSite::INATURALIST_NAME &&
-       inat_link.external_id.present?
+       inat_link.external_site.name == ExternalSite::INATURALIST_NAME
       qr_list << ObservationLabels::QRCodeField.new(
         "iNat: #{inat_link.external_id}", inat_link.link_url
       )

@@ -9,6 +9,8 @@
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
+#  exact_match::        Does a phrase identify a single record outright
+#                       (id, or a class-specific override)?
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
 #                       Add limit to a SQL query, then pass it to find_by_sql.
@@ -72,7 +74,7 @@ class AbstractModel < ApplicationRecord
   # (attribution) or looking at this (viewer-aware formatting),
   # set explicitly by the controller/caller before save/render. No
   # ambient global fallback (no Current.user) - every model gets
-  # this accessor for free so callers never need to add their own.
+  # this accessor for free, so callers don't need to add one.
   attr_accessor :current_user
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
@@ -83,23 +85,6 @@ class AbstractModel < ApplicationRecord
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def type_tag
     self.class.name.underscore.to_sym
-  end
-
-  # Default title strings for the `header/title_helper` helpers
-  # (`add_show_title` / `add_edit_title`). Subclasses override when
-  # there's a more meaningful per-instance string — e.g. an
-  # Observation's binomial, a SpeciesList's title.
-  #
-  # `page_title(user)` — rendered HTML/textile for the visible page
-  # heading. Defaults to the localized type-tag label.
-  # `document_title` — plain text for the browser tab `<title>`.
-  # Defaults to the same label (it's already plain).
-  def page_title(_user = nil)
-    type_tag.ti
-  end
-
-  def document_title
-    type_tag.ti
   end
 
   ##############################################################################
@@ -123,6 +108,15 @@ class AbstractModel < ApplicationRecord
     find(id)
   rescue ActiveRecord::RecordNotFound
     nil
+  end
+
+  # Does `phrase` identify a single record, without a fuzzy `pattern`
+  # search? Used by `exact_match_or` to prioritize an identifier match
+  # ahead of the fuzzy scope. Override where a class has another
+  # unambiguous identifier (User overrides for verified email).
+  def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
+    safe_find(phrase) if /^\d+$/.match?(phrase)
   end
 
   # At minimum this list should include all objects that can have
@@ -315,7 +309,7 @@ class AbstractModel < ApplicationRecord
   # "is missing" becomes "Object attribute is missing." Errors are created
   # via validates (magically) or by explicit calls to
   #
-  #   obj.errors.add(:attr, "message").
+  #   obj.errors.add(:attr, :some_tag).
   def formatted_errors
     out = []
     errors.each do |error|

@@ -64,21 +64,31 @@ module Components::Localization
   end
 
   # The one place to change or delete the standard trailing ":" on
-  # label-style text site-wide, if we ever decide to (#4687 did this
-  # for ApplicationForm field-prompt labels; this is the same thing
-  # for label-style text rendered outside of forms). Also included
-  # into `Components::ApplicationForm` directly (see that class's own
-  # `include Phlex::TrustedHtml` for why -- it doesn't inherit
-  # `Components::Base`, so this module has to be pulled in explicitly
-  # there too).
+  # label-style text site-wide, if that decision changes (#4687 did
+  # this for ApplicationForm field-prompt labels; this is the same
+  # thing for label-style text rendered outside of forms). Also
+  # included into `Components::ApplicationForm` directly (see that
+  # class's `include Phlex::TrustedHtml` for why -- it doesn't
+  # inherit `Components::Base`, so this module has to be pulled in
+  # explicitly there too).
   #
-  # `[text, ":"].safe_join` rather than `"#{text}:"`: plain string
+  # Includes a trailing space, so a caller rendering this immediately
+  # before more inline content doesn't need a separate `whitespace`
+  # statement -- the space is invisible anyway when a block-level
+  # element or form input follows instead.
+  #
+  # `[text, ": "].safe_join` rather than `"#{text}: "`: plain string
   # interpolation coerces an html_safe SafeBuffer (e.g. a `.ti`/`.t`
   # result carrying embedded textile/acronym markup) back into an
   # unsafe String, so the caller's rendering would then escape it --
   # `safe_join` preserves the html_safe flag when `text` already
   # carries one, and safely escapes it when it doesn't.
+  #
+  # The return value is html_safe -- render it directly (as a block's
+  # sole/last statement) or via `trusted_html(...)`. Wrapping it in
+  # `plain(...)` escapes it again, since `plain` always escapes
+  # regardless of the html_safe flag, defeating the point above.
   def append_colon(text)
-    [text, ":"].safe_join
+    [text, ": "].safe_join
   end
 end

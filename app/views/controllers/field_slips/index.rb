@@ -54,8 +54,9 @@ module Views::Controllers::FieldSlips
 
     def render_existing_prefix_block
       div(class: "mt-3") do
-        b { plain("#{:show_project_field_slip_prefix.t}:") }
-        plain(" #{@project.field_slip_prefix} ")
+        b { trusted_html(append_colon(:show_project_field_slip_prefix.t)) }
+        plain(@project.field_slip_prefix.to_s)
+        whitespace
         if @project.member?(current_user)
           Button(
             type: :get,
@@ -69,13 +70,13 @@ module Views::Controllers::FieldSlips
     end
 
     def render_no_prefix_nudge
-      div(class: "alert alert-info mt-3",
-          id: "field_slip_no_prefix_nudge") do
+      Alert(level: :info, id: "field_slip_no_prefix_nudge",
+            class: "mt-3") do
         plain(:show_project_field_slip_no_prefix.t)
         whitespace
         render(Components::Alert::Link.new(
-                 :show_project_field_slip_set_prefix.t,
-                 project_admin_path(project_id: @project.id)
+                 text: :show_project_field_slip_set_prefix.t,
+                 href: project_admin_path(project_id: @project.id)
                ))
       end
     end
@@ -115,7 +116,7 @@ module Views::Controllers::FieldSlips
     def row_prepend(field_slip)
       capture do
         h4 do
-          strong { plain("#{:field_slip_code.l}: ") }
+          strong { trusted_html(append_colon(:field_slip_code.l)) }
           Link(type: :get, name: field_slip.code, target: field_slip,
                class: "field_slip_link_#{field_slip.id}")
           br

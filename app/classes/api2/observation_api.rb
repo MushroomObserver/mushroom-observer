@@ -2,7 +2,7 @@
 
 class API2
   # API for Observation
-  # rubocop:disable Metrics/ClassLength
+  # rubocop:disable-next Metrics/ClassLength
   class ObservationAPI < ModelAPI
     def model
       Observation
@@ -12,7 +12,7 @@ class API2
       [
         :collection_numbers,
         { comments: :user },
-        :external_links,
+        { external_links: :external_site },
         { occurrence: :field_slip },
         { herbarium_records: :herbarium },
         { images: [:license, :user] },
@@ -20,6 +20,7 @@ class API2
         :name,
         { namings: [:name, :user] },
         :sequences,
+        { thumb_image: [:license, :user] },
         :user,
         { votes: :user }
       ]
@@ -123,6 +124,10 @@ class API2
     def build_setter(params)
       lambda do |obs|
         must_have_edit_permission!(obs)
+        # A read-only reflection is kept in sync from its source (#4214);
+        # block scalar-core edits here as the web edit form does.
+        raise(ObservationIsReadOnly.new(obs)) if obs.reflection?
+
         update_notes_fields(obs)
         obs.update!(params)
         update_images(obs)
@@ -155,7 +160,7 @@ class API2
     def add_field_slip_code(observation)
       return unless @code
 
-      field_slip = FieldSlip.find_by(code: @code)
+      field_slip = FieldSlip.find_by(code: @code.upcase)
       unless field_slip
         field_slip = FieldSlip.create!(code: @code, user: @user)
         field_slip.current_user = @user
@@ -207,13 +212,12 @@ class API2
       @initial_det      ||= @name.text_name
       # Disable cop because we're creating a bunch of instance variables,
       # rather than trying to memoize provide_specimen_defaults
-      # rubocop:disable Naming/MemoizedInstanceVariableName
+      # rubocop:disable-next Naming/MemoizedInstanceVariableName
       @accession_number ||= if @collection_number
                               "#{@collectors_name} #{@collection_number}"
                             else
                               "MO #{obs.id}"
                             end
-      # rubocop:enable Naming/MemoizedInstanceVariableName
     end
 
     def update_notes_fields(obs)
@@ -417,5 +421,4 @@ class API2
       params[:place_name] = Location.unknown.name
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

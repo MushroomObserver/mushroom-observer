@@ -7,16 +7,16 @@ module Views::Controllers::Herbaria
   # `new.rb` and `edit.rb`, and dynamically by
   # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(model, user:, back: nil, location: nil,
-                   top_users: nil, **)
-      @user = user
-      @back = back
-      @location = location
-      @top_users = top_users || []
+    prop :user, ::User
+    prop :back, _Nilable(String), default: nil
+    prop :location, _Nilable(::Location), default: nil
+    prop :top_users, _Array(::User), default: -> { [] } do |value|
+      value || []
+    end
+
+    def initialize(model, **)
       super(model, id: "herbarium_form", **)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def around_template
       @attributes[:data] ||= {}
@@ -91,10 +91,11 @@ module Views::Controllers::Herbaria
     end
 
     def render_top_users_list
-      @top_users.each_with_index do |(name, login, count), index|
+      @top_users.each_with_index do |user, index|
         br if index.positive?
         trusted_html(:edit_herbarium_user_records.t(
-                       name: "#{name} (#{login})", num: count
+                       name: "#{user.name} (#{user.login})",
+                       num: user.record_count
                      ))
       end
     end
@@ -144,7 +145,8 @@ module Views::Controllers::Herbaria
         :place_name,
         type: :location,
         label: location_label,
-        between: :optional,
+        label_colon: false,
+        label_appends: :optional,
         controller_data: { map_target: "autocompleter" },
         controller_id: "herbarium_location_autocompleter",
         create_text: :form_observations_create_locality.l,
@@ -159,10 +161,9 @@ module Views::Controllers::Herbaria
 
     def location_label
       capture do
-        span(class: "unconstrained-label") { "#{:location.ti}:" }
-        whitespace
+        span(class: "unconstrained-label") { append_colon(:location.ti) }
         span(class: "create-label") do
-          "#{:form_observations_create_locality.l}:"
+          append_colon(:form_observations_create_locality.l)
         end
       end
     end
@@ -179,18 +180,18 @@ module Views::Controllers::Herbaria
 
     def render_contact_fields
       text_field(:email, label: :create_herbarium_email,
-                         between: :optional)
+                         label_appends: :optional)
       textarea_field(
         :mailing_address,
         label: :create_herbarium_mailing_address,
         rows: 5,
-        between: :optional
+        label_appends: :optional
       )
     end
 
     def render_notes_field
       textarea_field(:description, label: :notes.ti, rows: 10,
-                                   between: :optional)
+                                   label_appends: :optional)
     end
 
     def submit_text

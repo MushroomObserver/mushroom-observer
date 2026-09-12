@@ -143,6 +143,8 @@ module SpeciesLists
         }
       )
       assert_flash_error # bogus commit button
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       assert_obj_arrays_equal([proj2], list.projects.reload)
 
       put(
@@ -159,6 +161,7 @@ module SpeciesLists
         }
       )
       assert_flash_warning # no changes
+      assert_unprocessable
       assert_obj_arrays_equal([proj2], list.projects.reload)
 
       put(

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # "Specimen" panel on the observation show page (and the naming
-# propose/edit pages) — specimen-available status, plus the
-# collection-numbers / herbarium-records / sequences sections. The
-# first line of the body says whether a specimen is actually
-# recorded. Renders right below the Details panel.
+# propose/edit pages) — the heading says whether a specimen is
+# actually recorded; the body holds the collection-numbers /
+# herbarium-records / sequences sections, collapsed by default when
+# none of those exist yet. Renders right below the Details panel.
 class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   include SiblingRecords
 
@@ -13,9 +13,12 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    Panel(panel_id: "observation_specimen") do |panel|
-      panel.with_heading { :specimen.ti }
-      panel.with_body { render_body }
+    Panel(panel_id: "observation_specimen",
+          collapsible: true,
+          collapse_target: "#observation_specimen_body",
+          expanded: specimen_records?) do |panel|
+      panel.with_heading { render_heading }
+      panel.with_body(collapse: true) { render_body }
     end
   end
 
@@ -25,21 +28,28 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
     @obs.occurrence&.has_specimen || @obs.specimen
   end
 
+  # Own records or a sibling's -- render_collection_numbers/
+  # render_herbarium_records/render_sequences all render sibling rows
+  # too, so the default expanded/collapsed state has to account for
+  # them as well, not just @obs's own associations.
+  def specimen_records?
+    [:collection_numbers, :herbarium_records, :sequences].any? do |assoc|
+      @obs.send(assoc).any? || sibling_has?(assoc)
+    end
+  end
+
+  def render_heading
+    if specimen?
+      plain(:show_observation_specimen_available.t)
+    else
+      plain(:show_observation_specimen_not_available.t)
+    end
+  end
+
   def render_body
-    render_specimen_line
     render_collection_numbers
     render_herbarium_records
     render_sequences
-  end
-
-  def render_specimen_line
-    p(class: "obs-specimen", id: "observation_specimen_available") do
-      if specimen?
-        plain(:show_observation_specimen_available.t)
-      else
-        plain(:show_observation_specimen_not_available.t)
-      end
-    end
   end
 
   def render_collection_numbers

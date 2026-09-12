@@ -24,14 +24,7 @@ module Views::Controllers::RssLogs
 
     def register_chrome
       add_index_title(@query)
-      add_context_nav(::Tab::RssLog::IndexActions.new(
-                        user: current_user, types: @types,
-                        make_default_param: params[:make_default],
-                        make_default_path: add_q_param(
-                          action: :index, make_default: 1
-                        )
-                      ))
-      add_type_filters(@query, @types)
+      add_type_filters(@query, @types, user: current_user)
       add_pagination(@pagination_data)
       container_class(:full)
     end

@@ -32,9 +32,9 @@ class Components::ObservationFragment::WhereGps < Components::Base
   end
 
   def gps_map_icon
-    Components::Link::Icon.new(
-      content: :click_for_map.l,
-      path: map_observation_path(id: @obs.id),
+    Components::Link::Get.new(
+      name: :click_for_map.l,
+      target: map_observation_path(id: @obs.id),
       icon: :place,
       class: Components::InlineLinkBlock.item_class
     )

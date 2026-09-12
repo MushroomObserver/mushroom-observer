@@ -5,9 +5,10 @@ module Views::Controllers::SpeciesLists::Uploads
   # `SpeciesLists::UploadsController#create` under the
   # `species_list[file]` param namespace.
   class Form < ::Components::ApplicationForm
-    def initialize(species_list, **)
-      @species_list = species_list
-      super(species_list, multipart: true)
+    prop :model, ::SpeciesList, :positional
+
+    def initialize(species_list, **attrs)
+      super(species_list, multipart: true, **attrs)
     end
 
     def view_template
@@ -22,7 +23,7 @@ module Views::Controllers::SpeciesLists::Uploads
 
     def form_action
       url_for(controller: "/species_lists/uploads", action: :create,
-              id: @species_list.id, only_path: true)
+              id: model.id, only_path: true)
     end
   end
 end

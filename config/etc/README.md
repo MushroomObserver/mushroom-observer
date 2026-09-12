@@ -25,7 +25,6 @@ Two rules:
 |---|---|---|
 | `crontab` | web server | `mo`'s crontab (`crontab config/etc/crontab` as `mo`) |
 | `nginx.conf` | web server | `/etc/nginx/nginx.conf` |
-| `nginx_dev.conf` | local dev | nginx config for a dev setup |
 | `puma.service` | web server | `/etc/systemd/system/puma.service` |
 | `solidqueue.service` | web server | `/etc/systemd/system/solidqueue.service` |
 | `rclone_originals.sh` | images server | `/data/images/mo/rclone/rclone_originals.sh`, run by `mo`'s crontab there (`15 1 * * *`) — nightly originals→GCS archive sync |

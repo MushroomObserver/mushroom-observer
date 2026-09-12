@@ -26,7 +26,7 @@ class Components::Matrix::Box::Title < Components::Base
 
   def view_template
     span(
-      class: ["rss-name", title_weight].join(" "),
+      class: class_names("rss-name", title_weight),
       id: "box_title_#{@id}"
     ) { @name }
   end
@@ -34,10 +34,6 @@ class Components::Matrix::Box::Title < Components::Base
   private
 
   def title_weight
-    if [:observation, :name].include?(@type)
-      ""
-    else
-      "font-weight-bold"
-    end
+    "font-weight-bold" unless [:observation, :name].include?(@type)
   end
 end

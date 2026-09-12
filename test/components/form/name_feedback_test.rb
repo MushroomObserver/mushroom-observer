@@ -26,6 +26,27 @@ class FormNameFeedbackTest < ComponentTestCase
     assert_html(html, ".alert-danger")
   end
 
+  # Naming::NameResolver sets `valid_names` to a non-nil but EMPTY
+  # array (Name.suggest_alternate_spellings finding nothing), not
+  # nil, when a name is totally unrecognized -- `if @valid_names`
+  # alone is true for `[]` too, so this used to wrongly render the
+  # warning branch (whose help text is itself gated on
+  # `valid_names.any?`, so nothing but the bare "not recognized"
+  # sentence ever appeared). JoeCohen review on #5055.
+  def test_renders_not_recognized_error_when_valid_names_is_empty_array
+    html = render_feedback(
+      given_name: "Xxxx yyy",
+      names: [],
+      valid_names: [],
+      suggest_corrections: true
+    )
+
+    assert_html(html, "#name_messages")
+    assert_html(html, ".alert-danger")
+    assert_no_html(html, ".alert-warning")
+    assert_includes(html, :form_naming_not_recognized_help.t(button: "Create"))
+  end
+
   def test_renders_deprecated_warning_with_valid_synonyms
     html = render_feedback(
       given_name: "Deprecated name",

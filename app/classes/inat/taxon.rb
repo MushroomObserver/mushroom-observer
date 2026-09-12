@@ -33,15 +33,19 @@ class Inat
   class Taxon
     include Inat::Constants
 
-    # Allow hash key access to the iNat observation data
-    delegate :[], to: :@taxon
-
     def initialize(taxon)
       @taxon = taxon
     end
 
+    # Hash-key access to the iNat taxon data -- nil when the observation
+    # has no taxon (an iNat "Unknown", e.g. an ID withdrawn after import,
+    # which a resync can turn an existing reflection into).
+    def [](key) = @taxon&.[](key)
+
     # Returns the matching MO Name, or nil if none found.
     def name
+      return nil if @taxon.nil?
+
       names =
         # iNat "Complex" definition
         # https://www.inaturalist.org/pages/curator+guide#complexes
@@ -57,6 +61,7 @@ class Inat
     # Handles special cases: infrageneric names (which need the genus prepended)
     # and infraspecific names (which need the rank inserted).
     def full_name_string
+      return nil if @taxon.nil?
       return monomial_complex_name_string if monomial_complex?
 
       # iNat infrageneric Observation ID's need special handling because
@@ -71,6 +76,8 @@ class Inat
     end
 
     def importable?
+      return false if @taxon.nil?
+
       ancestor_ids = @taxon[:ancestor_ids]
       return false if ancestor_ids.blank?
 

@@ -60,7 +60,7 @@ module Views::Controllers::Projects::Violations
       # button_to renders a <form method=post> with a hidden _method=put
       # and a <button type=submit>Label</button>.
       assert_includes(html, :form_violations_action_exclude.l)
-      assert_html(html, "form.button_to[action$='/violations']")
+      assert_html(html, "form.button_to[action$='/violations/resolve']")
       assert_html(html,
                   "input[type='hidden'][name='project[do]'][value='exclude']")
       assert_html(html, "input[type='hidden'][name='_method'][value='put']")
@@ -77,6 +77,19 @@ module Views::Controllers::Projects::Violations
       assert_includes(html, :form_violations_action_extend.l)
       assert_html(html,
                   "input[type='hidden'][name='project[do]'][value='extend']")
+    end
+
+    # A :date violation only requires one of start_date/end_date, so the
+    # detail line's ":form_projects_any.l" fallback (#4901) is reachable.
+    def test_date_violation_detail_shows_any_fallback_for_partial_range
+      proj = setup_partial_date_range_violation_project
+      date_v = proj.violations.find { |v| v.kinds.include?(:date) }
+      assert(date_v, "Setup must produce a date violation")
+
+      html = render_form(project: proj, violations: proj.violations,
+                         user: proj.user)
+
+      assert_includes(html, :form_projects_any.l)
     end
 
     def test_admin_sees_add_target_name_button_on_target_name_violation
@@ -182,6 +195,16 @@ module Views::Controllers::Projects::Violations
       # there's at least one obs owned by `roy`.
       roy_obs = observations(:nybg_2023_09_obs)
       roy_obs.update!(user: users(:roy)) unless roy_obs.user == users(:roy)
+      proj
+    end
+
+    def setup_partial_date_range_violation_project
+      proj = projects(:rare_fungi_project)
+      proj.project_target_locations.destroy_all
+      proj.project_target_names.destroy_all
+      proj.update!(start_date: Time.zone.today, end_date: nil, location: nil)
+      off_target = observations(:peltigera_obs)
+      proj.add_observation(off_target)
       proj
     end
 

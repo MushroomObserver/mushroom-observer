@@ -61,7 +61,7 @@ class ParallelTestConfigService
       output_handler.puts(
         "ERROR: config/database.yml not found. " \
         "Please copy from db/macos/database.yml or " \
-        "db/vagrant/database.yml"
+        "db/ubuntu/database.yml"
       )
       return nil
     end

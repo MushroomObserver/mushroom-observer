@@ -25,7 +25,7 @@
 #
 #  Private methods described below.
 #
-module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
+module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
   def clean_and_validate_params
@@ -41,6 +41,14 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     @params = new_params
     validate_order_by!
     assign_attributes(**@params) if @params.present?
+  end
+
+  # `validation_errors` holds [tag, args] pairs so resolution stays
+  # deferred until display time -- flash-facing consumers (index/
+  # search controllers) that need resolved text call this instead of
+  # joining the raw array.
+  def validation_error_messages
+    validation_errors.map { |tag, args| tag.t(**(args || {})) }
   end
 
   # Pin the `order_by` param against what the model can actually
@@ -64,13 +72,28 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     base = key.to_s.delete_prefix("reverse_")
     return if model.private_methods(false).include?(:"order_by_#{base}")
 
-    @validation_errors << "Query::#{model.name.pluralize} does not " \
-                          "accept order_by: `#{key}` — no " \
-                          "`#{model}.order_by_#{base}` scope is " \
-                          "defined."
+    add_validation_error(:query_validation_order_by_unsupported,
+                         models: model.name.pluralize, key:, model:, base:)
+    # Clear the bad value so `add_default_order_if_none_specified` treats
+    # it as unset and substitutes the model/attr's own `default_order` --
+    # otherwise it survives validation and reaches
+    # AbstractModel::OrderingScopes#order_by's dispatcher, which silently
+    # falls back to `all` (id: :desc) instead, ignoring the model's
+    # declared default.
+    @params[:order_by] = nil
   end
 
   private
+
+  # Every validator failure is a `[tag, args]` pair appended to
+  # `@validation_errors` (see `validation_error_messages` above) --
+  # this is the one place that builds that pair, so call sites read
+  # as a single statement instead of repeating the array literal +
+  # explicit `nil` return every time.
+  def add_validation_error(tag, **args)
+    @validation_errors << [tag, args]
+    nil
+  end
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
@@ -90,8 +113,19 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def array_validate(param, val, param_type)
     case val
     when Array
-      val[0, MO.query_max_array].map! do |val2|
-        scalar_validate(param, val2, param_type)
+      # Drop elements that failed validation (scalar_validate returns
+      # nil) rather than leaving nil placeholders in the array -- a
+      # nil left in place gets serialized into q[] params and
+      # re-validated on the next request as if it were real user
+      # input, producing a second, confusing validation error for
+      # what was already reported once. Not `filter_map`/`compact`:
+      # rubocop's Performance/MapCompact autocorrects any map+compact
+      # chain into filter_map, but filter_map also drops a legitimate
+      # `false` (e.g. from validate_boolean) -- only `nil` means
+      # "failed" here.
+      val[0, MO.query_max_array].each_with_object([]) do |val2, result|
+        validated = scalar_validate(param, val2, param_type)
+        result << validated unless validated.nil?
       end
     when ::API2::OrderedRange
       [scalar_validate(param, val.begin, param_type),
@@ -110,10 +144,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     when Hash
       validate_hash_param(param, val, param_type)
     else
-      @validation_errors <<
-        "Invalid declaration of :#{param} for #{model} " \
-        "query! (invalid type: #{param_type.class.name})"
-      nil
+      add_validation_error(:query_validation_invalid_declaration,
+                           param: param.to_s, model:,
+                           type_class: param_type.class.name)
     end
   end
 
@@ -121,77 +154,13 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     if param_type.respond_to?(:descends_from_active_record?)
       validate_record(param, val, param_type)
     else
-      @validation_errors <<
-        "Don't know how to parse #{param_type} :#{param} for #{model} query."
-      nil
+      add_validation_error(:query_validation_unknown_class_param,
+                           param_type:, param: param.to_s, model:)
     end
-  end
-
-  def validate_hash_param(param, val, param_type)
-    if [:string, :boolean].include?(param_type.keys.first)
-      validate_enum(param, val, param_type)
-    elsif param_type.keys.first == :subquery
-      validate_subquery(param, val, param_type)
-    else
-      validate_nested_params(param, val, param_type)
-    end
-  end
-
-  # For results, don't compact_blank, because sometimes we want `false`
-  def validate_nested_params(_param, val, param_type)
-    val2 = {}
-    param_type.each do |key, arg_type|
-      val2[key] = validate_value(arg_type, key, val[key])
-    end
-    val2.compact
-  end
-
-  # Validate the subquery's params by creating another Query instance
-  # and save it in @subqueries to facilitate access
-  def validate_subquery(param, val, param_type)
-    if param_type.keys.length != 1
-      @validation_errors <<
-        "Invalid subquery declaration for :#{param} for #{model} " \
-        "query! (wrong number of keys in hash)"
-      return nil
-    end
-    submodel = param_type.values.first
-    subquery = Query.create_query(submodel, val)
-    @subqueries[param] = subquery
-    @validation_errors += subquery.validation_errors
-    subquery.params
-  end
-
-  def validate_enum(param, val, hash)
-    if hash.keys.length != 1
-      @validation_errors <<
-        "Invalid enum declaration for :#{param} for #{model} " \
-        "query! (wrong number of keys in hash)"
-      return nil
-    end
-
-    arg_type = hash.keys.first
-    set = hash.values.first
-    unless set.is_a?(Array)
-      @validation_errors <<
-        "Invalid enum declaration for :#{param} for #{model} " \
-        "query! (expected value to be an array of allowed values)"
-      return nil
-    end
-
-    val2 = scalar_validate(param, val, arg_type)
-    if (arg_type == :string) && set.include?(val2.to_s.to_sym)
-      val2 = val2.to_s.to_sym
-    elsif set.exclude?(val2)
-      @validation_errors <<
-        :query_validation_param_not_in_set.t(param:, set: set.inspect)
-      val2 = nil
-    end
-    val2
   end
 
   # Disable cop because we do mean to symbols with boolean names
-  # rubocop:disable Lint/BooleanSymbol
+  # rubocop:disable-next Lint/BooleanSymbol
   def validate_boolean(param, val)
     case val
     when :true, :yes, :on, "true", "yes", "on", "1", 1, true
@@ -201,11 +170,19 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     when nil
       nil
     else
-      @validation_errors << :query_validation_boolean.t(param:, val:)
-      nil
+      add_validation_error(:query_validation_boolean, param: param.to_s, val:)
     end
   end
-  # rubocop:enable Lint/BooleanSymbol
+
+  # Permissive sibling of `validate_boolean`, with no error branch --
+  # an old stored value whose identity no longer matters (e.g. a
+  # legacy `needs_naming: <user_id>` bookmark, see
+  # Query::Observations) stays a working "flag on" instead of failing
+  # validation. Same FALSE_VALUES Rails already uses to cast a param
+  # string to boolean.
+  def validate_truthy(_param, val)
+    ActiveRecord::Type::Boolean.new.cast(val)
+  end
 
   # We don't currently have params for integers, but this would enable them.
   # def validate_integer(param, val)
@@ -224,8 +201,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
-      @validation_errors << :query_validation_float.t(param:, val: val.inspect)
-      nil
+      add_validation_error(:query_validation_float,
+                           param: param.to_s, val: val.inspect)
     end
   end
 
@@ -234,8 +211,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       unless val.id
-        @validation_errors << :query_validation_record_unsaved.t(param:, type:)
-        return nil
+        return add_validation_error(:query_validation_record_unsaved,
+                                    param: param.to_s, type:)
       end
 
       set_cached_parameter_instance(param, val)
@@ -245,26 +222,24 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif val.is_a?(String)
       validate_string_for_record(param, val, type)
     else
-      @validation_errors <<
-        :query_validation_record.t(param:, type:, val: val.inspect)
-      nil
+      add_validation_error(:query_validation_record,
+                           param: param.to_s, type:, val: val.inspect)
     end
   end
 
   def validate_string_for_record(param, val, type)
     return val unless param == :id_in_set
 
-    @validation_errors << :query_validation_id_in_set.t(type:, val:)
-    nil
+    add_validation_error(:query_validation_id_in_set, type:, val:)
   end
 
   def validate_string(param, val)
     if val.is_any?(Integer, Float, String, Symbol)
       val.to_s
     else
-      @validation_errors <<
-        :query_validation_string.t(param:, class: val.class, val: val.inspect)
-      nil
+      add_validation_error(:query_validation_string,
+                           param: param.to_s, class: val.class,
+                           val: val.inspect)
     end
   end
 
@@ -279,8 +254,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif (val2 = parse_date(val)).acts_like?(:date)
       format_date(val2)
     else
-      @validation_errors << :query_validation_date.t(param:, val:)
-      nil
+      add_validation_error(:query_validation_date, param: param.to_s, val:)
     end
   end
 
@@ -304,9 +278,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif (val2 = parse_time(val)).acts_like?(:time)
       format_time(val2)
     else
-      @validation_errors <<
-        :query_validation_time.t(param:, class: val.class.name, val:)
-      nil
+      add_validation_error(:query_validation_time,
+                           param: param.to_s, class: val.class.name, val:)
     end
   end
 
@@ -321,18 +294,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
            val.year, val.mon, val.day, val.hour, val.min, val.sec)
   end
 
-  def find_cached_parameter_instance(model, param)
-    return @params_cache[param] if @params_cache && @params_cache[param]
-
-    val = params[param]
-    instance = if could_be_record_id?(param, val)
-                 model.find(val)
-               elsif val.present?
-                 lookup_record_by_name(param, val, model)
-               end
-    set_cached_parameter_instance(param, instance)
-  end
-
   # Cache the instance for later use, in case we both instantiate and
   # execute query in the same action.
   def set_cached_parameter_instance(param, instance)
@@ -345,34 +306,5 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
       # (blasted admin user has id = 0!)
       val.is_a?(String) && (val == "0") && (param == :user)
-  end
-
-  # Requires a unique identifying string and will return [only_one_record].
-  def lookup_record_by_name(param, val, type, **args)
-    method = args[:method] || :instances
-    lookup = lookup_class(param, val, type)
-
-    results = lookup.new(val).send(method)
-    unless results
-      @validation_errors << :query_validation_lookup_id.t(val: val.inspect)
-    end
-
-    results.first
-  end
-
-  def lookup_class(param, val, type)
-    # We're only validating the projects passed as the param.
-    # Projects' species_lists will be looked up later.
-    type = type.name.pluralize
-    lookup = if param == :project_lists
-               Lookup::Projects
-             else
-               "Lookup::#{type}".constantize
-             end
-    unless defined?(lookup)
-      @validation_errors <<
-        :query_validation_lookup.t(type:, val: val.inspect)
-    end
-    lookup
   end
 end

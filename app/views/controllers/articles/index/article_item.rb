@@ -20,8 +20,7 @@ module Views::Controllers::Articles
       private
 
       def render_byline
-        small { plain("#{@article.created_at.web_time}:") }
-        whitespace
+        small { trusted_html(append_colon(@article.created_at.web_time)) }
         Link(type: :user, user: @article.user)
       end
     end

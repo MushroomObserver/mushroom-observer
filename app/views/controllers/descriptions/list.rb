@@ -41,7 +41,7 @@ module Views::Controllers::Descriptions
 
     def visible?(desc)
       desc.notes? || (desc.user == @user) || reviewer? ||
-        (desc.source_type == :public) || in_admin_mode?
+        (desc.source_type == "public") || in_admin_mode?
     end
 
     def sort_descriptions(list)

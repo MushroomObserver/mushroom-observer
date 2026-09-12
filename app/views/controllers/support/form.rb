@@ -9,11 +9,9 @@ module Views::Controllers::Support
   class Form < ::Components::ApplicationForm
     PRESET_AMOUNTS = [25.00, 50.00, 100.00, 200.00].freeze
 
-    def initialize(model, **)
+    def initialize(model, **attrs)
+      attrs[:data] = (attrs[:data] || {}).merge(controller: "donate")
       super
-      @attributes ||= {}
-      @attributes[:data] =
-        (@attributes[:data] || {}).merge(controller: "donate")
     end
 
     def view_template
@@ -41,7 +39,7 @@ module Views::Controllers::Support
     end
 
     def render_other_amount_inputs
-      radio_field(:amount, ["other", "#{:donate_other.l}: "],
+      radio_field(:amount, ["other", append_colon(:donate_other.l)],
                   wrap_class: "d-inline-block",
                   data: { donate_target: "otherCheck" })
       text_field(:other_amount, size: 7, label: "$ ", inline: true,

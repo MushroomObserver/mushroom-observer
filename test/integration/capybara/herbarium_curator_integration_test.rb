@@ -276,7 +276,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(herbarium_path(nybg))
 
     within("#herbarium_curators_form") do
-      fill_in("add_curator", with: mary.login)
+      fill_in("herbarium_curator_login", with: mary.login)
       click_commit
     end
 
@@ -302,7 +302,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
 
     # UGH. The localized string can't be compared cause of a damn smart quote
     # :show_herbarium_request_sent.t
-    assert_flash_text("Request has been sent to admins")
+    assert_flash(:show_herbarium_request_sent)
     assert_selector("#title", text: nybg.format_name)
   end
 

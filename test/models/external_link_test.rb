@@ -4,30 +4,26 @@ require("test_helper")
 
 class ExternalLinkTest < UnitTestCase
   def test_inaturalist_id
-    # manual link -- no external_id column, id lives only in the url
     assert_equal(
       "234723",
       external_links(:coprinus_comatus_obs_inaturalist_link).inaturalist_id
     )
-    # import link -- has external_id, link_url derives the same id
     assert_equal(
       "12345",
       external_links(:imported_inat_obs_inat_link).inaturalist_id
     )
-    # non-iNat site -- nil, regardless of what its url contains
+    # non-iNat site -- nil, regardless of what its external_id contains
     assert_nil(
       external_links(:coprinus_comatus_obs_mycoportal_link).inaturalist_id
     )
   end
 
   def test_mycoportal_id
-    # MyCoPortal's id lives in a query param, not appended to base_url --
-    # id_from_url has to reverse url_template's "?occid={id}" shape.
     assert_equal(
       "1950183",
       external_links(:coprinus_comatus_obs_mycoportal_link).mycoportal_id
     )
-    # non-MyCoPortal site -- nil, regardless of what its url contains
+    # non-MyCoPortal site -- nil, regardless of what its external_id contains
     assert_nil(
       external_links(:coprinus_comatus_obs_inaturalist_link).mycoportal_id
     )
@@ -46,34 +42,70 @@ class ExternalLinkTest < UnitTestCase
     # A site with neither accessor -- nil, not an error.
     other_site = ExternalSite.new(name: "GenBank",
                                   base_url: "https://genbank.example/")
-    link = ExternalLink.new(external_site: other_site,
-                            url: "https://genbank.example/123")
+    link = ExternalLink.new(external_site: other_site, external_id: "123")
     assert_nil(link.site_record_id)
   end
 
-  def test_normalize_external_id_and_url
+  def test_resolve_submitted_external_id_from_url
     inat = external_sites(:inaturalist)
     obs = observations(:detailed_unknown_obs)
 
-    # external_id present -> url is dropped (link identified by external_id)
+    # A pasted url resolves to the site's bare id before save.
     link = ExternalLink.create!(
       user: users(:rolf), target: obs, external_site: inat,
-      external_id: "5550000", url: "#{inat.base_url}123"
+      external_id: "#{inat.base_url}123"
     )
-    assert_nil(link.url)
-    assert_equal("5550000", link.external_id)
+    assert_equal("123", link.external_id)
 
-    # clearing external_id -> a url may be set again
-    link.update!(external_id: "", url: "#{inat.base_url}777")
-    assert_nil(link.external_id)
-    assert_equal("#{inat.base_url}777", link.url)
+    # A bare id passes through unchanged.
+    link.update!(external_id: "456")
+    assert_equal("456", link.external_id)
+  end
+
+  def test_resolve_submitted_external_id_rejects_unrecognized_url
+    inat = external_sites(:inaturalist)
+    obs = observations(:detailed_unknown_obs)
+
+    link = ExternalLink.new(
+      user: users(:rolf), target: obs, external_site: inat,
+      external_id: "https://example.com/not-inaturalist"
+    )
+    assert_not(link.valid?)
+    assert_not_empty(link.errors[:external_id])
+  end
+
+  def test_resolve_submitted_external_id_rejects_self_referential_url
+    mycoportal = external_sites(:mycoportal)
+    obs = observations(:detailed_unknown_obs)
+
+    link = ExternalLink.new(
+      user: users(:rolf), target: obs, external_site: mycoportal,
+      external_id: "http://mushroomobserver.org/#{obs.id}"
+    )
+    assert_not(link.valid?)
+    # A single, specific error -- not also a "not numeric" error piled on
+    # top of the unresolved-url string still sitting in external_id.
+    assert_equal(1, link.errors[:external_id].size)
+  end
+
+  def test_resolve_submitted_external_id_rejects_mycoportal_list_search_url
+    mycoportal = external_sites(:mycoportal)
+    obs = observations(:detailed_unknown_obs)
+
+    link = ExternalLink.new(
+      user: users(:rolf), target: obs, external_site: mycoportal,
+      external_id: "https://mycoportal.org/portal/collections/list.php" \
+                   "?catnum=AN+12345"
+    )
+    assert_not(link.valid?)
+    assert_not_empty(link.errors[:external_id])
   end
 
   def test_relationship_date
     link = external_links(:imported_inat_obs_inat_link)
     obs = link.observation
 
-    # no external_created_on -> falls back to the link's own created_at
+    # no external_created_on -> falls back to created_at
     link.update!(external_created_on: nil)
     assert_equal(link.created_at.to_date, link.relationship_date)
 
@@ -89,13 +121,12 @@ class ExternalLinkTest < UnitTestCase
 
   def test_create_valid
     site = ExternalSite.first
-    base_url = site.base_url
 
     link = ExternalLink.create!(
       user: mary,
       observation: Observation.first,
       external_site: site,
-      url: "#{base_url}plus_id"
+      external_id: "222222"
     )
     assert_not_nil(link, "ExternalLink should be created")
     assert_empty(link.errors, "ExternalLink should have no errors")
@@ -108,61 +139,8 @@ class ExternalLinkTest < UnitTestCase
                      "ExternalLink should require a target")
     assert_not_empty(link.errors[:external_site],
                      "ExternalLink should require an external_site")
-    # url is optional now (derived from the site template); no presence error.
-    assert_empty(link.errors[:url], "url is not required")
-  end
-
-  def test_create_validate_url
-    site = ExternalSite.first
-    base_url = site.base_url
-
-    link = ExternalLink.create(url: "#{base_url}#{"toolong" * 100}",
-                               external_site: site)
-    assert_not_empty(link.errors[:url],
-                     "URL that is too long should be invalid")
-
-    link = ExternalLink.create(url: "#{base_url}invalid url",
-                               external_site: site)
-    assert_not_empty(link.errors[:url],
-                     "URL with spaces should be invalid")
-
-    link = ExternalLink.create(url: "#{base_url}url", external_site: site)
-    assert_empty(link.errors[:url], "Valid URL should have no url errors")
-  end
-
-  # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
-  # causing FormatURL#url_exists? to return false and silently drop the link.
-  # For iNat URLs constructed from base_url, skip FormatURL entirely.
-  def test_inaturalist_link_skips_format_url
-    site = external_sites(:inaturalist)
-    obs = observations(:minimal_unknown_obs)
-    url = "#{site.base_url}253297232"
-
-    FormatURL.stub(:new, ->(*) { raise("FormatURL should not be called") }) do
-      link = ExternalLink.create!(
-        user: dick, observation: obs, external_site: site, url: url
-      )
-      assert_empty(link.errors, "iNat link should be created without errors")
-      assert_equal(url, link.url, "iNat link URL should be saved unchanged")
-    end
-  end
-
-  # iNat URLs must be only the base url plus an observation numeric id,
-  # e.g. /observations/12345.
-  # A URL like /observations/abc should be invalid.
-  def test_inaturalist_link_requires_numeric_id
-    site = external_sites(:inaturalist)
-    obs = observations(:minimal_unknown_obs)
-    url = "#{site.base_url}notanumber"
-
-    link = ExternalLink.create(
-      user: dick, observation: obs, external_site: site, url: url
-    )
-    assert_not_empty(
-      link.errors[:url],
-      "#{url} is not a valid iNat external link URL. " \
-      "It should be just #{site.base_url} + a numeric ID"
-    )
+    assert_not_empty(link.errors[:external_id],
+                     "ExternalLink should require an external_id")
   end
 
   # An MO obs can correspond to several external records (e.g. iNat-side
@@ -177,7 +155,7 @@ class ExternalLinkTest < UnitTestCase
       user: mary,
       observation: link1.observation,
       external_site: site,
-      url: "#{site.base_url}another_id"
+      external_id: "333333"
     )
     assert_empty(link2.errors,
                  "A second link for the same observation+site should be valid")
@@ -187,7 +165,7 @@ class ExternalLinkTest < UnitTestCase
     site = external_sites(:mycoportal)
     link = ExternalLink.create!(
       user: mary, observation: observations(:minimal_unknown_obs),
-      external_site: site, url: "#{site.base_url}1"
+      external_site: site, external_id: "1"
     )
     assert(link.manual?,
            "New links default to manual (user-added cross-links)")
@@ -198,7 +176,7 @@ class ExternalLinkTest < UnitTestCase
     site = external_sites(:mycoportal)
     link = ExternalLink.new(
       user: mary, observation: obs, external_site: site,
-      relationship: :import, url: "#{site.base_url}999"
+      relationship: :import, external_id: "999"
     )
     assert_not(link.valid?, "A second import link per target is invalid")
     assert_not_empty(link.errors[:relationship])
@@ -209,5 +187,92 @@ class ExternalLinkTest < UnitTestCase
     assert(link.manual?, "Fixture link starts as manual")
     link.update!(relationship: :import, external_id: "234723")
     assert(link.reload.import?, "Link should upgrade to import in place")
+  end
+
+  def test_external_id_presence_required_except_for_export
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    link.external_id = nil
+    assert_not(link.valid?, "Non-export link needs an external_id")
+    assert(link.errors[:external_id].any?)
+
+    link.relationship = :export
+    assert(link.valid?, "Export link is allowed no external_id yet")
+  end
+
+  # A blank submitted external_id must normalize to nil, not stay "" --
+  # an empty string is not NULL to the unique index, so a second
+  # export-batch marker on the same target/site would collide instead
+  # of coexisting the way two nil ids do.
+  def test_external_id_must_be_numeric_for_inaturalist_and_mycoportal
+    obs = observations(:minimal_unknown_obs)
+
+    inat_link = ExternalLink.new(user: mary, target: obs,
+                                 external_site: external_sites(:inaturalist),
+                                 external_id: "notanumber")
+    assert_not(inat_link.valid?)
+    assert(inat_link.errors[:external_id].any?)
+
+    mcp_link = ExternalLink.new(user: mary, target: obs,
+                                external_site: external_sites(:mycoportal),
+                                external_id: "12345abc")
+    assert_not(mcp_link.valid?)
+    assert(mcp_link.errors[:external_id].any?)
+
+    inat_link.external_id = "234723"
+    assert(inat_link.valid?)
+  end
+
+  # id_from_url's numeric guard is iNaturalist-only (#4592) -- a crafted
+  # MyCoPortal url with a non-numeric occid still resolves via the
+  # generic template capture, so the model-level check above is what
+  # catches it.
+  def test_mycoportal_url_with_non_numeric_occid_rejected
+    obs = observations(:minimal_unknown_obs)
+    site = external_sites(:mycoportal)
+
+    link = ExternalLink.new(
+      user: mary, target: obs, external_site: site,
+      external_id: "#{site.observation_url("")}abc"
+    )
+    assert_not(link.valid?)
+    assert(link.errors[:external_id].any?)
+  end
+
+  def test_blank_external_id_normalizes_to_nil
+    obs = observations(:minimal_unknown_obs)
+    site = external_sites(:mycoportal)
+
+    link = ExternalLink.create!(user: mary, target: obs, external_site: site,
+                                relationship: :export, external_id: "")
+    assert_nil(link.external_id)
+
+    second = ExternalLink.new(user: mary, target: obs, external_site: site,
+                              relationship: :export, external_id: "")
+    assert(second.valid?)
+    assert_nothing_raised { second.save! }
+  end
+
+  # ExternalLink has neither a name nor title column, and no
+  # order_external_links_by_name method -- order_by(:name) falls all the
+  # way through AbstractModel::OrderingScopes#order_other_models_by_name
+  # to order_by_default.
+  def test_index_includes_tree_matches_show_includes_tree
+    assert_equal(ExternalLink.show_includes_tree,
+                 ExternalLink.index_includes_tree)
+  end
+
+  def test_order_by_name_falls_back_to_default
+    assert_equal(ExternalLink.order_by_default.to_sql,
+                 ExternalLink.order_by(:name).to_sql)
+  end
+
+  def test_external_id_length_validation
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    link.external_id = "9" * 65
+    assert_not(link.valid?, "external_id over 64 chars should be invalid")
+    assert(link.errors[:external_id].any?)
+
+    link.external_id = "9" * 64
+    assert(link.valid?, "external_id of 64 chars should be valid")
   end
 end

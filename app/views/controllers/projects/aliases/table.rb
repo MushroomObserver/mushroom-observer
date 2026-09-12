@@ -15,10 +15,7 @@ module Views::Controllers::Projects::Aliases
     # `Link(type: :get, name: ..., target: alias_.target)` cell
     # doesn't trigger N+1 queries. The `Projects::AliasesController`
     # paths supply that.
-    def initialize(project_aliases:)
-      super()
-      @project_aliases = project_aliases
-    end
+    prop :project_aliases, _Array(::ProjectAlias)
 
     # Must stay `render(::Components::Table.new(...))`, not bare
     # `Table(...)` Kit syntax -- this view class is itself named

@@ -4,14 +4,16 @@
 # cancel link back to the observations index (preserving the
 # current Query so the filter survives the round trip).
 class Tab::SpeciesList::FormObservations < Tab::Collection
-  def initialize(q_param: nil)
+  def initialize(index_filter: nil)
     super()
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   private
 
   def tabs
-    [Tab::SpeciesList::ObservationsIndexReturn.new(q_param: @q_param)]
+    [Tab::SpeciesList::ObservationsIndexReturn.new(
+      index_filter: @index_filter
+    )]
   end
 end

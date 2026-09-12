@@ -136,10 +136,10 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "rss-what") do
       h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-        a(href: url_for(@data[:what].show_link_args)) do
-          render_title
-        end
-        render_id_badge(@data[:what])
+        Link(type: :get, name: @data[:name],
+             target: @data[:what].show_link_args) { render_title }
+        whitespace
+        IDBadge(object: @data[:what], size: :md, extra_class: nil)
       end
 
       render_identify_ui if @identify
@@ -152,11 +152,6 @@ class Components::Matrix::Box < Components::Base
              name: @data[:name],
              type: @data[:type]
            ))
-  end
-
-  def render_id_badge(obj)
-    whitespace
-    IDBadge(object: obj, size: :md, extra_class: nil)
   end
 
   def render_occurrence_link
@@ -237,7 +232,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_source_credit
     target = @data[:what]
-    return unless target.respond_to?(:source_credit) &&
+    return unless target.respond_to?(:source_noteworthy?) &&
                   target.source_noteworthy?
 
     div(class: "small mt-3") do
@@ -249,19 +244,26 @@ class Components::Matrix::Box < Components::Base
 
   # External imports get a Phlex-rendered link so we can set
   # target="_blank" / rel="noopener" — textile has no syntax for
-  # those attributes. Enum credits keep going through .tpl.
+  # those attributes. Enum credits go through .tl (inline, no <div>
+  # wrapper -- needed to sit next to the bold "via" on one line).
+  # `source_noteworthy?` (the caller's guard) guarantees `source` is
+  # present whenever `import_link` isn't, so the enum branch is safe
+  # without its own presence check.
   def render_source_credit_inner(target)
-    if target.respond_to?(:external_credit_link) &&
-       (link = target.external_credit_link)
+    if (link = target.import_link)
       render_external_credit_link(link)
     else
-      target.source_credit.tpl
+      b { plain(:via.l) }
+      whitespace
+      trusted_html(:"source_credit_#{target.source}".l.tl)
     end
   end
 
   # An import link's URL always resolves (stored override or derived from the
   # site template via link_url), so the credit always renders as a link.
   def render_external_credit_link(link)
-    Link(type: :external, content: link[:text], path: link[:url])
+    Link(type: :external,
+         content: :source_credit_external_text.l(name: link.external_site.name),
+         path: link.link_url)
   end
 end

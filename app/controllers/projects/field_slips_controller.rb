@@ -36,6 +36,7 @@ module Projects
         update_project(tracker)
       else
         flash_error(:field_slips_tracker_fail.t(title: @project.title))
+        redirect_to(new_project_field_slip_path(project_id: @project.id))
       end
     end
 

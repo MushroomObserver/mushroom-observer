@@ -30,6 +30,9 @@ module Views::Controllers::FieldSlips
 
       # GET form to /field_slips/new — the "enter code" entry point.
       assert_html(html, "form[action='/field_slips/new'][method='get']")
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_html(html, "form[data-turbo='false']")
       assert_html(html, "input[type='text'][name='field_slip[code]']" \
                         "[id='field_slip_code']")
       assert_html(html, "button[type='submit']")
@@ -110,14 +113,14 @@ module Views::Controllers::FieldSlips
 
     def test_renders_alert_when_model_has_errors
       fs = FieldSlip.new(code: "TEST-005")
-      fs.errors.add(:code, "is taken")
-      fs.errors.add(:base, "something else broke")
+      fs.errors.add(:code, :taken)
+      fs.errors.add(:base, :invalid)
       html = render_form(fs)
 
       # Renders Components::Alert with the error list.
       assert_html(html, ".alert.alert-danger")
-      assert_includes(html, "is taken")
-      assert_includes(html, "something else broke")
+      assert_includes(html, :taken.t)
+      assert_includes(html, "is invalid")
     end
 
     def test_no_alert_when_model_has_no_errors

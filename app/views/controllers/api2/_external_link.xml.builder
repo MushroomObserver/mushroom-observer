@@ -6,7 +6,8 @@ xml.tag!(
   url: object.show_url,
   type: "external_link"
 ) do
-  xml_string(xml, :url, object.url)
+  xml_string(xml, :url, object.link_url)
+  xml_string(xml, :external_id, object.external_id)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   xml_minimal_object(xml, :observation, :observation, object.observation_id)

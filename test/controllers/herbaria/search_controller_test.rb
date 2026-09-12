@@ -47,9 +47,9 @@ module Herbaria
       }
       post(:create, params: { query_herbaria: params })
 
-      assert_redirected_to(
-        controller: "/herbaria", action: :index,
-        params: { q: { model: :Herbarium, **params } }
+      assert_search_redirected_to(
+        controller: "/herbaria",
+        params: params
       )
     end
   end

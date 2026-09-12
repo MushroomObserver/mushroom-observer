@@ -54,4 +54,153 @@ class FieldSlipTest < UnitTestCase
     assert_not(slip.can_edit?(rolf),
                "Project admin must not edit a non-member's field slip")
   end
+
+  # ---------- default location (issue #4907) ----------
+  # mary's slips in eol_project: field_slip_one (obs minimal_unknown_obs),
+  # field_slip_two (obs owner_accepts_general_questions), field_slip_no_obs
+  # (no occurrence). eol_project has no location fixture.
+
+  def test_location_uses_latest_project_slip_with_located_obs
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: locations(:burbank).id)
+    field_slips(:field_slip_one).update_columns(updated_at: 2.days.ago)
+    field_slips(:field_slip_two).update_columns(updated_at: 1.day.ago)
+
+    # Newest slip has no observation: it must be skipped, not end the
+    # search. And the result must be the newest located slip's location,
+    # not the oldest's (the old `order(...desc).last` bug).
+    slip = field_slips(:field_slip_no_obs)
+    slip.update_columns(updated_at: 1.hour.ago)
+    slip.current_user = mary
+
+    assert_equal(locations(:burbank), slip.location)
+  end
+
+  # Changing a slip's project moves its observations with it.
+  def test_project_change_moves_the_observations
+    slip = field_slips(:field_slip_one)
+    obs = slip.occurrence.observations.first
+    joined = projects(:bolete_project)
+    slip.current_user = mary # FieldSlip#project= gates on can_add_field_slip?
+    assert_not_includes(joined.observations, obs)
+
+    slip.update!(project: joined)
+
+    assert_includes(joined.reload.observations, obs)
+  end
+
+  # All or nothing: a project that can't take every member would leave
+  # the slip claiming a project some of its observations aren't in, so it
+  # declines the project instead and comes out project-less. See #4932.
+  def test_project_change_declines_a_project_that_excludes_a_member
+    slip = field_slips(:field_slip_one)
+    obs = slip.occurrence.observations.first
+    joined = projects(:bolete_project)
+    slip.current_user = mary # FieldSlip#project= gates on can_add_field_slip?
+    joined.update!(start_date: Date.parse("1990-01-01"),
+                   end_date: Date.parse("1990-12-31"))
+    assert(joined.violates_constraints?(obs), "fixture must violate")
+
+    slip.update!(project: joined)
+
+    assert_nil(slip.reload.project_id)
+    assert_not_includes(joined.reload.observations, obs)
+  end
+
+  # A slip with no project must not inherit from the user's OTHER
+  # project-less slips: that bucket is orphaned spares, not an event
+  # cohort, and its "most recently updated" member is whatever a
+  # batch job touched last. The chain falls through to the user's
+  # latest located observation instead.
+  def test_projectless_slip_skips_other_projectless_slips
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    field_slips(:field_slip_one).update_columns(project_id: nil,
+                                                updated_at: 1.hour.ago)
+    latest = observations(:detailed_unknown_obs)
+    latest.update_columns(location_id: locations(:burbank).id,
+                          created_at: Time.zone.now)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.update_columns(project_id: nil)
+    slip.current_user = mary
+
+    assert_equal(locations(:burbank), slip.location)
+  end
+
+  def test_location_falls_back_to_project_location
+    observations(:minimal_unknown_obs).update_columns(location_id: nil)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: nil)
+    projects(:eol_project).update_columns(location_id: locations(:albion).id)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = mary
+
+    assert_equal(locations(:albion), slip.location)
+  end
+
+  def test_location_falls_back_to_users_latest_located_observation
+    observations(:minimal_unknown_obs).update_columns(location_id: nil)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: nil)
+    latest = observations(:detailed_unknown_obs)
+    latest.update_columns(location_id: locations(:burbank).id,
+                          created_at: Time.zone.now)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = mary
+
+    assert_equal(locations(:burbank), slip.location)
+  end
+
+  def test_location_nil_when_no_signal_available
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = users(:zero_user)
+
+    assert_nil(slip.location)
+  end
+
+  def test_location_prefers_own_observation
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: locations(:burbank).id)
+    field_slips(:field_slip_two).update_columns(updated_at: 1.hour.ago)
+
+    # field_slip_one's own observation wins even though another slip in
+    # the project is more recent.
+    slip = field_slips(:field_slip_one)
+    slip.update_columns(updated_at: 2.days.ago)
+    slip.current_user = mary
+
+    assert_equal(locations(:albion), slip.location)
+  end
+
+  # The event a slip was printed for survives a spare-slip release:
+  # its project association may be gone, but the printed prefix still
+  # names the project, and alias resolution keys off the event.
+  def test_event_project_falls_back_to_the_printed_prefix
+    slip = field_slips(:field_slip_one)
+
+    assert_not_nil(slip.project, "premise: slip starts with a project")
+    assert_equal(slip.project, slip.event_project)
+
+    slip.update_columns(project_id: nil)
+
+    assert_equal(projects(:eol_project), slip.reload.event_project,
+                 "the EOL prefix still names the event")
+  end
+
+  def test_event_project_nil_for_an_unknown_prefix
+    assert_nil(Project.find_by(field_slip_prefix: "ZZZX"),
+               "premise: no fixture project claims this prefix")
+
+    slip = field_slips(:field_slip_one)
+    slip.update_columns(code: "ZZZX-12781", project_id: nil)
+
+    assert_nil(slip.reload.event_project)
+  end
 end

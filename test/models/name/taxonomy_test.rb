@@ -597,7 +597,7 @@ class Name::TaxonomyTest < UnitTestCase
     assert_not(
       misspelt_genus.dependents?,
       "`dependents?` should be false for " \
-      "misspelt genus of misspelt Proposed Name " \
+      "misspelt genus of misspelt Proposed Name "
     )
   end
 

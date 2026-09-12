@@ -14,7 +14,8 @@ module Views::Controllers::Observations
     prop :given_name, _Nilable(String), default: nil
     prop :place_name, _Nilable(String), default: nil
     prop :default_place_name, _Nilable(String), default: nil
-    prop :dubious_where_reasons, _Nilable(Array), default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
     prop :vote, _Nilable(::Vote), default: nil
     prop :names, _Nilable(Array), default: nil
     prop :valid_names, _Nilable(Array), default: nil
@@ -27,17 +28,22 @@ module Views::Controllers::Observations
     prop :herbarium_id, _Nilable(Integer), default: nil
     prop :accession_number, _Nilable(String), default: nil
     prop :projects, _Array(::Project), default: -> { [] }
-    prop :submitted_project_ids, _Nilable(Array), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil, &TO_ID_ARRAY
     prop :lists, _Array(::SpeciesList), default: -> { [] }
     prop :submitted_list_ids, _Nilable(Array), default: nil
     prop :error_checked_projects, _Array(::Project), default: -> { [] }
     prop :suspect_checked_projects, _Array(::Project), default: -> { [] }
+    prop :cross_prefix_projects, _Array(::Project), default: -> { [] }
+    prop :slip_target_project, _Nilable(::Project), default: nil
     prop :field_code, _Nilable(String), default: nil
-    prop :field_code_locked, _Boolean, default: false
 
     def view_template
       add_new_title(:create_object, :observation)
-      add_context_nav(Tab::Observation::FormNew.new(q_param: q_param))
+      add_context_nav(Tab::Observation::FormNew.new(
+                        q_param: q_param,
+                        index_filter: index_filter(:Observation)
+                      ))
       container_class(:wide)
 
       render(Form.new(@observation, **form_attrs))
@@ -48,6 +54,7 @@ module Views::Controllers::Observations
     def form_attrs
       {
         mode: :create,
+        turbo: true,
         user: @user,
         location: @location,
         good_images: @good_images,
@@ -66,15 +73,21 @@ module Views::Controllers::Observations
         collectors_number: @collectors_number,
         herbarium_name: @herbarium_name,
         herbarium_id: @herbarium_id,
-        accession_number: @accession_number,
+        accession_number: @accession_number
+      }.merge(project_and_list_attrs)
+    end
+
+    def project_and_list_attrs
+      {
         projects: @projects,
         submitted_project_ids: @submitted_project_ids,
         lists: @lists,
         submitted_list_ids: @submitted_list_ids,
         error_checked_projects: @error_checked_projects,
         suspect_checked_projects: @suspect_checked_projects,
-        field_code: @field_code,
-        field_code_locked: @field_code_locked
+        cross_prefix_projects: @cross_prefix_projects,
+        slip_target_project: @slip_target_project,
+        field_code: @field_code
       }
     end
   end

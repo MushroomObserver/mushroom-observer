@@ -4,8 +4,8 @@ class Query::Projects < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Project])
-  query_attr(:by_users, [User])
-  query_attr(:members, [User])
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
+  query_attr(:members, [User], param_alias: :member, always_index: false)
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
                        include_subtaxa: :boolean,

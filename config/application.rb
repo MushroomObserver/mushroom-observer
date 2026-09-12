@@ -57,6 +57,12 @@ module MushroomObserver
     # else a scanner's malformed bytes reach a String op and 500.
     config.middleware.insert_before(0, Rack::UTF8Sanitizer)
 
+    # A hostile/garbage Accept header (vulnerability scanners) is the
+    # client's error, not a 500.
+    config.action_dispatch.rescue_responses[
+      "ActionDispatch::Http::MimeNegotiation::InvalidType"
+    ] = :not_acceptable
+
     # Tells rails not to generate controller-specific css and js stubs.
     config.generators.assets = false
 
@@ -91,8 +97,22 @@ module MushroomObserver
     # Strict loading - either :log, or :error out the page
     config.active_record.action_on_strict_loading_violation = :log
 
-    # Just starting to use Rails caching on 7.1, so we're current
+    # New cache-entry format from new_framework_defaults_7_1.rb -- must be
+    # set here, not in the initializer, per Rails' requirement. MO's
+    # single-process stop/start deploy (script/deploy.sh) means there's no
+    # window where old and new code read the cache at the same time.
     config.active_support.cache_format_version = 7.1
+
+    # Opt in to the Rails 8.0 #to_time behavior now (preserves the
+    # receiver's timezone offset instead of converting to system local).
+    config.active_support.to_time_preserves_timezone = true
+
+    # Rails 7.0 default from new_framework_defaults_7_0.rb -- must be set
+    # here, not in the initializer, per that file's instructions. No-op
+    # on this Rails version: the underlying mechanism was removed in
+    # Rails 7.2.0 (activesupport CHANGELOG), so nothing reads this key
+    # any more -- set for completeness, not because it changes behavior.
+    config.active_support.disable_to_s_conversion = true
 
     # Set up memcached as the cache store everywhere
     # config.cache_store = :mem_cache_store

@@ -1,6 +1,40 @@
 # frozen_string_literal: true
 
 class FieldSlipNotesBuilder
+  INAT_OBSERVATION_URL = "https://www.inaturalist.org/observations/"
+
+  # Stored form of an "Other Codes" value flagged as an iNat id: a textile
+  # link to the observation. Shared with the observation form, so both
+  # forms round-trip the same value (#4932).
+  def self.inat_link(codes)
+    return codes if codes.blank?
+
+    "\"iNat #{codes}\":#{INAT_OBSERVATION_URL}#{codes}"
+  end
+
+  # Anchored on the whole value, not a substring search for the iNat URL:
+  # "Other Codes" is free text, so a value like
+  # `https://evil.example/?u=https://www.inaturalist.org/observations/1`
+  # contains that URL without being one of ours. Both callers really mean
+  # "did we generate this?", which is exactly what matching our own shape
+  # end to end answers. Flagged by CodeQL as
+  # rb/incomplete-url-substring-sanitization.
+  INAT_LINK_RE =
+    /\A"iNat .+":#{Regexp.escape(INAT_OBSERVATION_URL)}(.+)\z/
+
+  # Whether a value is already in the stored form above. Guards against
+  # wrapping a link inside another link when an already-saved observation
+  # is edited with the checkbox still ticked.
+  def self.inat_link?(codes)
+    codes.to_s.match?(INAT_LINK_RE)
+  end
+
+  # The bare id inside a stored iNat link, so an edit form can show what
+  # the user typed rather than the markup generated from it.
+  def self.inat_code(codes)
+    codes.to_s[INAT_LINK_RE, 1] || codes
+  end
+
   def initialize(params, field_slip)
     @params = params
     @field_slip = field_slip
@@ -46,7 +80,7 @@ class FieldSlipNotesBuilder
     codes = @params[:field_slip][:other_codes]
     return codes unless @params[:field_slip][:inat] == "1"
 
-    "\"iNat #{codes}\":https://www.inaturalist.org/observations/#{codes}"
+    self.class.inat_link(codes)
   end
 
   def update_notes_fields(notes)

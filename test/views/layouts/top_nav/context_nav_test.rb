@@ -16,7 +16,7 @@ class Views::Layouts::TopNav
     # No links → no markup at all (the entire dropdown is conditional
     # on having something to put inside it).
     def test_renders_nothing_when_links_empty
-      html = render(Views::Layouts::TopNav::ContextNav.new(links: []))
+      html = render_top_bar([])
 
       assert_equal("", html)
     end
@@ -25,7 +25,7 @@ class Views::Layouts::TopNav
     # that returns `[edit_tab, destroy_tab_if_admin]` shouldn't
     # collapse the dropdown when one entry is nil.
     def test_renders_nothing_when_all_links_are_nil
-      html = render(Views::Layouts::TopNav::ContextNav.new(links: [nil, nil]))
+      html = render_top_bar([nil, nil])
 
       assert_equal("", html)
     end
@@ -61,7 +61,7 @@ class Views::Layouts::TopNav
 
       assert_html(html, "form[action='#{routes.article_path(@article)}']")
       assert_html(html, "input[name='_method'][value='delete']")
-      assert_no_html(html, ".glyphicon-remove-circle")
+      assert_no_html(html, "svg.mo-icon")
       assert_no_html(html, ".btn.btn-outline-default")
     end
 

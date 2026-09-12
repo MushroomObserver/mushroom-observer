@@ -20,7 +20,7 @@ module Account
         }
       }
       patch(:update, params: params)
-      assert_flash_text(:runtime_profile_success.t)
+      assert_flash(:runtime_profile_success)
 
       # Make sure changes were made.
       user = rolf.reload
@@ -46,7 +46,7 @@ module Account
               }
             })
 
-      assert_flash_text(:runtime_no_changes.t)
+      assert_flash(:runtime_no_changes)
     end
 
     # place_name doesn't match any Location → @need_location = true →
@@ -65,9 +65,10 @@ module Account
               }
             })
 
-      assert_flash_text(:runtime_profile_must_define.t)
+      assert_flash(:runtime_profile_must_define)
       assert_redirected_to(new_location_path(where: unknown,
-                                             set_user: rolf.id))
+                                             set_user: rolf.id,
+                                             format: :html))
     end
 
     # Blank place_name when the user previously had a location →
@@ -102,8 +103,9 @@ module Account
               }
             })
 
-      assert_response(:success)
+      assert_unprocessable
       assert_select("form")
+      assert_select("form[data-turbo='true']")
       assert_flash_error
     end
 

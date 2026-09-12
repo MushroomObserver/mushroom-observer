@@ -36,27 +36,25 @@ module ObservationsController::New
 
     @observation = Observation.new
     if params[:notes]
-      @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
+      @observation.notes = NotesHash.from_params(params[:notes]).to_h
     end
     @observation.current_user = @user
     @observation.place_name = params[:place_name]
-    # Prefill the editable collector: the field-slip collector when one
-    # came through (the redirect carries it), else the entering user, who
-    # records someone else here when entering on a collector's behalf.
-    @observation.collector = params[:collector].presence ||
-                             @user.unique_text_name
+    @observation.collector = params[:collector].presence || default_collector
     init_naming_and_vote
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
-    @field_code        = params[:field_code]
-    @field_code_locked = @field_code.present?
+    @field_code = params[:field_code]
     init_specimen_vars
     init_project_vars_for_new
     init_list_vars
     defaults_from_last_observation_created
+    # Must follow defaults_from_last_observation_created, which copies the
+    # user's last observation's location unconditionally.
+    apply_field_slip_location(@field_code)
     add_list(SpeciesList.safe_find(params[:species_list]))
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
@@ -68,15 +66,15 @@ module ObservationsController::New
 
   private
 
-  def render_new_view
-    render(Views::Controllers::Observations::New.new(**new_view_attrs))
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Observations::New.new(**new_view_attrs),
+           status: status, **render_opts)
   end
 
   def new_view_attrs
     new_view_obs_attrs.merge(new_view_naming_attrs).
       merge(new_view_specimen_attrs).merge(new_view_project_attrs).
-      merge(field_code: @field_code,
-            field_code_locked: @field_code_locked || false)
+      merge(field_code: @field_code)
   end
 
   def new_view_obs_attrs
@@ -113,14 +111,52 @@ module ObservationsController::New
       submitted_project_ids: @submitted_project_ids,
       lists: @lists || [], submitted_list_ids: @submitted_list_ids,
       error_checked_projects: @error_checked_projects || [],
-      suspect_checked_projects: @suspect_checked_projects || []
+      suspect_checked_projects: @suspect_checked_projects || [],
+      cross_prefix_projects: @cross_prefix_projects || [],
+      slip_target_project: @slip_target_project
     }
+  end
+
+  # Blank when a field slip is in play: the person at the keyboard is
+  # usually a foray recorder entering someone else's collection, and
+  # `ObservationFragment::Who` renders a blank collector on a field-slip
+  # observation as "Entered by:" alone rather than falsely naming them.
+  # Prefilling would make a missed edit silently misattribute the
+  # collection. See #3283. Without a field slip, keep defaulting to the
+  # entering user.
+  def default_collector
+    return nil if params[:field_code].present?
+
+    @user.unique_text_name
+  end
+
+  # A slip arrival defaults Locality the way the field slip form does,
+  # not the way a plain new-observation form does. The chain (#4907) is
+  # the user's most recent slip in this project, then the project's own
+  # location, then their last located observation — deliberately ranking
+  # the project above the last observation, because someone who has
+  # travelled to a foray hasn't entered anything at the site yet, while
+  # the project's location contains it. `defaults_from_last_observation_
+  # created` alone gets the first slip of every foray wrong.
+  def apply_field_slip_location(code)
+    location = field_slip_default_location(code)
+    return unless location
+
+    @observation.location = location
+    @observation.where = location.name
+    @location = location
+  end
+
+  # Reuses `FieldSlip#calc_location` rather than restating the precedence,
+  # so a future change to #4907's ordering moves both forms at once.
+  def field_slip_default_location(code)
+    field_slip_for_code(code)&.location
   end
 
   def init_naming_and_vote
     @naming      = Naming.new
     @vote        = Vote.new
-    @given_name = params[:name] || ""
+    @given_name = params.permit(:name)[:name] || ""
     return unless params[:notes] && params[:notes][:Field_Slip_ID]
 
     @given_name = params[:notes][:Field_Slip_ID].tr("_", "")
@@ -141,9 +177,16 @@ module ObservationsController::New
     last_observation = Observation.recent_by_user(@user).last
     return unless last_observation
 
-    %w[where location_id is_collection_location gps_hidden].each do |attr|
+    # `specimen` is sticky like the rest: a field slip was originally
+    # taken to mean a specimen (#4916), but that is only true of some
+    # users. Someone recording a foray without collecting had to uncheck
+    # it every time, while someone out collecting for the day had to
+    # check it every time. What the same user did last is a better
+    # predictor than the presence of a code. See #4932.
+    %w[is_collection_location gps_hidden specimen].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
     end
+    apply_default_locality(last_observation)
     @location = @observation.location
 
     if last_observation.created_at > 1.hour.ago
@@ -166,12 +209,51 @@ module ObservationsController::New
     @observation.species_list_ids = ids | [list.id]
   end
 
+  # A located (or clean free-text) locality is worth carrying forward;
+  # one that would itself trip the dubious-name confirmation is not --
+  # as a default it re-prompts on every subsequent create until
+  # dislodged (reported: one slip's unrecognized "Sunshine Foray/ ..."
+  # haunting every following observation). Fall back to the most
+  # recent located observation, or no default at all.
+  def apply_default_locality(last_observation)
+    source = locality_default_source(last_observation)
+    return unless source
+
+    @observation.where = source.where
+    @observation.location_id = source.location_id
+  end
+
+  def locality_default_source(last_observation)
+    return last_observation if usable_default_locality?(last_observation)
+
+    @user.observations.where.not(location_id: nil).
+      order(created_at: :desc, id: :desc).first
+  end
+
+  def usable_default_locality?(obs)
+    return true if obs.location_id
+    return false if obs.where.blank?
+
+    # check_db: false, deliberately -- the DB-backed check treats ANY
+    # previously used `where` as known (Observation.pluck(:where) is
+    # in location_name_cache), which would bless the very free text
+    # this guard exists to stop propagating. The syntactic check is
+    # deterministic.
+    !Location.dubious_name?(Location.user_format(@user, obs.where),
+                            false, false)
+  end
+
   # Adding a field-slip project: always check it; for other already-
   # checked projects, keep them checked UNLESS they have their own
   # field_slip_prefix (in which case adding a new field-slip project
   # supersedes them — original ERB had this exclusive behavior).
+  #
+  # An explicit `?project=` wins over the project derived from the code
+  # prefix: `AddDispatchController` sends it precisely so the page the
+  # user pressed "Add" on can override the slip's own project.
   def add_field_slip_project(code)
-    project = FieldSlip.find_by(code: code)&.project
+    project = Project.safe_find(params[:project]) ||
+              FieldSlip.find_by(code: code.to_s.strip.upcase)&.project
     return unless project&.current? || project&.admin?(@user)
     return unless project&.member?(@user)
 
@@ -184,9 +266,10 @@ module ObservationsController::New
   end
 
   def check_location
-    if params[:place_name]
+    place_name = params.permit(:place_name)[:place_name]
+    if place_name
       # Cannot use @place_name since that's being used for approved_where
-      @default_place_name = params[:place_name]
+      @default_place_name = place_name
       loc = Location.place_name_to_location(@default_place_name, @user)
       @location = loc if loc
     else

@@ -15,8 +15,10 @@
 #   Button(type: :edit, target: @herbarium,
 #                                 variant: :strip)
 class Components::Button::Edit < Components::Link::Edit
-  def initialize(target:, name: nil, icon: :edit, variant: nil, **)
-    super(target: target, name: name, icon: icon, button: variant, **)
+  def initialize(target: nil, name: nil, icon: :edit, variant: nil, **opts)
+    tab = opts.delete(:tab)
+    super(target: target, tab: tab, name: name, icon: icon,
+          button: variant, **opts)
   end
 
   private

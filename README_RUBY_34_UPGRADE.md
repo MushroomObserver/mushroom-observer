@@ -193,7 +193,7 @@ The following files are updated as part of this upgrade:
 
 - `.ruby-version` — `3.3.6` → `3.4.9`
 - `Gemfile.lock` — regenerated with Ruby 3.4.9
-- `README_MACOSX_NOTES.md` — version references updated
+- `README_DEV_SETUP_MACOSX.md` — version references updated
 - `README_PRODUCTION_RUBY_UPGRADE` — version reference updated
 
 CI (`ruby/setup-ruby`) reads `.ruby-version` automatically, so no

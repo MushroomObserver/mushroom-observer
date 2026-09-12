@@ -3,6 +3,15 @@
 require "test_helper"
 
 class InatImportTest < ActiveSupport::TestCase
+  def test_inat_username_normalized_to_lowercase
+    import = inat_imports(:rolf_inat_import)
+    import.update(inat_username: " MixedCase ")
+
+    assert_equal("mixedcase", import.inat_username,
+                 "inat_username should be stripped and downcased " \
+                 "(iNat logins are lowercase)")
+  end
+
   def test_total_expected_time_tabula_rasa
     zero_out_prior_import_records
     import = inat_imports(:rolf_inat_import)
@@ -77,6 +86,47 @@ class InatImportTest < ActiveSupport::TestCase
 
   def test_estimated_remaining_time_zero_when_done
     assert_equal(0, inat_imports(:lone_wolf_import).estimated_remaining_time)
+  end
+
+  def test_total_expected_time_capped_when_over_cap
+    import = inat_imports(:roy_inat_import)
+    import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE * import.initial_avg_import_seconds,
+      import.total_expected_time,
+      "Expected time should reflect the capped target, not the raw " \
+      "(uncapped) total_importables"
+    )
+  end
+
+  def test_estimated_remaining_time_before_any_imported_capped_when_over_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing",
+                   total_importables: InatImport::MAX_IMPORTABLE + 50,
+                   imported_count: 0, started_at: Time.zone.now,
+                   ended_at: nil)
+
+    assert_equal(
+      import.total_expected_time, import.estimated_remaining_time,
+      "Before any obs imported, fall back to the up-front (capped) estimate"
+    )
+  end
+
+  def test_extrapolated_remaining_time_uses_capped_total
+    import = inat_imports(:rolf_inat_import)
+    import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50,
+                   imported_count: 5)
+    import.define_singleton_method(:elapsed_time) { 10.0 }
+
+    remaining = InatImport::MAX_IMPORTABLE - 5
+    expected = (remaining * 10.0 / 5).round
+
+    assert_equal(
+      expected, import.send(:extrapolated_remaining_time),
+      "Extrapolation should use the capped total, not the raw " \
+      "(uncapped) total_importables"
+    )
   end
 
   def test_adequate_constraints
@@ -321,5 +371,132 @@ class InatImportTest < ActiveSupport::TestCase
     import.update_columns(imported_count: nil)
 
     assert_not(import.reached_import_cap?)
+  end
+
+  def test_excess_over_cap_zero_below_cap
+    assert_equal(
+      0, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE - 1),
+      "Count below MAX_IMPORTABLE should have no excess"
+    )
+  end
+
+  def test_excess_over_cap_zero_at_cap
+    assert_equal(
+      0, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE),
+      "Count exactly at MAX_IMPORTABLE should have no excess"
+    )
+  end
+
+  def test_excess_over_cap_positive_above_cap
+    assert_equal(
+      1, InatImport.excess_over_cap(InatImport::MAX_IMPORTABLE + 1),
+      "Count 1 above MAX_IMPORTABLE should have excess of 1"
+    )
+  end
+
+  def test_excess_over_cap_zero_when_nil
+    assert_equal(
+      0, InatImport.excess_over_cap(nil),
+      "Nil count should have no excess"
+    )
+  end
+
+  def test_capped_total_importables_below_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: InatImport::MAX_IMPORTABLE - 1)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE - 1, import.capped_total_importables,
+      "Total below MAX_IMPORTABLE should be unchanged"
+    )
+  end
+
+  def test_capped_total_importables_above_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: InatImport::MAX_IMPORTABLE + 50)
+
+    assert_equal(
+      InatImport::MAX_IMPORTABLE, import.capped_total_importables,
+      "Total above MAX_IMPORTABLE should be capped"
+    )
+  end
+
+  def test_capped_total_importables_zero_when_nil
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(total_importables: nil)
+
+    assert_equal(
+      0, import.capped_total_importables,
+      "Nil total_importables should cap to zero"
+    )
+  end
+
+  def test_reimport_url_returns_stored_original_ui_url
+    import = inat_imports(:rolf_inat_import)
+    original_url = "https://www.inaturalist.org/observations?taxon_id=48701"
+    import.update_columns(original_inat_url: original_url)
+
+    assert_equal(
+      original_url, import.reimport_url,
+      "reimport_url should return the stored original URL verbatim"
+    )
+  end
+
+  def test_reimport_url_returns_stored_original_api_url
+    import = inat_imports(:rolf_inat_import)
+    original_url =
+      "https://api.inaturalist.org/v1/observations?taxon_id=48701&d1=2020-01-01"
+    import.update_columns(original_inat_url: original_url)
+
+    assert_equal(
+      original_url, import.reimport_url,
+      "reimport_url should preserve the API host, not rewrite it to the " \
+      "UI host -- UI and API search params do not fully overlap"
+    )
+  end
+
+  def test_reimport_url_falls_back_to_inat_url_when_original_blank
+    import = inat_imports(:rolf_inat_import)
+    stored_query = "taxon_id=48701&user_login=rolf"
+    import.update_columns(original_inat_url: nil, inat_url: stored_query)
+
+    assert_equal(
+      "#{Inat::Constants::SITE}/observations?#{stored_query}",
+      import.reimport_url,
+      "reimport_url should rebuild a UI URL from inat_url for a record " \
+      "predating original_inat_url, so its reimport link still lands " \
+      "in URL mode instead of defaulting to \"import all\""
+    )
+  end
+
+  def test_reimport_url_nil_when_both_url_columns_blank
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(original_inat_url: nil, inat_url: nil)
+
+    assert_nil(
+      import.reimport_url,
+      "reimport_url should be nil when neither URL column was stored"
+    )
+  end
+
+  # #5259 review recorders: both JSON columns default to [] and append.
+  def test_constraint_violation_and_unlicensed_image_recording
+    import = inat_imports(:rolf_inat_import)
+
+    assert_equal([], import.constraint_violation_obs_ids)
+    import.add_constraint_violation_obs(123)
+    import.add_constraint_violation_obs(456)
+    import.add_constraint_violation_obs(123)
+    assert_equal([123, 456], import.reload.constraint_violation_obs_ids,
+                 "A re-recorded observation must not duplicate")
+
+    assert_equal([], import.unlicensed_image_events)
+    import.add_unlicensed_image_event(inat_id: 987, login: "somebody",
+                                      license_code: nil, count: 2)
+    event = import.reload.unlicensed_image_events.first
+    assert_equal(987, event["inat_id"])
+    assert_equal("somebody", event["login"])
+    assert_nil(event["license_code"])
+    assert_equal(2, event["count"])
   end
 end

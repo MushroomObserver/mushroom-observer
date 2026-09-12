@@ -5,17 +5,16 @@ module Views::Controllers::Checklists
   # #checklist_contents so the target-names turbo-stream can replace
   # the whole block when a target is added or removed.
   class Contents < ::Components::Base
-    def initialize(data:, context:)
-      super()
-      @data = data
-      @context = context
-    end
+    prop :data, ::Checklist
+    prop :context, ::Views::Controllers::Checklists::Context
+    prop :project_data, _Nilable(::Checklist), default: nil
 
     def view_template
       div(id: "checklist_contents") do
         render_summary
         render_location_header if @context.location
         render_panels
+        render_missing_taxa_panel if @project_data
         render_footnotes
       end
     end
@@ -73,7 +72,8 @@ module Views::Controllers::Checklists
 
     def render_location_header
       h4 do
-        plain("#{:checklist_for.t} ")
+        plain(:checklist_for.t)
+        whitespace
         Link(type: :location, location: @context.location)
       end
     end
@@ -106,6 +106,22 @@ module Views::Controllers::Checklists
              ))
     end
 
+    # Project taxa absent from the species-list checklist. Counts and
+    # links match the project checklist: `data:` is the project
+    # checklist, and the project-only context scopes taxon links to
+    # project observations (no admin tools -- `user` is omitted).
+    def render_missing_taxa_panel
+      missing = @project_data.taxa_not_in(@data)
+      return if missing.empty?
+
+      h4 { plain(:checklist_missing_taxa.t) }
+      render(Panel.new(
+               data: @project_data,
+               context: Context.new(project: @context.project),
+               taxa: missing, panel_id: "checklist_missing_panel"
+             ))
+    end
+
     def render_footnotes
       div do
         p { plain(:checklist_any_deprecated.l) } if @data.any_deprecated?
@@ -123,7 +139,8 @@ module Views::Controllers::Checklists
     def render_target_remove_footnote
       p do
         Icon(type: :x, class: "text-danger")
-        plain(" #{:checklist_target_remove_footnote.l}")
+        whitespace
+        plain(:checklist_target_remove_footnote.l)
       end
     end
   end

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class TranslationsController < ApplicationController
   before_action :login_required
 
   def index
     @lang = set_language_and_authorize_user
-    @for_page = params[:for_page]
+    @for_page = params.permit(:for_page)[:for_page]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     @show_tags = tags_to_show(@for_page, @strings)
@@ -33,7 +33,7 @@ class TranslationsController < ApplicationController
   # only responds to turbo_stream
   def edit
     @lang = set_language_and_authorize_user
-    @tag = params[:id]
+    @tag = params.permit(:id)[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
@@ -45,7 +45,7 @@ class TranslationsController < ApplicationController
   # Only accessed by turbo_stream from the index
   def update
     @lang = set_language_and_authorize_user
-    @tag = params[:id]
+    @tag = params.permit(:id)[:id]
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
@@ -63,7 +63,7 @@ class TranslationsController < ApplicationController
     form_view = Views::Controllers::Translations::Form.new(
       lang: @lang, tag: @tag, edit_tags: @edit_tags,
       strings: @strings, for_page: @for_page,
-      official_records: @official_records
+      official_records: @official_records, turbo: true
     )
     versions_view = build_versions_view
     render(turbo_stream: turbo_stream.update(
@@ -389,4 +389,3 @@ class TranslationsController < ApplicationController
     alias ttag string
   end
 end
-# rubocop:enable Metrics/ClassLength

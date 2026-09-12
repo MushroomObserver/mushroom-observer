@@ -31,7 +31,7 @@ module Mappable
     def must_have_valid_bounds
       return if at_least_one_val_nonzero? && north_south_makes_sense?
 
-      errors.add(:base, "Box must have valid boundaries.")
+      errors.add(:base, :validate_box_invalid_boundaries)
     end
 
     # Return a new box with edges expanded by delta multiplier applied to each

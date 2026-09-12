@@ -782,6 +782,51 @@ end
 **When NOT to use `trusted_html()`:**
 - For rendering components - use `render(component)` instead
 - For registered output helpers - they already return safe HTML
+
+### Building a safe HTML string to *return*, not render
+
+`trusted_html()` only works inside an active Phlex render buffer
+(`view_template`, an instance method called from it). A `self.`
+class method that has to *return* an HTML-safe `String` — because
+two unrelated call sites need the same value — has no buffer to
+write into, so `trusted_html()` doesn't apply.
+
+Never build it with string interpolation
+(`"#{safe_tag} #{untrusted_name}"`) — interpolation doesn't escape
+anything, so any untrusted piece (DB text, params) rides along
+unescaped inside the resulting `html_safe` string. And `.html_safe`
+itself is blocked in `app/components/`/`app/views/` files by
+`.claude/hooks/check_any_phlex_props_on_save.sh` — use
+`ActiveSupport::SafeBuffer.new("")` as the safe starting point
+instead, then build via `+`. `SafeBuffer#+` HTML-escapes any
+non-safe operand as it's concatenated, so untrusted pieces get
+escaped while already-safe pieces (translated tags, hand-written
+HTML entities wrapped in their own `SafeBuffer.new`) pass through:
+
+```ruby
+# Good — untrusted `name` gets escaped by the `+` chain
+def self.text_for(license:, year:, name:)
+  safe = ActiveSupport::SafeBuffer.new("")
+  safe + :image_show_copyright.t +
+    ActiveSupport::SafeBuffer.new(" &copy; ") + "#{year} " + name
+end
+
+# Bad — interpolation never escapes; untrusted `name` passes through raw
+def self.text_for(license:, year:, name:)
+  ActiveSupport::SafeBuffer.new("#{:image_show_copyright.t} &copy; #{year} #{name}")
+end
+```
+
+`Style/StringConcatenation` is enabled in this repo and its
+autocorrect (`--autocorrect-all`) rewrites `+` chains back into
+interpolation — which silently drops the escaping. Wrap the method
+in `# rubocop:disable Style/StringConcatenation` /
+`# rubocop:enable Style/StringConcatenation` with a one-line comment
+explaining why, so the pattern survives a future autocorrect pass.
+See `app/components/image_fragment/copyright.rb#text_for` for the
+worked example (found via a Copilot review comment on PR #4902 —
+the original interpolated form allowed HTML injection via an
+unsanitized `CopyrightChange#name` DB column).
 - For Phlex HTML methods - they handle safety automatically
 
 ### Using `plain()` vs Direct Output
@@ -1132,6 +1177,81 @@ Resources:
 - Phlex documentation: https://www.phlex.fun/
 - Phlex caching: https://www.phlex.fun/components/caching
 - Literal properties: https://literal.fun/docs/properties.html
+
+## Rendering Phlex outside a request — `ApplicationController.renderer`
+
+Model callbacks and background jobs that broadcast HTML (Action Cable /
+Turbo Streams) have no controller or view context. MO's fix is
+`ApplicationController.renderer.render(component, layout: false)` —
+established precedent: `Comment#after_create_commit`/`#after_update_commit`
+(`app/models/comment.rb`), `Image#broadcast_processed_update`
+(`app/models/image.rb`), `InatImport#after_update_commit`
+(`app/models/inat_import.rb`), `Inat::ObservationResyncer#broadcast`
+(`app/classes/inat/observation_resyncer.rb`).
+
+**Hard rule, reproduced directly (not taken from Phlex/Rails docs —
+verify again yourself if this ever seems to misbehave, don't just trust
+this paragraph): a block passed to `ApplicationController.renderer.
+render` never reaches the component.** Minimal repro:
+
+```ruby
+class Probe < Components::Base
+  def view_template
+    plain(block_given? ? "has block" : "no block")
+  end
+end
+ApplicationController.renderer.render(Probe.new, layout: false) { plain("x") }
+# => "no block" -- block_given? is false inside view_template. The
+# block isn't merely mis-scoped or silently erroring; Rails' renderer
+# never forwards it to the component's own render_in call at all.
+```
+
+So `renderer.render(MyComponent.new(...)) { trusted_html(...) }` renders
+as if the block were never given — no error, just the component's
+no-block branch (or nothing, if it unconditionally assumed a block).
+This is *not* the same as passing a block to Phlex's own `render(...)`
+or Kit-syntax call (`Alert(...) { ... }`) from *inside* another
+component's `view_template` — that block form works fine and is how
+`Views::Layouts::App::FlashNotices` renders trusted flash content
+today. The difference is which renderer receives the block: Rails'
+`ActionController::Renderer#render` (drops it) vs. Phlex's own in-tree
+render call (forwards it).
+
+**Consequence: every component broadcast this way must be fully
+self-contained** — all its content baked into constructor props, nothing
+supplied via a block at the `ApplicationController.renderer.render` call
+site. If you need trusted/HTML-safe content in a broadcast (a translated
+flash message, textile-rendered text, etc.), don't reach for a bare
+`Components::Alert.new(message: ...)` (its `message:` prop always
+escapes via `plain()`) and don't try to smuggle a block through the
+renderer. Instead, wrap the trusted-content logic in its own tiny view
+whose `view_template` calls the working in-tree block form internally:
+
+```ruby
+# The wrapper is self-contained (message/level are props); the block it
+# passes to Alert is safe because that call happens inside a real Phlex
+# render chain, not at the ApplicationController.renderer boundary.
+class Views::Layouts::App::MessageAlert < Views::Base
+  prop :message, String
+  prop :level, _Union(:success, :info, :warning, :danger)
+
+  def view_template
+    Alert(level: @level, id: "flash_notices", class: "mt-3") do
+      trusted_html(@message)
+    end
+  end
+end
+
+# Broadcast call site — one self-contained instance, no external block:
+ApplicationController.renderer.render(
+  Views::Layouts::App::MessageAlert.new(message: tag.t, level: :success),
+  layout: false
+)
+```
+
+Before assuming a renderer/block combination works, test it — this
+exact failure mode (silent empty output, no exception) is easy to ship
+unnoticed if you only check that the code runs without erroring.
 
 ## Form Components (Superform)
 

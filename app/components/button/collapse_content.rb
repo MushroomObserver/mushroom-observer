@@ -17,9 +17,19 @@ module Components::Button::CollapseContent
                title: @icon_title || @open_text || @closed_text
              ))
     end
-    span(class: "collapse-toggle-open") { plain(@open_text) } if @open_text
+    if @open_text
+      span(class: text_span_class("collapse-toggle-open")) { plain(@open_text) }
+    end
     return unless @closed_text
 
-    span(class: "collapse-toggle-closed") { plain(@closed_text) }
+    span(class: text_span_class("collapse-toggle-closed")) do
+      plain(@closed_text)
+    end
+  end
+
+  # `icon-text-gap` (see Components::IconWithText, _icons.scss) --
+  # only needed when an icon glyph precedes the text.
+  def text_span_class(base)
+    class_names(base, "icon-text-gap" => @icon)
   end
 end

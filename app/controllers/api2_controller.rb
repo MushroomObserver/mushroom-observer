@@ -85,6 +85,10 @@ class API2Controller < ApplicationController
     rest_query(:name_description)
   end
 
+  def namings
+    rest_query(:naming)
+  end
+
   def observations
     rest_query(:observation)
   end

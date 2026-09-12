@@ -31,10 +31,18 @@ class MatrixBoxFooterTest < ComponentTestCase
     assert_equal("", render_detail(""))
   end
 
-  def test_footer_detail_string_renders_detail_div
-    html = render_detail("Some log detail text")
+  # detail is an [tag, args] pair from RenderData#rss_log_detail_tag
+  # (#4868 -- moved off RssLog#detail), resolved via
+  # Footer#resolve_rss_detail at render time.
+  def test_footer_detail_array_renders_resolved_tag
+    html = render_detail([:rss_created_at, { type: :observation }])
 
-    assert_html(html, "div.rss-detail.small", text: "Some log detail text")
+    assert_html(html, "div.rss-detail.small",
+                text: :rss_created_at.t(type: :observation).as_displayed)
+  end
+
+  def test_footer_detail_array_with_nil_tag_renders_nothing
+    assert_equal("", render_detail([nil, nil]))
   end
 
   def test_footer_detail_user_renders_user_info
@@ -72,9 +80,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     project = projects(:bolete_project)
     obs = observations(:coprinus_comatus_obs)
     dick = users(:dick) # member of bolete_admins
-    html = render(
-      Components::Matrix::Box.new(user: dick, object: obs, project: project)
-    )
+    html = render_box(user: dick, object: obs, project: project)
 
     expected_path = routes.exclude_observation_project_update_path(
       project_id: project.id, id: obs.id
@@ -85,9 +91,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   def test_project_admin_footer_hidden_for_non_admin
     project = projects(:bolete_project)
     obs = observations(:coprinus_comatus_obs)
-    html = render(
-      Components::Matrix::Box.new(user: @user, object: obs, project: project)
-    )
+    html = render_box(user: @user, object: obs, project: project)
 
     expected_path = routes.exclude_observation_project_update_path(
       project_id: project.id, id: obs.id
@@ -97,14 +101,16 @@ class MatrixBoxFooterTest < ComponentTestCase
 
   def test_project_admin_footer_hidden_without_project
     obs = observations(:coprinus_comatus_obs)
-    html = render(
-      Components::Matrix::Box.new(user: @user, object: obs)
-    )
+    html = render_box(user: @user, object: obs)
 
     assert_no_html(html, "div.panel-footer.text-center")
   end
 
   private
+
+  def render_box(**)
+    render(Components::Matrix::Box.new(**))
+  end
 
   # Renders render_footer_detail(detail) in a Phlex context.
   def render_detail(detail)

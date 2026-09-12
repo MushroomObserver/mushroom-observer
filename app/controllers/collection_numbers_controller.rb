@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying collection numbers.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
   before_action :store_location, except: [:destroy]
@@ -37,21 +37,24 @@ class CollectionNumbersController < ApplicationController
 
   private
 
+  # `Query::CollectionNumbers.default_order` is :name_and_number, but
+  # nil keeps this index titled "Collection Numbers Index" rather than
+  # "... by Name and Number" -- see the base class's doc.
   def default_sort_order
-    nil # Query::CollectionNumbers.default_order
+    nil
   end
 
-  def index_active_params
-    [:pattern, :observation, :by, :q, :id].freeze
-  end
-
-  # Display list of CollectionNumbers for an Observation
-  def observation
-    @observation = Observation.find(params[:observation])
-    query = create_query(
-      :CollectionNumber, observations: params[:observation].to_s
-    )
-    [query, { always_index: true }]
+  # Hook runs before template displayed. Must return query.
+  #
+  # @observation (drives the page's observation-context banner) is
+  # derived from the query itself, after its own record-lookup
+  # validation already ran -- replaces the old
+  # `Observation.find(params[:observation])`, which raised
+  # RecordNotFound (500) on a bad id instead of flashing/redirecting
+  # like every other shortcut.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@observation, query, :observations, Observation)
+    query
   end
 
   def index_display_opts(opts, _query)
@@ -89,7 +92,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html { render_new_phlex }
+      format.html { render_new_view }
     end
   end
 
@@ -110,7 +113,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html { render_edit_phlex }
+      format.html { render_edit_view }
     end
   end
 
@@ -158,14 +161,14 @@ class CollectionNumbersController < ApplicationController
       flash_error_and_goto_index(CollectionNumber, params[:id])
   end
 
-  def render_new_phlex
+  def render_new_view
     render(Views::Controllers::CollectionNumbers::New.new(
              collection_number: @collection_number,
              observation: @observation, user: @user
            ))
   end
 
-  def render_edit_phlex
+  def render_edit_view
     render(Views::Controllers::CollectionNumbers::Edit.new(
              collection_number: @collection_number, user: @user,
              back: @back, back_object: @back_object
@@ -216,13 +219,10 @@ class CollectionNumbersController < ApplicationController
                       end
     redirect_params[:back] = @back if @back.present?
 
-    respond_to do |format|
-      format.html do
-        redirect_to(redirect_params)
-      end
-      format.turbo_stream do
-        reload_collection_number_modal_form_and_flash
-      end
+    if modal_submission?(:collection_number)
+      reload_collection_number_modal_form_and_flash
+    else
+      redirect_to(redirect_params)
     end
   end
 
@@ -233,13 +233,10 @@ class CollectionNumbersController < ApplicationController
     flash_notice(
       :runtime_added_to.t(type: :collection_number, name: :observation)
     )
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
-      end
-      format.turbo_stream do
-        render_collection_numbers_section_update
-      end
+    if modal_submission?(:collection_number)
+      render_collection_numbers_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @collection_number)
     end
   end
 
@@ -272,16 +269,12 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     flash_notice(:runtime_updated_at.t(type: :collection_number))
 
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number)
-      end
-      format.turbo_stream do
-        # if we're here, we're on an obs page.
-        # back_object should be the obs, sent via :back param from the link
-        @observation = @back_object
-        render_collection_numbers_section_update
-      end
+    if modal_submission?(:collection_number)
+      # back_object should be the obs, sent via :back param from the link
+      @observation = @back_object
+      render_collection_numbers_section_update
+    else
+      redirect_to_back_object_or_object(@back_object, @collection_number)
     end
   end
 
@@ -345,7 +338,7 @@ class CollectionNumbersController < ApplicationController
   # Determine @observation for redirect after destroy.
   # Must be called before destroy since we need to check observations.
   def figure_out_destroy_redirect
-    back = params[:back].to_s
+    back = params.permit(:back)[:back].to_s
     @observation = nil
     return if back == "index"
 
@@ -377,7 +370,7 @@ class CollectionNumbersController < ApplicationController
 
   def destroy_html_response
     if @observation
-      redirect_to(observation_path(@observation.id))
+      redirect_to(permanent_observation_path(@observation.id))
     else
       redirect_with_query(action: :index)
     end
@@ -399,7 +392,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back]
+    @back = params.permit(:back)[:back]
     @back_object = nil
     if @back == "show"
       @back_object = @collection_number
@@ -416,15 +409,10 @@ class CollectionNumbersController < ApplicationController
   end
 
   def show_flash_and_send_back
-    respond_to do |format|
-      format.html do
-        redirect_to_back_object_or_object(@back_object, @collection_number) and
-          return
-      end
-      # renders the flash in the modal
-      format.turbo_stream do
-        render_modal_flash_update(modal_identifier) and return
-      end
+    if modal_submission?(:collection_number)
+      render_modal_flash_update(modal_identifier)
+    else
+      redirect_to_back_object_or_object(@back_object, @collection_number)
     end
   end
 
@@ -486,4 +474,3 @@ class CollectionNumbersController < ApplicationController
                              }) and return true
   end
 end
-# rubocop:enable Metrics/ClassLength

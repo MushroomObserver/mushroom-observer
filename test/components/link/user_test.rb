@@ -5,7 +5,7 @@ require("test_helper")
 class UserLinkTest < ComponentTestCase
   def test_renders_anchor_to_user_show_with_unique_text_name
     rolf = users(:rolf)
-    html = render(Components::Link::User.new(user: rolf))
+    html = render_link(user: rolf)
 
     # Behavior pinned: where it links + the selector class. Each
     # attribute asserted separately so attribute order can drift
@@ -17,7 +17,7 @@ class UserLinkTest < ComponentTestCase
 
   def test_name_override_replaces_default_label
     rolf = users(:rolf)
-    html = render(Components::Link::User.new(user: rolf, name: "RS"))
+    html = render_link(user: rolf, name: "RS")
 
     assert_html(html, "a.user_link_#{rolf.id}", text: "RS")
   end
@@ -26,7 +26,7 @@ class UserLinkTest < ComponentTestCase
     # Some callers (translations versions, comments author lookup)
     # only have the user id at hand. Fall back to "User #<id>"
     # rather than blowing up trying to `unique_text_name` an integer.
-    html = render(Components::Link::User.new(user: 42))
+    html = render_link(user: 42)
 
     assert_html(html, "a[href='#{routes.user_path(42)}']",
                 text: "#{:user.ti} #42")
@@ -34,7 +34,7 @@ class UserLinkTest < ComponentTestCase
   end
 
   def test_integer_id_with_name_uses_name
-    html = render(Components::Link::User.new(user: 42, name: "rolf"))
+    html = render_link(user: 42, name: "rolf")
 
     assert_html(html, "a.user_link_42", text: "rolf")
   end
@@ -43,7 +43,7 @@ class UserLinkTest < ComponentTestCase
     # Matches the legacy helper's "unknown user" fallback so
     # callers (e.g. ip_stats with a missing User row) can pass nil
     # without conditional logic.
-    html = render(Components::Link::User.new(user: nil))
+    html = render_link(user: nil)
 
     assert_no_html(html, "a")
     assert_includes(html, :unknown_user_name.t)
@@ -51,15 +51,19 @@ class UserLinkTest < ComponentTestCase
 
   def test_attributes_passed_through_with_class_merged
     rolf = users(:rolf)
-    html = render(Components::Link::User.new(
-                    user: rolf,
-                    attributes: { id: "my_link", class: "extra" }
-                  ))
+    html = render_link(user: rolf,
+                       attributes: { id: "my_link", class: "extra" })
 
     # Caller's class merges with the auto `user_link_<id>`; the
     # caller's `id:` flows through unchanged.
     assert_html(html, "a#my_link")
     assert_html(html, "a.user_link_#{rolf.id}")
     assert_html(html, "a.extra")
+  end
+
+  private
+
+  def render_link(**)
+    render(Components::Link::User.new(**))
   end
 end

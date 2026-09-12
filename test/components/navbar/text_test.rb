@@ -19,10 +19,10 @@ class NavbarTextTest < ComponentTestCase
 
   def test_renders_with_custom_class
     html = render_component(
-      Components::Navbar::Text.new(class: "mx-0 hidden-xs")
+      Components::Navbar::Text.new(class: "mx-0 mt-3")
     ) { "Page" }
 
-    assert_html(html, "div.navbar-text.mx-0.hidden-xs", text: "Page")
+    assert_html(html, "div.navbar-text.mx-0.mt-3", text: "Page")
   end
 
   def test_renders_with_data_attributes

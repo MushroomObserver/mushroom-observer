@@ -55,6 +55,28 @@ class ImageFragmentCopyrightTest < ComponentTestCase
     assert_html(html, ".image-copyright", text: "Someone Else Entirely")
   end
 
+  # Was License#copyright_text, unit-tested directly on the model --
+  # moved here as a class method (#4901) since its only two callers
+  # (this component, and images/show/license_history_panel.rb) are
+  # both render call sites.
+  def test_text_for
+    year = 2024
+    name = "Jan Borovicka"
+
+    assert_equal(
+      "Copyright &copy; #{year} #{name}",
+      Components::ImageFragment::Copyright.text_for(
+        license: licenses(:ccnc25), year: year, name: name
+      )
+    )
+    assert_equal(
+      "Public Domain by #{name}",
+      Components::ImageFragment::Copyright.text_for(
+        license: licenses(:publicdomain), year: year, name: name
+      )
+    )
+  end
+
   private
 
   def render_copyright(object: nil)

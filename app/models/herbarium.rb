@@ -100,10 +100,12 @@ class Herbarium < AbstractModel
   }
 
   scope :pattern, lambda { |phrase|
-    cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
-            Herbarium[:description].coalesce("") +
-            Herbarium[:mailing_address].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
+              Herbarium[:description].coalesce("") +
+              Herbarium[:mailing_address].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   def self.mcp_collections
@@ -151,18 +153,6 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{name} (#{code})"
   end
 
-  # Page heading: textilize so apostrophes etc. become smart-quoted
-  # (and bold/italic markers, if any user typed them into the name,
-  # render correctly). Doc title is plain `format_name` — the
-  # browser tab doesn't render HTML or smart-quote.
-  def page_title(_user = nil)
-    format_name.t
-  end
-
-  def document_title
-    format_name
-  end
-
   def unique_format_name(_user = nil)
     "#{format_name} (#{id})"
   end
@@ -192,13 +182,6 @@ class Herbarium < AbstractModel
 
     # User must own all the records attached to the one being deleted.
     herbarium_records.all? { |r| r.user_id == user.id }
-  end
-
-  # Info to include about each herbarium in merge requests.
-  def merge_info
-    num_cur = curators.count
-    num_rec = herbarium_records.count
-    "#{:herbarium.ti} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
   end
 
   def merge(src)

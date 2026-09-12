@@ -54,6 +54,9 @@ class Inat
     IMPORTABLE_ICONIC_TAXA_ARG = IMPORTABLE_ICONIC_TAXA.join(",").freeze
 
     MO_URL_OBSERVATION_FIELD_ID = 5005
+    # iNat's `field:` search filter matches on the field name, not id
+    # (field:5005 returns nothing); this is the name of field 5005.
+    MO_URL_OBSERVATION_FIELD_NAME = "Mushroom Observer URL"
 
     # Extracts the MO observation id from a "Mushroom Observer URL" field
     # value, tolerating the URL variants that appear in the wild (current,
@@ -68,7 +71,7 @@ class Inat
       # not already exported from or imported to MO
       # (field written by iNat's defunct Import from MO feature,
       # Pulk's mirror script, and ObservationImporter)
-      without_field: "Mushroom Observer URL"
+      without_field: MO_URL_OBSERVATION_FIELD_NAME
     }.freeze
 
     # A work-around because iNat has no "has a date" filter;

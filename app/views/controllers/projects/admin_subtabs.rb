@@ -10,11 +10,8 @@
 # root rather than nested under a sub-controller's directory.
 module Views::Controllers::Projects
   class AdminSubtabs < Views::Base
-    def initialize(project:, current_subtab:)
-      super()
-      @project = project
-      @current_subtab = current_subtab
-    end
+    prop :project, ::Project
+    prop :current_subtab, _Union("details", "members", "aliases")
 
     def view_template
       Row do

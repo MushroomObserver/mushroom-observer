@@ -66,7 +66,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     def heading(records)
       if records.any? || @has_sibling_records
-        "#{append_colon(plural_tag.ti)} "
+        append_colon(plural_tag.ti)
       else
         "#{:no_objects.t(type: type_tag)} "
       end

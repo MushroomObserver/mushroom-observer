@@ -17,6 +17,66 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # A non-primary occurrence member's edit icon opens the choice modal
+  # (#5317): the modal is rendered and the edit icon toggles it.
+  def test_show_edit_modal_for_non_primary_member
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    occ = Occurrence.create!(user: user, primary_observation: reflection)
+    reflection.update_column(:occurrence_id, occ.id)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal")
+    # The toggle's href is "#" (a same-page hash Turbo won't visit), so
+    # the edit page can't load in the background under the modal (#5317).
+    assert_select(
+      "a[href='#'][data-toggle='modal']" \
+      "[data-target='#edit_occurrence_modal']"
+    )
+    assert_select(
+      "[data-target='#edit_occurrence_modal'][href*='/edit']", count: 0
+    )
+  end
+
+  # A standalone observation (no occurrence) gets no modal; its edit
+  # icon is a plain edit link.
+  def test_show_no_edit_modal_for_standalone_observation
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    login(obs.user.login)
+
+    get(:show, params: { id: obs.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal", count: 0)
+  end
+
+  # A reflection with no occurrence has no primary to steer toward, so
+  # no modal (#5328 review) -- it would just bounce back otherwise.
+  # A read-only reflection with no occurrence yet still gets the modal:
+  # "Create Editable Primary" creates the native and links an occurrence
+  # (#5317). It must not silently create a companion on icon click.
+  def test_show_edit_modal_for_reflection_without_occurrence
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("#edit_occurrence_modal")
+    assert_select("a[href='#'][data-target='#edit_occurrence_modal']")
+  end
+
   def test_show_no_login_with_flow
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id, flow: "next" })
@@ -58,6 +118,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
     assert_select("#matching_observations")
     assert_select("a[href*='occurrences/#{occ.id}']")
+  end
+
+  # Any image in the occurrence can be the thumbnail; when it belongs
+  # to a sibling it still leads the carousel (issue #5160).
+  def test_show_observation_sibling_image_as_thumbnail
+    login("rolf")
+    primary = observations(:two_img_obs)
+    sibling = observations(:fungi_obs)
+    thumb = images(:plane_image_example)
+    assert_includes(sibling.images, thumb)
+    assert_not_includes(primary.images, thumb)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ, thumb_image: thumb)
+    sibling.update!(occurrence: occ)
+
+    get(:show, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#observation_images .carousel-inner " \
+                  ".carousel-item:first-child#carousel_item_#{thumb.id}")
+    assert_select("#observation_images .carousel-item",
+                  count: primary.images.count + sibling.images.count)
   end
 
   def test_show_observation_noteless_image
@@ -767,8 +849,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     # Test that prev/next links do not have :q, and index link does
     get(:show, params: { id: o_chron.third.id })
-    next_href = observation_path(o_chron.fourth.id)
-    prev_href = observation_path(o_chron.second.id)
+    next_href = permanent_observation_path(o_chron.fourth.id)
+    prev_href = permanent_observation_path(o_chron.second.id)
     index_href = observations_path(params: { id: o_chron.third.id, q: })
     assert_select("a.next_object_link[href='#{next_href}']")
     assert_select("a.prev_object_link[href='#{prev_href}']")
@@ -823,7 +905,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     get(:show, params: params.merge({ id: o_id, flow: "next" }))
     assert_redirected_to(action: :show, id: o_id, params:)
-    assert_flash_text(/can.*t find.*results.*index/i)
+    assert_flash(:runtime_object_not_in_index, id: o_id, type: :observation)
     get(:show, params: params.merge({ id: o1.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o2.id, params:)
     get(:show, params: params.merge({ id: o2.id, flow: "next" }))
@@ -832,7 +914,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: o4.id, params:)
     get(:show, params: params.merge({ id: o4.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o4.id, params:)
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :observation)
 
     get(:show, params: params.merge({ id: o4.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o3.id, params:)
@@ -842,10 +924,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: o1.id, params:)
     get(:show, params: params.merge({ id: o1.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o1.id, params:)
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :observation)
     get(:show, params: params.merge({ id: o_id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o_id, params:)
-    assert_flash_text(/can.*t find.*results.*index/i)
+    assert_flash(:runtime_object_not_in_index, id: o_id, type: :observation)
   end
   # ----------------------------
   #  Interest.
@@ -855,31 +937,27 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("rolf")
     minimal_unknown = observations(:minimal_unknown_obs)
 
-    # No interest in this observation yet.
-    #
-    # <img[^>]+watch.*\.png[^>]+>[\w\s]*
+    # No interest in this observation yet -- both are creates (POST).
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /watch.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
-    )
-    assert_image_link_in_html(
-      /ignore.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
-    )
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /halfopen.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete,
+                           path: interest_path(minimal_unknown.id)
     )
-    assert_image_link_in_html(
-      /ignore.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch,
+                         path: interest_path(minimal_unknown.id), state: -1
     )
 
     # Destroy that interest, create new one with interest off.
@@ -887,13 +965,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     Interest.create(target: minimal_unknown, user: rolf, state: false)
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /halfopen.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete,
+                           path: interest_path(minimal_unknown.id)
     )
-    assert_image_link_in_html(
-      /watch.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch,
+                        path: interest_path(minimal_unknown.id), state: 1
     )
   end
 
@@ -941,9 +1019,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("body.observations__show")
     assert_select("form#naming_vote_form_#{naming1.id} " \
                   "select#vote_value_#{naming1.id}>" \
-                  "option[selected=selected][value='#{vote1.value}']")
+                  "option[selected][value='#{vote1.value}']")
     assert_select("form#naming_vote_form_#{naming2.id} " \
                   "select#vote_value_#{naming2.id}>" \
-                  "option[selected=selected][value='#{vote2.value}']")
+                  "option[selected][value='#{vote2.value}']")
   end
 end

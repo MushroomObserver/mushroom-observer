@@ -90,14 +90,14 @@ module Views::Layouts
     def render_user_list(title, users = [])
       return unless users&.any?
 
-      plain(user_list_title(title, users))
+      trusted_html(user_list_title(title, users))
       render_user_links(users)
       yield if block_given?
     end
 
     def user_list_title(title, users)
       title_text = users.size > 1 ? title.to_s.pluralize.to_sym.t : title.t
-      "#{title_text}: "
+      append_colon(title_text)
     end
 
     def render_user_links(users)

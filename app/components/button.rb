@@ -99,22 +99,35 @@ class Components::Button < Components::Base
 
   include Components::Button::Content
 
+  VARIANTS = [*Components::Button::Styling::BTN_VARIANTS.keys,
+              :default, :strip].freeze
+  SIZES = Components::Button::Styling::BTN_SIZES.keys.freeze
+
+  ICONS = Components::Icon::GLYPHS.to_a.freeze
+
+  prop :name, _Nilable(String), default: nil
+  prop :variant, _Nilable(_Union(*VARIANTS)), default: nil
+  prop :size, _Nilable(_Union(*SIZES)), default: nil
+  prop :icon, _Nilable(_Union(*ICONS)), default: nil
+  prop :icon_class, _Nilable(String), default: nil
+  prop :icon_title, _Nilable(String), default: nil
+  prop :active_icon, _Nilable(_Union(*ICONS)), default: nil
+  prop :active_content, _Nilable(String), default: nil
+  prop :label, _Nilable(_Boolean), default: nil
+  prop :tag, _Union(*ALLOWED_TAGS), default: :button
+  prop :type, _Union(String, Symbol), default: :button
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
   def initialize(name: nil, variant: nil, size: nil, icon: nil, **html_attrs)
-    super()
-    @name = name
-    @variant = variant
-    @size = size
-    @tag = html_attrs.delete(:tag) || :button
-    @type = html_attrs.delete(:type) || :button
-    @icon = icon
-    @icon_class = html_attrs.delete(:icon_class)
-    @icon_title = html_attrs.delete(:icon_title)
-    @label = html_attrs.delete(:label)
+    tag = html_attrs.delete(:tag) || :button
+    type = html_attrs.delete(:type) || :button
+    icon_opts = extract_icon_opts(html_attrs)
     onclick = html_attrs.delete(:onclick)
-    @html_attrs = html_attrs
     # Phlex blocks `onclick` by name; wrap in SafeValue to opt in.
-    @html_attrs[:onclick] = Phlex::SGML::SafeValue.new(onclick) if onclick
-    validate_no_btn_classes!(@html_attrs[:class])
+    html_attrs[:onclick] = Phlex::SGML::SafeValue.new(onclick) if onclick
+    validate_no_btn_classes!(html_attrs[:class])
+    super(name: name, variant: variant, size: size, icon: icon, tag: tag,
+          type: type, **icon_opts, **html_attrs)
   end
 
   def view_template(&block)
@@ -128,6 +141,16 @@ class Components::Button < Components::Base
 
   private
 
+  def extract_icon_opts(html_attrs)
+    {
+      icon_class: html_attrs.delete(:icon_class),
+      icon_title: html_attrs.delete(:icon_title),
+      active_icon: html_attrs.delete(:active_icon),
+      active_content: html_attrs.delete(:active_content),
+      label: html_attrs.delete(:label)
+    }
+  end
+
   def btn_styling
     return nil if @variant == :strip
 
@@ -135,10 +158,11 @@ class Components::Button < Components::Base
   end
 
   def merged_class
-    class_names(btn_styling, size_class(@size), @html_attrs[:class])
+    class_names(stateful_class, btn_styling, size_class(@size),
+                @attributes[:class])
   end
 
   def extra_attrs
-    @html_attrs.except(:class)
+    @attributes.except(:class)
   end
 end

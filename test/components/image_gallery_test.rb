@@ -11,12 +11,7 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   def test_renders_carousel_with_images
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: @images,
-      object: @obs
-    )
-    html = render(component)
+    html = render_gallery
 
     # Basic structure
     assert_includes(html, "carousel")
@@ -76,10 +71,7 @@ class ImageGalleryTest < ComponentTestCase
   # key) can't bake one viewer's vote state into shared HTML.
   def test_carousel_item_renders_vote_section
     image = @images.first
-    component = Components::ImageGallery.new(
-      user: @user, images: [image], object: @obs
-    )
-    html = render(component)
+    html = render_gallery(images: [image])
 
     assert_html(html,
                 ".carousel-item turbo-frame#image_vote_#{image.id}" \
@@ -88,12 +80,7 @@ class ImageGalleryTest < ComponentTestCase
 
   def test_renders_single_image_without_controls
     image = @images.first
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: [image],
-      object: @obs
-    )
-    html = render(component)
+    html = render_gallery(images: [image])
 
     assert_includes(html, "carousel")
     assert_includes(html, "carousel-item")
@@ -103,13 +90,7 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   def test_thumbnail_navigation_when_enabled
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: @images,
-      object: @obs,
-      thumbnails: true
-    )
-    html = render(component)
+    html = render_gallery(thumbnails: true)
 
     # Should have thumbnail navigation
     assert_includes(html, "carousel-indicators")
@@ -139,13 +120,7 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   def test_no_thumbnail_navigation_when_disabled
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: @images,
-      object: @obs,
-      thumbnails: false
-    )
-    html = render(component)
+    html = render_gallery(thumbnails: false)
 
     # Should not have thumbnail navigation or heading
     assert_not_includes(html, "carousel-indicators")
@@ -154,16 +129,12 @@ class ImageGalleryTest < ComponentTestCase
 
   def test_renders_with_custom_options
     links = '<a href="/test">Test Link</a>'
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: @images,
-      object: @obs,
+    html = render_gallery(
       title: "Custom Gallery Title",
       links: links,
       panel_id: "custom_panel_id",
       thumbnails: true
     )
-    html = render(component)
 
     # Custom title in panel heading
     assert_includes(html, "Custom Gallery Title")
@@ -188,10 +159,7 @@ class ImageGalleryTest < ComponentTestCase
   # the image-show page, so only that page live-updates; this one
   # catches up on the next load via the #4808 cache-busting URL token.
   def test_does_not_subscribe_to_action_cable_for_image_streams
-    component = Components::ImageGallery.new(
-      user: @user, images: @images, object: @obs
-    )
-    html = render(component)
+    html = render_gallery
 
     assert_no_html(html, "turbo-cable-stream-source")
   end
@@ -199,12 +167,7 @@ class ImageGalleryTest < ComponentTestCase
   def test_filters_nil_images
     # Create array with nils mixed in
     images_with_nil = [@images.first, nil, nil]
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: images_with_nil,
-      object: @obs
-    )
-    html = render(component)
+    html = render_gallery(images: images_with_nil)
 
     # Should render successfully without errors
     assert_includes(html, "carousel")
@@ -214,12 +177,7 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   def test_renders_no_images_message_when_empty
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: [],
-      object: @obs
-    )
-    html = render(component)
+    html = render_gallery(images: [])
 
     # Should show styled message area
     assert_includes(html, "text-muted")
@@ -239,14 +197,8 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   def test_renders_custom_title_when_empty
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: [],
-      object: @obs,
-      title: "Custom Gallery Title",
-      thumbnails: true
-    )
-    html = render(component)
+    html = render_gallery(images: [], title: "Custom Gallery Title",
+                          thumbnails: true)
 
     # Title in panel heading
     assert_includes(html, "Custom Gallery Title")
@@ -260,26 +212,14 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   def test_no_heading_when_thumbnails_disabled
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: [],
-      object: @obs,
-      thumbnails: false
-    )
-    html = render(component)
+    html = render_gallery(images: [], thumbnails: false)
 
     # Should not have panel heading
     assert_not_includes(html, "panel-heading")
   end
 
   def test_panel_id_is_passed_through
-    component = Components::ImageGallery.new(
-      user: @user,
-      images: [],
-      object: @obs,
-      panel_id: "custom_panel_id"
-    )
-    html = render(component)
+    html = render_gallery(images: [], panel_id: "custom_panel_id")
 
     assert_includes(html, "custom_panel_id")
   end
@@ -313,9 +253,7 @@ class ImageGalleryTest < ComponentTestCase
     leak_image = images(:connected_coprinus_comatus_image)
     leak_obs = leak_image.observations.first || @obs
 
-    html = render(Components::ImageGallery.new(
-                    user: @user, images: [leak_image], object: leak_obs
-                  ))
+    html = render_gallery(images: [leak_image], object: leak_obs)
 
     # Vote bar IS in the carousel-caption (a lazy Turbo Frame -- #4895).
     assert_html(html, ".carousel-caption turbo-frame")
@@ -324,5 +262,13 @@ class ImageGalleryTest < ComponentTestCase
     # in the lightbox's hidden `.lightbox-caption` element instead.)
     assert_no_html(html, ".carousel-caption .image-copyright")
     assert_no_html(html, ".carousel-caption .image-notes")
+  end
+
+  private
+
+  def render_gallery(images: @images, object: @obs, **)
+    render(Components::ImageGallery.new(
+             user: @user, images: images, object: object, **
+           ))
   end
 end

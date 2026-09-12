@@ -3,16 +3,15 @@
 # Main observation show page — the parent that composes every
 # obs-show sub-panel (`Components::ImageGallery`,
 # `Details`, `NameInfoPanel`, `SpeciesListsPanel`, `ProjectsPanel`,
-# `MatchingObservationsPanel`, `ThumbnailMapPanel`, namings
-# partial, comments partial, `Views::Layouts::ObjectFooter`) into a
-# two-column layout.
+# `MatchingObservationsPanel`, namings partial, comments partial,
+# `Views::Layouts::ObjectFooter`) into a two-column layout.
 #
 # Renders `add_show_title` + owner-naming line + pager / interest /
 # edit icons (logged-in only) into the page chrome, then a `.row`
 # with the carousel on the left and observation details / name
 # info / species lists / projects / matching obs on the right.
 # Second `.row` below: namings table + comments on the left,
-# thumbnail map on the right (logged-in only).
+# notes panel on the right.
 #
 # `owner_naming_line` is now `Observations::OwnerNamingLine`;
 # `link_to_display_name_brief_authors` is now
@@ -21,31 +20,34 @@
 # obs-title chain in `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
-    # The show page consumes every obs-derived ivar the controller
-    # builds; the param list mirrors the controller's `@ivar`s.
-    def initialize(observation:, user: nil, consensus: nil,
-                   comments: [], images: [], other_sites: nil,
-                   sibling_observations: nil, occurrence: nil,
-                   owner_name: nil)
-      super()
-      @observation = observation
-      @user = user
-      @consensus = consensus
-      @comments = comments
-      @images = images
-      @other_sites = other_sites
-      @sibling_observations = sibling_observations || []
-      @occurrence = occurrence
-      @owner_name = owner_name
+    prop :observation, ::Observation
+    prop :user, _Nilable(::User), default: nil
+    prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
+    prop :comments, _Array(::Comment), default: -> { [] }
+    prop :images, _Array(::Image), default: -> { [] }
+    prop :other_sites, _Nilable(_Array(::ExternalSite)), default: nil
+    prop :sibling_observations, _Array(::Observation)
+    prop :occurrence, _Nilable(::Occurrence), default: nil
+    prop :owner_name, _Nilable(::Name), default: nil
+
+    # sibling_observations: only gets computed by the controller when
+    # there's an @occurrence -- normalize nil to [] here so callers
+    # (and this class's own methods) never need a nil-guard.
+    def initialize(sibling_observations: nil, **)
+      super(sibling_observations: sibling_observations || [], **)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       add_chrome
+      # Any member of an occurrence with a reflection can get a resync
+      # broadcast (#4215) -- the aggregate flash goes to every member's
+      # channel. See Inat::ObservationResyncer#broadcast.
+      turbo_stream_from([@observation, :external_link_sync]) if
+        @observation.syncable?
       render_main_row
       render_secondary_row
       render_footer if @user
+      render_edit_modal if show_edit_modal?
     end
 
     private
@@ -56,10 +58,38 @@ module Views::Controllers::Observations
       if @user
         add_pager_for(@observation)
         add_interest_icons(@user, @observation)
-        add_edit_icons(@observation, @user)
+        add_edit_icons(@observation, @user,
+                       edit_modal_target: edit_modal_target)
       end
       container_class(:double)
       column_classes(:eight_four)
+    end
+
+    def edit_modal_target
+      Show::EditModal::MODAL_ID if show_edit_modal?
+    end
+
+    # The edit icon opens the choice modal for a non-primary occurrence
+    # member (a read-only reflection, or an editable non-primary), so the
+    # editor is steered to the primary rather than the wrong member.
+    # A read-only reflection always qualifies -- even with no occurrence
+    # yet, "Create Editable Primary" creates the native and links an
+    # occurrence (Companion#join_occurrence). An editable observation
+    # only qualifies when it's a non-primary occurrence member.
+    def show_edit_modal?
+      return false unless @user && can_edit_observation?
+      return true if @observation.reflection?
+
+      @occurrence && @occurrence.primary_observation_id != @observation.id
+    end
+
+    def can_edit_observation?
+      in_admin_mode? || @observation.can_edit?(@user)
+    end
+
+    def render_edit_modal
+      render(Show::EditModal.new(observation: @observation,
+                                 occurrence: @occurrence, user: @user))
     end
 
     # ---- main row: carousel | obs details / name / lists -----
@@ -83,7 +113,7 @@ module Views::Controllers::Observations
       return "" unless permission?(@observation)
 
       capture do
-        Link(type: :icon,
+        Link(type: :get,
              tab: ::Tab::Observation::ReuseImages.new(
                observation: @observation
              ))
@@ -93,7 +123,7 @@ module Views::Controllers::Observations
     def render_right_column
       render(Details.new(
                obs: @observation, consensus: @consensus, user: @user,
-               sites: @other_sites&.to_a, siblings: @sibling_observations
+               sites: @other_sites, siblings: @sibling_observations
              ))
       return unless @user
 
@@ -103,14 +133,14 @@ module Views::Controllers::Observations
              ))
       render(NameInfoPanel.new(obs: @observation, user: @user))
       render(SpeciesListsPanel.new(obs: @observation, user: @user))
-      render(ProjectsPanel.new(obs: @observation))
+      render(ProjectsPanel.new(obs: @observation, user: @user))
       render(MatchingObservationsPanel.new(
                obs: @observation, occurrence: @occurrence,
                siblings: @sibling_observations
              ))
     end
 
-    # ---- secondary row: namings + comments | thumbnail map ----
+    # ---- secondary row: namings + comments | notes ----
 
     def render_secondary_row
       Row do
@@ -118,9 +148,6 @@ module Views::Controllers::Observations
           render_namings_and_comments
         end
         div(class: content_for(:right_columns)) do
-          if @user&.thumbnail_maps
-            render(ThumbnailMapPanel.new(obs: @observation))
-          end
           render(NotesPanel.new(obs: @observation, user: @user))
         end
       end
@@ -129,7 +156,6 @@ module Views::Controllers::Observations
     def render_namings_and_comments
       render_namings if @user
       render_comments
-      render_source_credit if show_source_credit?
     end
 
     def render_namings
@@ -142,14 +168,6 @@ module Views::Controllers::Observations
                object: @observation, comments: @comments.to_a, user: @user,
                editable: @user.present?, limit: nil
              ))
-    end
-
-    def show_source_credit?
-      @observation.source_noteworthy? && !@observation.import_link
-    end
-
-    def render_source_credit
-      trusted_html(@observation.source_credit.tpl)
     end
 
     def render_footer

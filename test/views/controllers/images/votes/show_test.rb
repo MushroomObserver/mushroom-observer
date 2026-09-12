@@ -11,7 +11,7 @@ module Views::Controllers::Images::Votes
     end
 
     def test_renders_vote_interface_inside_matching_turbo_frame
-      html = render(Show.new(image: @image, user: @user))
+      html = render_show
 
       assert_html(html, "turbo-frame#image_vote_#{@image.id}")
       assert_html(html, "turbo-frame .vote-section#image_vote_#{@image.id}")
@@ -19,7 +19,7 @@ module Views::Controllers::Images::Votes
     end
 
     def test_lightbox_context_renders_prefixed_frame_and_content
-      html = render(Show.new(image: @image, user: @user, context: :lightbox))
+      html = render_show(context: :lightbox)
 
       assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}")
       assert_html(html,
@@ -28,10 +28,16 @@ module Views::Controllers::Images::Votes
     end
 
     def test_renders_for_anonymous_viewer
-      html = render(Show.new(image: @image, user: nil))
+      html = render_show(user: nil)
 
       assert_html(html, "turbo-frame#image_vote_#{@image.id}")
       assert_html(html, ".vote-section.require-user")
+    end
+
+    private
+
+    def render_show(**)
+      render(Show.new(image: @image, user: @user, **))
     end
   end
 end

@@ -3,14 +3,6 @@
 require("test_helper")
 
 class PaginatedResultsTest < ComponentTestCase
-  def setup
-    super
-    controller.define_singleton_method(:q_param) { nil }
-    controller.define_singleton_method(:observations_path) do |**|
-      "/observations"
-    end
-  end
-
   def test_wraps_block_in_results_div
     html = render_it
 
@@ -28,13 +20,6 @@ class PaginatedResultsTest < ComponentTestCase
     html = render_it
 
     assert_html(html, "div#results", text: "content")
-  end
-
-  def test_data_q_encodes_q_param
-    controller.define_singleton_method(:q_param) { "42" }
-    html = render_it
-
-    assert_html(html, "div#results[data-q='q=42']")
   end
 
   def test_weaves_pagination_strips_when_present

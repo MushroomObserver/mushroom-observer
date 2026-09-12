@@ -218,14 +218,13 @@ class Comment < AbstractModel
   # Pass either { type:, id: } or a commentable model instance.
   # Scope makes sure instance exists.
   scope :target, lambda { |target|
-    if target.is_a?(Hash) && target[:type] && target[:id]
-      type = target[:type]
-      return none unless (model = Comment.safe_model_from_name(type))
+    if target.is_a?(Hash)
+      return none unless target[:type] && target[:id]
+      return none unless (model = Comment.safe_model_from_name(target[:type]))
 
       target = model.safe_find(target[:id])
     elsif target.is_a?(AbstractModel)
-      type = target.class.name
-      return none unless Comment.safe_model_from_name(type)
+      return none unless Comment.safe_model_from_name(target.class.name)
     end
 
     where(target:)
@@ -238,8 +237,10 @@ class Comment < AbstractModel
         ->(phrase) { search_columns(Comment[:comment], phrase) }
 
   scope :pattern, lambda { |phrase|
-    cols = (Comment[:summary] + Comment[:comment].coalesce(""))
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = (Comment[:summary] + Comment[:comment].coalesce(""))
+      search_columns(cols, phrase)
+    end
   }
 
   scope :search_content, lambda { |phrase|
@@ -344,21 +345,21 @@ class Comment < AbstractModel
   def check_user # :nodoc:
     return if user || current_user
 
-    errors.add(:user, :validate_comment_user_missing.t)
+    errors.add(:user, :validate_comment_user_missing)
   end
 
   def check_summary # :nodoc:
     if summary.to_s.blank?
-      errors.add(:summary, :validate_comment_summary_missing.t)
+      errors.add(:summary, :validate_comment_summary_missing)
     elsif summary.size > 100
-      errors.add(:summary, :validate_comment_summary_too_long.t)
+      errors.add(:summary, :validate_comment_summary_too_long)
     end
   end
 
   def check_target # :nodoc:
     return unless target_type.to_s.size > 30
 
-    errors.add(:target_type, :validate_comment_object_type_too_long.t)
+    errors.add(:target_type, :validate_comment_object_type_too_long)
   end
 
   def no_recent_duplicate
@@ -369,7 +370,7 @@ class Comment < AbstractModel
     return unless effective_user && target
     return unless recent_identical_comment?(effective_user)
 
-    errors.add(:base, :validate_comment_duplicate.t)
+    errors.add(:base, :validate_comment_duplicate)
   end
 
   def recent_identical_comment?(effective_user)

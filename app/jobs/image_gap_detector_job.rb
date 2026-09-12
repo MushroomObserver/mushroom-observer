@@ -11,15 +11,32 @@ class ImageGapDetectorJob < ApplicationJob
 
   def perform
     result = Image::Processor.detect_gaps { |msg| log(msg) }
-    log("Found #{result[:gaps].size} gap(s), " \
-        "regenerated #{result[:regenerated].size} image(s), " \
-        "#{result[:unregenerable].size} unregenerable")
+    log(summary(result))
+    alert_unchecked(result[:unchecked])
     return if result[:gaps].empty?
 
     alert(gap_alert_message(result))
   end
 
   private
+
+  def summary(result)
+    "Found #{result[:gaps].size} gap(s), " \
+      "regenerated #{result[:regenerated].size} image(s), " \
+      "#{result[:unregenerable].size} unregenerable, " \
+      "#{result[:unchecked].size} unchecked"
+  end
+
+  # A remote listing that failed outright (#4974) means those images
+  # were skipped, not verified -- say so rather than reporting a
+  # falsely-clean run. The held checkpoint re-examines them next run.
+  def alert_unchecked(unchecked)
+    return if unchecked.empty?
+
+    alert("Could not check #{unchecked.size} image(s) - remote listing " \
+          "failed; they will be re-examined next run - image ids: " \
+          "#{unchecked}")
+  end
 
   def gap_alert_message(result)
     affected_ids = result[:gaps].map(&:first).uniq

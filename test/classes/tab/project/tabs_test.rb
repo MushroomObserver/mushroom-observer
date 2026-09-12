@@ -38,7 +38,10 @@ module Tab::Project
 
       assert_match(/\A\d+ /, tab.title)
       assert_match(/observations/i, tab.title)
-      assert_equal(routes.observations_path(project: @project), tab.path)
+      assert_equal(
+        routes.observations_path(project: @project, by: "thumbnail_quality"),
+        tab.path
+      )
       assert_equal("observations", tab.alt_title)
       assert_equal("observations_link", link_class(tab))
     end

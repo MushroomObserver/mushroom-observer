@@ -14,20 +14,31 @@
 #   Button(type: :submit,
 #     variant: :outline, class: "px-2"
 #   ) do
-#     span(class: "d-sm-none") { render(Components::Icon.new(type: :search)) }
-#     span(class: "hidden-xs") { plain(:search.ti) }
+#     span(class: "d-sm-none") { Icon(type: :search) }
+#     span(class: class_names(
+#            Components::Column.mobile_hide_classes(display: :inline)
+#          )) do
+#       plain(:search.ti)
+#     end
 #   end
 #
 class Components::Button::Submit < Components::Button
-  def initialize(name: nil, submits_with: nil, disable_with: nil,
-                 html_name: nil, **opts)
+  prop :submits_with, _Nilable(String), default: nil
+  prop :disable_with, _Nilable(String), default: nil
+  prop :html_name, _Nilable(String), default: nil
+
+  # `disable_with:` defaults to `name:` when the caller omits it.
+  # `validate_no_btn_classes!` is called explicitly here since
+  # declaring new props on this subclass makes Literal's generated
+  # super chain skip Button's own hand-written initialize body (see
+  # Button::CRUDBase for the same gotcha).
+  def initialize(name: nil, disable_with: nil, **opts)
     raise(ArgumentError.new("variant: :strip not valid on Submit")) if
       opts[:variant] == :strip
 
-    @submits_with = submits_with
-    @disable_with = disable_with || name
-    @html_name = html_name
-    super(name: name, type: "submit", **opts)
+    validate_no_btn_classes!(opts[:class])
+    super(name: name, disable_with: disable_with || name, type: "submit",
+          **opts)
   end
 
   private

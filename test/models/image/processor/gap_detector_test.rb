@@ -114,6 +114,39 @@ class Image::Processor::GapDetectorTest < UnitTestCase
                  "regeneration should only be attempted once per image")
   end
 
+  # A remote listing that failed outright (#4974) verified nothing --
+  # treating every path in the chunk as missing would trigger a mass
+  # regeneration + re-upload of files that are actually fine. The images
+  # are recorded as unchecked instead, and nothing is regenerated.
+  def test_failed_remote_check_records_unchecked_instead_of_gaps
+    image = images(:turned_over_image)
+    image.update_columns(transferred: true)
+    messages = []
+    detector = Image::Processor::GapDetector.new { |msg| messages << msg }
+
+    result = detector.stub(:remote_sizes_for, nil) do
+      detector.run(Image.where(id: image.id))
+    end
+
+    assert_empty(result[:gaps])
+    assert_empty(result[:regenerated])
+    assert_equal([image.id], result[:unchecked])
+    assert(messages.any? { |msg| msg.include?("Could not check") })
+  end
+
+  # Unchecked images hold the mark just like unregenerable ones, so they
+  # are re-examined next run instead of being skipped forever.
+  def test_checkpoint_holds_below_the_lowest_unchecked_image
+    detector = Image::Processor::GapDetector.new
+    detector.instance_variable_set(:@unchecked, [40])
+    ImageGapCheckpoint.reset_to(0)
+
+    detector.send(:advance_checkpoint,
+                  Image.where(id: images(:turned_over_image).id))
+
+    assert_equal(39, ImageGapCheckpoint.last_verified_image_id)
+  end
+
   # The default (scheduled) scope only examines transferred images.
   def test_default_scope_only_includes_transferred_images
     ImageGapCheckpoint.reset_to(0)

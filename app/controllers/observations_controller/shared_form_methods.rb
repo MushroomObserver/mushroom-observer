@@ -5,6 +5,7 @@
 #    permitted_observation_args
 #    update_permitted_observation_attributes
 #    permitted_observation_params
+#    drop_unwanted_geolocation
 #    notes_to_sym_and_compact
 #    notes_param_present?
 #
@@ -25,10 +26,27 @@
 #    strip_images!
 #
 #    update_projects
+#    desired_change_ids
 #    update_species_lists
 #
 module ObservationsController::SharedFormMethods
   private
+
+  # A malformed request can send a scalar for the whole `observation`
+  # param instead of the expected nested hash (`?observation=abc`).
+  # Every method below assumes `params[:observation]` is either
+  # absent or an ActionController::Parameters -- normalize a
+  # present-but-wrong-shape value to absent so they degrade the same
+  # way a missing param already does (a validation failure/redisplay,
+  # not a 500 buried in whichever method first calls `.dig`/`.permit`
+  # on it). Call at the top of `create`/`update`, before anything
+  # else reads params[:observation].
+  def normalize_observation_param
+    return if params[:observation].nil? ||
+              params[:observation].is_a?(ActionController::Parameters)
+
+    params.delete(:observation)
+  end
 
   # NOTE: potential gotcha... Any nested attributes must come last.
   def permitted_observation_args
@@ -51,7 +69,21 @@ module ObservationsController::SharedFormMethods
   def permitted_observation_params
     return unless params[:observation]
 
-    params[:observation].permit(permitted_observation_args).to_h
+    drop_unwanted_geolocation(
+      params[:observation].permit(permitted_observation_args).to_h
+    )
+  end
+
+  # The Geolocation checkbox is the observation's own statement about
+  # whether it has coordinates, but the map sits outside the section the
+  # checkbox collapses, so the inputs can still hold a point the user has
+  # said the observation does not have. Absent key means a caller that
+  # has no such checkbox (the API), which is left alone.
+  def drop_unwanted_geolocation(args)
+    return args unless params[:observation].key?(:has_geolocation)
+    return args if params[:observation][:has_geolocation].to_s == "1"
+
+    args.merge("lat" => nil, "lng" => nil, "alt" => nil)
   end
 
   # Symbolize keys and drop blank values -- except a blank on a key some
@@ -62,14 +94,14 @@ module ObservationsController::SharedFormMethods
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
 
-    symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    notes = NotesHash.from_params(params[:observation][:notes]).to_h
     # Collector has its own column; never let it live in notes (#4211).
-    symbolized.delete(:Collector)
+    notes.delete(:Collector)
     suppressible = suppressible_notes_keys
-    symbolized.reject! do |key, value|
+    notes.reject! do |key, value|
       value.blank? && suppressible.exclude?(key)
     end
-    symbolized
+    notes
   end
 
   # Keys where a blank value means "suppress the inherited value" rather
@@ -119,13 +151,17 @@ module ObservationsController::SharedFormMethods
     return unless herb_params
 
     @herbarium_name   = herb_params[:herbarium_name]
-    @herbarium_id     = herb_params[:herbarium_id]
+    @herbarium_id     = safe_integer(herb_params[:herbarium_id])
     @accession_number = herb_params[:accession_number]
   end
 
+  # `user_group: :users` (not just `:user_group`) -- the projects form's
+  # per-checkbox `Project#user_can_change_membership?` reads `member?`,
+  # which is `user_group.users.member?(user)`. Without the deeper
+  # preload that's a fresh query per checkbox (#5103).
   def init_project_vars
     @projects = @user.projects_member(order: :title,
-                                      include: :user_group)
+                                      include: { user_group: :users })
   end
 
   # Failure-reload path: capture the user's just-submitted project_ids
@@ -138,7 +174,9 @@ module ObservationsController::SharedFormMethods
     @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
-    @submitted_project_ids = params.dig(:observation, :project_ids)
+    @submitted_project_ids =
+      params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)
   end
 
   def init_list_vars
@@ -148,7 +186,9 @@ module ObservationsController::SharedFormMethods
   def init_list_vars_for_reload
     init_list_vars
     @lists = @lists.union(@observation.species_lists)
-    @submitted_list_ids = params.dig(:observation, :species_list_ids)
+    @submitted_list_ids =
+      params.permit(observation: { species_list_ids: [] }).
+      dig(:observation, :species_list_ids)
   end
 
   # Save observation now that everything is created successfully.
@@ -305,40 +345,85 @@ module ObservationsController::SharedFormMethods
   # the user wants the obs attached to. Only `@user.projects_member`
   # projects are toggled — non-member projects the obs belongs to are
   # preserved by omission (disabled checkboxes don't submit, and the
-  # iteration excludes them anyway).
+  # id-set comparison below excludes them anyway).
+  #
+  # Compares id arrays (one lightweight `project_ids` query) rather
+  # than loading every member project's `observations` to run
+  # `@observation.projects.include?` per project -- for a user in
+  # hundreds of projects that eager load dominated the request (#5245).
+  # Only the ids whose membership changed get touched.
   def update_projects
-    submitted_ids = params.dig(:observation, :project_ids)
+    submitted_ids =
+      params.permit(observation: { project_ids: [] }).
+      dig(:observation, :project_ids)
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    @user.projects_member(include: :observations).each do |project|
-      before = @observation.projects.include?(project)
-      after = desired.include?(project.id)
-      next unless before != after
+    member_projects = @user.projects_member
+    # A project id on the observation the user isn't a member of (e.g.
+    # an admin added it, or the user has since left) has no checkbox
+    # to submit it in `desired`. Intersecting keeps such ids out of
+    # the diff, so they don't mark the request "changed" and defeat
+    # the empty-diff return below.
+    current = @observation.project_ids & member_projects.map(&:id)
+    changed_ids = desired_change_ids(desired, current)
+    return if changed_ids.empty?
 
-      if after
+    member_projects.each do |project|
+      next unless changed_ids.include?(project.id)
+
+      if desired.include?(project.id)
         project.add_observation(@observation)
         name_flash_for_project(@observation.name, project)
       else
-        project.remove_observation(@observation)
-        flash_notice(:removed_from_project.t(object: :observation,
-                                             project: project.title))
+        flash_project_removal(project, project.remove_observation(@observation))
       end
     end
   end
 
+  # Ids that differ between `desired` and `current` -- the membership
+  # changes that still need to happen.
+  def desired_change_ids(desired, current)
+    (desired - current) | (current - desired)
+  end
+
+  # Unchecking one box can move up to Occurrence::MAX_OBSERVATIONS
+  # observations, since an occurrence's members share one project
+  # membership. Say how many rather than letting the rest go unmentioned.
+  def flash_project_removal(project, removed)
+    if removed.size > 1
+      flash_notice(:removed_from_project_with_siblings.t(
+                     count: removed.size, project: project.title
+                   ))
+    else
+      flash_notice(:removed_from_project.t(object: :observation,
+                                           project: project.title))
+    end
+  end
+
+  # See `update_projects` -- same id-set comparison, same reason: a
+  # user editable on hundreds of species lists no longer means loading
+  # hundreds of lists' `observations` (#5245).
   def update_species_lists
-    submitted_ids = params.dig(:observation, :species_list_ids)
+    submitted_ids =
+      params.permit(observation: { species_list_ids: [] }).
+      dig(:observation, :species_list_ids)
     return unless submitted_ids
 
     desired = submitted_ids.compact_blank.map(&:to_i)
-    @user.all_editable_species_lists.includes(:observations).
-      find_each do |list|
-      before = @observation.species_lists.include?(list)
-      after = desired.include?(list.id)
-      next unless before != after
+    # A species-list id on the observation the user can't edit (e.g. a
+    # list shared into a project the user has since left) has no
+    # checkbox to submit it in `desired`. Scope the "current" side to
+    # the editable subset of the observation's ids, not the user's
+    # full editable-lists set, so such an id doesn't mark the request
+    # "changed" and defeat the empty-diff return below.
+    current = @user.all_editable_species_lists.
+              where(id: @observation.species_list_ids).pluck(:id)
+    changed_ids = desired_change_ids(desired, current)
+    return if changed_ids.empty?
 
-      if after
+    @user.all_editable_species_lists.where(id: changed_ids).find_each do |list|
+      if desired.include?(list.id)
         list.add_observation(@observation)
         flash_notice(:added_to_list.t(list: list.title))
       else

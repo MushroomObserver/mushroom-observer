@@ -17,12 +17,16 @@ module Images
       render_edit_view
     end
 
-    # process_license_changes
+    # process_license_changes. Always re-renders this same page
+    # (never redirects), so -- unlike Admin::BlockedIpsController's
+    # turbo-frame-scoped Manager -- this is a full-page Turbo Drive
+    # response and needs the non-2xx status or Turbo treats it as a
+    # silent no-op instead of a redisplay.
     def update
       Image.process_license_changes_for_user(@user, params[:updates])
 
       @form = build_form_object
-      render_edit_view(location: images_edit_licenses_path)
+      render_edit_view_invalid(location: images_edit_licenses_path)
     end
 
     private

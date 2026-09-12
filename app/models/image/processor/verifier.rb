@@ -36,6 +36,7 @@ class Image
         @deleted = []
         @completed = []
         @failed = []
+        @stuck = []
         # Fetched once per run (not cached at the class level -- see the
         # comment on Image::Processor.local_images_path).
         @image_server_data = Processor.image_server_data
@@ -45,7 +46,7 @@ class Image
       def transfer(images)
         images.find_each { |image| transfer_image(image) }
         { uploaded: @uploaded, deleted: @deleted, completed: @completed,
-          failed: @failed }
+          failed: @failed, stuck: @stuck }
       end
 
       private
@@ -66,13 +67,9 @@ class Image
       end
 
       def locked_transfer_image(image)
-        paths = paths_for(image)
+        paths = Processor.expected_paths(image)
         local_sizes = paths.index_with { |path| local_size(path) }
-        # Still mid-#process (a size hasn't been generated locally yet) --
-        # nothing to verify or transfer until it exists. Not an error: this
-        # is the normal in-progress window between upload and job
-        # completion, exactly the window #4791's race used to exploit.
-        return if local_sizes.value?(nil)
+        return handle_missing_sizes(image) if local_sizes.value?(nil)
 
         remote_sizes = remote_snapshot(paths)
         # Re-read the servers after uploading: a file just pushed here must
@@ -89,19 +86,27 @@ class Image
         mark_transferred(image)
       end
 
+      # A size missing locally normally means the image is still
+      # mid-#process -- nothing to verify or transfer until it exists.
+      # Not an error: that's the normal in-progress window between upload
+      # and job completion, exactly the window #4791's race used to
+      # exploit. But without a timeout, "still being worked on" is
+      # indistinguishable from "processing died" (#4974: a Puma restart
+      # killed the resize) -- forever, and a retried transfer silently
+      # does nothing. Past the stale threshold, nothing is still working
+      # on it: report it stuck so the caller can advise reprocessing.
+      def handle_missing_sizes(image)
+        return if image.updated_at > StaleImageFilesJob::STALE_THRESHOLD.ago
+
+        @stuck << image.id
+        log("Image #{image.id} has missing local sizes and hasn't been " \
+            "touched since #{image.updated_at} - processing died?")
+      end
+
       def remote_snapshot(paths)
         @image_servers.index_with do |server|
           remote_sizes_for(server, paths_for_server(server, paths))
         end
-      end
-
-      def paths_for(image)
-        paths = Image::URL::SUBDIRECTORIES.values.map do |subdir|
-          "#{subdir}/#{image.id}.jpg"
-        end
-        ext = image.original_extension
-        paths << "orig/#{image.id}.#{ext}" if ext != "jpg"
-        paths
       end
 
       def local_size(path)
@@ -115,6 +120,16 @@ class Image
       def upload_mismatches(image, paths, local_sizes, remote_sizes)
         attempted = false
         @image_servers.each do |server|
+          # A nil snapshot means the remote check itself failed (see
+          # RemoteFiles#remote_sizes_for) -- uploading against it would
+          # blindly re-send files that are mostly already there (#4974's
+          # ssh connection storm). Record the failure instead, so
+          # TransferImagesJob retries once the server answers again.
+          if remote_sizes[server].nil?
+            @failed << [image.id, server, "remote check failed"]
+            next
+          end
+
           paths_for_server(server, paths).each do |path|
             next if remote_sizes[server][path] == local_sizes[path]
 
@@ -159,6 +174,10 @@ class Image
         return false if @image_servers.empty?
 
         @image_servers.all? do |server|
+          # nil snapshot: the check failed, so nothing is confirmed --
+          # never treat "could not ask" as "fully synced" (#4974).
+          next false if remote_sizes[server].nil?
+
           paths_for_server(server, paths).all? do |path|
             remote_sizes[server][path] == local_sizes[path]
           end

@@ -14,6 +14,8 @@ module SpeciesLists
       user = login("rolf")
       assert(user.successful_contributor?)
       get(:new)
+      # Permanently exempt -- see .claude/rules/turbo_submit_forms.md.
+      assert_select("form#name_lister_form[data-turbo='false']")
 
       params = {
         name_lister: {

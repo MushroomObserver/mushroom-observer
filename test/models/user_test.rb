@@ -3,10 +3,55 @@
 require("test_helper")
 
 class UserTest < UnitTestCase
+  def test_inat_username_normalized_to_lowercase
+    user = users(:rolf)
+    user.update(inat_username: " Lothlin ")
+
+    assert_equal("lothlin", user.inat_username,
+                 "inat_username should be stripped and downcased " \
+                 "(iNat logins are lowercase)")
+  end
+
   def test_auth
     assert_equal(rolf,
                  User.authenticate(login: "rolf", password: "testpassword"))
     assert_nil(User.authenticate(login: "nonrolf", password: "testpassword"))
+  end
+
+  def test_exact_match
+    assert_equal(rolf, User.exact_match(rolf.id.to_s))
+    assert_equal(rolf, User.exact_match(rolf.email))
+    assert_nil(User.exact_match("nonexistent_login_or_email"))
+    # Non-String callers (an id passed as an Integer, or a blank param
+    # that came through as nil) shouldn't raise.
+    assert_equal(rolf, User.exact_match(rolf.id))
+    assert_nil(User.exact_match(nil))
+    # A stray space around a typed-in id (easy to enter by accident)
+    # still counts as an exact match.
+    assert_equal(rolf, User.exact_match(" #{rolf.id} "))
+
+    unverified_user = users(:unverified)
+    assert_nil(
+      User.exact_match(unverified_user.id.to_s),
+      "An unverified user's id should not count as an exact match"
+    )
+    assert_nil(
+      User.exact_match(unverified_user.email),
+      "An unverified user's email should not count as an exact match"
+    )
+  end
+
+  def test_scope_pattern_exact_id_match_wins_over_fuzzy
+    # rolf's id, stringified, could theoretically also substring-match
+    # fuzzy login/name text -- exact_match must win outright, not get
+    # unioned with the fuzzy search.
+    results = User.pattern(rolf.id.to_s)
+    assert_equal([rolf.id], results.map(&:id))
+  end
+
+  def test_scope_pattern_falls_back_to_fuzzy_search
+    results = User.pattern(rolf.login)
+    assert_includes(results.map(&:id), rolf.id)
   end
 
   def test_password_change
@@ -132,6 +177,32 @@ class UserTest < UnitTestCase
     group2.reload # not destroyed, just empty
     assert_user_arrays_equal(all, group1.users, :sort)
     assert_user_arrays_equal([], group2.users, :sort)
+  end
+
+  def test_in_group_by_name
+    assert(rolf.in_group?("reviewers"))
+    assert(rolf.in_group?(:reviewers))
+    assert_not(rolf.in_group?("no_such_group"))
+  end
+
+  def test_in_group_by_user_group_object
+    assert(rolf.in_group?(user_groups(:reviewers)))
+    assert_not(rolf.in_group?(user_groups(:mary_only)))
+  end
+
+  # #4896: `in_group?` memoizes user_groups per-instance -- a group
+  # change made after the first call shouldn't affect a second call
+  # on the same (now-stale) User instance.
+  def test_in_group_memoizes_per_instance
+    user = users(:mary)
+    assert_not(user.in_group?("reviewers"))
+
+    UserGroup.reviewers.users << user
+    assert_not(user.in_group?("reviewers"),
+               "in_group? should reuse the cached result, not re-query")
+
+    assert(user.reload.in_group?("reviewers"),
+           "a fresh reload should see the new membership")
   end
 
   # Bug seen in the wild: myxomop created a username which was just under 80
@@ -526,14 +597,19 @@ class UserTest < UnitTestCase
   def test_culling_unverified_users
     unverified = users(:unverified)
     key = APIKey.create!(user: unverified, notes: "cull test")
+    stats = UserStats.create!(user_id: unverified.id)
     msgs = User.cull_unverified_users(dry_run: true)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert(APIKey.exists?(key.id), "dry run should not delete the api_key")
+    assert(UserStats.exists?(stats.id),
+           "dry run should not delete user_stats")
     msgs = User.cull_unverified_users(dry_run: false)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert_nil(User.find_by(id: unverified.id))
     assert_not(APIKey.exists?(key.id),
                "culling should delete the unverified user's api_key")
+    assert_not(UserStats.exists?(stats.id),
+               "culling should delete the unverified user's user_stats")
   end
 
   def test_lookup_unique_text_name

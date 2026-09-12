@@ -3,13 +3,10 @@
 module Views::Controllers::Projects::FieldSlips
   # Phlex view for the field slips form page.
   class New < Views::FullPageBase
-    def initialize(project:, user:, field_slip_max:, trackers:)
-      super()
-      @project = project
-      @user = user
-      @field_slip_max = field_slip_max
-      @trackers = trackers
-    end
+    prop :project, ::Project
+    prop :user, ::User
+    prop :field_slip_max, Integer
+    prop :trackers, _Array(::FieldSlipJobTracker)
 
     def view_template
       add_page_title(page_title)

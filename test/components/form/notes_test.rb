@@ -4,8 +4,8 @@ require "test_helper"
 
 # `Components::Form::Notes` always renders a collapsible Bootstrap Panel
 # wrapping the notes-fields content. The component is exercised here
-# inside small test forms — same pattern as the parity tests in
-# `application_form_helper_parity_test.rb`.
+# inside small test forms — same pattern as the tests in
+# `application_form_test.rb`.
 class FormNotesTest < ComponentTestCase
   def setup
     super
@@ -15,7 +15,7 @@ class FormNotesTest < ComponentTestCase
   # --- Panel wrap is always present ---
 
   def test_renders_collapsible_panel_with_notes_heading
-    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+    html = multi_part_html
 
     # Panel uses panel_id as its outer element id.
     assert_html(html, "div#test_notes")
@@ -31,7 +31,7 @@ class FormNotesTest < ComponentTestCase
   # --- Multi-part mode ---
 
   def test_multi_part_renders_textareas_and_textile_help_below
-    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+    html = multi_part_html
 
     # Inner notes div derives id from panel_id.
     assert_html(html, "#test_notes_fields")
@@ -56,7 +56,7 @@ class FormNotesTest < ComponentTestCase
   end
 
   def test_multi_part_textile_help_renders_below_textareas
-    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+    html = multi_part_html
 
     # The textile help is the last child of the notes-fields div,
     # below all the textareas (not above them).
@@ -69,7 +69,7 @@ class FormNotesTest < ComponentTestCase
   # --- Single-part mode ---
 
   def test_single_part_mode_renders_one_large_textarea
-    html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
+    html = single_part_html
 
     # The lone textarea is rows=10.
     assert_html(html,
@@ -83,7 +83,7 @@ class FormNotesTest < ComponentTestCase
   end
 
   def test_single_part_mode_renders_above_help_above_textarea
-    html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
+    html = single_part_html
 
     # Caller-supplied prose help renders ABOVE the textarea, inline
     # (no collapse wrapping — visible whenever the panel is open).
@@ -95,7 +95,7 @@ class FormNotesTest < ComponentTestCase
   end
 
   def test_single_part_mode_textile_help_renders_below_textarea
-    html = render(SinglePartFormNotes.new(Observation.new, action: "/t"))
+    html = single_part_html
 
     # Textile help still renders below the textarea — same as
     # multi-part mode. Above-help is the only extra in single-part.
@@ -165,7 +165,7 @@ class FormNotesTest < ComponentTestCase
   end
 
   def test_no_adopt_controller_without_adopt_options
-    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+    html = multi_part_html
 
     assert_no_html(html, "[data-controller='notes-adopt']")
   end
@@ -183,6 +183,16 @@ class FormNotesTest < ComponentTestCase
     assert_html(html, "button[data-notes-action='hide']")
     assert_no_html(html, "button[data-notes-action='adopt']")
     assert_no_html(html, "button[data-notes-action='concatenate']")
+  end
+
+  private
+
+  def multi_part_html
+    render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+  end
+
+  def single_part_html
+    render(SinglePartFormNotes.new(Observation.new, action: "/t"))
   end
 end
 

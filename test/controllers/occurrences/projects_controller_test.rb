@@ -15,7 +15,7 @@ module Occurrences
     end
 
     def test_update_add_all_resolves_gaps
-      login("rolf")
+      login("mary") # bolete member; unioning requires membership (#4932)
       occ = create_occurrence(@obs1, @obs3)
       project = projects(:bolete_project)
 
@@ -29,20 +29,35 @@ module Occurrences
       assert_includes(@obs3.reload.projects, project)
     end
 
-    def test_update_skip_leaves_projects_alone
-      # Skip button: explicit `resolution=skip` — the controller only
-      # acts on `add_all`, so skip falls through to a plain redirect
-      # without touching project memberships.
+    # Cancel backs the mix out instead of leaving it: the observations
+    # whose project membership differs from the primary's are detached,
+    # so what remains is consistent. Replaces the old Skip, which left
+    # the occurrence in a state its members aren't allowed to be in.
+    # See #4932.
+    def test_update_cancel_detaches_the_mismatched_observations
       login("rolf")
       project = projects(:bolete_project)
       occ = create_occurrence(@obs1, @obs3)
+      mismatched = occ.observations.reject do |obs|
+        obs.id == occ.primary_observation_id
+      end
+      assert_predicate(mismatched, :any?, "setup needs a mismatched member")
 
       patch(:update,
             params: { occurrence_id: occ.id,
-                      occurrence_projects: { resolution: "skip" } })
+                      occurrence_projects: { resolution: "cancel" } })
 
+      # Detaching leaves one observation and no field slip, so
+      # destroy_if_incomplete! removes the occurrence — there is no
+      # occurrence page left to redirect to.
+      assert_not(Occurrence.exists?(occ.id))
+      assert_redirected_to(permanent_observation_path(@obs1.id))
+      mismatched.each do |obs|
+        assert_nil(obs.reload.occurrence_id, "should have been detached")
+      end
+      # Detaching leaves each observation's own memberships alone; what
+      # cancel must not do is spread them, the way add_all would.
       assert_not_includes(@obs1.reload.projects, project)
-      assert_redirected_to(occurrence_path(occ))
     end
 
     def test_update_missing_resolution_param_leaves_projects_alone

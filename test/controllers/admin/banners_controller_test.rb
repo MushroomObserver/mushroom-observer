@@ -26,8 +26,9 @@ class Admin::BannersControllerTest < FunctionalTestCase
       post(:create, params: { banner: { message: "" } })
     end
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("div", "Failed to update banner.")
     assert_select("textarea", banners(:one).message)
+    assert_select("form[data-turbo='true']")
   end
 end

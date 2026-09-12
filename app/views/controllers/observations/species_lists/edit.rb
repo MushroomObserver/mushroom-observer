@@ -58,7 +58,7 @@ module Views::Controllers::Observations::SpeciesLists
     def render_section(heading:, lists:, remove: false, add: false)
       return if lists.empty?
 
-      h5(class: "mt-3") { plain("#{heading}:") }
+      h5(class: "mt-3") { append_colon(heading) }
       ListGroup do |list|
         lists.each do |sl|
           list.item(

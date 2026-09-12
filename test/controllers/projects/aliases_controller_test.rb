@@ -75,7 +75,8 @@ module Projects
                  name: "Walk 2",
                  project_id: @project.id,
                  target_type: "Location",
-                 location_id: locations(:albion).id
+                 location_id: locations(:albion).id,
+                 modal: "true"
                }
              }, format: :turbo_stream)
       end
@@ -136,7 +137,7 @@ module Projects
              })
       end
 
-      assert_flash_text(:project_alias_no_match.t(target_type: "User", term:))
+      assert_flash(:project_alias_no_match, target_type: "User", term:)
     end
 
     def test_create_renders_new_template_with_invalid_params
@@ -146,7 +147,8 @@ module Projects
              project_alias: { name: "", project_id: } # Invalid params
            })
 
-      assert_response(:success)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_update_modifies_project_alias_with_valid_params
@@ -171,7 +173,12 @@ module Projects
               project_alias: { name: "", project_id: } # Invalid params
             })
 
-      assert_response(:success)
+      assert_unprocessable
+      # Regression: #update didn't set @project before re-rendering the
+      # edit page on validation failure, so the project banner (which
+      # renders nothing at all without a project) silently disappeared.
+      assert_select("#project_tabs")
+      assert_select("form[data-turbo='true']")
     end
 
     def test_update_can_use_turbo_to_modify_project_alias
@@ -179,7 +186,8 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "Updated Name", project_id: }
+              project_alias: { name: "Updated Name", project_id:,
+                               modal: "true" }
             }, format: :turbo_stream)
 
       assert_select(
@@ -194,7 +202,8 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "", project_id: } # Invalid params
+              # Invalid params
+              project_alias: { name: "", project_id:, modal: "true" }
             }, format: :turbo_stream)
 
       assert_response(:success)

@@ -15,7 +15,7 @@ module Projects
     # the Phlex `Views::Controllers::Projects::Search::New` instead
     # of `projects/search/new.erb` (deleted).
     def new
-      @local = params[:local] != "false"
+      @context = params[:local] == "false" ? :dropdown : :page
       set_up_form_field_groupings
       @search = build_search_query
       respond_to do |format|
@@ -92,7 +92,7 @@ module Projects
 
     def new_phlex_view
       Views::Controllers::Projects::Search::New.new(
-        search: @search, local: @local
+        search: @search, context: @context
       )
     end
 

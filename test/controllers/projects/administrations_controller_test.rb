@@ -24,9 +24,8 @@ module Projects
       end
 
       assert_redirected_to(project_path(@project.id))
-      assert_flash_text(:project_administration_promoted_flash.t(
-                          title: @project.title
-                        ))
+      assert_flash(:project_administration_promoted_flash,
+                   title: @project.title)
       assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
 
       @project.reload
@@ -87,7 +86,7 @@ module Projects
       end
 
       assert_equal(email_count, ActionMailer::Base.deliveries.count)
-      assert_flash_text(:project_administration_already_admin_flash.t)
+      assert_flash(:project_administration_already_admin_flash)
     end
 
     def test_create_requires_login

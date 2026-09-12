@@ -27,7 +27,7 @@ module Views::Controllers::Projects::Violations
 
     def view_template
       h4 do
-        trusted_html("#{:project.ti}: ")
+        trusted_html(append_colon(:project.ti))
         Link(type: :object, object: @project)
       end
 
@@ -51,7 +51,7 @@ module Views::Controllers::Projects::Violations
     end
 
     def violations_path
-      project_violations_update_path(project_id: @project.id)
+      resolve_project_violations_path(@project.id)
     end
 
     def render_violations_table
@@ -68,13 +68,31 @@ module Views::Controllers::Projects::Violations
       end
     end
 
+    # q: threads the violations Query through so prev/next from this
+    # obs's show page stays within this project's violations, rather
+    # than falling back to session leftovers or an unscoped default.
     def render_obs_link(obs)
-      Link(type: :object, object: obs, name: obs.text_name)
-      plain(" (#{obs.id})")
+      a(href: permanent_observation_path(id: obs.id, q: q_param),
+        class: "observation_link_#{obs.id}") do
+        trusted_html(obs.text_name)
+      end
+      whitespace
+      plain("(#{obs.id})")
     end
 
     def kind_label(kind)
       :"form_violations_kind_#{kind}".l
+    end
+
+    # A :date violation only requires start_date OR end_date to be set
+    # (see Project#collect_date_violation_ids), so the fallback below
+    # is reachable here, unlike in the project banner (#4901).
+    def project_date_range
+      return :form_projects_any.l unless @project.start_date &&
+                                         @project.end_date
+
+      "#{@project.start_date.strftime("%Y-%m-%d")} to " \
+        "#{@project.end_date.strftime("%Y-%m-%d")}"
     end
 
     def render_details(obs, kinds)
@@ -88,7 +106,7 @@ module Views::Controllers::Projects::Violations
     def detail_for(obs, kind)
       case kind
       when :date
-        "#{kind_label(:date)}: #{obs.when} (#{@project.date_range})"
+        "#{kind_label(:date)}: #{obs.when} (#{project_date_range})"
       when :bbox
         bbox_detail(obs)
       when :target_name
@@ -165,7 +183,7 @@ module Views::Controllers::Projects::Violations
         type: :get,
         name: :form_violations_action_add_target_location.l,
         target: target_location_modal_project_violations_path(
-          project_id: @project.id, obs_id: obs.id
+          @project.id, obs_id: obs.id
         ),
         size: :xs,
         data: {

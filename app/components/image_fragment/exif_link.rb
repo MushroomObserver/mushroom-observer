@@ -11,6 +11,8 @@
 class Components::ImageFragment::EXIFLink < Components::Base
   prop :image_id, Integer, &:to_i
   prop :link_class, String, default: ""
+  prop :variant, _Nilable(_Union(*Components::Button::VARIANTS)),
+       default: :strip
 
   def view_template
     Button(
@@ -18,7 +20,7 @@ class Components::ImageFragment::EXIFLink < Components::Base
       name: :image_show_exif.t,
       target: exif_image_path(id: @image_id),
       modal_id: "image_exif_#{@image_id}",
-      variant: :strip, class: @link_class
+      variant: @variant, class: @link_class
     )
   end
 end

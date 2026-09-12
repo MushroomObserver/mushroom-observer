@@ -59,7 +59,7 @@ module Views::Controllers::Account::Login
                   text: :login_forgot_password.tp.as_displayed)
       assert_html(@html,
                   "#login_forgot_password " \
-                  "a[href='/account/email_new_password']")
+                  "a[href='/account/password_reset/new']")
     end
 
     private

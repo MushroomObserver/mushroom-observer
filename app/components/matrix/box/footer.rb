@@ -21,11 +21,30 @@ class Components::Matrix::Box
     def render_footer_detail(detail)
       return if detail.blank?
 
-      if detail.is_a?(User)
-        render_user_detail(detail)
-      else
-        div(class: "rss-detail small") { detail }
+      case detail
+      when User then render_user_detail(detail)
+      when Array then render_rss_detail(detail)
       end
+    end
+
+    # `detail` is an [tag, args] pair from RenderData#rss_log_detail_tag,
+    # unresolved until now.
+    def render_rss_detail(detail)
+      tag, args = detail
+      return unless tag
+
+      div(class: "rss-detail small") do
+        trusted_html(resolve_rss_detail(tag, args))
+      end
+    end
+
+    # RssLog#detail used to wrap this same resolution in a dev/
+    # production-aware rescue before this logic moved to the view
+    # layer; keep the same protection here.
+    def resolve_rss_detail(tag, args)
+      tag.t(args || {})
+    rescue StandardError => e
+      Rails.env.production? ? raise(e) : ""
     end
 
     def render_footer_time(time)

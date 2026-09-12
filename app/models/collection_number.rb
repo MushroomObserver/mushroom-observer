@@ -77,8 +77,10 @@ class CollectionNumber < AbstractModel
   }
 
   scope :pattern, lambda { |phrase|
-    cols = (CollectionNumber[:name] + CollectionNumber[:number])
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = (CollectionNumber[:name] + CollectionNumber[:number])
+      search_columns(cols, phrase)
+    end
   }
 
   # Eager-loads the observations + everything `Components::Matrix::Box`
@@ -109,14 +111,6 @@ class CollectionNumber < AbstractModel
   def format_name_was
     "#{name_was} #{number_was}"
   end
-
-  # Page heading + browser tab title — `format_name` is plain text
-  # (collector "name number"). The view applies `.t` on the page-
-  # title side to keep the binomial-in-name italicized.
-  def page_title(_user = nil)
-    format_name.t
-  end
-  alias document_title format_name
 
   def can_edit?(user)
     return false unless user

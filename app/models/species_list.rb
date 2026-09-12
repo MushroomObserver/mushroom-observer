@@ -136,9 +136,11 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
-           Location[:name].coalesce(SpeciesList[:where])
-    left_outer_joins(:location).search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+             Location[:name].coalesce(SpeciesList[:where])
+      left_outer_joins(:location).search_columns(cols, phrase)
+    end
   }
 
   scope :editable_by_user, lambda { |user|
@@ -267,17 +269,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Alias for title.
   def format_name(_user = nil)
-    title
-  end
-
-  # Page heading + browser tab title — both plain `title`. (Can't
-  # `alias` to `title` — the AR column accessor isn't defined yet
-  # at class-load time.)
-  def page_title(_user = nil)
-    title
-  end
-
-  def document_title
     title
   end
 
@@ -434,7 +425,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #     :specimen               => false
   #   )
   #
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable-next Metrics/MethodLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
@@ -480,7 +471,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
     observations << obs
   end
-  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
   #
@@ -544,20 +534,20 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     self.where = nil if where == ""
 
     if title.to_s.blank?
-      errors.add(:title, :validate_species_list_title_missing.t)
+      errors.add(:title, :validate_species_list_title_missing)
     elsif title.size > 100
-      errors.add(:title, :validate_species_list_title_too_long.t)
+      errors.add(:title, :validate_species_list_title_too_long)
     end
 
     if place_name.to_s.blank? && !location
-      errors.add(:place_name, :validate_species_list_where_missing.t)
+      errors.add(:place_name, :validate_species_list_where_missing)
     elsif where.to_s.size > 1024
-      errors.add(:place_name, :validate_species_list_where_too_long.t)
+      errors.add(:place_name, :validate_species_list_where_too_long)
     end
 
     return if user || current_user
 
-    errors.add(:user, :validate_species_list_user_missing.t)
+    errors.add(:user, :validate_species_list_user_missing)
   end
 
   def check_when

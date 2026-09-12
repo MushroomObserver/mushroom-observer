@@ -14,6 +14,10 @@ class Image
 
       # Byte sizes of the given paths that exist on the server; a missing
       # path is absent (ssh) or nil (file), so callers check `[path].nil?`.
+      # Returns nil (not {}) when the check itself failed (#4974): "I
+      # could not ask the server" must stay distinguishable from "the
+      # server has nothing", or every path reads as missing and gets
+      # re-uploaded / re-generated needlessly.
       def remote_sizes_for(server, paths)
         return {} if paths.empty?
 
@@ -51,6 +55,7 @@ class Image
         )
         if connection_failed?(status, error)
           log("Failed to check #{host} for #{server}: #{error}")
+          return nil
         end
         parse_find_output(output, root)
       end

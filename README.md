@@ -109,12 +109,10 @@ so be sure to take them with a grain of salt.
 [README_CODE](README_CODE):
 Provides a snapshot of the major components of Mushroom Observer.
 
-[README_DEVELOPMENT_INSTALL](README_DEVELOPMENT_INSTALL):
-If for some reason you want to install our code locally,
-this file describes the steps used by one developer.
-You are encouraged to update this document with your own experience.
-Also see [MACOSX_NOTES](MACOSX_NOTES) for notes about setting up a
-local Apple M1 working under the Monterey (12.4) version of MacOS.
+[README_DEV_SETUP_MACOSX](README_DEV_SETUP_MACOSX.md) and
+[README_DEV_SETUP_UBUNTU](README_DEV_SETUP_UBUNTU.md):
+Steps for setting up a local development environment on macOS or
+Ubuntu Linux, including a script that automates most of the process.
 >Rather than running our code locally on your hardware,
 we recommend using the process outlined in
 <https://github.com/MushroomObserver/developer-startup>

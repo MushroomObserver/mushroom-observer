@@ -12,4 +12,6 @@ class FormObject::InatImportConfirm < FormObject::Base
   attribute :original_inat_url, :string
   attribute :recheck_all, :string
   attribute :skip_inat_writeback, :string
+  attribute :inat_project, :string
+  attribute :inat_project_id, :string
 end
