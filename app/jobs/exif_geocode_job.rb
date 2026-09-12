@@ -1,17 +1,33 @@
 # frozen_string_literal: true
 
 # Reads an image's EXIF GPS/date data and broadcasts the result into
-# Components::Form::CameraInfo's lazy Turbo Frame, off the web
-# request that triggered the frame's fetch.
+# Components::Form::CameraInfo's Turbo Frame, off the web request
+# that renders the observation edit page.
 #
 # Image#read_exif_geocode shells out to exiftool (locally, or over
 # the network via script/exiftool_remote for a transferred image).
-# Running that inline in Images::EXIFGeocodeController#show ties up
-# a web worker for the whole call -- production runs single-threaded
-# Puma workers, so one slow image host could tie up several of the
-# site's few total worker slots at once. See issue #5369.
+# Running that inline in a controller action ties up a web worker for
+# the whole call -- production runs single-threaded Puma workers, so
+# one slow image host could tie up several of the site's few total
+# worker slots at once. See issue #5369.
 class EXIFGeocodeJob < ApplicationJob
   queue_as(:default)
+
+  # CameraInfo enqueues this job directly and subscribes to the
+  # broadcast in the same render pass, with no separate Turbo Frame
+  # fetch to race against. The one remaining race: the page's Action
+  # Cable subscription needs a moment to connect after the response
+  # reaches the browser. A fast local image can otherwise finish
+  # before that connection exists, and a broadcast with no live
+  # subscriber is simply lost -- Turbo Streams don't queue for late
+  # subscribers. This delay is cheap insurance for that case, and
+  # irrelevant for the slow/transferred case this job exists for.
+  DELAY = 1.second
+
+  def self.enqueue_for(image_id, read_only:, date_differs:)
+    set(wait: DELAY).perform_later(image_id, read_only: read_only,
+                                             date_differs: date_differs)
+  end
 
   def perform(image_id, read_only:, date_differs:)
     image = Image.find_by(id: image_id)

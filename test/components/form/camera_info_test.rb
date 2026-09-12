@@ -3,6 +3,8 @@
 require "test_helper"
 
 class FormCameraInfoTest < ComponentTestCase
+  include ActiveJob::TestHelper
+
   def test_renders_gps_info_with_all_values
     html = render_info(lat: "45.5231", lng: "-122.6765", alt: "100")
 
@@ -132,9 +134,14 @@ class FormCameraInfoTest < ComponentTestCase
   # file) loads its date/GPS fields lazily from the server instead of
   # rendering them directly -- see issue #5369.
   def test_saved_image_renders_lazy_exif_frame
-    html = render_info(upload: false)
+    html = nil
+    assert_enqueued_with(job: EXIFGeocodeJob,
+                         args: ["123",
+                                { read_only: false, date_differs: false }]) do
+      html = render_info(upload: false)
+    end
 
-    assert_html(html, "turbo-frame#camera_info_exif_123")
+    assert_html(html, "turbo-frame#camera_info_exif_123 .spinner-right")
     assert_no_html(html, "span.exif_gps")
     assert_no_html(html, "button.use_exif_btn")
   end

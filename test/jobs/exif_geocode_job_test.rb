@@ -35,6 +35,18 @@ class EXIFGeocodeJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_enqueue_for_schedules_with_delay
+    EXIFGeocodeJob.enqueue_for(42, read_only: true, date_differs: true)
+
+    job = enqueued_jobs.last
+    kwargs = job[:args].last.except("_aj_ruby2_keywords")
+
+    assert_equal("EXIFGeocodeJob", job[:job].to_s)
+    assert_equal(42, job[:args].first)
+    assert_equal({ "read_only" => true, "date_differs" => true }, kwargs)
+    assert(job[:at] >= Time.zone.now.to_f)
+  end
+
   private
 
   def stream_for(image)

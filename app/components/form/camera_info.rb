@@ -84,18 +84,22 @@ class Components::Form::CameraInfo < Components::Base
     end
   end
 
-  # `turbo_stream_from` subscribes to the stream EXIFGeocodeJob
-  # broadcasts to once it finishes -- see that job for why the frame
-  # request doesn't wait for the EXIF read.
+  # Enqueues EXIFGeocodeJob directly and subscribes to its broadcast
+  # in this same render, rather than fetching a separate Turbo Frame
+  # URL. A frame fetch and a broadcast are two independent delivery
+  # paths to the same target; if the job finishes before the frame's
+  # fetch response arrives, that response would overwrite the
+  # already-delivered content with a stale loading spinner. Enqueuing
+  # here and rendering only the spinner directly removes the second
+  # path instead of racing it. See EXIFGeocodeJob for the one
+  # remaining timing concern this doesn't solve.
   def render_lazy_exif_frame
+    EXIFGeocodeJob.enqueue_for(@img_id, read_only: @read_only,
+                                        date_differs: @date_differs)
     turbo_stream_from("exif_geocode_#{@img_id}")
-    turbo_frame_tag(
-      "camera_info_exif_#{@img_id}",
-      class: "form-group",
-      src: exif_geocode_image_path(id: @img_id, read_only: @read_only,
-                                   date_differs: @date_differs),
-      loading: "lazy"
-    )
+    turbo_frame_tag("camera_info_exif_#{@img_id}", class: "form-group") do
+      Icon(type: :spinner, class: "spinner-right")
+    end
   end
 
   def render_transfer_button
