@@ -6,6 +6,108 @@ require("test_helper")
 class SequencesControllerTest < FunctionalTestCase
   include QueryParamRoundTripTestHelpers
 
+  # Sequences on a reflection are source-owned; native adds route to
+  # the occurrence companion (#4214).
+  def test_new_on_reflection_redirects_to_companion_form
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+
+    get(:new, params: { observation_id: obs.id })
+
+    companion = reflection_companion(obs)
+    assert_not_nil(companion, "a companion should have been created")
+    assert_not(companion.reflection?)
+    assert_redirected_to(new_sequence_path(observation_id: companion.id))
+    assert_flash_success(:sequence_on_reflection_companion_created)
+  end
+
+  def test_create_on_reflection_lands_sequence_on_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+    params = { observation_id: obs.id,
+               sequence: { locus: "ITS", bases: ITS_BASES } }
+
+    assert_difference("Sequence.count", 1) { post(:create, params: params) }
+
+    companion = reflection_companion(obs)
+    seq = Sequence.find_by(observation: companion, locus: "ITS")
+    assert_not_nil(seq, "the sequence should land on the companion")
+    assert_users_equal(obs.user, seq.user)
+    assert_users_equal(obs.user, companion.user,
+                       "the companion belongs to the actor, as in the " \
+                       "Edit flow")
+    assert_empty(obs.reload.sequences, "the reflection gains no sequence")
+  end
+
+  # Anyone may sequence the specimen (labs add sequences to other
+  # people's collections): a non-editor's sequence lands on the
+  # IMPORTER's companion; the sequence itself belongs to the adder.
+  def test_create_on_reflection_by_non_editor_uses_importers_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    adder = users(:zero_user)
+    login(adder.login)
+    params = { observation_id: obs.id,
+               sequence: { locus: "ITS", bases: ITS_BASES } }
+
+    assert_difference("Sequence.count", 1) { post(:create, params: params) }
+
+    companion = reflection_companion(obs)
+    seq = Sequence.find_by(observation: companion, locus: "ITS")
+    assert_not_nil(seq, "the sequence should land on the companion")
+    assert_users_equal(adder, seq.user, "the adder owns their sequence")
+    assert_users_equal(obs.user, companion.user,
+                       "a non-editor's add creates the companion as " \
+                       "the importer's")
+    assert_empty(obs.reload.sequences, "the reflection gains no sequence")
+  end
+
+  def test_new_on_reflection_reuses_existing_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    companion = Observation::Companion.new(obs, obs.user).create
+    login(obs.user.login)
+
+    assert_no_difference("Observation.count") do
+      get(:new, params: { observation_id: obs.id })
+    end
+
+    assert_redirected_to(new_sequence_path(observation_id: companion.id))
+    assert_flash_success(:sequence_on_reflection_companion_existing)
+  end
+
+  def test_new_on_reflection_reports_companion_creation_failure
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+    invalid = Observation.new
+    invalid.errors.add(:base, :occurrence_max_observations_exceeded,
+                       max: Occurrence::MAX_OBSERVATIONS)
+    failing = Struct.new(:record) do
+      def existing = nil
+
+      def create
+        raise(ActiveRecord::RecordInvalid.new(record))
+      end
+    end.new(invalid)
+
+    Observation::Companion.stub(:new, ->(*) { failing }) do
+      get(:new, params: { observation_id: obs.id })
+    end
+
+    assert_flash_error
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+  end
+
+  def reflection_companion(obs)
+    occurrence = obs.reload.occurrence
+    return nil unless occurrence
+
+    occurrence.observations.where.not(id: obs.id).first
+  end
+
   # See QueryParamRoundTripTestHelpers.
   def test_create_query_from_url_params_recognizes_every_top_level_param
     login

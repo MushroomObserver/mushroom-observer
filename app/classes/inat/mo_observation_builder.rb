@@ -337,17 +337,21 @@ class Inat
       inat_obs[:quality_grade] == "research"
     end
 
+    # Direct creation, not API2: sequences on a reflection are
+    # source-owned, so the API rejects native adds
+    # (ObservationIsReadOnly) -- the import, like the resync, is the
+    # source writing its data. An invalid iNat value is skipped, as
+    # the API2 path silently did.
     def add_inat_sequences
       inat_obs.sequences.each do |sequence|
-        params = { action: :sequence, method: :post,
-                   api_key: user_api_key,
-                   observation: @observation.id,
-                   locus: sequence[:locus],
-                   bases: sequence[:bases],
-                   archive: sequence[:archive],
-                   accession: sequence[:accession],
-                   notes: sequence[:notes] }
-        API2.execute(params)
+        @observation.sequences.create(
+          user: @observation.user,
+          locus: sequence[:locus],
+          bases: sequence[:bases],
+          archive: sequence[:archive],
+          accession: sequence[:accession].to_s,
+          notes: sequence[:notes].to_s
+        )
       end
     end
   end
