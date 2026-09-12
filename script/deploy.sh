@@ -56,18 +56,79 @@ refresh_icon_library() {
     fi
 }
 
-# --icons-only is a manual, opt-in icon-library refresh -- deliberately
-# NOT part of a standard deploy (the icon-library repo has its own
-# release cadence, unrelated to app code). Exits here rather than
-# falling through to the code-deploy flow below, since none of that
-# (git branch check, maintenance page, puma/solidqueue stop,
-# db:migrate, lang:update) applies to a licensed-asset-only refresh.
+# Glyph keys Components::Icon::GLYPHS references that the current
+# sprite checkout lacks (one per line; empty when in sync). A missing
+# or unreadable sprite counts every glyph as lacking, so a wiped
+# checkout heals itself via the auto-refresh below.
+missing_icon_glyphs() {
+    ruby -e '
+      # An unreadable icon.rb or an unmatched GLYPHS extraction exits
+      # non-zero: the check must fail loudly rather than silently
+      # reporting "in sync" when it cannot actually diff.
+      src = begin
+        File.read("app/components/icon.rb")
+      rescue StandardError => e
+        abort("cannot read app/components/icon.rb: #{e.message}")
+      end
+      list = src[/GLYPHS = Set\[(.*?)\]/m, 1] ||
+             abort("cannot find GLYPHS in app/components/icon.rb -- " \
+                   "update the extraction in script/deploy.sh")
+      code = list.scan(/:(\w+)/).flatten
+      sprite = begin
+        File.read("vendor/assets/images/icons/mo-icons.svg").
+          scan(/symbol id="(\w+)"/).flatten
+      rescue StandardError
+        [] # missing sprite = every glyph lacking; the refresh heals it
+      end
+      puts(code - sprite)
+    '
+}
+
+# The manifest entry for the sprite -- the fingerprinted name a
+# correctly reloaded app emits in its pages.
+expected_sprite_asset() {
+    ruby -rjson -e '
+      manifest = Dir.glob("public/assets/.sprockets-manifest-*.json").first
+      abort("no sprockets manifest under public/assets") unless manifest
+      puts(JSON.parse(File.read(manifest))["assets"]["icons/mo-icons.svg"])
+    '
+}
+
+# Poll the running app (through local nginx; -k because the cert is
+# for the public name) until its pages reference the expected sprite
+# asset. A puma "reload" can keep the old asset manifest in memory
+# while every disk artifact is correct, so the reload's exit
+# status alone proves nothing.
+served_sprite_matches() {
+    expected="$1"
+    for _try in 1 2 3 4 5 6 7 8 9 10; do
+        served=$(curl -ksS -H "Host: mushroomobserver.org" \
+                      https://127.0.0.1/ 2>/dev/null |
+                     grep -o "mo-icons-[a-f0-9]*\.svg" | head -1)
+        if [ "icons/$served" = "$expected" ]; then
+            return 0
+        fi
+        sleep 3
+    done
+    echo "App still serves ${served:-no sprite reference}, expected $expected."
+    return 1
+}
+
+# A standard deploy refreshes the icon library AUTOMATICALLY when the
+# pulled code's Icon::GLYPHS references symbols the sprite checkout
+# lacks (see missing_icon_glyphs / the auto-detect before the
+# icons_flag check further down). The flags cover what
+# auto-detection can't:
 #
-# --icons bundles the same refresh into a normal code deploy (see the
-# icons_flag check further down, right before the single
-# assets:precompile that deploy already does) -- one precompile
-# instead of two separate ones from running --icons-only and a plain
-# deploy back to back.
+# --icons forces the refresh during a normal code deploy -- for
+# artwork-only icon-library changes whose symbol ids didn't change,
+# which the glyph diff can't see.
+#
+# --icons-only is the same forced refresh WITHOUT a code deploy. It
+# exits here rather than falling through to the code-deploy flow
+# below, since none of that (git branch check, maintenance page,
+# puma/solidqueue stop, db:migrate, lang:update) applies to a
+# licensed-asset-only refresh.
 icons_flag=0
 case "$1" in
     --icons-only)
@@ -77,12 +138,18 @@ case "$1" in
         # production) and fingerprinted, so new icon files aren't live
         # until recompiled. `service puma reload` sends SIGUSR2 (see
         # config/etc/puma.service's ExecReload) -- Puma's hot restart,
-        # which re-execs and picks up the new manifest while keeping
-        # the listening socket, so this needs neither the maintenance
-        # page nor a full stop/start.
+        # which keeps the listening socket, so this needs neither the
+        # maintenance page nor a full stop/start. Whether the re-exec
+        # picks up the new manifest is verified below, not assumed.
         echo Precompiling assets... && rake assets:precompile
         if [ $? -ne 0 ]; then
             echo assets:precompile failed.
+            exit 1
+        fi
+
+        expected=$(expected_sprite_asset)
+        if [ $? -ne 0 ] || [ -z "$expected" ]; then
+            echo "Cannot read the sprite's manifest entry; not reloading."
             exit 1
         fi
 
@@ -90,6 +157,25 @@ case "$1" in
         if [ $? -ne 0 ]; then
             echo Puma reload failed.
             exit 1
+        fi
+
+        # Verify the reload actually took: a hot restart has
+        # left the old asset manifest live before, while reporting
+        # success. Escalate to a full restart, then fail loudly.
+        echo "Verifying the app serves $expected..."
+        if ! served_sprite_matches "$expected"; then
+            echo "Reload left the old asset manifest live (#5365);"
+            echo "escalating to a full puma restart..."
+            sudo service puma restart
+            if [ $? -ne 0 ]; then
+                echo Puma restart failed.
+                exit 1
+            fi
+            if ! served_sprite_matches "$expected"; then
+                echo "Restart did not pick up the new manifest either --"
+                echo "investigate before trusting this refresh."
+                exit 1
+            fi
         fi
 
         echo SUCCESS\!
@@ -247,11 +333,54 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
     fi
 fi
 
+# Auto-detect icon-library skew: when the just-pulled code's
+# Icon::GLYPHS references symbols the sprite checkout lacks, the
+# refresh happens as part of this deploy -- shipping code whose icons
+# render blank is not an acceptable default. --icons still forces a
+# refresh for changes auto-detection can't see (reworked artwork
+# whose symbol ids didn't change).
+missing_glyphs=$(missing_icon_glyphs)
+if [ $? -ne 0 ]; then
+    echo "Icon glyph check failed -- cannot verify the sprite matches"
+    echo "the code (see the error above)."
+    echo "Deploy aborted. Restarting puma and solidqueue with existing code..."
+    sudo service puma start
+    sudo service solidqueue start
+    echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
+    exit 1
+fi
+if [ -n "$missing_glyphs" ]; then
+    echo "Icon sprite lacks glyph(s) the code references:" $missing_glyphs
+    echo "Refreshing the icon library as part of this deploy."
+    icons_flag=1
+fi
+
 if [ "$icons_flag" = "1" ]; then
     refresh_icon_library
     if [ $? -ne 0 ]; then
         echo ""
         echo "Deploy failed. Restarting puma and solidqueue with existing code..."
+        sudo service puma start
+        sudo service solidqueue start
+        echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
+        exit 1
+    fi
+    still_missing=$(missing_icon_glyphs)
+    if [ $? -ne 0 ]; then
+        echo "Icon glyph re-check failed after the refresh (see the error"
+        echo "above)."
+        echo "Deploy aborted. Restarting puma and solidqueue with existing code..."
+        sudo service puma start
+        sudo service solidqueue start
+        echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
+        exit 1
+    fi
+    if [ -n "$still_missing" ]; then
+        echo ""
+        echo "Icon library refreshed, but the sprite still lacks:" $still_missing
+        echo "icon-library main is behind the app code (CI should have"
+        echo "caught this -- see test/classes/icon_glyph_sync_test.rb)."
+        echo "Deploy aborted. Restarting puma and solidqueue with existing code..."
         sudo service puma start
         sudo service solidqueue start
         echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
