@@ -176,7 +176,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(1, primary_msgs.length,
                  "the primary's page gets the flash only")
     assert(primary_msgs.first.include?('target="page_flash"'))
-    assert_equal(3, obs_msgs.length,
+    assert_equal(4, obs_msgs.length,
                  "the synced reflection's page gets flash + panels")
   end
 
@@ -214,12 +214,15 @@ class Inat::ObservationResyncerTest < UnitTestCase
       resync(found: { @id => @raw })
     end
 
-    assert_equal(3, messages.length)
+    assert_equal(4, messages.length)
     assert(messages.any? { |m| m.include?('target="page_flash"') })
     assert(
       messages.any? { |m| m.include?('target="observation_details"') }
     )
     assert(messages.any? { |m| m.include?('target="observation_notes"') })
+    assert(
+      messages.any? { |m| m.include?('target="observation_sequences"') }
+    )
     flash = messages.find { |m| m.include?('target="page_flash"') }
     assert_includes(flash, :observation_resync_synced.t(count: 1))
   end

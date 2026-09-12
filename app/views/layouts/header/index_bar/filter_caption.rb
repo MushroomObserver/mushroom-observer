@@ -58,6 +58,13 @@ module Views::Layouts
 
     prop :query, ::Query
 
+    # Whether `query` has any filter params to caption, beyond the
+    # sort order -- used by `Views::FullPageBase#add_query_filters` to
+    # decide whether to render the index bar.
+    def self.filters_present?(query)
+      query.params.except(:order_by).compact_blank.present?
+    end
+
     def view_template
       div(id: "filters", class: "position-relative pr-5",
           data: {
@@ -114,7 +121,7 @@ module Views::Layouts
     end
 
     def render_caption_param_text(truncate:)
-      if @query.params.except(:order_by).present?
+      if self.class.filters_present?(@query)
         wrap_tag = truncate ? :span : :div
         render_params_joined(@query.params, truncate: truncate,
                                             wrap_tag: wrap_tag)
