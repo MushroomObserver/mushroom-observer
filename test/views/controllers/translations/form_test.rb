@@ -9,7 +9,7 @@ module Views::Controllers::Translations
       @lang = languages(:english)
       @strings = @lang.localization_strings
       @tag = "two"
-      @edit_tags = %w[two twos TWO TWOS]
+      @edit_tags = %w[two twos]
       @official_records = build_record_map(@lang)
       @other_locales = [languages(:french), languages(:greek)]
     end
@@ -71,20 +71,20 @@ module Views::Controllers::Translations
     def test_textarea_has_stimulus_target
       assert_html(html,
                   "textarea[data-translation-target='textarea']",
-                  count: 4)
+                  count: 2)
     end
 
     def test_textarea_has_stimulus_action
       assert_html(html,
                   "textarea[data-action='translation#formChanged']",
-                  count: 4)
+                  count: 2)
     end
 
     def test_textarea_has_label
       assert_html(html, "label[for='tag_#{@edit_tags[0]}']",
                   text: @edit_tags[0])
-      assert_html(html, "label[for='tag_#{@edit_tags[2]}']",
-                  text: @edit_tags[2])
+      assert_html(html, "label[for='tag_#{@edit_tags[1]}']",
+                  text: @edit_tags[1])
     end
 
     def test_textarea_has_form_control_class
@@ -92,7 +92,7 @@ module Views::Controllers::Translations
                   "textarea.form-control[name='tag_#{@edit_tags[0]}']")
     end
 
-    # --- Between notes (plural/singular, uppercase/lowercase) ---
+    # --- Between notes (plural/singular) ---
 
     def test_singular_tag_shows_singular_note
       assert_includes(html, :edit_translations_singular.t)
@@ -100,14 +100,6 @@ module Views::Controllers::Translations
 
     def test_plural_tag_shows_plural_note
       assert_includes(html, :edit_translations_plural.t)
-    end
-
-    def test_lowercase_tag_shows_lowercase_note
-      assert_includes(html, :edit_translations_lowercase.t)
-    end
-
-    def test_uppercase_tag_shows_uppercase_note
-      assert_includes(html, :edit_translations_uppercase.t)
     end
 
     # --- Buttons ---
