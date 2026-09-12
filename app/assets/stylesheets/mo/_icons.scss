@@ -204,9 +204,18 @@ tbody.collapse.show {
 // no per-context tuning -- covers .theater-btn, .input-group-btn's
 // goto button, and the pagination prev/next links (.btn-link, so
 // previously outside .btn:not(.btn-link)'s scope entirely) all at once.
+// Bootstrap's `.btn` sets `vertical-align: middle`, which for inline
+// content aligns to half the parent font's x-height above baseline --
+// a point well below the visual center of the surrounding text. A
+// button box taller than that x-height (true of every icon button
+// here) ends up hanging further below the baseline than it rises
+// above the cap line. A length-based value aligns relative to the
+// baseline directly instead, tunable to the button's height rather
+// than inheriting the x-height mismatch.
 .btn:has(.mo-icon) {
   display: inline-flex;
   align-items: center;
+  vertical-align: -0.15em;
 }
 
 .spinner-right {

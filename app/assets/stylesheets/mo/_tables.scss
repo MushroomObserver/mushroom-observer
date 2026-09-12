@@ -7,6 +7,32 @@ thead tr {
   background-color: $list-group-disabled-bg;
 }
 
+// Locks column widths to the first row's natural content. Use when
+// later rows can swap in wider content (e.g. an inline edit form)
+// and you don't want the columns to reflow on every state change.
+.table-layout-fixed {
+  table-layout: fixed;
+}
+
+// Combine with `.table` on the same <table> element to cascade
+// vertical-align: middle onto every cell -- overrides Bootstrap's
+// `th, td { vertical-align: top }` / `thead th { vertical-align:
+// bottom }` table defaults, unchanged between BS3 and BS4. Bootstrap's
+// `.align-middle` utility (vertical-align: middle on the element it's
+// applied to directly) already covers the plain per-cell case, so
+// this class is only for the table-wide cascade.
+.table-align-middle.table {
+
+  >thead>tr>th,
+  >thead>tr>td,
+  >tbody>tr>th,
+  >tbody>tr>td,
+  >tfoot>tr>th,
+  >tfoot>tr>td {
+    vertical-align: middle !important;
+  }
+}
+
 .table-curators,
 .table-description-permissions,
 .table-herbarium,
@@ -205,5 +231,15 @@ table.ips-lined {
     &:not(:first-child) {
       border-left: 2px solid #d0d;
     }
+  }
+}
+
+//
+// larger devices
+// --------------------------------------------------
+
+@media screen and (min-width: breakpoint-min(sm)) {
+  .table {
+    overflow-x: scroll;
   }
 }

@@ -2,12 +2,13 @@
 
 # Renders a group of inline mod/add links -- the observation-show
 # sub-panel edit/destroy pairs, the send-question link, sibling
-# records, etc. Pure layout glue: a Bootstrap `.ml-1` on the wrapper
-# (visibly wider than `.inline-icon-link`'s own `margin-right:
-# 0.25rem`, so the gap before the first item reads clearly, not just
-# technically, ahead of the internal item-to-item gaps) PLUS a
-# leading non-breaking space, a further non-breaking space between
-# each item (items carry no padding/margin of their own for that
+# records, etc. Pure layout glue: a Bootstrap margin-left on the
+# wrapper (`margin_class:`, default `.ml-2`; `Components::InlineCRUDLinks`
+# passes `.ml-1` -- visibly wider than `.inline-icon-link`'s
+# `margin-right: 0.25rem`, so the gap before the first item reads
+# clearly, not just technically, ahead of the internal item-to-item
+# gaps) PLUS a leading non-breaking space, a further non-breaking
+# space between each item (items carry no padding/margin for that
 # internal spacing), and a `white-space: nowrap` wrapper so the group
 # can't be split across a line break. The margin lands on the wrapper
 # span itself -- not on any item -- so this still does NOT style the
@@ -55,11 +56,12 @@ class Components::InlineLinkBlock < Components::Base
   end
 
   prop :items, _Array(_Union(Phlex::SGML, String))
+  prop :margin_class, String, default: "ml-2"
 
   def view_template
     return if @items.empty?
 
-    span(class: "text-nowrap ml-2") do
+    span(class: "text-nowrap #{@margin_class}") do
       nbsp
       @items.each_with_index do |item, index|
         nbsp if index.positive?

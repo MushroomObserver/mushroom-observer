@@ -2,6 +2,24 @@
 
 body {
   word-wrap: break-word;
+
+  // $font-size-base (14px) stays the phone size; bump body text up
+  // on screens with room for it. `.modal-body` has no font-size set
+  // for it, so it inherits this bump too. Headings are pinned to rem
+  // values fixed relative to the root font-size, not to body's
+  // computed size, so they don't move.
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9375rem; // 15px at 16px root
+  }
+}
+
+// Bootstrap's `.btn` sets `font-size: $btn-font-size`, a rem value
+// fixed at compile time -- it doesn't follow body's bump above, so
+// give it the same breakpoint explicitly.
+.btn {
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9375rem;
+  }
 }
 
 // Give focus outlines breathing room so they don't clip text/icons.

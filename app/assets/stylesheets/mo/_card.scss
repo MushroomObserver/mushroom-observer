@@ -36,3 +36,20 @@
   font-size: 1rem;
   font-weight: bold;
 }
+
+.p-card {
+  padding: $card-spacer-y $card-spacer-x;
+}
+
+// Card padding for list-group-flush, which appears within cards generally.
+.list-group-flush .list-group-item {
+  @extend .p-card;
+}
+
+.list-group-item.none-yet {
+  display: none;
+
+  &:only-child {
+    display: block;
+  }
+}

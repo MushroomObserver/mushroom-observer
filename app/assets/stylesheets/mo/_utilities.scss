@@ -20,24 +20,6 @@
   max-height: 100% !important;
 }
 
-// Combine with `.table` on the same <table> element to cascade
-// vertical-align: middle onto every cell -- overrides Bootstrap's
-// `th, td { vertical-align: top }` / `thead th { vertical-align:
-// bottom }` table defaults, unchanged between BS3 and BS4. Bootstrap's
-// `.align-middle` utility (vertical-align: middle on the element it's
-// applied to directly) already covers the plain per-cell case, so
-// this class is only for the table-wide cascade.
-.table-align-middle.table {
-  > thead > tr > th,
-  > thead > tr > td,
-  > tbody > tr > th,
-  > tbody > tr > td,
-  > tfoot > tr > th,
-  > tfoot > tr > td {
-    vertical-align: middle !important;
-  }
-}
-
 .object-fit-cover {
   @extend .w-100, .h-100;
   object-fit: cover;
@@ -64,8 +46,8 @@
   border: none !important;
 }
 
-.p-card {
-  padding: $card-spacer-y $card-spacer-x;
+.border-dashed {
+  border: 5px dashed;
 }
 
 // Bootstrap generates .m-*/.p-*/.mx-*/.my-*/.mt-*/.mb-*/.ml-*/.mr-*/
@@ -99,14 +81,6 @@
 
 .ls-50 {
   letter-spacing: 0.5em;
-}
-
-.dashed-border {
-  border: 5px dashed;
-}
-
-.dotted-border {
-  border: 1px dotted;
 }
 
 // .stretched-link is Bootstrap's; not usable for form.button_to
@@ -191,25 +165,6 @@
   left: auto;
 }
 
-.click-container {
-  a.ab-fab {
-
-    &:hover,
-    &:active,
-    &:focus {
-      background-color: transparent;
-    }
-  }
-}
-
-.list-group-item.none-yet {
-  display: none;
-
-  &:only-child {
-    display: block;
-  }
-}
-
 .bg-none {
   background: none !important;
 }
@@ -224,34 +179,12 @@
   background-color: $card-bg !important;
 }
 
-// Locks column widths to the first row's natural content. Use when
-// later rows can swap in wider content (e.g. an inline edit form)
-// and you don't want the columns to reflow on every state change.
-.table-layout-fixed {
-  table-layout: fixed;
-}
-
 .bg-visible {
   background: rgba($black, 0.3);
 }
 
 .bg-legible {
   background: rgba($black, 0.6);
-}
-
-// Bootstrap 4's contextual badge color variant -- BS3's .badge has
-// none. Uses the same soft-warning colors as .alert-warning.
-.badge-warning {
-  background-color: rgba($warning, 0.2);
-  color: $body-color;
-  font-weight: normal;
-}
-
-// Bootstrap 3 - collapse "fade" instead of "slide"
-.fade-not-slide.collapsing {
-  // transition-duration: 0.3s;
-  transition: height 0s, opacity 0.3s;
-  opacity: 0;
 }
 
 .opacity-0 {
@@ -270,12 +203,17 @@
   gap: 1rem !important;
 }
 
-//
-// larger devices
-// --------------------------------------------------
+// Bootstrap 4's contextual badge color variant -- BS3's .badge has
+// none. Uses the same soft-warning colors as .alert-warning.
+.badge-warning {
+  background-color: rgba($warning, 0.2);
+  color: $body-color;
+  font-weight: normal;
+}
 
-@media screen and (min-width: breakpoint-min(sm)) {
-  .table {
-    overflow-x: scroll;
-  }
+// Bootstrap 3 - collapse "fade" instead of "slide"
+.fade-not-slide.collapsing {
+  // transition-duration: 0.3s;
+  transition: height 0s, opacity 0.3s;
+  opacity: 0;
 }

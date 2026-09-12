@@ -87,6 +87,14 @@ $gray-100: $BODY_BG_COLOR !default;
 $gray-600: muted_text() !default;
 $gray-900: $BODY_TEXT_COLOR !default;
 
+// `color-yiq()` picks text color per arbitrary button background --
+// left at defaults ($gray-900/$white) it inherits $gray-900's remap
+// above, which is light in Amanita, so light-bg buttons got light
+// text. $DARK_COLOR/$LIGHT_COLOR stay dark/light regardless of which
+// plays "text" vs. "background" for the theme.
+$yiq-text-dark:  $DARK_COLOR !default;
+$yiq-text-light: $LIGHT_COLOR !default;
+
 // ==================================================
 // SECTION 3: TYPOGRAPHY
 // ==================================================
