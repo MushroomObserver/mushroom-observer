@@ -24,3 +24,31 @@ test:
   username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
   port: 3306
+
+# Same TCP/env-var shape as development/test above -- the app container
+# reaches MySQL over the network under this address either way,
+# whether that's the host, a Kamal accessory container, or a managed
+# service (#5345's own decision, not this file's).
+production:
+  primary:
+    database: <%= ENV.fetch("DATABASE_NAME", "mo_production") %>
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    # Independent of RAILS_MAX_THREADS (Puma's web-thread count) --
+    # this image also runs as the worker role (bin/jobs), whose
+    # thread need doesn't shrink just because the web role's Puma
+    # runs single-threaded. Must exceed Solid Queue's own thread need
+    # (config/queue.yml's largest single worker pool, plus 2 for that
+    # worker's own thread and heartbeat) -- see
+    # test/jobs/queue_config_test.rb and config/database.yml's own
+    # comment on this same pool setting.
+    pool: <%= ENV.fetch("DATABASE_POOL", 10) %>
+  cache:
+    database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    migrations_paths: "db/cache/migrate"
