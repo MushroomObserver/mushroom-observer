@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-12 (deploy-2026-09-12-12-00)
+
+- Fix `README_PRODUCTION_INSTALL`'s stale MySQL-on-app-box assumption ([PR5356](https://github.com/MushroomObserver/mushroom-observer/pull/5356), @nimmolo)
+- Enable Rails 7.0/7.1 defaults PR#3: Add session-cookie digest rotator ([PR5344](https://github.com/MushroomObserver/mushroom-observer/pull/5344), @nimmolo)
+- Skip `#index_bar` when no index filters are applied ([PR5362](https://github.com/MushroomObserver/mushroom-observer/pull/5362), @nimmolo)
+- Resync DNA sequences from iNat onto reflections (#4215) ([PR5361](https://github.com/MushroomObserver/mushroom-observer/pull/5361), @mo-nathan)
+- Deploy auto-refreshes the icon library when `Icon::GLYPHS` outruns the sprite (#5365) ([PR5366](https://github.com/MushroomObserver/mushroom-observer/pull/5366), @mo-nathan)
+
 ## 2026-09-10 (deploy-2026-09-10-12-00)
 
 - Keep `prerelease.rb` article rows in date order ([PR5350](https://github.com/MushroomObserver/mushroom-observer/pull/5350), @mo-nathan)
