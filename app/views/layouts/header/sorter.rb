@@ -26,7 +26,7 @@ module Views::Layouts
 
       div(class: "flex-bar pl-3 sorter") do
         render(Components::Navbar::Text.new(
-                 class: class_names("mx-0",
+                 class: class_names("mx-0 pr-2",
                                     Components::Column.mobile_hide_classes)
                )) do
           append_colon(:sort_by_header.l)
@@ -36,7 +36,7 @@ module Views::Layouts
           menu_id: "sort_nav_menu",
           label: toggle_title.to_s,
           element: :div,
-          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-2"),
+          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-0"),
           toggle_variant: :outline,
           toggle_class: "font-weight-normal",
           menu_class: "sorts",

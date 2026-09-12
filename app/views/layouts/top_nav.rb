@@ -160,7 +160,7 @@ class Views::Layouts::TopNav < Views::Base
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: class_names("pr-3 pr-sm-4",
+    div(class: class_names("pr-2 pr-sm-3",
                            Components::Column.visibility_classes(
                              show_at: :xs, hide_at: :md
                            ))) do
@@ -296,7 +296,7 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "ml-4 mr-2 top_nav_button top_nav_icon_button",
+      class: "mx-2 ml-sm-4 top_nav_button top_nav_icon_button",
       data: { placement: :bottom }
     )
   end

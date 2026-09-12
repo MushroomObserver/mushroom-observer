@@ -54,7 +54,7 @@ module Views::Layouts
       # The dropdown is the second child; Components::Dropdown is
       # passed `element: :div` (its default outer wrapper is `<li>`,
       # correct only inside a `<ul>`-based nav) and the Sorter passes
-      # `wrapper_class: "navbar-form px-2"` for navbar spacing.
+      # `wrapper_class: "navbar-form px-0"` for navbar spacing.
       assert_html(html, "div.sorter > div.dropdown.navbar-form")
       # Toggle `<a>` carries the btn styling the legacy sort-bar used.
       assert_html(html,
