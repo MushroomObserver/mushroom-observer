@@ -17,7 +17,11 @@
 # of empty/partial input. -f/-L: treat HTTP error responses as
 # failures rather than piping an error page's HTML into exiftool, and
 # follow redirects (CDN/S3-signed image URLs commonly redirect).
+#
+# --connect-timeout/--max-time: without these, an unreachable or
+# stalled host hangs curl (and the Open3.capture2e call waiting on
+# this script) with no bound (#5369).
 set -euo pipefail
 url="${@: -1}"
 flags=("${@:1:$#-1}")
-curl -fsSL -- "$url" | exiftool "${flags[@]}" -
+curl -fsSL --connect-timeout 5 --max-time 15 -- "$url" | exiftool "${flags[@]}" -

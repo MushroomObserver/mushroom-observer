@@ -427,6 +427,7 @@ MushroomObserver::Application.routes.draw do
     member do
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
+      get("exif_geocode", to: "images/exif_geocode#show", as: "exif_geocode")
       get("emails/new", to: "images/emails#new",
                         as: "new_commercial_inquiry_for")
       post("emails", to: "images/emails#create",

@@ -292,28 +292,27 @@ module ObservationsController::SharedFormMethods
     end
   end
 
-  # For now, this has to read the exif off the actual file on the server.
-  # This is because the exif data is not stored on the Image record.
+  # DB-only data for the edit page's initial render -- deliberately
+  # does NOT call Image#read_exif_geocode here. That read shells out
+  # to exiftool (locally or, for a transferred image, over the
+  # network via script/exiftool_remote) and used to run for every
+  # image before the page could render; one slow or unreachable image
+  # host hung the whole request (#5369). GPS/date from EXIF now loads
+  # lazily per image -- see Components::Form::CameraInfo and
+  # Images::ExifGeocodeController.
   def get_exif_data(images)
     data = {}
     images.each do |image|
-      # Don't hide GPS for the owner viewing their own edit form
-      exif_data = image&.read_exif_geocode(hide_gps: false)
-      # If no EXIF data (no GPS), provide basic info from database
-      if exif_data.nil?
-        exif_data = {
-          lat: nil,
-          lng: nil,
-          alt: nil,
-          date: image.when&.strftime("%d-%B-%Y"),
-          file_name: image.original_name,
-          file_size: nil # Could calculate from file system if needed
-        }
-      else
-        # EXIF data exists, but ensure file_name is set from database
-        exif_data[:file_name] ||= image.original_name
-      end
-      data[image.id] = exif_data
+      next unless image
+
+      data[image.id] = {
+        lat: nil,
+        lng: nil,
+        alt: nil,
+        date: image.when&.strftime("%d-%B-%Y"),
+        file_name: image.original_name,
+        file_size: nil
+      }
     end
     data
   end
