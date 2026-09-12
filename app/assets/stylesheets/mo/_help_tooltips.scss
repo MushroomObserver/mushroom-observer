@@ -14,6 +14,16 @@
   }
 }
 
+// `.form-text` only sets margin-top -- add the bottom space too,
+// since the field wrapper above it has the bottom margin zeroed to
+// avoid doubling the top-margin space. Scoped to `.help-block.form-text`
+// (the plain field-help shape) so it doesn't collide with `.well`'s
+// margin-bottom on the well-shaped `.help-block` (no `.form-text`
+// there).
+.help-block.form-text {
+  margin-bottom: 0.5rem;
+}
+
 .tooltip-inner {
   word-wrap: break-word;
 }

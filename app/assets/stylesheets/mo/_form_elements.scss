@@ -31,6 +31,15 @@ label {
   label {
     font-weight: $btn-font-weight;
 
+    // BS3's `.checkbox`/`.radio` reserved this gap via an
+    // absolutely-positioned input + label padding-left; BS4 doesn't
+    // define these classes, so nothing supplies the gap without this
+    // rule.
+    input[type="checkbox"],
+    input[type="radio"] {
+      margin-right: $custom-control-gutter;
+    }
+
     // Because it's within the label, it doesn't get the label's margin.
     .form-between {
       margin-left: 1rem;

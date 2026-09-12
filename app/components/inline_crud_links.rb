@@ -131,7 +131,7 @@ class Components::InlineCRUDLinks < Components::Base
   }.freeze
 
   def view_template
-    InlineLinkBlock(items: items, margin_class: "ml-1")
+    InlineLinkBlock(items: items, margin_class: "ml-2")
   end
 
   private
