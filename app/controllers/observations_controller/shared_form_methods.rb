@@ -294,12 +294,11 @@ module ObservationsController::SharedFormMethods
 
   # DB-only data for the edit page's initial render -- deliberately
   # does NOT call Image#read_exif_geocode here. That read shells out
-  # to exiftool (locally or, for a transferred image, over the
-  # network via script/exiftool_remote) and used to run for every
-  # image before the page could render; one slow or unreachable image
-  # host hung the whole request (#5369). GPS/date from EXIF now loads
-  # lazily per image -- see Components::Form::CameraInfo and
-  # Images::ExifGeocodeController.
+  # to exiftool (locally or, for a transferred image, after fetching
+  # the original over HTTP) and used to run for every image before the
+  # page could render; one slow or unreachable image host hung the
+  # whole request (#5369). GPS/date from EXIF now loads lazily per
+  # image -- see Components::Form::CameraInfo and EXIFGeocodeJob.
   def get_exif_data(images)
     data = {}
     images.each do |image|

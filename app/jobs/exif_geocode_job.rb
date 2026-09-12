@@ -4,12 +4,12 @@
 # Components::Form::CameraInfo's Turbo Frame, off the web request
 # that renders the observation edit page.
 #
-# Image#read_exif_geocode shells out to exiftool (locally, or over
-# the network via script/exiftool_remote for a transferred image).
-# Running that inline in a controller action ties up a web worker for
-# the whole call -- production runs single-threaded Puma workers, so
-# one slow image host could tie up several of the site's few total
-# worker slots at once. See issue #5369.
+# Image#read_exif_geocode shells out to exiftool (locally, or fetches
+# the original over HTTP first for a transferred image). Running that
+# inline in a controller action ties up a web worker for the whole
+# call -- production runs single-threaded Puma workers, so one slow
+# image host could tie up several of the site's few worker slots at
+# once. See issue #5369.
 class EXIFGeocodeJob < ApplicationJob
   queue_as(:default)
 

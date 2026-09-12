@@ -1044,30 +1044,56 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # remotely. Returns nil if it fails. Costly.
   # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
   #   observations to determine whether to hide GPS.
-  #
-  # No Shellwords.escape needed here -- Open3.capture2e's array form
-  # (`cmd, *flags, path`) execs directly, bypassing the shell entirely,
-  # so nothing ever interprets shell metacharacters. Escaping anyway
-  # used to be harmless (no argument here ever contained one), but
-  # original_url now carries a `?<version>` cache-buster (#4808) --
-  # Shellwords.escape turned that `?` into a literal `\?` in the
-  # argument itself (array form never strips the backslash back out),
-  # so every remote (transferred) EXIF re-read silently 404'd.
   def read_exif_data(flags = [], hide_gps: nil)
     hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
-    if transferred
-      cmd = "script/exiftool_remote"
-      path = original_url
-    else
-      cmd = "exiftool"
-      path = full_filepath("orig")
-    end
-    result, status = Open3.capture2e(cmd, *flags, path)
+    result, status = if transferred
+                       remote_exif(flags)
+                     else
+                       Open3.capture2e("exiftool", *flags,
+                                       full_filepath("orig"))
+                     end
 
     data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil
     [data, status, result]
   end
+
+  # A transferred image's bytes live wherever it was imported from, not
+  # locally. MO's resized derivatives strip EXIF entirely, so this has
+  # to fetch the full original and run exiftool against it (#5369) --
+  # unlike the local branch above, there's no file path to hand
+  # exiftool directly.
+  #
+  # open_timeout/timeout bound the fetch so an unreachable or stalled
+  # host can't hang the caller indefinitely (#5369).
+  def remote_exif(flags)
+    Tempfile.create(["exif_remote", ".img"], binmode: true) do |file|
+      file.write(fetch_remote_bytes)
+      file.flush
+      Open3.capture2e("exiftool", *flags, file.path)
+    end
+  rescue RestClient::Exception, SocketError, Errno::ECONNREFUSED,
+         Errno::ENOENT, Net::OpenTimeout, Net::ReadTimeout => e
+    [e.message, Struct.new(:success?).new(false)]
+  end
+
+  # original_url is a `file://` URL in dev/test -- MO.image_sources'
+  # file-based stand-in for a transferred image (config/image_config.yml)
+  # -- so read it directly instead of over HTTP, stripping the `?
+  # <version>` cache-buster query string (#4808) that isn't part of the
+  # filesystem path. In production it's an https:// URL, fetched over
+  # the network with a timeout.
+  def fetch_remote_bytes
+    url = original_url
+    if url.start_with?("file://")
+      File.binread(url.delete_prefix("file://").sub(/\?.*\z/, ""))
+    else
+      RestClient::Request.execute(
+        method: :get, url: url, open_timeout: 5, timeout: 15
+      ).body
+    end
+  end
+  private :remote_exif, :fetch_remote_bytes
 
   # This returns a { lat:, lng:, ... } hash if the image has GPS data in EXIF.
   # Returns nil if it fails. Note that it only reads these fields.

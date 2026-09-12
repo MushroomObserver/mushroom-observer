@@ -947,7 +947,7 @@ class ImageTest < UnitTestCase
     assert_equal(link, img.import_link)
   end
 
-  # ---- EXIF geocode reading (local file vs. remote via curl+exiftool) --
+  # ---- EXIF geocode reading (local file vs. fetched-then-exiftool) --
 
   # The image geotagged.jpg has this data (see also
   # ObservationFormSystemTest::GEOTAGGED_EXIF).
@@ -966,15 +966,11 @@ class ImageTest < UnitTestCase
     FileUtils.rm_f(img.full_filepath("orig"))
   end
 
-  # Regression test: `script/exiftool_remote` used to only read `$1`
-  # as a bare URL (fetched via `wget`), but `Image#read_exif_data`
-  # calls it with `flags..., url` -- the same `cmd, *flags, path`
-  # shape it uses for the local `exiftool` binary directly. That
-  # argument-shape mismatch (compounded by `wget` not being installed
-  # on every dev machine, unlike `curl`) silently broke EXIF re-reads
-  # for any already-transferred image -- `read_exif_geocode` always
-  # returned nil. See the corrected `curl [flags] url`-forwarding
-  # shape in `script/exiftool_remote`.
+  # Regression test: an earlier remote-fetch implementation only read
+  # the URL as a bare positional argument, dropping the exiftool flags
+  # `read_exif_geocode` passes along (`-n`, `-GPSLatitude`, etc.).
+  # `read_exif_geocode` always returned nil for an already-transferred
+  # image as a result.
   def test_read_exif_geocode_transferred_image
     img = images(:in_situ_image)
     img.update_column(:transferred, true)
