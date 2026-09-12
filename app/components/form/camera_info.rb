@@ -18,6 +18,7 @@
 #   )
 class Components::Form::CameraInfo < Components::Base
   include Components::Form::CameraInfoEXIFFields
+  include Phlex::Rails::Helpers::TurboStreamFrom
 
   # True for a freshly-uploaded image, where client-side JS
   # (form-exif_controller.js) fills the date/GPS fields in from the
@@ -83,7 +84,11 @@ class Components::Form::CameraInfo < Components::Base
     end
   end
 
+  # `turbo_stream_from` subscribes to the stream EXIFGeocodeJob
+  # broadcasts to once it finishes -- see that job for why the frame
+  # request doesn't wait for the EXIF read.
   def render_lazy_exif_frame
+    turbo_stream_from("exif_geocode_#{@img_id}")
     turbo_frame_tag(
       "camera_info_exif_#{@img_id}",
       class: "form-group",

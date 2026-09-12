@@ -4,33 +4,33 @@ module Images
   class EXIFGeocodeController < ApplicationController
     before_action :login_required
 
-    # Lazy-loaded fragment for Components::Form::CameraInfo. A Turbo
-    # Frame fetches this after the edit page has rendered. This keeps
-    # the slow Image#read_exif_geocode call off the page's request.
-    # See issue #5369.
+    # Turbo Frame endpoint for Components::Form::CameraInfo. Enqueues
+    # EXIFGeocodeJob to do the slow work (Image#read_exif_geocode
+    # shells out to exiftool) and responds immediately with a loading
+    # placeholder for the same frame. The job broadcasts the content
+    # when it finishes. See issue #5369 for why this doesn't read the
+    # EXIF data inline in this action.
     #
     # `read_only` and `date_differs` come from CameraInfo's props. The
     # caller already computed them cheaply from the database, so this
-    # action just passes them through.
+    # action just passes them through to the job.
     def show
       @image = Image.find(params[:id])
-      @data = @image.read_exif_geocode(hide_gps: false) || {}
-      render(Views::Controllers::Images::EXIFGeocode::Show.new(**view_props),
-             layout: false)
+      EXIFGeocodeJob.perform_later(@image.id, read_only: read_only_param?,
+                                              date_differs: date_differs_param?)
+      render(Views::Controllers::Images::EXIFGeocode::Loading.new(
+               img_id: @image.id.to_s
+             ), layout: false)
     end
 
     private
 
-    def view_props
-      {
-        img_id: @image.id.to_s,
-        lat: @data[:lat],
-        lng: @data[:lng],
-        alt: @data[:alt],
-        date: @data[:date] || @image.when&.strftime("%d-%B-%Y"),
-        date_differs: params[:date_differs] == "true",
-        read_only: params[:read_only] == "true"
-      }
+    def read_only_param?
+      params[:read_only] == "true"
+    end
+
+    def date_differs_param?
+      params[:date_differs] == "true"
     end
   end
 end
