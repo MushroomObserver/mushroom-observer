@@ -990,6 +990,39 @@ class ImageTest < UnitTestCase
     FileUtils.rm_f(remote_path)
   end
 
+  # original_url is a `file://` URL in dev/test (config/image_config.yml's
+  # stand-in for a transferred image), so the other transferred-image
+  # test above doesn't reach the http(s) branch a production host uses.
+  # Force it here to cover that branch directly.
+  def test_read_exif_geocode_transferred_image_over_http
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    url = "https://images.example.org/orig/#{img.id}.jpg"
+    stub_request(:get, url).to_return(
+      status: 200,
+      body: Rails.root.join("test/images/geotagged.jpg").binread
+    )
+
+    img.stub(:original_url, url) do
+      data = img.read_exif_geocode(hide_gps: false)
+
+      assert_equal(GEOTAGGED_EXIF_GPS[:lat], data[:lat])
+      assert_equal(GEOTAGGED_EXIF_GPS[:lng], data[:lng])
+      assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
+    end
+  end
+
+  def test_read_exif_geocode_transferred_image_network_failure
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    url = "https://images.example.org/orig/#{img.id}.jpg"
+    stub_request(:get, url).to_raise(SocketError)
+
+    img.stub(:original_url, url) do
+      assert_nil(img.read_exif_geocode(hide_gps: false))
+    end
+  end
+
   def stage_geotagged_file(path)
     FileUtils.mkdir_p(File.dirname(path))
     FileUtils.cp(Rails.root.join("test/images/geotagged.jpg"), path)
