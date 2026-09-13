@@ -130,9 +130,10 @@ class FormCameraInfoTest < ComponentTestCase
     assert_html(html, "button.use_exif_btn.d-none")
   end
 
-  # A saved image (upload: false, the default everywhere else in this
-  # file) loads its date/GPS fields lazily from the server instead of
-  # rendering them directly -- see issue #5369.
+  # A saved image (upload: true is the default everywhere else in
+  # this file; this test explicitly passes upload: false) loads its
+  # date/GPS fields lazily from the server instead of rendering them
+  # directly -- see issue #5369.
   def test_saved_image_renders_lazy_exif_frame
     html = nil
     assert_enqueued_with(job: EXIFGeocodeJob,

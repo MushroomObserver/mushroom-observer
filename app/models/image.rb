@@ -1116,7 +1116,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     return nil unless lat && lng
 
     if date
-      date = DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").strftime("%d-%B-%Y")
+      date = SimpleDate.from_date(
+        DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").to_date
+      )
     end
 
     file_size = "#{(file_size.to_i / 1024).to_i}kb" if file_size

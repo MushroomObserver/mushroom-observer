@@ -19,13 +19,20 @@ module Views::Controllers::Images
       prop :lat, _Nilable(_Union(Integer, Float)), default: nil
       prop :lng, _Nilable(_Union(Integer, Float)), default: nil
       prop :alt, _Nilable(_Union(Integer, Float)), default: nil
-      prop :date, _Nilable(::String), default: nil
+      prop :date, _Nilable(::SimpleDate), default: nil
       prop :date_differs, _Boolean, default: false
       prop :read_only, _Boolean, default: false
 
       def view_template
+        # CameraInfoEXIFFields reads `@date` directly, expecting a
+        # display string (it's shared with Components::Form::CameraInfo,
+        # whose `@date` is a plain string) -- capture the SimpleDate
+        # for the frame's JSON attribute first, then shadow `@date`
+        # with its display form for the shared module's rendering.
+        simple_date = @date
+        @date = simple_date&.to_display
         turbo_frame_tag(frame_id, class: "form-group",
-                                  data: frame_data) do
+                                  data: frame_data(simple_date)) do
           render_date_field
           render_gps_field
           render_transfer_button
@@ -42,10 +49,10 @@ module Views::Controllers::Images
         transfer_exif_button
       end
 
-      def frame_data
+      def frame_data(simple_date)
         {
           geocode: geocode_json,
-          exif_date: @date.to_s,
+          exif_date: simple_date&.to_json,
           action: "turbo:frame-load->form-exif#syncItemExif"
         }
       end

@@ -56,7 +56,7 @@ class EXIFGeocodeJob < ApplicationJob
         lat: data[:lat],
         lng: data[:lng],
         alt: data[:alt],
-        date: data[:date] || image.when&.strftime("%d-%B-%Y"),
+        date: data[:date] || SimpleDate.from_date(image.when),
         date_differs: date_differs,
         read_only: read_only
       ),
