@@ -1058,6 +1058,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     [data, status, result]
   end
 
+  # A stand-in for Process::Status when the fetch fails before
+  # exiftool runs -- only `.success?` is needed by callers. A single
+  # reusable class, not `Struct.new(:success?)` inline in the rescue
+  # below, which would define a new anonymous class on every failure.
+  FailedFetchStatus = Struct.new(:success?)
+  private_constant :FailedFetchStatus
+
   # A transferred image's bytes live wherever it was imported from, not
   # locally. MO's resized derivatives strip EXIF entirely, so this has
   # to fetch the full original and run exiftool against it (#5369) --
@@ -1074,7 +1081,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   rescue RestClient::Exception, SocketError, Errno::ECONNREFUSED,
          Errno::ENOENT, Net::OpenTimeout, Net::ReadTimeout => e
-    [e.message, Struct.new(:success?).new(false)]
+    [e.message, FailedFetchStatus.new(false)]
   end
 
   # original_url is a `file://` URL in dev/test -- MO.image_sources'
