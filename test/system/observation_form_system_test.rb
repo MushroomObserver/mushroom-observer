@@ -3,6 +3,8 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
+  include ActiveJob::TestHelper
+
   def test_create_minimal_observation
     browser = page.driver.browser
     user = users(:zero_user)
@@ -637,10 +639,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Test Miami image - Click thumbnail and verify Camera Info displays EXIF
     find("#carousel_thumbnail_#{miami_img.id}").click
-    sleep(0.5) # Give time for carousel transition
     miami_item = find("#carousel_item_#{miami_img.id}", visible: :all)
     within(miami_item) do
-      # Camera Info should display GPS from server-extracted EXIF
+      wait_for_exif_geocode_broadcast(miami_img, lat: GEOTAGGED_EXIF[:lat])
       assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s)
       assert_selector(".exif_lng", text: GEOTAGGED_EXIF[:lng].to_s)
       assert_selector(".exif_alt", text: GEOTAGGED_EXIF[:alt].to_s)
@@ -648,10 +649,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Test Pasadena image - Click thumbnail and verify Camera Info displays EXIF
     find("#carousel_thumbnail_#{pasadena_img.id}").click
-    sleep(0.5) # Give time for carousel transition
     pasadena_item = find("#carousel_item_#{pasadena_img.id}", visible: :all)
     within(pasadena_item) do
-      # Camera Info should display GPS from server-extracted EXIF
+      wait_for_exif_geocode_broadcast(pasadena_img, lat: SO_PASA_EXIF[:lat])
       assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s)
       assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s)
       assert_selector(".exif_alt", text: SO_PASA_EXIF[:alt].to_s)
@@ -871,6 +871,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Carousel items are re-output with image records this time.
     all(".carousel-indicator").last.trigger("click")
 
+    geo_image = Image.find_by(original_name: "geotagged_s_pasadena.jpg")
+    wait_for_exif_geocode_broadcast(geo_image, lat: SO_PASA_EXIF[:lat],
+                                               visible: :all)
     assert_selector(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
                                       visible: :all)
     second_item = find(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
@@ -943,9 +946,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
     # Just verify that Camera Info displays EXIF for saved images
     # (observation GPS was already set during creation)
+    geo_image = Image.find_by(original_name: "geotagged_s_pasadena.jpg")
     geo_item = find(".carousel-item[data-image-status='good']",
                     text: /geotagged_s_pasadena/, visible: :all)
     within(geo_item) do
+      wait_for_exif_geocode_broadcast(geo_image, lat: SO_PASA_EXIF[:lat],
+                                                 visible: :all)
       assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, visible: :all)
       assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s, visible: :all)
     end
@@ -979,7 +985,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     geo_item = find("#carousel_item_#{geo.id}", visible: :all)
     within(geo_item) do
       # Camera Info should display GPS coordinates from the saved image
-      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, wait: 3)
+      wait_for_exif_geocode_broadcast(geo, lat: SO_PASA_EXIF[:lat])
+      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s)
       assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s)
       assert_selector(".exif_alt", text: SO_PASA_EXIF[:alt].to_s)
     end
@@ -1858,6 +1865,31 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
   private :wait_for_autocompleter_request_params
+
+  # A saved image's GPS/date loads lazily via EXIFGeocodeJob (#5369),
+  # broadcast over the page's Action Cable subscription -- the test
+  # queue adapter leaves an enqueued job sitting in the queue instead
+  # of running it. A broadcast sent before that subscription connects
+  # is lost, so this polls by re-running the job against the live
+  # page instead of guessing how long the connection takes: each
+  # iteration either lands (subscription was already up) or is a
+  # harmless re-broadcast of the same content. Matches on `lat` (not
+  # just `.exif_lat`'s presence) so a page with more than one image's
+  # CameraInfo can't be satisfied by a different image's broadcast.
+  def wait_for_exif_geocode_broadcast(image, lat:, read_only: false,
+                                      date_differs: false, visible: true)
+    Timeout.timeout(10) do
+      loop do
+        EXIFGeocodeJob.perform_now(image.id, read_only: read_only,
+                                             date_differs: date_differs)
+        break if page.has_selector?(".exif_lat", text: lat.to_s, wait: 0.3,
+                                                 visible: visible)
+
+        sleep(0.2)
+      end
+    end
+  end
+  private :wait_for_exif_geocode_broadcast
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)
