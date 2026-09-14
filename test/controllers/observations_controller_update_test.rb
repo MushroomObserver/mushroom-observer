@@ -322,6 +322,24 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: reflection.id)
   end
 
+  # An editable native primary stays primary even when an older
+  # editable native is also a member (Copilot review).
+  def test_edit_reflection_keeps_editable_native_primary
+    user = users(:rolf)
+    reflection = editable_member(:imported_inat_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    natives = [editable_member(:coprinus_comatus_obs, user),
+               editable_member(:detailed_unknown_obs, user)].sort_by(&:id)
+    older, newer = natives
+    occ = make_occurrence(user, newer, [reflection, older, newer])
+    login(user.login)
+
+    get(:edit, params: { id: reflection.id })
+
+    assert_equal(newer.id, occ.reload.primary_observation_id)
+    assert_redirected_to(edit_observation_path(newer.id))
+  end
+
   # Guard: editable natives but no primary set -- edit on the
   # reflection promotes the oldest editable native.
   def test_edit_reflection_promotes_oldest_native_when_no_primary
