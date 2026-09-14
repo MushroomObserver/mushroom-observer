@@ -158,10 +158,7 @@ class Components::Form::UploadGallery < Components::Base
   # The reflection's date as the SimpleDate the form-exif controller
   # transfers onto the observation.
   def sibling_exif_date(image)
-    date = image&.when
-    return "" unless date
-
-    { day: date.day, month: date.month, year: date.year }.to_json
+    SimpleDate.from_date(image&.when)&.to_json
   end
 
   def register_thumbnails(carousel)
