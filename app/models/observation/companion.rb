@@ -17,9 +17,12 @@ class Observation::Companion
               :is_collection_location, :specimen, :notes,
               :collector].freeze
 
-  def initialize(reflection, user)
+  # `admin:` -- the editor is in admin mode, which grants edit rights the
+  # controller's permission check already honored.
+  def initialize(reflection, user, admin: false)
     @reflection = reflection
     @user = user
+    @admin = admin
   end
 
   # A non-reflection member of the occurrence the user may edit, made
@@ -31,7 +34,7 @@ class Observation::Companion
 
     companion = Observation.where(occurrence_id: @reflection.occurrence_id).
                 where.not(id: @reflection.id).order(:id).
-                find { |obs| !obs.reflection? && obs.can_edit?(@user) }
+                find { |obs| !obs.reflection? && editable?(obs) }
     make_primary(companion) if companion
     companion
   end
@@ -51,6 +54,10 @@ class Observation::Companion
   end
 
   private
+
+  def editable?(obs)
+    @admin || obs.can_edit?(@user)
+  end
 
   def build
     attrs = @reflection.attributes.symbolize_keys.slice(*SNAPSHOT)
@@ -72,8 +79,10 @@ class Observation::Companion
       change_vote(naming, Vote.maximum_vote, @user)
   end
 
+  # Fetched afresh for the same reason as `name`: the reflection's own
+  # occurrence association may be strict-loaded.
   def join_occurrence(companion)
-    occurrence = @reflection.occurrence
+    occurrence = Occurrence.find_by(id: @reflection.occurrence_id)
     if occurrence
       Occurrence.check_max_observations!(occurrence.observations.to_a +
                                          [companion])

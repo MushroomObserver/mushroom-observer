@@ -8,12 +8,11 @@
 module Views::FullPageBase::Icons
   # Edit / delete icons for the show-page title bar. Permission gating
   # + button rendering live on `Views::Layouts::Header::EditDeleteIcons`.
-  def add_edit_icons(object, user, edit_modal_target: nil)
+  def add_edit_icons(object, user)
     content_for(:edit_icons) do
       capture do
         render(::Views::Layouts::Header::EditDeleteIcons.new(
-                 object: object, user: user,
-                 edit_modal_target: edit_modal_target
+                 object: object, user: user
                ))
       end
     end

@@ -12,11 +12,7 @@ module ObservationsController::Destroy
 
     @observation.current_user = @user
     obs_id = @observation.id
-    # Permission first, THEN the reflection guard -- so a user who can't
-    # delete the observation gets the standard denial without being told
-    # it is a reflection (matches EditAndUpdate#editable_or_redirect?).
     return if destroy_denied?(obs_id)
-    return if destroy_blocked_for_reflection?(obs_id)
 
     # decide where to redirect after deleting observation, using Query.next_id
     if (this_query = find_query(:Observation))
@@ -37,24 +33,12 @@ module ObservationsController::Destroy
 
   private
 
-  # Standard permission-denied path. Checked before the reflection guard,
-  # so a non-owner gets the usual denial rather than the reflection
-  # warning (which would leak that the observation is a reflection).
+  # Standard permission-denied path. A read-only reflection is
+  # deletable like any other observation: it can always be reimported.
   def destroy_denied?(obs_id)
     return false if permission!(@observation)
 
     flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
-    redirect_to(action: :show, id: obs_id)
-    true
-  end
-
-  # A read-only reflection mirrors its imported source and is changed
-  # only by resync; deleting it on MO would drop the mirror (and its
-  # import link) while the source lives on. Block it like the edit lock.
-  def destroy_blocked_for_reflection?(obs_id)
-    return false unless @observation.reflection?
-
-    flash_warning(:destroy_observation_is_reflection.t)
     redirect_to(action: :show, id: obs_id)
     true
   end
