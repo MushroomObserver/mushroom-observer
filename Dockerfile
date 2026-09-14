@@ -1,12 +1,12 @@
 # syntax = docker/dockerfile:1
 
-# Multi-stage: `docker build` (or an explicit `--target development`)
-# builds the dev/test image from #4511, unchanged in shape -- it relies
-# on a bind mount for the app code, not a COPY, so edits don't need a
-# rebuild. `docker build --target production` (or Kamal's
-# `builder.target: production` in config/deploy.yml) adds
-# RAILS_ENV=production and a deployment-mode bundle install excluding
-# dev/test gems. Assets precompile at container start, not here -- see
+# Multi-stage: `docker build` defaults to the final stage (`production`).
+# For local dev/test, build `--target development` (compose.yaml sets this),
+# which relies on a bind mount for the app code, not a COPY.
+# For production, build `--target production` (or Kamal's
+# `builder.target: production` in config/deploy.yml), which sets
+# RAILS_ENV=production and installs gems in deployment mode excluding
+# dev/test groups. Assets precompile at container start -- see
 # docker/entrypoint.production.sh.
 FROM ruby:3.4.9-bookworm AS base
 
