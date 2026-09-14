@@ -45,7 +45,6 @@ module Views::Layouts
       this_letter, letters = letter_pagination_pages
 
       nav(class: "paginate pagination_letters flex-bar pl-4") do
-        render(Components::Navbar::Text.new(class: "mx-0")) { :by_letter.l }
         render_letter_input(this_letter, letters)
       end
     end
@@ -189,10 +188,16 @@ module Views::Layouts
     end
 
     def render_letter_input(this_letter, used_letters)
+      input_id = "letter_input_#{@position}"
+
       InputGroup(class: "page-input ml-2",
                  data: { controller: "page-input",
                          page_input_letters_value: used_letters }) do
+        render(Components::InputGroup::Addon.new(
+                 variant: :label, position: :prepend, label_for: input_id
+               )) { :by_letter.l }
         input(
+          id: input_id,
           type: :text, name: :letter, value: this_letter,
           class: "form-control text-right",
           size: 1, placeholder: "—",

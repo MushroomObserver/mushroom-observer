@@ -111,6 +111,17 @@ module Views::Layouts
       assert_html(
         html, "div.input-group.page-input[data-controller='page-input']"
       )
+      # The label is tied to the input (not a free-floating div) and
+      # sits inside the input-group with it -- see InputGroup::Addon.
+      letter_input_id =
+        Nokogiri::HTML5.fragment(html).at_css("input[name='letter']")["id"]
+      assert_html(
+        html,
+        "div.input-group.page-input " \
+        "label.input-group-text.font-weight-normal" \
+        "[for='#{letter_input_id}']",
+        text: :by_letter.l
+      )
     end
 
     def test_letter_goto_link_clears_page_number

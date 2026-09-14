@@ -19,6 +19,21 @@ class Components::InputGroup::AddonTest < ComponentTestCase
                 text: "@")
   end
 
+  def test_renders_label_variant
+    html = render_component(
+      Components::InputGroup::Addon.new(
+        variant: :label, position: :prepend, label_for: "letter_input"
+      )
+    ) { "By letter" }
+
+    assert_html(
+      html,
+      "div.input-group-prepend " \
+      "label.input-group-text.font-weight-normal[for='letter_input']",
+      text: "By letter"
+    )
+  end
+
   def test_renders_prepend_position
     html = render_component(
       Components::InputGroup::Addon.new(position: :prepend)

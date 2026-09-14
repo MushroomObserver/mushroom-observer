@@ -22,6 +22,19 @@ body {
   }
 }
 
+// Same gap as `.btn` above: `.form-control`'s `font-size:
+// $input-font-size` is also a fixed rem value that doesn't follow
+// body's bump. Left unadjusted, an input's height (driven by its
+// font-size) falls a pixel short of an adjacent `.btn`'s -- e.g. the
+// pagination "Goto" input-groups in Header::IndexPaginationNav, where
+// `align-items: stretch` can't help because `.form-control` sets an
+// explicit height rather than `auto`.
+.form-control {
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9375rem;
+  }
+}
+
 // Give focus outlines breathing room so they don't clip text/icons.
 a:focus,
 button:focus,
