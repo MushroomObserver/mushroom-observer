@@ -59,7 +59,7 @@
   .dropdown-menu {
     li {
       button.btn-link {
-        padding: 3px 20px;
+        padding: $dropdown-item-padding-y $dropdown-item-padding-x;
       }
 
       // Reproduces Bootstrap's `.dropdown-menu > li > a` treatment
@@ -70,7 +70,7 @@
       // so button-shaped and link-shaped items match.
       form.button_to {
         display: block;
-        padding: 3px 20px;
+        padding: $dropdown-item-padding-y $dropdown-item-padding-x;
         clear: both;
         font-weight: 400;
         line-height: 1.428571429;

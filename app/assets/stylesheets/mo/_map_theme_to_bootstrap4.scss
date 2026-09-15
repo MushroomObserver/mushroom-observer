@@ -215,6 +215,13 @@ $dropdown-link-disabled-color: mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%) !defau
 
 $dropdown-header-color:     $MENU_TEXT_COLOR !default;
 
+// Tighter than BS4's default (.25rem 1.5rem). Single source of
+// truth: reference these variables directly anywhere a
+// dropdown-item-style row needs this padding, rather than repeating
+// the literal value per file.
+$dropdown-item-padding-y:  0.25rem !default;
+$dropdown-item-padding-x:  0.5rem !default;
+
 // ==================================================
 // SECTION 8: NAVIGATION (NAVBAR)
 // ==================================================
