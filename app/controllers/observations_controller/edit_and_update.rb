@@ -4,7 +4,6 @@
 module ObservationsController::EditAndUpdate
   include ObservationsController::SharedFormMethods
   include ObservationsController::SiblingEXIF
-  include ObservationsController::EditablePrimary
   include ObservationsController::Validators
   include ::Locationable
 
@@ -65,7 +64,7 @@ module ObservationsController::EditAndUpdate
       return false
     end
     if companion
-      return false if redirect_for_companion_or_primary!
+      return false if redirect_to_companion!
     elsif redirect_if_reflection!
       return false
     end
@@ -100,7 +99,8 @@ module ObservationsController::EditAndUpdate
 
   # [companion, flash tag]
   def find_or_create_companion
-    builder = Observation::Companion.new(@observation, @user)
+    builder = Observation::Companion.new(@observation, @user,
+                                         admin: in_admin_mode?)
     if (companion = builder.existing)
       [companion, :edit_observation_companion_existing]
     else

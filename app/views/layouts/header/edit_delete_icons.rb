@@ -15,19 +15,13 @@
 # `Views::FullPageBase::Icons#add_edit_icons`.
 #
 # `Location` has a stricter destroy gate (model `destroyable?` + the
-# viewer owns the record or is in admin mode); `Observation` hides the
-# icon entirely for a read-only reflection (#5293) and shows a
-# read-only status icon beside edit/delete instead; other models
-# follow the edit-permission shape.
+# viewer owns the record or is in admin mode); `Observation` adds a
+# read-only status icon beside edit/delete for a reflection; other
+# models follow the edit-permission shape.
 module Views::Layouts
   class Header::EditDeleteIcons < Views::Base
     prop :object, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
-    # When set, the edit icon toggles this modal (by DOM id) instead of
-    # navigating -- used for a non-primary occurrence member, whose edit
-    # opens the choice modal (#5317). The edit route stays as the href,
-    # so it degrades to a plain edit link without JS.
-    prop :edit_modal_target, _Nilable(String), default: nil
 
     def view_template
       div(class: "h4 my-0 d-flex align-items-center object_edit") do
@@ -51,26 +45,10 @@ module Views::Layouts
     # companion observation for the changes.
     def edit_item
       return nil unless can_edit_object?
-      return edit_modal_toggle if @edit_modal_target
 
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
         class: ::Components::InlineLinkBlock.item_class
-      )
-    end
-
-    # Opens the static choice modal via Bootstrap data-toggle. Uses an
-    # href of "#" rather than the edit route: a same-page hash is not a
-    # Turbo visit (or prefetch), so the edit page can't load in the
-    # background under the open modal (#5317), while the anchor still
-    # gets the icon-link styling and link color the delete icon's
-    # sibling <a> has.
-    def edit_modal_toggle
-      ::Components::Button::Get.new(
-        name: :edit_object.t(type: @object.type_tag),
-        target: "#", icon: :edit, variant: :strip,
-        class: ::Components::InlineLinkBlock.item_class,
-        data: { toggle: "modal", target: "##{@edit_modal_target}" }
       )
     end
 
@@ -89,7 +67,6 @@ module Views::Layouts
 
     def can_destroy_object?
       return can_destroy_location? if @object.is_a?(::Location)
-      return can_destroy_observation? if @object.is_a?(::Observation)
 
       can_edit_object?
     end
@@ -98,15 +75,6 @@ module Views::Layouts
       return false unless @object.destroyable?
 
       in_admin_mode? || @object.user == @user
-    end
-
-    # A read-only reflection can't be destroyed -- ObservationsController::
-    # Destroy blocks the action itself; this hides the icon that would
-    # otherwise offer it.
-    def can_destroy_observation?
-      return false if @object.reflection?
-
-      can_edit_object?
     end
   end
 end

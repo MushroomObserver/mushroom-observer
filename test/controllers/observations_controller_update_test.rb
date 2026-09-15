@@ -253,58 +253,62 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
-  # target=primary from an editable non-primary member edits the
-  # occurrence's existing editable primary.
-  def test_edit_target_primary_edits_existing_primary
+  # Edit on an editable non-primary member edits that member itself;
+  # the occurrence's primary is left alone.
+  def test_edit_non_primary_member_edits_itself
     user = users(:rolf)
     primary = editable_member(:coprinus_comatus_obs, user)
     other = editable_member(:detailed_unknown_obs, user)
     occ = make_occurrence(user, primary, [primary, other])
     login(user.login)
 
-    get(:edit, params: { id: other.id, target: "primary" })
+    get(:edit, params: { id: other.id })
 
-    assert_redirected_to(edit_observation_path(primary.id))
+    assert_response(:success)
     assert_equal(primary.id, occ.reload.primary_observation_id)
   end
 
-  # target=primary from a reflection whose occurrence has no editable
-  # primary promotes the oldest editable sibling and edits it.
-  def test_edit_target_primary_promotes_editable_sibling
+  # Edit on a reflection whose occurrence has an editable native member
+  # makes that member the primary and edits it, flashing what happened.
+  def test_edit_reflection_edits_existing_native_member
     user = users(:rolf)
     reflection = editable_member(:detailed_unknown_obs, user)
     reflection.update_column(:reflected_at, Time.zone.now)
     native = editable_member(:coprinus_comatus_obs, user)
     occ = make_occurrence(user, reflection, [reflection, native])
-
     login(user.login)
-    get(:edit, params: { id: reflection.id, target: "primary" })
+
+    assert_no_difference("Observation.count") do
+      get(:edit, params: { id: reflection.id })
+    end
 
     assert_equal(native.id, occ.reload.primary_observation_id)
     assert_redirected_to(edit_observation_path(native.id))
+    assert_flash_success
   end
 
-  # target=primary from a lone read-only reflection creates a companion
-  # native, makes it primary, and edits it.
-  def test_edit_target_primary_creates_companion_for_lone_reflection
+  # Edit on a reflection that is the only member of its occurrence
+  # creates a companion native, makes it primary, and edits it.
+  def test_edit_lone_reflection_creates_companion
     user = users(:rolf)
     reflection = editable_member(:coprinus_comatus_obs, user)
     reflection.update_column(:reflected_at, Time.zone.now)
     occ = make_occurrence(user, reflection, [reflection])
-
     login(user.login)
+
     assert_difference("Observation.count", 1) do
-      get(:edit, params: { id: reflection.id, target: "primary" })
+      get(:edit, params: { id: reflection.id })
     end
 
     companion = occ.reload.primary_observation
     assert_not(companion.reflection?, "companion is an editable native")
     assert_redirected_to(edit_observation_path(companion.id))
+    assert_flash_success
   end
 
   # A companion that can't be created (here, invalid coordinates copied
   # from the reflection) flashes an error and returns to the show page.
-  def test_edit_target_primary_flashes_when_companion_invalid
+  def test_edit_reflection_flashes_when_companion_invalid
     user = users(:rolf)
     reflection = editable_member(:coprinus_comatus_obs, user)
     reflection.update_columns(reflected_at: Time.zone.now,
@@ -312,45 +316,53 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     make_occurrence(user, reflection, [reflection])
     login(user.login)
 
-    get(:edit, params: { id: reflection.id, target: "primary" })
+    get(:edit, params: { id: reflection.id })
 
     assert_flash_error
     assert_redirected_to(action: :show, id: reflection.id)
   end
 
-  # Guard: editable siblings but no primary set -- target=primary
-  # promotes the oldest editable member.
-  def test_edit_target_primary_promotes_oldest_when_no_primary
+  # An editable native primary stays primary even when an older
+  # editable native is also a member (Copilot review).
+  def test_edit_reflection_keeps_editable_native_primary
     user = users(:rolf)
+    reflection = editable_member(:imported_inat_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
+    natives = [editable_member(:coprinus_comatus_obs, user),
+               editable_member(:detailed_unknown_obs, user)].sort_by(&:id)
+    older, newer = natives
+    occ = make_occurrence(user, newer, [reflection, older, newer])
+    login(user.login)
+
+    get(:edit, params: { id: reflection.id })
+
+    assert_equal(newer.id, occ.reload.primary_observation_id)
+    assert_redirected_to(edit_observation_path(newer.id))
+  end
+
+  # Guard: editable natives but no primary set -- edit on the
+  # reflection promotes the oldest editable native.
+  def test_edit_reflection_promotes_oldest_native_when_no_primary
+    user = users(:rolf)
+    reflection = editable_member(:imported_inat_obs, user)
+    reflection.update_column(:reflected_at, Time.zone.now)
     older = editable_member(:coprinus_comatus_obs, user)
     newer = editable_member(:detailed_unknown_obs, user)
-    occ = make_occurrence(user, older, [older, newer])
+    occ = make_occurrence(user, older, [reflection, older, newer])
     occ.update_column(:primary_observation_id, nil)
-
     login(user.login)
-    get(:edit, params: { id: newer.id, target: "primary" })
+
+    get(:edit, params: { id: reflection.id })
 
     oldest = [older, newer].min_by(&:id)
     assert_equal(oldest.id, occ.reload.primary_observation_id)
     assert_redirected_to(edit_observation_path(oldest.id))
   end
 
-  # target=primary on a reflection with no occurrence redirects to the
-  # reflection's edit, which then creates the companion (companion flow).
-  def test_edit_target_primary_on_occurrenceless_reflection
-    user = users(:rolf)
-    reflection = editable_member(:coprinus_comatus_obs, user)
-    reflection.update_column(:reflected_at, Time.zone.now)
-    login(user.login)
-
-    get(:edit, params: { id: reflection.id, target: "primary" })
-
-    assert_redirected_to(edit_observation_path(reflection.id))
-  end
-
-  # In admin mode the resolver honors admin edit rights: it edits the
-  # existing (admin-editable) primary rather than creating a companion.
-  def test_edit_target_primary_honors_admin_editability
+  # In admin mode the editor may edit any member: edit on another
+  # user's reflection opens that occurrence's existing native primary
+  # rather than creating an admin-owned second companion.
+  def test_edit_reflection_honors_admin_editability
     make_admin("rolf")
     admin = users(:rolf)
     primary = observations(:detailed_unknown_obs)
@@ -363,7 +375,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     [primary, reflection].each { |o| o.update_column(:occurrence_id, occ.id) }
 
     assert_no_difference("Observation.count") do
-      get(:edit, params: { id: reflection.id, target: "primary" })
+      get(:edit, params: { id: reflection.id })
     end
 
     assert_redirected_to(edit_observation_path(primary.id))
