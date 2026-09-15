@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
-# Index-page sort-bar. `<div class="flex-bar pl-3 sorter">` with a
+# Index-page sort-bar. `<div class="flex-bar sorter">` with a
 # `Sort by:` label + `Components::Dropdown` (`element: :div`, since
 # this isn't a `<ul>`-based nav) whose menu lists every available
 # sort option plus a `Reverse` entry. Stashed in
-# `content_for(:sorter)` by `add_sorter` in the index view.
+# `content_for(:sorter)` by `add_sorter` in the index view. Left-edge
+# padding lives on `Header::IndexPaginationNav`'s `.pagination-*`
+# wrapper (`px-card`), not here -- this is always rendered as that
+# wrapper's leftmost child.
 #
 # `sorts` is `[[order_by_key, label_translation_symbol], ...]`, the
 # shape every `<Foo>Controller#index_sort_options` returns.
@@ -24,7 +27,7 @@ module Views::Layouts
     def view_template
       return unless visible?
 
-      div(class: "flex-bar pl-3 sorter") do
+      div(class: "flex-bar sorter") do
         render(Components::Navbar::Text.new(
                  class: class_names("mx-0 pr-2",
                                     Components::Column.mobile_hide_classes)

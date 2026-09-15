@@ -41,6 +41,16 @@
   padding: $card-spacer-y $card-spacer-x;
 }
 
+.px-card {
+  padding-left: $card-spacer-x;
+  padding-right: $card-spacer-x;
+}
+
+.py-card {
+  padding-top: $card-spacer-y;
+  padding-bottom: $card-spacer-y;
+}
+
 // Card padding for list-group-flush, which appears within cards generally.
 .list-group-flush .list-group-item {
   @extend .p-card;

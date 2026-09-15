@@ -28,7 +28,7 @@ module Views::Layouts
     prop :request_url, ::String # Full URL w/ query params, for links
 
     def view_template
-      div(class: "pagination-#{@position} flex-bar mb-2") do
+      div(class: "pagination-#{@position} flex-bar px-card mb-2") do
         div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
         div(class: "d-flex") do
           render_letter_pagination_nav

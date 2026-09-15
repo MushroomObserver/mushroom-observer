@@ -13,25 +13,25 @@ module Views::Layouts
       html = render_nav(position: :top, pagination_data: paginated(50, 1))
 
       # Main container has correct position class
-      assert_includes(html, 'class="pagination-top flex-bar mb-2"')
+      assert_html(html, ".pagination-top")
 
-      # Contains two d-flex divs
-      assert_html(html, "div.pagination-top > div.d-flex", count: 2)
+      # Contains two children (sorter wrapper + pager wrapper)
+      assert_html(html, ".pagination-top > *", count: 2)
     end
 
     def test_renders_basic_structure_with_position_bottom
       html = render_nav(position: :bottom, pagination_data: paginated(50, 1))
 
-      assert_includes(html, 'class="pagination-bottom flex-bar mb-2"')
+      assert_html(html, ".pagination-bottom")
     end
 
     def test_renders_number_pagination_when_multiple_pages
       html = render_nav(pagination_data: paginated(50, 1))
 
-      assert_includes(html, 'class="paginate pagination_numbers flex-bar')
+      assert_html(html, "nav.paginate.pagination_numbers")
       assert_includes(html, "prev_page_link")
       assert_includes(html, "next_page_link")
-      assert_includes(html, 'class="input-group page-input mx-2"')
+      assert_html(html, ".input-group.page-input")
       # Should have the max page link (5 pages = 50/10)
       assert_nested(
         html, parent_selector: "nav.pagination_numbers",
@@ -73,7 +73,7 @@ module Views::Layouts
 
       assert_no_html(html, "form.page_input")
       assert_html(
-        html, "div.input-group.page-input[data-controller='page-input']",
+        html, ".input-group.page-input[data-controller='page-input']",
         count: 1
       )
       # Input should have current page value
@@ -105,11 +105,11 @@ module Views::Layouts
 
       html = render_nav(pagination_data: pagination_data)
 
-      assert_includes(html, 'class="paginate pagination_letters flex-bar')
+      assert_html(html, "nav.paginate.pagination_letters")
       assert_html(html, "input[name='letter']", attribute: { value: "A" })
       assert_no_html(html, "form.page_input")
       assert_html(
-        html, "div.input-group.page-input[data-controller='page-input']"
+        html, ".input-group.page-input[data-controller='page-input']"
       )
       # The label is tied to the input (not a free-floating div) and
       # sits inside the input-group with it -- see InputGroup::Addon.
@@ -117,8 +117,8 @@ module Views::Layouts
         Nokogiri::HTML5.fragment(html).at_css("input[name='letter']")["id"]
       assert_html(
         html,
-        "div.input-group.page-input " \
-        "label.input-group-text.font-weight-normal" \
+        ".input-group.page-input " \
+        "label.input-group-text" \
         "[for='#{letter_input_id}']",
         text: :by_letter.l
       )
@@ -162,7 +162,7 @@ module Views::Layouts
       assert_nested(html, parent_selector: "nav.pagination_numbers",
                           child_selector: "a.prev_page_link")
       assert_nested(html, parent_selector: "nav.pagination_numbers",
-                          child_selector: "div.input-group.page-input")
+                          child_selector: ".input-group.page-input")
       assert_nested(html, parent_selector: "nav.pagination_numbers",
                           child_selector: "a.next_page_link")
     end

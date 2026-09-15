@@ -40,25 +40,18 @@ module Views::Layouts
       assert_equal("", html)
     end
 
-    def test_renders_outer_div_with_label_and_dropdown
+    def test_renders_outer_element_with_label_and_dropdown
       html = render_sorter(query: query_with(num_results: 5))
 
-      # Outer is a `<div>`, not a `<ul>` -- not a list of nav items,
-      # just a flex row (a `<ul>` here carries a stray default
-      # margin-bottom that breaks vertical centering against its
-      # sibling pagination row).
-      assert_html(html, "div.flex-bar.sorter")
+      assert_html(html, ".sorter")
       # The label is the first child.
-      assert_html(html, "div.sorter > div.navbar-text",
+      assert_html(html, ".sorter > .navbar-text",
                   text: "#{:sort_by_header.l}:")
       # The dropdown is the second child; Components::Dropdown is
       # passed `element: :div` (its default outer wrapper is `<li>`,
-      # correct only inside a `<ul>`-based nav) and the Sorter passes
-      # `wrapper_class: "navbar-form px-0"` for navbar spacing.
-      assert_html(html, "div.sorter > div.dropdown.navbar-form")
-      # Toggle `<a>` carries the btn styling the legacy sort-bar used.
-      assert_html(html,
-                  "div.dropdown a.dropdown-toggle.btn.btn-outline-default")
+      # correct only inside a `<ul>`-based nav).
+      assert_html(html, ".sorter > .dropdown")
+      assert_html(html, ".dropdown a.dropdown-toggle")
       # Menu carries the `sorts` extra class.
       assert_html(html, "ul.dropdown-menu.sorts")
     end

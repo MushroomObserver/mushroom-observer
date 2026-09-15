@@ -202,10 +202,11 @@ class ApplicationFormTest < ComponentTestCase
     # nested inside either one.
     columns_row = Nokogiri::HTML5.fragment(form).at_css(".d-inline-block").
                   parent
-    assert_equal("help-block",
-                 columns_row.next_element["class"],
-                 "help-block should immediately follow the row " \
-                 "containing both d-inline-block columns")
+    assert(
+      columns_row.next_element.matches?(".help-block"),
+      "help-block should immediately follow the row containing both " \
+      "d-inline-block columns"
+    )
   end
 
   def test_derive_form_id_uses_all_controller_segments

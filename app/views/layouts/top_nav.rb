@@ -44,8 +44,10 @@ class Views::Layouts::TopNav < Views::Base
   # of each landing on a separate line. `container-fluid` is already
   # flex + `justify-content: space-between` + `align-items: center`
   # as a descendant of `.navbar` (BS4's `.navbar .container-fluid`
-  # rule) -- no `flex-bar` needed here.
-  CONTAINER_CLASSES = %w[container-fluid px-3 w-100].freeze
+  # rule) -- no `flex-bar` needed here. `px-card` matches the
+  # horizontal padding cards use, so #top_nav's content lines up with
+  # card content below it.
+  CONTAINER_CLASSES = %w[container-fluid px-card w-100].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
