@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-15 (deploy-2026-09-15-12-00)
+
+- Edit on a reflection goes straight to its companion; drop the `EditModal` and re-allow reflection delete ([PR5372](https://github.com/MushroomObserver/mushroom-observer/pull/5372), @mo-nathan)
+
+## 2026-09-14 (deploy-2026-09-14-12-00)
+
+- Enable `config.load_defaults(7.2)`, delete the superseded framework-defaults files ([PR5354](https://github.com/MushroomObserver/mushroom-observer/pull/5354), @nimmolo)
+- Fix hanging EXIF reads on the observation edit page ([PR5370](https://github.com/MushroomObserver/mushroom-observer/pull/5370), @nimmolo)
+
 ## 2026-09-12 (deploy-2026-09-12-12-00)
 
 - Fix `README_PRODUCTION_INSTALL`'s stale MySQL-on-app-box assumption ([PR5356](https://github.com/MushroomObserver/mushroom-observer/pull/5356), @nimmolo)

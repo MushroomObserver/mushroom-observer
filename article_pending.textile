@@ -1,2 +1,1 @@
-|{white-space:nowrap}. 2026-09-12 | Sync DNA sequences from iNaturalist onto imported Observations | "PR#5361":https://github.com/MushroomObserver/mushroom-observer/pull/5361 |
-|{white-space:nowrap}. 2026-09-11 | Hide the filter row on index pages when no filters are applied | "PR#5362":https://github.com/MushroomObserver/mushroom-observer/pull/5362 |
+|{white-space:nowrap}. 2026-09-15 | Edit or delete imported Observations without the pop-up | "PR#5372":https://github.com/MushroomObserver/mushroom-observer/pull/5372 |

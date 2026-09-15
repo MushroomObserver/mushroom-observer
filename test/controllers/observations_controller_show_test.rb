@@ -17,9 +17,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # A non-primary occurrence member's edit icon opens the choice modal
-  # (#5317): the modal is rendered and the edit icon toggles it.
-  def test_show_edit_modal_for_non_primary_member
+  # A read-only reflection's edit icon is a plain edit link: the edit
+  # action itself steers to the occurrence's editable member or creates
+  # one, flashing what it did. No choice modal is rendered.
+  def test_show_reflection_edit_icon_links_to_edit
     user = users(:rolf)
     reflection = observations(:coprinus_comatus_obs)
     reflection.update_columns(user_id: user.id, collector_user_id: user.id,
@@ -32,37 +33,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: reflection.id })
 
     assert_response(:success)
-    assert_select("#edit_occurrence_modal")
-    # The toggle's href is "#" (a same-page hash Turbo won't visit), so
-    # the edit page can't load in the background under the modal (#5317).
-    assert_select(
-      "a[href='#'][data-toggle='modal']" \
-      "[data-target='#edit_occurrence_modal']"
-    )
-    assert_select(
-      "[data-target='#edit_occurrence_modal'][href*='/edit']", count: 0
-    )
+    assert_select("a[href*='/observations/#{reflection.id}/edit']")
+    assert_select("[data-toggle='modal'][href='#']", count: 0)
   end
 
-  # A standalone observation (no occurrence) gets no modal; its edit
-  # icon is a plain edit link.
-  def test_show_no_edit_modal_for_standalone_observation
-    obs = observations(:minimal_unknown_obs)
-    obs.update_column(:occurrence_id, nil)
-    login(obs.user.login)
-
-    get(:show, params: { id: obs.id })
-
-    assert_response(:success)
-    assert_select("#edit_occurrence_modal", count: 0)
-  end
-
-  # A reflection with no occurrence has no primary to steer toward, so
-  # no modal (#5328 review) -- it would just bounce back otherwise.
-  # A read-only reflection with no occurrence yet still gets the modal:
-  # "Create Editable Primary" creates the native and links an occurrence
-  # (#5317). It must not silently create a companion on icon click.
-  def test_show_edit_modal_for_reflection_without_occurrence
+  # Same for a reflection with no occurrence yet: a plain edit link,
+  # nothing to choose from.
+  def test_show_occurrenceless_reflection_edit_icon_links_to_edit
     user = users(:rolf)
     reflection = observations(:coprinus_comatus_obs)
     reflection.update_columns(user_id: user.id, collector_user_id: user.id,
@@ -73,8 +50,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: reflection.id })
 
     assert_response(:success)
-    assert_select("#edit_occurrence_modal")
-    assert_select("a[href='#'][data-target='#edit_occurrence_modal']")
+    assert_select("a[href*='/observations/#{reflection.id}/edit']")
+    assert_select("[data-toggle='modal'][href='#']", count: 0)
   end
 
   def test_show_no_login_with_flow

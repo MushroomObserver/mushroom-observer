@@ -17,21 +17,23 @@ class Observation::Companion
               :is_collection_location, :specimen, :notes,
               :collector].freeze
 
-  def initialize(reflection, user)
+  # `admin:` -- the editor is in admin mode, which grants edit rights the
+  # controller's permission check already honored.
+  def initialize(reflection, user, admin: false)
     @reflection = reflection
     @user = user
+    @admin = admin
   end
 
-  # A non-reflection member of the occurrence the user may edit, made
-  # the primary if a reflection still holds that spot. Read from the
-  # database, not the reflection's loaded association, which can
-  # predate a companion created moments ago.
+  # A non-reflection member of the occurrence the user may edit: the
+  # current primary when it qualifies, else the oldest such member,
+  # made the primary. Read from the database, not the reflection's
+  # loaded association, which can predate a companion created moments
+  # ago.
   def existing
     return unless @reflection.occurrence_id
 
-    companion = Observation.where(occurrence_id: @reflection.occurrence_id).
-                where.not(id: @reflection.id).order(:id).
-                find { |obs| !obs.reflection? && obs.can_edit?(@user) }
+    companion = preferred(editable_members)
     make_primary(companion) if companion
     companion
   end
@@ -51,6 +53,25 @@ class Observation::Companion
   end
 
   private
+
+  # Oldest first.
+  def editable_members
+    Observation.where(occurrence_id: @reflection.occurrence_id).
+      where.not(id: @reflection.id).order(:id).
+      select { |obs| !obs.reflection? && editable?(obs) }
+  end
+
+  # The current primary when it is one of the editable members, so Edit
+  # never flips an editable native primary; else the oldest member.
+  def preferred(members)
+    primary_id = Occurrence.find(@reflection.occurrence_id).
+                 primary_observation_id
+    members.find { |obs| obs.id == primary_id } || members.first
+  end
+
+  def editable?(obs)
+    @admin || obs.can_edit?(@user)
+  end
 
   def build
     attrs = @reflection.attributes.symbolize_keys.slice(*SNAPSHOT)
@@ -72,8 +93,10 @@ class Observation::Companion
       change_vote(naming, Vote.maximum_vote, @user)
   end
 
+  # Fetched afresh for the same reason as `name`: the reflection's own
+  # occurrence association may be strict-loaded.
   def join_occurrence(companion)
-    occurrence = @reflection.occurrence
+    occurrence = Occurrence.find_by(id: @reflection.occurrence_id)
     if occurrence
       Occurrence.check_max_observations!(occurrence.observations.to_a +
                                          [companion])
