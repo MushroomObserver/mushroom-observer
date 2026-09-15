@@ -2,8 +2,12 @@
 
 # Bootstrap nav-style dropdown menu. Renders the
 # `<li class="dropdown d-inline-block">` + `<a class="dropdown-toggle">` +
-# `<ul class="dropdown-menu">` triple that the top-nav's Actions
-# dropdown, user dropdown, and similar menus all share.
+# `<div class="dropdown-menu">` triple that the top-nav's Actions
+# dropdown, user dropdown, and similar menus all share. The menu's
+# items (`a`/`form.dropdown-item`) sit directly inside the menu div,
+# matching Bootstrap 4's flat dropdown markup -- no `<ul>`/`<li>`
+# nesting inside the menu itself (the outer `<li>` wrapper is a
+# separate concern, the surrounding navbar-nav's list-item).
 #
 # Builder-pattern API: yields a `menu` object the caller registers
 # sections on. Each section is `Tab::Collection`, a single
@@ -11,7 +15,7 @@
 # is what `Header::ContextNavHelper#add_context_nav` hands its
 # downstream renderers after normalizing — no live caller passes
 # raw tuple arrays directly anymore). Multiple sections are
-# separated by a `<li class="dropdown-divider">`. Empty sections
+# separated by a `<div class="dropdown-divider">`. Empty sections
 # are skipped (no spurious divider).
 #
 # @example Single-section (Actions dropdown)
@@ -47,7 +51,7 @@ class Components::Dropdown < Components::Base
   # `element: :div` instead.
   prop :element, ::Symbol, default: :li
   # Extra classes on the outer wrapper, the toggle `<a>`, and the
-  # menu `<ul>`. Defaults are nil — only the index sort-bar
+  # menu `<div>`. Defaults are nil — only the index sort-bar
   # (`Views::Layouts::Header::Sorter`) currently passes any of these.
   prop :wrapper_class, _Nilable(::String), default: nil
   # `toggle_variant:` / `toggle_size:` add Bootstrap btn styling to the
@@ -58,10 +62,10 @@ class Components::Dropdown < Components::Base
   prop :toggle_size, _Nilable(::Symbol), default: nil
   prop :toggle_class, _Nilable(::String), default: nil
   prop :menu_class, _Nilable(::String), default: nil
-  # Optional pre-section content rendered inside the menu `<ul>`
+  # Optional pre-section content rendered inside the menu `<div>`
   # above the first section. SafeBuffer (from `capture { … }`) so
   # `trusted_html` emits it intact. Used by the sort-bar to inject
-  # the mobile-only `Sort by:` `<li>` header.
+  # the mobile-only `Sort by:` header.
   prop :menu_header, _Nilable(::String), default: nil
 
   def initialize(...)
@@ -86,7 +90,7 @@ class Components::Dropdown < Components::Base
 
   # Register one section of items. Block-evaluation collects via
   # the vanish pattern above; consecutive sections get a Bootstrap
-  # `<li class="dropdown-divider">` between them.
+  # `<div class="dropdown-divider">` between them.
   #
   # @return [nil] so the call doesn't accidentally emit anything
   def section(items)
@@ -119,13 +123,13 @@ class Components::Dropdown < Components::Base
   end
 
   def render_menu(sections)
-    ul(id: @menu_id,
-       class: class_names("dropdown-menu", @menu_class),
-       aria: { labelledby: @id }) do
+    div(id: @menu_id,
+        class: class_names("dropdown-menu", @menu_class),
+        aria: { labelledby: @id }) do
       trusted_html(@menu_header) if @menu_header
       sections.each_with_index do |tuples, idx|
-        li(class: "dropdown-divider") if idx.positive?
-        tuples.each { |tuple| li { render_link(tuple) } }
+        div(class: "dropdown-divider") if idx.positive?
+        tuples.each { |tuple| render_link(tuple) }
       end
     end
   end

@@ -20,7 +20,6 @@ module Views::Controllers::Account::APIKeys
   #   Create button. Used by `new.rb` (no-JS fallback).
   class Form < ::Components::ApplicationForm
     prop :cancel_target, _Nilable(String), default: nil
-    prop :cancel_parent, _Nilable(String), default: nil
 
     def view_template
       if model.persisted?
@@ -77,8 +76,7 @@ module Views::Controllers::Account::APIKeys
              collapsed: false,
              icon: :cancel,
              icon_title: :cancel.ti,
-             button: :default,
-             data: { parent: "##{@cancel_parent}" })
+             button: :default)
       end
     end
 

@@ -20,6 +20,20 @@ class AccordionTest < ComponentTestCase
     assert_no_html(html, "#edit_42.#{EXPANDED}")
   end
 
+  # data-parent must live on each pane, not on the caller's trigger
+  # link -- Bootstrap 4's collapse.js reads data-parent off the
+  # collapse target that was clicked into (the pane), not the
+  # element that was clicked, to find sibling panes to close.
+  def test_each_pane_carries_data_parent_pointing_at_the_accordion
+    html = render_accordion do |a|
+      a.with_pane(id: "view_42", expanded: true) { "VIEW_CONTENT" }
+      a.with_pane(id: "edit_42") { "EDIT_CONTENT" }
+    end
+
+    assert_html(html, "#view_42[data-parent='#notes_42']")
+    assert_html(html, "#edit_42[data-parent='#notes_42']")
+  end
+
   def test_renders_pane_with_no_inner_block
     html = render_accordion do |a|
       a.with_pane(id: "view_42", expanded: true)

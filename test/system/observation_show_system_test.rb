@@ -319,6 +319,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # Clicking MCP closes iNat's pane (accordion) and opens MCP's own.
     assert_selector("#pane_#{mcp_link.id}.#{EXPANDED}", wait: 6)
     within("#pane_#{mcp_link.id}") { assert_text(/MyCoPortal/) }
-    assert_no_selector("#pane_#{inat_link.id}.#{EXPANDED}")
+    assert_no_selector("#pane_#{inat_link.id}.#{EXPANDED}", wait: 6)
   end
 end

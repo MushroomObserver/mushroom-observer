@@ -94,7 +94,6 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
          fallback_href: external_link_path(link.id),
          class: "badge badge-id badge-xl ml-2 text-uppercase",
          data: {
-           parent: "#external_links_accordion",
            turbo_frame: "external_link_frame_#{link.id}",
            tooltip_target: "tip", placement: "top",
            title: :show_observation_shared_with_tooltip.l(

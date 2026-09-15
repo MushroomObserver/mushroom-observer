@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
-# Bootstrap accordion where exactly one of the peer collapse divs
-# is visible at a time. Callers supply the trigger links (with
-# `data-toggle="collapse"`, `data-target="#pane_id"`,
-# `data-parent="#accordion_id"`) anywhere on the page — inside a
-# pane or elsewhere.
+# Bootstrap accordion where only one of the peer collapse divs is
+# visible at a time. Callers supply the trigger links (with
+# `data-toggle="collapse"` and `data-target="#pane_id"`/
+# `href="#pane_id"`) anywhere on the page — inside a pane or
+# elsewhere. No `data-parent` needed on the trigger: each pane
+# carries a `data-parent="##{id}"` (set below), which is what
+# Bootstrap 4's `collapse.js` reads to find sibling panes to close
+# (`Collapse#_getConfig` reads `data-parent` off the collapse target
+# element, not the trigger that clicked it).
 #
 # Add as many `with_pane` slots as needed. `id:` is required on each
 # pane — callers' `data-target` / `href` must point at it. Pass
@@ -14,12 +18,9 @@
 # zero-padding parent) -- separate from the `class:` passed to
 # `Accordion` itself, which styles the shared inner wrapper.
 #
-# Bootstrap 4's `collapse.js` (`Collapse#_getParent`) closes sibling
-# panes via `[data-toggle="collapse"][data-parent="..."]`, a plain
-# attribute selector -- the inner wrapper needs no Bootstrap component
-# class for this to work. `border-none`/`bg-none` strip its visual
-# chrome (border, background); `margin-bottom: ~20px` on the outer div
-# is the default spacing below an accordion instance, e.g. between
+# `border-none`/`bg-none` strip the inner wrapper's visual chrome
+# (border, background); `margin-bottom: ~20px` on the outer div is
+# the default spacing below an accordion instance, e.g. between
 # successive rows in `account/api_keys/table.rb`. Pass `class:` (via
 # the `attributes:` catch-all) for spacing overrides -- e.g.
 # `class: "m-0"`.
@@ -55,7 +56,8 @@ class Components::Accordion < Components::Base
   slot :pane, lambda { |id:, expanded: false, class: nil, &content|
     Collapsible(
       id: id, expanded: expanded,
-      class: class_names((@slide ? nil : "fade-not-slide"), grab(class:))
+      class: class_names((@slide ? nil : "fade-not-slide"), grab(class:)),
+      data: { parent: "##{@id}" }
     ) { content&.call }
   }, collection: true
 

@@ -26,62 +26,62 @@ class DropdownTest < ComponentTestCase
     end
 
     assert_html(html, "a.dropdown-toggle[id='single_tab_toggle']")
-    assert_html(html, "ul.dropdown-menu[id='single_tab_menu']")
+    assert_html(html, "div.dropdown-menu[id='single_tab_menu']")
     assert_html(
       html,
-      "ul.dropdown-menu li a[href='#{routes.project_path(id: @project.id)}']"
+      "div.dropdown-menu a[href='#{routes.project_path(id: @project.id)}']"
     )
   end
 
   # Post/put/patch/destroy tuples dispatched through the dropdown must
-  # NOT carry `.btn` styling — they should render as plain form-submits
-  # inside a `<li>`, not as Bootstrap-styled action buttons.
-  # Regression guard for the `variant: :strip` default added to
+  # NOT carry `.btn` styling — they should render as plain
+  # form-submits, not as Bootstrap-styled action buttons. Regression
+  # guard for the `variant: :strip` default added to
   # `Components::LinkRendering#render_crud_button_or_link`.
   def test_post_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :post)
 
-    assert_html(html, "li form")
+    assert_html(html, "form")
     assert_no_html(html, "button.btn")
   end
 
   # `.dropdown-item` belongs on the <form>, not the inner <button> —
   # `button_to`'s html_options land on the button, so a class meant
-  # for the row's own padding/hover treatment has to go through
-  # `form:` instead. Regression guard for the form/button hover-fill
-  # split (the form had the row's padding, only the button had the
-  # hover fill, so hovering the padded margin around the button text
-  # did nothing).
+  # for the row's padding/hover treatment has to go through `form:`
+  # instead. Regression guard for the form/button hover-fill split
+  # (the form had the row's padding, only the button had the hover
+  # fill, so hovering the padded margin around the button text did
+  # nothing).
   def test_post_tuple_dropdown_item_on_form_not_button
     html = render_dropdown_with_button(button: :post)
 
     # form.dropdown-item alone isn't enough -- Rails' `button_to` only
     # supplies its default "button_to" form class when no `form:
-    # class:` is given at all, so passing "dropdown-item" without
+    # class:` is given, so passing "dropdown-item" without
     # "button_to" silently drops "button_to" from the form (breaking
     # _form_elements.scss's browser-chrome-reset selector).
-    assert_html(html, "li form.button_to.dropdown-item")
+    assert_html(html, "form.button_to.dropdown-item")
     assert_no_html(html, "button.dropdown-item")
   end
 
   def test_patch_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :patch)
 
-    assert_html(html, "li form")
+    assert_html(html, "form")
     assert_no_html(html, "button.btn")
   end
 
   def test_put_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :put)
 
-    assert_html(html, "li form")
+    assert_html(html, "form")
     assert_no_html(html, "button.btn")
   end
 
   def test_destroy_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :destroy)
 
-    assert_html(html, "li form")
+    assert_html(html, "form")
     assert_no_html(html, "button.btn")
   end
 
@@ -97,7 +97,7 @@ class DropdownTest < ComponentTestCase
                                placement: "top" } }]])
     end
 
-    assert_html(html, "li a[href='/edit']")
+    assert_html(html, "a[href='/edit']")
     assert_no_html(html, "[data-tooltip-target='tip']")
     assert_no_html(html, "[data-title]")
     assert_no_html(html, "[data-placement]")
@@ -109,7 +109,7 @@ class DropdownTest < ComponentTestCase
       menu.section(Tab::Project::Summary.new(project: @project))
     end
 
-    assert_html(html, "ul.dropdown-menu li.dropdown-divider")
+    assert_html(html, "div.dropdown-menu div.dropdown-divider")
   end
 
   # `element:` controls the outer wrapper tag -- `:li` by default

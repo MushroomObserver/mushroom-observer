@@ -119,19 +119,17 @@ module Views::Controllers::Observations::Identify
           data: dual_target("pulldown").merge(
             action: scroll_actions
           )) do
-        ul(class: "virtual_list",
-           data: dual_target("list")) do
+        div(class: "virtual_list",
+            data: dual_target("list")) do
           10.times { |i| render_dropdown_item(i) }
         end
       end
     end
 
     def render_dropdown_item(index)
-      li(class: "dropdown-item") do
-        a(href: "#", data: {
-            row: index, action: click_actions
-          })
-      end
+      a(class: "dropdown-item", href: "#", data: {
+          row: index, action: click_actions
+        })
     end
 
     # --- Type select (in form-group to align in the navbar flex row) ---

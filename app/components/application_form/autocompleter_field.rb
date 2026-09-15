@@ -333,20 +333,19 @@ class Components::ApplicationForm < Superform::Rails::Form
           action: "scroll->#{stimulus_controller_name}#scrollList:passive"
         }
       ) do
-        ul(class: "virtual_list",
-           data: { target_attr_key => "list" }) do
+        div(class: "virtual_list",
+            data: { target_attr_key => "list" }) do
           10.times do |i|
-            li(class: "dropdown-item") do
-              Link(
-                type: :get,
-                name: "",
-                target: "#",
-                data: {
-                  row: i,
-                  action: "click->#{stimulus_controller_name}#selectRow:prevent"
-                }
-              )
-            end
+            Link(
+              type: :get,
+              name: "",
+              target: "#",
+              class: "dropdown-item",
+              data: {
+                row: i,
+                action: "click->#{stimulus_controller_name}#selectRow:prevent"
+              }
+            )
           end
         end
       end

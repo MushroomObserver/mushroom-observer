@@ -80,7 +80,6 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     assert_html(
       html,
       "a[data-toggle='collapse'][data-target='#pane_#{link.id}']" \
-      "[data-parent='#external_links_accordion']" \
       "[data-turbo-frame='external_link_frame_#{link.id}']" \
       "[data-tooltip-target='tip'][data-title='#{tooltip}']"
     )
@@ -93,8 +92,17 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs))
 
-    assert_html(html, "#pane_#{inat_link.id}.collapse")
-    assert_html(html, "#pane_#{mcp_link.id}.collapse")
+    # data-parent lives on the accordion panes, not the triggers --
+    # Bootstrap's collapse.js reads it off the collapse target that
+    # was clicked into, not the element that was clicked.
+    assert_html(
+      html,
+      "#pane_#{inat_link.id}.collapse[data-parent='#external_links_accordion']"
+    )
+    assert_html(
+      html,
+      "#pane_#{mcp_link.id}.collapse[data-parent='#external_links_accordion']"
+    )
     # `src` + `loading="lazy"`, not a bare empty frame: Bootstrap 4's
     # collapse data-API click handler calls preventDefault()/
     # stopPropagation() unconditionally, which blocks Turbo's

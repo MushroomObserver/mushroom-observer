@@ -35,9 +35,10 @@ class Views::Layouts::TopNav
 
       assert_html(html, "li.dropdown.d-inline-block")
       assert_html(html, "a.dropdown-toggle#context_nav_toggle")
-      assert_html(html, "ul.dropdown-menu#context_nav")
-      # Each link tuple becomes one <li> inside the dropdown menu
-      assert_html(html, "ul.dropdown-menu li", count: simple_links.length)
+      assert_html(html, "div.dropdown-menu#context_nav")
+      # Each link tuple becomes one item inside the dropdown menu
+      assert_html(html, "div.dropdown-menu .dropdown-item",
+                  count: simple_links.length)
     end
 
     # The dropdown's toggle shows the localized "Actions" label.

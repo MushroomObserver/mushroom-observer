@@ -65,10 +65,10 @@ module Views::Layouts
     # The mobile-only `Sort by:` header that sits at the top of the
     # dropdown menu on extra-small viewports. Pre-captured to a
     # SafeBuffer so `Components::Dropdown` can splat it into its
-    # `<ul>` via `trusted_html`.
+    # `<div>` via `trusted_html`.
     def mobile_header_html
       capture do
-        li(class: class_names(Components::Column.mobile_only_classes)) do
+        div(class: class_names(Components::Column.mobile_only_classes)) do
           a(href: "#", disabled: true, class: "opacity-75") do
             append_colon(:sort_by_header.l)
           end
