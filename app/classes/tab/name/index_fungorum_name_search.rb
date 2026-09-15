@@ -13,6 +13,6 @@ class Tab::Name::IndexFungorumNameSearch < Tab::Name::ExternalBase
 
   def path
     "https://duckduckgo.com/?q=site%3Aindexfungorum.org+" \
-      "%22#{@name.sensu_stricto}%22"
+      "%22#{url_encode(@name.sensu_stricto)}%22"
   end
 end

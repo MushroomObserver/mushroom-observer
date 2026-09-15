@@ -23,4 +23,13 @@ class Tab::Name::ExternalBase < Tab::Base
   def model
     @name
   end
+
+  private
+
+  # CGI.escape encodes a space as "+", which only decodes back to a
+  # space in form/query-string parsing -- not in a URL path segment.
+  # "%20" decodes correctly in both, so convert to that instead.
+  def url_encode(str)
+    CGI.escape(str).gsub("+", "%20")
+  end
 end

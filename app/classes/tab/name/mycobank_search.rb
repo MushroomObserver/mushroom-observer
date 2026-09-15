@@ -12,7 +12,7 @@ class Tab::Name::MycobankSearch < Tab::Name::ExternalBase
 
   def path
     "#{MYCOBANK_HOST}#{MYCOBANK_BASIC_SEARCH_PATH}" \
-      "/field/Taxon%20name/#{taxon_name.gsub(" ", "%20")}"
+      "/field/Taxon%20name/#{url_encode(taxon_name)}"
   end
 
   private

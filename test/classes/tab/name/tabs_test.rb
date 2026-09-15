@@ -121,6 +121,10 @@ module Tab::Name
       assert_includes(tab.path, "mycoportal.org")
       assert(tab.html_options[:external])
       assert_equal(@name, tab.model)
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "MyCoPortal path should URL-encode the Name's text_name"
+      )
     end
 
     def test_mycobank_search_external_link
@@ -149,6 +153,11 @@ module Tab::Name
 
       assert_equal(:google_images.t, tab.title)
       assert_includes(tab.path, "images.google.com")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "Google Images path should URL-encode the Name's " \
+        "real_text_name"
+      )
     end
 
     def test_eol_external_link
@@ -168,7 +177,10 @@ module Tab::Name
 
       assert_equal("GBIF", tab.title)
       assert_includes(tab.path, "gbif.org")
-      assert_includes(tab.path, @name.sensu_stricto)
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "GBIF path should URL-encode the Name's text_name"
+      )
     end
 
     def test_google_search_external_link_non_group_rank
@@ -177,6 +189,10 @@ module Tab::Name
       assert_equal(:google_name_search.l, tab.title)
       assert_includes(tab.path, "google.com/search")
       assert_not_includes(tab.path, "Clade")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "Google search path should URL-encode the Name's text_name"
+      )
     end
 
     def test_google_search_external_link_group_rank
@@ -191,6 +207,10 @@ module Tab::Name
 
       assert_equal("iNaturalist", tab.title)
       assert_includes(tab.path, "inaturalist.org")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "iNaturalist path should URL-encode the Name's text_name"
+      )
     end
 
     def test_ascomycete_org_external_link
@@ -198,6 +218,10 @@ module Tab::Name
 
       assert_equal("Ascomycete.org", tab.title)
       assert_includes(tab.path, "ascomycete.org")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "Ascomycete.org path should URL-encode the Name's text_name"
+      )
     end
 
     def test_mushroom_expert_external_link
@@ -205,6 +229,10 @@ module Tab::Name
 
       assert_equal("MushroomExpert", tab.title)
       assert_includes(tab.path, "mushroomexpert.com")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "MushroomExpert path should URL-encode the Name's text_name"
+      )
     end
 
     def test_ncbi_nucleotide_external_link
@@ -212,6 +240,10 @@ module Tab::Name
 
       assert_equal("NCBI Nucleotide", tab.title)
       assert_includes(tab.path, "ncbi.nlm.nih.gov")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "NCBI Nucleotide path should URL-encode the Name's text_name"
+      )
     end
 
     def test_wikipedia_external_link
@@ -219,6 +251,10 @@ module Tab::Name
 
       assert_equal("Wikipedia", tab.title)
       assert_includes(tab.path, "wikipedia.org")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "Wikipedia path should URL-encode the Name's text_name"
+      )
     end
 
     def test_index_fungorum_record_external_link
@@ -237,6 +273,11 @@ module Tab::Name
       assert_equal(:index_fungorum_web_search.l, tab.title)
       assert_includes(tab.path, "duckduckgo.com")
       assert_includes(tab.path, "indexfungorum.org")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "Index Fungorum search path should URL-encode the Name's " \
+        "text_name"
+      )
     end
 
     def test_index_fungorum_search_page_external_link
