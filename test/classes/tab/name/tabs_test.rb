@@ -128,6 +128,20 @@ module Tab::Name
 
       assert_equal(:mycobank_search.l, tab.title)
       assert_includes(tab.path, "mycobank.org")
+      assert_includes(
+        tab.path, "Agaricus%20campestris",
+        "MycoBank search path should URL-encode the Name's text_name"
+      )
+    end
+
+    def test_mycobank_search_external_link_subgenus
+      name = names(:amanita_subgenus_lepidella)
+      tab = Tab::Name::MycobankSearch.new(name: name)
+
+      assert_includes(
+        tab.path, "subgen.",
+        "MB search should abbreviate subgenus as 'subgen.'"
+      )
     end
 
     def test_user_google_images_external_link
