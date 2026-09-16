@@ -23,7 +23,9 @@ class Views::Layouts::TopNav::ContextNav < Views::Base
     Dropdown(
       id: "context_nav_toggle",
       menu_id: "context_nav",
-      label: :app_context_actions.l
+      label: :app_context_actions.l,
+      wrapper_class: "ml-2",
+      menu_class: "dropdown-menu-right"
     ) do |menu|
       menu.section(@links)
     end

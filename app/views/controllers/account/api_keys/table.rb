@@ -120,7 +120,7 @@ module Views::Controllers::Account::APIKeys
            icon: :edit,
            closed_text: " #{:edit.ti}",
            button: :default,
-           data: { role: "edit_api_key", parent: "#notes_#{key.id}" })
+           data: { role: "edit_api_key" })
     end
 
     def render_edit_notes_form(key)
@@ -129,8 +129,7 @@ module Views::Controllers::Account::APIKeys
                action: account_api_key_path(key.id),
                id: "edit_api_key_#{key.id}_form",
                turbo: true,
-               cancel_target: "view_notes_#{key.id}_container",
-               cancel_parent: "notes_#{key.id}"
+               cancel_target: "view_notes_#{key.id}_container"
              ))
     end
 
@@ -164,8 +163,7 @@ module Views::Controllers::Account::APIKeys
            fallback_href: new_account_api_key_path,
            closed_text: :account_api_keys_create_button.l,
            button: :default,
-           id: "new_key_button",
-           data: { parent: "#new_key_row" })
+           id: "new_key_button")
     end
 
     def render_new_form
@@ -174,8 +172,7 @@ module Views::Controllers::Account::APIKeys
                action: account_api_keys_path,
                id: "new_api_key_form",
                turbo: true,
-               cancel_target: "new_key_button_container",
-               cancel_parent: "new_key_row"
+               cancel_target: "new_key_button_container"
              ))
     end
   end

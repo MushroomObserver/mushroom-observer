@@ -14,12 +14,19 @@ module Views::Layouts
       ::Interest.where(user: @viewer, target: @obs).destroy_all
     end
 
+    # ---- container ---------------------------------------------------
+
+    def test_renders_toolbar_container
+      html = render_view
+
+      assert_html(html, "div.btn-toolbar.interest-eyes[role='toolbar']")
+    end
+
     # ---- default state (no interest set) ---------------------------
 
     def test_default_state_renders_two_small_icons
       html = render_view
 
-      assert_html(html, "ul.interest-eyes")
       # Default: small watch (→ start watching) + small ignore (→ ignore).
       assert_html(html, "img.mo-icon[src*='watch3']")
       assert_html(html, "img.mo-icon[src*='ignore3']")
@@ -31,19 +38,19 @@ module Views::Layouts
       html = render_view
 
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(1) " \
+                  ".interest-eyes " \
                   "form[action='#{routes.interests_path}'][method='post'] " \
                   "input[name='id'][value='#{@obs.id}']")
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(1) " \
+                  ".interest-eyes " \
+                  "form[action='#{routes.interests_path}'][method='post'] " \
                   "input[name='state'][value='1']")
-      assert_html(html, "ul.interest-eyes li:nth-of-type(1) img[src*='watch3']")
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(2) " \
+                  ".interest-eyes " \
                   "form[action='#{routes.interests_path}'][method='post'] " \
                   "input[name='state'][value='-1']")
-      assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(2) img[src*='ignore3']")
+      assert_html(html, ".interest-eyes img[src*='watch3']")
+      assert_html(html, ".interest-eyes img[src*='ignore3']")
     end
 
     # ---- watching state -------------------------------------------
@@ -66,23 +73,18 @@ module Views::Layouts
 
       # halfopen → DELETE (destroy the Interest row outright).
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(2) " \
-                  "form[action='#{obs_path}'] " \
+                  ".interest-eyes form[action='#{obs_path}'] " \
                   "input[name='_method'][value='delete']")
-      assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(2) img[src*='halfopen3']")
-      assert_no_html(html,
-                     "ul.interest-eyes li:nth-of-type(2) input[name='id']")
+      assert_html(html, ".interest-eyes img[src*='halfopen3']")
+      assert_no_html(html, ".interest-eyes form input[name='id']")
       # ignore → PATCH (update the existing row to state: -1).
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(3) " \
-                  "form[action='#{obs_path}'] " \
+                  ".interest-eyes form[action='#{obs_path}'] " \
                   "input[name='_method'][value='patch']")
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(3) " \
+                  ".interest-eyes form[action='#{obs_path}'] " \
                   "input[name='state'][value='-1']")
-      assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(3) img[src*='ignore3']")
+      assert_html(html, ".interest-eyes img[src*='ignore3']")
     end
 
     # ---- ignoring state -------------------------------------------
@@ -105,46 +107,42 @@ module Views::Layouts
 
       # watch → PATCH (update the existing row to state: 1).
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(2) " \
-                  "form[action='#{obs_path}'] " \
+                  ".interest-eyes form[action='#{obs_path}'] " \
                   "input[name='_method'][value='patch']")
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(2) " \
+                  ".interest-eyes form[action='#{obs_path}'] " \
                   "input[name='state'][value='1']")
-      assert_html(html, "ul.interest-eyes li:nth-of-type(2) img[src*='watch3']")
+      assert_html(html, ".interest-eyes img[src*='watch3']")
       # halfopen → DELETE (destroy the Interest row outright).
       assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(3) " \
-                  "form[action='#{obs_path}'] " \
+                  ".interest-eyes form[action='#{obs_path}'] " \
                   "input[name='_method'][value='delete']")
-      assert_html(html,
-                  "ul.interest-eyes li:nth-of-type(3) img[src*='halfopen3']")
+      assert_html(html, ".interest-eyes img[src*='halfopen3']")
     end
 
-    # ---- li structure (regression: two links were in one <li>) ----
+    # ---- structure (regression: two links merged into one control) --
 
-    def test_default_state_each_link_in_own_li
+    def test_default_state_each_link_is_its_own_form
       html = render_view
 
-      assert_html(html, "ul.interest-eyes > li", count: 2)
-      assert_html(html, "ul.interest-eyes li form", count: 2)
+      assert_html(html, "div.interest-eyes > form", count: 2)
     end
 
-    def test_watching_state_each_link_in_own_li
+    def test_watching_state_each_link_is_its_own_form
       ::Interest.create!(user: @viewer, target: @obs, state: true)
       html = render_view
 
-      # icon_li (big watch, no form) + two button lis.
-      assert_html(html, "ul.interest-eyes > li", count: 3)
-      assert_html(html, "ul.interest-eyes li form", count: 2)
+      # icon_item (big watch, a <span>, no form) + two form-backed buttons.
+      assert_html(html, "div.interest-eyes > *", count: 3)
+      assert_html(html, "div.interest-eyes > form", count: 2)
     end
 
-    def test_ignoring_state_each_link_in_own_li
+    def test_ignoring_state_each_link_is_its_own_form
       ::Interest.create!(user: @viewer, target: @obs, state: false)
       html = render_view
 
-      assert_html(html, "ul.interest-eyes > li", count: 3)
-      assert_html(html, "ul.interest-eyes li form", count: 2)
+      assert_html(html, "div.interest-eyes > *", count: 3)
+      assert_html(html, "div.interest-eyes > form", count: 2)
     end
 
     # ---- kind class -> image mapping --------------------------------
@@ -153,8 +151,8 @@ module Views::Layouts
     # interest_halfopen means this image" -- controller-level show-page
     # tests (observations/names/locations) assert only the class, via
     # `ControllerExtensions#assert_interest_button_in_html`, so they
-    # don't need to change if this ever moves off .png (e.g. to the
-    # SVG sprite).
+    # don't need to change if this moves off .png (e.g. to the SVG
+    # sprite).
 
     def test_watch_class_matches_watch_images
       html = render_view
@@ -184,8 +182,8 @@ module Views::Layouts
       html = render_view
 
       doc = Nokogiri::HTML(html)
-      buttons = doc.css("ul.interest-eyes button")
-      assert_equal(2, buttons.size, "Expected exactly two interest buttons")
+      buttons = doc.css(".interest-eyes button")
+      assert_equal(2, buttons.size, "Expected two interest buttons")
       buttons.each do |button|
         assert_equal("true", button["data-turbo-stream"],
                      "Every interest button should opt into turbo-stream")

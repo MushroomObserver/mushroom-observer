@@ -125,7 +125,8 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
 
       # Wait for autocomplete dropdown and select using keyboard
       assert_selector(".auto_complete", wait: 5)
-      assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 5)
+      assert_selector(".auto_complete a.dropdown-item", text: /Burbank/i,
+                                                        wait: 5)
       browser.keyboard.type(:down, :tab)
 
       # Verify location was selected (has-id class and hidden field populated)

@@ -1,0 +1,32 @@
+//
+// modals, plus naming vote popup
+// --------------------------------------------------
+
+.modal-content {
+  color: $dropdown-link-color !important;
+  // background-color: $modal-content-bg !important;
+}
+
+.modal-title {
+  font-weight: $font-weight-bold;
+}
+
+// Bootstrap's default .close opacity (0.5) makes the X hard to see in
+// dark themes like Amanita. Use the theme's danger color for a clear
+// dismiss button visible regardless of theme background.
+.modal-header .close {
+  opacity: 0.8;
+  color: $danger;
+  text-shadow: none;
+  // Bootstrap's margin-left: auto pushes .close to the right even
+  // with no .modal-title sibling -- redundant here since the title
+  // always renders first and .modal-header's
+  // justify-content: space-between already separates them.
+  margin-left: 0;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+    color: $danger;
+  }
+}

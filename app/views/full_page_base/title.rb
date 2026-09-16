@@ -23,12 +23,16 @@ module Views::FullPageBase::Title
   # Show-mode object title: the rich heading is the
   # `Views::Layouts::Header::ObjectTitle` view (with the user's naming
   # prefs applied); the doc title is the model's plain `document_title`
-  # (or its type-tag label) prefixed with `Type id:`.
-  def add_show_title(object, user: nil)
+  # (or its type-tag label) prefixed with `Type id:`. Pass
+  # `owner_naming: true` on an observation's show page to add the
+  # observer's-preferred-naming line under the title (nothing renders
+  # if the viewer hasn't opted in or the owner agrees with consensus).
+  def add_show_title(object, user: nil, owner_naming: false)
     add_page_title(
       capture do
         render(::Views::Layouts::Header::ObjectTitle.new(
-                 object: object, user: user
+                 object: object, user: user,
+                 owner_naming: owner_naming_html(object, user, owner_naming)
                ))
       end,
       show_document_title(document_title_for(object), object)
@@ -71,27 +75,6 @@ module Views::FullPageBase::Title
     add_query_filters(query)
   end
 
-  # Show-obs only: the observer's preferred naming sits on a second
-  # title line. The line view decides whether to render via its own
-  # `visible_for?` predicate — skip the wrap when nothing would render
-  # so we don't emit an empty `<h5>`.
-  def add_owner_naming(observation:, user:)
-    # Aliased to a local because the `LocalizationFilesTest` regex
-    # picks up `:OwnerNamingLine` after a `::` namespace separator
-    # and flags it as an undefined translation tag.
-    klass = ::Views::Controllers::Observations::OwnerNamingLine
-    return unless klass.visible_for?(observation: observation,
-                                     user: user)
-
-    content_for(:owner_naming) do
-      capture do
-        h5(class: "pl-3 mt-0 mb-4", id: "owner_naming") do
-          render(klass.new(observation: observation, user: user))
-        end
-      end
-    end
-  end
-
   # Index-only caption explaining what filters the current Query
   # applies. The caption HTML is built by
   # `Views::Layouts::Header::IndexBar::FilterCaption`. Skips the wrap
@@ -107,6 +90,21 @@ module Views::FullPageBase::Title
   end
 
   private
+
+  # Captured HTML for `add_show_title`'s `owner_naming:` line, or nil
+  # when disabled or the line has nothing to show (the view decides
+  # via `visible_for?`).
+  def owner_naming_html(object, user, enabled)
+    return nil unless enabled
+
+    # Aliased to a local because the `LocalizationFilesTest` regex
+    # picks up `:OwnerNamingLine` after a `::` namespace separator
+    # and flags it as an undefined translation tag.
+    klass = ::Views::Controllers::Observations::OwnerNamingLine
+    return nil unless klass.visible_for?(observation: object, user: user)
+
+    capture { render(klass.new(observation: object, user: user)) }
+  end
 
   # Models with no `Title::` subclass (see app/classes/title.rb) fall
   # back to their localized type tag (`observation`, `location`, etc.).

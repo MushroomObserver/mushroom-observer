@@ -19,7 +19,7 @@ class FieldSlipScanStateTest < ComponentTestCase
   def test_complete_read_links_to_the_review_form_as_a_button
     html = render_state(complete_read)
 
-    assert_html(html, "a.btn.btn-default[href='#{review_path}']",
+    assert_html(html, "a.btn.btn-secondary[href='#{review_path}']",
                 text: :field_slip_scan_review.l)
     assert_no_html(html, "form")
   end

@@ -110,7 +110,7 @@ class Components::Form::Search < Components::ApplicationForm
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
          button: :link,
-         class: class_names(Components::Navbar::LINK_CLASS, "px-2"),
+         class: "px-2",
          data: { search_type_target: "barToggle" })
   end
 

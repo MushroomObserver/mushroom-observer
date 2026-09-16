@@ -17,20 +17,20 @@
   flex-shrink: 0;
 
   &.off {
-    background: $input-border;
-    border-color: $input-border;
+    background: $input-border-color;
+    border-color: $input-border-color;
     box-shadow: 0 0 8px $input-bg;
   }
 
   &.red {
-    background: $alert-danger-border;
-    border-color: $alert-danger-border;
-    box-shadow: 0 0 8px $alert-danger-bg;
+    background: $danger;
+    border-color: $danger;
+    box-shadow: 0 0 8px rgba($danger, 0.2);
   }
 
   &.green {
-    background: $alert-success-border;
-    border-color: $alert-success-border;
-    box-shadow: 0 0 8px $alert-success-bg;
+    background: $success;
+    border-color: $success;
+    box-shadow: 0 0 8px rgba($success, 0.2);
   }
 }

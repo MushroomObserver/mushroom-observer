@@ -156,7 +156,7 @@ module Views::Controllers::Admin::BlockedIps
       Table(@list.ips,
             id: "#{@type}_ips",
             show_headers: false,
-            class: "ips align-middle border-top",
+            class: "ips table-align-middle border-top",
             attributes: { style: "order: 3" }) do |t|
         t.column("ip", &:t)
         t.column("actions", class: "text-right") do |ip|

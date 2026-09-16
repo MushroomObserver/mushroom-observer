@@ -145,8 +145,8 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     end
     assert_selector("#modal_obs_#{obs.id}_naming_#{nam.id}", wait: 9)
     assert_selector("#obs_#{obs.id}_naming_#{nam.id}_form", wait: 9)
-    # Verify vote field renders and the BS3 collapse toggle expands
-    # the reasons textarea when its checkbox is toggled on.
+    # Verify vote field renders and the collapse toggle expands the
+    # reasons textarea when its checkbox is toggled on.
     within("#obs_#{obs.id}_naming_#{nam.id}_form") do
       assert_selector("#naming_vote_value", wait: 4)
       # All reason textareas exist (some may already be expanded if
@@ -158,7 +158,10 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       # namings (NAMING_RECOGNIZED_BY_SIGHT default).
       assert_selector("#naming_reasons_4_notes", visible: false)
       find_by_id("naming_reasons_4_check").click
-      assert_selector("#naming_reasons_4_notes.in", wait: 4)
+      assert_selector(
+        "#naming_reasons_4_notes.#{Components::Collapsible::EXPANDED_CLASS}",
+        wait: 4
+      )
     end
     within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
       find(:css, ".close").click

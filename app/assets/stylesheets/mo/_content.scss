@@ -1,3 +1,11 @@
+// Bootstrap 4's reboot hardcodes `small { font-size: 80%; }` (not
+// driven by a variable) -- overridden to match Bootstrap 3's old
+// ~85% ratio (`ceil($font-size-base * .85) / $font-size-base`).
+small,
+.small {
+  font-size: 85%;
+}
+
 // Cached content display/hide
 // location format, when both are printed
 
@@ -89,34 +97,36 @@ ul.tight-list {
   }
 }
 
-.panel {
-  color: $panel-default-text;
-
-  .table-responsive {
-    border-color: transparent;
-  }
-  .border-top {
-    border-top: 1px solid $panel-inner-border;
-  }
-  .border-bottom {
-    border-bottom: 1px solid $panel-inner-border;
-  }
-}
-
-.panel-title {
-  font-size: 13px;
-  font-weight: bold;
-}
-
 .h3.page-title {
-  font-size: 22px;
-
-  .badge-id {
-    font-size: 66% !important
-  }
+  font-size: 1.375rem;
 
   small {
-    @extend .ml-3;
-    color: $text-color;
+    @extend .ml-2;
+    font-size: $font-size-base;
+    color: $body-color;
   }
+}
+
+.violation-highlight {
+  background-color: orange;
+}
+
+// Project violations page (#4136) — `button_to` renders each per-row
+// action as an inline form, and the modal trigger is a plain
+// <button>. Adjacent elements touch by default; add a small gap on
+// both axes so the action buttons don't visually merge, including
+// when they wrap to a second line.
+.project-violations td .button_to,
+.project-violations td > button {
+  display: inline-block;
+  // `button_to` wraps its <button> in a <form>, while the modal
+  // trigger is a bare <button>. Without an explicit vertical-align
+  // their baselines differ and the last button sits half a line
+  // higher than its siblings.
+  vertical-align: top;
+  margin: 0 4px 4px 0;
+}
+.project-violations td .button_to:last-child,
+.project-violations td > button:last-child {
+  margin-right: 0;
 }

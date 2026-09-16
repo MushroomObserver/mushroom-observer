@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Components::Matrix::Box
-  # Build render data for MatrixBox based on @object type
+class Components::Grid::Box
+  # Build render data for Grid::Box based on @object type
   module RenderData
     def build_render_data
       case @object
@@ -102,7 +102,7 @@ class Components::Matrix::Box
       end
     # log can be [] when notes is blank (e.g. an unsaved/edge-case
     # RssLog), which makes the indexing above (log.last[2], log[1],
-    # etc.) raise -- RssLog#detail used to rescue exactly this same
+    # etc.) raise -- RssLog#detail used to rescue this same
     # logic; restore the same dev-safe/production-raise protection
     # now that it's here instead.
     rescue StandardError => e

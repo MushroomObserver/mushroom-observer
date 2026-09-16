@@ -214,9 +214,9 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     html = render(top_nav(user: @user))
 
     # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
-    # navbar-nav/navbar-right literals.
+    # navbar-nav/ml-auto literals.
     assert_html(html,
-                "ul.nav.navbar-nav.navbar-right.d-none.d-sm-block.mr-0")
+                "ul.nav.navbar-nav.ml-auto.d-none.d-sm-block.mr-0")
   end
 
   private

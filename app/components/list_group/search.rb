@@ -66,7 +66,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
               search_status_messages_value: status_messages.to_json,
               search_status_matches_value: @object_names.to_json }
     ) do
-      div(class: "d-flex flex-row align-items-center form-inline mb-2") do
+      div(class: "form-inline mb-2") do
         render_status_light
         render_field_slip_input
       end

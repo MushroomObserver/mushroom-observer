@@ -97,7 +97,7 @@ module Views::Layouts
       div(id: "main_container", class: "px-sm-3",
           data: main_container_data(banner)) do
         render(Views::Layouts::App::Banners.new(banner: banner))
-        Row(class: "row-offcanvas row-offcanvas-left",
+        div(class: "row-offcanvas row-offcanvas-left",
             data: { nav_target: "offcanvas" }) do
           render(Views::Layouts::Sidebar.new(
                    user: current_user,
@@ -121,7 +121,10 @@ module Views::Layouts
     end
 
     def render_right_side(content_classes, banner:, &block)
-      Column(id: "right_side", xs: 12, md: 10) do
+      # Fixed width via `#right_side` in mo/_layout.scss (calc'd
+      # against the sidebar's fixed `$sidebar-max-width`), not a
+      # Bootstrap grid column.
+      div(id: "right_side") do
         render(Views::Layouts::TopNav.new(user: current_user,
                                           query: current_query,
                                           banner: banner))
@@ -146,7 +149,6 @@ module Views::Layouts
     def render_bottom_singletons
       Modal(type: :progress_spinner)
       Modal(type: :confirm)
-      render(Views::Layouts::App::MediaQueryTests.new)
       render(Views::Layouts::App::GtmFooter.new)
     end
 

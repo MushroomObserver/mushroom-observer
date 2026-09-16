@@ -203,13 +203,13 @@ class ImageFragmentLightboxCaptionTest < ComponentTestCase
   # with `context: :lightbox` (see
   # Components::ImageFragment::VoteInterface) -- same dark
   # background/link treatment as `.vote-section` (the hover-overlay
-  # class matrix-box/InteractiveImage thumbnails use), minus the
+  # class grid-box/InteractiveImage thumbnails use), minus the
   # absolute positioning -- always visible, since there's no
   # `.image-sizer` ancestor here to reveal it on hover -- and every id
   # prefixed so this copy can't collide with the in-page vote section
   # once the lightbox is open and both are live in the DOM at once.
   # #4895: the vote section is a lazy-loading Turbo Frame now, not
-  # rendered inline -- Matrix::Box's fragment cache has no user
+  # rendered inline -- Grid::Box's fragment cache has no user
   # component in its key, so rendering VoteInterface directly here
   # would bake whichever viewer wrote the cache entry's vote state
   # into the shared HTML for everyone. The frame fetches fresh, per

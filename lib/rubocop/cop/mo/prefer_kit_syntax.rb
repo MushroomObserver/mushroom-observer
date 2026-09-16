@@ -20,7 +20,7 @@ module RuboCop
       # 1. **Self-name collision**: a class named the same as the Kit
       #    method it would call breaks -- Kit's method resolution
       #    recurses into the caller's own class instead of resolving
-      #    the top-level Components class. `Components::Matrix::
+      #    the top-level Components class. `Components::Grid::Box::
       #    Carousel` calling `Carousel(...)`, and a view class named
       #    `Table` calling `Table(...)`, are both confirmed instances
       #    -- see commit 33fdc952e5. `render(Components::X.new(...))`
@@ -43,7 +43,7 @@ module RuboCop
       #   Alert(level: :info) { ... }
       #
       #   # good -- self-name collision, exception 1 above
-      #   class Components::Matrix::Carousel < Components::Base
+      #   class Components::Grid::Box::Carousel < Components::Base
       #     def view_template
       #       render(Components::Carousel.new(...)) { ... }
       #     end
