@@ -23,13 +23,8 @@ module Mycoportal
 
     # Observations never exported to MCP that are good enough to send.
     def new_observation_ids
-      not_yet_exported.
-        where(Observation.confidence_lower_bound(
-                MO.mycoportal_min_observation_vote
-              )).
-        where.not(name_id: excluded_name_ids).
+      qualifying_observations.
         where.not(name_id: non_fungal_name_ids).
-        where.not(id: empty_observation_ids).
         distinct.pluck(:id)
     end
 
@@ -47,6 +42,19 @@ module Mycoportal
       Observation.where.not(id: exported_observations.select(:id))
     end
 
+    # Every new_observation_ids filter except the kingdom check --
+    # shared with non_fungal_name_ids so its Name#kingdom parsing runs
+    # over only the observations that could still qualify, not every
+    # not-yet-exported observation on the site.
+    def qualifying_observations
+      not_yet_exported.
+        where(Observation.confidence_lower_bound(
+                MO.mycoportal_min_observation_vote
+              )).
+        where.not(name_id: excluded_name_ids).
+        where.not(id: empty_observation_ids)
+    end
+
     # Consensus name text_name matches one of the placeholder/junk names
     # (Duplicate, Undetermined, Mixed collection, etc.) that never belong
     # in MCP.
@@ -55,10 +63,11 @@ module Mycoportal
     end
 
     # Consensus name's kingdom isn't Fungi/Protozoa. Bounded by the number
-    # of *distinct* consensus names among not-yet-exported observations,
-    # not by the observation count.
+    # of *distinct* consensus names among observations that already pass
+    # every other filter, not by the observation count.
     def non_fungal_name_ids
-      candidate_name_ids = not_yet_exported.distinct.pluck(:name_id).compact
+      candidate_name_ids = qualifying_observations.distinct.
+                           pluck(:name_id).compact
       Name.where(id: candidate_name_ids).
         select(&:non_fungal_kingdom?).map(&:id)
     end
