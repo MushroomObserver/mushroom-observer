@@ -33,7 +33,7 @@ class Inat
     # these to #alerts.
     attr_reader :back_link_alerts
 
-    # Sequence syncs that declined to act (see
+    # Sequence and taxon syncs that declined to act (see
     # ReflectionResync#alerts) -- also sent to #alerts.
     delegate :alerts, to: :@applier
 

@@ -272,7 +272,7 @@ class Inat
       vote = Vote.find_or_initialize_by(naming: naming, user: user)
       vote.update!(observation: @observation, value: value,
                    external_site: @external_site)
-      # An ObservationView is needed even though noone has viewed this obs.
+      # An ObservationView is needed even though no one has viewed this obs.
       ObservationView.find_or_create_by(observation: @observation,
                                         user: user) do |view|
         view.last_view = vote.updated_at

@@ -31,9 +31,9 @@ class InatReflectionBatchResyncJobTest < ActiveJob::TestCase
     assert(called, "the job should run the batch resyncer")
   end
 
-  # A back-link mismatch or a declined sequence sync collected during
-  # the run is routed to #alerts.
-  def test_back_link_and_sequence_alerts_are_sent_to_alerts
+  # A back-link mismatch or a declined sequence or taxon sync collected
+  # during the run is routed to #alerts.
+  def test_back_link_and_resync_alerts_are_sent_to_alerts
     fake = Object.new
     fake.define_singleton_method(:resync_all) { { synced: 0 } }
     fake.define_singleton_method(:back_link_alerts) do
