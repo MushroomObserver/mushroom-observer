@@ -335,6 +335,46 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(html, "span.has-id-indicator")
   end
 
+  # Regression: a plain `help:` string (no block) must reach
+  # AutocompleterField's help slot the same way text_field/
+  # textarea_field/etc. already do via set_help_slot.
+  def test_autocompleter_field_help_string_renders_help_slot
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name")
+    end
+
+    assert_html(form, ".help-block", text: "Pick a name")
+  end
+
+  # Collapsible help renders as a sibling right after .form-group --
+  # when expanded, .form-group's default margin-bottom would read as
+  # a gap between the field and the help describing it. .form-group
+  # tightens to mb-2 and the outer .autocompleter picks up mb-3 to
+  # keep the same overall spacing to the next field.
+  def test_autocompleter_field_collapsible_help_adjusts_margins
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name", help_collapse: true)
+    end
+
+    assert_html(form, "div.autocompleter.mb-3")
+    assert_html(form, "div.form-group.mb-2")
+    assert_html(form, ".collapse .help-block", text: "Pick a name")
+  end
+
+  # Regression guard: with no help configured, neither margin class
+  # should render -- the adjustment is specific to the
+  # collapsible-help case.
+  def test_autocompleter_field_without_help_has_no_margin_classes
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name")
+    end
+
+    assert_no_html(form, "div.autocompleter.mb-3")
+    assert_no_html(form, "div.form-group.mb-2")
+  end
+
   private
 
   def render_with_component
