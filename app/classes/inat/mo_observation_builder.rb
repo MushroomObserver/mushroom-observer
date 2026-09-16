@@ -46,10 +46,11 @@ class Inat
     def create_observation
       @observation = Observation.create(new_obs_params)
       # Lead naming first so it wins calc_consensus ties (see consensus_naming).
-      proposed_namings(community_name, prov_name, override_name, naming_vote).
-        each do |name, value|
-          add_naming_with_vote(name: name, namer: namer_for(name), value: value)
-        end
+      naming_plan.proposals.each do |proposal|
+        add_naming_with_vote(name: proposal.name,
+                             namer: namer_for(proposal.name),
+                             value: proposal.vote)
+      end
       @observation.log(:log_observation_created, user: user)
     end
 
@@ -142,31 +143,27 @@ class Inat
     # preferred synonym when deprecated in MO. calc_consensus confirms it from
     # the votes, where it carries the highest weight. (#4212, #4533)
     def lead_name
-      @lead_name ||= preferred(override_name || prov_name || community_name)
+      @lead_name ||= naming_plan.lead
     end
 
-    # A deprecated name's best preferred synonym, else the name itself
-    # (falling back to itself when a deprecated name has no approved synonym).
-    def preferred(name)
-      return name unless name.deprecated?
-
-      name.best_preferred_synonym.presence || name
+    # The namings to create and their votes, shared with the resync's
+    # taxon engine (Inat::NamingPlan) so both propose the same names at
+    # the same weights.
+    def naming_plan
+      @naming_plan ||= Inat::NamingPlan.new(
+        community: community_name, provisional: prov_name,
+        override: override_name, lead_vote: naming_vote
+      )
     end
 
-    # Pure: the namings to create as [name, vote] for the given Observation
-    # Taxon name, provisional name (or nil), override name (or nil), and the
-    # lead's confidence vote. The lead (override, else provisional, else
-    # Observation Taxon)
-    # leads at lead_vote; every other name and the preferred synonym of any
-    # deprecated name follow at Could Be. Lead is first so it wins
-    # calc_consensus ties. (#4212, #4533)
-    def proposed_namings(community, provisional, override, lead_vote)
-      named = [override, provisional, community].compact
-      lead = preferred(named.first)
-      synonyms = named.select(&:deprecated?).
-                 filter_map { |name| name.best_preferred_synonym.presence }
-      others = (named + synonyms).uniq(&:id).reject { |n| n.id == lead.id }
-      [[lead, lead_vote]] + others.map { |n| [n, Vote::MIN_POS_VOTE] }
+    # Confidence weight for the importer's lead (consensus) naming, set
+    # from the iNat obs's signals (#4212).
+    def naming_vote
+      Inat::NamingPlan.lead_vote_for(
+        quality_grade: inat_obs[:quality_grade],
+        sequence_evidence: inat_obs.sequences.present?,
+        provisional_evidence: inat_obs.provisional_name.present?
+      )
     end
 
     # The proposer of a naming: the iNat user who suggested it when they're
@@ -214,19 +211,7 @@ class Inat
     end
 
     def create_mo_name(taxon)
-      # iNat "complex" rank needs special treatment because
-      # The equivalent MO rank is a one-off, requiring special handling
-      complex = taxon[:rank] == "complex"
-      rank_str = complex ? "Group" : taxon[:rank].titleize
-      name_str = if complex
-                   # append "complex" to prevent parsing it as a Species
-                   "#{taxon.full_name_string} complex"
-                 else
-                   taxon.full_name_string
-                 end
-
-      # There's no author or ICN ID because iNat taxa lack those.
-      post_name(name: name_str, rank: rank_str)
+      post_name(**taxon.mo_name_params)
     end
 
     def add_provisional_name(parsed_prov_name)
@@ -275,14 +260,18 @@ class Inat
       # Reuse the namer's existing naming for this name rather than stacking
       # a duplicate -- a re-import (or a re-run of this builder) otherwise
       # left the observation with identical namings (#5186).
+      # Stamped with the site so the resync's taxon engine can tell these
+      # source-derived rows from a person's (#4215).
       naming = @observation.namings.find_by(user: namer, name: name) ||
                Naming.create!(
                  observation: @observation, user: namer, name: name,
+                 external_site: @external_site,
                  reasons: { 2 => used_references_explanation(name) }
                )
 
       vote = Vote.find_or_initialize_by(naming: naming, user: user)
-      vote.update!(observation: @observation, value: value)
+      vote.update!(observation: @observation, value: value,
+                   external_site: @external_site)
       # An ObservationView is needed even though noone has viewed this obs.
       ObservationView.find_or_create_by(observation: @observation,
                                         user: user) do |view|
@@ -317,24 +306,6 @@ class Inat
       Name.where(text_name: text_name).
         order(deprecated: :asc, created_at: :desc).
         first
-    end
-
-    # Confidence weight for the importer's lead (consensus) naming, set
-    # from the iNat obs's signals (#4212). Sequence/DNA evidence is the
-    # strongest signal; a provisional name or Research Grade is Promising;
-    # everything else (needs_id / casual, no sequence) is Could Be.
-    def naming_vote
-      return Vote::MAXIMUM_VOTE if inat_obs.sequences.present?
-
-      if inat_obs.provisional_name.present? || research_grade?
-        Vote::NEXT_BEST_VOTE # Promising
-      else
-        Vote::MIN_POS_VOTE   # Could Be
-      end
-    end
-
-    def research_grade?
-      inat_obs[:quality_grade] == "research"
     end
 
     # Direct creation, not API2: sequences on a reflection are

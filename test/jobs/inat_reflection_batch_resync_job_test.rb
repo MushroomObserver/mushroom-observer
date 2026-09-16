@@ -22,7 +22,7 @@ class InatReflectionBatchResyncJobTest < ActiveJob::TestCase
       { synced: 0 }
     end
     fake.define_singleton_method(:back_link_alerts) { [] }
-    fake.define_singleton_method(:sequence_alerts) { [] }
+    fake.define_singleton_method(:alerts) { [] }
 
     Inat::ReflectionBatchResyncer.stub(:new, ->(**) { fake }) do
       InatReflectionBatchResyncJob.perform_now
@@ -39,7 +39,7 @@ class InatReflectionBatchResyncJobTest < ActiveJob::TestCase
     fake.define_singleton_method(:back_link_alerts) do
       ["Reflection obs 1: Mushroom Observer URL field mismatch"]
     end
-    fake.define_singleton_method(:sequence_alerts) do
+    fake.define_singleton_method(:alerts) do
       ["Reflection obs 2: ambiguous sequence sync for locus \"ITS\""]
     end
 

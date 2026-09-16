@@ -18,6 +18,6 @@ class InatReflectionBatchResyncJob < ApplicationJob
     # Sequence syncs that declined to act (ambiguous locus pairings,
     # invalid iNat values) get the same treatment.
     resyncer.back_link_alerts.each { |message| alert(message) }
-    resyncer.sequence_alerts.each { |message| alert(message) }
+    resyncer.alerts.each { |message| alert(message) }
   end
 end

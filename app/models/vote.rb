@@ -53,6 +53,8 @@ class Vote < AbstractModel
   belongs_to :user
   belongs_to :naming
   belongs_to :observation
+  # Set on a vote an import cast from a source site (#4215).
+  belongs_to :external_site, optional: true
 
   # scope :not_by_user, lambda { |user|
   #   user_id = user.is_a?(Integer) ? user : user&.id
