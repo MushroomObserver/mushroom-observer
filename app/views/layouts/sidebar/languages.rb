@@ -63,9 +63,7 @@ class Views::Layouts::Sidebar
     end
 
     def render_language_row(lang)
-      render(
-        Components::ListGroup::LinkItem.new(class: "indent")
-      ) do |css_class|
+      render(Components::ListGroup::LinkItem.new) do |css_class|
         LanguageSwitchButton(
           language: lang,
           id: "lang_drop_#{lang.locale}_link",

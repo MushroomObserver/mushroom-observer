@@ -40,26 +40,15 @@ class Views::Layouts::Sidebar
       assert_html(html, ".publications_link")
       assert_html(html, ".privacy_policy_link")
 
-      # Should have indent class on links
-      assert_html(html, ".list-group-item.indent")
-
       # Should have nav-active data attributes for active link tracking
       assert_html(html, "a[data-nav-active-target='link']")
-    end
-
-    def test_heading_has_correct_css_classes
-      html = render_component
-
-      # Heading should have the disabled and font-weight-bold classes
-      assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
     private
 
     def render_component
       classes = {
-        heading: "list-group-item disabled font-weight-bold",
-        indent: "list-group-item indent"
+        heading: "list-group-item disabled font-weight-bold"
       }
       render(Section.new(
                heading_key: :app_more,

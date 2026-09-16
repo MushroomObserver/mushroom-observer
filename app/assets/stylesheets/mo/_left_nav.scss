@@ -24,7 +24,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 4px;
+    padding: 0.25rem 0.5rem 0.25rem 0.75rem;
 
     // overflow: hidden above clips the keyboard focus ring at the
     // item's edges. Pull the outline inside so it renders fully.
@@ -49,7 +49,7 @@
       color: $LEFT_BAR_HEADER_TEXT_COLOR;
       background-color: $LEFT_BAR_HEADER_BG_COLOR;
       cursor: default;
-      padding-left: 5px;
+      padding: 0.25rem 0.5rem;
     }
 
     &#nav_bug_report_link {
