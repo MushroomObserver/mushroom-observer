@@ -1209,7 +1209,7 @@ class ReportTest < UnitTestCase
     warnings = []
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
+      link.errors.add(:base, :invalid, message: "stubbed failure")
       raise(ActiveRecord::RecordInvalid.new(link))
     end
 
@@ -1244,9 +1244,11 @@ class ReportTest < UnitTestCase
     report.body
 
     site_lookup_fails = -> { raise(ActiveRecord::RecordNotFound) }
-    ExternalSite.stub(:mycoportal, site_lookup_fails) do
-      assert_nothing_raised do
-        report.mark_exported!
+    Rails.logger.stub(:error, nil) do
+      ExternalSite.stub(:mycoportal, site_lookup_fails) do
+        assert_nothing_raised do
+          report.mark_exported!
+        end
       end
     end
   end
