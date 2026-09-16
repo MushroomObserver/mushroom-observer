@@ -20,13 +20,29 @@ module Views::Controllers::Licenses
     end
 
     def add_columns(tbl)
-      tbl.column("#{:id.ti}:") { |lic| lic.id.to_s }
+      add_id_column(tbl)
+      add_display_name_column(tbl)
+      add_url_column(tbl)
+      add_deprecated_column(tbl)
+    end
+
+    def add_id_column(tbl)
+      tbl.column(append_colon(:id.ti)) { |lic| lic.id.to_s }
+    end
+
+    def add_display_name_column(tbl)
       tbl.column(:license_display_name.l) do |lic|
         Link(type: :get, name: lic.display_name, target: lic)
       end
+    end
+
+    def add_url_column(tbl)
       tbl.column(:license_url.l) do |lic|
         Link(type: :get, name: lic.url, target: lic.url)
       end
+    end
+
+    def add_deprecated_column(tbl)
       tbl.column("#{:deprecated.l}?") { |lic| lic.deprecated ? "X" : "" }
     end
   end

@@ -25,12 +25,15 @@
 # (`occurrence_projects[*]`).
 module Views::Controllers::Occurrences::Projects
   class Form < ::Components::ApplicationForm
-    def initialize(gaps:, primary:, selected: nil, occurrence: nil, **)
-      @gaps = gaps
-      @primary = primary
-      @selected = selected
-      @occurrence = occurrence
-      super(build_form_object, **)
+    prop :gaps, Hash
+    prop :primary, ::Observation
+    prop :selected, _Nilable(_Array(::Observation)), default: nil
+    prop :occurrence, _Nilable(::Occurrence), default: nil
+
+    def initialize(gaps:, primary:, selected: nil, occurrence: nil, **attrs)
+      super(build_form_object(selected: selected, primary: primary),
+            gaps: gaps, primary: primary, selected: selected,
+            occurrence: occurrence, **attrs)
     end
 
     # Declares to Modal that this form renders its own `.modal-body`
@@ -67,17 +70,17 @@ module Views::Controllers::Occurrences::Projects
 
     private
 
-    def build_form_object
+    def build_form_object(selected:, primary:)
       # `for_update: true` flips the FormObject's `persisted?` so
       # Superform emits `_method=patch` for edit mode — the nested
       # projects resource expects PATCH. Create mode stays POST.
-      unless @selected
+      unless selected
         return FormObject::OccurrenceProjects.new(for_update: true)
       end
 
       FormObject::OccurrenceProjects.new(
-        observation_ids: @selected.map(&:id),
-        primary_observation_id: @primary.id
+        observation_ids: selected.map(&:id),
+        primary_observation_id: primary.id
       )
     end
 
@@ -89,7 +92,7 @@ module Views::Controllers::Occurrences::Projects
       projects = @gaps[:projects]
       return unless projects&.any?
 
-      strong { "#{:projects.ti}:" }
+      strong { append_colon(:projects.ti) }
       # `list-unstyled` drops the bullet + left padding. Each row is a
       # flex container so the id badge (button) sits inline with the
       # project-title link.
@@ -132,13 +135,12 @@ module Views::Controllers::Occurrences::Projects
     def render_buttons
       render(Components::Modal::CloseButton.new(target: cancel_path))
       whitespace
-      # Skip = proceed without backfilling projects. Both controllers
-      # (`OccurrencesController#create` and
-      # `Occurrences::ProjectsController#update`) only act on
-      # `value="add_all"`, so any other present value (here "skip") is
-      # treated as "create/keep the occurrence, leave projects alone".
-      submit(:skip.ti,
-             as: :button, value: "skip",
+      # Cancel backs out rather than leaving the occurrence's members with
+      # different project memberships, which is a state they aren't
+      # allowed to be in. On create that means not creating the
+      # occurrence; on edit it detaches the observations that differ.
+      submit(:cancel.ti,
+             as: :button, value: "cancel",
              name: "occurrence_projects[resolution]")
       whitespace
       submit(:add_all.ti,

@@ -18,7 +18,7 @@ class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
 
   def view_template
     Alert(level: :warning) do
-      p { plain("#{:list_observations_suggestions.t}:") }
+      p { append_colon(:list_observations_suggestions.t) }
       @names.each { |name, count| render_row(name, count) }
     end
   end
@@ -32,18 +32,21 @@ class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
   end
 
   def render_name_link(name)
-    plain("#{:list_observation_name.t}: ")
+    trusted_html(append_colon(:list_observation_name.t))
     a(href: url_for(name.show_link_args)) do
       trusted_html(name.display_name(current_user).t)
     end
-    plain(" (0)")
+    whitespace
+    plain("(0)")
   end
 
   def render_obs_link(name, count)
-    plain("#{:list_observation_observations.t} ")
+    plain(:list_observation_observations.t)
+    whitespace
     a(href: observations_path(pattern: name.text_name)) do
       trusted_html(name.display_name(current_user).t)
     end
-    plain(" (#{count})")
+    whitespace
+    plain("(#{count})")
   end
 end

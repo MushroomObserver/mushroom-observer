@@ -15,14 +15,11 @@
 #     class: "shadow-sm", data: { controller: "modal" }
 #   ) { ... }
 class Components::ContentPadded < Components::Base
-  # @param attrs [Hash] HTML attrs forwarded verbatim to the `<div>`.
-  #   `class:` is composed with the default `"p-3"`.
-  def initialize(**attrs)
-    super()
-    @attrs = attrs
-  end
+  # HTML attrs forwarded verbatim to the `<div>`. `class:` is
+  # composed with the default `"p-3"`.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    div(**mix({ class: "p-3" }, @attrs), &block)
+    div(**mix({ class: "p-3" }, @attributes), &block)
   end
 end

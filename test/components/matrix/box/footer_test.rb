@@ -80,9 +80,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     project = projects(:bolete_project)
     obs = observations(:coprinus_comatus_obs)
     dick = users(:dick) # member of bolete_admins
-    html = render(
-      Components::Matrix::Box.new(user: dick, object: obs, project: project)
-    )
+    html = render_box(user: dick, object: obs, project: project)
 
     expected_path = routes.exclude_observation_project_update_path(
       project_id: project.id, id: obs.id
@@ -93,9 +91,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   def test_project_admin_footer_hidden_for_non_admin
     project = projects(:bolete_project)
     obs = observations(:coprinus_comatus_obs)
-    html = render(
-      Components::Matrix::Box.new(user: @user, object: obs, project: project)
-    )
+    html = render_box(user: @user, object: obs, project: project)
 
     expected_path = routes.exclude_observation_project_update_path(
       project_id: project.id, id: obs.id
@@ -105,14 +101,16 @@ class MatrixBoxFooterTest < ComponentTestCase
 
   def test_project_admin_footer_hidden_without_project
     obs = observations(:coprinus_comatus_obs)
-    html = render(
-      Components::Matrix::Box.new(user: @user, object: obs)
-    )
+    html = render_box(user: @user, object: obs)
 
     assert_no_html(html, "div.panel-footer.text-center")
   end
 
   private
+
+  def render_box(**)
+    render(Components::Matrix::Box.new(**))
+  end
 
   # Renders render_footer_detail(detail) in a Phlex context.
   def render_detail(detail)

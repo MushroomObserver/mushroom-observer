@@ -170,7 +170,8 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_flash_warning(
-      "Should flash warning if user starts iNat import while another is running"
+      on_fail: "Should flash warning if user starts iNat import while " \
+               "another is running"
     )
     assert_redirected_to(inat_import_path(import))
   end
@@ -215,8 +216,93 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_flash_text(:inat_missing_username.l)
+    assert_flash(:inat_missing_username)
     assert_form_action(action: :create)
+  end
+
+  # #5259: the show page lists recorded constraint violations and
+  # unlicensed-photo events.
+  def test_show_renders_review_sections
+    import = inat_imports(:rolf_inat_import)
+    import.update!(
+      constraint_violation_obs_ids: [observations(:minimal_unknown_obs).id],
+      unlicensed_image_events: [{ "inat_id" => 123, "login" => "flick",
+                                  "license_code" => nil, "count" => 2 }]
+    )
+
+    login(import.user.login)
+    get(:show, params: { id: import.id })
+
+    assert_select("h5", text: :inat_import_tracker_constraint_violations.l)
+    assert_select("h5",
+                  text: :inat_import_tracker_unlicensed_images_heading.l)
+  end
+
+  # #5259: Go Back keeps the chosen target project on the redisplayed
+  # form.
+  def test_create_go_back_keeps_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    params = { inat_ids: "123", inat_username: user.inat_username,
+               consent: 1, go_back: "1",
+               inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action(action: :create)
+    assert_select("input[name=?][value=?]",
+                  "inat_import[inat_project_id]", project.id.to_s, true,
+                  "Go Back should keep the chosen project id")
+  end
+
+  # #5259: a project the user can neither join nor administer is
+  # refused (#4932 invariant 4).
+  def test_create_with_unjoinable_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    project.update!(open_membership: false)
+    assert_not(project.is_admin?(user) || project.member?(user) ||
+               project.can_join?(user),
+               "premise: rolf cannot use this project")
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash(:inat_project_not_allowed, title: project.title)
+    assert_form_action(action: :create)
+  end
+
+  # #5259: typed project text that resolves to no project is refused.
+  def test_create_with_unrecognized_project
+    user = users(:rolf)
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, inat_project: "No Such Project Anywhere" }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash(:inat_project_not_recognized)
+    assert_form_action(action: :create)
+  end
+
+  # #5259: a confirmed create stores the target project on the import.
+  def test_create_confirmed_stores_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, confirmed: 1,
+               inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_equal(project.id, created_import(user).project_id)
   end
 
   def test_reload_preserves_checkbox_state
@@ -247,7 +333,7 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(:inat_list_xor_all.l)
+    assert_flash(:inat_list_xor_all)
   end
 
   def test_create_list_and_all
@@ -261,9 +347,9 @@ class InatImportsControllerTest < FunctionalTestCase
     ) do
       post(:create, params: params)
     end
-    assert_flash_text(
-      :inat_list_xor_all.l,
-      "It should warn about listing IDs while checking Import All"
+    assert_flash(
+      :inat_list_xor_all,
+      on_fail: "It should warn about listing IDs while checking Import All"
     )
   end
 
@@ -276,7 +362,7 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(:runtime_illegal_inat_id.l)
+    assert_flash(:runtime_illegal_inat_id)
   end
 
   def test_no_numeric_ids_in_list_rejected
@@ -285,8 +371,8 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "id\nobservation", inat_username: "anything",
                    consent: 1 })
 
-    assert_flash_text(:runtime_illegal_inat_id.l,
-                      "Input with no numeric IDs should be rejected")
+    assert_flash(:runtime_illegal_inat_id,
+                 on_fail: "Input with no numeric IDs should be rejected")
     assert_form_action(action: :create)
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -301,8 +387,8 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "id\n123456a", inat_username: "anything",
                    consent: 1 })
 
-    assert_flash_text(:runtime_illegal_inat_id.l,
-                      "Alphanumeric token (e.g. 123456a) should be " \
+    assert_flash(:runtime_illegal_inat_id,
+                 on_fail: "Alphanumeric token (e.g. 123456a) should be " \
                       "rejected as a malformed ID")
     assert_form_action(action: :create)
     assert_select(
@@ -321,7 +407,7 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(:inat_consent_required.l)
+    assert_flash(:inat_consent_required)
   end
 
   def test_allows_maximum_ids
@@ -358,8 +444,8 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_ids: "123*", inat_username: "anything", consent: 1 })
 
-    assert_flash_text(:runtime_illegal_inat_id.l,
-                      "Should warn about illegal characters")
+    assert_flash(:runtime_illegal_inat_id,
+                 on_fail: "Should warn about illegal characters")
     assert_select(
       "textarea#inat_import_inat_ids",
       { text: "123*", count: 1 },
@@ -430,7 +516,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_form_action(action: :create)
-    assert_flash_text(:inat_too_many_ids_listed.l)
+    assert_flash(:inat_too_many_ids_listed)
   end
 
   def test_confirm_warns_about_previously_imported
@@ -444,8 +530,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     ExternalLink.create!(
       user: user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id
     )
     estimate_response = { total_results: 1 }.to_json
 
@@ -459,11 +544,11 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: "anything",
                    consent: 1 })
 
-    assert_response(:success)
-    assert_flash_text(
-      /#{Regexp.escape(:inat_previous_import.l(count: 1))}/,
-      "Confirmation page should warn about " \
-      "previously imported IDs"
+    assert_unprocessable
+    assert_flash(
+      :inat_previous_import,
+      count: 1,
+      on_fail: "Confirmation page should warn about previously imported IDs"
     )
   end
 
@@ -478,8 +563,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     ExternalLink.create!(
       user: user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id
     )
 
     fresh_id = "1123457"
@@ -492,7 +576,7 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(/#{Regexp.escape(:inat_previous_import.l(count: 1))}/)
+    assert_flash(:inat_previous_import, count: 1)
     # It should continue even if some ids were previously imported: the
     # previously imported id is dropped from the list, and the counts
     # reflect the cleaned list.
@@ -533,8 +617,8 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_response(:redirect)
     assert_equal(
-      user.name, created_import(user).inat_username,
-      "It should strip leading/trailing whitespace from inat_username"
+      user.name.downcase, created_import(user).inat_username,
+      "It should strip whitespace and downcase inat_username"
     )
   end
 
@@ -587,7 +671,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: inat_username,
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     body = @response.body
     assert_match(:inat_import_confirm_expected_caption.l, body)
@@ -619,7 +703,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: user.inat_username,
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -789,7 +873,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -815,7 +899,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: "rolf",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -849,7 +933,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "3",
@@ -889,7 +973,7 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#requested_count", "24",
                   "Requested should be the user's literal total_results, " \
                   "not an unfiltered (broader) count")
@@ -918,7 +1002,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
@@ -947,7 +1031,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select(
       "#expected_count", "3",
       "Estimate should still show when only unlicensed-others request fails"
@@ -972,7 +1056,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -999,7 +1083,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: inat_username,
                    consent: 1, go_back: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1027,7 +1111,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field, "inat_url input field not found in response")
     value = url_field["value"].presence || url_field.text.strip
@@ -1050,8 +1134,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_authorization_response_denied
@@ -1101,7 +1186,7 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_flash_text(:inat_importing_all_anothers.l)
+    assert_flash(:inat_importing_all_anothers)
     assert_form_action(action: :create)
   end
 
@@ -1119,7 +1204,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: "anyone", inat_ids: nil,
                    consent: 1, all: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
   end
 
@@ -1134,7 +1219,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: nil, inat_ids: nil,
                    consent: 1, all: 1 })
 
-    assert_flash_text(:inat_missing_username.l)
+    assert_flash(:inat_missing_username)
     assert_form_action(action: :create)
   end
 
@@ -1282,7 +1367,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
-    assert_response(:success, "Valid URL should proceed to confirmation")
+    assert_unprocessable
     assert_select("#expected_count", "5",
                   "Confirmation should show estimate from URL query")
   end
@@ -1326,9 +1411,9 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "rolf_inat_user", consent: 1 })
 
-    assert_flash_text(
-      :inat_taxon_id_not_importable.l,
-      "Warning should appear when taxon_id is outside Fungi/Mycetozoa"
+    assert_flash(
+      :inat_taxon_id_not_importable,
+      on_fail: "Warning should appear when taxon_id is outside Fungi/Mycetozoa"
     )
     url_field = css_select("input#inat_import_confirm_inat_url").first
     assert_not_nil(url_field,
@@ -1346,8 +1431,9 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_ids: "123",
                    inat_username: "rolf_inat_user", consent: 1 })
 
-    assert_flash_text(:inat_list_xor_all.l,
-                      "Supplying both URL and IDs should flash XOR error")
+    assert_flash(:inat_list_xor_all,
+                 on_fail: "Supplying both URL and IDs should flash " \
+                          "XOR error")
     assert_form_action(action: :create)
   end
 
@@ -1360,8 +1446,8 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, all: "1",
                    inat_username: "rolf_inat_user", consent: 1 })
 
-    assert_flash_text(:inat_list_xor_all.l,
-                      "URL + Import All should flash XOR error")
+    assert_flash(:inat_list_xor_all,
+                 on_fail: "URL + Import All should flash XOR error")
     assert_form_action(action: :create)
   end
 
@@ -1371,8 +1457,9 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: "https://example.com/not-inat",
                    inat_username: "someone", consent: 1 })
 
-    assert_flash_text(:inat_invalid_url.l,
-                      "Non-iNat URL should flash invalid URL error")
+    assert_flash(:inat_invalid_url,
+                 on_fail: "Non-iNat URL should flash invalid URL error")
+    assert_unprocessable
     assert_form_action(action: :create)
   end
 
@@ -1382,9 +1469,10 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: "project_id=291058&user_id=12345",
                    inat_username: "someone", consent: 1 })
 
-    assert_flash_text(:inat_invalid_url.l,
-                      "Bare query string should be rejected — " \
-                      "user must supply a full iNat observations URL")
+    assert_flash(:inat_invalid_url,
+                 on_fail: "Bare query string should be rejected — " \
+                          "user must supply a full iNat observations " \
+                          "URL")
     assert_form_action(action: :create)
   end
 
@@ -1401,8 +1489,10 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
-    assert_flash_text(/#{Regexp.escape(:inat_url_no_valid_filter_params.l)}/,
-                      "URL without valid filter params should flash a warning")
+    assert_flash(
+      [:inat_taxon_id_not_importable, :inat_url_no_valid_filter_params],
+      on_fail: "URL without valid filter params should flash a warning"
+    )
     assert_form_action(action: :create)
   end
 
@@ -1422,12 +1512,15 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
-    # Use Regexp (assert_match) to find the taxon warning within the
-    # combined multi-warning flash (assert_flash_text clears after each call).
-    assert_flash_text(
-      /#{Regexp.escape(:inat_taxon_id_not_importable.l)}/,
-      "Taxon warning must fire even when taxon_id is the sole param " \
-      "and validation fails before normalize_inat_url_param! runs"
+    # Taxon warning fires alongside the generic no-valid-params
+    # rejection -- both tags fire in the same request, so both are
+    # asserted (assert_flash's Array form is an exact match of the
+    # whole accumulated flash, not a partial search).
+    assert_flash(
+      [:inat_taxon_id_not_importable, :inat_url_no_valid_filter_params],
+      on_fail: "Taxon warning must fire even when taxon_id is the sole " \
+               "param and validation fails before " \
+               "normalize_inat_url_param! runs"
     )
   end
 
@@ -1468,15 +1561,18 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    # Use Regexp: the flash also contains the no-valid-params rejection
-    # message; assert_flash_text clears after the call so only one check
-    # is possible. The rejection message itself is covered by
+    # The ignored-params warning fires alongside the generic
+    # no-valid-params rejection -- both tags fire in the same request,
+    # so both are asserted (assert_flash's Array form is an exact
+    # match of the whole accumulated flash, not a partial search).
+    # The rejection message itself is covered by
     # test_create_url_with_no_surviving_params_rejected.
-    assert_flash_text(
-      /#{Regexp.escape(:inat_url_params_ignored.t(params: "user_login"))}/,
-      "Ignored-params warning must name user_login when it is stripped " \
-      "as the sole URL param and validation fails before " \
-      "normalize_inat_url_param! runs"
+    assert_flash(
+      [[:inat_url_params_ignored, { params: "user_login" }],
+       :inat_url_no_valid_filter_params],
+      on_fail: "Ignored-params warning must name user_login when it is " \
+               "stripped as the sole URL param and validation fails " \
+               "before normalize_inat_url_param! runs"
     )
   end
 
@@ -1491,10 +1587,10 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_flash_text(
-      :inat_invalid_url.l,
-      "An unparseable iNat URL should flash the invalid-URL message, " \
-      "not raise an exception"
+    assert_flash(
+      :inat_invalid_url,
+      on_fail: "An unparseable iNat URL should flash the invalid-URL " \
+               "message, not raise an exception"
     )
   end
 
@@ -1513,10 +1609,11 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_flash_text(
-      :inat_url_params_ignored.t(params: "user_login"),
-      "Confirm page must show the ignored-params warning for user_login " \
-      "stripped from the URL for a non-superimporter"
+    assert_flash(
+      :inat_url_params_ignored,
+      params: "user_login",
+      on_fail: "Confirm page must show the ignored-params warning for " \
+               "user_login stripped from the URL for a non-superimporter"
     )
     assert_select("#expected_count", "3",
                   "Confirm page should render with the estimate")
@@ -1536,9 +1633,11 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_flash_text(
-      :inat_url_params_ignored.t(params: "page"),
-      "URL with stripped params should warn the user which were ignored"
+    assert_flash(
+      :inat_url_params_ignored,
+      params: "page",
+      on_fail: "URL with stripped params should warn the user which " \
+               "were ignored"
     )
   end
 
@@ -1557,6 +1656,11 @@ class InatImportsControllerTest < FunctionalTestCase
                          "Confirmed URL import should redirect to iNat auth")
     assert_equal(normalized, import.inat_url,
                  "Normalized URL query string should be saved on InatImport")
+    assert_equal(url, import.original_inat_url,
+                 "Literal submitted URL should be saved on InatImport, " \
+                 "so a later reimport link can use it instead of " \
+                 "reconstructing (and guessing the host of) a URL from " \
+                 "the normalized query string")
   end
 
   def test_url_mode_importables_is_nil
@@ -1754,13 +1858,16 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_flash_text(
-      /#{Regexp.escape(inat_error)}/,
-      "Flash should surface iNat's error text instead of the generic " \
-      "'Cannot communicate' message"
+    assert_flash(
+      :inat_unknown_param,
+      error: inat_error,
+      on_fail: "Flash should surface iNat's error text instead of the " \
+               "generic 'Cannot communicate' message"
     )
+    assert_unprocessable
     assert_select("#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_estimate_422_with_non_json_body_falls_back_to_exception_message
@@ -1779,7 +1886,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     # inat_error_text rescues the JSON::ParserError and falls back to
     # exception.message ("422 Unprocessable Entity").
-    assert_flash_text(/422 Unprocessable Entity/)
+    assert_flash(:inat_unknown_param, error: "422 Unprocessable Entity")
   end
 
   # URI.parse raises URI::InvalidURIError on a malformed URL (e.g. a space);

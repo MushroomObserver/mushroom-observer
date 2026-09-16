@@ -43,10 +43,10 @@ module Views::Controllers::Info
       add_page_title(:how_title.l)
       trusted_html(:how_intro.tp)
 
-      h4 { "#{:how_common_tasks.l}:" }
+      h4 { append_colon(:how_common_tasks.l) }
       render_ordered_list(COMMON_TASKS)
 
-      h4 { "#{:how_glossary.l}:" }
+      h4 { append_colon(:how_glossary.l) }
       render_ordered_list(GLOSSARY)
     end
 

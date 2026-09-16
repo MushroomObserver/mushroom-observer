@@ -282,7 +282,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_field("observation_when_2i", with: Time.zone.today.month)
     assert_field("observation_when_3i", with: Time.zone.today.day)
     check(proj_checkbox)
-    assert_selector("##{proj_checkbox}[checked='checked']")
+    assert_selector("##{proj_checkbox}[checked]")
     assert_no_difference("Observation.count",
                          "Out-of-range Observation should not be created") do
       first(:button, "Create").click
@@ -309,7 +309,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       )
     end
     # assert_selector("#ignore_project_dates", visible: :hidden)
-    assert_selector("##{proj_checkbox}[checked='checked']")
+    assert_selector("##{proj_checkbox}[checked]")
 
     # Test the different ways to overcome the warning
     # 1. Prove that Obs is created if user unchecks out-of-range Project

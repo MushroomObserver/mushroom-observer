@@ -47,7 +47,15 @@ class Components::Form::CheckboxCollapse < Components::Base
       merge(@attributes[:label_aria] || {})
   end
 
+  # The box and the section it controls are one state, so `expanded:`
+  # decides both. Leaving the checkbox to derive its own state from the
+  # field breaks whenever the field is not a real attribute: the
+  # observation form's `has_geolocation` is only a scope, so the box
+  # rendered unchecked over an open section full of coordinates, and
+  # clicking it to "fix" that collapsed the section instead. A caller
+  # that genuinely needs them to differ can still pass `checked:`.
   def passthrough_attrs
-    @attributes.except(:label_data, :label_aria)
+    { checked: @expanded }.merge(@attributes.except(:label_data,
+                                                    :label_aria))
   end
 end

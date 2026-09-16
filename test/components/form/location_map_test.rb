@@ -18,7 +18,7 @@ class FormLocationMapTest < ComponentTestCase
     # the ARIA contract; `.btn-group` is Bootstrap-styling decoration.
     assert_html(html, "div[role='group']")
     assert_html(html, "button[data-toggle='collapse']")
-    assert_html(html, "button span.glyphicon")
+    assert_html(html, "button svg.mo-icon-globe")
     assert_html(html, "span.collapse-toggle-open",
                 text: :form_observations_hide_map.l.as_displayed)
     assert_html(html, "span.collapse-toggle-closed",

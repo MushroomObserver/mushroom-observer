@@ -29,7 +29,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   def heading_links
     return unless permission?(@obs)
 
-    Link(type: :icon,
+    Link(type: :get,
          tab: ::Tab::Observation::ReuseImages.new(observation: @obs))
   end
 

@@ -24,10 +24,11 @@ class Components::ImageFragment::ReuseForm < Components::ApplicationForm
     ::GlossaryTerm => "/glossary_terms/images"
   }.freeze
 
-  def initialize(target:, all_users: false)
-    @target = target
-    @all_users = all_users
-    super(FormObject::ImageReuse.new)
+  prop :target, _Union(::Observation, ::User, ::GlossaryTerm)
+  prop :all_users, _Boolean, default: false
+
+  def initialize(**)
+    super(FormObject::ImageReuse.new, **)
   end
 
   def form_action

@@ -20,10 +20,13 @@ module Images
     end
 
     def test_transform_bad_op
-      run_transform(opr: "bad_op", flash: %(Invalid operation "bad_op"))
+      run_transform(opr: "bad_op",
+                    flash_tag: :runtime_invalid,
+                    flash_args: { type: '"operation"', value: "bad_op" })
     end
 
-    def run_transform(opr:, flash: :image_show_transform_note.l)
+    def run_transform(opr:, flash_tag: :image_show_transform_note,
+                      flash_args: {})
       image = images(:in_situ_image)
       user = image.user
       params = { id: image.id, op: opr, size: user.image_size }
@@ -33,7 +36,7 @@ module Images
 
       # Asserting the flash text is the best I can do because Image.transform
       # does not transform images in the text environment. 2022-08-19 JDC
-      assert_flash_text(flash)
+      assert_flash(flash_tag, **flash_args)
       assert_redirected_to(image_path(image.id))
     end
 
@@ -54,6 +57,39 @@ module Images
       assert_response(:success)
       assert_select("turbo-stream[action='update'][target='page_flash']")
       assert_select("#flash_notices", text: :image_show_transform_note.l)
+    end
+
+    # #4989: an admin of a project the image's *observation* belongs
+    # to (not the image itself) may transform the image.
+    def test_transform_allowed_for_project_admin_of_observation
+      image = images(:commercial_inquiry_image)
+      obs = observations(:detailed_unknown_obs)
+      image.observations << obs
+      admin = dick
+      assert_true(obs.can_edit?(admin),
+                  "Fixture expectation: dick can edit detailed_unknown_obs " \
+                  "via bolete_project admin")
+
+      login(admin.login)
+      put(:update, params: { id: image.id, op: "rotate_left",
+                             size: admin.image_size })
+
+      assert_flash(:image_show_transform_note)
+      assert_redirected_to(image_path(image.id))
+    end
+
+    def test_transform_denied_for_unrelated_user
+      image = images(:commercial_inquiry_image)
+      outsider = katrina
+      assert_false(image.can_transform?(outsider),
+                   "Fixture expectation: katrina has no tie to this image")
+
+      login(outsider.login)
+      put(:update, params: { id: image.id, op: "rotate_left",
+                             size: outsider.image_size })
+
+      assert_flash(:permission_denied)
+      assert_redirected_to(image_path(image.id))
     end
 
     # Real file + real job run, unlike run_transform above -- confirms

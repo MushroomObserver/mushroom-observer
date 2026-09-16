@@ -104,9 +104,8 @@ class Sequence < AbstractModel
   # nucleotide codes from http://www.bioinformatics.org/sms2/iupac.html
   # RuboCop 0.89.0 Style/RedundantRegexpEscape cop gives false positive.
   # (In Ruby a hyphen (-) in a character class is a metacharacter.)
-  # rubocop:disable Style/RedundantRegexpEscape
+  # rubocop:disable-next Style/RedundantRegexpEscape
   VALID_CODES          = /ACGTURYSWKMBDHVN.\-/i
-  # rubocop:enable Style/RedundantRegexpEscape
 
   # FASTA allows interspersed numbers, whitespace. See https://goo.gl/NYbptK
   VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i
@@ -266,7 +265,7 @@ class Sequence < AbstractModel
   def bases_or_deposit
     return if bases? || deposit?
 
-    errors.add(:bases, :validate_sequence_bases_or_archive.t)
+    errors.add(:bases, :validate_sequence_bases_or_archive)
   end
 
   # Valid deposit must have both archive && accession or neither.
@@ -274,7 +273,7 @@ class Sequence < AbstractModel
   def deposit_complete_or_absent
     return if archive.present? == accession.present?
 
-    errors.add(:archive, :validate_sequence_deposit_complete.t)
+    errors.add(:archive, :validate_sequence_deposit_complete)
   end
 
   # Valid Sequence should have unique bases
@@ -284,7 +283,7 @@ class Sequence < AbstractModel
       other_sequence.bases_nucleotides == bases_nucleotides
     end
 
-    errors.add(:bases, :validate_sequence_bases_unique.t)
+    errors.add(:bases, :validate_sequence_bases_unique)
   end
 
   # array of other Sequences in same Observation
@@ -299,11 +298,11 @@ class Sequence < AbstractModel
   # full url in WebSequenceArchive::blast_format_help
   def bases_blastable
     if blank_line_in_middle?
-      errors.add(:bases, :validate_sequence_bases_blank_lines.t)
+      errors.add(:bases, :validate_sequence_bases_blank_lines)
     end
     return unless bad_code_in_data?
 
-    errors.add(:bases, :validate_sequence_bases_bad_codes.t)
+    errors.add(:bases, :validate_sequence_bases_bad_codes)
   end
 
   def blank_line_in_middle?
@@ -324,6 +323,6 @@ class Sequence < AbstractModel
       sequence.accession == accession
     end
 
-    errors.add(:bases, :validate_sequence_accession_unique.t)
+    errors.add(:bases, :validate_sequence_accession_unique)
   end
 end

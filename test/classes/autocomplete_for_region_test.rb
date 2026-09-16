@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "autocomplete"
 
 class AutocompleteForRegionTest < UnitTestCase
   def create_location(name:, north:, south:, east:, west:)
     Location.create!(
       name: name,
+      scientific_name: Location.reverse_name(name),
       north: north,
       south: south,
       east: east,

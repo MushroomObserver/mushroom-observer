@@ -37,7 +37,7 @@ class APIKeyTest < UnitTestCase
                       key: "duplicate_test_key")
 
     assert_not(dupe.valid?)
-    assert_includes(dupe.errors[:key], "api keys must be unique")
+    assert_includes(dupe.errors[:key], :account_api_keys_duplicate_key.t)
 
     original.destroy
   end

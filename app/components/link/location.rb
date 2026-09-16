@@ -46,9 +46,9 @@ class Components::Link::Location < Components::Link::Object
   end
 
   def click_for_map_icon
-    Components::Link::Icon.new(
-      content: :click_for_map.l,
-      path: location_href,
+    Components::Link::Get.new(
+      name: :click_for_map.l,
+      target: location_href,
       icon: :map,
       class: Components::InlineLinkBlock.item_class
     )
@@ -58,7 +58,10 @@ class Components::Link::Location < Components::Link::Object
     a(href: url_for(observations_path(where: @where)),
       class: "index_observations_at_where_link") do
       render_label(@where)
-      plain(" [#{:search.ti}]") if @click
+      if @click
+        whitespace
+        plain("[#{:search.ti}]")
+      end
     end
   end
 
@@ -72,7 +75,10 @@ class Components::Link::Location < Components::Link::Object
       span(class: "location-scientific") do
         plain(::Location.reverse_name(name))
       end
-      plain(" (#{@count})") if @count
+      if @count
+        whitespace
+        plain("(#{@count})")
+      end
     end
   end
 end

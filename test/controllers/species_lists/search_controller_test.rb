@@ -49,10 +49,39 @@ module SpeciesLists
       post(:create, params: { query_species_lists: params })
 
       validated_params = params.except(:has_comments)
-      assert_redirected_to(
-        controller: "/species_lists", action: :index,
-        params: { q: { model: :SpeciesList, **validated_params } }
+      assert_search_redirected_to(
+        controller: "/species_lists",
+        params: validated_params
       )
+    end
+
+    def test_create_species_lists_search_invalid_params
+      login
+      fake_query = FakeInvalidQuery.new(["Something went wrong."])
+
+      Query.stub(:create_query, fake_query) do
+        post(:create, params: { query_species_lists: { title_has: "x" } })
+      end
+
+      assert_redirected_to(action: :new)
+      assert_flash_error
+    end
+
+    # Stands in for a Query whose validation failed -- easier and more
+    # reliable than constructing real search params that survive
+    # Query's own param-cleaning to reach #invalid? as false.
+    class FakeInvalidQuery
+      def initialize(messages)
+        @messages = messages
+      end
+
+      def invalid?
+        true
+      end
+
+      def validation_error_messages
+        @messages
+      end
     end
   end
 end

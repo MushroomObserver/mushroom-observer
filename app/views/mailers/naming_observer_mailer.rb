@@ -75,7 +75,7 @@ class Views::Mailers::NamingObserverMailer < Views::Mailers::Base
 
   def links
     [[:email_links_show_object.t(type: :observation),
-      "#{MO.http_domain}/#{observation.id}"],
+      observation.show_url],
      [:email_links_latest_changes.t, MO.http_domain]]
   end
 

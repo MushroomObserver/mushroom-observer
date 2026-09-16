@@ -21,7 +21,7 @@ module FieldSlipsController::ObservationHandling
       @field_slip.adopt_user_from(obs)
       check_for_species_list(obs, params[:species_list])
       name_flash_for_project(name, @field_slip.project)
-      redirect_to(observation_url(obs.id))
+      redirect_to(permanent_observation_url(obs.id))
     else
       redirect_to(new_observation_url(field_code: @field_slip.code,
                                       place_name:, date:, notes:))
@@ -127,14 +127,25 @@ module FieldSlipsController::ObservationHandling
 
   def last_obs_project_ok?(obs)
     return true unless (project = @field_slip.project)
-    return false unless project.user_can_add_observation?(obs, @user)
+    return false unless last_obs_project_allowed?(project, obs)
 
-    if project.violates_constraints?(obs)
-      flash_error(:field_slip_constraint_violation.t)
-      return false
-    end
     project.add_observation(obs)
     true
+  end
+
+  # Both refusals say why. Membership is checked first: owning the
+  # observation no longer confers control over which projects reference
+  # it (see Project#user_can_change_membership?), so a non-member is
+  # turned away before the constraints are even consulted.
+  def last_obs_project_allowed?(project, obs)
+    unless project.user_can_change_membership?(obs, @user)
+      flash_error(:field_slip_project_not_member.t(title: project.title))
+      return false
+    end
+    return true unless project.violates_constraints?(obs)
+
+    flash_error(:field_slip_constraint_violation.t)
+    false
   end
 
   # -- Occurrence linking for field slips --

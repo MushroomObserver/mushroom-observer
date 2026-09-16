@@ -4,7 +4,7 @@
 # the description details panel: Edit / Destroy / Clone / Move /
 # Merge / Adjust Permissions / Make Default / Project / Publish.
 # Each entry is a `Tab::Description::*` PORO rendered via
-# `Components::Link::Icon`, gated by user permissions and description
+# `Components::Link::Get`, gated by user permissions and description
 # state.
 #
 # Sibling-in-spirit to `Components::InlineCRUDLinks` (the bracketed
@@ -100,7 +100,10 @@ class Components::Description::ModLinks < Components::Base
 
   def icon_from_tab(tab)
     unless tab.html_options[:button]
-      return Components::Link.new(type: :icon, tab: tab)
+      return Components::Link.new(
+        type: :get, tab: tab,
+        class: class_names("stateful-link", tab.html_options[:class])
+      )
     end
 
     method = tab.html_options[:button]
@@ -111,7 +114,7 @@ class Components::Description::ModLinks < Components::Base
                            icon: opts[:icon],
                            confirm: opts[:confirm],
                            variant: :strip,
-                           class: "icon-link")
+                           class: "stateful-link")
   end
 
   # -- predicates -------------------------------------------------

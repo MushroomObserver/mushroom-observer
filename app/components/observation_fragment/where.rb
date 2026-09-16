@@ -9,7 +9,7 @@ class Components::ObservationFragment::Where < Components::Base
 
   def view_template
     li(class: "obs-where hanging-indent") do
-      plain("#{where_label}: ")
+      trusted_html(append_colon(where_label))
       render_location
       render_vague_notice
     end

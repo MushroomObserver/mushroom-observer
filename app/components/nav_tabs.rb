@@ -44,22 +44,27 @@
 #     end
 #   end
 class Components::NavTabs < Components::Base
-  # @param current [String, Symbol, nil] tab key marked `.active`
-  # @param link_class [String, nil] extra CSS classes appended to
-  #   every tab's `<a class="nav-link …">` (e.g. `"mt-3"`)
-  # @param attributes [Hash] arbitrary HTML attrs forwarded to the
-  #   `<ul>` element (`data:`, ARIA, etc.). The `class:` is always
-  #   `"nav nav-tabs"` and is not overridable from here.
+  # Tab key marked `.active`.
+  prop :current, _Nilable(_Union(String, Symbol)), default: nil
+  # Extra CSS classes appended to every tab's `<a class="nav-link …">`
+  # (e.g. `"mt-3"`).
+  prop :link_class, _Nilable(String), default: nil
+  # Catch-all for arbitrary HTML attrs forwarded to the `<ul>` element
+  # (`data:`, ARIA, etc.) -- matches Icon/Collapsible's pattern. The
+  # `class:` is always `"nav nav-tabs"` and is not overridable here.
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
+  # `@tabs` is builder-accumulated state (populated by `tab`/`add_all`
+  # during `vanish`, plus any pre-seeded `tabs:` collection below),
+  # not a constructor prop -- see the class docs above.
+  #
   # @param tabs [Tab::Collection, Enumerable<Tab::Base>, nil]
   #   pre-built tabs to render. Any block passed to `view_template`
   #   runs *after* these, so a Collection + ad-hoc `tabs.tab(...)`
   #   calls compose cleanly.
-  def initialize(current: nil, link_class: nil, attributes: {}, tabs: nil)
-    super()
-    @current = current
-    @link_class = link_class
-    @attributes = attributes
+  def initialize(tabs: nil, **)
     @tabs = []
+    super(**)
     Array(tabs).each { |t| tab(t) } if tabs
   end
 

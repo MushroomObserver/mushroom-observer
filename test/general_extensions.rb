@@ -623,10 +623,18 @@ module GeneralExtensions
     str == template
   end
 
+  # ActiveJob::Base.logger holds its own reference, copied from
+  # Rails.logger once at boot -- it's not a live delegate, so a
+  # job's log output (e.g. ActiveJob::LogSubscriber's own
+  # retry-exhaustion/discard messages) wouldn't be captured by
+  # swapping Rails.logger alone.
   def with_captured_logger
     log_output = StringIO.new
     old_logger = Rails.logger
-    Rails.logger = Logger.new(log_output)
+    old_job_logger = ActiveJob::Base.logger
+    new_logger = Logger.new(log_output)
+    Rails.logger = new_logger
+    ActiveJob::Base.logger = new_logger
 
     yield
 
@@ -634,6 +642,22 @@ module GeneralExtensions
     log_output.string
   ensure
     Rails.logger = old_logger
+    ActiveJob::Base.logger = old_job_logger
+  end
+
+  # Minitest 5's own assert_equal(nil, ...) deprecation warning
+  # doesn't include a caller location in this app's test output, so a
+  # stray leftover call is unfindable by grep -- its nil-ness only
+  # shows up at runtime. Preview Minitest 6's actual future behavior
+  # now (fails outright via refute_nil -- see minitest/assertions.rb)
+  # instead of Minitest 5's silent warning: a real assertion failure
+  # comes with a full backtrace automatically, pointing straight at
+  # the offending call site.
+  def assert_equal(exp, act, msg = nil)
+    return assert_not_nil(exp, msg || "Use assert_nil if expecting nil.") if
+      exp.nil?
+
+    super
   end
 
   # assert_equal raises a deprecation warning in Minitest 5 when the

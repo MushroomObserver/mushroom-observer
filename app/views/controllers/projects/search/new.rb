@@ -8,7 +8,7 @@
 module Views::Controllers::Projects::Search
   class New < Views::FullPageBase
     prop :search, ::Query::Projects
-    prop :local, _Boolean, default: true
+    prop :context, _Union(:page, :dropdown), default: :page
 
     def view_template
       add_new_title(:search_object, :projects)
@@ -18,7 +18,7 @@ module Views::Controllers::Projects::Search
         render(::Components::Form::Search.new(
                  @search,
                  search_controller: controller,
-                 local: @local
+                 context: @context
                ))
       end
     end

@@ -65,6 +65,30 @@ class Image
       image_server_data.keys - [:local]
     end
 
+    # Every file (relative path) a fully-processed image is expected to
+    # have: the six jpg renditions, plus the raw original when the upload
+    # wasn't a jpg. Shared by Verifier (are they all here to transfer?)
+    # and StaleImageFilesJob (did processing ever finish? -- #4974).
+    def self.expected_paths(image)
+      paths = Image::URL::SUBDIRECTORIES.values.map do |subdir|
+        "#{subdir}/#{image.id}.jpg"
+      end
+      ext = image.original_extension
+      paths << "orig/#{image.id}.#{ext}" if ext != "jpg"
+      paths
+    end
+
+    # Console command an admin can paste to regenerate images whose
+    # processing died before the derivative sizes were produced (#4974).
+    # Retrying the transfer alone can't help those -- there is nothing
+    # to transfer until the sizes exist again.
+    def self.reprocess_command(ids)
+      "Image.where(id: #{ids.inspect}).find_each { |i| " \
+        "i.current_user = i.user; " \
+        "Image::Processor.new(image: i, set_size: false).process }; " \
+        "TransferImagesJob.perform_now(image_ids: #{ids.inspect})"
+    end
+
     def initialize(image:, user: nil, ext: nil, set_size: false)
       @image = image
       raise("Image::Processor needs an image.") unless @image

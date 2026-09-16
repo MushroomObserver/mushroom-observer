@@ -9,10 +9,13 @@ class LiveDataFilterFormTest < ComponentTestCase
     # Nav wrapper with flex layout
     assert_html(html, "nav.d-flex.justify-content-between")
 
-    # Form with autosubmit controller
+    # Form with autosubmit controller.
     assert_html(html, "form[action='/test/filter']")
-    assert_html(html, "[data-controller='autosubmit']")
+    assert_html(html, "[data-controller~='autosubmit']")
     assert_html(html, "[data-turbo-frame='test_frame']")
+    # GET forms aren't Turbo-safe by default either (see
+    # .claude/rules/turbo_submit_forms.md).
+    assert_html(html, "form[data-turbo='false']")
 
     # Filter input
     assert_html(html, "input[name='text_filter[starts_with]']")

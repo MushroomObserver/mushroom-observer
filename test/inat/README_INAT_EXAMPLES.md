@@ -39,6 +39,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | russula_subabietis| [307145241](https://www.inaturalist.org/observations/307145241) | 2 | public | **Observation Fields: `Collector's name`, `Voucher Number(s)`, `Voucher Specimen Taken` ** 2025 Summer Continental Mycoblitz, Mike Beug |
 | russulaceae | [216675045](https://www.inaturalist.org/observations/216675045) | 2 | public | **all rights reserved**, many projects, Activity; place: Point Defiance Park, Tacoma, WA, US |
 | somion_unicolor.json |  |  |  | Formatted version of following; facilitates viewing iNat API response key/values test/inat/somion_unicolor.json |
+| stemonitidia | [395507009](https://www.inaturalist.org/observations/395507009) | **0** | n/a | **hand-built minimal fixture, not a full iNat Taxon** -- slime mold (Mycetozoa) at rank Superorder, added for testing |
 | somion_unicolor | [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public |  `jdcohenesq` Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes | [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | user `dannymi` different collector; Notes; **Observation Fields: Collector**, place: 25th Ave NE, Seattle, WA, US, with huge error |
 | tremella_mesenterica | [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | place: Lewisville, TX 75057, USA |

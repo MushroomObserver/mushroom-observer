@@ -146,7 +146,7 @@ class License < AbstractModel
   def prevent_destruction_of_license_in_use
     return unless in_use?
 
-    errors.add(:base, "Cannot delete License that's in use")
+    errors.add(:base, :validate_license_in_use)
     throw(:abort)
   end
 end

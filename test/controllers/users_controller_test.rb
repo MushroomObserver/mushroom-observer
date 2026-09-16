@@ -7,6 +7,17 @@ require("test_helper")
 #  users_controller
 # ------------------------------------------------------------
 class UsersControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Users, :User, overrides: { id_in_set: rolf.id }
+    )
+  end
+
   def modified_generic_params(params, user)
     params[:username] = user.login
     params
@@ -66,8 +77,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_page_title(:users.ti)
     assert_empty(css_select(".sorts"), "There should be no sort links")
 
-    flash_text = :runtime_no_matches.l.sub("[types]", "users")
-    assert_flash_text(flash_text)
+    assert_flash(:runtime_no_matches, type: :user)
   end
 
   #   ---------------

@@ -17,19 +17,26 @@
 #            )
 #          ))
 class Components::Form::PatternSearch < Components::ApplicationForm
-  SEARCH_TYPE_OPTIONS = [
-    [:comments, :comments],
-    [:glossary, :glossary_terms],
-    [:herbaria, :herbaria],
-    [:herbarium_records, :herbarium_records],
-    [:locations, :locations],
-    [:names, :names],
-    [:observations, :observations],
-    [:projects, :projects],
-    [:species_lists, :species_lists],
-    [:users, :users],
-    [:app_search_google, :google]
-  ].freeze
+  # Pattern-searchable on the backend (SearchController::
+  # PATTERN_SEARCHABLE_MODELS) but excluded from this dropdown:
+  # Image.pattern's join is too expensive to expose on the
+  # always-visible search bar. The backend stays working so the query
+  # can be revisited later.
+  DROPDOWN_EXCLUDED_TYPES = [:images].freeze
+
+  # A few types show a label that differs from their model symbol.
+  LABEL_OVERRIDES = { glossary_terms: :glossary }.freeze
+
+  SEARCH_TYPE_OPTIONS = (
+    (SearchController::PATTERN_SEARCHABLE_MODELS - DROPDOWN_EXCLUDED_TYPES).
+      map { |type| [LABEL_OVERRIDES.fetch(type, type), type] } +
+      [[:app_search_google, :google]]
+  ).freeze
+
+  # The selectable `type` values — the set a stored
+  # `session[:search_type]` must belong to for the select to be able
+  # to show it (see `Views::Layouts::TopNav::SearchBar`).
+  TYPE_VALUES = SEARCH_TYPE_OPTIONS.map(&:last).freeze
 
   FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \
                "px-0 gap-2".freeze
@@ -51,7 +58,8 @@ class Components::Form::PatternSearch < Components::ApplicationForm
                "flex-grow-1 mb-0") do
       Icon(
         type: :search,
-        class: "form-control-feedback hidden-xs"
+        class: class_names("form-control-feedback",
+                           Components::Column.mobile_hide_classes)
       )
       # `label: false` skips the form-group wrap + auto-label so the
       # input nests directly inside the navbar flex row, matching
@@ -98,7 +106,11 @@ class Components::Form::PatternSearch < Components::ApplicationForm
         span(class: "d-sm-none") do
           Icon(type: :search)
         end
-        span(class: "hidden-xs") { plain(:app_search.l) }
+        span(class: class_names(
+          Components::Column.mobile_hide_classes(display: :inline)
+        )) do
+          plain(:app_search.l)
+        end
       end
     end
   end

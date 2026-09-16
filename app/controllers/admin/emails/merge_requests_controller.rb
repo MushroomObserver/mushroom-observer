@@ -29,7 +29,7 @@ module Admin
                      form_class:
                        Views::Controllers::Admin::Emails::MergeRequests::Form,
                      form_locals: { old_obj: @old_obj, new_obj: @new_obj,
-                                    model_class: @model }
+                                    model_class: @model, user: @user }
                    ), layout: false)
           end
         end

@@ -7,8 +7,22 @@ class Inat
   class ObservationImporter
     include Inat::Constants
 
+    # Transient iNat/AWS failures worth retrying with backoff before
+    # giving up on the writeback (and, ultimately, on the just-created
+    # MO Observation). See #4589.
+    RETRYABLE_WRITEBACK_ERRORS = [
+      RestClient::ServiceUnavailable, RestClient::TooManyRequests,
+      RestClient::BadGateway, RestClient::GatewayTimeout,
+      RestClient::RequestTimeout, RestClient::ServerBrokeConnection
+    ].freeze
+    MAX_WRITEBACK_RETRIES = 3       # on a retryable writeback failure
+    WRITEBACK_RETRY_BASE_SLEEP = 2  # seconds; doubles each retry (2, 4, 8)
+    MAX_RETRY_AFTER_WAIT = 8        # iNat's Retry-After honored up to this
+
     attr_reader :inat_import, :user, :job,
                 :unlicensed_obs_count, :skipped_images_count, :image_ids
+
+    include Standardization
 
     def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
@@ -22,6 +36,7 @@ class Inat
     def import_page(page)
       page["results"].each do |result|
         return false if inat_import.reload.canceled?
+        return false if inat_import.reached_import_cap?
 
         import_one_result(JSON.generate(result))
       end
@@ -40,6 +55,7 @@ class Inat
       return unless @observation
 
       accumulate_counts(builder)
+      standardize_for_project
       finalize_import
     end
 
@@ -179,6 +195,7 @@ class Inat
       @unlicensed_obs_count += builder.unlicensed_obs
       @skipped_images_count += builder.skipped_images
       @image_ids.concat(builder.created_image_ids)
+      record_unlicensed_images(builder)
       return unless builder.unlicensed_obs == 1
 
       inat_import.add_license_added_obs(inat_id: @inat_obs[:id])
@@ -218,11 +235,12 @@ class Inat
       update_inat_observation_field(
         observation_id: @inat_obs[:id],
         field_id: MO_URL_OBSERVATION_FIELD_ID,
-        value: "#{MO.http_domain}/#{@observation.id}"
+        value: @observation.show_url
       )
     end
 
-    def update_inat_observation_field(observation_id:, field_id:, value:)
+    def update_inat_observation_field(observation_id:, field_id:, value:,
+                                      attempt: 1)
       payload = { observation_field_value: { observation_id: observation_id,
                                              observation_field_id: field_id,
                                              value: value } }
@@ -230,10 +248,75 @@ class Inat
         request(method: :post,
                 path: "observation_field_values",
                 payload: payload)
+    rescue *RETRYABLE_WRITEBACK_ERRORS => e
+      retry_or_raise_writeback(e, payload, attempt)
     rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, payload: payload }.to_json
-      log_with_response_error(error)
-      raise(e)
+      log_and_raise_writeback_error(e, payload)
+    end
+
+    # iNat can return a transient error (503, etc.) after the field value
+    # was persisted. Confirm before retrying or giving up, so a false
+    # error doesn't needlessly retry or back out the just-created MO
+    # Observation.
+    def retry_or_raise_writeback(error, payload, attempt)
+      ofv = payload[:observation_field_value]
+      return if field_actually_written?(ofv[:observation_id],
+                                        ofv[:observation_field_id],
+                                        ofv[:value])
+
+      if attempt <= MAX_WRITEBACK_RETRIES
+        backoff_for_writeback_retry(error, attempt)
+        return update_inat_observation_field(
+          observation_id: ofv[:observation_id],
+          field_id: ofv[:observation_field_id],
+          value: ofv[:value], attempt: attempt + 1
+        )
+      end
+
+      log_and_raise_writeback_error(error, payload)
+    end
+
+    # Verify by the field_id passed in, not a field hard-coded to the MO
+    # URL field -- update_inat_observation_field's signature is generic,
+    # so this stays correct if it's called for another observation field.
+    def field_actually_written?(observation_id, field_id, value)
+      raw_obs = fetch_inat_observation(observation_id)
+      fields = Inat::Obs.new(JSON.generate(raw_obs)).inat_obs_fields
+      fields&.find { |field| field[:field_id] == field_id }&.dig(:value) ==
+        value
+    rescue StandardError
+      false
+    end
+
+    def fetch_inat_observation(observation_id)
+      response = Inat::APIRequest.new(@inat_import.token).
+                 request(path: "observations/#{observation_id}")
+      JSON.parse(response.body, symbolize_names: true)[:results]&.first || {}
+    end
+
+    def backoff_for_writeback_retry(error, attempt)
+      backoff = retry_after_seconds(error) ||
+                WRITEBACK_RETRY_BASE_SLEEP * (2**(attempt - 1))
+      warn("  iNat writeback #{error.class} on observation field; " \
+           "retry #{attempt}/#{MAX_WRITEBACK_RETRIES} in #{backoff}s")
+      sleep(backoff)
+    end
+
+    # Honor iNat's Retry-After when it's within our own retry budget;
+    # otherwise fall back to our own doubling backoff so a large
+    # server-suggested wait can't stall the whole import.
+    def retry_after_seconds(error)
+      headers = error.response&.headers
+      seconds = headers && headers[:retry_after]&.to_i
+      return nil unless seconds&.positive? && seconds <= MAX_RETRY_AFTER_WAIT
+
+      seconds
+    end
+
+    def log_and_raise_writeback_error(error, payload)
+      error_json = { error: error.http_code, payload: payload }.to_json
+      log_with_response_error(error_json)
+      raise(error)
     end
 
     def increment_imported_counts

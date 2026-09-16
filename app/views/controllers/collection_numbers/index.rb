@@ -58,7 +58,7 @@ module Views::Controllers::CollectionNumbers
     def render_observation_links(collection_number)
       collection_number.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: observation_path(obs)) do
+        a(href: permanent_observation_path(obs)) do
           trusted_html(obs.unique_format_name.t)
         end
       end

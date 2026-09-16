@@ -207,6 +207,7 @@ class TranslationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_equal("one", assigns(:tag))
     assert_includes(assigns(:edit_tags), "one")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_edit_unofficial_language

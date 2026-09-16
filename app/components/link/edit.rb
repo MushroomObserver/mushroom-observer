@@ -12,13 +12,14 @@
 #
 # @example bare icon
 #   render(Components::Link::Edit.new(target: @herbarium, variant: :strip))
+#
+# @example from a Tab PORO -- default_name doesn't apply; the tab's
+#   # own title is used unless name: is also given.
+#   render(Components::Link::Edit.new(tab: Tab::Name::Edit.new(name: @name)))
 class Components::Link::Edit < Components::Link::Get
-  def initialize(target:, name: nil, icon: :edit, **)
-    super(target: target,
-          name: name || default_name(target),
-          action: :edit,
-          icon: icon,
-          **)
+  def initialize(target: nil, tab: nil, name: nil, icon: :edit, **)
+    name ||= default_name(target) if target && !tab
+    super(target: target, tab: tab, name: name, action: :edit, icon: icon, **)
   end
 
   private

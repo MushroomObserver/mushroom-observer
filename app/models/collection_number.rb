@@ -77,8 +77,10 @@ class CollectionNumber < AbstractModel
   }
 
   scope :pattern, lambda { |phrase|
-    cols = (CollectionNumber[:name] + CollectionNumber[:number])
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = (CollectionNumber[:name] + CollectionNumber[:number])
+      search_columns(cols, phrase)
+    end
   }
 
   # Eager-loads the observations + everything `Components::Matrix::Box`

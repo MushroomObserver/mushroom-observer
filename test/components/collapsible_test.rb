@@ -17,7 +17,7 @@ class CollapsibleTest < ComponentTestCase
   end
 
   def test_closed_by_default
-    html = render(Components::Collapsible.new(id: "foo"))
+    html = render_collapsible(id: "foo")
 
     assert_html(html, "div.collapse#foo")
     assert_no_html(html, "div.in")
@@ -25,39 +25,36 @@ class CollapsibleTest < ComponentTestCase
   end
 
   def test_expanded_adds_in_class
-    html = render(Components::Collapsible.new(id: "foo", expanded: true))
+    html = render_collapsible(id: "foo", expanded: true)
 
     assert_html(html, "div.collapse.in#foo")
   end
 
   def test_panel_adds_panel_collapse_class
-    html = render(Components::Collapsible.new(id: "foo", panel: true))
+    html = render_collapsible(id: "foo", panel: true)
 
     assert_html(html, "div.collapse.panel-collapse#foo")
     assert_no_html(html, "div.in")
   end
 
   def test_expanded_panel_with_class
-    html = render(Components::Collapsible.new(
-                    id: "foo", expanded: true, panel: true,
-                    class: "custom-class"
-                  ))
+    html = render_collapsible(id: "foo", expanded: true, panel: true,
+                              class: "custom-class")
 
     assert_html(html, "div.collapse.in.panel-collapse.custom-class#foo")
   end
 
   def test_nil_id_omits_id_attr
-    html = render(Components::Collapsible.new)
+    html = render_collapsible
 
     assert_html(html, "div.collapse")
     assert_no_html(html, "div[id]")
   end
 
   def test_extra_attrs_forwarded
-    html = render(Components::Collapsible.new(
-                    id: "geo",
-                    data: { form_exif_target: "collapseFields" }
-                  ))
+    html = render_collapsible(
+      id: "geo", data: { form_exif_target: "collapseFields" }
+    )
 
     assert_html(html,
                 "div.collapse#geo[data-form-exif-target='collapseFields']")
@@ -66,13 +63,13 @@ class CollapsibleTest < ComponentTestCase
   def test_id_kwarg_always_wins_over_any_other_id_source
     # `id:` is an explicit prop, so it always claims that keyword --
     # there's no bucket a caller could stash a conflicting id in.
-    html = render(Components::Collapsible.new(id: "real", data: { foo: "bar" }))
+    html = render_collapsible(id: "real", data: { foo: "bar" })
 
     assert_html(html, "div.collapse#real[data-foo='bar']")
   end
 
   def test_element_kwarg_renders_alternate_tag
-    html = render(Components::Collapsible.new(id: "foo", element: :tbody))
+    html = render_collapsible(id: "foo", element: :tbody)
 
     assert_html(html, "tbody.collapse#foo")
     assert_no_html(html, "div.collapse")
@@ -87,6 +84,10 @@ class CollapsibleTest < ComponentTestCase
   end
 
   private
+
+  def render_collapsible(**, &block)
+    render(Components::Collapsible.new(**), &block)
+  end
 
   # Returns an anonymous Components::Base instance whose view_template
   # runs the given block in Phlex context (so `plain`, `div`, `render`

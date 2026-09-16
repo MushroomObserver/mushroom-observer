@@ -14,7 +14,8 @@ module Views::Controllers::Projects::Members
     # view's table column.
     def test_member_status
       project = projects(:eol_project)
-      view = Index.new(project: project, users: [], project_member: nil,
+      view = Index.new(project: project, users: [],
+                       project_member: ProjectMember.new(project: project),
                        user: @user)
 
       assert_equal(:owner.ti, view.send(:member_status, project.user))

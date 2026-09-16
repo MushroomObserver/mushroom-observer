@@ -36,7 +36,9 @@ module SpeciesLists
       }
       login("rolf", "testpassword")
       post(:create, params: params)
+      assert_unprocessable
       assert_edit_species_list
+      assert_select("form[data-turbo='true']")
       assert_equal(10, rolf.reload.contribution)
       # Doesn't actually change list, just feeds it to edit_species_list
       assert_equal(list_data, @controller.instance_variable_get(:@list_members))
@@ -57,6 +59,7 @@ module SpeciesLists
       }
       login("rolf", "testpassword")
       post(:create, params: params)
+      assert_unprocessable
       assert_edit_species_list
       assert_equal(10, rolf.reload.contribution)
       new_data = @controller.instance_variable_get(:@list_members)

@@ -17,10 +17,15 @@ module ProjectsController::Validators
     end
   end
 
+  # A clean-but-unmatched name is accepted here (location stays nil) --
+  # update_redirect_path sends the user to build it afterward, rather
+  # than the old behavior of hard-blocking the whole edit until they
+  # either fix the typo or give up on that name entirely.
   def valid_where
     where = params[:project][:place_name]
+    @raw_place_name = where
     location = find_location(where)
-    return false if !location && where != ""
+    return false if @dubious_where_reasons.present?
 
     @project.location = location
     @project.save

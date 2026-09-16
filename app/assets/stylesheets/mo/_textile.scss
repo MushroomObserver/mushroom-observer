@@ -11,6 +11,19 @@
   th {
     vertical-align: bottom;
   }
+
+  // Textile emits a bare <table>, so Bootstrap's `.table-responsive`
+  // wrapper div is unreachable from article markup -- the table element
+  // has to be its own scroll container. Confined to phone widths: making
+  // a <table> a block box drops it out of table layout for sizing, so a
+  // narrow table would otherwise stop filling its container on desktop.
+  @media (max-width: $screen-xs-max) {
+    table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }
 
 .sandbox {

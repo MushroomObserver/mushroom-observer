@@ -1,0 +1,1 @@
+|{white-space:nowrap}. 2026-09-15 | Edit or delete imported Observations without the pop-up | "PR#5372":https://github.com/MushroomObserver/mushroom-observer/pull/5372 |

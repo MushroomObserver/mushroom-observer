@@ -8,16 +8,23 @@
 #
 # @example
 #   render(Views::Controllers::Observations::Downloads::Form.new(
-#     query_param: q_param
+#     query: @query
 #   ))
 module Views::Controllers::Observations::Downloads
   class Form < ::Components::ApplicationForm
-    def initialize(query_param:, format: "raw", encoding: "UTF-8", **)
-      @query_param = query_param
+    # `query:` (not a precomputed q_param Hash) so `q_param` -- the
+    # ambient session/current-query helper -- only gets called once,
+    # here, at the point the URL is actually built.
+    prop :query, _Nilable(::Query), default: nil
+
+    def initialize(query: nil, format: "raw", encoding: "UTF-8", **attrs)
       form_object = FormObject::Download.new(
         format: format, encoding: encoding
       )
-      super(form_object, **)
+      # Permanently turbo: false -- Download/Print Labels send_data
+      # (see .claude/rules/turbo_submit_forms.md). turbo: false comes
+      # after **attrs so no caller can override it.
+      super(form_object, query: query, **attrs, turbo: false)
     end
 
     def view_template
@@ -32,18 +39,18 @@ module Views::Controllers::Observations::Downloads
     private
 
     def form_action
-      observations_downloads_path(q: @query_param)
+      observations_downloads_path(q: q_param(@query))
     end
 
     def render_format_section
-      p { "#{:download_observations_format.l}:" }
+      p { append_colon(:download_observations_format.l) }
       div(class: "form-group") do
         radio_field(:format, *format_options)
       end
     end
 
     def render_encoding_section
-      p { "#{:download_observations_encoding.l}:" }
+      p { append_colon(:download_observations_encoding.l) }
       div(class: "form-group") do
         radio_field(:encoding, *encoding_options)
       end
@@ -57,7 +64,7 @@ module Views::Controllers::Observations::Downloads
 
     def render_print_labels_section
       p(class: "mt-5") do
-        "#{:download_observations_print_labels_header.l}:"
+        append_colon(:download_observations_print_labels_header.l)
       end
       submit(:download_observations_print_labels.l)
     end

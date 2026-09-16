@@ -326,14 +326,29 @@ module ControllerExtensions
            "found #{found_hrefs}")
   end
 
-  def assert_image_link_in_html(img_src, url, _msg = nil)
-    unless url.is_a?(String)
-      revised_opts = raise_params(url)
-      url = url_for(revised_opts)
+  # Assert that `Header::InterestIcons` rendered a button whose icon
+  # carries `icon_class` (e.g. "interest_watch" -- a stable hook, not
+  # the image filename, which is an implementation detail owned by
+  # `interest_icons_test.rb`'s own class-to-image assertions) and
+  # whose form submits `method` to `path` -- `:post` for a
+  # not-yet-existing Interest (create), `:patch` for flipping an
+  # existing one to the other non-default state (update, needs
+  # `state:`), `:delete` for returning to the default state (destroy,
+  # no `state:` param at all). Mirrors `InterestsController`'s own
+  # create/update/destroy dispatch -- see `interest_icons_test.rb`.
+  def assert_interest_button_in_html(icon_class, method:, path:, state: nil)
+    if method == :post
+      assert_select("form[action='#{path}'][method='post'] " \
+                    "input[name='state'][value='#{state}']")
+    else
+      assert_select("form[action='#{path}'] " \
+                    "input[name='_method'][value='#{method}']")
+      if state
+        assert_select("form[action='#{path}'] " \
+                      "input[name='state'][value='#{state}']")
+      end
     end
-    assert_select("a[href = '#{url}']>img") do
-      assert_select(":match('src', ?)", img_src)
-    end
+    assert_select("form[action='#{path}'] img.#{icon_class}")
   end
 
   # Assert that a form exists which posts to the given url.
@@ -368,6 +383,14 @@ module ControllerExtensions
                           "Expected HTML to contain form that posts to " \
                           "<#{url}>, but found nothing at all."))
     end
+  end
+
+  # Assert a failed form submission's re-render used a non-2xx status.
+  # Turbo requires this -- a plain 200 on a failed submission's
+  # re-render is a silent no-op under Turbo instead of a redisplay
+  # (issue #5052).
+  def assert_unprocessable(msg = nil)
+    assert_response(:unprocessable_content, msg)
   end
 
   # Assert that a response body is same as contents of a given file.
@@ -612,10 +635,10 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{try_id}'."
       elsif elements.length == 1
-        message = if elements.first.to_s.start_with?("<select")
+        message = if elements.first.name == "select"
                     check_select_value(elements.first, expect_val, try_id)
                   else
-                    check_input_value(elements.first.to_s, expect_val, try_id)
+                    check_input_value(elements.first, expect_val, try_id)
                   end
       end
       break if message.nil?
@@ -631,15 +654,19 @@ module ControllerExtensions
     else
       assert_select(elem, "option[selected]", { count: 1 },
                     "Expected :#{id} to have one option selected") do |opts|
-        return check_input_value(opts.first.to_s, expect_val, id)
+        return check_input_value(opts.first, expect_val, id)
       end
     end
   end
 
+  # `elem` is the Nokogiri node, not a string serialization of it -- a
+  # bare boolean attribute (Phlex's `checked`) round-trips as
+  # `checked=""` under HTML5 parsing but bare `checked` under HTML4, so
+  # checking presence via Nokogiri's attribute API (`key?`) is the form
+  # stable across both.
   def check_input_value(elem, expect_val, id)
-    match = elem.match(/value=('[^']*'|"[^"]*")/)
-    actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
-    actual_val = "" if elem =~ /type=['"]?checkbox/ && elem !~ / checked[ >]/
+    actual_val = elem["value"].to_s
+    actual_val = "" if elem["type"] == "checkbox" && !elem.key?("checked")
     return if actual_val == expect_val.to_s
 
     "Input '#{id}' has wrong value, " \
@@ -653,10 +680,15 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        # NodeSet has no #join; map(&:to_s) converts to String array first
-        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
-                         join).strip
-        message = if actual_val != expect_val.to_s
+        # NodeSet has no #join; map(&:to_s) converts to String array first.
+        # Textarea content is plain text, not HTML -- unescape entities and
+        # normalize line endings (as an HTML5 parser does), but don't run
+        # it through as_displayed's strip_html: a literal "<...>" typed
+        # into the textarea is content the user typed, not a tag to strip.
+        actual_val = elements.first.children.map(&:to_s). # rubocop:disable Style/MapJoin
+                     join.unescape_html.gsub(/\r\n?/, "\n").strip
+        expect_val = expect_val.to_s.gsub(/\r\n?/, "\n").strip
+        message = if actual_val != expect_val
                     "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
                   end

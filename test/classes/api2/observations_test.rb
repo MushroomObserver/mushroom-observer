@@ -10,13 +10,11 @@ class API2::ObservationsTest < UnitTestCase
     do_basic_get_test(Observation)
   end
 
+  def api2_model = Observation
+
   # ---------------------------------
   #  :section: Observation Requests
   # ---------------------------------
-
-  def params_get(**)
-    { method: :get, action: :observation }.merge(**)
-  end
 
   def obs_sample
     @obs_sample ||= Observation.all.sample
@@ -280,12 +278,7 @@ class API2::ObservationsTest < UnitTestCase
     @lat = nil
     @long = nil
     @alt = nil
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      location: "Anywhere"
-    }
+    params = params_post(location: "Anywhere")
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_arrays_equal([Observation.last], api.results)
@@ -311,14 +304,7 @@ class API2::ObservationsTest < UnitTestCase
     @lat = burbank.center_lat
     @long = burbank.center_lng
     @alt = nil
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      latitude: @lat,
-      longitude: @long,
-      location: "Earth"
-    }
+    params = params_post(latitude: @lat, longitude: @long, location: "Earth")
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_arrays_equal([Observation.last], api.results)
@@ -354,10 +340,7 @@ class API2::ObservationsTest < UnitTestCase
     @lat = 39.229
     @long = -123.77
     @alt = 50
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
+    params = params_post(
       date: "20120626",
       notes: { Cap: "scaly",
                Gills: "inky\n",
@@ -379,7 +362,7 @@ class API2::ObservationsTest < UnitTestCase
       thumbnail: @img2.id,
       images: "#{@img1.id},#{@img2.id}",
       source: "mo_iphone_app"
-    }
+    )
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_arrays_equal([Observation.last], api.results)
@@ -417,14 +400,8 @@ class API2::ObservationsTest < UnitTestCase
   def test_post_observation_with_thumbnail_not_in_images
     img1 = images(:in_situ_image)
     img2 = images(:turned_over_image)
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      location: "Anywhere",
-      thumbnail: img2.id,
-      images: img1.id.to_s
-    }
+    params = params_post(location: "Anywhere", thumbnail: img2.id,
+                         images: img1.id.to_s)
 
     api = API2.execute(params)
 
@@ -436,14 +413,8 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_post_observation_with_no_log
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      location: "Anywhere",
-      name: "Agaricus campestris",
-      log: "no"
-    }
+    params = params_post(location: "Anywhere", name: "Agaricus campestris",
+                         log: "no")
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
@@ -453,37 +424,21 @@ class API2::ObservationsTest < UnitTestCase
   def test_post_observation_with_used_field_slip
     fs = field_slips(:field_slip_one)
     assert(fs.observations.any?, "Test needs field_slip with observation")
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      location: "Anywhere",
-      name: "Agaricus campestris",
-      code: fs.code
-    }
+    params = params_post(location: "Anywhere", name: "Agaricus campestris",
+                         code: fs.code)
     assert_api_pass(params)
     obs = Observation.last
     assert_equal(fs, obs.field_slip)
   end
 
   def test_post_observation_with_free_field_slip
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      location: "Anywhere",
-      name: "Agaricus campestris",
-      code: field_slips(:field_slip_no_obs).code
-    }
+    params = params_post(location: "Anywhere", name: "Agaricus campestris",
+                         code: field_slips(:field_slip_no_obs).code)
     assert_api_pass(params)
   end
 
   def test_post_observation_scientific_location
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key
-    }
+    params = params_post
     assert_equal("postal", rolf.location_format)
 
     params[:location] = "New Place, California, USA"
@@ -524,13 +479,8 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_post_observation_has_specimen
-    params = {
-      method: :post,
-      action: :observation,
-      api_key: @api_key.key,
-      location: locations(:burbank).name,
-      name: names(:peltigera).text_name
-    }
+    params = params_post(location: locations(:burbank).name,
+                         name: names(:peltigera).text_name)
 
     assert_api_fail(params.merge(has_specimen: "no", herbarium: "1"))
     assert_api_fail(params.merge(has_specimen: "no", collection_number: "1"))
@@ -556,21 +506,32 @@ class API2::ObservationsTest < UnitTestCase
     assert_obj_arrays_equal([obs], spec.observations)
   end
 
+  # A read-only reflection (#4214) can't be edited through the API
+  # either, even by its owner — the setter raises before any update.
+  def test_patching_a_reflection_is_blocked
+    obs = observations(:coprinus_comatus_obs)
+    assert(obs.can_edit?(rolf), "owner would otherwise be able to edit")
+    obs.update_column(:reflected_at, Time.zone.now)
+    params = params_patch(id: obs.id, set_date: "2012-12-12")
+    assert_api_fail(params)
+    assert(@api.errors.any?(API2::ObservationIsReadOnly),
+           "editing a reflection should raise ObservationIsReadOnly")
+    assert_not_equal(Date.parse("2012-12-12"), obs.reload.when,
+                     "a reflection's date must not change via the API")
+  end
+
   def test_patching_observations
     rolfs_obs = observations(:coprinus_comatus_obs)
     marys_obs = observations(:detailed_unknown_obs)
     assert(rolfs_obs.can_edit?(rolf))
     assert_not(marys_obs.can_edit?(rolf))
-    params = {
-      method: :patch,
-      action: :observation,
-      api_key: @api_key.key,
+    params = params_patch(
       id: rolfs_obs.id,
       set_date: "2012-12-12",
       set_location: 'Burbank\, California\, USA',
       set_has_specimen: "no",
       set_is_collection_location: "no"
-    }
+    )
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_obs.id))
     assert_api_fail(params.merge(set_date: ""))
@@ -583,15 +544,8 @@ class API2::ObservationsTest < UnitTestCase
     assert_equal(false, rolfs_obs.specimen)
     assert_equal(false, rolfs_obs.is_collection_location)
 
-    params = {
-      method: :patch,
-      action: :observation,
-      api_key: @api_key.key,
-      id: rolfs_obs.id,
-      set_latitude: "12.34",
-      set_longitude: "-56.78",
-      set_altitude: "901"
-    }
+    params = params_patch(id: rolfs_obs.id, set_latitude: "12.34",
+                          set_longitude: "-56.78", set_altitude: "901")
     assert_api_fail(params.except(:set_latitude))
     assert_api_fail(params.except(:set_longitude))
     assert_api_pass(params)
@@ -600,12 +554,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_in_delta(-56.78, rolfs_obs.lng, MO.box_epsilon)
     assert_in_delta(901, rolfs_obs.alt, MO.box_epsilon)
 
-    params = {
-      method: :patch,
-      action: :observation,
-      api_key: @api_key.key,
-      id: rolfs_obs.id
-    }
+    params = params_patch(id: rolfs_obs.id)
     assert_api_pass(params.merge(set_notes: { Other: "wow!",
                                               Cap: "red",
                                               Ring: "none",
@@ -632,7 +581,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_obj_arrays_equal(rolf.images, rolfs_obs.images, :sort)
     assert_api_pass(params.merge(remove_images: rolfs_img.id))
     rolfs_obs.reload
-    assert(rolfs_obs.thumb_image != rolfs_img)
+    assert_not_equal(rolfs_obs.thumb_image, rolfs_img)
     assert_objs_equal(rolfs_obs.images.first, rolfs_obs.thumb_image)
     imgs = rolf.images[2..6].map { |img| img.id.to_s }.join(",")
     imgs += ",#{marys_img.id}"
@@ -685,11 +634,7 @@ class API2::ObservationsTest < UnitTestCase
   def test_deleting_observations
     rolfs_obs = rolf.observations.sample
     marys_obs = mary.observations.sample
-    params = {
-      method: :delete,
-      action: :observation,
-      api_key: @api_key.key
-    }
+    params = params_delete
     assert_api_fail(params.merge(id: marys_obs.id))
     assert_api_pass(params.merge(id: rolfs_obs.id))
     assert_not_nil(Observation.safe_find(marys_obs.id))

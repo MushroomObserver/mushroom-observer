@@ -35,6 +35,7 @@ module Account
       @key = APIKey.new
 
       create_api_key
+      return if redirect_full_page_form?
 
       respond_to do |format|
         format.turbo_stream do
@@ -48,6 +49,8 @@ module Account
       return unless verify_user_owns_key
 
       update_api_key
+      return if redirect_full_page_form?
+
       respond_to do |format|
         format.turbo_stream do
           render_update_table_and_flash
@@ -86,6 +89,17 @@ module Account
     end
 
     private
+
+    # The standalone new/edit forms always redirect, even under
+    # Turbo (which requests turbo_stream) -- #account_api_keys_table
+    # doesn't exist on those pages for a turbo_stream response to
+    # target.
+    def redirect_full_page_form?
+      return false if params[:full_page_form].blank?
+
+      redirect_to(account_api_keys_path)
+      true
+    end
 
     # Replaces the formerly-ERB `_update_table_and_flash.erb`
     # turbo_stream partial — emit two stream actions: refresh the

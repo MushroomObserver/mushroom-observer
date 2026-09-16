@@ -50,6 +50,28 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     assert_nil(component.extract_image_data[:when])
   end
 
+  # An observation with a thumbnail uses it.
+  def test_observation_uses_thumb_image
+    obs = observations(:coprinus_comatus_obs)
+    assert(obs.thumb_image_id, "fixture should have a thumb_image")
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+
+    assert_equal(obs.thumb_image, component.build_render_data[:image])
+  end
+
+  # No thumbnail: the box carries no image. The view does not query
+  # for a fallback (no queries in Phlex views); the model-layer
+  # guarantee (Observation#ensure_thumb_image_present) and the #5314
+  # backfill keep an images-but-null-thumb observation from existing.
+  def test_observation_without_thumb_has_no_image_data
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(thumb_image_id: nil)
+    obs = Observation.find(obs.id)
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+
+    assert_nil(component.build_render_data[:image])
+  end
+
   # ---------------------------------------------------------------
   # extract_rss_log_name
   # ---------------------------------------------------------------

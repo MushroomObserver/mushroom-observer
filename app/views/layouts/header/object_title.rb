@@ -36,7 +36,9 @@ module Views::Layouts
     private
 
     def render_title_span
-      plain("#{:edit_object.t(type: @object.type_tag)}: ") if @mode == :edit
+      if @mode == :edit
+        trusted_html(append_colon(:edit_object.t(type: @object.type_tag)))
+      end
       render_title
     end
 

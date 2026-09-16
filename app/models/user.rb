@@ -287,6 +287,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # go through +change_password+.)
   before_create :crypt_password
 
+  include NormalizesInatUsername
+
   before_update :update_image_copyright_holder
   before_update :expire_caches_of_associated_observations
 
@@ -313,8 +315,10 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = User[:login] + User[:name]
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = User[:login] + User[:name]
+      search_columns(cols, phrase)
+    end
   }
 
   # NOTE: the obs images are a separate optimized query
@@ -331,7 +335,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :top_users_for_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
       where(herbarium_records: { herbarium_id: herbarium.id }).
-      select(:name, :login, User[:id].count).
+      select(:name, :login, User[:id].count.as("record_count")).
       group(:id).order(User[:id].count.desc).take(5)
   }
 
@@ -433,6 +437,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     users.find_each do |user|
       return user if user.unique_text_name == str
     end
+  end
+
+  # Doesn't match on login/name (those go through the fuzzy `pattern`
+  # scope instead, in case of a partial match) -- only a numeric id or
+  # a verified email address counts as "exact."
+  def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
+    user = (phrase.match?(/^\d+$/) && safe_find(phrase)) ||
+           find_by(email: phrase)
+    user if user&.verified
   end
 
   # Return User's full name if present, else return login.
@@ -722,9 +736,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
         UserGroup.one_user(id)&.destroy
       end
       UserGroupUser.where(user_id: ids).delete_all
-      # delete_all below bypasses `has_many :api_keys, dependent: :destroy`,
-      # so clean them here too (erase_user handles this via OWN_RECORDS).
+      # delete_all below bypasses `has_many :api_keys, dependent: :destroy`
+      # and `has_one :user_stats, dependent: :destroy`, so clean them here
+      # too (erase_user handles this via OWN_RECORDS).
       APIKey.where(user_id: ids).delete_all
+      UserStats.where(user_id: ids).delete_all
       User.where(id: ids).delete_all
     end
 
@@ -1060,11 +1076,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def user_login_requirements
     if login.to_s.blank?
-      errors.add(:login, :validate_user_login_missing.t)
+      errors.add(:login, :validate_user_login_missing)
     elsif login.length < 3 || login.size > 40
-      errors.add(:login, :validate_user_login_too_long.t)
+      errors.add(:login, :validate_user_login_too_long)
     elsif login_already_taken?
-      errors.add(:login, :validate_user_login_taken.t)
+      errors.add(:login, :validate_user_login_taken)
     end
   end
 
@@ -1075,36 +1091,37 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def user_password_requirements
-    errors.add(:password, :validate_user_password_too_long.t) \
+    errors.add(:password, :validate_user_password_too_long) \
       if password.to_s.present? && (password.length < 5 || password.size > 40)
   end
 
   def user_email_requirements
     if email.to_s.blank? || !ApplicationMailer.valid_email_address?(email.to_s)
-      errors.add(:email, :validate_user_email_missing.t)
+      errors.add(:email, :validate_user_email_missing)
     elsif email.size > 80
-      errors.add(:email, :validate_user_email_too_long.t)
+      errors.add(:email, :validate_user_email_too_long)
     end
   end
 
   def user_other_requirements
-    errors.add(:theme, :validate_user_theme_too_long.t) if theme.to_s.size > 40
-    errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
+    errors.add(:theme, :validate_user_theme_too_long) if theme.to_s.size > 40
+    errors.add(:name, :validate_user_name_too_long) if name.to_s.size > 80
   end
 
   def check_password
     return if password.blank?
 
     if password_confirmation.to_s.blank?
-      errors.add(:password, :validate_user_password_confirmation_missing.t)
+      errors.add(:password, :validate_user_password_confirmation_missing)
     elsif password != password_confirmation
-      errors.add(:password, :validate_user_password_no_match.t)
+      errors.add(:password, :validate_user_password_no_match)
     end
   end
 
   def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
-      errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
+      errors.add(:notes_template, :prefs_notes_template_no_other,
+                 part: ERB::Util.html_escape(part))
     end
   end
 
@@ -1117,8 +1134,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     notes_template.split(",").each do |part|
       next unless part.squish == "Collector"
 
-      errors.add(:notes_template,
-                 :prefs_notes_template_no_collector.t(part: part.squish))
+      errors.add(:notes_template, :prefs_notes_template_no_collector,
+                 part: ERB::Util.html_escape(part.squish))
     end
   end
 
@@ -1128,7 +1145,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     squished = notes_template.split(",").map { |s| s.squish.downcase }
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
     dups.each do |dup|
-      errors.add(:notes_template, :prefs_notes_template_no_dups.t(part: dup))
+      errors.add(:notes_template, :prefs_notes_template_no_dups,
+                 part: ERB::Util.html_escape(dup))
     end
   end
 
@@ -1163,6 +1181,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     return if Location.region(content_filter[:region]).any?
 
     # If we're here, there are no MO locations in that region.
-    errors.add(:region, :advanced_search_filter_region.t)
+    errors.add(:region, :advanced_search_filter_region)
   end
 end

@@ -13,10 +13,15 @@
 # model arg, the form id is set explicitly so `derive_form_id` skips
 # the model-name fallback.
 class Components::ListGroup::Search < Components::ApplicationForm
-  def initialize(object:, object_names:, project: nil, **)
-    @object = object
-    @object_names = object_names
-    @project = project
+  prop :object, _Union(::Project, ::SpeciesList)
+  # Actually `Observation` records (joined to `Name`, selecting only
+  # `text_name`/`id`) -- see the `object_names` query in
+  # ProjectsController/SpeciesListsController#show. Only used here via
+  # `.to_json` for the Stimulus autocompleter match list.
+  prop :object_names, _Array(::Observation)
+  prop :project, _Nilable(::Project), default: nil
+
+  def initialize(**)
     super(FormObject::ListSearch.new, id: "list_search_form", **)
   end
 

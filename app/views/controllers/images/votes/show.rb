@@ -11,7 +11,7 @@ module Views::Controllers::Images
     class Show < Views::Base
       prop :image, ::Image
       prop :user, _Nilable(::User)
-      prop :context, Symbol, default: :overlay
+      prop :context, Symbol, default: :matrix
 
       def view_template
         turbo_frame_tag(frame_id) do

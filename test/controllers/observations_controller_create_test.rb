@@ -56,7 +56,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     begin
       if o_num.zero?
-        assert_response(:success)
+        assert_unprocessable
       elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
@@ -139,6 +139,234 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                    "Observation should have log_updated_at time")
   end
 
+  # Arriving from a field slip leaves Collector blank: the person at the
+  # keyboard is usually a foray recorder entering someone else's
+  # collection, and a blank collector on a field-slip observation renders
+  # as "Entered by:" alone rather than falsely naming them. See #3283.
+  def test_new_from_field_slip_leaves_collector_blank
+    login("rolf")
+
+    get(:new, params: { field_code: field_slips(:field_slip_no_obs).code })
+
+    assert_select("input[name='observation[collector]']")
+    assert_select("input[name='observation[collector]'][value=?]",
+                  users(:rolf).unique_text_name, count: 0)
+  end
+
+  # Arriving with a field code defaults Locality the way the field slip
+  # form does: the project's own location outranks the user's last
+  # observation, because a forayer who has travelled to the site hasn't
+  # entered anything there yet. See #4907.
+  def test_new_from_field_slip_prefers_project_location
+    project = projects(:current_project)
+    user = users(:mary)
+    assert_equal(locations(:burbank), project.location)
+    assert_empty(FieldSlip.where(user: user, project: project),
+                 "Test needs a user with no prior slip in this project")
+
+    # Park the user's last observation elsewhere, so only the precedence
+    # rule can put the project's location on the form.
+    Observation.recent_by_user(user).last.
+      update_columns(location_id: locations(:albion).id)
+
+    login("mary")
+    get(:new, params: { field_code: "#{project.field_slip_prefix}-9999" })
+
+    assert_equal(project.location, assigns(:observation).location)
+  end
+
+  # A field code with surrounding whitespace and mixed case still resolves
+  # the existing slip's project onto the new observation --
+  # add_field_slip_project normalizes the code the same way
+  # field_slip_for_code does (#5199, #5210).
+  def test_new_from_field_slip_adds_project_case_and_space_insensitively
+    slip = field_slips(:field_slip_no_obs)
+    project = slip.project
+    assert(project.member?(users(:mary)),
+           "Test needs a member of the slip's project")
+
+    login("mary")
+    get(:new, params: { field_code: "  #{slip.code.downcase}  " })
+
+    assert_includes(assigns(:observation).project_ids, project.id,
+                    "whitespace/mixed-case code should still add the project")
+  end
+
+  # Without a field code the plain last-observation default still applies.
+  def test_new_without_field_slip_keeps_last_observation_location
+    user = users(:rolf)
+    last = Observation.recent_by_user(user).last
+    assert_not_nil(last&.location, "Test needs a located last observation")
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(last.location, assigns(:observation).location)
+  end
+
+  # The field slip form's "Add Images" / "Create Observation" redirects
+  # carry a resolved place_name, which `check_location` turns back into
+  # the Location rather than leaving as free text.
+  def test_new_with_place_name_param_resolves_the_location
+    location = locations(:albion)
+
+    login("rolf")
+    get(:new, params: { place_name: location.name })
+
+    assert_equal(location, assigns(:location))
+    assert_select("input[name='observation[place_name]'][value=?]",
+                  location.name)
+  end
+
+  # A collector carried in from the field-slip form still wins.
+  def test_new_from_field_slip_keeps_supplied_collector
+    login("rolf")
+
+    get(:new, params: { field_code: field_slips(:field_slip_no_obs).code,
+                        collector: "Jane Forager" })
+
+    assert_select("input[name='observation[collector]'][value=?]",
+                  "Jane Forager")
+  end
+
+  # A project alias typed into Locality or Collector resolves on save.
+  # "Walk 1" is not a plausible place name, so this also proves the
+  # resolution beats validate_place_name's dubious-name check to the punch.
+  def test_create_resolves_project_aliases
+    place_alias = project_aliases(:two)  # "Walk 1" -> albion
+    user_alias = project_aliases(:one)   # "RS" -> rolf
+    slip = field_slips(:field_slip_no_obs)
+    assert_equal(place_alias.project, slip.project)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  collector: user_alias.name } })
+
+    obs = assigns(:observation)
+    assert_predicate(obs, :persisted?, "alias should not block the save")
+    assert_equal(locations(:albion), obs.location)
+    assert_equal(rolf.unique_text_name, obs.collector)
+    assert_equal(rolf.id, obs.collector_user_id)
+  end
+
+  # A stale hidden location_id must not beat the typed alias. The
+  # autocompleter clears it client-side, but the form still supports
+  # non-JS submission, so the server has to win this on its own.
+  def test_alias_beats_stale_location_id
+    place_alias = project_aliases(:two)
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  location_id: locations(:burbank).id } })
+
+    assert_equal(locations(:albion), assigns(:observation).location)
+  end
+
+  # "Id by" resolves through project aliases to a textile user name, the
+  # same shape FieldSlipNotesBuilder stores from the slip form, so an
+  # observation reads back the same whichever form entered it.
+  def test_create_resolves_id_by_note_through_alias
+    user_alias = project_aliases(:one) # "RS" -> rolf
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: {
+                     place_name: locations.first.name,
+                     notes: { Field_Slip_ID_By: user_alias.name }
+                   } })
+
+    assert_equal(rolf.textile_name,
+                 assigns(:observation).notes[:Field_Slip_ID_By])
+  end
+
+  # Unmatched text stays verbatim — whoever identified a collection is not
+  # necessarily an MO user.
+  def test_id_by_note_keeps_unmatched_text
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   observation: {
+                     place_name: locations.first.name,
+                     notes: { Field_Slip_ID_By: "Some Stranger" }
+                   } })
+
+    assert_equal("Some Stranger",
+                 assigns(:observation).notes[:Field_Slip_ID_By])
+  end
+
+  def test_other_codes_becomes_an_inat_link_when_flagged
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   inat: "1",
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: "12345" } } })
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("12345"),
+                 assigns(:observation).notes[:Other_Codes])
+  end
+
+  def test_other_codes_left_alone_when_not_flagged
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: "12345" } } })
+
+    assert_equal("12345", assigns(:observation).notes[:Other_Codes])
+  end
+
+  # Editing a saved observation with the box still ticked must not wrap a
+  # link inside another link.
+  def test_other_codes_link_is_not_wrapped_twice
+    already = FieldSlipNotesBuilder.inat_link("12345")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   inat: "1",
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: already } } })
+
+    assert_equal(already, assigns(:observation).notes[:Other_Codes])
+  end
+
+  # Two targeted projects defining the same alias: newest wins, loudly.
+  def test_ambiguous_project_alias_warns_and_prefers_newest
+    place_alias = project_aliases(:two) # "Walk 1" -> albion, eol_project
+    other = projects(:bolete_project)
+    ProjectAlias.create!(project: other, target: locations(:burbank),
+                         name: place_alias.name)
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  project_ids: [other.id] } })
+
+    # Naming the resolved value is the point — the user has to be able to
+    # see whether the winner is the one they meant.
+    flash = get_last_flash.to_s
+    assert_includes(flash, locations(:burbank).format_name)
+    assert_includes(flash, place_alias.name)
+    assert_includes(flash, other.title)
+    assert_equal(locations(:burbank), assigns(:observation).location,
+                 "most recently updated alias should win")
+    assert_flash_warning
+  end
+
   def test_create_observation_with_explicit_collector
     params = {
       naming: { name: "", vote: { value: "" } },
@@ -179,7 +407,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post_requires_login(:create, params)
 
     assert_flash_success(
-      "Omitting Scientific Name should not cause flash error or warning."
+      on_fail: "Omitting Scientific Name should not cause flash error " \
+               "or warning."
     )
     assert_equal(
       fungi, Observation.last.name,
@@ -246,20 +475,112 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(slip, obs.field_slip)
   end
 
-  # An invalid field-slip code cannot abort creation (the observation is
-  # already saved); it warns and keeps the observation without a field slip.
-  def test_create_observation_with_invalid_field_slip
+  # has_specimen is a cache on the occurrence. The observation is saved
+  # with specimen: true *before* the occurrence exists, so the
+  # saved_change_to_specimen? hook can't fire — assign_field_slip has to
+  # recompute it or the cache stays false until the nightly repair job.
+  def test_create_observation_with_field_slip_sets_occurrence_has_specimen
     generic_construct_observation(
       { observation: { specimen: "1" },
-        field_code: "12345", # digits-only fails FieldSlip validation
+        field_code: "OPEN-77778",
         naming: { name: "Coprinus comatus" } },
       1, 1, 0, 0
     )
     obs = assigns(:observation)
 
-    assert_nil(obs.field_slip, "Invalid code must not attach a field slip")
-    assert_nil(obs.occurrence, "Invalid code must not create an occurrence")
+    assert(obs.occurrence.has_specimen,
+           "occurrence has_specimen cache must be recomputed on attach")
+  end
+
+  # An occurrence caps at Occurrence::MAX_OBSERVATIONS. The cap's model
+  # validation is `on: :update` for Occurrence, so attaching (which
+  # updates the Observation) slips past it without an explicit check.
+  # Rejected before the save, so nothing is written at all.
+  def test_create_observation_with_full_field_slip
+    slip = field_slips(:field_slip_one)
+    occ = slip.occurrence
+    fill_occurrence_to_capacity(occ)
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: slip.code,
+        naming: { name: "Coprinus comatus" } },
+      0, 0, 0, 0
+    )
+
+    assert_flash_error
+    assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
+  end
+
+  # A printed prefix is an invitation: using a slip for an
+  # open-membership project enrolls the user and puts the observation in
+  # the project, the way the field slip form has always done.
+  def test_create_with_open_project_slip_joins_and_adds
+    project = projects(:open_membership_project)
+    user = users(:mary)
+    assert(project.can_join?(user), "Test needs a joinable non-member")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: "#{project.field_slip_prefix}-70001",
+                   observation: { place_name: locations.first.name } })
+    obs = assigns(:observation)
+
+    assert(project.reload.member?(user), "slip should enroll the user")
+    assert_includes(project.observations, obs)
+  end
+
+  # The one blocking case: an existing slip in a project the user can
+  # neither join nor belong to. The observation still saves — just
+  # without the code — so nothing they typed is lost.
+  def test_create_with_closed_project_slip_saves_without_the_code
+    slip = field_slips(:field_slip_falmouth_one)
+    project = slip.project
+    user = users(:mary)
+    assert_not(project.member?(user), "Test needs a non-member")
+    assert_not(project.can_join?(user), "Test needs a closed project")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: locations.first.name } })
+    obs = assigns(:observation)
+
+    assert_predicate(obs, :persisted?, "observation must still save")
+    assert_nil(obs.field_slip, "barred code must not attach")
+    assert_not_includes(project.reload.observations, obs)
+    # Captured before the assertion below, which consumes the flash.
+    # The message has to be actionable, not just an explanation.
+    assert_includes(get_last_flash.to_s,
+                    new_project_admin_request_path(project_id: project.id))
     assert_flash_warning
+  end
+
+  # `where.not(occurrence_id: occ.id)` would drop the unattached rows —
+  # SQL `NULL != x` is NULL, not true — so select them explicitly.
+  def fill_occurrence_to_capacity(occ)
+    needed = Occurrence::MAX_OBSERVATIONS - occ.observations.count
+    Observation.where(occurrence_id: nil).limit(needed).
+      each { |o| o.update!(occurrence: occ) }
+    assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
+  end
+
+  # An invalid code now blocks the save and re-renders the form, rather
+  # than creating the observation and warning after the fact — the user
+  # gets their input back and can fix the code. See #4932.
+  def test_create_observation_with_invalid_field_slip
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: "12345", # digits-only fails FieldSlip validation
+        naming: { name: "Coprinus comatus" } },
+      0, 0, 0, 0
+    )
+
+    assert_flash_error
+    assert_nil(FieldSlip.find_by(code: "12345"),
+               "Invalid code must not create a field slip")
   end
 
   # update_field_slip lives in the shared FieldSlips concern. It used to be
@@ -908,6 +1229,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
   end
 
+  # Regression: validate_place_name never passed `approved:` to
+  # Location.dubious_reasons_for, so resubmitting an unchanged dubious
+  # place_name -- the flow form_observations_dubious_help tells the user
+  # to use ("Click 'Create' to use this location name") -- looped
+  # forever instead of accepting it.
+  def test_construct_observation_dubious_place_name_approved
+    where = "Bogus, Massachusetts, UAS"
+    params = {
+      naming: { name: "Unknown" },
+      location: { north: 35, south: 34, east: -117, west: -118 },
+      observation: { place_name: where, location_id: -1 }
+    }
+
+    # First submission: dubious, rejected, nothing created.
+    generic_construct_observation(params, 0, 0, 0, 0)
+
+    # Resubmission with approved_where matching the unchanged
+    # place_name: the dubious check is skipped, observation is created.
+    generic_construct_observation(
+      params.merge(approved_where: where), 1, 0, 0, 1
+    )
+  end
+
   def test_name_resolution
     login("rolf")
 
@@ -1341,7 +1685,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           }
         }
       )
-      assert_response(:success) # success = failure, paradoxically
+      assert_unprocessable
     end
     # Make sure image was created, but that it is unattached, and that it has
     # been kept in the @good_images array for attachment later.
@@ -1484,6 +1828,31 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_select("#name_messages", count: 0)
   end
 
+  # Specimen Available follows what this user did last, not whether a
+  # field code is present. A code meant a specimen for some users and not
+  # others; what the same user did last predicts it better. See #4932.
+  def test_specimen_default_follows_the_users_last_observation
+    login("rolf")
+    last = Observation.recent_by_user(rolf).last
+    assert_not_nil(last, "fixture: rolf needs a prior observation")
+
+    last.update!(specimen: true)
+    get(:new, params: { field_code: "TEST-001" })
+    assert_specimen_checked(1, "should follow a specimen-bearing last obs")
+    get(:new)
+    assert_specimen_checked(1, "and does so without a field code too")
+
+    last.update!(specimen: false)
+    get(:new, params: { field_code: "TEST-001" })
+    assert_specimen_checked(0, "a code alone must not check it")
+  end
+
+  def assert_specimen_checked(count, message)
+    assert_response(:success)
+    assert_select("input[type='checkbox'][name='observation[specimen]']" \
+                  "[checked]", count: count, message: message)
+  end
+
   # Stub-based regression coverage for the
   # `validate_observation` / `validate_naming` / `validate_vote`
   # failure branches (`@any_errors = true; false`). Observation,
@@ -1496,7 +1865,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # `Observation#valid?` passes but `#save` itself fails - exercises
@@ -1507,7 +1876,54 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_save_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
+  end
+
+  # Regression: a request sending `project_ids` without the `[]` array
+  # suffix (a scalar String, not the checkbox-group Array shape) used
+  # to crash `init_project_vars_for_reload`'s unguarded `.compact_blank`
+  # on the failure-reload path. Copilot flagged the underlying
+  # TO_ID_ARRAY gap on PR #5051 as a "suppressed" finding.
+  def test_create_observation_fails_validation_with_malformed_project_ids
+    login("rolf")
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(project_ids: "5")
+    stub_valid_false_on(Observation) do
+      post(:create, params: params)
+    end
+    assert_unprocessable
+  end
+
+  # Regression: a request sending a bare scalar for the whole
+  # `observation` param instead of the expected nested hash used to
+  # crash `create_observation_object`'s `.permit` call with
+  # NoMethodError. Copilot flagged this on PR #5051 as a "suppressed"
+  # finding on the sibling collection_number_params/
+  # herbarium_record_params methods; this is the same shape one level
+  # up.
+  def test_create_observation_with_malformed_observation_param
+    login("rolf")
+    post(:create, params: { observation: "abc" })
+
+    assert_unprocessable
+  end
+
+  # Regression: sending a bare scalar for collection_number/
+  # herbarium_record instead of the expected nested hash used to
+  # crash `.permit` (only defined on ActionController::Parameters,
+  # not String). Copilot's actual finding on PR #5051.
+  def test_create_observation_with_malformed_specimen_params
+    login("rolf")
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(
+      collection_number: "abc", herbarium_record: "xyz"
+    )
+
+    assert_difference("Observation.count", 1) do
+      post(:create, params: params)
+    end
+    assert_not_equal(500, @response.status,
+                     "Malformed specimen params should not 500")
   end
 
   def test_create_observation_fails_naming_validation
@@ -1515,7 +1931,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Naming) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   def test_create_observation_fails_vote_validation
@@ -1523,7 +1939,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     stub_valid_false_on(Vote) do
       post(:create, params: create_params_with_name)
     end
-    assert_response(:success)
+    assert_unprocessable
   end
 
   # `update_good_images` flash-object-errors branch — when editing
@@ -1550,7 +1966,505 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_not_equal("Forced change", img.reload.notes)
   end
 
+  # `validate_field_slip` rejects both of these before the save, so the
+  # post-save branches only fire when the slip changed underneath us
+  # between validation and application. A real race can't be staged, so
+  # the status is stubbed — the point is that the branch reports rather
+  # than failing silently.
+  def test_create_warns_when_field_slip_turns_invalid_after_validation
+    login("rolf")
+    stub_update_field_slip(:invalid) do
+      post(:create, params: create_params_with_name)
+    end
+
+    assert_flash_warning
+  end
+
+  def test_create_warns_when_field_slip_fills_after_validation
+    login("rolf")
+    stub_update_field_slip(:too_many) do
+      post(:create, params: create_params_with_name)
+    end
+
+    assert_flash_warning
+  end
+
+  # The soft constraint: a checked project with a DIFFERENT field slip
+  # prefix than the observation's slip is usually the form's remembered
+  # leftover from the last event (2026 CMS fair postmortem: NEMF test
+  # observations quietly joined the SMHF project). Warns everyone; the
+  # ignore-warnings resubmit proceeds, since the deliberate case is
+  # real.
+  def test_create_warns_when_a_checked_project_has_a_different_prefix
+    project = projects(:eol_project)
+    login("rolf")
+
+    assert_equal("EOL", project.field_slip_prefix, "premise")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0903")
+    params[:observation] =
+      params[:observation].merge(project_ids: [project.id.to_s])
+    post(:create, params: params)
+
+    assert_flash_warning
+    assert_nil(FieldSlip.find_by(code: "OPEN-0903"),
+               "nothing created; the form reloaded for confirmation")
+    assert_select("#project_messages li", text: /#{project.title}/)
+
+    params[:observation][:ignore_proj_conflicts] = "1"
+    post(:create, params: params)
+
+    obs = FieldSlip.find_by(code: "OPEN-0903")&.observation
+
+    assert_not_nil(obs, "the confirmed resubmit goes through")
+    assert_includes(project.observations.reload, obs)
+  end
+
+  def test_create_does_not_warn_when_the_prefixes_match
+    project = projects(:open_membership_project)
+    project.join(rolf)
+    login("rolf")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0904")
+    params[:observation] =
+      params[:observation].merge(project_ids: [project.id.to_s])
+    post(:create, params: params)
+
+    obs = FieldSlip.find_by(code: "OPEN-0904")&.observation
+
+    assert_not_nil(obs, "same-event project raises no warning")
+    assert_includes(project.observations.reload, obs)
+  end
+
+  # The slip's own project is a target even though a typed code checks
+  # no box: a violation surfaces BEFORE the save, in the same alert as
+  # every other project problem, so the whole mess is fixable in one
+  # pass (2026 CMS fair postmortem: the violation used to appear only
+  # after Create).
+  def test_create_surfaces_a_slip_project_violation_before_saving
+    project = projects(:open_membership_project)
+    project.update!(location: locations(:albion))
+    login("rolf")
+
+    # place_name is Massachusetts; the constraint is California.
+    params = create_params_with_name.merge(field_code: "OPEN-0902")
+    post(:create, params: params)
+
+    assert_nil(FieldSlip.find_by(code: "OPEN-0902"),
+               "nothing saved; the form reloaded with the warning")
+    assert_flash_warning
+    assert_select("#project_messages li", text: /#{project.title}/)
+
+    # A non-admin's confirmed resubmit saves, but can't force the
+    # project: the slip attaches and goes spare with its observation.
+    params[:observation] = params[:observation].
+                           merge(ignore_proj_conflicts: "1")
+    post(:create, params: params)
+
+    slip = FieldSlip.find_by(code: "OPEN-0902")
+    obs = slip&.observation
+
+    assert_not_nil(obs, "the slip still attaches")
+    assert_not_includes(project.observations.reload, obs,
+                        "the observation stays out of the project")
+    assert_nil(slip.reload.project,
+               "the slip goes spare along with its observation")
+    assert_flash_warning
+  end
+
+  # Using another event's slip on purpose: "Use as Spare Slip" attaches
+  # the slip with no project at all, ending the warning loop that
+  # otherwise has no exit (an admin's Ignore would force the project
+  # in, the opposite of spare use). The alert has to be VISIBLE too:
+  # it lives inside the Projects panel, which used to collapse when
+  # nothing was checked -- exactly the spare-use state.
+  def test_create_use_spare_slip_attaches_without_any_project
+    project = projects(:open_membership_project)
+    project.update!(location: locations(:albion))
+    login("rolf")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0906")
+    post(:create, params: params)
+
+    assert_flash_warning
+    assert_select("#observation_projects_inner.collapse.in",
+                  { count: 1 },
+                  "the panel holding the explanation must be expanded")
+    assert_select("input[name='observation[use_spare_slip]']" \
+                  "[type='checkbox']")
+
+    params[:observation] = params[:observation].merge(use_spare_slip: "1")
+    post(:create, params: params)
+
+    slip = FieldSlip.find_by(code: "OPEN-0906")
+    obs = slip&.observation
+
+    assert_not_nil(obs, "the spare resubmit saves")
+    assert_nil(slip.reload.project, "the slip carries no project")
+    assert_empty(obs.projects, "the observation joins nothing")
+  end
+
+  # Invariant 1 (#4932): an admin may force a violating observation
+  # in. Ignore-and-resubmit is that deliberate act, so the observation
+  # AND its slip land in the project together.
+  def test_create_admin_ignore_forces_obs_and_slip_into_the_project
+    project = projects(:open_membership_project)
+    project.update!(location: locations(:albion))
+    project.join(rolf)
+    project.admin_group.users << rolf unless project.is_admin?(rolf)
+    login("rolf")
+
+    params = create_params_with_name.merge(field_code: "OPEN-0905")
+    params[:observation] = params[:observation].
+                           merge(ignore_proj_conflicts: "1")
+    post(:create, params: params)
+
+    slip = FieldSlip.find_by(code: "OPEN-0905")
+    obs = slip&.observation
+
+    assert_not_nil(obs)
+    assert_includes(project.observations.reload, obs,
+                    "the admin's ignore forces the add")
+    assert_equal(project, slip.reload.project,
+                 "the slip keeps its project alongside its observation")
+  end
+
+  # --------------------------------------------------------------------
+  #  Landing on the slip review straight from Create (#5024)
+  # --------------------------------------------------------------------
+
+  # A reviewer whose new photo is a slip lands on the review page,
+  # which waits out the QR jobs and the background read.
+  def test_create_redirects_a_slip_reviewer_to_the_review_page
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0219") do
+      post(:create, params: slip_photo_params(image))
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+  end
+
+  # A slip attached during this create (typed or scanned code -- the
+  # QR jobs skip linked observations) gets its read started here.
+  def test_create_with_matching_field_code_starts_the_read
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0777") do
+      post(:create,
+           params: slip_photo_params(image).merge(field_code: "OPEN-0777"))
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+    assert(FieldSlipExtract.find_by(image_id: image.id).pending?,
+           "the read starts here; the QR jobs skip linked observations")
+  end
+
+  # The QR jobs refuse an in-use slip, so the review page would sit on
+  # its scan button with nothing running -- the redirect explains why,
+  # naming the observation that has the slip.
+  # Production race (obs 664468 warned about itself): the QR job can
+  # attach the slip to THIS observation between the image upload and
+  # the create request's own decode -- an in-memory association check
+  # then reads stale nil while the slip's occurrence is fresh. The
+  # decode stub performs the attach mid-request, exactly as the job
+  # does when it wins the race.
+  def test_create_no_in_use_warning_when_the_job_attached_to_this_obs
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    attach_during_decode = lambda do |img|
+      obs = img.observations.order(:id).last
+      if obs&.occurrence_id.nil?
+        FieldSlip::Attacher.attach(observation: obs, code: "OPEN-0910",
+                                   user: rolf)
+      end
+      "OPEN-0910"
+    end
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, attach_during_decode) do
+        post(:create, params: slip_photo_params(image))
+      end
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+    obs = assigns(:observation)
+
+    assert_equal("OPEN-0910", obs.reload.field_slip.code,
+                 "premise: the slip is attached to this observation")
+    assert_flash(
+      [[:runtime_observation_success, { id: obs.id }]],
+      on_fail: "a slip attached to this very observation is not in use"
+    )
+  end
+
+  def test_create_explains_a_detected_code_already_in_use
+    image = images(:in_situ_image)
+    other = observations(:coprinus_comatus_obs)
+    other.update!(occurrence: nil)
+    slip = FieldSlip.find_or_create_by_code("OPEN-0880", other.user)
+    other.field_slip = slip
+    other.save!
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0880") do
+      post(:create, params: slip_photo_params(image))
+    end
+
+    assert_redirected_to(
+      edit_image_field_slip_extract_path(image.id, await: 1)
+    )
+    # The warning names the in-use code and links the observation that
+    # holds the slip -- that explanation IS the behavior under test.
+    assert_flash(
+      [[:runtime_observation_success, { id: assigns(:observation).id }],
+       [:observation_field_slip_in_use,
+        { code: "OPEN-0880",
+          url: permanent_observation_path(other.id) }]]
+    )
+  end
+
+  # A photographed code for some OTHER slip than the attached one is
+  # never auto-reviewed into this observation.
+  def test_create_ignores_a_code_that_mismatches_the_attached_slip
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code("OPEN-0219") do
+      post(:create,
+           params: slip_photo_params(image).merge(field_code: "OPEN-0777"))
+    end
+
+    assert_response(:redirect)
+    assert_no_match(/field_slip_extract/, @response.location.to_s)
+    assert_nil(FieldSlipExtract.find_by(image_id: image.id))
+  end
+
+  # Most observations in a slip-prefix project eventually carry a
+  # slip, so a scan that found no code warns -- with a link to the
+  # scan page -- instead of staying silent (zbar missed ~27% of slip
+  # photos at the 2026 CMS fair).
+  def test_create_warns_when_no_slip_was_detected
+    image = images(:in_situ_image)
+    project = projects(:open_membership_project)
+    project.join(rolf)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    params = slip_photo_params(image)
+    params[:observation] =
+      params[:observation].merge(project_ids: [project.id.to_s])
+    with_decoded_slip_code(nil) do
+      post(:create, params: params)
+    end
+
+    assert_response(:redirect)
+    assert_flash_warning
+  end
+
+  def test_create_does_not_warn_outside_prefix_projects
+    image = images(:in_situ_image)
+    make_slip_project_admin(rolf)
+    login("rolf")
+
+    with_decoded_slip_code(nil) do
+      post(:create, params: slip_photo_params(image))
+    end
+
+    assert_response(:redirect)
+    # "does not warn" here means no field-slip-prefix warning -- the
+    # place_name in slip_photo_params ("Right Here, Massachusetts,
+    # USA") doesn't match a fixture Location, so the redirect to
+    # new_location_path also flashes runtime_location_not_found
+    # alongside the ordinary create-success message.
+    new_obs = assigns(:observation)
+    assert_not_nil(new_obs, "Cannot find new Observation")
+    assert_flash_warning(
+      [[:runtime_observation_success, { id: new_obs.id }],
+       [:runtime_location_not_found,
+        { name: "Right Here, Massachusetts, USA" }]]
+    )
+  end
+
+  # Ordinary uploads never pay for the scan or get detoured: the gate
+  # is admin-ship of a project with a field-slip prefix.
+  def test_create_does_not_detour_ordinary_uploads
+    login("katrina")
+
+    assert_not(
+      Project.where.not(field_slip_prefix: nil).
+        exists?(admin_group_id: katrina.user_group_ids),
+      "premise: katrina reviews no slip projects"
+    )
+
+    with_decoded_slip_code("OPEN-0219") do
+      post(:create,
+           params: modified_generic_params({ naming: { vote: {} } }, katrina))
+    end
+
+    assert_response(:redirect)
+    assert_no_match(/field_slip_extract/, @response.location.to_s)
+  end
+
+  # Android's system photo picker offers no camera (iOS builds one into
+  # its picker), so the form carries a dedicated capture input that
+  # opens the camera directly. Single-shot by nature: no `multiple`.
+  def test_new_offers_a_direct_camera_capture_input
+    login("rolf")
+    get(:new)
+
+    assert_select(
+      "input[type='file'][capture='environment'][accept='image/*']"
+    )
+    assert_select(
+      "input[type='file'][capture='environment'][multiple]", false,
+      "a capture input returns one photo per tap"
+    )
+  end
+
+  # The upload row says what the form already does (whole-form drop
+  # target, document-level paste) and names the picker honestly --
+  # "Select Photos" opens the photo library on mobile, the file
+  # browser on desktop. The hint is CSS-hidden on touch devices.
+  def test_new_upload_row_offers_drop_hint_and_photo_buttons
+    login("rolf")
+    get(:new)
+
+    assert_select("span.drop-paste-hint", text: :drop_or_paste_images.l)
+    assert_select("span.file-field", text: /#{:select_photos.l}/)
+    assert_select("span.file-field", text: /#{:take_photo.l}/)
+    # The button text isn't a <label> for the inputs, so each needs
+    # its own accessible name.
+    assert_select("input[type='file'][aria-label=?]", :select_photos.l)
+    assert_select("input[type='file'][aria-label=?]", :take_photo.l)
+  end
+
+  # Reported at the 2026 SMHF event: confirming a flagged free-text
+  # locality looped forever. The validator gate (dubious_reasons_for
+  # approved:) was fine -- the RE-RENDERED form never embedded
+  # approved_where, because nothing assigned @place_name on the
+  # dubious reload, so the resubmit never carried the approval.
+  def test_create_dubious_place_rerender_embeds_approved_where
+    login("rolf")
+    where = "Sunshine Foray/ Dunton Medows"
+
+    params = create_params_with_name
+    params[:observation] = params[:observation].merge(place_name: where)
+    post(:create, params: params)
+
+    assert_select("form#observation_form[action*=?]", "approved_where",
+                  true, "the reloaded form must carry the approval")
+
+    params[:approved_where] = where
+    post(:create, params: params)
+
+    obs = assigns(:observation)
+
+    assert_predicate(obs, :persisted?,
+                     "the approved resubmit must go through")
+    assert_equal(where, obs.where)
+  end
+
+  # The other half of the sticky-garbage report: an EXISTING slip code
+  # never got current_user set, which nil-guarded away the location
+  # cascade's user-dependent steps -- so after one free-text
+  # observation, the form kept defaulting to that free text instead of
+  # the user's last real location.
+  def test_new_with_existing_slip_code_prefers_last_located_observation
+    located = rolf.observations.where.not(location_id: nil).
+              order(created_at: :desc, id: :desc).first
+
+    assert_not_nil(located, "premise: rolf has a located observation")
+
+    Observation.create!(user: rolf, when: Time.zone.today,
+                        where: "Sunshine Foray/ Dunton Medows")
+    slip = FieldSlip.find_or_create_by_code("OPEN-0930", rolf)
+    slip.update_columns(project_id: nil)
+
+    login("rolf")
+    get(:new, params: { field_code: "OPEN-0930" })
+
+    assert_equal(located.location, assigns(:observation).location,
+                 "the cascade's last-located step must win over " \
+                 "the previous observation's free text")
+  end
+
+  # The reported path had NO field code: a plain new-observation form
+  # (slip arrives as a photo later) defaulted Locality from the
+  # previous observation even when that was dubious free text -- so
+  # one unrecognized slip location re-prompted the confirmation on
+  # every following create. A dubious free-text locality is never
+  # carried forward; the last located observation is used instead.
+  def test_new_locality_default_skips_dubious_free_text
+    located = rolf.observations.where.not(location_id: nil).
+              order(created_at: :desc, id: :desc).first
+
+    assert_not_nil(located, "premise: rolf has a located observation")
+
+    Observation.create!(user: rolf, when: Time.zone.today,
+                        where: "Sunshine Foray/ Dunton Medows")
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(located.location, assigns(:observation).location)
+  end
+
+  # Clean free text (a well-formed name MO just does not know) is a
+  # legitimate repeated locality and still carries forward.
+  def test_new_locality_default_keeps_clean_free_text
+    where = "Somewhere Nice, Massachusetts, USA"
+
+    assert_not(Location.dubious_name?(where, false, false),
+               "premise: the name is clean, just unknown")
+
+    Observation.create!(user: rolf, when: Time.zone.today, where: where)
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(where, assigns(:observation).where)
+  end
+
   private
+
+  def make_slip_project_admin(user)
+    project = projects(:open_membership_project)
+    project.admin_group.users << user unless project.is_admin?(user)
+  end
+
+  def slip_photo_params(image)
+    modified_generic_params(
+      { observation: { good_image_ids: image.id.to_s },
+        naming: { vote: {} } }, rolf
+    )
+  end
+
+  def with_decoded_slip_code(code, &block)
+    FieldSlip::QRDecoder.stub(:available?, true) do
+      FieldSlip::QRDecoder.stub(:slip_code_in, code, &block)
+    end
+  end
+
+  def stub_update_field_slip(status)
+    @controller.define_singleton_method(:update_field_slip) { |*| status }
+    yield
+  ensure
+    @controller.singleton_class.remove_method(:update_field_slip)
+  end
 
   def create_params_with_name
     {

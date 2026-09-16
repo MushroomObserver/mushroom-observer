@@ -6,21 +6,19 @@
 # current query of observations.
 module Views::Controllers::SpeciesLists::Observations
   class Edit < Views::FullPageBase
-    def initialize(prefill_value:, num_results:)
-      super()
-      @prefill_value = prefill_value
-      @num_results = num_results
-    end
+    prop :prefill_value, String
+    prop :num_results, Integer
 
     def view_template
       add_page_title(:species_list_add_remove_title.t)
       add_context_nav(::Tab::SpeciesList::FormObservations.new(
-                        q_param: q_param
+                        index_filter: index_filter(:Observation)
                       ))
       # Sibling reference within the module.
       render(Form.new(
                prefill_value: @prefill_value,
-               num_results: @num_results
+               num_results: @num_results,
+               turbo: true
              ))
     end
   end

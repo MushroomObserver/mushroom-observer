@@ -17,9 +17,7 @@ class Components::Carousel::ItemTest < ComponentTestCase
   # thread through to `obs:`, or the caption silently falls back to
   # the image-only branch on every carousel-driven lightbox.
   def test_observation_object_threads_into_lightbox_caption
-    html = render(Components::Carousel::Item.new(
-                    user: @user, image: @image, object: @obs
-                  ))
+    html = render_item(object: @obs)
 
     caption = Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption")
     assert_includes(caption.to_html, "obs-what")
@@ -32,11 +30,15 @@ class Components::Carousel::ItemTest < ComponentTestCase
   def test_non_observation_object_does_not_thread_into_obs
     location = locations(:burbank)
 
-    html = render(Components::Carousel::Item.new(
-                    user: @user, image: @image, object: location
-                  ))
+    html = render_item(object: location)
 
     caption = Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption")
     assert_not_includes(caption.to_html, "obs-what")
+  end
+
+  private
+
+  def render_item(**)
+    render(Components::Carousel::Item.new(user: @user, image: @image, **))
   end
 end

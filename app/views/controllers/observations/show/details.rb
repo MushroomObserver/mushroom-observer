@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # "Observation details" panel — an optional external-links "Shared
-# with" badge line, when / where / who, optional GPS, and field slip.
+# with" badge line, when / where / who, optional GPS, a thumbnail map
+# under the location info (logged-in viewers with the `thumbnail_maps`
+# pref on), and field slip.
 # The center column of the obs show page (and also rendered into the
 # naming form pages). Specimen-available status + collection-numbers /
 # herbarium-records / sequences live in the separate `SpecimenPanel`,
@@ -41,7 +43,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def render_body
     ul(class: "list-unstyled mb-0") { render_when_where_who }
-    render_field_slip if @user && @obs.field_slip
+    render_field_slip if @user
   end
 
   # ---- when / where / who -----------------------------------
@@ -50,16 +52,63 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     ObservationFragment(type: :when, obs: @obs)
     ObservationFragment(type: :where, obs: @obs, user: @user)
     ObservationFragment(type: :where_gps, obs: @obs, user: @user)
+    render_thumbnail_map
     ObservationFragment(type: :who, obs: @obs, user: @user)
+  end
+
+  def render_thumbnail_map
+    render(Views::Controllers::Observations::Show::ThumbnailMap.new(
+             obs: @obs, user: @user
+           ))
   end
 
   # ---- field slip -----------------------------------------------
 
   def render_field_slip
+    return unless @obs.field_slip || can_attach_field_slip? ||
+                  can_scan_field_slip?
+
     div(class: "obs-field-slips", id: "observation_field_slips") do
-      span { plain("#{:field_slip.ti}: ") }
-      Link(type: :object, object: @obs.field_slip)
+      span { trusted_html(append_colon(:field_slip.ti)) }
+      render_field_slip_link_or_attach
+      render_field_slip_scan_link if can_scan_field_slip?
     end
+  end
+
+  def render_field_slip_link_or_attach
+    if @obs.field_slip
+      Link(type: :object, object: @obs.field_slip)
+    elsif can_attach_field_slip?
+      render_inline_tab(::Tab::Observation::AttachFieldSlip)
+    end
+  end
+
+  def render_field_slip_scan_link
+    whitespace
+    render_inline_tab(::Tab::Observation::FieldSlipScan)
+  end
+
+  def render_inline_tab(tab_class)
+    tab = tab_class.new(observation: @obs)
+    Link(type: :get, tab: tab,
+         class: Components::InlineLinkBlock.item_class(
+           tab.html_options[:class]
+         ))
+  end
+
+  # Matches the gate `Observations::FieldSlipsController` enforces.
+  def can_attach_field_slip?
+    in_admin_mode? || @obs.can_edit?(@user)
+  end
+
+  # Matches the scan page's own gate
+  # (`Observations::FieldSlipScansController#permission_required`); a
+  # read that landed unseen at Create time is otherwise unreachable
+  # from the observation.
+  def can_scan_field_slip?
+    return false unless @user && @obs.images.any?
+
+    in_admin_mode? || @obs.projects.any? { |p| p.is_admin?(@user) }
   end
 
   # ---- external links ---------------------------------------------

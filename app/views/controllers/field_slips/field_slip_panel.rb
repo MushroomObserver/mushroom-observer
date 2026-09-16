@@ -35,8 +35,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_project_line
-      strong { plain("#{:project.ti}:") }
-      whitespace
+      strong { trusted_html(append_colon(:project.ti)) }
       if @field_slip.project
         Link(type: :object, object: @field_slip.project)
       else
@@ -47,7 +46,7 @@ module Views::Controllers::FieldSlips
     def render_observation_details
       obs = observation
       render_observation_top_lines(obs)
-      strong { plain("#{:notes.ti}:") }
+      strong { trusted_html(append_colon(:notes.ti)) }
       render_notes_block
       render_observation_id_lines(obs)
     end
@@ -69,15 +68,23 @@ module Views::Controllers::FieldSlips
 
     def render_observation_id_lines(obs)
       labeled(:id) { trusted_html(obs.field_slip_name.tl) }
-      labeled(:id_by) { trusted_html(obs.field_slip_id_by.tl) }
+      labeled(:id_by.t) { trusted_html(obs.field_slip_id_by.tl) }
+      render_other_codes_line(obs)
+    end
+
+    def render_other_codes_line(obs)
       return if obs.other_codes.to_s.empty?
 
-      labeled(:field_slip_other_codes) { trusted_html(obs.other_codes.tl) }
+      labeled(:field_slip_other_codes.t) { trusted_html(obs.other_codes.tl) }
     end
 
     # Emits `<strong>Label: </strong>` + the block's content + `<br>`.
+    # A Symbol is title-cased (most of these tags are lowercase prose:
+    # `date`, `location`, `collector`). Already-cased tags -- `ID By`,
+    # `Other Codes` -- must come in pre-resolved as Strings, because
+    # `.ti` would flatten them to "ID by" / "Other codes".
     def labeled(key)
-      strong { plain("#{key.ti}: ") }
+      strong { trusted_html(append_colon(key.is_a?(Symbol) ? key.ti : key)) }
       yield
       br
     end
@@ -92,7 +99,7 @@ module Views::Controllers::FieldSlips
         @field_slip.notes_fields.each do |field|
           next if field.value.blank?
 
-          strong { plain("#{field.label}: ") }
+          strong { trusted_html(append_colon(field.label)) }
           trusted_html(field.value.tl)
           br
         end
@@ -101,8 +108,7 @@ module Views::Controllers::FieldSlips
 
     def render_creator_line
       usr = @field_slip.user
-      strong { plain("#{:field_slip_creator.t}:") }
-      whitespace
+      strong { trusted_html(append_colon(:field_slip_creator.t)) }
       Link(type: :user, user: usr, name: usr.legal_name)
       br
     end
@@ -113,7 +119,7 @@ module Views::Controllers::FieldSlips
     # callers of `FieldSlipPanel` must preserve that contract.
     def render_observations_section
       all_obs = @field_slip.observations.to_a
-      strong { plain("#{:observations.ti}:") }
+      strong { trusted_html(append_colon(:observations.ti)) }
       if all_obs.any?
         render_observations_matrix(all_obs)
       else

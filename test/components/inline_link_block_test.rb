@@ -21,45 +21,47 @@ class InlineLinkBlockTest < ComponentTestCase
   end
 
   def test_renders_nothing_when_items_empty
-    html = render(Components::InlineLinkBlock.new(items: []))
+    html = render_links(items: [])
 
     assert_equal("", html.to_s.strip)
   end
 
   def test_single_item_rendered_inside_nowrap_span
-    html = render(Components::InlineLinkBlock.new(
-                    items: ["<b>edit</b>".html_safe]
-                  ))
+    html = render_links(items: ["<b>edit</b>".html_safe])
 
     assert_html(html, "span.text-nowrap b", text: "edit")
   end
 
   def test_leading_separator_is_nbsp
-    html = render(Components::InlineLinkBlock.new(items: ["x"]))
+    html = render_links(items: ["x"])
     text = Nokogiri::HTML(html).at_css("span.text-nowrap").text
 
     assert_equal("\u00A0x", text)
   end
 
   def test_multiple_items_rendered_with_nbsp_dividers
-    html = render(Components::InlineLinkBlock.new(items: %w[a b c]))
+    html = render_links(items: %w[a b c])
     text = Nokogiri::HTML(html).at_css("span.text-nowrap").text
 
     assert_equal("\u00A0a\u00A0b\u00A0c", text)
   end
 
   def test_string_items_rendered_as_trusted_html
-    html = render(Components::InlineLinkBlock.new(
-                    items: ["<i>archive</i>".html_safe]
-                  ))
+    html = render_links(items: ["<i>archive</i>".html_safe])
 
     assert_html(html, "span.text-nowrap i", text: "archive")
   end
 
   def test_phlex_component_items_rendered
     button = Components::Button.new(name: "Edit", variant: :strip)
-    html = render(Components::InlineLinkBlock.new(items: [button]))
+    html = render_links(items: [button])
 
     assert_html(html, "span.text-nowrap button", text: "Edit")
+  end
+
+  private
+
+  def render_links(items:)
+    render(Components::InlineLinkBlock.new(items: items))
   end
 end

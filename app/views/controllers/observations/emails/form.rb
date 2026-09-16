@@ -5,14 +5,14 @@
 # FormObject internally from the provided kwargs.
 module Views::Controllers::Observations::Emails
   class Form < ::Components::ApplicationForm
+    prop :observation, ::Observation
+
     # Accept optional model arg for ModalForm compatibility (ignored —
     # we create our own FormObject). Pattern B: form creates
     # FormObject internally.
-    def initialize(_model = nil, observation:, message: nil, **)
-      @observation = observation
-
+    def initialize(_model = nil, observation:, message: nil, **attrs)
       form_object = FormObject::ObserverQuestion.new(message: message)
-      super(form_object, **)
+      super(form_object, observation: observation, **attrs)
     end
 
     def view_template

@@ -72,7 +72,16 @@ export default class extends Controller {
   // after the real DOM mutation completes.
   maybeRefreshOnStream(event) {
     const target = event.target.target;
-    if (!target || !/^(lightbox_caption_|lightbox_image_vote_)/.test(target)) {
+    // observation_what_/observation_identify_ -- Observations::
+    // NamingsController#render_update_matrix_box_streams, the
+    // "propose a name from the lightbox" success response. Without
+    // these, an open lightbox's cloned caption keeps showing the
+    // stale "needs naming" strip after a naming is proposed from
+    // inside it, even though the real (hidden) caption DOM updated
+    // correctly.
+    const refreshTriggers =
+      /^(lightbox_caption_|lightbox_image_vote_|observation_what_|observation_identify_)/;
+    if (!target || !refreshTriggers.test(target)) {
       return;
     }
 

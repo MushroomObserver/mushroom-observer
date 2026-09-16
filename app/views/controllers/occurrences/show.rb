@@ -4,12 +4,9 @@
 # Displays observations in matrix boxes with the primary first.
 module Views::Controllers::Occurrences
   class Show < Views::FullPageBase
-    def initialize(occurrence:, observations:, user:)
-      super()
-      @occurrence = occurrence
-      @observations = observations
-      @user = user
-    end
+    prop :occurrence, ::Occurrence
+    prop :observations, _Array(::Observation)
+    prop :user, ::User
 
     def view_template
       container_class(:wide)

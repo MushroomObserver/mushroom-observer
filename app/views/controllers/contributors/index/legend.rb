@@ -103,7 +103,8 @@ module Views::Controllers::Contributors
             else
               plain("+")
             end
-            plain(" #{example[:number]} * #{weight}")
+            whitespace
+            plain("#{example[:number]} * #{weight}")
           end
           # `users_by_contribution_2[a-e]` cross-refs to the same
           # plain-text root keys as `user_stats_*` above; same logic

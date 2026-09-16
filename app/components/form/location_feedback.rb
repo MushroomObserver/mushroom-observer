@@ -18,10 +18,8 @@ class Components::Form::LocationFeedback < Components::Base
   def view_template
     return unless @dubious_where_reasons&.any?
 
-    render(
-      Components::Alert.new(
-        level: :warning, class: "my-3", id: "dubious_location_messages"
-      )
+    Alert(
+      level: :warning, class: "my-3", id: "dubious_location_messages"
     ) do
       div do
         @dubious_where_reasons.each_with_index do |reason, index|

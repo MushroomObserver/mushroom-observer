@@ -81,17 +81,11 @@ class InatImportJob < ApplicationJob
   def ensure_not_importing_others
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
-    begin
-      # fetch the logged-in iNat user
-      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
-      response = Inat::APIRequest.new(token).request(path: "users/me")
-    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
-      raise("iNat API user request failed: #{e.message}")
-    end
-
-    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    inat_logged_in_user = fetch_inat_logged_in_user
     log("inat_logged_in_user: #{inat_logged_in_user}")
-    return if inat_logged_in_user == inat_username
+    # casecmp: records saved before inat_username was normalized to
+    # lowercase can still hold the login with different case.
+    return if inat_logged_in_user.to_s.casecmp?(inat_username.to_s)
 
     wrong_inat_user_error(inat_logged_in_user)
   end
@@ -103,6 +97,14 @@ class InatImportJob < ApplicationJob
   def wrong_inat_user_error(inat_logged_in_user)
     raise(:inat_wrong_user.t(inat_username: inat_username,
                              inat_logged_in_user: inat_logged_in_user))
+  end
+
+  # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
+  def fetch_inat_logged_in_user
+    response = Inat::APIRequest.new(token).request(path: "users/me")
+    JSON.parse(response.body)["results"].first["login"]
+  rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
+    raise("iNat API user request failed: #{e.message}")
   end
 
   def import_requested_observations(id_above:, continuation:)

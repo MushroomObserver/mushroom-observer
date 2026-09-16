@@ -603,6 +603,22 @@ class Name::ParseTest < UnitTestCase
     )
   end
 
+  def test_name_parse_prov_sp_no_period
+    do_name_parse_test(
+      "Anap sp 'luna' S. Russ crypt. temp.",
+      text_name: "Anap sp. 'luna'",
+      real_text_name: "Anap sp. 'luna'",
+      search_name: "Anap sp. 'luna' S. Russ crypt. temp.",
+      real_search_name: "Anap sp. 'luna' S. Russ crypt. temp.",
+      sort_name: "Anap luna  S. Russ crypt. temp.",
+      display_name: "**__Anap__** sp. **__'luna'__** S. Russ crypt. temp.",
+      parent_name: "Anap",
+      rank: "Species",
+      author: "S. Russ crypt. temp.",
+      deprecated: false
+    )
+  end
+
   def test_name_parse_prov_gen
     do_name_parse_test(
       'Gen. "Snap" luna S. Russ crypt. temp.',

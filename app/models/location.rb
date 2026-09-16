@@ -90,7 +90,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   include Scopes
 
-  belongs_to :description, class_name: "LocationDescription" # (main one)
+  belongs_to :description, class_name: "LocationDescription", # (main one)
+                           optional: true
   belongs_to :rss_log
   belongs_to :user
 
@@ -137,6 +138,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
+  before_validation :derive_missing_name_field
   before_save :calculate_box_area_and_center
   before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
@@ -305,7 +307,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def found_here?(obs)
-    return true if obs.location == self
     return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
 
     loc = obs.location
@@ -567,10 +568,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     UNDERSTOOD_CONTINENTS[a_continent]
   end
 
-  def self.countries_by_count
-    CountryCounter.new.countries_by_count
-  end
-
   def self.location_name_cache
     Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
       (Location.pluck(:name) + Observation.pluck(:where) +
@@ -724,15 +721,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     result = name.split(",")[-2]
     result = result.strip if result
     result
-  end
-
-  def self.dubious_country?(name)
-    !understood_country?(country(name))
-  end
-
-  def self.fix_country(name)
-    c = country(name)
-    name[0..(name.rindex(c) - 1)] + COUNTRY_FIXES[c]
   end
 
   def self.find_by_name_with_wildcards(str)
@@ -898,12 +886,20 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     move_remaining_descriptions(old_loc)
   end
 
+  # A conflict (both sides have a non-blank value for the same note
+  # field) is left alone -- old_loc's description survives the
+  # location merge as a secondary description (see
+  # `move_remaining_descriptions`) for manual resolution via the
+  # descriptions/merges UI, same as a controller-driven description
+  # merge (Descriptions::Merges#perform_merge) would leave it.
   def merge_primary_descriptions(old_loc)
     return unless description && old_loc.description
-    return unless description.source_type == :public
-    return unless old_loc.description.source_type == :public
+    return unless description.source_type == "public"
+    return unless old_loc.description.source_type == "public"
+    return unless description.mergeable_notes?(old_loc.description)
 
-    description.merge(old_loc.description)
+    description.merge_notes_from(old_loc.description)
+    old_loc.description.destroy
   end
 
   def move_remaining_descriptions(old_loc)
@@ -985,6 +981,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_elevation
     validate_user
     validate_name
+    validate_scientific_name
   end
 
   def check_hidden
@@ -998,42 +995,60 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def validate_latitude
     if !north || north > 90
-      errors.add(:north, :validate_location_north_too_high.t)
+      errors.add(:north, :validate_location_north_too_high)
     end
     if !south || south < -90
-      errors.add(:south, :validate_location_south_too_low.t)
+      errors.add(:south, :validate_location_south_too_low)
     end
     return unless north && south && north < south
 
-    errors.add(:north, :validate_location_north_less_than_south.t)
+    errors.add(:north, :validate_location_north_less_than_south)
   end
 
   def validate_longitude
     if !east || east < -180 || east > 180
-      errors.add(:east, :validate_location_east_out_of_bounds.t)
+      errors.add(:east, :validate_location_east_out_of_bounds)
     end
     return unless !west || west < -180 || west > 180
 
-    errors.add(:west, :validate_location_west_out_of_bounds.t)
+    errors.add(:west, :validate_location_west_out_of_bounds)
   end
 
   def validate_elevation
     return unless high && low && high < low
 
-    errors.add(:high, :validate_location_high_less_than_low.t)
+    errors.add(:high, :validate_location_high_less_than_low)
   end
 
   def validate_user
     return if user || current_user
 
-    errors.add(:user, :validate_location_user_missing.t)
+    errors.add(:user, :validate_location_user_missing)
+  end
+
+  def derive_missing_name_field
+    if name.present? && scientific_name.blank?
+      self.scientific_name = Location.reverse_name(name)
+    elsif scientific_name.present? && name.blank?
+      self.name = Location.reverse_name(scientific_name)
+    end
   end
 
   def validate_name
     if name.to_s.size > 1024
-      errors.add(:name, :validate_location_name_too_long.t)
-    elsif name.empty?
-      errors.add(:name, :validate_missing.t(field: :name))
+      errors.add(:name, :validate_location_name_too_long)
+    elsif name.to_s.empty?
+      errors.add(:name, :validate_missing, field: :name)
+    end
+  end
+
+  def validate_scientific_name
+    if scientific_name.to_s.size > 1024
+      errors.add(:scientific_name, :validate_too_long,
+                 field: :scientific_name, max: 1024)
+    elsif scientific_name.to_s.empty?
+      errors.add(:scientific_name, :validate_missing,
+                 field: :scientific_name)
     end
   end
 end

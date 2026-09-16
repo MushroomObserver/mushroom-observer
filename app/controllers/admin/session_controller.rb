@@ -20,6 +20,7 @@ module Admin
         session[:admin] = true if @user&.admin && !in_admin_mode?
       elsif params[:turn_off]
         session[:admin] = nil
+        return redirect_to("/") if referer_is_admin_only?
       end
 
       redirect_back_or_to("/")
@@ -45,7 +46,7 @@ module Admin
 
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
-        flash_error("Couldn't find \"#{@id}\".  Play again?")
+        flash_error(:runtime_admin_switch_users_not_found.t(id: @id))
         redirect_to(action: :edit)
       # Allow non-admin that's already in "switch user mode" to switch to
       # another user. This is a weird case which only comes up if you switch to
@@ -61,11 +62,31 @@ module Admin
 
     private
 
+    # Turning admin mode off while viewing an admin-only page (e.g. a
+    # License) would otherwise redirect_back into that page, which
+    # immediately bounces to AdminController#access_denied with a
+    # startling "Permission denied" flash -- graceless for someone who
+    # just intentionally turned admin mode off, not someone genuinely
+    # denied access. Detect that case and skip straight to "/" instead.
+    def referer_is_admin_only?
+      return false unless request.referer
+
+      path = URI.parse(request.referer).path
+      route = Rails.application.routes.recognize_path(path)
+      controller_class = "#{route[:controller].camelize}Controller".
+                         safe_constantize
+      return false unless controller_class
+
+      controller_class <= AdminController
+    rescue URI::InvalidURIError, ActionController::RoutingError
+      false
+    end
+
     def switch_to_user_if_verified(new_user)
       if new_user.verified
         switch_to_user(new_user)
       else
-        flash_error("This user is not verified yet!")
+        flash_error(:runtime_admin_switch_users_not_verified.t)
       end
     end
 

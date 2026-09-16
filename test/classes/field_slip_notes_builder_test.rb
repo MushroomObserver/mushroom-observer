@@ -30,4 +30,27 @@ class FieldSlipNotesBuilderTest < UnitTestCase
     assert_not(notes.key?(:Collector),
                "collector lives in the column, not notes")
   end
+
+  def test_inat_link_round_trips
+    link = FieldSlipNotesBuilder.inat_link("12345")
+
+    assert(FieldSlipNotesBuilder.inat_link?(link))
+    assert_equal("12345", FieldSlipNotesBuilder.inat_code(link))
+  end
+
+  # "Other Codes" is free text, so a value can contain the iNat URL
+  # without being a link we generated. A substring test would call this
+  # ours, skip the wrap, and mis-extract the id.
+  def test_inat_link_recognizes_only_our_own_shape
+    hostile = "https://evil.example/?u=#{FieldSlipNotesBuilder::
+      INAT_OBSERVATION_URL}1"
+
+    assert_not(FieldSlipNotesBuilder.inat_link?(hostile))
+    assert_equal(hostile, FieldSlipNotesBuilder.inat_code(hostile))
+  end
+
+  def test_inat_code_passes_through_a_bare_code
+    assert_not(FieldSlipNotesBuilder.inat_link?("12345"))
+    assert_equal("12345", FieldSlipNotesBuilder.inat_code("12345"))
+  end
 end

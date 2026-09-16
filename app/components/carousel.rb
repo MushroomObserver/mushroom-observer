@@ -154,7 +154,7 @@ class Components::Carousel < Components::Base
 
   def render_controls
     if @controls_wrap_class
-      div(class: @controls_wrap_class) { render_controls_inner }
+      Row(class: @controls_wrap_class) { render_controls_inner }
     else
       render_controls_inner
     end

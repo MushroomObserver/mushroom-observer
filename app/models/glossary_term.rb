@@ -51,8 +51,10 @@ class GlossaryTerm < AbstractModel
         ->(str) { search_columns(GlossaryTerm[:description], str) }
 
   scope :pattern, lambda { |phrase|
-    cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   scope :show_includes, lambda {
@@ -126,6 +128,6 @@ class GlossaryTerm < AbstractModel
   def must_have_description_or_image
     return if description.present? || thumb_image.present?
 
-    errors.add(:base, :glossary_error_description_or_image.t)
+    errors.add(:base, :glossary_error_description_or_image)
   end
 end

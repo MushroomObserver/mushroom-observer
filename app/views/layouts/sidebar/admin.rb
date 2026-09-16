@@ -13,7 +13,7 @@ class Views::Layouts::Sidebar
   class Admin < Section
     def view_template
       render(Components::ListGroup::Item.new(class: @classes[:heading])) do
-        plain("#{@heading_key.t}:")
+        append_colon(@heading_key.t)
       end
 
       @tabs.compact.each do |link|

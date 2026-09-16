@@ -5,9 +5,9 @@
 # helper carried no per-model selector; auto-derived class is a
 # plain title-derived `<…>_link`.
 class Tab::SpeciesList::ObservationsIndexReturn < Tab::Base
-  def initialize(q_param: nil)
+  def initialize(index_filter: nil)
     super()
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   def title
@@ -15,6 +15,6 @@ class Tab::SpeciesList::ObservationsIndexReturn < Tab::Base
   end
 
   def path
-    with_q_param(observations_path, @q_param)
+    with_index_filter(observations_path, @index_filter)
   end
 end

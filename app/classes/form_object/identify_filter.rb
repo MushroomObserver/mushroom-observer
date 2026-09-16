@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # Form object for the identify observations filter form.
-# Params namespaced as filter[term], filter[type], etc.
+# Params namespaced as identify_filter[term], identify_filter[type],
+# etc. -- matches Query::Observations' identify_filter query_attr
+# directly, no controller-side param translation needed.
 class FormObject::IdentifyFilter < FormObject::Base
   VALID_TYPES = %w[clade region].freeze
 
@@ -14,9 +16,5 @@ class FormObject::IdentifyFilter < FormObject::Base
   # trust the value.
   def type=(value)
     super(VALID_TYPES.include?(value) ? value : "clade")
-  end
-
-  def self.model_name
-    ActiveModel::Name.new(self, nil, "Filter")
   end
 end

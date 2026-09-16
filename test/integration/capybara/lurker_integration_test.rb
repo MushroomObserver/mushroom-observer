@@ -147,7 +147,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
       )
 
       # (Make sure observation is shown somewhere.)
-      assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),
+      assert(has_selector?("a[href^='#{permanent_observation_path(obs.id)}']"),
              "Missing a link to Observation")
     end
     # back at Observation
@@ -242,8 +242,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     visit("/observations/identify")
     # Search for a location.
     place = "California, USA"
-    fill_in("filter_term", with: place)
-    select("Region", from: "filter_type")
+    fill_in("identify_filter_term", with: place)
+    select("Region", from: "identify_filter_type")
     within("#identify_filter") { click_button("Search") }
     assert_selector("#filters", text: /#{:query_needs_naming.l}/)
     assert_selector("#filters", text: /#{:query_region.l}/)
@@ -390,9 +390,12 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     click_link(text: "Observations at this Location")
     assert_match("Observations", page.title, "Wrong title")
 
-    within(first("form.page_input")) do
+    # No <form> -- the goto control is a plain link that
+    # page-input_controller.js keeps pointed at the typed page number
+    # (see IndexPaginationNav).
+    within(first(".input-group.page-input")) do
       fill_in("page", with: 2)
-      click_commit
+      find("a[data-page-input-target='goToLink']").click
     end
     assert_match("Observations", page.title, "Wrong title")
 

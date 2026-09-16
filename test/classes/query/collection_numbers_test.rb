@@ -95,8 +95,8 @@ class Query::CollectionNumbersTest < UnitTestCase
 
   def test_collection_number_numbers
     expects = [collection_numbers(:agaricus_campestris_coll_num)]
-    scope = CollectionNumber.numbers("07-123a").order_by_default
-    assert_query_scope(expects, scope, :CollectionNumber, numbers: "07-123a")
+    scope = CollectionNumber.numbers("07-456a").order_by_default
+    assert_query_scope(expects, scope, :CollectionNumber, numbers: "07-456a")
     expects = [collection_numbers(:minimal_unknown_coll_num),
                collection_numbers(:detailed_unknown_coll_num_one)]
     scope = CollectionNumber.numbers(%w[173 174]).order_by_default
@@ -122,7 +122,7 @@ class Query::CollectionNumbersTest < UnitTestCase
     assert_query_scope(expects, scope, :CollectionNumber, pattern: "Singer")
 
     expects = [collection_numbers(:agaricus_campestris_coll_num)]
-    scope = CollectionNumber.pattern("123a").order_by_default
-    assert_query_scope(expects, scope, :CollectionNumber, pattern: "123a")
+    scope = CollectionNumber.pattern("456a").order_by_default
+    assert_query_scope(expects, scope, :CollectionNumber, pattern: "456a")
   end
 end

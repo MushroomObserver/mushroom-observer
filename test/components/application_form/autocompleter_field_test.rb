@@ -1,0 +1,461 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class AutocompleterFieldTest < ComponentTestCase
+  include ApplicationFormFieldTestHelpers
+
+  def setup
+    super
+    @herbarium_record = HerbariumRecord.new
+  end
+
+  def test_autocompleter_field_renders_structure
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Species Name")
+    end
+
+    assert_html(form, "div.form-group")
+    assert_includes(form, "Species Name")
+    assert_html(form, "[data-controller*='autocompleter']")
+  end
+
+  def test_autocompleter_field_with_textarea
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, textarea: true,
+                                    label: "Name")
+    end
+
+    assert_html(form, "textarea")
+  end
+
+  # Regression: AutocompleterField must not register an empty
+  # label_end slot when create_text: is absent -- otherwise
+  # FieldLabelRow forces the d-flex layout for nothing. The
+  # has-id-indicator (label_after content) still renders inline with
+  # the label -- a wrapping span, not a bare svg (padding on a
+  # replaced element like svg eats into its own rendered content
+  # instead of adding space around it).
+  def test_autocompleter_field_no_d_flex_when_no_create_text
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_no_match(/d-flex justify-content-between/, form,
+                    "label row must not use d-flex when label_end is empty")
+    assert_html(form, "span.has-id-indicator svg")
+  end
+
+  # Regression: an outer .autocompleter must not carry an auto-derived
+  # id when the caller didn't pass controller_id: -- but does carry it
+  # when the caller does.
+  def test_autocompleter_field_omits_outer_id_by_default
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, wrapper_options: { label: "Name" }
+             ))
+    end
+
+    wrap = Nokogiri::HTML5.fragment(form).at_css("div.autocompleter")
+    assert_nil(wrap["id"],
+               "outer .autocompleter must not carry an auto-derived id " \
+               "when caller didn't pass controller_id:")
+  end
+
+  def test_autocompleter_field_emits_outer_id_when_requested
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, controller_id: "my_autocompleter_id",
+               wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_html(form, "div.autocompleter#my_autocompleter_id")
+  end
+
+  # Regression: create_text: populates the label_end slot, so the
+  # d-flex wrap is justified: label area left, create button right.
+  def test_autocompleter_field_uses_d_flex_when_create_text_set
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name, create_text: "Create new",
+               wrapper_options: { label: "Name" }
+             ))
+    end
+
+    assert_html(form, "div.d-flex.justify-content-between")
+  end
+
+  # Regression: the hidden-id input for a String field name must
+  # derive its name from the namespace correctly -- `<namespace>
+  # [<key>_id]`, not `<namespace>[<key>]` or anything else. (Earlier
+  # implementations used `field.dom.name.sub(/\[#{field.key}\]$/, …)`
+  # which silently fell through when `field.key` was a String
+  # containing brackets, leaving the hidden input with the same name
+  # as the visible input.)
+  def test_autocompleter_field_accepts_string_name_textarea
+    form = render_comment_form do
+      autocompleter_field("list[members]", type: :name, textarea: true,
+                                           value: "alpha", label: "Names:")
+    end
+
+    assert_html(form, "textarea[name='list[members]']", text: "alpha")
+    assert_html(form,
+                "div.autocompleter[data-controller='autocompleter--name']")
+    assert_html(form,
+                "input[type='hidden'][name='list[members_id]']" \
+                "[id='list_members_id']")
+  end
+
+  def test_component_has_correct_html_structure
+    html = render_with_component
+
+    # Should have outer autocompleter wrapper with type-specific controller
+    # herbarium type uses autocompleter--herbarium controller
+    assert_html(html,
+                ".autocompleter[data-controller='autocompleter--herbarium']")
+    assert_html(html, ".autocompleter[data-type='herbarium']")
+
+    # Should have form-group wrapper inside with target and dropdown class
+    # Namespaced targets use double-dash: data-autocompleter--herbarium-target
+    wrap_target = "data-autocompleter--herbarium-target='wrap'"
+    selector = ".autocompleter .form-group.dropdown[#{wrap_target}]"
+    assert_html(html, selector)
+
+    # Should have label inside form-group
+    assert_nested(
+      html,
+      parent_selector: ".form-group.dropdown[#{wrap_target}]",
+      child_selector: "label[for='herbarium_record_herbarium_name']"
+    )
+
+    # Should have input with autocompleter target inside form-group
+    assert_nested(
+      html,
+      parent_selector: ".form-group.dropdown[#{wrap_target}]",
+      child_selector: "input.form-control" \
+                      "[data-autocompleter--herbarium-target='input']"
+    )
+
+    # Should have proper placeholder and autocomplete attributes
+    assert_html(html, "input[placeholder='#{:start_typing.l}']")
+    assert_html(html, "input[autocomplete='off']")
+
+    # Should have dropdown menu INSIDE form-group wrapper
+    wrap_selector = ".form-group.dropdown[#{wrap_target}]"
+    assert_nested(
+      html,
+      parent_selector: wrap_selector,
+      child_selector: ".auto_complete.dropdown-menu" \
+                      "[data-autocompleter--herbarium-target='pulldown']"
+    )
+
+    # Should have hidden field INSIDE form-group wrapper
+    # Hidden field name matches field key (herbarium_name → herbarium_name_id)
+    assert_nested(
+      html,
+      parent_selector: wrap_selector,
+      child_selector: "input[type='hidden']" \
+                      "[name='herbarium_record[herbarium_name_id]']"
+    )
+    assert_nested(
+      html,
+      parent_selector: wrap_selector,
+      child_selector: "input[type='hidden']" \
+                      "[data-autocompleter--herbarium-target='hidden']"
+    )
+
+    # Should have virtual list inside dropdown
+    assert_nested(
+      html,
+      parent_selector: ".auto_complete.dropdown-menu",
+      child_selector: "ul.virtual_list" \
+                      "[data-autocompleter--herbarium-target='list']"
+    )
+
+    # Should have 10 dropdown items with links
+    assert_html(html, "li.dropdown-item", count: 10)
+    assert_html(html, "li.dropdown-item a", count: 10)
+
+    # Should have has_id_indicator (green check icon) -- a wrapping
+    # span, not a bare svg (padding on a replaced element like svg
+    # eats into its own rendered content instead of adding space
+    # around it).
+    assert_html(
+      html,
+      "span.has-id-indicator" \
+      "[data-autocompleter--herbarium-target='hasIdIndicator']"
+    )
+    assert_html(html, "span.has-id-indicator svg.text-success")
+  end
+
+  def test_component_textarea_mode
+    html = render_textarea_autocompleter
+
+    # Should have textarea instead of text input
+    # location type uses autocompleter--location controller
+    selector = "textarea.form-control" \
+               "[data-autocompleter--location-target='input']"
+    assert_html(html, selector)
+
+    # Should have textarea with correct name
+    assert_html(html, "textarea[name='comment[notes]']")
+
+    # Should still have hidden field with namespaced target
+    assert_html(html,
+                "input[type='hidden']" \
+                "[data-autocompleter--location-target='hidden']")
+
+    # Should still have dropdown structure
+    assert_html(html, ".auto_complete.dropdown-menu")
+    assert_html(html, "ul.virtual_list")
+  end
+
+  def test_textarea_autocompleter_has_newline_separator
+    html = render_textarea_autocompleter
+
+    # Textarea autocompleters should have newline separator for multi-value
+    assert_html(html, ".autocompleter[data-separator='\n']")
+  end
+
+  def test_text_input_autocompleter_has_no_separator
+    html = render_with_component
+
+    # Text input autocompleters should NOT have separator (single value only)
+    assert_no_html(
+      html, ".autocompleter[data-separator]",
+      "Text input autocompleter should not have separator attribute"
+    )
+  end
+
+  def test_hidden_field_derives_id_field_name
+    html = render_with_component
+
+    # Hidden field name is field_key + _id (herbarium_name → herbarium_name_id)
+    # This ensures controllers receive the expected param name
+    assert_html(
+      html,
+      "input[type='hidden'][name='herbarium_record[herbarium_name_id]']"
+    )
+  end
+
+  def test_component_has_stimulus_data_attributes
+    html = render_with_component
+
+    # Should have all necessary Stimulus targets (namespaced for herbarium type)
+    assert_html(html, "[data-autocompleter--herbarium-target='wrap']")
+    assert_html(html, "[data-autocompleter--herbarium-target='input']")
+    assert_html(html, "[data-autocompleter--herbarium-target='hidden']")
+    assert_html(html, "[data-autocompleter--herbarium-target='pulldown']")
+    assert_html(html, "[data-autocompleter--herbarium-target='list']")
+
+    # Should have scroll action with namespaced controller
+    assert_html(
+      html,
+      "[data-action='scroll->autocompleter--herbarium#scrollList:passive']"
+    )
+
+    # Dropdown items should have click action with namespaced controller
+    selector = "li.dropdown-item " \
+               "a[data-action*='click->autocompleter--herbarium#selectRow']"
+    assert_html(html, selector, count: 10)
+  end
+
+  def test_unknown_autocompleter_type_logs_warning
+    # Test that an unknown type logs a warning (line 87)
+    comment = Comment.new
+    form = TestUnknownTypeAutocompleterForm.new(comment, action: "/test")
+
+    # Capture Rails logger output
+    old_logger = Rails.logger
+    log_output = StringIO.new
+    Rails.logger = Logger.new(log_output)
+
+    render(form)
+
+    Rails.logger = old_logger
+    assert_includes(log_output.string,
+                    "Unknown autocompleter type: unknown_type")
+  end
+
+  def test_autocompleter_with_find_text_option
+    # Test find_text option renders find button (lines 174, 176)
+    comment = Comment.new
+    form = TestFindTextAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    # Should have find button with correct attributes -- a plain
+    # Button (not a Link), since it never had a real destination.
+    assert_html(html, "button.find-btn")
+    assert_html(html, "button[data-map-target='showBoxBtn']")
+    assert_html(html, "button[data-action='map#showBox']")
+  end
+
+  def test_autocompleter_with_keep_text_option
+    # Test keep_text option renders keep and edit buttons
+    comment = Comment.new
+    form = TestKeepTextAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    # Should have keep button
+    assert_html(html, "button.keep-btn")
+    assert_html(html, "button[data-map-target='lockBoxBtn']")
+
+    # Should have edit button
+    assert_html(html, "button.edit-btn")
+    assert_html(html, "button[data-map-target='editBoxBtn']")
+  end
+
+  def test_autocompleter_with_create_text_option
+    comment = Comment.new
+    form = TestCreateTextAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    assert_html(html, "button.create-button")
+    assert_html(html, "button#create_location_btn")
+  end
+
+  def test_autocompleter_with_modal_create_link
+    comment = Comment.new
+    form = TestModalCreateAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    assert_html(html, "a.create-link[data-controller='modal-toggle']")
+  end
+
+  def test_autocompleter_with_between_slot
+    comment = Comment.new
+    form = TestBetweenSlotAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    # Between slot content should appear after label
+    assert_includes(html, "(Login Name)")
+    # Has-id indicator should still be present after between content
+    assert_html(html, "span.has-id-indicator")
+  end
+
+  private
+
+  def render_with_component
+    form = Views::Controllers::HerbariumRecords::Form.new(
+      @herbarium_record,
+      observation: observations(:coprinus_comatus_obs),
+      herbarium_names: ["Test Herbarium"],
+      action: "/test_action"
+    )
+    render(form)
+  end
+
+  def render_textarea_autocompleter
+    # Create a simple form to test textarea mode using Comment model
+    comment = Comment.new
+    form = TestTextareaAutocompleterForm.new(
+      comment,
+      action: "/test"
+    )
+    render(form)
+  end
+end
+
+# Test form class to demonstrate textarea autocompleter
+class TestTextareaAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :location,
+          textarea: true,
+          wrapper_options: { label: "Notes" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for unknown autocompleter type
+class TestUnknownTypeAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :unknown_type,
+          wrapper_options: { label: "Notes" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for find_text option
+class TestFindTextAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :location,
+          find_text: "Find on map",
+          wrapper_options: { label: "Location" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for keep_text option (includes edit button)
+class TestKeepTextAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :location,
+          keep_text: "Keep this area",
+          edit_text: "Edit area",
+          wrapper_options: { label: "Location" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for create_text option (without create param)
+class TestCreateTextAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :location,
+          create_text: "Create new",
+          wrapper_options: { label: "Location" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for modal create link (with create and create_path)
+class TestModalCreateAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :location,
+          create_text: "Create new",
+          create: "New Location",
+          create_path: "/locations/new",
+          wrapper_options: { label: "Location" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for between slot
+class TestBetweenSlotAutocompleterForm < Components::ApplicationForm
+  def view_template
+    autocompleter_field(:notes, type: :user, label: "User:") do |f|
+      f.with_between { "(Login Name)" }
+    end
+  end
+end

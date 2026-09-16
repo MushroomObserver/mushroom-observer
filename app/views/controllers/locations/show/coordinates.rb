@@ -8,9 +8,7 @@ module Views::Controllers::Locations
       prop :location, ::Location
 
       def view_template
-        render(
-          ::Components::Panel.new(panel_id: "location_coordinates")
-        ) do |panel|
+        Panel(panel_id: "location_coordinates") do |panel|
           panel.with_heading { :coordinates.ti }
           links = heading_links
           panel.with_heading_links { trusted_html(links) } if links.present?
@@ -54,7 +52,7 @@ module Views::Controllers::Locations
         title, path, opts = ::Tab::Location::ReverseOrder.new(
           location: @location
         ).to_a
-        Link(type: :icon, content: title, path: add_q_param(path), **opts)
+        Link(type: :get, name: title, target: add_q_param(path), **opts)
       end
 
       def render_body
@@ -69,16 +67,14 @@ module Views::Controllers::Locations
 
       def render_north
         div(class: "text-center my-4") do
-          b { "#{:north.ti}:" }
-          whitespace
+          b { append_colon(:north.ti) }
           plain("#{@location.north}°")
         end
       end
 
       def render_south
         div(class: "text-center my-4") do
-          b { "#{:south.ti}:" }
-          whitespace
+          b { append_colon(:south.ti) }
           plain("#{@location.south}°")
         end
       end
@@ -87,15 +83,13 @@ module Views::Controllers::Locations
         Row do
           Column(xs: 6) do
             span(class: "pull-left") do
-              b { "#{:west.ti}:" }
-              whitespace
+              b { append_colon(:west.ti) }
               plain("#{@location.west}°")
             end
           end
           Column(xs: 6) do
             span(class: "pull-right") do
-              b { "#{:east.ti}:" }
-              whitespace
+              b { append_colon(:east.ti) }
               plain("#{@location.east}°")
             end
           end
@@ -113,16 +107,17 @@ module Views::Controllers::Locations
         value = @location.send(attr)
         return unless value
 
-        b(class: "text-nowrap") { "#{label_key.l}:" }
-        plain(" #{value} #{:units_meters.l}")
+        b(class: "text-nowrap") { append_colon(label_key.l) }
+        whitespace
+        plain("#{value} #{:units_meters.l}")
         br
       end
 
       def render_footer
         Link(
-          type: :icon,
+          type: :get,
           tab: ::Tab::Location::ObservationsAt.new(location: @location),
-          show_text: true
+          label: true
         )
       end
     end

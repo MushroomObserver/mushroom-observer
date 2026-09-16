@@ -20,7 +20,7 @@ module Views::Controllers::Publications
 
     def render_full
       p do
-        b { "#{:publication_full.l}:" }
+        b { append_colon(:publication_full.l) }
         br
         trusted_html(@publication.full.t.strip_links)
       end
@@ -28,7 +28,7 @@ module Views::Controllers::Publications
 
     def render_link
       p(style: "word-break:break-all") do
-        b { "#{:publication_link.l}:" }
+        b { append_colon(:publication_link.l) }
         br
         Link(type: :get, name: @publication.link, target: @publication.link)
       end
@@ -54,10 +54,10 @@ module Views::Controllers::Publications
 
     def render_added_by
       p do
-        b { :show_publication_added_by.l }
-        plain(": ")
+        b { append_colon(:show_publication_added_by.l) }
         Link(type: :user, user: @publication.user)
-        plain(" #{@publication.created_at.web_date}")
+        whitespace
+        plain(@publication.created_at.web_date.to_s)
         br
         render_updated_at_line
       end

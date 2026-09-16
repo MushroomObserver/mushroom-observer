@@ -12,12 +12,14 @@ module Views::Controllers::SpeciesLists::Observations
   # or a title, so the field handles both autocompleter selection
   # and direct URL pre-fill (`?species_list[title]=<title-or-id>`).
   class Form < ::Components::ApplicationForm
-    def initialize(num_results:, prefill_value: nil, **)
-      @num_results = num_results
+    prop :num_results, Integer
+
+    def initialize(num_results:, prefill_value: nil, **attrs)
       super(SpeciesList.new(title: prefill_value),
+            num_results: num_results,
             id: "species_list_observations_form",
             method: :put,
-            **)
+            **attrs)
     end
 
     def view_template

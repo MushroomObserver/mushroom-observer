@@ -49,9 +49,9 @@ module Observations::Images
         "added_images",
         ::Components::Form::UploadGallery::TurboStreamSlide.new(
           user: @user, image: @image,
-          img_id: params[:img_id],
-          file_name: params[:file_name],
-          file_size: params[:file_size]
+          img_id: params.permit(:img_id)[:img_id],
+          file_name: params.permit(:file_name)[:file_name],
+          file_size: params.permit(:file_size)[:file_size]
         )
       )
     end
@@ -60,14 +60,17 @@ module Observations::Images
       turbo_stream.prepend(
         "added_thumbnails",
         ::Components::Form::UploadGallery::TurboStreamThumb.new(
-          user: @user, image: @image, img_id: params[:img_id]
+          user: @user, image: @image,
+          img_id: params.permit(:img_id)[:img_id]
         )
       )
     end
 
-    def render_image(image, args)
-      name = args[:original_name].to_s
-      flash_notice(:runtime_image_uploaded.t(name: name))
+    def render_image(image, _args)
+      # No per-upload success flash: uploads now run concurrently (#5238),
+      # and MO's session-based flash loses writes under parallel requests.
+      # The created observation page already shows the uploaded images, so
+      # the per-image confirmation was redundant.
       render(json: image)
     end
 

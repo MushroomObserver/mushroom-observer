@@ -15,8 +15,13 @@ when "test"
 when "production"
   app_path = "/var/web/mushroom-observer"
   bind("unix://#{app_path}/tmp/sockets/puma.sock")
-  workers(3)
-  threads(1, 1)
+  # Total concurrency = workers x threads. Workers are the safe lever:
+  # the app has always run single-threaded in production, so raise
+  # RAILS_MAX_THREADS only as a deliberate, tested change (and size
+  # database.yml's pool to match).
+  workers(Integer(ENV.fetch("WEB_CONCURRENCY", 6)))
+  max_threads = Integer(ENV.fetch("RAILS_MAX_THREADS", 1))
+  threads(max_threads, max_threads)
   stdout_redirect("#{app_path}/log/puma.stdout.log",
                   "#{app_path}/log/puma.stderr.log", true)
 end

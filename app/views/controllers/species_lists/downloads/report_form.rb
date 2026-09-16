@@ -6,17 +6,21 @@ module Views::Controllers::SpeciesLists::Downloads
   # Sibling to `Views::Controllers::SpeciesLists::Downloads::Form`
   # (the print-labels form, also on the downloads/new page).
   class ReportForm < ::Components::ApplicationForm
-    def initialize(list:, query_param:, selected: nil)
-      @list = list
-      @query_param = query_param
+    prop :list, ::SpeciesList
+    prop :query, _Nilable(::Query), default: nil
+
+    def initialize(list:, query: nil, selected: nil)
+      # Permanently turbo: false -- always send_data (chosen report
+      # format) (see .claude/rules/turbo_submit_forms.md).
       super(FormObject::SpeciesListReport.new(format: selected),
-            id: "species_list_download_report")
+            list: list, query: query,
+            id: "species_list_download_report", turbo: false)
     end
 
     def view_template
       super do
-        h3 { "#{:species_list_report_header.t}:" }
-        p { "#{:download_observations_format.t}:" }
+        h3 { append_colon(:species_list_report_header.t) }
+        p { append_colon(:download_observations_format.t) }
         div(class: "form-group") { render_format_radios }
         submit(:species_list_report_button.l, center: true)
       end
@@ -35,7 +39,7 @@ module Views::Controllers::SpeciesLists::Downloads
 
     def form_action
       url_for(controller: "/species_lists/downloads",
-              action: :create, id: @list.id, q: @query_param,
+              action: :create, id: @list.id, q: q_param(@query),
               only_path: true)
     end
   end

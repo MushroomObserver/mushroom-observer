@@ -133,20 +133,33 @@ Good examples: `app/components/image_vote_section.rb`,
 See `.claude/ruby_style_guide.md` for detailed Ruby conventions.
 See `.claude/rules/phlex_reference.md` for Phlex coding conventions.
 See `.claude/rules/testing.md` for test structure and component test patterns.
+See `.claude/rules/system_test_state_polling.md` for when to poll a
+Stimulus controller's state (via `evaluate_script`) instead of
+waiting on a DOM selector in a system test.
 See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
 ("remove X from all models," "convert every Y") — don't self-limit
 scope below what the sweep already declared.
 See `.claude/rules/copilot_review_comments.md` for replying on the PR
 thread when a Copilot review finding is addressed, so later review
 passes don't re-verify it from scratch.
+See `.claude/rules/changelog.md` — every PR body needs a changelog
+block (`article:` verdict + user-facing sentence) for the automated
+changelogs (#5155).
 See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
 app; use ActiveRecord/Arel instead.
+See `.claude/rules/params_to_literal_props.md` — guard raw params
+(`params.permit`) before they reach a scalar-typed Literal `prop`; an
+unguarded nested-hash param raises instead of degrading gracefully.
 See `.claude/rules/no_pii_in_public.md` for the hard rule against
 putting PII (emails, etc.) in GitHub issues/PRs/comments — enforced
 by a `PreToolUse` hook.
 See `.claude/rules/code_comments.md` — comment the *why* (only when
 unclear), never the *what*; keep one source of truth, don't duplicate
 the same rationale across files.
+See `.claude/rules/turbo_submit_forms.md` — pattern for converting a
+Phlex form to Turbo submission (issue #5052), including which failure
+paths need a `422` and how to test the conversion without a system
+test.
 
 ## Git Workflow
 
@@ -158,7 +171,8 @@ the same rationale across files.
   - **Setup**: Create `.claude/developer.json` with
     `{"branchPrefix": "your-initials"}` (git-ignored)
 - Commit messages include Claude Code attribution
-- Create PRs via `gh pr create` with detailed descriptions
+- Create PRs via `gh pr create --draft` with detailed descriptions —
+  always a draft; see `.claude/rules/gh_pr_issue_formatting.md`
 - Link PRs to issues with `Fixes #issue_number`
 
 ## Architecture

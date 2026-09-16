@@ -37,6 +37,6 @@ class Components::Modal::ProgressSpinner < Components::Base
 
   def render_caption_and_spinner
     span(id: CAPTION_ID)
-    span(class: "spinner-right mx-2")
+    Icon(type: :reuse, class: "spinner-right mx-2")
   end
 end

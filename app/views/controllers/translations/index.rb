@@ -83,10 +83,10 @@ module Views::Controllers::Translations
     def render_tag_field(ttag)
       str = preview_string(@strings[ttag])
       p(class: "tag_field") do
-        Link(type: :get, name: "#{ttag}:",
+        Link(type: :get, name: append_colon(ttag.to_s),
              target: edit_translation_path(id: ttag, locale: @lang.locale),
              data: { tag: ttag, role: "show_tag", turbo_stream: true }) do
-          span(class: "tag") { "#{ttag}:" }
+          span(class: "tag") { append_colon(ttag.to_s) }
         end
         whitespace
         span(class: tag_str_class(ttag), id: "str_#{ttag}") { plain(str) }

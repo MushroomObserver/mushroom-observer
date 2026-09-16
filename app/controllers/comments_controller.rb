@@ -47,57 +47,6 @@ class CommentsController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Comments.default_order # :created_at
-  end
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_active_params
-    [:target, :pattern, :by_user, :for_user, :by, :q].freeze
-  end
-
-  # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: comments_path
-    )
-    return unless user
-
-    query = create_query(:Comment, by_users: user)
-    [query, {}]
-  end
-
-  # Shows comments for a given user's Observations, most recent first.
-  # (Linked from show_user.)
-  def for_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:for_user].to_s,
-      index_path: comments_path
-    )
-    return unless user
-
-    query = create_query(:Comment, for_user: user)
-    [query, {}]
-  end
-
-  # Shows comments for a given object, most recent first. (Linked from the
-  # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def target
-    return no_model unless (model = Comment.safe_model_from_name(params[:type]))
-    return unless (target = find_or_goto_index(model, params[:target].to_s))
-
-    query = create_query(:Comment, target: { type: target.class.name,
-                                             id: target.id })
-    [query, {}]
-  end
-
-  def no_model
-    flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
-    redirect_back_or_default(action: :index)
-    [nil, {}]
-  end
-
   def index_display_opts(opts, query)
     # `:include` falls back to `Comment.index_includes_tree` via
     # `default_index_includes_for_model`. (Re: the historical
@@ -190,7 +139,7 @@ class CommentsController < ApplicationController
     @comment = Comment.new(target: @target)
 
     respond_to do |format|
-      format.html { render_phlex_new }
+      format.html { render_new_view }
       format.turbo_stream { render_modal_comment_form }
     end
   end
@@ -234,7 +183,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_comment_form }
-      format.html { render_phlex_edit }
+      format.html { render_edit_view }
     end
   end
 
@@ -276,18 +225,18 @@ class CommentsController < ApplicationController
 
   private
 
-  def render_phlex_new
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::Comments::New.new(
              comment: @comment, target: @target, user: @user,
              comments: load_target_comments
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_phlex_edit
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Comments::Edit.new(
              comment: @comment, target: @target, user: @user,
              comments: load_target_comments
-           ))
+           ), status: status, **render_opts)
   end
 
   # Comments-for-target list used by the read-only `CommentsForObject`
@@ -307,10 +256,27 @@ class CommentsController < ApplicationController
     params[:comment].permit([:summary, :comment])
   end
 
+  # Called from both create's and update's failure paths. The
+  # format.html branch previously always rendered the New form, even
+  # on an update failure -- fixed to redisplay whichever form the
+  # calling action actually owns, at status: :unprocessable_content
+  # (a Turbo requirement for a re-rendered, non-redirected form
+  # response). The turbo_stream branch doesn't need that: Turbo
+  # Streams just look for a matching target id in the body, not a
+  # 2xx-implies-redirect signal.
   def reload_form
-    respond_to do |format|
-      format.turbo_stream { reload_modal_form }
-      format.html { render_phlex_new }
+    if modal_submission?(:comment)
+      reload_modal_form
+    else
+      render_reload_form_invalid
+    end
+  end
+
+  def render_reload_form_invalid
+    if action_name == "update"
+      render_edit_view_invalid
+    else
+      render_new_view_invalid
     end
   end
 
@@ -319,17 +285,14 @@ class CommentsController < ApplicationController
   # on the model's own Action Cable broadcast. Edit modal id is
   # "modal_comment_<id>"; the new-comment modal id is "modal_comment".
   def refresh_comments_or_redirect_to_show(extra_streams: [])
-    respond_to do |format|
-      format.turbo_stream do
-        modal_id = "modal_#{modal_identifier}"
-        render(turbo_stream: extra_streams + [
-          turbo_stream.close_modal(modal_id),
-          turbo_stream.remove(modal_id)
-        ])
-      end
-      format.html do
-        redirect_to(@target.show_link_args)
-      end
+    if modal_submission?(:comment)
+      modal_id = "modal_#{modal_identifier}"
+      render(turbo_stream: extra_streams + [
+        turbo_stream.close_modal(modal_id),
+        turbo_stream.remove(modal_id)
+      ])
+    else
+      redirect_to(@target.show_link_args)
     end
   end
 
@@ -372,14 +335,10 @@ class CommentsController < ApplicationController
   end
 
   def show_flash_and_send_back(target)
-    respond_to do |format|
-      format.html do
-        redirect_to(target.show_link_args) and return
-      end
-      # renders the flash in the modal
-      format.turbo_stream do
-        render_modal_flash_update(modal_identifier) and return
-      end
+    if modal_submission?(:comment)
+      render_modal_flash_update(modal_identifier)
+    else
+      redirect_to(target.show_link_args)
     end
   end
 end

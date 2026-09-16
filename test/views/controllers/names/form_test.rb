@@ -30,6 +30,13 @@ module Views::Controllers::Names
       assert_html(html, "option[value='Genus']")
       assert_html(html, "option[value='Family']")
 
+      # Rank select order: Domain (highest) down to Form (lowest) -
+      # customary rank ordering, reverse of Name.all_ranks/the enum
+      # definition order.
+      doc = Nokogiri::HTML5.fragment(html)
+      rank_values = doc.css("select[name='name[rank]'] option").pluck("value")
+      assert_equal(Name.all_ranks.reverse, rank_values)
+
       # Status select
       assert_html(html, "select[name='name[deprecated]']")
       assert_includes(html, :status.ti)

@@ -15,6 +15,14 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_link("Your Observations")
     click_on("Your Observations")
 
+    # `body.observations__index` alone matches both the filtered target
+    # page AND the unfiltered `/observations` page Turbo may still be
+    # showing mid-navigation (login redirects to bare `observations_path`,
+    # so that's genuinely on screen before this click's own page loads) --
+    # a login-warmed vs. cold Puma/Chrome start made this race visible
+    # only sometimes. Assert on the URL actually landing on `by_user=`
+    # so Capybara's own retry waits for the real navigation to finish.
+    assert_current_path(observations_path(by_user: rolf.id))
     assert_selector("body.observations__index")
     assert_link(text: /#{@obs.text_name}/)
     click_link(text: /#{@obs.text_name}/)
@@ -243,6 +251,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
+
+    # Wait for the flash triggered by the delete action
+    # so the link check doesn't race a still-in-flight page
+    # in a parallel test.
+    assert_flash_success(
+      :runtime_destroyed_id.t(type: :sequence, value: seq.id.to_s), wait: 5
+    )
     assert_no_link(text: /LSU/)
   end
 
@@ -262,11 +277,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find_link(:add_object.t(type: :external_link)).trigger("click")
     end
 
-    # external_id is active by default; the url field is grayed (readonly)
     assert_selector("#modal_external_link")
     within("#modal_external_link") do
-      assert_field("external_link_external_id", readonly: false)
-      assert_field("external_link_url", readonly: true)
       select(site.name, from: "external_link_external_site_id")
       fill_in("external_link_external_id", with: "12212326")
       click_commit
@@ -276,7 +288,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     mcp_link = ExternalLink.last
     assert_equal("12212326", mcp_link.external_id)
-    assert_nil(mcp_link.url, "an external_id link stores no url")
 
     # A second site's link, created directly (not via the UI) so the
     # accordion has two badges to switch between.

@@ -4,16 +4,13 @@
 # `Names::ClassificationController#edit`.
 module Views::Controllers::Names::Classification
   class Form < ::Components::ApplicationForm
-    def initialize(name, **)
-      @name = name
-      super(name)
-    end
-
     def view_template
       textarea_field(:classification, label: :form_names_classification,
                                       rows: 10,
-                                      between: classification_help,
-                                      data: { autofocus: true })
+                                      help_placement: :above,
+                                      data: { autofocus: true }) do |f|
+        f.with_help { classification_help }
+      end
 
       submit(:save.ti, center: true)
     end
@@ -21,12 +18,12 @@ module Views::Controllers::Names::Classification
     private
 
     def classification_help
-      rank = :"rank_#{@name.rank.to_s.downcase}".l
-      Help(element: :p, content: :form_names_classification_help.t(rank: rank))
+      rank = :"rank_#{model.rank.to_s.downcase}".l
+      trusted_html(:form_names_classification_help.t(rank: rank))
     end
 
     def form_action
-      classification_of_name_path(@name.id)
+      classification_of_name_path(model.id)
     end
   end
 end

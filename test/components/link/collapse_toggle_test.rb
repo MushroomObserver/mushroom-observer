@@ -86,6 +86,17 @@ class CollapseToggleLinkTest < ComponentTestCase
     # Bootstrap reads data-target before href; both must be present
     assert_html(html, "a[data-target='#help_foo']")
     assert_html(html, "a[data-toggle='collapse']")
+    # Bootstrap's collapse data-API only calls preventDefault() when
+    # data-target is absent, so fallback_href needs an explicit
+    # preventDefault() or the click always follows href instead of
+    # toggling -- see collapse-fallback_controller.js. No :prevent
+    # action modifier -- the controller itself decides whether to
+    # call preventDefault(), skipping it for a data-turbo-frame
+    # trigger so Turbo can handle that case instead.
+    assert_html(html, "a[data-controller='collapse-fallback']")
+    assert_html(
+      html, "a[data-action='click->collapse-fallback#intercept']"
+    )
   end
 
   def test_without_fallback_href_href_is_anchor
@@ -93,6 +104,7 @@ class CollapseToggleLinkTest < ComponentTestCase
 
     assert_html(html, "a[href='#help_foo']")
     assert_no_html(html, "a[data-target]")
+    assert_no_html(html, "a[data-controller]")
   end
 
   def test_button_variant_adds_btn_classes
@@ -116,19 +128,19 @@ class CollapseToggleLinkTest < ComponentTestCase
   def test_icon_kwarg_renders_icon_in_link
     html = render_it(icon: :info)
 
-    assert_html(html, "a span.glyphicon")
+    assert_html(html, "a svg.mo-icon-info")
   end
 
   def test_icon_title_forwarded_to_icon
     html = render_it(icon: :info, icon_title: "Help content")
 
-    assert_html(html, "a span.sr-only", text: "Help content")
+    assert_html(html, "a span[aria-label='Help content']")
   end
 
   def test_icon_title_defaults_to_closed_text
     html = render_it(icon: :plus, closed_text: "Show more")
 
-    assert_html(html, "a span.sr-only", text: "Show more")
+    assert_html(html, "a span[aria-label='Show more']")
   end
 
   def test_open_text_renders_collapse_toggle_open_span

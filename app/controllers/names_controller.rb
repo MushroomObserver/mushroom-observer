@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class NamesController < ApplicationController
   class RankWarning < RuntimeError; end
 
@@ -47,16 +47,6 @@ class NamesController < ApplicationController
 
   private
 
-  def default_sort_order
-    ::Query::Names.default_order # :name
-  end
-
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :has_observations, :has_descriptions,
-     :needs_description, :by_user, :by_editor, :by, :q, :id].freeze
-  end
-
   def make_name_suggestions
     return unless @objects.empty? &&
                   params[:q].is_a?(ActionController::Parameters) &&
@@ -67,66 +57,29 @@ class NamesController < ApplicationController
     @name_suggestions = Name.suggest_alternate_spellings(original_spelling)
   end
 
-  # Disabling the cop because subaction methods are going away soon
-  # rubocop:disable Naming/PredicatePrefix
-  # Display list of names that have observations.
-  def has_observations
-    query = create_query(:Name, has_observations: 1)
-    [query, {}]
-  end
-
-  # Display list of names with descriptions that have authors.
-  def has_descriptions
-    @has_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, has_descriptions: 1)
-    [query, {}]
-  end
-  # rubocop:enable Naming/PredicatePrefix
-
-  # Display list of the most popular 100 names that don't have descriptions.
-  # NOTE: all this extra info and help will be lost if user re-sorts.
-  def needs_description
-    @help = :needed_descriptions_help
-    query = create_query(:Name, needs_description: 1)
-    [query, { num_per_page: 100 }]
-  end
-
-  # Display list of names that a given user is author on.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: names_path
-    )
-    return unless user
-
-    query = create_query(:Name, by_users: user)
-    [query, {}]
-  end
-
-  # Display list of names that a given user is editor on.
-  def by_editor
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_editor].to_s,
-      index_path: names_path
-    )
-    return unless user
-
-    query = create_query(:Name, by_editor: user)
-    [query, {}]
-  end
-
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
+    @has_descriptions = query.params[:has_descriptions] == true
+    @help = :needed_descriptions_help if query.params[:needs_description]
     query
   end
 
-  def index_display_opts(opts, _query)
+  def index_display_opts(opts, query)
     {
       letters: true,
-      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
+      num_per_page: index_num_per_page(query),
       include: [:description]
     }.merge(opts)
+  end
+
+  # Needs-description page shows the 100 most popular unresolved
+  # names; every other sort of the index paginates 50 (500 for a
+  # letter-anchored jump).
+  def index_num_per_page(query)
+    return 100 if query.params[:needs_description]
+
+    /^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50
   end
 
   ###################################
@@ -301,7 +254,7 @@ class NamesController < ApplicationController
     # Third query (maybe combine with second)
     @obss = Name::Observations.new(@name)
     # This initiates a query for the images of only the most confident obs
-    @best_images = @obss.best_images
+    @best_images = @obss.best_images.to_a
 
     # Save a lookup in comments_for_object
     @comments = @name.comments&.sort_by(&:created_at)&.reverse
@@ -318,7 +271,7 @@ class NamesController < ApplicationController
 
   def new
     init_create_name_form
-    render_new_form
+    render_new_view
   end
 
   def create
@@ -336,7 +289,7 @@ class NamesController < ApplicationController
     return unless find_name!
 
     init_edit_name_form
-    render_edit_form
+    render_edit_view
   end
 
   def update
@@ -360,8 +313,11 @@ class NamesController < ApplicationController
   end
 
   def reload_name_form_on_error(err)
-    flash_error(err.to_s) if err.present?
-    flash_object_errors(@name)
+    if @name.errors.any?
+      flash_object_errors(@name)
+    elsif err.present?
+      flash_error(err.to_s)
+    end
     reload_name_form
   end
 
@@ -370,24 +326,30 @@ class NamesController < ApplicationController
     reload_name_form
   end
 
+  # Shared by both create's and update's rescue blocks -- always
+  # reloads the New form (pre-existing behavior, unchanged here: an
+  # update failure bounces to /names/new rather than back to the
+  # Edit page it came from). Worth a closer look outside this
+  # conversion's scope.
   def reload_name_form
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-    render(phlex_new_form, location: new_name_path)
+    render_new_view_invalid
   end
 
-  def render_new_form
-    render(phlex_new_form)
+  def render_new_view(status: :ok, **render_opts)
+    render(phlex_new_form, status: status, **render_opts)
   end
 
-  def render_edit_form
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Names::Edit.new(
              name: @name, user: @user,
              name_string: @name_string,
              misspelling: @misspelling,
              correct_spelling: @correct_spelling
-           ))
+           ),
+           status: status, **render_opts)
   end
 
   def phlex_new_form
@@ -451,11 +413,11 @@ class NamesController < ApplicationController
   end
 
   def set_locked_if_admin
-    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+    @name.locked = params[:name][:locked].to_s == "1" if in_admin_mode?
   end
 
   def set_icn_id_if_unlocked_or_admin
-    @name.icn_id   = params[:name][:icn_id] if editable_in_session?
+    @name.icn_id = params[:name][:icn_id] if editable_in_session?
   end
 
   # ------
@@ -470,7 +432,8 @@ class NamesController < ApplicationController
           name_id: @name.id,
           # Auricularia Bull. [#17132]
           new_name_with_icn_id: "#{@parse.search_name} " \
-                                "[##{params[:name][:icn_id]}]"
+                                "[##{params[:name][:icn_id]}]",
+          format: :html
         )
       )
       return
@@ -720,7 +683,8 @@ class NamesController < ApplicationController
       redirect_to_show_name
     else
       redirect_to(new_admin_emails_merge_requests_path(
-                    type: :Name, old_id: @name.id, new_id: new_name.id
+                    type: :Name, old_id: @name.id, new_id: new_name.id,
+                    format: :html
                   ))
     end
   end
@@ -821,4 +785,3 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
-# rubocop:enable Metrics/ClassLength

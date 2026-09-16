@@ -60,11 +60,13 @@ module Tab::Object
       assert_includes(tab.html_options[:class], "projects_index_link")
     end
 
-    def test_index_with_q_param
-      tab = Tab::Object::Index.new(object: @project, q_param: "ABC")
+    def test_index_with_index_filter
+      tab = Tab::Object::Index.new(
+        object: @project, index_filter: { by_user: 1 }
+      )
       path = tab.path
 
-      assert_equal("ABC", path[:q])
+      assert_equal(1, path[:by_user])
       # Original hash entries are preserved.
       @project.index_link_args.each do |k, v|
         assert_equal(v, path[k])

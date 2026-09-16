@@ -336,6 +336,60 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(expected, files)
   end
 
+  # The thumbnail can be an occurrence sibling's image (#5160); it is
+  # still the primary_image, and the observation's own images are
+  # still listed.
+  def test_get_observation_primary_image_from_sibling
+    primary = observations(:two_img_obs)
+    sibling = observations(:fungi_obs)
+    thumb = images(:plane_image_example)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ, thumb_image: thumb)
+    sibling.update!(occurrence: occ)
+
+    get(:observations, params: { id: primary.id, detail: :high,
+                                 format: :json })
+
+    assert_no_api_errors
+    result = response.parsed_body["results"][0]
+    assert_equal(thumb.id, result.dig("primary_image", "id"))
+    assert_equal(primary.image_ids.sort,
+                 result["images"].pluck("id").sort)
+
+    get(:observations, params: { id: primary.id, detail: :high,
+                                 format: :xml })
+
+    assert_no_api_errors
+    assert_select("primary_image[id=?]", thumb.id.to_s)
+    assert_select("images[number=?]", primary.images.count.to_s)
+    assert_select("images > image", count: primary.images.count)
+    primary.image_ids.each do |id|
+      assert_select("images > image[id=?]", id.to_s)
+    end
+    assert_select("images > image[id=?]", thumb.id.to_s, count: 0)
+  end
+
+  # ExternalLink has no url column -- ExternalSite#observation_url derives
+  # it from external_id. The serializer renders link_url and exposes
+  # external_id directly, so clients need not reverse-parse the URL.
+  def test_get_external_link_url_derived_from_external_id
+    link = ExternalLink.create!(
+      user: users(:rolf),
+      observation: observations(:agaricus_campestris_obs),
+      external_site: external_sites(:inaturalist),
+      relationship: :copy,
+      external_id: "4675274"
+    )
+
+    get(:external_links, params: { id: link.id, detail: :high, format: :json })
+
+    assert_no_api_errors
+    result = response.parsed_body["results"][0]
+    assert_equal("https://www.inaturalist.org/observations/4675274",
+                 result["url"])
+    assert_equal("4675274", result["external_id"])
+  end
+
   def test_post_corrupt_image
     setup_image_dirs
     count = Image.count
@@ -489,6 +543,88 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("GenBank", sequence.archive)
     assert_equal("KT1234", sequence.accession)
     assert_equal("sequence notes", sequence.notes)
+  end
+
+  # Sequences on a reflection are source-owned (#4214), but anyone may
+  # sequence the specimen: the API lands the add on the occurrence
+  # companion -- the importer's, when the poster cannot edit the
+  # reflection.
+  def test_post_sequence_to_reflection_lands_on_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg"
+    }
+
+    assert_difference("Sequence.count", 1) do
+      post(:sequences, params: params)
+    end
+    assert_no_api_errors
+    seq = Sequence.order(:id).last
+    companion = seq.observation
+    assert_not_equal(obs.id, companion.id,
+                     "the sequence must not land on the reflection")
+    assert_equal(obs.reload.occurrence_id, companion.reload.occurrence_id,
+                 "the companion shares the reflection's occurrence")
+    assert_users_equal(mary, seq.user)
+    assert_users_equal(obs.user, companion.user,
+                       "a non-editor's post creates the companion as " \
+                       "the importer's")
+  end
+
+  # Companion creation can fail (e.g. the occurrence is full); the API
+  # surfaces that as a structured CreateFailed error, not a 500.
+  def test_post_sequence_to_reflection_companion_failure_is_structured
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    # The error's message renders via unique_text_name, so the stub
+    # record needs a name, as a failed companion would have.
+    invalid = Observation.new(name: names(:fungi))
+    invalid.errors.add(:base, :occurrence_max_observations_exceeded,
+                       max: Occurrence::MAX_OBSERVATIONS)
+    failing = Struct.new(:record) do
+      def existing = nil
+
+      def create
+        raise(ActiveRecord::RecordInvalid.new(record))
+      end
+    end.new(invalid)
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg"
+    }
+
+    Observation::Companion.stub(:new, ->(*) { failing }) do
+      assert_no_difference("Sequence.count") do
+        post(:sequences, params: params)
+      end
+    end
+
+    assert_api_failed
+    assert(assigns(:api).errors.any?(API2::CreateFailed),
+           "Expected a structured CreateFailed error")
+  end
+
+  # Prove user can add a Naming to someone else's Observation
+  def test_post_naming
+    obs = observations(:coprinus_comatus_obs)
+    name = names(:boletus_edulis) # mary hasn't proposed this on obs yet
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      name: name.id
+    }
+    post(:namings, params: params)
+    assert_no_api_errors
+    naming = obs.namings.find_by(name: name)
+    assert_not_nil(naming, "Naming should have been created")
+    assert_users_equal(mary, naming.user)
+    assert_not_equal(obs.user, naming.user)
   end
 
   def test_get_field_slip_observation_ids

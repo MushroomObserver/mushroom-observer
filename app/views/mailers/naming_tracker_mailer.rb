@@ -44,7 +44,7 @@ class Views::Mailers::NamingTrackerMailer < Views::Mailers::Base
 
   private
 
-  def observation_url = "#{MO.http_domain}/#{@observation.id}"
+  def observation_url = @observation.show_url
   def name_url = "#{MO.http_domain}/names/#{@naming.name_id}"
   def observer_url = "#{MO.http_domain}/users/#{@observation.user_id}"
   def identifier_url = "#{MO.http_domain}/users/#{@naming.user_id}"

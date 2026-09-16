@@ -21,7 +21,10 @@
 #  user::          User that created it.
 #  observation::   Observation the URL is attached to.
 #  external_site:: External site the URL points to.
-#  url::           Actual URL, complete with transport ("http://"), etc.
+#  external_id::   This link's id on the external site -- the URL is
+#                  derived on demand via #link_url. Required for every
+#                  relationship except :export, where it is unknown
+#                  until the external site assigns one (see #5315).
 #
 class ExternalLink < AbstractModel
   # The kind of relationship this link records between the target and the
@@ -56,20 +59,30 @@ class ExternalLink < AbstractModel
   validates :target, presence: true
   validates :external_site, presence: true
   validates :user, presence: true
-  validates :url, length: { maximum: 100 }, allow_blank: true
-  validate  :check_url_syntax
+  # Matches the column's varchar(64); without this a long paste 500s
+  # with ActiveRecord::ValueTooLong instead of a form error.
+  validates :external_id, length: { maximum: 64 }
+  # Every other relationship identifies a specific record on the external
+  # site, so external_id is required. An export link is created before
+  # the external site has assigned one -- see issue #5315.
+  validates :external_id, presence: true, unless: :export?
   # No general one-link-per-(target, site) rule: an MO obs can legitimately
   # correspond to several iNat obs (iNat-side duplicates of one collection),
   # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
   # per target is still enforced (below + the import_target unique index).
   validate  :only_one_import_per_target, if: :import?
-  before_validation :normalize_external_id_and_url
-  before_validation :format_url_for_external_site
+  validate  :validate_external_id_numeric
+  before_validation :resolve_submitted_external_id
+
+  # Both currently-configured sites assign purely numeric ids
+  # (iNaturalist observation ids, MyCoPortal occids) -- a future site
+  # with an alphanumeric id scheme (e.g. GenBank accessions) would need
+  # to be excluded here.
+  NUMERIC_ID_SITE_NAMES = [ExternalSite::INATURALIST_NAME,
+                           ExternalSite::MYCOPORTAL_NAME].freeze
 
   scope :order_by_default,
         -> { order_by(::Query::ExternalLinks.default_order) }
-  scope :url_has,
-        ->(phrase) { search_columns(ExternalLink[:url], phrase) }
   scope :external_sites, lambda { |sites|
     ids = Lookup::ExternalSites.new(sites).ids
     where(external_site_id: ids)
@@ -95,12 +108,6 @@ class ExternalLink < AbstractModel
   scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
-  def check_url_syntax
-    return if url.blank? || format_url_for_external_site
-
-    errors.add(:url, :validate_invalid_url.t)
-  end
-
   # A target has at most one import link (its authoritative external
   # source). A DB unique index on a generated column also guards this; the
   # validation produces a friendly error instead of RecordNotUnique.
@@ -110,36 +117,55 @@ class ExternalLink < AbstractModel
     others = others.where.not(id: id) if id
     return unless others.exists?
 
-    errors.add(:relationship, :validate_one_import_per_target.t)
+    errors.add(:relationship, :validate_one_import_per_target)
   end
 
-  # Enforce the external_id XOR url invariant: a blank external_id is stored as
-  # nil, and whenever an external_id is present the url is dropped (it is
-  # derived from the external_id via link_url). So a link is identified by
-  # external_id OR url, never both (#4565). Runs before format_url so a cleared
-  # url is never format-validated.
-  def normalize_external_id_and_url
+  # `external_id` accepts either a bare site id or a url pasted from the
+  # external site -- resolves the latter to a bare id via the site's
+  # known shapes before validation, so a pasted permalink doesn't sit
+  # unresolved (there's no url column left to hold it in). A url shape
+  # that needs a live crawl to resolve, or that doesn't match this
+  # site's format, fails validation instead of storing the raw url as
+  # if it were an id. A directly-submitted bare id skips this url
+  # resolution entirely and is stored unchecked against the site's
+  # expected format -- this field has always accepted a bare id as-is.
+  def resolve_submitted_external_id
     self.external_id = nil if external_id.blank?
-    self.url = nil if external_id.present?
+    return if external_id.nil? || external_site.blank?
+    return unless external_id.include?("://")
+
+    resolved = external_site.id_from_url(external_id)
+    return self.external_id = resolved if resolved
+
+    reject_unresolvable_url
   end
 
-  def format_url_for_external_site
-    return true if url.blank?
-    return false unless (base_url = external_site&.base_url)
-    return inat_url?(base_url) if external_site.name == "iNaturalist"
+  # Catches a directly-submitted bare id that skips url resolution, and
+  # a crafted MyCoPortal url whose occid segment isn't numeric --
+  # id_from_url's numeric guard only applies to iNaturalist.
+  def validate_external_id_numeric
+    return if external_id.blank? || external_site.blank?
+    return unless NUMERIC_ID_SITE_NAMES.include?(external_site.name)
+    # An unresolved url is still sitting in external_id --
+    # reject_unresolvable_url already added the specific error for it; a
+    # numeric-format error on top would be redundant and confusing.
+    return if external_id.include?("://")
+    return if external_id.match?(/\A\d+\z/)
 
-    test_url = FormatURL.new(url, base_url)
-    return false unless test_url.valid?
-
-    self.url = test_url.formatted
-    url
+    errors.add(:external_id, :validate_external_link_not_numeric_id,
+               site: external_site.name)
   end
 
-  # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
-  # causing FormatURL#url_exists? to fail. Skip the reachability check,
-  # validating the URL format against a regexp instead.
-  def inat_url?(base_url)
-    url.to_s.match?(/\A#{Regexp.escape(base_url)}\d+\z/) && url
+  def reject_unresolvable_url
+    if external_site.mycoportal_list_search?(external_id)
+      errors.add(:external_id, :validate_external_link_list_search_url)
+    elsif ExternalLink.self_referential_url?(external_id)
+      errors.add(:external_id, :validate_external_link_self_referential_url,
+                 site: external_site.name)
+    else
+      errors.add(:external_id, :validate_external_link_unrecognized_url,
+                 site: external_site.name)
+    end
   end
 
   # Convenience function to allow +sort_by(&:site_name)+.
@@ -177,27 +203,25 @@ class ExternalLink < AbstractModel
     self.target = obs
   end
 
-  # The display URL: the stored override if present, else derived from the
-  # site's url_template + external_id (#4299). Import links store no url.
+  # The display URL, derived from the site's url_template + external_id
+  # (#4299).
   def link_url
-    url.presence || external_site&.observation_url(external_id)
+    external_site&.observation_url(external_id)
   end
 
   # This link's id on the external site, when the site is iNaturalist --
-  # nil for every other site. Import links already have it in the
-  # external_id column; manual links only store url, so
-  # ExternalSite#id_from_url reverse-derives it from link_url instead.
+  # nil for every other site.
   def inaturalist_id
     return nil unless external_site&.name == ExternalSite::INATURALIST_NAME
 
-    external_site.id_from_url(link_url)
+    external_id
   end
 
   # Same as #inaturalist_id, for MyCoPortal.
   def mycoportal_id
     return nil unless external_site&.name == ExternalSite::MYCOPORTAL_NAME
 
-    external_site.id_from_url(link_url)
+    external_id
   end
 
   # This link's id on its external site, for whichever site has an id
@@ -213,6 +237,23 @@ class ExternalLink < AbstractModel
 
     user.id == target&.user_id ||
       external_site&.project&.member?(user)
+  end
+
+  # Anchored to the start of the url, not just on "://mushroomobserver.org"
+  # -- an unanchored match would also catch a third-party url that merely
+  # carries a full MO url in a query value (e.g.
+  # "https://evil.example/track?next=https://mushroomobserver.org/N").
+  # Not matched on `uri.host` either, since a malformed double-scheme
+  # url like "http://https://mushroomobserver.org/N" parses with host
+  # "https", not the intended host -- the optional extra "https://"
+  # right after the scheme covers that case instead.
+  SELF_REFERENTIAL_RE =
+    %r{\Ahttps?://(?:https://)?(?:www\.)?mushroomobserver\.org(/|\z)}
+
+  # True when url points back at MushroomObserver -- a stray paste, or
+  # the linked target's MO url pasted in by mistake.
+  def self.self_referential_url?(url)
+    url == "http://adolf" || url.match?(SELF_REFERENTIAL_RE)
   end
 
   def self.show_controller; end

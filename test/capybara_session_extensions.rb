@@ -23,8 +23,7 @@
 #  delivered_mail_data
 #  first_link_in_mail
 #  assert_no_flash
-#  assert_flash_text
-#  assert_no_flash_text
+#  assert_flash
 #  assert_flash_success
 #  assert_flash_error
 #  assert_no_flash_errors
@@ -138,28 +137,62 @@ module CapybaraSessionExtensions
     URI.parse(href_value).request_uri
   end
 
-  def assert_no_flash(session: self)
-    session.assert_no_selector("#flash_notices")
+  # expect: nil (no flash at all), a bare Symbol tag (resolved via .t,
+  # with **args as its interpolation args), or an Array of tags (each
+  # entry either a bare Symbol or a [Symbol, args_hash] pair) -- none
+  # of which should appear in the flash.
+  def assert_no_flash(expect = nil, session: self, **args)
+    return session.assert_no_selector("#flash_notices") if expect.nil?
+
+    each_flash_tag(expect, args) do |text|
+      session.assert_no_selector("#flash_notices", text: text.as_displayed)
+    end
   end
 
-  def assert_flash_text(text = "", session: self)
-    session.assert_selector("#flash_notices")
-    session.assert_selector("#flash_notices", text: text)
+  # expect: nil (presence only, no text check), a bare Symbol tag
+  # (resolved via .t, with **args as its interpolation args), or an
+  # Array of tags for a message built from more than one (each entry
+  # either a bare Symbol or a [Symbol, args_hash] pair).
+  #
+  # Each tag is checked as its OWN substring assertion, not joined
+  # into one combined string -- the two Capybara drivers in play here
+  # (:rack_test for test/integration/capybara, Cuprite for
+  # test/system) disagree on what, if anything, appears between two
+  # adjacent flash <p> blocks (rack_test: nothing at all -- words end
+  # up glued together; Cuprite: a newline). A joined multi-tag string
+  # would need to guess that separator and could never be right for
+  # both drivers at once; checking each tag independently sidesteps
+  # the question entirely.
+  # wait: overrides Capybara's default_max_wait_time (3s, see
+  # ApplicationSystemTestCase) for this assertion only. A Turbo-
+  # submitted form's failure/success flash can take noticeably longer
+  # than 3s to settle on a heavy page (multiple image uploads plus a
+  # full FullPageBase render) -- this isn't a flash-clearing bug, just
+  # real work exceeding the default budget. Pass wait: explicitly at
+  # the call site for a known-slow flow rather than raising the
+  # global default, which would mask genuine hangs elsewhere.
+  def assert_flash(expect = nil, session: self, wait: nil, **args)
+    wait_opts = wait ? { wait: wait } : {}
+    session.assert_selector("#flash_notices", **wait_opts)
+    return if expect.nil?
+
+    each_flash_tag(expect, args) do |text|
+      session.assert_selector("#flash_notices", text: text.as_displayed,
+                                                **wait_opts)
+    end
   end
 
-  def assert_no_flash_text(text = "", session: self)
-    session.assert_no_selector("#flash_notices", text: text)
+  def assert_flash_success(expect = nil, session: self, wait: nil, **args)
+    session.assert_selector("#flash_notices.alert-success",
+                            **(wait ? { wait: wait } : {}))
+    assert_flash(expect, session:, wait:, **args) if expect
   end
 
-  def assert_flash_success(text = "", session: self)
-    session.assert_selector("#flash_notices.alert-success")
-    assert_flash_text(text, session: session) if text
-  end
-
-  def assert_flash_error(text = "", session: self)
+  def assert_flash_error(expect = nil, session: self, wait: nil, **args)
     session.assert_any_of_selectors("#flash_notices.alert-error",
-                                    "#flash_notices.alert-danger")
-    assert_flash_text(text, session: session) if text
+                                    "#flash_notices.alert-danger",
+                                    **(wait ? { wait: wait } : {}))
+    assert_flash(expect, session:, wait:, **args) if expect
   end
 
   def assert_no_flash_errors(session: self)
@@ -167,9 +200,21 @@ module CapybaraSessionExtensions
                                      "#flash_notices.alert-danger")
   end
 
-  def assert_flash_warning(text = "", session: self)
-    session.assert_selector("#flash_notices.alert-warning")
-    assert_flash_text(text, session: session) if text
+  def assert_flash_warning(expect = nil, session: self, wait: nil, **args)
+    session.assert_selector("#flash_notices.alert-warning",
+                            **(wait ? { wait: wait } : {}))
+    assert_flash(expect, session:, wait:, **args) if expect
+  end
+
+  # Yields each tag's resolved text in turn -- a bare Symbol yields
+  # once (top_level_args as its interpolation args), an Array yields
+  # once per entry (each a bare Symbol or a [Symbol, args_hash] pair).
+  def each_flash_tag(expect, top_level_args)
+    entries = expect.is_a?(Array) ? expect : [[expect, top_level_args]]
+    entries.each do |entry|
+      tag, tag_args = entry.is_a?(Array) ? entry : [entry, {}]
+      yield(tag.t(**(tag_args || {})))
+    end
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers

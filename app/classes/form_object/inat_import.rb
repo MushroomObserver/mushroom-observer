@@ -12,4 +12,6 @@ class FormObject::InatImport < FormObject::Base
   attribute :recheck_all, :string
   attribute :skip_inat_writeback, :string
   attribute :choose_method, :string
+  attribute :inat_project, :string
+  attribute :inat_project_id, :string
 end

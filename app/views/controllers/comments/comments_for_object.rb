@@ -84,8 +84,9 @@ module Views::Controllers::Comments
 
     def render_and_more_link
       Link(type: :get, name: :show_comments_and_more.t(num: and_more),
-           target: comments_path(target: @object.id,
-                                 type: @object.class.name),
+           target: comments_path(
+             target: { type: @object.class.name, id: @object.id }
+           ),
            class: "float-right")
     end
 

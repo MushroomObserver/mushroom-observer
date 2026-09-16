@@ -14,6 +14,8 @@
 # standard CRUD routing rather than a bespoke action.
 module Occurrences
   class ProjectsController < ApplicationController
+    include OccurrenceProjectResolvable
+
     before_action :login_required
     before_action :find_occurrence!
 
@@ -24,8 +26,9 @@ module Occurrences
         return
       end
 
+      primary = @occurrence.primary_observation
       apply_resolution(gaps)
-      redirect_to(occurrence_path(@occurrence))
+      redirect_after_resolution(primary)
     end
 
     private
@@ -40,13 +43,43 @@ module Occurrences
     end
 
     def apply_resolution(gaps)
-      return unless params.dig(:occurrence_projects,
-                               :resolution) == "add_all"
+      case params.dig(:occurrence_projects, :resolution)
+      when "add_all" then add_all(gaps)
+      when "cancel" then cancel_mix
+      end
+    end
 
+    # Cancel can leave the occurrence with a single observation and no
+    # field slip, in which case `destroy_if_incomplete!` removes it —
+    # there is no occurrence page left to return to.
+    def redirect_after_resolution(primary)
+      if @occurrence.destroyed?
+        redirect_to(permanent_observation_path(primary.id))
+      else
+        redirect_to(occurrence_path(@occurrence))
+      end
+    end
+
+    def add_all(gaps)
       projects = gaps[:projects] || []
-      @occurrence.add_all_to_collections(projects: projects)
+      result = @occurrence.add_all_to_collections(
+        projects: projects, user: @user, site_admin: in_admin_mode?
+      )
       flash_notice(:occurrence_resolve_projects_all_done.t(
-                     count: projects.size
+                     count: projects.size - result[:refused].size
+                   ))
+      flash_add_all_result(result)
+    end
+
+    # Backs out the attach that created the mix, rather than leaving the
+    # occurrence's members with different project memberships — a state
+    # they aren't allowed to be in. See #4932.
+    def cancel_mix
+      detached = @occurrence.detach_mismatched_observations(@user)
+      return if detached.empty?
+
+      flash_notice(:occurrence_resolve_projects_cancelled.t(
+                     count: detached.size
                    ))
     end
   end

@@ -240,6 +240,9 @@ class LookupsController < ApplicationController
         :runtime_suggest_one_alternate.t(match: id, type: model.type_tag)
       )
     end
+    # For observations this resolves to the logged-out-accessible /obs/
+    # form -- the obs/:id route is defined ahead of the resource route,
+    # so hash-form url_for picks it.
     redirect_to(controller: obj.show_controller,
                 action: obj.show_action,
                 id: obj.id)

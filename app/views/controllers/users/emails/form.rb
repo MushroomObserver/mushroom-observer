@@ -5,17 +5,18 @@ module Views::Controllers::Users::Emails
   # users/emails controller's `new.erb`.
   # Creates its own FormObject internally from the provided kwargs.
   class Form < ::Components::ApplicationForm
+    prop :target, ::User
+
     # Accept optional model arg for ModalForm compatibility (ignored
     # — we create our own FormObject). This is Pattern B: form
     # creates FormObject internally.
-    def initialize(_model = nil, target:, subject: nil, message: nil, **)
-      @target = target
-
+    def initialize(_model = nil, target:, subject: nil, message: nil,
+                   **attrs)
       form_object = FormObject::UserQuestion.new(
         subject: subject,
         message: message
       )
-      super(form_object, **)
+      super(form_object, target: target, **attrs)
     end
 
     def view_template

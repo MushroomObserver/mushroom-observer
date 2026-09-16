@@ -126,8 +126,11 @@ class Components::Help < Components::Base
 
     div(class: classes.join(" "), id: @id) do
       emit_content(&block)
-      # `hidden-xs` keeps the arrow desktop-only.
-      div(class: "arrow-#{@arrow} hidden-xs") if @arrow
+      # Hidden at xs keeps the arrow desktop-only.
+      if @arrow
+        div(class: class_names("arrow-#{@arrow}",
+                               Components::Column.mobile_hide_classes))
+      end
     end
   end
 

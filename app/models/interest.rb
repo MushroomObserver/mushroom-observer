@@ -101,12 +101,10 @@ class Interest < AbstractModel
   # In practice every real caller already sets `user:`/`.user =`
   # explicitly; current_user is only a fallback for this check.
   def check_requirements # :nodoc:
-    if !user && !current_user
-      errors.add(:user, :validate_interest_user_missing.t)
-    end
+    errors.add(:user, :validate_interest_user_missing) if !user && !current_user
 
     return unless target_type.to_s.size > 30
 
-    errors.add(:target_type, :validate_interest_object_type_too_long.t)
+    errors.add(:target_type, :validate_interest_object_type_too_long)
   end
 end

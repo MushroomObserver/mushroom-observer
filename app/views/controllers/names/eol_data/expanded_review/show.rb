@@ -45,7 +45,7 @@ class Views::Controllers::Names::EolData::ExpandedReview::Show <
   end
 
   def render_name_row(name, odd_or_even)
-    div(class: "ListLine#{odd_or_even} py-10px") do
+    div(class: "ListLine#{odd_or_even} py-3") do
       plain(name.display_name(current_user))
       br
       render_image_count_line(name.id) if @data.has_images?(name.id)

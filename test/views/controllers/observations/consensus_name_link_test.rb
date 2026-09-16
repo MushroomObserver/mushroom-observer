@@ -30,7 +30,7 @@ module Views::Controllers::Observations
     def test_current_name_logged_in_renders_consensus_link_only
       obs = observations(:minimal_unknown_obs)
 
-      html = render(ConsensusNameLink.new(observation: obs, user: @user))
+      html = render_link(observation: obs)
 
       assert_html(html, "a.obs_consensus_naming_link_#{obs.name.id}")
       assert_html(html, "a[href='#{routes.name_path(id: obs.name.id)}']")
@@ -44,7 +44,7 @@ module Views::Controllers::Observations
     def test_current_name_logged_out_renders_textile_name_only
       obs = observations(:minimal_unknown_obs)
 
-      html = render(ConsensusNameLink.new(observation: obs, user: nil))
+      html = render_link(observation: obs, user: nil)
 
       # No `<a>` — just the textile-rendered display name.
       assert_no_html(html, "a")
@@ -57,7 +57,7 @@ module Views::Controllers::Observations
       obs = deprecated_obs
       preferred = obs.name.best_preferred_synonym
 
-      html = render(ConsensusNameLink.new(observation: obs, user: @user))
+      html = render_link(observation: obs)
 
       assert_html(html,
                   "a.obs_consensus_deprecated_synonym_link_#{obs.name.id}")
@@ -71,7 +71,7 @@ module Views::Controllers::Observations
       obs = deprecated_obs
       preferred = obs.name.best_preferred_synonym
 
-      html = render(ConsensusNameLink.new(observation: obs, user: nil))
+      html = render_link(observation: obs, user: nil)
 
       # No `<a>` tags at all logged-out — just textile-rendered
       # name + flag + textile-rendered preferred synonym.
@@ -87,7 +87,7 @@ module Views::Controllers::Observations
       @user.update!(view_owner_id: true)
       obs = observations(:owner_only_favorite_ne_consensus)
 
-      html = render(ConsensusNameLink.new(observation: obs, user: @user))
+      html = render_link(observation: obs)
 
       assert_html(html, "a.obs_consensus_naming_link_#{obs.name.id}")
       assert_html(html, ".obs-site-id-flag",
@@ -98,7 +98,7 @@ module Views::Controllers::Observations
       @user.update!(view_owner_id: false)
       obs = observations(:owner_only_favorite_ne_consensus)
 
-      html = render(ConsensusNameLink.new(observation: obs, user: @user))
+      html = render_link(observation: obs)
 
       assert_html(html, "a.obs_consensus_naming_link_#{obs.name.id}")
       assert_no_html(html, ".obs-site-id-flag")
@@ -110,13 +110,17 @@ module Views::Controllers::Observations
       # owner-preference state.
       obs = observations(:owner_only_favorite_ne_consensus)
 
-      html = render(ConsensusNameLink.new(observation: obs, user: nil))
+      html = render_link(observation: obs, user: nil)
 
       assert_no_html(html, "a")
       assert_no_html(html, ".obs-site-id-flag")
     end
 
     private
+
+    def render_link(**)
+      render(ConsensusNameLink.new(user: @user, **))
+    end
 
     def deprecated_obs
       @deprecated_obs ||= begin

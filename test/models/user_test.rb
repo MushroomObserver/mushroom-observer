@@ -3,10 +3,55 @@
 require("test_helper")
 
 class UserTest < UnitTestCase
+  def test_inat_username_normalized_to_lowercase
+    user = users(:rolf)
+    user.update(inat_username: " Lothlin ")
+
+    assert_equal("lothlin", user.inat_username,
+                 "inat_username should be stripped and downcased " \
+                 "(iNat logins are lowercase)")
+  end
+
   def test_auth
     assert_equal(rolf,
                  User.authenticate(login: "rolf", password: "testpassword"))
     assert_nil(User.authenticate(login: "nonrolf", password: "testpassword"))
+  end
+
+  def test_exact_match
+    assert_equal(rolf, User.exact_match(rolf.id.to_s))
+    assert_equal(rolf, User.exact_match(rolf.email))
+    assert_nil(User.exact_match("nonexistent_login_or_email"))
+    # Non-String callers (an id passed as an Integer, or a blank param
+    # that came through as nil) shouldn't raise.
+    assert_equal(rolf, User.exact_match(rolf.id))
+    assert_nil(User.exact_match(nil))
+    # A stray space around a typed-in id (easy to enter by accident)
+    # still counts as an exact match.
+    assert_equal(rolf, User.exact_match(" #{rolf.id} "))
+
+    unverified_user = users(:unverified)
+    assert_nil(
+      User.exact_match(unverified_user.id.to_s),
+      "An unverified user's id should not count as an exact match"
+    )
+    assert_nil(
+      User.exact_match(unverified_user.email),
+      "An unverified user's email should not count as an exact match"
+    )
+  end
+
+  def test_scope_pattern_exact_id_match_wins_over_fuzzy
+    # rolf's id, stringified, could theoretically also substring-match
+    # fuzzy login/name text -- exact_match must win outright, not get
+    # unioned with the fuzzy search.
+    results = User.pattern(rolf.id.to_s)
+    assert_equal([rolf.id], results.map(&:id))
+  end
+
+  def test_scope_pattern_falls_back_to_fuzzy_search
+    results = User.pattern(rolf.login)
+    assert_includes(results.map(&:id), rolf.id)
   end
 
   def test_password_change
@@ -552,14 +597,19 @@ class UserTest < UnitTestCase
   def test_culling_unverified_users
     unverified = users(:unverified)
     key = APIKey.create!(user: unverified, notes: "cull test")
+    stats = UserStats.create!(user_id: unverified.id)
     msgs = User.cull_unverified_users(dry_run: true)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert(APIKey.exists?(key.id), "dry run should not delete the api_key")
+    assert(UserStats.exists?(stats.id),
+           "dry run should not delete user_stats")
     msgs = User.cull_unverified_users(dry_run: false)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert_nil(User.find_by(id: unverified.id))
     assert_not(APIKey.exists?(key.id),
                "culling should delete the unverified user's api_key")
+    assert_not(UserStats.exists?(stats.id),
+               "culling should delete the unverified user's user_stats")
   end
 
   def test_lookup_unique_text_name

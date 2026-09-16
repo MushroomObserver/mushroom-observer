@@ -10,6 +10,14 @@ $brand-danger:                              $DANGER_COLOR;
 $black:                                     black;
 $white:                                     white;
 
+// Bootstrap 4's variable name (bootstrap-sass/BS3 doesn't read this --
+// defined ahead of the cutover per issue #3797's mapping direction, so
+// _utilities.scss's BS4-matching duplicates already read the BS4 name).
+// Reuses $PANEL_BORDER_COLOR rather than $muted_border directly: every
+// theme defines it, including Admin/Sudo, whose high-contrast design
+// has no $muted_border and wants a solid color here instead.
+$border-color:                              $PANEL_BORDER_COLOR;
+
 $text-color:                                $BODY_TEXT_COLOR;
 $body-bg:                                   $BODY_BG_COLOR;
 

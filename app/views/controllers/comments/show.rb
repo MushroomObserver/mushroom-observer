@@ -61,21 +61,21 @@ module Views::Controllers::Comments
 
     def render_created_at
       p do
-        plain("#{:comment_show_created_at.t}: ")
+        trusted_html(append_colon(:comment_show_created_at.t))
         plain(@comment.created_at.web_time)
       end
     end
 
     def render_author
       p do
-        plain("#{:comment_show_by.t}: ")
+        trusted_html(append_colon(:comment_show_by.t))
         Link(type: :user, user: @comment.user)
       end
     end
 
     def render_summary
       p do
-        plain("#{:comment_show_summary.t}: ")
+        trusted_html(append_colon(:comment_show_summary.t))
         trusted_html(@comment.summary.tl)
       end
     end

@@ -21,21 +21,31 @@ class Query::RssLogsTest < UnitTestCase
 
   def test_rss_log_type_all
     ids = RssLog.order_by_default
-    scope = RssLog.type(:all).order_by_default
+    scope = RssLog.types(:all).order_by_default
     assert_query_scope(ids, scope, :RssLog, type: :all)
   end
 
   def test_rss_log_type_species_list
     ids = [rss_logs(:species_list_rss_log).id]
-    scope = RssLog.type(:species_list)
+    scope = RssLog.types(:species_list)
     assert_query_scope(ids, scope, :RssLog, type: :species_list)
   end
 
+  # The singular `type:` alias still accepts a legacy space-separated
+  # bookmark value -- RssLog.types re-splits it internally.
   def test_rss_log_type_species_list_project
     ids = [rss_logs(:project_rss_log),
            rss_logs(:species_list_rss_log)]
-    scope = RssLog.type("species_list project").order_by_default
+    scope = RssLog.types("species_list project").order_by_default
     assert_query_scope(ids, scope, :RssLog, type: "species_list project")
+  end
+
+  def test_rss_log_types_array
+    ids = [rss_logs(:project_rss_log),
+           rss_logs(:species_list_rss_log)]
+    scope = RssLog.types(%w[species_list project]).order_by_default
+    assert_query_scope(ids, scope, :RssLog,
+                       types: %w[species_list project])
   end
 
   def test_rss_log_content_filter_has_specimen

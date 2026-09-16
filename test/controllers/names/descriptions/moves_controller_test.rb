@@ -116,7 +116,10 @@ module Names::Descriptions
         description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/Sorry, the name you tried to display/)
+      assert_flash(
+        [[:runtime_object_not_found, { id: "bogus", type: :name }],
+         [:runtime_invalid, { type: '"target"', value: "bogus" }]]
+      )
     end
 
     # if @delete_after & src_was_default
@@ -142,7 +145,7 @@ module Names::Descriptions
         description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_description_private.t)
+      assert_flash_error(:runtime_description_private)
       assert_redirected_to(name_path(mary_desc.parent_id))
     end
 
@@ -169,7 +172,7 @@ module Names::Descriptions
 
       # Create a mock description that fails save
       desc = NameDescription.new(name: names(:coprinus), user: rolf)
-      desc.errors.add(:base, "Test validation error")
+      desc.errors.add(:base, :invalid, message: "Test validation error")
 
       desc.stub(:save, false) do
         NameDescription.stub(:new, desc) do
@@ -178,6 +181,9 @@ module Names::Descriptions
       end
 
       assert_flash_error
+      # Must redirect -- previously fell through with no render or
+      # redirect at all (see .claude/rules/turbo_submit_forms.md).
+      assert_redirected_to(new_move_name_description_path(id: rolf_desc.id))
     end
   end
 end

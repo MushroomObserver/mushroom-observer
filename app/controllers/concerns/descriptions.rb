@@ -52,7 +52,7 @@ module Descriptions
     def user_has_permission_to_see_description?
       return true if in_admin_mode? || @description.is_reader?(@user)
 
-      if @description.source_type == :project
+      if @description.source_type == "project"
         flash_error(:runtime_show_draft_denied.t)
       else
         flash_error(:runtime_show_description_denied.t)

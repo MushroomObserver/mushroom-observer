@@ -78,7 +78,7 @@ module Mappable
     def location_must_be_a_location
       return unless location.present? && !location.is_a?(Location)
 
-      errors.add(:location, "must be a Location object")
+      errors.add(:location, :invalid, message: "must be a Location object")
     end
   end
 end

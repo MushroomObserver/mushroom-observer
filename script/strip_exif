@@ -3,6 +3,11 @@
 #  Strip GPS data from EXIF header of original image file.
 #
 ################################################################################
+
+# shellcheck source=script/bash_ensure_modern
+MO_REEXEC_SCRIPT="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")" \
+    source "$(dirname "$0")/bash_ensure_modern"
+
 set -e
 
 id=$1

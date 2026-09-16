@@ -305,7 +305,11 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # prefixes its content with a tiny label that says what the
   # value means.
   def render_mobile_label(text, block: false)
-    vis = block ? "visible-xs-inline-block" : "visible-xs-inline mr-4"
-    small(class: vis) { plain("#{text}: ") }
+    display = block ? :"inline-block" : :inline
+    vis = Components::Column.visibility_classes(
+      show_at: :xs, hide_at: :sm, display: display
+    )
+    vis << "mr-4" unless block
+    small(class: class_names(vis)) { append_colon(text) }
   end
 end

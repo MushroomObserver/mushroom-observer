@@ -8,37 +8,32 @@ module Descriptions
 
     def show
       set_object_and_authors
-      if @authors.member?(@user) || @user.in_group?("reviewers")
-        render(Views::Controllers::Descriptions::Authors::Show.new(
-                 object: @object, authors: @authors.to_a
-               ))
-      else
-        parent = @object.parent
-        flash_error(:review_authors_denied.t)
-        redirect_to(parent.show_link_args)
-      end
+      return unless authorized?
+
+      render(Views::Controllers::Descriptions::Authors::Show.new(
+               object: @object, authors: @authors.to_a
+             ))
     end
 
     def create
       set_object_and_authors
-      add_id = params[:add] || params.dig(:add_author, :user)
-      new_author = add_id.present? ? User.find(add_id) : nil
-      return unless new_author && !@authors.member?(new_author)
+      return unless authorized?
 
-      @object.add_author(new_author)
-      flash_notice("Added #{new_author.legal_name}")
-      # Should send email as well
+      add_ref = params[:add] || params.dig(:description_author, :user)
+      add_author_matching(add_ref)
       redirect_to(action: :show)
     end
 
     def destroy
       set_object_and_authors
-      old_author = params[:remove] ? User.find(params[:remove]) : nil
-      return unless old_author && @authors.member?(old_author)
+      return unless authorized?
 
-      @object.remove_author(old_author)
-      flash_notice("Removed #{old_author.legal_name}")
-      # Should send email as well
+      old_author = params[:remove] ? User.safe_find(params[:remove]) : nil
+      if old_author && @authors.member?(old_author)
+        @object.remove_author(old_author)
+        flash_notice("Removed #{old_author.legal_name}")
+        # Should send email as well
+      end
       redirect_to(action: :show)
     end
 
@@ -47,6 +42,32 @@ module Descriptions
     def set_object_and_authors
       @object = AbstractModel.find_object(params[:type], params[:id].to_s)
       @authors = @object.authors
+    end
+
+    # Reviewing (and adding/removing) authors is limited to existing
+    # authors and reviewers -- same check `create`/`destroy` need,
+    # not just `show`.
+    def authorized?
+      return true if @authors.member?(@user) || @user.in_group?("reviewers")
+
+      flash_error(:review_authors_denied.t)
+      redirect_to(@object.parent.show_link_args)
+      false
+    end
+
+    def add_author_matching(add_ref)
+      new_author = User.lookup_unique_text_name(add_ref)
+      if new_author.nil?
+        flash_error(:review_authors_no_user.t(login: add_ref))
+      elsif @authors.member?(new_author)
+        flash_error(
+          :review_authors_already_author.t(login: new_author.legal_name)
+        )
+      else
+        @object.add_author(new_author)
+        flash_notice("Added #{new_author.legal_name}")
+        # Should send email as well
+      end
     end
   end
 end

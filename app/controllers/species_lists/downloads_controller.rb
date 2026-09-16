@@ -2,6 +2,8 @@
 
 module SpeciesLists
   class DownloadsController < ApplicationController
+    include DownloadFormatValidatable
+
     before_action :login_required
 
     ############################################################################
@@ -13,9 +15,9 @@ module SpeciesLists
     # Template shows three forms: print_labels, make_report, and download obs
     def new
       @list = find_species_list!
-      @type = species_list_report_format || "txt"
-      @format = params[:format] || "raw"
-      @encoding = params[:encoding] || "UTF-8"
+      @type = valid_report_type(species_list_report_format)
+      @format = valid_download_format(params[:format])
+      @encoding = valid_download_encoding(params[:encoding])
       @query = lookup_species_list_query(@list)
       render(
         Views::Controllers::SpeciesLists::Downloads::New.new(
@@ -30,9 +32,9 @@ module SpeciesLists
 
     def create
       @list = find_species_list!
-      @type = species_list_report_format || "txt"
-      @format = params[:format] || "raw"
-      @encoding = params[:encoding] || "UTF-8"
+      @type = valid_report_type(species_list_report_format)
+      @format = valid_download_format(params[:format])
+      @encoding = valid_download_encoding(params[:encoding])
       @query = lookup_species_list_query(@list)
 
       make_report
@@ -56,18 +58,15 @@ module SpeciesLists
       return unless (@species_list = find_species_list!)
 
       names = @species_list.names
-      case species_list_report_format
+      # @type is already validated against report_types (falls back
+      # to "txt"), so every branch here is reachable -- no else needed.
+      case @type
       when "txt"
         render_name_list_as_txt(names)
       when "rtf"
         render_name_list_as_rtf(names)
       when "csv"
         render_name_list_as_csv(names)
-      else
-        flash_error(
-          :make_report_not_supported.t(type: species_list_report_format)
-        )
-        redirect_to(species_list_path(params[:id].to_s))
       end
     end
 
@@ -76,6 +75,20 @@ module SpeciesLists
     # the `species_list_report[format]` namespace.
     def species_list_report_format
       params.dig(:species_list_report, :format)
+    end
+
+    # Only for the `new` action's radio pre-selection -- silently
+    # falling back to the default is harmless there. `make_report`'s
+    # own `case`/`else` above is the real validator for report
+    # generation, with a user-facing error; this must NOT replace it,
+    # or an invalid type would silently become a txt report instead
+    # of showing that error.
+    def report_types
+      %w[txt rtf csv].freeze
+    end
+
+    def valid_report_type(value, default: "txt")
+      report_types.include?(value) ? value : default
     end
 
     ############################################################################

@@ -34,7 +34,7 @@ class ListGroupItemTest < ComponentTestCase
   end
 
   def test_arbitrary_attributes_forwarded
-    html = render_item(attributes: { data: { role: "row" } }) { "x" }
+    html = render_item(data: { role: "row" }) { "x" }
 
     assert_html(html, "div.list-group-item",
                 attribute: { "data-role" => "row" })
@@ -44,9 +44,8 @@ class ListGroupItemTest < ComponentTestCase
     # Composition contract: the block renders inside the wrapper
     # element. The CommentRow case (ListGroupItem wrapping a
     # CommentItem) depends on this.
-    html = render(Components::ListGroup::Item.new(class: "comment",
-                                                  id: "x")) do
-      render(Components::ListGroup::Item.new(class: "inner")) { "hi" }
+    html = render_item(class: "comment", id: "x") do
+      render_item(class: "inner") { "hi" }
     end
 
     assert_html(html,
@@ -56,11 +55,10 @@ class ListGroupItemTest < ComponentTestCase
 
   private
 
-  def render_item(element: :div, class: nil, id: nil, attributes: {}, &block)
+  def render_item(element: :div, class: nil, id: nil, **attrs, &block)
     extra_class = binding.local_variable_get(:class)
     render(Components::ListGroup::Item.new(
-             element: element, class: extra_class, id: id,
-             attributes: attributes
+             element: element, class: extra_class, id: id, **attrs
            ), &block)
   end
 end

@@ -100,10 +100,12 @@ class Herbarium < AbstractModel
   }
 
   scope :pattern, lambda { |phrase|
-    cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
-            Herbarium[:description].coalesce("") +
-            Herbarium[:mailing_address].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
+              Herbarium[:description].coalesce("") +
+              Herbarium[:mailing_address].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   def self.mcp_collections

@@ -28,13 +28,22 @@
 # names. `destroy_path` defaults to `:path_target` and `destroy_name`
 # to `:name_destroy_object` when absent from a handler -- only
 # genuinely non-standard targets need to override them.
+#
+# Why a Tab-PORO dispatch table here but not on the page-title-bar
+# edit/delete icons (`Header::EditDeleteIcons`): that component is
+# fully generic across every model (always the model's own standard
+# edit page, gated by its own `can_edit?`/`destroyable?`), with no
+# per-model behavior to carry. Here the behavior varies per target --
+# modal edit vs. plain link, detach-not-destroy paths, different
+# permission predicates -- which is what a Tab PORO carries.
 class Components::InlineCRUDLinks < Components::Base
   # Target is polymorphic; the supported classes are exactly the
   # keys of `TARGET_HANDLERS` below. `target:` present/absent is
   # what selects edit/destroy mode vs. add mode.
   prop :target, _Nilable(_Union(::CollectionNumber, ::HerbariumRecord,
                                 ::Sequence, ::ExternalLink,
-                                ::Naming, ::Comment, ::Description)),
+                                ::Naming, ::Comment, ::Description,
+                                ::Publication)),
        default: nil
   # CollectionNumber / HerbariumRecord: required -- permission and/or
   # the detach path need the observation. Every other target derives
@@ -113,6 +122,11 @@ class Components::InlineCRUDLinks < Components::Base
       tab: :tab_description_edit,
       can_edit: :can_edit_via_writer?,
       can_destroy: :can_destroy_via_admin?
+    },
+    ::Publication => {
+      edit: :icon_link_edit,
+      tab: :tab_publication_edit,
+      can_edit: :can_edit_via_target?
     }
   }.freeze
 
@@ -139,12 +153,11 @@ class Components::InlineCRUDLinks < Components::Base
   # shown visibly (no `show_text:`), matching the pre-consolidation
   # `Components::Link::InlineAdd` behavior.
   def add_component
-    Components::Button.new(
+    Components::Link.new(
       type: :modal,
       name: @tab.title,
       target: @tab.path,
       modal_id: @modal_id,
-      variant: :strip,
       icon: :add,
       **tab_html_options(@tab)
     )
@@ -186,18 +199,19 @@ class Components::InlineCRUDLinks < Components::Base
       target: send(handler[:destroy_path] || :path_target),
       name: send(handler[:destroy_name] || :name_destroy_object),
       icon: :remove,
-      # Match `Components::Link::Icon`'s `px-2` icon padding so the
-      # destroy icon doesn't hug the neighboring edit link.
-      icon_class: "px-2",
       variant: :strip,
       class: destroy_class,
       confirm: handler[:destroy_confirm] && send(handler[:destroy_confirm])
     }
   end
 
+  # `px-2` spacing so the destroy icon doesn't hug the neighboring
+  # edit link -- on the button's own class, not `icon_class:` (a bare
+  # <svg> can't take padding, see Components::Icon).
   def destroy_class
     Components::InlineLinkBlock.item_class(
-      handler[:destroy_class] && send(handler[:destroy_class])
+      class_names("px-2",
+                  handler[:destroy_class] && send(handler[:destroy_class]))
     )
   end
 
@@ -231,7 +245,7 @@ class Components::InlineCRUDLinks < Components::Base
 
   def icon_link_edit
     tab = send(handler[:tab])
-    Components::Link::Icon.new(
+    Components::Link::Get.new(
       tab: tab,
       class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
     )
@@ -292,6 +306,10 @@ class Components::InlineCRUDLinks < Components::Base
     ::Tab::Description::Edit.new(description: @target)
   end
 
+  def tab_publication_edit
+    ::Tab::Publication::Edit.new(publication: @target)
+  end
+
   # ---- :destroy_path handlers -------------------------------
 
   # Default -- pass the model and let `Button::Delete` build
@@ -307,11 +325,11 @@ class Components::InlineCRUDLinks < Components::Base
          @target.id, observation_id: @observation.id)
   end
 
-  # Sequence destroy keeps a `back: observation_path(obs)` query so
+  # Sequence destroy keeps a `back: permanent_observation_path(obs)` query so
   # the controller redirects to the obs after destroying.
   def path_sequence_with_back
     sequence_path(id: @target.id,
-                  back: observation_path(@target.observation))
+                  back: permanent_observation_path(@target.observation))
   end
 
   # Namings are nested under observations in routing; no top-level

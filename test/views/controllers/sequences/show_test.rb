@@ -14,7 +14,7 @@ module Views::Controllers::Sequences
     # component produces the required external-navigation attrs.
     def test_blast_link_opens_in_new_tab
       seq = sequences(:local_sequence)
-      html = render(Show.new(sequence: seq))
+      html = render_show(sequence: seq)
 
       assert_html(html, "a[target='_blank'][rel='noopener noreferrer']" \
                         "[href*='blast.ncbi.nlm.nih.gov']")
@@ -27,11 +27,17 @@ module Views::Controllers::Sequences
     # without conflicting.
     def test_deposited_sequence_shows_deposit_line_and_blast_link
       seq = sequences(:deposited_sequence)
-      html = render(Show.new(sequence: seq))
+      html = render_show(sequence: seq)
 
       # BLAST link + deposit archive + deposit accession all open externally
       assert_html(html, "a[target='_blank'][href*='blast.ncbi.nlm.nih.gov']")
       assert_html(html, "a[target='_blank'][href*='ncbi.nlm.nih.gov/nuccore']")
+    end
+
+    private
+
+    def render_show(**)
+      render(Show.new(**))
     end
   end
 end

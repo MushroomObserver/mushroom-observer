@@ -32,6 +32,7 @@ if enabled
       ActionController::InvalidAuthenticityToken
       ActionController::UnknownFormat
       ActionController::BadRequest
+      ActionDispatch::Http::MimeNegotiation::InvalidType
       Rack::QueryParser::InvalidParameterError
     ],
     # Collapse a burst of the same error into one alert.

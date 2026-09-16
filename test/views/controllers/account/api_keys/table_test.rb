@@ -61,7 +61,7 @@ module Views::Controllers::Account::APIKeys
       assert_html(html,
                   "a[data-role='edit_api_key']" \
                   "[data-parent='#notes_#{key.id}']")
-      assert_html(html, "a[data-role='edit_api_key'] span.glyphicon")
+      assert_html(html, "a[data-role='edit_api_key'] svg.mo-icon-edit")
       assert_html(html,
                   "a[data-role='edit_api_key'] span.collapse-toggle-closed",
                   text: " #{:edit.ti.as_displayed}")

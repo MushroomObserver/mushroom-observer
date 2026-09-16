@@ -3,9 +3,27 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
-  # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Images, :Image,
+      overrides: {
+        id_in_set: images(:in_situ_image).id,
+        by_users: rolf.id,
+        license: licenses(:ccnc25).id,
+        observations: observations(:minimal_unknown_obs).id,
+        locations: locations(:burbank).id,
+        projects: projects(:bolete_project).id,
+        species_lists: species_lists(:first_species_list).id
+      }
+    )
+  end
+
+  # Tests of index: unfiltered index, then each recognized filter param.
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
     assert_select(".matrix-box")
@@ -22,6 +40,16 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Companion to the `name` case above -- exercises
+  # `Query::Images#alphabetical_by`'s `"user"`/`"reverse_user"` branch
+  # (`User[:login]`), not just `"name"`/`"reverse_name"`.
+  def test_index_sort_by_user_enables_letter_pagination
+    login
+    get(:index, params: { by: "user" })
+
+    assert_response(:success)
+  end
+
   def test_index_by_user
     user = rolf
 
@@ -34,6 +62,17 @@ class ImagesControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
+  def test_index_by_user_single_match_redirects
+    user = katrina
+    image = Image.where(user: user).first
+    assert(Image.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(image_path(image.id))
+  end
+
   def test_index_by_users_bad_user_id
     bad_user_id = observations(:minimal_unknown_obs).id
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
@@ -41,9 +80,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(images_path)
   end
 
@@ -57,6 +94,26 @@ class ImagesControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
+  def test_index_project_single_match_redirects
+    project = projects(:lone_wolf_project)
+    image = Image.projects(project.id).first
+    assert(Image.projects(project.id).one?)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_redirected_to(image_path(image.id))
+  end
+
+  # A bad project id redirects to the projects index. See redirect_to:
+  # in query_attr (app/extensions/class.rb).
+  def test_index_project_with_unknown_id_redirects
+    login
+    get(:index, params: { project: 999_999_999 })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_index_too_many_pages
     login
     get(:index, params: { page: 1_000_000 })
@@ -66,16 +123,15 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern
-  def test_index_pattern_param_redirected_to_search
+  def test_index_pattern_param_builds_query_directly
     pattern = "USA"
 
     login
     get(:index, params: { pattern: pattern })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :images })
-    )
+
+    assert_select(".matrix-box")
+    assert_page_title(:images.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def q_pattern(pattern)
@@ -101,7 +157,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_flash(:runtime_no_matches, type: :image)
     assert_select("body.images__index")
   end
 
@@ -132,7 +188,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     # Zero matching Observations → zero matching Images → "no matches"
     # flash, not a silent fall-back to the unfiltered Image index.
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_flash(:runtime_no_matches, type: :image)
     assert_select("body.images__index")
   end
 
@@ -150,6 +206,125 @@ class ImagesControllerTest < FunctionalTestCase
       get(:show, params: { id: image.id, size: size })
       assert_select("body.images__show")
     end
+  end
+
+  # The Read Field Slip button is offered on every image with an
+  # observation -- a plausibility test that guessed wrong would hide it
+  # on exactly the slips someone wants to read -- but only to people
+  # who may press it (FieldSlipExtract.permitted?).
+  def test_show_hides_field_slip_button_from_ordinary_users
+    image = images(:in_situ_image)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]",
+                  image_field_slip_extract_path(image.id), count: 0)
+  end
+
+  def test_show_offers_field_slip_button_to_site_admin
+    image = images(:in_situ_image)
+    login("rolf")
+    make_admin
+
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]", image_field_slip_extract_path(image.id))
+  end
+
+  def test_show_offers_field_slip_button_to_project_admin
+    image = images(:in_situ_image)
+    obs = image.observations.first
+    project = projects(:eol_project)
+    project.observations << obs unless project.observations.include?(obs)
+    login(mary.login)
+
+    assert(project.is_admin?(mary), "premise: mary administers it")
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]", image_field_slip_extract_path(image.id))
+    assert_select("a[href=?]", edit_image_field_slip_extract_path(image.id),
+                  count: 0)
+  end
+
+  # The Read button always re-reads; an existing read is reachable from
+  # here too, as a button labelled by its state, so a result that
+  # landed unseen is not lost behind a re-read. Read doubles as the
+  # retry for a failed one, so no separate Retry button here.
+  def test_show_links_existing_field_slip_read
+    image = images(:in_situ_image)
+    login("rolf")
+    make_admin
+    FieldSlipExtract.fail!(image: image, user: rolf, error: "boom")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("a.btn[href=?]",
+                  edit_image_field_slip_extract_path(image.id),
+                  text: :field_slip_scan_failed.l)
+    assert_select("form[action=?] button.btn.ml-2",
+                  image_field_slip_extract_path(image.id),
+                  text: :field_slip_extract_button.l)
+    assert_select("form[action=?] button",
+                  image_field_slip_extract_path(image.id), count: 1)
+  end
+
+  def test_show_hides_existing_field_slip_read_from_ordinary_users
+    image = images(:in_situ_image)
+    FieldSlipExtract.start!(image: image, user: rolf)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("a[href=?]", edit_image_field_slip_extract_path(image.id),
+                  count: 0)
+  end
+
+  # #4989: rotate/mirror controls follow permission on the image itself
+  # OR on the Observation it belongs to -- not just the image's
+  # (separate) project attachment.
+  def test_show_hides_transform_buttons_from_unrelated_user
+    image = images(:commercial_inquiry_image)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select(
+      "form[action=?]",
+      transform_image_path(id: image.id, op: "rotate_left",
+                           size: katrina.image_size),
+      count: 0
+    )
+  end
+
+  def test_show_offers_transform_buttons_to_project_admin_of_observation
+    image = images(:commercial_inquiry_image)
+    obs = observations(:detailed_unknown_obs)
+    image.observations << obs
+    admin = dick
+    assert(obs.can_edit?(admin), "premise: dick can edit this observation")
+
+    login(admin.login)
+    get(:show, params: { id: image.id })
+
+    assert_select(
+      "form[action=?]",
+      transform_image_path(id: image.id, op: "rotate_left",
+                           size: admin.image_size)
+    )
+  end
+
+  def test_show_offers_transform_buttons_in_admin_mode
+    image = images(:commercial_inquiry_image)
+    admin = make_admin("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select(
+      "form[action=?]",
+      transform_image_path(id: image.id, op: "rotate_left",
+                           size: admin.image_size)
+    )
   end
 
   def test_show_image_info_panel_heading

@@ -8,15 +8,17 @@ module Views::Controllers::Checklists
   # Every taxon row, its display content, link path, and the optional
   # "remove target name" button live here as private methods.
   class Panel < ::Components::Base
-    def initialize(data:, context:, taxa: nil,
-                   panel_id: "checklist_panel",
-                   link_to_name_page: false)
-      super()
-      @data = data
-      @context = context
-      @taxa = taxa || data.taxa
-      @panel_id = panel_id
-      @link_to_name_page = link_to_name_page
+    prop :data, ::Checklist
+    prop :context, ::Views::Controllers::Checklists::Context
+    prop :taxa, _Array(Array)
+    prop :panel_id, String, default: "checklist_panel"
+    prop :link_to_name_page, _Boolean, default: false
+
+    # taxa: defaults to the full checklist when the caller doesn't
+    # pass a filtered subset (see Checklists::Contents#render_panel_
+    # section, which passes species_level_observed_taxa etc).
+    def initialize(data:, taxa: nil, **)
+      super(data: data, taxa: taxa || data.taxa, **)
     end
 
     def view_template
@@ -51,7 +53,8 @@ module Views::Controllers::Checklists
 
     def render_taxon_content(name, deprecated, synonym_id)
       i { plain(name) }
-      plain(" (#{@data.counts[name]})")
+      whitespace
+      plain("(#{@data.counts[name]})")
       plain(" *") if deprecated
       plain(" +") if @data.duplicate_synonyms&.include?(synonym_id)
     end
@@ -69,11 +72,13 @@ module Views::Controllers::Checklists
                                  "include_subtaxa:false")
     end
 
+    # The list wins over the project -- a species-list checklist may
+    # carry a project as banner context, but its taxa are list-scoped.
     def link_prefix_for(user:, project:, list:)
-      return "user:#{user.id}"       if user
-      return "project:#{project.id}" if project
+      return "user:#{user.id}" if user
+      return "list:#{list.id}" if list
 
-      "list:#{list.id}" if list
+      "project:#{project.id}" if project
     end
 
     def target_name?(name_id)

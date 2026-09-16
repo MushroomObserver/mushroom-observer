@@ -3,6 +3,8 @@
 require("test_helper")
 
 class ObservationsControllerIndexTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   tests ObservationsController
 
   def setup
@@ -13,8 +15,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
 
   # First, test that the index does not require login - AN 20230923
@@ -23,6 +24,59 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index)
 
     assert_response(:redirect)
+  end
+
+  # Unfiltered index (browsing the whole table) only offers sorts with
+  # no join/aggregate over that many rows.
+  def test_index_unfiltered_offers_only_column_sorts
+    login
+    get(:index)
+
+    assert_select("a.observations_by_rss_log_link", true)
+    assert_select("a.observations_by_date_link", true)
+    assert_select("a.observations_by_created_at_link", true)
+    assert_select("a.observations_by_name_link", false)
+    assert_select("a.observations_by_user_link", false)
+    assert_select("a.observations_by_confidence_link", false)
+    assert_select("a.observations_by_thumbnail_quality_link", false)
+    assert_select("a.observations_by_num_views_link", false)
+  end
+
+  # An unfiltered index has nothing worth a caption for -- the bar
+  # would just say "All".
+  def test_index_unfiltered_hides_index_bar
+    login
+    get(:index)
+
+    assert_select("#index_bar", false)
+    assert_select("#filters", false)
+  end
+
+  def test_index_filtered_offers_all_sorts
+    login(rolf.login)
+    get(:index, params: { by_user: rolf.id })
+
+    assert_select("a.observations_by_name_link", true)
+    assert_select("a.observations_by_user_link", true)
+    assert_select("a.observations_by_confidence_link", true)
+    assert_select("a.observations_by_thumbnail_quality_link", true)
+    assert_select("a.observations_by_num_views_link", true)
+  end
+
+  # A bookmarked/permalinked unfiltered index carrying an order_by
+  # that's not in the unfiltered allowlist (no other filter params)
+  # must still offer the full sort list -- otherwise the current sort
+  # has no matching option and the dropdown's toggle label goes blank.
+  def test_index_unfiltered_with_unsafe_order_offers_all_sorts
+    login
+    get(:index, params: { q: { model: "Observation", order_by: "name" } })
+
+    assert_select("a.observations_by_name_link", true)
+    assert_select("a.observations_by_user_link", true)
+    assert_select("a.observations_by_confidence_link", true)
+    assert_select("a.observations_by_thumbnail_quality_link", true)
+    assert_select("a.observations_by_num_views_link", true)
+    assert_select("#sort_nav_toggle", text: :sort_by_name.l)
   end
 
   # Regression for #4492: the top-nav `search-type` Stimulus controller
@@ -117,7 +171,29 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     get(:index, params: { by: by })
-    assert_flash_text("Can't figure out how to sort Observations by :#{by}.")
+    assert_flash(:runtime_invalid_sort_order, type: :observation,
+                                              order_by: by)
+  end
+
+  # A distinct, lower-level check from the one above: `by:` alone goes
+  # through `order_by_or_flash_if_unknown` (sorted_index's
+  # pre-check), which stops a bad value from reaching the Query. A
+  # subaction that forwards raw params straight into
+  # `create_query_from_url_params` (e.g. `by_user`) skips that
+  # pre-check, so an invalid `by:` alongside it reaches
+  # `Query#validate_order_by!` instead -- caught there, substituted
+  # with the default, and surfaced via
+  # `ApplicationController::Indexes#flash_query_validation_errors`,
+  # a different flash message than `:runtime_invalid_sort_order`.
+  def test_index_by_user_with_invalid_order_flashes_query_validation
+    login
+    get(:index, params: { by_user: rolf.id, by: "totally_bogus_order" })
+
+    assert_flash_warning(
+      :query_validation_order_by_unsupported,
+      models: "Observations", key: "totally_bogus_order",
+      model: Observation, base: "totally_bogus_order"
+    )
   end
 
   def test_index_with_id
@@ -143,7 +219,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params:)
-    assert_flash_error(:runtime_no_matches.t(type: :observation))
+    assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
   # `?page=999` on a result set with fewer than 999 pages should
@@ -196,17 +272,19 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern, which instantiates the
-  # PatternSearch::Observation and then redirects here with :q param
-  def test_index_pattern_param_redirected_to_search
+  # Via PatternSearch::Observation.
+  def test_index_pattern_param_builds_query_directly
     pattern = "Agaricus"
 
-    login
+    setup_rolfs_index
     get(:index, params: { pattern: })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :observations })
-    )
+
+    # Pattern search guesses this is a name query
+    assert_page_title(:observations.ti)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
+    count = Observation.pattern(pattern).count
+    assert_results(text: /#{pattern}/i, count:)
   end
 
   def setup_rolfs_index
@@ -334,10 +412,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(look_alikes > 1, "Test needs different fixture")
 
     setup_rolfs_index
-    get(:index, params: { look_alikes: "1", name: name.id })
+    get(:index, params: { look_alikes: name.id })
 
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
+    assert_displayed_filters("#{:query_look_alikes.l}: #{name.text_name}")
     assert_results(count: look_alikes)
   end
 
@@ -350,11 +428,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(look_alikes.zero?, "Test needs different fixture")
 
     setup_rolfs_index
-    get(:index, params: { look_alikes: "1", name: name.id })
+    get(:index, params: { look_alikes: name.id })
 
     assert_response(:success)
     assert_page_title(:observations.ti)
     assert_results(count: look_alikes)
+  end
+
+  # look_alikes is record-backed (Name) -- a bad id flashes and
+  # redirects, same as any other record-backed shortcut.
+  def test_index_look_alikes_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { look_alikes: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
   end
 
   def test_index_related_taxa
@@ -368,10 +458,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       )
 
     setup_rolfs_index
-    get(:index, params: { related_taxa: "1", name: name.text_name })
+    get(:index, params: { related_taxa: name.id })
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_names.l}: #{parent.text_name}")
+    assert_displayed_filters("#{:query_related_taxa.l}: #{name.text_name}")
     assert_results(count: obss_of_related_taxa.count)
+  end
+
+  # related_taxa is record-backed (Name) -- a bad id flashes and
+  # redirects, same as look_alikes and any other record-backed
+  # shortcut.
+  def test_index_related_taxa_bad_id
+    bad_id = Name.maximum(:id).to_i + 1
+
+    setup_rolfs_index
+    get(:index, params: { related_taxa: bad_id })
+
+    assert_response(:redirect)
+    assert_flash(:runtime_object_not_found, type: :name, id: bad_id)
   end
 
   def test_index_name
@@ -385,11 +488,33 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
+    assert_displayed_filters("#{:query_any_name.l}: #{name.text_name}")
     ids.each do |id|
       assert_select(
         "a:match('href', ?)", %r{^/obs/#{id}}, true,
         "Observations of Name should link to each Observation of Name"
+      )
+    end
+  end
+
+  # The scalar form of an Array-typed attr (`?this_name=<id>`, the URL
+  # the Name-show observation links generate) must filter the index --
+  # an array-only permit filter dropped it silently, rendering the
+  # unfiltered index instead.
+  def test_index_this_name_scalar_param
+    name = names(:fungi)
+    ids = Observation.where(name: name).map(&:id)
+    assert(ids.length.positive?, "Test needs different fixture for 'name'")
+
+    login("zero")
+    get(:index, params: { this_name: name.id })
+
+    assert_response(:success)
+    assert_displayed_filters("#{:query_this_name.l}: #{name.text_name}")
+    ids.each do |id|
+      assert_select(
+        "a:match('href', ?)", %r{^/obs/#{id}}, true,
+        "Observations of this Name should link to each Observation"
       )
     end
   end
@@ -431,6 +556,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Do not show Observer ID when nobody logged in")
   end
 
+  def test_index_user_single_match_redirects
+    user = lone_wolf
+    obs = Observation.where(user: user).first
+    assert(Observation.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url)
+  end
+
   def test_index_user_unknown_user
     user = observations(:minimal_unknown_obs)
 
@@ -438,7 +574,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_equal(users_url, redirect_to_url, "Wrong page")
-    assert_flash_text(:runtime_object_not_found.l(type: :user.l, id: user.id))
+    assert_flash(:runtime_object_not_found, type: :user, id: user.id)
   end
 
   def test_index_location_with_observations
@@ -454,36 +590,37 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     )
   end
 
+  def test_index_location_single_match_redirects
+    location = locations(:collection_location)
+    obs = Observation.within_locations(location).first
+    assert(Observation.within_locations(location).one?)
+
+    login
+    get(:index, params: { location: location.id })
+
+    assert_match(/#{obs.id}/, redirect_to_url)
+  end
+
   def test_index_location_without_observations
     location = locations(:unused_location)
     params = { location: location }
-    flash_matcher = Regexp.new(
-      Regexp.escape_except_spaces(
-        :runtime_no_matches.t(type: :observation)
-      )
-    )
 
     login
     get(:index, params: params)
 
     assert_response(:success)
-    assert_flash(flash_matcher)
+    assert_flash_error(:runtime_no_matches, type: :observation)
     assert_page_title(:observations.ti)
   end
 
   def test_index_location_with_nonexistent_location
     location = "non-existent"
     params = { location: location }
-    flash_matcher = Regexp.new(
-      Regexp.escape_except_spaces(
-        :runtime_object_not_found.t(type: :location, id: location)
-      )
-    )
 
     login
     get(:index, params: params)
 
-    assert_flash(flash_matcher)
+    assert_flash(:runtime_object_not_found, type: :location, id: location)
     assert_redirected_to(locations_path)
   end
 
@@ -579,8 +716,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     end
     # On page 1, prev link should be disabled (has opacity-0 class)
     assert_select("a.prev_page_link.disabled.opacity-0")
-    assert_select("form.page_input[action='#{observations_url}']")
-    assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
+    # The goto-page link (no <form> -- see IndexPaginationNav) carries
+    # the full current query state in its href.
+    assert_select("a[data-page-input-target='goToLink']") do |links|
+      href = links.first["href"]
+      assert_includes(href, q_model,
+                      "Goto link should have q[model]=Observation")
+    end
   end
 
   # Regression test for https://github.com/MushroomObserver/mushroom-observer/pull/3528
@@ -614,13 +756,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                       "Next link should preserve third by_users value")
     end
 
-    # Also check the page input form has hidden fields for all three values
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user1.id}']")
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user2.id}']")
-    assert_select("input[type='hidden'][name='q[by_users][]']" \
-                  "[value='#{user3.id}']")
+    # Also check the goto-page link's href preserves all three
+    # values (no <form>/hidden fields -- see IndexPaginationNav).
+    assert_select("a[data-page-input-target='goToLink']") do |links|
+      href = links.first["href"]
+      assert_includes(href, by_user_1,
+                      "Goto link should preserve first by_users value")
+      assert_includes(href, by_user_2,
+                      "Goto link should preserve second by_users value")
+      assert_includes(href, by_user_3,
+                      "Goto link should preserve third by_users value")
+    end
 
     # Search form prefilling is tested in
     # test/controllers/observations/search_controller_test.rb
@@ -636,8 +782,38 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
   end
 
-  # Covers the `return unless (project = find_or_goto_index(...))`
-  # bail-out in `ObservationsController::Index#project` (L169).
+  # `project` is a plain param_alias for `projects` -- no attr-level
+  # default_order, so a bare `?project=X` (no `by`) falls through to
+  # the class default (:date). thumbnail_quality only applies via the
+  # explicit `by:` the project header's Observations tab sends (see
+  # Tab::Project::Observations) -- keeping the two orderings separate
+  # is what test_observation_names_in_species_lists_and_projects
+  # already relies on for a bare `projects:` query elsewhere.
+  def test_index_project_bare_url_uses_class_default_order
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_nil(query.params[:order_by])
+    assert_equal(:date, query.default_order)
+  end
+
+  def test_index_project_explicit_by_respected
+    project = projects(:bolete_project)
+
+    login
+    get(:index, params: { project: project.id, by: "thumbnail_quality" })
+
+    assert_response(:success)
+    query = @controller.instance_variable_get(:@query)
+    assert_equal("thumbnail_quality", query.params[:order_by])
+  end
+
+  # A bad project id redirects to the projects index. See redirect_to:
+  # in query_attr (app/extensions/class.rb).
   def test_index_project_with_unknown_id_redirects
     login
     get(:index, params: { project: 999_999_999 })
@@ -666,7 +842,162 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_flash_text(:runtime_no_matches.l(type: :observation))
+    assert_flash_error(:runtime_no_matches, type: :observation)
+  end
+
+  # `create_query_from_url_params` (ApplicationController::QueryParams)
+  # tested directly via @controller.send, same pattern as other
+  # private-method tests in this file.
+  def test_create_query_from_url_params_resolves_by_alias
+    login
+    raw_params = ActionController::Parameters.new(by: "date")
+
+    query, display_opts = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_equal("date", query.params[:order_by])
+    assert_equal(false, display_opts[:always_index])
+  end
+
+  def test_create_query_from_url_params_ignores_unrecognized_params
+    login
+    raw_params = ActionController::Parameters.new(by: "date",
+                                                  bogus_param: "haxx")
+
+    query, = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_not(query.params.key?(:bogus_param))
+  end
+
+  # `project` is a record-backed param_alias for `projects` -- exercises
+  # create_query_from_url_params's `constantize` path end to end.
+  def test_create_query_from_url_params_sets_always_index_for_record_alias
+    login
+    project = projects(:bolete_project)
+
+    raw_params = ActionController::Parameters.new(project: project.id.to_s)
+    query, display_opts = @controller.send(
+      :create_query_from_url_params, :Observation, raw_params
+    )
+
+    assert_equal([project.id], query.params[:projects])
+    assert_equal(true, display_opts[:always_index])
+  end
+
+  def test_resolve_query_param_records_looks_up_record_and_wraps_array
+    login
+    project = projects(:bolete_project)
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project], param_alias: :project)
+    end
+
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass, { project: project.id.to_s }
+    )
+
+    assert_equal({ projects: [project.id] }, resolved)
+    assert_equal(true, force_index)
+  end
+
+  # See QueryParamRoundTripTestHelpers -- proves every param
+  # Query::Observations recognizes survives the top-level URL round
+  # trip through create_query_from_url_params, not each attr's
+  # filtering behavior (test/classes/query/observations_test.rb
+  # already covers that via direct Query.lookup(:Observation,
+  # attr: value) calls). `identify_filter`, `names`, and the subquery
+  # attrs are structural Hashes, so the helper skips them
+  # automatically.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Observations, :Observation,
+      overrides: {
+        id_in_set: observations(:minimal_unknown_obs).id,
+        by_users: rolf.id,
+        look_alikes: names(:fungi).id,
+        related_taxa: names(:fungi).id,
+        locations: locations(:burbank).id,
+        within_locations: locations(:burbank).id,
+        herbaria: herbaria(:nybg_herbarium).id,
+        herbarium_records: herbarium_records(
+          :coprinus_comatus_nybg_spec
+        ).id,
+        projects: projects(:bolete_project).id,
+        project_lists: projects(:bolete_project).id,
+        project_violations: projects(:bolete_project).id,
+        species_lists: species_lists(:first_species_list).id,
+        inat_import: inat_imports(:rolf_inat_import).id,
+        external_sites: external_sites(:mycoportal).id
+      }
+    )
+  end
+
+  # Multiple ids submitted directly under the attr's name (not via a
+  # param_alias) must not collapse to a single record --
+  # find_by(id: [...]) only returns the first match, so this attr
+  # skips single-record lookup entirely instead of silently dropping
+  # every id but one.
+  def test_resolve_query_param_records_preserves_multiple_ids
+    login
+    project1 = projects(:bolete_project)
+    project2 = projects(:empty_project)
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project])
+    end
+
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass,
+      { projects: [project1.id.to_s, project2.id.to_s] }
+    )
+
+    assert_equal({ projects: [project1.id.to_s, project2.id.to_s] },
+                 resolved)
+    assert_equal(false, force_index)
+  end
+
+  # Non-record-backed Array-typed attrs (e.g. [:time]) need the same
+  # scalar-to-array wrapping a record-backed alias already gets --
+  # confirmed missing by Copilot review on PR #5142.
+  def test_resolve_query_param_records_wraps_non_record_backed_array_attr
+    login
+    klass = Class.new(Query::Observations) do
+      query_attr(:test_dates, [:time], param_alias: :test_date)
+    end
+
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass, { test_date: "2024-01-01" }
+    )
+
+    assert_equal({ test_dates: ["2024-01-01"] }, resolved)
+    assert_equal(false, force_index)
+  end
+
+  # find_alias_record_or_goto_own_index's flash+redirect-on-bad-id
+  # behavior is already covered by
+  # test_index_project_with_unknown_id_redirects (a dispatched request
+  # through the existing `project` shortcut) -- this test isolates
+  # what resolve_query_param_records itself does with a not-found
+  # result, stubbing find_alias_record_or_goto_own_index so a bare
+  # @controller.send doesn't trip Rails' one-redirect-per-action guard.
+  def test_resolve_query_param_records_returns_nil_when_lookup_fails
+    login
+    klass = Class.new(Query::Observations) do
+      query_attr(:projects, [Project], param_alias: :project)
+    end
+    @controller.define_singleton_method(
+      :find_alias_record_or_goto_own_index
+    ) { |*| nil }
+
+    resolved, force_index = @controller.send(
+      :resolve_query_param_records, klass, { project: "999999999" }
+    )
+
+    assert_nil(resolved)
+    assert_equal(false, force_index)
   end
 
   def test_index_species_list
@@ -697,7 +1028,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_flash_text(:runtime_no_matches.l(type: :observation))
+    assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
   # Prove that lichen content_filter works on observations

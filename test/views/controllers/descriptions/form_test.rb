@@ -145,7 +145,7 @@ module Views::Controllers::Descriptions
     def test_merge_opts_renders_merge_hidden_fields
       html = render_form(
         description: @existing_name_desc,
-        merge_opts: { merge: true, old_desc_id: 42, delete_after: "1" }
+        merge_opts: { merge: true, old_desc_id: 42, delete_after: true }
       )
 
       # `render_flat_hidden_field` uses the raw name (no `description[...]`
@@ -153,7 +153,7 @@ module Views::Controllers::Descriptions
       assert_html(html,
                   "input[type='hidden'][name='old_desc_id'][value='42']")
       assert_html(html,
-                  "input[type='hidden'][name='delete_after'][value='1']")
+                  "input[type='hidden'][name='delete_after'][value='true']")
     end
 
     def test_merge_opts_omitted_when_not_merging

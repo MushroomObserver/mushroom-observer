@@ -15,8 +15,10 @@
 #     variant: :outline
 #   )
 class Components::Button::New < Components::Link::New
-  def initialize(target:, name: nil, icon: :add, variant: nil, **)
-    super(target: target, name: name, icon: icon, button: variant, **)
+  def initialize(target: nil, name: nil, icon: :add, variant: nil, **opts)
+    tab = opts.delete(:tab)
+    super(target: target, tab: tab, name: name, icon: icon,
+          button: variant, **opts)
   end
 
   private

@@ -7,11 +7,36 @@ Intended Use
 Our API is intended for individual MO users to create and modify their and other users' MO Observations (and other objects)
 and for developing applications to support them.
 It is not intended for data scraping or for generalized experimentation with AI, image recognition or large data sets.
-For those purposes you should use the CSV files described below.
+For those purposes you should use the [CSV files](#csv-files) described below.
 
 We're an all-volunteer organization with a tiny budget and scarce resources.
 Using the API to obtain large amounts of data puts an unnecessary strain on those resources and adversely impacts other users.
 If we notice improper usage of the API or usage that seriously impacts our performance we may institute blocks without notification.
+
+Rate and Load Restrictions
+--------------------------
+
+We limit anonymous traffic to MO, including API traffic, by restricting the
+rate of requests to 20 per minute (1 request every 5 seconds on average), and
+less than 50% of the resoures of a single server instance.  A good rule of
+thumb would be to read the "run_time" from the response, and make sure you wait
+at least 5 seconds or the last run_time before making a new request.  If you
+get locked out, please contact us and we can discuss your needs and perhaps
+better ways of achieving them.
+
+Interactive Documentation
+-------------------------
+
+Browsable, per-endpoint documentation — every resource, its supported
+methods, and every accepted parameter with its description — lives at:
+
+* <https://mushroomobserver.org/api-docs/>
+
+It is generated from the API code itself (`bin/rails api:openapi`, an
+OpenAPI 3.1 spec at [/api-docs/openapi.yaml](https://mushroomobserver.org/api-docs/openapi.yaml)),
+so it stays current as the API changes. This file covers the context the
+generated docs don't: intended use, bulk-data alternatives, rate limits,
+and how the request styles and API keys work.
 
 CSV files
 ---------
@@ -45,20 +70,9 @@ GET requests are read-only and do not require authentication.  POST (create),
 PATCH (update) and DELETE (destroy) requests require authentication via an API
 key (see below).
 
-Responses can be requested in either JSON (default) or XML. You can either
-set the appropriate HTTP request header, or you can request it explicitly with
-a parameter (see below).
-
-Rate and Load Restrictions
---------------------------
-
-We limit anonymous traffic to MO, including API traffic, by restricting the
-rate of requests to 20 per minute (1 request every 5 seconds on average), and
-less than 50% of the resoures of a single server instance.  A good rule of
-thumb would be to read the "run_time" from the response, and make sure you wait
-at least 5 seconds or the last run_time before making a new request.  If you
-get locked out, please contact us and we can discuss your needs and perhaps
-better ways of achieving them.
+Responses are JSON by default. XML output still works (via the Accept
+header or `format=xml`) but is deprecated and no longer documented; use
+JSON.
 
 GET Requests
 ------------
@@ -71,7 +85,7 @@ Combinations are of course welcome.
 In addition to these filter parameters a few special pseudoparameters are
 accepted:
 
-* help=1 -- Resturn a list of accepted parameters.
+* help=1 -- Return a list of accepted parameters.
 * detail=none -- Return only record ids (default).
 * detail=low -- Return some basic data with each record.
 * detail=high -- Return a great deal of data with each record.
@@ -103,8 +117,9 @@ the new record in parameters.  Example:
 
 The response will include the id of the new record.
 
-Attach the image as POST data or URL.  See script/test_api for an example of how
-to attach an image in the POST data.
+Attach an image as POST data or by URL — see the `upload_file` and
+`upload_url` parameters on the images endpoint in the
+[interactive docs](https://mushroomobserver.org/api-docs/).
 
 PATCH Requests
 --------------
@@ -150,16 +165,21 @@ in their name.  The app will then use the user's new API key for all subsequent
 POST requests.  The app will be responsible for remembering and keeping secure
 each user's API key.
 
-Apparently, it should also be possible for an app to create an account for a
-new user, too.  I don't remember writing this, but it apparently has extensive
-unit tests to guarantee that it works correctly(!)  Presumably the new user
-will have to verify their email address like usual before the app can create an
-API key for them and post observations.
+An app can also create the account itself: POST to /api2/users with login,
+name, email and password, adding create_key=&lt;your app name&gt; to create an
+API key for the new account in the same request.  The new account starts
+unverified, and the user must confirm their email address as usual before
+the account and its key can be used.
 
-All of this is still very unsecure.  If anyone gets hold of a user's API key
-they can readily POST things in their name.  Anyone interested in hooking us up
-with a more sophisticated authentication process is welcome to contribute.
-We'd be happy to help.
+API keys are bearer credentials, the same widely used pattern as most API
+authentication: anyone holding a key can act as its user.  Treat a key like
+a password — keep it out of shared code and logs, and send it as POST data
+rather than in the URL (URLs can end up in server logs).  A user can revoke
+any of their keys at any time from
+<https://mushroomobserver.org/account/api_keys>.  Contributions that
+harden this further are welcome — per-key scopes, key expiry/rotation,
+accepting the key via the Authorization header, or an OAuth flow for
+third-party apps.
 
 Database Tables
 ---------------
@@ -167,26 +187,33 @@ Database Tables
 Most of the important database tables have entry points:
 
 * api_keys (POST only)
+* collection_numbers
 * comments
 * external_links
 * external_sites (GET only)
+* field_slips
 * herbaria (GET only)
+* herbarium_records
 * images
 * locations (not DELETE)
+* location_descriptions (GET only)
 * names (not DELETE)
+* name_descriptions (GET only)
+* namings
 * observations
+* occurrences
 * projects (not DELETE)
 * sequences
 * species_lists
-* users (not DELETE)
+* users
 
-Use the special "help=1" parameter to request a set of parameters supported for
-each table.  Detailed documentation doesn't exist; we're relying on things
-being simplistic enough to be more or less self-explanatory.  Note that it is
-safe to mess around with strange parameters and see what they do.  Note that
-XML responses include a copy of the SQL query used.  This can be a very
-effective way of discovering exactly how unfamiliar parameters work.  Here's
-the SQL query from one of the examples above:
+The [interactive docs](https://mushroomobserver.org/api-docs/) list every
+parameter each of these supports, with descriptions; the same information
+is available in-band via the special "help=1" parameter.  It is safe to
+mess around with strange parameters and see what they do.  Responses also
+include a copy of the SQL query used ("query"), which can be an effective
+way of discovering how unfamiliar parameters work.  Here's the SQL query
+from one of the examples above:
 
 ```sql
 SELECT DISTINCT observations.id
@@ -196,11 +223,7 @@ AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%De
 ORDER BY observations.id ASC
 ```
 
-See also the database diagram here:
-
-* [DATA_STRUCTURE.gif](DATA_STRUCTURE.gif)
-
-and the database schema here:
+See also the database schema here:
 
 * [db/schema.rb](db/schema.rb)
 
@@ -210,8 +233,8 @@ Change Log
 v1 -- First version 2016.
 v2 -- Latest version 2020.
 
-The endpoint is now "api2" instead of "api".  The old endpoint will be phased
-out some time in 2021.  The default format is now JSON not XML, since JSON is
+The endpoint is now "api2" instead of "api".  The old endpoint has been
+removed.  The default format is now JSON not XML, since JSON is
 significantly faster.  And a few result structures have been tweaked slightly:
 
 api_keys -- field names were wrong (created_at, last_used, num_uses)

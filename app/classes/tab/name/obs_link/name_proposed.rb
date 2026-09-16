@@ -11,13 +11,7 @@ class Tab::Name::ObsLink::NameProposed < Tab::Name::ObsLink
     :obss_name_proposed
   end
 
-  def build_query
-    q = Query.create_query(
-      :Observation,
-      names: { lookup: @name.id, include_all_name_proposals: true },
-      order_by: :confidence
-    )
-    q.save
-    q
+  def filter_attr
+    :name_proposed
   end
 end

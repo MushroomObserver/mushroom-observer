@@ -63,7 +63,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
 
   def render_badges
     div do
-      plain("#{:shared_with.ti}: ")
+      trusted_html(append_colon(:shared_with.ti))
       visible_sites.each { |site_name, link| render_badge(site_name, link) }
     end
   end

@@ -4,7 +4,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Shared module for rendering help blocks on form fields.
   # Default: plain always-visible block below the field.
   # Pass `help_collapse: true` to render a collapsible well with a
-  # question-mark trigger icon next to the label instead.
+  # question-mark trigger icon next to the label instead. Pass
+  # `help_well: false` alongside it to drop the well styling (e.g.
+  # when the field already sits inside a panel) while keeping the
+  # collapsible behavior.
   module FieldWithHelp
     # Field classes (`DateField`, `TextField`, etc.) extend `Phlex::HTML`
     # directly rather than living as a direct `Components::*` constant,
@@ -69,12 +72,21 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_collapsed_help_text
       Collapsible(id: help_id) do
-        Help(well: true) { render(help_slot) }
+        Help(well: wrapper_options.fetch(:help_well, true)) do
+          render(help_slot)
+        end
       end
     end
 
+    # help_placement: :above drops the help block's default top margin
+    # -- see FieldLabelRow#label_class's matching mb-0 on the label,
+    # and FieldLabelRow#help_placement_above? for the shared check.
+    # respond_to? guards SelectRangeField, the one class that includes
+    # this module without FieldLabelRow.
     def render_plain_help_text
-      Help(id: help_id) { render(help_slot) }
+      above = respond_to?(:help_placement_above?) && help_placement_above?
+      extra_class = "mt-0" if above
+      Help(id: help_id, class: extra_class) { render(help_slot) }
     end
   end
 end

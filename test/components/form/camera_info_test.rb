@@ -3,6 +3,8 @@
 require "test_helper"
 
 class FormCameraInfoTest < ComponentTestCase
+  include ActiveJob::TestHelper
+
   def test_renders_gps_info_with_all_values
     html = render_info(lat: "45.5231", lng: "-122.6765", alt: "100")
 
@@ -52,6 +54,16 @@ class FormCameraInfoTest < ComponentTestCase
     assert_includes(html, "2.5 MB")
   end
 
+  # File size row is dropped when there's no size (e.g. a reflection
+  # image), rather than showing an empty "File size:" label.
+  def test_hides_file_size_when_absent
+    html = render_info(file_name: "IMG_1234.jpg", file_size: nil)
+
+    assert_html(html, "span.file_name", text: "IMG_1234.jpg")
+    assert_no_html(html, "span.file_size")
+    assert_not_includes(html, :image_file_size.l)
+  end
+
   def test_always_renders_no_gps_message_with_d_none
     html = render_info(lat: "45.5231", lng: "-122.6765", alt: "100")
 
@@ -83,20 +95,78 @@ class FormCameraInfoTest < ComponentTestCase
     assert_includes(html, "100")
   end
 
+  # A read-only reflection image shows the read-only note, immutable
+  # copyright/license, and a link to the source observation.
+  def test_read_only_reflection_panel
+    html = render_info(read_only: true, copyright_holder: "(c) Jane",
+                       license_name: "CC BY-NC", date_differs: true,
+                       source_url: "https://www.inaturalist.org/observations/9")
+
+    assert_includes(html, :image_reflection_info.l)
+    assert_html(html, "div.reflection_readonly_note",
+                text: :image_reflection_readonly_note.l)
+    assert_html(html, "span.reflection_copyright", text: "(c) Jane")
+    assert_html(html, "span.reflection_license", text: "CC BY-NC")
+    assert_html(
+      html,
+      "a.reflection_source_link" \
+      "[href='https://www.inaturalist.org/observations/9']"
+    )
+  end
+
+  # Read-only with a location OR a differing date offers "Use this info".
+  def test_read_only_shows_use_this_info_when_adoptable
+    with_location = render_info(read_only: true, lat: "45.5", lng: "-122.6")
+    assert_html(with_location, "button.use_exif_btn:not(.d-none)")
+
+    date_only = render_info(read_only: true, date_differs: true)
+    assert_html(date_only, "button.use_exif_btn:not(.d-none)")
+  end
+
+  # Read-only with no location and the same date has nothing to adopt.
+  def test_read_only_hides_use_this_info_when_nothing_to_adopt
+    html = render_info(read_only: true, date_differs: false)
+
+    assert_html(html, "button.use_exif_btn.d-none")
+  end
+
+  # A saved image (upload: true is the default everywhere else in
+  # this file; this test explicitly passes upload: false) loads its
+  # date/GPS fields lazily from the server instead of rendering them
+  # directly -- see issue #5369.
+  def test_saved_image_renders_lazy_exif_frame
+    html = nil
+    assert_enqueued_with(job: EXIFGeocodeJob,
+                         args: ["123",
+                                { read_only: false, date_differs: false }]) do
+      html = render_info(upload: false)
+    end
+
+    assert_html(html, "turbo-frame#camera_info_exif_123 .spinner-right")
+    assert_no_html(html, "span.exif_gps")
+    assert_no_html(html, "button.use_exif_btn")
+  end
+
+  def test_upload_image_renders_fields_directly
+    html = render_info(upload: true, lat: "45.5231")
+
+    assert_no_html(html, "turbo-frame")
+    assert_html(html, "span.exif_gps")
+  end
+
   private
 
-  # rubocop:disable Metrics/ParameterLists
+  # rubocop:disable-next Metrics/ParameterLists
   def render_info(lat: nil, lng: nil, alt: nil, date: "2024-01-15",
-                  file_name: nil, file_size: nil)
+                  file_name: nil, file_size: nil, read_only: false,
+                  copyright_holder: nil, license_name: nil,
+                  source_url: nil, date_differs: false, upload: true)
     render(Components::Form::CameraInfo.new(
-             img_id: 123,
-             lat: lat,
-             lng: lng,
-             alt: alt,
-             date: date,
-             file_name: file_name,
-             file_size: file_size
+             img_id: 123, upload: upload, lat: lat, lng: lng, alt: alt,
+             date: date, file_name: file_name, file_size: file_size,
+             read_only: read_only, copyright_holder: copyright_holder,
+             license_name: license_name, source_url: source_url,
+             date_differs: date_differs
            ))
   end
-  # rubocop:enable Metrics/ParameterLists
 end

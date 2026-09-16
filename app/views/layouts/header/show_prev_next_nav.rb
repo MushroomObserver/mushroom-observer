@@ -25,32 +25,27 @@ module Views::Layouts
     private
 
     def render_adjacent_link(dir)
-      hide = no_more?(dir) ? "disabled opacity-0" : ""
-      classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       adjacent_id = @query.send(:"#{dir}_id")
+      hide = adjacent_id.nil? ? "disabled opacity-0" : ""
+      classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
-      Link(type: :icon, content: adjacent_title(dir), path: href,
+      Link(type: :get, name: adjacent_title(dir), target: href,
            icon: dir, button: :link, size: :lg, class: classes)
     end
 
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
 
-      Link(type: :icon, content: index_title, path: index_path,
+      Link(type: :get, name: index_title, target: index_path,
            icon: index_icon, button: :link, size: :lg, class: classes)
-    end
-
-    def no_more?(dir)
-      if dir == :prev
-        @query.result_ids.first == @object.id
-      else
-        @query.result_ids.last == @object.id
-      end
     end
 
     def adjacent_path(id)
       return activity_log_path(id: id) if type_tag == :rss_log
+      # Observation show links use the logged-out-accessible /obs/ form
+      # (see Observation.show_url).
+      return permanent_observation_path(id: id) if type_tag == :observation
 
       send(:"#{type_tag}_path", id: id)
     end

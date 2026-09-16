@@ -231,6 +231,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # glossary unused-image cleanup).
   has_many :external_links, as: :target, dependent: :delete_all
 
+  # The machine-read of a field slip photo (#4932) describes this image
+  # specifically, so it goes with it. delete_all for the same reason as
+  # external_links above: no destroy callbacks, and a bulk DELETE avoids
+  # loading the association under strict loading.
+  has_many :field_slip_extracts, dependent: :delete_all
+
   # The import ExternalLink for this image (its source photo), if any.
   def import_link
     if external_links.loaded?
@@ -684,11 +690,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def validate_image_length
     if upload_length || save_to_temp_file
       if upload_length > MO.image_upload_max_size
-        errors.add(:image,
-                   :validate_image_file_too_big.t(
-                     size: upload_length,
-                     max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb")
-                   ))
+        errors.add(:image, :validate_image_file_too_big,
+                   size: upload_length,
+                   max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb"))
         result = false
       else
         result = true
@@ -710,8 +714,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       else
         file = upload_original_name.to_s
         file = "?" if file.blank?
-        errors.add(:image,
-                   :validate_image_wrong_type.t(type: upload_type, file: file))
+        errors.add(:image, :validate_image_wrong_type,
+                   type: upload_type, file: ERB::Util.html_escape(file))
         result = false
       end
     end
@@ -730,8 +734,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       if sum == upload_md5sum
         result = true
       else
-        errors.add(:image, :validate_image_md5_mismatch.
-          t(actual: sum.split.first, expect: upload_md5sum))
+        errors.add(:image, :validate_image_md5_mismatch,
+                   actual: sum.split.first, expect: upload_md5sum)
         result = false
       end
     end
@@ -781,18 +785,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
           self.upload_length = @file.size
           result = true
         rescue StandardError => e
-          errors.add(:image,
-                     "Unexpected error while copying attached file " \
-                     "to temp file. Error class #{e.class}: #{e}")
+          errors.add(:image, :validate_image_copy_error,
+                     klass: e.class, error: e)
           result = false
         end
 
       # It should never reach here.
       else
-        errors.add(:image, "Unexpected error: did not receive a valid upload " \
-                           "stream from the webserver (we got an instance of " \
-                           "#{upload_handle.class.name}). Send this to the " \
-                           "webmaster, please.  Backtrace: #{caller[0..20]}...")
+        errors.add(:image, :validate_image_invalid_upload_stream,
+                   klass: upload_handle.class.name, backtrace: caller[0..20])
         result = false
       end
     end
@@ -806,7 +807,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def process_image(strip: false)
     result = true
     if new_record?
-      errors.add(:image, "Called process_image before saving image record.")
+      errors.add(:image, :validate_image_process_before_save)
       result = false
     elsif save_to_temp_file
       ext = original_extension
@@ -834,7 +835,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     error = Image::Processor.strip_original_gps(self, ext: ext)
     return true unless error
 
-    errors.add(:image, :runtime_failed_to_strip_gps.t(msg: error))
+    errors.add(:image, :runtime_failed_to_strip_gps,
+               msg: ERB::Util.html_escape(error))
     false
   end
 
@@ -859,11 +861,25 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   rescue StandardError => e
     Rails.logger.error("Image::Processor failed for image #{id}: " \
                        "#{e.full_message(highlight: false)}")
+    notify_image_process_failure(e)
     fail_image_process
   end
 
+  # Same Slack routing (and gating) job failures get via ApplicationJob's
+  # rescue_from. Processing runs synchronously in the web request and its
+  # failure is rescued into a validation error above, so without this the
+  # exception never reaches exception_notification's middleware and
+  # nothing but production.log records it (#4974) -- while every
+  # neighbouring pipeline step (TransferImagesJob, StaleImageFilesJob,
+  # GpsLeakDetectorJob) alerts on failure.
+  def notify_image_process_failure(error)
+    return unless ExceptionNotifier.notifiers.any?
+
+    ExceptionNotifier.notify_exception(error, data: { image: id })
+  end
+
   def fail_image_process # rubocop:disable Naming/PredicateMethod
-    errors.add(:image, :runtime_image_process_failed.t(id: id))
+    errors.add(:image, :runtime_image_process_failed, id: id)
     false
   end
 
@@ -949,6 +965,48 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       find { |path| File.exist?(path) }
   end
 
+  # Ids below this have their originals only in the GCS archive bucket,
+  # not on the images server, so script/strip_exif cannot reach them.
+  GPS_STRIP_RETRY_MIN_ID = 1_600_000
+
+  # Nightly retry of GPS strips still pending on images attached to a
+  # gps_hidden observation. A failed strip only flashes an error at the
+  # submitting user (see strip_gps! callers), so without this sweep it
+  # is not retried and the original keeps its GPS. Yields a message per
+  # still-failing image so the caller can alert. The per-run cap keeps
+  # a pathological backlog from turning the nightly job into thousands
+  # of ssh execs; the remainder is reported, not silently dropped.
+  def self.retry_failed_gps_strips(dry_run: false,
+                                   min_id: GPS_STRIP_RETRY_MIN_ID,
+                                   limit: 200)
+    scope = joins(observation_images: :observation).
+            where(observations: { gps_hidden: true }).
+            where(gps_stripped: false).
+            where(id: min_id..).
+            distinct
+    total = scope.count
+    msgs = scope.order(:id).limit(limit).map do |img|
+      retry_gps_strip(img, dry_run) { |failure| yield(failure) if block_given? }
+    end
+    if total > limit
+      msgs << "GPS strip retries capped at #{limit}/#{total}; " \
+              "the rest run on later nights"
+    end
+    msgs
+  end
+
+  def self.retry_gps_strip(img, dry_run)
+    return "Image ##{img.id}: would retry GPS strip" if dry_run
+
+    error = img.strip_gps!
+    return "Image ##{img.id}: GPS strip retried" unless error
+
+    failure = "Image ##{img.id}: GPS strip retry failed - #{error}"
+    yield(failure)
+    failure
+  end
+  private_class_method :retry_gps_strip
+
   # Attempt to strip GPS data from original image. Returns error message as
   # string if it fails.
   #
@@ -986,30 +1044,63 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # remotely. Returns nil if it fails. Costly.
   # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
   #   observations to determine whether to hide GPS.
-  #
-  # No Shellwords.escape needed here -- Open3.capture2e's array form
-  # (`cmd, *flags, path`) execs directly, bypassing the shell entirely,
-  # so nothing ever interprets shell metacharacters. Escaping anyway
-  # used to be harmless (no argument here ever contained one), but
-  # original_url now carries a `?<version>` cache-buster (#4808) --
-  # Shellwords.escape turned that `?` into a literal `\?` in the
-  # argument itself (array form never strips the backslash back out),
-  # so every remote (transferred) EXIF re-read silently 404'd.
   def read_exif_data(flags = [], hide_gps: nil)
     hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
-    if transferred
-      cmd = "script/exiftool_remote"
-      path = original_url
-    else
-      cmd = "exiftool"
-      path = full_filepath("orig")
-    end
-    result, status = Open3.capture2e(cmd, *flags, path)
+    result, status = if transferred
+                       remote_exif(flags)
+                     else
+                       Open3.capture2e("exiftool", *flags,
+                                       full_filepath("orig"))
+                     end
 
     data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil
     [data, status, result]
   end
+
+  # A stand-in for Process::Status when the fetch fails before
+  # exiftool runs -- only `.success?` is needed by callers. A single
+  # reusable class, not `Struct.new(:success?)` inline in the rescue
+  # below, which would define a new anonymous class on every failure.
+  FailedFetchStatus = Struct.new(:success?)
+  private_constant :FailedFetchStatus
+
+  # A transferred image's bytes live wherever it was imported from, not
+  # locally. MO's resized derivatives strip EXIF entirely, so this has
+  # to fetch the full original and run exiftool against it (#5369) --
+  # unlike the local branch above, there's no file path to hand
+  # exiftool directly.
+  #
+  # open_timeout/timeout bound the fetch so an unreachable or stalled
+  # host can't hang the caller indefinitely (#5369).
+  def remote_exif(flags)
+    Tempfile.create(["exif_remote", ".img"], binmode: true) do |file|
+      file.write(fetch_remote_bytes)
+      file.flush
+      Open3.capture2e("exiftool", *flags, file.path)
+    end
+  rescue RestClient::Exception, SocketError, Errno::ECONNREFUSED,
+         Errno::ENOENT, Net::OpenTimeout, Net::ReadTimeout => e
+    [e.message, FailedFetchStatus.new(false)]
+  end
+
+  # original_url is a `file://` URL in dev/test -- MO.image_sources'
+  # file-based stand-in for a transferred image (config/image_config.yml)
+  # -- so read it directly instead of over HTTP, stripping the `?
+  # <version>` cache-buster query string (#4808) that isn't part of the
+  # filesystem path. In production it's an https:// URL, fetched over
+  # the network with a timeout.
+  def fetch_remote_bytes
+    url = original_url
+    if url.start_with?("file://")
+      File.binread(url.delete_prefix("file://").sub(/\?.*\z/, ""))
+    else
+      RestClient::Request.execute(
+        method: :get, url: url, open_timeout: 5, timeout: 15
+      ).body
+    end
+  end
+  private :remote_exif, :fetch_remote_bytes
 
   # This returns a { lat:, lng:, ... } hash if the image has GPS data in EXIF.
   # Returns nil if it fails. Note that it only reads these fields.
@@ -1032,7 +1123,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     return nil unless lat && lng
 
     if date
-      date = DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").strftime("%d-%B-%Y")
+      date = SimpleDate.from_date(
+        DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").to_date
+      )
     end
 
     file_size = "#{(file_size.to_i / 1024).to_i}kb" if file_size
@@ -1128,10 +1221,19 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # Save changes unless there were already pending changes to be saved
     # (meaning the caller is presumably about to save the changes anyway so
-    # we don't need to do it twice).  No need to update +updated_at+ or do any
-    # of the other callbacks, either, since this doesn't result in emails,
-    # contribution changes, or rss log entries.
-    save_without_our_callbacks if save_changes
+    # we don't need to do it twice).  vote_cache is derived data: keep
+    # updated_at (and the cache-busting URL token derived from it, which
+    # would invalidate every browser's cached renditions) stable.
+    # Suppressed on this instance only -- the class-level flag is shared
+    # across threads and would leak into unrelated concurrent saves.
+    if save_changes
+      begin
+        self.record_timestamps = false
+        save_without_our_callbacks
+      ensure
+        self.record_timestamps = true
+      end
+    end
     # update +updated_at+ for any associated observations, in order to update
     # the cached interactive_image in the matrix_box (contrast with the above)
     observations&.touch_all
@@ -1177,6 +1279,23 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def can_edit?(user)
     Project.can_edit?(self, user)
   end
+
+  # #4989: broader than `can_edit?` -- also grants admins of any
+  # project an observation belongs to, regardless of owner trust.
+  def can_transform?(user, site_admin: false)
+    return true if site_admin
+    return false unless user
+
+    can_edit?(user) ||
+      observations.any? { |obs| obs_transformable?(obs, user) }
+  end
+
+  def obs_transformable?(obs, user)
+    obs.can_edit?(user) || obs.projects.any? do |project|
+      project.is_admin?(user)
+    end
+  end
+  private :obs_transformable?
 
   ##############################################################################
   #
@@ -1381,7 +1500,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_upload if upload_handle && new_record?
 
     # I guess this is kind of serious -- uploading with no one logged in??!
-    errors.add(:user, :validate_image_user_missing.t) if !user && !current_user
+    errors.add(:user, :validate_image_user_missing) if !user && !current_user
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.

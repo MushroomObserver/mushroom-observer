@@ -14,9 +14,7 @@ class API2::HerbariaTest < UnitTestCase
   #  :section: Herbarium Requests
   # -------------------------------
 
-  def params_get(**)
-    { method: :get, action: :herbarium }.merge(**)
-  end
+  def api2_model = Herbarium
 
   def test_getting_herbaria_created_at
     herbs = Herbarium.created_on("2012-10-21")

@@ -46,11 +46,6 @@
           },
           {
             "type": "command",
-            "command": "test -x .claude/hooks/block_index_active_params.sh && exec .claude/hooks/block_index_active_params.sh || exit 0",
-            "timeout": 10
-          },
-          {
-            "type": "command",
             "command": "test -x .claude/hooks/block_bare_db_tasks.sh && exec .claude/hooks/block_bare_db_tasks.sh || exit 0",
             "timeout": 10
           },
@@ -62,6 +57,16 @@
           {
             "type": "command",
             "command": "test -x .claude/hooks/block_noop_cd.sh && exec .claude/hooks/block_noop_cd.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_sass_compile_check.sh && exec .claude/hooks/block_sass_compile_check.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_banned_words.sh && exec .claude/hooks/block_banned_words.sh || exit 0",
             "timeout": 10
           }
         ]
@@ -91,7 +96,7 @@
           },
           {
             "type": "command",
-            "command": "test -x .claude/hooks/block_index_active_params.sh && exec .claude/hooks/block_index_active_params.sh || exit 0",
+            "command": "test -x .claude/hooks/block_banned_words.sh && exec .claude/hooks/block_banned_words.sh || exit 0",
             "timeout": 10
           }
         ]

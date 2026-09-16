@@ -20,7 +20,8 @@ module Views::Controllers::Contributors
                   "[href='#contribution_legend']" \
                   "[aria-controls='contribution_legend']" \
                   "[aria-expanded='false']")
-      assert_html(html, "a[href='#contribution_legend'] span.glyphicon")
+      assert_html(html,
+                  "a[href='#contribution_legend'] svg.mo-icon-info-circle")
     end
 
     def test_renders_weights_table

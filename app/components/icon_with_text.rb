@@ -2,15 +2,19 @@
 
 # Shared "icon + optional text" rendering — the icon glyph plus a
 # text `<span>` that's `.sr-only` (hidden, default) or visible (at
-# `sm+`) when `show_text:` is truthy. Included by both
-# `Components::Button::Content` (Button / Link::Get family) and
-# `Components::Link::Icon`.
+# `sm+`) when `show_text:` is truthy. Included by
+# `Components::Button::Content`, in turn included by both
+# `Components::Button` and `Components::Link` (the `Link::Get` family)
+# -- so both get the optional active-icon/active-label swap below for
+# free.
 #
-# Callers that need multiple icon/text pairs in a specific order
-# (e.g. `Link::Icon`'s stateful icon + active-icon swap) call
-# `render_icon_glyph` / `render_icon_text` separately rather than
-# the fused `render_icon_with_text`, so the icons and text spans can
-# still be grouped icon-then-icon, text-then-text.
+# `render_icon_with_text` renders icon-then-text by default; passing
+# `active_icon:`/`active_content:` additionally renders a second
+# icon/text pair (marked `.active-icon`/`.active-label`), for a
+# target whose appearance swaps based on state (e.g. a bookmark/
+# subscribe toggle) -- CSS keys visibility off a `.active`/`.collapsed`
+# class on the trigger element (see `_icons.scss`'s `.stateful-link`
+# rule).
 module Components::IconWithText
   # `icon-text-gap`, not a `.pl-*` rem-based utility -- the gap needs
   # to scale with the surrounding font-size (a `.panel-title` heading's
@@ -38,10 +42,18 @@ module Components::IconWithText
     span(class: classes) { trusted_or_plain(content) }
   end
 
-  def render_icon_with_text(icon, content, show_text:, icon_class: nil,
-                            icon_title: nil)
-    render_icon_glyph(icon, html_class: icon_class, title: icon_title)
+  def render_icon_with_text(icon, content, show_text:, icon_opts: {},
+                            active: {})
+    render_icon_glyph(icon, html_class: icon_opts[:class],
+                            title: icon_opts[:title])
     render_icon_text(content, show_text: show_text)
+    return unless active[:icon] && active[:content]
+
+    render_icon_glyph(active[:icon],
+                      html_class: class_names(icon_opts[:class],
+                                              "active-icon"))
+    render_icon_text(active[:content], show_text: show_text,
+                                       extra_class: "active-label")
   end
 
   # Content can be a textile-rendered safe-buffer string (e.g. a

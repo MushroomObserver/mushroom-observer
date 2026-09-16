@@ -61,11 +61,20 @@ module Location::Scopes
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|
-      cols = Location[:name] + LocationDescription.searchable_columns
-      joins_default_descriptions.search_columns(cols, phrase)
+      exact_match_or(phrase) do
+        cols = Location[:name] + LocationDescription.searchable_columns
+        joins_default_descriptions.search_columns(cols, phrase)
+      end
     }
     scope :regexp, lambda { |phrase|
       where(Location[:name] =~ phrase.to_s.strip.squeeze(" ")).distinct
+    }
+    # Locations whose name ends with the given country -- MO location
+    # names are formatted "City, State, Country". Named `in_country`,
+    # not `country`, to avoid colliding with `Location.country`
+    # (parses the country out of a location name string).
+    scope :in_country, lambda { |name|
+      regexp("#{name}$")
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
@@ -138,11 +147,19 @@ module Location::Scopes
       in_box(**args).invert_where
     }
     # Use named parameters (lat:, lng:), any order
+    # A location whose box straddles longitude 180 has west > east (e.g.
+    # Kiribati: west=169, east=-145) -- containment there means the point
+    # is east of west OR west of east, not between them. Getting this
+    # backwards (AND instead of OR) previously matched points nowhere
+    # near the location (issue #5080: (0, 0) "contained" by Kiribati).
     scope :contains_point, lambda { |**args|
       args => { lat:, lng: }
+      west = Location[:west]
+      east = Location[:east]
+      not_straddling = west.lteq(east).and(west.lteq(lng)).and(east.gteq(lng))
+      straddling = west.gt(east).and(west.lteq(lng).or(east.gteq(lng)))
       where(Location[:south].lteq(lat).and(Location[:north].gteq(lat)).
-            and(Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
-                or(Location[:west].gteq(lng).and(Location[:east].lteq(lng)))))
+            and(not_straddling.or(straddling)))
     }
     # Use named parameters (lat:, lng:), any order
     scope :with_minimum_bounding_box_containing_point, lambda { |**args|
@@ -195,6 +212,10 @@ module Location::Scopes
       regions = hash.delete(:region)
       scope = scope.region(regions) if regions.present?
       scope.joins(:observations).subquery(:Observation, hash)
+    }
+    # Locations of observations attached to the given project(s).
+    scope :projects, lambda { |project_ids|
+      observation_query(projects: project_ids)
     }
 
     scope :show_includes, lambda {

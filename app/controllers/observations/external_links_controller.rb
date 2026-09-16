@@ -73,7 +73,6 @@ module Observations
         @user, @observation, admin: in_admin_mode?
       )
       @site = @sites&.first
-      @back_object = @observation
     end
 
     def set_ivars_for_edit
@@ -84,11 +83,24 @@ module Observations
                      includes(Observation.matrix_box_includes).
                      find(@external_link.observation.id)
       @site = @external_link.external_site
-      @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
+      @sites = sites_including_current(@site)
+      # No standalone external_link "show" destination exists to offer
+      # as an alternative (unlike sequences' back=show) -- redirects
+      # always go to the observation. @back only exists so an
+      # incoming `?back=<url>` survives a validation-error reload;
+      # blank/absent is the common case and every consumer already
+      # guards on `@back.present?` before using it.
+      @back = params.permit(:back)[:back]
+    end
+
+    # The link's current site must stay selectable even if the user
+    # is no longer a member of it (project membership can change
+    # after a link is created).
+    def sites_including_current(site)
+      sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       ).to_a
-      @sites |= [@site] # the link's current site must stay selectable
-      @back_object = @observation
+      sites | [site]
     end
 
     def check_external_link_permission!(link: nil, obs: nil, site: nil)
@@ -133,10 +145,11 @@ module Observations
                         end
       redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
-      flash_error(@external_link.formatted_errors.join("\n").strip_html)
-      respond_to do |format|
-        format.turbo_stream { reload_external_link_modal_form_and_flash }
-        format.html { redirect_to(redirect_params) and return true }
+      flash_object_errors(@external_link)
+      if modal_submission?(:external_link)
+        reload_external_link_modal_form_and_flash
+      else
+        redirect_to(redirect_params)
       end
     end
 
@@ -150,11 +163,10 @@ module Observations
                   :runtime_destroyed_id.t(type: :external_link, value: @id)
                 end
       flash_notice(message)
-      respond_to do |format|
-        format.turbo_stream { render_external_links_section_update }
-        format.html do
-          redirect_to(permanent_observation_path(@observation))
-        end
+      if modal_submission?(:external_link)
+        render_external_links_section_update
+      else
+        redirect_to(permanent_observation_path(@observation))
       end
     end
 
@@ -168,10 +180,10 @@ module Observations
       end
     end
 
-    # Editable on update by any editor: url + external_id (mutually exclusive —
-    # the model drops url when external_id is present) + relationship.
+    # Editable on update by any editor. external_id accepts either a bare
+    # id or a url -- the model resolves the latter server-side.
     def permitted_external_link_params
-      params.require(:external_link).permit(:url, :external_id, :relationship)
+      params.require(:external_link).permit(:external_id, :relationship)
     end
 
     def remove_external_link
@@ -187,13 +199,10 @@ module Observations
       # tests check_external_link_permission! directly without sending a request
       return unless @_response
 
-      respond_to do |format|
-        # renders the flash in the modal, but not sure it's necessary
-        # to have a response here. are they getting sent back?
-        format.turbo_stream { render_modal_flash_update(modal_identifier) }
-        format.html do
-          redirect_to(permanent_observation_path(@observation)) and return
-        end
+      if modal_submission?(:external_link)
+        render_modal_flash_update(modal_identifier)
+      else
+        redirect_to(permanent_observation_path(@observation))
       end
     end
 
@@ -226,7 +235,7 @@ module Observations
                model: @external_link,
                observation: @observation,
                back: @back,
-               form_locals: { sites: @sites, site: @site }
+               form_locals: { sites: @sites, site: @site, user: @user }
              ), layout: false)
     end
 

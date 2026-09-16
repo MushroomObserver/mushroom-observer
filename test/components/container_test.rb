@@ -17,42 +17,40 @@ class ContainerTest < ComponentTestCase
   end
 
   def test_default_is_a_plain_div_with_no_width_class
-    html = render(Components::Container.new)
+    html = render_container
 
     assert_html(html, "div")
     assert_no_html(html, "div[class*='container']")
   end
 
   def test_width_renders_matching_class
-    html = render(Components::Container.new(width: :wide))
+    html = render_container(width: :wide)
 
     assert_html(html, "div.container-wide")
   end
 
   def test_element_renders_alternate_tag
-    html = render(Components::Container.new(element: :main, width: :text))
+    html = render_container(element: :main, width: :text)
 
     assert_html(html, "main.container-text")
     assert_no_html(html, "div.container-text")
   end
 
   def test_extra_class_merges_with_width_class
-    html = render(Components::Container.new(width: :text, class: "ml-4"))
+    html = render_container(width: :text, class: "ml-4")
 
     assert_html(html, "div.container-text.ml-4")
   end
 
   def test_extra_class_alone_with_no_width
-    html = render(Components::Container.new(class: "hidden-print"))
+    html = render_container(class: "hidden-print")
 
     assert_html(html, "div.hidden-print")
     assert_no_html(html, "div.container-full")
   end
 
   def test_other_attrs_pass_through
-    html = render(Components::Container.new(
-                    id: "content", data: { controller: "lightgallery" }
-                  ))
+    html = render_container(id: "content", data: { controller: "lightgallery" })
 
     assert_html(html, "div#content[data-controller='lightgallery']")
   end
@@ -66,6 +64,10 @@ class ContainerTest < ComponentTestCase
   end
 
   private
+
+  def render_container(**, &block)
+    render(Components::Container.new(**), &block)
+  end
 
   # Returns an anonymous Components::Base instance whose view_template
   # runs the given block in Phlex context (so `plain`, `div`, `render`

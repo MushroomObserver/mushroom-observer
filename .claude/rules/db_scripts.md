@@ -22,7 +22,7 @@ snapshot into local dev live in `db/`, not `script/`:
   SQL the server understands, and errors with `ERROR 1064 (42000)` if
   passed to `-e` (fixed 2026-07, see git blame on `strip_checkpoint`).
 
-Documented for end users in `README_MACOSX_NOTES.md` ("Load a MO
+Documented for end users in `README_DEV_SETUP_MACOSX.md` ("Load a MO
 database backup") as `db/download_checkpoint`.
 
 **Deliberately kept in `db/`, not `script/`.** `script/` is a flat pile

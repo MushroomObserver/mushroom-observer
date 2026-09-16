@@ -3,11 +3,8 @@
 # Phlex view for the project aliases index page.
 module Views::Controllers::Projects::Aliases
   class Index < Views::FullPageBase
-    def initialize(project:, project_aliases:)
-      super()
-      @project = project
-      @project_aliases = project_aliases
-    end
+    prop :project, ::Project
+    prop :project_aliases, _Array(::ProjectAlias)
 
     def view_template
       add_project_banner(@project)

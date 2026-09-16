@@ -11,7 +11,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #
   # Parallel of `ButtonStyleRadio`. Same constructor shape, same
   # caller ergonomics — just emits `type="checkbox"` and supports
-  # name-array shapes like `q[type][]` for multi-select filters.
+  # name-array shapes like `q[types][]` for multi-select filters.
   #
   # Standalone (no Superform context) — takes raw HTML kwargs rather
   # than a `Field` / `FieldProxy`, since the call sites (filter UIs,
@@ -19,7 +19,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #
   # @example
   #   render(Components::ApplicationForm::ButtonStyleCheckbox.new(
-  #     name: "q[type][]", value: "observation",
+  #     name: "q[types][]", value: "observation",
   #     id: "type_observation", checked: types.include?("observation"),
   #     variant: :outline, size: :sm,
   #     label: { class: "filter-checkbox" }

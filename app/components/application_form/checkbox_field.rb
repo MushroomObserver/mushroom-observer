@@ -58,7 +58,9 @@ class Components::ApplicationForm < Superform::Rails::Form
         # form control).
         render_boolean_with_wrapper(label_for: nil) { yield(self) }
       else
-        render_boolean_with_wrapper { render_boolean_inputs }
+        render_boolean_with_wrapper(label_for: boolean_label_for) do
+          render_boolean_inputs
+        end
       end
     end
 
@@ -238,6 +240,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Use custom ID if provided, otherwise use Superform's generated ID
     def checkbox_id
       @attributes[:id] || field.dom.id
+    end
+
+    # Defaults to an explicit `for="<checkbox_id>"` (unchanged
+    # behavior), but a caller can pass `label_for: nil` when the
+    # checkbox's id isn't guaranteed unique on the page (e.g. content
+    # that gets cloned elsewhere in the DOM, like lightGallery's
+    # caption snapshot) -- an explicit `for=` pointing at a duplicated
+    # id makes browsers' label-click activation ambiguous even though
+    # the checkbox is ALSO nested inside this same label, which is a
+    # sufficient (and unambiguous) association on its own per the
+    # HTML label-activation spec.
+    def boolean_label_for
+      wrapper_options.fetch(:label_for) { checkbox_id }
     end
 
     def label_position_before?

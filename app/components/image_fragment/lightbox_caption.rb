@@ -102,7 +102,7 @@ class Components::ImageFragment::LightboxCaption < Components::Base
   end
 
   # `context: :lightbox` -- plain always-visible styling (no
-  # `.image-sizer` hover ancestor here to reveal a `:overlay`), and
+  # `.image-sizer` hover ancestor here to reveal a `:matrix`), and
   # every id this emits gets prefixed so it can't collide with the
   # in-page vote section that's also live in the DOM once the
   # lightbox is open. See `Components::ImageFragment::VoteInterface`.

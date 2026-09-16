@@ -5,6 +5,7 @@
 class OccurrencesController < ApplicationController
   include Show
   include Edit
+  include OccurrenceProjectResolvable
 
   before_action :login_required
 
@@ -18,7 +19,7 @@ class OccurrencesController < ApplicationController
       return
     end
 
-    render_new_form(@source_obs)
+    render_new_view
   end
 
   def create
@@ -98,8 +99,15 @@ class OccurrencesController < ApplicationController
       render_project_confirmation(gaps, selected, primary_obs)
       return
     end
+    # Nothing exists yet here, so backing out is simply not creating it.
+    return cancel_occurrence_creation if project_resolution_param == "cancel"
 
     commit_occurrence(primary_obs, selected, gaps)
+  end
+
+  def cancel_occurrence_creation
+    flash_notice(:occurrence_not_created.t)
+    redirect_to(permanent_observation_path(@source_obs.id))
   end
 
   def commit_occurrence(primary_obs, selected, gaps)
@@ -122,8 +130,8 @@ class OccurrencesController < ApplicationController
     flash_warning(:occurrence_locations_differ.t)
   end
 
-  def render_new_form(source_obs)
-    recent = recent_observations(source_obs)
+  def render_new_view(status: :ok, **render_opts)
+    recent = recent_observations(@source_obs)
     confirm = {}
     if @project_gaps&.any?
       confirm = { gaps: @project_gaps, primary: @project_primary,
@@ -131,11 +139,12 @@ class OccurrencesController < ApplicationController
     end
     render(
       Views::Controllers::Occurrences::New.new(
-        source_obs: source_obs,
+        source_obs: @source_obs,
         recent_observations: recent,
         user: @user,
         project_confirm: confirm
-      )
+      ),
+      status: status, **render_opts
     )
   end
 
@@ -176,13 +185,20 @@ class OccurrencesController < ApplicationController
     @project_gaps = gaps
     @project_primary = primary_obs
     @project_selected = selected
-    render_new_form(@source_obs)
+    # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+    # (confirmed: see turbo_submit_forms.md) -- needs a non-2xx status
+    # even though nothing actually "failed" yet; the occurrence just
+    # isn't created until the user resolves the project gaps.
+    render_new_view_invalid
   end
 
   def apply_project_resolution(occ, gaps)
     return if gaps.empty?
     return unless project_resolution_param == "add_all"
 
-    occ.add_all_to_collections(projects: gaps[:projects] || [])
+    flash_add_all_result(
+      occ.add_all_to_collections(projects: gaps[:projects] || [],
+                                 user: @user, site_admin: in_admin_mode?)
+    )
   end
 end

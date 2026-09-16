@@ -13,7 +13,6 @@
 #
 class API2Controller < ApplicationController
   require("xmlrpc/client")
-  require("api2")
 
   disable_filters
 
@@ -83,6 +82,10 @@ class API2Controller < ApplicationController
 
   def name_descriptions
     rest_query(:name_description)
+  end
+
+  def namings
+    rest_query(:naming)
   end
 
   def observations

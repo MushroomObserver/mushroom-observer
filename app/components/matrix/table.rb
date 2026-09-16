@@ -108,6 +108,7 @@ class Components::Matrix::Table < Components::Base
       end
     end
 
+    render_vote_interface_streams if !block && @objects
     div(class: "clearfix")
   end
 
@@ -184,5 +185,20 @@ class Components::Matrix::Table < Components::Base
                identify: @identify, project: @project
              ))
     end
+  end
+
+  # Fills every box's empty vote-interface frame in one uncached pass —
+  # viewer-specific content that must stay out of the shared box
+  # fragments, but shouldn't cost one frame-src request per image
+  # either. RssLog boxes have no thumb_image accessor; their frames
+  # keep the per-frame lazy fetch.
+  def render_vote_interface_streams
+    images = @objects.filter_map do |object|
+      object.is_a?(::Image) ? object : object.try(:thumb_image)
+    end
+    return if images.empty?
+
+    ImageFragment(type: :vote_interface_streams, images: images,
+                  user: @user)
   end
 end

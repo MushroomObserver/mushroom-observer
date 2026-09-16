@@ -95,7 +95,7 @@ class ListSearchTest < ComponentTestCase
   def render_for(object, project: nil)
     object_names = object.observations.joins(:name).
                    select(Name[:text_name], Name[:id]).distinct.
-                   order(Name[:text_name])
+                   order(Name[:text_name]).to_a
     render(Components::ListGroup::Search.new(
              object: object, object_names: object_names, project: project
            ))

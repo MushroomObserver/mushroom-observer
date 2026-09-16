@@ -98,7 +98,15 @@ class Inat
     ########## MO attributes
 
     # disable cop because gps_hidden is a pseudo-attribute
-    def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
+    # rubocop:disable-next Naming/PredicateMethod
+    def gps_hidden = @obs[:geoprivacy].present?
+
+    # True when iNat has blurred the public coordinate for any reason --
+    # user geoprivacy OR automatic taxon geoprivacy (which #gps_hidden,
+    # reading only :geoprivacy, misses). iNat's :obscured folds both. A
+    # missing flag is treated as obscured, so an unexpected response keeps
+    # a blurred coordinate from overwriting MO's accurate one (#4215).
+    def obscured? = @obs[:obscured] != false
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
@@ -318,7 +326,7 @@ class Inat
         user: self[:user][:login],
         observed: self.when,
         show_observation_inat_lat_lng: lat_lon_accuracy,
-        place: self[:place_guess],
+        place: snapshot_place,
         id: inat_taxon_name,
         dqa: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
@@ -330,6 +338,15 @@ class Inat
         chomp # prevent blank line between Snapshot and :Other Notes fields
     end
     private :snapshot_raw_str
+
+    def snapshot_place
+      if @obs[:geoprivacy] == "private"
+        :inat_geoprivacy_private.l
+      else
+        self[:place_guess]
+      end
+    end
+    private :snapshot_place
 
     def copyright
       name = self[:user][:name].presence || self[:user][:login]
@@ -367,7 +384,14 @@ class Inat
       "#{self[:location]} +/-#{self[:public_positional_accuracy]} m"
     end
 
+    # Excludes MO's own "Mushroom Observer URL" back-link (field 5005): MO
+    # writes it onto the iNat obs after import, so keeping it here would
+    # make every back-linked reflection's snapshot differ from its stored
+    # (pre-back-link) form on the first resync. The snapshot mirrors iNat's
+    # own data, not MO's annotations of it.
     def obs_fields(fields)
+      fields = Array(fields).
+               reject { |f| f[:field_id] == MO_URL_OBSERVATION_FIELD_ID }
       return :none.t if fields.empty?
 
       "\n#{one_line_per_field(fields)}"

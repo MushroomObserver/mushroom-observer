@@ -55,7 +55,8 @@ module Admin
 
       def check_both_names!
         (@name = Name.safe_find(params[:name_id])) &&
-          (@new_name_with_icn_id = params[:new_name_with_icn_id])
+          (@new_name_with_icn_id =
+             params.permit(:new_name_with_icn_id)[:new_name_with_icn_id])
       end
 
       def check_different_icn_ids

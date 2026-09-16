@@ -107,10 +107,7 @@ module Descriptions::Permissions
         redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
-        klass = "Views::Controllers::#{controller_path.camelize}::Edit".
-                constantize
-        render(klass.new(description: @description, groups: @groups,
-                         data: @data))
+        render_edit_view
       end
     end
 
@@ -140,11 +137,16 @@ module Descriptions::Permissions
         redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
-        klass = "Views::Controllers::#{controller_path.camelize}::Edit".
-                constantize
-        render(klass.new(description: @description, groups: @groups,
-                         data: @data))
+        render_edit_view_invalid
       end
+    end
+
+    def render_edit_view(status: :ok, **render_opts)
+      klass = "Views::Controllers::#{controller_path.camelize}::Edit".
+              constantize
+      render(klass.new(description: @description, groups: @groups,
+                       data: @data),
+             status: status, **render_opts)
     end
 
     # Return name of group or user if it's a one-user group.

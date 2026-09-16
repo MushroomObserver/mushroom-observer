@@ -3,12 +3,29 @@
 require("test_helper")
 
 class LocationsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   def setup
     @new_pts  = 10
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
     super
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Locations, :Location,
+      overrides: {
+        id_in_set: locations(:burbank).id,
+        by_users: rolf.id,
+        by_editor: rolf.id,
+        projects: projects(:bolete_project).id
+      }
+    )
   end
 
   # Init params based on existing location.
@@ -199,8 +216,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show, params: { id: loc.id, desc: bad_desc_id })
 
     assert_select("body.locations__show")
-    assert_flash_text(:runtime_object_not_found.t(type: :description,
-                                                  id: bad_desc_id))
+    assert_flash(:runtime_object_not_found, type: :description,
+                                            id: bad_desc_id)
   end
 
   def test_show_location_with_unreadable_description
@@ -227,35 +244,37 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 1))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: -1))
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 0))
-    assert_image_link_in_html(/ignore.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: -1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(albion.id)
+    )
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch, path: interest_path(albion.id),
+                         state: -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.new(target: albion, user: rolf, state: false).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 0))
-    assert_image_link_in_html(/watch.*\.png/,
-                              set_interest_path(type: "Location",
-                                                id: albion.id, state: 1))
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete, path: interest_path(albion.id)
+    )
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch, path: interest_path(albion.id),
+                        state: 1
+    )
   end
 
   ##############################################################################
@@ -263,8 +282,7 @@ class LocationsControllerTest < FunctionalTestCase
   #    INDEX
 
   # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
   def test_index
     login
@@ -360,7 +378,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_page_title(:locations.ti)
-    assert_displayed_filters("#{:query_regexp.l}: #{country}")
+    assert_displayed_filters("#{:query_in_country.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
@@ -375,7 +393,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_page_title(:locations.ti)
-    assert_displayed_filters("#{:query_regexp.l}: #{country}")
+    assert_displayed_filters("#{:query_in_country.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true, "USA page should include New Mexico"
@@ -384,6 +402,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def create_new_mexico_location
     Location.create!(name: "Santa Fe, New Mexico, USA",
+                     scientific_name: "USA, New Mexico, Santa Fe",
                      north: 34.1865,
                      west: -116.924,
                      east: -116.88,
@@ -414,7 +433,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_select("body.locations__index")
-    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_flash(:runtime_no_matches, type: :location)
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
@@ -456,7 +475,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_select("body.locations__index")
-    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_flash(:runtime_no_matches, type: :location)
   end
 
   def test_index_by_user_bad_user_id
@@ -465,9 +484,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(locations_path)
   end
 
@@ -509,7 +526,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_editor: user.id })
 
     assert_select("body.locations__index")
-    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_flash(:runtime_no_matches, type: :location)
   end
 
   def test_index_by_editor_bad_user_i
@@ -518,9 +535,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(locations_path)
   end
 
@@ -662,7 +677,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     post(:create, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
+    assert_select("form[data-turbo='true']")
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
@@ -742,7 +758,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     post(:create, params: params)
 
-    assert_redirected_to(observation_path(obs))
+    assert_redirected_to(permanent_observation_path(obs))
   end
 
   def test_create_location_already_exists
@@ -757,9 +773,8 @@ class LocationsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_flash_warning(:runtime_location_already_exists.t(
-                           name: existing_loc.display_name
-                         ))
+    assert_flash_warning(:runtime_location_already_exists,
+                         name: existing_loc.display_name)
     # Should redirect to observation if set_observation, else to location
     assert_redirected_to(location_path(existing_loc.id))
   end
@@ -810,6 +825,39 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(herbarium_path(herbarium))
     herbarium.reload
     assert_equal(loc, herbarium.location)
+  end
+
+  # Part of #2248's fix: Project has no bounding-box UI, so a clean
+  # but unmatched name sends the user here (via set_project) to
+  # actually create the Location, same offramp as set_herbarium/
+  # set_user.
+  def test_create_location_with_set_project
+    project = projects(:eol_project)
+    login("rolf")
+    params = barton_flats_params
+    params[:set_project] = project.id.to_s
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(project_path(project))
+    project.reload
+    assert_equal(loc, project.location)
+  end
+
+  # Regression test: a stale/tampered set_herbarium id used to make
+  # return_to_caller issue no redirect at all (Herbarium.safe_find
+  # returning nil skipped straight past the whole branch), raising a
+  # missing-template error instead of falling back to the location.
+  def test_create_location_with_invalid_set_herbarium
+    login("mary")
+    params = barton_flats_params
+    params[:set_herbarium] = "0"
+
+    post(:create, params: params)
+
+    loc = assigns(:location)
+    assert_redirected_to(location_path(loc.id))
   end
 
   ##############################################################################
@@ -942,7 +990,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     params[:location][:display_name] = ""
     put(:update, params: params)
-    assert_response(:success) # means failure!
+    assert_unprocessable # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     put(:update, params: params)
@@ -966,7 +1014,7 @@ class LocationsControllerTest < FunctionalTestCase
     params = update_params_from_loc(loc)
     params[:location][:display_name] = new_normal_name
     put(:update, params: params)
-    assert_response(:success) # means failure
+    assert_unprocessable # means failure
 
     params[:location][:display_name] = new_scientific_name
     put(:update, params: params)
@@ -1157,7 +1205,7 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     put(:update, params: params)
 
-    assert_flash_warning(:runtime_edit_location_no_change.t)
+    assert_flash_warning(:runtime_edit_location_no_change)
     assert_redirected_to(location_path(loc.id))
   end
 
@@ -1181,7 +1229,8 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Should redirect to merge request form
     assert_redirected_to(new_admin_emails_merge_requests_path(
-                           type: :Location, old_id: to_go.id, new_id: to_stay.id
+                           type: :Location, old_id: to_go.id,
+                           new_id: to_stay.id, format: :html
                          ))
   end
 
@@ -1193,6 +1242,7 @@ class LocationsControllerTest < FunctionalTestCase
     rolf = users(:rolf)
     location = Location.create!(
       name: "Destroyable Location, Oregon, USA",
+      scientific_name: "USA, Oregon, Destroyable Location",
       north: 45.0, south: 44.0, east: -122.0, west: -123.0,
       user: rolf
     )
@@ -1215,6 +1265,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_destroy_location_by_admin
     location = Location.create!(
       name: "Admin Destroyable Location, Oregon, USA",
+      scientific_name: "USA, Oregon, Admin Destroyable Location",
       north: 45.0, south: 44.0, east: -122.0, west: -123.0,
       user: users(:rolf)
     )

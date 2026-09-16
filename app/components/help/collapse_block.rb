@@ -22,8 +22,10 @@ class Components::Help::CollapseBlock < Components::Base
       div(class: div_class) do
         yield if block
         if @direction
-          arrow_class = "arrow-#{@direction}"
-          arrow_class += " hidden-xs" unless @mobile
+          arrow_class = class_names(
+            "arrow-#{@direction}",
+            (Components::Column.mobile_hide_classes unless @mobile)
+          )
           div(class: arrow_class)
         end
       end

@@ -5,18 +5,28 @@ module Views::Controllers::InatImports
   # and Proceed/Go Back buttons. Hidden fields carry form data
   # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
+    prop :expected, _Nilable(::Integer), default: nil
+    prop :unlicensed_obs, _Nilable(::Integer), default: nil
+    prop :inat_import, _Nilable(::InatImport), default: nil
+    prop :requested, _Nilable(::Integer), default: nil
+    prop :after_taxon, _Nilable(::Integer), default: nil
+    prop :not_yet_imported, _Nilable(::Integer), default: nil
+    prop :estimate_with_date, _Nilable(::Integer), default: nil
+    prop :estimated_at, ::Time, default: -> { Time.current }
+    prop :urls, ::Inat::ConfirmURLBuilder
+
     def initialize(model, expected: nil, unlicensed_obs: nil,
                    breakdown: {}, **)
-      @expected = expected
-      @unlicensed_obs = unlicensed_obs
-      @inat_import = breakdown[:inat_import]
-      @requested = breakdown[:requested]
-      @after_taxon = breakdown[:after_taxon]
-      @not_yet_imported = breakdown[:not_yet_imported]
-      @estimate_with_date = breakdown[:estimate_with_date]
-      @estimated_at = Time.current
-      @urls = ::Inat::ConfirmURLBuilder.new(model)
-      super(model, **)
+      super(model,
+            expected: expected,
+            unlicensed_obs: unlicensed_obs,
+            inat_import: breakdown[:inat_import],
+            requested: breakdown[:requested],
+            after_taxon: breakdown[:after_taxon],
+            not_yet_imported: breakdown[:not_yet_imported],
+            estimate_with_date: breakdown[:estimate_with_date],
+            urls: ::Inat::ConfirmURLBuilder.new(model),
+            **)
     end
 
     def view_template
@@ -91,6 +101,7 @@ module Views::Controllers::InatImports
           render_ignored_row(row[:key], row[:count], row[:url])
         end
         unlicensed_ignored_row if import_others?
+        render_over_cap_line
       end
       br
     end
@@ -99,7 +110,8 @@ module Views::Controllers::InatImports
       ignored_row_data.any? ||
         # Import-others' unlicensed obs are never imported. So they
         # belong here rather than own-import's informational-only line.
-        import_others?
+        import_others? ||
+        over_cap_count.positive?
     end
 
     def ignored_row_data
@@ -148,7 +160,8 @@ module Views::Controllers::InatImports
     def render_ignored_total
       return unless @requested && (@estimate_with_date || @expected)
 
-      total = @requested.to_i - (@estimate_with_date || @expected).to_i
+      total = @requested.to_i - (@estimate_with_date || @expected).to_i +
+              over_cap_count
       b { plain(:inat_import_confirm_ignored_total_caption.l) }
       plain(": ")
       span(id: "total_ignored_count") { plain(total.to_s) }
@@ -168,7 +181,7 @@ module Views::Controllers::InatImports
 
     def render_ignored_row(caption_key, count, url)
       div(class: "mb-1") do
-        b { plain("#{caption_key.l}: ") }
+        b { append_colon(caption_key.l) }
         if url
           render(Components::Link::External.new(content: count.to_s,
                                                 path: url))
@@ -186,7 +199,7 @@ module Views::Controllers::InatImports
     # estimate is visible as blank, distinguishable from a genuine zero.
     def unlicensed_ignored_row
       div(class: "mb-1") do
-        b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
+        b { append_colon(:inat_import_confirm_unlicensed_obs_caption.l) }
         span(id: "unlicensed_obs_count") { render_unlicensed_count }
         if @unlicensed_obs.to_i.positive?
           whitespace
@@ -220,7 +233,7 @@ module Views::Controllers::InatImports
       plain(": ")
       span(id: "expected_count") do
         url = expected_obs_url
-        count = (@estimate_with_date || @expected).to_s
+        count = capped_expected_count.to_s
         if url
           render(Components::Link::External.new(content: count, path: url))
         else
@@ -230,6 +243,18 @@ module Views::Controllers::InatImports
     end
 
     def expected_obs_url = @urls.expected_obs_url
+
+    def expected_count = (@estimate_with_date || @expected).to_i
+
+    def capped_expected_count
+      [expected_count, InatImport::MAX_IMPORTABLE].min
+    end
+
+    def over_cap_count = InatImport.excess_over_cap(expected_count)
+
+    def render_over_cap_line
+      render(OverCapLine.new(count: over_cap_count))
+    end
 
     def render_nothing_to_import_notice
       # Match the count that drives the display and the Proceed button, so
@@ -256,7 +281,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      format_hms((@estimate_with_date || @expected) * avg_import_seconds)
+      format_hms(capped_expected_count * avg_import_seconds)
     end
 
     def format_hms(seconds)
@@ -276,16 +301,24 @@ module Views::Controllers::InatImports
     def render_hidden_fields
       [:inat_username, :inat_ids, :import_all, :consent, :import_others,
        :inat_url, :original_inat_url, :recheck_all,
-       :skip_inat_writeback].each do |f|
+       :skip_inat_writeback, :inat_project, :inat_project_id].each do |f|
         hidden_field(f)
       end
     end
 
     def render_buttons
       div(class: "mt-3") do
+        # data-turbo="false": this submit redirects to iNaturalist's
+        # OAuth authorize page (an external host). Turbo Drive's
+        # fetch-based form submission follows redirects as fetch
+        # requests, not real navigations -- a cross-origin redirect
+        # there doesn't land the browser on iNat's login page the way
+        # a plain form submit does. Opting this one button out of
+        # Turbo keeps the redirect a normal top-level navigation.
         submit(:inat_import_confirm_proceed.l, as: :button,
                                                name: "confirmed", value: "1",
-                                               disabled: nothing_to_import?)
+                                               disabled: nothing_to_import?,
+                                               data: { turbo: "false" })
         whitespace
         submit(:inat_import_confirm_go_back.l, as: :button,
                                                name: "go_back", value: "1")

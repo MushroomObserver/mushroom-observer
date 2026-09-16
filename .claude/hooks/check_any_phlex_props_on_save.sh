@@ -55,13 +55,14 @@ COMMENT_LINE_RE='^[0-9]*:[[:space:]]*#'
 #    `,_Any` (no space) AND `(_Any` etc., without matching
 #    identifiers like `_AnyThing` or `Foo_Any`.
 #
-#    Exception: `prop :attributes, ..._Any...` — the established,
+#    Exception: `prop :attributes, ..._Any...` (and the `:args` /
+#    `:opts` catch-all rest-hash spelling) — the established,
 #    repeated pattern for an arbitrary-HTML-attributes passthrough
 #    hash (values are genuinely polymorphic: strings, nested hashes
 #    for `data:`, booleans, etc.). Already used this way across many
 #    components before this hook existed; not worth flagging every time.
-ATTRIBUTES_PROP_RE='^[0-9]*:[[:space:]]*prop :attributes,'
-ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])_Any([^[:alnum:]_]|$)' | grep -v "$COMMENT_LINE_RE" | grep -v "$ATTRIBUTES_PROP_RE" || true)"
+ATTRIBUTES_PROP_RE='^[0-9]*:[[:space:]]*prop :(attributes|args|opts),'
+ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])_Any([^[:alnum:]_]|$)' | grep -v "$COMMENT_LINE_RE" | grep -vE "$ATTRIBUTES_PROP_RE" || true)"
 
 # 2. `.html_safe` (chained on any expression) or `raw(...)`. Phlex
 #    views should use `trusted_html(...)`, which writes safely-

@@ -14,7 +14,7 @@ module Images
       # # Prove that it won't email someone who has opted out of all emails.
       mary.update(no_emails: true)
       requires_login(:new, id: id)
-      assert_flash_text(:permission_denied.t)
+      assert_flash(:permission_denied)
     end
 
     def test_send_commercial_inquiry
@@ -41,7 +41,9 @@ module Images
              params: { id: image.id, email: { message: "" } })
       end
       assert_flash_error
+      assert_unprocessable
       assert_select("body.emails__new")
+      assert_select("form[data-turbo='true']")
     end
 
     def test_new_turbo_stream

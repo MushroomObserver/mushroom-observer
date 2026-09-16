@@ -17,6 +17,17 @@ description: Professional responses without casual affirmations
   - State what was accomplished factually
   - Focus on the work itself, not celebrating completion
 
+- State the action directly instead of prefacing it with "Let me":
+  - Do NOT open with "Let me ..." to narrate what you're about to do
+  - Name the action in progressive form or as a plain statement
+  - An occasional "Let me" is fine; the point is to avoid the reflex of
+    prefacing nearly every action with it
+
+- Avoid the word "genuine" (and "genuinely"):
+  - It adds nothing; state the fact without it
+  - Same applies to the other empty intensifiers already discouraged
+    elsewhere ("real", "actually", "truly")
+
 - Be concise and focused:
   - Provide clear, technical information
   - Explain what changed and why
@@ -45,3 +56,19 @@ When completing tasks:
 
 ✅ Use instead:
 "I'll help with that. Here's the approach:"
+
+---
+
+❌ Avoid:
+"Let me update the project memory to reflect it."
+
+✅ Use instead:
+"Updating the project memory to reflect it."
+
+---
+
+❌ Avoid:
+"This is a genuine risk if production still holds duplicates."
+
+✅ Use instead:
+"This is a risk if production still holds duplicates."

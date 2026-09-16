@@ -152,6 +152,12 @@ module AbstractModel::OrderingScopes
       end
     end
 
+    def order_by_external_id
+      return all unless self == ExternalLink
+
+      order(ExternalLink[:external_id].asc)
+    end
+
     def order_by_herbarium_label
       return all unless self == HerbariumRecord
 
@@ -305,12 +311,6 @@ module AbstractModel::OrderingScopes
       return all unless column_names.include?("updated_at")
 
       order(arel_table[:updated_at].desc)
-    end
-
-    def order_by_url
-      return all unless self == ExternalLink
-
-      order(ExternalLink[:url].asc)
     end
 
     def order_by_user

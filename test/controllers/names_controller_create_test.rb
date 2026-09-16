@@ -84,7 +84,8 @@ class NamesControllerCreateTest < FunctionalTestCase
     login(rolf.login)
     post(:create, params: params)
 
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     last_name = Name.last
     assert_equal(count, Name.count,
                  "Shouldn't have created #{last_name.search_name.inspect}.")
@@ -109,7 +110,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     }
     login(mary.login)
     post(:create, params: params)
-    assert_response(:success)
+    assert_unprocessable
     last_name = Name.last
     assert_equal(name_count, Name.count,
                  "Shouldn't have created #{last_name.search_name.inspect}.")
@@ -129,13 +130,12 @@ class NamesControllerCreateTest < FunctionalTestCase
         citation: desired_name.citation
       }
     }
-    flash_text = :create_name_multiple_names_match.t(str: text_name)
     count = Name.count
     login(rolf.login)
     post(:create, params: params)
 
-    assert_flash_text(flash_text)
-    assert_response(:success)
+    assert_flash(:create_name_multiple_names_match, str: text_name)
+    assert_unprocessable
     last_name = Name.last
     assert_equal(count, Name.count,
                  "Shouldn't have created #{last_name.search_name.inspect}.")
@@ -157,11 +157,9 @@ class NamesControllerCreateTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_response(:success)
-    flash_text = :runtime_name_create_already_exists.t(
-      name: name.display_name
-    )
-    assert_flash_text(flash_text)
+    assert_unprocessable
+    assert_flash(:runtime_name_create_already_exists,
+                 name: name.display_name)
     assert_empty(name.reload.author)
     assert_equal(old_name_count, Name.count)
     expect = user.contribution
@@ -180,11 +178,9 @@ class NamesControllerCreateTest < FunctionalTestCase
     }
     post(:create, params: params)
 
-    assert_response(:success)
-    flash_text = :runtime_name_create_already_exists.t(
-      name: name.display_name
-    )
-    assert_flash_text(flash_text)
+    assert_unprocessable
+    assert_flash(:runtime_name_create_already_exists,
+                 name: name.display_name)
     assert_equal(author, name.reload.author)
     assert_equal(old_name_count, Name.count)
     expect = user.contribution
@@ -252,7 +248,11 @@ class NamesControllerCreateTest < FunctionalTestCase
     ) do
       post(:create, params: params)
     end
-    assert_flash_error(:name_error_field_end.l)
+    assert_flash_error(
+      :validate_name_author_ending,
+      object_error_type: :name,
+      object_error_attribute: :author
+    )
   end
 
   def test_create_name_citation_leading_commma
@@ -275,7 +275,10 @@ class NamesControllerCreateTest < FunctionalTestCase
     ) do
       post(:create, params: params)
     end
-    assert_flash_error(:name_error_field_start.l)
+    assert_flash_error(
+      :name_error_field_start,
+      field: :citation.ti, start: ERB::Util.html_escape(", ")
+    )
   end
 
   def test_create_name_author_limit
@@ -324,7 +327,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     post(:create, params: { name: { text_name: text_name, rank: "Family" } })
     assert_nil(Name.find_by(text_name: text_name),
                "Should not create name on first submit when rank conflicts")
-    assert_flash_warning("Should flash rank warning to admin")
+    assert_flash_warning(on_fail: "Should flash rank warning to admin")
     assert_select("input[type=hidden][name=approved_rank]",
                   { count: 1 },
                   "Form should include approved_rank hidden field")

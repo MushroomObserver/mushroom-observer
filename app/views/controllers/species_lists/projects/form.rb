@@ -7,15 +7,19 @@ module Views::Controllers::SpeciesLists::Projects
   # `SpeciesLists::ProjectsController#update` via PUT under the
   # `species_list_projects[*]` namespace.
   class Form < ::Components::ApplicationForm
-    def initialize(list:, projects:, object_states:, project_states:, **)
-      @list = list
-      @projects = projects
-      @object_states = object_states
-      @project_states = project_states
-      super(build_form_object,
+    prop :list, ::SpeciesList
+    prop :projects, _Array(::Project)
+    prop :object_states, _Hash(Symbol, _Boolean)
+    prop :project_states, _Hash(Integer, _Boolean)
+
+    def initialize(list:, projects:, object_states:, project_states:,
+                   **attrs)
+      super(build_form_object(object_states, project_states),
+            list: list, projects: projects, object_states: object_states,
+            project_states: project_states,
             id: "species_list_projects_form",
             method: :put,
-            **)
+            **attrs)
     end
 
     def view_template
@@ -28,12 +32,12 @@ module Views::Controllers::SpeciesLists::Projects
 
     private
 
-    def build_form_object
+    def build_form_object(object_states, project_states)
       FormObject::SpeciesListProjects.new(
-        objects_list: @object_states[:list] ? "1" : "0",
-        objects_obs: @object_states[:obs] ? "1" : "0",
-        objects_img: @object_states[:img] ? "1" : "0",
-        project_ids: @project_states.select { |_id, on| on }.keys.map(&:to_s)
+        objects_list: object_states[:list] ? "1" : "0",
+        objects_obs: object_states[:obs] ? "1" : "0",
+        objects_img: object_states[:img] ? "1" : "0",
+        project_ids: project_states.select { |_id, on| on }.keys.map(&:to_s)
       )
     end
 

@@ -39,6 +39,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Add objects which are not included in fixtures
     loc = Location.create(user: @user,
                           name: "Sevier Co., Tennessee, USA",
+                          scientific_name: "USA, Tennessee, Sevier Co.",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
     before_total_imported_count = @inat_import.total_imported_count.to_i
@@ -86,6 +87,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(@user.unique_text_name, obs.collector)
     assert_equal(@user.id, obs.collector_user_id)
 
+    # New imports are read-only reflections (#4214): reflected_at is
+    # stamped at creation, so scalar-core edits are blocked until the
+    # value is changed at the source and resynced (#4215).
+    assert_not_nil(obs.reflected_at, "Import should stamp reflected_at")
+    assert(obs.reflection?, "A new import should be a read-only reflection")
+
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
@@ -109,6 +116,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -162,15 +170,22 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions
     raiser = ->(*) { raise(ActiveRecord::RecordInvalid.new(ExternalLink.new)) }
-    ExternalLink.stub(:create!, raiser) do
-      assert_no_difference(
-        "Observation.count",
-        "A cross-referenced iNat obs is skipped even when the " \
-        "self-heal link fails"
-      ) do
-        InatImportJob.perform_now(@inat_import)
+    # Inat::ObservationImporter#create_crosslink logs the validation
+    # failure via Rails.logger.warn -- capture it instead of letting it
+    # print to the test suite's console.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      ExternalLink.stub(:create!, raiser) do
+        assert_no_difference(
+          "Observation.count",
+          "A cross-referenced iNat obs is skipped even when the " \
+          "self-heal link fails"
+        ) do
+          InatImportJob.perform_now(@inat_import)
+        end
       end
     end
+    assert_includes(logged, "failed to create remote_manual ExternalLink")
 
     assert_nil(
       ExternalLink.find_by(external_id: @parsed_results.first[:id].to_s,
@@ -218,6 +233,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -250,6 +266,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Add objects which are not included in fixtures
     Location.create(user: user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -287,6 +304,7 @@ class InatImportJobTest < ActiveJob::TestCase
     loc = Location.create(
       user: @user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
+      scientific_name: "USA, Oregon, Multnomah Co., Troutdale",
       north: 45.5609, south: 45.5064,
       east: -122.367, west: -122.431
     )
@@ -532,6 +550,46 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
     assert(obs.sequences.none?)
+  end
+
+  # Use iNat's rank if it conflicts with MO's rank-guessing heuristic.
+  # MO's rank-guessing suffix-based heuristic can give an incorrect rank
+  # for Names ending in `eae`.
+  def test_import_job_ambiguous_rank_suffix
+    create_ivars_from_filename("leucocoprineae")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Leucocoprineae", rank: "Tribe")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Tribe"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
+  end
+
+  # A rank MO can't reliably infer from the name string: iNat's declared
+  # rank is authoritative, using the same trusted-rank fallback as the
+  # ambiguous-suffix case above.
+  def test_import_job_superorder_rank
+    create_ivars_from_filename("stemonitidia")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Stemonitidia", rank: "Superorder")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Superorder"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
   end
 
   # Prove that Namings, Votes, Identification are correct
@@ -900,6 +958,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -935,8 +994,7 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     ExternalLink.create!(
       user: @user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id.to_s,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id.to_s
     )
 
     stub_inat_interactions
@@ -962,6 +1020,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @user.update(inat_username: @inat_import.inat_username)
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -998,8 +1057,9 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJob.perform_now(@inat_import)
 
     assert_equal(
-      updated_inat_username, @user.reload.inat_username,
-      "Failed to update User's inat_username after successful import"
+      updated_inat_username.downcase, @user.reload.inat_username,
+      "Failed to update User's inat_username (normalized to lowercase) " \
+      "after successful import"
     )
   end
 
@@ -1184,6 +1244,31 @@ class InatImportJobTest < ActiveJob::TestCase
                "must not be persisted")
   end
 
+  # A record saved before inat_username was normalized to lowercase can
+  # hold the login with different case; the logged-in-user check must
+  # not treat it as a different account (iNat logins are lowercase).
+  def test_import_mixed_case_username_matches_logged_in_user
+    create_ivars_from_filename("calostoma_lutescens")
+    lowercase_login = @inat_import.inat_username
+    @inat_import.update_columns(inat_username: lowercase_login.capitalize)
+
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+    stub_inat_interactions(login: lowercase_login)
+
+    assert_difference(
+      "Observation.count", 1,
+      "The same iNat account differing only by case should import"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+    assert_equal(lowercase_login, @user.reload.inat_username,
+                 "Persisted username should be normalized to lowercase")
+  end
+
   def test_super_importer_anothers_observation
     @user = users(:dick)
     inat_username = @user.inat_username
@@ -1290,6 +1375,38 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Import should be Done")
     assert(@inat_import.canceled?,
            "Import should remain canceled")
+  end
+
+  # reached_import_cap? must be checked per-observation, not just between
+  # pages -- otherwise a page/batch already in progress when the cap is
+  # hit would overshoot it by up to a full page.
+  def test_import_respects_max_importable_mid_page
+    create_ivars_from_filename("listed_ids") # importing multiple observations
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "231104466,195434438",
+                                     token: "MockCode",
+                                     inat_username: "anything")
+    stub_inat_interactions
+
+    saved_max = InatImport.const_get(:MAX_IMPORTABLE)
+    InatImport.send(:remove_const, :MAX_IMPORTABLE)
+    InatImport.const_set(:MAX_IMPORTABLE, 1)
+
+    begin
+      assert_difference(
+        "Observation.count", 1,
+        "Should stop importing once MAX_IMPORTABLE is reached, " \
+        "even mid-page"
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+
+      assert_equal(1, @inat_import.reload.imported_count,
+                   "imported_count should not exceed MAX_IMPORTABLE")
+    ensure
+      InatImport.send(:remove_const, :MAX_IMPORTABLE)
+      InatImport.const_set(:MAX_IMPORTABLE, saved_max)
+    end
   end
 
   def test_oauth_failure
@@ -1431,6 +1548,7 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("calostoma_lutescens")
     @user.update(inat_username: @inat_import.inat_username)
     Location.create(user: @user, name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
     stub_inat_interactions
@@ -1438,7 +1556,7 @@ class InatImportJobTest < ActiveJob::TestCase
     warnings = []
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
+      link.errors.add(:base, :invalid)
       raise(ActiveRecord::RecordInvalid.new(link))
     end
     Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do

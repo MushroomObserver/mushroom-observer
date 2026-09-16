@@ -3,13 +3,33 @@
 require("test_helper")
 
 class FieldSlipsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   setup do
     @field_slip = field_slips(:field_slip_one)
+  end
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::FieldSlips, :FieldSlip,
+      overrides: {
+        id_in_set: field_slips(:field_slip_one).id,
+        by_users: rolf.id,
+        observation: observations(:minimal_unknown_obs).id,
+        projects: projects(:bolete_project).id
+      }
+    )
   end
 
   def test_should_get_index
     requires_login(:index)
     assert_response(:success)
+    # GET forms aren't Turbo-safe by default either (see
+    # .claude/rules/turbo_submit_forms.md).
+    assert_select("form.form-inline[data-turbo='false']")
   end
 
   def test_should_get_index_at_id
@@ -23,9 +43,43 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_index_for_project_bad_id_redirects
+    bad_project_id = Project.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { project: bad_project_id })
+
+    assert_flash(:runtime_object_not_found, type: :project,
+                                            id: bad_project_id)
+    assert_redirected_to(projects_path)
+  end
+
   def test_should_get_index_for_user
     requires_login(:index, by_user: @field_slip.user.id)
     assert_response(:success)
+  end
+
+  def test_index_for_user_single_match_redirects
+    user = roy
+    assert_not(FieldSlip.where(user: user).exists?,
+               "Test needs a user with no existing field slips")
+    slip = FieldSlip.create!(user: user, project: @field_slip.project,
+                             code: "EOL-ROY1")
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(field_slip_path(slip.id))
+  end
+
+  def test_index_for_user_bad_id
+    bad_user_id = User.maximum(:id).to_i + 1000
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
+    assert_redirected_to(users_path)
   end
 
   # eol_project: admins rolf + mary; katrina is a member but not admin.
@@ -142,7 +196,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
     slip = FieldSlip.find_by(code: code)
     assert_equal(rolf.unique_text_name, slip.collector)
-    assert_redirected_to(observation_url(slip.observation))
+    assert_redirected_to(permanent_observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
@@ -169,7 +223,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # rolf is not the owner, so his supplied collector is ignored and the
     # observation's existing collector is preserved.
     assert_equal("Original Collector", slip.collector)
-    assert_redirected_to(observation_url(slip.observation))
+    assert_redirected_to(permanent_observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(rolf.id))
   end
 
@@ -195,11 +249,38 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(422, response.status)
   end
 
-  def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
+  # Owning the observation no longer lets you put it in a project you
+  # don't belong to, and the refusal says so rather than failing silently.
+  # See #4932.
+  def test_should_not_create_field_slip_with_last_viewed_obs_when_not_member
     login(@field_slip.user.login)
     ObservationView.update_view_stats(@field_slip.observation&.id,
                                       @field_slip.user_id)
     proj = projects(:falmouth_2023_09_project)
+    assert_not(proj.member?(@field_slip.user), "fixture: owner is not a member")
+    code = "#{proj.field_slip_prefix}-1234"
+    assert_difference("FieldSlip.count", 0) do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: { code: code, project_id: proj.id }
+           })
+    end
+
+    assert_flash_error
+    assert_nil(FieldSlip.find_by(code: code))
+    assert_equal(422, response.status)
+  end
+
+  def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
+    login(@field_slip.user.login)
+    ObservationView.update_view_stats(@field_slip.observation&.id,
+                                      @field_slip.user_id)
+    # A project the user IS in, so the constraint check is what refuses.
+    proj = projects(:eol_project)
+    assert(proj.member?(@field_slip.user), "fixture: owner is a member")
+    proj.update!(start_date: Date.parse("1990-01-01"),
+                 end_date: Date.parse("1990-12-31"))
     code = "#{proj.field_slip_prefix}-1234"
     assert_difference("FieldSlip.count", 0) do
       post(:create,
@@ -241,7 +322,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     fs = FieldSlip.find_by(code: code)
     assert(fs.user)
     obs = fs.observation
-    assert_redirected_to(observation_url(obs))
+    assert_redirected_to(permanent_observation_url(obs))
     assert(project.member?(user))
     assert(project.observations.member?(obs))
     assert(species_list.observations.member?(obs))
@@ -311,7 +392,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_equal(date, obs.when)
-    assert_redirected_to(observation_url(obs.id))
+    assert_redirected_to(permanent_observation_url(obs.id))
   end
 
   def test_should_create_obs_with_link_to_inat
@@ -374,7 +455,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not_nil(field_slip, "Cannot find FieldSlip for code #{code}")
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
-    assert_redirected_to(observation_url(obs.id))
+    assert_redirected_to(permanent_observation_url(obs.id))
     assert_equal("Fungi", obs.text_name)
   end
 
@@ -397,7 +478,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not_nil(field_slip, "Cannot find FieldSlip for code #{code}")
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
-    assert_redirected_to(observation_url(obs.id))
+    assert_redirected_to(permanent_observation_url(obs.id))
   end
 
   def test_should_create_field_slip_in_project_from_code
@@ -451,7 +532,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_take_admin_to_edit
     login(@field_slip.user.login)
     get(:show, params: { id: @field_slip.code })
-    assert_redirected_to(observation_url(@field_slip.observation))
+    assert_redirected_to(permanent_observation_url(@field_slip.observation))
     # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
@@ -508,6 +589,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
       "select[name=?] option[value=?]",
       "field_slip[project_id]", bolete.id.to_s
     )
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_show_field_slip_and_allow_owner_to_change
@@ -520,15 +602,76 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
   def test_should_show_field_slip_by_code
     get(:show, params: { id: @field_slip.code })
-    assert_redirected_to(observation_url(@field_slip.observation))
+    assert_redirected_to(permanent_observation_url(@field_slip.observation))
   end
 
-  def test_should_redirect_to_get_new
+  # A code with no field slip goes straight to the observation form with
+  # the code prefilled — the user scanned a slip to record an observation,
+  # and the slip row is created lazily when that observation is saved.
+  def test_unused_code_redirects_to_new_observation
     login
     project = projects(:bolete_project)
     code = "#{project.field_slip_prefix}-1235"
+
     get(:show, params: { id: code })
-    assert_redirected_to(new_field_slip_url(code: code, id: code))
+
+    assert_redirected_to(new_observation_url(field_code: code))
+  end
+
+  # A numeric id is looked up by id, not by code, so a missing one can't
+  # go to the observation form — there is no code to prefill. It falls
+  # back to the field slip form, which is the only branch of `show` a
+  # code no longer reaches.
+  def test_missing_numeric_id_falls_back_to_new_field_slip
+    login
+
+    get(:show, params: { id: "999999999" })
+
+    assert_redirected_to(new_field_slip_url(code: "999999999",
+                                            id: "999999999"))
+  end
+
+  # Same destination when a FieldSlip row exists but holds no
+  # observations: from the scanner's side that is indistinguishable from
+  # an unused code, and the slip's own show page would be a dead end
+  # ("No Observation found" plus an edit icon).
+  def test_code_with_slip_but_no_observations_redirects_to_new_observation
+    login
+    slip = field_slips(:field_slip_no_obs)
+    assert_empty(slip.observations, "fixture must have no observations")
+
+    get(:show, params: { id: slip.code })
+
+    assert_redirected_to(new_observation_url(field_code: slip.code))
+  end
+
+  # A lower-case scan still resolves and hands the form the canonical
+  # upper-case code.
+  def test_code_is_upcased_into_the_observation_form
+    login
+    slip = field_slips(:field_slip_no_obs)
+
+    get(:show, params: { id: slip.code.downcase })
+
+    assert_redirected_to(new_observation_url(field_code: slip.code))
+  end
+
+  # AddDispatchController is what puts these on a /qr/ URL (the "Add"
+  # button on project and species-list pages); they have to survive the
+  # hop into the observation form.
+  def test_add_dispatch_context_survives_redirect_to_new_observation
+    login
+    project = projects(:bolete_project)
+    list = species_lists(:first_species_list)
+    code = "#{project.field_slip_prefix}-1236"
+
+    get(:show, params: { id: code, project: project.id,
+                         species_list: list.id, name: "Agaricus" })
+
+    assert_redirected_to(
+      new_observation_url(field_code: code, project: project.id,
+                          species_list: list.id, name: "Agaricus")
+    )
   end
 
   def test_show_project_prphan_has_edit_link
@@ -937,6 +1080,34 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
   end
 
+  # Coverage gap: no existing create test exercises the
+  # check_field_slip_project_gaps branch reached via
+  # attach_selected_observations -- POSTs two observations whose
+  # projects differ (obs3 is in bolete_project), which sets
+  # @field_slip_project_gaps and renders the modal instead of
+  # redirecting.
+  def test_create_with_project_gaps_renders_modal
+    login("rolf")
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs) # in bolete_project
+    [obs2, obs3].each { |obs| obs.update_column(:occurrence_id, nil) }
+    code = "EOL-9003"
+
+    post(:create,
+         params: {
+           observation_ids: [obs2.id.to_s, obs3.id.to_s],
+           field_slip: { code: code }
+         })
+
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
+    assert_select(
+      "#modal_resolve_projects.modal.fade.in",
+      { count: 1 },
+      "Expected Components::Modal for project-gaps overlay"
+    )
+  end
+
   # ---------- sync_selected_observations on update ----------
 
   def test_update_sync_adds_observation
@@ -1136,7 +1307,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
           field_slip: { code: fs.code }
         })
 
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     # Components::Modal markup proves the new modal composition
     # rendered, not just that we got a 200.
     assert_select(

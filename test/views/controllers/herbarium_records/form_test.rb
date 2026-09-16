@@ -37,9 +37,9 @@ module Views::Controllers::HerbariumRecords
     end
 
     def test_local_form_omits_turbo
-      html = render_form(model: HerbariumRecord.new, local: true)
+      html = render_form(model: HerbariumRecord.new, turbo: false)
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_auto_url_for_new_record
@@ -57,12 +57,12 @@ module Views::Controllers::HerbariumRecords
 
     private
 
-    def render_form(model:, action: "/test_action", local: false)
+    def render_form(model:, action: "/test_action", turbo: true)
       render(Form.new(model,
                       observation: @observation,
                       action: action,
                       id: "herbarium_record_form",
-                      local: local))
+                      turbo: turbo))
     end
   end
 end

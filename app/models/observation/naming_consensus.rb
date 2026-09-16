@@ -54,7 +54,7 @@
 
 # Disable Metrics/ClassLength - genuinely a lot of vote/consensus
 # bookkeeping in one place; hasn't been split up yet.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class Observation
   class NamingConsensus
     attr_accessor :observation, :namings, :votes, :consensus_changed
@@ -556,4 +556,3 @@ class Observation
     end
   end
 end
-# rubocop:enable Metrics/ClassLength

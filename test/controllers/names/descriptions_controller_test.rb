@@ -4,6 +4,24 @@ require("test_helper")
 
 module Names
   class DescriptionsControllerTest < FunctionalTestCase
+    include QueryParamRoundTripTestHelpers
+
+    # See QueryParamRoundTripTestHelpers.
+    def test_create_query_from_url_params_recognizes_every_top_level_param
+      login
+
+      assert_all_top_level_params_survive(
+        Query::NameDescriptions, :NameDescription,
+        overrides: {
+          id_in_set: name_descriptions(:agaricus_campestras_desc).id,
+          by_users: rolf.id,
+          by_author: rolf.id,
+          by_editor: rolf.id,
+          projects: projects(:bolete_project).id
+        }
+      )
+    end
+
     def empty_notes
       NameDescription.all_note_fields.index_with do |_field|
         ""
@@ -68,7 +86,7 @@ module Names
       login
       get(:index, params: { by_author: user })
 
-      assert_flash_text("No matching name descriptions found.")
+      assert_flash(:runtime_no_matches, type: :name_description)
       assert_select("body.descriptions__index")
     end
 
@@ -79,9 +97,7 @@ module Names
       login
       get(:index, params: { by_author: bad_user_id })
 
-      assert_flash_text(
-        :runtime_object_not_found.l(type: "user", id: bad_user_id)
-      )
+      assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
       assert_redirected_to(name_descriptions_index_path)
     end
 
@@ -129,7 +145,7 @@ module Names
       login
       get(:index, params: { by_editor: user.id })
 
-      assert_flash_text("No matching name descriptions found.")
+      assert_flash(:runtime_no_matches, type: :name_description)
       assert_select("body.descriptions__index")
     end
 
@@ -141,9 +157,7 @@ module Names
       login
       get(:index, params: { by_editor: bad_user_id })
 
-      assert_flash_text(
-        :runtime_object_not_found.l(type: "user", id: bad_user_id)
-      )
+      assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
       assert_redirected_to(name_descriptions_index_path)
     end
 
@@ -651,7 +665,10 @@ module Names
         }
       }
       put(:update, params: params)
-      assert_flash_warning(:runtime_edit_name_description_no_change.t)
+      assert_flash_warning([:runtime_description_public_write_wrong,
+                            :runtime_edit_name_description_no_change])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Cover resolve_merge_conflicts_and_delete_old_description
@@ -705,7 +722,10 @@ module Names
       }
       put(:update, params: params)
 
-      assert_flash(/permission to delete/)
+      assert_flash(
+        [[:runtime_edit_name_description_success, { id: dest_desc.id }],
+         :runtime_description_merge_delete_denied]
+      )
       assert(NameDescription.safe_find(old_desc.id))
     end
   end

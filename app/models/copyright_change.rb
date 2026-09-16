@@ -51,9 +51,13 @@ class CopyrightChange < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    errors.add(:user, "missing user") unless user
-    errors.add(:user, "missing target") unless target
-    errors.add(:user, "missing modification time") unless updated_at
-    errors.add(:user, "missing license") unless license
+    errors.add(:user, :invalid, message: "missing user") unless user
+    errors.add(:user, :invalid, message: "missing target") unless target
+    unless updated_at
+      errors.add(:user, :invalid, message: "missing modification time")
+    end
+    return if license
+
+    errors.add(:user, :invalid, message: "missing license")
   end
 end

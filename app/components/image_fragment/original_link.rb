@@ -15,6 +15,7 @@ class Components::ImageFragment::OriginalLink < Components::Base
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :link_class, String, default: ""
+  prop :button, _Nilable(_Union(*Components::Button::VARIANTS)), default: nil
 
   def view_template
     id = @image&.id || @image_id
@@ -24,6 +25,7 @@ class Components::ImageFragment::OriginalLink < Components::Base
          target: "/images/#{id}/original",
          new_tab: true,
          class: @link_class,
+         button: @button,
          data: {
            controller: "image-loader",
            action: "click->image-loader#load",

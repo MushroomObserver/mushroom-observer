@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_04_020000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -48,9 +48,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
   create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.integer "user_id"
-    t.string "summary", limit: 100
-    t.text "comment"
-    t.string "target_type", limit: 30
+    t.string "summary", limit: 100, collation: "utf8mb4_general_ci"
+    t.text "comment", collation: "utf8mb4_general_ci"
+    t.string "target_type", limit: 30, collation: "utf8mb4_general_ci"
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
     t.index ["target_id", "target_type"], name: "target_index"
@@ -84,7 +84,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.integer "user_id"
     t.integer "target_id"
     t.integer "external_site_id"
-    t.string "url", limit: 100
     t.string "target_type", limit: 64
     t.string "external_id", limit: 64
     t.integer "relationship", default: 0, null: false
@@ -94,6 +93,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
     t.index ["external_site_id", "target_type", "external_id"], name: "index_external_links_on_site_target_extid"
     t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
+    t.index ["target_type", "target_id", "external_site_id", "external_id"], name: "index_external_links_on_target_and_site_and_extid", unique: true
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"
   end
 
@@ -104,6 +104,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.text "description"
     t.datetime "last_successful_sync_at"
     t.string "url_template"
+  end
+
+  create_table "field_slip_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "image_id", null: false
+    t.integer "user_id", null: false
+    t.string "provider", null: false
+    t.string "model", null: false
+    t.string "prompt_version"
+    t.json "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "status", default: "complete", null: false
+    t.index ["image_id"], name: "index_field_slip_extracts_on_image_id", unique: true
+    t.index ["user_id"], name: "index_field_slip_extracts_on_user_id"
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -203,8 +217,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.string "content_type", limit: 100
     t.integer "user_id"
     t.date "when"
-    t.text "notes"
-    t.string "copyright_holder"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.string "copyright_holder", collation: "utf8mb4_general_ci"
     t.integer "license_id", default: 10, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
@@ -212,7 +226,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.integer "height"
     t.float "vote_cache"
     t.boolean "ok_for_export", default: true, null: false
-    t.string "original_name", limit: 120, default: ""
+    t.string "original_name", limit: 120, default: "", collation: "utf8mb4_general_ci"
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
     t.boolean "diagnostic", default: true, null: false
@@ -250,6 +264,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.text "license_added_inat_ids"
     t.boolean "recheck_all", default: false, null: false
     t.integer "ignored_unlicensed_count", default: 0, null: false
+    t.text "original_inat_url"
+    t.integer "project_id"
+    t.text "constraint_violation_obs_ids"
+    t.text "unlicensed_image_events"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -405,8 +423,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.float "low"
     t.boolean "ok_for_export", default: true, null: false
     t.text "notes"
-    t.string "name", limit: 1024
-    t.string "scientific_name", limit: 1024
+    t.string "name", limit: 1024, null: false
+    t.string "scientific_name", limit: 1024, null: false
     t.boolean "locked", default: false, null: false
     t.boolean "hidden", default: false, null: false
     t.decimal "box_area", precision: 21, scale: 10
@@ -539,7 +557,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.boolean "locked", default: false, null: false
     t.integer "icn_id"
+    t.index ["search_name"], name: "index_names_on_search_name"
     t.index ["synonym_id"], name: "synonym_index"
+    t.index ["text_name"], name: "index_names_on_text_name"
   end
 
   create_table "naming_reasons", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -556,6 +576,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.integer "user_id"
     t.float "vote_cache", default: 0.0
     t.text "reasons"
+    t.index ["observation_id", "user_id", "name_id"], name: "index_namings_on_obs_user_name", unique: true
     t.index ["observation_id"], name: "index_namings_on_observation_id"
   end
 
@@ -621,12 +642,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.integer "inat_import_id"
     t.datetime "reflected_at"
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
+    t.index ["created_at", "id"], name: "index_observations_on_created_at_and_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"
     t.index ["location_id"], name: "index_observations_on_location_id"
+    t.index ["log_updated_at", "id"], name: "index_observations_on_log_updated_at_and_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
     t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
     t.index ["reflected_at"], name: "index_observations_on_reflected_at"
+    t.index ["user_id", "created_at"], name: "index_observations_on_user_id_and_created_at"
+    t.index ["when", "id"], name: "index_observations_on_when_and_id"
   end
 
   create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -742,7 +767,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
   create_table "query_records", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "updated_at", precision: nil
     t.integer "access_count"
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.boolean "permalink", default: false
   end
 
@@ -783,6 +808,33 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
   end
 
+  create_table "solid_queue_batch_executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.bigint "batch_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["batch_id"], name: "index_solid_queue_batch_executions_on_batch_id"
+    t.index ["job_id"], name: "index_solid_queue_batch_executions_on_job_id", unique: true
+  end
+
+  create_table "solid_queue_batches", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "active_job_batch_id"
+    t.string "description"
+    t.text "on_finish"
+    t.text "on_success"
+    t.text "on_failure"
+    t.text "metadata"
+    t.integer "total_jobs", default: 0, null: false
+    t.integer "completed_jobs", default: 0, null: false
+    t.integer "failed_jobs", default: 0, null: false
+    t.datetime "enqueued_at"
+    t.datetime "finished_at"
+    t.datetime "failed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active_job_batch_id"], name: "index_solid_queue_batches_on_active_job_batch_id", unique: true
+    t.index ["finished_at"], name: "index_solid_queue_batches_on_finished_at"
+  end
+
   create_table "solid_queue_blocked_executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.string "queue_name", null: false
@@ -821,7 +873,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.string "concurrency_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "batch_id"
     t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id"
+    t.index ["batch_id"], name: "index_solid_queue_jobs_on_batch_id"
     t.index ["class_name"], name: "index_solid_queue_jobs_on_class_name"
     t.index ["finished_at"], name: "index_solid_queue_jobs_on_finished_at"
     t.index ["queue_name", "finished_at"], name: "index_solid_queue_jobs_for_filtering"
@@ -1023,7 +1077,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.boolean "email_names_admin", default: false
     t.integer "thumbnail_size", default: 1
     t.integer "image_size", default: 5
-    t.string "default_rss_type", limit: 40, default: "all"
+    t.string "default_rss_type", default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
     t.datetime "last_activity", precision: nil
@@ -1031,7 +1085,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.text "mailing_address"
     t.integer "layout_count"
     t.boolean "view_owner_id", default: false, null: false
@@ -1082,6 +1136,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
 
   add_foreign_key "observations", "users", column: "collector_user_id"
   add_foreign_key "project_aliases", "projects"
+  add_foreign_key "solid_queue_batch_executions", "solid_queue_batches", column: "batch_id", on_delete: :cascade
+  add_foreign_key "solid_queue_batch_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

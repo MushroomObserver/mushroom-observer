@@ -8,26 +8,13 @@ module Views::Controllers::VisualModels
   class Form < ::Components::ApplicationForm
     def view_template
       super do
-        render_errors if model.errors.any?
+        render(Components::Form::Errors.new(model: model))
         render_name_field
         submit(:submit.ti, center: true)
       end
     end
 
     private
-
-    def render_errors
-      count = pluralize(model.errors.count, :error.l, plural: :errors.l)
-
-      Alert(level: :danger, id: "error_explanation") do
-        h2 { "#{count} #{:visual_model_errors.l}:" }
-        ul do
-          model.errors.each do |error|
-            li { error.full_message }
-          end
-        end
-      end
-    end
 
     def render_name_field
       div(class: "form-group field") do

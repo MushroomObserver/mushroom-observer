@@ -7,10 +7,11 @@ module Views::Controllers::CollectionNumbers
   # `new.rb` and `edit.rb`, and dynamically by
   # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, observation: nil, back: nil, **)
-      @observation = observation || model.observations.first
-      @back = back
-      super(model, **)
+    prop :observation, ::Observation
+    prop :back, _Nilable(String), default: nil
+
+    def initialize(model, observation: nil, **)
+      super(model, observation: observation || model.observations.first, **)
     end
 
     def view_template
@@ -39,14 +40,14 @@ module Views::Controllers::CollectionNumbers
     def render_name_field
       text_field(:name,
                  label: :collection_number_name,
-                 between: :required,
+                 label_appends: :required,
                  data: { autofocus: true })
     end
 
     def render_number_field
       text_field(:number,
                  label: :collection_number_number,
-                 between: :required)
+                 label_appends: :required)
     end
 
     def submit_text

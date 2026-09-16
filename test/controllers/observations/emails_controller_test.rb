@@ -43,8 +43,8 @@ module Observations
       ) do
         post(:create, params: params)
       end
-      assert_redirected_to(observation_path(obs.id))
-      assert_flash_text(:runtime_ask_observation_question_success.t)
+      assert_redirected_to(permanent_observation_path(obs.id))
+      assert_flash(:runtime_ask_observation_question_success)
     end
 
     # Regression test for #3791: on success the modal must close (not
@@ -66,7 +66,7 @@ module Observations
         post(:create, params: params, format: :turbo_stream)
       end
       assert_response(:success)
-      assert_flash_text(:runtime_ask_observation_question_success.t)
+      assert_flash(:runtime_ask_observation_question_success)
       assert_select("turbo-stream[action='close_modal']",
                     text: "modal_observation_email")
       assert_select(
@@ -83,8 +83,10 @@ module Observations
         post(:create,
              params: { id: obs.id, observer_question: { message: "" } })
       end
+      assert_unprocessable
       assert_flash_error
       assert_select("body.emails__new")
+      assert_select("form[data-turbo='true']")
     end
   end
 end

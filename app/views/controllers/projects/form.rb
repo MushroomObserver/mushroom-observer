@@ -5,13 +5,17 @@
 # (`Projects::AdminController#show`).
 module Views::Controllers::Projects
   class Form < ::Components::ApplicationForm
-    def initialize(model, dates_any: true, upload_params: nil,
-                   dirty_form: false, **)
-      @dates_any = dates_any
-      @upload_params = upload_params
-      @dirty_form = dirty_form
-      super(model, **)
-    end
+    prop :dates_any, _Boolean
+    prop :upload_params, _Nilable(Hash), default: nil
+    prop :dirty_form, _Boolean, default: false
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
+    # Project#place_name= only ever resolves-or-clears +location+ (no
+    # free-text fallback), so a just-submitted, still-unresolved name
+    # can't be read back off `model` -- the controller threads it
+    # through explicitly instead. See ProjectsController::Creation#
+    # cleanup_failed_project_creation.
+    prop :raw_place_name, _Nilable(String), default: nil
 
     # Adds the dirty-form Stimulus controller to the rendered <form>
     # tag when the caller opts in. Used on the Admin/Details tab to
@@ -37,6 +41,11 @@ module Views::Controllers::Projects
         render_summary
         render_field_slip_prefix
         render_location
+        render(Components::Form::LocationFeedback.new(
+                 dubious_where_reasons: @dubious_where_reasons,
+                 button: submit_text
+               ))
+        render_approved_where_hidden
         render_dates_section
         render_upload_fields if @upload_params
       end
@@ -75,7 +84,15 @@ module Views::Controllers::Projects
 
     def render_location
       autocompleter_field(:place_name, type: :location,
-                                       label: :where.ti)
+                                       label: :where.ti,
+                                       value: @raw_place_name ||
+                                              model.place_name(current_user))
+    end
+
+    def render_approved_where_hidden
+      return if @raw_place_name.blank?
+
+      hidden_field("approved_where", value: @raw_place_name)
     end
 
     def render_dates_section

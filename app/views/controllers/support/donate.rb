@@ -16,7 +16,8 @@ module Views::Controllers::Support
       trusted_html(:donate_explanation.tp)
       render(Form.new(
                @donation,
-               action: url_for(controller: "/support", action: :confirm)
+               action: url_for(controller: "/support", action: :confirm),
+               turbo: true
              ))
       trusted_html(:donate_snail_mail.tp)
       trusted_html(:donate_fine_print.tp)

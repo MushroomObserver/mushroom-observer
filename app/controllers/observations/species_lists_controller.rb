@@ -18,7 +18,7 @@ module Observations
       return unless (@observation = find_observation!)
 
       set_list_ivars
-      render_phlex_edit
+      render_edit_view
     end
 
     # new endpoint for :add_observation_to_species_list and
@@ -28,7 +28,7 @@ module Observations
                     (@observation = find_observation!)
 
       unless permission!(@species_list)
-        return redirect_to(species_list_path(@species_list.id))
+        return redirect_with_query(permanent_observation_path(@observation.id))
       end
 
       set_list_ivars
@@ -40,7 +40,7 @@ module Observations
         remove_observation_from_species_list(@species_list, @observation)
       else
         flash_error("Invalid mode: #{params[:commit].inspect}")
-        render_phlex_edit(
+        render_edit_view_invalid(
           location: edit_observation_species_lists_path(
             id: @observation.id
           )
@@ -50,7 +50,7 @@ module Observations
 
     private
 
-    def render_phlex_edit(**render_opts)
+    def render_edit_view(**render_opts)
       render(
         Views::Controllers::Observations::SpeciesLists::Edit.new(
           observation: @observation,
@@ -92,7 +92,7 @@ module Observations
       species_list.add_observation(observation)
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(species_list_path(id: species_list.id))
+      redirect_with_query(permanent_observation_path(observation.id))
     end
 
     # Used by manage_species_lists.
@@ -100,7 +100,7 @@ module Observations
       species_list.remove_observation(observation)
       flash_notice(:runtime_species_list_remove_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(species_list_path(id: species_list.id))
+      redirect_with_query(permanent_observation_path(observation.id))
     end
   end
 end

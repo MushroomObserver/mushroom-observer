@@ -2,7 +2,8 @@
 
 json.id(object.id)
 json.type("external_link")
-json.url(object.url.to_s)
+json.url(object.link_url.to_s)
+json.external_id(object.external_id)
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
 json.observation_id(object.observation_id)

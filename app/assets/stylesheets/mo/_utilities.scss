@@ -197,7 +197,7 @@
 }
 
 .font-weight-bold {
-  font-weight: 800 !important;
+  font-weight: 700 !important;
 }
 
 .font-weight-normal {
@@ -216,14 +216,14 @@
   border: none !important;
 }
 
+// $border-color (Bootstrap 4's variable name for this) is set in
+// _map_theme_vars_to_bootstrap_vars.scss, per theme.
 .border-top {
-  border-top-width: 1px !important;
-  border-top-style: solid !important;
+  border-top: 1px solid $border-color !important;
 }
 
 .border-bottom {
-  border-bottom-width: 1px !important;
-  border-bottom-style: solid !important;
+  border-bottom: 1px solid $border-color !important;
 }
 
 .rounded-0 {
@@ -247,10 +247,6 @@
 .mx-2 {
   margin-left: 0.5rem !important;
   margin-right: 0.5rem !important;
-}
-
-.m-10px {
-  margin: 10px !important;
 }
 
 .m-3 {
@@ -363,11 +359,6 @@
   margin-left: 0 !important;
 }
 
-.mx-10px {
-  margin-right: 10px !important;
-  margin-left: 10px !important;
-}
-
 .mx-3 {
   margin-right: 1rem !important;
   margin-left: 1rem !important;
@@ -379,10 +370,6 @@
 
 .mr-2 {
   margin-right: 0.5rem !important;
-}
-
-.mr-10px {
-  margin-right: 10px !important;
 }
 
 .mr-3 {
@@ -399,10 +386,6 @@
 
 .ml-0 {
   margin-left: 0 !important;
-}
-
-.ml-10px {
-  margin-left: 10px !important;
 }
 
 .ml-1 {
@@ -449,23 +432,14 @@
   padding: 3rem !important;
 }
 
-.p-5px {
-  padding: 5px !important;
-}
-
 .py-0 {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 
-.py-5px {
-  padding-top: 5px !important;
-  padding-bottom: 5px !important;
-}
-
-.py-10px {
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
+.py-1 {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
 }
 
 .py-2 {
@@ -480,10 +454,6 @@
 
 .pt-0 {
   padding-top: 0 !important;
-}
-
-.pt-10px {
-  padding-top: 10px !important;
 }
 
 .pt-2 {
@@ -560,10 +530,6 @@
 
 .pr-0 {
   padding-right: 0 !important;
-}
-
-.pr-10px {
-  padding-right: 10px !important;
 }
 
 .pr-3 {
@@ -741,6 +707,14 @@
 
 .list-group-flush {
   border-radius: 0;
+
+  > .list-group-item {
+    border-width: 0 0 1px;
+
+    &:last-child {
+      border-bottom-width: 0;
+    }
+  }
 }
 
 .list-group-item.none-yet {
@@ -768,6 +742,15 @@
 
 .bg-legible {
   background: rgba($black, 0.6);
+}
+
+// Bootstrap 4's contextual badge color variant -- BS3's .badge has
+// none of its own. Reuses the same theme-mapped warning colors as
+// .alert-warning.
+.badge-warning {
+  background-color: $alert-warning-bg;
+  color: $alert-warning-text;
+  font-weight: normal;
 }
 
 // Bootstrap 3 - collapse "fade" instead of "slide"
@@ -811,6 +794,10 @@
 
 .gap-2 {
   gap: 0.5rem !important;
+}
+
+.gap-3 {
+  gap: 1rem !important;
 }
 
 //
@@ -859,6 +846,10 @@
     margin-left: 0.5em !important;
   }
 
+  .ml-sm-2 {
+    margin-left: 0.5em !important;
+  }
+
   .mx-sm-3 {
     margin-right: 1em !important;
     margin-left: 1em !important;
@@ -887,8 +878,53 @@
   }
 }
 
+// display utilities at the remaining BS3 breakpoints -- Components::Column's
+// show_at:/hide_at: (app/components/column.rb) can target any of xs/sm/md/
+// lg, so all three need their .d-{bp}-* set defined, not just sm.
+@media screen and (min-width: $screen-md-min) {
+  .d-md-none {
+    display: none !important;
+  }
+
+  .d-md-block {
+    display: block !important;
+  }
+
+  .d-md-inline {
+    display: inline !important;
+  }
+
+  .d-md-inline-block {
+    display: inline-block !important;
+  }
+
+  .d-md-flex {
+    display: flex !important;
+  }
+}
+
 @media screen and (min-width: $screen-lg-min) {
   .mr-lg-5 {
     margin-right: 3rem !important;
+  }
+
+  .d-lg-none {
+    display: none !important;
+  }
+
+  .d-lg-block {
+    display: block !important;
+  }
+
+  .d-lg-inline {
+    display: inline !important;
+  }
+
+  .d-lg-inline-block {
+    display: inline-block !important;
+  }
+
+  .d-lg-flex {
+    display: flex !important;
   }
 }

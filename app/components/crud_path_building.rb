@@ -12,6 +12,13 @@ module Components::CRUDPathBuilding
   # `edit_<model>_path`.
   NAMED_ROUTE_ACTIONS = [:edit, :new, :download].freeze
 
+  # Every action: value either includer (Link::Get, Button::CRUDBase)
+  # can pass — the full valid set for their `action` prop.
+  ACTIONS = (NAMED_ROUTE_ACTIONS + [:destroy]).freeze
+
+  # Valid back: override values — see #default_back_param.
+  BACK_VALUES = [:show, :index].freeze
+
   # Controllers whose edit/destroy actions support the `?back=`
   # round-trip so the controller can redirect after a mutation.
   SHOW_OBS_EDITABLES = %w[

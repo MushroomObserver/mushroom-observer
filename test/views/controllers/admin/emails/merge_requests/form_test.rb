@@ -6,6 +6,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
   class FormTest < ComponentTestCase
     def setup
       super
+      @user = users(:rolf)
       @email = FormObject::EmailRequest.new
       @old_name = names(:coprinus_comatus)
       @new_name = names(:agaricus_campestris)
@@ -65,7 +66,8 @@ module Views::Controllers::Admin::Emails::MergeRequests
       form = Form.new(@email,
                       old_obj: @old_name,
                       new_obj: @new_name,
-                      model_class: Name)
+                      model_class: Name,
+                      user: @user)
       # Stub url_for to avoid routing errors in test environment
       form.stub(:url_for, "/test_action") do
         render(form)

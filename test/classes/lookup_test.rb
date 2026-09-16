@@ -66,6 +66,22 @@ class LookupTest < UnitTestCase
     assert_lookup_objects(:Observations, expects, expects.map(&:id))
   end
 
+  def test_lookup_unmatched_tracks_misses
+    herb = herbaria(:rolf_herbarium)
+    lookup = Lookup::Herbaria.new([herb.name, "Nonexistent Herbarium XYZ"])
+
+    assert_equal([herb.id], lookup.ids)
+    assert_equal(["Nonexistent Herbarium XYZ"], lookup.unmatched)
+  end
+
+  def test_lookup_unmatched_empty_when_all_match
+    herb = herbaria(:rolf_herbarium)
+    lookup = Lookup::Herbaria.new([herb.name])
+
+    lookup.ids
+    assert_equal([], lookup.unmatched)
+  end
+
   ########################################################################
   # tests of Lookup::Names
   #
@@ -184,6 +200,25 @@ class LookupTest < UnitTestCase
 
   def test_lookup_names_by_name_invalid
     assert_lookup_names([], ["¡not a name!"])
+  end
+
+  def test_lookup_names_unmatched_tracks_misses
+    name = names(:coprinus_comatus)
+    lookup = Lookup::Names.new([name.text_name, "¡not a name!"])
+
+    assert_equal([name.id], lookup.ids)
+    assert_equal(["¡not a name!"], lookup.unmatched)
+  end
+
+  # Expansion (synonyms/subtaxa) adds names beyond the literal matches --
+  # unmatched must reflect only the original resolution, not that growth.
+  def test_lookup_names_unmatched_unaffected_by_subtaxa_expansion
+    name1 = names(:macrolepiota)
+    lookup = Lookup::Names.new([name1.text_name, "¡not a name!"],
+                               include_subtaxa: true)
+
+    assert_operator(lookup.ids.length, :>, 1)
+    assert_equal(["¡not a name!"], lookup.unmatched)
   end
 
   def create_test_name(name)

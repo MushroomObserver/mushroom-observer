@@ -34,10 +34,10 @@ module Observations
         }
       }
       put_requires_login(:update, params)
-      # Action is `:update` (body class would be `images__edit`); the
-      # update success branch does `render("images/show", ...)`. Pin a
-      # stable element from the show page instead.
-      assert_select("#image_votes_container")
+      # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+      # Drive, so the update success branch redirects to the image's
+      # show page rather than rendering it in place.
+      assert_redirected_to(image_path(image.id))
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)
@@ -66,9 +66,9 @@ module Observations
 
       put_requires_login(:update, params)
 
-      assert_flash_text(:runtime_no_changes.l,
-                        "Flash should say no changes " \
-                        "if no changes made when editing image")
+      assert_flash(:runtime_no_changes,
+                   on_fail: "Flash should say no changes " \
+                            "if no changes made when editing image")
     end
 
     # Prove that user can remove image from project
@@ -165,6 +165,8 @@ module Observations
 
       assert_page_title("Edit Image",
                         "It should return to form if image save fails")
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Appear on both observations/images/new and images/edit
@@ -265,7 +267,7 @@ module Observations
       post_requires_login(:attach, id: obs.id, img_id: image.id)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert(obs.reload.images.member?(image))
-      assert(updated_at != obs.updated_at)
+      assert_not_equal(updated_at, obs.updated_at)
     end
 
     def test_reuse_image_by_id
@@ -289,7 +291,7 @@ module Observations
       # assert_template(controller: "/observations", action: :show)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert(obs.reload.images.member?(image))
-      assert(updated_at != obs.updated_at)
+      assert_not_equal(updated_at, obs.updated_at)
     end
 
     def test_reuse_image_for_observation_bad_image_id
@@ -299,7 +301,9 @@ module Observations
       login(obs.user.login)
       post(:attach, params: params)
 
-      assert_flash_text(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+      assert_flash(:runtime_image_reuse_invalid_id, id: params[:img_id])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_reuse_image_strip_gps_failed

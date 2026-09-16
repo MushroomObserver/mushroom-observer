@@ -43,6 +43,37 @@ class ObservationsControllerDestroyTest < FunctionalTestCase
     end
   end
 
+  # A read-only reflection is deletable by its owner like any other
+  # observation -- it can always be reimported (#5180).
+  def test_destroy_reflection_by_owner
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    id = obs.id
+    login(obs.user.login)
+
+    assert_difference("Observation.count", -1) do
+      delete(:destroy, params: { id: id })
+    end
+    assert_flash_success
+    assert_raises(ActiveRecord::RecordNotFound) { Observation.find(id) }
+  end
+
+  # A non-owner gets the standard permission-denied path.
+  def test_destroy_reflection_by_non_owner_is_permission_denied
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    id = obs.id
+    assert_not_equal("mary", obs.user.login, "mary must not own the obs")
+    login("mary")
+
+    assert_no_difference("Observation.count") do
+      delete(:destroy, params: { id: id })
+    end
+    assert_flash_error
+    assert_redirected_to(action: :show, id: id)
+    assert(Observation.find(id).reflection?)
+  end
+
   def test_original_filename_visibility
     login("mary")
     obs_id = observations(:agaricus_campestris_obs).id

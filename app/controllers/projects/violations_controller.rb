@@ -10,22 +10,37 @@
 module Projects
   class ViolationsController < ApplicationController
     before_action :login_required
-    # Cannot figure out the eager loading here.
-    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
+    # `@project.violating_observations` is an AR relation (not a
+    # Query), so it's paginated directly with PaginationData rather
+    # than through build_index_with_query's Query-driven machinery --
+    # see the class doc on PaginationData for this "without Query"
+    # usage. Unlike the array-slicing shown there, the current page
+    # is fetched with LIMIT/OFFSET, so only one page of observations
+    # gets its violation kinds computed.
+    #
+    # A Query is built and stored too, apart from the row fetch
+    # above, so prev/next from a violation's obs page stays within
+    # this project's violations instead of falling back to session
+    # leftovers or an unscoped default. See Observation's
+    # project_violations scope.
     def index
       return unless find_project!
 
-      @violations = @project.violations
-      build_index_with_query
+      observations = @project.violating_observations
+      @pagination_data = number_pagination_data
+      @pagination_data.num_total = observations.count
+      page = observations.offset(@pagination_data.from).
+             limit(@pagination_data.num_per_page)
+      @violations = @project.violations_for(page)
+      store_violations_query
+      render_index_view
     end
 
-    # Overrides `ApplicationController::Indexes#render_index_view` so
-    # `show_index_of_objects` renders the Phlex `Violations::Index`
-    # class instead of `projects/violations/index.html.erb` (deleted).
     def render_index_view
       render(Views::Controllers::Projects::Violations::Index.new(
-               project: @project, violations: @violations, user: @user
+               project: @project, violations: @violations,
+               pagination_data: @pagination_data, user: @user
              ))
     end
 
@@ -44,7 +59,7 @@ module Projects
     # redirecting; the trigger is a turbo-stream fetch, so the
     # redirect-to-index fallback from `find_project!` doesn't fit.
     def target_location_modal
-      project = Project.find_by(id: params[:project_id])
+      project = Project.find_by(id: params[:id])
       obs = Observation.safe_find(params[:obs_id])
       return head(:not_found) unless project && obs && project.is_admin?(@user)
 
@@ -67,15 +82,25 @@ module Projects
     end
 
     def update
-      @project = find_or_goto_index(Project, params[:project_id])
+      @project = find_or_goto_index(Project, params[:id])
       return unless @project
 
       dispatch_action
 
-      redirect_to(project_violations_path(project_id: @project.id))
+      redirect_to(project_violations_path(@project.id))
     end
 
     private
+
+    # @query isn't used to fetch @violations (see the index action's
+    # comment), but setting it here makes q_param/current_query
+    # resolve it from the view, so obs links can carry q: and
+    # prev/next stays within this project's violations.
+    def store_violations_query
+      @query = create_query(:Observation, project_violations: @project.id,
+                                          order_by: :name)
+      update_stored_query(@query)
+    end
 
     # Pre-loads `name => Location` for every suffix of `obs.where`
     # that has a corresponding Location row. `TargetLocationForm`
@@ -91,8 +116,8 @@ module Projects
     # returns nil rather than raising, so the `||` fallback fires
     # cleanly on a missing id.
     def find_project!
-      @project = Project.violations_includes.find_by(id: params[:project_id]) ||
-                 flash_error_and_goto_index(Project, params[:project_id])
+      @project = Project.violations_includes.find_by(id: params[:id]) ||
+                 flash_error_and_goto_index(Project, params[:id])
     end
 
     # All action params (`do`, `obs_id`, `location_id`) are namespaced

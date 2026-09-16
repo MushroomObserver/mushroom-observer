@@ -34,6 +34,20 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     end
   end
 
+  # AddDispatchController's "Add" button sends an explicit ?project=
+  # precisely so the page the user pressed it on overrides the project
+  # the field slip code's prefix would imply.
+  def test_explicit_project_param_overrides_field_slip_project
+    login("katrina")
+    slip = field_slips(:field_slip_no_obs)
+    other = katrina.projects_member.find { |p| p != slip.project && p.current? }
+    assert_not_nil(other, "Test needs a second current project for katrina")
+
+    get(:new, params: { field_code: slip.code, project: other.id })
+
+    assert_project_checks(other.id => :checked)
+  end
+
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
@@ -128,6 +142,26 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     get(:edit, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
+  end
+
+  # Copilot review on PR #5302: a project id on the observation that
+  # the current user isn't a member of has no checkbox to submit it,
+  # so it shouldn't count as a "change" and force a full member-project
+  # scan. Confirms a no-op project update leaves it untouched either way.
+  def test_update_projects_no_op_preserves_non_member_project
+    init_for_project_checkbox_tests
+    @proj1.add_observation(@obs1) # dick isn't a member of @proj1
+
+    login("dick")
+    put(:update,
+        params: {
+          id: @obs1.id,
+          observation: { good_image_ids: @obs1_img_ids.join(" "),
+                         project_ids: [@proj2.id.to_s] }
+        })
+
+    assert_response(:redirect)
+    assert_obj_arrays_equal([@proj1, @proj2], @obs1.reload.projects, :sort)
   end
 
   def init_for_project_checkbox_tests
@@ -323,6 +357,24 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :checked_but_disabled, @spl2.id => :checked)
   end
 
+  # Copilot review on PR #5302: a species-list id on the observation
+  # that the current user can't edit has no checkbox to submit it, so
+  # it shouldn't count as a "change" and defeat the no-op fast path.
+  def test_update_species_lists_no_op_preserves_non_editable_list
+    init_for_list_checkbox_tests
+    @spl1.add_observation(@obs2) # mary can't edit @spl1 (owned by rolf)
+
+    login("mary")
+    put(:update,
+        params: {
+          id: @obs2.id,
+          observation: { species_list_ids: [@spl2.id.to_s] }
+        })
+
+    assert_response(:redirect)
+    assert_obj_arrays_equal([@spl1, @spl2], @obs2.reload.species_lists, :sort)
+  end
+
   def init_for_list_checkbox_tests
     @spl1 = species_lists(:first_species_list)
     @spl2 = species_lists(:unknown_species_list)
@@ -341,5 +393,59 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     list_states.each do |id, state|
       assert_checkbox_state("observation_species_list_ids_#{id}", state)
     end
+  end
+
+  # ---------- cross-prefix soft constraint on update ----------
+  # The create-side twins live in observations_controller_create_test.rb;
+  # the validator runs on both actions, so update gets its own coverage.
+
+  def attach_open_slip(obs, code)
+    obs.update!(occurrence: nil)
+    obs.field_slip = FieldSlip.find_or_create_by_code(code, obs.user)
+    obs.save!
+  end
+
+  def test_update_warns_when_a_checked_project_has_a_different_prefix
+    obs = observations(:coprinus_comatus_obs)
+    attach_open_slip(obs, "OPEN-1001")
+    project = projects(:eol_project)
+
+    assert_equal("EOL", project.field_slip_prefix, "premise")
+
+    login("rolf")
+    params = { id: obs.id,
+               field_code: "OPEN-1001",
+               observation: { place_name: obs.place_name,
+                              project_ids: [project.id.to_s] } }
+    put(:update, params: params)
+
+    assert_flash_warning
+    assert_select("#project_messages li", text: /#{project.title}/)
+    assert_not_includes(project.observations.reload, obs)
+
+    params[:observation][:ignore_proj_conflicts] = "1"
+    put(:update, params: params)
+
+    assert_response(:redirect)
+    assert_includes(project.observations.reload, obs,
+                    "the confirmed resubmit goes through")
+  end
+
+  def test_update_does_not_warn_for_a_cross_prefix_project_already_joined
+    obs = observations(:california_obs)
+    attach_open_slip(obs, "OPEN-1002")
+    project = projects(:eol_project)
+    project.observations << obs
+
+    login("dick")
+    put(:update, params: { id: obs.id,
+                           field_code: "OPEN-1002",
+                           observation: {
+                             place_name: obs.place_name,
+                             project_ids: [project.id.to_s]
+                           } })
+
+    assert_no_flash
+    assert_response(:redirect)
   end
 end

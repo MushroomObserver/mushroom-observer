@@ -19,7 +19,7 @@ module Views::Controllers::Images
       def test_renders_heading_for_logged_out_viewer
         controller.instance_variable_set(:@user, nil)
 
-        html = render(VotePanel.new(image: @image))
+        html = render_panel
 
         assert_html(html, "#image_vote_content")
         assert_html(html, "table.table-show-votes")
@@ -29,7 +29,7 @@ module Views::Controllers::Images
       def test_renders_vote_grid_for_logged_in_viewer
         controller.instance_variable_set(:@user, users(:rolf))
 
-        html = render(VotePanel.new(image: @image))
+        html = render_panel
 
         assert_html(html, "a[data-role='image_vote']")
         assert_html(html, "table.table-show-votes")
@@ -39,7 +39,7 @@ module Views::Controllers::Images
         image_votes(:in_situ_image_mary_vote).update!(anonymous: true)
         controller.instance_variable_set(:@user, users(:rolf))
 
-        html = render(VotePanel.new(image: @image))
+        html = render_panel
 
         doc = Nokogiri::HTML.fragment(html)
         assert_includes(doc.css("table.table-show-votes td").map(&:text),
@@ -47,6 +47,12 @@ module Views::Controllers::Images
         assert_no_html(html,
                        "table.table-show-votes " \
                        "a[href*='#{users(:mary).id}']")
+      end
+
+      private
+
+      def render_panel
+        render(VotePanel.new(image: @image))
       end
     end
   end
