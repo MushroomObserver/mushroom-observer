@@ -8,6 +8,7 @@ require(Rails.root.join("script/open_pull_requests").to_s)
 class OpenPullRequestsTest < UnitTestCase
   NOW = Time.utc(2026, 9, 17, 12, 0)
   READY = "2026-09-16T18:00:00Z" # 18 hours before NOW
+  REVIEWED = "2026-09-17T06:00:00Z"
   NODE_DEFAULTS = {
     number: 1, title: "A change", labels: [], reviews: [], ready: READY,
     created: "2026-09-01T00:00:00Z", draft: false, branch: "some-branch",
@@ -19,11 +20,11 @@ class OpenPullRequestsTest < UnitTestCase
                  OpenPullRequests.review_type(["bug"]))
     assert_equal(["urgent", nil],
                  OpenPullRequests.review_type(["bug", "review: urgent"]))
-    assert_equal(["needs review", "multiple review labels"],
+    assert_equal(["unclear", "multiple review labels"],
                  OpenPullRequests.review_type(["review: needs review",
                                                "review: blocker"]),
-                 "several labels take the most cautious")
-    assert_equal(["standard", "unknown review label"],
+                 "several labels make the type unclear")
+    assert_equal(["unclear", "unknown review label"],
                  OpenPullRequests.review_type(["review: someday"]))
   end
 
@@ -59,6 +60,69 @@ class OpenPullRequestsTest < UnitTestCase
                                reviews: [%w[APPROVED Bot]])),
                "a bot's approval does not count")
     assert(mergeable?(node(labels: labels, reviews: [%w[APPROVED User]])))
+  end
+
+  # Moving a PR back to draft and marking it ready again resets review:
+  # approvals and change requests from before are ignored.
+  def test_reviews_before_the_latest_ready_are_ignored
+    ready = "2026-09-10T00:00:00Z"
+    before = "2026-09-09T00:00:00Z"
+
+    assert(mergeable?(node(labels: ["review: standard"], ready: ready,
+                           reviews: [["CHANGES_REQUESTED", "User", before]])),
+           "an earlier change request no longer holds the PR")
+    assert_not(mergeable?(node(labels: ["review: needs review"],
+                               ready: ready,
+                               reviews: [["APPROVED", "User", before]])),
+               "an earlier approval no longer counts")
+  end
+
+  def test_unclear_labels_hold_the_pr
+    report = OpenPullRequests.new(
+      [node(labels: ["review: urgent", "review: standard"],
+            reviews: [%w[APPROVED User]])],
+      now: NOW
+    )
+
+    assert_not(report.mergeable?(report.pulls.first))
+    assert_match(
+      /Waiting:\n  PR#1 +unclear .*\[approved, CI ok, multiple review labels\]/,
+      report.report
+    )
+  end
+
+  def test_unknown_merge_state_holds_the_pr
+    report = OpenPullRequests.new(
+      [node(labels: ["review: urgent"], mergeable: "UNKNOWN")], now: NOW
+    )
+
+    assert_not(report.mergeable?(report.pulls.first))
+    assert_match(/PR#1 .*\[CI ok, merge state unknown - rerun\]/,
+                 report.report)
+  end
+
+  def test_fetch_requeries_once_when_merge_state_is_unknown
+    responses = [graphql_response(node(mergeable: "UNKNOWN")),
+                 graphql_response(node(mergeable: "MERGEABLE"))]
+    success = Struct.new(:success?).new(true)
+    calls = 0
+    capture3 = lambda do |*|
+      calls += 1
+      [responses.shift, "", success]
+    end
+
+    report = nil
+    _out, err = capture_io do
+      OpenPullRequests.stub(:merge_state_retry_delay, 0) do
+        Open3.stub(:capture3, capture3) do
+          report = OpenPullRequests.fetch(now: NOW)
+        end
+      end
+    end
+
+    assert_equal(2, calls)
+    assert_equal("MERGEABLE", report.pulls.first.mergeable)
+    assert_match(/Waiting for GitHub to compute merge conflicts/, err)
   end
 
   def test_the_clock_starts_at_the_ready_event_else_at_creation
@@ -101,9 +165,7 @@ class OpenPullRequestsTest < UnitTestCase
   end
 
   def test_fetch_builds_the_report_from_the_graphql_response
-    response = { "data" => { "repository" => { "pullRequests" => {
-      "pageInfo" => { "hasNextPage" => true }, "nodes" => [node(number: 7)]
-    } } } }.to_json
+    response = graphql_response(node(number: 7), more: true)
     success = Struct.new(:success?).new(true)
 
     report = nil
@@ -174,6 +236,12 @@ class OpenPullRequestsTest < UnitTestCase
     }.merge(reviews_field(opts[:reviews]))
   end
 
+  def graphql_response(*nodes, more: false)
+    { "data" => { "repository" => { "pullRequests" => {
+      "pageInfo" => { "hasNextPage" => more }, "nodes" => nodes
+    } } } }.to_json
+  end
+
   def ready_events(ready)
     ready ? [{ "createdAt" => ready }] : []
   end
@@ -182,10 +250,12 @@ class OpenPullRequestsTest < UnitTestCase
     { "commit" => { "statusCheckRollup" => { "state" => state } } }
   end
 
-  # reviews: [[state, author __typename], ...]
+  # reviews: [[state, author __typename, submittedAt], ...]; submittedAt
+  # defaults to REVIEWED, after READY.
   def reviews_field(reviews)
-    nodes = reviews.map do |state, kind|
-      { "state" => state, "author" => { "__typename" => kind } }
+    nodes = reviews.map do |state, kind, submitted = REVIEWED|
+      { "state" => state, "submittedAt" => submitted,
+        "author" => { "__typename" => kind } }
     end
     { "latestOpinionatedReviews" => { "nodes" => nodes } }
   end

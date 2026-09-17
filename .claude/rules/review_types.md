@@ -24,16 +24,27 @@ it reports, it does not gate.
   deadline.
 
 A PR with no review label is treated as Standard and flagged in the
-report. A PR with several takes the most cautious and is flagged too.
-The `changelog-pending` PR is exempt. Dependabot PRs are labeled
+report. A PR with several review labels, or one the report doesn't
+know, is held under "Waiting" until the labels are fixed. The
+`changelog-pending` PR is exempt. Dependabot PRs are labeled
 `review: urgent` by `.github/dependabot.yml`.
+
+Labels can be changed by anyone with triage access or higher to the
+repository; a contributor without that access needs a team member to
+label their PR.
+
+GitHub computes merge conflicts lazily. The report re-queries once when
+a PR's merge state is unknown; if it still is, the PR is held with
+"merge state unknown - rerun".
 
 ## The clock
 
 - Starts at the PR's latest "ready for review" event; a PR opened as
   ready starts when it was opened. Draft PRs are not on the clock.
 - Pushes after the PR is ready do **not** reset it. For a large change,
-  convert the PR back to draft and mark it ready again.
+  convert the PR back to draft and mark it ready again. That also resets
+  review: approvals and change requests submitted before the latest
+  "ready for review" event no longer count.
 
 ## Approvals
 
@@ -43,8 +54,11 @@ The `changelog-pending` PR is exempt. Dependabot PRs are labeled
 - Copilot and other bot reviews do not count.
 - Commits pushed after an approval keep it valid.
 - A review requesting changes holds a Standard or Needs Review PR until
-  it is resolved; for Standard it is not the silence that counts as
-  approval.
+  the reviewer approves, the review is dismissed, or the PR goes back to
+  draft and is marked ready again. For Standard it is not the silence
+  that counts as approval.
+- Nothing on GitHub enforces any of this: `main` requires no reviews or
+  status checks, so these rules hold by agreement.
 
 ## In Claude sessions
 

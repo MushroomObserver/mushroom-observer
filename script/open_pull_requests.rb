@@ -17,14 +17,14 @@ require("time")
 # Classifies open PRs as mergeable now or still waiting.
 class OpenPullRequests
   LABEL_PREFIX = "review: "
-  # Least to most cautious; a PR with several review labels takes the most
-  # cautious one.
   TYPES = ["blocker", "urgent", "standard", "needs review"].freeze
   DEFAULT_TYPE = "standard"
+  UNCLEAR_TYPE = "unclear"
   STANDARD_WAIT = 24 * 60 * 60
   EXCLUDED_BRANCH = "changelog-pending"
   TITLE_WIDTH = 50
   NO_LABEL = "no review label"
+  MERGE_STATE_UNKNOWN = "merge state unknown - rerun"
 
   QUERY = <<~GRAPHQL
     query($owner: String!, $name: String!) {
@@ -35,7 +35,7 @@ class OpenPullRequests
             number title isDraft createdAt headRefName mergeable
             labels(first: 30) { nodes { name } }
             latestOpinionatedReviews(first: 30) {
-              nodes { state author { __typename } }
+              nodes { state submittedAt author { __typename } }
             }
             timelineItems(itemTypes: [READY_FOR_REVIEW_EVENT], last: 1) {
               nodes { ... on ReadyForReviewEvent { createdAt } }
@@ -50,24 +50,20 @@ class OpenPullRequests
   GRAPHQL
 
   Pull = Data.define(:number, :title, :type, :label_problem, :ready_at,
-                     :approved, :changes_requested, :ci, :conflicts)
+                     :approved, :changes_requested, :ci, :mergeable)
 
-  # [type, problem] from a PR's label names. problem is nil when the PR has
-  # one known review label; otherwise it names what's wrong, and the type
-  # is the most cautious known label present, else the default.
+  # [type, problem] from a PR's label names. No review label means the
+  # default type; several, or one this script doesn't know, make the type
+  # unclear, which holds the PR until the labels are fixed.
   def self.review_type(label_names)
     names = label_names.select { |name| name.start_with?(LABEL_PREFIX) }.
             map { |name| name.delete_prefix(LABEL_PREFIX) }
-    known = TYPES & names
-    type = known.max_by { |name| TYPES.index(name) } || DEFAULT_TYPE
-    [type, label_problem(names, known)]
-  end
+    return [DEFAULT_TYPE, NO_LABEL] if names.empty?
+    return [UNCLEAR_TYPE, "multiple review labels"] if names.size > 1
+    return [UNCLEAR_TYPE, "unknown review label"] unless
+      TYPES.include?(names.first)
 
-  def self.label_problem(names, known)
-    return NO_LABEL if names.empty?
-    return "unknown review label" if known.empty?
-
-    "multiple review labels" if names.size > 1
+    [names.first, nil]
   end
 
   # Merged PRs (gh pr list JSON, with labels) typed blocker or urgent, so
@@ -84,17 +80,34 @@ class OpenPullRequests
     ["=== Blocker and urgent PRs in this deploy ===", "", *lines, ""]
   end
 
+  # GitHub computes merge conflicts lazily, and a query tends to start the
+  # computation, so one pause and re-query usually resolves UNKNOWN.
   def self.fetch(now: Time.now.utc)
+    connection = query_pulls
+    if merge_state_pending?(connection["nodes"])
+      warn("Waiting for GitHub to compute merge conflicts...")
+      sleep(merge_state_retry_delay)
+      connection = query_pulls
+    end
+    warn("More than 100 open PRs; the summary covers the first 100.") if
+      connection.dig("pageInfo", "hasNextPage")
+    new(connection["nodes"], now: now)
+  end
+
+  def self.query_pulls
     out, err, status = Open3.capture3(
       "gh", "api", "graphql", "-F", "owner={owner}", "-F", "name={repo}",
       "-f", "query=#{QUERY}"
     )
     abort("Open PR query failed:\n#{err}") unless status.success?
-    connection = JSON.parse(out).dig("data", "repository", "pullRequests")
-    warn("More than 100 open PRs; the summary covers the first 100.") if
-      connection.dig("pageInfo", "hasNextPage")
-    new(connection["nodes"], now: now)
+    JSON.parse(out).dig("data", "repository", "pullRequests")
   end
+
+  def self.merge_state_pending?(nodes)
+    nodes.any? { |node| !node["isDraft"] && node["mergeable"] == "UNKNOWN" }
+  end
+
+  def self.merge_state_retry_delay = 5
 
   attr_reader :pulls
 
@@ -117,14 +130,7 @@ class OpenPullRequests
   end
 
   def mergeable?(pull)
-    case pull.type
-    when "blocker", "urgent" then true
-    when "standard"
-      !pull.changes_requested &&
-        (pull.approved || @now >= pull.ready_at + STANDARD_WAIT)
-    else
-      pull.approved && !pull.changes_requested
-    end
+    hold_reasons(pull).empty?
   end
 
   private
@@ -137,12 +143,13 @@ class OpenPullRequests
     type, problem = self.class.review_type(
       node.dig("labels", "nodes").map { |label| label.fetch("name") }
     )
-    states = human_review_states(node)
+    ready = ready_at(node)
+    states = current_review_states(node, ready)
     Pull.new(number: node["number"], title: node["title"], type: type,
-             label_problem: problem, ready_at: ready_at(node),
+             label_problem: problem, ready_at: ready,
              approved: states.include?("APPROVED"),
              changes_requested: states.include?("CHANGES_REQUESTED"),
-             ci: ci_state(node), conflicts: node["mergeable"] == "CONFLICTING")
+             ci: ci_state(node), mergeable: node["mergeable"])
   end
 
   # A PR opened as ready has no ReadyForReviewEvent; its clock starts when
@@ -152,17 +159,50 @@ class OpenPullRequests
     Time.parse(event ? event["createdAt"] : node["createdAt"]).utc
   end
 
-  # Only a person's review counts; GitHub already bars the author from
-  # approving.
-  def human_review_states(node)
+  # Each person's latest approval or change request since the PR was last
+  # marked ready. Moving a PR back to draft is how an author resets review
+  # after a large change, so earlier reviews no longer apply. Bot reviews
+  # don't count; GitHub already bars the author from approving.
+  def current_review_states(node, ready)
     node.dig("latestOpinionatedReviews", "nodes").
       select { |review| review.dig("author", "__typename") == "User" }.
+      select { |review| Time.parse(review.fetch("submittedAt")).utc >= ready }.
       map { |review| review.fetch("state") }
   end
 
   def ci_state(node)
     node.dig("commits", "nodes").first&.
       dig("commit", "statusCheckRollup", "state")
+  end
+
+  # Why the PR may not merge yet; empty when it may.
+  def hold_reasons(pull)
+    return [pull.label_problem] if pull.type == UNCLEAR_TYPE
+
+    [(MERGE_STATE_UNKNOWN if pull.mergeable == "UNKNOWN"),
+     *type_holds(pull)].compact
+  end
+
+  def type_holds(pull)
+    case pull.type
+    when "standard" then standard_holds(pull)
+    when "needs review" then approval_holds(pull)
+    else []
+    end
+  end
+
+  def standard_holds(pull)
+    return ["changes requested"] if pull.changes_requested
+    return [] if pull.approved || @now >= pull.ready_at + STANDARD_WAIT
+
+    hours = ((pull.ready_at + STANDARD_WAIT - @now) / 3600.0).ceil
+    ["can merge in #{hours}h"]
+  end
+
+  def approval_holds(pull)
+    return ["changes requested"] if pull.changes_requested
+
+    pull.approved ? [] : ["needs approval"]
   end
 
   def section(heading, pulls)
@@ -188,14 +228,9 @@ class OpenPullRequests
 
   def notes(pull)
     list = [review_note(pull), ci_note(pull.ci),
-            ("conflicts" if pull.conflicts), inline_label_problem(pull),
-            wait_note(pull)].compact
+            ("conflicts" if pull.mergeable == "CONFLICTING"),
+            *hold_reasons(pull)].compact.uniq
     list.empty? ? "" : "  [#{list.join(", ")}]"
-  end
-
-  # A missing label is listed once, after the sections.
-  def inline_label_problem(pull)
-    pull.label_problem unless pull.label_problem == NO_LABEL
   end
 
   def review_note(pull)
@@ -210,14 +245,6 @@ class OpenPullRequests
     when "FAILURE", "ERROR" then "CI failing"
     when "PENDING", "EXPECTED" then "CI running"
     end
-  end
-
-  def wait_note(pull)
-    return if mergeable?(pull) || pull.changes_requested
-    return "needs approval" unless pull.type == "standard"
-
-    hours = ((pull.ready_at + STANDARD_WAIT - @now) / 3600.0).ceil
-    "can merge in #{hours}h"
   end
 
   def truncate(title)
