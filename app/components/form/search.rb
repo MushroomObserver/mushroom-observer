@@ -63,8 +63,10 @@ class Components::Form::Search < Components::ApplicationForm
 
   def view_template
     render_header if dropdown?
-    div(id: "search_#{search_type}_flash") # turbo_stream update target
-    render_form_columns
+    Row(class: "flex-column") do
+      div(id: "search_#{search_type}_flash") # turbo_stream update target
+      render_form_columns
+    end
     render_form_buttons
   end
 
