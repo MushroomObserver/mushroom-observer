@@ -214,6 +214,7 @@ fi
 # for this deploy. Checked against origin/main (the code that will be
 # pulled below), before anything is paused or stopped.
 update_article=0
+banner_flags=""
 pending_tag=`git show origin/main:CHANGELOG.md 2>/dev/null | \
     grep -m1 -oE '^## [0-9-]+ \(deploy-[0-9-]+\)' | \
     sed -E 's/.*\((deploy-[0-9-]+)\).*/\1/'`
@@ -243,7 +244,9 @@ else
     read -r answer
     case "$answer" in
         y|Y|yes|YES)
-            echo "Forcing deploy without changelog, MO Article, or banner update."
+            echo "Forcing deploy without changelog or MO Article update;"
+            echo "the banner will announce an urgent release."
+            banner_flags="--urgent"
             ;;
         *)
             echo "Deploy aborted. Run the pre-release, then deploy again."
@@ -423,14 +426,14 @@ if [ "$update_article" = "1" ]; then
         echo "Retry by hand:"
         echo "  bundle exec rails runner script/update_article_changelog.rb --apply"
     fi
+fi
 
-    echo Updating the site banner...
-    bundle exec rails runner script/update_release_banner.rb --apply
-    if [ $? -ne 0 ]; then
-        echo "WARNING: banner update failed; the deploy continues."
-        echo "Retry by hand:"
-        echo "  bundle exec rails runner script/update_release_banner.rb --apply"
-    fi
+echo Updating the site banner...
+bundle exec rails runner script/update_release_banner.rb $banner_flags --apply
+if [ $? -ne 0 ]; then
+    echo "WARNING: banner update failed; the deploy continues."
+    echo "Retry by hand:"
+    echo "  bundle exec rails runner script/update_release_banner.rb $banner_flags --apply"
 fi
 
 echo Tagging repo with $tag... && git tag $tag && \

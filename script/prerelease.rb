@@ -9,12 +9,13 @@
 #   Apply (pushes the changelog-pending branch, creates/updates the PR):
 #     script/prerelease.rb --apply
 #
-# Deploy-tag time (all UTC):
-#   default            the next 12:00 UTC (today's noon if it hasn't
-#                      passed, else tomorrow's)
+# Deploy-tag time (the tag is stamped in UTC):
+#   default            the next 8am Eastern (today's if it hasn't
+#                      passed, else tomorrow's) -- 12:00 or 13:00 UTC
+#                      depending on daylight saving
 #   --now              the current date and time
-#   --at DATETIME      an explicit "YYYY-MM-DD" (noon) or
-#                      "YYYY-MM-DD HH:MM"
+#   --at DATETIME      an explicit "YYYY-MM-DD" (8am Eastern) or
+#                      "YYYY-MM-DD HH:MM" (UTC)
 #
 # What it does:
 # - mints the upcoming deploy tag name (deploy-YYYY-MM-DD-HH-MM) for
@@ -87,12 +88,14 @@ class Prerelease
     parse_at(value)
   end
 
-  # A bare date means noon UTC; a date+time is taken as UTC.
+  # A bare date means that day's scheduled deploy time; a date+time is
+  # taken as UTC.
   def parse_at(value)
     case value
     when /\A(\d{4})-(\d{2})-(\d{2})\z/
-      Time.utc(::Regexp.last_match(1).to_i, ::Regexp.last_match(2).to_i,
-               ::Regexp.last_match(3).to_i, 12, 0)
+      ReleaseNotes.deploy_time_on(
+        Date.new(*(1..3).map { |n| ::Regexp.last_match(n).to_i })
+      )
     when /\A(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})\z/
       Time.utc(*(1..5).map { |n| ::Regexp.last_match(n).to_i })
     else
@@ -108,15 +111,7 @@ class Prerelease
     return Time.now.utc if @now
     return @at if @at
 
-    next_noon_utc
-  end
-
-  # Today's 12:00 UTC if it hasn't passed (noon itself counts as not
-  # passed), otherwise tomorrow's.
-  def next_noon_utc
-    now = Time.now.utc
-    noon = Time.utc(now.year, now.month, now.day, 12, 0)
-    now <= noon ? noon : noon + (24 * 60 * 60)
+    ReleaseNotes.next_deploy_time
   end
 
   def collect_pending(generator)

@@ -31,6 +31,11 @@ To deploy to production:
 
      ruby script/prerelease.rb --apply    # push branch + create/update PR
 
+   Deploys are scheduled for 8am Eastern (5am Pacific) -- 12:00 UTC
+   during daylight saving time, 13:00 UTC otherwise. By default the
+   script targets the next one; --at 'YYYY-MM-DD' picks another day at
+   that time, and --now or --at 'YYYY-MM-DD HH:MM' (UTC) an exact time.
+
    This builds a draft PR from the changelog-pending branch holding the
    next CHANGELOG.md section (its heading names the tag the deploy will
    create) and article_pending.textile (the rows the deploy publishes
@@ -45,6 +50,9 @@ To deploy to production:
    line like:
 
      Next release Sep 15 noon UTC (8am eastern, 5am pacific). See "pre-release change log":https://github.com/MushroomObserver/mushroom-observer/blob/changelog-pending/CHANGELOG.md for details<br/>
+
+   (In winter the UTC time reads "13:00 UTC"; the local times stay the
+   same.)
 
    Replace the first line of the banner with it at
    https://mushroomobserver.org/admin/banners and leave the other
@@ -86,8 +94,20 @@ To deploy to production:
 
 Deploying without a pre-release (urgent fix): deploy.sh warns and asks
 whether to force. Forcing deploys main as the script always did -- no
-CHANGELOG.md section, no MO Article or banner update; the skipped PRs
-roll into the next pre-release/deploy cycle.
+CHANGELOG.md section and no MO Article update; the skipped PRs roll
+into the next pre-release/deploy cycle. The banner's first line still
+changes, to one of:
+
+  Urgent release complete: Sep 17 14:32 UTC (10:32am eastern, 7:32am pacific). See "MO Improvements":https://mushroomobserver.org/articles/55 for details
+  Urgent release complete: Sep 17 14:32 UTC (10:32am eastern, 7:32am pacific). No user-facing changes - "details here":https://github.com/MushroomObserver/mushroom-observer/blob/main/CHANGELOG.md
+
+The first when any PR merged since the previous deploy tag has an
+"article: yes" changelog block. deploy.sh reads those PRs from GitHub's
+public API; if that fails, it says why and uses the second line. The
+urgent PRs appear in the Article and CHANGELOG.md with the next
+pre-release deploy. Retry on the server with:
+
+  bundle exec rails runner script/update_release_banner.rb --urgent --apply
 
 Asset-only icon refresh: script/deploy.sh --icons-only (no code deploy,
 no pre-release needed); --icons bundles the refresh into a normal

@@ -106,8 +106,8 @@ publishes the rows (best-effort) via
 `script/update_article_changelog.rb`, then points the site banner at
 the release (`script/update_release_banner.rb`; steps in
 `README_PRODUCTION_DEPLOY`). With no pre-release it warns and offers
-a force deploy that skips all of that, rolling the PRs into the next
-cycle.
+a force deploy that skips the changelog and Article, rolling the PRs
+into the next cycle, and sets an "Urgent release complete" banner.
 
 `script/article_rows.rb --since YYYY-MM-DD [--until YYYY-MM-DD]`
 prints rows for a date range (backfills, audits), newest first,
