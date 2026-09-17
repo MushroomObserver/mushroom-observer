@@ -5,7 +5,8 @@ require "json"
 class Inat
   # Applies one iNaturalist fetch result to one read-only reflection
   # (#4215): refreshes the source-owned scalar core (date / location /
-  # GPS / notes), handles a source that was deleted on iNat, stamps
+  # GPS / notes), runs the sequence, taxon and image engines, handles a
+  # source that was deleted on iNat, stamps
   # `last_synced_at`, and logs the outcome as the admin actor. This is
   # the per-reflection unit shared by both sync triggers -- the
   # occurrence-wide "Sync now" button (Inat::ObservationResyncer) and the
@@ -21,10 +22,11 @@ class Inat
     # :source_deleted, :fetch_failed.
     Result = Data.define(:status, :observation)
 
-    # Messages from the sequence and taxon engines that declined to act
-    # (ambiguous locus pairings, invalid iNat values, names MO can't
-    # resolve); the batch job sends them to #alerts alongside the
-    # back-link mismatches.
+    # Messages from the sequence, taxon and image engines that declined
+    # to act (ambiguous locus pairings, invalid iNat values, names MO
+    # can't resolve, photos that failed to import or are used elsewhere);
+    # the batch job sends them to #alerts alongside the back-link
+    # mismatches.
     attr_reader :alerts
 
     def initialize
@@ -80,29 +82,29 @@ class Inat
     # in-memory `changed?` never converges. `saved_changes` (sans the
     # timestamp) reflects what actually moved.
     def apply(obs, inat_obs)
-      obs.assign_attributes(scalar_attributes(inat_obs))
-      obs.save! if obs.changed?
-      scalars_changed = obs.saved_changes.except("updated_at").present?
-      sequences = sync_sequences(obs, inat_obs)
-      # After sequences: the taxon engine weighs its lead by sequence
-      # evidence, and a name change usually accompanies new sequence data.
-      taxon = sync_taxon(obs, inat_obs)
+      scalars_changed = sync_scalars(obs, inat_obs).present?
+      outcomes = sync_engines(obs, inat_obs)
       mark_synced(obs)
-      log_resync(obs) if scalars_changed || taxon.changed?
-      changed = scalars_changed || sequences.changed? || taxon.changed?
+      log_resync(obs) if scalars_changed || outcomes.any?(&:logs_resync?)
+      changed = scalars_changed || outcomes.any?(&:changed?)
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
     end
 
-    # Sequence adds/updates do their logging through Sequence's model
-    # callbacks; here we only collect the declined-to-act messages.
-    def sync_sequences(obs, inat_obs)
-      collect_alerts(obs, SequenceSync.new.call(obs, inat_obs))
+    # The saved changes, minus the timestamp.
+    def sync_scalars(obs, inat_obs)
+      obs.assign_attributes(scalar_attributes(inat_obs))
+      obs.save! if obs.changed?
+      obs.saved_changes.except("updated_at")
     end
 
-    # Naming adds log through Naming's own callbacks; consensus changes
-    # through calc_consensus.
-    def sync_taxon(obs, inat_obs)
-      collect_alerts(obs, TaxonSync.new.call(obs, inat_obs))
+    # Taxon after sequences: it weighs its lead by sequence evidence, and
+    # a name change usually accompanies new sequence data. Each outcome
+    # says whether it changed anything and whether that change needs the
+    # resync log entry (changes a model callback doesn't already log).
+    def sync_engines(obs, inat_obs)
+      [SequenceSync.new, TaxonSync.new, ImageSync.new].map do |engine|
+        collect_alerts(obs, engine.call(obs, inat_obs))
+      end
     end
 
     def collect_alerts(obs, outcome)

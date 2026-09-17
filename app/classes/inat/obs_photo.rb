@@ -65,5 +65,8 @@ class Inat
     end
 
     def url = @photo[:photo][:url].sub("square", "original")
+
+    # Enough resolution for a dhash (Image::Dhash is resolution-invariant).
+    def medium_url = @photo[:photo][:url].sub("square", "medium")
   end
 end

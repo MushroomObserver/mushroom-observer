@@ -214,6 +214,7 @@ module Observations
     def reuse
       return unless (@observation = find_observation!)
       return unless check_observation_permission!
+      return redirect_reflection_to_companion if @observation.reflection?
 
       load_images_to_reuse
       render_reuse_view
@@ -222,19 +223,11 @@ module Observations
     # reuse image form buttons POST here
     def attach
       return unless (@observation = find_observation!)
-
       return unless check_observation_permission!
+      return unless (@observation = attach_target)
 
-      img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
-      image = Image.safe_find(img_id)
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: img_id))
-        load_images_to_reuse
-        render_reuse_view_invalid(
-          location: reuse_images_for_observation_path(@observation.id)
-        )
-        return
-      end
+      image = Image.safe_find(reuse_image_id)
+      return render_invalid_image_id unless image
 
       attach_image_to_observation(image)
     end
@@ -259,6 +252,54 @@ module Observations
 
     def find_observation!
       find_or_goto_index(Observation, params[:id].to_s)
+    end
+
+    def reuse_image_id
+      params.dig(:image_reuse, :img_id).presence || params[:img_id]
+    end
+
+    def render_invalid_image_id
+      flash_error(:runtime_image_reuse_invalid_id.t(id: reuse_image_id))
+      load_images_to_reuse
+      render_reuse_view_invalid(
+        location: reuse_images_for_observation_path(@observation.id)
+      )
+    end
+
+    # A reflection's images mirror its source (#4214), so reusing an image
+    # on one works on its companion, as Edit does.
+    def redirect_reflection_to_companion
+      companion = reflection_companion
+      redirect_to(reuse_images_for_observation_path(companion.id)) if companion
+    end
+
+    # The observation an attach lands on: a reflection's companion, so the
+    # chosen image isn't lost; nil after redirecting on failure.
+    def attach_target
+      @observation.reflection? ? reflection_companion : @observation
+    end
+
+    # The reflection's companion, found or created, with a flash saying
+    # which; nil after redirecting when it can't be created.
+    def reflection_companion
+      companion, notice = find_or_create_reuse_companion
+      flash_notice(notice.t)
+      companion
+    rescue ActiveRecord::RecordInvalid => e
+      flash_error(e.record.errors.full_messages.join("; "))
+      redirect_to(permanent_observation_path(id: @observation.id))
+      nil
+    end
+
+    # [companion, flash tag]
+    def find_or_create_reuse_companion
+      builder = Observation::Companion.new(@observation, @user,
+                                           admin: in_admin_mode?)
+      if (companion = builder.existing)
+        [companion, :image_reuse_on_reflection_companion_existing]
+      else
+        [builder.create, :image_reuse_on_reflection_companion_created]
+      end
     end
 
     def check_observation_permission!
