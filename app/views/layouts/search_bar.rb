@@ -1,19 +1,23 @@
 # frozen_string_literal: true
 
-# Top-nav search bar. When the viewer is logged in, renders the
+# Search bar. When the viewer is logged in, renders the
 # Bootstrap collapse-trigger help toggle, the `PatternSearchForm`,
 # and (off SearchController pages) the form toggle that opens
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
-class Views::Layouts::TopNav::SearchBar < Views::Base
-  BAR_TOGGLE_CLASSES = ["px-2"].freeze
+class Views::Layouts::SearchBar < Views::Base
+  # `start`/`end` toggles sit at the left/right edge of the bar --
+  # `pl-0`/`pr-0` respectively lets them sit flush against the
+  # container instead of matching the `px-2` spacing they use toward
+  # their neighbor.
+  BAR_TOGGLE_CLASSES = { start: "pl-0 pr-2", end: "pl-2 pr-0" }.freeze
 
   # Search types that have a per-type help expander. Mirrors
-  # `Views::Layouts::TopNav::SEARCH_HELP_TYPES`; passed through
+  # `Views::Layouts::SearchNav::SEARCH_HELP_TYPES`; passed through
   # so the bar can decide which toggle starts visible.
   prop :search_help_types, _Array(Symbol)
   # Search types whose advanced-search form is reachable via the
-  # form-toggle. Mirrors `Views::Layouts::TopNav::SEARCH_FORM_TYPES`.
+  # form-toggle. Mirrors `Views::Layouts::SearchNav::SEARCH_FORM_TYPES`.
   prop :search_form_types, _Array(Symbol)
 
   def view_template
@@ -58,7 +62,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # controller populates with whichever advanced-search form
   # matches the selected search type.
   def render_advanced_form_target
-    Collapsible(id: "search_nav_form", class: "w-100 pt-2 border-top",
+    Collapsible(id: "search_nav_form", class: "w-100",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end
@@ -72,7 +76,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          icon: :info,
          icon_title: :search_bar_help.l,
          button: :link,
-         class: bar_toggle_class(visible: help_visible?),
+         class: bar_toggle_class(:start, visible: help_visible?),
          data: { search_type_target: "helpToggle" })
   end
 
@@ -85,12 +89,12 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          icon: :plus,
          icon_title: :search_bar_more_options.l,
          button: :link,
-         class: bar_toggle_class(visible: form_visible?),
+         class: bar_toggle_class(:end, visible: form_visible?),
          data: { search_type_target: "formToggle" })
   end
 
-  def bar_toggle_class(visible:)
-    classes = BAR_TOGGLE_CLASSES.dup
+  def bar_toggle_class(position, visible:)
+    classes = [BAR_TOGGLE_CLASSES.fetch(position)]
     classes << "d-none" unless visible
     classes.join(" ")
   end

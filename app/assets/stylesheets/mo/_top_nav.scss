@@ -9,6 +9,16 @@
   }
 }
 
+// `.mb-2`'s margin (Bootstrap spacing utilities are `!important`,
+// hence the `!important` here too) only supplies a gap while
+// `#search_nav` is collapsed and invisible. Open or mid-animation,
+// `#search_nav`'s vertical padding already supplies that gap, so
+// stacking both would double the space between the two navbars.
+#top_nav:has(+ #search_nav.show),
+#top_nav:has(+ #search_nav.collapsing) {
+  margin-bottom: 0 !important;
+}
+
 // Plain single-row flex-bar alias: a horizontal bar of items with
 // space distributed between them (sorter, search bar, pagination,
 // interest icons, prev/next nav, etc). Unrelated to `.navbar` -
@@ -108,12 +118,15 @@
     h4 {
       font-size: 14px;
     }
-    .navbar-form {
-      padding-right: 0;
-    }
     #sorter button {
       max-width: 60px;
       overflow: hidden;
+    }
+  }
+
+  #top_nav, #search_nav {
+    .navbar-form {
+      padding-right: 0;
     }
   }
 
@@ -171,4 +184,14 @@
 #index_bar {
   @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
   border-bottom-color: $TOP_BAR_BORDER_COLOR;
+}
+
+// Flex items default to min-width: auto (the content's width), which
+// stops them shrinking below that even with flex-grow/w-auto set --
+// without this the input group and select push the row wider than
+// the viewport on narrow screens instead of sharing it.
+#pattern_search_form {
+  .input-group, select {
+    min-width: 0;
+  }
 }

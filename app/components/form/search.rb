@@ -102,7 +102,8 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   # Bootstrap collapse-trigger button that hides the search-bar elements row
-  # in the top nav.
+  # in the top nav. `pr-0` sits it flush against the header row's
+  # right edge, matching the top-nav search bar's edge toggles.
   def render_search_bar_toggle
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",
@@ -110,7 +111,7 @@ class Components::Form::Search < Components::ApplicationForm
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
          button: :link,
-         class: "px-2",
+         class: "pl-2 pr-0",
          data: { search_type_target: "barToggle" })
   end
 

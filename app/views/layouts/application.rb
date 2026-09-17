@@ -128,6 +128,7 @@ module Views::Layouts
         render(Views::Layouts::TopNav.new(user: current_user,
                                           query: current_query,
                                           banner: banner))
+        render(Views::Layouts::SearchNav.new)
         render(Views::Layouts::App::PageFlash.new)
         render(Views::Layouts::Header.new(
                  any_content_filters_applied: @any_content_filters_applied

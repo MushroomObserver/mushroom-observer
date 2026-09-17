@@ -9,7 +9,9 @@
 #     and either `Views::Layouts::TopNav::UserNav` or
 #     `Views::Layouts::TopNav::Login` depending on
 #     `@user.nil?`)
-#   - the collapsible search-bar row
+#
+# The collapsible search-bar row itself is a sibling, not a child --
+# see `Views::Layouts::SearchNav`.
 #
 # Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
 # `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
@@ -31,22 +33,15 @@ class Views::Layouts::TopNav < Views::Base
   # ancestor (`#main_container`, see `Views::Layouts::Application`).
   prop :banner, _Nilable(::Banner), default: nil
 
-  # Controllers / actions where the search-help dropdown is available
-  SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
-  SEARCH_FORM_TYPES = [
-    :names, :observations, :locations,
-    :projects, :herbaria, :species_lists
-  ].freeze
-
-  # Container classes shared by the top-nav row and the search-nav
-  # row. `w-100` is load-bearing since `#top_nav` is `display: flex`
-  # -- without it these two rows would share a single line instead
-  # of each landing on a separate line. `container-fluid` is already
-  # flex + `justify-content: space-between` + `align-items: center`
-  # as a descendant of `.navbar` (BS4's `.navbar .container-fluid`
-  # rule) -- no `flex-bar` needed here. `px-card` matches the
-  # horizontal padding cards use, so #top_nav's content lines up with
-  # card content below it.
+  # `w-100` is load-bearing since `#top_nav` is `display: flex` --
+  # without it this row would shrink to content width instead of
+  # filling the navbar. `container-fluid` is already flex +
+  # `justify-content: space-between` + `align-items: center` as a
+  # descendant of `.navbar` (BS4's `.navbar .container-fluid` rule)
+  # -- no `flex-bar` needed here. `px-card` matches the horizontal
+  # padding cards use, so #top_nav's content lines up with card
+  # content below it. `Views::Layouts::SearchNav::CONTAINER_CLASSES`
+  # holds the same values for the search-bar row's navbar.
   CONTAINER_CLASSES = %w[container-fluid px-card w-100].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
@@ -95,7 +90,6 @@ class Views::Layouts::TopNav < Views::Base
            padding: "py-2 px-0",
            aria: { label: :app_top_nav_label.l }) do
       render_top_row
-      render_search_row
     end
   end
 
@@ -130,33 +124,6 @@ class Views::Layouts::TopNav < Views::Base
     end
     render(Login.new) if @user.nil?
     render_show_banner_button
-  end
-
-  def render_search_row
-    div(class: class_names(CONTAINER_CLASSES)) do
-      Collapsible(id: "search_nav", class: "w-100 mt-2",
-                  data: {
-                    controller: "search-type",
-                    # Stimulus Array values must be JSON. Rails' tag
-                    # helper JSON-encodes arrays automatically; Phlex
-                    # space-joins them ("a b"), which breaks
-                    # JSON.parse in the controller and silently
-                    # disables the help/advanced-search forms (#4492).
-                    search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
-                    search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-                  }) do
-        # Identify pages get their own filter bar; everything else
-        # gets the pattern-search bar.
-        if controller.controller_name == "identify"
-          render(::Views::Controllers::Observations::Identify::FormFilter.new)
-        else
-          render(SearchBar.new(
-                   search_help_types: SEARCH_HELP_TYPES,
-                   search_form_types: SEARCH_FORM_TYPES
-                 ))
-        end
-      end
-    end
   end
 
   # The hamburger that opens the offcanvas sidebar on mobile /

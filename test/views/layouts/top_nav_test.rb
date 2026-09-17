@@ -7,22 +7,6 @@ require("test_helper")
 # helpers. The deleted helper test file had no Phlex equivalent;
 # these tests pin the behaviour those helpers used to cover.
 class Views::Layouts::TopNavTest < ComponentTestCase
-  # Subclass with `render_search_row` neutralized — the search-bar /
-  # identify-filter partials resolve through Rails view-paths that
-  # aren't on the test controller's `append_view_path`. We render the
-  # subclass instead of monkey-patching the real class, so the change
-  # doesn't leak across the test process (an earlier version that
-  # `define_method`'d on `Views::Layouts::TopNav` directly silently
-  # broke the search-bar's `<select>` in every test that ran after
-  # this file).
-  class TopNavWithoutSearchRow < Views::Layouts::TopNav
-    private
-
-    def render_search_row
-      nil
-    end
-  end
-
   def setup
     super
     @user = users(:rolf)
@@ -222,7 +206,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
   private
 
   def top_nav(user:, query: nil, banner: nil)
-    TopNavWithoutSearchRow.new(user: user, query: query, banner: banner)
+    Views::Layouts::TopNav.new(user: user, query: query, banner: banner)
   end
 
   # Override controller_name on the test controller so methods like
