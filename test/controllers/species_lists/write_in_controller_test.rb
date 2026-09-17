@@ -48,6 +48,56 @@ module SpeciesLists
       assert_nil(synonym_name.synonym_id)
     end
 
+    # Approving the synonym side of a "<name> = <synonym>" line makes
+    # construct_approved_names deprecate the approved synonym, even though
+    # the species list creation as a whole still fails (synonyms still
+    # require a separate confirmation step -- see test above).
+    def test_construct_species_list_synonym_approved
+      species_list = species_lists(:first_species_list)
+      name = names(:macrolepiota_rachodes)
+      synonym_name = names(:lepiota_rachodes)
+      assert_not(synonym_name.deprecated)
+
+      params = {
+        id: species_list.id,
+        list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
+        approved_names: synonym_name.text_name
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_unprocessable
+
+      assert(
+        synonym_name.reload.deprecated,
+        "Approving the synonym name should have deprecated it"
+      )
+    end
+
+    # If the synonym side of a "<name> = <synonym>" line doesn't parse as a
+    # name, construct_approved_names should flash an error instead of
+    # creating anything.
+    def test_construct_species_list_synonym_unparseable
+      species_list = species_lists(:first_species_list)
+      name = names(:macrolepiota_rachodes)
+      unparseable_synonym = "12345"
+
+      params = {
+        id: species_list.id,
+        list: { members: "#{name.text_name} = #{unparseable_synonym}" },
+        approved_names: unparseable_synonym
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_unprocessable
+      assert_flash_error(
+        on_fail: "Unparseable approved synonym name should flash an error"
+      )
+      assert_nil(
+        Name.find_by(text_name: unparseable_synonym),
+        "Unparseable synonym text should not create a Name"
+      )
+    end
+
     def test_construct_species_list_nonalpha_multiple
       # First try creating it with ambiguous name "Warnerbros bugs-bunny".
 
