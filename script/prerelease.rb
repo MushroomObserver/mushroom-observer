@@ -29,6 +29,8 @@
 #   section, so last-minute merges are picked up
 # - prints which open PRs may merge now (script/open_pull_requests.rb)
 #   and which merged PRs in this deploy are review: blocker or urgent
+# - with --apply, prints the first line to post in the site banner;
+#   deploy.sh replaces it once the release is up
 #
 # Works in a temporary git worktree; the current checkout stays put.
 
@@ -39,11 +41,13 @@ require("tmpdir")
 require_relative("generate_changelog")
 require_relative("article_rows")
 require_relative("open_pull_requests")
+require_relative("release_notes")
 
 # Builds the changelog-pending branch and PR for the next deploy.
 class Prerelease
   BRANCH = "changelog-pending"
-  ARTICLE_FILE = "article_pending.textile"
+  ARTICLE_FILE = ReleaseNotes::PENDING_FILE
+  BANNER_ADMIN_URL = "https://mushroomobserver.org/admin/banners"
   USAGE = "Usage: script/prerelease.rb [--apply] " \
           "[--now | --at 'YYYY-MM-DD[ HH:MM]']"
 
@@ -264,6 +268,8 @@ class Prerelease
   def apply(generator)
     push_branch(generator)
     upsert_pr
+    puts("", "Replace the banner's first line at #{BANNER_ADMIN_URL} with:",
+         "", "#{ReleaseNotes.pending_banner_line(deploy_time)}<br/>")
   end
 
   def push_branch(generator)

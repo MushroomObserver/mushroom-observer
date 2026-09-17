@@ -222,7 +222,7 @@ if [ -n "$pending_tag" ] && \
     tag="$pending_tag"
     update_article=1
     echo "Pre-release found: tagging this deploy $tag and updating the"
-    echo "MO Article from article_pending.textile."
+    echo "MO Article from article_pending.textile and the site banner."
 else
     echo ""
     echo "WARNING: no pre-release changelog found for this deploy, so"
@@ -243,7 +243,7 @@ else
     read -r answer
     case "$answer" in
         y|Y|yes|YES)
-            echo "Forcing deploy without changelog or MO Article update."
+            echo "Forcing deploy without changelog, MO Article, or banner update."
             ;;
         *)
             echo "Deploy aborted. Run the pre-release, then deploy again."
@@ -413,7 +413,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Best-effort (#5155): a failure here warns and the deploy still
-# succeeds -- the Article is cosmetic; the site is already up.
+# succeeds -- the Article and banner are cosmetic; the site is already
+# up. The banner comes after the Article it may link to.
 if [ "$update_article" = "1" ]; then
     echo Updating the MO Article from article_pending.textile...
     bundle exec rails runner script/update_article_changelog.rb --apply
@@ -421,6 +422,14 @@ if [ "$update_article" = "1" ]; then
         echo "WARNING: MO Article update failed; the deploy continues."
         echo "Retry by hand:"
         echo "  bundle exec rails runner script/update_article_changelog.rb --apply"
+    fi
+
+    echo Updating the site banner...
+    bundle exec rails runner script/update_release_banner.rb --apply
+    if [ $? -ne 0 ]; then
+        echo "WARNING: banner update failed; the deploy continues."
+        echo "Retry by hand:"
+        echo "  bundle exec rails runner script/update_release_banner.rb --apply"
     fi
 fi
 

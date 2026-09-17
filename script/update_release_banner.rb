@@ -1,0 +1,50 @@
+# frozen_string_literal: true
+
+# Sets the first line of the site banner once a pre-release deploy is up:
+# it links the MO Article when article_pending.textile has rows, else
+# CHANGELOG.md on main. Run by script/deploy.sh; safe to re-run by hand.
+#
+#   Dry run (default -- reports what WOULD change, writes nothing):
+#     bundle exec rails runner script/update_release_banner.rb
+#   Live run:
+#     bundle exec rails runner script/update_release_banner.rb --apply
+#
+# Saves a new Banner version, as the admin banner page does, so the banner
+# reappears for visitors who dismissed the previous one. Idempotent: a
+# banner whose first line already says this is left alone.
+
+require_relative("release_notes")
+
+SCRIPT = "bundle exec rails runner script/update_release_banner.rb"
+
+args = ARGV.dup
+apply = args.delete("--apply") ? true : false
+abort("Unknown arguments: #{args.join(" ")}") unless args.empty?
+
+banner = Banner.current
+unless banner
+  puts("No banner; nothing to update.")
+  exit(0)
+end
+
+pending = ReleaseNotes::PENDING_FILE
+user_facing = File.exist?(pending) && File.read(pending).strip.present?
+line = ReleaseNotes.released_banner_line(Time.now.utc,
+                                         user_facing: user_facing)
+message = ReleaseNotes.with_first_line(banner.message, line)
+
+if message == banner.message
+  puts("The banner already starts with: #{line}")
+  exit(0)
+end
+
+puts("New first line for the banner:")
+puts("  #{line}")
+
+unless apply
+  puts("Dry run - nothing written. To apply: #{SCRIPT} --apply")
+  exit(0)
+end
+
+new_banner = Banner.create!(message: message, version: Banner.next_version)
+puts("Done: banner version #{new_banner.version}.")

@@ -14,12 +14,11 @@
 # Idempotent: if the article body already contains the first pending
 # row, nothing is written (covers a re-run after a failed deploy step
 # and a deploy with a stale, already-published file).
-#
-# The article id is bumped by hand at yearly rollover (create the next
-# year's article, update the constant) -- article creation is not
-# automated.
-ARTICLE_ID = 55
-PENDING_FILE = "article_pending.textile"
+
+require_relative("release_notes")
+
+ARTICLE_ID = ReleaseNotes::ARTICLE_ID
+PENDING_FILE = ReleaseNotes::PENDING_FILE
 HEADER_ROW = "| +date+ | +what+ | +link+ |"
 SCRIPT = "bundle exec rails runner script/update_article_changelog.rb"
 
