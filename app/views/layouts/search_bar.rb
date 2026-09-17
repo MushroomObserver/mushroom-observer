@@ -6,12 +6,6 @@
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
 class Views::Layouts::SearchBar < Views::Base
-  # `start`/`end` toggles sit at the left/right edge of the bar --
-  # `pl-0`/`pr-0` respectively lets them sit flush against the
-  # container instead of matching the `px-2` spacing they use toward
-  # their neighbor.
-  BAR_TOGGLE_CLASSES = { start: "pl-0 pr-2", end: "pl-2 pr-0" }.freeze
-
   # Search types that have a per-type help expander. Mirrors
   # `Views::Layouts::SearchNav::SEARCH_HELP_TYPES`; passed through
   # so the bar can decide which toggle starts visible.
@@ -75,8 +69,8 @@ class Views::Layouts::SearchBar < Views::Base
          target_id: "search_bar_help",
          icon: :info,
          icon_title: :search_bar_help.l,
-         button: :link,
-         class: bar_toggle_class(:start, visible: help_visible?),
+         button: :link, size: :lg,
+         class: toggle_class(visible: help_visible?),
          data: { search_type_target: "helpToggle" })
   end
 
@@ -88,13 +82,13 @@ class Views::Layouts::SearchBar < Views::Base
          target_id: "search_nav_form",
          icon: :plus,
          icon_title: :search_bar_more_options.l,
-         button: :link,
-         class: bar_toggle_class(:end, visible: form_visible?),
+         button: :link, size: :lg,
+         class: toggle_class(visible: form_visible?),
          data: { search_type_target: "formToggle" })
   end
 
-  def bar_toggle_class(position, visible:)
-    classes = [BAR_TOGGLE_CLASSES.fetch(position)]
+  def toggle_class(visible:)
+    classes = ["p-0"]
     classes << "d-none" unless visible
     classes.join(" ")
   end
