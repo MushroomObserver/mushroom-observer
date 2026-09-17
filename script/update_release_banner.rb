@@ -4,40 +4,25 @@
 # script/deploy.sh; safe to re-run by hand.
 #
 #   Dry run (default -- reports what WOULD change, writes nothing):
-#     bundle exec rails runner script/update_release_banner.rb [--urgent]
+#     bundle exec rails runner script/update_release_banner.rb [--forced]
 #   Live run: add --apply
 #
-# A pre-release deploy says "<date> release complete". --urgent, for a
-# forced deploy with no pre-release, says "Urgent release complete:
-# <date> <time>". Either links the MO Article when the release is
-# user-facing, else CHANGELOG.md on main. User-facing means
-# article_pending.textile has rows (pre-release), or any PR merged since
-# the last deploy tag has an `article: yes` changelog block (--urgent;
-# read from GitHub, and treated as not user-facing if that fails).
+# A pre-release deploy says "<date> release complete", linking the MO
+# Article when article_pending.textile has rows, else CHANGELOG.md on
+# main. --forced, for a deploy that skipped the pre-release, says
+# "Undocumented forced deploy occurred <date> <time>".
 #
 # Saves a new Banner version, as the admin banner page does, so the banner
 # reappears for visitors who dismissed the previous one. A banner whose
 # first line already says this is left alone.
 
 require_relative("release_notes")
-require_relative("deployed_pulls")
 
 SCRIPT = "bundle exec rails runner script/update_release_banner.rb"
 
-def pre_release_user_facing?
-  pending = ReleaseNotes::PENDING_FILE
-  File.exist?(pending) && File.read(pending).strip.present?
-end
-
-def urgent_user_facing?
-  pulls, problems = DeployedPulls.fetch
-  problems.each { |problem| warn("Couldn't read deployed PRs: #{problem}") }
-  ReleaseNotes.user_facing?(pulls)
-end
-
 args = ARGV.dup
 apply = args.delete("--apply") ? true : false
-urgent = args.delete("--urgent") ? true : false
+forced = args.delete("--forced") ? true : false
 abort("Unknown arguments: #{args.join(" ")}") unless args.empty?
 
 banner = Banner.current
@@ -47,13 +32,12 @@ unless banner
 end
 
 now = Time.now.utc
-line = if urgent
-         ReleaseNotes.urgent_banner_line(now,
-                                         user_facing: urgent_user_facing?)
+line = if forced
+         ReleaseNotes.forced_banner_line(now)
        else
-         ReleaseNotes.released_banner_line(
-           now, user_facing: pre_release_user_facing?
-         )
+         pending = ReleaseNotes::PENDING_FILE
+         user_facing = File.exist?(pending) && File.read(pending).strip.present?
+         ReleaseNotes.released_banner_line(now, user_facing: user_facing)
        end
 message = ReleaseNotes.with_first_line(banner.message, line)
 
@@ -66,7 +50,7 @@ puts("New first line for the banner:")
 puts("  #{line}")
 
 unless apply
-  flags = urgent ? " --urgent" : ""
+  flags = forced ? " --forced" : ""
   puts("Dry run - nothing written. To apply: #{SCRIPT}#{flags} --apply")
   exit(0)
 end

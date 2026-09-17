@@ -233,20 +233,22 @@ else
     echo "The pre-release process (issue #5155):"
     echo "  1. On a dev machine: ruby script/prerelease.rb --apply"
     echo "     (builds the changelog-pending PR with the next CHANGELOG.md"
-    echo "      section and article_pending.textile's MO Article rows)"
+    echo "      section and article_pending.textile's MO Article rows;"
+    echo "      add --now for a blocker deploy right away)"
     echo "  2. Review and merge that PR as the last PR before deploying."
     echo "  3. Run script/deploy.sh -- it tags the deploy with the"
     echo "     pre-release's tag name and publishes the Article rows."
     echo ""
-    echo "Forcing deploys main as-is (useful for an urgent fix); the"
-    echo "skipped PRs roll into the next pre-release/deploy cycle."
+    echo "Forcing deploys main as-is, for when even a blocker deploy can't"
+    echo "wait or the release scripts are broken. The skipped PRs roll into"
+    echo "the next pre-release/deploy cycle, and the banner will say an"
+    echo "undocumented forced deploy occurred."
     printf "Force the deploy without a changelog? [y/N] "
     read -r answer
     case "$answer" in
         y|Y|yes|YES)
-            echo "Forcing deploy without changelog or MO Article update;"
-            echo "the banner will announce an urgent release."
-            banner_flags="--urgent"
+            echo "Forcing deploy without changelog or MO Article update."
+            banner_flags="--forced"
             ;;
         *)
             echo "Deploy aborted. Run the pre-release, then deploy again."

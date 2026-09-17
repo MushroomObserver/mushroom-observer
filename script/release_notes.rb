@@ -8,7 +8,6 @@
 
 require("date")
 require("tzinfo")
-require_relative("article_rows")
 
 module ReleaseNotes
   # Bumped by hand at yearly rollover (create the next year's article,
@@ -25,8 +24,6 @@ module ReleaseNotes
   LOCAL_ZONES = { "eastern" => "America/New_York",
                   "pacific" => "America/Los_Angeles" }.freeze
   LINE_BREAK = %r{<br\s*/?>\s*\z}
-  # A merge commit's subject, or a squash merge's "(#1234)" suffix.
-  PR_SUBJECT = /\AMerge pull request #(\d+)|\(#(\d+)\)\z/
 
   module_function
 
@@ -57,10 +54,11 @@ module ReleaseNotes
     "#{day(release_time)} release complete. #{details(user_facing)}"
   end
 
-  # Set by deploy.sh after a forced deploy, which skips the pre-release.
-  def urgent_banner_line(release_time, user_facing:)
-    "Urgent release complete: #{when_text(release_time)}. " \
-      "#{details(user_facing)}"
+  # Set by deploy.sh after a forced deploy. Blocker releases go through
+  # `prerelease.rb --apply --now`, so a forced deploy means the release
+  # process was bypassed and nothing documents what shipped.
+  def forced_banner_line(deploy_time)
+    "Undocumented forced deploy occurred #{when_text(deploy_time)}"
   end
 
   # message with its first line replaced by line, keeping the old line's
@@ -68,21 +66,6 @@ module ReleaseNotes
   def with_first_line(message, line)
     first, separator, rest = message.to_s.partition(/\r?\n/)
     "#{line}#{first[LINE_BREAK]}#{separator}#{rest}"
-  end
-
-  # PR numbers from `git log --format=%s` subjects.
-  def pr_numbers(subjects)
-    subjects.filter_map do |subject|
-      match = subject.strip.match(PR_SUBJECT)
-      (match[1] || match[2]).to_i if match
-    end.uniq
-  end
-
-  # Whether any PR (gh pr list JSON shape: number, title, url, mergedAt,
-  # body) has a usable `article: yes` changelog block -- the same test
-  # that puts a row in the MO Article.
-  def user_facing?(pulls)
-    ArticleRows.new.rows_for(pulls).first.any?
   end
 
   def details(user_facing)

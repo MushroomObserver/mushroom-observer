@@ -92,22 +92,23 @@ To deploy to production:
 
    Both are dry runs without --apply.
 
-Deploying without a pre-release (urgent fix): deploy.sh warns and asks
-whether to force. Forcing deploys main as the script always did -- no
-CHANGELOG.md section and no MO Article update; the skipped PRs roll
-into the next pre-release/deploy cycle. The banner's first line still
-changes, to one of:
+Blocker deploys: follow the same steps with
+"ruby script/prerelease.rb --apply --now", which targets the current
+time instead of the next 8am Eastern, then deploy as soon as the
+changelog PR is merged. The Article and banner update as usual.
 
-  Urgent release complete: Sep 17 14:32 UTC (10:32am eastern, 7:32am pacific). See "MO Improvements":https://mushroomobserver.org/articles/55 for details
-  Urgent release complete: Sep 17 14:32 UTC (10:32am eastern, 7:32am pacific). No user-facing changes - "details here":https://github.com/MushroomObserver/mushroom-observer/blob/main/CHANGELOG.md
+Forced deploys (rare): with no undeployed pre-release on main,
+deploy.sh warns and asks whether to force. Force only when something
+can't wait even for a blocker deploy, or the pre-release or deploy
+scripts are broken. Forcing deploys main as-is -- no CHANGELOG.md
+section and no MO Article update; the skipped PRs roll into the next
+pre-release/deploy cycle. The banner's first line becomes:
 
-The first when any PR merged since the previous deploy tag has an
-"article: yes" changelog block. deploy.sh reads those PRs from GitHub's
-public API; if that fails, it says why and uses the second line. The
-urgent PRs appear in the Article and CHANGELOG.md with the next
-pre-release deploy. Retry on the server with:
+  Undocumented forced deploy occurred Sep 17 14:32 UTC (10:32am eastern, 7:32am pacific)
 
-  bundle exec rails runner script/update_release_banner.rb --urgent --apply
+Retry that on the server with:
+
+  bundle exec rails runner script/update_release_banner.rb --forced --apply
 
 Asset-only icon refresh: script/deploy.sh --icons-only (no code deploy,
 no pre-release needed); --icons bundles the refresh into a normal

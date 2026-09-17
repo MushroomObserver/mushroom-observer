@@ -59,36 +59,10 @@ class ReleaseNotesTest < UnitTestCase
     )
   end
 
-  def test_urgent_banner_line_gives_the_time
-    time = Time.utc(2026, 12, 1, 14, 32)
-
-    assert_equal(
-      "Urgent release complete: Dec 1 14:32 UTC (9:32am eastern, 6:32am " \
-      "pacific). See \"MO Improvements\":https://mushroomobserver.org/" \
-      "articles/#{ReleaseNotes::ARTICLE_ID} for details",
-      ReleaseNotes.urgent_banner_line(time, user_facing: true)
-    )
-    assert(ReleaseNotes.urgent_banner_line(time, user_facing: false).
-             end_with?("No user-facing changes - \"details here\":" \
-                       "#{ReleaseNotes.changelog_url("main")}"))
-  end
-
-  def test_pr_numbers_from_merge_and_squash_subjects
-    subjects = ["Merge pull request #5378 from MushroomObserver/branch",
-                "Fix the thing (#123)", "Merge branch 'main' into topic",
-                "Merge pull request #5378 from MushroomObserver/branch"]
-
-    assert_equal([5378, 123], ReleaseNotes.pr_numbers(subjects))
-  end
-
-  def test_user_facing_follows_the_changelog_blocks
-    yes = pull("<!-- changelog -->\narticle: yes\nAdd maps\n" \
-               "<!-- /changelog -->")
-    no = pull("<!-- changelog -->\narticle: no\n<!-- /changelog -->")
-
-    assert(ReleaseNotes.user_facing?([no, yes]))
-    assert_not(ReleaseNotes.user_facing?([no, pull("no block")]))
-    assert_not(ReleaseNotes.user_facing?([]))
+  def test_forced_banner_line_gives_the_time
+    assert_equal("Undocumented forced deploy occurred Dec 1 14:32 UTC " \
+                 "(9:32am eastern, 6:32am pacific)",
+                 ReleaseNotes.forced_banner_line(Time.utc(2026, 12, 1, 14, 32)))
   end
 
   def test_with_first_line_keeps_the_break_and_later_lines
@@ -100,12 +74,5 @@ class ReleaseNotesTest < UnitTestCase
                  ReleaseNotes.with_first_line(message, "Released"))
     assert_equal("Released", ReleaseNotes.with_first_line("Old", "Released"),
                  "a one-line banner has no break to keep")
-  end
-
-  private
-
-  def pull(body)
-    { "number" => 1, "title" => "A change", "url" => "https://example.test",
-      "mergedAt" => "2026-09-17T10:00:00Z", "body" => body }
   end
 end

@@ -9,7 +9,7 @@ it reports, it does not gate.
 
 | Label | Review | May merge | Ships in |
 | --- | --- | --- | --- |
-| `review: blocker` | Optional; the author may request one | As soon as the author is comfortable | An off-schedule deploy, run by the PR author |
+| `review: blocker` | Optional; the author may request one | As soon as the author is comfortable | An off-schedule deploy (`prerelease.rb --apply --now`, then `deploy.sh`), run by the PR author |
 | `review: urgent` | Optional | Any time | The next scheduled deploy |
 | `review: standard` | Optional; no review within 24 hours counts as approval | 24 hours after the PR was last marked ready, or earlier with an approving review | The first deploy at least 24 hours after ready (earlier if approved) |
 | `review: needs review` | Required: an approving review | Once approved | The first deploy after it merges |
