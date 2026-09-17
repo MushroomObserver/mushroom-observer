@@ -10,7 +10,8 @@ class OpenPullRequestsTest < UnitTestCase
   READY = "2026-09-16T18:00:00Z" # 18 hours before NOW
   REVIEWED = "2026-09-17T06:00:00Z"
   NODE_DEFAULTS = {
-    number: 1, title: "A change", labels: [], reviews: [], ready: READY,
+    number: 1, title: "A change", author: "alice", labels: [], reviews: [],
+    ready: READY,
     created: "2026-09-01T00:00:00Z", draft: false, branch: "some-branch",
     ci: "SUCCESS", mergeable: "MERGEABLE"
   }.freeze
@@ -145,13 +146,16 @@ class OpenPullRequestsTest < UnitTestCase
     report = OpenPullRequests.new(
       [node(number: 10, labels: ["review: urgent"], ci: "FAILURE",
             mergeable: "CONFLICTING"),
-       node(number: 20, title: "Standard change")],
+       node(number: 20, title: "Standard change", author: "bartholomew")],
       now: NOW
     ).report
 
     assert_match(/Can merge now:\n  PR#10 .*\[CI failing, conflicts\]/,
                  report)
     assert_match(/Waiting:\n  PR#20 .*Standard change  /, report)
+    assert_match(/PR#10 .* @alice        A change/, report,
+                 "authors pad to the longest login")
+    assert_match(/PR#20 .* @bartholomew  Standard change/, report)
     assert_match(/PR#20 .*\[CI ok, can merge in 6h\]/, report)
     assert_match(/No review label \(treated as standard\): PR#20$/, report)
   end
@@ -162,6 +166,10 @@ class OpenPullRequestsTest < UnitTestCase
     ).report
 
     assert_match(/PR#1 .*\[approved, CI running\]/, report)
+  end
+
+  def test_a_deleted_authors_pr_shows_as_ghost
+    assert_equal("ghost", pulls(node(author: nil)).first.author)
   end
 
   def test_fetch_builds_the_report_from_the_graphql_response
@@ -199,7 +207,7 @@ class OpenPullRequestsTest < UnitTestCase
 
   def test_urgent_merges_report
     merged = [
-      { "number" => 1, "title" => "Hot fix",
+      { "number" => 1, "title" => "Hot fix", "author" => { "login" => "alice" },
         "labels" => [{ "name" => "review: blocker" }] },
       { "number" => 2, "title" => "Feature",
         "labels" => [{ "name" => "review: standard" }] },
@@ -207,7 +215,7 @@ class OpenPullRequestsTest < UnitTestCase
     ]
 
     assert_equal(["=== Blocker and urgent PRs in this deploy ===", "",
-                  "  PR#1 blocker: Hot fix", ""],
+                  "  PR#1 blocker (@alice): Hot fix", ""],
                  OpenPullRequests.urgent_merges_report(merged))
     assert_empty(OpenPullRequests.urgent_merges_report(merged.drop(1)))
   end
@@ -228,6 +236,7 @@ class OpenPullRequestsTest < UnitTestCase
     opts = NODE_DEFAULTS.merge(overrides)
     {
       "number" => opts[:number], "title" => opts[:title],
+      "author" => opts[:author] && { "login" => opts[:author] },
       "isDraft" => opts[:draft], "createdAt" => opts[:created],
       "headRefName" => opts[:branch], "mergeable" => opts[:mergeable],
       "labels" => { "nodes" => opts[:labels].map { |n| { "name" => n } } },

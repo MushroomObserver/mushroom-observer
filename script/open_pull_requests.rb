@@ -33,6 +33,7 @@ class OpenPullRequests
           pageInfo { hasNextPage }
           nodes {
             number title isDraft createdAt headRefName mergeable
+            author { login }
             labels(first: 30) { nodes { name } }
             latestOpinionatedReviews(first: 30) {
               nodes { state submittedAt author { __typename } }
@@ -49,8 +50,9 @@ class OpenPullRequests
     }
   GRAPHQL
 
-  Pull = Data.define(:number, :title, :type, :label_problem, :ready_at,
-                     :approved, :changes_requested, :ci, :mergeable)
+  Pull = Data.define(:number, :title, :author, :type, :label_problem,
+                     :ready_at, :approved, :changes_requested, :ci,
+                     :mergeable)
 
   # [type, problem] from a PR's label names. No review label means the
   # default type; several, or one this script doesn't know, make the type
@@ -72,12 +74,19 @@ class OpenPullRequests
     lines = merged.filter_map do |pull|
       names = pull["labels"].to_a.map { |label| label.fetch("name") }
       type = review_type(names).first
-      "  PR##{pull["number"]} #{type}: #{pull["title"]}" if
-        %w[blocker urgent].include?(type)
+      if %w[blocker urgent].include?(type)
+        "  PR##{pull["number"]} #{type} (@#{author_login(pull)}): " \
+          "#{pull["title"]}"
+      end
     end
     return [] if lines.empty?
 
     ["=== Blocker and urgent PRs in this deploy ===", "", *lines, ""]
+  end
+
+  # GitHub returns no author for a deleted account and shows it as "ghost".
+  def self.author_login(pull)
+    pull.dig("author", "login") || "ghost"
   end
 
   # GitHub computes merge conflicts lazily, and a query tends to start the
@@ -145,7 +154,8 @@ class OpenPullRequests
     )
     ready = ready_at(node)
     states = current_review_states(node, ready)
-    Pull.new(number: node["number"], title: node["title"], type: type,
+    Pull.new(number: node["number"], title: node["title"],
+             author: self.class.author_login(node), type: type,
              label_problem: problem, ready_at: ready,
              approved: states.include?("APPROVED"),
              changes_requested: states.include?("CHANGES_REQUESTED"),
@@ -220,10 +230,16 @@ class OpenPullRequests
   end
 
   def line(pull)
-    format("  PR#%<number>-5d %<type>-12s ready %<ready>s  %<title>s%<notes>s",
+    format("  PR#%<number>-5d %<type>-12s ready %<ready>s  %<author>s  " \
+           "%<title>s%<notes>s",
            number: pull.number, type: pull.type,
            ready: pull.ready_at.strftime("%m-%d %H:%M"),
+           author: "@#{pull.author}".ljust(author_width),
            title: truncate(pull.title), notes: notes(pull))
+  end
+
+  def author_width
+    @author_width ||= @pulls.map { |pull| pull.author.length + 1 }.max
   end
 
   def notes(pull)
