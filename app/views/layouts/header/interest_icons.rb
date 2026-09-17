@@ -30,7 +30,7 @@ module Views::Layouts
     prop :object, ::AbstractModel
 
     def view_template
-      div(class: "btn-toolbar interest-eyes h4 my-0", role: "toolbar",
+      div(class: "btn-toolbar interest-eyes h4 my-0 ml-2", role: "toolbar",
           aria: { label: :app_interest_icons_label.l }) do
         render_icons if @user
       end
@@ -76,7 +76,7 @@ module Views::Layouts
     # border is what visually marks this one as "your current state",
     # not clickable.
     def icon_item(size, kind, alt_key)
-      Button(tag: :span, variant: :outline, class: "disabled") do
+      Button(tag: :span, variant: :outline, class: "disabled px-1") do
         interest_icon(size, kind, alt_key)
       end
     end
@@ -118,7 +118,8 @@ module Views::Layouts
     # button's job now, not the icon's (see `interest_icon`).
     def interest_button(method, path, kind:, alt_key:, params:)
       Button(type: method, target: path, name: alt_key.l(object: type.l),
-             variant: :link, params:, form: { class: "interest-link" },
+             variant: :link, class: "px-1", params:,
+             form: { class: "interest-link" },
              data: { turbo_stream: "true", placement: "bottom",
                      tooltip_container: TOOLTIP_CONTAINER }) do
         interest_icon(:small, kind, alt_key)

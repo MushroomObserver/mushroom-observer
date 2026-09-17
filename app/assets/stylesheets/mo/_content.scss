@@ -98,12 +98,24 @@ ul.tight-list {
 }
 
 .h3.page-title {
-  font-size: 1.375rem;
+  font-size: 1.1rem;
 
   small {
     @extend .ml-2;
     font-size: $font-size-base;
     color: $body-color;
+  }
+
+  @media screen and (min-width: breakpoint-min(sm)) {
+    font-size: 1.375rem;
+  }
+}
+
+#owner_naming.h5 {
+  font-size: 1rem;
+
+  @media screen and (min-width: breakpoint-min(sm)) {
+    font-size: $h5-font-size;
   }
 }
 

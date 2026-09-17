@@ -28,6 +28,7 @@ module Views::FullPageBase::Title
   # observer's-preferred-naming line under the title (nothing renders
   # if the viewer hasn't opted in or the owner agrees with consensus).
   def add_show_title(object, user: nil, owner_naming: false)
+    add_id_badge(object)
     add_page_title(
       capture do
         render(::Views::Layouts::Header::ObjectTitle.new(
@@ -42,6 +43,7 @@ module Views::FullPageBase::Title
   # Edit-mode object title: heading flips to `mode: :edit`; doc title
   # gets a leading `EDIT` label.
   def add_edit_title(object, user: nil)
+    add_id_badge(object)
     add_page_title(
       capture do
         render(::Views::Layouts::Header::ObjectTitle.new(
@@ -90,6 +92,27 @@ module Views::FullPageBase::Title
   end
 
   private
+
+  # `Header::PageTitle` places this HTML twice -- next to the object
+  # name on desktop, and again in the mobile-only top row alongside
+  # the edit/interest/pager icons. `Components::IDBadge` emits no
+  # HTML `id` attribute, so the duplication carries no id-collision
+  # risk. No `extra_class:` here -- each placement site supplies the
+  # spacing that context needs.
+  #
+  # `size: :xl` -- neither placement nests the badge inside a `.h3`
+  # (or other heading) anymore, so its size can't ride on an ancestor
+  # heading's font-size the way `:sm`/`:md`/`:lg` are meant to; `:xl`
+  # is the one size in `Components::IDBadge::SIZE_CLASSES` that isn't
+  # scaled down from its context.
+  def add_id_badge(object)
+    content_for(:id_badge) do
+      capture do
+        render(::Components::IDBadge.new(object: object, size: :xl,
+                                         extra_class: nil))
+      end
+    end
+  end
 
   # Captured HTML for `add_show_title`'s `owner_naming:` line, or nil
   # when disabled or the line has nothing to show (the view decides

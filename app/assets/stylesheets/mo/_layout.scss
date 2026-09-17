@@ -70,6 +70,15 @@ $sidebar-max-width: 9.9rem;
   margin-right: $grid-gutter-width;
 }
 
+// A flex item's default `min-width: auto` refuses to shrink below its
+// content's min-content width -- an unconstrained descendant deep
+// inside #right_side (an image, a table, ...) can inflate #right_side,
+// and everything nested in it, far past the viewport instead of being
+// capped by max-width: 100% against a definite ancestor width.
+#right_side {
+  min-width: 0;
+}
+
 @media screen and (min-width: breakpoint-min(lg)) {
   // In-flow next to #right_side instead of sliding in from off-screen.
   .sidebar-offcanvas {
