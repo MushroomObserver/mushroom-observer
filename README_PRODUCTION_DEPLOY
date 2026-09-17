@@ -79,13 +79,14 @@ To deploy to production:
    inserts the Article rows below the Article's table header, and then
    replaces the first line of the site banner with one of:
 
-     Sep 15 release complete. See "MO Improvements":https://mushroomobserver.org/articles/55 for details
-     Sep 15 release complete. No user-facing changes - "details here":https://github.com/MushroomObserver/mushroom-observer/blob/main/CHANGELOG.md
+     Sep 15 release completed at 12:04 UTC. See "MO Improvements":https://mushroomobserver.org/articles/55 for details
+     Sep 15 release completed at 12:04 UTC. No user-facing changes - "details here":https://github.com/MushroomObserver/mushroom-observer/blob/main/CHANGELOG.md
 
    The first when article_pending.textile has rows, the second when it
-   is empty. The rest of the banner is kept, and a banner that already
-   starts with the line is left alone. If the Article or banner step
-   fails, the deploy still succeeds; retry on the server with:
+   is empty. The time is the server's clock, in UTC, when the banner is
+   set -- not the time in the deploy tag -- and the rest of the banner
+   is kept. If the Article or banner step fails, the deploy still
+   succeeds; retry on the server with:
 
      bundle exec rails runner script/update_article_changelog.rb --apply
      bundle exec rails runner script/update_release_banner.rb --apply
@@ -104,7 +105,7 @@ scripts are broken. Forcing deploys main as-is -- no CHANGELOG.md
 section and no MO Article update; the skipped PRs roll into the next
 pre-release/deploy cycle. The banner's first line becomes:
 
-  Undocumented forced deploy occurred Sep 17 14:32 UTC (10:32am eastern, 7:32am pacific)
+  Undocumented forced deploy occurred Sep 17 14:32 UTC
 
 Retry that on the server with:
 

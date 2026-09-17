@@ -43,25 +43,26 @@ class ReleaseNotesTest < UnitTestCase
   end
 
   def test_released_banner_line_links_the_article_or_the_changelog
-    time = Time.utc(2026, 9, 15, 12, 20)
+    # The server clock's zone doesn't matter; the banner shows UTC.
+    time = Time.new(2026, 9, 15, 8, 20, 0, "-04:00")
 
     assert_equal(
-      "Sep 15 release complete. See \"MO Improvements\":" \
+      "Sep 15 release completed at 12:20 UTC. See \"MO Improvements\":" \
       "https://mushroomobserver.org/articles/#{ReleaseNotes::ARTICLE_ID} " \
       "for details",
       ReleaseNotes.released_banner_line(time, user_facing: true)
     )
     assert_equal(
-      "Sep 15 release complete. No user-facing changes - \"details here\":" \
-      "https://github.com/MushroomObserver/mushroom-observer/blob/main/" \
-      "CHANGELOG.md",
+      "Sep 15 release completed at 12:20 UTC. No user-facing changes - " \
+      "\"details here\":https://github.com/MushroomObserver/" \
+      "mushroom-observer/blob/main/CHANGELOG.md",
       ReleaseNotes.released_banner_line(time, user_facing: false)
     )
+    assert_equal(8, time.hour, "the caller's time is not converted in place")
   end
 
-  def test_forced_banner_line_gives_the_time
-    assert_equal("Undocumented forced deploy occurred Dec 1 14:32 UTC " \
-                 "(9:32am eastern, 6:32am pacific)",
+  def test_forced_banner_line_gives_the_utc_time
+    assert_equal("Undocumented forced deploy occurred Dec 1 14:32 UTC",
                  ReleaseNotes.forced_banner_line(Time.utc(2026, 12, 1, 14, 32)))
   end
 

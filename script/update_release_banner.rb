@@ -7,10 +7,11 @@
 #     bundle exec rails runner script/update_release_banner.rb [--forced]
 #   Live run: add --apply
 #
-# A pre-release deploy says "<date> release complete", linking the MO
-# Article when article_pending.textile has rows, else CHANGELOG.md on
-# main. --forced, for a deploy that skipped the pre-release, says
-# "Undocumented forced deploy occurred <date> <time>".
+# A pre-release deploy says "<date> release completed at <time> UTC",
+# linking the MO Article when article_pending.textile has rows, else
+# CHANGELOG.md on main. --forced, for a deploy that skipped the
+# pre-release, says "Undocumented forced deploy occurred <date> <time>
+# UTC". The time is this script's run on the server.
 #
 # Saves a new Banner version, as the admin banner page does, so the banner
 # reappears for visitors who dismissed the previous one. A banner whose

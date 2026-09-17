@@ -43,22 +43,28 @@ module ReleaseNotes
   end
 
   # Posted by hand after `prerelease.rb --apply`, when production has no
-  # part in the change yet.
+  # part in the change yet. Only this line gives Eastern and Pacific
+  # times: an upcoming release is something people may plan work
+  # around, while a completed one needs only its UTC time.
   def pending_banner_line(deploy_time)
     "Next release #{when_text(deploy_time)}. See \"pre-release change " \
       "log\":#{changelog_url("changelog-pending")} for details"
   end
 
-  # Set by deploy.sh once a pre-release deploy is up.
+  # Set by deploy.sh once a pre-release deploy is up. release_time is the
+  # server clock when the banner is set, not the deploy tag's planned
+  # time, which a late deploy would misstate.
   def released_banner_line(release_time, user_facing:)
-    "#{day(release_time)} release complete. #{details(user_facing)}"
+    "#{day(release_time)} release completed at #{utc_time(release_time)}. " \
+      "#{details(user_facing)}"
   end
 
   # Set by deploy.sh after a forced deploy. Blocker releases go through
   # `prerelease.rb --apply --now`, so a forced deploy means the release
   # process was bypassed and nothing documents what shipped.
   def forced_banner_line(deploy_time)
-    "Undocumented forced deploy occurred #{when_text(deploy_time)}"
+    "Undocumented forced deploy occurred #{day(deploy_time)} " \
+      "#{utc_time(deploy_time)}"
   end
 
   # message with its first line replaced by line, keeping the old line's
@@ -86,6 +92,10 @@ module ReleaseNotes
 
   def day(time)
     time.getutc.strftime("%b %-d")
+  end
+
+  def utc_time(time)
+    time.getutc.strftime("%H:%M UTC")
   end
 
   def utc_clock(time)
