@@ -1,7 +1,8 @@
 # Review types — one `review:` label on every PR
 
-Every PR carries one review-type label saying how soon it may merge and
-what review it needs (issue #5381). A type decides when a PR may
+Every PR should carry a single review-type label saying how soon it may
+merge and what review it needs (issue #5381); see below for what the
+report does when a PR has none or more than one. A type decides when a PR may
 **merge**: every deploy ships whatever is on `main`, so holding a change
 back means not merging it yet. `script/open_pull_requests.rb` (also
 printed by `script/prerelease.rb`) lists which open PRs may merge now;
@@ -23,9 +24,13 @@ it reports, it does not gate.
   aim to respond within about a week; that is an expectation, not a
   deadline.
 
-A PR with no review label is treated as Standard and flagged in the
-report. A PR with several review labels, or one the report doesn't
-know, is held under "Waiting" until the labels are fixed. The
+When a PR breaks the one-label rule, the report handles it this way: a
+PR with no review label is treated as Standard and flagged; a PR with
+more than one, or with one the report doesn't know, is held under
+"Waiting" until the labels are fixed.
+
+The label is set once and stays through draft and ready-for-review
+changes; nothing prompts for it again. The
 `changelog-pending` PR is exempt. Dependabot PRs are labeled
 `review: urgent` by `.github/dependabot.yml`.
 

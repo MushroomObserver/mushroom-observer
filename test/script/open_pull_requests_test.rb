@@ -10,10 +10,10 @@ class OpenPullRequestsTest < UnitTestCase
   READY = "2026-09-16T18:00:00Z" # 18 hours before NOW
   REVIEWED = "2026-09-17T06:00:00Z"
   NODE_DEFAULTS = {
-    number: 1, title: "A change", author: "alice", labels: [], reviews: [],
-    ready: READY,
-    created: "2026-09-01T00:00:00Z", draft: false, branch: "some-branch",
-    ci: "SUCCESS", mergeable: "MERGEABLE"
+    number: 1, title: "A change", author: "alice", labels: [],
+    reviews: [], ready: READY, created: "2026-09-01T00:00:00Z",
+    draft: false, branch: "some-branch", ci: "SUCCESS",
+    mergeable: "MERGEABLE"
   }.freeze
 
   def test_review_type_from_labels

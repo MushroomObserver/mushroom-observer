@@ -145,8 +145,9 @@ passes don't re-verify it from scratch.
 See `.claude/rules/changelog.md` — every PR body needs a changelog
 block (`article:` verdict + user-facing sentence) for the automated
 changelogs (#5155).
-See `.claude/rules/review_types.md` — every PR gets one `review:` label
-(default `review: standard`) saying when it may merge (#5381).
+See `.claude/rules/review_types.md` — every PR should have a single
+`review:` label (default `review: standard`) saying when it may merge
+(#5381).
 See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
 app; use ActiveRecord/Arel instead.
 See `.claude/rules/params_to_literal_props.md` — guard raw params

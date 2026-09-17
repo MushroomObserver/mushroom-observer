@@ -7,7 +7,8 @@
 <!-- How a reviewer can verify the change. -->
 
 <!--
-Add one review label (a PR with none is treated as review: standard).
+Add a single review label. A PR with none is treated as review: standard;
+one with more than one is held until the extra labels are removed.
 The clock starts when the PR is last marked ready for review.
 - review: blocker — urgent fix; merge when ready, then deploy it yourself.
 - review: urgent — may merge any time; ships in the next deploy.
