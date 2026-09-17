@@ -155,6 +155,38 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(1, outcome.added)
   end
 
+  def test_provisional_name_found_in_mo_leads
+    provisional = { name: "Provisional Species Name",
+                    value: @old.text_name }
+
+    outcome = sync(fresh(ofvs: [provisional]))
+
+    assert_empty(outcome.alerts)
+    assert_equal(2, outcome.added)
+    assert_equal(Vote::NEXT_BEST_VOTE,
+                 importer_vote(@obs.namings.find_by(name: @old)).value,
+                 "the provisional name leads")
+    assert_equal(Vote::MIN_POS_VOTE,
+                 importer_vote(@obs.namings.find_by(name: @new)).value,
+                 "the Observation Taxon follows at Could Be")
+    assert_equal(@old, @obs.reload.name)
+  end
+
+  def test_override_name_missing_from_mo_is_created_and_leads
+    assert_nil(Name.find_by(text_name: "Agrocybe yyy"))
+    override = { name: "Species Name Override", value: "Agrocybe yyy" }
+
+    outcome = sync(fresh(ofvs: [override]))
+
+    created = Name.find_by(text_name: "Agrocybe yyy")
+    assert_not_nil(created, "the override's MO name should have been created")
+    assert_equal(User.admin, created.user)
+    assert_empty(outcome.alerts)
+    assert_equal(Vote::NEXT_BEST_VOTE,
+                 importer_vote(@obs.namings.find_by(name: created)).value,
+                 "the override leads")
+  end
+
   def test_unresolvable_provisional_is_alerted_and_the_rest_proceeds
     provisional = { name: "Provisional Species Name", value: "!!!" }
 
