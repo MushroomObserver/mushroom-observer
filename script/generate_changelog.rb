@@ -216,7 +216,7 @@ class ChangelogGenerator
               "--search", "merged:#{from}..#{to}",
               "--json",
               "number,title,author,url,mergeCommit,mergedAt,body," \
-              "headRefName")
+              "headRefName,labels")
     )
     if pulls.size >= SEARCH_CAP
       abort("#{pulls.size} PRs merged in #{from}..#{to} hits GitHub's " \

@@ -7,6 +7,17 @@
 <!-- How a reviewer can verify the change. -->
 
 <!--
+Add one review label (a PR with none is treated as review: standard).
+The clock starts when the PR is last marked ready for review.
+- review: blocker — urgent fix; merge when ready, then deploy it yourself.
+- review: urgent — may merge any time; ships in the next deploy.
+- review: standard — may merge 24 hours after ready, or earlier once a
+  reviewer approves.
+- review: needs review — merge only after another developer approves.
+Details: .claude/rules/review_types.md
+-->
+
+<!--
 The changelog block below feeds the automated changelogs (issue #5155).
 - `article: yes` + a one-line, plain-English sentence written for site
   users (no code names; 60 characters or fewer, e.g. "Fix map cluster

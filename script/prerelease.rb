@@ -27,6 +27,8 @@
 #   deploy applies the file as merged
 # - re-running replaces the branch, the PR body, and any stale pending
 #   section, so last-minute merges are picked up
+# - prints which open PRs may merge now (script/open_pull_requests.rb)
+#   and which merged PRs in this deploy are review: blocker or urgent
 #
 # Works in a temporary git worktree; the current checkout stays put.
 
@@ -36,6 +38,7 @@ require("tempfile")
 require("tmpdir")
 require_relative("generate_changelog")
 require_relative("article_rows")
+require_relative("open_pull_requests")
 
 # Builds the changelog-pending branch and PR for the next deploy.
 class Prerelease
@@ -56,8 +59,12 @@ class Prerelease
   def run
     warn("Fetching tags and main from origin...")
     run_cmd("git", "fetch", "origin", "--tags")
+    # Before collect_pending, which aborts when nothing has merged -- the
+    # open PRs matter most then.
+    puts(OpenPullRequests.fetch.report, "")
     generator = ChangelogGenerator.new([])
     collect_pending(generator)
+    puts(OpenPullRequests.urgent_merges_report(@pulls))
     @apply ? apply(generator) : preview
   end
 

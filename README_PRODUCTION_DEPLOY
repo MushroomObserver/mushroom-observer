@@ -14,6 +14,11 @@ To deploy to production:
    PR bodies. PRs without a changelog block are listed in the PR body
    for an article yes/no verdict.
 
+   Both modes first print the open PRs that may merge now and those
+   still waiting, by their review: label (.claude/rules/review_types.md),
+   then any review: blocker or urgent PRs going out in this deploy.
+   "ruby script/open_pull_requests.rb" prints the open-PR part alone.
+
 2. Review that PR. The deploy publishes article_pending.textile as
    merged, so any desired corrections or additions (e.g. promoting a
    blockless PR) can be made to that file in the PR -- usually none
