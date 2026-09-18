@@ -9,6 +9,7 @@ class Tab::Name::NcbiNucleotide < Tab::Name::ExternalBase
   end
 
   def path
-    "https://www.ncbi.nlm.nih.gov/nuccore/?term=#{@name.sensu_stricto}"
+    "https://www.ncbi.nlm.nih.gov/nuccore/?term=" \
+      "#{url_encode(@name.sensu_stricto)}"
   end
 end
