@@ -145,6 +145,9 @@ passes don't re-verify it from scratch.
 See `.claude/rules/changelog.md` — every PR body needs a changelog
 block (`article:` verdict + user-facing sentence) for the automated
 changelogs (#5155).
+See `.claude/rules/review_types.md` — every PR should have a single
+`review:` label (default `review: standard`) saying when it may merge
+(#5381).
 See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
 app; use ActiveRecord/Arel instead.
 See `.claude/rules/params_to_literal_props.md` — guard raw params
@@ -171,8 +174,10 @@ test.
   - **Setup**: Create `.claude/developer.json` with
     `{"branchPrefix": "your-initials"}` (git-ignored)
 - Commit messages include Claude Code attribution
-- Create PRs via `gh pr create --draft` with detailed descriptions —
-  always a draft; see `.claude/rules/gh_pr_issue_formatting.md`
+- Create PRs via `gh pr create --draft --label "review: standard"` with
+  detailed descriptions — always a draft; see
+  `.claude/rules/gh_pr_issue_formatting.md` and
+  `.claude/rules/review_types.md`
 - Link PRs to issues with `Fixes #issue_number`
 
 ## Architecture
