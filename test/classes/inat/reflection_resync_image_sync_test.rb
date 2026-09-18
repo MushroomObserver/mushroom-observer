@@ -69,15 +69,17 @@ class Inat::ReflectionResyncImageSyncTest < UnitTestCase
     assert_not(Image.exists?(lost.id))
   end
 
-  def test_photo_unlicensed_on_the_importers_observation_is_kept
+  # The importer agreed to license their photo this way at import, so a
+  # later change to their default license doesn't relicense the image.
+  def test_photo_unlicensed_on_the_importers_observation_keeps_its_license
     @importer.update_column(:inat_username, "dick_on_inat")
     image = add_image(1, license: licenses(:ccbync))
+    @importer.update_column(:license_id, licenses(:ccby).id)
 
     outcome = sync([photo(1, license: nil)], login: "Dick_On_iNat")
 
     assert_equal(0, outcome.removed)
-    assert_equal(@importer.license_id, image.reload.license_id,
-                 "the importer's default license, as at import")
+    assert_equal(licenses(:ccbync).id, image.reload.license_id)
   end
 
   def test_license_and_copyright_holder_follow_inat

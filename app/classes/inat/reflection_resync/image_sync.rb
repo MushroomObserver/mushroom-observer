@@ -11,7 +11,10 @@ class Inat
     #     unless another observation, glossary term or profile uses it,
     #     in which case it is only detached from the reflection and
     #     reported;
-    #   - a kept photo's license and copyright holder follow iNat;
+    #   - a kept photo's copyright holder follows iNat, and so does its
+    #     license while iNat has one; an unlicensed photo (kept only on an
+    #     observation the importer made) keeps the license it was imported
+    #     with;
     #   - a new photo is imported by Inat::PhotoImporter, under the same
     #     rules as the importer;
     #   - the thumbnail follows iNat's first photo, unless it points at an
@@ -129,7 +132,7 @@ class Inat
       def update_kept_images
         photos = photos_by_id
         linked_images.each do |photo_id, image|
-          attrs = source_attributes(photos[photo_id])
+          attrs = source_attributes(photos[photo_id], image)
           next if attrs.all? { |key, value| image[key] == value }
 
           image.current_user = User.admin
@@ -138,8 +141,17 @@ class Inat
         end
       end
 
-      def source_attributes(photo)
-        { license_id: @importer.license_id_for(photo),
+      # A licensed photo's license follows iNat. An unlicensed one is only
+      # kept on an observation the importer made, where the image carries
+      # the license they chose at import; that stands, since they agreed
+      # to license their photo that way.
+      def source_attributes(photo, image)
+        license_id = if photo.license_code.present?
+                       photo.license_id
+                     else
+                       image.license_id
+                     end
+        { license_id: license_id,
           copyright_holder: Inat::PhotoImporter.copyright_holder(photo) }
       end
 
