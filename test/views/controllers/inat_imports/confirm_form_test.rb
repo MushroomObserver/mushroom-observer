@@ -87,9 +87,23 @@ module Views::Controllers::InatImports
     end
 
     def test_requested_count_present_when_provided
-      html = render_form(breakdown: { requested: 12, after_taxon: 10 })
+      requested = 12 # arbitrary value
+      after_taxon = 10 # arbitrary lower value
+      html = render_form(
+        breakdown: { requested: requested, after_taxon: after_taxon }
+      )
 
       assert_html(html, "#requested_count")
+    end
+
+    def test_requested_count_rendered_as_plain_text_without_url
+      model = FormObject::InatImportConfirm.new(inat_username: "")
+      requested = 12 # arbitrary value
+      html = render_form(form_model: model,
+                         breakdown: { requested: requested })
+
+      assert_html(html, "#requested_count", text: requested.to_s)
+      assert_no_html(html, "#requested_count a[href]")
     end
 
     def test_no_ignored_section_when_no_breakdown_counts
@@ -99,8 +113,12 @@ module Views::Controllers::InatImports
     end
 
     def test_ignored_total_shown_with_requested_and_expected
+      requested = 12 # arbitrary value
+      after_taxon = 10 # arbitrary lower value
+      estimate_with_date = 9 # even lower value
       html = render_form(
-        breakdown: { requested: 12, after_taxon: 10, estimate_with_date: 9 }
+        breakdown: { requested: requested, after_taxon: after_taxon,
+                     estimate_with_date: estimate_with_date }
       )
 
       assert_html(html, "#total_ignored_count")
@@ -120,12 +138,12 @@ module Views::Controllers::InatImports
     end
 
     def test_overlap_note_absent_with_single_ignored_row
-      # Only not_importable row: requested(12) - after_taxon(10) = 2 > 0
-      # already_imported: after_taxon(10) - not_yet_imported(10) = 0, not
-      # positive
-      # no_date: nil (no estimate_with_date provided)
+      requested = 12
+      after_taxon = 10 # not_importable row
+      not_yet_imported = after_taxon
       html = render_form(
-        breakdown: { requested: 12, after_taxon: 10, not_yet_imported: 10 }
+        breakdown: { requested: requested, after_taxon: after_taxon,
+                     not_yet_imported: not_yet_imported }
       )
 
       assert_no_html(html, ".overlap-note")
@@ -242,6 +260,8 @@ module Views::Controllers::InatImports
 
     private
 
+    # `expected:` default is an arbitrary positive placeholder so the
+    # "nothing to import" branch doesn't fire unless a test overrides it.
     def render_form(form_model: @form_model, inat_import: @import,
                     expected: 10, unlicensed_obs: 0, breakdown: {})
       inat_import_val = inat_import

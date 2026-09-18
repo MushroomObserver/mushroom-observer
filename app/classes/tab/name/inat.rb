@@ -8,6 +8,6 @@ class Tab::Name::Inat < Tab::Name::ExternalBase
   end
 
   def path
-    "https://www.inaturalist.org/search?q=#{@name.sensu_stricto}"
+    "https://www.inaturalist.org/search?q=#{url_encode(@name.sensu_stricto)}"
   end
 end
