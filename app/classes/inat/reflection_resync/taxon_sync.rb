@@ -20,6 +20,10 @@ class Inat
         def changed?
           added.positive? || reweighted.positive?
         end
+
+        # Naming callbacks log adds, but not vote reweights or consensus
+        # changes.
+        def logs_resync? = changed?
       end
 
       def call(obs, inat_obs)

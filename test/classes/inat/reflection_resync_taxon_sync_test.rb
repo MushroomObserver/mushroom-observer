@@ -241,9 +241,11 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
             ofvs: [], ancestor_ids: nil)
     taxon = @raw[:taxon].merge(name: name, rank: rank)
     taxon[:ancestor_ids] = ancestor_ids unless ancestor_ids.nil?
+    # No photos: the full-resync test would otherwise import them.
     Inat::Obs.new(JSON.generate(@raw.merge(quality_grade: quality,
                                            taxon: taxon, identifications: [],
-                                           ofvs: ofvs)))
+                                           ofvs: ofvs,
+                                           observation_photos: [])))
   end
 
   def raw_for(inat_obs)

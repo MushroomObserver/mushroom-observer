@@ -1613,6 +1613,8 @@
   image_remove_title: Remove Images from [name]
 
   # observations/images/reuse
+  image_reuse_on_reflection_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created a linked companion observation for the image. The two are grouped as one occurrence for the same specimen.
+  image_reuse_on_reflection_companion_existing: That observation is a read-only reflection of its imported source, so the image goes on its linked companion observation for the same specimen.
   image_reuse_title: Reuse Image for [name]
   image_reuse_id: Image ID
   image_reuse_reuse: Reuse
