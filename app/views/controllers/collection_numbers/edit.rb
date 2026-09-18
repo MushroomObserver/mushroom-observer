@@ -2,7 +2,7 @@
 
 # Action template for `CollectionNumbersController#edit`. Wraps
 # the existing `Form` Phlex component with the page chrome + a
-# side-column list of MatrixBox previews (one per associated obs).
+# side-column list of Grid::Box previews (one per associated obs).
 module Views::Controllers::CollectionNumbers
   class Edit < Views::FullPageBase
     prop :collection_number, ::CollectionNumber
@@ -36,7 +36,7 @@ module Views::Controllers::CollectionNumbers
     def render_observation_boxes
       Row(element: :ul, class: "list-unstyled") do
         @collection_number.observations.each do |obs|
-          render(Components::Matrix::Box.new(
+          render(Components::Grid::Box.new(
                    user: @user,
                    object: obs.rss_log || obs,
                    columns: Components::Column.classes_for(xs: 12)

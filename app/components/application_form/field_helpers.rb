@@ -382,6 +382,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         **field_opts
       )
 
+      set_help_slot(field_component, wrapper_opts[:help])
       yield(field_component) if block_given?
 
       render(field_component)

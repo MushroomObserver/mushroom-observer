@@ -73,7 +73,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def view_template
       div(
         id: controller_id,
-        class: "autocompleter",
+        class: class_names("autocompleter", collapse_help_present? && "mb-3"),
         data: controller_data
       ) do
         render_input_field do
@@ -172,8 +172,22 @@ class Components::ApplicationForm < Superform::Rails::Form
     def autocompleter_wrapper_options
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
-        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown",
+                                collapse_help_present? && "mb-2")
       )
+    end
+
+    # A collapsible help block renders as a sibling right after
+    # .form-group -- when expanded, .form-group's default margin-
+    # bottom (~1rem) reads as a gap between the field and the help
+    # describing it. Tighten .form-group to mb-2 and move the
+    # field-to-field spacing that margin used to provide onto the
+    # outer .autocompleter wrapper instead (mb-3, see view_template).
+    # Plain (non-collapsible) help already handles this correctly via
+    # FieldWrapperRendering#help_present? -- this only covers the
+    # collapsible case, which that check deliberately excludes.
+    def collapse_help_present?
+      help_slot && wrapper_options[:help_collapse]
     end
 
     def add_slots_to_field(field_component, &block)
@@ -333,20 +347,19 @@ class Components::ApplicationForm < Superform::Rails::Form
           action: "scroll->#{stimulus_controller_name}#scrollList:passive"
         }
       ) do
-        ul(class: "virtual_list",
-           data: { target_attr_key => "list" }) do
+        div(class: "virtual_list",
+            data: { target_attr_key => "list" }) do
           10.times do |i|
-            li(class: "dropdown-item") do
-              Link(
-                type: :get,
-                name: "",
-                target: "#",
-                data: {
-                  row: i,
-                  action: "click->#{stimulus_controller_name}#selectRow:prevent"
-                }
-              )
-            end
+            Link(
+              type: :get,
+              name: "",
+              target: "#",
+              class: "dropdown-item",
+              data: {
+                row: i,
+                action: "click->#{stimulus_controller_name}#selectRow:prevent"
+              }
+            )
           end
         end
       end

@@ -199,7 +199,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
+    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}",
+                              normalize_ws: true)
   end
 
   # Tests of show_name_helper module

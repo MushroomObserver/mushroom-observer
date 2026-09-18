@@ -27,12 +27,12 @@ module Views::Controllers::Projects::Members
     end
 
     # Submit button uses `btn: "btn btn-primary"` (not `class:`). Verify it
-    # renders with the primary style and no btn-default stacking.
+    # renders with the primary style and no btn-secondary stacking.
     def test_submit_button_uses_primary_style_without_stacking_default
       html = render_modal(count: 3)
 
       assert_html(html, ".modal-footer button.btn.btn-primary")
-      assert_no_html(html, "form[data-turbo='true'] button.btn-default")
+      assert_no_html(html, "form[data-turbo='true'] button.btn-secondary")
     end
 
     def test_no_submit_button_when_count_is_zero

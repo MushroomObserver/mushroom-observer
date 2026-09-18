@@ -69,7 +69,7 @@ module Observations
 
     def test_propose_naming_turbo_from_identify_ui
       args = propose_naming_setup
-      params = args[:params].merge(context: "matrix_box")
+      params = args[:params].merge(context: "grid_box")
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)

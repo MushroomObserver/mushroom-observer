@@ -5,9 +5,6 @@
 # inherit) each modeled as a Tab PORO so the conditional render
 # logic lives on the Tab class (via `.for(name:)` predicates), not
 # in the view.
-#
-# Data attrs wire the panel up to the `name-panels` Stimulus
-# controller for the side-by-side collapse with the lifeform panel.
 class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   prop :name, ::Name
   prop :children_query, _Nilable(::Query::Names), default: nil
@@ -15,10 +12,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(panel_id: "name_classification",
-          attributes: { data: {
-            name_panels_target: "classification"
-          } }) do |panel|
+    Panel(panel_id: "name_classification") do |panel|
       panel.with_heading { plain(:show_name_classification.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { render_body }

@@ -6,55 +6,50 @@ class HelpTest < ComponentTestCase
   def test_plain_block_with_string
     html = render_help(element: :p, content: "Help text")
 
-    # Default plain shape: a `help-block`-classed element.
-    assert_html(html, "p.help-block", text: "Help text")
+    # Default plain shape: a `help-block form-text`-classed element.
+    assert_html(html, "p.help-block.form-text", text: "Help text")
   end
 
   def test_plain_block_with_block_content
     html = render_help(element: :div) { "From block" }
 
     # Block-form content takes precedence over `content:`.
-    assert_html(html, "div.help-block", text: "From block")
+    assert_html(html, "div.help-block.form-text", text: "From block")
   end
 
   def test_content_only_uses_default_div_element
     html = render_help(content: "Help text")
 
-    assert_html(html, "div.help-block", text: "Help text")
+    assert_html(html, "div.help-block.form-text", text: "Help text")
   end
 
   def test_well_wraps_in_bootstrap_well
     html = render_help(element: :p, content: "Help", well: true)
 
-    # The `well:` flavour wraps content in a Bootstrap well; the
-    # element kwarg is intentionally ignored for the well shape.
-    assert_html(html, "div.well.well-sm.help-block.position-relative",
-                text: "Help")
+    # The `well:` flavour wraps content in a Well; the element kwarg
+    # is intentionally ignored for the well shape.
+    assert_html(html, "div.well.help-block", text: "Help")
   end
 
   def test_arrow_implies_well_and_adds_arrow_div
     html = render_help(element: :div, content: "Help", arrow: :up)
 
     # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
-    # always a well, with an `arrow-up`/`arrow-down` sibling. `mt-3`
-    # is added on the up-pointing variant to leave room above for the
-    # arrow tip.
-    assert_html(html, "div.well.help-block.mt-3", text: "Help")
+    # always a well, with an `arrow-up`/`arrow-down` sibling.
+    assert_html(html, "div.well.help-block", text: "Help")
     assert_html(html, "div.arrow-up.d-none.d-sm-block")
   end
 
-  def test_arrow_down_omits_mt3
+  def test_arrow_down_renders_arrow_down_div
     html = render_help(element: :div, content: "Help", arrow: :down)
 
-    # Down arrows hang below the well — no leading `mt-3`.
-    assert_no_html(html, "div.mt-3")
     assert_html(html, "div.arrow-down.d-none.d-sm-block")
   end
 
   def test_extra_class_appended_to_plain_block
     html = render_help(element: :p, content: "Help", class: "extra-thing")
 
-    assert_html(html, "p.help-block.extra-thing", text: "Help")
+    assert_html(html, "p.help-block.form-text.extra-thing", text: "Help")
   end
 
   def test_id_and_extra_attrs_passed_through
@@ -64,7 +59,7 @@ class HelpTest < ComponentTestCase
     # id and arbitrary data-* asserted independently so renaming
     # the wrapper element or reshuffling attribute order doesn't
     # mass-fail this test.
-    assert_html(html, "div.help-block", text: "Help")
+    assert_html(html, "div.help-block.form-text", text: "Help")
     assert_html(html, "div#h1")
     assert_html(html, "div[data-x='v']")
   end
@@ -101,12 +96,13 @@ class HelpTest < ComponentTestCase
   # `Components::Help` used to have a second "note" flavor
   # (`Help::Note`, `.help-note` class, `:span` default element)
   # alongside this one (`Help::Block`, `.help-block`). Merged into one
-  # dispatcher, but the two CSS classes stay genuinely distinct:
-  # `.help-block` is Bootstrap's own class and hardcodes
-  # `display: block`, so reusing it for `element: :span` content would
-  # force that content onto its own line regardless of the `<span>`
-  # tag. `render_plain` picks `.help-note` for `:span` and
-  # `.help-block` for everything else to keep the inline shape inline.
+  # dispatcher, but the two CSS classes stay distinct: `.help-block`
+  # also carries `.form-text` (Bootstrap 4's `display: block` +
+  # top-margin class), so reusing it for `element: :span` content
+  # would force that content onto a line by itself, no matter the
+  # `<span>` tag. `render_plain` picks `.help-note` for `:span` and
+  # `.help-block form-text` for everything else to keep the inline
+  # shape inline.
 
   def test_span_element_renders_help_note_class
     html = render_help(element: :span, content: "(optional)")

@@ -13,10 +13,8 @@ class Views::Layouts::Sidebar
       html = render_component
 
       # Should have heading with icon and username
-      assert_html(html,
-                  "div.list-group-item svg.mo-icon-user")
+      assert_html(html, ".list-group-item svg.mo-icon-user")
       assert_includes(html, @user.login)
-      assert_html(html, "span.ml-2")
 
       # Should have mobile_only class
       assert_html(html, ".mobile-only")
@@ -28,7 +26,6 @@ class Views::Layouts::Sidebar
       # Should have logout button
       assert_includes(html, :app_logout.t)
       assert_html(html, ".logout_link")
-      assert_html(html, ".btn.btn-link")
     end
 
     def test_renders_user_tabs
@@ -74,7 +71,6 @@ class Views::Layouts::Sidebar
     def render_component
       classes = {
         heading: "list-group-item disabled font-weight-bold",
-        indent: "list-group-item indent",
         mobile_only: "mobile-only"
       }
       render(User.new(user: @user, classes: classes))

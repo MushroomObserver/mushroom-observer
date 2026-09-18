@@ -99,7 +99,9 @@ module Views::Layouts
     def test_has_sidebar_structure
       html = render_component
 
-      assert_html(html, "nav#sidebar.sidebar-offcanvas")
+      assert_html(html,
+                  "nav#sidebar.sidebar-offcanvas" \
+                  "[aria-label='#{:app_sidebar_nav_label.l}']")
       assert_html(html, "div#navigation")
     end
 

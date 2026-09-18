@@ -127,7 +127,7 @@ module Views::Controllers::Names
     end
 
     def render_classification_and_lifeform_row
-      Row(data: { controller: "name-panels" }) do
+      Row do
         Column(xs: 12, sm: 6) do
           render(Show::ClassificationPanel.new(
                    name: @name, user: @user,

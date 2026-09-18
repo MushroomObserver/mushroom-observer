@@ -52,7 +52,7 @@ class ContributorsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { matrix: true,
+    { grid: true,
       letters: true,
       include: [:image, :location] }.merge(opts)
   end

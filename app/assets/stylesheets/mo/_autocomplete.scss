@@ -65,7 +65,7 @@
   // color: $dropdown-link-color;
   // background-color: $dropdown-bg;
   margin: 0px;
-  // border: 1px solid $dropdown-border;
+  // border: 1px solid $dropdown-border-color;
   border-radius: 0;
   padding: 0px;
   overflow-x: hidden;
@@ -74,25 +74,23 @@
   // z-index: 100;
 }
 
-ul.virtual_list {
+// Scroll-content wrapper for the autocompleter's virtualized row
+// pool -- see base_controller.js's ROW_HEIGHT/scroll math. Not a
+// list (BS4's flat dropdown markup puts .dropdown-item rows
+// directly here, no <li>), so no list-style reset needed.
+.virtual_list {
   margin: 0px;
   border: 0px;
   padding: 0px;
-  list-style: none;
   overflow-x: hidden;
-}
 
-li.dropdown-item {
-  margin: 0px;
-  border: 0px;
-  white-space: nowrap;
-  cursor: pointer;
-
-  a {
+  a.dropdown-item {
     display: block;
-    padding: 2px 4px;
+    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
     color: $dropdown-link-color;
     text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
 
     &[data-deprecated="false"] {
       font-weight: bold;
@@ -109,10 +107,13 @@ li.dropdown-item {
       background-color: $dropdown-link-hover-bg !important;
       text-decoration: none;
     }
-  }
 
-  &.active {
-    a {
+    // Keyboard-navigation highlight (base_controller.js's HOT_CLASS).
+    // Declared explicitly with the hover-* variables rather than
+    // relying on Bootstrap's .dropdown-item.active rule, which
+    // would use the theme's separate active-* variables instead and
+    // silently change this highlight's color.
+    &.active {
       color: $dropdown-link-color;
       background-color: $dropdown-link-hover-bg !important;
     }

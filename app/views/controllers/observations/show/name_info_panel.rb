@@ -9,8 +9,7 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(panel_id: "observation_name_info",
-          panel_class: "small") do |panel|
+    Panel(panel_id: "observation_name_info") do |panel|
       panel.with_heading { :about_this_taxon.l }
       panel.with_body { render_body }
     end

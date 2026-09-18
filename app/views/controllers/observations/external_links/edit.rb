@@ -2,7 +2,7 @@
 
 # Action template for `Observations::ExternalLinksController#edit` —
 # the "edit this external link" page. Renders `ExternalLinks::Form`
-# alongside a `Components::Matrix::Box` observation-summary card.
+# alongside a `Components::Grid::Box` observation-summary card.
 module Views::Controllers::Observations::ExternalLinks
   class Edit < Views::FullPageBase
     prop :external_link, ::ExternalLink
@@ -37,7 +37,7 @@ module Views::Controllers::Observations::ExternalLinks
 
     def render_matrix_box
       Row(element: :ul, class: "list-unstyled") do
-        render(::Components::Matrix::Box.new(
+        render(::Components::Grid::Box.new(
                  user: @user,
                  object: @observation,
                  columns: Components::Column.classes_for(xs: 12)

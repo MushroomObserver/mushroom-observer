@@ -63,7 +63,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     end
     assert_selector("body.identify__index")
 
-    box_ids = find_all(".matrix-box").first(4).pluck(:id)
+    box_ids = find_all(".grid-box").first(4).pluck(:id)
     first_three = box_ids.first(3)
     last_one = box_ids.fourth
 
@@ -94,7 +94,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     assert_selector("body.identify__index")
 
     # Find an observation box that has an image (theater button)
-    box_with_image = first(".matrix-box:has(.theater-btn)")
+    box_with_image = first(".grid-box:has(.theater-btn)")
     obs_id = box_with_image[:id].sub("box_", "")
 
     # Verify both checkboxes start unchecked

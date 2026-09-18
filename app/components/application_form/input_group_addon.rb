@@ -3,7 +3,7 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Shared input-group decoration for TextField + SelectField. The
   # field renders inside `<div class="input-group">` and a trailing
-  # `<span class="input-group-btn">` holds either a `<button>` or an
+  # `<div class="input-group-append">` holds either a `<button>` or an
   # `<a>` styled as a button — caller picks via `:button_href` (link
   # if present, button otherwise).
   #

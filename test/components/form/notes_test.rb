@@ -22,7 +22,7 @@ class FormNotesTest < ComponentTestCase
     # Heading slot is filled with the localized NOTES label and
     # nothing else — no help icon or collapse trigger in the heading.
     assert_includes(html, :notes.ti)
-    assert_no_html(html, ".panel-heading a.info-collapse-trigger",
+    assert_no_html(html, ".card-header a.info-collapse-trigger",
                    "no in-header help trigger — help is inline in body")
     # Body collapse target is derived from panel_id.
     assert_html(html, "#test_notes_inner")

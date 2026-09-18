@@ -23,11 +23,10 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, 'data-interval="false"')
 
     # Panel structure
-    assert_includes(html, "panel")
-    assert_includes(html, "panel-default")
+    assert_includes(html, "card")
     assert_nested(
       html,
-      parent_selector: ".panel.panel-default",
+      parent_selector: ".card",
       child_selector: ".carousel"
     )
 
@@ -47,15 +46,12 @@ class ImageGalleryTest < ComponentTestCase
       )
     end
 
-    # Controls only show with multiple images. Bootstrap 3 markup
-    # is `a.left.carousel-control` / `a.right.carousel-control` —
-    # `Components::Carousel::Controls#render_control` builds that
-    # shape, not the Bootstrap 4 `carousel-control-prev/next` form.
+    # Controls only show with multiple images.
     if @images.length > 1
-      assert_html(html, "a.left.carousel-control")
-      assert_html(html, "a.right.carousel-control")
+      assert_html(html, "button.carousel-control-prev")
+      assert_html(html, "button.carousel-control-next")
     else
-      assert_no_html(html, "a.carousel-control")
+      assert_no_html(html, ".carousel-control-prev")
     end
   end
 
@@ -67,7 +63,7 @@ class ImageGalleryTest < ComponentTestCase
   # malformed Phlex and silently no-op'd so the lightbox / carousel never
   # showed votes.
   # #4895: the vote section is a lazy-loading Turbo Frame now (not
-  # rendered inline), so Matrix::Box's fragment cache (no user in its
+  # rendered inline), so Grid::Box's fragment cache (no user in its
   # key) can't bake one viewer's vote state into shared HTML.
   def test_carousel_item_renders_vote_section
     image = @images.first
@@ -84,9 +80,8 @@ class ImageGalleryTest < ComponentTestCase
 
     assert_includes(html, "carousel")
     assert_includes(html, "carousel-item")
-    # Single image → no prev/next controls. Bootstrap 3 markup is
-    # `a.carousel-control`, so assert absence of that selector.
-    assert_no_html(html, "a.carousel-control")
+    # Single image → no prev/next controls.
+    assert_no_html(html, ".carousel-control-prev")
   end
 
   def test_thumbnail_navigation_when_enabled
@@ -96,26 +91,26 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "carousel-indicators")
 
     # Panel heading structure
-    assert_includes(html, "panel-heading")
+    assert_includes(html, "card-header")
     assert_nested(
       html,
-      parent_selector: ".panel",
-      child_selector: ".panel-heading"
+      parent_selector: ".card",
+      child_selector: ".card-header"
     )
 
     # Thumbnail indicators as panel footer
-    assert_includes(html, "panel-footer")
+    assert_includes(html, "card-footer")
     assert_nested(
       html,
-      parent_selector: ".carousel-indicators.panel-footer",
+      parent_selector: ".carousel-indicators.card-footer",
       child_selector: "li"
     )
 
     # Verify proper order: panel > heading > carousel > footer
     assert_nested(
       html,
-      parent_selector: ".panel",
-      child_selector: ".carousel-indicators.panel-footer"
+      parent_selector: ".card",
+      child_selector: ".carousel-indicators.card-footer"
     )
   end
 
@@ -124,7 +119,7 @@ class ImageGalleryTest < ComponentTestCase
 
     # Should not have thumbnail navigation or heading
     assert_not_includes(html, "carousel-indicators")
-    assert_not_includes(html, "panel-heading")
+    assert_not_includes(html, "card-header")
   end
 
   def test_renders_with_custom_options
@@ -140,15 +135,15 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "Custom Gallery Title")
     assert_nested(
       html,
-      parent_selector: ".panel-heading",
-      child_selector: ".panel-title",
+      parent_selector: ".card-header",
+      child_selector: ".card-title",
       text: "Custom Gallery Title"
     )
 
     # Custom links in panel heading
     assert_includes(html, "Test Link")
     assert_includes(html, "/test")
-    assert_includes(html, "panel-heading-links")
+    assert_includes(html, "card-header-links")
 
     # Custom panel ID
     assert_includes(html, "custom_panel_id")
@@ -187,11 +182,10 @@ class ImageGalleryTest < ComponentTestCase
     assert_not_includes(html, "carousel-control-prev")
 
     # Panel structure
-    assert_includes(html, "panel")
-    assert_includes(html, "panel-default")
+    assert_includes(html, "card")
     assert_nested(
       html,
-      parent_selector: ".panel.panel-default",
+      parent_selector: ".card",
       child_selector: ".text-muted"
     )
   end
@@ -202,11 +196,11 @@ class ImageGalleryTest < ComponentTestCase
 
     # Title in panel heading
     assert_includes(html, "Custom Gallery Title")
-    assert_includes(html, "panel-heading")
+    assert_includes(html, "card-header")
     assert_nested(
       html,
-      parent_selector: ".panel-heading",
-      child_selector: ".panel-title",
+      parent_selector: ".card-header",
+      child_selector: ".card-title",
       text: "Custom Gallery Title"
     )
   end
@@ -215,7 +209,7 @@ class ImageGalleryTest < ComponentTestCase
     html = render_gallery(images: [], thumbnails: false)
 
     # Should not have panel heading
-    assert_not_includes(html, "panel-heading")
+    assert_not_includes(html, "card-header")
   end
 
   def test_panel_id_is_passed_through
@@ -235,7 +229,7 @@ class ImageGalleryTest < ComponentTestCase
   # condition is met — that's a separate user-facing feature
   # pinned by `LurkerIntegrationTest#test_show_observation`.
   #
-  # The original bug (caught by the matrix-box tryout): the abstract
+  # The original bug (caught by the grid-box tryout): the abstract
   # `Components::Carousel::Item#render_carousel_caption` gated the
   # image-info block on `image_info_html.present?`. That predicate
   # called `image_info_html`, which called `copyright` / `notes` /
