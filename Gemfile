@@ -209,6 +209,12 @@ group :test, :development do
   gem("rubocop-thread_safety", require: false)
 end
 
+# Pin json below 3.0:
+# activesupport 7.2's JSON encoder passes
+# legacy `quirks_mode:` option to JSON.generate,
+# json 3.0 rejects that with ArgumentError (instead of ignoring).
+gem("json", "< 3.0")
+
 group :test do
   # Use capybara to simulate user-browser interaction
   gem("capybara")
