@@ -18,14 +18,15 @@ class ParallelTestConfigServiceTest < UnitTestCase
     FileUtils.rm_rf(@temp_dir)
   end
 
-  # Helper to create a valid database.yml file
-  def create_database_yml(test_config = nil)
-    test_config ||= {
+  # Helper to create a valid database.yml file. test: is multi-db
+  # (primary/cache, #4807) like development/production now.
+  def create_database_yml(primary_config = nil)
+    primary_config ||= {
       "username" => "test_user",
       "password" => "test_pass"
     }
 
-    config = { "test" => test_config }
+    config = { "test" => { "primary" => primary_config } }
     config_path = @rails_root.join("config")
     FileUtils.mkdir_p(config_path)
     File.write(config_path.join("database.yml"), YAML.dump(config))
