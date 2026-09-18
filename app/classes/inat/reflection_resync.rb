@@ -21,13 +21,14 @@ class Inat
     # :source_deleted, :fetch_failed.
     Result = Data.define(:status, :observation)
 
-    # Messages from sequence syncs that declined to act (ambiguous
-    # locus pairings, invalid iNat values); the batch job sends them
-    # to #alerts alongside the back-link mismatches.
-    attr_reader :sequence_alerts
+    # Messages from the sequence and taxon engines that declined to act
+    # (ambiguous locus pairings, invalid iNat values, names MO can't
+    # resolve); the batch job sends them to #alerts alongside the
+    # back-link mismatches.
+    attr_reader :alerts
 
     def initialize
-      @sequence_alerts = []
+      @alerts = []
     end
 
     # The reflection's iNaturalist import link, or nil when it has none.
@@ -83,19 +84,31 @@ class Inat
       obs.save! if obs.changed?
       scalars_changed = obs.saved_changes.except("updated_at").present?
       sequences = sync_sequences(obs, inat_obs)
+      # After sequences: the taxon engine weighs its lead by sequence
+      # evidence, and a name change usually accompanies new sequence data.
+      taxon = sync_taxon(obs, inat_obs)
       mark_synced(obs)
-      log_resync(obs) if scalars_changed
-      changed = scalars_changed || sequences.changed?
+      log_resync(obs) if scalars_changed || taxon.changed?
+      changed = scalars_changed || sequences.changed? || taxon.changed?
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
     end
 
     # Sequence adds/updates do their logging through Sequence's model
     # callbacks; here we only collect the declined-to-act messages.
     def sync_sequences(obs, inat_obs)
-      outcome = SequenceSync.new.call(obs, inat_obs)
+      collect_alerts(obs, SequenceSync.new.call(obs, inat_obs))
+    end
+
+    # Naming adds log through Naming's own callbacks; consensus changes
+    # through calc_consensus.
+    def sync_taxon(obs, inat_obs)
+      collect_alerts(obs, TaxonSync.new.call(obs, inat_obs))
+    end
+
+    def collect_alerts(obs, outcome)
       outcome.alerts.each do |message|
-        @sequence_alerts << "Reflection obs #{obs.id} (iNat " \
-                            "#{self.class.inat_id(obs)}): #{message}"
+        @alerts << "Reflection obs #{obs.id} (iNat " \
+                   "#{self.class.inat_id(obs)}): #{message}"
       end
       outcome
     end

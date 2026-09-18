@@ -1150,6 +1150,8 @@
   observation_resync_unchanged: Imported data is already up to date.
   observation_resync_source_deleted: "[count] imported source record(s) could not be found and may have been deleted. The Mushroom Observer copies were kept."
   observation_resync_failed: Couldn't sync with the source right now. Please try again later.
+  observation_last_synced: Last synced
+  observation_never_synced: Not yet synced
 
   ##############################################################################
 

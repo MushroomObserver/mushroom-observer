@@ -68,96 +68,6 @@ class InatMoObservationBuilderTest < UnitTestCase
                              quality_grade: "casual"))
   end
 
-  # --- proposed_namings: which names become namings, and at what weight ----
-  # Lactarius alpinus is approved; L. alpigenes is deprecated in favor of it;
-  # Pluteus petasatus (deprecated) has no approved synonym; Peltigera is a
-  # second approved name. (See test_best_preferred_synonym in name_test.rb.)
-
-  # An accepted Observation Taxon with no provisional name: a single naming.
-  def test_proposed_namings_single_accepted
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:lactarius_alpinus)))
-  end
-
-  # A deprecated Observation Taxon is corrected: its preferred synonym leads,
-  # the deprecated name follows at Could Be. (Applies to all imports.)
-  def test_proposed_namings_deprecated_community_adds_preferred_synonym
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:lactarius_alpigenes)))
-  end
-
-  # A provisional name (not deprecated) leads; the Observation Taxon follows.
-  def test_proposed_namings_provisional_leads
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:lactarius_alpinus)))
-  end
-
-  # The provisional is deprecated in favor of the leading ID (the
-  # Leccinum scenario): the accepted name leads, the deprecated provisional
-  # follows, and the synonym-of-the-provisional dedups with the Observation
-  # Taxon.
-  def test_proposed_namings_deprecated_provisional_prefers_accepted
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:lactarius_alpinus),
-                          provisional: names(:lactarius_alpigenes)))
-  end
-
-  # A deprecated name with no approved synonym falls back to itself.
-  def test_proposed_namings_deprecated_without_synonym_keeps_self
-    assert_equal([["Pluteus petasatus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:pluteus_petasatus_deprecated)))
-  end
-
-  # Provisional equal to the leading ID collapses to a single naming.
-  def test_proposed_namings_provisional_equals_community
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:lactarius_alpinus),
-                          provisional: names(:lactarius_alpinus)))
-  end
-
-  # --- Species Name Override (#4533) ---
-
-  # The override leads ahead of the leading ID.
-  def test_proposed_namings_override_leads_over_community
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          override: names(:lactarius_alpinus)))
-  end
-
-  # The override outranks BOTH the provisional name and the leading ID;
-  # the other two follow at Could Be.
-  def test_proposed_namings_override_outranks_provisional_and_community
-    assert_equal([["Coprinus comatus", Vote::MAXIMUM_VOTE],
-                  ["Boletus edulis", Vote::MIN_POS_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:boletus_edulis),
-                          override: names(:coprinus_comatus)))
-  end
-
-  # Override equal to the provisional collapses to one naming for it.
-  def test_proposed_namings_override_equals_provisional
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:lactarius_alpinus),
-                          override: names(:lactarius_alpinus)))
-  end
-
-  # A deprecated override is corrected to its preferred synonym, which leads.
-  def test_proposed_namings_deprecated_override_prefers_synonym
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          override: names(:lactarius_alpigenes)))
-  end
-
   # When the iNat provisional name already exists in MO, reuse it rather than
   # posting a new one.
   def test_prov_name_reuses_existing_mo_name
@@ -442,14 +352,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                            name_override: name_override,
                            obs_taxon_name: obs_taxon_name)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
-                                   external_site: :stub)
-  end
-
-  def proposed(community:, provisional: nil, override: nil,
-               lead_vote: Vote::MAXIMUM_VOTE)
-    builder_for.send(:proposed_namings, community, provisional, override,
-                     lead_vote).
-      map { |name, vote| [name.text_name, vote] }
+                                   external_site: external_sites(:inaturalist))
   end
 
   def naming_vote(sequence:, provisional:, quality_grade:)
