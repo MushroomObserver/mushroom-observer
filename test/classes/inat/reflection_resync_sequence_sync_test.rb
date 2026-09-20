@@ -132,9 +132,9 @@ class Inat::ReflectionResyncSequenceSyncTest < UnitTestCase
     assert_equal(:synced, result.status,
                  "a sequence-only change should count as synced")
     assert_equal(1, @obs.sequences.reload.count)
-    assert_equal(1, resync.sequence_alerts.length)
+    assert_equal(1, resync.alerts.length)
     assert_match(/\AReflection obs #{@obs.id} /,
-                 resync.sequence_alerts.first,
+                 resync.alerts.first,
                  "batch alerts must identify the reflection")
   end
 

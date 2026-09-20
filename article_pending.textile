@@ -1,1 +1,2 @@
-|{white-space:nowrap}. 2026-09-15 | Edit or delete imported Observations without the pop-up | "PR#5372":https://github.com/MushroomObserver/mushroom-observer/pull/5372 |
+|{white-space:nowrap}. 2026-09-18 | Update imported Observations when the source Name changes | "PR#5377":https://github.com/MushroomObserver/mushroom-observer/pull/5377 |
+|{white-space:nowrap}. 2026-09-17 | Fix broken links to the API docs and stats pages | "PR#5378":https://github.com/MushroomObserver/mushroom-observer/pull/5378 |

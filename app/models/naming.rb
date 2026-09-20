@@ -47,6 +47,8 @@ class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
   belongs_to :user
+  # Set on a naming an import created from a source site (#4215).
+  belongs_to :external_site, optional: true
   has_many :votes, dependent: :destroy
 
   serialize :reasons, coder: YAML

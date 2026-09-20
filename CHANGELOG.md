@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-18 (deploy-2026-09-18-12-00)
+
+- Serve the `/api-docs` and `/stats` directory URLs from nginx ([PR5378](https://github.com/MushroomObserver/mushroom-observer/pull/5378), @mo-nathan)
+- Use `subgen.` for MB search ([PR5374](https://github.com/MushroomObserver/mushroom-observer/pull/5374), @JoeCohen)
+- Cover missed line in imports confirm_form ([PR5382](https://github.com/MushroomObserver/mushroom-observer/pull/5382), @JoeCohen)
+- 100% cover for NameValidation ([PR5383](https://github.com/MushroomObserver/mushroom-observer/pull/5383), @JoeCohen)
+- Resync a reflection's namings when its iNaturalist identification changes (`#4215`) ([PR5377](https://github.com/MushroomObserver/mushroom-observer/pull/5377), @mo-nathan)
+
 ## 2026-09-15 (deploy-2026-09-15-12-00)
 
 - Edit on a reflection goes straight to its companion; drop the `EditModal` and re-allow reflection delete ([PR5372](https://github.com/MushroomObserver/mushroom-observer/pull/5372), @mo-nathan)
