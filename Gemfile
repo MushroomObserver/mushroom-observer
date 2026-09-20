@@ -161,7 +161,7 @@ gem("google-cloud-storage")
 #   * `Zip::Entry`
 #   * `Zip::InputStream`
 #   * `Zip::OutputStream`
-gem("rubyzip", "~> 3.2.2")
+gem("rubyzip", "~> 3.6.0")
 
 # QR code generator
 gem("rqrcode")
