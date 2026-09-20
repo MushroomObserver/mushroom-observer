@@ -8,11 +8,10 @@ class Inat
   # occurrence-wide event: pressing "Sync now" on any member observation
   # refreshes all of the occurrence's reflections at essentially the same
   # time, in ONE rate-limited API call (`Inat::ObsFetcher#fetch_batch`
-  # takes the whole id list). Each reflection's scalar core (date /
-  # location / GPS / notes) is MO's mirror of its source, so it is
-  # re-fetched and updated in place. Only source-owned fields are touched;
-  # namings, votes, comments, images and sequences are handled by later
-  # slices.
+  # takes the whole id list). Each reflection's scalar core, sequences,
+  # source-derived namings and images mirror its source and are updated
+  # in place; MO-side records (comments, people's namings and votes) are
+  # left alone.
   #
   # The per-reflection refresh itself lives in Inat::ReflectionResync,
   # shared with the scheduled daily batch (Inat::ReflectionBatchResyncer);
