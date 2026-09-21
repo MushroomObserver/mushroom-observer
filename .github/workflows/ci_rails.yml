@@ -105,6 +105,8 @@ jobs:
           sudo chmod 755 /usr/local/bin/exifautotran
 
       - name: Load fixtures
+        env:
+          RAILS_ENV: test
         run: |
           bundle exec rake db:schema:load
           bundle exec rake db:fixtures:load
@@ -123,6 +125,8 @@ jobs:
           done
 
       - name: Update translation files
+        env:
+          RAILS_ENV: test
         run: bundle exec rake lang:update
 
       - name: Create log files

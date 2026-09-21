@@ -30,7 +30,8 @@ Rails.application.config.after_initialize do
     ), false
   )
   db_fallback_backend = I18n::Backend::DbFallback.new(cache_backend)
-  gem_file_backend = I18n::Backend::Simple.new
+  # See I18n::Backend::EnTxtLoader for why en.txt is loaded in here too.
+  gem_file_backend = I18n::Backend::EnTxtLoader.call(I18n::Backend::Simple.new)
 
   I18n.backend = I18n::Backend::Chain.new(
     cache_backend, db_fallback_backend, gem_file_backend
