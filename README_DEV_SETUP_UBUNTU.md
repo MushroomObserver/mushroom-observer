@@ -45,6 +45,14 @@ installs system packages, chruby, ruby-install), then automatically
 continues as `mo` to clone the repo, set up Ruby/gems/the database,
 and run the test suite -- one command instead of two.
 
+MO's icon sprite (`mo-icons.svg`) comes from the private
+`MushroomObserver/icon-library` repo (licensed Glyphicons artwork), and
+setup warns rather than stopping if you lack access. Without the
+sprite, `bin/rails test` fails on every test that renders a page with
+`Sprockets::FileNotFound: couldn't find file 'icons/mo-icons.svg'`, so
+ask an MO admin for access and then run `script/dev_setup --icons-only`
+to fetch it. See `README_ICON_LIBRARY_PAT.md`.
+
 It may prompt you to set a password for `mo` partway through (needed
 for `mo` to `sudo` in the steps after that) if one isn't set yet.
 That prompt works fine if you downloaded the script to a file first

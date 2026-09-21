@@ -25,16 +25,19 @@ jobs:
       # source material), so mo-icons.svg -- the curated derivative
       # sprite -- isn't committed to this (public, MIT-licensed) repo.
       # ICON_LIBRARY_PAT is a fine-grained PAT scoped to read-only
-      # Contents access on icon-library only. Not available on
-      # pull_request runs from forks (GitHub doesn't expose repo
-      # secrets there) -- skips rather than fails, matching the
-      # best-effort stance
-      # script/dev_setup_components/sync_mo_icon_library.sh already
-      # takes for devs without icon-library access. An
-      # expired (rather than missing) token is NOT covered by this
-      # skip -- git clone fails with a bad-credentials error, which
-      # fails the step loudly, since $ICON_LIBRARY_PAT is still
-      # non-empty in that case.
+      # Contents access on icon-library only.
+      #
+      # The sprite is REQUIRED, not best-effort: app/assets/config/
+      # manifest.js links it, so without it every test that renders a
+      # page dies with Sprockets::FileNotFound. A missing token fails
+      # here, where the message says what to do, instead of surfacing
+      # as hundreds of unrelated-looking test errors.
+      #
+      # Dependabot PRs run with DEPENDABOT secrets, not Actions
+      # secrets, so the same PAT has to exist in BOTH stores
+      # (Settings > Secrets and variables > Actions, and the same page
+      # under Dependabot). Fork PRs get neither and cannot run this
+      # job; run their branch in this repo to test it.
       #
       # Auth via a request header (-c http.extraHeader), not a
       # token-in-the-URL -- the latter gets persisted verbatim into
@@ -44,23 +47,28 @@ jobs:
         env:
           ICON_LIBRARY_PAT: ${{ secrets.ICON_LIBRARY_PAT }}
         run: |
-          if [ -n "$ICON_LIBRARY_PAT" ]; then
-            auth=$(printf 'x-access-token:%s' "$ICON_LIBRARY_PAT" | base64 -w 0)
-            git -c http.extraHeader="AUTHORIZATION: basic $auth" \
-              clone --quiet --filter=blob:none --sparse \
-              https://github.com/MushroomObserver/icon-library.git \
-              vendor/assets/images/icons
-            source script/icon_library_narrow_checkout.sh
-            icon_library_narrow_checkout vendor/assets/images/icons ||
-              echo "::warning::Narrowing the icon-library checkout failed -- continuing with whatever was cloned."
-            if [ -f vendor/assets/images/icons/mo-icons.svg ]; then
-              echo "Cloned icon-library -- mo-icons.svg present."
-            else
-              echo "::warning::Cloned icon-library but mo-icons.svg is missing -- check its main branch."
-            fi
-          else
-            echo "ICON_LIBRARY_PAT not set -- skipping icon sprite fetch."
+          if [ -z "$ICON_LIBRARY_PAT" ]; then
+            echo "::error::ICON_LIBRARY_PAT is not set for this run, so the"
+            echo "::error::icon sprite can't be fetched and the suite cannot"
+            echo "::error::run. Dependabot runs read Dependabot secrets, not"
+            echo "::error::Actions secrets: add ICON_LIBRARY_PAT under"
+            echo "::error::Settings > Secrets and variables > Dependabot."
+            exit 1
           fi
+          auth=$(printf 'x-access-token:%s' "$ICON_LIBRARY_PAT" | base64 -w 0)
+          git -c http.extraHeader="AUTHORIZATION: basic $auth" \
+            clone --quiet --filter=blob:none --sparse \
+            https://github.com/MushroomObserver/icon-library.git \
+            vendor/assets/images/icons
+          source script/icon_library_narrow_checkout.sh
+          icon_library_narrow_checkout vendor/assets/images/icons ||
+            echo "::warning::Narrowing the icon-library checkout failed -- continuing with whatever was cloned."
+          if [ ! -f vendor/assets/images/icons/mo-icons.svg ]; then
+            echo "::error::Cloned icon-library but mo-icons.svg is missing --"
+            echo "::error::check its main branch."
+            exit 1
+          fi
+          echo "Cloned icon-library -- mo-icons.svg present."
 
       # https://github.com/ruby/setup-ruby
       - name: Set up Ruby

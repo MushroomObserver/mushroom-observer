@@ -7,6 +7,7 @@ It includes notes later added by @nimmolo, and by
 though Sequoia 15.2.
 
 - [Quick Start: Run the Setup Script](#quick-start-run-the-setup-script)
+  - [You need icon-library access to run the tests](#you-need-icon-library-access-to-run-the-tests)
 - [Install Needed Tools](#install-needed-tools)
   - [Xcode](#xcode)
   - [Xcode Command Line Tools](#xcode-command-line-tools)
@@ -62,6 +63,27 @@ automate on its own -- setting the MySQL root password, or a missing
 
 **If the script breaks, or you want to understand what it's actually
 doing, the rest of this document walks through every step by hand.**
+
+## You need icon-library access to run the tests
+
+MO's icon sprite (`mo-icons.svg`) is a derivative of licensed
+Glyphicons artwork, so it lives in the private
+`MushroomObserver/icon-library` repo instead of this public one. Setup
+fetches it into `vendor/assets/images/icons/`, and warns instead of
+stopping if you lack access.
+
+That warning matters: the asset manifest links the sprite, so without
+it `bin/rails test` fails on every test that renders a page, with
+`Sprockets::FileNotFound: couldn't find file 'icons/mo-icons.svg'`.
+The code isn't broken; the file is absent.
+
+Ask an MO admin to add you to `icon-library`, then run
+`script/dev_setup --icons-only` to fetch just the sprite. Same story
+in CI: pushing a branch to this repo works (the workflow holds a
+read-only token), while a pull request from a fork can't run the test
+job, since GitHub withholds repository secrets from fork runs. A
+maintainer can push the branch here to get it tested. See
+`README_ICON_LIBRARY_PAT.md`.
 
 # Install Needed Tools
 

@@ -2,10 +2,12 @@
 # tmp/icon-library/, then copies its mo-icons.svg into
 # vendor/assets/images/icons/ -- part of the regular dev-setup flow
 # (called from mo_finish_app_setup) since every dev needs working
-# icons once Components::Icon actually renders them. Best-effort: not
-# every dev has icon-library access yet, so a failure here is a
-# warning, not a reason to abort the rest of setup -- nothing in the
-# app requires the sprite yet either way.
+# icons once Components::Icon renders them. Best-effort about
+# finishing setup: not every dev has icon-library access yet, so a
+# failure here warns rather than aborting the rest. The sprite is not
+# optional for working on the code, though -- app/assets/config/
+# manifest.js links it, so without it every test that renders a page
+# fails with Sprockets::FileNotFound.
 #
 # mo-icons.svg is never committed here -- vendor/assets/images/icons/
 # is gitignored wholesale, since this repo is public/MIT-licensed and
@@ -70,8 +72,9 @@ mo_sync_icon_library() {
         echo "Cloned $clone_dir"
     else
         echo "Could not clone MushroomObserver/icon-library (no access yet?) --"
-        echo "skipping. Ask an MO admin for access if you need it; the rest of"
-        echo "setup doesn't depend on it."
+        echo "skipping, so the rest of setup can finish. Ask an MO admin for"
+        echo "access: without mo-icons.svg, every test that renders a page"
+        echo "fails with Sprockets::FileNotFound (see README_ICON_LIBRARY_PAT.md)."
         return
     fi
 

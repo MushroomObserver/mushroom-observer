@@ -11,18 +11,26 @@ That's `ICON_LIBRARY_PAT`: a fine-grained GitHub Personal Access
 Token, stored as a repository secret on `mushroom-observer`, scoped to
 **read-only** access on `icon-library` alone. `.github/workflows/
 ci_rails.yml`'s `test` job uses it to sparse-clone `icon-library` into
-`vendor/assets/images/icons/` at the start of each run. If the secret
-is ever entirely *missing* (deleted, or a `pull_request` run from a
-fork, which GitHub doesn't expose repo secrets to), that step skips
-instead of failing -- see its comment in `ci_rails.yml`.
+`vendor/assets/images/icons/` at the start of each run. The sprite is
+required, not optional: `app/assets/config/manifest.js` links it, so
+without it every test that renders a page fails with
+`Sprockets::FileNotFound`. If the secret is *missing* (deleted, or a
+`pull_request` run from a fork, which GitHub doesn't expose repo
+secrets to), the step fails immediately with a message saying so,
+rather than letting the suite break later in a way that looks
+unrelated -- see its comment in `ci_rails.yml`.
 
-An *expired* token is a different case, and does **not** hit that
-skip path: the secret variable is still non-empty, just carrying a
-token GitHub no longer accepts, so `git clone` fails with a
-bad-credentials error -- which fails the step, and the whole `test`
-job, loudly, on every run. That's arguably the better failure mode
-(you can't miss it), but it does mean expiration shows up as a hard
-CI break, not a quiet skip -- worth knowing so it doesn't look like an
+**The token has to live in two secret stores.** Workflows on
+Dependabot's PRs read *Dependabot* secrets, not Actions secrets, so a
+PAT stored only under Actions leaves `secrets.ICON_LIBRARY_PAT` empty
+on every Dependabot run. Add the same value in both places (step 8
+below).
+
+An *expired* token fails a step earlier than a missing one, and with a
+different message: the secret variable is still non-empty, just
+carrying a token GitHub no longer accepts, so `git clone` fails with a
+bad-credentials error. Either way the `test` job stops at the fetch
+step on every run -- worth knowing so it doesn't look like an
 unrelated regression when it happens.
 
 Fine-grained tokens require an expiration date (GitHub doesn't allow
@@ -52,10 +60,15 @@ Needs a GitHub account with read access to `MushroomObserver/icon-library`
    don't grant more.
 7. **Generate token**. GitHub shows the value exactly once -- copy it
    now, you won't be able to see it again.
-8. On `github.com/MushroomObserver/mushroom-observer/settings/secrets/actions`:
-   **New repository secret** (or edit the existing `ICON_LIBRARY_PAT`
-   if renewing) -> name it `ICON_LIBRARY_PAT` -> paste the token value
-   -> **Add secret** (or **Update secret**).
+8. Store it twice, under the same name, with the same value:
+   - `github.com/MushroomObserver/mushroom-observer/settings/secrets/actions`:
+     **New repository secret** (or edit the existing `ICON_LIBRARY_PAT`
+     if renewing) -> name it `ICON_LIBRARY_PAT` -> paste the token
+     value -> **Add secret** (or **Update secret**). This covers
+     branches pushed to this repo.
+   - `github.com/MushroomObserver/mushroom-observer/settings/secrets/dependabot`:
+     the same again. This covers Dependabot's PRs, which can't read
+     the Actions store.
 
 Never paste the token value anywhere else -- not into a commit, an
 issue, a PR description, or a chat with an AI assistant. It only ever
