@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-21 (deploy-2026-09-21-12-00)
+
+- Resync a reflection's images from its iNaturalist photos (`#4215`) ([PR5385](https://github.com/MushroomObserver/mushroom-observer/pull/5385), @mo-nathan)
+- Add `review:` labels, an open-PR merge report, and release banner updates ([PR5384](https://github.com/MushroomObserver/mushroom-observer/pull/5384), @mo-nathan)
+- Bump `rubyzip`, `sprockets`, `image_processing`, `cuprite`, `mission_control-jobs` ([PR5396](https://github.com/MushroomObserver/mushroom-observer/pull/5396), @mo-nathan)
+
 ## 2026-09-18 (deploy-2026-09-18-12-00)
 
 - Serve the `/api-docs` and `/stats` directory URLs from nginx ([PR5378](https://github.com/MushroomObserver/mushroom-observer/pull/5378), @mo-nathan)
