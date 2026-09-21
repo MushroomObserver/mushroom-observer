@@ -107,7 +107,20 @@ class Lookup::Names < Lookup
     matches = author_search(parse, srch_str)
     return matches unless matches.empty?
 
-    text_name_search(srch_str)
+    matches = text_name_search(srch_str)
+    return matches unless matches.empty? && epithet?(srch_str)
+
+    epithet_search(srch_str)
+  end
+
+  # A lone lowercase word can't be a genus or higher taxon.
+  def epithet?(str)
+    str.match?(/\A[a-z][a-z-]*\z/)
+  end
+
+  def epithet_search(epithet)
+    Name.where(Name[:text_name].matches("% #{epithet}")).
+      select(*minimal_name_columns)
   end
 
   def author_search(parse, srch_str)

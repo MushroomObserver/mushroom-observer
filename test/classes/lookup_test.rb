@@ -202,6 +202,31 @@ class LookupTest < UnitTestCase
     assert_lookup_names([], ["¡not a name!"])
   end
 
+  def test_lookup_names_by_bare_epithet
+    name = names(:coprinus_comatus)
+    epithet = name.text_name.split.last
+    lookup = Lookup::Names.new([epithet])
+
+    assert_includes(lookup.ids, name.id,
+                    "Bare epithet '#{epithet}' should match #{name.text_name}")
+    assert_empty(lookup.unmatched,
+                 "Matched epithet should not be reported as unmatched")
+    Name.where(id: lookup.ids).find_each do |match|
+      assert(match.text_name.end_with?(" #{epithet}"),
+             "#{match.text_name} should end with the epithet '#{epithet}'")
+    end
+  end
+
+  def test_lookup_names_unknown_bare_epithet_is_unmatched
+    epithet = "zzzunknownepithet"
+    lookup = Lookup::Names.new([epithet])
+
+    assert_empty(lookup.ids,
+                 "Unknown epithet '#{epithet}' should match nothing")
+    assert_equal([epithet], lookup.unmatched,
+                 "Unknown epithet should be tracked as a miss")
+  end
+
   def test_lookup_names_rejects_other_model_instance
     user = users(:rolf)
     lookup = Lookup::Names.new([user])
