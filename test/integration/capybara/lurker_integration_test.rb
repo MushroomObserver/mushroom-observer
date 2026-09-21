@@ -30,7 +30,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
     go_back_after do
-      click_link("Prev")
+      within(".show_object_nav") { click_link("Prev") }
     end
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
@@ -346,17 +346,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     save_path = current_fullpath
 
     # First. Prev link does not appear or have href, so nothing should happen.
-    within("#header") { click_link(text: "Prev") }
+    within(".show_object_nav") { click_link(text: "Prev") }
     assert_equal(save_path, current_fullpath)
 
-    within("#header") { click_link(text: "Next") }
+    within(".show_object_nav") { click_link(text: "Next") }
     assert_no_flash
 
     save_path = current_fullpath
-    within("#header") { click_link(text: "Next") }
+    within(".show_object_nav") { click_link(text: "Next") }
     assert_no_flash
 
-    within("#header") { click_link(text: "Prev") }
+    within(".show_object_nav") { click_link(text: "Prev") }
     assert_no_flash
 
     assert_equal(save_path, current_fullpath,
@@ -366,7 +366,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     index_link = first(".index_object_link")
     assert_equal(query_params, parse_query_params(index_link[:href]))
 
-    within("#header") { click_link(text: "Index") }
+    within(".show_object_nav") { click_link(text: "Index") }
     # Be sure we're actually on that sorted/filtered query, now we're on index
     assert_equal(query_params, parse_query_params(current_fullpath))
 

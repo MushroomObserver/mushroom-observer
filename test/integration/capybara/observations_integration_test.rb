@@ -49,7 +49,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Show first Observation from Your Observations search.
     click_link(first_obs.text_name)
     # Destroy it.
-    click_button(class: "destroy_observation_link_#{first_obs.id}")
+    within(".show_title_nav") do
+      click_button(class: "destroy_observation_link_#{first_obs.id}")
+    end
 
     # MO should show next Observation.
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
@@ -199,7 +201,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}",
+    assert_selector(".badge-id", text: obs.id.to_s)
+    assert_selector("#title", text: obs.name.search_name,
                               normalize_ws: true)
   end
 
