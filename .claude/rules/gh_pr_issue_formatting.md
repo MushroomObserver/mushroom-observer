@@ -16,7 +16,7 @@ This lives in this file (not just something said in conversation) because every 
 
 ## Create every PR as a draft
 
-`gh pr create --draft …`, always. Marking it ready (`gh pr ready <n>`) is Nathan's call unless he asks the session to do it; when asked, wait until the PR is at least two minutes old and the session's own checks (tests, RuboCop) have passed.
+`gh pr create --draft --label "review: standard" …`, always (the label is covered in `review_types.md`). Marking it ready (`gh pr ready <n>`) is Nathan's call unless he asks the session to do it; when asked, wait until the PR is at least two minutes old and the session's own checks (tests, RuboCop) have passed.
 
 Two reasons. Nathan wants session-created PRs to arrive as drafts so a PR is visibly "Claude's proposal" until a human has looked at it. And it sidesteps a Copilot review failure: the repo ruleset requests a Copilot review the moment a non-draft PR opens, and that request sometimes aborts after ~45 s ("Copilot encountered an error") — a fast pre-review failure that then sticks to the PR number, so re-requesting keeps failing and only a fresh PR recovers (#5162→#5169, #5173→#5176, #5177→#5178). Drafts get no automatic request (`review_draft_pull_requests` is off); the request fires on "ready for review," once the PR's merge ref has had time to exist. See `copilot_review_comments.md` for the stuck-PR remedy.
 

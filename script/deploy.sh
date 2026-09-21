@@ -214,6 +214,7 @@ fi
 # for this deploy. Checked against origin/main (the code that will be
 # pulled below), before anything is paused or stopped.
 update_article=0
+banner_flags=""
 pending_tag=`git show origin/main:CHANGELOG.md 2>/dev/null | \
     grep -m1 -oE '^## [0-9-]+ \(deploy-[0-9-]+\)' | \
     sed -E 's/.*\((deploy-[0-9-]+)\).*/\1/'`
@@ -222,7 +223,7 @@ if [ -n "$pending_tag" ] && \
     tag="$pending_tag"
     update_article=1
     echo "Pre-release found: tagging this deploy $tag and updating the"
-    echo "MO Article from article_pending.textile."
+    echo "MO Article from article_pending.textile and the site banner."
 else
     echo ""
     echo "WARNING: no pre-release changelog found for this deploy, so"
@@ -232,18 +233,22 @@ else
     echo "The pre-release process (issue #5155):"
     echo "  1. On a dev machine: ruby script/prerelease.rb --apply"
     echo "     (builds the changelog-pending PR with the next CHANGELOG.md"
-    echo "      section and article_pending.textile's MO Article rows)"
+    echo "      section and article_pending.textile's MO Article rows;"
+    echo "      add --now for a blocker deploy right away)"
     echo "  2. Review and merge that PR as the last PR before deploying."
     echo "  3. Run script/deploy.sh -- it tags the deploy with the"
     echo "     pre-release's tag name and publishes the Article rows."
     echo ""
-    echo "Forcing deploys main as-is (useful for an urgent fix); the"
-    echo "skipped PRs roll into the next pre-release/deploy cycle."
+    echo "Forcing deploys main as-is, for when even a blocker deploy can't"
+    echo "wait or the release scripts are broken. The skipped PRs roll into"
+    echo "the next pre-release/deploy cycle, and the banner will say an"
+    echo "undocumented forced deploy occurred."
     printf "Force the deploy without a changelog? [y/N] "
     read -r answer
     case "$answer" in
         y|Y|yes|YES)
             echo "Forcing deploy without changelog or MO Article update."
+            banner_flags="--forced"
             ;;
         *)
             echo "Deploy aborted. Run the pre-release, then deploy again."
@@ -413,7 +418,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Best-effort (#5155): a failure here warns and the deploy still
-# succeeds -- the Article is cosmetic; the site is already up.
+# succeeds -- the Article and banner are cosmetic; the site is already
+# up. The banner comes after the Article it may link to.
 if [ "$update_article" = "1" ]; then
     echo Updating the MO Article from article_pending.textile...
     bundle exec rails runner script/update_article_changelog.rb --apply
@@ -422,6 +428,14 @@ if [ "$update_article" = "1" ]; then
         echo "Retry by hand:"
         echo "  bundle exec rails runner script/update_article_changelog.rb --apply"
     fi
+fi
+
+echo Updating the site banner...
+bundle exec rails runner script/update_release_banner.rb $banner_flags --apply
+if [ $? -ne 0 ]; then
+    echo "WARNING: banner update failed; the deploy continues."
+    echo "Retry by hand:"
+    echo "  bundle exec rails runner script/update_release_banner.rb $banner_flags --apply"
 fi
 
 echo Tagging repo with $tag... && git tag $tag && \

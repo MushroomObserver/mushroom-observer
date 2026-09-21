@@ -11,6 +11,6 @@ class Tab::Name::MushroomExpert < Tab::Name::ExternalBase
 
   def path
     "https://duckduckgo.com/?q=site%3Amushroomexpert.com+" \
-      "%22#{@name.sensu_stricto}%22&ia=web"
+      "%22#{url_encode(@name.sensu_stricto)}%22&ia=web"
   end
 end

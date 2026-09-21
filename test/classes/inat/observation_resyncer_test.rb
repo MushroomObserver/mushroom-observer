@@ -158,9 +158,10 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_not_nil(sib.reload.location || sib.where)
   end
 
-  # The aggregate flash goes to EVERY member's channel — a viewer may be
-  # on the non-reflection primary's page — while panel updates go only
-  # to the changed reflection's own channel.
+  # The aggregate flash goes to EVERY member's channel -- a viewer may be
+  # on the non-reflection primary's page. The changed reflection's page
+  # refreshes with the flash; the unchanged primary's page takes the
+  # flash and the new sync time in place.
   def test_flash_broadcast_reaches_every_member_page
     primary = add_non_reflection_primary
 
@@ -173,11 +174,13 @@ class Inat::ObservationResyncerTest < UnitTestCase
       end
     end
 
-    assert_equal(1, primary_msgs.length,
-                 "the primary's page gets the flash only")
-    assert(primary_msgs.first.include?('target="page_flash"'))
-    assert_equal(4, obs_msgs.length,
-                 "the synced reflection's page gets flash + panels")
+    primary_tags = stream_tags(primary_msgs)
+    assert_equal(%w[update replace], primary_tags.pluck("action"),
+                 "the primary's page gets the flash and the sync time")
+    assert_equal("page_flash", primary_tags.first["target"])
+    assert_equal(".reflection-last-synced", primary_tags.last["targets"])
+    assert_equal(%w[refresh_with_flash], stream_tags(obs_msgs).pluck("action"),
+                 "the synced reflection's page gets one refresh")
   end
 
   # Mixed outcomes (rare) are reported honestly in one flash: refreshed
@@ -193,10 +196,15 @@ class Inat::ObservationResyncerTest < UnitTestCase
       Inat::ObservationResyncer.new(@obs, fetcher: fetcher).resync
     end
 
-    flash = messages.find { |m| m.include?('target="page_flash"') }
-    assert_includes(flash, :observation_resync_synced.t(count: 1))
-    assert_includes(flash, :observation_resync_source_deleted.t(count: 1))
-    assert_includes(flash, "alert-warning",
+    refresh = stream_tags(messages).find do |tag|
+      tag["action"] == "refresh_with_flash"
+    end
+    flash = flash_in(refresh)
+    assert_includes(flash.text,
+                    :observation_resync_synced.t(count: 1).as_displayed)
+    assert_includes(flash.text,
+                    :observation_resync_source_deleted.t(count: 1).as_displayed)
+    assert_includes(flash.classes, "alert-warning",
                     "a missing source should drive the level to warning")
     assert_not_nil(sib_link.reload.last_synced_at,
                    "the deleted-source check still stamps last_synced_at")
@@ -206,30 +214,21 @@ class Inat::ObservationResyncerTest < UnitTestCase
   #  Broadcast shapes for single-reflection outcomes
   # ---------------------------------------------------------------
 
-  # A real change: one flash broadcast plus a replace of each panel that
-  # actually displays resynced fields (Details: when/location/GPS;
-  # NotesPanel: notes).
-  def test_synced_broadcasts_flash_and_panel_updates
+  # A real change refreshes the page, so each viewer refetches the
+  # namings panel and title with their session; the flash rides along.
+  def test_synced_refreshes_the_page_carrying_the_flash
     messages = capture_broadcasts(stream(@obs)) do
       resync(found: { @id => @raw })
     end
 
-    assert_equal(4, messages.length)
-    assert(messages.any? { |m| m.include?('target="page_flash"') })
-    assert(
-      messages.any? { |m| m.include?('target="observation_details"') }
-    )
-    assert(messages.any? { |m| m.include?('target="observation_notes"') })
-    assert(
-      messages.any? { |m| m.include?('target="observation_sequences"') }
-    )
-    flash = messages.find { |m| m.include?('target="page_flash"') }
-    assert_includes(flash, :observation_resync_synced.t(count: 1))
+    tags = stream_tags(messages)
+    assert_equal(%w[refresh_with_flash], tags.pluck("action"))
+    assert_equal(:observation_resync_synced.t(count: 1).as_displayed,
+                 flash_in(tags.first).text)
   end
 
-  # No real change: just the flash, no point re-rendering panels whose
-  # content didn't move.
-  def test_unchanged_broadcasts_flash_only
+  # No change: no refresh, just the flash and the new sync time.
+  def test_unchanged_broadcasts_flash_and_sync_time
     resync(found: { @id => @raw }) # first sync, becomes the baseline
     @obs = Observation.find(@obs.id)
 
@@ -237,18 +236,30 @@ class Inat::ObservationResyncerTest < UnitTestCase
       resync(found: { @id => @raw })
     end
 
-    assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_unchanged.t)
+    flash_tag, sync_tag = stream_tags(messages)
+    assert_equal(2, messages.length)
+    assert_equal(:observation_resync_unchanged.t.as_displayed,
+                 flash_in(flash_tag).text)
+    assert_equal(".reflection-last-synced", sync_tag["targets"])
+    assert_not_nil(
+      sync_tag.at_css("template .reflection-last-synced " \
+                      "[data-controller='local-time']"),
+      "the replacement shows the sync time"
+    )
   end
 
-  def test_source_deleted_broadcasts_warning_flash_only
+  def test_source_deleted_broadcasts_warning_flash_and_sync_time
     @obs.rss_log.update_columns(notes: "20250101000000\n")
 
     messages = capture_broadcasts(stream(@obs)) { resync(found: {}) }
 
-    assert_equal(1, messages.length)
-    assert_includes(messages.first,
-                    :observation_resync_source_deleted.t(count: 1))
+    flash_tag, sync_tag = stream_tags(messages)
+    assert_equal(2, messages.length, "flash and the new sync time")
+    flash = flash_in(flash_tag)
+    assert_equal(:observation_resync_source_deleted.t(count: 1).as_displayed,
+                 flash.text)
+    assert_includes(flash.classes, "alert-warning")
+    assert_equal(".reflection-last-synced", sync_tag["targets"])
   end
 
   def test_fetch_failed_broadcasts_danger_flash_only
@@ -257,10 +268,24 @@ class Inat::ObservationResyncerTest < UnitTestCase
     end
 
     assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_failed.t)
+    flash = flash_in(stream_tags(messages).first)
+    assert_equal(:observation_resync_failed.t.as_displayed, flash.text)
+    assert_includes(flash.classes, "alert-danger")
   end
 
   private
+
+  # Broadcasts are turbo-stream markup; parse them so assertions select
+  # elements instead of matching substrings.
+  def stream_tags(messages)
+    messages.map { |m| Nokogiri::HTML5.fragment(m).at_css("turbo-stream") }
+  end
+
+  def flash_in(tag)
+    flash = tag.at_css("template #flash_notices")
+    assert_not_nil(flash, "stream should carry a flash")
+    flash
+  end
 
   def stream(obs)
     Turbo::StreamsChannel.send(:stream_name_from, [obs, :external_link_sync])

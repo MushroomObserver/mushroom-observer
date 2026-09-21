@@ -52,6 +52,26 @@ Turbo.StreamActions.prepend_once = function () {
   });
 }
 
+// A page refresh (refetched with the viewer's session) that keeps the
+// flash in the stream's template, which the refetched page would
+// otherwise replace with its empty #page_flash. Used by
+// Inat::ObservationResyncer. The listener skips preview renders of a
+// cached snapshot, and drops out if the viewer has navigated elsewhere.
+Turbo.StreamActions.refresh_with_flash = function () {
+  const flash = this.templateContent
+  const url = document.baseURI
+  const carryFlash = (event) => {
+    if (document.documentElement.hasAttribute("data-turbo-preview")) return
+
+    document.removeEventListener("turbo:before-render", carryFlash)
+    if (window.location.href !== url) return
+
+    event.detail.newBody.querySelector("#page_flash")?.replaceChildren(flash)
+  }
+  document.addEventListener("turbo:before-render", carryFlash)
+  Turbo.session.refresh(url)
+}
+
 import "@rails/request.js"
 
 import "@hotwired/stimulus"

@@ -83,6 +83,29 @@ class Observation::CompanionTest < UnitTestCase
     assert_equal(native.id, occurrence.reload.primary_observation_id)
   end
 
+  # An editable native primary is kept even when an older editable
+  # native is also a member: Edit must not flip the primary.
+  def test_existing_prefers_the_editable_native_primary
+    natives = [observations(:minimal_unknown_obs),
+               observations(:detailed_unknown_obs)].sort_by(&:id)
+    older, newer = natives
+    occurrence = Occurrence.create!(user: @user,
+                                    primary_observation: @reflection)
+    @reflection.update_column(:occurrence_id, occurrence.id)
+    natives.each do |obs|
+      obs.update_columns(occurrence_id: occurrence.id, user_id: @user.id,
+                         collector_user_id: @user.id)
+    end
+    occurrence.update_column(:primary_observation_id, newer.id)
+    assert(newer.can_edit?(@user), "premise: the primary is editable")
+
+    found = Observation::Companion.new(@reflection, @user).existing
+
+    assert_equal(newer, found)
+    assert_equal(newer.id, occurrence.reload.primary_observation_id)
+    assert_not_equal(older.id, found.id)
+  end
+
   def test_create_refuses_a_full_occurrence
     occurrence = Occurrence.create!(user: @user,
                                     primary_observation: @reflection)

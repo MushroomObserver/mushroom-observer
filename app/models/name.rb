@@ -319,11 +319,11 @@ class Name < AbstractModel
     Domain: 1100
   }
 
-  belongs_to :correct_spelling, class_name: "Name"
+  belongs_to :correct_spelling, class_name: "Name", optional: true
   belongs_to :description, class_name: "NameDescription",
-                           inverse_of: :name # (main one)
+                           inverse_of: :name, optional: true # (main one)
   belongs_to :rss_log
-  belongs_to :synonym
+  belongs_to :synonym, optional: true
 
   belongs_to :user
 

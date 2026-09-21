@@ -127,6 +127,7 @@ class CheckForBrokenReferencesJob
       [NameDescriptionWriter,        :user_group,           :delete],
       [NameTracker,                  :name,                 :delete],
       [NameTracker,                  :user,                 :delete],
+      [Naming,                       :external_site,        :alert],
       [Naming,                       :name,                 :delete],
       [Naming,                       :observation,          :delete],
       [Naming,                       :user,                 :alert],
@@ -202,6 +203,7 @@ class CheckForBrokenReferencesJob
       [VisualGroup,                  :visual_model,         :alert],
       [VisualGroupImage,             :image,                :delete],
       [VisualGroupImage,             :visual_group,         :delete],
+      [Vote,                         :external_site,        :alert],
       [Vote,                         :naming,               :delete],
       [Vote,                         :observation,          :delete],
       [Vote,                         :user,                 :delete]

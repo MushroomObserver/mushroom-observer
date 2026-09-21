@@ -335,5 +335,89 @@ module Observations
       assert_not_equal(File.size(fixture),
                        File.size(img.full_filepath("orig")))
     end
+
+    # A reflection's images mirror its source (#4214), so image reuse
+    # works on its companion, as Edit does.
+    def test_reuse_on_reflection_redirects_to_a_new_companion
+      obs = reflection
+      login(obs.user.login)
+
+      get(:reuse, params: { id: obs.id })
+
+      companion = reflection_companion(obs)
+      assert_not_nil(companion, "a companion should have been created")
+      assert_redirected_to(reuse_images_for_observation_path(companion.id))
+      assert_flash_success(:image_reuse_on_reflection_companion_created)
+    end
+
+    def test_reuse_on_reflection_uses_the_existing_companion
+      obs = reflection
+      companion = Observation::Companion.new(obs, obs.user).create
+      login(obs.user.login)
+
+      assert_no_difference("Observation.count") do
+        get(:reuse, params: { id: obs.id })
+      end
+
+      assert_redirected_to(reuse_images_for_observation_path(companion.id))
+      assert_flash_success(:image_reuse_on_reflection_companion_existing)
+    end
+
+    def test_attach_on_reflection_lands_on_the_companion
+      obs = reflection
+      image = images(:disconnected_coprinus_comatus_image)
+      login(obs.user.login)
+
+      post(:attach, params: { id: obs.id, img_id: image.id })
+
+      companion = reflection_companion(obs)
+      assert_redirected_to(permanent_observation_path(companion.id))
+      assert_includes(companion.images, image)
+      assert_not_includes(obs.reload.images, image)
+    end
+
+    def test_reuse_and_attach_report_companion_creation_failure
+      obs = reflection
+      login(obs.user.login)
+
+      Observation::Companion.stub(:new, ->(*) { failing_companion }) do
+        get(:reuse, params: { id: obs.id })
+        assert_flash_error
+        assert_redirected_to(permanent_observation_path(id: obs.id))
+
+        post(:attach,
+             params: { id: obs.id, img_id: images(:in_situ_image).id })
+        assert_flash_error
+        assert_redirected_to(permanent_observation_path(id: obs.id))
+      end
+    end
+
+    private
+
+    def reflection
+      obs = observations(:imported_inat_obs)
+      obs.update_column(:reflected_at, Time.zone.now)
+      obs
+    end
+
+    def reflection_companion(obs)
+      occurrence = obs.reload.occurrence
+      return nil unless occurrence
+
+      occurrence.observations.where.not(id: obs.id).first
+    end
+
+    def failing_companion
+      invalid = Observation.new
+      invalid.errors.add(:base, :occurrence_max_observations_exceeded,
+                         max: Occurrence::MAX_OBSERVATIONS)
+      Struct.new(:record) do
+        def existing = nil
+
+        def create
+          raise(ActiveRecord::RecordInvalid.new(record))
+        end
+      end.new(invalid)
+    end
   end
 end

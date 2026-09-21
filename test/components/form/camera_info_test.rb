@@ -3,6 +3,8 @@
 require "test_helper"
 
 class FormCameraInfoTest < ComponentTestCase
+  include ActiveJob::TestHelper
+
   def test_renders_gps_info_with_all_values
     html = render_info(lat: "45.5231", lng: "-122.6765", alt: "100")
 
@@ -128,16 +130,40 @@ class FormCameraInfoTest < ComponentTestCase
     assert_html(html, "button.use_exif_btn.d-none")
   end
 
+  # A saved image (upload: true is the default everywhere else in
+  # this file; this test explicitly passes upload: false) loads its
+  # date/GPS fields lazily from the server instead of rendering them
+  # directly -- see issue #5369.
+  def test_saved_image_renders_lazy_exif_frame
+    html = nil
+    assert_enqueued_with(job: EXIFGeocodeJob,
+                         args: ["123",
+                                { read_only: false, date_differs: false }]) do
+      html = render_info(upload: false)
+    end
+
+    assert_html(html, "turbo-frame#camera_info_exif_123 .spinner-right")
+    assert_no_html(html, "span.exif_gps")
+    assert_no_html(html, "button.use_exif_btn")
+  end
+
+  def test_upload_image_renders_fields_directly
+    html = render_info(upload: true, lat: "45.5231")
+
+    assert_no_html(html, "turbo-frame")
+    assert_html(html, "span.exif_gps")
+  end
+
   private
 
   # rubocop:disable-next Metrics/ParameterLists
   def render_info(lat: nil, lng: nil, alt: nil, date: "2024-01-15",
                   file_name: nil, file_size: nil, read_only: false,
                   copyright_holder: nil, license_name: nil,
-                  source_url: nil, date_differs: false)
+                  source_url: nil, date_differs: false, upload: true)
     render(Components::Form::CameraInfo.new(
-             img_id: 123, lat: lat, lng: lng, alt: alt, date: date,
-             file_name: file_name, file_size: file_size,
+             img_id: 123, upload: upload, lat: lat, lng: lng, alt: alt,
+             date: date, file_name: file_name, file_size: file_size,
              read_only: read_only, copyright_holder: copyright_holder,
              license_name: license_name, source_url: source_url,
              date_differs: date_differs

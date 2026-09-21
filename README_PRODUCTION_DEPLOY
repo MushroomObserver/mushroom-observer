@@ -1,9 +1,40 @@
 To deploy to production:
 
-1. Pre-release (on your dev machine, in the repo, with gh logged in):
+1. Check open PRs (on your dev machine, in the repo, with gh logged in):
 
      ruby script/prerelease.rb            # dry run: preview
+
+   The output starts with a report of the open, ready-for-review PRs,
+   grouped by what each PR's review: label allows (see
+   .claude/rules/review_types.md):
+
+   - "Can merge now": PRs whose review type allows merging -- blocker
+     and urgent PRs, standard PRs 24 hours after they were marked
+     ready (or earlier once approved), and approved needs-review PRs.
+     In general, merge everything here as part of the deploy. Use
+     judgment on a PR noted "CI failing" or "conflicts": sometimes a PR
+     merges with failing CI, and conflicts must be resolved first.
+   - "Waiting": PRs not yet allowed to merge, with the reason --
+     "can merge in Nh", "needs approval", "changes requested", a
+     review-label problem, or "merge state unknown - rerun". GitHub
+     works out merge conflicts lazily; the script re-queries once, and
+     if a PR still shows unknown, rerun the script shortly.
+   - PRs with no review label are listed at the end and treated as
+     standard.
+
+   Each line gives the PR's type, when it was marked ready, its
+   author, approval, and CI state. The report only advises: nothing on
+   GitHub blocks a merge. "ruby script/open_pull_requests.rb" prints
+   the report alone.
+
+2. Pre-release, once the PRs going out are merged:
+
      ruby script/prerelease.rb --apply    # push branch + create/update PR
+
+   Deploys are scheduled for 8am Eastern (5am Pacific) -- 12:00 UTC
+   during daylight saving time, 13:00 UTC otherwise. By default the
+   script targets the next one; --at 'YYYY-MM-DD' picks another day at
+   that time, and --now or --at 'YYYY-MM-DD HH:MM' (UTC) an exact time.
 
    This builds a draft PR from the changelog-pending branch holding the
    next CHANGELOG.md section (its heading names the tag the deploy will
@@ -12,36 +43,80 @@ To deploy to production:
    PR merged since the last deploy (except the changelog PRs
    themselves); the Article rows come from the changelog blocks in the
    PR bodies. PRs without a changelog block are listed in the PR body
-   for an article yes/no verdict.
+   for an article yes/no verdict. After the open-PR report, the output
+   lists any review: blocker or urgent PRs going out in this deploy.
 
-2. Review that PR. The deploy publishes article_pending.textile as
-   merged, so any desired corrections or additions (e.g. promoting a
+3. Announce the release in the site banner. --apply ends by printing a
+   line like:
+
+     Next release Sep 15 noon UTC (8am eastern, 5am pacific). See "pre-release change log":https://github.com/MushroomObserver/mushroom-observer/blob/changelog-pending/CHANGELOG.md for details<br/>
+
+   (In winter the UTC time reads "13:00 UTC"; the local times stay the
+   same.)
+
+   Replace the first line of the banner with it at
+   https://mushroomobserver.org/admin/banners and leave the other
+   lines as they are. This is a manual step because the script runs on
+   a dev machine, not the production server. Saving creates a new
+   banner version, so the banner shows again to visitors who dismissed
+   the last one.
+
+4. Review the changelog PR. The deploy publishes article_pending.textile
+   as merged, so any desired corrections or additions (e.g. promoting a
    blockless PR) can be made to that file in the PR -- usually none
    are needed. If more PRs merge before the deploy, run
    "ruby script/prerelease.rb --apply" again to refresh it. Merge it
    as the LAST PR before deploying.
 
-3. Deploy:
+5. Deploy:
 
      ssh mushroomobserver.org
      sudo su mo
      cd /var/web/mo
      script/deploy.sh
 
-   The deploy tags the release with the pre-release's tag name and
-   inserts the Article rows below the Article's table header. If the
-   Article step fails, the deploy still succeeds; retry on the server
-   with:
+   The deploy tags the release with the pre-release's tag name,
+   inserts the Article rows below the Article's table header, and then
+   replaces the first line of the site banner with one of:
+
+     Sep 15 release completed at 12:04 UTC. See "MO Improvements":https://mushroomobserver.org/articles/55 for details
+     Sep 15 release completed at 12:04 UTC. No user-facing changes - "details here":https://github.com/MushroomObserver/mushroom-observer/blob/main/CHANGELOG.md
+
+   The first when article_pending.textile has rows, the second when it
+   is empty. The time is the server's clock, in UTC, when the banner is
+   set -- not the time in the deploy tag -- and the rest of the banner
+   is kept. If the Article or banner step fails, the deploy still
+   succeeds; retry on the server with:
 
      bundle exec rails runner script/update_article_changelog.rb --apply
+     bundle exec rails runner script/update_release_banner.rb --apply
 
-Deploying without a pre-release (urgent fix): deploy.sh warns and asks
-whether to force. Forcing deploys main as the script always did -- no
-CHANGELOG.md section, no MO Article update; the skipped PRs roll into
-the next pre-release/deploy cycle.
+   Both are dry runs without --apply.
+
+Blocker deploys: follow the same steps with
+"ruby script/prerelease.rb --apply --now", which targets the current
+time instead of the next 8am Eastern, then deploy as soon as the
+changelog PR is merged. The Article and banner update as usual.
+
+Forced deploys (rare): with no undeployed pre-release on main,
+deploy.sh warns and asks whether to force. Force only when something
+can't wait even for a blocker deploy, or the pre-release or deploy
+scripts are broken. Forcing deploys main as-is -- no CHANGELOG.md
+section and no MO Article update; the skipped PRs roll into the next
+pre-release/deploy cycle. The banner's first line becomes:
+
+  Undocumented forced deploy occurred Sep 17 14:32 UTC
+
+Retry that on the server with:
+
+  bundle exec rails runner script/update_release_banner.rb --forced --apply
 
 Asset-only icon refresh: script/deploy.sh --icons-only (no code deploy,
 no pre-release needed); --icons bundles the refresh into a normal
 deploy.
 
-Design and history: issue #5155.
+The MO Article id (55) and the banner wording live in
+script/release_notes.rb; bump the id there when a new year's Article
+is created.
+
+Design and history: issues #5155 and #5381.

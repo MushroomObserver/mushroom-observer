@@ -84,6 +84,18 @@ class Inat
       ancestor_ids.intersect?(IMPORTABLE_TAXON_IDS)
     end
 
+    # The name and rank strings MO needs to create this taxon's Name.
+    # iNat's "complex" is MO's one-off Group rank, with "complex" appended
+    # so the string doesn't parse as a species. No author or ICN id: iNat
+    # taxa lack those.
+    def mo_name_params
+      if complex?
+        { name: "#{full_name_string} complex", rank: "Group" }
+      else
+        { name: full_name_string, rank: @taxon[:rank].titleize }
+      end
+    end
+
     #########
 
     private
@@ -113,7 +125,7 @@ class Inat
     end
 
     # Returns e.g. "Amanita mappae" (no "complex" suffix —
-    # create_mo_name appends it).
+    # mo_name_params appends it).
     def monomial_complex_name_string
       "#{ancestor_genus_name} #{@taxon[:name].downcase}"
     end

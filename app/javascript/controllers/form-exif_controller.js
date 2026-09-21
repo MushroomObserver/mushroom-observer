@@ -121,6 +121,20 @@ export default class extends Controller {
     this.dispatch("populated", { target: itemElement });
   }
 
+  // A saved image's date/GPS fields load lazily from the server (see
+  // EXIFGeocodeJob, issue #5369). Once that Turbo Frame loads, copy
+  // its geocode/date onto the ancestor `.item`, so "Use this info"
+  // (which reads the item's dataset) sees the loaded values instead
+  // of the empty placeholder set at page load.
+  syncItemExif(event) {
+    const frame = event.target;
+    const itemElement = frame.closest(".item");
+    if (!itemElement) return;
+
+    if (frame.dataset.geocode) itemElement.dataset.geocode = frame.dataset.geocode;
+    if (frame.dataset.exifDate) itemElement.dataset.exif_date = frame.dataset.exifDate;
+  }
+
   // Now that we've read the data from the loaded file, populate carousel-item
   populateExifData(itemElement, exif_data) {
     itemElement.dataset.initialized = "true"

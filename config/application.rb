@@ -32,9 +32,37 @@ module MushroomObserver
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
-    # Uncomment this after migrating to all recommended default configs for 7.1
-    # config/initializers/new_framework_defaults_7_1.rb
-    # config.load_defaults(7.1)
+    # Every setting from new_framework_defaults_7_0.rb/_7_1.rb/_7_2.rb has
+    # been individually audited and enabled (or confirmed no-op/N-A for
+    # MO) -- those three files are deleted, this replaces them.
+    # belongs_to_required_by_default is the one exception, overridden
+    # back to false immediately below.
+    config.load_defaults(7.2)
+
+    # load_defaults(5.0) sets belongs_to_required_by_default = true. A
+    # full test-suite run with it enabled found 1,500+ failures across
+    # dozens of models -- associations like Observation#location,
+    # Observation#thumb_image, Name#rss_log, etc. are legitimately
+    # absent on a new record and weren't enforced before. Auditing
+    # every belongs_to in the app is a project -- see issue #5363.
+    # Left off for now so this PR doesn't couple to that audit.
+    config.active_record.belongs_to_required_by_default = false
+
+    # load_defaults(7.0) sets action_dispatch.cookies_serializer = :json;
+    # override back to :hybrid so existing marshal-serialized cookies
+    # keep deserializing. Safe to keep on :hybrid long-term until
+    # confident every cookie has been converted to JSON.
+    config.action_dispatch.cookies_serializer = :hybrid
+
+    # Not part of any load_defaults version tier -- standalone
+    # deprecated-behavior flags outside the version-bundle system, so
+    # they stay on legacy behavior unless set explicitly here.
+    config.active_support.remove_deprecated_time_with_zone_name = true
+    # No-op for MO: no request.content_type call sites.
+    config.action_dispatch.return_only_request_media_type_on_content_type =
+      false
+    # No-op for MO: no Digest::UUID.uuid_v3/uuid_v5 call sites.
+    config.active_support.use_rfc4122_namespaced_uuids = true
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
@@ -97,22 +125,14 @@ module MushroomObserver
     # Strict loading - either :log, or :error out the page
     config.active_record.action_on_strict_loading_violation = :log
 
-    # New cache-entry format from new_framework_defaults_7_1.rb -- must be
-    # set here, not in the initializer, per Rails' requirement. MO's
-    # single-process stop/start deploy (script/deploy.sh) means there's no
-    # window where old and new code read the cache at the same time.
-    config.active_support.cache_format_version = 7.1
+    # load_defaults(7.2) already sets cache_format_version to 7.1 (MO's
+    # single-process stop/start deploy means there's no window where old
+    # and new code read the cache at the same time, so this is safe).
 
     # Opt in to the Rails 8.0 #to_time behavior now (preserves the
     # receiver's timezone offset instead of converting to system local).
+    # Not part of load_defaults(7.2) -- an 8.0-era setting adopted early.
     config.active_support.to_time_preserves_timezone = true
-
-    # Rails 7.0 default from new_framework_defaults_7_0.rb -- must be set
-    # here, not in the initializer, per that file's instructions. No-op
-    # on this Rails version: the underlying mechanism was removed in
-    # Rails 7.2.0 (activesupport CHANGELOG), so nothing reads this key
-    # any more -- set for completeness, not because it changes behavior.
-    config.active_support.disable_to_s_conversion = true
 
     # Set up memcached as the cache store everywhere
     # config.cache_store = :mem_cache_store
