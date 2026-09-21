@@ -202,6 +202,20 @@ class LookupTest < UnitTestCase
     assert_lookup_names([], ["¡not a name!"])
   end
 
+  def test_lookup_names_rejects_other_model_instance
+    user = users(:rolf)
+    lookup = Lookup::Names.new([user])
+
+    error = assert_raises(
+      RuntimeError,
+      "Lookup::Names should reject a #{user.class} instance"
+    ) { lookup.ids }
+    assert_includes(
+      error.message, user.class.name,
+      "Error should name the offending #{user.class} class"
+    )
+  end
+
   def test_lookup_names_unmatched_tracks_misses
     name = names(:coprinus_comatus)
     lookup = Lookup::Names.new([name.text_name, "¡not a name!"])
