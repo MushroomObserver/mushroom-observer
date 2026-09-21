@@ -1238,6 +1238,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     sync_reflections.any?
   end
 
+  # Most recent resync of any reflection in the occurrence, or nil when
+  # none has synced yet. The max, not the min: the scheduled batch only
+  # stamps reflections that changed at the source.
+  def last_synced_at
+    sync_reflections.filter_map { |obs| obs.import_link&.last_synced_at }.max
+  end
+
   # Do we want to prominently advertise the source of this observation?
   # An import link makes it noteworthy; otherwise a non-website entry agent.
   def source_noteworthy?

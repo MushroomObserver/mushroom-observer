@@ -143,6 +143,30 @@ module Observations
       assert_response(:success)
     end
 
+    # A resync stamps last_synced_at with update_column, leaving the
+    # link's updated_at alone -- the etag still has to change so the
+    # pane shows the new sync time.
+    def test_show_turbo_frame_etag_changes_when_a_sync_finishes
+      link = external_links(:imported_inat_obs_inat_link)
+      link.observation.update_column(:reflected_at, Time.zone.now)
+
+      login
+      simulate_turbo_frame_request(link)
+      get(:show, params: { id: link.id })
+      assert_select(".reflection-last-synced",
+                    text: :observation_never_synced.l)
+      etag = @response.headers["ETag"]
+
+      link.update_column(:last_synced_at, Time.zone.now)
+
+      simulate_turbo_frame_request(link)
+      @request.headers["If-None-Match"] = etag
+      get(:show, params: { id: link.id })
+
+      assert_response(:success)
+      assert_select(".reflection-last-synced [data-controller='local-time']")
+    end
+
     # A site with 2+ links created by the viewer -- the frame lists
     # every one, not just the link the route id happens to point at.
     def test_show_turbo_frame_multiple_own_links_same_site

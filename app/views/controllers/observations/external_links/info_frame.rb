@@ -11,7 +11,8 @@
 # pointing at the source. Sibling reflection rows get the same note.
 # When the occurrence holds any reflection, the pane ends with ONE
 # occurrence-wide "Sync now" button (#4215), shown to any logged-in
-# viewer, which refreshes every reflection in the occurrence. Sibling
+# viewer, which refreshes every reflection in the occurrence, and a
+# line saying when the occurrence last synced. Sibling
 # rows never get InlineCRUDLinks either way. Otherwise purely
 # informational, not a form.
 module Views::Controllers::Observations::ExternalLinks
@@ -43,7 +44,12 @@ module Views::Controllers::Observations::ExternalLinks
         @site_links.each { |link| render_own_row(link) }
         @sibling_site_links.each { |sib_link| render_sibling_row(sib_link) }
       end
-      render_sync_button if @user && @obs.syncable?
+      return unless @user && @obs.syncable?
+
+      div(class: "d-flex align-items-center mt-3") do
+        render_sync_button
+        render(LastSynced.new(synced_at: @obs.last_synced_at))
+      end
     end
 
     # Edit/destroy affordance for the current obs's own links only --
@@ -82,7 +88,7 @@ module Views::Controllers::Observations::ExternalLinks
         name: :sync_now.ti,
         target: resync_observation_path(@obs.id),
         size: :sm,
-        class: "reflection-sync-button mt-3",
+        class: "reflection-sync-button",
         data: { turbo_confirm: :observation_resync_confirm.l }
       )
     end

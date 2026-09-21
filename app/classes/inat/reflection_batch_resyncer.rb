@@ -33,9 +33,9 @@ class Inat
     # these to #alerts.
     attr_reader :back_link_alerts
 
-    # Sequence syncs that declined to act (see
-    # ReflectionResync#sequence_alerts) -- also sent to #alerts.
-    delegate :sequence_alerts, to: :@applier
+    # Sequence and taxon syncs that declined to act (see
+    # ReflectionResync#alerts) -- also sent to #alerts.
+    delegate :alerts, to: :@applier
 
     def initialize(fetcher: ObsFetcher.new, applier: ReflectionResync.new)
       @fetcher = fetcher

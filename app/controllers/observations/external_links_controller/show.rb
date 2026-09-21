@@ -22,12 +22,12 @@ module Observations::ExternalLinksController::Show
 
   def set_ivars_for_show
     @external_link = ExternalLink.show_includes.find(params[:id])
-    # `occurrence: :observations` (not just `:occurrence`) -- InfoFrame's
-    # occurrence-wide Sync button calls `@obs.syncable?`, which walks the
-    # occurrence's member observations (#4215); strict loading raises if
-    # they aren't eager-loaded already.
+    # The occurrence's members and their links -- InfoFrame's
+    # occurrence-wide Sync button calls `@obs.syncable?` and
+    # `@obs.last_synced_at`, which walk the member observations (#4215);
+    # strict loading raises if they aren't eager-loaded already.
     @observation = Observation.strict_loading.
-                   includes({ occurrence: :observations },
+                   includes({ occurrence: { observations: :external_links } },
                             external_links: show_link_includes).
                    find(@external_link.observation.id)
     @site = @external_link.external_site
@@ -83,10 +83,13 @@ module Observations::ExternalLinksController::Show
   def render_external_link_info_frame
     site_links = site_links_for(@observation, @site)
     sibling_links = sibling_site_links_for(@siblings, @site)
-    # Etag on the real ExternalLink records (not the SiblingLink Data
-    # wrapper -- it has no cache_key of its own) so the digest reacts
-    # to actual updated_at changes.
-    fresh_when(etag: site_links + sibling_links.map(&:link), public: false)
+    # Etag on the ExternalLink records (not the SiblingLink Data
+    # wrapper -- it has no cache_key) so the digest reacts to updated_at
+    # changes. A resync stamps last_synced_at without touching
+    # updated_at, so the sync time is added separately.
+    fresh_when(etag: site_links + sibling_links.map(&:link) +
+                     [@observation.last_synced_at],
+               public: false)
     return if performed?
 
     render(Views::Controllers::Observations::ExternalLinks::InfoFrame.new(

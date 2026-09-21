@@ -32,10 +32,7 @@ class Admin::BannersController < AdminController
   end
 
   def banner_params
-    params.require(:banner).permit(:message).merge(version: next_version)
-  end
-
-  def next_version
-    (Banner.maximum(:version) || 0) + 1
+    params.require(:banner).permit(:message).
+      merge(version: Banner.next_version)
   end
 end

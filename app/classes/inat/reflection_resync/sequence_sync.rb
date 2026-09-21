@@ -31,6 +31,9 @@ class Inat
         def changed?
           added.positive? || updated.positive? || removed.positive?
         end
+
+        # Sequence's callbacks log every write.
+        def logs_resync? = false
       end
 
       def call(obs, inat_obs)

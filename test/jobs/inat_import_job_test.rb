@@ -60,6 +60,11 @@ class InatImportJobTest < ActiveJob::TestCase
     # This iNat obs has only 1 suggested ID.
     # The suggester is the person who made the iNat observation.
     proposed_name = obs.namings.first
+    assert_equal(ExternalSite.inaturalist.id, proposed_name.external_site_id,
+                 "the import stamps its naming with the source site")
+    assert_equal([ExternalSite.inaturalist.id],
+                 proposed_name.votes.map(&:external_site_id).uniq,
+                 "the import stamps its vote with the source site")
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),

@@ -2299,6 +2299,24 @@ class ObservationTest < UnitTestCase
            "every member of an occurrence with a reflection is syncable")
   end
 
+  def test_last_synced_at_is_the_occurrences_latest_sync
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert_nil(obs.last_synced_at, "an unsynced reflection has no sync time")
+
+    primary = observations(:minimal_unknown_obs)
+    [primary, obs].each { |o| o.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user,
+                             primary_observation: primary)
+    primary.update!(occurrence: occ)
+    obs.update!(occurrence: occ)
+    synced_at = 1.hour.ago.change(usec: 0)
+    obs.import_link.update_column(:last_synced_at, synced_at)
+
+    assert_equal(synced_at, primary.reload.last_synced_at,
+                 "every member reports the occurrence's sync time")
+  end
+
   # ----- Coverage gap tests for app/models/observation.rb -----
 
   # field_slip= is a no-op when the slip arg is nil — the early

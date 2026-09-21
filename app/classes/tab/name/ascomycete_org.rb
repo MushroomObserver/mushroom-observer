@@ -9,6 +9,7 @@ class Tab::Name::AscomyceteOrg < Tab::Name::ExternalBase
   end
 
   def path
-    "https://ascomycete.org/Search-Results?search=#{@name.sensu_stricto}"
+    "https://ascomycete.org/Search-Results?search=" \
+      "#{url_encode(@name.sensu_stricto)}"
   end
 end
