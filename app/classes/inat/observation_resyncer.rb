@@ -8,11 +8,10 @@ class Inat
   # occurrence-wide event: pressing "Sync now" on any member observation
   # refreshes all of the occurrence's reflections at essentially the same
   # time, in ONE rate-limited API call (`Inat::ObsFetcher#fetch_batch`
-  # takes the whole id list). Each reflection's scalar core (date /
-  # location / GPS / notes) is MO's mirror of its source, so it is
-  # re-fetched and updated in place. Only source-owned fields are touched;
-  # namings, votes, comments, images and sequences are handled by later
-  # slices.
+  # takes the whole id list). Each reflection's scalar core, sequences,
+  # source-derived namings and images mirror its source and are updated
+  # in place; MO-side records (comments, people's namings and votes) are
+  # left alone.
   #
   # The per-reflection refresh itself lives in Inat::ReflectionResync,
   # shared with the scheduled daily batch (Inat::ReflectionBatchResyncer);
@@ -63,24 +62,30 @@ class Inat
                    select { |obs| ReflectionResync.inat_link(obs) }
     end
 
-    # Turbo Stream broadcast so "Sync now" updates pages live, no reload
-    # (#4215) -- see Observations::InatResyncsController#create for why
-    # the controller response itself is flash-only. The aggregate flash
-    # goes to EVERY member observation's channel (a viewer may be on the
-    # primary's page, not a reflection's); panel updates go to each
-    # changed reflection's own channel, since the DOM targets are that
-    # page's panels. Rendering uses no user -- the channel is shared by
-    # every viewer of the page, so the safe logged-out-equivalent view is
-    # the only one that's right for all of them.
+    # Turbo Stream broadcast so "Sync now" updates pages live (#4215) --
+    # see Observations::InatResyncsController#create for why the
+    # controller response itself is flash-only. The aggregate flash goes
+    # to EVERY member observation's channel (a viewer may be on the
+    # primary's page, not a reflection's). A changed reflection's page
+    # refreshes instead of taking rendered panels: the namings panel and
+    # title are per-viewer, and the channel is shared by every viewer,
+    # so each browser refetches its page with its session. The
+    # `refresh_with_flash` action (app/javascript/application.js) carries
+    # the flash across that refetch.
     def broadcast(results)
       flash_html = render_flash(results)
+      last_synced_html = render_last_synced(results)
+      changed_ids = results.select { |r| r.status == :synced }.
+                    map { |r| r.observation.id }
       members.each do |member|
-        Turbo::StreamsChannel.broadcast_update_to(
-          channel(member), target: "page_flash", html: flash_html
-        )
+        if changed_ids.include?(member.id)
+          broadcast_action(member, :refresh_with_flash, html: flash_html)
+        else
+          broadcast_action(member, :update, target: "page_flash",
+                                            html: flash_html)
+          broadcast_last_synced(member, last_synced_html)
+        end
       end
-      results.select { |r| r.status == :synced }.
-        each { |r| broadcast_panels(r.observation) }
     end
 
     def members
@@ -127,46 +132,29 @@ class Inat
       parts
     end
 
-    # Only `:synced` changes anything these panels display (when /
-    # location / GPS / notes) -- `:unchanged`/`:source_deleted`/
-    # `:fetch_failed` leave the observation's own data untouched, so
-    # there's nothing to re-render there.
-    def broadcast_panels(observation)
-      broadcast_replace(observation, "observation_details",
-                        Views::Controllers::Observations::Show::Details.new(
-                          obs: observation, user: nil,
-                          sites: addable_sites(observation),
-                          siblings: siblings_of(observation)
-                        ))
-      broadcast_replace(observation, "observation_notes",
-                        Views::Controllers::Observations::Show::NotesPanel.new(
-                          obs: observation, user: nil
-                        ))
-    end
+    # Nothing is stamped when the fetch failed, so there is no newer time
+    # to show.
+    def render_last_synced(results)
+      return if results.any? { |r| r.status == :fetch_failed }
 
-    # Same lookup `Observations::ExternalLinksController::Show` uses for
-    # the same panel's own turbo-stream re-render -- which external
-    # sites the viewer may still add a link to (none for the no-user
-    # rendering, matching the logged-out view).
-    def addable_sites(observation)
-      ExternalSite.sites_user_can_add_links_to_for_obs(nil, observation).
-        to_a
-    end
-
-    def siblings_of(observation)
-      return [] unless observation.occurrence
-
-      observation.occurrence.observations.where.not(id: observation.id).
-        includes(:external_links).to_a
-    end
-
-    def broadcast_replace(observation, target, component)
-      Turbo::StreamsChannel.broadcast_replace_to(
-        channel(observation), target: target,
-                              html: ApplicationController.renderer.render(
-                                component, layout: false
-                              )
+      ApplicationController.renderer.render(
+        Views::Controllers::Observations::ExternalLinks::LastSynced.new(
+          synced_at: @observation.last_synced_at
+        ),
+        layout: false
       )
+    end
+
+    def broadcast_last_synced(member, html)
+      return unless html
+
+      broadcast_action(member, :replace, targets: ".reflection-last-synced",
+                                         html: html)
+    end
+
+    def broadcast_action(member, action, **)
+      Turbo::StreamsChannel.broadcast_action_to(channel(member),
+                                                action: action, **)
     end
   end
 end

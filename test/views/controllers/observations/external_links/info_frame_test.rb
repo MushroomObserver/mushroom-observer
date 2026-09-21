@@ -117,6 +117,29 @@ module Views::Controllers::Observations::ExternalLinks
       )
     end
 
+    def test_reflection_pane_shows_when_the_occurrence_last_synced
+      link = external_links(:imported_inat_obs_inat_link)
+      obs = link.observation
+      obs.update_column(:reflected_at, Time.zone.now)
+      user = users(:rolf)
+
+      html = render(frame_with(obs: obs, site_links: [link], user: user))
+      assert_html(html, ".reflection-last-synced",
+                  text: :observation_never_synced.l)
+
+      synced_at = Time.zone.now.change(usec: 0)
+      link.update_column(:last_synced_at, synced_at)
+      html = render(frame_with(obs: obs.reload, site_links: [link],
+                               user: user))
+
+      assert_html(
+        html,
+        ".reflection-last-synced [data-controller='local-time']" \
+        "[data-local-time-utc-value='#{synced_at.utc.iso8601}']",
+        text: synced_at.display_time
+      )
+    end
+
     def test_reflection_pane_hides_sync_button_when_logged_out
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       obs = link.observation
@@ -125,6 +148,7 @@ module Views::Controllers::Observations::ExternalLinks
       html = render(frame_with(obs: obs, site_links: [link], user: nil))
 
       assert_no_html(html, ".reflection-sync-button")
+      assert_no_html(html, ".reflection-last-synced")
     end
 
     # From a non-reflection member's page, a sibling reflection's row

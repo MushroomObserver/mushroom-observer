@@ -95,16 +95,14 @@ module Views::FullPageBase::Title
   # Index-only caption explaining what filters the current Query
   # applies. The caption HTML is built by
   # `Views::Layouts::Header::IndexBar::FilterCaption`. Skips the wrap
-  # when there's no query to caption.
+  # when there's no query, or the query has no filters to caption --
+  # an unfiltered index has nothing worth a caption row for.
   def add_query_filters(query)
-    return unless query&.params
+    klass = ::Views::Layouts::Header::IndexBar::FilterCaption
+    return unless query&.params && klass.filters_present?(query)
 
     content_for(:filters) do
-      capture do
-        render(::Views::Layouts::Header::IndexBar::FilterCaption.new(
-                 query: query
-               ))
-      end
+      capture { render(klass.new(query: query)) }
     end
   end
 

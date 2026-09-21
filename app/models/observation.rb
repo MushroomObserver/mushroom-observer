@@ -323,7 +323,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
      :observation_views,
      :project_observations,
      :species_list_observations,
-     { occurrence: [:field_slip, :observations] },
+     # Members' sequences: the Specimen panel lists the whole
+     # occurrence's sequences (they describe the shared specimen).
+     { occurrence: [:field_slip, { observations: { sequences: :user } }] },
      { projects: [{ admin_group: :users }, :image] },
      :rss_log,
      { sequences: :user },
@@ -1234,6 +1236,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # with no user at all (#4215).
   def syncable?
     sync_reflections.any?
+  end
+
+  # Most recent resync of any reflection in the occurrence, or nil when
+  # none has synced yet. The max, not the min: the scheduled batch only
+  # stamps reflections that changed at the source.
+  def last_synced_at
+    sync_reflections.filter_map { |obs| obs.import_link&.last_synced_at }.max
   end
 
   # Do we want to prominently advertise the source of this observation?

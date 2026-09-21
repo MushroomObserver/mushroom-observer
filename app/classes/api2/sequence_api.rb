@@ -54,7 +54,7 @@ class API2
 
     def create_params
       {
-        observation: parse(:observation, :observation),
+        observation: sequence_target(parse(:observation, :observation)),
         locus: parse(:string, :locus),
         bases: parse(:string, :bases),
         archive: parse(:archive, :archive),
@@ -78,6 +78,23 @@ class API2
       raise(MissingParameter.new(:observation)) unless params[:observation]
       raise(MissingParameter.new(:locus))       if params[:locus].blank?
       # Sequence validators handle the rest, it's too complicated to repeat.
+    end
+
+    # Sequences on a reflection are source-owned (mirrored from iNat by
+    # the resync), but anyone may sequence the specimen -- so the add
+    # lands on the occurrence companion instead (#4214): the actor's
+    # when they may edit the reflection, else the importer's. Same rule
+    # as SequencesController::ReflectionRouting.
+    def sequence_target(obs)
+      return obs unless obs&.reflection?
+
+      companion_user = obs.can_edit?(@user) ? @user : obs.user
+      builder = Observation::Companion.new(obs, companion_user)
+      builder.existing || builder.create
+    rescue ActiveRecord::RecordInvalid => e
+      # e.g. the occurrence is full -- surface as a structured API
+      # error rather than a 500 (API2 only rescues API2::Error).
+      raise(CreateFailed.new(e.record))
     end
   end
 end

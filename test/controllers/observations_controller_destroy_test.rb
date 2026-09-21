@@ -43,26 +43,22 @@ class ObservationsControllerDestroyTest < FunctionalTestCase
     end
   end
 
-  # A read-only reflection (#4214) can't be deleted on MO -- the owner,
-  # who passes the permission check, is stopped by the reflection guard
-  # with a warning.
-  def test_destroy_reflection_blocked
+  # A read-only reflection is deletable by its owner like any other
+  # observation -- it can always be reimported (#5180).
+  def test_destroy_reflection_by_owner
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)
     id = obs.id
     login(obs.user.login)
 
-    assert_no_difference("Observation.count") do
+    assert_difference("Observation.count", -1) do
       delete(:destroy, params: { id: id })
     end
-    assert_redirected_to(action: :show, id: id)
-    assert_flash_warning
-    assert(Observation.find(id).reflection?)
+    assert_flash_success
+    assert_raises(ActiveRecord::RecordNotFound) { Observation.find(id) }
   end
 
-  # A non-owner gets the standard permission-denied path (an error flash),
-  # not the reflection warning -- the permission check runs before the
-  # reflection guard, so reflection status isn't leaked (Copilot #5193).
+  # A non-owner gets the standard permission-denied path.
   def test_destroy_reflection_by_non_owner_is_permission_denied
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)

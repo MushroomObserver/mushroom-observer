@@ -96,6 +96,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
 
         render(Components::Form::CameraInfo.new(
                  img_id: @img_id,
+                 upload: @upload,
                  **@camera_info
                ))
       end

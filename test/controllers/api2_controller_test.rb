@@ -545,6 +545,71 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("sequence notes", sequence.notes)
   end
 
+  # Sequences on a reflection are source-owned (#4214), but anyone may
+  # sequence the specimen: the API lands the add on the occurrence
+  # companion -- the importer's, when the poster cannot edit the
+  # reflection.
+  def test_post_sequence_to_reflection_lands_on_companion
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg"
+    }
+
+    assert_difference("Sequence.count", 1) do
+      post(:sequences, params: params)
+    end
+    assert_no_api_errors
+    seq = Sequence.order(:id).last
+    companion = seq.observation
+    assert_not_equal(obs.id, companion.id,
+                     "the sequence must not land on the reflection")
+    assert_equal(obs.reload.occurrence_id, companion.reload.occurrence_id,
+                 "the companion shares the reflection's occurrence")
+    assert_users_equal(mary, seq.user)
+    assert_users_equal(obs.user, companion.user,
+                       "a non-editor's post creates the companion as " \
+                       "the importer's")
+  end
+
+  # Companion creation can fail (e.g. the occurrence is full); the API
+  # surfaces that as a structured CreateFailed error, not a 500.
+  def test_post_sequence_to_reflection_companion_failure_is_structured
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    # The error's message renders via unique_text_name, so the stub
+    # record needs a name, as a failed companion would have.
+    invalid = Observation.new(name: names(:fungi))
+    invalid.errors.add(:base, :occurrence_max_observations_exceeded,
+                       max: Occurrence::MAX_OBSERVATIONS)
+    failing = Struct.new(:record) do
+      def existing = nil
+
+      def create
+        raise(ActiveRecord::RecordInvalid.new(record))
+      end
+    end.new(invalid)
+    params = {
+      observation: obs.id,
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg"
+    }
+
+    Observation::Companion.stub(:new, ->(*) { failing }) do
+      assert_no_difference("Sequence.count") do
+        post(:sequences, params: params)
+      end
+    end
+
+    assert_api_failed
+    assert(assigns(:api).errors.any?(API2::CreateFailed),
+           "Expected a structured CreateFailed error")
+  end
+
   # Prove user can add a Naming to someone else's Observation
   def test_post_naming
     obs = observations(:coprinus_comatus_obs)

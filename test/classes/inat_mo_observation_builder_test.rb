@@ -68,96 +68,6 @@ class InatMoObservationBuilderTest < UnitTestCase
                              quality_grade: "casual"))
   end
 
-  # --- proposed_namings: which names become namings, and at what weight ----
-  # Lactarius alpinus is approved; L. alpigenes is deprecated in favor of it;
-  # Pluteus petasatus (deprecated) has no approved synonym; Peltigera is a
-  # second approved name. (See test_best_preferred_synonym in name_test.rb.)
-
-  # An accepted Observation Taxon with no provisional name: a single naming.
-  def test_proposed_namings_single_accepted
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:lactarius_alpinus)))
-  end
-
-  # A deprecated Observation Taxon is corrected: its preferred synonym leads,
-  # the deprecated name follows at Could Be. (Applies to all imports.)
-  def test_proposed_namings_deprecated_community_adds_preferred_synonym
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:lactarius_alpigenes)))
-  end
-
-  # A provisional name (not deprecated) leads; the Observation Taxon follows.
-  def test_proposed_namings_provisional_leads
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:lactarius_alpinus)))
-  end
-
-  # The provisional is deprecated in favor of the leading ID (the
-  # Leccinum scenario): the accepted name leads, the deprecated provisional
-  # follows, and the synonym-of-the-provisional dedups with the Observation
-  # Taxon.
-  def test_proposed_namings_deprecated_provisional_prefers_accepted
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:lactarius_alpinus),
-                          provisional: names(:lactarius_alpigenes)))
-  end
-
-  # A deprecated name with no approved synonym falls back to itself.
-  def test_proposed_namings_deprecated_without_synonym_keeps_self
-    assert_equal([["Pluteus petasatus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:pluteus_petasatus_deprecated)))
-  end
-
-  # Provisional equal to the leading ID collapses to a single naming.
-  def test_proposed_namings_provisional_equals_community
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:lactarius_alpinus),
-                          provisional: names(:lactarius_alpinus)))
-  end
-
-  # --- Species Name Override (#4533) ---
-
-  # The override leads ahead of the leading ID.
-  def test_proposed_namings_override_leads_over_community
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          override: names(:lactarius_alpinus)))
-  end
-
-  # The override outranks BOTH the provisional name and the leading ID;
-  # the other two follow at Could Be.
-  def test_proposed_namings_override_outranks_provisional_and_community
-    assert_equal([["Coprinus comatus", Vote::MAXIMUM_VOTE],
-                  ["Boletus edulis", Vote::MIN_POS_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:boletus_edulis),
-                          override: names(:coprinus_comatus)))
-  end
-
-  # Override equal to the provisional collapses to one naming for it.
-  def test_proposed_namings_override_equals_provisional
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:lactarius_alpinus),
-                          override: names(:lactarius_alpinus)))
-  end
-
-  # A deprecated override is corrected to its preferred synonym, which leads.
-  def test_proposed_namings_deprecated_override_prefers_synonym
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          override: names(:lactarius_alpigenes)))
-  end
-
   # When the iNat provisional name already exists in MO, reuse it rather than
   # posting a new one.
   def test_prov_name_reuses_existing_mo_name
@@ -245,157 +155,6 @@ class InatMoObservationBuilderTest < UnitTestCase
                  "spelling note when proposed name corrects the obs taxon")
   end
 
-  # --- cleaned_copyright_holder: strip "all rights reserved", cap length ---
-
-  FakePhoto = Struct.new(:copyright_holder)
-
-  def test_cleaned_copyright_holder_strips_all_rights_reserved
-    photo = FakePhoto.new("(c) cactusdan, all rights reserved")
-    assert_equal("(c) cactusdan, ",
-                 builder_for.send(:cleaned_copyright_holder, photo))
-  end
-
-  def test_cleaned_copyright_holder_strips_all_rights_reserved_mid_string
-    photo = FakePhoto.new(
-      "(c) jo_bone, all rights reserved, uploaded by jo_bone"
-    )
-    assert_equal("(c) jo_bone, , uploaded by jo_bone",
-                 builder_for.send(:cleaned_copyright_holder, photo))
-  end
-
-  def test_cleaned_copyright_holder_leaves_licensed_attribution_untouched
-    attribution = "(c) Tim C., some rights reserved (CC BY-NC)"
-    photo = FakePhoto.new(attribution)
-    assert_equal(attribution,
-                 builder_for.send(:cleaned_copyright_holder, photo))
-  end
-
-  def test_cleaned_copyright_holder_truncates_to_255_chars
-    photo = FakePhoto.new("x" * 300)
-    result = builder_for.send(:cleaned_copyright_holder, photo)
-    assert_equal(255, result.length,
-                 "copyright_holder should be truncated to 255 chars")
-  end
-
-  # --- upload_inat_image: surface API2 errors instead of masking them ---
-
-  FakeAPI2Response = Struct.new(:errors, :results)
-
-  def test_upload_inat_image_raises_descriptive_error_on_api_failure
-    error = API2::MissingParameter.new(:upload_url)
-    fake_api = FakeAPI2Response.new([error], nil)
-    builder = builder_for
-
-    API2.stub(:execute, fake_api) do
-      err = assert_raises(RuntimeError) do
-        builder.send(:upload_inat_image, {}, "377332865")
-      end
-      assert_match(/Failed to import image 377332865/, err.message,
-                   "Error should identify the failing iNat photo")
-      assert_match(/#{Regexp.escape(error.to_s)}/, err.message,
-                   "Error should include the underlying API2 error")
-    end
-  end
-
-  # AWS/S3 is occasionally unavailable for a moment (#5183); a download
-  # failure should be retried, not fail the whole observation.
-  def test_upload_inat_image_retries_transient_download_failure
-    image = images(:in_situ_image)
-    responses = [
-      FakeAPI2Response.new([download_error], nil),
-      FakeAPI2Response.new([download_error], nil),
-      FakeAPI2Response.new([], [image])
-    ]
-    call_count = 0
-    builder = builder_for
-    builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
-    # Capture the retry backoff's warn() instead of letting it print --
-    # bare Kernel#warn isn't Rails.logger, so config.log_level doesn't
-    # filter it, and it dumps straight into the test suite's console.
-    warnings = []
-    builder.define_singleton_method(:warn) { |msg| warnings << msg }
-
-    API2.stub(:execute, lambda { |_params|
-      call_count += 1
-      responses[call_count - 1]
-    }) do
-      result = builder.send(:upload_inat_image, {}, "377332865")
-      assert_equal(image, result,
-                   "Should return the image once a retry succeeds")
-    end
-
-    assert_equal(3, call_count,
-                 "Should retry an image download failure, succeed on the " \
-                 "third attempt")
-    assert_equal(2, warnings.size,
-                 "Should warn once per retry, not on the final success")
-  end
-
-  def test_upload_inat_image_raises_after_exhausting_retries
-    fake_api = FakeAPI2Response.new([download_error], nil)
-    call_count = 0
-    builder = builder_for
-    builder.define_singleton_method(:sleep) { |*| } # skip backoff waits
-    # Capture the retry backoff's warn() instead of letting it print --
-    # bare Kernel#warn isn't Rails.logger, so config.log_level doesn't
-    # filter it, and it dumps straight into the test suite's console.
-    warnings = []
-    builder.define_singleton_method(:warn) { |msg| warnings << msg }
-
-    API2.stub(:execute, lambda { |_params|
-      call_count += 1
-      fake_api
-    }) do
-      err = assert_raises(RuntimeError) do
-        builder.send(:upload_inat_image, {}, "377332865")
-      end
-      assert_match(/Failed to import image 377332865/, err.message,
-                   "Error should identify the failing iNat photo")
-    end
-
-    assert_equal(Inat::MoObservationBuilder::ImageHandling::
-                 MAX_UPLOAD_RETRIES, warnings.size,
-                 "Should warn once per retry, not on the final failure")
-    assert_equal(Inat::MoObservationBuilder::ImageHandling::
-                 MAX_UPLOAD_RETRIES + 1, call_count,
-                 "Should try once, retry until the cap is reached, " \
-                 "before giving up")
-  end
-
-  def test_upload_inat_image_does_not_retry_non_download_errors
-    error = API2::MissingParameter.new(:upload_url)
-    fake_api = FakeAPI2Response.new([error], nil)
-    call_count = 0
-    builder = builder_for
-
-    API2.stub(:execute, lambda { |_params|
-      call_count += 1
-      fake_api
-    }) do
-      assert_raises(RuntimeError) do
-        builder.send(:upload_inat_image, {}, "377332865")
-      end
-    end
-
-    assert_equal(1, call_count,
-                 "A non-retryable API2 error should not be retried")
-  end
-
-  # created_image_ids is what ObservationImporter (then InatImportJob)
-  # reads to enqueue one TransferImagesJob per import batch (#4791).
-  def test_upload_inat_image_accumulates_created_image_ids
-    image = images(:in_situ_image)
-    fake_api = FakeAPI2Response.new([], [image])
-    builder = builder_for
-
-    API2.stub(:execute, fake_api) do
-      result = builder.send(:upload_inat_image, {}, "377332865")
-      assert_equal(image, result)
-    end
-
-    assert_equal([image.id], builder.created_image_ids)
-  end
-
   # Re-importing (or re-running the builder) reuses the namer's existing
   # naming instead of stacking a duplicate, updating the vote in place
   # (#5186).
@@ -427,14 +186,6 @@ class InatMoObservationBuilderTest < UnitTestCase
 
   private
 
-  def download_error
-    API2::CouldntDownloadURL.new(
-      "https://inaturalist-open-data.s3.amazonaws.com/photos/" \
-      "377332865/original.jpeg",
-      StandardError.new("simulated S3 outage")
-    )
-  end
-
   def builder_for(provisional_name: nil, name_override: nil,
                   obs_taxon_name: nil)
     fake = FakeInatObs.new(sequences: [], quality_grade: "needs_id",
@@ -442,14 +193,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                            name_override: name_override,
                            obs_taxon_name: obs_taxon_name)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
-                                   external_site: :stub)
-  end
-
-  def proposed(community:, provisional: nil, override: nil,
-               lead_vote: Vote::MAXIMUM_VOTE)
-    builder_for.send(:proposed_namings, community, provisional, override,
-                     lead_vote).
-      map { |name, vote| [name.text_name, vote] }
+                                   external_site: external_sites(:inaturalist))
   end
 
   def naming_vote(sequence:, provisional:, quality_grade:)

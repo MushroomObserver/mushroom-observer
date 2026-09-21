@@ -947,7 +947,7 @@ class ImageTest < UnitTestCase
     assert_equal(link, img.import_link)
   end
 
-  # ---- EXIF geocode reading (local file vs. remote via curl+exiftool) --
+  # ---- EXIF geocode reading (local file vs. fetched-then-exiftool) --
 
   # The image geotagged.jpg has this data (see also
   # ObservationFormSystemTest::GEOTAGGED_EXIF).
@@ -966,15 +966,11 @@ class ImageTest < UnitTestCase
     FileUtils.rm_f(img.full_filepath("orig"))
   end
 
-  # Regression test: `script/exiftool_remote` used to only read `$1`
-  # as a bare URL (fetched via `wget`), but `Image#read_exif_data`
-  # calls it with `flags..., url` -- the same `cmd, *flags, path`
-  # shape it uses for the local `exiftool` binary directly. That
-  # argument-shape mismatch (compounded by `wget` not being installed
-  # on every dev machine, unlike `curl`) silently broke EXIF re-reads
-  # for any already-transferred image -- `read_exif_geocode` always
-  # returned nil. See the corrected `curl [flags] url`-forwarding
-  # shape in `script/exiftool_remote`.
+  # Regression test: an earlier remote-fetch implementation only read
+  # the URL as a bare positional argument, dropping the exiftool flags
+  # `read_exif_geocode` passes along (`-n`, `-GPSLatitude`, etc.).
+  # `read_exif_geocode` always returned nil for an already-transferred
+  # image as a result.
   def test_read_exif_geocode_transferred_image
     img = images(:in_situ_image)
     img.update_column(:transferred, true)
@@ -992,6 +988,39 @@ class ImageTest < UnitTestCase
     assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
   ensure
     FileUtils.rm_f(remote_path)
+  end
+
+  # original_url is a `file://` URL in dev/test (config/image_config.yml's
+  # stand-in for a transferred image), so the other transferred-image
+  # test above doesn't reach the http(s) branch a production host uses.
+  # Force it here to cover that branch directly.
+  def test_read_exif_geocode_transferred_image_over_http
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    url = "https://images.example.org/orig/#{img.id}.jpg"
+    stub_request(:get, url).to_return(
+      status: 200,
+      body: Rails.root.join("test/images/geotagged.jpg").binread
+    )
+
+    img.stub(:original_url, url) do
+      data = img.read_exif_geocode(hide_gps: false)
+
+      assert_equal(GEOTAGGED_EXIF_GPS[:lat], data[:lat])
+      assert_equal(GEOTAGGED_EXIF_GPS[:lng], data[:lng])
+      assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
+    end
+  end
+
+  def test_read_exif_geocode_transferred_image_network_failure
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    url = "https://images.example.org/orig/#{img.id}.jpg"
+    stub_request(:get, url).to_raise(SocketError)
+
+    img.stub(:original_url, url) do
+      assert_nil(img.read_exif_geocode(hide_gps: false))
+    end
   end
 
   def stage_geotagged_file(path)
