@@ -86,9 +86,12 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       select("Could Be", from: "vote_value_#{nam.id}")
     end
 
-    assert_no_selector("#modal_progress_spinner")
-    assert_selector("#title", text: /#{obs.text_name}/)
-    # sleep(3)
+    # This vote doesn't change the consensus, so the namings-panel
+    # turbo_stream update lands without touching #title -- wait on
+    # #title directly rather than the spinner, which proves nothing
+    # about whether the save landed (it can pass before the request
+    # even starts).
+    assert_selector("#title", text: /#{obs.text_name}/, wait: 8)
 
     within("#observation_namings") do
       assert_link(text: /#{n_d.text_name}/)
@@ -96,16 +99,17 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       select("I'd Call It That", from: "vote_value_#{nam.id}")
     end
 
-    # The "Saving…" progress spinner appears + disappears too fast to
-    # catch reliably under Cuprite (the previous `assert_selector(
-    # "#modal_progress_spinner", wait: 4)` flaked). Skip the mid-save
-    # check and assert the reliable post-conditions: spinner is gone
-    # (Capybara's default wait absorbs any tail of the save) and the
-    # title bar reflects the new consensus naming. Title text only
-    # updates AFTER the vote round-trip completes, so it's a
-    # strictly-stronger signal that the save landed.
-    assert_no_selector("#modal_progress_spinner")
-    assert_selector("#title", text: /#{nam.text_name}/)
+    # This vote changes the consensus, so
+    # Observations::Namings::VotesController#render_namings_section_update
+    # does a full-page redirect (the namings-panel turbo_stream target
+    # can't reach page chrome like #title) rather than a targeted
+    # update -- that round-trip can exceed Capybara's 3s default wait
+    # under parallel test load. Wait on #title directly with a longer
+    # explicit timeout; the "Saving…" spinner proves nothing about
+    # whether the save landed (it can pass before the request even
+    # starts, and disappears too fast to catch reliably under Cuprite
+    # regardless).
+    assert_selector("#title", text: /#{nam.text_name}/, wait: 8)
 
     # check that there is a vote "index" tally with this naming
     within("#observation_namings") do
@@ -176,6 +180,9 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     within("#observation_namings") do
       assert_no_link(text: /#{n_d.text_name}/, wait: 9)
     end
-    assert_selector("#title", text: /#{obs.text_name}/)
+    # Destroying the consensus naming triggers the same kind of
+    # full-page redirect as a consensus-changing vote (see the wait:
+    # 8 comment above) -- give #title the same explicit timeout.
+    assert_selector("#title", text: /#{obs.text_name}/, wait: 8)
   end
 end
