@@ -63,7 +63,7 @@ gem("sprockets-rails")
 # Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
 # Delete this dependency declaration if the issue gets resolved:
 # https://github.com/hotwired/stimulus-rails/issues/108
-gem("sprockets", "~>4.2.1")
+gem("sprockets", "~>4.4.1")
 # Compile SCSS for stylesheets
 gem("dartsass-sprockets")
 # Use bootstrap style generator
@@ -161,7 +161,7 @@ gem("google-cloud-storage")
 #   * `Zip::Entry`
 #   * `Zip::InputStream`
 #   * `Zip::OutputStream`
-gem("rubyzip", "~> 3.2.2")
+gem("rubyzip", "~> 3.6.0")
 
 # QR code generator
 gem("rqrcode")
