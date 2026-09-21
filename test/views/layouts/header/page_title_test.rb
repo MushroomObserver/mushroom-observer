@@ -24,7 +24,7 @@ module Views::Layouts
     PREV_NEXT = "<nav class='pager-marker'></nav>".html_safe
 
     def test_desktop_and_mobile_each_get_one_copy_of_every_piece
-      html = render_page_title { populate_slots("show") }
+      html = render_page_title("show")
 
       # Mobile top row: one visibility-gated copy of each of the four
       # icon/badge pieces.
@@ -45,7 +45,7 @@ module Views::Layouts
     end
 
     def test_no_duplicate_ids_between_mobile_and_desktop_copies
-      html = render_page_title { populate_slots("show") }
+      html = render_page_title("show")
       ids = Nokogiri::HTML5.fragment(html).css("[id]").pluck("id")
 
       assert_equal(ids.uniq.length, ids.length,
@@ -53,7 +53,7 @@ module Views::Layouts
     end
 
     def test_right_column_and_mobile_object_nav_absent_off_show_action
-      html = render_page_title { populate_slots("edit") }
+      html = render_page_title("edit")
 
       assert_no_html(html, ".interest-icons-marker")
       assert_no_html(html, ".pager-marker")
@@ -64,7 +64,7 @@ module Views::Layouts
     end
 
     def test_suppressed_on_index_action
-      html = render_page_title { populate_slots("index") }
+      html = render_page_title("index")
 
       assert_no_html(html, ".title-marker")
       assert_no_html(html, ".badge-id")
@@ -75,24 +75,26 @@ module Views::Layouts
 
     private
 
-    def populate_slots(action)
-      controller.define_singleton_method(:action_name) { action }
-      column_classes
-      content_for(:title) { TITLE }
-      content_for(:id_badge) { ID_BADGE }
-      content_for(:edit_icons) { EDIT_ICONS }
-      content_for(:interest_icons) { INTEREST_ICONS }
-      content_for(:prev_next_object) { PREV_NEXT }
+    # Runs against `page` (the one-off page instance rendered by
+    # `render_page_title`) rather than `self` -- `controller`/
+    # `content_for`/`column_classes` are page-instance methods, not
+    # test-instance methods.
+    def populate_slots(page, action)
+      page.controller.define_singleton_method(:action_name) { action }
+      page.column_classes
+      page.content_for(:title) { TITLE }
+      page.content_for(:id_badge) { ID_BADGE }
+      page.content_for(:edit_icons) { EDIT_ICONS }
+      page.content_for(:interest_icons) { INTEREST_ICONS }
+      page.content_for(:prev_next_object) { PREV_NEXT }
     end
 
-    # `setup_block` runs `instance_eval`'d inside the one-off page's
-    # `view_template`, so it can call `controller`/`content_for`/
-    # `column_classes` as instance methods.
-    def render_page_title(&setup_block)
+    def render_page_title(action)
       captured = nil
+      test = self
       page_class = Class.new(Views::FullPageBase) do
         define_method(:view_template) do
-          instance_eval(&setup_block)
+          test.send(:populate_slots, self, action)
           captured = capture { render(Header::PageTitle.new) }
         end
         def around_template
