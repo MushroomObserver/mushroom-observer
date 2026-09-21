@@ -27,8 +27,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   private
 
   # Always at least the propose-naming button; the suggest-names
-  # button only renders when the user is allowed to use it. Both
-  # `d-block` (stacked, no `<br>` needed) with `mb-2` each.
+  # button only renders when the user is allowed to use it.
   def render_buttons
     render_propose_button
     return unless suggest_namings_enabled?
@@ -39,17 +38,19 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # Text-button variant of the propose-naming link (icon-only
   # variant lives in the panel `Header` for mobile).
   def render_propose_button
-    Button(
-      type: :modal,
-      name: :show_namings_propose_new_name.t,
-      target: new_observation_naming_path(
-        observation_id: @obs.id,
-        context: "namings_table"
-      ),
-      modal_id: "obs_#{@obs.id}_naming",
-      size: :sm,
-      class: "d-none d-sm-block mb-2 propose-naming-link"
-    )
+    div(class: "d-none d-sm-block mb-2") do
+      Button(
+        type: :modal,
+        name: :show_namings_propose_new_name.t,
+        target: new_observation_naming_path(
+          observation_id: @obs.id,
+          context: "namings_table"
+        ),
+        modal_id: "obs_#{@obs.id}_naming",
+        size: :sm,
+        class: "propose-naming-link"
+      )
+    end
   end
 
   # Gating: a thumb image must exist (so

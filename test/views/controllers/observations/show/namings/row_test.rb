@@ -27,14 +27,14 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
 
   def test_renders_four_main_column_cells_plus_eyes_column
     # Layout pin: name / vote-tally / your-vote widen on mobile (5/3/4)
-    # to fill the space the proposer cell would take at `sm`+ (4/3/2/3)
+    # to fill the space the proposer cell would take at `sm`+ (5/2/2/3)
     # -- the proposer cell is hidden below `sm`, its content moves to
     # the reasons row instead (see the proposer-cell tests below). The
     # eyes icon column is the narrow `col-sm-1`.
     html = render_row
 
-    assert_html(html, ".col.col-sm-11 .col-5.col-sm-4")
-    assert_html(html, ".col.col-sm-11 .col-sm-3.d-none.d-sm-block")
+    assert_html(html, ".col.col-sm-11 .col-5.col-sm-5")
+    assert_html(html, ".col.col-sm-11 .col-sm-2.d-none.d-sm-block")
     assert_html(html, ".col.col-sm-11 .col-3.col-sm-2")
     assert_html(html, ".col.col-sm-11 .col-4.col-sm-3")
     assert_html(html, ".col-sm-1.d-none.d-sm-block")
@@ -53,13 +53,23 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # destroy) appears next to the name link.
     html = render_row
 
-    assert_html(html, ".text-nowrap")
+    assert_html(html, ".inline-link-block")
     assert_html(html, "a.edit_naming_link_#{@naming.id}")
+  end
+
+  def test_mod_links_render_as_a_direct_sibling_of_the_name_link
+    # No wrapping block-level element between the name link and the
+    # mod-links group -- they must sit inline, on the same line, not
+    # nested in a div (which would push them onto a new line and make
+    # InlineLinkBlock's wrapper margin meaningless).
+    html = render_row
+
+    assert_html(html, "a + span.inline-link-block")
   end
 
   def test_no_mod_links_for_non_owner
     # Non-owner viewer → InlineModLinks renders nothing, so the
-    # wrapper `.text-nowrap` is also absent.
+    # wrapper `.inline-link-block` is also absent.
     other_user = users(:mary)
     controller.instance_variable_set(:@user, other_user)
     html = render_row(user: other_user)

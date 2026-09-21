@@ -25,8 +25,8 @@ module Views::Layouts
 
     def view_template
       div(class: "h4 my-0 d-flex align-items-center object_edit") do
-        render_reflection_icon if reflection?
-        InlineLinkBlock(items: [edit_item, delete_item].compact)
+        InlineLinkBlock(items: [reflection_item, edit_item,
+                                delete_item].compact)
       end
     end
 
@@ -36,9 +36,14 @@ module Views::Layouts
       @object.is_a?(::Observation) && @object.reflection?
     end
 
-    def render_reflection_icon
-      Icon(type: :read_only, title: :show_observation_reflection_read_only.l,
-           wrap_class: "mr-2")
+    def reflection_item
+      return nil unless reflection?
+
+      ::Components::Icon.new(
+        type: :read_only,
+        title: :show_observation_reflection_read_only.l,
+        wrap_class: ::Components::InlineLinkBlock.item_class
+      )
     end
 
     # A read-only reflection keeps its edit icon: Edit opens a linked

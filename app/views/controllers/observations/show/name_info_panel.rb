@@ -30,17 +30,23 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
     end
   end
 
-  # Three groups, each rendered as a block-level div wrapping the link:
-  # related-name filtered indexes, alt-descriptions list, and
-  # the per-name distribution map link.
+  # Three groups, each an `<li class="hanging-indent">`: related-name
+  # filtered indexes, alt-descriptions list, and the per-name
+  # distribution map link. Hanging indent keeps a wrapped link's
+  # second line aligned under its first, instead of the full-width
+  # wrap a bare block gives it.
   def render_links_on_mo
-    related_name_tabs.each { |tab| render_tab_link(tab) }
-    render_alt_descriptions
-    render_tab_link(occurrence_map_tab)
+    ul(class: "list-unstyled mb-0") do
+      related_name_tabs.each { |tab| render_tab_link(tab) }
+      li(class: "hanging-indent") { render_alt_descriptions }
+      render_tab_link(occurrence_map_tab)
+    end
   end
 
   def render_links_on_web
-    web_name_tabs.each { |tab| render_tab_link(tab) }
+    ul(class: "list-unstyled mb-0") do
+      web_name_tabs.each { |tab| render_tab_link(tab) }
+    end
   end
 
   def related_name_tabs
@@ -68,7 +74,7 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   end
 
   def render_tab_link(tab)
-    div do
+    li(class: "hanging-indent") do
       if tab.html_options[:external]
         Link(type: :external, tab: tab)
       else

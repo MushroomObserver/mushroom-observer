@@ -20,8 +20,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `sm` (see `render_mobile_proposer_prefix`), and `xs:` for the
   # other three sums to 12 without it.
   COLUMN_WIDTHS = {
-    name: { xs: 5, sm: 4 },
-    proposer: { sm: 3 },
+    name: { xs: 5, sm: 5 },
+    proposer: { sm: 2 },
     votes: { xs: 3, sm: 2 },
     your_vote: { xs: 4, sm: 3 }
   }.freeze
@@ -141,8 +141,10 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   def render_name_cell
     name_for_link = local || primary
     ::Textile.register_name(name_for_link.name)
-    render_name_link(name_for_link)
-    render_mod_links(name_for_link) if local
+    div(class: "d-flex align-items-start") do
+      render_name_link(name_for_link)
+      InlineCRUDLinks(target: local, user: @user) if local
+    end
   end
 
   def render_name_link(naming)
@@ -151,12 +153,6 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
         naming.display_name_brief_authors(@user).
           t.break_name.small_author
       )
-    end
-  end
-
-  def render_mod_links(naming)
-    div(class: "text-nowrap") do
-      InlineCRUDLinks(target: naming, user: @user)
     end
   end
 

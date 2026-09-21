@@ -222,6 +222,10 @@ class Views::Controllers::Observations::Show::DetailsTest <
       ".attach_observation_to_field_slip_link_#{obs.id}" \
       "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
     )
+    # The item must render inside InlineLinkBlock's wrapper span, not
+    # loose in the panel -- that's what supplies the group's margin.
+    assert_html(html,
+                "#observation_field_slips span.inline-link-block.ml-3 a")
   end
 
   def test_no_field_slip_section_when_no_field_slip_and_cannot_edit

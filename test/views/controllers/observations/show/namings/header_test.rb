@@ -38,8 +38,8 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # propose icon show on mobile.
     html = render_header
 
-    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 2)
-    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 1)
+    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 1)
+    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 2)
   end
 
   def test_name_column_is_block_on_xs
@@ -48,7 +48,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # title.
     html = render_header
 
-    assert_html(html, ".col.col-sm-4.d-block")
+    assert_html(html, ".col.col-sm-5.d-block")
   end
 
   def test_rows_align_items_end_for_bottom_label_alignment

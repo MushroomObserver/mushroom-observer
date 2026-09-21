@@ -242,13 +242,23 @@ button.badge-id:hover {
   min-width: 6rem;
 }
 
+// Wrapper for a group of inline mod/add links (Components::
+// InlineLinkBlock). Flex + gap spaces items evenly with no trailing
+// margin after the last one, so a lone or final item's width matches
+// its content.
+.inline-link-block {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: map-get($spacers, 3);
+}
+
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual top offset and 1.12em size are tuned for looser
 // contexts -- undone/shrunk here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
-  margin-right: 0.25rem;
   line-height: 1;
   background-color: transparent;
   text-decoration: none;
@@ -262,6 +272,16 @@ button.badge-id:hover {
     width: 1em;
     height: 1em;
   }
+}
+
+// button_to's <form> wrapper around a destroy .inline-icon-link keeps
+// the browser's default line-height, taller than `line-height: 1` on
+// the button -- baseline-aligns the icon a pixel or two off from a
+// plain <a>'s. Flex centering (matches .btn:has(.mo-icon)) collapses
+// the form to its content height instead.
+form:has(> .inline-icon-link) {
+  display: inline-flex;
+  align-items: center;
 }
 
 //

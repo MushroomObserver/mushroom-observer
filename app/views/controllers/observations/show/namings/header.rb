@@ -34,10 +34,12 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   def render_label_columns
     Column(xs: 10, sm: 11) do
       Row(class: "d-flex align-items-end") do
-        render_label_column(sm_width: 4, extra: "d-block") do
+        render_label_column(sm_width: 5, extra: "d-block") do
           render_panel_title
         end
-        render_label_column { small { trusted_html(:show_namings_user.t) } }
+        render_label_column(sm_width: 2) do
+          small { trusted_html(:show_namings_user.t) }
+        end
         render_label_column(sm_width: 2, extra: "d-none d-sm-block") do
           small { trusted_html(:show_namings_consensus.t) }
         end
@@ -48,11 +50,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
     end
   end
 
-  # Default column is `col col-sm-3 d-none d-sm-block` (hidden on
-  # `xs`, visible on `sm+`). Callers override `sm_width:`/`extra:` for
-  # the outliers — the name-column header is wider (sm-4) and visible
-  # on `xs` (so the panel title shows on mobile too); the
-  # consensus header is narrower (sm-2).
+  # Widths mirror `Row::COLUMN_WIDTHS`.
   def render_label_column(sm_width: 3, extra: "d-none d-sm-block", &block)
     Column(col: true, sm: sm_width, class: extra, &block)
   end
