@@ -238,7 +238,7 @@ class Views::Layouts::TopNav < Views::Base
     { type: :new,
       target: url_for(controller: "/#{controller.controller_path}",
                       action: :new),
-      name: :add.ti, label: true,
+      name: :add.ti, show_label: :responsive,
       variant: :success, size: :sm,
       class: "ml-1 mr-0 mx-sm-3 top_nav_button new_object_button",
       title: full_label,

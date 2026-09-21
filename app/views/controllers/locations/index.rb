@@ -106,7 +106,7 @@ module Views::Controllers::Locations
              target: matching_locations_for_observations_path(
                where: location_name
              ),
-             icon: :merge, label: false)
+             icon: :merge, show_label: :hidden)
       end
     end
   end

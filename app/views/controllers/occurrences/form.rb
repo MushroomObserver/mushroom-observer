@@ -254,7 +254,7 @@ module Views::Controllers::Occurrences
 
     def render_occurrence_link(obs)
       Link(type: :get, tab: Tab::Occurrence::Existing.new(obs: obs),
-           label: true)
+           show_label: :responsive)
     end
   end
 end

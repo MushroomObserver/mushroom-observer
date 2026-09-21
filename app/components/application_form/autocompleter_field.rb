@@ -259,13 +259,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # `Link::Get` auto-wires a tooltip (data-tooltip-target + title)
     # whenever `icon:` is present -- plain `Button` doesn't (only
     # `CRUDBase`, for form-submitting buttons, does that automatically).
-    # Converting away from Link dropped it, so each one adds the same
-    # tooltip_data shape Link::Get used to supply, by hand.
+    # Each button below supplies the same tooltip_data shape by hand.
     def render_find_button
       return unless find_text
 
       Button(name: find_text,
-             icon: :find_on_map, label: false,
+             icon: :find_on_map, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 find-btn d-none p-0",
@@ -280,7 +279,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless keep_text
 
       Button(name: keep_text,
-             icon: :apply, label: false,
+             icon: :apply, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 keep-btn d-none p-0",
@@ -297,7 +296,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless keep_text
 
       Button(name: edit_text,
-             icon: :edit, label: false,
+             icon: :edit, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 edit-btn d-none p-0",
@@ -316,7 +315,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
              class: "ml-3 create-button p-0",
-             icon: :plus, label: true,
+             icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
              title: create_text,
@@ -333,7 +332,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            modal_id: create,
            name: create_text,
            target: create_path,
-           icon: :plus, label: true,
+           icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
            class: "ml-3 create-link",
            data: { target_attr_key => "createBtn" })
