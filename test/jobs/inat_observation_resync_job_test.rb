@@ -24,6 +24,7 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
     received = nil
     fake_resyncer = Object.new
     def fake_resyncer.resync; end
+    def fake_resyncer.alerts = []
 
     Inat::ObservationResyncer.stub(
       :new,
@@ -36,5 +37,28 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
     end
 
     assert_equal([obs, {}], received)
+  end
+
+  # A sync engine that declined to act had nowhere to report it on the
+  # "Sync now" path: the resyncer collected the messages and no one read
+  # them. They get the same #alerts treatment the scheduled batch gives
+  # them (InatReflectionBatchResyncJob).
+  def test_perform_forwards_engine_alerts
+    obs = observations(:imported_inat_obs)
+    fake_resyncer = Object.new
+    def fake_resyncer.resync; end
+    def fake_resyncer.alerts = ["obs 5: photo not imported"]
+
+    sent = []
+    Inat::ObservationResyncer.stub(:new, ->(*, **) { fake_resyncer }) do
+      ExceptionNotifier.stub(:notifiers, [:slack]) do
+        ExceptionNotifier.stub(
+          :notify_exception,
+          ->(exception, **_opts) { sent << exception.message }
+        ) { InatObservationResyncJob.perform_now(obs) }
+      end
+    end
+
+    assert_equal(["obs 5: photo not imported"], sent)
   end
 end
