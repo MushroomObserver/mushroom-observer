@@ -21,17 +21,30 @@ module Form
       assert_includes(html, "carousel-inner")
       assert_includes(html, "carousel-item")
 
-      # Should have carousel controls
-      assert_includes(html, "carousel-control-prev")
-      assert_includes(html, "carousel-control-next")
-      assert_includes(html, 'data-slide="prev"')
-      assert_includes(html, 'data-slide="next"')
-
       # Should have correct data attributes for Stimulus
       assert_includes(html, 'data-ride="false"')
       assert_includes(html, 'data-interval="false"')
       assert_includes(html, 'data-form-images-target="carousel"')
       assert_includes(html, 'data-form-exif-target="carousel"')
+    end
+
+    # Prev/next controls need at least 2 images to be worth showing --
+    # same threshold as the indicator strip (`indicators_d_none`).
+    def test_renders_carousel_controls_with_multiple_images
+      two_images = observations(:two_img_obs).images.to_a
+      html = render_carousel(images: two_images)
+
+      assert_includes(html, "carousel-control-prev")
+      assert_includes(html, "carousel-control-next")
+      assert_includes(html, 'data-slide="prev"')
+      assert_includes(html, 'data-slide="next"')
+    end
+
+    def test_omits_carousel_controls_with_one_image
+      html = render_carousel(images: [@images.first])
+
+      assert_not_includes(html, "carousel-control-prev")
+      assert_not_includes(html, "carousel-control-next")
     end
 
     def test_renders_carousel_items_in_carousel_inner
@@ -97,10 +110,9 @@ module Form
       # Should still render carousel structure
       assert_includes(html, "carousel")
       assert_includes(html, "carousel-inner")
-      # But no carousel items
+      # But no carousel items, and no controls with nothing to slide to
       assert_not_includes(html, "carousel-item")
-      # Still has controls
-      assert_includes(html, "carousel-control-prev")
+      assert_not_includes(html, "carousel-control-prev")
     end
 
     def test_renders_with_nil_images
@@ -132,7 +144,7 @@ module Form
     end
 
     def test_carousel_structure_and_nesting
-      html = render_carousel
+      html = render_carousel(images: observations(:two_img_obs).images.to_a)
 
       # Root carousel div
       assert_nested(

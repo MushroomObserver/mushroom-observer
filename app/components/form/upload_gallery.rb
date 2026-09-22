@@ -3,9 +3,9 @@
 # Editable image-upload carousel — the observation form's image-upload
 # section. Wraps the `Components::Carousel` primitive in form-specific
 # chrome (Stimulus targets for `form_images` / `form_exif`, a wrapped
-# controls strip, and `d-none` toggle on the indicator list when there's
-# only one image) and registers per-image slides + thumbnails via the
-# carousel's `c.item(...) { … }` / `c.thumb(...) { … }` API.
+# controls strip, prev/next controls and the indicator list both off
+# with one image or fewer) and registers per-image slides + thumbnails
+# via the carousel's `c.item(...) { … }` / `c.thumb(...) { … }` API.
 #
 # @example
 #   render Components::Form::UploadGallery.new(
@@ -31,6 +31,7 @@ class Components::Form::UploadGallery < Components::Base
       carousel_id: @carousel_id,
       wrapper_class: "image-form-carousel",
       inner_id: "added_images",
+      show_controls: total_image_count > 1,
       indicators_id: "added_thumbnails",
       indicators_class_extra: indicators_d_none,
       extra_data: {
