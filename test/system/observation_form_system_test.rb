@@ -1775,7 +1775,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_selector("#observation_geolocation.#{EXPANDED}")
 
     find("a.info-collapse-trigger" \
-        "[href='#observation_has_geolocation_help']").click
+         "[href='#observation_has_geolocation_help']").click
 
     assert_selector("#observation_has_geolocation_help.#{EXPANDED}")
     assert_no_selector("#observation_geolocation.#{EXPANDED}")

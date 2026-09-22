@@ -40,13 +40,17 @@ label {
       margin-right: $custom-control-gutter;
     }
 
-    // Because it's within the label, it doesn't get the label's margin.
-    .form-between {
-      margin-left: 1rem;
-    }
     .badge-id {
       font-size: 90% !important
     }
+  }
+
+  // A checkbox's help-collapse trigger (`.form-between`) renders as a
+  // label sibling, not nested inside it, so a click on it doesn't
+  // bubble into a `data-toggle="collapse"` the label itself carries.
+  // It doesn't inherit the label's margin from that position either.
+  > .form-between {
+    margin-left: 1rem;
   }
 
   // When the row has a sibling button-link next to the label (e.g.
