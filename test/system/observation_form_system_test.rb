@@ -1761,6 +1761,27 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                     "[data-type='location_containing']", wait: 6)
   end
 
+  # The Geolocation checkbox's label carries the coordinate-fields
+  # collapse trigger; the help-icon trigger used to render nested
+  # inside that same label, so a click on it bubbled into the label's
+  # trigger too and opened the coordinate fields along with the help
+  # text.
+  def test_geolocation_help_trigger_does_not_toggle_coordinate_fields
+    login!(users(:zero_user))
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    assert_no_checked_field("observation_has_geolocation", visible: :all)
+    assert_no_selector("#observation_geolocation.#{EXPANDED}")
+
+    find("a.info-collapse-trigger" \
+        "[href='#observation_has_geolocation_help']").click
+
+    assert_selector("#observation_has_geolocation_help.#{EXPANDED}")
+    assert_no_selector("#observation_geolocation.#{EXPANDED}")
+    assert_no_checked_field("observation_has_geolocation", visible: :all)
+  end
+
   def assert_geolocation_is_empty
     assert_field("observation_lat", with: "", visible: :all)
     assert_field("observation_lng", with: "", visible: :all)
