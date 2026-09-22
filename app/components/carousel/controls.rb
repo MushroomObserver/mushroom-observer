@@ -13,6 +13,12 @@
 #   render Components::Carousel::Controls.new(carousel_id: "my_carousel")
 class Components::Carousel::Controls < Components::Base
   prop :carousel_id, String
+  # Rendered `d-none` when there's nothing to navigate to yet (e.g.
+  # the upload form's carousel starts empty) -- `form-images_
+  # controller.js#showOrHideCarouselControls` toggles it from there
+  # as items are added/removed. Kept in the DOM either way so that
+  # JS has an element to reveal.
+  prop :hidden, _Boolean, default: false
 
   def view_template
     render_control(:prev)
@@ -28,7 +34,8 @@ class Components::Carousel::Controls < Components::Base
     Button(variant: :strip,
            icon: icon_type,
            name: label.l,
-           class: "carousel-control-#{direction}",
+           class: class_names("carousel-control-#{direction}",
+                              ("d-none" if @hidden)),
            data: { target: "##{@carousel_id}", slide: direction.to_s })
   end
 end

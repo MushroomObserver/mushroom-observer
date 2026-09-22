@@ -39,6 +39,7 @@ class Components::Carousel < Components::Base
   prop :indicators_id, _Nilable(::String), default: nil
   prop :indicators_class_extra, ::String, default: ""
   prop :show_controls, _Boolean, default: true
+  prop :controls_hidden, _Boolean, default: false
   prop :show_indicators, _Boolean, default: true
   # Arbitrary `data-*` attributes merged onto the outer `<div>` (after
   # the always-emitted `data-ride="false"` / `data-interval="false"`).
@@ -153,6 +154,8 @@ class Components::Carousel < Components::Base
   end
 
   def render_controls
-    render(Components::Carousel::Controls.new(carousel_id: @carousel_id))
+    render(Components::Carousel::Controls.new(
+             carousel_id: @carousel_id, hidden: @controls_hidden
+           ))
   end
 end

@@ -28,23 +28,29 @@ module Form
       assert_includes(html, 'data-form-exif-target="carousel"')
     end
 
-    # Prev/next controls need at least 2 images to be worth showing --
-    # same threshold as the indicator strip (`indicators_d_none`).
-    def test_renders_carousel_controls_with_multiple_images
+    # Prev/next controls need at least 2 images to be worth navigating
+    # -- same threshold as the indicator strip (`indicators_d_none`).
+    # Both stay in the DOM either way (`d-none` toggles instead) since
+    # images are added client-side after this renders --
+    # form-images_controller.js#showOrHideCarouselControls needs an
+    # element already there to reveal.
+    def test_carousel_controls_visible_with_multiple_images
       two_images = observations(:two_img_obs).images.to_a
       html = render_carousel(images: two_images)
 
-      assert_includes(html, "carousel-control-prev")
-      assert_includes(html, "carousel-control-next")
+      assert_html(html, "button.carousel-control-prev")
+      assert_html(html, "button.carousel-control-next")
+      assert_no_html(html, "button.carousel-control-prev.d-none")
+      assert_no_html(html, "button.carousel-control-next.d-none")
       assert_includes(html, 'data-slide="prev"')
       assert_includes(html, 'data-slide="next"')
     end
 
-    def test_omits_carousel_controls_with_one_image
+    def test_carousel_controls_hidden_with_one_image
       html = render_carousel(images: [@images.first])
 
-      assert_not_includes(html, "carousel-control-prev")
-      assert_not_includes(html, "carousel-control-next")
+      assert_html(html, "button.carousel-control-prev.d-none")
+      assert_html(html, "button.carousel-control-next.d-none")
     end
 
     def test_renders_carousel_items_in_carousel_inner
@@ -110,9 +116,10 @@ module Form
       # Should still render carousel structure
       assert_includes(html, "carousel")
       assert_includes(html, "carousel-inner")
-      # But no carousel items, and no controls with nothing to slide to
+      # But no carousel items; controls stay in the DOM for JS to
+      # reveal later, starting hidden with nothing to navigate to yet
       assert_not_includes(html, "carousel-item")
-      assert_not_includes(html, "carousel-control-prev")
+      assert_html(html, "button.carousel-control-prev.d-none")
     end
 
     def test_renders_with_nil_images

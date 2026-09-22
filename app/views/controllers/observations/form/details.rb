@@ -186,7 +186,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_lat_lng_alt_row
-    Row(class: "no-gutters", id: "observation_lat_lng_alt") do
+    Row(id: "observation_lat_lng_alt") do
       render_coordinate_field(:lat, :lat, :latitude, "º")
       render_coordinate_field(:lng, :lng, :longitude, "º")
       render_coordinate_field(:alt, :alt, :altitude, "m")

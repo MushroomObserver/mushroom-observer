@@ -300,7 +300,6 @@ form {
 }
 
 .card-body {
-  .row:last-child .form-group,
   > .autocompleter:last-child .form-group.dropdown:last-child,
   // Help now renders as a sibling after .form-group (#4911), so an
   // autocompleter with help text has .help-block, not .form-group, as

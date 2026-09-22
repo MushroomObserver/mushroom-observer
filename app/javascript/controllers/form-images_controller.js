@@ -534,15 +534,17 @@ export default class extends Controller {
   showOrHideCarouselControls() {
     const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
       _indicontrols = this.carouselTarget.querySelector('#added_thumbnails'),
-      _controls = this.carouselTarget.querySelector('.carousel-control'),
+      _controls = this.carouselTarget.querySelectorAll(
+        '.carousel-control-prev, .carousel-control-next'
+      ),
       _count = _items.length;
 
     if (_count > 1) {
       _indicontrols?.classList.remove('d-none');
-      _controls?.classList.remove('d-none');
+      _controls.forEach((control) => control.classList.remove('d-none'));
     } else {
       _indicontrols?.classList.add('d-none');
-      _controls?.classList.add('d-none');
+      _controls.forEach((control) => control.classList.add('d-none'));
     }
   }
 
