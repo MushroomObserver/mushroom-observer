@@ -144,16 +144,16 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     end)
   end
 
-  def test_content_padding_panels_writes_p_0
-    assert_equal("p-0", captured_slot(:content_padding) do
+  def test_content_padding_panels_writes_py_card
+    assert_equal("py-card", captured_slot(:content_padding) do
       content_padding(:panels)
     end)
   end
 
-  def test_content_padding_default_for_show_action_is_p_0
+  def test_content_padding_default_for_show_action_is_py_card
     stub_action_name("show")
 
-    assert_equal("p-0", captured_slot(:content_padding) do
+    assert_equal("py-card", captured_slot(:content_padding) do
       content_padding
     end)
   end
@@ -169,7 +169,7 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
   def test_content_padding_explicit_then_default_does_not_aggregate
     stub_action_name("new")
 
-    assert_equal("p-0", captured_slot(:content_padding) do
+    assert_equal("py-card", captured_slot(:content_padding) do
       content_padding(:panels)
       default_content_padding
     end)

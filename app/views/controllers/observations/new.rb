@@ -45,6 +45,7 @@ module Views::Controllers::Observations
                         index_filter: index_filter(:Observation)
                       ))
       container_class(:wide)
+      content_padding(:panels)
 
       render(Form.new(@observation, **form_attrs))
     end

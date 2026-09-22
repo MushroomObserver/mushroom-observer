@@ -11,7 +11,7 @@
 # has no permissions -- so the parent flex layout in `Views::Layouts::
 # Header::PageTitle` is consistent regardless of permission state.
 #
-# Rendered into `content_for(:edit_icons)` by
+# Rendered into `content_for(:title_bar_actions)` by
 # `Views::FullPageBase::Icons#add_edit_icons`.
 #
 # `Location` has a stricter destroy gate (model `destroyable?` + the

@@ -5,24 +5,22 @@
 #
 #   - left: the id badge, `<h1 id="title">` (consensus title from
 #     content_for(:title), including, on obs show, the owner-naming
-#     line -- see `Views::Layouts::Header::ObjectTitle`), and the
-#     edit-icons strip.
+#     line -- see `Views::Layouts::Header::ObjectTitle`), a CTA slot
+#     right after the title (a form's primary submit button), and the
+#     actions slot flush right (edit/destroy icons).
 #   - right (show-only, non-project): interest-icons strip and the
 #     prev/index/next pager.
 #
 # Below `md`, those two columns collapse to `d-none` and a third
-# piece, `render_mobile_top_row`, takes over: the id badge, edit
-# icons, and interest-icons/pager all on one line, with the object
+# piece, `render_mobile_top_row`, takes over: the id badge, CTA,
+# actions, and interest-icons/pager all on one line, with the object
 # name/owner-naming (the unchanged left-column `<h1>`) on a separate
-# line below. The mobile row duplicates the id-badge/edit-icons/
-# interest-icons/pager markup rather than reordering it in place --
-# none of those four emits an HTML `id`, so the duplication is safe
-# (see `Views::FullPageBase::Title#add_id_badge`).
+# line below. The mobile row duplicates that markup rather than
+# reordering it in place -- none of those pieces emits an HTML `id`,
+# so the duplication is safe (see
+# `Views::FullPageBase::Title#add_id_badge`).
 #
-# `show_page_edit_icons` / `show_page_interest_icons` are private
-# methods on this view — the only caller of either.
-#
-# Neither `.show_title_nav` (title + edit-icons) nor `.show_object_nav`
+# Neither `.show_title_nav` (title + actions) nor `.show_object_nav`
 # (interest-icons + pager) is a `<nav>` landmark -- neither holds only
 # navigation content. The `<nav>` landmark in this strip is supplied
 # by `Views::Layouts::Header::ShowPrevNextNav`, around the pager alone.
@@ -55,7 +53,8 @@ module Views::Layouts
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-card") do
           trusted_html(content_for(:id_badge))
-          trusted_html(content_for(:edit_icons))
+          trusted_html(content_for(:title_bar_cta))
+          trusted_html(content_for(:title_bar_actions))
           render_mobile_object_nav if show_right_column?
         end
       end
@@ -69,16 +68,45 @@ module Views::Layouts
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
         div(class: SHOW_TITLE_CLASSES) do
-          div(class: "d-none d-md-block mr-3 mt-md-1") do
-            trusted_html(content_for(:id_badge))
-          end
+          render_id_badge
           h1(class: "h3 page-title mt-1 mb-2", id: "title") do
             trusted_html(content_for(:title))
           end
-          div(class: "d-none d-md-block ml-auto") do
-            trusted_html(content_for(:edit_icons))
-          end
+          render_title_bar_cta
+          render_title_bar_actions
         end
+      end
+    end
+
+    # `add_id_badge` (`Views::FullPageBase::Title`) only runs for
+    # show/edit pages with an object; an unconditional wrapper here
+    # left an empty `mr-3`-margined div on pages with neither (`new`).
+    def render_id_badge
+      return unless content_for?(:id_badge)
+
+      div(class: "d-none d-md-block mr-3 mt-md-1") do
+        trusted_html(content_for(:id_badge))
+      end
+    end
+
+    # A form's primary submit button -- right after the title, the
+    # clearest spot for a call to action. Associates with the `<form>`
+    # via `form:` rather than nesting the title bar inside it -- see
+    # `Components::ApplicationForm::FieldHelpers#title_bar_submit`.
+    def render_title_bar_cta
+      return unless content_for?(:title_bar_cta)
+
+      div(class: "d-none d-md-block ml-3") do
+        trusted_html(content_for(:title_bar_cta))
+      end
+    end
+
+    # Edit/destroy icons, flush right.
+    def render_title_bar_actions
+      return unless content_for?(:title_bar_actions)
+
+      div(class: "d-none d-md-block ml-auto") do
+        trusted_html(content_for(:title_bar_actions))
       end
     end
 

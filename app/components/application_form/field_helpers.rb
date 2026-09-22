@@ -436,6 +436,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # Renders `submit(...)` into the page title bar's CTA slot
+    # (`Header::PageTitle#render_title_bar_cta`) instead of inline in
+    # the form. `form:` associates the button with this `<form>` by
+    # id, since the title bar sits outside the form in the DOM.
+    def title_bar_submit(*, **)
+      html = capture { submit(*, form: @attributes[:id], **) }
+      content_for(:title_bar_cta, html)
+    end
+
     private
 
     # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update

@@ -19,6 +19,7 @@ module Views::Layouts
   class Header::PageTitleTest < ComponentTestCase
     TITLE = "<span class='title-marker'>Fungus</span>".html_safe
     ID_BADGE = "<button class='badge-id'>42</button>".html_safe
+    CTA = "<button class='cta-marker'>Create</button>".html_safe
     EDIT_ICONS = "<a class='edit-icons-marker'>Edit</a>".html_safe
     INTEREST_ICONS = "<div class='interest-icons-marker'></div>".html_safe
     PREV_NEXT = "<nav class='pager-marker'></nav>".html_safe
@@ -26,15 +27,16 @@ module Views::Layouts
     def test_desktop_and_mobile_each_get_one_copy_of_every_piece
       html = render_page_title("show")
 
-      # Mobile top row: one visibility-gated copy of each of the four
-      # icon/badge pieces.
+      # Mobile top row: one visibility-gated copy of each piece.
       assert_html(html, ".col-12.d-md-none .badge-id")
+      assert_html(html, ".col-12.d-md-none .cta-marker")
       assert_html(html, ".col-12.d-md-none .edit-icons-marker")
       assert_html(html, ".col-12.d-md-none .interest-icons-marker")
       assert_html(html, ".col-12.d-md-none .pager-marker")
 
-      # Desktop positions: same four pieces, gated the other way.
+      # Desktop positions: same pieces, gated the other way.
       assert_html(html, ".d-none.d-md-block .badge-id")
+      assert_html(html, ".show_title_nav .d-none.d-md-block .cta-marker")
       assert_html(html,
                   ".show_title_nav .d-none.d-md-block .edit-icons-marker")
       assert_html(html, ".show_object_nav .interest-icons-marker")
@@ -42,6 +44,20 @@ module Views::Layouts
 
       # The object title appears once in the output, not twice.
       assert_html(html, "#title .title-marker", count: 1)
+    end
+
+    # CTA (a form's submit button) sits right after the title with a
+    # small gap (`ml-3`); the actions slot (edit/destroy icons) is
+    # pushed flush right (`ml-auto`) instead -- distinct slots for
+    # distinct positions, not one slot guessing from content.
+    def test_cta_sits_after_title_actions_sit_flush_right
+      html = render_page_title("show")
+
+      assert_html(html, "#title + .ml-3.d-none.d-md-block .cta-marker")
+      assert_no_html(html, ".ml-3 .edit-icons-marker")
+      assert_html(html,
+                  ".ml-auto.d-none.d-md-block .edit-icons-marker")
+      assert_no_html(html, ".ml-auto .cta-marker")
     end
 
     def test_no_duplicate_ids_between_mobile_and_desktop_copies
@@ -57,10 +73,23 @@ module Views::Layouts
 
       assert_no_html(html, ".interest-icons-marker")
       assert_no_html(html, ".pager-marker")
-      # Badge and edit icons still appear at both positions.
+      # Badge, CTA, and edit icons still appear at both positions.
       assert_html(html, ".col-12.d-md-none .badge-id")
       assert_html(html, ".d-none.d-md-block .badge-id")
+      assert_html(html, ".col-12.d-md-none .cta-marker")
       assert_html(html, ".col-12.d-md-none .edit-icons-marker")
+    end
+
+    # `new`/`create` pages have no object yet, so `add_id_badge`/
+    # `add_edit_icons` don't run -- no empty, margined wrapper div
+    # should be left behind for any of the three slots.
+    def test_id_badge_and_edit_icons_wrappers_absent_when_unset
+      html = render_page_title_title_only("new")
+
+      assert_no_html(html, ".show_title_nav .mr-3")
+      assert_no_html(html, ".show_title_nav .ml-3")
+      assert_no_html(html, ".show_title_nav .ml-auto")
+      assert_html(html, "#title .title-marker")
     end
 
     def test_suppressed_on_index_action
@@ -68,6 +97,7 @@ module Views::Layouts
 
       assert_no_html(html, ".title-marker")
       assert_no_html(html, ".badge-id")
+      assert_no_html(html, ".cta-marker")
       assert_no_html(html, ".edit-icons-marker")
       assert_no_html(html, ".interest-icons-marker")
       assert_no_html(html, ".pager-marker")
@@ -84,7 +114,8 @@ module Views::Layouts
       page.column_classes
       page.content_for(:title) { TITLE }
       page.content_for(:id_badge) { ID_BADGE }
-      page.content_for(:edit_icons) { EDIT_ICONS }
+      page.content_for(:title_bar_cta) { CTA }
+      page.content_for(:title_bar_actions) { EDIT_ICONS }
       page.content_for(:interest_icons) { INTEREST_ICONS }
       page.content_for(:prev_next_object) { PREV_NEXT }
     end
@@ -95,6 +126,25 @@ module Views::Layouts
       page_class = Class.new(Views::FullPageBase) do
         define_method(:view_template) do
           test.send(:populate_slots, self, action)
+          captured = capture { render(Header::PageTitle.new) }
+        end
+        def around_template
+          yield
+        end
+      end
+      render(page_class.new)
+      captured
+    end
+
+    # Only `title`, matching a `new`/`create` page -- no object yet
+    # for `add_id_badge`/`add_edit_icons` to run against.
+    def render_page_title_title_only(action)
+      captured = nil
+      page_class = Class.new(Views::FullPageBase) do
+        define_method(:view_template) do
+          controller.define_singleton_method(:action_name) { action }
+          column_classes
+          content_for(:title) { TITLE }
           captured = capture { render(Header::PageTitle.new) }
         end
         def around_template

@@ -51,7 +51,7 @@ module Views::FullPageBase::LayoutClasses
   def content_padding(content_has = nil)
     content_has ||= action_name.in?(%w[index show]) ? :panels : :no_panels
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "p-card" : "p-0"
+      content_has == :no_panels ? "p-card" : "py-card"
     end
   end
 
