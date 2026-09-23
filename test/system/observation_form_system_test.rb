@@ -57,8 +57,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
     naming_name = find_by_id("observation_naming_name")
-    # The field is prefilled; clear it first. The synthetic blur from
-    # set("") is harmless because send_keys' keydown resets the focus flag.
+    # Clear with set(""), rather than ctrl-a.
+    # On a mac, ctrl-a moves the cursor instead of selecting the text.
     naming_name.set("")
     naming_name.send_keys("Coprinus com")
     browser.keyboard.type(:tab)
