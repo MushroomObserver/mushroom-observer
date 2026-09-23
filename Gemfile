@@ -154,13 +154,6 @@ gem("rest-client")
 gem("google-cloud-storage")
 
 # for creating zip files
-# The public API of some Rubyzip classes has been modernized to use named
-# parameters for optional arguments. Please check your usage of the
-# following classes:
-#   * `Zip::File`
-#   * `Zip::Entry`
-#   * `Zip::InputStream`
-#   * `Zip::OutputStream`
 gem("rubyzip")
 
 # QR code generator

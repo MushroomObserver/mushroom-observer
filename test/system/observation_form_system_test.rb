@@ -24,6 +24,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # start typing the location...
     # send_keys, not fill_in: Cuprite's fill_in ends with a synthetic blur,
     # which makes the autocompleter discard its response.
+    assert_field("observation_place_name", with: "")
     find_by_id("observation_place_name").send_keys(locations.first.name[0, 1])
     # wait for the autocompleter...
     assert_selector(".auto_complete", wait: 6)
@@ -56,6 +57,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
     naming_name = find_by_id("observation_naming_name")
+    # The field is prefilled; clear it first. The synthetic blur from
+    # set("") is harmless because send_keys' keydown resets the focus flag.
     naming_name.set("")
     naming_name.send_keys("Coprinus com")
     browser.keyboard.type(:tab)
