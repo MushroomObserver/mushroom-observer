@@ -14,6 +14,27 @@ Fix Image::Processor#ssh_sizes logging false failures
 
 This lives in this file (not just something said in conversation) because every file under `.claude/rules/` is auto-loaded into context every session regardless of whether `CLAUDE.md` links to it — that's the mechanism that makes a rule actually stick across sessions. Something only ever stated in conversation does not persist once that conversation ends; a rule file does.
 
+### Single-quote any title containing backticks
+
+In a double-quoted shell argument the backticks are command substitution — the shell runs what's between them and substitutes the output, usually nothing:
+
+```bash
+# ❌ the shell runs `updated_since` and substitutes its empty output
+gh issue create --title "Deleted sources (`updated_since` cannot see it)"
+#   creates: Deleted sources ( cannot see it)
+
+# ✅
+gh issue create --title 'Deleted sources (`updated_since` cannot see it)'
+```
+
+`--body-file` sidesteps this for bodies (see below); there is no equivalent for titles, so quoting is the only protection. This is the more dangerous of the two cases: a mangled body renders visibly wrong, while a mangled title is created silently and reads like an ordinary typo — and if the backticked text happens to be a runnable command, the shell runs it before `gh` ever sees it.
+
+Since the section above requires backticks around every code identifier in a title, essentially every title needs single quotes. After creating, check what landed:
+
+```bash
+gh issue view <n> --json title --jq .title
+```
+
 ## Create every PR as a draft
 
 `gh pr create --draft --label "review: standard" …`, always (the label is covered in `review_types.md`). Marking it ready (`gh pr ready <n>`) is Nathan's call unless he asks the session to do it; when asked, wait until the PR is at least two minutes old and the session's own checks (tests, RuboCop) have passed.
