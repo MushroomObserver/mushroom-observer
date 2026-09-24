@@ -32,6 +32,20 @@
       outline-offset: -2px;
     }
 
+    // Bootstrap's `.list-group-item + .list-group-item.active` rule
+    // outranks the plain `.list-group-item` rule above -- null both
+    // properties back out.
+    + &.active {
+      margin-top: 0;
+      border-top-width: 0;
+    }
+
+    // Bootstrap's `&.active` sets its theme's primary border color --
+    // match the borderless sidebar items instead.
+    &.active {
+      border-color: transparent;
+    }
+
     &.active,
     &:hover,
     &:focus,
