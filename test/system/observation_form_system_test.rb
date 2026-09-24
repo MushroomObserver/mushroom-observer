@@ -24,7 +24,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_place_name_help",
                     text: "Albion, Mendocino Co., California", visible: :all)
     # start typing the location...
-    fill_in("observation_place_name", with: locations.first.name[0, 1])
+    # send_keys, not fill_in: Cuprite's fill_in ends with a synthetic blur,
+    # which makes the autocompleter discard its response.
+    assert_field("observation_place_name", with: "")
+    find_by_id("observation_place_name").send_keys(locations.first.name[0, 1])
     # wait for the autocompleter...
     assert_selector(".auto_complete", wait: 6)
     browser.keyboard.type(:down, :tab) # cursor to first match + select row
@@ -55,7 +58,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    fill_in("observation_naming_name", with: "Coprinus com")
+    naming_name = find_by_id("observation_naming_name")
+    # Clear with set(""), rather than ctrl-a.
+    # On a mac, ctrl-a moves the cursor instead of selecting the text.
+    naming_name.set("")
+    naming_name.send_keys("Coprinus com")
     browser.keyboard.type(:tab)
     # wait for the autocompleter!
     assert_selector(".auto_complete")
