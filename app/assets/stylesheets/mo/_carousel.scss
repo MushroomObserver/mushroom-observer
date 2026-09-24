@@ -101,8 +101,9 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  margin-top: 5rem; // to let overlays through
-  margin-bottom: 5rem; // fullscreen and caption/voting
+  width: 10%; // narrower than Bootstrap's 15% default
+  margin-top: 4rem; // to let overlays through
+  margin-bottom: 4rem; // fullscreen and caption/voting
   border: 0;
   background: none !important;
   font-size: 1.25rem;
@@ -200,6 +201,10 @@
     border: none;
     border-radius: 0;
     margin: 0;
+    // Bootstrap 4's carousel-indicator styling dims every `li` to
+    // opacity .5 by default and undims `.active` to 1 -- undo that
+    // base rule here so only `.active` is dimmed, not the reverse.
+    opacity: 1;
 
     &.active {
       width: 6vw;
@@ -276,15 +281,18 @@
   }
 
   // Keeps the controls over the image, not the form panel below it
-  // (mobile) / beside it (lg) -- .carousel-inner stacks the image
-  // above the form panel on mobile, side-by-side at lg.
+  // (mobile) / beside it (lg), and clear of the indicator strip below
+  // both -- .carousel-inner stacks the image above the form panel on
+  // mobile, side-by-side at lg; the `+ 6vw + 1rem` term matches
+  // .carousel-indicators li's height plus its .py-2 padding, same as
+  // the non-form carousel's equivalent rule above.
   .carousel-control-prev,
   .carousel-control-next {
     top: 6rem;
-    bottom: calc(50% - 6rem);
+    bottom: calc(50% - 6rem + 6vw + 1rem);
 
     @media screen and (min-width: breakpoint-min(lg)) {
-      bottom: 6rem;
+      bottom: calc(6rem + 6vw + 1rem);
     }
   }
 
