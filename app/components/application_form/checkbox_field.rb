@@ -204,14 +204,15 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # --- Boolean mode wrapper ---
 
+    # The help trigger renders as a sibling of `<label>`, not nested
+    # inside it -- a click anywhere inside a checkbox's `<label>`
+    # toggles the checkbox itself.
     def render_boolean_with_wrapper(label_for: checkbox_id, &checkbox_block)
       div(class: boolean_wrap_class) do
         label_attrs = label_attributes
         label_attrs = label_attrs.merge(for: label_for) if label_for
-        label(**label_attrs) do
-          render_boolean_content(&checkbox_block)
-          render_help_in_label_row
-        end
+        label(**label_attrs) { render_boolean_content(&checkbox_block) }
+        render_help_in_label_row
         render_help_after_field
         render(append_slot) if append_slot
       end
