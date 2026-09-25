@@ -10,6 +10,11 @@ class InatObservationResyncJob < ApplicationJob
   queue_as :default
 
   def perform(observation)
-    Inat::ObservationResyncer.new(observation).resync
+    resyncer = Inat::ObservationResyncer.new(observation)
+    resyncer.resync
+    # Same treatment as the scheduled batch gives them
+    # (InatReflectionBatchResyncJob): a sync engine that declined to act
+    # is for a human to look at, and nothing else surfaces these.
+    resyncer.alerts.each { |message| alert(message) }
   end
 end
