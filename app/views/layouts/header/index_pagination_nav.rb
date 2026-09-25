@@ -152,6 +152,11 @@ module Views::Layouts
         type: :text, name: :page, value: this_page,
         class: "form-control text-right",
         size: max_page.digits.count,
+        # This `name` is reused identically across every index page,
+        # so Chrome accumulates a large saved-value history under it
+        # and offers to autofill/suggest from that history as soon as
+        # the field is focused -- suppress it.
+        autocomplete: "off",
         data: { page_input_target: "numberInput",
                 action: "page-input#sanitizeNumber" }
       }
@@ -196,6 +201,8 @@ module Views::Layouts
           type: :text, name: :letter, value: this_letter,
           class: "form-control text-right",
           size: 1, placeholder: "—",
+          # Same reused-name autofill exposure as the page input above.
+          autocomplete: "off",
           data: { page_input_target: "letterInput",
                   action: "page-input#sanitizeLetter" }
         )
