@@ -3,6 +3,10 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
+  # Bootstrap 3's expanded-collapse class -- "show" under BS4 (see
+  # Components::Collapsible.collapse_classes).
+  EXPANDED = "in"
+
   include ActiveJob::TestHelper
 
   def test_create_minimal_observation
@@ -22,7 +26,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_place_name_help",
                     text: "Albion, Mendocino Co., California", visible: :all)
     # start typing the location...
-    fill_in("observation_place_name", with: locations.first.name[0, 1])
+    # send_keys, not fill_in: Cuprite's fill_in ends with a synthetic blur,
+    # which makes the autocompleter discard its response.
+    assert_field("observation_place_name", with: "")
+    find_by_id("observation_place_name").send_keys(locations.first.name[0, 1])
     # wait for the autocompleter...
     assert_selector(".auto_complete", wait: 6)
     browser.keyboard.type(:down, :tab) # cursor to first match + select row
@@ -53,7 +60,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
-    fill_in("observation_naming_name", with: "Coprinus com")
+    naming_name = find_by_id("observation_naming_name")
+    # Clear with set(""), rather than ctrl-a.
+    # On a mac, ctrl-a moves the cursor instead of selecting the text.
+    naming_name.set("")
+    naming_name.send_keys("Coprinus com")
     browser.keyboard.type(:tab)
     # wait for the autocompleter!
     assert_selector(".auto_complete")
@@ -1755,6 +1766,27 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     assert_selector("#observation_location_autocompleter" \
                     "[data-type='location_containing']", wait: 6)
+  end
+
+  # The Geolocation checkbox's label carries the coordinate-fields
+  # collapse trigger; the help-icon trigger used to render nested
+  # inside that same label, so a click on it bubbled into the label's
+  # trigger too and opened the coordinate fields along with the help
+  # text.
+  def test_geolocation_help_trigger_does_not_toggle_coordinate_fields
+    login!(users(:zero_user))
+
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    assert_no_checked_field("observation_has_geolocation", visible: :all)
+    assert_no_selector("#observation_geolocation.#{EXPANDED}")
+
+    find("a.info-collapse-trigger" \
+         "[href='#observation_has_geolocation_help']").click
+
+    assert_selector("#observation_has_geolocation_help.#{EXPANDED}")
+    assert_no_selector("#observation_geolocation.#{EXPANDED}")
+    assert_no_checked_field("observation_has_geolocation", visible: :all)
   end
 
   def assert_geolocation_is_empty

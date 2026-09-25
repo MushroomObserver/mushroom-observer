@@ -3,6 +3,15 @@
 require("test_helper")
 
 class InatObservationResyncJobTest < ActiveJob::TestCase
+  # Stands in for Inat::ObservationResyncer, carrying whatever engine
+  # alerts a test wants the job to find. One class rather than a
+  # per-test singleton: LocalizationFilesTest scans source files for
+  # repeated method definitions and counts `def fake.resync` in two
+  # tests as a duplicate.
+  FakeResyncer = Struct.new(:alerts) do
+    def resync; end
+  end
+
   # The job is a thin wrapper around Inat::ObservationResyncer. A
   # non-reflection observation exercises the wiring without any network
   # call, because the resyncer's guard returns before it fetches.
@@ -22,9 +31,7 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
   def test_perform_hands_resyncer_the_observation_only
     obs = observations(:imported_inat_obs)
     received = nil
-    fake_resyncer = Object.new
-    def fake_resyncer.resync; end
-    def fake_resyncer.alerts = []
+    fake_resyncer = FakeResyncer.new([])
 
     Inat::ObservationResyncer.stub(
       :new,
@@ -45,9 +52,7 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
   # them (InatReflectionBatchResyncJob).
   def test_perform_forwards_engine_alerts
     obs = observations(:imported_inat_obs)
-    fake_resyncer = Object.new
-    def fake_resyncer.resync; end
-    def fake_resyncer.alerts = ["obs 5: photo not imported"]
+    fake_resyncer = FakeResyncer.new(["obs 5: photo not imported"])
 
     sent = []
     Inat::ObservationResyncer.stub(:new, ->(*, **) { fake_resyncer }) do
