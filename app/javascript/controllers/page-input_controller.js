@@ -138,9 +138,11 @@ export default class extends Controller {
     // Bootstrap doesn't watch data-original-title for changes, so an
     // already-visible tooltip bubble won't pick up the new text on
     // its own. `container: false` (Bootstrap's default) inserts the
-    // tooltip markup as the trigger's next sibling -- same pattern as
-    // clipboard_controller.js.
-    const tooltipInner = icon.nextElementSibling?.querySelector(".tooltip-inner")
+    // tooltip markup as the trigger's next sibling; a `data-tooltip-
+    // container` override instead appends it inside the trigger --
+    // same two-branch check as clipboard_controller.js.
+    const tooltipInner = icon.querySelector(".tooltip-inner") ||
+      icon.nextElementSibling?.querySelector(".tooltip-inner")
     if (tooltipInner) { tooltipInner.innerText = text }
   }
 }
