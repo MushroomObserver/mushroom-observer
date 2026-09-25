@@ -32,20 +32,16 @@
       outline-offset: -2px;
     }
 
-    // Bootstrap's `.list-group-item + .list-group-item.active` rule
-    // outranks the plain `.list-group-item` rule above -- null both
-    // properties back out.
-    + &.active {
-      margin-top: 0;
-      border-top-width: 0;
-    }
-
     // Bootstrap's `&.active` sets its theme's primary border color --
     // match the borderless sidebar items instead.
     &.active {
       border-color: transparent;
     }
 
+    // $link-hover-decoration underlines a hovered <a> globally --
+    // these items are themselves <a> tags (Components::ListGroup::
+    // LinkItem puts the class directly on the Link-rendered anchor),
+    // so undo it here.
     &.active,
     &:hover,
     &:focus,
@@ -54,6 +50,7 @@
     a.dropdown-toggle:hover {
       color: $LEFT_BAR_HOVER_TEXT_COLOR;
       background-color: $LEFT_BAR_HOVER_BG_COLOR;
+      text-decoration: none;
     }
 
     // These are the headers
@@ -79,6 +76,13 @@
   a.dropdown-toggle {
     color: $LEFT_BAR_TEXT_COLOR;
     background-color: $LEFT_BAR_BG_COLOR;
+  }
+
+  // Bootstrap's `.list-group-item + .list-group-item.active` rule
+  // reassigns margin-top/border-top-width -- null both back out.
+  .list-group-item + .list-group-item.active {
+    margin-top: 0;
+    border-top-width: 0;
   }
 }
 

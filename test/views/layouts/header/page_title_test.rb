@@ -123,16 +123,13 @@ module Views::Layouts
     def render_page_title(action)
       captured = nil
       test = self
-      page_class = Class.new(Views::FullPageBase) do
+      StubPage.class_eval do
         define_method(:view_template) do
           test.send(:populate_slots, self, action)
           captured = capture { render(Header::PageTitle.new) }
         end
-        def around_template
-          yield
-        end
       end
-      render(page_class.new)
+      render(StubPage.new)
       captured
     end
 
@@ -140,19 +137,31 @@ module Views::Layouts
     # for `add_id_badge`/`add_edit_icons` to run against.
     def render_page_title_title_only(action)
       captured = nil
-      page_class = Class.new(Views::FullPageBase) do
+      StubTitleOnlyPage.class_eval do
         define_method(:view_template) do
           controller.define_singleton_method(:action_name) { action }
           column_classes
           content_for(:title) { TITLE }
           captured = capture { render(Header::PageTitle.new) }
         end
-        def around_template
-          yield
-        end
       end
-      render(page_class.new)
+      render(StubTitleOnlyPage.new)
       captured
+    end
+
+    # Named (not `Class.new(...) do ... end`) so LocalizationFilesTest's
+    # duplicate-method scanner sees each `around_template` in a
+    # separate scope -- see phlex_reference.md.
+    class StubPage < Views::FullPageBase
+      def around_template
+        yield
+      end
+    end
+
+    class StubTitleOnlyPage < Views::FullPageBase
+      def around_template
+        yield
+      end
     end
   end
 end
