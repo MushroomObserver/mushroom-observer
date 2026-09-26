@@ -87,8 +87,11 @@ class Inat
     # timestamp) reflects what actually moved.
     def apply(obs, inat_obs)
       upgrading = upgrade_placeholder?(obs, inat_obs)
-      upgrade_placeholder(obs) if upgrading
+      # Clear the flag before syncing, so the sync brings in full content.
+      obs.update!(placeholder: false) if upgrading
       changed = sync_source_data(obs, inat_obs) || upgrading
+      # Log after the sync's entries, so the upgrade is the newest one.
+      log_upgrade(obs) if upgrading
       Result.new(status: changed ? :synced : :unchanged, observation: obs)
     end
 
@@ -108,8 +111,7 @@ class Inat
     end
 
     # The MO owner is unchanged.
-    def upgrade_placeholder(obs)
-      obs.update!(placeholder: false)
+    def log_upgrade(obs)
       obs.log(:log_observation_upgraded_from_placeholder, user: @requested_by)
     end
 

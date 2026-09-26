@@ -136,7 +136,10 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(fresh.sequences.size, @obs.sequences.count,
                  "An upgraded reflection should get the sequences")
     assert_equal(owner, @obs.user, "The MO owner should be unchanged")
-    assert_match(/#{requester.login}/, @obs.rss_log.reload.notes.to_s,
+    tag, args, = @obs.rss_log.reload.parse_log.first
+    assert_equal(:log_observation_upgraded_from_placeholder, tag,
+                 "The upgrade should be the newest log entry")
+    assert_equal(requester.login, args[:user],
                  "The upgrade should be logged against the requester")
   end
 
