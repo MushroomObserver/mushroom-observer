@@ -53,6 +53,19 @@ class InatMoObservationBuilderTest < UnitTestCase
                              quality_grade: "needs_id"))
   end
 
+  def test_naming_vote_unparseable_provisional_is_no_evidence
+    fake = FakeInatObs.new(sequences: [], provisional_name: "-",
+                           quality_grade: "needs_id")
+    builder = Inat::MoObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf), external_site: :stub
+    )
+
+    assert_equal(naming_vote(sequence: false, provisional: false,
+                             quality_grade: "needs_id"),
+                 builder.send(:naming_vote),
+                 "An unparseable provisional name should not raise the vote")
+  end
+
   def test_naming_vote_research_grade_is_promising
     assert_equal(Vote::NEXT_BEST_VOTE,
                  naming_vote(sequence: false, provisional: false,
@@ -199,7 +212,8 @@ class InatMoObservationBuilderTest < UnitTestCase
   def naming_vote(sequence:, provisional:, quality_grade:)
     fake = FakeInatObs.new(
       sequences: sequence ? [:a_sequence] : [],
-      provisional_name: provisional ? "Boletus sp. 'T01'" : nil,
+      # An existing MO name, so resolving it needs no API post.
+      provisional_name: provisional ? names(:lactarius_alpinus).text_name : nil,
       quality_grade: quality_grade
     )
     # external_site: :stub keeps the constructor from hitting
