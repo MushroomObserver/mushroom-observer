@@ -2,7 +2,7 @@
 
 ## 2026-09-26 (deploy-2026-09-26-12-00)
 
-- jdc Bump arel_extensions to 2.5.0 ([PR5406](https://github.com/MushroomObserver/mushroom-observer/pull/5406), @JoeCohen)
+- Bump arel_extensions to 2.5.0 ([PR5406](https://github.com/MushroomObserver/mushroom-observer/pull/5406), @JoeCohen)
 - Bump simplecov to 1.3.0 ([PR5407](https://github.com/MushroomObserver/mushroom-observer/pull/5407), @JoeCohen)
 - Bump rubyzip from 3.6.0 to 3.7.0 ([PR5408](https://github.com/MushroomObserver/mushroom-observer/pull/5408), @JoeCohen)
 - Create Obs: Fix `CheckboxField` help-icon trigger independently toggling collapsed fields ([PR5400](https://github.com/MushroomObserver/mushroom-observer/pull/5400), @nimmolo)
