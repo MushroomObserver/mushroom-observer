@@ -80,6 +80,16 @@ module Views::Layouts
       assert_html(html, "input[name='page']", attribute: { value: "2" })
     end
 
+    # `name="page"` is identical across every index page, so Chrome
+    # accumulates a large saved-value history under it and offers to
+    # autofill from it -- suppress that.
+    def test_page_input_disables_browser_autocomplete
+      html = render_nav(pagination_data: paginated(50, 2))
+
+      assert_html(html, "input[name='page']",
+                  attribute: { autocomplete: "off" })
+    end
+
     def test_page_goto_link_points_at_current_page
       html = render_nav(pagination_data: paginated(50, 2))
 
@@ -107,6 +117,8 @@ module Views::Layouts
 
       assert_html(html, "nav.paginate.pagination_letters")
       assert_html(html, "input[name='letter']", attribute: { value: "A" })
+      assert_html(html, "input[name='letter']",
+                  attribute: { autocomplete: "off" })
       assert_no_html(html, "form.page_input")
       assert_html(
         html, ".input-group.page-input[data-controller='page-input']"

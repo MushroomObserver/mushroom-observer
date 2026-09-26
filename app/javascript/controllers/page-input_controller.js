@@ -23,7 +23,9 @@ export default class extends Controller {
     // moved/removed by Bootstrap's tooltip init, so it reads the same
     // whether that init has run yet or not.
     if (this.hasGoToLinkTarget) {
-      const icon = this.goToLinkTarget.querySelector("svg")
+      const icon = this.goToLinkTarget.querySelector(
+        '[data-tooltip-target="tip"]'
+      )
       this.originalTooltip = icon?.getAttribute("aria-label") || null
     }
   }
@@ -104,7 +106,7 @@ export default class extends Controller {
     link.href = url.toString()
 
     if (!replacePattern) return
-    const icon = link.querySelector("svg")
+    const icon = link.querySelector('[data-tooltip-target="tip"]')
     if (!icon) return
 
     if (!value) {
@@ -132,5 +134,15 @@ export default class extends Controller {
     } else if (icon.hasAttribute("title")) {
       icon.setAttribute("title", text)
     }
+
+    // Bootstrap doesn't watch data-original-title for changes, so an
+    // already-visible tooltip bubble won't pick up the new text on
+    // its own. `container: false` (Bootstrap's default) inserts the
+    // tooltip markup as the trigger's next sibling; a `data-tooltip-
+    // container` override instead appends it inside the trigger --
+    // same two-branch check as clipboard_controller.js.
+    const tooltipInner = icon.querySelector(".tooltip-inner") ||
+      icon.nextElementSibling?.querySelector(".tooltip-inner")
+    if (tooltipInner) { tooltipInner.innerText = text }
   }
 }
