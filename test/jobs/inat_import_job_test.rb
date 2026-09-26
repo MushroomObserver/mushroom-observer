@@ -1794,7 +1794,8 @@ class InatImportJobTest < ActiveJob::TestCase
                                       create_skeletons: true)
   end
 
-  # Only the snapshot: no description and no obs field values.
+  # The snapshot and the placeholder line: no description and no obs
+  # field values.
   def assert_skeleton_notes(obs, inat_obs, collector)
     notes_text = obs.notes.values.join("\n")
     assert_includes(notes_text, inat_obs[:user][:login],
@@ -1803,8 +1804,8 @@ class InatImportJobTest < ActiveJob::TestCase
                         "Skeleton notes should omit the description")
     assert_not_includes(notes_text, collector,
                         "Skeleton notes should omit obs field values")
-    assert_equal(1, obs.notes.size,
-                 "Skeleton notes should have only the snapshot part")
+    assert_equal(inat_obs.skeleton_notes, obs.notes,
+                 "Skeleton notes should be the snapshot and placeholder line")
   end
 
   def assert_skeleton_import_counts(inat_import)

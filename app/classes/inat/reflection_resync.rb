@@ -195,7 +195,7 @@ class Inat
 
     def notes(obs, inat_obs)
       if obs.placeholder?
-        # A placeholder's notes are only the factual snapshot.
+        # A placeholder's notes are the snapshot and placeholder line.
         inat_obs.skeleton_notes
       else
         inat_obs.notes

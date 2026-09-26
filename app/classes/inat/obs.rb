@@ -117,10 +117,21 @@ class Inat
     end
 
     # A skeleton copies no copyrightable content -- neither the description
-    # nor the observation field values -- only the factual snapshot.
+    # nor the observation field values -- only the factual snapshot, plus a
+    # line marking it as a placeholder.
     def skeleton_notes
-      { snapshot_key => snapshot(obs_fields: false) }
+      { snapshot_key => snapshot(obs_fields: false),
+        Other: placeholder_line }
     end
+
+    # Notes hold Textile source, rendered at display time, so `.l` (not `.t`).
+    def placeholder_line
+      :inat_skeleton_placeholder_notes.l(
+        inat_link: "\"iNat ##{self[:id]}\":#{SITE}/observations/#{self[:id]}",
+        name: observer_name
+      ).to_str
+    end
+    private :placeholder_line
 
     # Observation form requires a "normalized" key (no spaces) for Notes parts
     def snapshot_key
@@ -367,7 +378,7 @@ class Inat
     private :snapshot_place
 
     def copyright
-      name = self[:user][:name].presence || self[:user][:login]
+      name = observer_name
       code = self[:license_code]
       if code.blank?
         return "#{OBS_COPYRIGHT_LABEL} #{name} - #{ALL_RIGHTS_RESERVED}"
@@ -376,6 +387,11 @@ class Inat
       "#{OBS_COPYRIGHT_LABEL} #{name} (\"#{code}\":#{license.url})"
     end
     private :copyright
+
+    def observer_name
+      self[:user][:name].presence || self[:user][:login]
+    end
+    private :observer_name
 
     def suggested_id_names
       "\n#{

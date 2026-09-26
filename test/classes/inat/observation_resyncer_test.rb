@@ -88,7 +88,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
   end
 
   # A placeholder synced by anyone but the iNat observer stays a skeleton:
-  # only the snapshot notes, no sequences.
+  # skeleton notes, no sequences.
   def test_placeholder_stays_stripped_for_a_non_owner_sync
     @obs.update_column(:placeholder, true)
     raw = copyrightable_raw
@@ -99,7 +99,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     @obs.reload
     assert(@obs.placeholder?, "A non-owner sync should keep the placeholder")
     assert_equal(fresh.skeleton_notes, @obs.notes,
-                 "A placeholder's notes should be only the snapshot")
+                 "A placeholder should keep its skeleton notes")
     assert_empty(@obs.sequences, "A placeholder should not sync sequences")
   end
 

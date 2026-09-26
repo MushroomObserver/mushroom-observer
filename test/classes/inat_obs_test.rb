@@ -129,15 +129,27 @@ class InatObsTest < UnitTestCase
     fields_start =
       full_snapshot.index("\n#{:observation_fields.l.upcase_first}: ")
 
+    inat_id = mock_inat_obs[:id]
+    user = mock_inat_obs[:user]
+
     notes = mock_inat_obs.skeleton_notes
 
-    assert_equal([snapshot_key], notes.keys,
-                 "Skeleton notes should hold only the snapshot part")
+    assert_equal([snapshot_key, :Other], notes.keys,
+                 "Skeleton notes should hold the snapshot and Other parts")
     assert_equal(full_snapshot[0...fields_start], notes[snapshot_key],
                  "Skeleton snapshot should be the full snapshot minus " \
                  "the observation fields")
     assert_not_includes(notes[snapshot_key], field[:value].to_s,
                         "Skeleton snapshot should omit field values")
+    assert_equal(
+      :inat_skeleton_placeholder_notes.l(
+        inat_link: "\"iNat ##{inat_id}\":" \
+                   "#{Inat::Constants::SITE}/observations/#{inat_id}",
+        name: user[:name].presence || user[:login]
+      ),
+      notes[:Other],
+      "Skeleton Other notes should be only the placeholder line"
+    )
   end
 
   def test_snapshot_place_private_geoprivacy
