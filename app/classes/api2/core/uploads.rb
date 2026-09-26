@@ -51,8 +51,21 @@ module API2::Uploads
     def initialize(url)
       super()
       fetch(url)
+      count_media(url)
     rescue StandardError => e
       raise(API2::CouldntDownloadURL.new(url, e))
+    end
+
+    # The one place that knows both the host asked for and the bytes it
+    # returned, which is what an external site's media budget is measured
+    # in -- iNat blocks over 5 GB/hour or 24 GB/day. ExternalSiteUsage
+    # decides which hosts belong to a tracked site and ignores the rest,
+    # since MO uploads by URL from other places too. Accounting failures
+    # stay out of the upload's way.
+    def count_media(url)
+      ExternalSiteUsage.record_media(url, content_length)
+    rescue StandardError => e
+      Rails.logger.warn("media usage accounting failed: #{e.message}")
     end
 
     def fetch(url, limit = 10)

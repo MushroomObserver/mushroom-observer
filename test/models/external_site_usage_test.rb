@@ -1,0 +1,148 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# Accounting for what MO spends against an external site's rate limits
+# (#5416, #2320).
+class ExternalSiteUsageTest < UnitTestCase
+  def setup
+    super
+    @site = external_sites(:inaturalist)
+  end
+
+  def test_records_a_request_in_the_current_bucket
+    ExternalSiteUsage.record_request(@site)
+
+    row = ExternalSiteUsage.sole
+    assert_equal(@site.id, row.external_site_id)
+    assert_equal(1, row.requests)
+    assert_equal(0, row.media_bytes)
+    assert_equal(ExternalSiteUsage.bucket_for, row.bucket_start)
+  end
+
+  # One row per site per bucket, incremented rather than duplicated.
+  def test_accumulates_into_one_row_per_bucket
+    3.times { ExternalSiteUsage.record_request(@site) }
+    ExternalSiteUsage.record_request(@site, count: 7)
+
+    assert_equal(1, ExternalSiteUsage.count)
+    assert_equal(10, ExternalSiteUsage.sole.requests)
+  end
+
+  def test_buckets_are_ten_minutes_wide
+    time = Time.zone.parse("2026-09-26 14:37:42")
+    bucket = ExternalSiteUsage.bucket_for(time)
+
+    assert_equal(Time.zone.parse("2026-09-26 14:30:00"), bucket)
+    assert_equal(Time.zone.parse("2026-09-26 14:40:00"),
+                 ExternalSiteUsage.new(bucket_start: bucket).bucket_end)
+  end
+
+  def test_separate_times_land_in_separate_buckets
+    early = ExternalSiteUsage.bucket_for(Time.zone.parse("2026-09-26 14:31"))
+    late = ExternalSiteUsage.bucket_for(Time.zone.parse("2026-09-26 14:41"))
+
+    assert_not_equal(early, late)
+  end
+
+  # iNat serves open-licence photos from S3 and the rest from its CDN.
+  def test_attributes_media_from_a_known_host
+    ExternalSiteUsage.record_media(
+      "https://inaturalist-open-data.s3.amazonaws.com/photos/1/original.jpg",
+      2_800_000
+    )
+
+    assert_equal(2_800_000, ExternalSiteUsage.sole.media_bytes)
+    assert_equal(@site.id, ExternalSiteUsage.sole.external_site_id)
+  end
+
+  def test_attributes_media_from_the_cdn_host
+    ExternalSiteUsage.record_media(
+      "https://static.inaturalist.org/photos/2/original.jpeg", 1_000
+    )
+
+    assert_equal(1_000, ExternalSiteUsage.sole.media_bytes)
+  end
+
+  # MO uploads by URL from other places, and those count against nobody.
+  def test_ignores_media_from_an_untracked_host
+    ExternalSiteUsage.record_media("https://example.org/photo.jpg", 5_000_000)
+
+    assert_empty(ExternalSiteUsage.all)
+  end
+
+  def test_ignores_a_zero_or_missing_byte_count
+    url = "https://static.inaturalist.org/photos/3/original.jpeg"
+    ExternalSiteUsage.record_media(url, 0)
+    ExternalSiteUsage.record_media(url, nil)
+
+    assert_empty(ExternalSiteUsage.all)
+  end
+
+  def test_ignores_an_unparseable_url
+    assert_nothing_raised do
+      ExternalSiteUsage.record_media("http://[bad", 100)
+    end
+    assert_empty(ExternalSiteUsage.all)
+  end
+
+  # The rolling window is what the caps are expressed in: 5 GB in the
+  # trailing hour, 10,000 requests in the trailing day.
+  def test_sums_a_trailing_window_and_excludes_older_buckets
+    inside = ExternalSiteUsage.bucket_for(20.minutes.ago)
+    outside = ExternalSiteUsage.bucket_for(3.hours.ago)
+    ExternalSiteUsage.create!(external_site: @site, bucket_start: inside,
+                              requests: 5, media_bytes: 1_000)
+    ExternalSiteUsage.create!(external_site: @site, bucket_start: outside,
+                              requests: 99, media_bytes: 9_000)
+
+    assert_equal(5, ExternalSiteUsage.requests_since(@site, 1.hour))
+    assert_equal(1_000, ExternalSiteUsage.media_bytes_since(@site, 1.hour))
+    assert_equal(104, ExternalSiteUsage.requests_since(@site, 1.day))
+    assert_equal(10_000, ExternalSiteUsage.media_bytes_since(@site, 1.day))
+  end
+
+  def test_sums_only_the_site_asked_about
+    other = external_sites(:mycoportal)
+    ExternalSiteUsage.record_request(@site, count: 4)
+    ExternalSiteUsage.record_request(other, count: 11)
+
+    assert_equal(4, ExternalSiteUsage.requests_since(@site, 1.hour))
+    assert_equal(11, ExternalSiteUsage.requests_since(other, 1.hour))
+  end
+
+  def test_a_window_with_no_usage_sums_to_zero
+    assert_equal(0, ExternalSiteUsage.requests_since(@site, 1.hour))
+    assert_equal(0, ExternalSiteUsage.media_bytes_since(@site, 1.hour))
+  end
+
+  # Two processes recording in the same bucket race: the unique index
+  # turns the loser's insert into RecordNotUnique, and the retry then
+  # increments the row the winner created rather than duplicating it.
+  def test_a_concurrent_insert_retries_onto_the_existing_row
+    calls = 0
+    original = ExternalSiteUsage.method(:find_or_create_by!)
+    racing = lambda do |**attrs|
+      calls += 1
+      raise(ActiveRecord::RecordNotUnique.new("duplicate")) if calls == 1
+
+      original.call(**attrs)
+    end
+
+    ExternalSiteUsage.stub(:find_or_create_by!, racing) do
+      ExternalSiteUsage.record_request(@site, count: 2)
+    end
+
+    assert_equal(2, calls, "the first attempt raised and was retried")
+    assert_equal(1, ExternalSiteUsage.count)
+    assert_equal(2, ExternalSiteUsage.sole.requests)
+  end
+
+  # A nil site would otherwise create an orphan row.
+  def test_a_missing_site_records_nothing
+    ExternalSiteUsage.record_request(nil)
+
+    assert_empty(ExternalSiteUsage.all)
+    assert_equal(0, ExternalSiteUsage.requests_since(nil, 1.hour))
+  end
+end
