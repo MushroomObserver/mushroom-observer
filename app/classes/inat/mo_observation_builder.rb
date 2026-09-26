@@ -162,7 +162,7 @@ class Inat
       Inat::NamingPlan.lead_vote_for(
         quality_grade: inat_obs[:quality_grade],
         sequence_evidence: inat_obs.sequences.present?,
-        provisional_evidence: inat_obs.provisional_name.present?
+        provisional_evidence: prov_name.present?
       )
     end
 
