@@ -11,11 +11,14 @@ class Inat
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
-    def initialize(inat_obs:, user:, import_others: false,
+    # skeleton: build a placeholder that copies none of the iNat obs's
+    # copyrightable content (description, observation field values).
+    def initialize(inat_obs:, user:, skeleton: false,
                    external_site: nil, inat_import: nil)
       @inat_obs = inat_obs
       @user = user
-      @import_others = import_others
+      @import_others = inat_import&.import_others || false
+      @skeleton = skeleton
       @external_site = external_site || ExternalSite.inaturalist
       @inat_import = inat_import
       @skipped_images = 0
@@ -32,7 +35,7 @@ class Inat
         add_external_link
         add_inat_images(inat_obs[:observation_photos])
         update_names_and_proposals
-        add_inat_sequences
+        add_inat_sequences unless @skeleton
       end
       @observation
     rescue StandardError => e
@@ -65,11 +68,20 @@ class Inat
         name_id: lead_name.id,
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
-        notes: inat_obs.notes,
+        notes: notes,
+        placeholder: @skeleton,
         inat_import_id: @inat_import&.id,
         # A fresh import is a clean reflection by construction, so mark it
         # read-only now (#4214). The #4585 engine stamps the backlog later.
         reflected_at: Time.zone.now }.merge(collector_attrs)
+    end
+
+    def notes
+      if @skeleton
+        inat_obs.skeleton_notes
+      else
+        inat_obs.notes
+      end
     end
 
     # Link the collector to an MO user when the iNat collector (a custom

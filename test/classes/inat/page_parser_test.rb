@@ -221,9 +221,27 @@ class Inat
                  "and the user's own without_field is still stripped")
     end
 
+    def test_add_ownership_filter_omits_licensed_when_creating_skeletons
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.create_skeletons = true
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      parser = PageParser.new(import)
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG }
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_not(query_args.key?(:licensed),
+                 "Import-others with skeletons must fetch unlicensed obss " \
+                 "too, so it must not add a licensed filter")
+    end
+
     def test_add_ownership_filter_defaults_licensed_true_when_absent
       import = inat_imports(:dick_inat_import).tap do |i|
         i.import_others = true
+        i.create_skeletons = false
         i.inat_username = ""
         i.inat_ids = "123"
       end

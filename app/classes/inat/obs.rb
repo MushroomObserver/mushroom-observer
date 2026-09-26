@@ -40,6 +40,7 @@
 #  name
 #  name_id
 #  notes
+#  skeleton_notes
 #  text_name
 #  when
 #  where
@@ -111,11 +112,21 @@ class Inat
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
     def notes
-      # Observation form requires a "normalized" key (no spaces) for Notes parts
-      snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
       { snapshot_key => snapshot,
         Other: cleaned_description }
     end
+
+    # A skeleton copies no copyrightable content -- neither the description
+    # nor the observation field values -- only the factual snapshot.
+    def skeleton_notes
+      { snapshot_key => snapshot(obs_fields: false) }
+    end
+
+    # Observation form requires a "normalized" key (no spaces) for Notes parts
+    def snapshot_key
+      Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    end
+    private :snapshot_key
 
     # Pattern matches the legacy back-link annotations MO/Pulk's mirror
     # script wrote into iNat observation descriptions. Re-importing one
@@ -314,30 +325,37 @@ class Inat
         find { |field| field[:name] =~ /^Provisional Species Name/ }
     end
 
-    def snapshot
+    def snapshot(obs_fields: true)
       # add a newline to separate snapshot caption from its subparts
-      "\n#{snapshot_raw_str.gsub(/^\s+/, "")}".
+      "\n#{snapshot_raw_str(obs_fields).gsub(/^\s+/, "")}".
         chomp # revent extra blank line before Other part
     end
 
-    def snapshot_raw_str
+    def snapshot_raw_str(include_obs_fields)
       result = "#{copyright}\n"
-      {
-        user: self[:user][:login],
-        observed: self.when,
-        show_observation_inat_lat_lng: lat_lon_accuracy,
-        place: snapshot_place,
-        id: inat_taxon_name,
-        dqa: dqa,
-        show_observation_inat_suggested_ids: suggested_id_names,
-        observation_fields: obs_fields(inat_obs_fields)
-      }.each do |label, value|
+      snapshot_parts(include_obs_fields).each do |label, value|
         result += "#{label.to_sym.l.upcase_first}: #{value}\n"
       end
       result.
         chomp # prevent blank line between Snapshot and :Other Notes fields
     end
     private :snapshot_raw_str
+
+    def snapshot_parts(include_obs_fields)
+      parts = {
+        user: self[:user][:login],
+        observed: self.when,
+        show_observation_inat_lat_lng: lat_lon_accuracy,
+        place: snapshot_place,
+        id: inat_taxon_name,
+        dqa: dqa,
+        show_observation_inat_suggested_ids: suggested_id_names
+      }
+      return parts unless include_obs_fields
+
+      parts.merge(observation_fields: obs_fields(inat_obs_fields))
+    end
+    private :snapshot_parts
 
     def snapshot_place
       if @obs[:geoprivacy] == "private"

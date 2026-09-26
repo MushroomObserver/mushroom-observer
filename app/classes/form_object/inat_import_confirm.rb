@@ -8,6 +8,7 @@ class FormObject::InatImportConfirm < FormObject::Base
   attribute :import_all, :string
   attribute :consent, :string
   attribute :import_others, :string
+  attribute :create_skeletons, :string
   attribute :inat_url, :string
   attribute :original_inat_url, :string
   attribute :recheck_all, :string

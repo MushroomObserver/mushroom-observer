@@ -29,7 +29,11 @@ class Inat
     # mismatches.
     attr_reader :alerts
 
-    def initialize
+    # requested_by: the MO user who pressed "Sync now", or nil for the
+    # scheduled batch. A placeholder (skeleton) reflection is upgraded to
+    # a full reflection only when that user owns the iNat source.
+    def initialize(requested_by: nil)
+      @requested_by = requested_by
       @alerts = []
     end
 
@@ -82,17 +86,41 @@ class Inat
     # in-memory `changed?` never converges. `saved_changes` (sans the
     # timestamp) reflects what actually moved.
     def apply(obs, inat_obs)
+      upgrading = upgrade_placeholder?(obs, inat_obs)
+      upgrade_placeholder(obs) if upgrading
+      changed = sync_source_data(obs, inat_obs) || upgrading
+      Result.new(status: changed ? :synced : :unchanged, observation: obs)
+    end
+
+    # Returns whether anything changed.
+    def sync_source_data(obs, inat_obs)
       scalars_changed = sync_scalars(obs, inat_obs).present?
       outcomes = sync_engines(obs, inat_obs)
       mark_synced(obs)
       log_resync(obs) if scalars_changed || outcomes.any?(&:logs_resync?)
-      changed = scalars_changed || outcomes.any?(&:changed?)
-      Result.new(status: changed ? :synced : :unchanged, observation: obs)
+      scalars_changed || outcomes.any?(&:changed?)
+    end
+
+    # A placeholder becomes a full reflection when the user requesting the
+    # sync is the iNat observer
+    def upgrade_placeholder?(obs, inat_obs)
+      obs.placeholder? && requested_by_inat_owner?(inat_obs)
+    end
+
+    # The MO owner is unchanged.
+    def upgrade_placeholder(obs)
+      obs.update!(placeholder: false)
+      obs.log(:log_observation_upgraded_from_placeholder, user: @requested_by)
+    end
+
+    def requested_by_inat_owner?(inat_obs)
+      login = @requested_by&.inat_username.to_s
+      login.present? && login.casecmp?(inat_obs[:user].to_h[:login].to_s)
     end
 
     # The saved changes, minus the timestamp.
     def sync_scalars(obs, inat_obs)
-      obs.assign_attributes(scalar_attributes(inat_obs))
+      obs.assign_attributes(scalar_attributes(obs, inat_obs))
       obs.save! if obs.changed?
       obs.saved_changes.except("updated_at")
     end
@@ -102,8 +130,17 @@ class Inat
     # says whether it changed anything and whether that change needs the
     # resync log entry (changes a model callback doesn't already log).
     def sync_engines(obs, inat_obs)
-      [SequenceSync.new, TaxonSync.new, ImageSync.new].map do |engine|
+      engines(obs).map do |engine|
         collect_alerts(obs, engine.call(obs, inat_obs))
+      end
+    end
+
+    def engines(obs)
+      if obs.placeholder?
+        # Placeholder omits sequences, which are iNat observation fields.
+        [TaxonSync.new, ImageSync.new]
+      else
+        [SequenceSync.new, TaxonSync.new, ImageSync.new]
       end
     end
 
@@ -149,11 +186,20 @@ class Inat
     # only iNat's blurred public coordinate, which would overwrite the
     # authenticated import's accurate one. The first run degraded 1,421
     # reflections that way (#4215) before this gate was added.
-    def scalar_attributes(inat_obs)
-      attrs = { when: inat_obs.when, notes: inat_obs.notes,
+    def scalar_attributes(obs, inat_obs)
+      attrs = { when: inat_obs.when, notes: notes(obs, inat_obs),
                 gps_hidden: inat_obs.obscured? }
       attrs.merge!(location_attributes(inat_obs)) unless inat_obs.obscured?
       attrs
+    end
+
+    def notes(obs, inat_obs)
+      if obs.placeholder?
+        # A placeholder's notes are only the factual snapshot.
+        inat_obs.skeleton_notes
+      else
+        inat_obs.notes
+      end
     end
 
     # A present Location drives `where` from its own name via a callback,

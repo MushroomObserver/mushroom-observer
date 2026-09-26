@@ -2,15 +2,26 @@
 
 module Views::Controllers::InatImports
   class Status
-    # Post-import review sections (#5259): observations kept out of the
-    # target project by its constraints, and photos skipped for a
-    # missing iNat license.
+    # Post-import review sections (#5259): unlicensed obss imported as
+    # skeletons, observations kept out of the target project by its
+    # constraints, and photos skipped for a missing iNat license.
     module ReviewSections
       private
 
       def render_review_sections
+        render_skeleton_section
         render_constraint_violation_section
         render_unlicensed_images_section
+      end
+
+      def render_skeleton_section
+        count = @inat_import.skeleton_imported_count.to_i
+        return unless count.positive?
+
+        Alert(level: :success, class: "mt-3", id: "skeleton_imported") do
+          h5 { plain(:inat_import_tracker_skeleton_imported_heading.l) }
+          div { plain(:inat_import_tracker_skeleton_imported_note.t(count:)) }
+        end
       end
 
       def render_constraint_violation_section

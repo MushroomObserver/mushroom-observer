@@ -85,8 +85,9 @@ module InatImportJobTestDoubles
     unless @inat_import.inat_ids.present? || @inat_import.recheck_all?
       query_args.merge!(BASE_FILTER_PARAMS)
     end
+    # Mirrors PageParser#add_ownership_filter.
     if @inat_import.import_others
-      query_args.merge!(LICENSED_FILTER)
+      query_args.merge!(LICENSED_FILTER) unless @inat_import.create_skeletons
     else
       query_args[:user_login] = @inat_import.inat_username
     end

@@ -79,16 +79,24 @@ class Inat
       true
     end
 
-    # Safety net for import-others. This check is what actually stops an
-    # unlicensed observation belonging to another iNat user from being
-    # imported. Own-obs imports are never gated here.
+    # Safety net for import-others:
+    # Prevent a **full** import of an
+    # unlicensed observation of another iNat user. It is skipped,
+    # or imported as a skeleton when the import creates skeletons.
+    # Imports of the user's obss are not filtered here.
     def unlicensed_other?
       return false unless inat_import.import_others
       return false if @inat_obs[:license_code].present?
+      return false if inat_import.create_skeletons
 
       log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
       inat_import.add_ignored_obs(:unlicensed)
       true
+    end
+
+    def skeleton?
+      inat_import.import_others && inat_import.create_skeletons &&
+        @inat_obs[:license_code].blank?
     end
 
     # The real duplicate check: any typed iNat ExternalLink for this iNat
@@ -169,8 +177,7 @@ class Inat
 
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(
-        inat_obs: @inat_obs, user: @user,
-        import_others: @inat_import.import_others,
+        inat_obs: @inat_obs, user: @user, skeleton: skeleton?,
         external_site: inat_site,
         inat_import: @inat_import
       )
@@ -193,17 +200,20 @@ class Inat
 
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
-      @skipped_images_count += builder.skipped_images
+      # A skeleton omits unlicensed photos by design; that is not an error.
+      @skipped_images_count += builder.skipped_images unless skeleton?
       @image_ids.concat(builder.created_image_ids)
       record_unlicensed_images(builder)
       return unless builder.unlicensed_obs == 1
+      return if skeleton?
 
       inat_import.add_license_added_obs(inat_id: @inat_obs[:id])
     end
 
     def finalize_import
       update_inat_observation unless skip_inat_writeback?
-      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}" \
+          "#{" (skeleton)" if skeleton?}")
       increment_imported_counts
       update_timings
     rescue StandardError => e
@@ -322,6 +332,7 @@ class Inat
     def increment_imported_counts
       @inat_import.increment!(:imported_count)
       @inat_import.increment!(:total_imported_count)
+      @inat_import.increment!(:skeleton_imported_count) if skeleton?
     end
 
     # Use cumulative moving average to update user's historical avg import time

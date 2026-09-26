@@ -34,6 +34,9 @@
 #                          reset in InatImportsController#authorization_response
 #                          and in Job after each observation import
 #  cancel/canceled::       Did the user requested canceling the Job
+#  create_skeletons::      Import-others only: import another user's
+#                          unlicensed iNat obss as placeholder skeletons
+#  skeleton_imported_count:: skeletons imported by the associated job
 #
 # == Class Methods
 #  super_importers         users who can import other users' iNat obss

@@ -119,6 +119,27 @@ class InatObsTest < UnitTestCase
     assert_equal(3, mock_inat_obs[:identifications].size)
   end
 
+  def test_skeleton_notes
+    mock_inat_obs = mock_observation("donadinia_PNW01")
+    field = mock_inat_obs.inat_obs_fields.first
+    assert_not_nil(field, "Test requires an obs with observation fields")
+    snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    full_snapshot = mock_inat_obs.snapshot
+    # The observation fields part is the last part of the snapshot.
+    fields_start =
+      full_snapshot.index("\n#{:observation_fields.l.upcase_first}: ")
+
+    notes = mock_inat_obs.skeleton_notes
+
+    assert_equal([snapshot_key], notes.keys,
+                 "Skeleton notes should hold only the snapshot part")
+    assert_equal(full_snapshot[0...fields_start], notes[snapshot_key],
+                 "Skeleton snapshot should be the full snapshot minus " \
+                 "the observation fields")
+    assert_not_includes(notes[snapshot_key], field[:value].to_s,
+                        "Skeleton snapshot should omit field values")
+  end
+
   def test_snapshot_place_private_geoprivacy
     mock_inat_obs = mock_observation("somion_unicolor")
     place_guess = mock_inat_obs[:place_guess]

@@ -103,12 +103,16 @@ module Views::Controllers::InatImports
       html = render_form(super_importer: false)
 
       assert_no_html(html, "input[name='inat_import[import_others]']")
+      assert_no_html(html, "input[name='inat_import[create_skeletons]']")
     end
 
     def test_super_importer_field_shown_when_enabled
       html = render_form(super_importer: true)
 
       assert_html(html, "input[name='inat_import[import_others]']")
+      assert_html(html, "input[name='inat_import[create_skeletons]']")
+      assert_html(html, "#inat_import_create_skeletons_help",
+                  text: :inat_create_skeletons_help.l)
     end
 
     def test_submit_posts_to_inat_imports_path

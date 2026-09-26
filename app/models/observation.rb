@@ -51,6 +51,8 @@
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?
 #  notes::                  Arbitrary text supplied by User and serialized.
+#  placeholder::            Minimal counterpart ("skeleton") of unlicensed
+#                           iNat obs.
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
