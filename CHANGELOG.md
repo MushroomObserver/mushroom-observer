@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-26 (deploy-2026-09-26-12-00)
+
+- jdc Bump arel_extensions to 2.5.0 ([PR5406](https://github.com/MushroomObserver/mushroom-observer/pull/5406), @JoeCohen)
+- Bump simplecov to 1.3.0 ([PR5407](https://github.com/MushroomObserver/mushroom-observer/pull/5407), @JoeCohen)
+- Bump rubyzip from 3.6.0 to 3.7.0 ([PR5408](https://github.com/MushroomObserver/mushroom-observer/pull/5408), @JoeCohen)
+- Create Obs: Fix `CheckboxField` help-icon trigger independently toggling collapsed fields ([PR5400](https://github.com/MushroomObserver/mushroom-observer/pull/5400), @nimmolo)
+- Send "Sync now" engine alerts to `#alerts` ([PR5399](https://github.com/MushroomObserver/mushroom-observer/pull/5399), @mo-nathan)
+- Fix stale pagination goto-page tooltip and disable browser autofill ([PR5411](https://github.com/MushroomObserver/mushroom-observer/pull/5411), @nimmolo)
+- Unresolved provisional not counted as vote evidence in new import ([PR5414](https://github.com/MushroomObserver/mushroom-observer/pull/5414), @JoeCohen)
+
 ## 2026-09-21 (deploy-2026-09-21-12-00)
 
 - Resync a reflection's images from its iNaturalist photos (`#4215`) ([PR5385](https://github.com/MushroomObserver/mushroom-observer/pull/5385), @mo-nathan)
