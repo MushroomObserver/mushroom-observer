@@ -328,7 +328,7 @@ class Inat
     def snapshot(obs_fields: true)
       # add a newline to separate snapshot caption from its subparts
       "\n#{snapshot_raw_str(obs_fields).gsub(/^\s+/, "")}".
-        chomp # revent extra blank line before Other part
+        chomp # prevent extra blank line before Other part
     end
 
     def snapshot_raw_str(include_obs_fields)
