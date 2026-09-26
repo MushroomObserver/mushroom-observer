@@ -135,7 +135,11 @@ class Inat
     # comment for the parallel).
     def add_ownership_filter(query_args)
       if @import.import_others
-        query_args[:licensed] = true unless query_args.key?(:licensed)
+        # With skeletons on, unlicensed obss are imported (as skeletons),
+        # so the query must not drop them.
+        unless query_args.key?(:licensed) || @import.create_skeletons
+          query_args[:licensed] = true
+        end
       else
         query_args[:user_login] = @import.inat_username
       end

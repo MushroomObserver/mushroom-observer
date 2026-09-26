@@ -7,9 +7,9 @@ module InatImportsController::Estimators
 
   def fetch_expected_count
     # Short-circuit to 0 rather than issue a query that answers a different
-    # question when user's own request is entirely unlicensed
-    # (import-others never imports unlicensed obs)
-    return 0 if import_others? && licensed_explicitly_false?
+    # question when the request is entirely unlicensed and nothing
+    # unlicensed will be imported
+    return 0 if only_unlicensed_ignored_obs?
 
     response = inat_get(import_estimate_query_args)
     JSON.parse(response.body)["total_results"]
@@ -41,9 +41,9 @@ module InatImportsController::Estimators
 
   def fetch_estimate_with_date_count
     # Short-circuit to 0 rather than issue a query that answers a different
-    # question when user's own request is entirely unlicensed
-    # (import-others never imports unlicensed obs)
-    return 0 if import_others? && licensed_explicitly_false?
+    # question when the request is entirely unlicensed and nothing
+    # unlicensed will be imported
+    return 0 if only_unlicensed_ignored_obs?
 
     args = import_estimate_query_args
     args[:d1] ||= EARLIEST_DATE_FILTER
@@ -57,7 +57,7 @@ module InatImportsController::Estimators
   end
 
   # Import-others: count of obs that are importable-taxa but not licensed.
-  # These will be skipped entirely.
+  # Imported as skeletons when create_skeletons is on, else skipped.
   def fetch_unlicensed_others_count
     args = import_estimate_query_args.except(:licensed).
            merge(licensed: false)
@@ -87,7 +87,7 @@ module InatImportsController::Estimators
 
   # All obs in user scope — no taxon, without_field, or license filter.
   def raw_requested_query_args
-    args = listing_url? ? url_query_args : {}
+    args = listing_query_args
     args[:only_id] = true
     args[:id] = params[:inat_ids] if listing_ids?
     args[:user_login] = normalized_inat_username unless import_others?
@@ -96,12 +96,21 @@ module InatImportsController::Estimators
 
   # Obs in importable taxa — no without_field or license filter.
   def after_taxon_query_args
-    args = listing_url? ? url_query_args : {}
+    args = listing_query_args
     args[:only_id] = true
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
     args[:id] = params[:inat_ids] if listing_ids?
     args[:user_login] = normalized_inat_username unless import_others?
     args
+  end
+
+  # The user's URL query, when importing by URL; else nothing.
+  def listing_query_args
+    if listing_url?
+      url_query_args
+    else
+      {}
+    end
   end
 
   # iNat logins are lowercase; send iNat the form it stores.
@@ -110,9 +119,9 @@ module InatImportsController::Estimators
   end
 
   # Obs that will actually be imported: taxon + without_field
-  # + licensed (for import-others) + user scope.
+  # + licensed (for import-others without skeletons) + user scope.
   def import_estimate_query_args
-    args = listing_url? ? url_query_args : {}
+    args = listing_query_args
     args.merge!(estimate_without_field_filter, ownership_filter_args,
                 only_id: true)
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
@@ -134,6 +143,11 @@ module InatImportsController::Estimators
     listing_url? && url_query_args[:licensed] == "false"
   end
 
+  # Import-others without skeletons ignores unlicensed observations.
+  def only_unlicensed_ignored_obs?
+    import_others? && !create_skeletons? && licensed_explicitly_false?
+  end
+
   # Id lists always re-check obs already carrying the MO URL field, and
   # query modes re-check when the user opted in — the estimate must
   # match actual import behavior (#4565).
@@ -143,11 +157,15 @@ module InatImportsController::Estimators
     BASE_FILTER_PARAMS
   end
 
+  # Import-others with skeletons imports unlicensed obss too, so it keeps
+  # whatever license filter the URL has.
   def ownership_filter_args
-    if import_others?
-      LICENSED_FILTER
-    else
+    if !import_others?
       { user_login: normalized_inat_username }
+    elsif create_skeletons?
+      {}
+    else
+      LICENSED_FILTER
     end
   end
 

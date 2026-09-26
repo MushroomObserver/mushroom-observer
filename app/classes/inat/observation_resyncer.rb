@@ -40,8 +40,10 @@ class Inat
     # the button rather than to whoever can act on it.
     delegate :alerts, to: :@applier
 
-    def initialize(observation, fetcher: ObsFetcher.new,
-                   applier: ReflectionResync.new)
+    # requested_by: the MO user who pressed "Sync now" (see
+    # ReflectionResync#initialize).
+    def initialize(observation, fetcher: ObsFetcher.new, requested_by: nil,
+                   applier: ReflectionResync.new(requested_by: requested_by))
       @observation = observation
       @fetcher = fetcher
       @applier = applier

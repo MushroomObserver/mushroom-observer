@@ -793,7 +793,7 @@ class InatImportJobTest < ActiveJob::TestCase
            "Test requires user to be a super_importer")
 
     create_ivars_from_filename("donadinia_PNW01")
-    @inat_import.update(import_others: true)
+    @inat_import.update(import_others: true, create_skeletons: false)
 
     stub_inat_interactions
 
@@ -806,6 +806,67 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(1, @inat_import.reload.ignored_unlicensed_count,
                  "Should count the unlicensed obs as ignored")
+  end
+
+  # Superimporter import of another user's unlicensed obs, skeletons on:
+  # the obs fields are read (namings, collector) but not copied, and the
+  # description and unlicensed photos are left out.
+  def test_job_imports_unlicensed_obs_as_skeleton_for_others_import
+    collector = "Skeleton Test Collector"
+    create_skeleton_ivars(collector: collector)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Unlicensed obs should import as a skeleton") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the skeleton Observation")
+    inat_obs = Inat::Obs.new(JSON.generate(@parsed_results.first))
+    assert(obs.placeholder?, "Skeleton should be marked as a placeholder")
+    assert_skeleton_notes(obs, inat_obs, collector)
+    assert_empty(obs.sequences, "Skeleton should not copy sequences")
+    assert_equal(collector, obs.collector,
+                 "Skeleton should take its collector from the obs field")
+    prov_name = Name.parse_name(inat_obs.provisional_name).text_name
+    assert_includes(obs.namings.map { |n| n.name.text_name }, prov_name,
+                    "Skeleton should propose the provisional name")
+    assert_equal(expected_imported_photo_count, obs.images.length,
+                 "Skeleton should import only the licensed photos")
+    assert_skeleton_import_counts(@inat_import)
+  end
+
+  # A skeleton that fails to import is reported like any other failure.
+  def test_job_reports_failed_skeleton_import
+    create_skeleton_ivars(collector: "Skeleton Test Collector")
+    stub_inat_interactions
+
+    # Fail the upload of the skeleton's licensed photo.
+    original_execute = API2.method(:execute)
+    API2.singleton_class.define_method(:execute) do |params|
+      if params[:action] == :image && params[:method] == :post
+        api = API2.new(params)
+        api.errors << API2::MissingParameter.new(:upload_url)
+        api
+      else
+        original_execute.call(params)
+      end
+    end
+
+    assert_no_difference("Observation.count",
+                         "A failed skeleton import should create no obs") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    @inat_import.reload
+    assert_match(/Failed to import iNat #{@parsed_results.first[:id]}/,
+                 @inat_import.response_errors,
+                 "Should log which skeleton failed to import")
+    assert_equal(0, @inat_import.skeleton_imported_count,
+                 "A failed skeleton should not count as imported")
+  ensure
+    API2.singleton_class.define_method(:execute, original_execute)
   end
 
   # Not-own superimporter import: a *licensed* obs still imports even when
@@ -1714,6 +1775,55 @@ class InatImportJobTest < ActiveJob::TestCase
   # For own-obs imports (default), all photos are imported (unlicensed ones
   # use the user's default license). For not-own superimporter imports, only
   # licensed photos are imported.
+  # An unlicensed obs of another iNat user (donadinia_PNW01), imported by a
+  # superimporter with skeletons on. Its first photo is licensed and it
+  # has a collector obs field.
+  def create_skeleton_ivars(collector:)
+    @user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(@user),
+           "Test requires user to be a super_importer")
+    create_ivars_from_filename("donadinia_PNW01")
+    parsed = JSON.parse(@mock_inat_response, symbolize_names: true)
+    result = parsed[:results].first
+    assert_nil(result[:license_code], "Fixture obs should be unlicensed")
+    result[:observation_photos].first[:photo][:license_code] = "cc-by"
+    result[:ofvs] << { name: "Collector's name", value: collector }
+    @mock_inat_response = JSON.generate(parsed)
+    @parsed_results = parsed[:results]
+    @inat_import = create_inat_import(import_others: true,
+                                      create_skeletons: true)
+  end
+
+  # Only the snapshot: no description and no obs field values.
+  def assert_skeleton_notes(obs, inat_obs, collector)
+    notes_text = obs.notes.values.join("\n")
+    assert_includes(notes_text, inat_obs[:user][:login],
+                    "Skeleton notes should include the iNat snapshot")
+    assert_not_includes(notes_text, inat_obs.cleaned_description,
+                        "Skeleton notes should omit the description")
+    assert_not_includes(notes_text, collector,
+                        "Skeleton notes should omit obs field values")
+    assert_equal(1, obs.notes.size,
+                 "Skeleton notes should have only the snapshot part")
+  end
+
+  def assert_skeleton_import_counts(inat_import)
+    inat_import.reload
+    assert_equal(1, inat_import.skeleton_imported_count,
+                 "Should count the skeleton")
+    assert_equal(0, inat_import.ignored_unlicensed_count,
+                 "A skeleton should not count as ignored")
+    assert_empty(inat_import.license_added_inat_ids,
+                 "A skeleton should not be listed as license-added")
+    skipped = @parsed_results.first[:observation_photos].size -
+              expected_imported_photo_count
+    assert_no_match(
+      :inat_skipped_images_summary.t(count: skipped),
+      inat_import.response_errors,
+      "A skeleton's skipped unlicensed photos should not be an error"
+    )
+  end
+
   def expected_imported_photo_count
     obs_photos = @parsed_results.first[:observation_photos]
     return obs_photos.length unless @inat_import.import_others

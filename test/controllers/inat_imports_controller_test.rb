@@ -767,6 +767,35 @@ class InatImportsControllerTest < FunctionalTestCase
            "recheck_all should flatten from namespaced confirm params")
   end
 
+  def test_create_skeletons_checkbox_checked_by_default
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    login(user.login)
+    get(:new)
+
+    assert_select(
+      "input[type=checkbox][id=inat_import_create_skeletons][checked]", true,
+      "Skeleton checkbox should default to checked on a fresh form"
+    )
+  end
+
+  def test_create_skeletons_checkbox_stays_unchecked_on_reload
+    user = users(:dick) # Dick is a superimporter
+    login(user.login)
+    # No consent, so the form re-renders with the submitted values.
+    post(:create,
+         params: { inat_import: { inat_username: "anyone",
+                                  choose_method: "ids", inat_ids: "123",
+                                  import_others: "1",
+                                  create_skeletons: "0" } })
+
+    assert_select(
+      "input[type=checkbox][id=inat_import_create_skeletons][checked]", false,
+      "An unchecked skeleton checkbox should stay unchecked on reload"
+    )
+  end
+
   def test_skip_writeback_checkbox_admin_only
     login(users(:rolf).login)
     get(:new)
@@ -943,6 +972,75 @@ class InatImportsControllerTest < FunctionalTestCase
       "#unlicensed_obs_count", "2",
       "Confirm form should report unlicensed obs that will be skipped"
     )
+  end
+
+  def test_confirm_shows_skeleton_obs_line_for_import_others
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    requested = 5
+    unlicensed = 2
+    # With skeletons, the estimate has no license filter.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: requested }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "true")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: unlicensed }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
+                   consent: 1, import_others: "1", create_skeletons: "1" })
+
+    assert_unprocessable
+    assert_select("#expected_count", requested.to_s,
+                  "Estimate with skeletons should include unlicensed obs")
+    assert_select("b", text: :inat_import_confirm_skeleton_obs_caption.l)
+    assert_select("#unlicensed_obs_count", unlicensed.to_s,
+                  "Confirm form should count the obs to become skeletons")
+    assert_select("#total_ignored_count", { count: 0 },
+                  "Skeletons should not be counted as ignored")
+    assert_select("input[name='inat_import_confirm[create_skeletons]']" \
+                  "[value='1']")
+  end
+
+  def test_create_confirmed_persists_create_skeletons
+    user = users(:dick) # Dick is a superimporter
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "anyone", inat_ids: "123,456", import_all: "",
+             consent: "1", import_others: "1", create_skeletons: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert(import.create_skeletons,
+           "Should save create_skeletons from the confirm form")
+  end
+
+  def test_create_confirmed_ignores_create_skeletons_without_import_others
+    user = users(:dick) # Dick is a superimporter
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "dick", inat_ids: "123,456", import_all: "",
+             consent: "1", create_skeletons: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert_not(import.create_skeletons,
+               "Skeletons apply only to imports of others' obss")
   end
 
   # Regression test: a superimporter's URL that itself filters on

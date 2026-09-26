@@ -87,6 +87,59 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "a resync should be logged as the admin user")
   end
 
+  # A placeholder synced by anyone but the iNat observer stays a skeleton:
+  # only the snapshot notes, no sequences.
+  def test_placeholder_stays_stripped_for_a_non_owner_sync
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+    fresh = Inat::Obs.new(JSON.generate(raw))
+
+    resync(found: { @id => raw }, requested_by: users(:rolf))
+
+    @obs.reload
+    assert(@obs.placeholder?, "A non-owner sync should keep the placeholder")
+    assert_equal(fresh.skeleton_notes, @obs.notes,
+                 "A placeholder's notes should be only the snapshot")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
+  end
+
+  def test_placeholder_stays_stripped_for_the_scheduled_sync
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+
+    resync(found: { @id => raw })
+
+    @obs.reload
+    assert(@obs.placeholder?, "A sync with no requester should not upgrade")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
+  end
+
+  # The iNat observer asking for a sync upgrades the placeholder to a full
+  # reflection; its MO owner is unchanged.
+  def test_placeholder_upgrades_when_the_inat_observer_syncs
+    @obs.update_column(:placeholder, true)
+    owner = @obs.user
+    raw = copyrightable_raw
+    fresh = Inat::Obs.new(JSON.generate(raw))
+    assert(fresh.sequences.any?, "Test requires a source with a sequence")
+    requester = users(:rolf)
+    requester.update_column(:inat_username, raw[:user][:login].upcase)
+    @obs.rss_log.update_columns(notes: "20250101000000\n")
+
+    result = resync(found: { @id => raw }, requested_by: requester).first
+
+    assert_equal(:synced, result.status, "An upgrade should count as synced")
+    @obs.reload
+    assert_not(@obs.placeholder?, "The owner's sync should upgrade it")
+    assert_equal(fresh.notes, @obs.notes,
+                 "An upgraded reflection should get the full notes")
+    assert_equal(fresh.sequences.size, @obs.sequences.count,
+                 "An upgraded reflection should get the sequences")
+    assert_equal(owner, @obs.user, "The MO owner should be unchanged")
+    assert_match(/#{requester.login}/, @obs.rss_log.reload.notes.to_s,
+                 "The upgrade should be logged against the requester")
+  end
+
   def test_second_resync_with_same_data_is_unchanged
     assert_equal(:synced, resync(found: { @id => @raw }).first.status)
     # Reload as the background job would (fresh GlobalID deserialization);
@@ -291,9 +344,10 @@ class Inat::ObservationResyncerTest < UnitTestCase
     Turbo::StreamsChannel.send(:stream_name_from, [obs, :external_link_sync])
   end
 
-  def resync(found:, failed: false)
+  def resync(found:, failed: false, requested_by: nil)
     fetcher = FakeFetcher.new([found, failed])
-    Inat::ObservationResyncer.new(@obs, fetcher: fetcher).resync
+    Inat::ObservationResyncer.new(@obs, requested_by: requested_by,
+                                        fetcher: fetcher).resync
   end
 
   # A second read-only reflection grouped into @obs's occurrence, with
@@ -328,6 +382,16 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # The calostoma raw plus the content a skeleton leaves out: a
+  # description and a DNA sequence observation field.
+  def copyrightable_raw
+    dna_field = mock_raw("donadinia_PNW01")[:ofvs].
+                find { |field| field[:datatype] == "dna" }
+    assert_not_nil(dna_field, "Test requires a DNA observation field")
+    @raw.merge(description: "Copyrightable description",
+               ofvs: [dna_field])
   end
 
   # The open calostoma raw, flipped to obscured -- the flag iNat sets when
