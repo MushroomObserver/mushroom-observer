@@ -18,9 +18,34 @@ development:
     port: 3306
     migrations_paths: "db/cache/migrate"
 
+# Multi-db (primary/cache) like development, not a flat db:, so Solid
+# Cache (#4807's I18n backend) has a real solid_cache_entries table in
+# test instead of raising when it's actually touched -- see
+# config/environments/test.rb's solid_cache.connects_to.
+<%
+  worker_suffix = ENV["TEST_ENV_NUMBER"].to_s.empty? ? "" : "-#{ENV["TEST_ENV_NUMBER"]}"
+  test_db = ENV["MO_TEST_DATABASE"] || "mo_test#{worker_suffix}"
+  # "cache_<env>", matching cache_development -- not <primary>_cache.
+  # MO_TEST_DATABASE is a full manual override with no tied cache-naming
+  # convention, so just suffix it in that one case.
+  cache_test_db = ENV["MO_TEST_DATABASE"] ? "#{test_db}_cache" :
+                  "cache_test#{worker_suffix}"
+%>
 test:
-  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
-  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-  username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-  port: 3306
+  primary:
+    database: "<%= test_db %>"
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    # Must exceed Solid Queue's own estimated thread need -- see
+    # test/jobs/queue_config_test.rb and db/vagrant/database.yml (the
+    # template CI actually copies, which already had this).
+    pool: 10
+  cache:
+    database: "<%= cache_test_db %>"
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    migrations_paths: "db/cache/migrate"
