@@ -59,6 +59,31 @@ $sidebar-max-width: 9.9rem;
   left: $sidebar-max-width;
 }
 
+// #main_container's `.px-sm-3` insets .row-offcanvas from the
+// viewport by $spacer at this width and up -- both the sidebar's
+// offset and the active row-shift need that same amount added, or
+// the sidebar leaves a sliver when closed and sits flush against
+// #right_side (no gap) when open.
+@media screen and (min-width: breakpoint-min(sm)) {
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -($sidebar-max-width + $spacer);
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -($sidebar-max-width + $spacer);
+  }
+
+  .row-offcanvas-right.active {
+    right: $sidebar-max-width + $spacer;
+  }
+
+  .row-offcanvas-left.active {
+    left: $sidebar-max-width + $spacer;
+  }
+}
+
 // Sits inside .row-offcanvas alongside #right_side.
 .sidebar-offcanvas {
   position: absolute;
