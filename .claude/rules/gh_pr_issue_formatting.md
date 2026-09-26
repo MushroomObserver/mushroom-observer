@@ -14,6 +14,42 @@ Fix Image::Processor#ssh_sizes logging false failures
 
 This lives in this file (not just something said in conversation) because every file under `.claude/rules/` is auto-loaded into context every session regardless of whether `CLAUDE.md` links to it — that's the mechanism that makes a rule actually stick across sessions. Something only ever stated in conversation does not persist once that conversation ends; a rule file does.
 
+### Single-quote any title containing backticks
+
+In a double-quoted shell argument the backticks are command substitution — the shell runs what's between them and substitutes the output, usually nothing:
+
+```bash
+# ❌ the shell runs `updated_since` and substitutes its empty output
+gh issue create --title "Deleted sources (`updated_since` cannot see it)"
+#   creates: Deleted sources ( cannot see it)
+
+# ✅
+gh issue create --title 'Deleted sources (`updated_since` cannot see it)'
+```
+
+`--body-file` sidesteps this for bodies (see below); there is no equivalent for titles, so quoting is the only protection. This is the more dangerous of the two cases: a mangled body renders visibly wrong, while a mangled title is created silently and reads like an ordinary typo — and if the backticked text happens to be a runnable command, the shell runs it before `gh` ever sees it.
+
+Escaping each backtick inside double quotes is equally safe, and is the way out when the title also contains an apostrophe, where single-quoting needs the awkward `'\''` dance:
+
+```bash
+gh issue create --title "Fix \`Name\`'s handling"
+```
+
+**Do not carry that habit into a body heredoc.** In a double-quoted argument the shell consumes the backslash and `gh` receives a bare backtick; inside a quoted heredoc (`<<'EOF'`) nothing is expanded, so the backslash survives and ships to GitHub, which is the mangling described under "Why" below. Same two characters, opposite outcomes:
+
+```bash
+printf '%s\n' "a \`b\` c"   # -> a `b` c      (backslash consumed)
+cat <<'EOF'
+a \`b\` c                    # -> a \`b\` c    (backslash kept)
+EOF
+```
+
+Since the section above requires backticks around every code identifier in a title, essentially every title needs one of the two forms. Single quotes are the default; reach for escaped double quotes when an apostrophe forces it. After creating, check what landed:
+
+```bash
+gh issue view <n> --json title --jq .title
+```
+
 ## Create every PR as a draft
 
 `gh pr create --draft --label "review: standard" …`, always (the label is covered in `review_types.md`). Marking it ready (`gh pr ready <n>`) is Nathan's call unless he asks the session to do it; when asked, wait until the PR is at least two minutes old and the session's own checks (tests, RuboCop) have passed.
