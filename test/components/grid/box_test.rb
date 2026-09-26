@@ -1,0 +1,351 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class Components::Grid::BoxTest < ComponentTestCase
+  def setup
+    super
+    @user = users(:rolf)
+  end
+
+  def test_renders_observation_with_thumbnail
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_includes(html, "grid-box")
+    assert_includes(html, "box_#{obs.id}")
+    # Should include the thumbnail image with the correct CSS class
+    assert_includes(html, "image_#{obs.thumb_image_id}")
+  end
+
+  # Grid boxes deliberately do NOT subscribe to
+  # [image, :processed] broadcasts -- rotate/mirror only happens on
+  # the image-show page, and an index page with dozens of boxes would
+  # otherwise open a websocket subscription per thumbnail for an event
+  # that can't happen from this page.
+  def test_does_not_subscribe_to_action_cable_even_with_a_thumbnail
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_nil(obs.thumb_image)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_no_html(html, "turbo-cable-stream-source")
+  end
+
+  def test_renders_observation_without_thumbnail
+    obs = observations(:minimal_unknown_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_includes(html, "grid-box")
+    assert_includes(html, "box_#{obs.id}")
+  end
+
+  def test_renders_image_object
+    image = images(:connected_coprinus_comatus_image)
+    component = Components::Grid::Box.new(user: @user, object: image)
+    html = render(component)
+
+    assert_includes(html, "grid-box")
+    assert_includes(html, "box_#{image.id}")
+    assert_includes(html, "image_#{image.id}")
+  end
+
+  def test_renders_user_object
+    user = users(:katrina)
+    component = Components::Grid::Box.new(user: @user, object: user)
+    html = render(component)
+
+    assert_includes(html, "grid-box")
+    assert_includes(html, "box_#{user.id}")
+  end
+
+  def test_renders_rss_log_with_observation_target
+    rss_log = RssLog.where.not(observation_id: nil).first
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
+    html = render(component)
+
+    assert_includes(html, "grid-box")
+  end
+
+  def test_renders_with_custom_columns
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(
+      user: @user,
+      object: obs,
+      columns: "col-12 col-sm-6"
+    )
+    html = render(component)
+
+    assert_includes(html, "col-12 col-sm-6")
+  end
+
+  def test_renders_with_extra_class
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(
+      user: @user,
+      object: obs,
+      extra_class: "custom-class"
+    )
+    html = render(component)
+
+    assert_includes(html, "custom-class")
+  end
+
+  # NOTE: Testing custom block content requires Phlex DSL context
+  # This test is commented out as it requires the block to be evaluated
+  # in the component's Phlex context, not the test context
+  # def test_renders_custom_block_content
+  #   component = Components::Grid::Box.new(
+  #                 id: 123, extra_class: "test-cls"
+  #               ) do
+  #     div { "Custom content" }
+  #   end
+  #   html = render(component)
+  #
+  #   assert_includes(html, "box_123")
+  #   assert_includes(html, "test-class")
+  #   assert_includes(html, "Custom content")
+  # end
+
+  # Test HTML structure and nesting
+  def test_wraps_panel_in_list_item
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    # Should have li.grid-box containing div.card
+    assert_nested(
+      html,
+      parent_selector: "li.grid-box",
+      child_selector: "div.card"
+    )
+  end
+
+  def test_thumbnail_nested_in_panel_thumbnail_section
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    # Thumbnail should be in thumbnail-container within the card
+    assert_nested(
+      html,
+      parent_selector: "div.card",
+      child_selector: "div.thumbnail-container"
+    )
+    # Should contain the image
+    assert_nested(
+      html,
+      parent_selector: "div.thumbnail-container",
+      child_selector: "img"
+    )
+  end
+
+  def test_details_section_has_correct_class
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    # Details section should have log-details class
+    assert_includes(html, "log-details")
+    assert_nested(
+      html,
+      parent_selector: "div.card-body.log-details",
+      child_selector: "div.log-what"
+    )
+  end
+
+  def test_renders_what_where_when_sections_in_body
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    # Should have what section in card-body
+    assert_nested(
+      html,
+      parent_selector: "div.card-body.log-details",
+      child_selector: "div.log-what"
+    )
+    # Should have where section in card-body
+    assert_nested(
+      html,
+      parent_selector: "div.card-body.log-details",
+      child_selector: "li.log-where"
+    )
+    # Should have when/who info (rendered with log-when and log-who classes)
+    assert_includes(html, "log-when")
+    assert_includes(html, "log-who")
+  end
+
+  def test_observation_title_includes_name
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    # Should include observation name in the what section
+    assert_text_in_nested_selector(
+      html,
+      text: obs.name.text_name,
+      parent: "div.log-what",
+      child: "h5"
+    )
+  end
+
+  def test_observation_includes_location
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    # Should include location in where section
+    assert_includes(html, obs.where)
+  end
+
+  def test_rss_log_renders_footer
+    # Find an RssLog with detail or time
+    rss_log = RssLog.where.not(observation_id: nil).first
+    skip("No RssLog found for testing") unless rss_log
+
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
+    html = render(component)
+
+    # RssLogs should have log-footer
+    assert_includes(html, "log-footer")
+    assert_nested(
+      html,
+      parent_selector: "div.card",
+      child_selector: "div.card-footer.log-footer"
+    )
+  end
+
+  # Selection logic moved from RssLog#detail to
+  # Components::Grid::Box::RenderData#rss_log_detail_tag (#4868) --
+  # this exercises the orphan/penultimate-message branch end to end,
+  # matching what used to be test_detail_for_merged_location in
+  # rss_log_test.rb.
+  def test_rss_log_footer_shows_resolved_detail_for_orphaned_merge
+    loc1 = locations(:albion)
+    loc2 = locations(:mitrula_marsh)
+    log = loc1.rss_log
+    loc2.merge(mary, loc1)
+    log.reload
+    assert(log.orphan?)
+
+    component = Components::Grid::Box.new(user: @user, object: log)
+    html = render(component)
+
+    assert_html(html, ".log-detail",
+                text: :log_location_merged.t(that: loc2.display_name,
+                                             user: "mary").as_displayed)
+  end
+
+  # NOTE: identify mode tests require permission? helper which needs
+  # complex test setup. These features are tested in integration tests.
+
+  def test_image_object_structure
+    image = images(:connected_coprinus_comatus_image)
+    component = Components::Grid::Box.new(user: @user, object: image)
+    html = render(component)
+
+    # Should have card structure
+    assert_nested(
+      html,
+      parent_selector: "li#box_#{image.id}",
+      child_selector: "div.card"
+    )
+    # Should have thumbnail
+    assert_nested(
+      html,
+      parent_selector: "div.thumbnail-container",
+      child_selector: "img"
+    )
+  end
+
+  def test_user_object_structure
+    user = users(:katrina)
+    component = Components::Grid::Box.new(user: @user, object: user)
+    html = render(component)
+
+    # Should have card structure
+    assert_nested(
+      html,
+      parent_selector: "li#box_#{user.id}",
+      child_selector: "div.card"
+    )
+    # Should have user info in body
+    assert_nested(
+      html,
+      parent_selector: "div.card-body",
+      child_selector: "div.log-what"
+    )
+  end
+
+  def test_does_not_render_identify_ui_and_footer_when_identify_is_false
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Grid::Box.new(
+      user: @user,
+      object: obs,
+      identify: false
+    )
+    html = render(component)
+
+    # Should not have identify UI (vote container or propose naming link)
+    assert_not_includes(html, "vote-select-container")
+    assert_not_includes(html, "context=grid_box")
+    # Should not have identify footer
+    assert_not_includes(html, "card-active")
+    assert_not_includes(html, "box_reviewed")
+  end
+
+  def test_renders_identify_ui_and_footer_when_identify_is_true
+    # Must eager-load observation_views for identify footer to render
+    obs = Observation.includes(:observation_views).
+          find(observations(:coprinus_comatus_obs).id)
+    component = Components::Grid::Box.new(
+      user: @user,
+      object: obs,
+      identify: true
+    )
+    html = render(component)
+
+    # Should have identify UI (vote container or propose naming link)
+    assert(
+      html.include?("vote-select-container") ||
+        html.include?("context=grid_box"),
+      "Expected identify UI to be rendered"
+    )
+    # Should have identify footer
+    assert_includes(html, "card-active")
+    assert_includes(html, "box_reviewed")
+  end
+
+  # External-source credit renders the link with target="_blank" /
+  # rel="noopener noreferrer" so it opens in a new tab (off-site).
+  def test_external_source_credit_renders_new_tab_link
+    obs = observations(:imported_inat_obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_includes(html, "Imported from iNaturalist")
+    # link_url is the rendered href (stored override or derived); import
+    # links may have a NULL url column, so assert against link_url.
+    expected_url = obs.import_link.link_url
+    assert_html(html, "a[href='#{expected_url}'][target='_blank']" \
+                      "[rel='noopener noreferrer']")
+  end
+
+  # Enum-credit branch (no import_link) -- Observation#source_credit
+  # was deleted (#4868); this exercises the replacement tag directly
+  # in app/components/grid/box.rb#render_source_credit_inner.
+  # mo_website specifically is excluded by source_noteworthy? (it's
+  # the default, not worth calling out), so this needs a fixture with
+  # a different source -- amateur_obs has mo_api.
+  def test_enum_source_credit_renders_credit_text
+    obs = observations(:amateur_obs)
+    assert(obs.source_noteworthy?)
+    component = Components::Grid::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_html(html, ".log-source-credit", text: "#{:via.l} MO API")
+  end
+end

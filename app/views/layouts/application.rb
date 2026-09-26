@@ -78,26 +78,16 @@ module Views::Layouts
 
     def render_body(&block)
       render_gtm_iframe_when_production
-      render_main_container(content_classes_for_main, &block)
+      render_main_container(&block)
       render_bottom_singletons
     end
 
-    # `content_for(:container_class)` + `(:content_padding)` are
-    # guaranteed populated by the time the layout renders —
-    # `Views::FullPageBase#around_template` fills any unset slot
-    # with the matching default after the action's `view_template`
-    # has finished.
-    def content_classes_for_main
-      class_names(content_for(:container_class),
-                  content_for(:content_padding))
-    end
-
-    def render_main_container(content_classes, &block)
+    def render_main_container(&block)
       banner = ::Banner.current
       div(id: "main_container", class: "px-sm-3",
           data: main_container_data(banner)) do
         render(Views::Layouts::App::Banners.new(banner: banner))
-        Row(class: "row-offcanvas row-offcanvas-left",
+        div(class: "row-offcanvas row-offcanvas-left",
             data: { nav_target: "offcanvas" }) do
           render(Views::Layouts::Sidebar.new(
                    user: current_user,
@@ -105,7 +95,7 @@ module Views::Layouts
                    request: request,
                    languages: current_languages
                  ))
-          render_right_side(content_classes, banner: banner, &block)
+          render_right_side(banner: banner, &block)
         end
       end
     end
@@ -120,16 +110,33 @@ module Views::Layouts
       { controller: controllers, nav_target: "container" }
     end
 
-    def render_right_side(content_classes, banner:, &block)
-      Column(id: "right_side", xs: 12, md: 10) do
+    def render_right_side(banner:, &block)
+      # Fixed width via `#right_side` in mo/_layout.scss (calc'd
+      # against the sidebar's fixed `$sidebar-max-width`), not a
+      # Bootstrap grid column.
+      div(id: "right_side") do
         render(Views::Layouts::TopNav.new(user: current_user,
                                           query: current_query,
                                           banner: banner))
+        render(Views::Layouts::SearchNav.new)
         render(Views::Layouts::App::PageFlash.new)
+        render_header_and_main(&block)
+      end
+    end
+
+    # `content_for(:container_class)` -- guaranteed populated by the
+    # time the layout renders, see `Views::FullPageBase#around_template`
+    # -- wraps the header and `<main>` together so the title bar's
+    # right-aligned content (edit icons, a form's submit button) lines
+    # up with the content box's edge below it, not `#right_side`'s
+    # full, sidebar-independent width.
+    def render_header_and_main(&block)
+      div(class: content_for(:container_class)) do
         render(Views::Layouts::Header.new(
                  any_content_filters_applied: @any_content_filters_applied
                ))
-        Container(element: :main, id: "content", class: content_classes,
+        Container(element: :main, id: "content",
+                  class: content_for(:content_padding),
                   data: { controller: "lightgallery" }) do
           comment { "MAIN_PAGE_CONTENT" }
           yield
@@ -146,7 +153,6 @@ module Views::Layouts
     def render_bottom_singletons
       Modal(type: :progress_spinner)
       Modal(type: :confirm)
-      render(Views::Layouts::App::MediaQueryTests.new)
       render(Views::Layouts::App::GtmFooter.new)
     end
 

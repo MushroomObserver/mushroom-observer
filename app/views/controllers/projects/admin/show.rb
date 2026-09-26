@@ -44,7 +44,7 @@ module Views::Controllers::Projects::Admin
 
     def render_danger_zone
       Panel(
-        panel_class: "panel-danger mt-4",
+        panel_class: "border-danger mt-4",
         panel_id: "project_danger_zone"
       ) do |panel|
         panel.with_heading do

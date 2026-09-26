@@ -9,10 +9,9 @@
 #   than the current consensus, or
 # - there's no viewer at all.
 #
-# Used by `Views::FullPageBase#add_owner_naming(observation:,
-# user:)` (rendered into `content_for(:owner_naming)`), and
-# consulted by `ConsensusNameLink` to decide whether to append a
-# `(Site ID)` flag to the consensus name.
+# Used by `Views::FullPageBase#add_show_title`'s `owner_naming:`
+# handling, and consulted by `ConsensusNameLink` to decide whether
+# to append a `(Site ID)` flag to the consensus name.
 module Views::Controllers::Observations
   class OwnerNamingLine < Views::Base
     # Convenience: matches `visible?` without instantiating
@@ -27,19 +26,14 @@ module Views::Controllers::Observations
     def view_template
       return unless visible?
 
-      # Render the link inline (not via `DisplayNameBriefAuthorsLink`)
-      # because the owner-naming line wants the author text at the
-      # same size as the species name — the obs-show title chain
-      # uses `.small_author` for the author bit, but on this line
-      # the legacy behavior (matched on production) keeps everything
-      # at the normal size.
-      Link(type: :get, name: owner_name.text_name,
-           target: name_path(id: owner_name.id),
-           class: "obs_owner_naming_link_#{owner_name.id}") do
-        trusted_html(owner_name.display_name_brief_authors(@user).t)
-      end
+      render(DisplayNameBriefAuthorsLink.new(
+               name: owner_name, user: @user,
+               class: "obs_owner_naming_link_#{owner_name.id}"
+             ))
       whitespace
-      plain("(#{:show_observation_owner_id.l})")
+      small(class: "owner-naming-flag") do
+        "(#{:show_observation_owner_id.l})"
+      end
     end
 
     def visible?

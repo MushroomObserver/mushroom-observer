@@ -4,6 +4,18 @@ body {
   word-wrap: break-word;
 }
 
+// rem font-sizes (Bootstrap sets .btn/.form-control/.dropdown-menu's
+// at compile time) are relative to the root, not to body -- list any
+// such element here so it follows body's breakpoint bump too.
+body,
+.btn,
+.form-control,
+.dropdown-menu {
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9375rem; // 15px at 16px root
+  }
+}
+
 // Give focus outlines breathing room so they don't clip text/icons.
 a:focus,
 button:focus,
@@ -14,7 +26,7 @@ button:focus,
 
 // Inside matrix boxes, overflow:hidden clips outlines. Use an
 // inset box-shadow instead so the focus indicator is visible.
-.rss-box-details {
+.log-details {
   a:focus,
   button:focus,
   .btn:focus,

@@ -27,12 +27,10 @@ class Views::Layouts::Sidebar
       html = render_sidebar(simple_links)
 
       # Heading row.
-      heading_classes =
-        "div.list-group-item.disabled.font-weight-bold.d-block.d-sm-none"
-      assert_html(html, heading_classes,
+      assert_html(html, ".list-group-item.d-block.d-sm-none",
                   text: "#{:app_context_actions.t}:")
-      # Each plain link is an indented, mobile-only row.
-      assert_html(html, "a.list-group-item.indent.d-block.d-sm-none",
+      # Each plain link is a mobile-only row.
+      assert_html(html, "a.list-group-item.d-block.d-sm-none",
                   count: simple_links.length)
     end
 

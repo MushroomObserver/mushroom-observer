@@ -33,4 +33,13 @@ export default class extends Controller {
       : false
     $(element).tooltip({ container })
   }
+
+  // A Turbo Stream `replace` on a vote button's ancestor swaps the
+  // trigger out from under an open tooltip without ever firing its
+  // hide/hover-out handlers, leaving the popup element orphaned in
+  // the DOM. Stimulus's target-tracking MutationObserver calls this
+  // whenever a `tip` target is removed, wherever that happens.
+  tipTargetDisconnected(element) {
+    $(element).tooltip("dispose")
+  }
 }

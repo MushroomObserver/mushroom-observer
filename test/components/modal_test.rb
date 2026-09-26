@@ -11,13 +11,17 @@ class ModalTest < ComponentTestCase
 
     # Modal nesting
     assert_html(html, ".modal#modal_thing[role='dialog']")
-    assert_html(html, ".modal-dialog[role='document']")
+    assert_html(html, ".modal-dialog.modal-dialog-centered[role='document']")
     assert_html(html, ".modal-content")
 
     # Default chrome
     assert_html(html, ".modal-header > h4.modal-title#modal_thing_title",
                 text: "Pick a thing")
     assert_html(html, ".modal-header > button.close[data-dismiss='modal']")
+    # .modal-header is a flex row (justify-content: space-between) --
+    # DOM order determines left-to-right position, so the title has
+    # to precede the close button to land on the left.
+    assert_html(html, ".modal-title + button.close")
 
     # Body + footer rendered from slot content
     assert_html(html, ".modal-body#modal_thing_body > p",
@@ -27,7 +31,7 @@ class ModalTest < ComponentTestCase
     # Default modal Stimulus controller
     assert_html(html, ".modal[data-controller='modal']")
 
-    # Default styling: fade in (not auto-open)
+    # Default styling: fade, not shown (not auto-open)
     assert_includes(html, "class=\"modal fade\"")
     assert_not_includes(html, "modal-backdrop")
   end
@@ -48,8 +52,8 @@ class ModalTest < ComponentTestCase
   def test_auto_open_adds_backdrop_and_display_block
     html = render_modal(id: "modal_auto", title: "Auto", auto_open: true)
 
-    assert_html(html, ".modal-backdrop.fade.in")
-    assert_includes(html, "class=\"modal fade in\"")
+    assert_html(html, ".modal-backdrop.fade.show")
+    assert_includes(html, "class=\"modal fade show\"")
     assert_includes(html, "style=\"display: block;\"")
   end
 
@@ -67,6 +71,24 @@ class ModalTest < ComponentTestCase
     assert_html(html, "h4.modal-title#modal_x_header")
     assert_html(html, ".modal-body#modal_x_body")
     assert_html(html, ".modal[aria-labelledby='modal_x_header']")
+  end
+
+  def test_size_adds_modal_size_class
+    html = render_modal(id: "modal_lg", title: "T", size: :lg) do |m|
+      m.with_body { "b".html_safe }
+    end
+
+    assert_html(html, ".modal-dialog.modal-dialog-centered.modal-lg")
+  end
+
+  def test_no_size_omits_modal_size_class
+    html = render_modal(id: "modal_default", title: "T") do |m|
+      m.with_body { "b".html_safe }
+    end
+
+    assert_html(html, ".modal-dialog.modal-dialog-centered")
+    assert_no_html(html, ".modal-sm")
+    assert_no_html(html, ".modal-lg")
   end
 
   def test_title_content_slot_overrides_title_prop

@@ -155,12 +155,12 @@ export default class extends Controller {
 
   addDashedBorder() {
     // console.log("addDashedBorder")
-    this.drop_zone.classList.add('dashed-border');
+    this.drop_zone.classList.add('border-dashed');
   }
 
   removeDashedBorder() {
     // console.log("removeDashedBorder")
-    this.drop_zone.classList.remove('dashed-border');
+    this.drop_zone.classList.remove('border-dashed');
   }
 
   dropFiles(e) {
@@ -534,15 +534,17 @@ export default class extends Controller {
   showOrHideCarouselControls() {
     const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
       _indicontrols = this.carouselTarget.querySelector('#added_thumbnails'),
-      _controls = this.carouselTarget.querySelector('.carousel-control'),
+      _controls = this.carouselTarget.querySelectorAll(
+        '.carousel-control-prev, .carousel-control-next'
+      ),
       _count = _items.length;
 
     if (_count > 1) {
       _indicontrols?.classList.remove('d-none');
-      _controls?.classList.remove('d-none');
+      _controls.forEach((control) => control.classList.remove('d-none'));
     } else {
       _indicontrols?.classList.add('d-none');
-      _controls?.classList.add('d-none');
+      _controls.forEach((control) => control.classList.add('d-none'));
     }
   }
 
@@ -779,13 +781,13 @@ export default class extends Controller {
   }
 
   // Point the carousel-item's thumb radio (its value, id, and the
-  // wrapping label's `for=`) at the real image id from the server.
+  // wrapping label's `for=`) at the image id from the server.
   // good_images is assembled separately, in selection order, by
   // uploadBatch -- so it is not touched here.
   //
   // At render time the radio's `value` was `"true"` and its `id`
   // was `thumb_image_id_<UUID>` (UUID generated client-side per
-  // upload). Once we have a real image id from the server, we
+  // upload). Once we have a image id from the server, we
   // switch to `value="<image.id>"` and `id="thumb_image_id_<image.id>"`
   // so:
   //   - the submitted `observation[thumb_image_id]` value is real,
@@ -821,21 +823,6 @@ export default class extends Controller {
   /*********************/
   /*      Helpers      */
   /*********************/
-
-  // notice this is for block-level
-  show(element) {
-    if (element !== undefined) {
-      element.style.display = 'block';
-      element.classList.add('in');
-    }
-  }
-
-  hide(element) {
-    if (element !== undefined) {
-      element.classList.remove('in');
-      window.setTimeout(() => { element.style.display = 'none'; }, 600);
-    }
-  }
 
   // Phlex renders submit buttons as <button>, not <input> -- setting
   // .value on a <button> is a no-op for its displayed text (.value is

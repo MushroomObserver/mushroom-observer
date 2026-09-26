@@ -3,9 +3,7 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
-  # Bootstrap 3's expanded-collapse class -- "show" under BS4 (see
-  # Components::Collapsible.collapse_classes).
-  EXPANDED = "in"
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
 
   include ActiveJob::TestHelper
 
@@ -44,7 +42,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:tab)
     assert_field("observation_naming_name", with: "Elfin saddle")
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     assert_flash_error(:form_observations_there_is_a_problem_with_name)
     assert_selector("#observation_form")
@@ -77,7 +75,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Test naming reason checkbox/textarea interaction
     # The Vote/Reasons collapse should have expanded when valid name was entered
     assert_selector(
-      "[data-autocompleter--name-target='collapseFields'].in", wait: 4
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}", wait: 4
     )
 
     # Find reason 2 checkbox ("Used references") and check it
@@ -87,7 +85,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Check the reason checkbox (click the label to toggle collapse)
     reason_checkbox_label.click
-    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
 
     # Fill in the reason notes textarea
     reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
@@ -96,23 +94,23 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Uncheck the reason checkbox - should collapse and clear the input
     reason_checkbox_label.click
-    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     # Wait for the collapse animation to complete and trigger clearInput
     sleep(0.5)
 
     # Re-check the reason checkbox - should expand but be empty
     reason_checkbox_label.click
-    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
     assert_equal("", reason_notes.value,
                  "Textarea should be empty after toggle")
 
     # Uncheck again before submitting (we want no reason 2 stored)
     reason_checkbox_label.click
-    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     sleep(0.5)
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     assert_selector("body.observations__show")
     new_obs = Observation.last
@@ -261,7 +259,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".upload-status-overlay.d-none", visible: :all)
     assert_selector(".remove_image_button:not([disabled])", visible: :all)
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     # The overlay unhides once this item's own upload POST starts, and
     # settles on the checkmark (not the spinner) once it succeeds --
@@ -311,7 +309,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                    # so stub it rather than let it print.
                    Rails.logger.stub(:error, nil) do
                      accept_alert(wait: 8) do
-                       within("#observation_form") { click_commit }
+                       within("#title_bar") { click_commit }
                      end
                    end
                  ensure
@@ -349,7 +347,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Elfin saddle")
     page.driver.browser.keyboard.type(:tab)
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     assert_selector("#name_messages.alert-danger", wait: 6)
     assert_selector("#name_messages", text: "MO does not recognize the name")
@@ -396,7 +394,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     # Observation should have saved with the existing location_id for U.P.
     assert_selector("body.observations__show")
@@ -441,7 +439,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
     fill_in("observation_naming_name", with: "Coprinus comatus")
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     assert_selector("body.locations__new", wait: 6)
     assert_field("location_display_name", with: nonexistent_where)
@@ -633,7 +631,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Agaricus")
 
     # Submit to create observation
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
     assert_selector("body.observations__show", wait: 10)
 
     # Navigate to edit page
@@ -846,7 +844,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     # rejected, but images uploaded
     assert_selector("body.observations__new", wait: 12)
@@ -926,13 +924,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Agaricus campestris")
     assert_field("observation_naming_name", with: "Agaricus campestris")
     # Vote/reasons collapse should expand when name is filled
-    assert_selector("[data-autocompleter--name-target='collapseFields'].in")
+    assert_selector(
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"
+    )
     select(Vote.confidence_string(Vote.next_best_vote),
            from: "observation_naming_vote_value")
     assert_select("observation_naming_vote_value",
                   selected: Vote.confidence_string(Vote.next_best_vote))
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     # NOTE: The flash message for location creation is commented out in
     # locationable.rb line 117, so we don't expect it here
@@ -1033,7 +1033,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(obs_notes, align: :top)
     fill_in(other_notes_id, with: "New notes for observation")
 
-    within("#observation_form") { click_commit }
+    within("#title_bar") { click_commit }
 
     assert_selector("body.observations__show")
     # NOTE: Flash message behavior may have changed - commenting out for now
@@ -1078,7 +1078,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Open the map
     click_button(:form_observations_open_map.l)
-    assert_selector("#observation_form_map.in", wait: 10)
+    assert_selector("#observation_form_map.#{EXPANDED}", wait: 10)
 
     # Wait for Google Maps to load (map controller sets data-map="connected")
     assert_selector("[data-map='connected']", wait: 10)
@@ -1977,7 +1977,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Wait for geolocation collapse to expand
-    assert_selector("#observation_geolocation.in", wait: 10)
+    assert_selector("#observation_geolocation.#{EXPANDED}", wait: 10)
 
     # Verify GPS fields are populated. wait: 20, not 10 -- same
     # contention-sensitive EXIF-extraction dependency as the GEOTAGGED_EXIF

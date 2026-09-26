@@ -14,7 +14,7 @@ module Views::Controllers::Images
         # Subscribes this page to Image#broadcast_processed_update's
         # interactive-size broadcast (rendered as a plain top-level
         # statement, not inside the Panel(...) block below -- see
-        # Components::Matrix::Box for why that placement would
+        # Components::Grid::Box for why that placement would
         # silently never emit anything).
         turbo_stream_from([@image, :processed])
         Panel(panel_id: "image_panel") do |panel|
@@ -57,7 +57,7 @@ module Views::Controllers::Images
           name: label_key.t,
           target: transform_image_path(id: @image.id,
                                        op: operation, size: @size),
-          variant: :outline, icon: icon, label: true
+          variant: :outline, icon: icon, show_label: :responsive
         )
       end
 

@@ -85,7 +85,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
   # deliberately skips the whole lightbox stream for imageless
   # observations (there's no `.theater-btn`/caption element anywhere
   # in the DOM to target; `render_lightbox_link` already no-ops
-  # without an image on the normal show/matrix-box render path
+  # without an image on the normal show/grid-box render path
   # either). Use an obs with a thumb image so the caption-rendering
   # path under test actually runs.
   def test_update_turbo_stream_renders_caption_components

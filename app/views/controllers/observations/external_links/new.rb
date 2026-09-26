@@ -2,7 +2,7 @@
 
 # Action template for `Observations::ExternalLinksController#new` —
 # the "add an external link to this observation" page. Renders
-# `ExternalLinks::Form` alongside a `Components::Matrix::Box`
+# `ExternalLinks::Form` alongside a `Components::Grid::Box`
 # observation-summary card.
 module Views::Controllers::Observations::ExternalLinks
   class New < Views::FullPageBase
@@ -37,7 +37,7 @@ module Views::Controllers::Observations::ExternalLinks
 
     def render_matrix_box
       Row(element: :ul, class: "list-unstyled") do
-        render(::Components::Matrix::Box.new(
+        render(::Components::Grid::Box.new(
                  user: @user,
                  object: @observation.rss_log || @observation,
                  columns: Components::Column.classes_for(xs: 12)

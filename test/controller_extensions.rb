@@ -765,7 +765,7 @@ module ControllerExtensions
   # Assert index results. This measures <a> tags that link to an obs ID
   def assert_results(**attributes)
     assert_select(
-      "#results .rss-what a:match('href', ?)", %r{^/obs/\d+}, attributes,
+      "#results .log-what a:match('href', ?)", %r{^/obs/\d+}, attributes,
       "Wrong number of results displayed"
     )
   end

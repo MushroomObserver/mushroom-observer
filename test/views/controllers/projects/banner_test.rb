@@ -13,7 +13,7 @@ module Views::Controllers::Projects
 
       # Outer row and container
       assert_html(html, ".row")
-      assert_html(html, ".col-xs-12#project_banner")
+      assert_html(html, ".col-12#project_banner")
 
       # Banner overlay positioning (only with images)
       assert_html(html, ".bottom-left.ml-3.mb-3.p-2")
@@ -28,7 +28,7 @@ module Views::Controllers::Projects
 
       # Outer row and container
       assert_html(html, ".row")
-      assert_html(html, ".col-xs-12#project_banner")
+      assert_html(html, ".col-12#project_banner")
 
       # No banner overlay positioning without images
       assert_no_html(html, ".bottom-left")

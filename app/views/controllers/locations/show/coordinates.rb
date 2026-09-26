@@ -117,7 +117,7 @@ module Views::Controllers::Locations
         Link(
           type: :get,
           tab: ::Tab::Location::ObservationsAt.new(location: @location),
-          label: true
+          show_label: :responsive
         )
       end
     end

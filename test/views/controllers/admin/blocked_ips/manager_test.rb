@@ -4,6 +4,8 @@ require("test_helper")
 
 module Views::Controllers::Admin::BlockedIps
   class ManagerTest < ComponentTestCase
+    EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
     def setup
       super
       IpStats.reset!
@@ -16,7 +18,7 @@ module Views::Controllers::Admin::BlockedIps
       assert_html(html, "turbo-frame#blocked_ips_list")
 
       # Panel structure with collapsible
-      assert_html(html, ".panel.panel-default")
+      assert_html(html, ".card")
       assert_html(html, ".panel-collapse-trigger")
       assert_html(html, "#blocked_ips_body")
 
@@ -62,8 +64,8 @@ module Views::Controllers::Admin::BlockedIps
 
       # Shows pagination info in the panel heading, e.g.
       # "Showing 1 of 100 (page 2 of 5)".
-      assert_html(html, ".panel-heading-links", text: "Showing 1 of 100")
-      assert_html(html, ".panel-heading-links", text: "page 2 of 5")
+      assert_html(html, ".card-header-links", text: "Showing 1 of 100")
+      assert_html(html, ".card-header-links", text: "page 2 of 5")
 
       # Renders filter form
       assert_html(html, "#blocked-ips-list-filter-form")
@@ -77,8 +79,8 @@ module Views::Controllers::Admin::BlockedIps
       html = render_manager(type: :okay, ips: ["1.2.3.4"],
                             page: nil, total_pages: nil, total_count: nil)
 
-      heading = Nokogiri::HTML(html).at_css(".panel-heading-links")
-      assert(heading, "Expected .panel-heading-links element")
+      heading = Nokogiri::HTML(html).at_css(".card-header-links")
+      assert(heading, "Expected .card-header-links element")
       assert_includes(heading.text, "Showing 1")
       assert_not_includes(heading.text, "page")
       assert_no_html(html, "#okay-ips-list-filter-form")
@@ -101,8 +103,8 @@ module Views::Controllers::Admin::BlockedIps
         "[href='#blocked_ips_body']"
       )
 
-      # Body is expanded by default (has "in" class)
-      assert_html(html, ".panel-collapse.collapse.in")
+      # Body is expanded by default
+      assert_html(html, ".card-collapse.collapse.#{EXPANDED}")
     end
 
     private

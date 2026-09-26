@@ -73,7 +73,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def view_template
       div(
         id: controller_id,
-        class: "autocompleter",
+        class: class_names("autocompleter", collapse_help_present? && "mb-3"),
         data: controller_data
       ) do
         render_input_field do
@@ -172,8 +172,22 @@ class Components::ApplicationForm < Superform::Rails::Form
     def autocompleter_wrapper_options
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
-        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown",
+                                collapse_help_present? && "mb-2")
       )
+    end
+
+    # A collapsible help block renders as a sibling right after
+    # .form-group -- when expanded, .form-group's default margin-
+    # bottom (~1rem) reads as a gap between the field and the help
+    # describing it. Tighten .form-group to mb-2 and move the
+    # field-to-field spacing that margin used to provide onto the
+    # outer .autocompleter wrapper instead (mb-3, see view_template).
+    # Plain (non-collapsible) help already handles this correctly via
+    # FieldWrapperRendering#help_present? -- this only covers the
+    # collapsible case, which that check deliberately excludes.
+    def collapse_help_present?
+      help_slot && wrapper_options[:help_collapse]
     end
 
     def add_slots_to_field(field_component, &block)
@@ -245,13 +259,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # `Link::Get` auto-wires a tooltip (data-tooltip-target + title)
     # whenever `icon:` is present -- plain `Button` doesn't (only
     # `CRUDBase`, for form-submitting buttons, does that automatically).
-    # Converting away from Link dropped it, so each one adds the same
-    # tooltip_data shape Link::Get used to supply, by hand.
+    # Each button below supplies the same tooltip_data shape by hand.
     def render_find_button
       return unless find_text
 
       Button(name: find_text,
-             icon: :find_on_map, label: false,
+             icon: :find_on_map, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 find-btn d-none p-0",
@@ -266,7 +279,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless keep_text
 
       Button(name: keep_text,
-             icon: :apply, label: false,
+             icon: :apply, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 keep-btn d-none p-0",
@@ -283,7 +296,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless keep_text
 
       Button(name: edit_text,
-             icon: :edit, label: false,
+             icon: :edit, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 edit-btn d-none p-0",
@@ -302,7 +315,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
              class: "ml-3 create-button p-0",
-             icon: :plus, label: true,
+             icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
              title: create_text,
@@ -319,7 +332,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            modal_id: create,
            name: create_text,
            target: create_path,
-           icon: :plus, label: true,
+           icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
            class: "ml-3 create-link",
            data: { target_attr_key => "createBtn" })
@@ -333,20 +346,19 @@ class Components::ApplicationForm < Superform::Rails::Form
           action: "scroll->#{stimulus_controller_name}#scrollList:passive"
         }
       ) do
-        ul(class: "virtual_list",
-           data: { target_attr_key => "list" }) do
+        div(class: "virtual_list",
+            data: { target_attr_key => "list" }) do
           10.times do |i|
-            li(class: "dropdown-item") do
-              Link(
-                type: :get,
-                name: "",
-                target: "#",
-                data: {
-                  row: i,
-                  action: "click->#{stimulus_controller_name}#selectRow:prevent"
-                }
-              )
-            end
+            Link(
+              type: :get,
+              name: "",
+              target: "#",
+              class: "dropdown-item",
+              data: {
+                row: i,
+                action: "click->#{stimulus_controller_name}#selectRow:prevent"
+              }
+            )
           end
         end
       end

@@ -31,7 +31,7 @@ class Views::Layouts::Sidebar
 
     private
 
-    def render_nav_link(link, link_class: @classes[:indent])
+    def render_nav_link(link, link_class: nil)
       title, url, html_options = link
       html_options ||= {}
       extra_class = html_options.delete(:class)

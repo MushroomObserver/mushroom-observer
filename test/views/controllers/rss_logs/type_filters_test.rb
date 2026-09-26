@@ -19,7 +19,7 @@ module Views::Controllers::RssLogs
     def test_renders_show_label
       html = render_component(nil, ["all"])
 
-      # Was styled as a disabled btn-default — misleading affordance.
+      # Was styled as a disabled btn-secondary — misleading affordance.
       # Now a plain `text-muted` span: visibly a label, not a button.
       assert_html(html, "span.text-muted", text: :rss_show.t)
     end
@@ -103,7 +103,7 @@ module Views::Controllers::RssLogs
 
       # "Apply" reads better than "Submit" for a filter-narrowing
       # action. Filter buttons use `.btn-outline-default` (subtle);
-      # the Apply button uses solid `.btn-default` so it stands out
+      # the Apply button uses solid `.btn-secondary` so it stands out
       # as the commit action.
       assert_html(html, "button[type='submit']", text: :apply.ti)
     end

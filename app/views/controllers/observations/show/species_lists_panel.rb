@@ -54,7 +54,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
          tab: ::Tab::Observation::AddToSpeciesList.new(
            observation: @obs, q_param: q_param
          ),
-         label: true)
+         show_label: :always)
   end
 
   def render_list
@@ -66,25 +66,29 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   def render_item(spl)
     li(id: "species_list_#{spl.id}") do
       a(href: species_list_path(spl.id)) { trusted_html(spl.format_name.t) }
-      if permission?(spl)
-        whitespace
-        render_remove_button(spl)
-      end
+      InlineLinkBlock(items: remove_button_items(spl))
     end
   end
 
-  def render_remove_button(spl)
+  def remove_button_items(spl)
+    return [] unless permission?(spl)
+
+    [remove_button(spl)]
+  end
+
+  def remove_button(spl)
     remove_path = observation_species_list_path(
       id: @obs.id, species_list_id: spl.id, commit: "remove"
     )
-    Button(
+    Components::Button.new(
       type: :put,
       variant: :strip,
       icon: :remove,
       icon_class: "text-danger",
       name: :remove.ti,
       target: remove_path,
-      confirm: :are_you_sure.l
+      confirm: :are_you_sure.l,
+      class: Components::InlineLinkBlock.item_class
     )
   end
 end

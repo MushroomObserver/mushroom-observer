@@ -1,20 +1,24 @@
 # frozen_string_literal: true
 
-# First panel-footer row of the namings sub-panel: the
+# First card-footer row of the namings sub-panel: the
 # "Propose new name" button on the left and the consensus-help
 # blurb on the right. Admins / image-model beta testers also see
-# a "Suggest names" button stacked under the propose button.
-#
+# a "Suggest names" button stacked under the propose button. On
+# mobile, the propose button and the consensus-help text are both
+# hidden by default -- the help text lives behind a toggle instead.
 class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Base
   prop :user, ::User
   prop :obs, ::Observation
 
+  # `xs: 12` on both -- the buttons column is entirely `d-none` on
+  # mobile (propose is `d-sm-block`, suggest is admin-only), so
+  # `col: true` at `xs` reserved half the row for nothing.
   def view_template
     Row do
       Column(sm: 11) do
         Row do
-          Column(col: true, md: 4) { render_buttons }
-          Column(col: true, md: 8) { render_consensus_help }
+          Column(xs: 12, md: 4) { render_buttons }
+          Column(xs: 12, md: 8) { render_consensus_help }
         end
       end
     end
@@ -28,24 +32,25 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
     render_propose_button
     return unless suggest_namings_enabled?
 
-    br
     render_suggest_button
   end
 
   # Text-button variant of the propose-naming link (icon-only
   # variant lives in the panel `Header` for mobile).
   def render_propose_button
-    Button(
-      type: :modal,
-      name: :show_namings_propose_new_name.t,
-      target: new_observation_naming_path(
-        observation_id: @obs.id,
-        context: "namings_table"
-      ),
-      modal_id: "obs_#{@obs.id}_naming",
-      size: :sm,
-      class: "d-none d-sm-inline-block propose-naming-link"
-    )
+    div(class: "d-none d-sm-block mb-2") do
+      Button(
+        type: :modal,
+        name: :show_namings_propose_new_name.t,
+        target: new_observation_naming_path(
+          observation_id: @obs.id,
+          context: "namings_table"
+        ),
+        modal_id: "obs_#{@obs.id}_naming",
+        size: :sm,
+        class: "propose-naming-link"
+      )
+    end
   end
 
   # Gating: a thumb image must exist (so
@@ -64,7 +69,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
     Button(
       name: :show_namings_suggest_names.l,
       size: :sm,
-      class: "mt-2",
+      class: "mb-2",
       data: suggest_button_data
     )
   end
@@ -97,9 +102,24 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
     }.to_json
   end
 
+  # Collapsed by default, behind a mobile-only toggle -- `d-sm-block`
+  # (an `!important` utility) overrides the collapse's plain
+  # `display: none` at `sm`+, so desktop always shows it open.
   def render_consensus_help
-    div(class: "card-text small") do
+    render_mobile_help_toggle
+    Collapsible(id: "namings_consensus_help",
+                class: "card-text small d-sm-block") do
       trusted_html(:show_namings_consensus_help.t)
+    end
+  end
+
+  def render_mobile_help_toggle
+    Link(type: :collapse_toggle,
+         target_id: "namings_consensus_help",
+         button: :link, size: :sm,
+         class: "d-sm-none") do
+      plain(:show_namings_vote_on_names.t)
+      Icon(type: :info, wrap_class: "icon-text-gap")
     end
   end
 end

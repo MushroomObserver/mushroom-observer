@@ -37,6 +37,6 @@ class ModalProgressSpinnerTest < ComponentTestCase
                 "> #modal_progress_spinner_caption")
     assert_html(html,
                 "#modal_progress_spinner_body > " \
-                "svg.mo-icon.mo-icon-reuse.spinner-right.mx-2")
+                "svg.mo-icon.mo-icon-spinner.spinner-right")
   end
 end

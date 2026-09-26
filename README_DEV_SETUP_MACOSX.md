@@ -475,10 +475,10 @@ When it's on, the cache store is Solid Cache (the `cache_development`
 database), matching production — not an in-process memory store — so
 a cache read/write costs a real query locally too, same as prod.
 
-MO's fragment-caching call site, `Components::Matrix::Table` (the
+MO's fragment-caching call site, `Components::Grid` (the
 observations/images grid), keys its fragments on a hand-maintained
-`CACHE_VERSION` string (see `app/components/matrix/table.rb`), not
-automatic template-digest busting. If you're editing `Matrix::Box`'s
+`CACHE_VERSION` string (see `app/components/grid.rb`), not
+automatic template-digest busting. If you're editing `Grid`'s
 rendering with caching toggled on, remember to bump `CACHE_VERSION`
 or you'll see stale HTML for previously-cached rows.
 

@@ -35,10 +35,10 @@ module Views::Controllers::Occurrences
     end
 
     def render_observation_grid
-      render(Components::Matrix::Table.new(
-               objects: @observations,
-               user: @user
-             ))
+      Grid(
+        objects: @observations,
+        user: @user
+      )
     end
   end
 end

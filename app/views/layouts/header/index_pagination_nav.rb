@@ -28,7 +28,7 @@ module Views::Layouts
     prop :request_url, ::String # Full URL w/ query params, for links
 
     def view_template
-      div(class: "pagination-#{@position} flex-bar mb-2") do
+      div(class: "pagination-#{@position} flex-bar px-card mb-2") do
         div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
         div(class: "d-flex") do
           render_letter_pagination_nav
@@ -45,7 +45,6 @@ module Views::Layouts
       this_letter, letters = letter_pagination_pages
 
       nav(class: "paginate pagination_letters flex-bar pl-4") do
-        render(Components::Navbar::Text.new(class: "mx-0")) { :by_letter.l }
         render_letter_input(this_letter, letters)
       end
     end
@@ -108,7 +107,7 @@ module Views::Layouts
     def render_page_link(direction, disabled:)
       page = instance_variable_get(:"@#{direction}_page")
       classes = class_names(
-        Components::Navbar::LINK_CLASSES, "#{direction}_page_link",
+        "px-2", "#{direction}_page_link",
         ("disabled opacity-0" if disabled)
       )
       url = pagination_link_url(page)
@@ -194,10 +193,16 @@ module Views::Layouts
     end
 
     def render_letter_input(this_letter, used_letters)
+      input_id = "letter_input_#{@position}"
+
       InputGroup(class: "page-input ml-2",
                  data: { controller: "page-input",
                          page_input_letters_value: used_letters }) do
+        render(Components::InputGroup::Addon.new(
+                 variant: :label, position: :prepend, label_for: input_id
+               )) { :by_letter.l }
         input(
+          id: input_id,
           type: :text, name: :letter, value: this_letter,
           class: "form-control text-right",
           size: 1, placeholder: "—",
