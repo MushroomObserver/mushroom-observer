@@ -50,6 +50,10 @@ class CheckForBrokenReferencesJob
       [ExternalLink,                 :external_site,        :alert],
       [ExternalLink,                 :user,                 :alert],
       [ExternalSite,                 :project,              :alert],
+      # :alert, not :delete -- the usage history is kept deliberately for
+      # reporting (#5416), so orphaned accounting rows are for a human to
+      # look at rather than something to clean up silently.
+      [ExternalSiteUsage,            :external_site,        :alert],
       [FieldSlip,                    :project,              :nil],
       [FieldSlip,                    :user,                 :alert],
       # An extract describes one image; without it there is nothing left
