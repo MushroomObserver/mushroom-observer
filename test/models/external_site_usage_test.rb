@@ -207,6 +207,50 @@ class ExternalSiteUsageTest < UnitTestCase
     assert_equal(4_096, totals[:bytes_out])
   end
 
+  # Counters no limit covers, so a report shows them as plain totals
+  # rather than omitting them. iNat caps requests and bytes_in.
+  def test_uncapped_totals_names_only_what_no_limit_covers
+    ExternalSiteUsage.record_transfer(@site, requests: 1, bytes_out: 7)
+
+    uncapped = ExternalSiteUsage.uncapped_totals(@site, 1.day)
+
+    assert_equal([:bytes_out], uncapped.keys)
+    assert_equal(7, uncapped[:bytes_out])
+  end
+
+  def test_uncapped_totals_covers_everything_for_a_site_with_no_limits
+    other = external_sites(:mycoportal)
+    ExternalSiteUsage.record_transfer(other, requests: 3, bytes_in: 5)
+
+    uncapped = ExternalSiteUsage.uncapped_totals(other, 1.day)
+
+    assert_equal([:requests, :bytes_in, :bytes_out], uncapped.keys)
+    assert_equal(3, uncapped[:requests])
+  end
+
+  # The lifetime figure answers "how much have we moved between these
+  # sites", which no trailing window can.
+  def test_lifetime_sums_everything_recorded_and_dates_the_start
+    old = ExternalSiteUsage.bucket_for(40.days.ago)
+    ExternalSiteUsage.create!(external_site: @site, bucket_start: old,
+                              requests: 8, bytes_in: 100, bytes_out: 2)
+    ExternalSiteUsage.record_transfer(@site, requests: 1, bytes_in: 5)
+
+    total = ExternalSiteUsage.lifetime(@site)
+
+    assert_equal(9, total.requests)
+    assert_equal(105, total.bytes_in)
+    assert_equal(2, total.bytes_out)
+    assert_equal(old, total.since)
+  end
+
+  def test_lifetime_of_a_site_with_nothing_recorded
+    total = ExternalSiteUsage.lifetime(external_sites(:mycoportal))
+
+    assert_equal(0, total.requests)
+    assert_nil(total.since)
+  end
+
   def test_totals_cover_every_counter
     assert_equal([:requests, :bytes_in, :bytes_out],
                  ExternalSiteUsage.totals_since(@site, 1.day).keys)

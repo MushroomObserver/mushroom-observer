@@ -115,6 +115,25 @@ class ExternalSiteUsage < AbstractModel
       COUNTERS.index_with { |counter| sum_since(site, window, counter) }
     end
 
+    # Counters no published limit covers, so a report can show them as
+    # plain totals rather than omitting them.
+    def uncapped_totals(site, window)
+      capped = against_limits(site).map { |limit, _u, _c| limit.counter }.uniq
+      totals_since(site, window).except(*capped)
+    end
+
+    # Everything recorded, which is what answers "how much have we moved
+    # between these two sites". `since` is nil when nothing is recorded.
+    Lifetime = Data.define(:requests, :bytes_in, :bytes_out, :since)
+
+    def lifetime(site)
+      rows = where(external_site_id: site&.id)
+      Lifetime.new(requests: rows.sum(:requests),
+                   bytes_in: rows.sum(:bytes_in),
+                   bytes_out: rows.sum(:bytes_out),
+                   since: rows.minimum(:bucket_start))
+    end
+
     # The bucket a time falls in, floored to BUCKET.
     def bucket_for(time = Time.zone.now)
       seconds = BUCKET.to_i

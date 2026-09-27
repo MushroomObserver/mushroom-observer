@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
-# Reports what MO has exchanged with each external site (#5416, #2320).
+# What MO holds from, and has exchanged with, each external site (#5416,
+# #2320). Every configured site is reported, whether or not it publishes
+# a limit and whether or not anything has been recorded: "we have
+# exchanged nothing with this site" is itself worth seeing.
+#
 # Limits live on the site rows, so a new data source needs no change
-# here -- and a site that publishes no limit is still reported, since
-# knowing how hard MO leans on a partner is useful without a cap to
-# compare against.
+# here. This is the command-line form of what belongs on an admin page.
+
+def commas(number)
+  ActiveSupport::NumberHelper.number_to_delimited(number.to_i)
+end
 
 def format_usage(value, units)
-  return value.to_s if units == :count
+  return commas(value) if units == :count
 
   format("%.2f GB", value / (1024.0**3))
 end
@@ -21,46 +27,52 @@ end
 
 def limit_line(limit, used, cap)
   share = 100.0 * used / cap
-  format("  %-22s %12s of %-10s %5.1f%%%s", limit.label,
+  format("  %-24s %14s of %-10s %5.1f%%%s", limit.label,
          format_usage(used, limit.units), format_usage(cap, limit.units),
          share, usage_flag(share))
 end
 
-# For a site with no published limit, or a counter no limit covers.
 def total_line(label, value, units)
-  format("  %-22s %12s", label, format_usage(value, units))
+  format("  %-24s %14s", label, format_usage(value, units))
+end
+
+# What MO holds that came from or points at this site.
+def inventory_line(site)
+  counts = site.link_counts
+  format("  %-24s %14s  (observations %s, images %s)", "links held",
+         commas(counts.total), commas(counts.observations),
+         commas(counts.images))
+end
+
+# Everything recorded, not just a trailing window -- the lifetime figure
+# is what answers "how much have we moved between these sites".
+def lifetime_line(site)
+  total = ExternalSiteUsage.lifetime(site)
+  return "  no traffic recorded" unless total.since
+
+  format("  %-24s %14s  (in %s, out %s, since %s)", "requests, lifetime",
+         commas(total.requests), format_usage(total.bytes_in, :bytes),
+         format_usage(total.bytes_out, :bytes), total.since.to_date)
 end
 
 def report_site_usage(site)
   puts("#{site.name}, as of #{Time.zone.now}")
+  puts(inventory_line(site))
   ExternalSiteUsage.against_limits(site).each do |limit, used, cap|
     puts(limit_line(limit, used, cap))
   end
   report_uncapped_totals(site)
-  report_busiest_bucket(site)
+  puts(lifetime_line(site))
 end
 
 # Whatever the limits did not already cover, over the trailing day, so a
-# site with no limits still shows its traffic.
+# site with no published limit still shows its recent traffic.
 def report_uncapped_totals(site)
-  capped = ExternalSiteUsage.against_limits(site).
-           map { |limit, _used, _cap| limit.counter }.uniq
-  totals = ExternalSiteUsage.totals_since(site, 1.day)
-  (ExternalSiteUsage::COUNTERS - capped).each do |counter|
+  ExternalSiteUsage.uncapped_totals(site, 1.day).each do |counter, value|
     units = counter == :requests ? :count : :bytes
-    label = "#{counter.to_s.tr("_", " ")}, trailing day"
-    puts(total_line(label, totals[counter], units))
+    puts(total_line("#{counter.to_s.tr("_", " ")}, trailing day",
+                    value, units))
   end
-end
-
-def report_busiest_bucket(site)
-  busiest = site.external_site_usages.order(bytes_in: :desc).first
-  return puts("  no usage recorded yet") unless busiest
-
-  puts("  busiest ten minutes: #{busiest.bucket_start} " \
-       "in #{format_usage(busiest.bytes_in, :bytes)}, " \
-       "out #{format_usage(busiest.bytes_out, :bytes)}, " \
-       "#{busiest.requests} requests")
 end
 
 # Grouped in Ruby rather than with a SQL date function: a month is at
@@ -89,25 +101,20 @@ def history_line(day, rows)
          format_usage(rows.sum { |_s, _r, _i, o| o }, :bytes))
 end
 
-# SITE=<name> narrows to one site; otherwise every site with a published
-# limit or any recorded usage.
+# Every site, so a site MO has exchanged nothing with is visibly at zero
+# rather than missing. SITE=<name> narrows to one.
 def usage_sites
   named = ENV.fetch("SITE", nil)
-  return ExternalSite.where(name: named) if named.present?
+  return ExternalSite.where(name: named).order(:name) if named.present?
 
-  ExternalSite.all.select do |site|
-    ExternalSiteUsage.against_limits(site).any? ||
-      site.external_site_usages.any?
-  end
+  ExternalSite.order(:name)
 end
 
 namespace :external_sites do
-  desc "Report usage against each site's published limits (SITE=name)"
+  desc "Report holdings and usage per external site (SITE=name)"
   task usage: :environment do
     sites = usage_sites
-    if sites.empty?
-      next puts("no sites with published limits or recorded usage")
-    end
+    next puts("no external sites configured") if sites.empty?
 
     sites.each { |site| report_site_usage(site) }
   end

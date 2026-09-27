@@ -173,6 +173,20 @@ class ExternalSiteTest < UnitTestCase
     assert_nil(ExternalSite.serving_media(nil))
   end
 
+  # What MO holds pointing at a site, for the usage report and the admin
+  # view it is a sketch of.
+  def test_link_counts_split_by_target_type
+    site = external_sites(:inaturalist)
+    counts = site.link_counts
+
+    assert_equal(site.external_links.count, counts.total)
+    assert_equal(site.external_links.where(target_type: "Observation").count,
+                 counts.observations)
+    assert_equal(site.external_links.where(target_type: "Image").count,
+                 counts.images)
+    assert_operator(counts.total, :>=, counts.observations + counts.images)
+  end
+
   # The point of holding these as data: a second source is a row, not a
   # code change.
   def test_another_site_can_claim_media_hosts

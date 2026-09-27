@@ -115,6 +115,17 @@ class ExternalSite < AbstractModel
       reject(&:empty?)
   end
 
+  # What MO holds that points at this site, by what the link targets.
+  # One grouped count rather than a query per type.
+  LinkCounts = Data.define(:total, :observations, :images)
+
+  def link_counts
+    by_type = external_links.group(:target_type).count
+    LinkCounts.new(total: by_type.values.sum,
+                   observations: by_type["Observation"].to_i,
+                   images: by_type["Image"].to_i)
+  end
+
   # URL of the per-record page on this site for the given external_id
   # (#4299). Built from `url_template` with its `{id}` placeholder
   # substituted; falls back to appending the id to `base_url` when no
