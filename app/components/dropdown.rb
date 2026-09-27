@@ -139,9 +139,9 @@ class Components::Dropdown < Components::Base
   # used to provide (merge args, strip `d-block` for buttons,
   # dispatch via `LinkRendering`).
   #
-  # `args[:active]` (sort-bar uses this) adds the BS3 `.active`
-  # class to the link and disables it so the current sort doesn't
-  # navigate away to itself.
+  # `args[:active]` (sort-bar uses this) adds the `.active` class to
+  # the link and disables it so the current sort doesn't navigate
+  # away to itself.
   def render_link(tuple)
     str, url, args = tuple
     args ||= {}

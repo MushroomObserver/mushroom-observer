@@ -180,7 +180,7 @@ module Views::Controllers::Projects::Violations
       #
       # We dismiss the modal via `data-action="click->modal#hide"`
       # instead of Bootstrap's `data-dismiss="modal"` because
-      # Bootstrap 3's dismiss handler chain ends up preventing the
+      # Bootstrap's dismiss handler chain ends up preventing the
       # link's default `target="_blank"` action, suppressing the new
       # tab. `modal#hide` calls `$(modal).modal('hide')` without
       # passing the event, so no preventDefault — the link's new

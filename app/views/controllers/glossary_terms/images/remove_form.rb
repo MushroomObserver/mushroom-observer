@@ -69,7 +69,7 @@ module Views::Controllers::GlossaryTerms::Images
     # `selected[<image_id>]` with `"yes"`/`"no"` matches the existing
     # controller's expected param structure (see
     # `glossary_terms/images_controller.rb#detach`). Wraps each
-    # checkbox in MO's standard `.checkbox` BS3 markup.
+    # checkbox in MO's standard `.checkbox` markup.
     def render_select_checkbox(image)
       checkbox_field("selected[#{image.id}]",
                      label: "#{:image.l} ##{image.id}",

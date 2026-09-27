@@ -819,9 +819,9 @@ export default class BaseAutocompleterController extends Controller {
     }
   }
 
-  // `show` toggles on pulldownTarget itself, not wrapTarget -- BS4's
-  // `.dropdown-menu.show` is a compound selector on the menu element,
-  // unlike BS3's `.open > .dropdown-menu` parent-child selector.
+  // `show` toggles on pulldownTarget itself, not wrapTarget --
+  // `.dropdown-menu.show` is a compound selector on the menu element
+  // itself, not a parent-child selector.
   hidePulldown() {
     this.pulldownTarget?.classList?.remove('show');
     this.menu_up = false;

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Renders a bordered, slim-padded box -- `<div class="well">` by
-# default, or any other tag via `element:`. Bootstrap 3's `.well` had
-# no BS4 successor; this is MO's minimal replacement (no size
+# default, or any other tag via `element:`. No Bootstrap `.well`
+# component exists; this is MO's minimal replacement (no size
 # variants, no background, just padding/border/margin -- see
 # `mo/_help_tooltips.scss`). Callers supply their semantic classes
 # (`.help-block`, `.position-relative`, etc.) via `class:`.

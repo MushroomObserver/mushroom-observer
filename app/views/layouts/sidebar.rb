@@ -73,8 +73,7 @@ class Views::Layouts::Sidebar < Views::Base
   def render_logo
     a(id: "logo_link", href: logo_href) do
       img(
-        # `img-responsive` was Bootstrap 3's class -- BS4 renamed it
-        # to `img-fluid` (max-width: 100%, height: auto). `w-100`
+        # `img-fluid` sets max-width: 100%, height: auto. `w-100`
         # fills the sidebar's fixed width, since `img-fluid` alone
         # only caps at 100% without growing to reach it.
         class: "logo-trim img-fluid w-100 py-3",

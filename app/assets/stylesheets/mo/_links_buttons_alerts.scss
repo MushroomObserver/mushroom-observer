@@ -17,9 +17,9 @@
   font-weight: normal !important;
 }
 
-// Custom variant (not in BS3) that mirrors form-input styling, using
-// BS3's darken() step pattern and $input-* vars so dark themes get
-// dark hover/active for free.
+// A custom variant that mirrors form-input styling, using the same
+// darken() step pattern and $input-* vars so dark themes get dark
+// hover/active for free.
 .btn-outline-default {
   color: $input-color;
   background-color: $input-bg;
@@ -121,9 +121,9 @@ form.button_to {
 }
 
 // A form-wrapped button (Components::Button::CRUDBase) gets none of
-// `.btn-group`'s border-radius squaring or margin collapse -- BS3's
-// CSS only reaches a `.btn` that's a direct child. Reimplemented
-// generically below for every `.btn-group`.
+// `.btn-group`'s border-radius squaring or margin collapse --
+// Bootstrap's CSS only reaches a `.btn` that's a direct child.
+// Reimplemented generically below for every `.btn-group`.
 //
 // `.vote-btn-group` (_images.scss) overrides this on its elements via
 // higher selector specificity and import order -- no extra override

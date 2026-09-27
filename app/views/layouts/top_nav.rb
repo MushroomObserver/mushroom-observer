@@ -102,36 +102,19 @@ class Views::Layouts::TopNav < Views::Base
     end
   end
 
+  # LEFT SIDE ##############################################################
   def render_left
     render_left_nav_toggle
     h4(class: "font-weight-bold mb-0 mr-2", id: "rubric") { render_rubric }
-    div(class: "mr-3 mr-sm-4 mr-lg-5") { render_nav_create }
-  end
-
-  def render_right
-    div(class: "btn-toolbar") do
-      render_search_nav_toggle
-      render_nav_scan_qr_code
-    end
-    ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
-                          Components::Navbar::RIGHT_CLASS, "mr-0",
-                          Components::Column.mobile_hide_classes)) do
-      # `content_for(:context_nav)` (no-block) returns the previously
-      # stashed SafeBuffer; `trusted_html` emits it into Phlex's
-      # buffer (a no-op `content_for` call would only read it).
-      trusted_html(content_for(:context_nav)) if content_for?(:context_nav)
-      render(UserNav.new(user: @user)) if @user
-    end
-    render(Login.new) if @user.nil?
-    render_show_banner_button
+    div(class: "mr-3 mr-lg-4") { render_nav_create }
   end
 
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: class_names("pr-2 pr-sm-3",
+    div(class: class_names("pr-2",
                            Components::Column.visibility_classes(
-                             show_at: :xs, hide_at: :md
+                             show_at: :xs, hide_at: :lg
                            ))) do
       Button(
         variant: :outline,
@@ -145,19 +128,6 @@ class Views::Layouts::TopNav < Views::Base
             width: "30px", alt: :menu.ti, title: :menu.ti)
       end
     end
-  end
-
-  # The magnifying-glass that toggles the collapsible search-bar
-  # row below the top nav. Shares a `.btn-toolbar` wrap with
-  # `render_nav_scan_qr_code` (see `render_right`).
-  def render_search_nav_toggle
-    Button(
-      type: :collapse_toggle,
-      target_id: "search_nav",
-      variant: :outline, size: :sm,
-      class: "px-2 top_nav_button top_nav_icon_button",
-      aria: { expanded: "false", controls: "search_nav" }
-    ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
   end
 
   # The page title in the navbar. Becomes a link to the
@@ -240,7 +210,7 @@ class Views::Layouts::TopNav < Views::Base
                       action: :new),
       name: :add.ti, show_label: :responsive,
       variant: :success, size: :sm,
-      class: "ml-1 mr-0 mx-sm-3 top_nav_button new_object_button",
+      class: "mx-sm-3 top_nav_button new_object_button",
       title: full_label,
       aria: { label: full_label },
       data: { tooltip_target: "tip", placement: :bottom } }
@@ -249,6 +219,38 @@ class Views::Layouts::TopNav < Views::Base
   def nav_create_label
     obj_name = controller.controller_model_name.underscore.to_sym.ti
     [:new.ti, obj_name].safe_join(" ")
+  end
+
+  # RIGHT SIDE #############################################################
+  def render_right
+    div(class: "btn-toolbar") do
+      render_search_nav_toggle
+      render_nav_scan_qr_code
+    end
+    ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
+                          Components::Navbar::RIGHT_CLASS, "mr-0",
+                          Components::Column.mobile_hide_classes)) do
+      # `content_for(:context_nav)` (no-block) returns the previously
+      # stashed SafeBuffer; `trusted_html` emits it into Phlex's
+      # buffer (a no-op `content_for` call would only read it).
+      trusted_html(content_for(:context_nav)) if content_for?(:context_nav)
+      render(UserNav.new(user: @user)) if @user
+    end
+    render(Login.new) if @user.nil?
+    render_show_banner_button
+  end
+
+  # The magnifying-glass that toggles the collapsible search-bar
+  # row below the top nav. Shares a `.btn-toolbar` wrap with
+  # `render_nav_scan_qr_code` (see `render_right`).
+  def render_search_nav_toggle
+    Button(
+      type: :collapse_toggle,
+      target_id: "search_nav",
+      variant: :outline, size: :sm,
+      class: "px-2 top_nav_button top_nav_icon_button",
+      aria: { expanded: "false", controls: "search_nav" }
+    ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
   end
 
   # QR-scanner link, only for the Observations / FieldSlips
@@ -265,7 +267,7 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "mx-2 ml-sm-4 top_nav_button top_nav_icon_button",
+      class: "mx-2 ml-md-4 top_nav_button top_nav_icon_button",
       data: { placement: :bottom }
     )
   end

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap 3 button-styled checkbox: a `<label class="btn …">`
+  # A button-styled checkbox: a `<label class="btn …">`
   # wrapping an `<input type="checkbox">` plus arbitrary block content
   # (the visible text/icons). NO `.checkbox` div wrap — that wrap is
   # for vertical checkbox-list layout; this component is for
-  # checkboxes that look like buttons (BS3's
+  # checkboxes that look like buttons (a
   # `.btn-group[data-toggle="buttons"]` pattern, or standalone
   # button-styled checkboxes scattered across a filter UI).
   #

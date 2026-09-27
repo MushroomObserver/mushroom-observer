@@ -23,7 +23,7 @@ module Components::IconWithText
   # to scale with the surrounding font-size (a `.card-title` heading's
   # bold type needs visibly more gap than small body text), which only
   # an em-based value does. See `_icons.scss` for the rule.
-  RESPONSIVE_TEXT_CLASSES = "d-none d-sm-inline icon-text-gap"
+  RESPONSIVE_TEXT_CLASSES = "d-none d-md-inline icon-text-gap"
   ALWAYS_VISIBLE_TEXT_CLASSES = "icon-text-gap"
 
   private

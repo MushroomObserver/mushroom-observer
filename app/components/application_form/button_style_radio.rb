@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap 3 button-styled radio: a `<label class="btn …">` wrapping
+  # A button-styled radio: a `<label class="btn …">` wrapping
   # an `<input type="radio">` plus arbitrary block content (the visible
   # text/icons). NO `.radio` div wrap — that wrap is for vertical
   # checkbox-list layout; this component is for radios that look and
-  # behave like buttons (BS3's `.btn-group[data-toggle="buttons"]`
+  # behave like buttons (a `.btn-group[data-toggle="buttons"]`
   # pattern, or standalone button-styled radios scattered across a
   # form).
   #

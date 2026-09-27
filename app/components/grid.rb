@@ -136,7 +136,7 @@ class Components::Grid < Components::Base
   def view_template(&block)
     Row(
       element: :ul,
-      class: class_names(ROW_COLS_CLASSES, "list-unstyled mt-3")
+      class: class_names(ROW_COLS_CLASSES, "grid-row list-unstyled mt-3")
     ) do
       if block
         yield

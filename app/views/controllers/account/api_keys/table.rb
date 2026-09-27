@@ -91,8 +91,8 @@ module Views::Controllers::Account::APIKeys
 
     # Read-only ✓ for verified keys, rendered via CheckboxField
     # so the markup stays in lockstep with form-mode checkboxes
-    # (BS3/4/5 migration changes one file, not many). The
-    # `disabled:` mode skips the hidden sidecar.
+    # (a future Bootstrap version change touches one file, not
+    # many). The `disabled:` mode skips the hidden sidecar.
     def render_verified_check_box(key)
       render(Components::ApplicationForm::CheckboxField.new(
                Components::ApplicationForm::FieldProxy.new(

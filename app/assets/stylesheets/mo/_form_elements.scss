@@ -31,10 +31,8 @@ label {
   label {
     font-weight: $btn-font-weight;
 
-    // BS3's `.checkbox`/`.radio` reserved this gap via an
-    // absolutely-positioned input + label padding-left; BS4 doesn't
-    // define these classes, so nothing supplies the gap without this
-    // rule.
+    // Bootstrap doesn't define `.checkbox`/`.radio` classes, so
+    // nothing else supplies this gap.
     input[type="checkbox"],
     input[type="radio"] {
       margin-right: $custom-control-gutter;
@@ -68,7 +66,7 @@ label {
 
 // Theme- AND variant-aware "pressed" styles for button-styled
 // radios/checkboxes that drive their active state via
-// `:has(input:checked)` rather than the BS3 `.active` class.
+// `:has(input:checked)`.
 //
 // Each `.btn-{variant}` exposes its active-state colors as CSS
 // custom properties (base color/bg/border per variant, darkened the

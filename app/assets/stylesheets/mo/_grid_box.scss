@@ -2,11 +2,23 @@
 // rss log
 // --------------------------------------------------
 
+.grid-row {
+  --bs-gutter-x: 18px;
+  --bs-gutter-y: 18px;
+}
+
+@media screen and (min-width: breakpoint-min(lg)) {
+  .grid-row {
+    --bs-gutter-x: 24px;
+    --bs-gutter-y: 24px;
+  }
+}
+
 .grid-box {
   // On the <li>, not the card: the card has `h-100` (fills the
   // row's stretched height), so a margin-bottom on the card itself
   // pushes it past the <li>'s box instead of creating visible space.
-  margin-bottom: $grid-gutter-width;
+  margin-bottom: var(--bs-gutter-y);
 
   .card {
     // min-height: 200px;
@@ -80,9 +92,8 @@
   white-space: normal !important;
 }
 
-// BS3 muted small text inside any heading automatically via
-// $headings-small-color; BS4 dropped that mechanism, so the author
-// citation needs it restored explicitly here.
+// Nothing mutes small text inside headings automatically, so the
+// author citation needs it restored explicitly here.
 .log-heading small {
   opacity: 0.65;
 }

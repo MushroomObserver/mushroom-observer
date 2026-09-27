@@ -14,7 +14,7 @@
 #   Components::Modal.new(type: :turbo_form, identifier: "…",
 #                         title: "…", user: @user, model: @record)
 #
-# Encapsulates the Bootstrap 3
+# Encapsulates the
 # `modal > modal-dialog > modal-content > header / body / footer`
 # nesting and the close-button / title boilerplate so callers can
 # focus on the modal's content.

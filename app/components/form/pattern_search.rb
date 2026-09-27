@@ -63,10 +63,9 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   end
 
   def view_template
-    # BS4 dropped BS3's `.has-feedback`/`.form-control-feedback`
-    # icon-overlay pattern -- the documented replacement is an
-    # `.input-group` with the icon in a prepended
-    # `.input-group-text`, not an icon floated inside the input.
+    # An `.input-group` with the icon in a prepended
+    # `.input-group-text` is the pattern for combining an input with
+    # an icon -- not an icon floated inside the input.
     # `.input-group` sets width: 100% unconditionally -- w-auto lifts
     # that so flex-sm-grow-1 (grow only at `sm`+) has room to share
     # the row with the select and submit button below `sm`.

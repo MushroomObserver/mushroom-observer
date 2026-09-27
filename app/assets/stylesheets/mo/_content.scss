@@ -1,6 +1,6 @@
 // Bootstrap 4's reboot hardcodes `small { font-size: 80%; }` (not
-// driven by a variable) -- overridden to match Bootstrap 3's old
-// ~85% ratio (`ceil($font-size-base * .85) / $font-size-base`).
+// driven by a variable) -- overridden here to ~85%
+// (`ceil($font-size-base * .85) / $font-size-base`).
 small,
 .small {
   font-size: 85%;
@@ -106,7 +106,7 @@ ul.tight-list {
     color: $body-color;
   }
 
-  @media screen and (min-width: breakpoint-min(sm)) {
+  @media screen and (min-width: breakpoint-min(lg)) {
     font-size: 1.375rem;
   }
 }
@@ -114,7 +114,7 @@ ul.tight-list {
 #owner_naming.h5 {
   font-size: 1rem;
 
-  @media screen and (min-width: breakpoint-min(sm)) {
+  @media screen and (min-width: breakpoint-min(lg)) {
     font-size: $h5-font-size;
   }
 }

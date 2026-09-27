@@ -114,9 +114,8 @@ $link-hover-decoration: underline !default;
 // $font-family-sans-serif default (a system-font stack), not pinned
 // to a specific typeface list.
 $font-size-base:         0.875rem !default;  // 14px at 16px root
-// Bootstrap 4's stock default is 1.5; matches Bootstrap 3's old
-// default (20px/14px) instead, which is what MO's typography was
-// built against.
+// Bootstrap 4's stock default is 1.5; set to 20px/14px instead,
+// which is what MO's typography is built against.
 $line-height-base:       1.428571429 !default;
 
 // Headings
@@ -336,11 +335,8 @@ $list-group-action-color:       $LINK_TEXT_COLOR !default;
 $list-group-action-hover-color: $LINK_HOVER_TEXT_COLOR !default;
 
 // ==================================================
-// SECTION 16: CARDS (PANELS IN BS3)
+// SECTION 16: CARDS
 // ==================================================
-//
-// Bootstrap 4 replaced panels with cards
-//
 
 $card-bg:           $LIST_BG_COLOR !default;
 $card-border-color: $LIST_BORDER_COLOR !default;

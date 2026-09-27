@@ -21,16 +21,7 @@ $sidebar-max-width: 9.9rem;
   transition: all .25s ease-out;
   // NOTE: Do not add `transform:` (or `filter:` / `perspective:`)
   // to .row-offcanvas. Any of those creates a CSS containing block
-  // for descendants, which breaks `position: fixed` on BS3 modals
-  // — the modal becomes positioned relative to .row-offcanvas
-  // instead of the viewport, ending up inline in document flow
-  // while the backdrop (which is appended to <body>, outside
-  // .row-offcanvas) still fills the viewport on top. Result: modal
-  // is visible but unclickable at narrow widths. Previously we had
-  // `-webkit-transform: translate3d(0,0,0)` here as a hardware-
-  // acceleration hack for the offcanvas slide; modern browsers
-  // composite without that, and the side-effect was breaking the
-  // project-violations target-location modal on mobile.
+  // for descendants, which breaks `position: fixed` on modals
 }
 
 .row-offcanvas-right {
@@ -59,31 +50,6 @@ $sidebar-max-width: 9.9rem;
   left: $sidebar-max-width;
 }
 
-// #main_container's `.px-sm-3` insets .row-offcanvas from the
-// viewport by $spacer at this width and up -- both the sidebar's
-// offset and the active row-shift need that same amount added, or
-// the sidebar leaves a sliver when closed and sits flush against
-// #right_side (no gap) when open.
-@media screen and (min-width: breakpoint-min(sm)) {
-  .row-offcanvas-right
-  .sidebar-offcanvas {
-    right: -($sidebar-max-width + $spacer);
-  }
-
-  .row-offcanvas-left
-  .sidebar-offcanvas {
-    left: -($sidebar-max-width + $spacer);
-  }
-
-  .row-offcanvas-right.active {
-    right: $sidebar-max-width + $spacer;
-  }
-
-  .row-offcanvas-left.active {
-    left: $sidebar-max-width + $spacer;
-  }
-}
-
 // Sits inside .row-offcanvas alongside #right_side.
 .sidebar-offcanvas {
   position: absolute;
@@ -102,6 +68,31 @@ $sidebar-max-width: 9.9rem;
 // capped by max-width: 100% against a definite ancestor width.
 #right_side {
   min-width: 0;
+}
+
+// #main_container's `.px-md-card` insets .row-offcanvas from the
+// viewport by $card-spacer-x at this width and up -- both the
+// sidebar's offset and the active row-shift need that same amount
+// added, or the sidebar leaves a sliver when closed and sits flush
+// against #right_side (no gap) when open.
+@media screen and (min-width: breakpoint-min(md)) {
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -($sidebar-max-width + $card-spacer-x);
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -($sidebar-max-width + $card-spacer-x);
+  }
+
+  .row-offcanvas-right.active {
+    right: $sidebar-max-width + $card-spacer-x;
+  }
+
+  .row-offcanvas-left.active {
+    left: $sidebar-max-width + $card-spacer-x;
+  }
 }
 
 @media screen and (min-width: breakpoint-min(lg)) {
