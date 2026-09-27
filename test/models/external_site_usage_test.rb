@@ -64,6 +64,48 @@ class ExternalSiteUsageTest < UnitTestCase
     assert_equal(1_000, ExternalSiteUsage.sole.media_bytes)
   end
 
+  # The hosts live on the site row, so another source needs no code
+  # change to be counted.
+  def test_attributes_media_to_whichever_site_claims_the_host
+    other = external_sites(:mycoportal)
+    other.update!(media_hosts: "images.mycoportal.org")
+
+    ExternalSiteUsage.record_media("https://images.mycoportal.org/a.jpg", 99)
+
+    assert_equal(99, ExternalSiteUsage.media_bytes_since(other, 1.hour))
+    assert_equal(0, ExternalSiteUsage.media_bytes_since(@site, 1.hour))
+  end
+
+  # The caps live on the site too, so this reports whatever it publishes.
+  def test_against_limits_reports_each_published_limit
+    ExternalSiteUsage.record_request(@site, count: 5)
+
+    rows = ExternalSiteUsage.against_limits(@site)
+
+    assert_equal(4, rows.size, "iNat publishes four limits in the fixture")
+    attributes = rows.map { |limit, _used, _cap| limit.attribute }
+    assert_includes(attributes, :requests_per_day_limit)
+    assert_includes(attributes, :media_bytes_per_hour_limit)
+    day = rows.find { |l, _u, _c| l.attribute == :requests_per_day_limit }
+    assert_equal(5, day[1])
+    assert_equal(10_000, day[2])
+  end
+
+  def test_against_limits_skips_limits_a_site_leaves_unset
+    assert_empty(ExternalSiteUsage.against_limits(external_sites(:mycoportal)))
+  end
+
+  def test_against_limits_of_no_site
+    assert_empty(ExternalSiteUsage.against_limits(nil))
+  end
+
+  def test_limit_labels_name_the_counter_and_window
+    labels = ExternalSiteUsage::LIMITS.map(&:label)
+
+    assert_includes(labels, "requests, trailing day")
+    assert_includes(labels, "media, trailing hour")
+  end
+
   # MO uploads by URL from other places, and those count against nobody.
   def test_ignores_media_from_an_untracked_host
     ExternalSiteUsage.record_media("https://example.org/photo.jpg", 5_000_000)
