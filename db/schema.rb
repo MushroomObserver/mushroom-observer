@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_25_120100) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_27_140000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -97,6 +97,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_25_120100) do
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"
   end
 
+  create_table "external_site_usages", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "external_site_id", null: false
+    t.datetime "bucket_start", null: false
+    t.integer "requests", default: 0, null: false
+    t.bigint "bytes_in", default: 0, null: false
+    t.bigint "bytes_out", default: 0, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["bucket_start"], name: "index_external_site_usages_on_bucket_start"
+    t.index ["external_site_id", "bucket_start"], name: "index_usages_on_site_and_bucket", unique: true
+  end
+
   create_table "external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
@@ -104,6 +116,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_25_120100) do
     t.text "description"
     t.datetime "last_successful_sync_at"
     t.string "url_template"
+    t.integer "requests_per_minute_limit"
+    t.integer "requests_per_day_limit"
+    t.bigint "bytes_in_per_hour_limit"
+    t.bigint "bytes_in_per_day_limit"
+    t.text "media_hosts"
   end
 
   create_table "field_slip_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
