@@ -206,18 +206,24 @@
 // Bootstrap 5's row/column gutter mechanism, backported: --bs-gutter-x
 // and --bs-gutter-y read via calc() by .row's margin and every
 // column's padding, so a .gx-*/.gy-*/.g-* class can override one
-// row's gutter instead of the sitewide $grid-gutter-width default.
-// Named to match Bootstrap 5 -- nothing that uses these classes
-// needs to change at upgrade, only this backport gets deleted.
+// row's gutter instead of the default below. Named to match
+// Bootstrap 5 -- nothing that uses these classes needs to change at
+// upgrade, only this backport gets deleted.
 // `.row`'s children don't read --bs-gutter-y yet (BS5 applies it as
 // margin-top on wrapped row children, not wired up here) --
 // `.grid-row`/`.grid-box` (_grid_box.scss) is the one place that
 // reads it so far, via its margin-bottom.
 .row {
-  --bs-gutter-x: #{$grid-gutter-width};
+  --bs-gutter-x: #{$grid-gutter-width * .75};
   --bs-gutter-y: 0px;
   margin-right: calc(var(--bs-gutter-x) * -.5);
   margin-left: calc(var(--bs-gutter-x) * -.5);
+}
+
+@media screen and (min-width: breakpoint-min(lg)) {
+  .row {
+    --bs-gutter-x: #{$grid-gutter-width};
+  }
 }
 
 .row > .col,

@@ -113,11 +113,26 @@
 //   }
 // }
 
+// Mobile-first three-step scale: 14px below md, 16px from md, the
+// standard h4 size ($h4-font-size, 21px) from lg.
+#top_nav h4 {
+  font-size: $font-size-base;
+}
+
+@media screen and (min-width: breakpoint-min(md)) {
+  #top_nav h4 {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (min-width: breakpoint-min(lg)) {
+  #top_nav h4 {
+    font-size: $h4-font-size;
+  }
+}
+
 @media screen and (max-width: breakpoint-max(md)) {
   #top_nav {
-    h4 {
-      font-size: 14px;
-    }
     #sorter button {
       max-width: 60px;
       overflow: hidden;
@@ -147,9 +162,7 @@
 // (`btn-success`, see #3930) keeps its solid green styling on
 // phones too — losing it here would re-create the unclear-CTA
 // problem that motivated the redesign.
-// 480px: a sub-breakpoint within Bootstrap 4's xs range (0-575px);
-// BS4 has no named tier at this width, so it stays a literal here.
-@media screen and (max-width: 480px) {
+@media screen and (max-width: breakpoint-max(sm)) {
   #top_nav {
     .top_nav_button {
       padding-left: 0.5rem;

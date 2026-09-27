@@ -2,15 +2,15 @@
 // rss log
 // --------------------------------------------------
 
+// --bs-gutter-x comes from .row's default (_utilities.scss) -- only
+// --bs-gutter-y needs setting here, since nothing else reads it yet.
 .grid-row {
-  --bs-gutter-x: 18px;
-  --bs-gutter-y: 18px;
+  --bs-gutter-y: #{$grid-gutter-width * .75};
 }
 
 @media screen and (min-width: breakpoint-min(lg)) {
   .grid-row {
-    --bs-gutter-x: 24px;
-    --bs-gutter-y: 24px;
+    --bs-gutter-y: #{$grid-gutter-width};
   }
 }
 

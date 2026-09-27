@@ -30,7 +30,8 @@ module Views::Layouts
     prop :object, ::AbstractModel
 
     def view_template
-      div(class: "btn-toolbar interest-eyes h4 my-0 ml-2", role: "toolbar",
+      div(class: "btn-toolbar interest-eyes h4 my-0 ml-2 ml-sm-0",
+          role: "toolbar",
           aria: { label: :app_interest_icons_label.l }) do
         render_icons if @user
       end
