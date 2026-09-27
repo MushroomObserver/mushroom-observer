@@ -21,8 +21,8 @@ class AddUsageLimitsToExternalSites < ActiveRecord::Migration[7.2]
   def up
     add_column(:external_sites, :requests_per_minute_limit, :integer)
     add_column(:external_sites, :requests_per_day_limit, :integer)
-    add_column(:external_sites, :media_bytes_per_hour_limit, :bigint)
-    add_column(:external_sites, :media_bytes_per_day_limit, :bigint)
+    add_column(:external_sites, :bytes_in_per_hour_limit, :bigint)
+    add_column(:external_sites, :bytes_in_per_day_limit, :bigint)
     # Comma-separated hostnames; see ExternalSite#media_host_list.
     add_column(:external_sites, :media_hosts, :text)
 
@@ -32,8 +32,8 @@ class AddUsageLimitsToExternalSites < ActiveRecord::Migration[7.2]
   def down
     remove_column(:external_sites, :requests_per_minute_limit)
     remove_column(:external_sites, :requests_per_day_limit)
-    remove_column(:external_sites, :media_bytes_per_hour_limit)
-    remove_column(:external_sites, :media_bytes_per_day_limit)
+    remove_column(:external_sites, :bytes_in_per_hour_limit)
+    remove_column(:external_sites, :bytes_in_per_day_limit)
     remove_column(:external_sites, :media_hosts)
   end
 
@@ -46,8 +46,8 @@ class AddUsageLimitsToExternalSites < ActiveRecord::Migration[7.2]
     site.update_columns(
       requests_per_minute_limit: 60,
       requests_per_day_limit: 10_000,
-      media_bytes_per_hour_limit: 5 * GIBIBYTE,
-      media_bytes_per_day_limit: 24 * GIBIBYTE,
+      bytes_in_per_hour_limit: 5 * GIBIBYTE,
+      bytes_in_per_day_limit: 24 * GIBIBYTE,
       media_hosts: "static.inaturalist.org," \
                    "inaturalist-open-data.s3.amazonaws.com"
     )

@@ -16,6 +16,6 @@ inaturalist:
   # Published limits, per its API description and developers page.
   requests_per_minute_limit: 60
   requests_per_day_limit: 10000
-  media_bytes_per_hour_limit: 5368709120
-  media_bytes_per_day_limit: 25769803776
+  bytes_in_per_hour_limit: 5368709120
+  bytes_in_per_day_limit: 25769803776
   media_hosts: "static.inaturalist.org,inaturalist-open-data.s3.amazonaws.com"

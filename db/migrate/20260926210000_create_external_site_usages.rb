@@ -23,7 +23,13 @@ class CreateExternalSiteUsages < ActiveRecord::Migration[7.2]
       t.integer(:external_site_id, null: false)
       t.datetime(:bucket_start, null: false)
       t.integer(:requests, null: false, default: 0)
-      t.bigint(:media_bytes, null: false, default: 0)
+      # Split by direction and named for bytes rather than media:
+      # iNat only sends MO photos, but a file-based exchange (MO
+      # pushes Darwin Core Archives to MyCoPortal, #4216) moves data
+      # both ways, and "how much have we sent them" is as worth
+      # knowing as how much we pulled.
+      t.bigint(:bytes_in, null: false, default: 0)
+      t.bigint(:bytes_out, null: false, default: 0)
       # `bucket_start` is the time this row is about, so created_at would
       # duplicate it and updated_at would say when the bucket last took a
       # hit -- neither is worth a column on a row written this often.

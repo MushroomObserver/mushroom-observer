@@ -101,7 +101,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_27_140000) do
     t.integer "external_site_id", null: false
     t.datetime "bucket_start", null: false
     t.integer "requests", default: 0, null: false
-    t.bigint "media_bytes", default: 0, null: false
+    t.bigint "bytes_in", default: 0, null: false
+    t.bigint "bytes_out", default: 0, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.index ["bucket_start"], name: "index_external_site_usages_on_bucket_start"
@@ -117,8 +118,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_27_140000) do
     t.string "url_template"
     t.integer "requests_per_minute_limit"
     t.integer "requests_per_day_limit"
-    t.bigint "media_bytes_per_hour_limit"
-    t.bigint "media_bytes_per_day_limit"
+    t.bigint "bytes_in_per_hour_limit"
+    t.bigint "bytes_in_per_day_limit"
     t.text "media_hosts"
   end
 

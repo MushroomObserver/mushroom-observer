@@ -33,7 +33,7 @@ class API2::UploadsTest < UnitTestCase
 
     upload(INAT_URL)
 
-    assert_equal(4_096, ExternalSiteUsage.media_bytes_since(@site, 1.hour))
+    assert_equal(4_096, ExternalSiteUsage.bytes_in_since(@site, 1.hour))
   end
 
   def test_accumulates_across_photos
@@ -44,7 +44,7 @@ class API2::UploadsTest < UnitTestCase
     upload(INAT_URL)
     upload(other)
 
-    assert_equal(3_000, ExternalSiteUsage.media_bytes_since(@site, 1.hour))
+    assert_equal(3_000, ExternalSiteUsage.bytes_in_since(@site, 1.hour))
   end
 
   # MO uploads by URL from elsewhere too, and those count against nobody.
@@ -61,7 +61,7 @@ class API2::UploadsTest < UnitTestCase
   def test_an_accounting_failure_does_not_break_the_upload
     stub_photo(INAT_URL, 512)
 
-    ExternalSiteUsage.stub(:record_media, ->(*) { raise("boom") }) do
+    ExternalSiteUsage.stub(:record_download, ->(*) { raise("boom") }) do
       assert_equal(512, upload(INAT_URL).content_length)
     end
   end

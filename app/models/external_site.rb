@@ -20,8 +20,8 @@
 #  requests_per_minute_limit::    what the site asks for, not what it
 #                                 enforces, where those differ
 #  requests_per_day_limit::
-#  media_bytes_per_hour_limit::
-#  media_bytes_per_day_limit::
+#  bytes_in_per_hour_limit::
+#  bytes_in_per_day_limit::
 #  media_hosts::                  comma-separated hostnames serving the
 #                                 site's media
 #

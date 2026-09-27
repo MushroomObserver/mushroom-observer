@@ -63,7 +63,7 @@ module API2::Uploads
     # since MO uploads by URL from other places too. Accounting failures
     # stay out of the upload's way.
     def count_media(url)
-      ExternalSiteUsage.record_media(url, content_length)
+      ExternalSiteUsage.record_download(url, content_length)
     rescue StandardError => e
       Rails.logger.warn("media usage accounting failed: #{e.message}")
     end
