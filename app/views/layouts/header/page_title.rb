@@ -51,7 +51,7 @@ module Views::Layouts
     def render_mobile_top_row
       div(class: "col-12 d-md-none") do
         div(class: "d-flex flex-wrap justify-content-between " \
-                   "align-items-center px-card") do
+                   "align-items-center px-card mb-2") do
           div(class: "d-sm-none") { trusted_html(content_for(:id_badge)) }
           trusted_html(content_for(:title_bar_cta))
           div(class: "d-sm-none") do

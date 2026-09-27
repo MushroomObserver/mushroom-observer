@@ -111,6 +111,16 @@ ul.tight-list {
   }
 }
 
+.object_edit {
+  @media screen and (max-width: breakpoint-max(md)) {
+    font-size: 1rem;
+  }
+
+  .inline-link-block {
+    margin-top: map-get($spacers, 1);
+  }
+}
+
 #owner_naming.h5 {
   font-size: 1rem;
 

@@ -8,7 +8,7 @@ body {
 // at compile time) are relative to the root, not to body -- list any
 // such element here so it follows body's breakpoint bump too.
 body,
-.btn,
+.btn:not(.btn-lg):not(.btn-sm),
 .form-control,
 .dropdown-menu {
   @include media-breakpoint-up(lg) {
