@@ -1,1 +1,2 @@
-|{white-space:nowrap}. 2026-09-20 | Update Images on imported Observations from their source | "PR#5385":https://github.com/MushroomObserver/mushroom-observer/pull/5385 |
+|{white-space:nowrap}. 2026-09-25 | Fix pagination "go to page" tooltip and stop it autofilling | "PR#5411":https://github.com/MushroomObserver/mushroom-observer/pull/5411 |
+|{white-space:nowrap}. 2026-09-24 | Fix checkbox help icon accidentally toggling other fields | "PR#5400":https://github.com/MushroomObserver/mushroom-observer/pull/5400 |
