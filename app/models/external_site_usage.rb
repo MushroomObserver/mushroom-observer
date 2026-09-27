@@ -49,9 +49,15 @@ class ExternalSiteUsage < AbstractModel
     end
   end
 
+  # `requests_per_minute_limit` is deliberately absent. A ten-minute
+  # bucket cannot express a one-minute window: the trailing-minute sum
+  # would include the whole current bucket, so 61 requests spread over
+  # ten minutes would report as 101% of a 60/minute cap. Finer buckets
+  # would fix the arithmetic but buy nothing, because MO already paces
+  # its requests about one a second (Inat::ObsFetcher::INTER_PAGE_SLEEP
+  # and friends), which satisfies a per-minute ask by construction. The
+  # column stays as a record of what the site publishes.
   LIMITS = [
-    Limit.new(attribute: :requests_per_minute_limit, window: 1.minute,
-              counter: :requests, units: :count),
     Limit.new(attribute: :requests_per_day_limit, window: 1.day,
               counter: :requests, units: :count),
     Limit.new(attribute: :bytes_in_per_hour_limit, window: 1.hour,
@@ -157,6 +163,12 @@ class ExternalSiteUsage < AbstractModel
       retry
     end
 
+    # Includes the bucket the window starts inside, so the sum covers up
+    # to BUCKET more than asked for. That over-counts rather than
+    # under-counts, which is the safe direction for a cap: MO backs off
+    # slightly early rather than slipping past. The error is at most ten
+    # minutes, so it matters little for an hour (17%) and less for a day
+    # (0.7%) -- and is why LIMITS carries no window shorter than an hour.
     def sum_since(site, window, column)
       return 0 unless site
 

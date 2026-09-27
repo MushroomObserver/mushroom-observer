@@ -82,7 +82,8 @@ class ExternalSiteUsageTest < UnitTestCase
 
     rows = ExternalSiteUsage.against_limits(@site)
 
-    assert_equal(4, rows.size, "iNat publishes four limits in the fixture")
+    assert_equal(3, rows.size,
+                 "the per-minute limit is deliberately not compared")
     attributes = rows.map { |limit, _used, _cap| limit.attribute }
     assert_includes(attributes, :requests_per_day_limit)
     assert_includes(attributes, :bytes_in_per_hour_limit)
@@ -103,6 +104,7 @@ class ExternalSiteUsageTest < UnitTestCase
     labels = ExternalSiteUsage::LIMITS.map(&:label)
 
     assert_includes(labels, "requests, trailing day")
+    assert_not_includes(labels, "requests, trailing minute")
     assert_includes(labels, "bytes in, trailing hour")
   end
 
