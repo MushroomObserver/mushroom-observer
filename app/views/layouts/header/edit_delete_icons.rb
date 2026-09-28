@@ -42,12 +42,14 @@ module Views::Layouts
     end
 
     # A read-only reflection keeps its edit icon: Edit opens a linked
-    # companion observation for the changes.
+    # companion observation for the changes, so its tooltip says that
+    # instead of the generic "Edit Observation".
     def edit_item
       return nil unless can_edit_object?
 
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
+        name: (:edit_reflection_tooltip.l if reflection?),
         class: ::Components::InlineLinkBlock.item_class
       )
     end
