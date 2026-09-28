@@ -106,7 +106,7 @@ module Projects
 
       assert_select(
         "a[href='#{Inat::Constants::SITE}/projects/303327']",
-        text: "2026 NAMA Yoop (238 not yet imported)"
+        text: "2026 NAMA Yoop"
       )
     end
 
@@ -117,15 +117,17 @@ module Projects
       get(:index, params: { project_id: @project.id })
 
       assert_select("#project_site_#{@inat.id}",
-                    text: /#{:project_sites_no_constraints.l}/)
+                    text: /No project constraints/)
       assert_select("input[name='project_external_site[use_constraints]']",
                     count: 0)
     end
 
-    # The count beside the checkbox is what following the constraints
-    # would bring in that MO does not already hold.
-    def test_constraints_carry_what_they_would_bring_in
+    # A configured project gets one line saying what it would bring in,
+    # below both shapes rather than beside either.
+    def test_a_configured_project_says_what_it_would_bring_in
       project = projects(:rare_fungi_project)
+      ProjectExternalSite.create!(project: project, external_site: @inat,
+                                  use_constraints: true)
       stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
         to_return(status: 200, body: { results: [] }.to_json)
       stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
@@ -133,8 +135,19 @@ module Projects
       make_admin("dick")
       get(:index, params: { project_id: project.id })
 
-      assert_select("label",
-                    text: /#{:project_sites_use_constraints.l}.*238/)
+      # `.t` curls the quotes, so match the part that has none.
+      assert_select("#project_site_#{@inat.id}",
+                    text: /238 not yet imported/)
+    end
+
+    # Neither shape set would search every fungus on iNat, which is no
+    # number worth showing.
+    def test_an_unconfigured_project_is_told_the_search_is_unbounded
+      make_admin("dick")
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("#project_site_#{@inat.id}",
+                    text: /Too many observations to import/)
     end
 
     # Saved: the panel shows what the id resolved to, with the field

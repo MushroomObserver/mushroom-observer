@@ -94,7 +94,7 @@ module Projects
     def render_index_view(status: :ok, **render_opts)
       render(Views::Controllers::Projects::ExternalSites::Index.new(
                project: @project, project_sites: project_sites,
-               sites: sites, counts: counts, user: @user
+               sites: sites, candidates: candidates, user: @user
              ),
              status: status, **render_opts)
     end
@@ -137,10 +137,9 @@ module Projects
       @inat_site ||= ExternalSite.inaturalist
     end
 
-    # What the configuration would bring in, asked of iNat rather than
-    # guessed at. Nil counts where it has nothing to count or could not
-    # answer.
-    def counts
+    # What the saved configuration would bring in, asked of iNat rather
+    # than guessed at.
+    def candidates
       Inat::CandidateCount.for(
         project: @project,
         project_site: project_sites[inat_site.id]

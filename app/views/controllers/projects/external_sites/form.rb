@@ -10,7 +10,7 @@
 module Views::Controllers::Projects::ExternalSites
   class Form < ::Components::ApplicationForm
     prop :project, ::Project
-    prop :counts, ::Inat::CandidateCount::Counts
+    prop :candidates, ::Inat::CandidateCount::Candidates
 
     def initialize(model, **attrs)
       super(model, turbo: true, **attrs)
@@ -20,6 +20,7 @@ module Views::Controllers::Projects::ExternalSites
       super do
         render_constraints_field
         render_remote_project_field
+        render_candidates_line
         render_action_fields
         number_field(:import_limit,
                      label: :project_sites_import_limit.l,
@@ -38,13 +39,24 @@ module Views::Controllers::Projects::ExternalSites
         @project.constraints?
 
       checkbox_field(:use_constraints,
-                     label: constraints_label,
+                     label: :project_sites_use_constraints.l,
                      help: :project_sites_use_constraints_help.t,
                      help_collapse: true)
     end
 
-    def constraints_label
-      with_count(:project_sites_use_constraints.l, @counts.constraints)
+    # What the saved configuration would bring in, on a line of its own
+    # below both shapes -- the number answers to the two together, and
+    # follows what is stored rather than what is on screen, which is why
+    # it names the button that would refresh it.
+    def render_candidates_line
+      p(class: "mt-2") { candidates_text }
+    end
+
+    def candidates_text
+      return :project_sites_unbounded.t unless @candidates.configured
+      return nil unless @candidates.total
+
+      :project_sites_candidates.t(count: @candidates.total)
     end
 
     # Two states in one place: what the saved project resolved to, and
@@ -69,12 +81,8 @@ module Views::Controllers::Projects::ExternalSites
     end
 
     def render_remote_project_link
-      Link(type: :external, content: remote_project_label,
+      Link(type: :external, content: model.remote_project_name.to_s,
            path: model.remote_url.to_s)
-    end
-
-    def remote_project_label
-      with_count(model.remote_project_name.to_s, @counts.combined)
     end
 
     # An anchor, not a bare <button>: the browser paints a plain button
@@ -105,12 +113,6 @@ module Views::Controllers::Projects::ExternalSites
 
     def resolved?
       model.remote_project_name.present?
-    end
-
-    def with_count(text, count)
-      return text unless count
-
-      "#{text} (#{:project_sites_not_yet_imported.l(count: count)})"
     end
 
     def form_action

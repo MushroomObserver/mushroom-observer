@@ -8,7 +8,7 @@ module Views::Controllers::Projects::ExternalSites
     prop :project, ::Project
     prop :sites, _Array(::ExternalSite)
     prop :project_sites, Hash
-    prop :counts, ::Inat::CandidateCount::Counts
+    prop :candidates, ::Inat::CandidateCount::Candidates
     prop :user, ::User
 
     def view_template
@@ -52,7 +52,8 @@ module Views::Controllers::Projects::ExternalSites
       project_site = @project_sites[site.id]
       return p { :project_sites_nothing_to_configure.t } unless project_site
 
-      render(Form.new(project_site, project: @project, counts: @counts))
+      render(Form.new(project_site, project: @project,
+                                    candidates: @candidates))
     end
   end
 end
