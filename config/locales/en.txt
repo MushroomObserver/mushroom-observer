@@ -2737,7 +2737,6 @@
   # Project External Sites (#5416)
   project_sites_title: External Sites
   project_sites_tab: External Sites
-  project_sites_intro: What this project already holds from each external site, and, for a site Mushroom Observer can query, where the project's observations may come from there and what Mushroom Observer may do about them.
   project_sites_holdings: "[linked] of this project's [observations] observations are linked to [site], [imported] of them imported by Mushroom Observer."
   project_sites_nothing_to_configure: Mushroom Observer cannot query this site for a project's observations, so there is nothing to configure here.
   project_sites_remote_project: iNaturalist project

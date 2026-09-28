@@ -19,7 +19,6 @@ module Views::Controllers::Projects::ExternalSites
       render(Views::Controllers::Projects::AdminSubtabs.new(
                project: @project, current_subtab: "external_sites"
              ))
-      p(class: "mt-3") { :project_sites_intro.t }
       @sites.each { |site| render_site_panel(site) }
     end
 
