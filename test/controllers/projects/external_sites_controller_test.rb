@@ -21,7 +21,7 @@ module Projects
     # bring in; the numbers themselves are Inat::CandidateCount's
     # own test.
     def stub_candidate_counts(total = 238)
-      stub_request(:get, %r{#{Inat::Constants::API_BASE}/observations}o).
+      stub_request(:get, inat_api_matcher("observations")).
         to_return(status: 200,
                   body: { total_results: total }.to_json)
     end
@@ -130,9 +130,9 @@ module Projects
       project = projects(:rare_fungi_project)
       ProjectExternalSite.create!(project: project, external_site: @inat,
                                   use_constraints: true)
-      stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
+      stub_request(:get, inat_api_matcher("taxa")).
         to_return(status: 200, body: { results: [] }.to_json)
-      stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
+      stub_request(:get, inat_api_matcher("places")).
         to_return(status: 200, body: { results: [] }.to_json)
       make_admin("dick")
       get(:index, params: { project_id: project.id })
@@ -204,9 +204,9 @@ module Projects
       project = projects(:rare_fungi_project)
       ProjectExternalSite.create!(project: project, external_site: @inat,
                                   use_constraints: true)
-      stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
+      stub_request(:get, inat_api_matcher("taxa")).
         to_return(status: 200, body: { results: [] }.to_json)
-      stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
+      stub_request(:get, inat_api_matcher("places")).
         to_return(status: 200, body: { results: [] }.to_json)
       make_admin("dick")
       get(:index, params: { project_id: project.id })

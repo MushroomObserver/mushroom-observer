@@ -99,7 +99,7 @@ class Inat::ProjectLookupTest < UnitTestCase
 
   # iNat being down is an answer of "not found", not a 500 for the admin.
   def test_a_failed_request
-    stub_request(:get, %r{#{Inat::Constants::API_BASE}/projects}o).
+    stub_request(:get, inat_api_matcher("projects")).
       to_return(status: 500)
     lookup = Inat::ProjectLookup.new("303327")
 

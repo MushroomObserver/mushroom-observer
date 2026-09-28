@@ -13,7 +13,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
   end
 
   def stub_json(path_fragment, results)
-    stub_request(:get, %r{#{Inat::Constants::API_BASE}/#{path_fragment}}).
+    stub_request(:get, inat_api_matcher(path_fragment)).
       to_return(status: 200, body: { results: results }.to_json)
   end
 
@@ -122,7 +122,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
       2.times { Inat::ConstraintMapper.new(@project).params }
     end
 
-    assert_requested(:get, %r{#{Inat::Constants::API_BASE}/taxa}o, times: 2)
+    assert_requested(:get, inat_api_matcher("taxa"), times: 2)
   end
 
   def with_memory_cache

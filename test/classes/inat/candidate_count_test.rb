@@ -18,7 +18,7 @@ class Inat::CandidateCountTest < UnitTestCase
   end
 
   def stub_count(query_fragment, total)
-    stub_request(:get, %r{#{Inat::Constants::API_BASE}/observations}o).
+    stub_request(:get, inat_api_matcher("observations")).
       with(query: hash_including(query_fragment)).
       to_return(status: 200, body: { total_results: total }.to_json)
   end
@@ -89,7 +89,7 @@ class Inat::CandidateCountTest < UnitTestCase
   end
 
   def test_inat_not_answering_is_no_number_rather_than_a_wrong_one
-    stub_request(:get, %r{#{Inat::Constants::API_BASE}/observations}o).
+    stub_request(:get, inat_api_matcher("observations")).
       to_return(status: 500)
     candidates = candidates_for(remote_project_id: "303327")
 
@@ -101,9 +101,9 @@ class Inat::CandidateCountTest < UnitTestCase
   # so an admin can see why a number is bigger than the project means.
   def test_unresolved_targets_ride_along_with_the_count
     project = projects(:rare_fungi_project)
-    stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
+    stub_request(:get, inat_api_matcher("taxa")).
       to_return(status: 200, body: { results: [] }.to_json)
-    stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
+    stub_request(:get, inat_api_matcher("places")).
       to_return(status: 200, body: { results: [] }.to_json)
     stub_count({ "taxon_id" =>
                  Inat::Constants::IMPORTABLE_TAXON_IDS_ARG }, 9_999)
