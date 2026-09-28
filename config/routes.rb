@@ -719,6 +719,13 @@ MushroomObserver::Application.routes.draw do
       end
     end
     resources :aliases, controller: "projects/aliases"
+    resources :external_sources, only: [:index, :create, :update],
+                                 controller: "projects/external_sources" do
+      member do
+        patch :approve
+        patch :revoke
+      end
+    end
     resources :target_names, only: [:create, :destroy],
                              controller: "projects/target_names"
     resources :target_locations, only: [:create, :destroy],

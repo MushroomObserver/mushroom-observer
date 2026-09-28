@@ -11,7 +11,8 @@
 module Views::Controllers::Projects
   class AdminSubtabs < Views::Base
     prop :project, ::Project
-    prop :current_subtab, _Union("details", "members", "aliases")
+    prop :current_subtab,
+         _Union("details", "members", "aliases", "sources")
 
     def view_template
       Row do

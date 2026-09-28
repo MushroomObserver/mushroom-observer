@@ -2734,6 +2734,31 @@
   project_alias_updated: Project Alias was successfully updated.
   project_alias_no_match: Unable to find [target_type] matching '[term]'
 
+  # Project External Sources (#5416)
+  project_sources_title: External Sources
+  project_sources_tab: Sources
+  project_sources_intro: Mushroom Observer can watch iNaturalist for observations that belong in this project, alert the project's admins when one appears, and bring it in. Nothing is watched or imported until a site administrator approves the project.
+  project_sources_remote_project_id: iNaturalist project id
+  project_sources_remote_project_id_help: The number iNaturalist gives a sister project, from its URL. Its observations are the ones Mushroom Observer will consider.
+  project_sources_use_criteria: Use this project's target names, locations, box and dates
+  project_sources_use_criteria_help: Mushroom Observer builds the iNaturalist search from what the project already declares. Selective only where the project sets target names.
+  project_sources_alerting: Alert this project's admins when a matching observation appears
+  project_sources_importing: Import matching observations into this project
+  project_sources_import_limit: Import limit
+  project_sources_import_limit_help: The most observations Mushroom Observer will ever import into this project.
+  project_sources_import_limit_shown: "Import limit: [limit] observations."
+  project_sources_approved: Approved by [user] on [date].
+  project_sources_unapproved: Alerting and importing stay off until a site administrator approves this project.
+  project_sources_approval: Approval
+  project_sources_approve: Approve
+  project_sources_revoke: Withdraw Approval
+  project_sources_updated: External source settings saved.
+  project_sources_approve_success: Project approved.
+  project_sources_revoke_success: Approval withdrawn. Alerting and importing are off.
+  project_source_duplicate_site: This project already has a source for that site.
+  project_source_needs_a_source: Give an iNaturalist project id or use the project's criteria before turning alerting or importing on.
+  project_source_needs_approval: A site administrator must approve this project before alerting or importing can be turned on.
+
   # Project Target Names
   project_target_name_add: Add
   project_target_names_to_add_label: "Target Names to Add"

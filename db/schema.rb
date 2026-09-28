@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_27_140000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -710,6 +710,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_27_140000) do
     t.index ["observation_id"], name: "index_project_excluded_observations_on_observation_id"
     t.index ["project_id", "observation_id"], name: "index_project_excluded_observations_on_project_and_obs", unique: true
     t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
+  end
+
+  create_table "project_external_sources", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "external_site_id", null: false
+    t.string "remote_project_id", limit: 100
+    t.boolean "use_criteria", default: false, null: false
+    t.boolean "alerting", default: false, null: false
+    t.boolean "importing", default: false, null: false
+    t.datetime "approved_at"
+    t.integer "approved_by_id"
+    t.integer "import_limit", default: 10000, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["external_site_id"], name: "index_project_external_sources_on_external_site_id"
+    t.index ["project_id", "external_site_id"], name: "index_project_sources_on_project_and_site", unique: true
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|

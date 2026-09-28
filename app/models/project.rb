@@ -99,6 +99,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
+  has_many :project_external_sources, dependent: :destroy
+  has_many :external_sites, through: :project_external_sources
+
   include HasPlaceName
 
   before_destroy :orphan_drafts
