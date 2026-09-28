@@ -150,6 +150,9 @@ module Projects
         assert_select("[data-remote-project-target='entry'][hidden]")
         assert_select("input[data-remote-project-target='input']" \
                       "[value='303327']")
+        # The site's own clear convention: the circled red X.
+        assert_select("button[data-action='remote-project#clear']" \
+                      ".text-danger")
       end
     end
 
@@ -159,6 +162,10 @@ module Projects
 
       assert_select("[data-remote-project-target='display'][hidden]")
       assert_select("[data-remote-project-target='entry']:not([hidden])")
+      # The site's own help convention: a question-mark trigger beside
+      # the label opening a collapsed block, not a title attribute.
+      assert_select("a.info-collapse-trigger")
+      assert_select("#project_external_site_remote_project_id_help")
     end
 
     # --- saving ------------------------------------------------------

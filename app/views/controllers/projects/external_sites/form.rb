@@ -39,7 +39,8 @@ module Views::Controllers::Projects::ExternalSites
 
       checkbox_field(:use_constraints,
                      label: constraints_label,
-                     help: :project_sites_use_constraints_help.t)
+                     help: :project_sites_use_constraints_help.t,
+                     help_collapse: true)
     end
 
     def constraints_label
@@ -59,9 +60,7 @@ module Views::Controllers::Projects::ExternalSites
     def render_remote_project_display
       div(data: { remote_project_target: "display" }, hidden: !resolved?) do
         plain(append_colon(:project_sites_remote_project.l))
-        whitespace
         render_remote_project_link
-        whitespace
         render_clear_button
       end
     end
@@ -76,7 +75,7 @@ module Views::Controllers::Projects::ExternalSites
     end
 
     def render_clear_button
-      Button(variant: :strip, icon: :x, icon_class: "text-danger",
+      Button(variant: :strip, icon: :delete, class: "text-danger ml-2",
              icon_title: :project_sites_clear_remote_project.l,
              data: { action: "remote-project#clear" })
     end
@@ -85,15 +84,10 @@ module Views::Controllers::Projects::ExternalSites
       div(data: { remote_project_target: "entry" }, hidden: resolved?) do
         text_field(:remote_project_id,
                    label: :project_sites_remote_project.l, inline: true,
-                   data: { remote_project_target: "input" }) do |field|
-          field.with_append { render_remote_project_hint }
-        end
+                   help: :project_sites_remote_project_help.t,
+                   help_collapse: true,
+                   data: { remote_project_target: "input" })
       end
-    end
-
-    def render_remote_project_hint
-      Help(type: :tooltip, label: "(?)",
-           title: :project_sites_remote_project_help.l)
     end
 
     def render_action_fields
