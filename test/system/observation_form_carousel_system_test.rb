@@ -103,7 +103,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
 
       assert_no_difference(["Image.count", "Observation.count"]) do
         alert_text = accept_alert do
-          within("#observation_form") { click_commit }
+          within("#title_bar") { click_commit }
         end
         assert_includes(alert_text, "Coprinus_comatus.jpg",
                         "alert must name the over-limit file")
