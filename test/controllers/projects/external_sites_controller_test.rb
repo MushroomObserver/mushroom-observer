@@ -150,9 +150,12 @@ module Projects
         assert_select("[data-remote-project-target='entry'][hidden]")
         assert_select("input[data-remote-project-target='input']" \
                       "[value='303327']")
-        # The site's own clear convention: the circled red X.
-        assert_select("button[data-action='remote-project#clear']" \
-                      ".text-danger")
+        # The site's clear convention: the circled red X, as an
+        # anchor so the browser paints it no button box.
+        assert_select("a.text-danger[data-action='remote-project" \
+                      "#clear:prevent']")
+        assert_select("[data-remote-project-target='display'] label",
+                      text: /iNaturalist project/)
       end
     end
 

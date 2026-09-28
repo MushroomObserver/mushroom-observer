@@ -59,7 +59,10 @@ module Views::Controllers::Projects::ExternalSites
 
     def render_remote_project_display
       div(data: { remote_project_target: "display" }, hidden: !resolved?) do
-        plain(append_colon(:project_sites_remote_project.l))
+        label(for: field(:remote_project_id).dom.id) do
+          plain(append_colon(:project_sites_remote_project.l))
+        end
+        whitespace
         render_remote_project_link
         render_clear_button
       end
@@ -74,10 +77,14 @@ module Views::Controllers::Projects::ExternalSites
       with_count(model.remote_project_name.to_s, @counts.combined)
     end
 
+    # An anchor, not a bare <button>: the browser paints a plain button
+    # its own box, and the site's other stripped buttons only escape
+    # that through the form.button_to reset in _links_buttons_alerts.
     def render_clear_button
-      Button(variant: :strip, icon: :delete, class: "text-danger ml-2",
+      Button(tag: :a, variant: :strip, icon: :delete, href: "#",
+             role: "button", class: "text-danger ml-2",
              icon_title: :project_sites_clear_remote_project.l,
-             data: { action: "remote-project#clear" })
+             data: { action: "remote-project#clear:prevent" })
     end
 
     def render_remote_project_entry
