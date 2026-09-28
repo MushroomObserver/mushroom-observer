@@ -12,7 +12,7 @@ module Views::Controllers::Projects
   class AdminSubtabs < Views::Base
     prop :project, ::Project
     prop :current_subtab,
-         _Union("details", "members", "aliases", "sources")
+         _Union("details", "members", "aliases", "external_sites")
 
     def view_template
       Row do
@@ -20,7 +20,8 @@ module Views::Controllers::Projects
                id: "project_admin_subtabs") do
           NavTabs(
             current: @current_subtab,
-            tabs: ::Tab::Project::AdminSubtabs.new(project: @project)
+            tabs: ::Tab::Project::AdminSubtabs.new(project: @project,
+                                                   site_admin: in_admin_mode?)
           )
         end
       end

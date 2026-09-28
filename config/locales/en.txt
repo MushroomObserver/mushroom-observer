@@ -2734,30 +2734,25 @@
   project_alias_updated: Project Alias was successfully updated.
   project_alias_no_match: Unable to find [target_type] matching '[term]'
 
-  # Project External Sources (#5416)
-  project_sources_title: External Sources
-  project_sources_tab: Sources
-  project_sources_intro: Mushroom Observer can watch iNaturalist for observations that belong in this project, alert the project's admins when one appears, and bring it in. Nothing is watched or imported until a site administrator approves the project.
-  project_sources_remote_project_id: iNaturalist project id
-  project_sources_remote_project_id_help: The number iNaturalist gives a sister project, from its URL. Its observations are the ones Mushroom Observer will consider.
-  project_sources_use_criteria: Use this project's target names, locations, box and dates
-  project_sources_use_criteria_help: Mushroom Observer builds the iNaturalist search from what the project already declares. Selective only where the project sets target names.
-  project_sources_alerting: Alert this project's admins when a matching observation appears
-  project_sources_importing: Import matching observations into this project
-  project_sources_import_limit: Import limit
-  project_sources_import_limit_help: The most observations Mushroom Observer will ever import into this project.
-  project_sources_import_limit_shown: "Import limit: [limit] observations."
-  project_sources_approved: Approved by [user] on [date].
-  project_sources_unapproved: Alerting and importing stay off until a site administrator approves this project.
-  project_sources_approval: Approval
-  project_sources_approve: Approve
-  project_sources_revoke: Withdraw Approval
-  project_sources_updated: External source settings saved.
-  project_sources_approve_success: Project approved.
-  project_sources_revoke_success: Approval withdrawn. Alerting and importing are off.
-  project_source_duplicate_site: This project already has a source for that site.
-  project_source_needs_a_source: Give an iNaturalist project id or use the project's criteria before turning alerting or importing on.
-  project_source_needs_approval: A site administrator must approve this project before alerting or importing can be turned on.
+  # Project External Sites (#5416)
+  project_sites_title: External Sites
+  project_sites_tab: External Sites
+  project_sites_intro: What this project already holds from each external site, and, for a site Mushroom Observer can query, where the project's observations may come from there and what Mushroom Observer may do about them.
+  project_sites_holdings: "[linked] of this project's [observations] observations are linked to [site], [imported] of them imported by Mushroom Observer."
+  project_sites_nothing_to_configure: Mushroom Observer cannot query this site for a project's observations, so there is nothing to configure here.
+  project_sites_remote_project: iNaturalist project
+  project_sites_remote_project_help: Its name, its id, the address of its page, or the address of an observation search that names it. Mushroom Observer stores the id, and refuses a value that names more than one project.
+  project_sites_use_constraints: Consider only observations meeting this project's constraints
+  project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
+  project_sites_alerting: Alert this project's admins when a matching observation appears
+  project_sites_importing: Import matching observations into this project
+  project_sites_import_limit: Import limit
+  project_sites_import_limit_help: The most observations Mushroom Observer will ever import into this project.
+  project_site_updated: External site settings saved.
+  project_site_duplicate_site: This project already has settings for that site.
+  project_site_needs_a_source: Give an iNaturalist project or use this project's constraints before turning alerting or importing on.
+  project_site_inat_project_unknown: "'[project]' does not name an iNaturalist project."
+  project_site_inat_project_ambiguous: "'[project]' names more than one iNaturalist project. Use its id or the address of its page instead."
 
   # Project Target Names
   project_target_name_add: Add

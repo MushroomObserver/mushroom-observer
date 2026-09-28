@@ -99,8 +99,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
-  has_many :project_external_sources, dependent: :destroy
-  has_many :external_sites, through: :project_external_sources
+  has_many :project_external_sites, dependent: :destroy
+
+  # What the project already holds from an external site (#5416): how
+  # many of its observations carry a link to that site, and how many
+  # of those MO imported from there rather than someone linking by
+  # hand.
+  ExternalSiteHoldings = Data.define(:observations, :linked, :imported)
+
+  def external_site_holdings(site)
+    links = ExternalLink.where(external_site: site,
+                               target_type: "Observation").
+            where(target_id: observations.select(:id))
+    ExternalSiteHoldings.new(observations: observations.count,
+                             linked: links.distinct.count(:target_id),
+                             imported: links.import.distinct.
+                                       count(:target_id))
+  end
 
   include HasPlaceName
 

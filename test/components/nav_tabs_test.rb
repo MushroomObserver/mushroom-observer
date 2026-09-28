@@ -108,13 +108,12 @@ class NavTabsTest < ComponentTestCase
 
     html = render_with(current: "members", tabs: collection)
 
-    # Collection contributed 5 tabs; the one keyed "members" is active.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 5)
+    # Collection contributed 4 tabs; the one keyed "members" is active.
+    assert_html(html, "ul.nav-tabs > li.nav-item", count: 4)
     assert_html(html, "a.nav-link.active.members_link")
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.aliases_link")
     assert_html(html, "a.nav-link.field_slips_link")
-    assert_html(html, "a.nav-link.sources_link")
   end
 
   def test_add_all_appends_collection_tabs
@@ -126,13 +125,12 @@ class NavTabsTest < ComponentTestCase
       tabs.tab("Extra", "/extra", key: "extra")
     end
 
-    # Collection's 5 tabs + 1 ad-hoc = 6 total, in declaration order.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 6)
+    # Collection's 4 tabs + 1 ad-hoc = 5 total, in declaration order.
+    assert_html(html, "ul.nav-tabs > li.nav-item", count: 5)
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.members_link")
     assert_html(html, "a.nav-link.aliases_link")
     assert_html(html, "a.nav-link.field_slips_link")
-    assert_html(html, "a.nav-link.sources_link")
     assert_html(html, "a.nav-link[href='/extra']", text: "Extra")
   end
 

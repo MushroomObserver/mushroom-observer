@@ -712,20 +712,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
   end
 
-  create_table "project_external_sources", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "project_external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "external_site_id", null: false
     t.string "remote_project_id", limit: 100
-    t.boolean "use_criteria", default: false, null: false
+    t.string "remote_project_name"
+    t.boolean "use_constraints", default: false, null: false
     t.boolean "alerting", default: false, null: false
     t.boolean "importing", default: false, null: false
-    t.datetime "approved_at"
-    t.integer "approved_by_id"
     t.integer "import_limit", default: 10000, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.index ["external_site_id"], name: "index_project_external_sources_on_external_site_id"
-    t.index ["project_id", "external_site_id"], name: "index_project_sources_on_project_and_site", unique: true
+    t.index ["external_site_id"], name: "index_project_external_sites_on_external_site_id"
+    t.index ["project_id", "external_site_id"], name: "index_project_sites_on_project_and_site", unique: true
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|

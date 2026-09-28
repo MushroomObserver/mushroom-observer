@@ -5,7 +5,7 @@ require("test_helper")
 module Views::Controllers::Projects
   # Tests for the project Admin sub-tabs component (issue #4148).
   class Views::Controllers::Projects::AdminSubtabsTest < ComponentTestCase
-    def test_renders_five_subtabs
+    def test_renders_four_subtabs
       project = projects(:eol_project)
       html = render_subtabs(project: project, current_subtab: "details")
 
@@ -19,9 +19,6 @@ module Views::Controllers::Projects
       assert_html(html, "a[href='/projects/#{project.id}/aliases']")
       assert_html(html, "a[href='/field_slips?project=#{project.id}']",
                   text: "#{project.field_slips.count} #{:field_slips.ti}")
-      assert_html(html,
-                  "a[href='/projects/#{project.id}/external_sources']",
-                  text: :project_sources_tab.l)
     end
 
     def test_details_active_when_current
@@ -44,13 +41,22 @@ module Views::Controllers::Projects
       )
     end
 
-    def test_sources_active_when_current
+    # The External Sites sub-tab is a site admin's, so it appears only
+    # in admin mode (#5416).
+    def test_external_sites_subtab_is_for_a_site_admin
       project = projects(:eol_project)
-      html = render_subtabs(project: project, current_subtab: "sources")
+      html = render_subtabs(project: project, current_subtab: "details")
+
+      assert_no_html(html,
+                     "a[href='/projects/#{project.id}/external_sites']")
+
+      stub_admin_mode!
+      html = render_subtabs(project: project,
+                            current_subtab: "external_sites")
 
       assert_html(
         html,
-        "a.nav-link.active[href='/projects/#{project.id}/external_sources']"
+        "a.nav-link.active[href='/projects/#{project.id}/external_sites']"
       )
     end
 
