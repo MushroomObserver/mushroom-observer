@@ -49,7 +49,9 @@ module Views::Controllers::Projects::ExternalSites
     # anything to configure; MyCoPortal exchanges files (#5422).
     def render_configuration(site)
       project_site = @project_sites[site.id]
-      return p { :project_sites_nothing_to_configure.t } unless project_site
+      unless project_site
+        return p { :project_sites_imports_not_implemented.t(site: site.name) }
+      end
 
       render(Form.new(project_site, project: @project,
                                     candidates: @candidates))

@@ -80,6 +80,8 @@ module Projects
       assert_select("#project_site_#{@inat.id} form")
       assert_select("#project_site_#{external_sites(:mycoportal).id} form",
                     count: 0)
+      assert_select("#project_site_#{external_sites(:mycoportal).id}",
+                    text: /MyCoPortal imports not yet implemented/)
     end
 
     def test_index_counts_what_the_project_already_holds

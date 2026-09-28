@@ -2738,7 +2738,7 @@
   project_sites_title: External Sites
   project_sites_tab: External Sites
   project_sites_holdings: "[linked] of this project's [observations] observations are linked to [site], [imported] of them imported by Mushroom Observer."
-  project_sites_nothing_to_configure: Mushroom Observer cannot query this site for a project's observations, so there is nothing to configure here.
+  project_sites_imports_not_implemented: "[site] imports not yet implemented."
   project_sites_remote_project: iNaturalist project
   project_sites_remote_project_help: An iNat project url, name, or id. Give its name, the number in its address, the address of its page, or the address of an observation search naming it. Mushroom Observer stores the id, and refuses a value naming more than one project.
   project_sites_clear_remote_project: Clear this project
