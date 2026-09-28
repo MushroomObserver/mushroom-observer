@@ -18,6 +18,19 @@ class Inat
 
     CACHE_TTL = 30.days
 
+    # iNat writes an infraspecific name without the rank marker MO
+    # uses: MO's "Hygrophorus nemoreus var. raphaneus" is its
+    # "Hygrophorus nemoreus raphaneus". The dot is required for the
+    # abbreviated markers, so a one-letter word elsewhere in a name is
+    # left alone.
+    RANK_MARKERS = /\s+(?:var|subvar|subsp|ssp|sect|subg|f|v)\.\s+|
+                    \s+(?:forma|form)\s+/xi
+
+    # MO abbreviates a county where iNat writes it out: "Barnstable
+    # Co." is iNat's "Barnstable County". Seven of the 57 target
+    # locations are written that way.
+    COUNTY_ABBREVIATION = /\bCo\.\z/
+
     def initialize(project)
       @project = project
       @unresolved_names = []
@@ -74,7 +87,12 @@ class Inat
     end
 
     def text_names_for(name)
-      ([name.text_name] + name.synonyms.map(&:text_name)).uniq
+      ([name.text_name] + name.synonyms.map(&:text_name)).
+        flat_map { |text| [text, strip_rank_markers(text)] }.uniq
+    end
+
+    def strip_rank_markers(text)
+      text.gsub(RANK_MARKERS, " ").squeeze(" ").strip
     end
 
     def search_taxon(text_name)
@@ -97,11 +115,27 @@ class Inat
     end
 
     def search_place(location)
-      query = location.name.to_s.split(",").first.to_s.strip
-      return nil if query.blank?
+      queries = place_queries(location)
+      return nil if queries.empty?
 
+      queries.lazy.
+        filter_map { |query| matching_place(query, queries, location) }.first
+    end
+
+    def place_queries(location)
+      query = location.name.to_s.split(",").first.to_s.strip
+      return [] if query.blank?
+
+      [query, query.sub(COUNTY_ABBREVIATION, "County")].uniq
+    end
+
+    # A place answers only to the whole of one of the spellings MO
+    # tried, so a fragment match -- "Washington Monument" for
+    # "Washington DC" -- is no answer.
+    def matching_place(query, spellings, location)
       place_candidates(query).find do |place|
-        place["name"].to_s.casecmp?(query) && overlaps?(place, location)
+        spellings.any? { |name| place["name"].to_s.casecmp?(name) } &&
+          overlaps?(place, location)
       end&.dig("id")
     end
 

@@ -132,4 +132,51 @@ class Inat::ConstraintMapperTest < UnitTestCase
   ensure
     Rails.cache = original
   end
+
+  # iNat writes an infraspecific name without MO's rank marker, so the
+  # stripped spelling is tried when the full one finds nothing.
+  def test_a_name_without_its_rank_marker
+    project = projects(:eol_project)
+    project.add_target_name(names(:amanita_boudieri_var_beillei))
+    stub_taxon_miss("Amanita boudieri var. beillei")
+    stub_taxon("Amanita boudieri beillei", 352_461)
+
+    params = Inat::ConstraintMapper.new(project).params
+
+    assert_equal("352461", params[:taxon_id])
+  end
+
+  # MO abbreviates a county where iNat writes it out.
+  def test_a_county_written_out
+    project = projects(:eol_project)
+    project.add_target_location(locations(:elgin_co))
+    stub_json("taxa", [])
+    stub_place_miss("Elgin Co.")
+    stub_place("Elgin County", 7_898, elgin_bounds)
+
+    params = Inat::ConstraintMapper.new(project).params
+
+    assert_equal("7898", params[:place_id])
+  end
+
+  def elgin_bounds
+    elgin = locations(:elgin_co)
+    [[elgin.west, elgin.south], [elgin.east, elgin.north]]
+  end
+
+  def stub_taxon_miss(text_name)
+    stub_request(
+      :get,
+      "#{Inat::Constants::API_BASE}/taxa?q=#{ERB::Util.url_encode(text_name)}" \
+      "&per_page=5"
+    ).to_return(status: 200, body: { results: [] }.to_json)
+  end
+
+  def stub_place_miss(query)
+    stub_request(
+      :get,
+      "#{Inat::Constants::API_BASE}/places/autocomplete?" \
+      "q=#{ERB::Util.url_encode(query)}"
+    ).to_return(status: 200, body: { results: [] }.to_json)
+  end
 end
