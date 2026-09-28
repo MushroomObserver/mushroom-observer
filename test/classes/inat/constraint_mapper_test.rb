@@ -179,4 +179,16 @@ class Inat::ConstraintMapperTest < UnitTestCase
       "q=#{ERB::Util.url_encode(query)}"
     ).to_return(status: 200, body: { results: [] }.to_json)
   end
+
+  # The stub for one endpoint should not answer for a longer word that
+  # starts the same way, while a path or query below it still matches.
+  def test_the_api_matcher_stops_at_an_endpoint_boundary
+    matcher = inat_api_matcher("places")
+
+    assert_match(matcher, "#{Inat::Constants::API_BASE}/places")
+    assert_match(matcher,
+                 "#{Inat::Constants::API_BASE}/places/autocomplete?q=x")
+    assert_no_match(matcher, "#{Inat::Constants::API_BASE}/places_elsewhere")
+    assert_no_match(matcher, "https://apiXinaturalistXorg/v1/places")
+  end
 end

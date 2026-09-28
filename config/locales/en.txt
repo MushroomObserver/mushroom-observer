@@ -322,6 +322,8 @@
   project: project
   projects: projects
   project_lists: project lists
+  project_external_site: external site settings
+  project_external_sites: external site settings
   project_alias: project alias
   project_aliases: project aliases
   publication: publication

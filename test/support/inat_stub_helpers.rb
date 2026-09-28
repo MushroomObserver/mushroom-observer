@@ -25,14 +25,16 @@ module InatStubHelpers
       )
   end
 
-  # A WebMock URL matcher anchored at iNat's API base. Interpolating
-  # the base into a regexp leaves its dots matching any character, so
-  # a stub meant for api.inaturalist.org would answer for
+  # A WebMock URL matcher for one iNat API endpoint. Interpolating the
+  # base into a regexp leaves the dots in api.inaturalist.org matching
+  # any character, so a stub meant for that host would answer for
   # apiXinaturalistXorg as well -- CodeQL's "incomplete regular
-  # expression for hostnames". Escaping the base fixes that, and
-  # anchoring it keeps the stub to the path it names.
+  # expression for hostnames". Escaping fixes that; the lookahead ends
+  # the match at a path or query boundary, so a stub for `places` does
+  # not answer for `places_somewhere` while `places/autocomplete?q=x`
+  # still does.
   def inat_api_matcher(path)
-    /\A#{Regexp.escape("#{API_BASE}/#{path}")}/
+    %r{\A#{Regexp.escape("#{API_BASE}/#{path}")}(?=[/?]|\z)}
   end
 
   # NOTE: webmock is picky about the User-Agent string

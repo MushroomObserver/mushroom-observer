@@ -159,7 +159,9 @@ module Projects
       @site = @project.project_external_sites.find_by(id: params[:id])
       return true if @site
 
-      flash_error(:runtime_object_not_found.t(type: :project, id: params[:id]))
+      flash_error(:runtime_object_not_found.t(
+                    type: ProjectExternalSite.type_tag, id: params[:id]
+                  ))
       redirect_to(project_external_sites_path(project_id: @project.id))
       false
     end

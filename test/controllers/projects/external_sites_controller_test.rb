@@ -314,7 +314,9 @@ module Projects
             params: { project_id: @project.id, id: other.id,
                       project_external_site: { alerting: "1" } })
 
-      assert_flash_error
+      # The row is what was not found here, not the project.
+      assert_flash_error(:runtime_object_not_found,
+                         type: :project_external_site, id: other.id)
       assert_not(other.reload.alerting?)
     end
   end
