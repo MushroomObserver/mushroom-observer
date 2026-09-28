@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-28 (deploy-2026-09-28-12-00)
+
+- Record and report what MO exchanges with each external site (`ExternalSiteUsage`) ([PR5420](https://github.com/MushroomObserver/mushroom-observer/pull/5420), @mo-nathan)
+- Single-quote `gh` titles containing backticks ([PR5413](https://github.com/MushroomObserver/mushroom-observer/pull/5413), @mo-nathan)
+- Fix misleading edit tooltip on read-only reflection `Observation`s ([PR5421](https://github.com/MushroomObserver/mushroom-observer/pull/5421), @nimmolo)
+
 ## 2026-09-26 (deploy-2026-09-26-12-00)
 
 - Bump arel_extensions to 2.5.0 ([PR5406](https://github.com/MushroomObserver/mushroom-observer/pull/5406), @JoeCohen)
