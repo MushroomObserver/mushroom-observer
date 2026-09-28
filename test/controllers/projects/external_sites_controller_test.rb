@@ -186,6 +186,39 @@ module Projects
       assert_select("#project_external_site_remote_project_id_help")
     end
 
+    # A count over the ceiling gets said so, since importing would stop
+    # there.
+    def test_a_count_over_the_import_limit_says_so
+      create_project_site(remote_project_id: "303327",
+                          remote_project_name: "2026 NAMA Yoop",
+                          import_limit: 100)
+      make_admin("dick")
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("#project_site_#{@inat.id}",
+                    text: /more than this project.s import limit of 100/)
+    end
+
+    # Targets iNat does not know are named, not silently dropped.
+    def test_unresolved_targets_are_listed
+      project = projects(:rare_fungi_project)
+      ProjectExternalSite.create!(project: project, external_site: @inat,
+                                  use_constraints: true)
+      stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
+        to_return(status: 200, body: { results: [] }.to_json)
+      stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
+        to_return(status: 200, body: { results: [] }.to_json)
+      make_admin("dick")
+      get(:index, params: { project_id: project.id })
+
+      assert_select("#project_site_#{@inat.id}",
+                    text: /Target names iNaturalist does not know/)
+      assert_select("#project_site_#{@inat.id}",
+                    text: /#{project.target_names.first.text_name}/)
+      assert_select("#project_site_#{@inat.id}",
+                    text: /Target locations iNaturalist does not know/)
+    end
+
     # --- saving ------------------------------------------------------
 
     def test_create_resolves_and_saves_the_inat_project

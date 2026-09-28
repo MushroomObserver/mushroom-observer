@@ -96,4 +96,33 @@ class Inat::CandidateCountTest < UnitTestCase
     assert(candidates.configured)
     assert_nil(candidates.total)
   end
+
+  # A target iNat does not know is left out of the search and named,
+  # so an admin can see why a number is bigger than the project means.
+  def test_unresolved_targets_ride_along_with_the_count
+    project = projects(:rare_fungi_project)
+    stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
+      to_return(status: 200, body: { results: [] }.to_json)
+    stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
+      to_return(status: 200, body: { results: [] }.to_json)
+    stub_count({ "taxon_id" =>
+                 Inat::Constants::IMPORTABLE_TAXON_IDS_ARG }, 9_999)
+    site = ProjectExternalSite.new(project: project, external_site: @site,
+                                   use_constraints: true)
+
+    candidates = Inat::CandidateCount.for(project: project,
+                                          project_site: site)
+
+    assert_equal(project.target_names.map(&:text_name),
+                 candidates.unresolved_names)
+    assert_equal(project.target_locations.map(&:name),
+                 candidates.unresolved_locations)
+  end
+
+  def test_an_unconfigured_row_has_no_unresolved_targets
+    candidates = candidates_for
+
+    assert_empty(candidates.unresolved_names)
+    assert_empty(candidates.unresolved_locations)
+  end
 end

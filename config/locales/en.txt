@@ -2744,6 +2744,9 @@
   project_sites_clear_remote_project: Clear this project
   project_sites_candidates: '[count] not yet imported. Click "Save" to update.'
   project_sites_unbounded: Too many observations to import. Give an iNaturalist project, or follow this project's constraints.
+  project_sites_over_limit: "That is more than this project's import limit of [limit]."
+  project_sites_unresolved_names: "Target names iNaturalist does not know, left out of the search: [targets]"
+  project_sites_unresolved_locations: "Target locations iNaturalist does not know, left out of the search: [targets]"
   project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
   project_sites_use_constraints: Follow this project's constraints
   project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.

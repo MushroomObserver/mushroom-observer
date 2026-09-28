@@ -23,8 +23,12 @@ class Inat
     CACHE_TTL = 10.minutes
 
     # total is nil when iNat could not answer, so the page can show
-    # nothing rather than a wrong number.
-    Candidates = Data.define(:configured, :total)
+    # nothing rather than a wrong number. The unresolved lists are what
+    # the constraints asked for and iNat does not know: left out of the
+    # search rather than guessed at, and named on the page so an admin
+    # can see why a number is bigger than the project means.
+    Candidates = Data.define(:configured, :total, :unresolved_names,
+                             :unresolved_locations)
 
     def self.for(project:, project_site:)
       new(project, project_site).candidates
@@ -36,13 +40,22 @@ class Inat
     end
 
     def candidates
-      return Candidates.new(configured: false, total: nil) unless
-        @project_site.configured?
+      return unconfigured unless @project_site.configured?
 
-      Candidates.new(configured: true, total: count)
+      # The mapper fills its unresolved lists while the search is
+      # built, so they are read after the count, not before.
+      total = count
+      Candidates.new(configured: true, total: total,
+                     unresolved_names: @mapper.unresolved_names,
+                     unresolved_locations: @mapper.unresolved_locations)
     end
 
     private
+
+    def unconfigured
+      Candidates.new(configured: false, total: nil, unresolved_names: [],
+                     unresolved_locations: [])
+    end
 
     def search_params
       params = {}

@@ -49,7 +49,13 @@ module Views::Controllers::Projects::ExternalSites
     # follows what is stored rather than what is on screen, which is why
     # it names the button that would refresh it.
     def render_candidates_line
-      p(class: "mt-2") { candidates_text }
+      text = candidates_text
+      p(class: "mt-2") { text } if text
+      render_over_limit
+      render_unresolved(:project_sites_unresolved_names,
+                        @candidates.unresolved_names)
+      render_unresolved(:project_sites_unresolved_locations,
+                        @candidates.unresolved_locations)
     end
 
     def candidates_text
@@ -57,6 +63,23 @@ module Views::Controllers::Projects::ExternalSites
       return nil unless @candidates.total
 
       :project_sites_candidates.t(count: @candidates.total)
+    end
+
+    def render_over_limit
+      return unless @candidates.total.to_i > model.import_limit
+
+      p(class: "mt-2") do
+        :project_sites_over_limit.t(limit: model.import_limit)
+      end
+    end
+
+    # A target iNat does not know is left out of the search rather than
+    # guessed at, which is worth saying: it is why a count can be larger
+    # than the project means.
+    def render_unresolved(tag, targets)
+      return if targets.blank?
+
+      p(class: "mt-2") { tag.t(targets: targets.join(", ")) }
     end
 
     # Two states in one place: what the saved project resolved to, and
