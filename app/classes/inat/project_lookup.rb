@@ -16,6 +16,8 @@ class Inat
   # was typed. Refusing an ambiguous answer is the point: storing the
   # wrong project would quietly import a stranger's observations.
   class ProjectLookup
+    include Inat::JsonFetch
+
     # Named Result, not Project: inside this class a constant named
     # Project would shadow the MO model.
     Result = Data.define(:id, :title)
@@ -57,7 +59,7 @@ class Inat
     end
 
     def fetch(token)
-      body = get("projects/#{CGI.escape(token)}")
+      body = fetch_json("projects/#{escape(token)}")
       project_from(body&.dig("results")&.first)
     end
 
@@ -65,7 +67,7 @@ class Inat
     # is the answer; several are only an answer when one of them is
     # titled exactly what was typed.
     def search(name)
-      results = get("projects?q=#{CGI.escape(name)}&per_page=10")&.
+      results = fetch_json("projects?q=#{escape(name)}&per_page=10")&.
                 dig("results") || []
       return project_from(results.first) if results.one?
 
@@ -80,15 +82,6 @@ class Inat
       return nil if result.blank? || result["id"].blank?
 
       Result.new(id: result["id"].to_s, title: result["title"].to_s)
-    end
-
-    # A lookup that fails is an answer of "not found", not an error page
-    # for the admin: the caller says so with its own message.
-    def get(path)
-      JSON.parse(Inat::APIRequest.new(nil).request(path: path).body)
-    rescue RestClient::Exception, JSON::ParserError, SocketError => e
-      Rails.logger.warn("iNat project lookup failed: #{e.message}")
-      nil
     end
   end
 end

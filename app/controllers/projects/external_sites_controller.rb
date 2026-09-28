@@ -94,7 +94,7 @@ module Projects
     def render_index_view(status: :ok, **render_opts)
       render(Views::Controllers::Projects::ExternalSites::Index.new(
                project: @project, project_sites: project_sites,
-               sites: sites, user: @user
+               sites: sites, counts: counts, user: @user
              ),
              status: status, **render_opts)
     end
@@ -111,19 +111,40 @@ module Projects
     # iNaturalist first, since it is the only site MO can act on; the
     # rest by name.
     def sites
-      inat = ExternalSite::INATURALIST_NAME
+      name = ExternalSite::INATURALIST_NAME
       @sites ||= ExternalSite.order(:name).to_a.
-                 partition { |site| site.name == inat }.flatten
+                 partition { |site| site.name == name }.flatten
     end
 
     # The saved rows, plus the unsaved one the form draws on for a site
-    # with no row yet. Keyed by site id.
+    # with no row yet. Keyed by site id. A project that constrains
+    # anything starts out following those constraints, since that is
+    # what makes a search of iNat selective.
     def project_sites
+      @project_sites ||= build_project_sites
+    end
+
+    def build_project_sites
       rows = @project.project_external_sites.index_by(&:external_site_id)
-      inat = ExternalSite.inaturalist
-      rows[inat.id] ||= @project.project_external_sites.new(external_site: inat)
+      rows[inat_site.id] ||= @project.project_external_sites.new(
+        external_site: inat_site, use_constraints: @project.constraints?
+      )
       rows[@site.external_site_id] = @site if @site
       rows
+    end
+
+    def inat_site
+      @inat_site ||= ExternalSite.inaturalist
+    end
+
+    # What the configuration would bring in, asked of iNat rather than
+    # guessed at. Nil counts where it has nothing to count or could not
+    # answer.
+    def counts
+      Inat::CandidateCount.for(
+        project: @project,
+        project_site: project_sites[inat_site.id]
+      )
     end
 
     def find_project!

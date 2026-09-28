@@ -2741,11 +2741,14 @@
   project_sites_holdings: "[linked] of this project's [observations] observations are linked to [site], [imported] of them imported by Mushroom Observer."
   project_sites_nothing_to_configure: Mushroom Observer cannot query this site for a project's observations, so there is nothing to configure here.
   project_sites_remote_project: iNaturalist project
-  project_sites_remote_project_help: Its name, its id, the address of its page, or the address of an observation search that names it. Mushroom Observer stores the id, and refuses a value that names more than one project.
-  project_sites_use_constraints: Consider only observations meeting this project's constraints
+  project_sites_remote_project_help: iNat project url, name, or id
+  project_sites_clear_remote_project: Clear this project
+  project_sites_not_yet_imported: "[count] not yet imported"
+  project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
+  project_sites_use_constraints: Follow this project's constraints
   project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
   project_sites_alerting: Alert this project's admins when a matching observation appears
-  project_sites_importing: Import matching observations into this project
+  project_sites_importing: Automatically import matching observations into this project
   project_sites_import_limit: Import limit
   project_sites_import_limit_help: The most observations Mushroom Observer will ever import into this project.
   project_site_updated: External site settings saved.

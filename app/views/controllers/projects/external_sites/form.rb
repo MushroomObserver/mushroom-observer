@@ -3,9 +3,14 @@
 # Where a project's observations may come from on iNaturalist, and what
 # MO may do about them (#5416). Rendered by
 # `Projects::ExternalSitesController#index`, inside that site's panel.
+#
+# Each of the two source shapes carries what it would bring in -- the
+# observations matching it that MO does not already hold -- so an admin
+# can see what a setting means before turning importing on.
 module Views::Controllers::Projects::ExternalSites
   class Form < ::Components::ApplicationForm
     prop :project, ::Project
+    prop :counts, ::Inat::CandidateCount::Counts
 
     def initialize(model, **attrs)
       super(model, turbo: true, **attrs)
@@ -13,13 +18,8 @@ module Views::Controllers::Projects::ExternalSites
 
     def view_template
       super do
-        text_field(:remote_project_id,
-                   label: :project_sites_remote_project.l,
-                   help: :project_sites_remote_project_help.t)
-        checkbox_field(:use_constraints,
-                       label: :project_sites_use_constraints.l,
-                       help: :project_sites_use_constraints_help.t,
-                       wrap_class: "mt-3")
+        render_constraints_field
+        render_remote_project_field
         render_action_fields
         number_field(:import_limit,
                      label: :project_sites_import_limit.l,
@@ -31,10 +31,85 @@ module Views::Controllers::Projects::ExternalSites
 
     private
 
+    # A project with nothing to constrain by has nothing to follow, so
+    # it gets the reason rather than a checkbox that would do nothing.
+    def render_constraints_field
+      return Help(content: :project_sites_no_constraints.l) unless
+        @project.constraints?
+
+      checkbox_field(:use_constraints,
+                     label: constraints_label,
+                     help: :project_sites_use_constraints_help.t)
+    end
+
+    def constraints_label
+      with_count(:project_sites_use_constraints.l, @counts.constraints)
+    end
+
+    # Two states in one place: what the saved project resolved to, and
+    # the field for naming one. The clear button swaps them back without
+    # a round trip; the change saves with the rest of the form.
+    def render_remote_project_field
+      div(class: "mt-3", data: { controller: "remote-project" }) do
+        render_remote_project_display
+        render_remote_project_entry
+      end
+    end
+
+    def render_remote_project_display
+      div(data: { remote_project_target: "display" }, hidden: !resolved?) do
+        plain(append_colon(:project_sites_remote_project.l))
+        whitespace
+        render_remote_project_link
+        whitespace
+        render_clear_button
+      end
+    end
+
+    def render_remote_project_link
+      Link(type: :external, content: remote_project_label,
+           path: model.remote_url.to_s)
+    end
+
+    def remote_project_label
+      with_count(model.remote_project_name.to_s, @counts.combined)
+    end
+
+    def render_clear_button
+      Button(variant: :strip, icon: :x, icon_class: "text-danger",
+             icon_title: :project_sites_clear_remote_project.l,
+             data: { action: "remote-project#clear" })
+    end
+
+    def render_remote_project_entry
+      div(data: { remote_project_target: "entry" }, hidden: resolved?) do
+        text_field(:remote_project_id,
+                   label: :project_sites_remote_project.l, inline: true,
+                   data: { remote_project_target: "input" }) do |field|
+          field.with_append { render_remote_project_hint }
+        end
+      end
+    end
+
+    def render_remote_project_hint
+      Help(type: :tooltip, label: "(?)",
+           title: :project_sites_remote_project_help.l)
+    end
+
     def render_action_fields
       checkbox_field(:alerting, label: :project_sites_alerting.l,
                                 wrap_class: "mt-3")
       checkbox_field(:importing, label: :project_sites_importing.l)
+    end
+
+    def resolved?
+      model.remote_project_name.present?
+    end
+
+    def with_count(text, count)
+      return text unless count
+
+      "#{text} (#{:project_sites_not_yet_imported.l(count: count)})"
     end
 
     def form_action

@@ -8,6 +8,7 @@ module Views::Controllers::Projects::ExternalSites
     prop :project, ::Project
     prop :sites, _Array(::ExternalSite)
     prop :project_sites, Hash
+    prop :counts, ::Inat::CandidateCount::Counts
     prop :user, ::User
 
     def view_template
@@ -51,18 +52,7 @@ module Views::Controllers::Projects::ExternalSites
       project_site = @project_sites[site.id]
       return p { :project_sites_nothing_to_configure.t } unless project_site
 
-      render_current_remote_project(project_site)
-      render(Form.new(project_site, project: @project))
-    end
-
-    def render_current_remote_project(project_site)
-      return if project_site.remote_project_name.blank?
-
-      p(class: "mt-3") do
-        plain(append_colon(:project_sites_remote_project.l))
-        Link(type: :external, content: project_site.remote_project_name,
-             path: project_site.remote_url)
-      end
+      render(Form.new(project_site, project: @project, counts: @counts))
     end
   end
 end

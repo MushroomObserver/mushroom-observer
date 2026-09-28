@@ -14,6 +14,16 @@ module Projects
       @controller = Projects::ExternalSitesController.new
       @project = projects(:eol_project)
       @inat = external_sites(:inaturalist)
+      stub_candidate_counts
+    end
+
+    # Every render of the page asks iNat what a configuration would
+    # bring in; the numbers themselves are Inat::CandidateCount's
+    # own test.
+    def stub_candidate_counts(total = 238)
+      stub_request(:get, %r{#{Inat::Constants::API_BASE}/observations}o).
+        to_return(status: 200,
+                  body: { total_results: total }.to_json)
     end
 
     def project_site
@@ -96,8 +106,59 @@ module Projects
 
       assert_select(
         "a[href='#{Inat::Constants::SITE}/projects/303327']",
-        text: "2026 NAMA Yoop"
+        text: "2026 NAMA Yoop (238 not yet imported)"
       )
+    end
+
+    # A project that constrains nothing has nothing to follow, so it is
+    # told why rather than given a checkbox that would do nothing.
+    def test_a_project_without_constraints_is_told_so
+      make_admin("dick")
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("#project_site_#{@inat.id}",
+                    text: /#{:project_sites_no_constraints.l}/)
+      assert_select("input[name='project_external_site[use_constraints]']",
+                    count: 0)
+    end
+
+    # The count beside the checkbox is what following the constraints
+    # would bring in that MO does not already hold.
+    def test_constraints_carry_what_they_would_bring_in
+      project = projects(:rare_fungi_project)
+      stub_request(:get, %r{#{Inat::Constants::API_BASE}/taxa}o).
+        to_return(status: 200, body: { results: [] }.to_json)
+      stub_request(:get, %r{#{Inat::Constants::API_BASE}/places}o).
+        to_return(status: 200, body: { results: [] }.to_json)
+      make_admin("dick")
+      get(:index, params: { project_id: project.id })
+
+      assert_select("label",
+                    text: /#{:project_sites_use_constraints.l}.*238/)
+    end
+
+    # Saved: the panel shows what the id resolved to, with the field
+    # behind it for a clear to bring back.
+    def test_a_saved_project_shows_as_a_link_with_the_field_hidden
+      create_project_site(remote_project_id: "303327",
+                          remote_project_name: "2026 NAMA Yoop")
+      make_admin("dick")
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("[data-controller='remote-project']") do
+        assert_select("[data-remote-project-target='display']:not([hidden])")
+        assert_select("[data-remote-project-target='entry'][hidden]")
+        assert_select("input[data-remote-project-target='input']" \
+                      "[value='303327']")
+      end
+    end
+
+    def test_an_unset_project_shows_the_field
+      make_admin("dick")
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("[data-remote-project-target='display'][hidden]")
+      assert_select("[data-remote-project-target='entry']:not([hidden])")
     end
 
     # --- saving ------------------------------------------------------
