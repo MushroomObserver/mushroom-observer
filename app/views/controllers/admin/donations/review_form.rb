@@ -17,7 +17,7 @@ module Views::Controllers::Admin::Donations
 
     def view_template
       super do
-        submit(:review_donations_update.l, center: true)
+        title_bar_submit(:review_donations_update.l)
         render_donations_table
         submit(:review_donations_update.l, center: true)
       end

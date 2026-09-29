@@ -35,7 +35,7 @@ module Views::Controllers::Projects
 
     def view_template
       super do
-        submit(submit_text, center: true)
+        title_bar_submit(submit_text)
         render_open_membership
         render_title
         render_summary

@@ -29,7 +29,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     end
 
     def view_template
-      submit(:submit.ti, center: true)
+      title_bar_submit(:submit.ti)
       render_name_feedback if model.proposed_name.present?
       render_proposed_field
       render_misspelling_field

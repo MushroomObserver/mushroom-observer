@@ -11,7 +11,7 @@ module Views::Controllers::Names::Synonyms::Approve
     prop :user, ::User
 
     def view_template
-      submit(:approve.ti, center: true)
+      title_bar_submit(:approve.ti)
 
       render_approved_names_section if @approved_names.present?
 
