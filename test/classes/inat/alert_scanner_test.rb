@@ -190,4 +190,47 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_empty(scan)
     assert_not_requested(:get, inat_api_matcher("observations"))
   end
+
+  # A project box narrows the target locations further, the way the
+  # preview's query does.
+  def test_an_observation_outside_the_project_box_does_not_alert
+    @project.update!(location: locations(:albion))
+    alerting_row
+    stub_observations([observation])
+
+    assert_empty(scan)
+  end
+
+  def test_an_observation_inside_both_the_box_and_a_target_location_alerts
+    @project.update!(location: @burbank)
+    alerting_row
+    stub_observations([observation])
+
+    assert_equal(1, scan.values.first.size)
+  end
+
+  # iNat dates are ISO strings; anything else is no date rather than a
+  # broken cycle.
+  def test_an_unreadable_date_is_no_date
+    alerting_row
+    stub_observations([observation("observed_on" => "N/A")])
+
+    alert = scan.values.first.first
+
+    assert_nil(alert.observed_on)
+  end
+
+  # A cycle that hits its page ceiling says so instead of walking iNat
+  # for a quarter of an hour; what it did not read waits for the next
+  # cycle.
+  def test_a_poll_that_fills_every_page_reports_the_overflow
+    alerting_row
+    stub_observations([observation, observation("id" => 12_346)])
+    scanner = Inat::AlertScanner.new(site: @site, page_size: 2, max_pages: 2)
+
+    scanner.scan
+
+    assert_equal(1, scanner.warnings.size)
+    assert_match(/stopped at 2 pages/, scanner.warnings.first)
+  end
 end

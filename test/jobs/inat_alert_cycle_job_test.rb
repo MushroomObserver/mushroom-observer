@@ -61,4 +61,21 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
     fake.define_singleton_method(:warnings) { warnings }
     fake
   end
+
+  # One receiver's delivery failing cannot take the cycle down with it.
+  def test_a_delivery_failure_is_logged_and_the_cycle_carries_on
+    scanner = fake_scanner({ users(:mary) => [project_external_site_alert] })
+    raiser = ->(**) { raise("no mail today") }
+    logged = nil
+
+    Inat::AlertScanner.stub(:new, scanner) do
+      ProjectAlertMailer.stub(:build, raiser) do
+        Rails.logger.stub(:error, ->(message) { logged = message }) do
+          assert_nothing_raised { InatAlertCycleJob.perform_now }
+        end
+      end
+    end
+
+    assert_match(/no mail today/, logged)
+  end
 end

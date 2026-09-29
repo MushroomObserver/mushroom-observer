@@ -31,8 +31,14 @@ class Inat
 
     attr_reader :alerts_sent, :warnings
 
-    def initialize(site: ExternalSite.inaturalist)
+    # `page_size` and `max_pages` are arguments rather than constants
+    # read directly so a test can drive the overflow path without
+    # fabricating a thousand results.
+    def initialize(site: ExternalSite.inaturalist, page_size: PAGE_SIZE,
+                   max_pages: MAX_PAGES)
       @site = site
+      @page_size = page_size
+      @max_pages = max_pages
       @alerts_sent = 0
       @warnings = []
     end
@@ -103,12 +109,12 @@ class Inat
 
     def pages(taxa)
       results = []
-      (1..MAX_PAGES).each do |page|
+      (1..@max_pages).each do |page|
         batch = fetch_page(taxa, page)
         results.concat(batch)
-        return results if batch.size < PAGE_SIZE
+        return results if batch.size < @page_size
 
-        note_overflow(page) if page == MAX_PAGES
+        note_overflow(page) if page == @max_pages
       end
       results
     end
@@ -116,13 +122,13 @@ class Inat
     def fetch_page(taxa, page)
       query = { taxon_id: taxa.join(","), updated_since: @since.utc.iso8601,
                 order_by: "updated_at", order: "asc",
-                per_page: PAGE_SIZE, page: page }.to_query
+                per_page: @page_size, page: page }.to_query
       Array(fetch_json("observations?#{query}")&.dig("results"))
     end
 
     def note_overflow(page)
       @warnings << "iNat alert poll stopped at #{page} pages of " \
-                   "#{PAGE_SIZE}; the rest waits for the next cycle."
+                   "#{@page_size}; the rest waits for the next cycle."
     end
   end
 end

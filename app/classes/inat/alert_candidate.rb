@@ -16,10 +16,6 @@ class Inat
       @result["id"].to_s
     end
 
-    def url
-      "#{Inat::Constants::SITE}/observations/#{id}"
-    end
-
     def observed_on
       value = @result["observed_on"]
       return nil if value.blank?
