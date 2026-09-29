@@ -322,6 +322,8 @@
   project: project
   projects: projects
   project_lists: project lists
+  project_external_site: external site settings
+  project_external_sites: external site settings
   project_alias: project alias
   project_aliases: project aliases
   publication: publication
@@ -2733,6 +2735,32 @@
   project_alias_type: Alias Type
   project_alias_updated: Project Alias was successfully updated.
   project_alias_no_match: Unable to find [target_type] matching '[term]'
+
+  # Project External Sites (#5416)
+  project_sites_title: External Sites
+  project_sites_tab: External Sites
+  project_sites_holdings: "[linked] of this project's [observations] observations are linked to [site], [imported] of them imported by Mushroom Observer."
+  project_sites_imports_not_implemented: "[site] imports not yet implemented."
+  project_sites_remote_project: iNaturalist project
+  project_sites_remote_project_help: An iNat project url, name, or id. Give its name, the number in its address, the address of its page, or the address of an observation search naming it. Mushroom Observer stores the id, and refuses a value naming more than one project.
+  project_sites_clear_remote_project: Clear this project
+  project_sites_candidates: '[count] not yet imported. Click "Save" to update.'
+  project_sites_unbounded: Too many observations to import. Give an iNaturalist project, or follow this project's constraints.
+  project_sites_over_limit: "That is more than this project's import limit of [limit]."
+  project_sites_unresolved_names: "Target names iNaturalist does not know, left out of the search: [targets]"
+  project_sites_unresolved_locations: "Target locations iNaturalist does not know, left out of the search: [targets]"
+  project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
+  project_sites_use_constraints: Follow this project's constraints
+  project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
+  project_sites_alerting: Alert this project's admins when a matching observation appears
+  project_sites_importing: Automatically import matching observations into this project
+  project_sites_import_limit: Import limit
+  project_sites_import_limit_help: The most observations Mushroom Observer will ever import into this project.
+  project_site_updated: External site settings saved.
+  project_site_duplicate_site: This project already has settings for that site.
+  project_site_needs_a_source: Give an iNaturalist project or use this project's constraints before turning alerting or importing on.
+  project_site_inat_project_unknown: "'[project]' does not name an iNaturalist project."
+  project_site_inat_project_ambiguous: "'[project]' names more than one iNaturalist project. Use its id or the address of its page instead."
 
   # Project Target Names
   project_target_name_add: Add
