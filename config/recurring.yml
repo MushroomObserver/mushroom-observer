@@ -4,6 +4,14 @@
 # https://github.com/rails/solid_queue/tree/main#recurring-tasks
 
 # production:
+  # The alert half of the iNat cycle (#5416). Ten minutes is the agreed
+  # cadence: one query serves every alerting project, so the cost is a
+  # page of results, not a page per project. On the :alerts queue with a
+  # worker of its own (config/queue.yml), so the offsets the maintenance
+  # jobs below care about do not apply.
+  inat_alert_cycle:
+    class: InatAlertCycleJob
+    schedule: every 10 minutes
 #   a_periodic_job:
 #     class: MyJob
 #     args: [ 42, { status: "custom_status" } ]

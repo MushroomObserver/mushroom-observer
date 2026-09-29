@@ -100,6 +100,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   has_many :project_external_sites, dependent: :destroy
+  has_many :project_external_site_alerts, dependent: :destroy
 
   # What the project already holds from an external site (#5416): how
   # many of its observations carry a link to that site, and how many

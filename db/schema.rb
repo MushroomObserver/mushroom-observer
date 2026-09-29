@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_29_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -121,6 +121,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.bigint "bytes_in_per_hour_limit"
     t.bigint "bytes_in_per_day_limit"
     t.text "media_hosts"
+    t.datetime "last_alert_poll_at"
   end
 
   create_table "field_slip_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -710,6 +711,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.index ["observation_id"], name: "index_project_excluded_observations_on_observation_id"
     t.index ["project_id", "observation_id"], name: "index_project_excluded_observations_on_project_and_obs", unique: true
     t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
+  end
+
+  create_table "project_external_site_alerts", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "external_site_id", null: false
+    t.string "remote_identification_id", limit: 100, null: false
+    t.string "remote_observation_id", limit: 100, null: false
+    t.string "name"
+    t.date "observed_on"
+    t.datetime "alerted_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["external_site_id"], name: "index_project_external_site_alerts_on_external_site_id"
+    t.index ["project_id", "external_site_id", "remote_identification_id"], name: "index_project_site_alerts_on_project_site_and_ident", unique: true
   end
 
   create_table "project_external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|

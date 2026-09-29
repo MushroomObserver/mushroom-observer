@@ -1,0 +1,193 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# The alert half of the iNaturalist cycle (#5416).
+class Inat::AlertScannerTest < UnitTestCase
+  include InatStubHelpers
+
+  # The rare-fungi fixture is the shape alerting is for: target names
+  # and target locations both set.
+  def setup
+    super
+    @project = projects(:rare_fungi_project)
+    @site = external_sites(:inaturalist)
+    @site.update!(last_alert_poll_at: 1.hour.ago)
+    @coprinus = names(:coprinus_comatus)
+    @burbank = locations(:burbank)
+    stub_taxon_lookups
+    stub_place_lookups
+  end
+
+  def stub_taxon_lookups
+    stub_request(:get, inat_api_matcher("taxa")).
+      to_return(lambda { |request|
+        name = CGI.unescape(request.uri.query.to_s[/q=([^&]*)/, 1].to_s)
+        { status: 200,
+          body: { results: [{ id: taxon_id_for(name), name: name }] }.to_json }
+      })
+  end
+
+  def taxon_id_for(name)
+    name == @coprinus.text_name ? 47_347 : 48_701
+  end
+
+  def stub_place_lookups
+    geojson = { "coordinates" =>
+                [[[@burbank.west, @burbank.south],
+                  [@burbank.east, @burbank.north]]] }
+    stub_request(:get, inat_api_matcher("places")).
+      to_return(status: 200,
+                body: { results: [{ id: 962, name: "Burbank",
+                                    bounding_box_geojson: geojson }] }.to_json)
+  end
+
+  # One observation as iNat returns it, inside Burbank and identified
+  # as one of the project's target names.
+  def observation(**overrides)
+    { "id" => 12_345,
+      "observed_on" => "2026-09-20",
+      "location" => "#{@burbank.center_lat},#{@burbank.center_lng}",
+      "identifications" => [identification] }.merge(overrides.stringify_keys)
+  end
+
+  def identification(id: 999, taxon_id: 47_347, current: true)
+    { "id" => id, "current" => current,
+      "taxon" => { "id" => taxon_id, "name" => "Coprinus comatus" } }
+  end
+
+  def stub_observations(results)
+    stub_request(:get, inat_api_matcher("observations")).
+      to_return(status: 200,
+                body: { results: results, total_results: results.size }.to_json)
+  end
+
+  def alerting_row(**args)
+    ProjectExternalSite.create!(project: @project, external_site: @site,
+                                use_constraints: true, alerting: true, **args)
+  end
+
+  def scan
+    Inat::AlertScanner.new(site: @site).scan
+  end
+
+  def test_no_alerting_project_asks_inat_nothing
+    assert_empty(scan)
+    assert_not_requested(:get, inat_api_matcher("observations"))
+  end
+
+  def test_a_new_target_identification_alerts_the_admins
+    alerting_row
+    stub_observations([observation])
+
+    digests = scan
+
+    assert_equal(@project.admin_group.users.sort_by(&:id),
+                 digests.keys.sort_by(&:id))
+    alert = digests.values.first.first
+
+    assert_equal("Coprinus comatus", alert.name)
+    assert_equal(Date.parse("2026-09-20"), alert.observed_on)
+    assert_equal("12345", alert.remote_observation_id)
+  end
+
+  # The row is what says a project has been told, so a later edit to
+  # the same observation is not a second alert.
+  def test_an_identification_already_alerted_on_is_skipped
+    alerting_row
+    stub_observations([observation])
+    scan
+
+    assert_empty(scan)
+    assert_equal(1, ProjectExternalSiteAlert.count)
+  end
+
+  # A withdrawn identification comes back with `current` false. An
+  # alert is for something urgent to do; a name going away is not.
+  def test_a_withdrawn_identification_does_not_alert
+    alerting_row
+    stub_observations([observation(
+      "identifications" => [identification(current: false)]
+    )])
+
+    assert_empty(scan)
+    assert_equal(0, ProjectExternalSiteAlert.count)
+  end
+
+  def test_an_identification_of_an_untracked_taxon_does_not_alert
+    alerting_row
+    stub_observations([observation(
+      "identifications" => [identification(taxon_id: 1234)]
+    )])
+
+    assert_empty(scan)
+  end
+
+  def test_an_observation_outside_the_target_locations_does_not_alert
+    alerting_row
+    stub_observations([observation("location" => "10.0,10.0")])
+
+    assert_empty(scan)
+  end
+
+  # iNat withholds the point for an obscured observation, and a rare
+  # find is the case where an admin most wants to hear.
+  def test_an_observation_without_coordinates_alerts
+    alerting_row
+    stub_observations([observation("location" => nil)])
+
+    assert_equal(1, scan.values.first.size)
+  end
+
+  def test_an_observation_outside_the_project_dates_does_not_alert
+    @project.update!(start_date: Date.parse("2026-01-01"),
+                     end_date: Date.parse("2026-06-30"))
+    alerting_row
+    stub_observations([observation])
+
+    assert_empty(scan)
+  end
+
+  # Switching alerting on is not a request to hear about last year.
+  def test_the_first_cycle_seeds_the_watermark_and_sends_nothing
+    @site.update!(last_alert_poll_at: nil)
+    alerting_row
+    stub_observations([observation])
+
+    assert_empty(scan)
+    assert_not_nil(@site.reload.last_alert_poll_at)
+    assert_not_requested(:get, inat_api_matcher("observations"))
+  end
+
+  def test_the_watermark_advances_after_a_cycle
+    alerting_row
+    stub_observations([])
+    before = @site.last_alert_poll_at
+
+    scan
+
+    assert_operator(@site.reload.last_alert_poll_at, :>, before)
+  end
+
+  # A target name applied to an observation MO already holds is still
+  # news, so the importer's without_field filter has no place here.
+  def test_the_poll_does_not_exclude_what_mo_already_holds
+    alerting_row
+    stub_observations([])
+    scan
+
+    assert_requested(:get, inat_api_matcher("observations")) do |request|
+      request.uri.query.to_s.exclude?("without_field")
+    end
+  end
+
+  # A project with no target locations has nothing selective to poll
+  # for, so it is left out.
+  def test_a_project_without_target_locations_does_not_alert
+    @project.project_target_locations.destroy_all
+    alerting_row
+
+    assert_empty(scan)
+    assert_not_requested(:get, inat_api_matcher("observations"))
+  end
+end
