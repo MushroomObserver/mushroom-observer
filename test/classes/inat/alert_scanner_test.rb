@@ -233,4 +233,16 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_equal(1, scanner.warnings.size)
     assert_match(/stopped at 2 pages/, scanner.warnings.first)
   end
+
+  # Stamping the moment the cycle began would step over the pages it
+  # did not reach. It resumes from the newest observation it read.
+  def test_an_overflowing_poll_resumes_where_it_stopped
+    alerting_row
+    read = "2026-09-25T00:00:00+00:00"
+    stub_observations([observation("updated_at" => read),
+                       observation("id" => 12_346, "updated_at" => read)])
+    Inat::AlertScanner.new(site: @site, page_size: 2, max_pages: 2).scan
+
+    assert_equal(Time.zone.parse(read), @site.reload.last_alert_poll_at)
+  end
 end

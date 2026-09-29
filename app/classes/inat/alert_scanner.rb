@@ -41,6 +41,7 @@ class Inat
       @max_pages = max_pages
       @alerts_sent = 0
       @warnings = []
+      @overflowed = false
     end
 
     # A Hash of User => Array of ProjectExternalSiteAlert, the digest
@@ -57,8 +58,9 @@ class Inat
       @since = @site.last_alert_poll_at
       return seed_watermark if @since.nil?
 
-      digests = collect(criteria, fetch_candidates(criteria))
-      @site.update(last_alert_poll_at: @polled_at)
+      candidates = fetch_candidates(criteria)
+      digests = collect(criteria, candidates)
+      @site.update(last_alert_poll_at: watermark_after(candidates))
       digests
     end
 
@@ -127,8 +129,22 @@ class Inat
     end
 
     def note_overflow(page)
+      @overflowed = true
       @warnings << "iNat alert poll stopped at #{page} pages of " \
                    "#{@page_size}; the rest waits for the next cycle."
+    end
+
+    # Where the next cycle starts. Ordinarily the moment this one
+    # began, so anything touched while it ran is caught next time. When
+    # the poll stopped at its page ceiling, the newest observation it
+    # did read instead -- stamping the later moment would step over
+    # the pages it had not reached and drop them. An observation read
+    # twice is harmless: the alert row is what decides whether a
+    # project has been told.
+    def watermark_after(candidates)
+      return @polled_at unless @overflowed
+
+      candidates.filter_map(&:updated_at).max || @polled_at
     end
   end
 end

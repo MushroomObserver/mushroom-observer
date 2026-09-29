@@ -25,6 +25,16 @@ class Inat
       nil
     end
 
+    # When iNat last touched the observation. The poll reads pages in
+    # this order, so the newest one read is where the next cycle
+    # resumes if this one stopped early.
+    def updated_at
+      value = @result["updated_at"]
+      return nil if value.blank?
+
+      Time.zone.parse(value.to_s)
+    end
+
     def lat
       coordinates&.last
     end

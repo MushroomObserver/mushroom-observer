@@ -38,7 +38,7 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   private
 
   def intro
-    :email_project_alert_intro.tp(count: @alerts.size)
+    :email_project_alert_intro.l(count: @alerts.size)
   end
 
   def by_project
@@ -48,20 +48,22 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
 
   def render_projects
     by_project.each do |project, alerts|
-      emit_tp(:email_project_alert_project.tp(project: project.title))
-      alerts.sort_by(&:id).each { |alert| render_alert(alert) }
+      emit_tp(:email_project_alert_project.l(project: project.title))
+      render_alerts(alerts.sort_by(&:id))
       gap
     end
   end
 
-  # HTML links the observation; text gives the bare address, since
-  # html_to_ascii would drop the href.
-  def render_alert(alert)
+  # A row per alert: list items under one list in HTML, plain lines in
+  # text.
+  def render_alerts(alerts)
     if html?
-      li { emit_alert_row(alert) }
+      ul { alerts.each { |alert| li { emit_alert_row(alert) } } }
     else
-      emit_alert_row(alert)
-      newline
+      alerts.each do |alert|
+        emit_alert_row(alert)
+        newline
+      end
     end
   end
 

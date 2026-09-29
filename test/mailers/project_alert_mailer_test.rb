@@ -35,6 +35,10 @@ class ProjectAlertMailerTest < MailerTestCase
     assert_includes(body, "Coprinus comatus")
     assert_includes(body, Date.parse("2026-09-20").web_date)
     assert_includes(body, "#{Inat::Constants::SITE}/observations/12345")
+    # Rows are a list, not loose <li>s.
+    assert_match(%r{<ul>.*<li>.*</li>.*</ul>}m, body)
+    # emit_tp textilizes, so the view hands it a localized string.
+    assert_no_match(/<div class="textile"><div class="textile">/, body)
   end
 
   def test_text_digest
