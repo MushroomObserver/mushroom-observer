@@ -71,6 +71,7 @@ class ExternalLink < AbstractModel
   # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
   # per target is still enforced (below + the import_target unique index).
   validate  :only_one_import_per_target, if: :import?
+  validate  :only_one_import_per_remote_observation, if: :import?
   validate  :validate_external_id_numeric
   before_validation :resolve_submitted_external_id
 
@@ -118,6 +119,24 @@ class ExternalLink < AbstractModel
     return unless others.exists?
 
     errors.add(:relationship, :validate_one_import_per_target)
+  end
+
+  # And one MO observation per remote observation. The unique index on
+  # `import_source` is what holds this when two imports race; this
+  # produces a message instead of RecordNotUnique when they do not.
+  # Images are exempt: an iNat user can attach one photo to two
+  # observations, and 207 photo ids in production are claimed by two MO
+  # images for that reason.
+  def only_one_import_per_remote_observation
+    return unless target_type == "Observation" && external_id.present?
+
+    others = ExternalLink.import.where(target_type: "Observation",
+                                       external_site_id: external_site_id,
+                                       external_id: external_id)
+    others = others.where.not(id: id) if id
+    return unless others.exists?
+
+    errors.add(:base, :validate_one_import_per_remote_observation)
   end
 
   # `external_id` accepts either a bare site id or a url pasted from the

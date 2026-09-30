@@ -187,10 +187,23 @@ class Inat
         external_id: external_id, relationship: :import
       )
     rescue ActiveRecord::RecordInvalid => e
+      # A second MO observation for one remote observation is the race
+      # `Inat::ObservationImporter` expects to lose: raise what it
+      # rescues, so the half-built observation is removed and the
+      # import counts it as already imported. Anything else is logged
+      # and the import carries on, as it did before.
+      raise(ActiveRecord::RecordNotUnique.new(e.message)) if
+        duplicate_remote_observation?(e.record)
+
       Rails.logger.warn(
         "InatImport: failed to create ExternalLink for " \
         "#{target.class} #{target.id} (iNat #{external_id}): #{e.message}"
       )
+    end
+
+    def duplicate_remote_observation?(record)
+      record.errors.of_kind?(:base,
+                             :validate_one_import_per_remote_observation)
     end
 
     def create_missing_identification_names
