@@ -19,7 +19,7 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.0")
+  gem("actioncable", "~> 7.2")
   # gem("actionmailbox", "~> 7.0")
   gem("actionmailer", "~> 7.0")
   gem("actionpack", "~> 7.0")
