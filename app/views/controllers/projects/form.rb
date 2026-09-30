@@ -35,7 +35,6 @@ module Views::Controllers::Projects
 
     def view_template
       super do
-        submit(submit_text, center: true)
         render_open_membership
         render_title
         render_summary
@@ -48,6 +47,7 @@ module Views::Controllers::Projects
         render_approved_where_hidden
         render_dates_section
         render_upload_fields if @upload_params
+        submit(submit_text, center: true)
       end
     end
 
