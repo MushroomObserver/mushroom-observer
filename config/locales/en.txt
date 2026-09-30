@@ -3908,7 +3908,7 @@
   validate_not_a_number: "[Field] is not a number."
   validate_not_in_range: "[Field] is out of range."
   validate_one_import_per_target: Only one import link is allowed per record.
-  validate_one_import_per_remote_observation: That observation has already been imported.
+  validate_one_import_per_remote_record: That has already been imported.
   validate_this_more_than_that: "[That] should be greater than [this]."
   validate_too_large: "[Field] should be at most [max]."
   validate_too_long: "[Field] must be less than [max] characters long."

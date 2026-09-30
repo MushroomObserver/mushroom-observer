@@ -90,7 +90,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_30_120000) do
     t.datetime "last_synced_at"
     t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb3':',`target_id`) end)", stored: true
     t.date "external_created_on"
-    t.virtual "import_source", type: :string, as: "(case when ((`relationship` = 1) and (`target_type` = _utf8mb4'Observation')) then concat(`external_site_id`,_utf8mb4':',`external_id`) end)", stored: true
+    t.virtual "import_source", type: :string, as: "(case when (`relationship` = 1) then concat(`external_site_id`,_utf8mb4':',`target_type`,_utf8mb4':',`external_id`) end)", stored: true
     t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
     t.index ["external_site_id", "target_type", "external_id"], name: "index_external_links_on_site_target_extid"
     t.index ["import_source"], name: "index_external_links_on_import_source", unique: true

@@ -193,7 +193,7 @@ class Inat
       # import counts it as already imported. Anything else is logged
       # and the import carries on, as it did before.
       raise(ActiveRecord::RecordNotUnique.new(e.message)) if
-        duplicate_remote_observation?(e.record)
+        duplicate_remote_record?(e.record)
 
       Rails.logger.warn(
         "InatImport: failed to create ExternalLink for " \
@@ -201,9 +201,9 @@ class Inat
       )
     end
 
-    def duplicate_remote_observation?(record)
+    def duplicate_remote_record?(record)
       record.errors.of_kind?(:base,
-                             :validate_one_import_per_remote_observation)
+                             :validate_one_import_per_remote_record)
     end
 
     def create_missing_identification_names

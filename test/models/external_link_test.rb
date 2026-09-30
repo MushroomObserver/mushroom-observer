@@ -295,14 +295,16 @@ class ExternalLinkTest < UnitTestCase
     assert(first.valid?)
     assert_not(second.valid?)
     assert(second.errors.of_kind?(
-             :base, :validate_one_import_per_remote_observation
+             :base, :validate_one_import_per_remote_record
            ))
   end
 
-  # An iNat user can attach one photo to two observations, so the same
-  # photo legitimately reaches two MO images (207 such pairs in
-  # production) -- the constraint is observations only.
-  def test_two_images_may_import_the_same_remote_photo
+  # An iNat user can attach one photo to two observations, which is how
+  # 207 photo ids came to be claimed by two MO images. Those were
+  # merged (script/merge_duplicate_inat_images.rb), and
+  # `Inat::PhotoImporter` reuses the image it already holds, so one MO
+  # image per remote photo holds from here.
+  def test_one_import_link_per_remote_photo
     site = external_sites(:inaturalist)
     ExternalLink.create!(user: rolf, target: images(:in_situ_image),
                          external_site: site, external_id: "987654322",
@@ -311,7 +313,22 @@ class ExternalLinkTest < UnitTestCase
                               external_site: site, external_id: "987654322",
                               relationship: :import)
 
-    assert(second.valid?)
+    assert_not(second.valid?)
+  end
+
+  # An observation id and a photo id are numbers from different
+  # namespaces, so one of each may share a value.
+  def test_an_observation_and_a_photo_may_share_an_id
+    site = external_sites(:inaturalist)
+    ExternalLink.create!(user: rolf, target: images(:in_situ_image),
+                         external_site: site, external_id: "987654323",
+                         relationship: :import)
+    observation_link = ExternalLink.new(
+      user: rolf, target: observations(:agaricus_campestris_obs),
+      external_site: site, external_id: "987654323", relationship: :import
+    )
+
+    assert(observation_link.valid?)
   end
 
   # A manual link to an observation MO imported elsewhere is still fine
