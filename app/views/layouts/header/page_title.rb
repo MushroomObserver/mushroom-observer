@@ -3,10 +3,9 @@
 # Page-title strip below the top nav, rendered on non-index actions.
 # Two columns:
 #
-#   - left: `<h1 id="title">` (consensus title from content_for(:title)),
-#     a CTA slot right after the title (a form's primary submit
-#     button), and the edit-icons strip; on obs show, the owner-naming
-#     line (separate content_for(:owner_naming)) hangs below the h1.
+#   - left: `<h1 id="title">` (consensus title from content_for(:title))
+#     plus the edit-icons strip; on obs show, the owner-naming line
+#     (separate content_for(:owner_naming)) hangs below the h1.
 #   - right (show-only, non-project): interest-icons strip and the
 #     prev/index/next pager.
 #
@@ -32,22 +31,9 @@ module Views::Layouts
           h1(class: "h3 page-title mt-3 mb-4", id: "title") do
             trusted_html(content_for(:title))
           end
-          render_title_bar_cta
           trusted_html(content_for(:edit_icons))
         end
         trusted_html(content_for(:owner_naming)) if content_for?(:owner_naming)
-      end
-    end
-
-    # A form's primary submit button -- right after the title, the
-    # clearest spot for a call to action. Associates with the `<form>`
-    # via `form:` rather than nesting the title bar inside it -- see
-    # `Components::ApplicationForm::FieldHelpers#title_bar_submit`.
-    def render_title_bar_cta
-      return unless content_for?(:title_bar_cta)
-
-      div(class: "ml-3") do
-        trusted_html(content_for(:title_bar_cta))
       end
     end
 

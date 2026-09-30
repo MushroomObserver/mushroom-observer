@@ -58,7 +58,7 @@ module Views::Controllers::SpeciesLists::WriteIn
 
     def view_template
       super do
-        title_bar_submit(@button.ti)
+        submit(@button.ti, center: true)
         render(ListFeedback.new(
                  new_names: @new_names,
                  deprecated_names: @deprecated_names,

@@ -27,7 +27,7 @@ module Views::Controllers::Observations::Images
 
     def view_template
       super do
-        title_bar_submit(:save_edits.ti)
+        submit(:save_edits.ti, center: true)
         render_image_fields
         render_project_checkboxes if @projects.any?
         render_footer_buttons

@@ -44,7 +44,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:tab)
     assert_field("observation_naming_name", with: "Elfin saddle")
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     assert_flash_error(:form_observations_there_is_a_problem_with_name)
     assert_selector("#observation_form")
@@ -112,7 +112,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
     sleep(0.5)
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     new_obs = Observation.last
@@ -149,7 +149,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     disabled_immediately_after_click = evaluate_script(<<~JS)
       (() => {
         const btn = document.querySelector(
-          "#title_bar button[type='submit']"
+          "#observation_form button[type='submit']"
         );
         btn.click();
         return btn.disabled;
@@ -182,7 +182,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # matter if click 1's disabling didn't take effect in time.
     execute_script(<<~JS)
       const btn = document.querySelector(
-        "#title_bar button[type='submit']"
+        "#observation_form button[type='submit']"
       );
       btn.click();
       btn.click();
@@ -261,7 +261,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".upload-status-overlay.d-none", visible: :all)
     assert_selector(".remove_image_button:not([disabled])", visible: :all)
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     # The overlay unhides once this item's own upload POST starts, and
     # settles on the checkmark (not the spinner) once it succeeds --
@@ -311,7 +311,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                    # so stub it rather than let it print.
                    Rails.logger.stub(:error, nil) do
                      accept_alert(wait: 8) do
-                       within("#title_bar") { click_commit }
+                       within("#observation_form") { click_commit }
                      end
                    end
                  ensure
@@ -329,7 +329,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("observation_place_name",
                  evaluate_script("document.activeElement.id"),
                  "Form should accept focus again after a failed upload")
-    assert_selector("#title_bar button[type='submit']:not([disabled])")
+    assert_selector("#observation_form button[type='submit']:not([disabled])")
     assert_selector(".remove_image_button:not([disabled])", visible: :all)
   end
 
@@ -349,7 +349,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Elfin saddle")
     page.driver.browser.keyboard.type(:tab)
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     assert_selector("#name_messages.alert-danger", wait: 6)
     assert_selector("#name_messages", text: "MO does not recognize the name")
@@ -396,7 +396,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     # Observation should have saved with the existing location_id for U.P.
     assert_selector("body.observations__show")
@@ -441,7 +441,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
     fill_in("observation_naming_name", with: "Coprinus comatus")
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     assert_selector("body.locations__new", wait: 6)
     assert_field("location_display_name", with: nonexistent_where)
@@ -633,7 +633,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Agaricus")
 
     # Submit to create observation
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
     assert_selector("body.observations__show", wait: 10)
 
     # Navigate to edit page
@@ -846,7 +846,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     # rejected, but images uploaded
     assert_selector("body.observations__new", wait: 12)
@@ -932,7 +932,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_naming_vote_value",
                   selected: Vote.confidence_string(Vote.next_best_vote))
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     # NOTE: The flash message for location creation is commented out in
     # locationable.rb line 117, so we don't expect it here
@@ -1033,7 +1033,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(obs_notes, align: :top)
     fill_in(other_notes_id, with: "New notes for observation")
 
-    within("#title_bar") { click_commit }
+    within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
     # NOTE: Flash message behavior may have changed - commenting out for now
