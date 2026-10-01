@@ -83,6 +83,7 @@ class InatImport < ApplicationRecord
   serialize :license_added_inat_ids, coder: JSON
   serialize :constraint_violation_obs_ids, coder: JSON
   serialize :unlicensed_image_events, coder: JSON
+  serialize :unlicensed_inat_ids, coder: JSON
 
   after_update_commit lambda { |inat_import|
     html = ApplicationController.renderer.render(
@@ -152,7 +153,7 @@ class InatImport < ApplicationRecord
     when :not_importable   then increment!(:ignored_not_importable_count)
     when :date_missing     then append_date_missing(inat_id)
     when :already_imported then increment!(:ignored_already_imported_count)
-    when :unlicensed       then increment!(:ignored_unlicensed_count)
+    when :unlicensed       then append_unlicensed(inat_id)
     else raise(ArgumentError.new("Unknown ignored reason: #{reason.inspect}"))
     end
   end
@@ -168,6 +169,10 @@ class InatImport < ApplicationRecord
   end
 
   def unlicensed_image_events
+    super || []
+  end
+
+  def unlicensed_inat_ids
     super || []
   end
 
@@ -338,6 +343,13 @@ class InatImport < ApplicationRecord
     reload
     self.ignored_date_missing_count = ignored_date_missing_count + 1
     self.date_missing_inat_ids = date_missing_inat_ids + [inat_id].compact
+    save!
+  end
+
+  def append_unlicensed(inat_id)
+    reload
+    self.ignored_unlicensed_count = ignored_unlicensed_count + 1
+    self.unlicensed_inat_ids = unlicensed_inat_ids + [inat_id].compact
     save!
   end
 end

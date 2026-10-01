@@ -918,10 +918,10 @@ class InatImportsControllerTest < FunctionalTestCase
     # All queries return 1 (1 obs in scope, which is unlicensed)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
-    # Unlicensed query (own import uses licensed=false) also returns 1
+    # None of it carries a license code, so unlicensed = 1 - 0
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
-      to_return(status: 200, body: { total_results: 1 }.to_json)
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
 
     login(user.login)
     post(:create,
@@ -948,14 +948,11 @@ class InatImportsControllerTest < FunctionalTestCase
     # Total (no license filter) returns 5: 2 unlicensed will be skipped
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 5 }.to_json)
-    # Licensed query (the estimate) returns 3 — registered last, matched first
+    # Licensed query (the estimate) returns 3 — registered last, matched
+    # first; unlicensed = 5 - 3 (obs that will be skipped)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 3 }.to_json)
-    # Unlicensed query returns 2 (obs that will be skipped)
-    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
-      to_return(status: 200, body: { total_results: 2 }.to_json)
 
     login(user.login)
     post(:create,
@@ -974,6 +971,30 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  # One of 3 obss has an empty license: iNat's license-code filter leaves
+  # it out, and so does its `licensed=false` filter.
+  def test_confirm_counts_empty_license_obs_as_unlicensed
+    all, coded = stub_counts_with_empty_license_obs
+
+    post_import_others_confirm(create_skeletons: "0")
+
+    assert_select("#expected_count", coded.to_s,
+                  "Without skeletons, an empty-license obs is not expected")
+    assert_select("#unlicensed_obs_count", (all - coded).to_s,
+                  "An empty-license obs should count as unlicensed")
+  end
+
+  def test_confirm_counts_empty_license_obs_as_placeholder
+    all, coded = stub_counts_with_empty_license_obs
+
+    post_import_others_confirm(create_skeletons: "1")
+
+    assert_select("#expected_count", all.to_s,
+                  "With skeletons, an empty-license obs is expected")
+    assert_select("#unlicensed_obs_count", (all - coded).to_s,
+                  "An empty-license obs should count as a placeholder")
+  end
+
   def test_confirm_shows_skeleton_obs_line_for_import_others
     user = users(:dick) # Dick is a superimporter
     assert(InatImport.super_importer?(user),
@@ -983,12 +1004,11 @@ class InatImportsControllerTest < FunctionalTestCase
     # With skeletons, the estimate has no license filter.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: requested }.to_json)
+    # Unlicensed = all minus those carrying a license code.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
-      to_return(status: 200, body: { total_results: 0 }.to_json)
-    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
-      to_return(status: 200, body: { total_results: unlicensed }.to_json)
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
+      to_return(status: 200,
+                body: { total_results: requested - unlicensed }.to_json)
 
     login(user.login)
     post(:create,
@@ -1047,7 +1067,7 @@ class InatImportsControllerTest < FunctionalTestCase
   # `licensed=false` (previewing others' unlicensed obs) must not have that
   # filter silently stripped by URL normalization. Requested/after-taxon
   # must reflect the user's literal request (24), Expected must reflect
-  # MO's forced licensed:true policy (0, since the request is entirely
+  # MO's licensed-only policy (0, since the request is entirely
   # unlicensed), and Already-imported must not absorb the unlicensed obs
   # into its count.
   def test_confirm_url_mode_import_others_licensed_false_filter
@@ -1057,15 +1077,14 @@ class InatImportsControllerTest < FunctionalTestCase
     url = "#{INAT_API_OBS_URL}?licensed=false&created_on=2016-02-01" \
           "&iconic_taxa=Fungi&order=desc&order_by=created_at"
 
-    # Requested / after-taxon / unlicensed-others queries all carry the
-    # user's own licensed=false filter through unmodified.
+    # Requested / after-taxon / unlicensed queries all carry the user's
+    # own licensed=false filter through unmodified.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       with(query: hash_including("licensed" => "false")).
       to_return(status: 200, body: { total_results: 24 }.to_json)
-    # The estimate always force-overrides to licensed=true, regardless of
-    # the URL's own filter — none of the (entirely unlicensed) 24 match.
+    # None of the (entirely unlicensed) 24 carries a license code.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 0 }.to_json)
 
     login(user.login)
@@ -1093,7 +1112,7 @@ class InatImportsControllerTest < FunctionalTestCase
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)
@@ -1114,14 +1133,12 @@ class InatImportsControllerTest < FunctionalTestCase
            "Test requires user to be a super_importer")
 
     # Total-others request (no license filter) returns 200 with invalid JSON,
-    # triggers JSON::ParserError and the rescue in fetch_unlicensed_others_count
+    # triggers JSON::ParserError and the rescue in inat_get_count
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: "not json")
     # Licensed estimate returns valid JSON — registered last, matched first.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including(
-        "licensed" => "true"
-      )).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 3 }.to_json)
 
     login(user.login)
@@ -2003,6 +2020,31 @@ class InatImportsControllerTest < FunctionalTestCase
   # Each import now creates a brand-new persistent InatImport record; the
   # freshly created one is the last by id (deterministic insertion order,
   # unlike created_at which can tie under coarse/frozen timestamps).
+  # iNat's counts for 3 obss, one of whose license_code is "": the
+  # license-code filter matches 2 and `licensed=false` matches none.
+  # Returns [all, coded].
+  def stub_counts_with_empty_license_obs
+    all = 3
+    coded = 2
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: all }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
+      to_return(status: 200, body: { total_results: coded }.to_json)
+    [all, coded]
+  end
+
+  def post_import_others_confirm(create_skeletons:)
+    login(users(:dick).login) # Dick is a superimporter
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "anyone", consent: 1,
+                   import_others: "1", create_skeletons: create_skeletons })
+    assert_unprocessable
+  end
+
   def created_import(user)
     InatImport.where(user: user).order(:id).last
   end

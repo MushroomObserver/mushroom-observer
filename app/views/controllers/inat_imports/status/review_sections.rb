@@ -90,6 +90,30 @@ module Views::Controllers::InatImports
         )
       end
 
+      def render_ignored_unlicensed_row
+        count = @inat_import.ignored_unlicensed_count.to_i
+        return unless count.positive?
+
+        ids = @inat_import.unlicensed_inat_ids
+        div(id: "ignored_unlicensed", class: "mb-1") do
+          b { append_colon(:inat_import_tracker_ignored_unlicensed.l) }
+          plain(count.to_s)
+          render_ignored_unlicensed_links(ids) if ids.any?
+        end
+      end
+
+      def render_ignored_unlicensed_links(ids)
+        plain(" — ")
+        ids.each_with_index do |inat_id, index|
+          plain(", ") if index.positive?
+          Link(type: :external,
+               content: :inat_import_tracker_unlicensed_images_link.l(
+                 inat_id: inat_id
+               ),
+               path: inat_observation_url(inat_id))
+        end
+      end
+
       def inat_observation_url(inat_id)
         "#{Inat::Constants::SITE}/observations/#{inat_id}"
       end

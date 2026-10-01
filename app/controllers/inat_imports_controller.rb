@@ -150,11 +150,7 @@ class InatImportsController < ApplicationController
     # status.
     return render_new_view_invalid if @expected == false
 
-    @unlicensed_obs = if import_others?
-                        fetch_unlicensed_others_count
-                      else
-                        fetch_unlicensed_obs_count
-                      end
+    @unlicensed_obs = fetch_unlicensed_count
     @inat_import = InatImport.new(user: @user)
     warn_about_listed_previous_imports
     @confirm_form = build_confirm_form

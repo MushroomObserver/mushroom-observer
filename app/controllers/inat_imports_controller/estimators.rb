@@ -50,18 +50,20 @@ module InatImportsController::Estimators
     inat_get_count(args)
   end
 
-  # Own-imports: count of obs in scope that carry no license.
-  # Informational only — own obs are imported regardless of license.
-  def fetch_unlicensed_obs_count
-    inat_get_count(import_estimate_query_args.merge(licensed: false))
-  end
+  # Obs in the estimate's scope without a license: all of them minus the
+  # licensed ones, since iNat's `licensed=false` misses an obs whose
+  # license is "". Own imports import them anyway (informational);
+  # import-others imports them as skeletons, or else skips them. A user's
+  # own `license` filter leaves none.
+  def fetch_unlicensed_count
+    return 0 if listing_query_args.key?(:license)
 
-  # Import-others: count of obs that are importable-taxa but not licensed.
-  # Imported as skeletons when create_skeletons is on, else skipped.
-  def fetch_unlicensed_others_count
-    args = import_estimate_query_args.except(:licensed).
-           merge(licensed: false)
-    inat_get_count(args)
+    scope = import_estimate_query_args.except(*LICENSED_FILTER.keys)
+    all = inat_get_count(scope)
+    licensed = inat_get_count(scope.merge(LICENSED_FILTER))
+    return nil unless all && licensed
+
+    all - licensed
   end
 
   def inat_error_text(exception)
@@ -119,7 +121,7 @@ module InatImportsController::Estimators
   end
 
   # Obs that will actually be imported: taxon + without_field
-  # + licensed (for import-others without skeletons) + user scope.
+  # + license (for import-others without skeletons) + user scope.
   def import_estimate_query_args
     args = listing_query_args
     args.merge!(estimate_without_field_filter, ownership_filter_args,
@@ -158,11 +160,12 @@ module InatImportsController::Estimators
   end
 
   # Import-others with skeletons imports unlicensed obss too, so it keeps
-  # whatever license filter the URL has.
+  # whatever license filter the URL has, as does a URL's own `license`
+  # filter (see PageParser#add_license_filter).
   def ownership_filter_args
     if !import_others?
       { user_login: normalized_inat_username }
-    elsif create_skeletons?
+    elsif create_skeletons? || listing_query_args.key?(:license)
       {}
     else
       LICENSED_FILTER

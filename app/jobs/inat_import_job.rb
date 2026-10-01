@@ -114,6 +114,7 @@ class InatImportJob < ApplicationJob
                          ignored_date_missing_count: 0,
                          ignored_already_imported_count: 0,
                          ignored_unlicensed_count: 0,
+                         unlicensed_inat_ids: [],
                          skeleton_imported_count: 0)
       return log("No observations requested") unless observations_requested?
     end

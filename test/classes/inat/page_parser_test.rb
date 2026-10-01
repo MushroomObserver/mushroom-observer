@@ -221,55 +221,56 @@ class Inat
                  "and the user's own without_field is still stripped")
     end
 
-    def test_add_ownership_filter_omits_licensed_when_creating_skeletons
-      import = inat_imports(:dick_inat_import).tap do |i|
-        i.import_others = true
-        i.create_skeletons = true
-        i.inat_username = ""
-        i.inat_ids = "123"
-      end
-      parser = PageParser.new(import)
+    def test_add_ownership_filter_omits_license_when_creating_skeletons
       query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG }
 
-      parser.send(:add_ownership_filter, query_args)
+      ownership_filter(query_args, create_skeletons: true)
 
-      assert_not(query_args.key?(:licensed),
+      assert_not(query_args.key?(:license),
                  "Import-others with skeletons must fetch unlicensed obss " \
-                 "too, so it must not add a licensed filter")
+                 "too, so it must not add a license filter")
     end
 
-    def test_add_ownership_filter_defaults_licensed_true_when_absent
-      import = inat_imports(:dick_inat_import).tap do |i|
-        i.import_others = true
-        i.create_skeletons = false
-        i.inat_username = ""
-        i.inat_ids = "123"
-      end
-      parser = PageParser.new(import)
+    def test_add_ownership_filter_adds_license_codes_when_absent
       query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG }
 
-      parser.send(:add_ownership_filter, query_args)
+      ownership_filter(query_args)
 
-      assert_equal(true, query_args[:licensed],
-                   "licensed should default to true when the stored URL " \
-                   "doesn't specify one")
+      assert_equal(LICENSED_FILTER[:license], query_args[:license],
+                   "Should ask iNat for the license codes, which leave out " \
+                   "an obs whose license is empty")
     end
 
-    def test_add_ownership_filter_preserves_licensed_false
-      import = inat_imports(:dick_inat_import).tap do |i|
-        i.import_others = true
-        i.inat_username = ""
-        i.inat_ids = "123"
-      end
-      parser = PageParser.new(import)
-      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG, licensed: false }
+    def test_add_ownership_filter_adds_license_codes_to_licensed_true
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG, licensed: "true" }
 
-      parser.send(:add_ownership_filter, query_args)
+      ownership_filter(query_args)
 
-      assert_equal(false, query_args[:licensed],
-                   "licensed:false from the stored URL must not be " \
-                   "overridden — ObservationImporter#unlicensed_other? is " \
-                   "the authoritative safety net, not this fetch filter")
+      assert_equal(LICENSED_FILTER[:license], query_args[:license],
+                   "A URL's licensed=true also matches an obs whose license " \
+                   "is empty, so the license codes are still added")
+    end
+
+    def test_add_ownership_filter_keeps_url_license
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG, license: "cc0" }
+
+      ownership_filter(query_args)
+
+      assert_equal("cc0", query_args[:license],
+                   "A URL's own license filter is narrower, so it is kept")
+    end
+
+    # The confirm page never lets this import run (expected count 0); if it
+    # did, the license codes would leave nothing to fetch.
+    def test_add_ownership_filter_adds_license_codes_to_licensed_false
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG, licensed: "false" }
+
+      ownership_filter(query_args)
+
+      assert_equal("false", query_args[:licensed],
+                   "licensed=false from the stored URL is left as is")
+      assert_equal(LICENSED_FILTER[:license], query_args[:license],
+                   "The license codes are added regardless")
     end
 
     def test_add_ownership_filter_sets_user_login_for_own_import
@@ -284,8 +285,8 @@ class Inat
 
       assert_equal("some_user", query_args[:user_login],
                    "Own-import should scope by user_login")
-      assert_nil(query_args[:licensed],
-                 "Own-import must not touch the licensed filter")
+      assert_nil(query_args[:license],
+                 "Own-import must not add a license filter")
     end
 
     def test_next_page_url_mode_returns_parsed_json
@@ -345,6 +346,19 @@ class Inat
       assert_equal(750, args[:id_above],
                    "Internal cursor should override URL id_above after " \
                    "the first page")
+    end
+
+    private
+
+    # Runs PageParser#add_ownership_filter for an import of others' obss.
+    def ownership_filter(query_args, create_skeletons: false)
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.create_skeletons = create_skeletons
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      PageParser.new(import).send(:add_ownership_filter, query_args)
     end
   end
 end

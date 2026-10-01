@@ -806,6 +806,46 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(1, @inat_import.reload.ignored_unlicensed_count,
                  "Should count the unlicensed obs as ignored")
+    assert_equal([@parsed_results.first[:id]],
+                 @inat_import.unlicensed_inat_ids,
+                 "Should record the id of the ignored unlicensed obs")
+  end
+
+  # iNat returns license_code "" for some obss with no license.
+  def test_job_skips_empty_license_obs_for_others_import
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    use_empty_obs_license
+    @inat_import.update(import_others: true, create_skeletons: false)
+    stub_inat_interactions
+
+    assert_no_difference(
+      "Observation.count",
+      "An obs with an empty license must not be imported in full"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_equal([@parsed_results.first[:id]],
+                 @inat_import.reload.unlicensed_inat_ids,
+                 "An empty-license obs should be listed as unlicensed")
+  end
+
+  def test_job_imports_empty_license_obs_as_skeleton
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    use_empty_obs_license
+    @inat_import.update(import_others: true, create_skeletons: true)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "An empty-license obs should import as a skeleton") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the skeleton Observation")
+    assert(obs.placeholder?, "An empty-license obs should be a placeholder")
   end
 
   # Superimporter import of another user's unlicensed obs, skeletons on:
@@ -1777,6 +1817,13 @@ class InatImportJobTest < ActiveJob::TestCase
   # An unlicensed obs of another iNat user (donadinia_PNW01), imported by a
   # superimporter with skeletons on. Its first photo is licensed and it
   # has a collector obs field.
+  def use_empty_obs_license
+    parsed = JSON.parse(@mock_inat_response, symbolize_names: true)
+    parsed[:results].first[:license_code] = ""
+    @mock_inat_response = JSON.generate(parsed)
+    @parsed_results = parsed[:results]
+  end
+
   def create_skeleton_ivars(collector:)
     @user = users(:dick) # Dick is a superimporter
     assert(InatImport.super_importer?(@user),

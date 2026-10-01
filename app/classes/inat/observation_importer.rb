@@ -89,7 +89,7 @@ class Inat
       return false if inat_import.create_skeletons
 
       log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
-      inat_import.add_ignored_obs(:unlicensed)
+      inat_import.add_ignored_obs(:unlicensed, inat_id: @inat_obs[:id])
       true
     end
 

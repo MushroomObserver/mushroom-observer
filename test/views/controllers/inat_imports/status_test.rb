@@ -174,6 +174,25 @@ module Views::Controllers::InatImports
       assert_no_html(html, "#skeleton_imported")
     end
 
+    def test_ignored_unlicensed_row_links_each_obs
+      ids = [395_299_285, 395_299_286]
+      @import.update_columns(state: InatImport.states[:Done],
+                             ended_at: Time.zone.now, imported_count: 0,
+                             ignored_unlicensed_count: ids.size)
+      @import.update!(unlicensed_inat_ids: ids)
+      html = render_status
+
+      assert_html(html, "#ignored_unlicensed b",
+                  text: :inat_import_tracker_ignored_unlicensed.l)
+      ids.each do |inat_id|
+        url = "#{Inat::Constants::SITE}/observations/#{inat_id}"
+        assert_html(
+          html, "#ignored_unlicensed a[href='#{url}'][target='_blank']",
+          text: :inat_import_tracker_unlicensed_images_link.l(inat_id:)
+        )
+      end
+    end
+
     def test_unlicensed_images_summary_and_linked_list
       events = [
         { "inat_id" => 30, "login" => "Zed", "license_code" => nil,

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_120100) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -287,6 +287,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_120000) do
     t.text "unlicensed_image_events"
     t.boolean "create_skeletons", default: true, null: false
     t.integer "skeleton_imported_count", default: 0, null: false
+    t.text "unlicensed_inat_ids"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
