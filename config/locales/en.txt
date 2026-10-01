@@ -2737,6 +2737,7 @@
   project_alias_no_match: Unable to find [target_type] matching '[term]'
 
   # Project External Sites (#5416)
+  project_best_observation_none: "[project] has no observation of [name] yet."
   project_sites_title: External Sites
   project_sites_tab: External Sites
   project_sites_holdings: "[linked] of this project's [observations] observations are linked to [site], [imported] of them imported by Mushroom Observer."
