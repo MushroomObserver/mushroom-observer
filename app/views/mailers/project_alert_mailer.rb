@@ -20,7 +20,7 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
 
     def render_body
       emit_tp(intro)
-      render_projects
+      render_alerts
       render_links_section(links)
     end
   end
@@ -29,7 +29,7 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
     def view_template
       emit_tp(intro)
       gap
-      render_projects
+      render_alerts
       gap
       render_links_section(links)
     end
@@ -38,44 +38,59 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   private
 
   def intro
-    :email_project_alert_intro.l(count: @alerts.size)
+    count = by_observation.size
+    tag = if count == 1
+            :email_project_alert_intro_one
+          else
+            :email_project_alert_intro
+          end
+    tag.l(count: count)
   end
 
-  def by_project
-    @by_project ||= @alerts.group_by(&:project).
-                    sort_by { |project, _| project.title.to_s }
+  # Grouped by observation rather than by project: one observation can
+  # match several of the receiver's projects, and they want to read
+  # about it once, with the projects it matched named on the row.
+  # Each observation's alerts, oldest observation first. The id itself
+  # is not wanted, so the groups come back as a plain Array -- which is
+  # also what keeps `each` from looking like a Hash iteration.
+  def by_observation
+    @by_observation ||=
+      @alerts.group_by(&:remote_observation_id).values.
+      sort_by { |alerts| alerts.filter_map(&:observed_on).min || Date.new }
   end
 
-  def render_projects
-    by_project.each do |project, alerts|
-      emit_tp(:email_project_alert_project.l(project: project.title))
-      render_alerts(alerts.sort_by(&:id))
-      gap
-    end
-  end
-
-  # A row per alert: list items under one list in HTML, plain lines in
-  # text.
-  def render_alerts(alerts)
+  def render_alerts
     if html?
-      ul { alerts.each { |alert| li { emit_alert_row(alert) } } }
+      ul do
+        by_observation.each do |alerts|
+          li do
+            emit_alert_row(alerts)
+          end
+        end
+      end
     else
-      alerts.each do |alert|
-        emit_alert_row(alert)
+      by_observation.each do |alerts|
+        emit_alert_row(alerts)
         newline
       end
     end
   end
 
-  def emit_alert_row(alert)
+  def emit_alert_row(alerts)
+    alert = alerts.first
     plain(:email_project_alert_row.l(name: alert.name.to_s,
-                                     date: observed_on(alert)))
+                                     date: observed_on(alert),
+                                     projects: project_names(alerts)))
     whitespace
     if html?
       link_to(alert.remote_url, alert.remote_url)
     else
       plain(alert.remote_url.to_s)
     end
+  end
+
+  def project_names(alerts)
+    alerts.map { |alert| alert.project.title }.uniq.sort.to_sentence
   end
 
   def observed_on(alert)

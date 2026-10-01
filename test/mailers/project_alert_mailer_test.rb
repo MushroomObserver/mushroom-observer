@@ -25,12 +25,13 @@ class ProjectAlertMailerTest < MailerTestCase
 
     mail = ProjectAlertMailer.build(receiver: mary, alerts: [alert]).message
 
-    assert_equal("[MO] #{:email_subject_project_alert.l(count: 1)}",
+    assert_equal("[MO] #{:email_subject_project_alert_one.l(count: 1)}",
                  mail.subject)
     assert_includes(mail.to, mary.email)
     assert_html_mail(mail)
     body = mail.body.to_s
 
+    # The row names the project the observation matched.
     assert_includes(body, @project.title)
     assert_includes(body, "Coprinus comatus")
     assert_includes(body, Date.parse("2026-09-20").web_date)
@@ -75,5 +76,23 @@ class ProjectAlertMailerTest < MailerTestCase
 
     assert_includes(body, "Coprinus comatus")
     assert_includes(body, "Agaricus campestris")
+  end
+
+  # One observation can match several of the receiver's projects. They
+  # read about it once, with both projects named on the row.
+  def test_an_observation_matching_two_projects_is_one_row
+    other = projects(:bolete_project)
+    alerts = [alert,
+              alert(project: other, remote_identification_id: "1001")]
+
+    mail = ProjectAlertMailer.build(receiver: mary, alerts: alerts).message
+
+    assert_equal("[MO] #{:email_subject_project_alert_one.l(count: 1)}",
+                 mail.subject)
+    body = mail.body.to_s
+
+    assert_includes(body, @project.title)
+    assert_includes(body, other.title)
+    assert_equal(1, body.scan("Coprinus comatus").size)
   end
 end

@@ -8,10 +8,24 @@
 class ProjectAlertMailer < ApplicationMailer
   def build(receiver:, alerts:)
     setup_user(receiver)
-    subject = :email_subject_project_alert.l(count: alerts.size)
+    subject = subject_for(alerts)
     debug_log(:project_alert, nil, receiver, count: alerts.size.to_s)
     mo_mail(subject, to: receiver,
                      view_params: { subject: subject, receiver: receiver,
                                     alerts: alerts })
+  end
+
+  private
+
+  # One observation can match several of the receiver's projects, so
+  # the count is of observations, not of rows.
+  def subject_for(alerts)
+    count = alerts.map(&:remote_observation_id).uniq.size
+    tag = if count == 1
+            :email_subject_project_alert_one
+          else
+            :email_subject_project_alert
+          end
+    tag.l(count: count)
   end
 end
