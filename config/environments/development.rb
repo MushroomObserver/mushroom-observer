@@ -27,9 +27,12 @@ MushroomObserver::Application.configure do
   # Code appended to ids to make "sync_id".  Must start with letter.
   config.server_code = "XX"
 
-  # Tell ActionMailer not to deliver emails to the real world.
-  # The :file delivery method accumulates sent emails in the
-  # ../mail directory.  (This is a feature I added. -JPH 20080213)
+  # Tell ActionMailer not to deliver emails to the real world. The
+  # :file delivery method writes each one to tmp/mails/<address>,
+  # appending when that address is mailed again, and nothing prunes
+  # them. (The comment here used to say ../mail, describing a
+  # hand-rolled version of this from 2008 -- Rails' own :file method
+  # replaced it and uses tmp/mails.)
   config.action_mailer.delivery_method = :file
 
   # Don't care if the mailer can't send.
