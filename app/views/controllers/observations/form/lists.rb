@@ -29,9 +29,10 @@ class Views::Controllers::Observations::Form::Lists < Views::Base
         form_object_name: "observation",
         objects: @lists,
         checked_ids: checked_list_ids,
-        disabled_ids: disabled_list_ids
+        disabled_ids: disabled_list_ids,
+        help_text: :form_observations_list_help.t
       )
-    ) { render_help_text }
+    )
   end
 
   private
@@ -46,9 +47,5 @@ class Views::Controllers::Observations::Form::Lists < Views::Base
 
   def disabled_list_ids
     @lists.reject { |list| permission?(list) }.map(&:id)
-  end
-
-  def render_help_text
-    p { :form_observations_list_help.t }
   end
 end

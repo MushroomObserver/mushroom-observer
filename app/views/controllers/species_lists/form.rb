@@ -108,9 +108,10 @@ module Views::Controllers::SpeciesLists
           form_object_name: "species_list",
           objects: @projects,
           checked_ids: checked_project_ids,
-          disabled_ids: disabled_project_ids
+          disabled_ids: disabled_project_ids,
+          help_text: :form_species_lists_project_help.t
         )
-      ) { Help(content: :form_species_lists_project_help.t) }
+      )
     end
 
     def checked_project_ids

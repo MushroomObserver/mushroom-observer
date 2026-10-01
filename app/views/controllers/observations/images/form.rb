@@ -71,9 +71,10 @@ module Views::Controllers::Observations::Images
           form_object_name: "image",
           objects: @projects,
           checked_ids: checked_project_ids,
-          disabled_ids: disabled_project_ids
+          disabled_ids: disabled_project_ids,
+          help_text: :form_images_project_help.t
         )
-      ) { Help(content: :form_images_project_help.t) }
+      )
     end
 
     def checked_project_ids

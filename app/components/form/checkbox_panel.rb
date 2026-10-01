@@ -18,6 +18,9 @@
 # @param objects [Array<Project, SpeciesList>] candidate records
 # @param checked_ids [Array<Integer>]
 # @param disabled_ids [Array<Integer>]
+# @param help_text [String, nil] rendered via a single shared
+#   `Help(...)` call, after the block (if any) and before the
+#   checkbox list
 # @param expanded [Boolean, nil] override the default
 #   (`checked_ids.any?`) -- e.g. to also expand on a constraint warning
 class Components::Form::CheckboxPanel < Components::Base
@@ -27,6 +30,7 @@ class Components::Form::CheckboxPanel < Components::Base
   prop :objects, _Array(_Union(::Project, ::SpeciesList))
   prop :checked_ids, _Array(Integer), default: -> { [] }
   prop :disabled_ids, _Array(Integer), default: -> { [] }
+  prop :help_text, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
 
   def view_template(&block)
@@ -34,12 +38,19 @@ class Components::Form::CheckboxPanel < Components::Base
       p.with_heading { type_plural.ti }
       p.with_body(collapse: true) do
         yield if block
+        render_help_text
         render_checkbox_list
       end
     end
   end
 
   private
+
+  def render_help_text
+    return unless @help_text
+
+    Help(content: @help_text)
+  end
 
   def type_plural
     @type.to_s.pluralize.to_sym

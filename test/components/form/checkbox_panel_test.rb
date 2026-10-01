@@ -125,10 +125,30 @@ class FormCheckboxPanelTest < ComponentTestCase
                 "[name='observation[species_list_ids][]'][value='#{list.id}']")
   end
 
+  def test_no_help_text_renders_no_help_block
+    html = render_panel(objects: [@proj1])
+
+    assert_no_html(html, ".help-block")
+  end
+
+  def test_help_text_renders_before_checklist_and_after_block
+    html = render_panel(objects: [@proj1], help_text: "Pick some projects") do
+      view_context.tag.div(id: "extra_block")
+    end
+    doc = Nokogiri::HTML(html)
+    extra_block = doc.at_css("#extra_block")
+    help_block = doc.at_css(".help-block")
+    checklist = doc.at_css(".overflow-scroll-checklist")
+
+    assert_includes(help_block.text, "Pick some projects")
+    assert_includes(extra_block.xpath("following-sibling::div"), help_block)
+    assert_includes(help_block.xpath("following-sibling::div"), checklist)
+  end
+
   private
 
   def render_panel(objects:, type: :project,
-                   checked_ids: [], disabled_ids: [], expanded: nil, &block)
+                   checked_ids: [], disabled_ids: [], **extra, &block)
     form = TestForm.new(@obs, action: "/observations")
     the_form = form
     form.render_block = proc do
@@ -139,7 +159,7 @@ class FormCheckboxPanelTest < ComponentTestCase
                objects: objects,
                checked_ids: checked_ids,
                disabled_ids: disabled_ids,
-               expanded: expanded
+               **extra
              ), &block)
     end
     render(form)

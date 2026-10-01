@@ -48,12 +48,10 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
         objects: @projects,
         checked_ids: checked_project_ids,
         disabled_ids: disabled_project_ids,
+        help_text: :form_observations_project_help.t,
         expanded: any_checked? || constraint_issues?
       )
-    ) do
-      render_constraint_messages
-      render_help_text
-    end
+    ) { render_constraint_messages }
   end
 
   private
@@ -159,9 +157,5 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
       :use_spare_slip,
       label: :form_observations_projects_use_spare_slip
     )
-  end
-
-  def render_help_text
-    p { :form_observations_project_help.t }
   end
 end
