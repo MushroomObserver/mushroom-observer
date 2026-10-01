@@ -82,7 +82,8 @@ class Components::Form::CheckboxPanel < Components::Base
   end
 
   def render_checkbox_list
-    div(class: "overflow-scroll-checklist") do
+    div(class: "overflow-scroll-checklist",
+        data: { controller: "overflow-fade" }) do
       # Sentinel: ensures the field key is always present in params
       # even when every checkbox is unchecked (Rack drops empty
       # arrays). Callers' controllers compact_blank this empty value.

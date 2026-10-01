@@ -32,6 +32,13 @@ class FormCheckboxPanelTest < ComponentTestCase
                 "[value='#{@proj2.id}']")
   end
 
+  def test_checklist_wired_to_overflow_fade_controller
+    html = render_panel(objects: [@proj1])
+
+    assert_html(html,
+                ".overflow-scroll-checklist[data-controller='overflow-fade']")
+  end
+
   def test_sentinel_hidden_field_present
     html = render_panel(objects: [@proj1])
 

@@ -297,6 +297,10 @@ form {
     }
   }
 
+  // Background-painted gradients sit behind the checkbox rows, not
+  // over them, so they can't dim content that's packed with no
+  // background gap to show through -- these need to be elements,
+  // painted above the rows via z-index.
   &::before,
   &::after {
     content: "";
@@ -304,20 +308,31 @@ form {
     position: sticky;
     left: 0;
     right: 0;
-    height: 1.5rem;
     pointer-events: none;
+    z-index: 1;
   }
 
   &::before {
     top: 0;
+    height: 1.5rem;
     margin-bottom: -1.5rem;
+    border-top: 1px solid $PANEL_BORDER_COLOR;
     background: linear-gradient(to bottom, $PANEL_BG_COLOR, transparent);
   }
 
   &::after {
     bottom: 0;
-    margin-top: -1.5rem;
+    height: 3rem;
+    margin-top: -3rem;
+    border-bottom: 1px solid $PANEL_BORDER_COLOR;
     background: linear-gradient(to top, $PANEL_BG_COLOR, transparent);
+  }
+
+  // Set by the overflow-fade Stimulus controller once scrolled to
+  // that edge -- nothing left in that direction, so no fade.
+  &.at-top::before,
+  &.at-bottom::after {
+    display: none;
   }
 }
 
