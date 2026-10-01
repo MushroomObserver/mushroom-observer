@@ -268,10 +268,10 @@ form {
 .overflow-scroll-checklist {
   position: relative;
   max-height: 15rem;
-  // `scroll`, not `auto` -- keeps the scrollbar track visible even
-  // when the list is short enough not to overflow, so the control
-  // reads as scrollable before the user tries it.
-  overflow-y: scroll;
+  overflow-y: auto;
+  // Keep the thumb visible once a scrollbar exists, instead of only
+  // on hover. No scrollbar renders when the list fits without
+  // scrolling -- `overflow-y: auto` stays conditional on overflow.
   // Firefox + modern Chromium/Edge.
   scrollbar-width: thin;
   scrollbar-color: $PANEL_BORDER_COLOR transparent;
