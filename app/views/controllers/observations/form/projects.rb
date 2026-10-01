@@ -13,8 +13,8 @@
 # persisted record).
 #
 # `ignore_proj_conflicts` (the "ignore project warnings" checkbox)
-# now lives under `observation[ignore_proj_conflicts]` rather than
-# its own `project[]` namespace.
+# lives under `observation[ignore_proj_conflicts]`, not a `project[]`
+# namespace.
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param observation [Observation] the observation model
@@ -40,38 +40,40 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :slip_target_project, _Nilable(Project), default: nil
 
   def view_template
-    render(panel) do |p|
-      p.with_heading { :projects.ti }
-      p.with_body(collapse: true) { render_body }
+    render(
+      Components::Form::CheckboxPanel.new(
+        form: @form,
+        type: :project,
+        form_object_name: "observation",
+        objects: @projects,
+        checked_ids: checked_project_ids,
+        disabled_ids: disabled_project_ids,
+        expanded: any_checked? || constraint_issues?
+      )
+    ) do
+      render_constraint_messages
+      render_help_text
     end
   end
 
   private
 
-  def panel
-    Components::Panel.new(
-      panel_id: "observation_projects",
-      collapsible: true,
-      collapse_target: "#observation_projects_inner",
-      # Constraint messages live inside this panel; collapsing them
-      # away leaves the flash pointing at nothing (reported: every box
-      # unchecked, slip project still warning, no visible explanation).
-      expanded: any_checked? || constraint_issues?
-    )
-  end
-
-  def any_checked?
+  def checked_project_ids
     if @submitted_project_ids
-      @submitted_project_ids.compact_blank.any?
+      @submitted_project_ids.compact_blank
     else
-      @observation.project_ids.any?
+      @observation.project_ids
     end
   end
 
-  def render_body
-    render_constraint_messages
-    render_help_text
-    render_project_checkboxes
+  def disabled_project_ids
+    @projects.reject do |project|
+      project.user_can_change_membership?(@observation, @user)
+    end.map(&:id)
+  end
+
+  def any_checked?
+    checked_project_ids.any?
   end
 
   def render_constraint_messages
@@ -147,9 +149,9 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   end
 
   # The opt-out for a slip used outside its event: attach it to this
-  # observation with no project at all. Only offered when the slip's
-  # own project is part of the problem -- either violating (its
-  # target conflict) or mismatched against a checked project's prefix.
+  # observation with no project. Only offered when the slip's project
+  # is part of the problem -- either violating (its target conflict)
+  # or mismatched against a checked project's prefix.
   def render_spare_slip_checkbox
     return unless spare_slip_option?
 
@@ -161,37 +163,5 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
 
   def render_help_text
     p { :form_observations_project_help.t }
-  end
-
-  def render_project_checkboxes
-    div(class: "overflow-scroll-checklist") do
-      # Sentinel: ensures `observation[project_ids]` is always present
-      # in params even when every checkbox is unchecked (Rack drops
-      # empty arrays). Controller `compact_blank`s this empty value.
-      input(type: "hidden", name: "observation[project_ids][]",
-            value: "", autocomplete: "off")
-      @projects.each { |project| render_project_checkbox(project) }
-    end
-  end
-
-  def render_project_checkbox(project)
-    @form.checkbox_field(
-      :project_ids,
-      label: false,
-      disabled: !project.user_can_change_membership?(@observation, @user)
-    ) do |cb|
-      cb.option(project.id, checked: project_checked?(project.id)) do
-        whitespace
-        plain(project.title)
-      end
-    end
-  end
-
-  def project_checked?(project_id)
-    if @submitted_project_ids
-      @submitted_project_ids.include?(project_id)
-    else
-      @observation.project_ids.include?(project_id)
-    end
   end
 end

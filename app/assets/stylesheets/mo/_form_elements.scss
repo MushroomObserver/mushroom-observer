@@ -258,9 +258,40 @@ form {
   .collapse-toggle-closed { display: inline; }
 }
 
+// `::before`/`::after` are sticky, zero-height-in-flow overlays (negative
+// margin cancels the height so they don't push the checkboxes down) that
+// stay pinned to the scroll container's visible top/bottom edge, fading
+// into $PANEL_BG_COLOR to hint the list continues past the visible rows.
+// Uses the theme-level color constant, not the Bootstrap-mapped
+// $panel-bg/$card-bg, so this rule compiles unchanged on either
+// Bootstrap version.
 .overflow-scroll-checklist {
-  max-height: 30rem;
+  position: relative;
+  max-height: 15rem;
   overflow-y: auto;
+
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    position: sticky;
+    left: 0;
+    right: 0;
+    height: 1.5rem;
+    pointer-events: none;
+  }
+
+  &::before {
+    top: 0;
+    margin-bottom: -1.5rem;
+    background: linear-gradient(to bottom, $PANEL_BG_COLOR, transparent);
+  }
+
+  &::after {
+    bottom: 0;
+    margin-top: -1.5rem;
+    background: linear-gradient(to top, $PANEL_BG_COLOR, transparent);
+  }
 }
 
 // The containing form uses `form-inline`, which turns .form-group into
