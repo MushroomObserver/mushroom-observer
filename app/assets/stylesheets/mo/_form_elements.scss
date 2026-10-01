@@ -268,7 +268,27 @@ form {
 .overflow-scroll-checklist {
   position: relative;
   max-height: 15rem;
-  overflow-y: auto;
+  // `scroll`, not `auto` -- keeps the scrollbar track visible even
+  // when the list is short enough not to overflow, so the control
+  // reads as scrollable before the user tries it.
+  overflow-y: scroll;
+  // Firefox + modern Chromium/Edge.
+  scrollbar-width: thin;
+  scrollbar-color: $PANEL_BORDER_COLOR transparent;
+
+  // Safari / older Chromium -- same reasoning, WebKit-prefixed API.
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $PANEL_BORDER_COLOR;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
   &::before,
   &::after {
