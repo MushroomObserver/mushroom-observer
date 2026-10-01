@@ -272,22 +272,29 @@ form {
   // Keep the thumb visible once a scrollbar exists, instead of only
   // on hover. No scrollbar renders when the list fits without
   // scrolling -- `overflow-y: auto` stays conditional on overflow.
-  // Firefox + modern Chromium/Edge.
-  scrollbar-width: thin;
+  // Full (not `thin`) width by default -- a thin scrollbar is hard to
+  // see; narrowed down to `thin` for touch devices below, where a
+  // full-width one would be oversized. Firefox + modern Chromium/Edge.
   scrollbar-color: $PANEL_BORDER_COLOR transparent;
 
   // Safari / older Chromium -- same reasoning, WebKit-prefixed API.
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
   &::-webkit-scrollbar-thumb {
     background: $PANEL_BORDER_COLOR;
-    border-radius: 4px;
   }
 
   &::-webkit-scrollbar-track {
     background: transparent;
+  }
+
+  // hover/pointer media is this file's standard touch-device signal
+  // (see the take-photo-field rule below) -- narrow the scrollbar
+  // only where screen space is tight.
+  @media (hover: none) and (pointer: coarse) {
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      width: 0.5rem;
+    }
   }
 
   &::before,
