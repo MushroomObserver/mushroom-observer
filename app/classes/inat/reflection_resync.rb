@@ -88,6 +88,9 @@ class Inat
     def apply(obs, inat_obs)
       upgrading = upgrade_placeholder?(obs, inat_obs)
       # Clear the flag before syncing, so the sync brings in full content.
+      # Not in a transaction: the sync downloads photos, and a rollback
+      # would not undo their uploads. If the sync raises, the next sync
+      # brings in the full content; only the upgrade's log entry is lost.
       obs.update!(placeholder: false) if upgrading
       changed = sync_source_data(obs, inat_obs) || upgrading
       # Log after the sync's entries, so the upgrade is the newest one.
