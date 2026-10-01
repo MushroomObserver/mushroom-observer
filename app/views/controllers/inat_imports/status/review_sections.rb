@@ -61,27 +61,40 @@ module Views::Controllers::InatImports
         events.group_by { |event| event["login"].to_s }.
           sort_by { |login, _| login.downcase }.
           each do |login, user_events|
-            div(class: "mb-1") do
-              plain(:inat_import_tracker_unlicensed_images_summary.l(
-                      login: login, obs_count: user_events.size,
-                      photo_count: user_events.sum { |e| e["count"].to_i }
-                    ))
-            end
+            render_unlicensed_images_user_line(login, user_events)
           end
       end
 
+      def render_unlicensed_images_user_line(login, user_events)
+        div(class: "mb-1") do
+          render_inat_user_link(login)
+          plain(": ")
+          plain(:inat_import_tracker_unlicensed_images_summary.l(
+                  obs_count: user_events.size,
+                  photo_count: user_events.sum { |e| e["count"].to_i }
+                ))
+        end
+      end
+
       def render_unlicensed_image_row(event)
-        license = event["license_code"].presence ||
-                  :inat_import_tracker_no_license.l
         div(class: "mb-1") do
           Link(type: :external, content: unlicensed_image_link_text(event),
                path: inat_observation_url(event["inat_id"]))
           whitespace
-          plain(:inat_import_tracker_unlicensed_images_row.l(
-                  login: event["login"], license: license,
+          plain(:inat_import_tracker_unlicensed_images_license.l(
+                  license: unlicensed_image_license(event)
+                ))
+          plain(" — ")
+          render_inat_user_link(event["login"])
+          plain(" — ")
+          plain(:inat_import_tracker_unlicensed_images_photos.l(
                   count: event["count"]
                 ))
         end
+      end
+
+      def unlicensed_image_license(event)
+        event["license_code"].presence || :inat_import_tracker_no_license.l
       end
 
       def unlicensed_image_link_text(event)
@@ -112,6 +125,11 @@ module Views::Controllers::InatImports
                ),
                path: inat_observation_url(inat_id))
         end
+      end
+
+      def render_inat_user_link(login)
+        Link(type: :external, content: login,
+             path: "#{Inat::Constants::SITE}/people/#{login}")
       end
 
       def inat_observation_url(inat_id)

@@ -212,6 +212,12 @@ module Views::Controllers::InatImports
                    Nokogiri::HTML5.fragment(html).
                      css("#unlicensed_images_summary > div").map(&:text),
                    "Summary should have one line per iNat user, by login")
+      %w[amy Zed].each do |login|
+        url = "#{Inat::Constants::SITE}/people/#{login}"
+        assert_html(html, "#unlicensed_images_summary " \
+                          "a[href='#{url}'][target='_blank']",
+                    text: login)
+      end
       events.each do |event|
         url = "#{Inat::Constants::SITE}/observations/#{event["inat_id"]}"
         assert_html(
@@ -220,6 +226,9 @@ module Views::Controllers::InatImports
             inat_id: event["inat_id"]
           )
         )
+        user_url = "#{Inat::Constants::SITE}/people/#{event["login"]}"
+        assert_html(html, "#unlicensed_images_list a[href='#{user_url}']",
+                    text: event["login"])
       end
       assert_no_html(html, ".alert-warning")
     end
@@ -371,10 +380,11 @@ module Views::Controllers::InatImports
     def expected_unlicensed_summary(events, logins)
       logins.map do |login|
         user_events = events.select { |event| event["login"] == login }
-        :inat_import_tracker_unlicensed_images_summary.l(
-          login: login, obs_count: user_events.size,
+        counts = :inat_import_tracker_unlicensed_images_summary.l(
+          obs_count: user_events.size,
           photo_count: user_events.sum { |e| e["count"] }
         )
+        "#{login}: #{counts}"
       end
     end
   end
