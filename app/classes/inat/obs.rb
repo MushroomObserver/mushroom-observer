@@ -118,7 +118,7 @@ class Inat
     end
 
     # A skeleton copies no copyrightable content -- neither Description
-    # nor Oservation Field(s) -- only the factual snapshot.
+    # nor Observation Field(s) -- only the factual snapshot.
     def skeleton_notes
       { snapshot_key => snapshot(obs_fields: false) }
     end
