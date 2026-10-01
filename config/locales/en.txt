@@ -3030,7 +3030,7 @@
   inat_import_tracker_license_added_note: "[count] observation(s) had no iNat license; your default MO license was applied."
   inat_import_tracker_license_added_reimport: "Re-import [count] observation(s) after adding a license on iNat"
   inat_import_tracker_skeleton_imported_heading: Skeleton Observations Imported
-  inat_import_tracker_skeleton_imported_note: "[count] unlicensed observation(s) were imported as minimal placeholders."
+  inat_import_tracker_skeleton_imported_note: "[count] unlicensed observation(s) imported as minimal placeholders."
 
   # observer/list_notifications
 
