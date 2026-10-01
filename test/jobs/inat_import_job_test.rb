@@ -898,16 +898,13 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(@inat_import)
     end
 
-    obs = Observation.last
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
     assert_equal(photos.length - 1, obs.images.length,
                  "Only the licensed photos should be imported")
     assert_equal(0, @inat_import.reload.ignored_unlicensed_count,
                  "A licensed obs must not count as an ignored/unlicensed obs")
-    assert_match(
-      :inat_skipped_images_summary.t(count: 1),
-      @inat_import.response_errors,
-      "Should log a summary of the 1 skipped unlicensed image"
-    )
+    assert_unlicensed_photos_listed_not_errors(@inat_import, skipped: 1)
   end
 
   # Inat Prov Species Name "Hygrocybe sp. 'conica-CA06'" (epithet single-quoted)
@@ -1818,11 +1815,19 @@ class InatImportJobTest < ActiveJob::TestCase
                  "A skeleton should not be listed as license-added")
     skipped = @parsed_results.first[:observation_photos].size -
               expected_imported_photo_count
-    assert_no_match(
-      :inat_skipped_images_summary.t(count: skipped),
-      inat_import.response_errors,
-      "A skeleton's skipped unlicensed photos should not be an error"
-    )
+    assert_unlicensed_photos_listed_not_errors(inat_import, skipped: skipped)
+  end
+
+  # Skipped unlicensed photos go on the status page's list, not into the
+  # import's errors.
+  def assert_unlicensed_photos_listed_not_errors(inat_import, skipped:)
+    event = inat_import.unlicensed_image_events.
+            find { |e| e["inat_id"] == @parsed_results.first[:id] }
+    assert_not_nil(event, "Skipped photos should be recorded for the list")
+    assert_equal(skipped, event["count"],
+                 "The list should count every skipped photo")
+    assert_empty(inat_import.response_errors.to_s.strip,
+                 "Skipped unlicensed photos should not be reported as errors")
   end
 
   def expected_imported_photo_count

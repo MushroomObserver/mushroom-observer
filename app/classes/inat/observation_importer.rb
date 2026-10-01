@@ -20,7 +20,7 @@ class Inat
     MAX_RETRY_AFTER_WAIT = 8        # iNat's Retry-After honored up to this
 
     attr_reader :inat_import, :user, :job,
-                :unlicensed_obs_count, :skipped_images_count, :image_ids
+                :unlicensed_obs_count, :image_ids
 
     include Standardization
 
@@ -29,7 +29,6 @@ class Inat
       @user = user
       @job = job
       @unlicensed_obs_count = 0
-      @skipped_images_count = 0
       @image_ids = []
     end
 
@@ -200,8 +199,6 @@ class Inat
 
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
-      # A skeleton omits unlicensed photos by design; that is not an error.
-      @skipped_images_count += builder.skipped_images unless skeleton?
       @image_ids.concat(builder.created_image_ids)
       record_unlicensed_images(builder)
       return unless builder.unlicensed_obs == 1

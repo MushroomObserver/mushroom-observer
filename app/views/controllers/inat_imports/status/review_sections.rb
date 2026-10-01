@@ -45,21 +45,53 @@ module Views::Controllers::InatImports
         events = @inat_import.unlicensed_image_events
         return if events.empty?
 
-        Alert(level: :info, class: "mt-3") do
+        Alert(level: :info, class: "mt-3", id: "unlicensed_images") do
           h5 { plain(:inat_import_tracker_unlicensed_images_heading.l) }
-          events.each { |event| render_unlicensed_image_row(event) }
+          div(id: "unlicensed_images_summary") do
+            render_unlicensed_images_summary(events)
+          end
+          div(id: "unlicensed_images_list", class: "mt-3") do
+            events.each { |event| render_unlicensed_image_row(event) }
+          end
         end
+      end
+
+      # One line per iNat user, alphabetical by login.
+      def render_unlicensed_images_summary(events)
+        events.group_by { |event| event["login"].to_s }.
+          sort_by { |login, _| login.downcase }.
+          each do |login, user_events|
+            div(class: "mb-1") do
+              plain(:inat_import_tracker_unlicensed_images_summary.l(
+                      login: login, obs_count: user_events.size,
+                      photo_count: user_events.sum { |e| e["count"].to_i }
+                    ))
+            end
+          end
       end
 
       def render_unlicensed_image_row(event)
         license = event["license_code"].presence ||
                   :inat_import_tracker_no_license.l
         div(class: "mb-1") do
-          plain(:inat_import_tracker_unlicensed_images_row.t(
-                  inat_id: event["inat_id"], login: event["login"],
-                  license: license, count: event["count"]
+          Link(type: :external, content: unlicensed_image_link_text(event),
+               path: inat_observation_url(event["inat_id"]))
+          whitespace
+          plain(:inat_import_tracker_unlicensed_images_row.l(
+                  login: event["login"], license: license,
+                  count: event["count"]
                 ))
         end
+      end
+
+      def unlicensed_image_link_text(event)
+        :inat_import_tracker_unlicensed_images_link.l(
+          inat_id: event["inat_id"]
+        )
+      end
+
+      def inat_observation_url(inat_id)
+        "#{Inat::Constants::SITE}/observations/#{inat_id}"
       end
     end
   end
