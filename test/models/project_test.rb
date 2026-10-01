@@ -1135,6 +1135,33 @@ class ProjectTest < UnitTestCase
     assert_includes(project.user_group.users, user)
   end
 
+  # What a project already holds from an external site (#5416): the
+  # observations carrying a link to it, and how many MO imported.
+  def test_external_site_holdings
+    project = projects(:open_membership_project)
+    site = external_sites(:inaturalist)
+    obs, other = project.observations.first(2)
+    ExternalLink.create!(target: obs, external_site: site, user: obs.user,
+                         external_id: "1", relationship: :import)
+    ExternalLink.create!(target: other, external_site: site,
+                         user: other.user, external_id: "2",
+                         relationship: :manual)
+
+    holdings = project.external_site_holdings(site)
+
+    assert_equal(project.observations.count, holdings.observations)
+    assert_equal(2, holdings.linked)
+    assert_equal(1, holdings.imported)
+  end
+
+  def test_external_site_holdings_with_nothing_linked
+    holdings = projects(:eol_project).
+               external_site_holdings(external_sites(:mycoportal))
+
+    assert_equal(0, holdings.linked)
+    assert_equal(0, holdings.imported)
+  end
+
   private
 
   # An observation owned by an eol member (mary), added to eol_project

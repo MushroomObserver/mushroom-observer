@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-09-29 (deploy-2026-09-29-12-00)
+
+- Give a project a page for external sites (`ProjectExternalSite`) ([PR5426](https://github.com/MushroomObserver/mushroom-observer/pull/5426), @mo-nathan)
+
 ## 2026-09-28 (deploy-2026-09-28-12-00)
 
 - Record and report what MO exchanges with each external site (`ExternalSiteUsage`) ([PR5420](https://github.com/MushroomObserver/mushroom-observer/pull/5420), @mo-nathan)
