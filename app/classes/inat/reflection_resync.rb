@@ -190,14 +190,23 @@ class Inat
     # reflections that way (#4215) before this gate was added.
     def scalar_attributes(obs, inat_obs)
       attrs = { when: inat_obs.when, notes: notes(obs, inat_obs),
+                skeleton_omissions: skeleton_omissions(obs, inat_obs),
                 gps_hidden: inat_obs.obscured? }
       attrs.merge!(location_attributes(inat_obs)) unless inat_obs.obscured?
       attrs
     end
 
+    # Kept current, so the placeholder's panel reflects the source; cleared
+    # once the placeholder is upgraded.
+    def skeleton_omissions(obs, inat_obs)
+      return unless obs.placeholder?
+
+      inat_obs.skeleton_omissions
+    end
+
     def notes(obs, inat_obs)
       if obs.placeholder?
-        # A placeholder's notes are the snapshot and placeholder line.
+        # A placeholder's notes are only the snapshot.
         inat_obs.skeleton_notes
       else
         inat_obs.notes

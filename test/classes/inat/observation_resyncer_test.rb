@@ -101,6 +101,30 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_equal(fresh.skeleton_notes, @obs.notes,
                  "A placeholder should keep its skeleton notes")
     assert_empty(@obs.sequences, "A placeholder should not sync sequences")
+    assert_equal(fresh.skeleton_omissions, @obs.skeleton_omissions,
+                 "A placeholder should record what it did not import")
+  end
+
+  # The "Not imported" list follows the source: a change on iNat to what
+  # the skeleton leaves out is a sync change, so the page refreshes.
+  def test_placeholder_omissions_follow_the_source
+    @obs.update_column(:placeholder, true)
+    stale = Inat::Obs.new(JSON.generate(@raw))
+    raw = copyrightable_raw
+    fresh = Inat::Obs.new(JSON.generate(raw))
+    assert_not_equal(stale.skeleton_omissions, fresh.skeleton_omissions,
+                     "Test requires the source's omissions to change")
+    # Bring everything else in line with the source first.
+    resync(found: { @id => @raw })
+    assert_equal(:unchanged, resync(found: { @id => @raw }).first.status,
+                 "Test requires a placeholder already in sync")
+
+    result = resync(found: { @id => raw }).first
+
+    assert_equal(:synced, result.status,
+                 "A change in what is not imported should count as synced")
+    assert_equal(fresh.skeleton_omissions, @obs.reload.skeleton_omissions,
+                 "The placeholder should record the source's new omissions")
   end
 
   def test_placeholder_stays_stripped_for_the_scheduled_sync
@@ -141,6 +165,8 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "The upgrade should be the newest log entry")
     assert_equal(requester.login, args[:user],
                  "The upgrade should be logged against the requester")
+    assert_nil(@obs.skeleton_omissions,
+               "An upgraded reflection should no longer record omissions")
   end
 
   def test_second_resync_with_same_data_is_unchanged

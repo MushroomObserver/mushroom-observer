@@ -825,6 +825,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_not_nil(obs, "Cannot find the skeleton Observation")
     inat_obs = Inat::Obs.new(JSON.generate(@parsed_results.first))
     assert(obs.placeholder?, "Skeleton should be marked as a placeholder")
+    assert_equal(inat_obs.skeleton_omissions, obs.skeleton_omissions,
+                 "Skeleton should record what it did not import")
     assert_skeleton_notes(obs, inat_obs, collector)
     assert_empty(obs.sequences, "Skeleton should not copy sequences")
     assert_equal(collector, obs.collector,
@@ -1791,8 +1793,7 @@ class InatImportJobTest < ActiveJob::TestCase
                                       create_skeletons: true)
   end
 
-  # The snapshot and the placeholder line: no description and no obs
-  # field values.
+  # Only the snapshot: no description and no obs field values.
   def assert_skeleton_notes(obs, inat_obs, collector)
     notes_text = obs.notes.values.join("\n")
     assert_includes(notes_text, inat_obs[:user][:login],
@@ -1802,7 +1803,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_not_includes(notes_text, collector,
                         "Skeleton notes should omit obs field values")
     assert_equal(inat_obs.skeleton_notes, obs.notes,
-                 "Skeleton notes should be the snapshot and placeholder line")
+                 "Skeleton notes should be only the snapshot")
   end
 
   def assert_skeleton_import_counts(inat_import)

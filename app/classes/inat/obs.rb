@@ -41,6 +41,7 @@
 #  name_id
 #  notes
 #  skeleton_notes
+#  skeleton_omissions
 #  text_name
 #  when
 #  where
@@ -116,22 +117,29 @@ class Inat
         Other: cleaned_description }
     end
 
-    # A skeleton copies no copyrightable content -- neither the description
-    # nor the observation field values -- only the factual snapshot, plus a
-    # line marking it as a placeholder.
+    # A skeleton copies no copyrightable content -- neither Description
+    # nor Oservation Field(s) -- only the factual snapshot.
     def skeleton_notes
-      { snapshot_key => snapshot(obs_fields: false),
-        Other: placeholder_line }
+      { snapshot_key => snapshot(obs_fields: false) }
     end
 
-    # Notes hold Textile source, rendered at display time, so `.l` (not `.t`).
-    def placeholder_line
-      :inat_skeleton_placeholder_notes.l(
-        inat_link: "\"iNat ##{self[:id]}\":#{SITE}/observations/#{self[:id]}",
-        name: observer_name
-      ).to_str
+    # What a skeleton of this obs leaves out, for its "On iNaturalist"
+    # panel. String keys, since Observation#skeleton_omissions is a JSON
+    # column.
+    def skeleton_omissions
+      { "login" => self[:user][:login],
+        "images" => unlicensed_photo_count,
+        "obs_fields" => without_mo_url_field(inat_obs_fields).size,
+        "description" => cleaned_description.present?,
+        "sequences" => sequences.present? }
     end
-    private :placeholder_line
+
+    def unlicensed_photo_count
+      Array(self[:observation_photos]).count do |obs_photo|
+        obs_photo.dig(:photo, :license_code).blank?
+      end
+    end
+    private :unlicensed_photo_count
 
     # Observation form requires a "normalized" key (no spaces) for Notes parts
     def snapshot_key
@@ -378,7 +386,7 @@ class Inat
     private :snapshot_place
 
     def copyright
-      name = observer_name
+      name = self[:user][:name].presence || self[:user][:login]
       code = self[:license_code]
       if code.blank?
         return "#{OBS_COPYRIGHT_LABEL} #{name} - #{ALL_RIGHTS_RESERVED}"
@@ -387,11 +395,6 @@ class Inat
       "#{OBS_COPYRIGHT_LABEL} #{name} (\"#{code}\":#{license.url})"
     end
     private :copyright
-
-    def observer_name
-      self[:user][:name].presence || self[:user][:login]
-    end
-    private :observer_name
 
     def suggested_id_names
       "\n#{
@@ -424,12 +427,16 @@ class Inat
     # (pre-back-link) form on the first resync. The snapshot mirrors iNat's
     # own data, not MO's annotations of it.
     def obs_fields(fields)
-      fields = Array(fields).
-               reject { |f| f[:field_id] == MO_URL_OBSERVATION_FIELD_ID }
+      fields = without_mo_url_field(fields)
       return :none.t if fields.empty?
 
       "\n#{one_line_per_field(fields)}"
     end
+
+    def without_mo_url_field(fields)
+      Array(fields).reject { |f| f[:field_id] == MO_URL_OBSERVATION_FIELD_ID }
+    end
+    private :without_mo_url_field
 
     def one_line_per_field(fields)
       fields.map { |f| "&nbsp;&nbsp;#{f[:name]}: #{f[:value]}" }.

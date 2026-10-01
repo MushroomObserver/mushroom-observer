@@ -53,6 +53,7 @@
 #  notes::                  Arbitrary text supplied by User and serialized.
 #  placeholder::            Minimal counterpart ("skeleton") of unlicensed
 #                           iNat obs.
+#  skeleton_omissions::     What the MO skeleton omitted from the iNat obs
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
@@ -777,6 +778,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # omitted, and any markup is stripped from the keys.
 
   serialize :notes, coder: YAML
+  serialize :skeleton_omissions, coder: JSON
 
   # value of observation.notes if there are no notes
   def self.no_notes

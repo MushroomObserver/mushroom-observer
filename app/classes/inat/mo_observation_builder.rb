@@ -70,10 +70,17 @@ class Inat
         text_name: lead_name.text_name,
         notes: notes,
         placeholder: @skeleton,
+        skeleton_omissions: skeleton_omissions,
         inat_import_id: @inat_import&.id,
         # A fresh import is a clean reflection by construction, so mark it
         # read-only now (#4214). The #4585 engine stamps the backlog later.
         reflected_at: Time.zone.now }.merge(collector_attrs)
+    end
+
+    def skeleton_omissions
+      return unless @skeleton
+
+      inat_obs.skeleton_omissions
     end
 
     def notes
