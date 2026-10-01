@@ -50,13 +50,19 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   # Grouped by observation rather than by project: one observation can
   # match several of the receiver's projects, and they want to read
   # about it once, with the projects it matched named on the row.
-  # Each observation's alerts, oldest observation first. The id itself
-  # is not wanted, so the groups come back as a plain Array -- which is
-  # also what keeps `each` from looking like a Hash iteration.
+  # Each observation's alerts, newest observation first, undated last.
+  # The id itself is not wanted, so the groups come back as a plain
+  # Array -- which is also what keeps `each` from looking like a Hash
+  # iteration.
   def by_observation
     @by_observation ||=
       @alerts.group_by(&:remote_observation_id).values.
-      sort_by { |alerts| alerts.filter_map(&:observed_on).min || Date.new }
+      sort_by { |alerts| recency(alerts) }
+  end
+
+  def recency(alerts)
+    observed = alerts.filter_map(&:observed_on).max
+    observed ? [0, -observed.jd] : [1, 0]
   end
 
   def render_alerts
@@ -78,9 +84,7 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
 
   def emit_alert_row(alerts)
     alert = alerts.first
-    plain(:email_project_alert_row.l(name: alert.name.to_s,
-                                     date: observed_on(alert),
-                                     projects: project_names(alerts)))
+    plain(row_text(alert, project_names(alerts)))
     whitespace
     if html?
       link_to(alert.remote_url, alert.remote_url)
@@ -89,12 +93,23 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
     end
   end
 
-  def project_names(alerts)
-    alerts.map { |alert| alert.project.title }.uniq.sort.to_sentence
+  # iNat does not always have a date for an observation, and "observed
+  # unknown" is worse than saying so.
+  def row_text(alert, projects)
+    return undated_row_text(alert, projects) if alert.observed_on.blank?
+
+    :email_project_alert_row.l(name: alert.name.to_s,
+                               date: alert.observed_on.web_date,
+                               projects: projects)
   end
 
-  def observed_on(alert)
-    alert.observed_on ? alert.observed_on.web_date : :unknown.l
+  def undated_row_text(alert, projects)
+    :email_project_alert_row_undated.l(name: alert.name.to_s,
+                                       projects: projects)
+  end
+
+  def project_names(alerts)
+    alerts.map { |alert| alert.project.title }.uniq.sort.to_sentence
   end
 
   def links

@@ -95,4 +95,25 @@ class ProjectAlertMailerTest < MailerTestCase
     assert_includes(body, other.title)
     assert_equal(1, body.scan("Coprinus comatus").size)
   end
+
+  # Newest observation first, with the undated ones after -- the recent
+  # find is the one an admin may still be able to do something about.
+  def test_rows_run_newest_first_with_undated_last
+    alerts = [
+      alert(observed_on: nil, remote_identification_id: "1002",
+            remote_observation_id: "12347", name: "Gomphus clavatus"),
+      alert(observed_on: Date.parse("2026-09-20")),
+      alert(observed_on: Date.parse("2026-09-21"),
+            remote_identification_id: "1001",
+            remote_observation_id: "12346", name: "Entoloma luteum")
+    ]
+
+    body = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: alerts).message.body.to_s
+    order = ["Entoloma luteum", "Coprinus comatus", "Gomphus clavatus"].
+            map { |name| body.index(name) }
+
+    assert_equal(order.sort, order)
+    assert_includes(body, "date unknown")
+  end
 end
