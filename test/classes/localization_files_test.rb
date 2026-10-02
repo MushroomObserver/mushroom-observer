@@ -12,8 +12,15 @@ class LocalizationFilesTest < UnitTestCase
 
   ##############################################################################
 
-  def test_localization_files_exist
-    Language.find_each { |lang| assert_path_exists(lang.localization_file) }
+  # config/locales/<locale>.yml is no longer generated at runtime (#4807
+  # -- translations are DB/Solid-Cache-backed) so there's no file left
+  # to check for; assert the DB-backed equivalent instead, that every
+  # language actually has real localization content.
+  def test_every_language_has_localization_strings
+    Language.find_each do |lang|
+      assert_not_empty(lang.localization_strings,
+                       "#{lang.locale} has no localization strings")
+    end
   end
 
   def test_syntax_of_official_export_file
@@ -33,9 +40,7 @@ class LocalizationFilesTest < UnitTestCase
   def test_embedded_refs
     errors = []
     Language.find_each do |lang|
-      data = File.open(lang.localization_file, "r:utf-8") do |fh|
-        YAML.safe_load(fh)
-      end
+      data = lang.localization_strings
       tags = {}
       data.each_key { |tag| tags[tag.to_s.downcase] = true }
       data.each do |tag, str|
