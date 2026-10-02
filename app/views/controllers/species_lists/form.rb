@@ -55,7 +55,6 @@ module Views::Controllers::SpeciesLists
 
     def view_template
       super do
-        submit(@button.ti, center: true)
         render_hidden_fields
         render_visible_fields
         render_project_checkboxes if @projects.any?

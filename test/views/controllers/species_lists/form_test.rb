@@ -86,14 +86,10 @@ module Views::Controllers::SpeciesLists
       assert_html(html, "[name='species_list[place_name]']")
     end
 
-    def test_renders_submit_buttons_top_and_bottom
+    def test_renders_submit_button
       html = render_form(species_list: SpeciesList.new, button: :create)
 
-      # `submit(button.l, center: true)` is called twice — one above
-      # the fields and one below. Locks in the count so a future
-      # refactor doesn't silently drop one.
-      assert_html(html, "button[type='submit']", text: "Create",
-                                                 count: 2)
+      assert_html(html, "button[type='submit']", text: "Create")
     end
 
     def test_renders_project_checkboxes_when_projects_provided

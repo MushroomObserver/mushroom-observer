@@ -66,12 +66,12 @@ module Views::Controllers::Observations
     end
 
     def view_template
-      submit(button_name, center: true, disable_with: :submitting.ti)
       render_images_details_panel
       render_naming_specimen_panel
       render_notes_panel
       render_projects_panel if show_projects?
       render_lists_panel if show_lists?
+      submit(button_name, center: true, disable_with: :submitting.ti)
     end
 
     private
