@@ -23,7 +23,8 @@ class NamingTrackerMailerTest < MailerTestCase
     assert_html_mail(mail)
     body = mail.body.to_s
     assert_html(
-      body, "a[href='https://mushroomobserver.org/obs/#{naming.observation_id}']"
+      body,
+      "a[href='https://mushroomobserver.org/obs/#{naming.observation_id}']"
     )
     assert_html(
       body, "a[href='https://mushroomobserver.org/names/#{naming.name_id}']"
