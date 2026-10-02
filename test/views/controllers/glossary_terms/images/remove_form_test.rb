@@ -51,11 +51,10 @@ module Views::Controllers::GlossaryTerms::Images
       end
     end
 
-    def test_renders_submit_buttons_above_and_below_matrix
+    def test_renders_submit_button_below_matrix
       html = render_form
 
-      # Two submit buttons (top + bottom), both centered.
-      assert_html(html, "button[type='submit']", count: 2)
+      assert_html(html, "button[type='submit']")
     end
 
     def test_renders_matrix_with_one_box_per_image

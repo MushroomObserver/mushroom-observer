@@ -258,9 +258,82 @@ form {
   .collapse-toggle-closed { display: inline; }
 }
 
+// `::before`/`::after` are sticky, zero-height-in-flow overlays (negative
+// margin cancels the height so they don't push the checkboxes down) that
+// stay pinned to the scroll container's visible top/bottom edge, fading
+// into $PANEL_BG_COLOR to hint the list continues past the visible rows.
+// Uses the theme-level color constant, not the Bootstrap-mapped
+// $panel-bg/$card-bg, so this rule compiles unchanged on either
+// Bootstrap version.
 .overflow-scroll-checklist {
-  max-height: 30rem;
+  position: relative;
+  max-height: 15rem;
   overflow-y: auto;
+  // Keep the thumb visible once a scrollbar exists, instead of only
+  // on hover. No scrollbar renders when the list fits without
+  // scrolling -- `overflow-y: auto` stays conditional on overflow.
+  // Full (not `thin`) width by default -- a thin scrollbar is hard to
+  // see; narrowed down to `thin` for touch devices below, where a
+  // full-width one would be oversized. Firefox + modern Chromium/Edge.
+  scrollbar-color: $PANEL_BORDER_COLOR transparent;
+
+  // Safari / older Chromium -- same reasoning, WebKit-prefixed API.
+  &::-webkit-scrollbar-thumb {
+    background: $PANEL_BORDER_COLOR;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  // hover/pointer media is this file's standard touch-device signal
+  // (see the take-photo-field rule below) -- narrow the scrollbar
+  // only where screen space is tight.
+  @media (hover: none) and (pointer: coarse) {
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      width: 0.5rem;
+    }
+  }
+
+  // Background-painted gradients sit behind the checkbox rows, not
+  // over them, so they can't dim content that's packed with no
+  // background gap to show through -- these need to be elements,
+  // painted above the rows via z-index.
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    position: sticky;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &::before {
+    top: 0;
+    height: 1.5rem;
+    margin-bottom: -1.5rem;
+    border-top: 1px solid $PANEL_BORDER_COLOR;
+    background: linear-gradient(to bottom, $PANEL_BG_COLOR, transparent);
+  }
+
+  &::after {
+    bottom: 0;
+    height: 3rem;
+    margin-top: -3rem;
+    border-bottom: 1px solid $PANEL_BORDER_COLOR;
+    background: linear-gradient(to top, $PANEL_BG_COLOR, transparent);
+  }
+
+  // Set by the overflow-fade Stimulus controller once scrolled to
+  // that edge -- nothing left in that direction, so no fade.
+  &.at-top::before,
+  &.at-bottom::after {
+    display: none;
+  }
 }
 
 // The containing form uses `form-inline`, which turns .form-group into
