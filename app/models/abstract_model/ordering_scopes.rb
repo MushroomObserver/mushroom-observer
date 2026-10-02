@@ -267,6 +267,13 @@ module AbstractModel::OrderingScopes
               Observation[:vote_cache].desc)
     end
 
+    def order_by_recent_observation
+      return all unless [Project, SpeciesList].include?(self)
+
+      left_outer_joins(:observations).group(arel_table[:id]).distinct.
+        order(Observation[:created_at].maximum.desc)
+    end
+
     def order_by_records
       return all unless self == Herbarium
 

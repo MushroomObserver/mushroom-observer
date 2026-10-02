@@ -4603,6 +4603,7 @@
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_posted: Date Posted
+  sort_by_recent_observation: Recent Observations
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
   sort_by_rss_log: Recent Activity
