@@ -1162,6 +1162,27 @@ class ProjectTest < UnitTestCase
     assert_equal(0, holdings.imported)
   end
 
+  def test_order_by_recent_observation
+    user = users(:rolf)
+    older = Project.create!(title: "Older Activity #{SecureRandom.hex(4)}",
+                            user: user)
+    newer = Project.create!(title: "Newer Activity #{SecureRandom.hex(4)}",
+                            user: user)
+    inactive = Project.create!(title: "No Activity #{SecureRandom.hex(4)}",
+                               user: user)
+    older_obs = Observation.create!(user: user, when: Date.current)
+    older_obs.update_column(:created_at, 2.days.ago)
+    newer_obs = Observation.create!(user: user, when: Date.current)
+    newer_obs.update_column(:created_at, 1.hour.ago)
+    older.observations << older_obs
+    newer.observations << newer_obs
+
+    ordered = Project.where(id: [older.id, newer.id, inactive.id]).
+              order_by(:recent_observation).to_a
+
+    assert_equal([newer, older, inactive], ordered)
+  end
+
   private
 
   # An observation owned by an eol member (mary), added to eol_project

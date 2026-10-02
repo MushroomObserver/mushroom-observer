@@ -740,4 +740,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     put(:clear, params: { id: spl.id })
     assert_equal(initial_count, spl.observations.count)
   end
+
+  def test_sort_options_includes_recent_observation
+    assert_includes(SpeciesListsController.sort_options,
+                    ["recent_observation", :sort_by_recent_observation.t])
+  end
 end
