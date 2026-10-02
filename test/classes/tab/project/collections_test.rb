@@ -108,7 +108,8 @@ module Tab::Project
       collection.each { |t| assert_kind_of(Tab::Base, t) }
     end
 
-    # AdminSubtabs: always Details, Members, Aliases, Field Slips.
+    # AdminSubtabs: Details, Members, Aliases, Field Slips, plus
+    # External Sites for a site admin.
     def test_admin_subtabs_order
       bolete = projects(:bolete_project)
       tabs = Tab::Project::AdminSubtabs.new(project: bolete).to_a
@@ -120,6 +121,32 @@ module Tab::Project
          Tab::Project::AdminFieldSlips],
         tabs.map(&:class)
       )
+    end
+
+    def test_admin_subtabs_for_a_site_admin
+      bolete = projects(:bolete_project)
+      tabs = Tab::Project::AdminSubtabs.new(project: bolete,
+                                            site_admin: true).to_a
+
+      assert_equal(
+        [Tab::Project::AdminDetails,
+         Tab::Project::AdminMembers,
+         Tab::Project::AdminAliases,
+         Tab::Project::AdminFieldSlips,
+         Tab::Project::AdminExternalSites],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_admin_external_sites_tab
+      bolete = projects(:bolete_project)
+      tab = Tab::Project::AdminExternalSites.new(project: bolete)
+
+      assert_equal(:project_sites_tab.l, tab.title)
+      assert_equal(routes.project_external_sites_path(project_id: bolete.id),
+                   tab.path)
+      assert_equal("external_sites", tab.alt_title)
+      assert_equal("external_sites", tab.nav_key)
     end
 
     def test_admin_field_slips_tab

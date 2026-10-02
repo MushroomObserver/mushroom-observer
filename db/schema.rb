@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_15_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -97,6 +97,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_15_120000) do
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"
   end
 
+  create_table "external_site_usages", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "external_site_id", null: false
+    t.datetime "bucket_start", null: false
+    t.integer "requests", default: 0, null: false
+    t.bigint "bytes_in", default: 0, null: false
+    t.bigint "bytes_out", default: 0, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["bucket_start"], name: "index_external_site_usages_on_bucket_start"
+    t.index ["external_site_id", "bucket_start"], name: "index_usages_on_site_and_bucket", unique: true
+  end
+
   create_table "external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
@@ -104,6 +116,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_15_120000) do
     t.text "description"
     t.datetime "last_successful_sync_at"
     t.string "url_template"
+    t.integer "requests_per_minute_limit"
+    t.integer "requests_per_day_limit"
+    t.bigint "bytes_in_per_hour_limit"
+    t.bigint "bytes_in_per_day_limit"
+    t.text "media_hosts"
   end
 
   create_table "field_slip_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -693,6 +710,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_15_120000) do
     t.index ["observation_id"], name: "index_project_excluded_observations_on_observation_id"
     t.index ["project_id", "observation_id"], name: "index_project_excluded_observations_on_project_and_obs", unique: true
     t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
+  end
+
+  create_table "project_external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "external_site_id", null: false
+    t.string "remote_project_id", limit: 100
+    t.string "remote_project_name"
+    t.boolean "use_constraints", default: false, null: false
+    t.boolean "alerting", default: false, null: false
+    t.boolean "importing", default: false, null: false
+    t.integer "import_limit", default: 10000, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["external_site_id"], name: "index_project_external_sites_on_external_site_id"
+    t.index ["project_id", "external_site_id"], name: "index_project_sites_on_project_and_site", unique: true
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|

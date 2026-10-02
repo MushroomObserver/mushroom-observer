@@ -27,6 +27,11 @@ class Query::ProjectsTest < UnitTestCase
     assert_query(expects, :Project, order_by: :summary)
   end
 
+  def test_project_order_by_recent_observation
+    expects = Project.order_by(:recent_observation).to_a
+    assert_query(expects, :Project, order_by: :recent_observation)
+  end
+
   def test_project_in_set
     set = [projects(:eol_project).id]
     assert_query_scope(set,

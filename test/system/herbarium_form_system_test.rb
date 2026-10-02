@@ -158,10 +158,14 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       execute_script("arguments[0].click()",
                      find_field("herbarium_place_name"))
 
-      # Wait for hidden ID to be set (proves geocoding worked)
-      assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 10)
-
-      # Wait for geocoding to complete (async Google API call)
+      # Stepwise diagnostic for a live Google Geocoding API roundtrip,
+      # same order and reasoning as the mode-switching test above:
+      # 1. Hidden ID transitions blank -> "-1" once JS has ANY Google
+      #    response. If THIS fails, Google API itself is slow/dead --
+      #    distinct from "JS race lost the field update."
+      # 2. Field text gets the full geocoded string.
+      assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                            wait: 15)
       assert_field("herbarium_place_name",
                    with: "Génolhac, Gard, Occitanie, France", wait: 10)
 

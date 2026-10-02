@@ -719,6 +719,8 @@ MushroomObserver::Application.routes.draw do
       end
     end
     resources :aliases, controller: "projects/aliases"
+    resources :external_sites, only: [:index, :create, :update],
+                               controller: "projects/external_sites"
     resources :target_names, only: [:create, :destroy],
                              controller: "projects/target_names"
     resources :target_locations, only: [:create, :destroy],

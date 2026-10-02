@@ -75,6 +75,29 @@ module Views::Layouts
       assert_no_html(html, "div.object_edit .mo-icon-read-only")
     end
 
+    def test_reflection_edit_tooltip_explains_companion_observation
+      @obs.update_column(:reflected_at, Time.zone.now)
+      html = render_icons(user: @owner)
+      edit_href = routes.edit_observation_path(@obs.id)
+
+      assert_html(
+        html,
+        "a[href='#{edit_href}'][title='#{:edit_reflection_tooltip.l}']"
+      )
+    end
+
+    def test_non_reflection_edit_tooltip_is_generic
+      html = render_icons(user: @owner)
+      edit_href = routes.edit_observation_path(@obs.id)
+
+      assert_html(
+        html,
+        "a[href='#{edit_href}']" \
+        "[title='#{:edit_object.t(type: @obs.type_tag)}']"
+      )
+      assert_no_html(html, "a[title='#{:edit_reflection_tooltip.l}']")
+    end
+
     private
 
     def render_icons(**)
