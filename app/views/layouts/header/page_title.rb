@@ -30,7 +30,7 @@ module Views::Layouts
       "show_title_nav d-flex justify-content-start align-items-start px-card"
 
     def view_template
-      Row(id: "title_bar") do
+      Row(id: "title_bar", class: "mb-2") do
         render_mobile_top_row unless suppress_title?
         render_left_column unless suppress_title?
         render_right_column if show_right_column?
