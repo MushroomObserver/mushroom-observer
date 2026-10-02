@@ -139,6 +139,32 @@ module Names
       assert(interest)
     end
 
+    # A second submit of the new form (back button, two tabs) must update
+    # the existing tracker instead of creating a duplicate.
+    def test_email_tracking_create_with_existing_tracker
+      name = names(:coprinus_comatus)
+      name_tracker = NameTracker.find_by(name: name, user: rolf)
+      assert(name_tracker, "Test needs a fixture with existing tracker")
+      note = "A note about :observation from :observer"
+      params = {
+        id: name.id,
+        commit: :enable.ti,
+        name_tracker: { note_template_enabled: "1", note_template: note }
+      }
+
+      login("rolf")
+      assert_no_difference(
+        ["NameTracker.count", "Interest.count"],
+        "Create should not add a tracker or interest when one exists"
+      ) do
+        post(:create, params: params)
+      end
+
+      assert_redirected_to(name_path(name.id))
+      assert_equal(note, name_tracker.reload.note_template,
+                   "Create should update the existing tracker")
+    end
+
     def test_email_tracking_update_add_note
       name = names(:coprinus_comatus)
       count_before = NameTracker.count
