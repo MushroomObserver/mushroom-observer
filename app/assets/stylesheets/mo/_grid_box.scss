@@ -48,7 +48,13 @@
 // Shared size for .log-details and .log-footer -- one declaration
 // instead of each wrap repeating the same value.
 .log-text {
-  font-size: 0.85rem;
+  font-size: 0.81rem;
+}
+
+@media screen and (min-width: breakpoint-min(xl)) {
+  .log-text {
+    font-size: 0.85rem;
+  }
 }
 
 // Tighter than BS4's stock .card-footer padding ($card-spacer-y
@@ -100,6 +106,12 @@
 
 .log-heading h5 {
   font-size: 0.9375rem; // 15px at 16px root
+}
+
+@media screen and (min-width: breakpoint-min(xl)) {
+  .log-heading h5 {
+    font-size: 1rem;
+  }
 }
 
 // Each `li` in the details/footer `ul.list-unstyled` carries the
