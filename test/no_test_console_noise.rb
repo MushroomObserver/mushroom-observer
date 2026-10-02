@@ -56,28 +56,22 @@ module NoTestConsoleNoise
     content
   end
 
+  # Only flags console noise on a test that would otherwise have
+  # passed -- a test that's already failing/erroring/skipped has a
+  # usable signal already; leak noise from the same run adds nothing
+  # and would be invisible anyway (every minitest-reporters reporter
+  # displays only `result.failure` (`failures.first`), not a second
+  # array entry).
   def handle_leak(result, leaked)
+    return unless result.failures.empty?
+
     message = "Unexpected console output during this test -- capture " \
               "it (Rails.logger.stub, capture_io, etc.) instead of " \
               "letting it print:\n\n#{leaked}"
     if ENFORCE
-      attach_leak(result, message)
-    else
-      record_leak(message)
-    end
-  end
-
-  # Every minitest-reporters reporter displays only `result.failure`
-  # (`failures.first`) -- none iterate the full array. So a leak on a
-  # test that's already failing/erroring/skipped can't be a second
-  # array entry, or it's silently invisible everywhere. Append it onto
-  # the existing failure's message instead; only a test that would
-  # otherwise have passed gets a new one.
-  def attach_leak(result, message)
-    if result.failures.empty?
       fail_result(result, message)
     else
-      append_to_message(result.failures.first, message)
+      record_leak(message)
     end
   end
 
@@ -89,15 +83,6 @@ module NoTestConsoleNoise
     flunk(message)
   rescue Minitest::Assertion => e
     result.failures << e
-  end
-
-  # Neither Minitest::Assertion nor Minitest::UnexpectedError expose a
-  # public message setter (UnexpectedError even computes #message
-  # dynamically from its wrapped error) -- a singleton override is the
-  # one approach that works uniformly across both.
-  def append_to_message(failure, message)
-    original = failure.message
-    failure.define_singleton_method(:message) { "#{original}\n\n#{message}" }
   end
 
   def record_leak(message)
