@@ -75,11 +75,7 @@ module Name::Taxonomy
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
       /"/ =~ text_name && rank >= "Class" ||
-      # Use kingdom: Protozoa as a rough proxy for slime molds
-      # Slime molds, which are Protozoa, are in fungal nomenclature registries.
-      # But most Protozoa are not slime molds and there's no efficient way
-      # for MO to tell the difference. So err on the side of registrability.
-      kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom
+      non_fungal_kingdom?
   end
 
   # Name for which it makes sense to have links to search pages in fungal
@@ -90,9 +86,18 @@ module Name::Taxonomy
   end
 
   def unsearchable_in_registry?
-    kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom ||
+    non_fungal_kingdom? ||
       rank == "Domain" ||
       /\bcrypt temp\b/i =~ author&.delete(".")
+  end
+
+  # Is this name's kingdom something other than Fungi/Protozoa?
+  # Use kingdom: Protozoa as a rough proxy for slime molds.
+  # Slime molds, which are Protozoa, are in fungal nomenclature registries.
+  # But most Protozoa are not slime molds and there's no efficient way
+  # for MO to tell the difference. So err on the side of registrability.
+  def non_fungal_kingdom?
+    kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom
   end
 
   ################
