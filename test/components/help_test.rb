@@ -37,13 +37,15 @@ class HelpTest < ComponentTestCase
     # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
     # always a well, with an `arrow-up`/`arrow-down` sibling.
     assert_html(html, "div.well.help-block", text: "Help")
-    assert_html(html, "div.arrow-up.d-none.d-sm-block")
+    hide_classes = Components::Column.mobile_hide_classes.join(".")
+    assert_html(html, "div.arrow-up.#{hide_classes}")
   end
 
   def test_arrow_down_renders_arrow_down_div
     html = render_help(element: :div, content: "Help", arrow: :down)
 
-    assert_html(html, "div.arrow-down.d-none.d-sm-block")
+    hide_classes = Components::Column.mobile_hide_classes.join(".")
+    assert_html(html, "div.arrow-down.#{hide_classes}")
   end
 
   def test_extra_class_appended_to_plain_block

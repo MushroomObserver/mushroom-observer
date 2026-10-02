@@ -26,11 +26,12 @@ class Views::Layouts::Sidebar
     def test_renders_heading_and_plain_link_rows
       html = render_sidebar(simple_links)
 
+      only_classes = Components::Column.mobile_only_classes.join(".")
       # Heading row.
-      assert_html(html, ".list-group-item.d-block.d-sm-none",
+      assert_html(html, ".list-group-item.#{only_classes}",
                   text: "#{:app_context_actions.t}:")
       # Each plain link is a mobile-only row.
-      assert_html(html, "a.list-group-item.d-block.d-sm-none",
+      assert_html(html, "a.list-group-item.#{only_classes}",
                   count: simple_links.length)
     end
 

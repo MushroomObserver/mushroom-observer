@@ -29,7 +29,9 @@ class LinkGetTest < ComponentTestCase
     html = render_link(name: :edit.ti, target: @path, icon: :edit,
                        show_label: :responsive)
 
-    assert_html(html, "a span.d-none.d-sm-inline", text: :edit.ti)
+    hide_classes = Components::Column.mobile_hide_classes(display: :inline).
+                   join(".")
+    assert_html(html, "a span.#{hide_classes}", text: :edit.ti)
     assert_no_html(html, "a span.sr-only")
   end
 

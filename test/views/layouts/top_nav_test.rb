@@ -30,7 +30,9 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, "a.btn-success[data-tooltip-target='tip']")
     # Responsive content: the word "Add" appears in a span hidden at
     # xs width and shown at sm and up.
-    assert_html(html, "a.btn-success span.d-none.d-sm-inline",
+    hide_classes = Components::Column.mobile_hide_classes(display: :inline).
+                   join(".")
+    assert_html(html, "a.btn-success span.#{hide_classes}",
                 text: :add.ti)
   end
 
@@ -199,8 +201,9 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
     # navbar-nav/ml-auto literals.
+    hide_classes = Components::Column.mobile_hide_classes.join(".")
     assert_html(html,
-                "ul.nav.navbar-nav.ml-auto.d-none.d-sm-block.mr-0")
+                "ul.nav.navbar-nav.ml-auto.#{hide_classes}.mr-0")
   end
 
   private

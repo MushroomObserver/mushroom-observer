@@ -7,7 +7,9 @@ module Views::Layouts
     def test_renders_logo_mobile_only
       html = render_component
 
-      assert_html(html, "div.text-center.d-block.d-sm-none")
+      assert_html(html,
+                  "div.text-center.#{Components::Column.mobile_only_classes.
+                    join(".")}")
       assert_html(html, "img.logo-trim[alt='MO Logo'][src='/logo-trim.png']")
     end
 

@@ -51,22 +51,22 @@ class ColumnTest < ComponentTestCase
   end
 
   def test_mobile_hide_classes_shorthand
-    assert_equal(%w[d-none d-sm-block],
+    assert_equal(%w[d-none d-md-block],
                  Components::Column.mobile_hide_classes)
   end
 
   def test_mobile_hide_classes_shorthand_display_override
-    assert_equal(%w[d-none d-sm-inline],
+    assert_equal(%w[d-none d-md-inline],
                  Components::Column.mobile_hide_classes(display: :inline))
   end
 
   def test_mobile_only_classes_shorthand
-    assert_equal(%w[d-block d-sm-none],
+    assert_equal(%w[d-block d-md-none],
                  Components::Column.mobile_only_classes)
   end
 
   def test_mobile_only_classes_shorthand_display_override
-    assert_equal(%w[d-inline-block d-sm-none],
+    assert_equal(%w[d-inline-block d-md-none],
                  Components::Column.mobile_only_classes(
                    display: :"inline-block"
                  ))

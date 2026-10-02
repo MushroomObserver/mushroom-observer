@@ -61,7 +61,8 @@ module Views::Layouts
 
       # `menu_header:` slot — mobile-only row rendered above the
       # section's links.
-      assert_html(html, "div.dropdown-menu.sorts > div.d-block.d-sm-none",
+      only_classes = Components::Column.mobile_only_classes.join(".")
+      assert_html(html, "div.dropdown-menu.sorts > div.#{only_classes}",
                   text: "#{:sort_by_header.l}:")
     end
 
