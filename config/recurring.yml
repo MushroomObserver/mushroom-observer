@@ -43,6 +43,15 @@ production:
   resync_inat_reflections:
     class: InatReflectionBatchResyncJob
     schedule: every day at 1:17am
+  # Temporary (#5357): one 30-minute slice a day of the pass that
+  # rewrites iNat's "Mushroom Observer URL" values to the /obs/ form and
+  # resyncs the reflection behind each. Weeks long, because iNat writes
+  # are paced at one per second. Well clear of the resync above, which
+  # can run long on a first pass. REMOVE THIS ENTRY when the job alerts
+  # that the pass is complete.
+  inat_url_backfill:
+    class: InatURLBackfillJob
+    schedule: every day at 2:23am
   # Transfer itself is event-driven now (TransferImagesJob, started when
   # processing/an iNat batch finishes -- see #4791's target design) --
   # nothing here polls for untransferred images anymore. This is the
