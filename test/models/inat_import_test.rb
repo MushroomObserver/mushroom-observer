@@ -297,6 +297,19 @@ class InatImportTest < ActiveSupport::TestCase
     assert_equal([42], import.date_missing_inat_ids)
   end
 
+  def test_add_ignored_obs_unlicensed_increments_count_and_appends_id
+    import = inat_imports(:rolf_inat_import)
+    inat_ids = [10, 20]
+
+    inat_ids.each { |inat_id| import.add_ignored_obs(:unlicensed, inat_id:) }
+    import.reload
+
+    assert_equal(inat_ids.size, import.ignored_unlicensed_count,
+                 "Should count each ignored unlicensed obs")
+    assert_equal(inat_ids, import.unlicensed_inat_ids,
+                 "Should record each ignored unlicensed obs's id")
+  end
+
   def test_add_ignored_obs_date_missing_nil_id_still_increments
     import = inat_imports(:rolf_inat_import)
 

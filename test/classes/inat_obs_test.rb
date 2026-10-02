@@ -119,6 +119,60 @@ class InatObsTest < UnitTestCase
     assert_equal(3, mock_inat_obs[:identifications].size)
   end
 
+  def test_skeleton_notes
+    mock_inat_obs = mock_observation("donadinia_PNW01")
+    field = mock_inat_obs.inat_obs_fields.first
+    assert_not_nil(field, "Test requires an obs with observation fields")
+    snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    full_snapshot = mock_inat_obs.snapshot
+    # The observation fields part is the last part of the snapshot.
+    fields_start =
+      full_snapshot.index("\n#{:observation_fields.l.upcase_first}: ")
+
+    notes = mock_inat_obs.skeleton_notes
+
+    assert_equal([snapshot_key], notes.keys,
+                 "Skeleton notes should hold only the snapshot part")
+    assert_equal(full_snapshot[0...fields_start], notes[snapshot_key],
+                 "Skeleton snapshot should be the full snapshot minus " \
+                 "the observation fields")
+    assert_not_includes(notes[snapshot_key], field[:value].to_s,
+                        "Skeleton snapshot should omit field values")
+  end
+
+  def test_skeleton_omissions
+    raw = JSON.parse(File.read("test/inat/donadinia_PNW01.txt"),
+                     symbolize_names: true)[:results].first
+    raw[:observation_photos].first[:photo][:license_code] = "cc-by"
+    raw[:ofvs] << { field_id: MO_URL_OBSERVATION_FIELD_ID,
+                    name: "Mushroom Observer URL", value: "x" }
+    inat_obs = Inat::Obs.new(JSON.generate(raw))
+    unlicensed = raw[:observation_photos].count do |photo|
+      photo[:photo][:license_code].blank?
+    end
+    assert(inat_obs.sequences.present?, "Test requires a sequence")
+
+    assert_equal(
+      { "login" => raw[:user][:login], "images" => unlicensed,
+        "obs_fields" => raw[:ofvs].size - 1, "description" => true,
+        "sequences" => true },
+      inat_obs.skeleton_omissions,
+      "Should count unlicensed photos and fields other than the MO URL " \
+      "field, and flag the description and sequence data"
+    )
+  end
+
+  def test_skeleton_omissions_when_nothing_is_left_out
+    inat_obs = mock_observation("calostoma_lutescens")
+
+    assert_equal(
+      { "login" => inat_obs[:user][:login], "images" => 0,
+        "obs_fields" => 0, "description" => false, "sequences" => false },
+      inat_obs.skeleton_omissions,
+      "An obs with no photos, fields, description or sequences omits nothing"
+    )
+  end
+
   def test_snapshot_place_private_geoprivacy
     mock_inat_obs = mock_observation("somion_unicolor")
     place_guess = mock_inat_obs[:place_guess]

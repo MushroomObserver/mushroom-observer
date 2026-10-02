@@ -108,6 +108,32 @@ class Inat
              "A URL with only id params (id=) should be considered stable")
     end
 
+    def test_expected_obs_url_uses_license_codes_for_import_others
+      args = expected_link_args("project_id=303327", import_others: "1")
+
+      assert_equal(Inat::Constants::LICENSED_FILTER[:license],
+                   args["license"],
+                   "Expected link should use the import's license codes")
+      assert_nil(args["licensed"],
+                 "Expected link should not use iNat's licensed filter")
+    end
+
+    def test_expected_obs_url_keeps_url_license_for_import_others
+      args = expected_link_args("project_id=303327&license=cc0",
+                                import_others: "1")
+
+      assert_equal("cc0", args["license"],
+                   "Expected link should keep the license filter in the URL")
+    end
+
+    def test_expected_obs_url_has_no_license_filter_with_skeletons
+      args = expected_link_args("project_id=303327",
+                                import_others: "1", create_skeletons: "1")
+
+      assert_nil(args["license"],
+                 "With skeletons, unlicensed obss are imported too")
+    end
+
     # Regression (#4706): a user-supplied iconic_taxa superset must be
     # narrowed to the importable subset, not passed through unfiltered.
     def test_expected_obs_url_strips_unimportable_iconic_taxa
@@ -221,6 +247,16 @@ class Inat
 
     def build(model)
       Inat::ConfirmURLBuilder.new(model)
+    end
+
+    # The query args of the "expected" link for a URL import.
+    def expected_link_args(query, **)
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?#{query}", **
+      )
+      url = build(model).expected_obs_url
+      assert_not_nil(url, "Expected link should be built")
+      Rack::Utils.parse_query(url.split("?", 2).last)
     end
   end
 end

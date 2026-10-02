@@ -78,13 +78,15 @@ class Inat
     # an arbitrarily early d1 approximates it.
     EARLIEST_DATE_FILTER = "1000-01-01"
 
-    # Added when importing others' observations (superimporter, not own).
-    # Own-observation imports accept unlicensed obs and apply the user's
-    # default MO license to any unlicensed images.
-    LICENSED_FILTER = { licensed: true }.freeze
+    # iNat's observation license codes.
+    LICENSE_CODES = %w[
+      cc0 cc-by cc-by-nc cc-by-sa cc-by-nd cc-by-nc-sa cc-by-nc-nd
+    ].freeze
 
-    # Kept for backwards compatibility; some callers may still reference this.
-    IMPORT_FILTER_PARAMS = BASE_FILTER_PARAMS.merge(LICENSED_FILTER).freeze
+    # Added when importing others' observations (superimporter, not own).
+    # Lists the codes rather than `licensed: true`: iNat's `licensed`
+    # filter includes obss whose license_code is "" (no license).
+    LICENSED_FILTER = { license: LICENSE_CODES.join(",") }.freeze
 
     # MO adds this string + date to the description of iNat observation
     IMPORTED_BY_MO = "Imported by Mushroom Observer"
