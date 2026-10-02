@@ -52,9 +52,9 @@ module Views::Layouts
       div(class: "col-12 d-md-none") do
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-card mb-2") do
-          div(class: "d-sm-none") { trusted_html(content_for(:id_badge)) }
+          div(class: "d-md-none") { trusted_html(content_for(:id_badge)) }
           trusted_html(content_for(:title_bar_cta))
-          div(class: "d-sm-none") do
+          div(class: "d-md-none") do
             trusted_html(content_for(:title_bar_actions))
           end
           render_mobile_object_nav if show_right_column?
@@ -86,7 +86,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "d-none d-sm-block mr-3 mt-sm-1") do
+      div(class: "d-none d-md-block mr-3 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end
@@ -106,7 +106,7 @@ module Views::Layouts
     def render_title_bar_actions
       return unless content_for?(:title_bar_actions)
 
-      div(class: "d-none d-sm-block ml-auto") do
+      div(class: "d-none d-md-block ml-auto") do
         trusted_html(content_for(:title_bar_actions))
       end
     end
