@@ -26,17 +26,13 @@ label {
   margin-bottom: 5px;
 }
 
-.checkbox,
-.radio {
-  label {
+// Bootstrap 4 custom-control checkboxes/radios -- input and label are
+// DOM siblings (see Components::ApplicationForm::CheckboxField/
+// RadioField), so this is scoped to `.custom-control-label` rather
+// than a bare `label` selector.
+.custom-control {
+  .custom-control-label {
     font-weight: $btn-font-weight;
-
-    // Bootstrap doesn't define `.checkbox`/`.radio` classes, so
-    // nothing else supplies this gap.
-    input[type="checkbox"],
-    input[type="radio"] {
-      margin-right: $custom-control-gutter;
-    }
 
     .badge-id {
       font-size: 90% !important

@@ -111,16 +111,17 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
 
   # Locate the row by the radio input's `value` attribute rather than by
   # label text — the "Falmouth, Massachusetts, USA" row's text also
-  # contains the substring "Massachusetts, USA", so `find(".radio",
+  # contains the substring "Massachusetts, USA", so `find(".custom-control",
   # text: ...)` is ambiguous.
   def assert_disabled_row_with_create_link(modal_id, missing_suffix)
     within("##{modal_id}") do
       assert_selector(
         "input[type='radio'][value='#{missing_suffix}'][disabled]"
       )
-      # The Create link is appended to the disabled row's .radio div
-      # (per-row append). Match by its target+href shape so we don't
-      # have to scope `within` a sibling-relationship to the input.
+      # The Create link is appended to the disabled row's
+      # .custom-control div (per-row append). Match by its target+href
+      # shape so we don't have to scope `within` a sibling-relationship
+      # to the input.
       create_link = find(
         "a[target='_blank'][href*='where=Massachusetts']"
       )

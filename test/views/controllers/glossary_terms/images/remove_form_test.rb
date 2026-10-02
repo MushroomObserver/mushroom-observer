@@ -42,12 +42,15 @@ module Views::Controllers::GlossaryTerms::Images
     def test_each_checkbox_wrap_has_my_0_class
       html = render_form
 
-      # Each per-image .checkbox wrapper gets `my-0` so BS3's default
-      # 10px vertical margin doesn't leave visible gaps inside the
+      # Each per-image custom-control wrapper gets `my-0` so Bootstrap's
+      # default vertical margin doesn't leave visible gaps inside the
       # Grid::Box cell.
       @model.images.each do |image|
-        assert_html(html,
-                    ".checkbox.my-0 input[name='selected[#{image.id}]']")
+        assert_html(
+          html,
+          ".custom-control.custom-checkbox.my-0 " \
+          "input[name='selected[#{image.id}]']"
+        )
       end
     end
 
