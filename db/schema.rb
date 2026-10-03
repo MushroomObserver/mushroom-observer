@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_09_30_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -90,8 +90,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.datetime "last_synced_at"
     t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb3':',`target_id`) end)", stored: true
     t.date "external_created_on"
+    t.virtual "import_source", type: :string, as: "(case when (`relationship` = 1) then concat(`external_site_id`,_utf8mb4':',`target_type`,_utf8mb4':',`external_id`) end)", stored: true
     t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
     t.index ["external_site_id", "target_type", "external_id"], name: "index_external_links_on_site_target_extid"
+    t.index ["import_source"], name: "index_external_links_on_import_source", unique: true
     t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
     t.index ["target_type", "target_id", "external_site_id", "external_id"], name: "index_external_links_on_target_and_site_and_extid", unique: true
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"

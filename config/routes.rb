@@ -721,6 +721,12 @@ MushroomObserver::Application.routes.draw do
     resources :aliases, controller: "projects/aliases"
     resources :external_sites, only: [:index, :create, :update],
                                controller: "projects/external_sites"
+    # The observation a QR code on a printed label should lead to: the
+    # project is in the path, the name is the thing being looked up,
+    # and the answer is whichever observation the project holds now
+    # (#5416). Kept short because the URL has to fit in a QR code.
+    get("names/:name_id", to: "projects/best_observations#show",
+                          as: :name_observation)
     resources :target_names, only: [:create, :destroy],
                              controller: "projects/target_names"
     resources :target_locations, only: [:create, :destroy],
