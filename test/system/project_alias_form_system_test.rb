@@ -21,9 +21,8 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
     # Panels toggle via Bootstrap's collapse mechanism (type-switch
     # controller), not .d-none.
     assert_selector("[data-type-switch-type='location'].collapse.#{EXPANDED}")
-    assert_selector(
-      "[data-type-switch-type='user'].collapse:not(.#{EXPANDED})",
-      visible: :all
+    assert_no_selector(
+      "[data-type-switch-type='user'].collapse.#{EXPANDED}", visible: :all
     )
 
     # Switch to User type
@@ -31,8 +30,8 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
 
     # Now user autocompleter should be visible, location hidden
     assert_selector("[data-type-switch-type='user'].collapse.#{EXPANDED}")
-    assert_selector(
-      "[data-type-switch-type='location'].collapse:not(.#{EXPANDED})",
+    assert_no_selector(
+      "[data-type-switch-type='location'].collapse.#{EXPANDED}",
       visible: :all
     )
 
@@ -41,9 +40,8 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
 
     # Location visible again, user hidden
     assert_selector("[data-type-switch-type='location'].collapse.#{EXPANDED}")
-    assert_selector(
-      "[data-type-switch-type='user'].collapse:not(.#{EXPANDED})",
-      visible: :all
+    assert_no_selector(
+      "[data-type-switch-type='user'].collapse.#{EXPANDED}", visible: :all
     )
   end
 end

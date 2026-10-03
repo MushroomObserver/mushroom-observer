@@ -69,6 +69,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.default_max_wait_time = 3
     # disable CSS transitions and jQuery animations
     Capybara.disable_animation = true
+    # BS4 custom-control checkboxes/radios hide the input (opacity: 0)
+    # and paint the visible control via the sibling label -- check/
+    # uncheck/choose fall back to clicking the label when the input
+    # itself isn't interactable.
+    Capybara.automatic_label_click = true
     # Capybara.always_include_port = true
     # Capybara.raise_server_errors = true
     # default in test_helper = true. some SO threads suggest false

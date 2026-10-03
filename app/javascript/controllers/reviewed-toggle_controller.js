@@ -21,6 +21,9 @@ export default class extends Controller {
     if (event.target.closest(".custom-control-label")) return;
 
     this.toggleTarget.checked = !this.toggleTarget.checked;
+    // Stimulus's default action event for an <input> is "input", not
+    // "change" -- a real checkbox toggle fires both; match that.
+    this.toggleTarget.dispatchEvent(new Event("input", { bubbles: true }));
     this.toggleTarget.dispatchEvent(new Event("change", { bubbles: true }));
   }
 }

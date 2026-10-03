@@ -8,6 +8,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     visit("/herbaria/new")
+    capture_geocode_errors
     assert_selector("body.herbaria__new")
     create_herbarium_with_new_location
 
@@ -71,6 +72,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     visit("/herbaria/new")
+    capture_geocode_errors
 
     within("#herbarium_form") do
       # Start in normal location mode
@@ -102,10 +104,13 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # 2. Field text gets the full geocoded string.
       #
       # Same order as `create_herbarium_with_new_location` below.
-      assert_field("herbarium_location_id", with: "-1", type: :hidden,
-                                            wait: 15)
-      assert_field("herbarium_place_name",
-                   with: "Burbank, Los Angeles Co., California, USA", wait: 10)
+      with_geocode_errors_on_failure do
+        assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                              wait: 15)
+        assert_field("herbarium_place_name",
+                     with: "Burbank, Los Angeles Co., California, USA",
+                     wait: 10)
+      end
     end
   end
 
@@ -158,16 +163,12 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       execute_script("arguments[0].click()",
                      find_field("herbarium_place_name"))
 
-      # Stepwise diagnostic for a live Google Geocoding API roundtrip,
-      # same order and reasoning as the mode-switching test above:
-      # 1. Hidden ID transitions blank -> "-1" once JS has ANY Google
-      #    response. If THIS fails, Google API itself is slow/dead --
-      #    distinct from "JS race lost the field update."
-      # 2. Field text gets the full geocoded string.
-      assert_field("herbarium_location_id", with: "-1", type: :hidden,
-                                            wait: 15)
-      assert_field("herbarium_place_name",
-                   with: "Génolhac, Gard, Occitanie, France", wait: 10)
+      with_geocode_errors_on_failure do
+        assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                              wait: 15)
+        assert_field("herbarium_place_name",
+                     with: "Génolhac, Gard, Occitanie, France", wait: 10)
+      end
 
       # Verify hidden fields are populated correctly
       assert_field("location_north", with: "44.3726", type: :hidden)
@@ -179,5 +180,39 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       fill_in("herbarium_code", with: "CEV")
       click_commit
     end
+  end
+
+  # TEMP diagnostic (system-test-flakiness investigation): wraps
+  # google.maps.Geocoder#geocode so a rejected promise is recorded
+  # instead of only reaching the controller's console.log. Pull the
+  # capture into the assertion failure message via
+  # `with_geocode_errors_on_failure` -- MO's NoTestConsoleNoise hook
+  # strips stray console/stdout output from a failing test's visible
+  # output.
+  def capture_geocode_errors
+    execute_script(<<~JS)
+      window.__geocodeErrors = [];
+      (function patch() {
+        const gm = window.google && window.google.maps;
+        if (!gm || !gm.Geocoder) { setTimeout(patch, 100); return; }
+        const orig = gm.Geocoder.prototype.geocode;
+        gm.Geocoder.prototype.geocode = function(...args) {
+          return orig.apply(this, args).catch((e) => {
+            window.__geocodeErrors.push(
+              JSON.stringify({ name: e && e.name, message: e && e.message,
+                               code: e && e.code })
+            );
+            throw e;
+          });
+        };
+      })();
+    JS
+  end
+
+  def with_geocode_errors_on_failure
+    yield
+  rescue Minitest::Assertion => e
+    errors = evaluate_script("window.__geocodeErrors") || []
+    raise(e.class.new("#{e.message}\n\nCaptured geocode errors: #{errors}"))
   end
 end
