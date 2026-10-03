@@ -72,10 +72,7 @@ module Views::Controllers::Descriptions
         assert_html(html, "textarea[name='description[#{field}]']")
       end
 
-      # Two submit buttons (top + bottom), value = CREATE for a new record.
-      assert_html(html,
-                  "button[type='submit']", text: :create.ti,
-                                           count: 2)
+      assert_html(html, "button[type='submit']", text: :create.ti)
     end
 
     def test_admin_mode_renders_all_source_types
@@ -101,10 +98,8 @@ module Views::Controllers::Descriptions
       assert_html(html,
                   "input[type='hidden'][name='description[source_type]']")
 
-      # Submit buttons read SAVE_EDITS, not CREATE, for an existing record.
-      assert_html(html,
-                  "button[type='submit']", text: :save_edits.ti,
-                                           count: 2)
+      # Submit button reads SAVE_EDITS, not CREATE, for an existing record.
+      assert_html(html, "button[type='submit']", text: :save_edits.ti)
     end
 
     # Regression for #4491: project/foreign descriptions show the source

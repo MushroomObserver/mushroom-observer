@@ -2,7 +2,7 @@
 
 module Views::Controllers::GlossaryTerms::Images
   # Bulk image-removal form: shows a matrix of images with a
-  # checkbox under each, plus matching top/bottom submit buttons.
+  # checkbox under each, plus a submit button below the matrix.
   # The controller action receives `params[:selected][image_id] =
   # "yes"` for selected images (and `"no"` for unselected, via the
   # hidden sidecar).
@@ -23,7 +23,6 @@ module Views::Controllers::GlossaryTerms::Images
 
     def view_template
       super do
-        submit_remove
         render_image_matrix
         submit_remove
       end
