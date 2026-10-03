@@ -245,4 +245,52 @@ class Inat::AlertScannerTest < UnitTestCase
 
     assert_equal(Time.zone.parse(read), @site.reload.last_alert_poll_at)
   end
+
+  # A failed fetch is not an empty result: stamping over its window
+  # would drop whatever was identified during it.
+  def test_a_failed_poll_leaves_the_watermark_where_it_was
+    alerting_row
+    stub_request(:get, inat_api_matcher("observations")).
+      to_return(status: 500)
+    before = @site.last_alert_poll_at
+    scanner = Inat::AlertScanner.new(site: @site)
+
+    assert_empty(scanner.scan)
+    assert_equal(before.to_i, @site.reload.last_alert_poll_at.to_i)
+    assert_match(/stays open/, scanner.warnings.first)
+  end
+
+  # The pages that did arrive are still matched; the window reopening
+  # only means those observations are read again next cycle.
+  def test_a_poll_that_fails_partway_keeps_what_it_read
+    alerting_row
+    responses = [{ status: 200,
+                   body: { results: [observation,
+                                     observation("id" => 12_346)] }.to_json },
+                 { status: 500 }]
+    stub_request(:get, inat_api_matcher("observations")).
+      to_return(responses)
+    before = @site.last_alert_poll_at
+    scanner = Inat::AlertScanner.new(site: @site, page_size: 2, max_pages: 2)
+
+    digests = scanner.scan
+
+    assert_equal(1, scanner.alerts_sent)
+    assert_not_empty(digests)
+    assert_equal(before.to_i, @site.reload.last_alert_poll_at.to_i)
+  end
+
+  # The site carries fields this cycle has no opinion about; stamping
+  # the watermark shouldn't be blocked by one of them being invalid.
+  def test_the_watermark_is_stamped_on_a_site_failing_validation
+    alerting_row
+    stub_observations([])
+    @site.update_column(:base_url, "")
+    before = @site.last_alert_poll_at
+
+    scan
+
+    assert_not_predicate(@site.reload, :valid?)
+    assert_operator(@site.last_alert_poll_at, :>, before)
+  end
 end

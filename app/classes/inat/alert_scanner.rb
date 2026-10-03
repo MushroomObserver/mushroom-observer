@@ -42,6 +42,7 @@ class Inat
       @alerts_sent = 0
       @warnings = []
       @overflowed = false
+      @fetch_failed = false
     end
 
     # A Hash of User => Array of ProjectExternalSiteAlert, the digest
@@ -60,7 +61,7 @@ class Inat
 
       candidates = fetch_candidates(criteria)
       digests = collect(criteria, candidates)
-      @site.update(last_alert_poll_at: watermark_after(candidates))
+      advance_watermark(candidates)
       digests
     end
 
@@ -69,8 +70,25 @@ class Inat
     # The first cycle for a site establishes where the poll starts and
     # sends nothing.
     def seed_watermark
-      @site.update(last_alert_poll_at: @polled_at)
+      stamp(@polled_at)
       {}
+    end
+
+    # Only a clean poll moves the watermark. A fetch that failed leaves
+    # its window unread, and stamping over it would drop whatever was
+    # identified during it -- the rare find this cycle exists to catch.
+    # The next cycle re-covers the window instead.
+    def advance_watermark(candidates)
+      return if @fetch_failed
+
+      stamp(watermark_after(candidates))
+    end
+
+    # update_column so stamping this bookkeeping timestamp isn't blocked
+    # by validating unrelated (possibly already invalid) fields on the
+    # site, matching the sibling watermark on the same table.
+    def stamp(time)
+      @site.update_column(:last_alert_poll_at, time)
     end
 
     def collect(criteria, candidates)
@@ -113,6 +131,8 @@ class Inat
       results = []
       (1..@max_pages).each do |page|
         batch = fetch_page(taxa, page)
+        return note_fetch_failure(page, results) if batch.nil?
+
         results.concat(batch)
         return results if batch.size < @page_size
 
@@ -121,11 +141,26 @@ class Inat
       results
     end
 
+    # nil when iNat could not answer, which a page of no results would
+    # otherwise be indistinguishable from.
     def fetch_page(taxa, page)
       query = { taxon_id: taxa.join(","), updated_since: @since.utc.iso8601,
                 order_by: "updated_at", order: "asc",
                 per_page: @page_size, page: page }.to_query
-      Array(fetch_json("observations?#{query}")&.dig("results"))
+      json = fetch_json("observations?#{query}")
+      return nil if json.nil?
+
+      Array(json["results"])
+    end
+
+    # Whatever earlier pages did return is still worth matching -- the
+    # alert row decides whether a project has been told, so re-reading
+    # those observations next cycle costs nothing.
+    def note_fetch_failure(page, results)
+      @fetch_failed = true
+      @warnings << "iNat alert poll failed at page #{page}; its window " \
+                   "stays open for the next cycle."
+      results
     end
 
     def note_overflow(page)
