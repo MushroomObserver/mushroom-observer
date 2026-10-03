@@ -144,6 +144,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   # `trusted_html(:foo.t)` instead of `raw(:foo.t) # rubocop:disable
   # Rails/OutputSafety`.
   include Phlex::TrustedHtml
+  # Same reasoning as `Phlex::TrustedHtml` above -- `content_for`/
+  # `content_for?` for `title_bar_submit` (`FieldHelpers`).
+  include Phlex::Rails::Helpers::ContentFor
   include FieldHelpers
   include UploadHelpers
 

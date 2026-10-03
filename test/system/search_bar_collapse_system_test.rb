@@ -10,6 +10,8 @@ require("application_system_test_case")
 # Fix: Panel now uses Button::CollapseToggle (<button>) so no navigation
 # can occur regardless of Bootstrap's preventDefault behavior.
 class SearchBarCollapseSystemTest < ApplicationSystemTestCase
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   # Test the full collapse-toggle lifecycle inside the top-nav turbo
   # search form:
   #   1. Switch top nav to the faceted observations search form.
@@ -21,7 +23,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
 
     # Open the top-nav search bar collapse (starts hidden).
     find("[aria-controls='search_nav']").click
-    assert_selector("#search_nav.in", wait: 5)
+    assert_selector("#search_nav.#{EXPANDED}", wait: 5)
 
     # Wait for the search-type Stimulus controller to connect and
     # fire the initial async form fetch into #search_nav_form.
@@ -33,14 +35,14 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
     # The form content arrives via Turbo stream; wait for the detail
     # panel heading to confirm it is fully loaded.
     assert_selector(
-      "#search_nav_form .panel",
+      "#search_nav_form .card",
       text: :search_term_group_detail.t.as_displayed,
       wait: 10
     )
 
     # Expand the "detail" collapsible panel.
     find("a[aria-controls='observations_detail']").click
-    assert_selector("#observations_detail.in", wait: 5)
+    assert_selector("#observations_detail.#{EXPANDED}", wait: 5)
 
     # Collapse the panel. Before the fix this caused Bootstrap to skip
     # preventDefault (because data-target was set), Turbo then followed
@@ -51,10 +53,10 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
     assert_selector("#search_nav_form")
     # Panel heading still there.
     assert_selector(
-      "#search_nav_form .panel",
+      "#search_nav_form .card",
       text: :search_term_group_detail.t.as_displayed
     )
     # Collapsed pane is closed.
-    assert_no_selector("#observations_detail.in")
+    assert_no_selector("#observations_detail.#{EXPANDED}")
   end
 end

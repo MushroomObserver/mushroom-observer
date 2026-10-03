@@ -13,11 +13,13 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
   def test_layout_pins_buttons_on_left_consensus_help_on_right
     html = render_footer_buttons
 
-    # Buttons column is 4 of 12; the consensus-help blurb takes
-    # the remaining 8. Both inside the leftmost col-sm-11 so the
-    # right gutter aligns with the eyes-column above.
-    assert_html(html, ".col-sm-11 > .row > .col.col-md-4")
-    assert_html(html, ".col-sm-11 > .row > .col.col-md-8")
+    # Buttons column is 4 of 12 at md+; the consensus-help blurb
+    # takes the remaining 8. Both full-width (stacked) below md,
+    # since the buttons column is empty there. Both inside the
+    # leftmost col-sm-11 so the right gutter aligns with the
+    # eyes-column above.
+    assert_html(html, ".col-sm-11 > .row > .col-12.col-md-4")
+    assert_html(html, ".col-sm-11 > .row > .col-12.col-md-8")
   end
 
   def test_renders_propose_naming_modal_link_without_icon
@@ -45,11 +47,29 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
     html = render_footer_buttons
 
     # `.as_displayed` (`app/extensions/string.rb`) strips HTML tags
-    # and unescapes entities — gives us what the user actually
-    # reads, which is what `assert_html(text:)` compares against
-    # (it extracts text content, not raw markup).
-    assert_html(html, "div",
+    # and unescapes entities — gives us what the user reads, which
+    # is what `assert_html(text:)` compares against (it extracts
+    # text content, not raw markup).
+    assert_html(html, "#namings_consensus_help",
                 text: :show_namings_consensus_help.t.as_displayed)
+  end
+
+  def test_consensus_help_collapsed_by_default_visible_at_sm_up
+    html = render_footer_buttons
+
+    # `.collapse` with no `.show` -- collapsed below `sm`; `d-sm-block`
+    # forces it visible at `sm`+ regardless (see footer_buttons.rb).
+    assert_html(html, "#namings_consensus_help.collapse.d-sm-block")
+    assert_no_html(html, "#namings_consensus_help.show")
+  end
+
+  def test_mobile_help_toggle_targets_consensus_help
+    html = render_footer_buttons
+
+    assert_html(html,
+                "a.d-sm-none[data-toggle='collapse']" \
+                "[href='#namings_consensus_help']" \
+                "[aria-controls='namings_consensus_help']")
   end
 
   # ---- suggest-names button gating ----------------------------------

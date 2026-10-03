@@ -18,7 +18,7 @@ class Components::ProjectButtonTest < ComponentTestCase
   def test_renders_btn_default_at_btn_lg_size_with_row_spacing
     html = render_button
 
-    assert_html(html, "a.btn.btn-default.btn-lg.my-3.mr-3[href='/some/path']")
+    assert_html(html, "a.btn.btn-secondary.btn-lg.my-3.mr-3[href='/some/path']")
   end
 
   private

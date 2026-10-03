@@ -589,8 +589,18 @@ class String
     ind = rindex(tag)
     return self if !ind || !offset || (length <= (ind + offset))
 
+    # Skip the space between the name and the author before opening
+    # the tag, so that space stays a normal wrap point instead of
+    # becoming the first character of the author span (unbreakable,
+    # since the span is `white-space: nowrap`). Without this, the
+    # binomial's genus/epithet space is the only wrap point left in
+    # the whole name+author run, so a narrow viewport breaks the
+    # binomial itself instead of wrapping before the author.
+    start = ind + offset
+    start += 1 while self[start] == " "
+
     insert(length, "</small>".html_safe)
-    insert(ind + offset, '<small class="text-nowrap">'.html_safe)
+    insert(start, '<small class="text-nowrap">'.html_safe)
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.

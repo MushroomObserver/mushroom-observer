@@ -197,13 +197,13 @@ module Views::Controllers::Projects::Violations
       # data-action="click->modal#hide" — these together let the admin
       # create the missing Location and see the radio enabled on next
       # "Add Target Location" click without a page reload. The link
-      # lives INSIDE the disabled radio's `.radio` div (per-row
-      # append), not as a sibling above the radio group.
+      # lives INSIDE the disabled radio's `.custom-control` div
+      # (per-row append), not as a sibling above the radio group.
       #
       # `data-action` is used in place of Bootstrap's `data-dismiss`
       # because the latter's handler chain preventDefaults the click
       # and suppresses the new tab.
-      create_link = ".radio a[href*='/locations/new?where=']" \
+      create_link = ".custom-control a[href*='/locations/new?where=']" \
                     "[target='_blank']" \
                     "[rel='noopener noreferrer']" \
                     "[data-action='click->modal#hide']"
@@ -225,7 +225,7 @@ module Views::Controllers::Projects::Violations
 
       encoded = "Unique+County+X42%2C+California%2C+USA"
       assert_html(html,
-                  ".radio a[href='/locations/new?where=#{encoded}']" \
+                  ".custom-control a[href='/locations/new?where=#{encoded}']" \
                   "[target='_blank']")
     end
 

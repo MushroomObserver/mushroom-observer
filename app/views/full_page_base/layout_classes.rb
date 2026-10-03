@@ -46,17 +46,22 @@ module Views::FullPageBase::LayoutClasses
     column_classes
   end
 
-  # ----- Vertical padding inside the main container ----------------
+  # ----- Horizontal padding inside the main container ---------------
 
   def content_padding(content_has = nil)
     content_has ||= action_name.in?(%w[index show]) ? :panels : :no_panels
+    # `content_for?` treats a blank captured value as unset, so the
+    # :panels branch (an intentionally empty class string) can't rely
+    # on it to tell `default_content_padding` this slot was already
+    # explicitly set -- track that separately.
+    @content_padding_set = true
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "p-3" : "p-0"
+      content_has == :no_panels ? "px-card" : ""
     end
   end
 
   def default_content_padding
-    return if content_for?(:content_padding)
+    return if @content_padding_set
 
     content_padding
   end

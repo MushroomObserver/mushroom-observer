@@ -3,9 +3,7 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
-  # Bootstrap 3's expanded-collapse class -- "show" under BS4 (see
-  # Components::Collapsible.collapse_classes).
-  EXPANDED = "in"
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
 
   include ActiveJob::TestHelper
 
@@ -44,7 +42,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:tab)
     assert_field("observation_naming_name", with: "Elfin saddle")
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_flash_error(:form_observations_there_is_a_problem_with_name)
     assert_selector("#observation_form")
@@ -77,7 +75,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Test naming reason checkbox/textarea interaction
     # The Vote/Reasons collapse should have expanded when valid name was entered
     assert_selector(
-      "[data-autocompleter--name-target='collapseFields'].in", wait: 4
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}", wait: 4
     )
 
     # Find reason 2 checkbox ("Used references") and check it
@@ -87,7 +85,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Check the reason checkbox (click the label to toggle collapse)
     reason_checkbox_label.click
-    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
 
     # Fill in the reason notes textarea
     reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
@@ -96,23 +94,23 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Uncheck the reason checkbox - should collapse and clear the input
     reason_checkbox_label.click
-    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     # Wait for the collapse animation to complete and trigger clearInput
     sleep(0.5)
 
     # Re-check the reason checkbox - should expand but be empty
     reason_checkbox_label.click
-    assert_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     reason_notes = find("#naming_reasons_2_notes textarea", visible: :all)
     assert_equal("", reason_notes.value,
                  "Textarea should be empty after toggle")
 
     # Uncheck again before submitting (we want no reason 2 stored)
     reason_checkbox_label.click
-    assert_no_selector("#naming_reasons_2_notes.in", wait: 4)
+    assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     sleep(0.5)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("body.observations__show")
     new_obs = Observation.last
@@ -259,16 +257,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                     visible: :all)
     # Overlay exists but is hidden before submission starts.
     assert_selector(".upload-status-overlay.d-none", visible: :all)
-    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+    assert_selector(".remove_image_button", visible: :all)
+    assert_no_selector(".remove_image_button[disabled]", visible: :all)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
-    # The overlay unhides once this item's own upload POST starts, and
+    # The overlay unhides once this item's upload POST starts, and
     # settles on the checkmark (not the spinner) once it succeeds --
     # all while the carousel item itself remains visible throughout,
-    # unlike the old hide-the-whole-item behavior.
-    assert_selector(".upload-status-overlay:not(.d-none)", wait: 5)
-    assert_selector(".upload-status-check:not(.d-none)", wait: 8)
+    # unlike the old hide-the-whole-item behavior. assert_no_selector
+    # on the positive `.d-none` class, not assert_selector with
+    # `:not()` -- see system_test_state_polling.md.
+    assert_no_selector(".upload-status-overlay.d-none", wait: 5)
+    assert_no_selector(".upload-status-check.d-none", wait: 8)
     assert_selector(".carousel-item[data-image-status='upload']",
                     visible: true)
     assert_selector(".remove_image_button[disabled]", visible: :all)
@@ -311,7 +312,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                    # so stub it rather than let it print.
                    Rails.logger.stub(:error, nil) do
                      accept_alert(wait: 8) do
-                       within("#observation_form") { click_commit }
+                       click_commit
                      end
                    end
                  ensure
@@ -329,8 +330,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("observation_place_name",
                  evaluate_script("document.activeElement.id"),
                  "Form should accept focus again after a failed upload")
-    assert_selector("#observation_form button[type='submit']:not([disabled])")
-    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+    assert_selector("#observation_form button[type='submit']")
+    assert_no_selector("#observation_form button[type='submit'][disabled]")
+    assert_selector(".remove_image_button", visible: :all)
+    assert_no_selector(".remove_image_button[disabled]", visible: :all)
   end
 
   # JoeCohen's review on #5055: the "MO does not recognize the name"
@@ -349,7 +352,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Elfin saddle")
     page.driver.browser.keyboard.type(:tab)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("#name_messages.alert-danger", wait: 6)
     assert_selector("#name_messages", text: "MO does not recognize the name")
@@ -396,7 +399,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     # Observation should have saved with the existing location_id for U.P.
     assert_selector("body.observations__show")
@@ -441,7 +444,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
     fill_in("observation_naming_name", with: "Coprinus comatus")
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("body.locations__new", wait: 6)
     assert_field("location_display_name", with: nonexistent_where)
@@ -632,8 +635,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "California, USA")
     fill_in("observation_naming_name", with: "Agaricus")
 
-    # Submit to create observation
-    within("#observation_form") { click_commit }
+    # Submit to create observation. click_commit's uploadAll locks the
+    # form, uploads both images (each showing a checkmark on success),
+    # polls for EXIF, then resubmits. A browser repro of this flow,
+    # test DB, same two files, completed in under 10s end to end --
+    # these waits are sized to that, not padded.
+    click_commit
+    wait_for_upload_checkmarks(count: 2)
     assert_selector("body.observations__show", wait: 10)
 
     # Navigate to edit page
@@ -828,7 +836,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     specimen_section = find_by_id("observation_specimen_section", visible: :all)
     scroll_to(specimen_section, align: :center)
-    assert_field("observation_specimen")
+    assert_field("observation_specimen", visible: :all)
     check("observation_specimen")
     assert_field("observation_collection_number_number")
     fill_in("observation_collection_number_number", with: "17-034a")
@@ -846,7 +854,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
-    within("#observation_form") { click_commit }
+    click_commit
 
     # rejected, but images uploaded
     assert_selector("body.observations__new", wait: 12)
@@ -926,13 +934,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Agaricus campestris")
     assert_field("observation_naming_name", with: "Agaricus campestris")
     # Vote/reasons collapse should expand when name is filled
-    assert_selector("[data-autocompleter--name-target='collapseFields'].in")
+    assert_selector(
+      "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"
+    )
     select(Vote.confidence_string(Vote.next_best_vote),
            from: "observation_naming_vote_value")
     assert_select("observation_naming_vote_value",
                   selected: Vote.confidence_string(Vote.next_best_vote))
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     # NOTE: The flash message for location creation is commented out in
     # locationable.rb line 117, so we don't expect it here
@@ -966,7 +976,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, visible: :all)
       assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s, visible: :all)
     end
-    assert_unchecked_field("observation_is_collection_location")
+    assert_unchecked_field("observation_is_collection_location", visible: :all)
     assert_checked_field("observation_specimen", visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
@@ -1033,7 +1043,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(obs_notes, align: :top)
     fill_in(other_notes_id, with: "New notes for observation")
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("body.observations__show")
     # NOTE: Flash message behavior may have changed - commenting out for now
@@ -1078,7 +1088,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Open the map
     click_button(:form_observations_open_map.l)
-    assert_selector("#observation_form_map.in", wait: 10)
+    assert_selector("#observation_form_map.#{EXPANDED}", wait: 10)
 
     # Wait for Google Maps to load (map controller sets data-map="connected")
     assert_selector("[data-map='connected']", wait: 10)
@@ -1923,6 +1933,62 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :wait_for_exif_geocode_broadcast
 
+  # Diagnostic for a stuck upload/submit sequence (TEMP, for the
+  # system-test-flakiness investigation): read the client-side state
+  # a passing run goes through, so a failure says which step it's
+  # stuck on instead of just "timed out".
+  # Watches for the form-images controller reconnecting (its host
+  # element removed/replaced, or connect() re-running) mid-upload --
+  # a repro at full Capybara/CDP speed, in dev, did not trigger this,
+  # so catching it needs instrumenting the failing environment
+  # directly rather than reproducing it externally.
+  # Counts via plain positive class-presence selectors only -- no
+  # `:not()`, which is an unreliable read in this environment (see
+  # system_test_state_polling.md), not just an unreliable
+  # Capybara assert_selector wait.
+  def dump_upload_state
+    evaluate_script(<<~JS)
+      JSON.stringify({
+        spinnersTotal: document.querySelectorAll(
+          ".upload-status-spinner").length,
+        spinnersHidden: document.querySelectorAll(
+          ".upload-status-spinner.d-none").length,
+        checkmarksTotal: document.querySelectorAll(
+          ".upload-status-check").length,
+        checkmarksHidden: document.querySelectorAll(
+          ".upload-status-check.d-none").length,
+        formInert: document.getElementById("observation_form")?.inert,
+        btnLabel: document.querySelector(
+          "#observation_form button[type=submit]")?.textContent?.trim(),
+        url: location.pathname
+      })
+    JS
+  end
+
+  # Polls client-side state directly instead of assert_selector --
+  # assert_selector's Capybara::ExpectationNotMet on timeout wasn't
+  # reaching a surrounding rescue in this file for reasons not yet
+  # understood, so a timeout here reported the plain Capybara message
+  # with none of the diagnostic state attached.
+  def wait_for_upload_checkmarks(count:, wait: 15)
+    Timeout.timeout(wait) do
+      loop do
+        total = evaluate_script(
+          'document.querySelectorAll(".upload-status-check").length'
+        )
+        hidden = evaluate_script(
+          'document.querySelectorAll(".upload-status-check.d-none").length'
+        )
+        break if total - hidden >= count
+
+        sleep(0.25)
+      end
+    end
+  rescue Timeout::Error
+    flunk("Timed out waiting for #{count} upload checkmarks.\n\n" \
+          "Upload state: #{dump_upload_state}")
+  end
+
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)
     assert_selector('[id$="when_2i"]', visible: :all)
@@ -1967,8 +2033,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                                    visible: :all, wait: 5)
     end
 
-    # Wait for "use exif" button to appear (not d-none)
-    assert_selector(".use_exif_btn:not(.d-none)", wait: 10)
+    # Wait for "use exif" button to appear -- assert_no_selector on
+    # the positive `.d-none` class, not `:not()` (see
+    # system_test_state_polling.md).
+    assert_no_selector(".use_exif_btn.d-none", wait: 10)
 
     # For the first image, JavaScript auto-transfers EXIF data and disables
     # the button. If the button is disabled, skip clicking it.
@@ -1977,7 +2045,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Wait for geolocation collapse to expand
-    assert_selector("#observation_geolocation.in", wait: 10)
+    assert_selector("#observation_geolocation.#{EXPANDED}", wait: 10)
 
     # Verify GPS fields are populated. wait: 20, not 10 -- same
     # contention-sensitive EXIF-extraction dependency as the GEOTAGGED_EXIF

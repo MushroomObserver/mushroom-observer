@@ -51,7 +51,7 @@ module Views::Layouts
       edit_href = routes.edit_observation_path(@obs.id)
       destroy_action = routes.observation_path(@obs.id)
 
-      assert_html(html, "div.object_edit .inline-icon-link", count: 2)
+      assert_html(html, "div.object_edit .inline-icon-link", count: 3)
       assert_html(html, "div.object_edit a[href='#{edit_href}']")
       assert_html(html, "div.object_edit form[action='#{destroy_action}']")
     end
@@ -61,6 +61,12 @@ module Views::Layouts
       html = render_icons(user: @owner)
 
       assert_html(html, "div.object_edit .mo-icon-read-only")
+      # Must render inside InlineLinkBlock's wrapper span -- that's
+      # what gives it the same spacing/size as the edit/delete icons
+      # beside it, instead of the sprite's larger default size.
+      assert_html(html,
+                  "div.object_edit span.inline-link-block.ml-3 " \
+                  ".mo-icon-read-only")
     end
 
     def test_non_reflection_has_no_read_only_status_icon

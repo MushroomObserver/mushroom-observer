@@ -94,7 +94,7 @@ module Views::Controllers::Projects
         icon: :remove,
         icon_class: "text-danger",
         name: :remove.ti,
-        label: true,
+        show_label: :responsive,
         target: observation_project_path(
           id: @observation.id, project_id: @project.id, commit: "remove"
         ),
@@ -107,7 +107,7 @@ module Views::Controllers::Projects
         type: :put,
         name: :add.ti,
         icon: :attach,
-        label: true,
+        show_label: :responsive,
         target: observation_project_path(
           id: @observation.id, project_id: @project.id, commit: "add"
         )

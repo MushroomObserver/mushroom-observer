@@ -55,11 +55,11 @@ module Views::Controllers::RssLogs
     end
 
     def render_filter_buttons
-      # "Show:" label sits OUTSIDE the .btn-group: BS3 `.btn-group`
-      # floats and inline-blocks its children expecting `.btn`-shaped
-      # elements, and a non-`.btn` span inside breaks the layout (the
-      # span ends up after the group). Sibling-of-group keeps it
-      # inline-aligned without being subject to the group's layout
+      # "Show:" label sits OUTSIDE the .btn-group: `.btn-group` is a
+      # flex container expecting `.btn`-shaped children, and a
+      # non-`.btn` span inside breaks the layout (the span ends up
+      # after the group). Sibling-of-group keeps it inline-aligned
+      # without being subject to the group's layout
       # rules.
       div(class: class_names("px-3 pb-1 text-nowrap",
                              Components::Column.mobile_hide_classes)) do
@@ -77,7 +77,7 @@ module Views::Controllers::RssLogs
     # disabled btn-default to share vertical rhythm with the other
     # button-styled controls, but that's misleading (looks like a
     # button you can't press). Plain text with `text-muted` and
-    # margin matches the BS3 caption-style without the affordance.
+    # margin matches a caption style without the affordance.
     def render_show_label
       span(class: "text-muted mr-2") { :rss_show.t }
     end
@@ -123,10 +123,10 @@ module Views::Controllers::RssLogs
 
     # Individual type checkbox styled as a Bootstrap button. Routes
     # through `ButtonStyleCheckbox` so the markup stays in lockstep
-    # with the rest of MO's button-style radio/checkbox helpers
-    # (BS3/4/5 migration changes one file, not many). The "pressed"
-    # active state is CSS-only via `.filter-checkbox:has(input:checked)`
-    # in `_form_elements.scss`.
+    # with the rest of MO's button-style radio/checkbox helpers (a
+    # future Bootstrap version change touches one file, not many).
+    # The "pressed" active state is CSS-only via
+    # `.filter-checkbox:has(input:checked)` in `_form_elements.scss`.
     def render_type_checkbox(type)
       render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
                name: "q[types][]", value: type,

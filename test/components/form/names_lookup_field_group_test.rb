@@ -262,28 +262,30 @@ class NamesLookupFieldGroupTest < ComponentTestCase
 
   # Tests for collapse behavior now test the component methods directly
   # since the collapse div is rendered via a slot
-  def test_collapse_has_in_class_when_lookup_present
+  def test_collapse_has_expanded_class_when_lookup_present
     @query.names = { lookup: [@name.id] }
     component = create_component(modifier_fields: [])
 
-    assert_equal("in", component.send(:collapse_class))
+    assert_equal(Components::Collapsible::EXPANDED_CLASS,
+                 component.send(:collapse_class))
   end
 
-  def test_collapse_without_values_has_no_in_class
+  def test_collapse_without_values_has_no_expanded_class
     @query.names = {}
     component = create_component(modifier_fields: [])
 
     assert_nil(component.send(:collapse_class))
   end
 
-  def test_collapse_has_in_class_when_modifiers_set
+  def test_collapse_has_expanded_class_when_modifiers_set
     @query.names = { include_synonyms: true }
     component = create_component(modifier_fields: [[:include_synonyms]])
 
-    assert_equal("in", component.send(:collapse_class))
+    assert_equal(Components::Collapsible::EXPANDED_CLASS,
+                 component.send(:collapse_class))
   end
 
-  def test_collapse_without_modifiers_has_no_in_class
+  def test_collapse_without_modifiers_has_no_expanded_class
     @query.names = {}
     component = create_component(modifier_fields: [[:include_synonyms]])
 

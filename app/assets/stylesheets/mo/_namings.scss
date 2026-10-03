@@ -1,12 +1,12 @@
 // Namings is not a <table>, but has table-like layout properties
 .namings-table {
   .row {
-    border-radius: $panel-border-radius;
+    border-radius: $border-radius;
   }
 
-  .panel-heading .row {
+  .card-header .row {
     .col {
-      // padding: $panel-body-padding;
+      // padding: $card-spacer-y;
       vertical-align: bottom;
       // padding-bottom: 0.25rem;
 
@@ -17,10 +17,10 @@
   }
 
   .list-group-item {
-    background-color: $panel-bg;
+    background-color: $card-bg;
 
     .col {
-      // padding: $panel-body-padding;
+      // padding: $card-spacer-y;
       vertical-align: middle;
 
       &.naming-reasons {
@@ -37,6 +37,25 @@
 
 .namings-table-header {
   line-height: $headings-line-height;
+}
+
+// A third of the usual gutter -- packed as tight as the mobile
+// naming-row columns are, the full $grid-gutter-width eats too much
+// of the row's width.
+.naming-columns {
+  margin-left: -$grid-gutter-width / 3;
+  margin-right: -$grid-gutter-width / 3;
+
+  > [class*="col-"] {
+    padding-left: $grid-gutter-width / 3;
+    padding-right: $grid-gutter-width / 3;
+  }
+}
+
+// Votes::Form's float-right is for sharing a line with an inline
+// label -- the label sits in a separate row here, so cancel it.
+.naming-columns .naming-vote-form {
+  float: none !important;
 }
 
 .vote-icon-width {

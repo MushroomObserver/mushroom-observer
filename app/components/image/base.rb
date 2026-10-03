@@ -54,7 +54,7 @@ class Components::Image::Base < Components::Base
   prop :identify, _Boolean, default: false
   prop :observation_view, _Nilable(ObservationView), default: nil
 
-  # Upload mode (no real image instance)
+  # Upload mode (no image instance)
   prop :upload, _Boolean, default: false
 
   # This should be implemented by subclasses
@@ -89,7 +89,7 @@ class Components::Image::Base < Components::Base
       # Size-scoped so a broadcast re-render of one size (see
       # Image#broadcast_processed_update) targets only the element
       # actually showing that size -- the same image can be on-screen
-      # at different sizes on different pages (matrix-box thumbnail
+      # at different sizes on different pages (grid-box thumbnail
       # vs. image-show huge vs. edit-page medium), all sharing the
       # same default id_prefix.
       html_id: "#{@id_prefix}_#{img_id}_#{@size}",

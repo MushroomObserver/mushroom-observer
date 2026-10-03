@@ -60,13 +60,18 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
     open_target_location_modal(project, obs)
     within("##{modal_id}") do
       assert_selector(
-        "input[type='radio'][value='#{new_location.id}']:not([disabled])"
+        "input[type='radio'][value='#{new_location.id}']", visible: :all
+      )
+      assert_no_selector(
+        "input[type='radio'][value='#{new_location.id}'][disabled]",
+        visible: :all
       )
       # No Create links anywhere in the fresh modal — both suffixes
       # now point at existing Locations.
       assert_no_selector("a[target='_blank']")
 
-      find("input[type='radio'][value='#{new_location.id}']").click
+      find("input[type='radio'][value='#{new_location.id}']",
+           visible: :all).choose
       click_button(:form_violations_modal_target_location_submit.l)
     end
 
@@ -111,16 +116,18 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
 
   # Locate the row by the radio input's `value` attribute rather than by
   # label text — the "Falmouth, Massachusetts, USA" row's text also
-  # contains the substring "Massachusetts, USA", so `find(".radio",
+  # contains the substring "Massachusetts, USA", so `find(".custom-control",
   # text: ...)` is ambiguous.
   def assert_disabled_row_with_create_link(modal_id, missing_suffix)
     within("##{modal_id}") do
       assert_selector(
-        "input[type='radio'][value='#{missing_suffix}'][disabled]"
+        "input[type='radio'][value='#{missing_suffix}'][disabled]",
+        visible: :all
       )
-      # The Create link is appended to the disabled row's .radio div
-      # (per-row append). Match by its target+href shape so we don't
-      # have to scope `within` a sibling-relationship to the input.
+      # The Create link is appended to the disabled row's
+      # .custom-control div (per-row append). Match by its target+href
+      # shape so we don't have to scope `within` a sibling-relationship
+      # to the input.
       create_link = find(
         "a[target='_blank'][href*='where=Massachusetts']"
       )

@@ -21,18 +21,36 @@ module Form
       assert_includes(html, "carousel-inner")
       assert_includes(html, "carousel-item")
 
-      # Should have carousel controls
-      assert_includes(html, "carousel-control-wrap")
-      assert_includes(html, "carousel-control")
-      # FormCarousel uses different control classes (left/right)
-      assert_includes(html, 'data-slide="prev"')
-      assert_includes(html, 'data-slide="next"')
-
       # Should have correct data attributes for Stimulus
       assert_includes(html, 'data-ride="false"')
       assert_includes(html, 'data-interval="false"')
       assert_includes(html, 'data-form-images-target="carousel"')
       assert_includes(html, 'data-form-exif-target="carousel"')
+    end
+
+    # Prev/next controls need at least 2 images to be worth navigating
+    # -- same threshold as the indicator strip (`indicators_d_none`).
+    # Both stay in the DOM either way (`d-none` toggles instead) since
+    # images are added client-side after this renders --
+    # form-images_controller.js#showOrHideCarouselControls needs an
+    # element already there to reveal.
+    def test_carousel_controls_visible_with_multiple_images
+      two_images = observations(:two_img_obs).images.to_a
+      html = render_carousel(images: two_images)
+
+      assert_html(html, "button.carousel-control-prev")
+      assert_html(html, "button.carousel-control-next")
+      assert_no_html(html, "button.carousel-control-prev.d-none")
+      assert_no_html(html, "button.carousel-control-next.d-none")
+      assert_includes(html, 'data-slide="prev"')
+      assert_includes(html, 'data-slide="next"')
+    end
+
+    def test_carousel_controls_hidden_with_one_image
+      html = render_carousel(images: [@images.first])
+
+      assert_html(html, "button.carousel-control-prev.d-none")
+      assert_html(html, "button.carousel-control-next.d-none")
     end
 
     def test_renders_carousel_items_in_carousel_inner
@@ -61,11 +79,11 @@ module Form
       assert_includes(html, "carousel-indicators")
       assert_includes(html, "added_thumbnails")
 
-      # Thumbnail list has panel-footer class
-      assert_includes(html, "panel-footer")
+      # Thumbnail list has card-footer class
+      assert_includes(html, "card-footer")
       assert_nested(
         html,
-        parent_selector: ".carousel-indicators.panel-footer",
+        parent_selector: ".carousel-indicators.card-footer",
         child_selector: "li"
       )
 
@@ -98,10 +116,10 @@ module Form
       # Should still render carousel structure
       assert_includes(html, "carousel")
       assert_includes(html, "carousel-inner")
-      # But no carousel items
+      # But no carousel items; controls stay in the DOM for JS to
+      # reveal later, starting hidden with nothing to navigate to yet
       assert_not_includes(html, "carousel-item")
-      # Still has controls
-      assert_includes(html, "carousel-control-wrap")
+      assert_html(html, "button.carousel-control-prev.d-none")
     end
 
     def test_renders_with_nil_images
@@ -133,7 +151,7 @@ module Form
     end
 
     def test_carousel_structure_and_nesting
-      html = render_carousel
+      html = render_carousel(images: observations(:two_img_obs).images.to_a)
 
       # Root carousel div
       assert_nested(
@@ -142,11 +160,13 @@ module Form
         child_selector: ".carousel-inner"
       )
 
-      # Carousel inner contains items and controls
+      # Controls are siblings of carousel-inner, not nested inside it
+      # -- Bootstrap 4's carousel markup has no wrapping element
+      # around the two buttons.
       assert_nested(
         html,
-        parent_selector: "#added_images",
-        child_selector: ".carousel-control-wrap"
+        parent_selector: ".carousel.image-form-carousel",
+        child_selector: ".carousel-control-prev"
       )
 
       # Thumbnails at same level as carousel-inner

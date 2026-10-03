@@ -93,7 +93,7 @@ module Views::Controllers::SpeciesLists
         icon: :remove,
         icon_class: "text-danger",
         name: :remove.ti,
-        label: true,
+        show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,

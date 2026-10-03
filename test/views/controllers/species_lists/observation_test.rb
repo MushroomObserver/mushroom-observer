@@ -33,13 +33,13 @@ module Views::Controllers::SpeciesLists
       # Image column class + details column class
       assert_html(html, ".col-sm-4.col-md-3")
       assert_html(html, ".col-sm-8.col-md-9")
-      assert_no_html(html, ".col-xs-12")
+      assert_no_html(html, ".col-12")
     end
 
     def test_renders_single_column_layout_without_image
       html = render_row(image: false)
 
-      assert_html(html, ".col-xs-12")
+      assert_html(html, ".col-12")
       assert_no_html(html, ".col-sm-4.col-md-3")
       assert_no_html(html, ".col-sm-8.col-md-9")
     end

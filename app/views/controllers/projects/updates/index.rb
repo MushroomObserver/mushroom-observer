@@ -85,9 +85,9 @@ module Views::Controllers::Projects::Updates
     end
 
     def render_matrix
-      render(Components::Matrix::Table.new) do
+      Grid() do
         @observations.each do |obs|
-          render(Components::Matrix::Box.new(
+          render(Components::Grid::Box.new(
                    user: @user, object: obs
                  )) do
             render(Views::Controllers::Projects::Updates::ObsFooter.new(

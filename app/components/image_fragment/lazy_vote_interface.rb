@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # A lazy-loading Turbo Frame wrapper around `VoteInterface`, meant to
-# be called from inside cacheable render paths (`Matrix::Box ->
+# be called from inside cacheable render paths (`Grid::Box ->
 # InteractiveImage`/`LightboxCaption`) instead of `VoteInterface`
-# itself. `Matrix::Box`'s fragment cache key has no user component
-# (`Components::Matrix::Table.cache_key_for`) -- rendering
+# itself. `Grid::Box`'s fragment cache key has no user component
+# (`Components::Grid.cache_key_for`) -- rendering
 # `VoteInterface` directly would bake whichever viewer's request
 # happened to write the cache entry's vote state into the shared HTML
 # for every subsequent viewer. `loading: "lazy"` defers the fetch

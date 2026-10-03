@@ -19,7 +19,7 @@ class RadioFieldTest < ComponentTestCase
       radio_field(:number, [1, "Option 1"], [2, "Option 2"])
     end
 
-    assert_html(form, "div.radio")
+    assert_html(form, "div.custom-control.custom-radio")
     assert_html(form, "input[type='radio'][name='collection_number[number]']",
                 count: 2)
     assert_html(form, "input[value='1']")
@@ -33,7 +33,7 @@ class RadioFieldTest < ComponentTestCase
       radio_field(:number, [1, "A"], [2, "B"], wrap_class: "ml-4")
     end
 
-    assert_html(form, "div.radio.ml-4", count: 2)
+    assert_html(form, "div.custom-control.custom-radio.ml-4", count: 2)
   end
 
   # Regression: each per-option label carries `for=` pointing at its
@@ -65,8 +65,9 @@ class RadioFieldTest < ComponentTestCase
       render(component)
     end
 
-    assert_html(form, "div.radio div.d-inline-block.ml-3 span.help-note",
-                count: 2)
+    assert_html(form,
+                "div.custom-control.custom-radio div.d-inline-block.ml-3 " \
+                "span.help-note", count: 2)
     assert_includes(form, "(see notes)")
   end
 
@@ -78,7 +79,7 @@ class RadioFieldTest < ComponentTestCase
     html = render_radio_field(proxy, [10, "Alpha"], [20, "Beta"],
                               wrapper_options: { wrap_class: "ml-4" })
 
-    assert_html(html, "div.radio.ml-4", count: 2)
+    assert_html(html, "div.custom-control.custom-radio.ml-4", count: 2)
     assert_html(html,
                 "input[type='radio'][name='chosen_name[name_id]']",
                 count: 2)
@@ -124,7 +125,7 @@ class RadioFieldTest < ComponentTestCase
       end
     end
 
-    radios = form.scan('<div class="radio">')
+    radios = form.scan('<div class="custom-control custom-radio">')
     assert_equal(3, radios.size, "expected 3 radio option wraps")
 
     last_radio_end = form.rindex("</div>", form.index("after-radios"))
@@ -150,11 +151,14 @@ class RadioFieldTest < ComponentTestCase
   def test_renders_simple_two_tuple_choices
     html = render_field([[1, "Option 1"], [2, "Option 2"]])
 
-    # Each option wrapped in .radio with a label-for matching the radio id.
-    assert_html(html, ".radio > label[for='target_1'] > input" \
-                      "[type='radio'][name='target'][value='1']")
-    assert_html(html, ".radio > label[for='target_2'] > input" \
-                      "[type='radio'][name='target'][value='2']")
+    # Each option wrapped in .custom-control, input and label as
+    # siblings, label's for= matching the radio's id.
+    assert_html(html, ".custom-control > input[type='radio']" \
+                      "[name='target'][value='1'][id='target_1']")
+    assert_html(html, ".custom-control > label[for='target_1']")
+    assert_html(html, ".custom-control > input[type='radio']" \
+                      "[name='target'][value='2'][id='target_2']")
+    assert_html(html, ".custom-control > label[for='target_2']")
     assert_includes(html, "Option 1")
     assert_includes(html, "Option 2")
   end
@@ -183,10 +187,11 @@ class RadioFieldTest < ComponentTestCase
                           [2, "B", { append: append_html }]
                         ])
 
-    # Append rendered as a sibling of the label, inside the .radio wrap,
-    # so a click on the link doesn't activate the radio.
-    assert_html(html, ".radio > label[for='target_2']")
-    assert_html(html, ".radio > a[href='/create']")
+    # Append rendered as a sibling of the label, inside the
+    # .custom-control wrap, so a click on the link doesn't activate
+    # the radio.
+    assert_html(html, ".custom-control > label[for='target_2']")
+    assert_html(html, ".custom-control > a[href='/create']")
     # Sibling, not nested:
     assert_no_html(html, "label[for='target_2'] a[href='/create']")
   end
@@ -218,8 +223,9 @@ class RadioFieldTest < ComponentTestCase
                         ])
 
     # Proc invoked in RadioField's Phlex render context — sibling of
-    # the label, inside .radio, just like the SafeBuffer form.
-    assert_html(html, ".radio > a[href='/from_proc']", text: "Create")
+    # the label, inside .custom-control, just like the SafeBuffer form.
+    assert_html(html, ".custom-control > a[href='/from_proc']",
+                text: "Create")
     assert_no_html(html, "label[for='target_2'] a[href='/from_proc']")
   end
 

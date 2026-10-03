@@ -34,7 +34,7 @@ export default class extends Controller {
     document.getElementById('modal_progress_spinner_caption').innerHTML =
       this.localized_text.saving + "... ";
 
-    // Must be in jQuery for Bootstrap 3 and 4
+    // Must be in jQuery -- Bootstrap's modal plugin is jQuery-based
     $("#modal_progress_spinner").modal('show');
     this.element.requestSubmit();
   }

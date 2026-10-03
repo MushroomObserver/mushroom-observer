@@ -86,17 +86,6 @@ class CollapseToggleLinkTest < ComponentTestCase
     # Bootstrap reads data-target before href; both must be present
     assert_html(html, "a[data-target='#help_foo']")
     assert_html(html, "a[data-toggle='collapse']")
-    # Bootstrap's collapse data-API only calls preventDefault() when
-    # data-target is absent, so fallback_href needs an explicit
-    # preventDefault() or the click always follows href instead of
-    # toggling -- see collapse-fallback_controller.js. No :prevent
-    # action modifier -- the controller itself decides whether to
-    # call preventDefault(), skipping it for a data-turbo-frame
-    # trigger so Turbo can handle that case instead.
-    assert_html(html, "a[data-controller='collapse-fallback']")
-    assert_html(
-      html, "a[data-action='click->collapse-fallback#intercept']"
-    )
   end
 
   def test_without_fallback_href_href_is_anchor

@@ -3,13 +3,15 @@
 require "test_helper"
 
 class CollapseHelpBlockTest < ComponentTestCase
+  HIDE_CLASSES = Components::Column.mobile_hide_classes.join(".")
+
   def test_renders_basic_collapse_block_with_content
     html = render_component(
       Components::Help::CollapseBlock.new(target_id: "help_1")
     ) { "This is help text" }
 
     assert_html(html, "div.collapse#help_1")
-    assert_html(html, "div.well.well-sm.mb-3.help-block.position-relative")
+    assert_html(html, "div.well.help-block")
     assert_html(html, "div.collapse#help_1", text: "This is help text")
   end
 
@@ -28,8 +30,7 @@ class CollapseHelpBlockTest < ComponentTestCase
                                           direction: "down")
     ) { "Content" }
 
-    assert_html(html, "div.arrow-down.d-none.d-sm-block")
-    assert_not_includes(html, "mt-3")
+    assert_html(html, "div.arrow-down.#{HIDE_CLASSES}")
   end
 
   def test_renders_with_arrow_up_when_direction_up
@@ -37,8 +38,8 @@ class CollapseHelpBlockTest < ComponentTestCase
       Components::Help::CollapseBlock.new(target_id: "help_4", direction: "up")
     ) { "Content" }
 
-    assert_html(html, "div.arrow-up.d-none.d-sm-block")
-    assert_html(html, "div.well.well-sm.mb-3.help-block.position-relative.mt-3")
+    assert_html(html, "div.arrow-up.#{HIDE_CLASSES}")
+    assert_html(html, "div.well.help-block")
   end
 
   def test_renders_arrow_visible_on_mobile_when_mobile_true
@@ -63,7 +64,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       )
     ) { "Desktop content" }
 
-    assert_html(html, "div.arrow-down.d-none.d-sm-block")
+    assert_html(html, "div.arrow-down.#{HIDE_CLASSES}")
   end
 
   def test_yields_block_content
@@ -96,6 +97,6 @@ class CollapseHelpBlockTest < ComponentTestCase
         mobile: false
       )
     ) { "Right" }
-    assert_html(html_right, "div.arrow-right.d-none.d-sm-block")
+    assert_html(html_right, "div.arrow-right.#{HIDE_CLASSES}")
   end
 end

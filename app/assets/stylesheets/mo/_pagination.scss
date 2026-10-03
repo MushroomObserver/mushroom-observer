@@ -5,6 +5,15 @@
 
 .pagination_numbers, .show_object_nav {
   a {
-    color: $text-color;
+    color: $body-color;
   }
+}
+
+// The page/letter "goto" widget (Header::IndexPaginationNav) has
+// just two elements (an input + a button). BS4's `.input-group` sets
+// `flex-wrap: wrap` for multi-element validation-feedback layouts,
+// which isn't relevant here and instead lets the goto button wrap
+// below the input at narrow widths.
+.page-input {
+  flex-wrap: nowrap;
 }

@@ -205,13 +205,9 @@ class Components::InlineCRUDLinks < Components::Base
     }
   end
 
-  # `px-2` spacing so the destroy icon doesn't hug the neighboring
-  # edit link -- on the button's own class, not `icon_class:` (a bare
-  # <svg> can't take padding, see Components::Icon).
   def destroy_class
     Components::InlineLinkBlock.item_class(
-      class_names("px-2",
-                  handler[:destroy_class] && send(handler[:destroy_class]))
+      handler[:destroy_class] && send(handler[:destroy_class])
     )
   end
 

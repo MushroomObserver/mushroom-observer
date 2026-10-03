@@ -139,7 +139,7 @@ module Observations::Namings
     def test_rolf_vote_change_turbo_from_identify_ui
       args = vote_change_basic_setup
       args => { obs:, nam:, params: }
-      params = params.merge(context: "matrix_box")
+      params = params.merge(context: "grid_box")
 
       put(:update, params:, format: :turbo_stream)
       # _update_matrix_box.erb deleted; the controller now renders

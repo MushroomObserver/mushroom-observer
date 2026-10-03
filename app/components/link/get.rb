@@ -63,7 +63,6 @@ class Components::Link::Get < Components::Link
   prop :active_icon, _Nilable(_Union(*Components::Button::ICONS)),
        default: nil
   prop :active_content, _Nilable(String), default: nil
-  prop :label, _Nilable(_Boolean), default: nil
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def initialize(name: nil, target: nil, button: nil, new_tab: false, **opts)
@@ -94,7 +93,7 @@ class Components::Link::Get < Components::Link
       icon_title: opts.delete(:icon_title),
       active_icon: opts.delete(:active_icon),
       active_content: opts.delete(:active_content),
-      label: opts.delete(:label)
+      show_label: opts.delete(:show_label) || :hidden
     }
   end
 
