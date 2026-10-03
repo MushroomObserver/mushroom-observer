@@ -167,6 +167,17 @@ class RedirectsIntegrationTest < IntegrationTestCase
     assert_equal(name_path(name.id), @response.request.path)
   end
 
+  def test_name_email_tracking_get
+    tracker = name_trackers(:coprinus_comatus_name_tracker)
+
+    login(tracker.user.login)
+    get("/name/email_tracking/#{tracker.name_id}")
+
+    assert_equal(edit_tracker_of_name_path(tracker.name_id),
+                 @response.request.path,
+                 "Old disable-tracking link should open the tracker edit form")
+  end
+
   # /search/advanced — retired in favor of per-controller search forms.
   # MO's IntegrationTestCase auto-follows redirects (see session_extensions.rb),
   # so `@response.request.fullpath` is the final URL.
