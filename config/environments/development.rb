@@ -13,6 +13,9 @@ MushroomObserver::Application.configure do
   ]
   # Allow the default puma-dev host.
   config.hosts << "mushroomobserver.test"
+  # The Mac's Bonjour name, so a phone on the same wifi can reach the
+  # dev server by a name that survives a new DHCP lease.
+  config.hosts << ".local"
 
   # ----------------------------------------------------
   #  MO configuration. These values are used in MO code.
