@@ -73,10 +73,12 @@ class Inat::PhotoImporterTest < UnitTestCase
   end
 
   # A photo link that can't be saved is logged; the upload still counts.
+  # The target already carries an import link for a different photo,
+  # which `only_one_import_per_target` refuses.
   def test_import_logs_a_rejected_photo_link
     ExternalLink.create!(user: @user, target: @image,
                          external_site: external_sites(:inaturalist),
-                         external_id: "555", relationship: :import)
+                         external_id: "999", relationship: :import)
     logged = nil
 
     result = Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
@@ -88,6 +90,41 @@ class Inat::PhotoImporterTest < UnitTestCase
     assert_equal(@image, result)
     assert_match(/failed to create ExternalLink for Image #{@image.id}/,
                  logged)
+  end
+
+  # iNat joins one photo to as many observations as its owner likes, so
+  # a second observation naming the same photo reuses the MO image
+  # rather than downloading it again (#5416).
+  def test_import_reuses_an_image_already_imported_for_that_photo
+    ExternalLink.create!(user: @user, target: @image,
+                         external_site: external_sites(:inaturalist),
+                         external_id: "555", relationship: :import)
+    import = importer(owner: false)
+
+    result = API2.stub(:execute, ->(_) { flunk("should not upload") }) do
+      import.import(photo(license_code: "cc-by", id: 555))
+    end
+
+    assert_equal(@image, result)
+    assert_includes(@obs.reload.images, @image)
+    assert_equal([@image.id], import.reused_image_ids)
+    assert_empty(import.created_image_ids)
+  end
+
+  # A photo MO holds for another observation is reused whether or not
+  # its license would allow a fresh import -- the image is already here.
+  def test_a_reused_image_is_attached_once
+    ExternalLink.create!(user: @user, target: @image,
+                         external_site: external_sites(:inaturalist),
+                         external_id: "555", relationship: :import)
+    @obs.images.push(@image)
+    import = importer(owner: false)
+
+    API2.stub(:execute, ->(_) { flunk("should not upload") }) do
+      import.import(photo(license_code: "cc-by", id: 555))
+    end
+
+    assert_equal(1, @obs.reload.images.count { |i| i == @image })
   end
 
   def test_import_recreates_a_missing_api_key

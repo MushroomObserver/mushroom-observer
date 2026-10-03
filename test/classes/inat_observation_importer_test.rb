@@ -248,6 +248,48 @@ class InatObservationImporterTest < UnitTestCase
     assert_not_requested(:get, writeback_get_url(args[:observation_id]))
   end
 
+  # #5416: the importer already treated a lost race as "already
+  # imported", but the index it relied on could not catch one -- each
+  # racing import builds its own MO observation, so neither collides on
+  # a per-target index. With the per-remote-observation index in place,
+  # the loser raises what the importer rescues, and the half-built
+  # observation goes with it.
+  def test_a_second_import_of_one_remote_observation_is_refused
+    site = external_sites(:inaturalist)
+    obs = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: rolf, target: obs, external_site: site,
+                         external_id: "987654321", relationship: :import)
+    builder = link_builder(site, rolf)
+
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      builder.send(:create_import_link,
+                   observations(:agaricus_campestris_obs), "987654321")
+    end
+  end
+
+  # A link that fails validation for some other reason is logged and
+  # the import carries on, as it did before.
+  def test_another_invalid_link_is_logged_rather_than_raised
+    site = external_sites(:inaturalist)
+    builder = link_builder(site, rolf)
+    logged = nil
+
+    Rails.logger.stub(:warn, ->(message) { logged = message }) do
+      builder.send(:create_import_link,
+                   observations(:agaricus_campestris_obs), "not a number")
+    end
+
+    assert_match(/failed to create ExternalLink/, logged)
+  end
+
+  # The builder's link step, with the two collaborators it reads.
+  def link_builder(site, user)
+    builder = ::Inat::MoObservationBuilder.allocate
+    builder.instance_variable_set(:@external_site, site)
+    builder.define_singleton_method(:user) { user }
+    builder
+  end
+
   private
 
   def writeback_call_args
