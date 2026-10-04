@@ -99,7 +99,7 @@ class Inat
           next unless alert
 
           @alerts_sent += 1
-          criterion.admins.each { |admin| digests[admin] << alert }
+          criterion.recipients.each { |user| digests[user] << alert }
         end
       end
       digests

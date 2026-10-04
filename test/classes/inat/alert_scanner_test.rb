@@ -13,6 +13,7 @@ class Inat::AlertScannerTest < UnitTestCase
     @project = projects(:rare_fungi_project)
     @site = external_sites(:inaturalist)
     @site.update!(last_alert_poll_at: 1.hour.ago)
+    @recipient = users(:mary)
     @coprinus = names(:coprinus_comatus)
     @burbank = locations(:burbank)
     stub_taxon_lookups
@@ -62,7 +63,11 @@ class Inat::AlertScannerTest < UnitTestCase
                 body: { results: results, total_results: results.size }.to_json)
   end
 
+  # Alerting goes to whoever opted in, so a row that alerts needs at
+  # least one recipient.
   def alerting_row(**args)
+    args[:alert_recipient_ids] = [@recipient.id] unless
+      args.key?(:alert_recipient_ids)
     ProjectExternalSite.create!(project: @project, external_site: @site,
                                 use_constraints: true, alerting: true, **args)
   end
@@ -76,14 +81,23 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_not_requested(:get, inat_api_matcher("observations"))
   end
 
-  def test_a_new_target_identification_alerts_the_admins
+  # Alerting is opt-in. A row with nobody listed is a row nobody asked
+  # for, so a matching observation is recorded and sent to no one.
+  def test_a_project_with_no_recipients_sends_nothing
+    row = alerting_row
+    row.update_column(:alert_recipient_ids, [].to_json)
+    stub_observations([observation])
+
+    assert_empty(scan, "Alerting with nobody listed should mail no one")
+  end
+
+  def test_a_new_target_identification_alerts_the_recipients
     alerting_row
     stub_observations([observation])
 
     digests = scan
 
-    assert_equal(@project.admin_group.users.sort_by(&:id),
-                 digests.keys.sort_by(&:id))
+    assert_equal([@recipient], digests.keys)
     alert = digests.values.first.first
 
     assert_equal("Coprinus comatus", alert.name)

@@ -51,7 +51,9 @@ class ProjectExternalSiteTest < UnitTestCase
   end
 
   def test_a_configured_row_may_act
-    site = new_site(use_constraints: true, alerting: true, importing: true)
+    site = new_site(use_constraints: true, alerting: true,
+                    importing: true,
+                    alert_recipient_ids: [users(:mary).id])
 
     assert(site.valid?)
     assert(site.acting?)
@@ -74,7 +76,8 @@ class ProjectExternalSiteTest < UnitTestCase
   end
 
   def test_scopes
-    acting = new_site(use_constraints: true, alerting: true)
+    acting = new_site(use_constraints: true, alerting: true,
+                      alert_recipient_ids: [users(:mary).id])
     acting.save!
     idle = ProjectExternalSite.create!(project: projects(:bolete_project),
                                        external_site: @site,
@@ -93,5 +96,47 @@ class ProjectExternalSiteTest < UnitTestCase
     @project.destroy
 
     assert_not(ProjectExternalSite.exists?(site.id))
+  end
+
+  # --- who gets alerted ------------------------------------------------
+
+  def test_alerting_needs_somebody_to_alert
+    row = new_site(use_constraints: true, alerting: true)
+
+    assert_not(row.valid?, "Alerting with nobody listed should not save")
+    assert(row.errors[:base].any?)
+  end
+
+  def test_importing_does_not_need_a_recipient
+    assert(new_site(use_constraints: true, importing: true).save,
+           "Only alerting needs somebody to alert")
+  end
+
+  def test_recipients_come_from_the_logins_typed
+    row = new_site(use_constraints: true, alerting: true)
+    row.alert_recipient_logins = "#{users(:mary).login}, #{users(:rolf).login}"
+
+    assert(row.save)
+    assert_equal([users(:mary), users(:rolf)].sort_by(&:id),
+                 row.alert_recipients.sort_by(&:id))
+  end
+
+  def test_an_unknown_login_is_a_form_error
+    row = new_site(use_constraints: true, alerting: true)
+    row.alert_recipient_logins = "#{users(:mary).login}, nosuchuser"
+
+    assert_not(row.valid?, "An unknown login should not be dropped silently")
+    assert(row.errors[:base].any?)
+  end
+
+  def test_logins_round_trip_for_the_form
+    row = new_site(use_constraints: true, alerting: true)
+    row.alert_recipient_logins = users(:mary).login
+
+    assert_equal(users(:mary).login, row.alert_recipient_logins)
+  end
+
+  def test_a_row_with_no_recipients_alerts_nobody
+    assert_empty(new_site.alert_recipients)
   end
 end

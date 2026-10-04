@@ -49,8 +49,11 @@ class Inat
       within_dates?(candidate.observed_on) && within_area?(candidate)
     end
 
-    def admins
-      project.admin_group.users
+    # Whoever opted in, which is nobody until a site admin names them.
+    # Being an admin of a project is not a request to be told what
+    # iNaturalist identified overnight.
+    def recipients
+      project_site.alert_recipients
     end
 
     private

@@ -131,6 +131,11 @@ module Views::Controllers::Projects::ExternalSites
     def render_action_fields
       checkbox_field(:alerting, label: :project_sites_alerting.l,
                                 wrap_class: "mt-3")
+      text_field(:alert_recipient_logins,
+                 label: :project_sites_alert_recipients.l,
+                 value: model.alert_recipient_logins,
+                 help: :project_sites_alert_recipients_help.t,
+                 help_collapse: true)
       checkbox_field(:importing, label: :project_sites_importing.l)
     end
 

@@ -2760,13 +2760,17 @@
   project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
   project_sites_use_constraints: Follow this project's constraints
   project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
-  project_sites_alerting: Alert this project's admins when a matching observation appears
+  project_sites_alerting: Email an alert when a matching observation appears
   project_sites_importing: Automatically import matching observations into this project
   project_sites_import_limit: Import limit
   project_sites_import_limit_help: The most observations Mushroom Observer will ever import into this project.
   project_site_updated: External site settings saved.
   project_site_duplicate_site: This project already has settings for that site.
   project_site_needs_a_source: Give an iNaturalist project or use this project's constraints before turning alerting or importing on.
+  project_site_needs_a_recipient: Name at least one person to alert before turning alerting on.
+  project_site_unknown_recipients: "No such user: [logins]"
+  project_sites_alert_recipients: Alert these users
+  project_sites_alert_recipients_help: Comma-separated MO logins. Only these people are emailed; project admins hear nothing unless they are listed.
   project_site_inat_project_unknown: "'[project]' does not name an iNaturalist project."
   project_site_inat_project_ambiguous: "'[project]' names more than one iNaturalist project. Use its id or the address of its page instead."
 

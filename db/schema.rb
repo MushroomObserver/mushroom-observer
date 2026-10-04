@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_120100) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_04_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -745,6 +745,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_120100) do
     t.integer "import_limit", default: 10000, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text "alert_recipient_ids"
     t.index ["external_site_id"], name: "index_project_external_sites_on_external_site_id"
     t.index ["project_id", "external_site_id"], name: "index_project_sites_on_project_and_site", unique: true
   end
