@@ -24,7 +24,6 @@ module Views::Controllers::Projects::Admin
                project: @project, current_subtab: "details"
              ))
       render_form
-      render(AlertPanel.new(project: @project, user: @user))
       render_danger_zone
     end
 
@@ -39,7 +38,8 @@ module Views::Controllers::Projects::Admin
                dirty_form: true,
                turbo: true,
                dubious_where_reasons: @dubious_where_reasons,
-               raw_place_name: @raw_place_name
+               raw_place_name: @raw_place_name,
+               user: @user
              ))
     end
 

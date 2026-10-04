@@ -2770,9 +2770,6 @@
   project_alerts_heading: "iNaturalist alerts"
   project_alerts_subscribe: "Email me when [site] identifies an observation matching this project"
   project_alerts_off: "[site] alerts are not turned on for this project. A site administrator sets that up."
-  project_alerts_subscribed: "You will be emailed about new matching observations for [project]."
-  project_alerts_unsubscribed: "You will no longer be emailed about [project]."
-  project_alerts_not_offered: "That project is not set up for alerts."
   project_site_inat_project_unknown: "'[project]' does not name an iNaturalist project."
   project_site_inat_project_ambiguous: "'[project]' names more than one iNaturalist project. Use its id or the address of its page instead."
 

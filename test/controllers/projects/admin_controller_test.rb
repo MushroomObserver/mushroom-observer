@@ -81,5 +81,39 @@ module Projects
 
       assert_redirected_to(new_account_login_path)
     end
+
+    # A site admin says a project may be alerted on; the checkbox is how
+    # each of its admins says whether to be emailed (#5416). It sits in
+    # the project form, so Save Edits carries it.
+    def test_an_alerting_project_offers_the_admin_a_checkbox
+      site = ProjectExternalSite.create!(
+        project: @project, external_site: external_sites(:inaturalist),
+        use_constraints: true, alerting: true
+      )
+      login(@project.admin_group.users.first.login)
+
+      get(:show, params: { project_id: @project.id })
+
+      assert_select("form[action=?]", project_path(@project.id)) do
+        assert_select("input[type=checkbox][name=?]",
+                      "alert_subscriptions[#{site.id}]")
+      end
+    end
+
+    # Named even when the project is not alerting on it, so an admin can
+    # see the setting exists and that nothing is being sent.
+    def test_a_site_not_alerting_is_named_without_a_checkbox
+      site = ProjectExternalSite.create!(
+        project: @project, external_site: external_sites(:inaturalist),
+        use_constraints: true
+      )
+      login(@project.admin_group.users.first.login)
+
+      get(:show, params: { project_id: @project.id })
+
+      assert_select("input[name=?]", "alert_subscriptions[#{site.id}]",
+                    count: 0)
+      assert_select("#content", text: /alerts are not turned on/)
+    end
   end
 end
