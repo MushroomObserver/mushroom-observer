@@ -52,10 +52,26 @@ class Inat
     end
 
     def response_bad?(response)
-      response.is_a?(::RestClient::RequestFailed) ||
+      # nil when the request got no response: a timeout carries none, so
+      # the rescues below hand back a nil `e.response`.
+      response.nil? ||
+        response.is_a?(::RestClient::RequestFailed) ||
         response.instance_of?(::RestClient::Response) && response.code != 200 ||
         # RestClient was happy, but the user wasn't authorized
         response.is_a?(Hash) && response[:status] == 401
+    end
+
+    # A timeout carries no response and so no status code, and "null"
+    # tells the reader nothing. Name the failure instead, and say the
+    # import stopped early: a page that failed to arrive is otherwise
+    # indistinguishable from the last page, so the status page is the
+    # only place the user learns there is more to fetch.
+    def request_error(error, query_args)
+      if error.response
+        return { error: error.http_code, query: query_args.to_json }.to_json
+      end
+
+      :inat_import_request_failed.l(message: error.message)
     end
 
     def next_request(**args)
@@ -66,8 +82,7 @@ class Inat
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, query: query_args.to_json }.to_json
-      @import.add_response_error(error)
+      @import.add_response_error(request_error(e, query_args))
       e.response
     end
 
@@ -83,8 +98,7 @@ class Inat
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, query: query_args.to_json }.to_json
-      @import.add_response_error(error)
+      @import.add_response_error(request_error(e, query_args))
       e.response
     end
 
