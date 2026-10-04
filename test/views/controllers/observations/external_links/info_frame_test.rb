@@ -88,6 +88,30 @@ module Views::Controllers::Observations::ExternalLinks
       )
     end
 
+    def test_placeholder_import_link_shows_placeholder_notes
+      link, obs = placeholder_link_and_obs
+      login = obs.skeleton_omissions["login"]
+
+      html = render(frame_with(obs: obs, site_links: [link],
+                               user: users(:rolf)))
+
+      assert_html(html, ".reflection-placeholder-note",
+                  text: :observation_placeholder_source.l(login: login))
+      assert_html(html, ".reflection-not-imported-note")
+    end
+
+    def test_regular_reflection_shows_no_placeholder_notes
+      link, obs = placeholder_link_and_obs
+      obs.placeholder = false
+
+      html = render(frame_with(obs: obs, site_links: [link],
+                               user: users(:rolf)))
+
+      assert_html(html, ".reflection-read-only-note")
+      assert_no_html(html, ".reflection-placeholder-note")
+      assert_no_html(html, ".reflection-not-imported-note")
+    end
+
     # ONE occurrence-wide "Sync now" button (#4215), shown to any
     # logged-in viewer -- sync applies no user input, so there is no
     # permission gate beyond login.
@@ -180,6 +204,19 @@ module Views::Controllers::Observations::ExternalLinks
 
     def sibling_link(link, observation)
       InfoFrame::SiblingLink.new(link: link, observation: observation)
+    end
+
+    # A placeholder reflection and its iNat import link.
+    def placeholder_link_and_obs
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      link.relationship = :import
+      obs = link.observation
+      obs.reflected_at = Time.zone.now
+      obs.placeholder = true
+      obs.skeleton_omissions = { "login" => "inat_observer", "images" => 2,
+                                 "obs_fields" => 0, "description" => true,
+                                 "sequences" => false }
+      [link, obs]
     end
 
     def frame_with(obs:, site_links:, user:, sibling_site_links: [])
