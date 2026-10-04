@@ -74,11 +74,56 @@ class InatImportTest < ActiveSupport::TestCase
                     "ETA should extrapolate from the observed rate")
   end
 
+  # A re-run skips what it already holds. Those observations are work the
+  # run has finished with, so the rate counts them; before, imported_count
+  # stayed at 0 through the whole page and the estimate was pinned to the
+  # opening guess.
+  def test_estimated_remaining_time_counts_skipped_observations
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 0, ignored_already_imported_count: 10,
+                   started_at: 10.seconds.ago, ended_at: nil)
+
+    # ~10 obs in ~10s ≈ 1 s/obs; 10 remaining ≈ 10s.
+    assert_in_delta(10, import.estimated_remaining_time, 4,
+                    "Skipped observations should count as progress")
+    assert_operator(import.estimated_remaining_time, :<,
+                    import.total_expected_time,
+                    "A run that has skipped half its page should not still " \
+                    "report its opening estimate")
+  end
+
+  # The total counts every observation iNat returns, so the rate has to
+  # count imports and skips together or the two drift apart.
+  def test_estimated_remaining_time_mixes_imported_and_skipped
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 2, ignored_already_imported_count: 6,
+                   ignored_unlicensed_count: 2,
+                   started_at: 10.seconds.ago, ended_at: nil)
+
+    # 10 of 20 processed in ~10s; 10 remaining ≈ 10s.
+    assert_in_delta(10, import.estimated_remaining_time, 4,
+                    "Imported and skipped should both count toward the rate")
+  end
+
+  # More observations skipped than the estimate expected leaves nothing to
+  # do, not a negative amount of time.
+  def test_estimated_remaining_time_does_not_go_negative
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 5,
+                   imported_count: 2, ignored_already_imported_count: 8,
+                   started_at: 10.seconds.ago, ended_at: nil)
+
+    assert_equal(0, import.estimated_remaining_time,
+                 "Processing past the estimated total should report 0 left")
+  end
+
   def test_estimated_remaining_time_before_any_imported
     import = inat_imports(:rolf_inat_import)
     import.update!(state: "Importing", total_importables: 10,
-                   imported_count: 0, started_at: Time.zone.now,
-                   ended_at: nil)
+                   imported_count: 0, ignored_already_imported_count: 0,
+                   started_at: Time.zone.now, ended_at: nil)
 
     assert_equal(import.total_expected_time, import.estimated_remaining_time,
                  "Before any obs imported, fall back to the up-front estimate")
