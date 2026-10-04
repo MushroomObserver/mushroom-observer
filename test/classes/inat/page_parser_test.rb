@@ -304,8 +304,8 @@ class Inat
     end
 
     # A timeout is an ExceptionWithResponse whose response is nil, so the
-    # rescue hands nil back to next_page. Before the guard that reached
-    # `result.body` and raised NoMethodError mid-import.
+    # rescue hands nil back to next_page. Without the guard, next_page
+    # called `result.body` on that nil and raised mid-import.
     def test_next_page_returns_nil_when_the_request_times_out
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058"
