@@ -960,7 +960,6 @@ MushroomObserver::Application.routes.draw do
   # ----- Names: legacy action redirects -----------------------------------
   get("name/eol", to: redirect("names/eol_data#show"))
   get("name/name_search", to: redirect(path: "names"))
-  get("name/email_tracking/:id", to: redirect("/names/%{id}/trackers/edit"))
 
   # ----- Lookups: legacy action redirects ---------------------------
   # The only legacy lookup that was ok'd for use by external sites
