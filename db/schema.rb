@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_02_181337) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_120100) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -531,7 +531,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_02_181337) do
     t.datetime "updated_at", precision: nil
     t.boolean "require_specimen", default: false, null: false
     t.boolean "approved", default: true, null: false
-    t.index ["user_id", "name_id"], name: "index_name_trackers_on_user_id_and_name_id", unique: true
   end
 
   create_table "name_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
