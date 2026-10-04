@@ -137,22 +137,29 @@ class Inat
       BASE_FILTER_PARAMS
     end
 
-    # When importing own observations: scope by user_login, no licensed filter.
-    # When importing others' (superimporter): default to
-    # licensed:true unless stored URL specifies a `licensed`
-    # value. This only trims how many observations iNat sends back — it
-    # doesn't guarantee anything.
-    # ObservationImporter#unlicensed_other? is
-    # the check that actually stops an unlicensed obs from another user
-    # from being imported, the same way already_linked? is what actually
-    # stops a duplicate, not the without_field fetch filter (see that
-    # comment for the parallel).
+    # When importing own observations: scope by user_login, no license filter.
+    # When importing others' (superimporter) without skeletons: add
+    # LICENSED_FILTER. This only trims how many observations iNat sends
+    # back; ObservationImporter#unlicensed_other? is the check that stops an
+    # unlicensed obs from another user from being imported, as
+    # already_linked? (not the without_field filter) stops a duplicate.
     def add_ownership_filter(query_args)
       if @import.import_others
-        query_args[:licensed] = true unless query_args.key?(:licensed)
+        # With skeletons on, unlicensed obss are imported (as skeletons),
+        # so the query must not drop them.
+        add_license_filter(query_args) unless @import.create_skeletons
       else
         query_args[:user_login] = @import.inat_username
       end
+    end
+
+    # A `license=` filter in the stored URL is kept, since it is already
+    # narrower. A URL's `licensed=true` still gets LICENSED_FILTER, since it
+    # matches obss with an empty license.
+    def add_license_filter(query_args)
+      return if query_args.key?(:license)
+
+      query_args.merge!(LICENSED_FILTER)
     end
   end
 end

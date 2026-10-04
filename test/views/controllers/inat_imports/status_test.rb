@@ -165,6 +165,91 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{reimport_path}']")
     end
 
+    def test_skeleton_section_absent_when_no_skeletons
+      @import.update_columns(state: InatImport.states[:Done],
+                             ended_at: Time.zone.now,
+                             imported_count: 3, skeleton_imported_count: 0)
+      html = render_status
+
+      assert_no_html(html, "#skeleton_imported")
+    end
+
+    def test_ignored_unlicensed_row_links_each_obs
+      ids = [395_299_285, 395_299_286]
+      @import.update_columns(state: InatImport.states[:Done],
+                             ended_at: Time.zone.now, imported_count: 0,
+                             ignored_unlicensed_count: ids.size)
+      @import.update!(unlicensed_inat_ids: ids)
+      html = render_status
+
+      assert_html(html, "#ignored_unlicensed b",
+                  text: :inat_import_tracker_ignored_unlicensed.l)
+      ids.each do |inat_id|
+        url = "#{Inat::Constants::SITE}/observations/#{inat_id}"
+        assert_html(
+          html, "#ignored_unlicensed a[href='#{url}'][target='_blank']",
+          text: :inat_import_tracker_unlicensed_images_link.l(inat_id:)
+        )
+      end
+    end
+
+    def test_unlicensed_images_summary_and_linked_list
+      events = [
+        { "inat_id" => 30, "login" => "Zed", "license_code" => nil,
+          "count" => 2 },
+        { "inat_id" => 10, "login" => "amy", "license_code" => "cc-by",
+          "count" => 1 },
+        { "inat_id" => 20, "login" => "Zed", "license_code" => nil,
+          "count" => 3 }
+      ]
+      @import.update_columns(state: InatImport.states[:Done],
+                             ended_at: Time.zone.now, imported_count: 3,
+                             response_errors: "")
+      @import.update!(unlicensed_image_events: events)
+      html = render_status
+
+      assert_equal(expected_unlicensed_summary(events, %w[amy Zed]),
+                   Nokogiri::HTML5.fragment(html).
+                     css("#unlicensed_images_summary > div").map(&:text),
+                   "Summary should have one line per iNat user, by login")
+      %w[amy Zed].each do |login|
+        url = "#{Inat::Constants::SITE}/people/#{login}"
+        assert_html(html, "#unlicensed_images_summary " \
+                          "a[href='#{url}'][target='_blank']",
+                    text: login)
+      end
+      events.each do |event|
+        url = "#{Inat::Constants::SITE}/observations/#{event["inat_id"]}"
+        assert_html(
+          html, "#unlicensed_images_list a[href='#{url}'][target='_blank']",
+          text: :inat_import_tracker_unlicensed_images_link.l(
+            inat_id: event["inat_id"]
+          )
+        )
+        user_url = "#{Inat::Constants::SITE}/people/#{event["login"]}"
+        assert_html(html, "#unlicensed_images_list a[href='#{user_url}']",
+                    text: event["login"])
+      end
+      assert_no_html(html, ".alert-warning")
+    end
+
+    def test_skeleton_section_shown_with_count
+      count = 2
+      @import.update_columns(state: InatImport.states[:Done],
+                             ended_at: Time.zone.now,
+                             imported_count: 3,
+                             skeleton_imported_count: count)
+      html = render_status
+
+      assert_html(html, "#skeleton_imported.alert-success h5",
+                  text: :inat_import_tracker_skeleton_imported_heading.l)
+      assert_html(
+        html, "#skeleton_imported div",
+        text: :inat_import_tracker_skeleton_imported_note.t(count:).
+              as_displayed
+      )
+    end
+
     def test_over_cap_line_absent_when_under_cap
       @import.update_columns(total_importables: InatImport::MAX_IMPORTABLE)
       html = render_status
@@ -290,6 +375,17 @@ module Views::Controllers::InatImports
 
     def render_status
       render(Status.new(inat_import: @import))
+    end
+
+    def expected_unlicensed_summary(events, logins)
+      logins.map do |login|
+        user_events = events.select { |event| event["login"] == login }
+        counts = :inat_import_tracker_unlicensed_images_summary.l(
+          obs_count: user_events.size,
+          photo_count: user_events.sum { |e| e["count"] }
+        )
+        "#{login}: #{counts}"
+      end
     end
   end
 end
