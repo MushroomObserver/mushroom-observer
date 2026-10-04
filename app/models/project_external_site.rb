@@ -46,7 +46,6 @@ class ProjectExternalSite < AbstractModel
   validates :remote_project_id, length: { maximum: 100 }
 
   validate :acting_needs_a_source
-  validate :alerting_needs_a_recipient
 
   scope :alerting, -> { where(alerting: true) }
   scope :importing, -> { where(importing: true) }
@@ -68,28 +67,25 @@ class ProjectExternalSite < AbstractModel
     "#{Inat::Constants::SITE}/projects/#{remote_project_id}"
   end
 
-  # Who hears about a candidate. Nobody until somebody is named: being
-  # an admin of a project is not a request to be told what iNaturalist
-  # identified overnight.
+  # Who hears about a candidate. Nobody until somebody asks: being an
+  # admin of a project is not a request to be told what iNaturalist
+  # identified overnight, so each admin subscribes for themselves.
   def alert_recipients
     return User.none if alert_recipient_ids.blank?
 
     User.where(id: alert_recipient_ids)
   end
 
-  # The logins behind the stored ids, for the form to show and take back.
-  def alert_recipient_logins
-    alert_recipients.map(&:login).join(", ")
+  def alerts?(user)
+    alert_recipient_ids.include?(user&.id)
   end
 
-  # Takes what a site admin typed, so an unknown login is a form error
-  # rather than a silently dropped recipient.
-  def alert_recipient_logins=(value)
-    logins = value.to_s.split(",").map(&:strip).compact_blank.uniq
-    found = User.where(login: logins).to_a
-    @unknown_recipient_logins =
-      logins.reject { |l| found.any? { |u| u.login.casecmp?(l) } }
-    self.alert_recipient_ids = found.map(&:id)
+  # Idempotent, so a double submit or two tabs cannot subscribe twice
+  # or raise.
+  def alerts_for(user, wanted)
+    ids = alert_recipient_ids - [user.id]
+    ids += [user.id] if wanted
+    update!(alert_recipient_ids: ids)
   end
 
   private
@@ -99,19 +95,6 @@ class ProjectExternalSite < AbstractModel
     return if configured?
 
     errors.add(:base, :project_site_needs_a_source)
-  end
-
-  # Alerting with nobody to alert is a setting that does nothing, and
-  # looks on the page like it is working.
-  def alerting_needs_a_recipient
-    if @unknown_recipient_logins.present?
-      errors.add(:base, :project_site_unknown_recipients,
-                 logins: @unknown_recipient_logins.join(", "))
-    end
-    return unless alerting?
-    return if alert_recipient_ids.present?
-
-    errors.add(:base, :project_site_needs_a_recipient)
   end
 
   def ensure_alert_recipient_ids_initialized

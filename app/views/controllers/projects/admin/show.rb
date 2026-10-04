@@ -24,6 +24,7 @@ module Views::Controllers::Projects::Admin
                project: @project, current_subtab: "details"
              ))
       render_form
+      render(AlertPanel.new(project: @project, user: @user))
       render_danger_zone
     end
 

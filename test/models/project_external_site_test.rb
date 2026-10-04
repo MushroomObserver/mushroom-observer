@@ -100,43 +100,48 @@ class ProjectExternalSiteTest < UnitTestCase
 
   # --- who gets alerted ------------------------------------------------
 
-  def test_alerting_needs_somebody_to_alert
-    row = new_site(use_constraints: true, alerting: true)
-
-    assert_not(row.valid?, "Alerting with nobody listed should not save")
-    assert(row.errors[:base].any?)
-  end
-
-  def test_importing_does_not_need_a_recipient
-    assert(new_site(use_constraints: true, importing: true).save,
-           "Only alerting needs somebody to alert")
-  end
-
-  def test_recipients_come_from_the_logins_typed
-    row = new_site(use_constraints: true, alerting: true)
-    row.alert_recipient_logins = "#{users(:mary).login}, #{users(:rolf).login}"
-
-    assert(row.save)
-    assert_equal([users(:mary), users(:rolf)].sort_by(&:id),
-                 row.alert_recipients.sort_by(&:id))
-  end
-
-  def test_an_unknown_login_is_a_form_error
-    row = new_site(use_constraints: true, alerting: true)
-    row.alert_recipient_logins = "#{users(:mary).login}, nosuchuser"
-
-    assert_not(row.valid?, "An unknown login should not be dropped silently")
-    assert(row.errors[:base].any?)
-  end
-
-  def test_logins_round_trip_for_the_form
-    row = new_site(use_constraints: true, alerting: true)
-    row.alert_recipient_logins = users(:mary).login
-
-    assert_equal(users(:mary).login, row.alert_recipient_logins)
-  end
-
   def test_a_row_with_no_recipients_alerts_nobody
     assert_empty(new_site.alert_recipients)
+    assert_not(new_site.alerts?(users(:mary)))
+  end
+
+  def test_an_admin_subscribes_and_unsubscribes_themselves
+    row = new_site(use_constraints: true, alerting: true)
+    row.save!
+
+    row.alerts_for(users(:mary), true)
+
+    assert(row.alerts?(users(:mary)))
+    assert_equal([users(:mary)], row.alert_recipients.to_a)
+
+    row.alerts_for(users(:mary), false)
+
+    assert_not(row.alerts?(users(:mary)))
+    assert_empty(row.alert_recipients)
+  end
+
+  # Two tabs, or a double submit, should not subscribe twice.
+  def test_subscribing_twice_leaves_one_recipient
+    row = new_site(use_constraints: true, alerting: true)
+    row.save!
+    2.times { row.alerts_for(users(:mary), true) }
+
+    assert_equal([users(:mary).id], row.alert_recipient_ids)
+  end
+
+  def test_unsubscribing_leaves_the_others_alone
+    row = new_site(use_constraints: true, alerting: true)
+    row.save!
+    row.alerts_for(users(:mary), true)
+    row.alerts_for(users(:rolf), true)
+    row.alerts_for(users(:mary), false)
+
+    assert_equal([users(:rolf)], row.alert_recipients.to_a)
+  end
+
+  # Alerting is a site admin saying the project may be alerted on, not
+  # a claim that anyone has asked to hear about it.
+  def test_alerting_saves_with_nobody_subscribed
+    assert(new_site(use_constraints: true, alerting: true).save)
   end
 end
