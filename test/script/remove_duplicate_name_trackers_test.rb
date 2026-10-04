@@ -35,7 +35,7 @@ class RemoveDuplicateNameTrackersTest < UnitTestCase
     err = run_repair(apply: false, pair: [keep, extra])
 
     assert(NameTracker.exists?(extra.id), "Dry run should not destroy")
-    assert_match(/keep #{keep.id}; remove #{extra.id}/, err,
+    assert_match(/keep #{keep.id}\b[^;]*; remove #{extra.id}\b/, err,
                  "Dry run should name the tracker kept and removed")
   end
 
