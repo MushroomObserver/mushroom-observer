@@ -14,8 +14,6 @@ module Views::Controllers::Names
 
     def view_template
       super do
-        submit(button_text, center: true)
-
         render_approved_rank_field
         render_admin_locked_checkbox if in_admin_mode?
 

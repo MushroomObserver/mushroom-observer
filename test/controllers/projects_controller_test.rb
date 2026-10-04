@@ -871,4 +871,9 @@ class ProjectsControllerTest < FunctionalTestCase
       end
     end
   end
+
+  def test_index_sort_options_includes_recent_observation
+    assert_includes(ProjectsController.new.index_sort_options,
+                    ["recent_observation", :sort_by_recent_observation.l])
+  end
 end

@@ -13,8 +13,6 @@ when "test"
   workers(0)
   threads(1, 1)
 when "production"
-  app_path = "/var/web/mushroom-observer"
-  bind("unix://#{app_path}/tmp/sockets/puma.sock")
   # Total concurrency = workers x threads. Workers are the safe lever:
   # the app has always run single-threaded in production, so raise
   # RAILS_MAX_THREADS only as a deliberate, tested change (and size
@@ -22,13 +20,30 @@ when "production"
   workers(Integer(ENV.fetch("WEB_CONCURRENCY", 6)))
   max_threads = Integer(ENV.fetch("RAILS_MAX_THREADS", 1))
   threads(max_threads, max_threads)
-  stdout_redirect("#{app_path}/log/puma.stdout.log",
-                  "#{app_path}/log/puma.stderr.log", true)
+
+  if ENV["PORT"]
+    # Running under Docker/Kamal (#5345) -- the proxy reaches the
+    # container over the network, not a shared filesystem socket, and
+    # Docker's restart policy tracks the process, not a pidfile. Both
+    # Puma's process output and the Rails app logger (see
+    # config/environments/production.rb) go to STDOUT here, captured
+    # by `docker logs`/Kamal.
+    app_path = ENV.fetch("PWD", ".")
+    bind("tcp://0.0.0.0:#{ENV.fetch("PORT")}")
+  else
+    app_path = "/var/web/mushroom-observer"
+    bind("unix://#{app_path}/tmp/sockets/puma.sock")
+    stdout_redirect("#{app_path}/log/puma.stdout.log",
+                    "#{app_path}/log/puma.stderr.log", true)
+  end
 end
 
 environment rails_env
-pidfile     "#{app_path}/tmp/pids/puma.pid"
-state_path  "#{app_path}/tmp/pids/puma.state"
+
+unless rails_env == "production" && ENV["PORT"]
+  pidfile    "#{app_path}/tmp/pids/puma.pid"
+  state_path "#{app_path}/tmp/pids/puma.state"
+end
 
 # To run Solid Queue's supervisor together with Puma and have Puma monitor
 # and manage it. With this you don't have to `bin/rails solid_queue:start`,

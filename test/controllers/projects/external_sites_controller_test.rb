@@ -86,8 +86,10 @@ module Projects
 
     def test_index_counts_what_the_project_already_holds
       obs = @project.observations.first
+      # Not 12345: the imported_inat_obs fixture's import link holds
+      # that remote id, and only one import exists per remote record.
       ExternalLink.create!(target: obs, external_site: @inat,
-                           user: obs.user, external_id: "12345",
+                           user: obs.user, external_id: "7654321",
                            relationship: :import)
       make_admin("dick")
       get(:index, params: { project_id: @project.id })
