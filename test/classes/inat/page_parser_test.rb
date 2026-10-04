@@ -303,6 +303,56 @@ class Inat
                        "API error should be logged to import.response_errors")
     end
 
+    # A timeout is an ExceptionWithResponse whose response is nil, so the
+    # rescue hands nil back to next_page. Before the guard that reached
+    # `result.body` and raised NoMethodError mid-import.
+    def test_next_page_returns_nil_when_the_request_times_out
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
+      end
+      parser = PageParser.new(import)
+
+      stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).to_timeout
+
+      result = parser.next_page
+
+      assert_nil(result, "A timed-out page should come back as nil")
+    end
+
+    # The status page is the only place the user learns the import
+    # stopped short of the pages it had not fetched.
+    def test_a_timed_out_page_is_reported_as_worth_retrying
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
+      end
+      parser = PageParser.new(import)
+
+      stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).to_timeout
+
+      parser.next_page
+
+      assert_match(/please try again/, import.response_errors,
+                   "A failed request should tell the user to retry")
+      assert_no_match(/"error":null/, import.response_errors,
+                      "A response-less failure should not report a null code")
+    end
+
+    # A failure that did answer still reports its status code.
+    def test_an_http_error_still_reports_its_code
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
+      end
+      parser = PageParser.new(import)
+
+      stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+        to_return(status: 404, body: '{"error":"Not Found"}')
+
+      parser.next_page
+
+      assert_match(/404/, import.response_errors,
+                   "An HTTP error should still log its status code")
+    end
+
     def test_url_id_above_used_for_first_page
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058&id_above=500"
