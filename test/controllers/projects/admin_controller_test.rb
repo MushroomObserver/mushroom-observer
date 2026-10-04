@@ -100,9 +100,9 @@ module Projects
       end
     end
 
-    # Named even when the project is not alerting on it, so an admin can
-    # see the setting exists and that nothing is being sent.
-    def test_a_site_not_alerting_is_named_without_a_checkbox
+    # A site the project is not alerting on has nothing for an admin to
+    # decide here, so it is left out.
+    def test_a_site_not_alerting_offers_nothing
       site = ProjectExternalSite.create!(
         project: @project, external_site: external_sites(:inaturalist),
         use_constraints: true
@@ -113,7 +113,7 @@ module Projects
 
       assert_select("input[name=?]", "alert_subscriptions[#{site.id}]",
                     count: 0)
-      assert_select("#content", text: /alerts are not turned on/)
+      assert_select("#content", text: /alerts enabled/, count: 0)
     end
   end
 end

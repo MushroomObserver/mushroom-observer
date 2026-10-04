@@ -65,27 +65,24 @@ module Views::Controllers::Projects
       return if alert_sites.empty?
 
       div(class: "mt-4") do
-        h5 { plain(:project_alerts_heading.l) }
         alert_sites.each { |project_site| render_alert_site(project_site) }
       end
     end
 
-    # Named even when the project is not alerting on it, so an admin can
-    # see the setting exists and that nothing is being sent.
     def render_alert_site(project_site)
       name = project_site.external_site.name
-      return p { :project_alerts_off.t(site: name) } unless
-        project_site.alerting?
-
+      h5 { strong { plain(:project_alerts_enabled.l(site: name)) } }
       checkbox_field("alert_subscriptions[#{project_site.id}]",
                      label: :project_alerts_subscribe.l(site: name),
                      checked: project_site.alerts?(@user))
     end
 
+    # Only a site the project is alerting on: one it is not says nothing
+    # an admin can act on here.
     def alert_sites
       return [] if @user.nil? || model.nil? || !model.persisted?
 
-      @alert_sites ||= model.project_external_sites.
+      @alert_sites ||= model.project_external_sites.alerting.
                        includes(:external_site).to_a
     end
 
