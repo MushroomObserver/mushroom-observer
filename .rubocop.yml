@@ -23,6 +23,7 @@ require:
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
+  - ./lib/rubocop/cop/mo/no_not_pseudo_selector
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -166,6 +167,17 @@ MO/NoHandRolledWhitespace:
     # nbsp's definition -- legitimately builds the &nbsp; entity this
     # cop exists to keep everywhere else.
     - "app/components/base.rb"
+
+MO/NoNotPseudoSelector:
+  Description: >-
+    System/integration tests must not put :not(...) inside a Capybara
+    selector string -- unreliable under this suite's Cuprite setup --
+    see .claude/rules/system_test_state_polling.md and
+    lib/rubocop/cop/mo/no_not_pseudo_selector.rb.
+  Enabled: true
+  Include:
+    - "test/system/**/*.rb"
+    - "test/integration/**/*.rb"
 
 MO/NoQuerySubclassMutation:
   Description: >-
