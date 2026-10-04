@@ -3,9 +3,9 @@
 require("test_helper")
 require(Rails.root.join("script/remove_duplicate_name_trackers").to_s)
 
-# The unique index stops the test database from holding duplicate
-# trackers, so the repair tests stub the lookup to present two trackers
-# as one user/Name pair.
+# The repair tests stub the lookup to present two trackers as one
+# user/Name pair, so they do not depend on the database accepting
+# duplicates.
 class RemoveDuplicateNameTrackersTest < UnitTestCase
   def test_keeper_prefers_note_then_approved_then_oldest
     oldest = NameTracker.new(id: 1, approved: true)

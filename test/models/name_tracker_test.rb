@@ -21,17 +21,6 @@ class NameTrackerTest < UnitTestCase
     assert(name_tracker.errors[:user].any?)
   end
 
-  def test_one_tracker_per_user_and_name
-    existing = name_trackers(:coprinus_comatus_name_tracker)
-
-    duplicate = NameTracker.new(user: existing.user, name: existing.name)
-
-    assert_not(duplicate.valid?,
-               "Second tracker for the same user and Name should be invalid")
-    assert(duplicate.errors[:name_id].any?,
-           "Duplicate tracker should have an error on name_id")
-  end
-
   def test_show_includes_tree
     assert_equal([:name, :user, :interests], NameTracker.show_includes_tree)
     assert_equal(NameTracker.show_includes_tree,

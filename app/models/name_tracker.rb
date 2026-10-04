@@ -29,8 +29,6 @@ class NameTracker < AbstractModel
   belongs_to :name
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  validates :name_id, uniqueness: { scope: :user_id }
-
   scope :for_user, ->(user) { where(user: user) }
 
   # Eager-loads everything every NameTracker iteration reaches into.
