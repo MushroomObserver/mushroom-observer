@@ -102,9 +102,10 @@ class Inat
     def sync_source_data(obs, inat_obs)
       scalars_changed = sync_scalars(obs, inat_obs).present?
       outcomes = sync_engines(obs, inat_obs)
+      omissions_changed = sync_skeleton_omissions(obs, inat_obs)
       mark_synced(obs)
       log_resync(obs) if scalars_changed || outcomes.any?(&:logs_resync?)
-      scalars_changed || outcomes.any?(&:changed?)
+      scalars_changed || omissions_changed || outcomes.any?(&:changed?)
     end
 
     # A placeholder becomes a full reflection when the user requesting the
@@ -193,18 +194,30 @@ class Inat
     # reflections that way (#4215) before this gate was added.
     def scalar_attributes(obs, inat_obs)
       attrs = { when: inat_obs.when, notes: notes(obs, inat_obs),
-                skeleton_omissions: skeleton_omissions(obs, inat_obs),
                 gps_hidden: inat_obs.obscured? }
       attrs.merge!(location_attributes(inat_obs)) unless inat_obs.obscured?
       attrs
     end
 
     # Kept current, so the placeholder's panel reflects the source; cleared
-    # once the placeholder is upgraded.
+    # once the placeholder is upgraded. After the image engine, so a photo
+    # it attached (MO already had an image of it) is not counted as not
+    # imported. Returns whether it changed.
+    def sync_skeleton_omissions(obs, inat_obs)
+      omissions = skeleton_omissions(obs, inat_obs)
+      changed = obs.skeleton_omissions != omissions
+      obs.update!(skeleton_omissions: omissions) if changed
+      changed
+    end
+
     def skeleton_omissions(obs, inat_obs)
       return unless obs.placeholder?
 
-      inat_obs.skeleton_omissions
+      inat_obs.skeleton_omissions(
+        imported_photo_ids: PhotoImporter.imported_photo_ids(
+          obs, self.class.inat_link(obs).external_site
+        )
+      )
     end
 
     def notes(obs, inat_obs)

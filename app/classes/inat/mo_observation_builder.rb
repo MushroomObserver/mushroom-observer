@@ -34,6 +34,7 @@ class Inat
         create_observation
         add_external_link
         add_inat_images(inat_obs[:observation_photos])
+        record_skeleton_omissions if @skeleton
         update_names_and_proposals
         add_inat_sequences unless @skeleton
       end
@@ -70,17 +71,21 @@ class Inat
         text_name: lead_name.text_name,
         notes: notes,
         placeholder: @skeleton,
-        skeleton_omissions: skeleton_omissions,
         inat_import_id: @inat_import&.id,
         # A fresh import is a clean reflection by construction, so mark it
         # read-only now (#4214). The #4585 engine stamps the backlog later.
         reflected_at: Time.zone.now }.merge(collector_attrs)
     end
 
-    def skeleton_omissions
-      return unless @skeleton
-
-      inat_obs.skeleton_omissions
+    # After the images, so a photo MO already had an image of (and so
+    # attached) is not counted as not imported.
+    def record_skeleton_omissions
+      photo_ids = Inat::PhotoImporter.imported_photo_ids(@observation,
+                                                         @external_site)
+      @observation.update!(
+        skeleton_omissions:
+          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids)
+      )
     end
 
     def notes

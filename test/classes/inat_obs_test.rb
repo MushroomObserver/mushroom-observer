@@ -162,6 +162,21 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  def test_skeleton_omissions_skip_photos_already_imported
+    raw = JSON.parse(File.read("test/inat/donadinia_PNW01.txt"),
+                     symbolize_names: true)[:results].first
+    inat_obs = Inat::Obs.new(JSON.generate(raw))
+    photos = raw[:observation_photos]
+    assert(photos.all? { |p| p[:photo][:license_code].blank? },
+           "Test requires only unlicensed photos")
+    imported = [photos.first[:photo_id].to_s]
+
+    omissions = inat_obs.skeleton_omissions(imported_photo_ids: imported)
+
+    assert_equal(photos.size - imported.size, omissions["images"],
+                 "A photo MO already has an image of is not missing")
+  end
+
   def test_skeleton_omissions_when_nothing_is_left_out
     inat_obs = mock_observation("calostoma_lutescens")
 

@@ -879,6 +879,30 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_skeleton_import_counts(@inat_import)
   end
 
+  # An unlicensed photo MO already has an image of is attached to the
+  # skeleton, so it is not listed as not imported.
+  def test_skeleton_omissions_skip_a_reused_photo
+    create_skeleton_ivars(collector: "Skeleton Test Collector")
+    photos = @parsed_results.first[:observation_photos]
+    reused = photos.find { |p| p[:photo][:license_code].blank? }
+    image = images(:in_situ_image)
+    ExternalLink.create!(user: @user, target: image,
+                         external_site: external_sites(:inaturalist),
+                         external_id: reused[:photo_id].to_s,
+                         relationship: :import)
+    stub_inat_interactions
+
+    InatImportJob.perform_now(@inat_import)
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the skeleton Observation")
+    assert_includes(obs.images, image,
+                    "The skeleton should reuse the image MO already has")
+    unlicensed = photos.count { |p| p[:photo][:license_code].blank? }
+    assert_equal(unlicensed - 1, obs.skeleton_omissions["images"],
+                 "A reused photo should not be counted as not imported")
+  end
+
   # A skeleton that fails to import is reported like any other failure.
   def test_job_reports_failed_skeleton_import
     create_skeleton_ivars(collector: "Skeleton Test Collector")
