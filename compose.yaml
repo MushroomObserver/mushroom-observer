@@ -3,6 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Explicit, not relying on stage order in the Dockerfile -- an
+      # unspecified target defaults to whichever stage is declared
+      # last, which is `production` now that the Dockerfile is
+      # multi-stage (#5345).
+      target: development
 
     volumes:
       - .:/app

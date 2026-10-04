@@ -16,13 +16,26 @@ class Inat
     MAX_UPLOAD_RETRIES = 3       # per image, on transient download failure
     UPLOAD_RETRY_BASE_SLEEP = 2  # seconds; doubles each retry (2, 4, 8)
 
-    attr_reader :created_image_ids, :skipped_images
+    attr_reader :created_image_ids, :reused_image_ids, :skipped_images
 
     # A photo's copyright holder as MO stores it: imported images all get
     # a license, so iNat's "all rights reserved" is dropped.
     def self.copyright_holder(photo)
       photo.copyright_holder.sub("all rights reserved", "").strip.
         truncate(255)
+    end
+
+    # iNat photo ids (Strings) of the observation's images, from their
+    # import ExternalLinks. Queries the join table, since an observation's
+    # loaded `images` misses images the Image API attached.
+    def self.imported_photo_ids(observation,
+                                external_site = ExternalSite.inaturalist)
+      image_ids = ObservationImage.where(observation_id: observation.id).
+                  select(:image_id)
+      ExternalLink.import.
+        where(target_type: "Image", target_id: image_ids,
+              external_site: external_site).
+        pluck(:external_id).map(&:to_s)
     end
 
     # owner: whether the importer made the iNat observation.
@@ -33,6 +46,7 @@ class Inat
       @owner = owner
       @external_site = external_site
       @created_image_ids = []
+      @reused_image_ids = []
       @skipped_images = 0
     end
 
@@ -44,9 +58,12 @@ class Inat
       @owner ? @user.license_id : nil
     end
 
-    # The created Image, or nil when the photo was skipped. Raises when
-    # the upload fails after retries.
+    # The created (or reused) Image, or nil when the photo was skipped.
+    # Raises when the upload fails after retries.
     def import(photo)
+      existing = image_already_imported(photo)
+      return attach(existing) if existing
+
       license_id = license_id_for(photo)
       unless license_id
         @skipped_images += 1
@@ -59,6 +76,25 @@ class Inat
     end
 
     private
+
+    # iNat joins one photo to as many observations as its owner likes,
+    # so two observations MO imports can name the same photo. The photo
+    # id says they are the same photo -- no guess, and nothing to
+    # download twice.
+    def image_already_imported(photo)
+      ExternalLink.import.
+        find_by(target_type: "Image", external_site: @external_site,
+                external_id: photo.external_id.to_s)&.target
+    end
+
+    # MO images already belong to as many observations as needed, so the
+    # second observation joins the image rather than copying it.
+    def attach(image)
+      @observation.images.push(image) unless
+        @observation.images.include?(image)
+      @reused_image_ids << image.id
+      image
+    end
 
     # external_id identifies which iNat photo failed, since an
     # observation can have several.
