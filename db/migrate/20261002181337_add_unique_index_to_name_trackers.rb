@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
-# Production and every local checkpoint hold duplicate trackers, so the
-# cleanup runs here, ahead of the index, instead of in a run-once script.
+# One tracker per user and Name (#5458). Existing duplicates need the
+# repair below first; it keeps one tracker per pair and destroys the
+# others with their Interests.
 class AddUniqueIndexToNameTrackers < ActiveRecord::Migration[7.2]
-  class Tracker < ActiveRecord::Base
+  REPAIR = "bin/rails runner script/remove_duplicate_name_trackers.rb --apply"
+
+  # A copy of the table as this migration needs it, rather than the
+  # application's model -- that one goes on changing after this
+  # migration is written.
+  class MigrationNameTracker < ActiveRecord::Base
     self.table_name = "name_trackers"
   end
 
-  class TrackerInterest < ActiveRecord::Base
-    self.table_name = "interests"
-  end
-
   def up
-    remove_duplicate_trackers
+    refuse_until_repaired
     add_index(:name_trackers, [:user_id, :name_id], unique: true)
   end
 
@@ -22,29 +24,18 @@ class AddUniqueIndexToNameTrackers < ActiveRecord::Migration[7.2]
 
   private
 
-  def remove_duplicate_trackers
-    duplicate_pairs.each do |user_id, name_id|
-      keep, *extras = Tracker.where(user_id:, name_id:).sort_by do |tracker|
-        keep_rank(tracker)
-      end
-      extra_ids = extras.map(&:id)
-      TrackerInterest.where(target_type: "NameTracker",
-                            target_id: extra_ids).delete_all
-      Tracker.where(id: extra_ids).delete_all
-      say("User #{user_id}, Name #{name_id}: kept tracker #{keep.id}, " \
-          "removed #{extra_ids.join(", ")}")
-    end
-  end
+  def refuse_until_repaired
+    duplicates = MigrationNameTracker.group(:user_id, :name_id).
+                 having(Arel.star.count.gt(1)).count
+    return if duplicates.empty?
 
-  def duplicate_pairs
-    Tracker.group(:user_id, :name_id).
-      having(Tracker.arel_table[:id].count.gt(1)).
-      pluck(:user_id, :name_id)
-  end
+    raise(<<~MESSAGE)
+      #{duplicates.size} user/Name pairs have more than one tracker, so the
+      unique index cannot be added yet.
 
-  # Keep a tracker with a note template (approved first), else the oldest.
-  def keep_rank(tracker)
-    [tracker.note_template.present? ? 0 : 1, tracker.approved ? 0 : 1,
-     tracker.id]
+      Run the repair first, reading its dry run before applying it:
+        #{REPAIR.sub(" --apply", "")}
+        #{REPAIR}
+    MESSAGE
   end
 end
