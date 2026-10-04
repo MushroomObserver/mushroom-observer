@@ -11,11 +11,14 @@ class Inat
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
-    def initialize(inat_obs:, user:, import_others: false,
+    # skeleton: build a placeholder that copies none of the iNat obs's
+    # copyrightable content (description, observation field values).
+    def initialize(inat_obs:, user:, skeleton: false,
                    external_site: nil, inat_import: nil)
       @inat_obs = inat_obs
       @user = user
-      @import_others = import_others
+      @import_others = inat_import&.import_others || false
+      @skeleton = skeleton
       @external_site = external_site || ExternalSite.inaturalist
       @inat_import = inat_import
       @skipped_images = 0
@@ -31,8 +34,9 @@ class Inat
         create_observation
         add_external_link
         add_inat_images(inat_obs[:observation_photos])
+        record_skeleton_omissions if @skeleton
         update_names_and_proposals
-        add_inat_sequences
+        add_inat_sequences unless @skeleton
       end
       @observation
     rescue StandardError => e
@@ -65,11 +69,31 @@ class Inat
         name_id: lead_name.id,
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
-        notes: inat_obs.notes,
+        notes: notes,
+        placeholder: @skeleton,
         inat_import_id: @inat_import&.id,
         # A fresh import is a clean reflection by construction, so mark it
         # read-only now (#4214). The #4585 engine stamps the backlog later.
         reflected_at: Time.zone.now }.merge(collector_attrs)
+    end
+
+    # After the images, so a photo MO already had an image of (and so
+    # attached) is not counted as not imported.
+    def record_skeleton_omissions
+      photo_ids = Inat::PhotoImporter.imported_photo_ids(@observation,
+                                                         @external_site)
+      @observation.update!(
+        skeleton_omissions:
+          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids)
+      )
+    end
+
+    def notes
+      if @skeleton
+        inat_obs.skeleton_notes
+      else
+        inat_obs.notes
+      end
     end
 
     # Link the collector to an MO user when the iNat collector (a custom
@@ -187,10 +211,23 @@ class Inat
         external_id: external_id, relationship: :import
       )
     rescue ActiveRecord::RecordInvalid => e
+      # A second MO observation for one remote observation is the race
+      # `Inat::ObservationImporter` expects to lose: raise what it
+      # rescues, so the half-built observation is removed and the
+      # import counts it as already imported. Anything else is logged
+      # and the import carries on, as it did before.
+      raise(ActiveRecord::RecordNotUnique.new(e.message)) if
+        duplicate_remote_record?(e.record)
+
       Rails.logger.warn(
         "InatImport: failed to create ExternalLink for " \
         "#{target.class} #{target.id} (iNat #{external_id}): #{e.message}"
       )
+    end
+
+    def duplicate_remote_record?(record)
+      record.errors.of_kind?(:base,
+                             :validate_one_import_per_remote_record)
     end
 
     def create_missing_identification_names

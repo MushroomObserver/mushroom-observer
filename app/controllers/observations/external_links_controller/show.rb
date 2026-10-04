@@ -86,9 +86,10 @@ module Observations::ExternalLinksController::Show
     # Etag on the ExternalLink records (not the SiblingLink Data
     # wrapper -- it has no cache_key) so the digest reacts to updated_at
     # changes. A resync stamps last_synced_at without touching
-    # updated_at, so the sync time is added separately.
+    # updated_at, so the sync time is added separately. The observation's
+    # updated_at covers a placeholder's upgrade and its not-imported list.
     fresh_when(etag: site_links + sibling_links.map(&:link) +
-                     [@observation.last_synced_at],
+                     [@observation.last_synced_at, @observation.updated_at],
                public: false)
     return if performed?
 

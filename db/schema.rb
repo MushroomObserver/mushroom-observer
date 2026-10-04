@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_120100) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -90,8 +90,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.datetime "last_synced_at"
     t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb3':',`target_id`) end)", stored: true
     t.date "external_created_on"
+    t.virtual "import_source", type: :string, as: "(case when (`relationship` = 1) then concat(`external_site_id`,_utf8mb4':',`target_type`,_utf8mb4':',`external_id`) end)", stored: true
     t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
     t.index ["external_site_id", "target_type", "external_id"], name: "index_external_links_on_site_target_extid"
+    t.index ["import_source"], name: "index_external_links_on_import_source", unique: true
     t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
     t.index ["target_type", "target_id", "external_site_id", "external_id"], name: "index_external_links_on_target_and_site_and_extid", unique: true
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"
@@ -285,6 +287,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.integer "project_id"
     t.text "constraint_violation_obs_ids"
     t.text "unlicensed_image_events"
+    t.boolean "create_skeletons", default: true, null: false
+    t.integer "skeleton_imported_count", default: 0, null: false
+    t.text "unlicensed_inat_ids"
   end
 
   create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -660,6 +665,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_28_120000) do
     t.integer "collector_user_id"
     t.integer "inat_import_id"
     t.datetime "reflected_at"
+    t.boolean "placeholder", default: false, null: false
+    t.text "skeleton_omissions"
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["created_at", "id"], name: "index_observations_on_created_at_and_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"

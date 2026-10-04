@@ -113,7 +113,9 @@ class InatImportJob < ApplicationJob
                          ignored_not_importable_count: 0,
                          ignored_date_missing_count: 0,
                          ignored_already_imported_count: 0,
-                         ignored_unlicensed_count: 0)
+                         ignored_unlicensed_count: 0,
+                         unlicensed_inat_ids: [],
+                         skeleton_imported_count: 0)
       return log("No observations requested") unless observations_requested?
     end
 
@@ -221,22 +223,12 @@ class InatImportJob < ApplicationJob
       ::Inat::ObservationImporter.new(inat_import, user, self)
   end
 
+  # Photos skipped for lacking an iNat license are listed on the status
+  # page (InatImport#unlicensed_image_events), not reported as errors.
   def log_unlicensed_summary
+    return if inat_import.import_others
+
     unlicensed_obs = observation_importer.unlicensed_obs_count
-    skipped_images = observation_importer.skipped_images_count
-
-    if inat_import.import_others
-      if skipped_images.positive?
-        inat_import.add_response_error(
-          :inat_skipped_images_summary.t(count: skipped_images)
-        )
-      end
-    else
-      log_own_unlicensed_summary(unlicensed_obs)
-    end
-  end
-
-  def log_own_unlicensed_summary(unlicensed_obs)
     return unless unlicensed_obs.positive?
 
     inat_import.add_response_error(

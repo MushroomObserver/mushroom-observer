@@ -7,9 +7,9 @@ module InatImportsController::Estimators
 
   def fetch_expected_count
     # Short-circuit to 0 rather than issue a query that answers a different
-    # question when user's own request is entirely unlicensed
-    # (import-others never imports unlicensed obs)
-    return 0 if import_others? && licensed_explicitly_false?
+    # question when the request is entirely unlicensed and nothing
+    # unlicensed will be imported
+    return 0 if only_unlicensed_ignored_obs?
 
     response = inat_get(import_estimate_query_args)
     JSON.parse(response.body)["total_results"]
@@ -41,27 +41,29 @@ module InatImportsController::Estimators
 
   def fetch_estimate_with_date_count
     # Short-circuit to 0 rather than issue a query that answers a different
-    # question when user's own request is entirely unlicensed
-    # (import-others never imports unlicensed obs)
-    return 0 if import_others? && licensed_explicitly_false?
+    # question when the request is entirely unlicensed and nothing
+    # unlicensed will be imported
+    return 0 if only_unlicensed_ignored_obs?
 
     args = import_estimate_query_args
     args[:d1] ||= EARLIEST_DATE_FILTER
     inat_get_count(args)
   end
 
-  # Own-imports: count of obs in scope that carry no license.
-  # Informational only — own obs are imported regardless of license.
-  def fetch_unlicensed_obs_count
-    inat_get_count(import_estimate_query_args.merge(licensed: false))
-  end
+  # Obs in the estimate's scope without a license: all of them minus the
+  # licensed ones, since iNat's `licensed=false` misses an obs whose
+  # license is "". Own imports import them anyway (informational);
+  # import-others imports them as skeletons, or else skips them. A user's
+  # own `license` filter leaves none.
+  def fetch_unlicensed_count
+    return 0 if listing_query_args.key?(:license)
 
-  # Import-others: count of obs that are importable-taxa but not licensed.
-  # These will be skipped entirely.
-  def fetch_unlicensed_others_count
-    args = import_estimate_query_args.except(:licensed).
-           merge(licensed: false)
-    inat_get_count(args)
+    scope = import_estimate_query_args.except(*LICENSED_FILTER.keys)
+    all = inat_get_count(scope)
+    licensed = inat_get_count(scope.merge(LICENSED_FILTER))
+    return nil unless all && licensed
+
+    all - licensed
   end
 
   def inat_error_text(exception)
@@ -87,7 +89,7 @@ module InatImportsController::Estimators
 
   # All obs in user scope — no taxon, without_field, or license filter.
   def raw_requested_query_args
-    args = listing_url? ? url_query_args : {}
+    args = listing_query_args
     args[:only_id] = true
     args[:id] = params[:inat_ids] if listing_ids?
     args[:user_login] = normalized_inat_username unless import_others?
@@ -96,12 +98,21 @@ module InatImportsController::Estimators
 
   # Obs in importable taxa — no without_field or license filter.
   def after_taxon_query_args
-    args = listing_url? ? url_query_args : {}
+    args = listing_query_args
     args[:only_id] = true
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
     args[:id] = params[:inat_ids] if listing_ids?
     args[:user_login] = normalized_inat_username unless import_others?
     args
+  end
+
+  # The user's URL query, when importing by URL; else nothing.
+  def listing_query_args
+    if listing_url?
+      url_query_args
+    else
+      {}
+    end
   end
 
   # iNat logins are lowercase; send iNat the form it stores.
@@ -110,9 +121,9 @@ module InatImportsController::Estimators
   end
 
   # Obs that will actually be imported: taxon + without_field
-  # + licensed (for import-others) + user scope.
+  # + license (for import-others without skeletons) + user scope.
   def import_estimate_query_args
-    args = listing_url? ? url_query_args : {}
+    args = listing_query_args
     args.merge!(estimate_without_field_filter, ownership_filter_args,
                 only_id: true)
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
@@ -134,6 +145,11 @@ module InatImportsController::Estimators
     listing_url? && url_query_args[:licensed] == "false"
   end
 
+  # Import-others without skeletons ignores unlicensed observations.
+  def only_unlicensed_ignored_obs?
+    import_others? && !create_skeletons? && licensed_explicitly_false?
+  end
+
   # Id lists always re-check obs already carrying the MO URL field, and
   # query modes re-check when the user opted in — the estimate must
   # match actual import behavior (#4565).
@@ -143,11 +159,16 @@ module InatImportsController::Estimators
     BASE_FILTER_PARAMS
   end
 
+  # Import-others with skeletons imports unlicensed obss too, so it keeps
+  # whatever license filter the URL has, as does a URL's own `license`
+  # filter (see PageParser#add_license_filter).
   def ownership_filter_args
-    if import_others?
-      LICENSED_FILTER
-    else
+    if !import_others?
       { user_login: normalized_inat_username }
+    elsif create_skeletons? || listing_query_args.key?(:license)
+      {}
+    else
+      LICENSED_FILTER
     end
   end
 

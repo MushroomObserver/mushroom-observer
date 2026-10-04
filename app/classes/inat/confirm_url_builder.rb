@@ -70,9 +70,17 @@ class Inat::ConfirmURLBuilder
     unless skip_without_field?
       args["without_field"] = BASE_FILTER_PARAMS[:without_field]
     end
-    filter = LICENSED_FILTER.stringify_keys.transform_values(&:to_s)
-    args.merge!(filter) if import_others?
+    add_license_filter(args)
     args
+  end
+
+  # Same rule as PageParser#add_license_filter, so the link shows what
+  # the import fetches.
+  def add_license_filter(args)
+    return unless import_others? && !create_skeletons?
+    return if args.key?("license")
+
+    args.merge!(LICENSED_FILTER.stringify_keys)
   end
 
   # Narrows a user-supplied iconic_taxa list to the importable subset,
@@ -110,5 +118,9 @@ class Inat::ConfirmURLBuilder
 
   def import_others?
     @model.import_others == "1"
+  end
+
+  def create_skeletons?
+    @model.create_skeletons == "1"
   end
 end
