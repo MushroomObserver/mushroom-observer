@@ -16,6 +16,10 @@ module Views::Controllers::Projects
     # through explicitly instead. See ProjectsController::Creation#
     # cleanup_failed_project_creation.
     prop :raw_place_name, _Nilable(String), default: nil
+    # Set on the Admin tab, where an admin can say whether to be
+    # emailed about this project's iNaturalist alerts. Absent on the
+    # new-project form, which has no project to subscribe to yet.
+    prop :user, _Nilable(::User), default: nil
 
     # Adds the dirty-form Stimulus controller to the rendered <form>
     # tag when the caller opts in. Used on the Admin/Details tab to
@@ -47,11 +51,40 @@ module Views::Controllers::Projects
         render_approved_where_hidden
         render_dates_section
         render_upload_fields if @upload_params
+        render_alert_subscriptions
         submit(submit_text, center: true)
       end
     end
 
     private
+
+    # A site admin says whether a project may be alerted on; each of its
+    # admins says whether to be one of the people alerted. The checkbox
+    # saves with the rest of the form, so the page keeps one Save.
+    def render_alert_subscriptions
+      return if alert_sites.empty?
+
+      div(class: "mt-4") do
+        alert_sites.each { |project_site| render_alert_site(project_site) }
+      end
+    end
+
+    def render_alert_site(project_site)
+      name = project_site.external_site.name
+      h5 { strong { plain(:project_alerts_enabled.l(site: name)) } }
+      checkbox_field("alert_subscriptions[#{project_site.id}]",
+                     label: :project_alerts_subscribe.l(site: name),
+                     checked: project_site.alerts?(@user))
+    end
+
+    # Only a site the project is alerting on: one it is not says nothing
+    # an admin can act on here.
+    def alert_sites
+      return [] if @user.nil? || model.nil? || !model.persisted?
+
+      @alert_sites ||= model.project_external_sites.alerting.
+                       includes(:external_site).to_a
+    end
 
     def form_action
       return projects_path if model.nil? || !model.persisted?

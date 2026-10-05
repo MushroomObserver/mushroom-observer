@@ -163,6 +163,8 @@ class CheckForBrokenReferencesJob
       [ProjectAlias,                 :project,              :alert],
       [ProjectExternalSite,          :external_site,        :alert],
       [ProjectExternalSite,          :project,              :delete],
+      [ProjectExternalSiteAlert,     :external_site,        :alert],
+      [ProjectExternalSiteAlert,     :project,              :delete],
       [ProjectExcludedObservation,   :observation,          :delete],
       [ProjectExcludedObservation,   :project,              :delete],
       [ProjectImage,                 :image,                :delete],

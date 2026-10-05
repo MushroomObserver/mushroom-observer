@@ -147,6 +147,7 @@ class ProjectsController < ApplicationController
         override_fixed_dates
         @project.save
         @project.log_update
+        update_alert_subscriptions
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
         return redirect_to(update_redirect_path)
       else
@@ -295,6 +296,22 @@ class ProjectsController < ApplicationController
   # has been resolved-or-confirmed-clean and still doesn't match an
   # existing one, send the user to build it rather than leaving the
   # project permanently location-less with no path to fix that.
+  # Whether this admin is one of the people the project's iNaturalist
+  # alerts go to (#5416). A checkbox on the Admin tab's form, so it
+  # saves with everything else there rather than behind a second Save.
+  def update_alert_subscriptions
+    wanted = params.permit(alert_subscriptions: {})[:alert_subscriptions]
+    return if wanted.blank? || !@project.is_admin?(@user)
+
+    @project.project_external_sites.alerting.find_each do |project_site|
+      value = wanted[project_site.id.to_s]
+      next if value.nil?
+
+      project_site.alerts_for(@user,
+                              ActiveModel::Type::Boolean.new.cast(value))
+    end
+  end
+
   def update_redirect_path
     if @project.location.nil? && @raw_place_name.present?
       new_location_path(where: @raw_place_name, set_project: @project.id)

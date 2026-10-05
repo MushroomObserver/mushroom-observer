@@ -876,4 +876,68 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_includes(ProjectsController.new.index_sort_options,
                     ["recent_observation", :sort_by_recent_observation.l])
   end
+
+  # --- iNaturalist alert subscriptions ---------------------------------
+  #
+  # A site admin says a project may be alerted on; each of its admins
+  # says whether to be emailed, on the same form as everything else
+  # (#5416).
+
+  def alerting_project_site(project)
+    ProjectExternalSite.create!(
+      project: project, external_site: external_sites(:inaturalist),
+      use_constraints: true, alerting: true
+    )
+  end
+
+  def update_params_for(project, **extra)
+    params = build_params(project.title, project.summary.to_s)
+    params[:id] = project.id
+    params.merge(extra)
+  end
+
+  def test_saving_the_project_subscribes_the_admin
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    login(admin.login)
+
+    put(:update, params: update_params_for(
+      project, alert_subscriptions: { site.id.to_s => "1" }
+    ))
+
+    assert(site.reload.alerts?(admin),
+           "Saving with the box ticked should subscribe the admin")
+  end
+
+  # An unticked box submits the hidden "0".
+  def test_saving_the_project_unsubscribes_the_admin
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    site.alerts_for(admin, true)
+    login(admin.login)
+
+    put(:update, params: update_params_for(
+      project, alert_subscriptions: { site.id.to_s => "0" }
+    ))
+
+    assert_not(site.reload.alerts?(admin),
+               "Saving with the box unticked should unsubscribe the admin")
+  end
+
+  # Saving the form from a page that never showed the checkbox leaves
+  # whoever is subscribed alone.
+  def test_saving_without_the_checkbox_changes_nothing
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    site.alerts_for(admin, true)
+    login(admin.login)
+
+    put(:update, params: update_params_for(project))
+
+    assert(site.reload.alerts?(admin),
+           "A form with no subscription field should not unsubscribe")
+  end
 end
