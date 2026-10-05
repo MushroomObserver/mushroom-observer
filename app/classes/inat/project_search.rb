@@ -31,6 +31,13 @@ class Inat
 
     # The search as a page a person can open, which is also the form an
     # import takes it in.
+    #
+    # An observation search carrying the numeric project id, not
+    # `ProjectExternalSite#remote_url`: a `/projects/<id>` or
+    # `/projects/<slug>` address is the sister project's page rather
+    # than a search, and `Inat::URLNormalizer` accepts only
+    # `/observations`. The id is what MO stores, whatever shape the
+    # admin typed (`Inat::ProjectLookup`).
     def url
       "#{SITE}/observations?#{params.to_query}"
     end
