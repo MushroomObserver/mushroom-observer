@@ -29,7 +29,7 @@ class Inat
       def update_mushroom_observer_url_field
         update_inat_observation_field(
           observation_id: @inat_obs[:id],
-          field_id: MO_URL_OBSERVATION_FIELD_ID,
+          field_id: Inat::Constants::MO_URL_OBSERVATION_FIELD_ID,
           value: @observation.show_url
         )
       end
