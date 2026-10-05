@@ -66,10 +66,11 @@ class Inat
       true
     end
 
-    # An observation iNat gives no point for still belongs: it withholds
-    # the point for an obscured or private observation, and a rare find
-    # is the case where an admin most wants to hear. The preview counts
-    # it too, for the same reason.
+    # An observation iNat gives no point for still belongs: it
+    # withholds the point for a private observation, and a rare find
+    # is the case where an admin most wants to hear. The preview
+    # counts it too, for the same reason. An obscured observation
+    # does carry a point and is matched on it.
     def within_area?(candidate)
       return true if candidate.lat.nil? || candidate.lng.nil?
 

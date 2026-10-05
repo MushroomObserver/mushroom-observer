@@ -65,8 +65,11 @@ class Inat
       { id: ident["id"], taxon_id: taxon["id"], name: taxon["name"].to_s }
     end
 
-    # iNat writes a point as "lat,lng" in `location`, and withholds it
-    # for an obscured or private observation.
+    # iNat writes a point as "lat,lng" in `location`. An obscured
+    # observation still carries one -- a public point randomized
+    # within a cell, tens of km wide per `public_positional_accuracy`
+    # -- so it is matched like any other, give or take that cell at a
+    # boundary. Only a private one has no point.
     def coordinates
       return @coordinates if defined?(@coordinates)
 
