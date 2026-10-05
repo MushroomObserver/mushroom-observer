@@ -158,6 +158,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     login(@admin.login)
     post(:create,
          params: { project_site: site.id, consent: "1",
+                   inat_username: "rolf_on_inat",
                    import_others: "1", create_skeletons: "1",
                    confirmed: "1",
                    # What a tampered form would carry.
@@ -183,6 +184,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
 
     login(@admin.login)
     post(:create, params: { project_site: site.id, consent: "1",
+                            inat_username: "rolf_on_inat",
                             import_others: "1", create_skeletons: "1" })
 
     assert_unprocessable
@@ -200,6 +202,20 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     assert_select("li", text: matching(:inat_details_includes_all), count: 0)
   end
 
+  # The field says mandatory and is kept so: a project admin
+  # authenticates to iNaturalist as that account.
+  def test_an_import_without_an_inat_username_is_refused
+    site = project_site
+
+    login(@admin.login)
+    post(:create, params: { project_site: site.id, consent: "1",
+                            import_others: "1", confirmed: "1" })
+
+    assert_flash_warning
+    assert_unprocessable
+    assert_empty(InatImport.where(user: @admin, project_id: @project.id))
+  end
+
   # A project none of whose target names iNat knows would search for
   # every fungus in its area and dates, which is not what the project
   # means.
@@ -209,6 +225,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
 
     login(@admin.login)
     post(:create, params: { project_site: site.id, consent: "1",
+                            inat_username: "rolf_on_inat",
                             import_others: "1", confirmed: "1" })
 
     assert_flash_error

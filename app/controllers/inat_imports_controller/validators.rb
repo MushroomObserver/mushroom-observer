@@ -14,10 +14,39 @@ module InatImportsController::Validators
 
   def params_valid?
     project_targets_resolved? &&
+      project_url_resolved? &&
       import_adequately_constrained? &&
       imports_valid? &&
       project_valid? &&
       consented?
+  end
+
+  # iNat's UI shows a project's page rather than a search for its
+  # observations, so that address is the one someone reaching for "a
+  # URL" has to hand -- and an import cannot take it, since
+  # URLNormalizer accepts only `/observations`. Resolve it to the
+  # search it means. Runs before the other URL checks, which assume a
+  # search.
+  def project_url_resolved?
+    return true unless listing_url?
+    return true unless Inat::ProjectLookup.project_page?(params[:inat_url])
+
+    resolved_project_url?(params[:inat_url])
+  end
+
+  def resolved_project_url?(url)
+    lookup = Inat::ProjectLookup.new(url)
+    found = lookup.resolve
+    unless found
+      # The id or slug, not the URL it came out of: Textile reads a
+      # pasted URL as a link and swallows the quote closing the message.
+      flash_warning(lookup.error.t(project: lookup.token || url))
+      return false
+    end
+
+    params[:inat_url] = "#{Inat::Constants::SITE}/observations" \
+                        "?project_id=#{found.id}"
+    true
   end
 
   # Optional target project (#5259). Blank is fine. A chosen project
@@ -57,7 +86,11 @@ module InatImportsController::Validators
     return true if params[:inat_username].present?
     # An import of others' observations by specific ID list or URL
     # doesn't need a username; the filter constraints are sufficient.
-    return true if import_others? && (listing_ids? || listing_url?)
+    # A project admin gives theirs regardless: they authenticate to
+    # iNaturalist as it, and having an account there is the habit the
+    # arrangement rests on.
+    return true if import_others? && (listing_ids? || listing_url?) &&
+                   !project_admin_import?
 
     flash_warning(:inat_missing_username.l)
     false

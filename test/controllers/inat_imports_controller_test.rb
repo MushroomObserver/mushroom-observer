@@ -1566,6 +1566,44 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  # iNat shows a project's page, not a search for its observations, so
+  # that address is the one a user has to hand. MO resolves it to the
+  # search it means rather than refusing it.
+  def test_create_with_a_project_page_url_imports_the_project
+    stub_request(:get, %r{api\.inaturalist\.org/v1/projects/fundis-ne}).
+      to_return(status: 200,
+                body: { results: [{ "id" => 102_213,
+                                    "title" => "FUNDIS NE" }] }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_url: "https://www.inaturalist.org/projects/" \
+                             "fundis-ne?tab=observations",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_unprocessable
+    assert_select("#requested_count a[href*=?]", "project_id=102213")
+  end
+
+  def test_create_with_an_unknown_project_page_url_rejected
+    stub_request(:get, %r{api\.inaturalist\.org/v1/projects}).
+      to_return(status: 200, body: { results: [] }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_url: "https://www.inaturalist.org/projects/nope",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash(
+      :project_site_inat_project_unknown,
+      project: "nope",
+      on_fail: "A project page naming no iNat project should say so"
+    )
+    assert_unprocessable
+  end
+
   def test_create_invalid_url_rejected
     login
     post(:create,
