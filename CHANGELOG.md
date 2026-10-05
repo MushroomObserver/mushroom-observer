@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-05 (deploy-2026-10-05-12-07)
+
+- Update rails gems to 7.2.4 ([PR5450](https://github.com/MushroomObserver/mushroom-observer/pull/5450), @JoeCohen)
+- Move/delete duplicate top submit buttons on 13 forms ([PR5451](https://github.com/MushroomObserver/mushroom-observer/pull/5451), @nimmolo)
+- Reusable, collapsible project/species-list checkbox panels ([PR5453](https://github.com/MushroomObserver/mushroom-observer/pull/5453), @nimmolo)
+- Skip `no_test_console_noise.rb` leak reporting when a test already failed ([PR5460](https://github.com/MushroomObserver/mushroom-observer/pull/5460), @nimmolo)
+- Make `Dockerfile` multi-stage, add a `production` target (#5345 prep) ([PR5355](https://github.com/MushroomObserver/mushroom-observer/pull/5355), @nimmolo)
+- Allow one MO record per remote record, and reuse an imported photo ([PR5449](https://github.com/MushroomObserver/mushroom-observer/pull/5449), @mo-nathan)
+- Point a label QR code at a project, not at one observation (`Project::BestObservation`) ([PR5454](https://github.com/MushroomObserver/mushroom-observer/pull/5454), @mo-nathan)
+- Stop an iNaturalist timeout from crashing an import (`Inat::PageParser`) ([PR5465](https://github.com/MushroomObserver/mushroom-observer/pull/5465), @mo-nathan)
+- Revised skeleton imports ([PR5419](https://github.com/MushroomObserver/mushroom-observer/pull/5419), @JoeCohen)
+- Tell a project's admins what iNaturalist just identified (`InatAlertCycleJob`) ([PR5443](https://github.com/MushroomObserver/mushroom-observer/pull/5443), @mo-nathan)
+
 ## 2026-09-29 (deploy-2026-09-29-12-00)
 
 - Give a project a page for external sites (`ProjectExternalSite`) ([PR5426](https://github.com/MushroomObserver/mushroom-observer/pull/5426), @mo-nathan)
