@@ -44,11 +44,11 @@ class Inat
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
       @observation = nil
-      return if unimportable?
-      return if date_missing?
-      return if unlicensed_other?
-      return if already_linked?
-      return if crosslinked_to_live_mo_obs?
+      return skipped if unimportable?
+      return skipped if date_missing?
+      return skipped if unlicensed_other?
+      return skipped if already_linked?
+      return skipped if crosslinked_to_live_mo_obs?
 
       builder = create_mo_observation
       return unless @observation
@@ -59,6 +59,17 @@ class Inat
     end
 
     private
+
+    # The per-obs clock measures the gap since the last observation this
+    # run finished with, and a skip is one of those. Leaving it running
+    # charges the next import for every skip before it: a re-run that
+    # skipped a whole page priced its first import at the length of that
+    # page, both in the remaining-time estimate and in the user's
+    # historical average.
+    def skipped
+      @inat_import.reset_last_obs_start
+      nil
+    end
 
     def unimportable?
       return false if @inat_obs.taxon_importable?

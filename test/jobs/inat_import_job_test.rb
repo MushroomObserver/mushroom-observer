@@ -1127,6 +1127,8 @@ class InatImportJobTest < ActiveJob::TestCase
     )
 
     stub_inat_interactions
+    started = 1.hour.ago
+    @inat_import.update!(last_obs_start: started)
 
     assert_no_difference(
       "Observation.count",
@@ -1137,6 +1139,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_match(/Skipped #{inat_id} already linked/, job_log_file.read,
                  "Should log a skip message when the obs is already imported")
+    assert_operator(@inat_import.reload.last_obs_start, :>, started,
+                    "A skip should restart the per-obs clock, so the next " \
+                    "import is not charged for the time spent skipping")
   end
 
   # If a simultaneous import job inserts the same iNat obs between
