@@ -2769,6 +2769,8 @@
   project_site_needs_a_source: Give an iNaturalist project or use this project's constraints before turning alerting or importing on.
   project_alerts_enabled: "[site] alerts enabled"
   project_alerts_subscribe: "Email me when [site] identifies an observation matching this project"
+  project_import_enabled: "[site] importing enabled"
+  project_import_start: "Import this project's observations from [site]"
   project_site_inat_project_unknown: "'[project]' does not name an iNaturalist project."
   project_site_inat_project_ambiguous: "'[project]' names more than one iNaturalist project. Use its id or the address of its page instead."
 
@@ -2933,6 +2935,9 @@
   inat_create_skeletons_help: "When checked, adds minimal placeholders pointing to unlicensed observations."
   inat_skip_writeback: "Skip writing the MO link back to iNaturalist (admin)"
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
+  inat_import_consent_project: "(Required) I consent to importing these iNaturalist observations into Mushroom Observer. My default Mushroom Observer license will be applied to any unlicensed images of mine. For other observers, only images carrying a license Mushroom Observer can accept are imported; when skeleton records are turned on, their unlicensed observations are recorded as placeholders without images."
+  inat_import_project_scope: "Observations matching [project] on iNaturalist:"
+  inat_import_project_targets_unresolved: "iNaturalist does not recognize [targets], so this import would cover every fungus in the project's area and dates instead. Correct the target names before importing."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
@@ -3000,6 +3005,7 @@
   inat_details_heading: Details/Caveats
   inat_details_excludes: Excludes observations previously imported from/exported to iNat.
   inat_details_includes_all: "Includes all your observations (any unlicensed images will use your default MO license)."
+  inat_details_includes_project: "Includes observations by any observer that match this project. Unlicensed images of yours use your default MO license; unlicensed images of other observers stay on iNaturalist."
   inat_details_fungi_only: Includes only observations identified as fungi or mycetozoa.
   inat_details_data_fields: MO lists most iNat data and/or maps it to analogous MO fields.
   inat_details_coordinates: MO hides coordinates from the public if iNat obscured them.

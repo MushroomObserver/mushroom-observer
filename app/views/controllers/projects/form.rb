@@ -52,6 +52,7 @@ module Views::Controllers::Projects
         render_dates_section
         render_upload_fields if @upload_params
         render_alert_subscriptions
+        render_import_links
         submit(submit_text, center: true)
       end
     end
@@ -84,6 +85,35 @@ module Views::Controllers::Projects
 
       @alert_sites ||= model.project_external_sites.alerting.
                        includes(:external_site).to_a
+    end
+
+    # A site admin says whether a project may be imported from; its
+    # admins are then the people who start one (#5416). A link, not a
+    # submit: it leaves this form for the import form.
+    def render_import_links
+      return if import_sites.empty?
+
+      div(class: "mt-4") do
+        import_sites.each { |project_site| render_import_link(project_site) }
+      end
+    end
+
+    def render_import_link(project_site)
+      name = project_site.external_site.name
+      h5 { strong { plain(:project_import_enabled.l(site: name)) } }
+      Button(
+        type: :get,
+        name: :project_import_start.l(site: name),
+        target: new_inat_import_path(project_site: project_site.id),
+        class: "mt-1"
+      )
+    end
+
+    def import_sites
+      return [] if @user.nil? || model.nil? || !model.persisted?
+
+      @import_sites ||= model.project_external_sites.importing.
+                        includes(:external_site).to_a
     end
 
     def form_action

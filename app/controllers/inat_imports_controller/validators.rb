@@ -13,7 +13,8 @@ module InatImportsController::Validators
   private
 
   def params_valid?
-    import_adequately_constrained? &&
+    project_targets_resolved? &&
+      import_adequately_constrained? &&
       imports_valid? &&
       project_valid? &&
       consented?
@@ -54,9 +55,9 @@ module InatImportsController::Validators
   # See InatImport.adequate_constraints?
   def import_adequately_constrained?
     return true if params[:inat_username].present?
-    # Superimporters importing by specific ID list or URL don't need a
-    # username; the filter constraints are sufficient.
-    return true if superimporter_not_own? && (listing_ids? || listing_url?)
+    # An import of others' observations by specific ID list or URL
+    # doesn't need a username; the filter constraints are sufficient.
+    return true if import_others? && (listing_ids? || listing_url?)
 
     flash_warning(:inat_missing_username.l)
     false
@@ -163,9 +164,9 @@ module InatImportsController::Validators
   # unchecked the query uses the licensed filter with no user_login, so
   # there is no "other user" to protect against.
   def not_importing_all_anothers?
-    return true unless InatImport.super_importer?(@user) && importing_all?
-    # Superimporter explicitly opted out of own-only: licensed filter applies.
-    return true if superimporter_not_own?
+    return true unless may_import_others? && importing_all?
+    # Opted into others' observations: the licensed filter applies.
+    return true if import_others?
 
     # user.inat_username can be nil if they've never done an iNat import or
     # if it got clobbered. We have no way to check if the iNat username they
@@ -178,10 +179,6 @@ module InatImportsController::Validators
 
     flash_warning(:inat_importing_all_anothers.t)
     false
-  end
-
-  def superimporter_not_own?
-    InatImport.super_importer?(@user) && params[:import_others] == "1"
   end
 
   def consented?
