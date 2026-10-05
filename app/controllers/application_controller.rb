@@ -37,6 +37,7 @@ class ApplicationController < ActionController::Base
   include Indexes
   include PatternSearchState
   include SectionUpdater
+  include RequestStats
   include ModalUpdater
   include ViewerAwareFormat
 
@@ -155,38 +156,6 @@ class ApplicationController < ActionController::Base
       session[:layout] = change
     end
   end
-
-  # Catch errors for integration tests, and report stats re completed request.
-  def catch_errors_and_log_request_stats
-    clear_user_globals
-    stats = request_stats
-    yield
-    IpStats.log_stats(stats, @user&.id)
-    logger.warn(request_stats_log_message(stats))
-  rescue StandardError => e
-    raise(@error = e)
-  end
-
-  def request_stats
-    {
-      time: Time.current,
-      controller: params[:controller],
-      action: params[:action],
-      api_key: params[:api_key],
-      robot: browser.bot? ? "robot" : "user",
-      ip: request.try(&:remote_ip),
-      url: request.try(&:url),
-      ua: browser.try(&:ua)
-    }
-  end
-
-  def request_stats_log_message(stats)
-    "TIME: #{Time.current - stats[:time]} #{status} " \
-    "#{stats[:controller]} #{stats[:action]} " \
-    "#{stats[:robot]} #{stats[:ip]}\t#{stats[:url]}\t#{stats[:ua]}"
-  end
-
-  private :request_stats, :request_stats_log_message
 
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
