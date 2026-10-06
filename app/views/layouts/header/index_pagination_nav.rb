@@ -48,9 +48,17 @@ module Views::Layouts
 
       this_letter, letters = letter_pagination_pages
 
-      nav(class: "paginate pagination_letters flex-bar pl-4") do
+      nav(class: "paginate pagination_letters flex-bar pl-3") do
+        render_letter_label
         render_letter_input(this_letter, letters)
       end
+    end
+
+    def render_letter_label
+      render(Components::Navbar::Text.new(
+               element: :label, for: "letter_input_#{@position}",
+               class: "m-0 font-weight-normal text-nowrap"
+             )) { :by_letter.l }
     end
 
     def render_number_pagination_nav
@@ -59,7 +67,7 @@ module Views::Layouts
       setup_letter_params
       setup_page_numbers
 
-      nav(class: "paginate pagination_numbers flex-bar pl-4") do
+      nav(class: "paginate pagination_numbers flex-bar pl-3") do
         render_page_link(:prev, disabled: @prev_page < 1)
         render_page_label
         render_goto_page_input(@this_page, @max_page)
@@ -80,7 +88,8 @@ module Views::Layouts
 
     def render_page_label
       render(Components::Navbar::Text.new(
-               class: class_names("mx-0",
+               element: :label, for: "page_input_#{@position}",
+               class: class_names("m-0 font-weight-normal text-nowrap",
                                   Components::Column.mobile_hide_classes)
              )) { :page.ti }
     end
@@ -108,10 +117,14 @@ module Views::Layouts
       @page_arg = @pagination_data.number_arg
     end
 
+    # No padding on the outer-facing side -- the prev/next arrows
+    # should align flush with the content edge, not sit indented
+    # from it.
     def render_page_link(direction, disabled:)
       page = instance_variable_get(:"@#{direction}_page")
+      padding = direction == :prev ? "pl-0 pr-2" : "pl-2 pr-0"
       classes = class_names(
-        "px-2", "#{direction}_page_link",
+        padding, "#{direction}_page_link",
         ("disabled opacity-0" if disabled)
       )
       url = pagination_link_url(page)
@@ -152,6 +165,7 @@ module Views::Layouts
 
     def page_input_attrs(this_page, max_page)
       {
+        id: "page_input_#{@position}",
         type: :text, name: :page, value: this_page,
         class: "form-control text-right",
         size: max_page.digits.count,
@@ -202,9 +216,6 @@ module Views::Layouts
       InputGroup(class: "page-input ml-2",
                  data: { controller: "page-input",
                          page_input_letters_value: used_letters }) do
-        render(Components::InputGroup::Addon.new(
-                 variant: :label, position: :prepend, label_for: input_id
-               )) { :by_letter.l }
         input(
           id: input_id,
           type: :text, name: :letter, value: this_letter,

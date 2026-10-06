@@ -119,8 +119,36 @@ module Views::Layouts
                                           query: current_query,
                                           banner: banner))
         render(Views::Layouts::SearchNav.new)
+        render_index_bar
         render(Views::Layouts::App::PageFlash.new)
         render_header_and_main(&block)
+      end
+    end
+
+    # `Header::IndexBar` lives here, not inside `Header`, so it sits
+    # above `:page_flash` instead of below it.
+    def render_index_bar
+      return unless index_bar?
+
+      maybe_set_filter_help
+      render(Views::Layouts::Header::IndexBar.new)
+    end
+
+    def index_bar?
+      action = controller.action_name
+      controller_name = controller.controller_name
+      (action == "index" && controller_name != "articles") ||
+        controller_name == "maps"
+    end
+
+    def maybe_set_filter_help
+      return unless @any_content_filters_applied
+
+      content_for(:filter_help) do
+        Help(type: :tooltip,
+             label: "(#{:filtered.t})",
+             title: :rss_filtered_mouseover.t,
+             extra_class: "filter-help")
       end
     end
 
@@ -132,9 +160,7 @@ module Views::Layouts
     # full, sidebar-independent width.
     def render_header_and_main(&block)
       div(class: content_for(:container_class)) do
-        render(Views::Layouts::Header.new(
-                 any_content_filters_applied: @any_content_filters_applied
-               ))
+        render(Views::Layouts::Header.new)
         Container(element: :main, id: "content",
                   class: content_for(:content_padding),
                   data: { controller: "lightgallery" }) do
