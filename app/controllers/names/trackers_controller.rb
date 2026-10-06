@@ -21,6 +21,7 @@ module Names
     def create
       return unless find_name!
 
+      find_name_tracker
       submit_tracking_form_create
     end
 
