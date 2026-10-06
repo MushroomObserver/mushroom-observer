@@ -35,6 +35,13 @@
 
 .type-filter-menu .label-zone {
   padding-right: 1rem;
+
+  // The link wraps just its text, not the zone's flex-grow width --
+  // block fills it, so a click lands on the link, not the zone's
+  // dead space beside it.
+  a {
+    display: block;
+  }
 }
 
 // Beats the global `.btn-link { font-weight: normal !important; }`
