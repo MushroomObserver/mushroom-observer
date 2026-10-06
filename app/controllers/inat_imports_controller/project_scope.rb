@@ -48,7 +48,8 @@ module InatImportsController::ProjectScope
 
   def scope_params
     {
-      choose_method: "url", all: nil, inat_ids: nil,
+      # Blank, not nil: what the form submits when its id box is empty.
+      choose_method: "url", all: nil, inat_ids: "",
       inat_url: project_search.url, original_inat_url: nil,
       inat_project_id: scoped_project_site.project_id.to_s,
       inat_project: scoped_project_site.project.title

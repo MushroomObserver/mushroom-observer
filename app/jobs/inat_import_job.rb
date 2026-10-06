@@ -169,8 +169,10 @@ class InatImportJob < ApplicationJob
       inat_import.inat_url.present?
   end
 
+  # `inat_ids` is nil on an import that listed none, and this runs
+  # before the URL check that such an import is waiting for.
   def inat_id_list
-    inat_import.inat_ids.delete(" ")
+    inat_import.inat_ids.to_s.delete(" ")
   end
 
   # Import the next page of iNat API results,
