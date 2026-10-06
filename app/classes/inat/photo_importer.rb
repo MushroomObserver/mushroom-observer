@@ -25,6 +25,19 @@ class Inat
         truncate(255)
     end
 
+    # iNat photo ids (Strings) of the observation's images, from their
+    # import ExternalLinks. Queries the join table, since an observation's
+    # loaded `images` misses images the Image API attached.
+    def self.imported_photo_ids(observation,
+                                external_site = ExternalSite.inaturalist)
+      image_ids = ObservationImage.where(observation_id: observation.id).
+                  select(:image_id)
+      ExternalLink.import.
+        where(target_type: "Image", target_id: image_ids,
+              external_site: external_site).
+        pluck(:external_id).map(&:to_s)
+    end
+
     # owner: whether the importer made the iNat observation.
     def initialize(observation:, user:, owner:,
                    external_site: ExternalSite.inaturalist)

@@ -20,16 +20,16 @@ class Inat
     MAX_RETRY_AFTER_WAIT = 8        # iNat's Retry-After honored up to this
 
     attr_reader :inat_import, :user, :job,
-                :unlicensed_obs_count, :skipped_images_count, :image_ids
+                :unlicensed_obs_count, :image_ids
 
     include Standardization
+    include Writeback
 
     def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
       @user = user
       @job = job
       @unlicensed_obs_count = 0
-      @skipped_images_count = 0
       @image_ids = []
     end
 
@@ -45,11 +45,11 @@ class Inat
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
       @observation = nil
-      return if unimportable?
-      return if date_missing?
-      return if unlicensed_other?
-      return if already_linked?
-      return if crosslinked_to_live_mo_obs?
+      return skipped if unimportable?
+      return skipped if date_missing?
+      return skipped if unlicensed_other?
+      return skipped if already_linked?
+      return skipped if crosslinked_to_live_mo_obs?
 
       builder = create_mo_observation
       return unless @observation
@@ -60,6 +60,17 @@ class Inat
     end
 
     private
+
+    # The per-obs clock measures the gap since the last observation this
+    # run finished with, and a skip is one of those. Leaving it running
+    # charges the next import for every skip before it: a re-run that
+    # skipped a whole page priced its first import at the length of that
+    # page, both in the remaining-time estimate and in the user's
+    # historical average.
+    def skipped
+      @inat_import.reset_last_obs_start
+      nil
+    end
 
     def unimportable?
       return false if @inat_obs.taxon_importable?
@@ -79,16 +90,24 @@ class Inat
       true
     end
 
-    # Safety net for import-others. This check is what actually stops an
-    # unlicensed observation belonging to another iNat user from being
-    # imported. Own-obs imports are never gated here.
+    # Safety net for import-others:
+    # Prevent a **full** import of an
+    # unlicensed observation of another iNat user. It is skipped,
+    # or imported as a skeleton when the import creates skeletons.
+    # Imports of the user's obss are not filtered here.
     def unlicensed_other?
       return false unless inat_import.import_others
       return false if @inat_obs[:license_code].present?
+      return false if inat_import.create_skeletons
 
       log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
-      inat_import.add_ignored_obs(:unlicensed)
+      inat_import.add_ignored_obs(:unlicensed, inat_id: @inat_obs[:id])
       true
+    end
+
+    def skeleton?
+      inat_import.import_others && inat_import.create_skeletons &&
+        @inat_obs[:license_code].blank?
     end
 
     # The real duplicate check: any typed iNat ExternalLink for this iNat
@@ -169,8 +188,7 @@ class Inat
 
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(
-        inat_obs: @inat_obs, user: @user,
-        import_others: @inat_import.import_others,
+        inat_obs: @inat_obs, user: @user, skeleton: skeleton?,
         external_site: inat_site,
         inat_import: @inat_import
       )
@@ -193,17 +211,18 @@ class Inat
 
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
-      @skipped_images_count += builder.skipped_images
       @image_ids.concat(builder.created_image_ids)
       record_unlicensed_images(builder)
       return unless builder.unlicensed_obs == 1
+      return if skeleton?
 
       inat_import.add_license_added_obs(inat_id: @inat_obs[:id])
     end
 
     def finalize_import
       update_inat_observation unless skip_inat_writeback?
-      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}" \
+          "#{" (skeleton)" if skeleton?}")
       increment_imported_counts
       update_timings
     rescue StandardError => e
@@ -214,114 +233,10 @@ class Inat
       nil
     end
 
-    # Stamp the MO observation's URL onto the source iNat observation. Only
-    # called when writing back: `finalize_import` gates this on
-    # `skip_inat_writeback?` (skipped by default in development so a local
-    # import never annotates a real iNat observation; production writes back,
-    # and the test suite is isolated from iNat by WebMock). Admins can override
-    # per import via a checkbox on the import form (InatImport#writeback).
-    def update_inat_observation
-      update_mushroom_observer_url_field
-      sleep(1) # Avoid hitting iNat API rate limits
-    end
-
-    def skip_inat_writeback?
-      return Rails.env.development? if @inat_import.writeback_default?
-
-      @inat_import.writeback_skip?
-    end
-
-    def update_mushroom_observer_url_field
-      update_inat_observation_field(
-        observation_id: @inat_obs[:id],
-        field_id: MO_URL_OBSERVATION_FIELD_ID,
-        value: @observation.show_url
-      )
-    end
-
-    def update_inat_observation_field(observation_id:, field_id:, value:,
-                                      attempt: 1)
-      payload = { observation_field_value: { observation_id: observation_id,
-                                             observation_field_id: field_id,
-                                             value: value } }
-      Inat::APIRequest.new(@inat_import.token).
-        request(method: :post,
-                path: "observation_field_values",
-                payload: payload)
-    rescue *RETRYABLE_WRITEBACK_ERRORS => e
-      retry_or_raise_writeback(e, payload, attempt)
-    rescue ::RestClient::ExceptionWithResponse => e
-      log_and_raise_writeback_error(e, payload)
-    end
-
-    # iNat can return a transient error (503, etc.) after the field value
-    # was persisted. Confirm before retrying or giving up, so a false
-    # error doesn't needlessly retry or back out the just-created MO
-    # Observation.
-    def retry_or_raise_writeback(error, payload, attempt)
-      ofv = payload[:observation_field_value]
-      return if field_actually_written?(ofv[:observation_id],
-                                        ofv[:observation_field_id],
-                                        ofv[:value])
-
-      if attempt <= MAX_WRITEBACK_RETRIES
-        backoff_for_writeback_retry(error, attempt)
-        return update_inat_observation_field(
-          observation_id: ofv[:observation_id],
-          field_id: ofv[:observation_field_id],
-          value: ofv[:value], attempt: attempt + 1
-        )
-      end
-
-      log_and_raise_writeback_error(error, payload)
-    end
-
-    # Verify by the field_id passed in, not a field hard-coded to the MO
-    # URL field -- update_inat_observation_field's signature is generic,
-    # so this stays correct if it's called for another observation field.
-    def field_actually_written?(observation_id, field_id, value)
-      raw_obs = fetch_inat_observation(observation_id)
-      fields = Inat::Obs.new(JSON.generate(raw_obs)).inat_obs_fields
-      fields&.find { |field| field[:field_id] == field_id }&.dig(:value) ==
-        value
-    rescue StandardError
-      false
-    end
-
-    def fetch_inat_observation(observation_id)
-      response = Inat::APIRequest.new(@inat_import.token).
-                 request(path: "observations/#{observation_id}")
-      JSON.parse(response.body, symbolize_names: true)[:results]&.first || {}
-    end
-
-    def backoff_for_writeback_retry(error, attempt)
-      backoff = retry_after_seconds(error) ||
-                WRITEBACK_RETRY_BASE_SLEEP * (2**(attempt - 1))
-      warn("  iNat writeback #{error.class} on observation field; " \
-           "retry #{attempt}/#{MAX_WRITEBACK_RETRIES} in #{backoff}s")
-      sleep(backoff)
-    end
-
-    # Honor iNat's Retry-After when it's within our own retry budget;
-    # otherwise fall back to our own doubling backoff so a large
-    # server-suggested wait can't stall the whole import.
-    def retry_after_seconds(error)
-      headers = error.response&.headers
-      seconds = headers && headers[:retry_after]&.to_i
-      return nil unless seconds&.positive? && seconds <= MAX_RETRY_AFTER_WAIT
-
-      seconds
-    end
-
-    def log_and_raise_writeback_error(error, payload)
-      error_json = { error: error.http_code, payload: payload }.to_json
-      log_with_response_error(error_json)
-      raise(error)
-    end
-
     def increment_imported_counts
       @inat_import.increment!(:imported_count)
       @inat_import.increment!(:total_imported_count)
+      @inat_import.increment!(:skeleton_imported_count) if skeleton?
     end
 
     # Use cumulative moving average to update user's historical avg import time

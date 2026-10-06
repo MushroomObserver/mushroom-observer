@@ -1,0 +1,4 @@
+|{white-space:nowrap}. 2026-10-04 | Import unlicensed iNat Observations as placeholders | "PR#5419":https://github.com/MushroomObserver/mushroom-observer/pull/5419 |
+|{white-space:nowrap}. 2026-10-04 | Fix iNaturalist imports crashing when the site times out | "PR#5465":https://github.com/MushroomObserver/mushroom-observer/pull/5465 |
+|{white-space:nowrap}. 2026-10-02 | Project and species-list checklists now collapse and scroll instead of growing without end | "PR#5453":https://github.com/MushroomObserver/mushroom-observer/pull/5453 |
+|{white-space:nowrap}. 2026-10-02 | Submit buttons no longer sit above a form's fields | "PR#5451":https://github.com/MushroomObserver/mushroom-observer/pull/5451 |
