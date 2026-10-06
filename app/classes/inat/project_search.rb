@@ -55,6 +55,8 @@ class Inat
     end
 
     def unresolved_names
+      # Resolve first: the mapper fills @unresolved_names as a side
+      # effect of target_taxon_ids, and reads empty until it runs.
       @mapper.target_taxon_ids
       @mapper.unresolved_names
     end
