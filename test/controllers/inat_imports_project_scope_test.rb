@@ -61,8 +61,8 @@ class InatImportsProjectScopeTest < FunctionalTestCase
   end
 
   # A translation read as a pattern, so its punctuation stays literal.
-  def matching(tag)
-    Regexp.new(Regexp.escape(tag.l))
+  def matching(tag, **args)
+    Regexp.new(Regexp.escape(tag.l(**args)))
   end
 
   # ---- the form a project admin is given -------------------------------
@@ -77,7 +77,18 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     assert_select("input[name='inat_import[project_site]'][value=?]",
                   site.id.to_s)
     assert_select("input[name='inat_import[choose_method]']", count: 0)
-    assert_select("a[href*=?]", "taxon_id=#{CGI.escape(taxon_ids)}")
+    assert_select("p", text: matching(:inat_import_project_scope,
+                                      project: @project.title))
+  end
+
+  # The search itself carries every target taxon and place the project
+  # names, which iNaturalist's web UI will not render as a query and
+  # which says nothing an admin can act on.
+  def test_the_scoped_form_does_not_print_the_search
+    login(@admin.login)
+    get(:new, params: { project_site: project_site.id })
+
+    assert_select("a[href*=?]", "taxon_id=", count: 0)
   end
 
   def test_the_scoped_form_turns_on_importing_others_and_skeletons

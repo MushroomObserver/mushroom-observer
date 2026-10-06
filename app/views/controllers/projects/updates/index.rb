@@ -38,8 +38,33 @@ module Views::Controllers::Projects::Updates
       div(class: "d-flex justify-content-between " \
                  "align-items-center mb-3 flex-wrap") do
         render_count_and_toggle
-        div { render_add_all_button }
+        div do
+          render_import_buttons
+          render_add_all_button
+        end
       end
+    end
+
+    # A site admin says whether a project may be imported from; its
+    # admins are then the people who start one (#5416). This page is
+    # where observations are added to the project, so it is where
+    # fetching more of them from elsewhere belongs.
+    def render_import_buttons
+      import_sites.each do |project_site|
+        Button(
+          type: :get,
+          name: :project_import_start.l(
+            site: project_site.external_site.name
+          ),
+          target: new_inat_import_path(project_site: project_site.id),
+          class: "mr-2"
+        )
+      end
+    end
+
+    def import_sites
+      @import_sites ||= @project.project_external_sites.importing.
+                        includes(:external_site).to_a
     end
 
     def render_count_and_toggle

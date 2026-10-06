@@ -85,27 +85,21 @@ module Views::Controllers::InatImports
     end
 
     # The project's configuration decides what this import covers, so
-    # the search is shown -- a link, so an admin can read it on iNat
-    # before importing it -- rather than offered as a choice. The
-    # controller rebuilds it on submit; nothing here is read back.
+    # it is stated rather than offered as a choice. The controller
+    # rebuilds the search on submit; nothing here is read back.
+    #
+    # The search itself is not shown. It carries every target taxon and
+    # place the project names, which iNaturalist's web UI will not
+    # render as a query, and which says nothing an admin can act on.
     def render_project_scope_section
       hidden_field(:project_site)
       Panel(panel_class: "my-5") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           p { plain(:inat_import_project_scope.l(project: project_title)) }
-          p(class: "mt-2") do
-            render(Components::Link::External.new(
-                     content: project_search_url, path: project_search_url
-                   ))
-          end
           render_recheck_all_field
         end
       end
-    end
-
-    def project_search_url
-      @project_search_url ||= ::Inat::ProjectSearch.new(@project_site).url
     end
 
     def project_title = @project_site.project.title

@@ -115,37 +115,5 @@ module Projects
                     count: 0)
       assert_select("#content", text: /alerts enabled/, count: 0)
     end
-
-    # A site admin says a project may be imported from; its admins are
-    # then the people who start one (#5416). A link rather than a
-    # submit, since a button inside this form would nest one.
-    def test_an_importing_project_offers_the_admin_a_link
-      site = ProjectExternalSite.create!(
-        project: @project, external_site: external_sites(:inaturalist),
-        use_constraints: true, importing: true
-      )
-      login(@project.admin_group.users.first.login)
-
-      get(:show, params: { project_id: @project.id })
-
-      assert_select("form[action=?]", project_path(@project.id)) do
-        assert_select("a[href=?]",
-                      new_inat_import_path(project_site: site.id))
-      end
-      assert_select("h5", text: :project_import_enabled.l(site: "iNaturalist"))
-    end
-
-    def test_a_site_not_importing_offers_no_link
-      site = ProjectExternalSite.create!(
-        project: @project, external_site: external_sites(:inaturalist),
-        use_constraints: true, alerting: true
-      )
-      login(@project.admin_group.users.first.login)
-
-      get(:show, params: { project_id: @project.id })
-
-      assert_select("a[href=?]",
-                    new_inat_import_path(project_site: site.id), count: 0)
-    end
   end
 end

@@ -165,6 +165,34 @@ module Projects
       assert_response(:not_found)
     end
 
+    # A site admin says a project may be imported from; its admins are
+    # then the people who start one (#5416). This page is where
+    # observations are added to the project, so it is where fetching
+    # more of them from elsewhere belongs.
+    def test_an_importing_project_offers_a_link_to_the_import
+      site = ProjectExternalSite.create!(
+        project: @project, external_site: external_sites(:inaturalist),
+        use_constraints: true, importing: true
+      )
+
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("a[href=?]",
+                    new_inat_import_path(project_site: site.id))
+    end
+
+    def test_a_site_not_importing_offers_no_link
+      site = ProjectExternalSite.create!(
+        project: @project, external_site: external_sites(:inaturalist),
+        use_constraints: true, alerting: true
+      )
+
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("a[href=?]",
+                    new_inat_import_path(project_site: site.id), count: 0)
+    end
+
     private
 
     # Helper to pull observations from the rendered view for assertions.
