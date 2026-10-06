@@ -2769,8 +2769,7 @@
   project_site_needs_a_source: Give an iNaturalist project or use this project's constraints before turning alerting or importing on.
   project_alerts_enabled: "[site] alerts enabled"
   project_alerts_subscribe: "Email me when [site] identifies an observation matching this project"
-  project_import_enabled: "[site] importing enabled"
-  project_import_start: "Import this project's observations from [site]"
+  project_import_start: "iNat Update"
   project_site_inat_project_unknown: "'[project]' does not name an iNaturalist project."
   project_site_inat_project_ambiguous: "'[project]' names more than one iNaturalist project. Use its id or the address of its page instead."
 

@@ -165,6 +165,21 @@ module Projects
       assert_response(:not_found)
     end
 
+    # Nothing listed is nothing to add.
+    def test_add_all_is_offered_only_when_something_matches
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("form[action^=?]",
+                    add_all_project_updates_path(project_id: @project.id))
+
+      @project.add_observation(@matching_obs)
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("form[action^=?]",
+                    add_all_project_updates_path(project_id: @project.id),
+                    count: 0)
+    end
+
     # A site admin says a project may be imported from; its admins are
     # then the people who start one (#5416). This page is where
     # observations are added to the project, so it is where fetching

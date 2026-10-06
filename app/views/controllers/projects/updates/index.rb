@@ -28,6 +28,7 @@ module Views::Controllers::Projects::Updates
 
       render_toolbar
       render_pagination
+      render_add_all_button
       render_matrix
       render_pagination
     end
@@ -38,10 +39,7 @@ module Views::Controllers::Projects::Updates
       div(class: "d-flex justify-content-between " \
                  "align-items-center mb-3 flex-wrap") do
         render_count_and_toggle
-        div do
-          render_import_buttons
-          render_add_all_button
-        end
+        div { render_import_buttons }
       end
     end
 
@@ -53,11 +51,8 @@ module Views::Controllers::Projects::Updates
       import_sites.each do |project_site|
         Button(
           type: :get,
-          name: :project_import_start.l(
-            site: project_site.external_site.name
-          ),
-          target: new_inat_import_path(project_site: project_site.id),
-          class: "mr-2"
+          name: :project_import_start.l,
+          target: new_inat_import_path(project_site: project_site.id)
         )
       end
     end
@@ -88,16 +83,21 @@ module Views::Controllers::Projects::Updates
       :project_updates_count
     end
 
+    # Nothing listed is nothing to add, so the button says nothing.
     def render_add_all_button
-      Button(
-        type: :post,
-        name: :project_updates_add_all.t,
-        target: add_all_project_updates_path(
-          project_id: @project.id,
-          show_excluded: @show_excluded
-        ),
-        confirm: :project_updates_confirm_add_all.t
-      )
+      return if @current_count.zero?
+
+      div(class: "mb-3") do
+        Button(
+          type: :post,
+          name: :project_updates_add_all.t,
+          target: add_all_project_updates_path(
+            project_id: @project.id,
+            show_excluded: @show_excluded
+          ),
+          confirm: :project_updates_confirm_add_all.t
+        )
+      end
     end
 
     def render_pagination
