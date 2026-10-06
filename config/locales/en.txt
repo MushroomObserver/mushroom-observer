@@ -1942,8 +1942,9 @@
   rss_title: "[:app_title]"
   rss_filtered_mouseover: "[:app_title] has applied filter(s) based on your preferences."
   rss_show: "Show:"
-  rss_all: Everything
+  rss_all: All
   rss_all_help: Show all object types.
+  rss_selected: Selected
   rss_one_observation: "[:observations.ti]"
   rss_one_name: "[:names.ti]"
   rss_one_location: "[:locations.ti]"
@@ -1952,7 +1953,7 @@
   rss_one_glossary_term: "[:glossary.ti]"
   rss_one_article: "[:news.ti]"
   rss_one_help: Show only [types].
-  rss_make_default: Make This My Default
+  rss_make_default: Set as default
   rss_created_at: "[TYPE] Created"
   rss_destroyed: "[TYPE] Deleted"
 

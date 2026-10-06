@@ -16,4 +16,12 @@
 // below the input at narrow widths.
 .page-input {
   flex-wrap: nowrap;
+
+  // Floor, not a fixed size -- this sits in a flex row alongside a
+  // variable-width sibling (Header::Sorter, or the rss-log
+  // type-filter row) that can otherwise shrink the input below a
+  // usable width.
+  .form-control {
+    min-width: 4rem;
+  }
 }

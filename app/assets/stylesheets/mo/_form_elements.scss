@@ -118,9 +118,17 @@ $btn-active-variants: (
 // Button-styled filter checkboxes (rss-log type filters etc.):
 // CSS-only "pressed" state via `:has()` matching the inner checked
 // input — no JS to toggle `.active`. Same pattern as
-// `.thumb_img_btn` in `_carousel.scss`.
-.filter-checkbox:has(input[type="checkbox"]:checked) {
+// `.thumb_img_btn` in `_carousel.scss`. Not for `.dropdown-item`
+// rows — those show state via the checked box alone, no background.
+.filter-checkbox:not(.dropdown-item):has(input[type="checkbox"]:checked) {
   @include button-active-state;
+}
+
+// ButtonStyleCheckbox/ButtonStyleRadio's two-zone split: a fixed
+// width for the custom-control graphic, the rest to the label zone.
+.checkbox-zone,
+.radio-zone {
+  flex: 0 0 1.5rem;
 }
 
 // Remove browser default gradients on select elements

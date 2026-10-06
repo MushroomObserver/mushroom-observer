@@ -67,6 +67,13 @@ class Components::Dropdown < Components::Base
   # `trusted_html` emits it intact. Used by the sort-bar to inject
   # the mobile-only `Sort by:` header.
   prop :menu_header, _Nilable(::String), default: nil
+  # Optional raw content rendered inside the menu `<div>`, after any
+  # sections. SafeBuffer (from `capture { … }`), for menu content
+  # that doesn't fit `section`'s link-tuple shape -- form fields,
+  # checkboxes. A caller using only `menu_content:` can pass an empty
+  # block (`Dropdown(..., menu_content: ...) { }`); the empty-menu
+  # guard below also checks this, not just registered sections.
+  prop :menu_content, _Nilable(::String), default: nil
 
   def initialize(...)
     super
@@ -79,7 +86,7 @@ class Components::Dropdown < Components::Base
     # we render the wrapper + items afterwards.
     vanish(self, &block)
     rendered = @sections.map { |s| normalize_section(s) }.reject(&:empty?)
-    return if rendered.empty?
+    return if rendered.empty? && @menu_content.blank?
 
     send(@element,
          class: class_names("dropdown d-inline-block", @wrapper_class)) do
@@ -131,6 +138,7 @@ class Components::Dropdown < Components::Base
         div(class: "dropdown-divider") if idx.positive?
         tuples.each { |tuple| render_link(tuple) }
       end
+      trusted_html(@menu_content) if @menu_content
     end
   end
 

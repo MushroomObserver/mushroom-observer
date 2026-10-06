@@ -8,8 +8,10 @@
 #     (`Header::PageTitle` — replaces `_page_title.erb`);
 #   - on index actions (and `maps` show), the index filter / pager
 #     bar (`Header::IndexBar` — replaces `_index_bar.erb`);
-#   - the rss-log type-filter row and project observation-buttons
-#     row, both fed from content_for slots.
+#   - the project observation-buttons row, fed from a content_for
+#     slot. (The rss-log type-filter row renders inline with the
+#     pager instead, via `IndexPaginationNav`'s `:type_filters` slot
+#     — see `Views::FullPageBase::IndexNav#add_type_filters`.)
 #
 # `any_content_filters_applied` is the controller-set ivar that
 # `ApplicationController::Indexes` populates on index actions; we
@@ -55,19 +57,12 @@ module Views::Layouts
         controller_name == "maps"
     end
 
-    # Matches the ERB exactly: the outer `.row` is always rendered,
-    # even when neither inner content_for is set. Keeps the empty
-    # row in case any CSS / JS keys off `header > .row:last-child`.
+    # Matches the ERB's structure: the outer `.row` is always
+    # rendered, even when the inner content_for isn't set. Keeps the
+    # empty row in case any CSS / JS keys off `header > .row:last-child`.
     def render_filter_row
       Row do
-        render_type_filters if content_for?(:type_filters)
         render_observation_buttons if content_for?(:observation_buttons)
-      end
-    end
-
-    def render_type_filters
-      Column(xs: 12, class: "hidden-print") do
-        trusted_html(content_for(:type_filters))
       end
     end
 

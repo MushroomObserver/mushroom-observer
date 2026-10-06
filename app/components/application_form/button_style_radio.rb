@@ -1,25 +1,16 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # A button-styled radio: a `<label class="btn …">` wrapping
-  # an `<input type="radio">` plus arbitrary block content (the visible
-  # text/icons). NO `.radio` div wrap — that wrap is for vertical
-  # checkbox-list layout; this component is for radios that look and
-  # behave like buttons (a `.btn-group[data-toggle="buttons"]`
-  # pattern, or standalone button-styled radios scattered across a
-  # form).
+  # Two independent click zones: a fixed-width radio zone (BS4
+  # custom-radio graphic) and a flex-grow label zone (block content).
+  # Same shape as ButtonStyleCheckbox -- see its comment for why.
   #
-  # Multiple instances with the same `name:` form a radio group via
-  # browser-native behavior — no JS needed to manage checked state
-  # across them. The `data-form-images-target`-style hook in
-  # Form::UploadGallery::Item only manages the visual `.active` class on
-  # the label.
+  # Multiple instances sharing one `name:` form a radio group via
+  # browser-native behavior -- no JS needed.
   #
-  # Standalone (no Superform context) — takes raw HTML kwargs rather
-  # than a `Field` / `FieldProxy`, since the call sites (carousel
-  # cards, in-form toolbar radios) don't always have a form context
-  # available and the radio name is usually fixed by the surrounding
-  # markup contract anyway.
+  # `label_wrap: true` also wraps the label zone in a `<label
+  # for=id>`, for content with no competing click action (e.g.
+  # Form::UploadGallery::Item's thumbnail picker).
   #
   # @example
   #   render(Components::ApplicationForm::ButtonStyleRadio.new(
@@ -30,21 +21,17 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     span(class: "set_thumb_img_text") { :image_set_default.l }
   #   end
   class ButtonStyleRadio < Phlex::HTML
-    # Extends `Phlex::HTML` directly (not `Components::Base`), so it
-    # gets no Kit sugar on its own — see `.claude/rules/phlex_reference.md`'s
-    # "Kit sugar doesn't reach app/components/application_form/*" section.
     include ::Components
 
     # @param name [String] HTML name (shared across radios in the group)
     # @param value [String] value submitted when this radio is checked
-    # @param id [String] HTML id (matches the label's `for`)
+    # @param id [String] HTML id (matches the radio zone's label `for`)
     # @param checked [Boolean] initial checked state
-    # @param variant [Symbol, nil] btn variant; nil (default) for btn-default
-    #   frame, :strip for a plain label with no btn classes
-    # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
-    # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
-    #   `class:` for identifier classes, `data:`). Do not pass btn classes
-    #   here — use `variant:` and `size:` instead.
+    # @param variant [Symbol, nil] btn variant for the outer wrapper
+    # @param size [Symbol, nil] btn size modifier for the outer wrapper
+    # @param label_wrap [Boolean] also wrap the label zone in a
+    #   `<label for=id>` (default false)
+    # @param label [Hash] extra HTML attrs for the outer wrapper
     # @param input_attrs [Hash] HTML attrs passed through to `<input>`
     def initialize(name:, value:, id:, **opts)
       super()
@@ -54,24 +41,40 @@ class Components::ApplicationForm < Superform::Rails::Form
       @checked = opts.delete(:checked) { false }
       @variant = opts.delete(:variant)
       @size = opts.delete(:size)
-      @label_attrs = opts.delete(:label) || {}
+      @label_wrap = opts.delete(:label_wrap) { false }
+      @wrapper_attrs = opts.delete(:label) || {}
       @input_attrs = opts
     end
 
     def view_template(&block)
-      Button(tag: :label, for: @id, variant: @variant, size: @size,
-             class: @label_attrs[:class],
-             **@label_attrs.except(:class)) do
-        input(**input_attributes)
-        block&.call
+      Button(tag: :span, variant: @variant, size: @size,
+             **mix({ class: "d-flex align-items-center" }, @wrapper_attrs)) do
+        render_radio_zone
+        render_label_zone(&block)
       end
     end
 
     private
 
+    def render_radio_zone
+      div(class: "custom-control custom-radio radio-zone") do
+        input(**input_attributes)
+        label(class: "custom-control-label", for: @id)
+      end
+    end
+
+    def render_label_zone(&block)
+      if @label_wrap
+        label(for: @id, class: "label-zone flex-grow-1") { yield if block }
+      else
+        div(class: "label-zone flex-grow-1") { yield if block }
+      end
+    end
+
     def input_attributes
-      { type: :radio, name: @name, id: @id, value: @value,
-        checked: @checked, **@input_attrs }
+      mix({ type: :radio, name: @name, id: @id, value: @value,
+            checked: @checked, class: "custom-control-input" },
+          @input_attrs)
     end
   end
 end
