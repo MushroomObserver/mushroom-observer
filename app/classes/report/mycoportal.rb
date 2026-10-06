@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "haversine"
-
 # Report (a TSV spreadsheet) for exporting Observations to MyCoPortal
 # https://mycoportal.org/
 # https://www.mycoportal.org/portal/api/v2/documentation
@@ -12,7 +10,6 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < CSV
-    CODE_NAME_QUALIFIER = "code name aff. species"
     GPS_HIDDEN_MESSAGE = "Coordinates obscured by observer"
 
     # MCP uses Symbiota, which is largely based on Darwin Core (DwC).
@@ -83,30 +80,20 @@ module Report
 
     # taxon name, without authority or qualification (such as "group")
     def sciname(row)
-      text_name = row.name_text_name
-      return text_name.split.first if code_name?(row)
-      # The last word in text_name could be Group or Complex
-      return text_name_without_last_word(text_name) if group?(row)
-
-      text_name
+      NameResolver.new(row).sciname
     end
 
     # Qualifies unpublished MO text_name.
-    # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.
+    # Examples: nom. prov., comb. prov., group, sensu lato, sensu auct.,
+    # aff. section, aff. <code name epithet>
     def identification_qualifier(row)
-      return nil unless unregistrable_name?(row)
-      return CODE_NAME_QUALIFIER if code_name?(row)
-      return group_token(row) if group?(row)
-      return prov_token(row) if provisional?(row)
-
-      row.name_author&.match(/sensu.*/)&.[](0)
+      NameResolver.new(row).identification_qualifier
     end
 
-    # Full name+author for code names, provisional names, and groups
+    # Full name+author for code names, provisional names, groups, and
+    # infrageneric ranks (section, subgenus, etc.)
     def taxon_remarks(row)
-      return unless code_name?(row) || provisional?(row) || group?(row)
-
-      "#{row.name_text_name} #{row.name_author}".strip
+      NameResolver.new(row).taxon_remarks
     end
 
     # collector's number
@@ -147,10 +134,13 @@ module Report
       if gps_hidden?(row)
         return unless public_lat(row) && public_lng(row)
 
-        box = loc_box(row)
-        max_distance_to_any_corner(public_lat(row), public_lng(row), box)
+        CoordinateUncertainty.max_distance_to_any_corner(
+          public_lat(row), public_lng(row), loc_box(row)
+        )
       elsif row.obs_lat.blank?
-        distance_from_center_to_farthest_corner(row)
+        CoordinateUncertainty.distance_from_center_to_farthest_corner(
+          loc_box(row)
+        )
       end
     end
 
@@ -176,6 +166,7 @@ module Report
       add_herbarium_accession_numbers!(rows, :herbarium_accession_numbers)
       add_sequence_ids!(rows, :sequence_ids)
       add_gps_hidden!(rows)
+      add_correct_spelling!(rows)
     end
 
     def collector_ids(row)
@@ -195,87 +186,97 @@ module Report
     end
 
     def sort_before(rows)
+      @included_observation_ids = rows.map(&:obs_id)
       rows.sort_by(&:obs_id)
+    end
+
+    # Records every Observation included in the most recent #body call as
+    # exported to MyCoPortal (creating or refreshing its ExternalLink), so
+    # a future run's "updated since last export" check has something to
+    # compare against. A separate step from #body -- not automatic -- so
+    # merely computing a CSV never has the side effect of marking
+    # observations as sent; only an explicit post-generation call does.
+    def mark_exported!
+      unless @included_observation_ids
+        raise("mark_exported! called before body")
+      end
+
+      export_observations!
     end
 
     ##########
 
     private
 
-    def group?(row)
-      row.name_text_name.match?(/(group|complex|clade)$/)
+    # Misspelled MO Names must never reach MCP under the wrong spelling --
+    # substitute the correctly-spelled Name's text_name/author/rank for
+    # every downstream calculation. Batched over the distinct Names in
+    # this batch of rows, not per-row.
+    def add_correct_spelling!(rows)
+      corrections = correct_spellings_by_name_id(rows)
+      rows.each do |row|
+        correction = corrections[row.name_id]
+        next unless correction
+
+        row.add_val(correction[:text_name], :corrected_text_name)
+        row.add_val(correction[:author], :corrected_author)
+        row.add_val(correction[:rank], :corrected_rank)
+      end
     end
 
-    def group_token(row)
-      row.name_text_name.match(/(group|complex|clade)$/)[0]
+    def correct_spellings_by_name_id(rows)
+      name_ids = rows.map(&:name_id).uniq
+      Name.where(id: name_ids).where.not(correct_spelling_id: nil).
+        includes(:correct_spelling).index_by(&:id).
+        transform_values { |name| correct_spelling_vals(name) }
     end
 
-    def text_name_without_last_word(text_name)
-      text_name.split[0...-1].join(" ")
+    def correct_spelling_vals(name)
+      correct = name.correct_spelling
+      { text_name: correct.text_name, author: correct.author,
+        rank: correct.rank }
     end
 
-    def unregistrable_name?(row)
-      group?(row) ||
-        sensu_non_stricto?(row) ||
-        provisional?(row) ||
-        code_name?(row)
+    # Bookkeeping only -- must never let a failure here (e.g. a missing
+    # ExternalSite row, a DB error) turn an already-computed, valid CSV
+    # into a 500. See Report::MycoportalImageList#export_images! for the
+    # same reasoning.
+    def export_observations!
+      site = ExternalSite.mycoportal
+      now = Time.current
+      @included_observation_ids.each do |obs_id|
+        upsert_export_link(site, obs_id, now)
+      end
+    rescue StandardError => e
+      Rails.logger.error(
+        "MyCoPortal export-tracking failed: #{e.class}: #{e.message}"
+      )
     end
 
-    def sensu_non_stricto?(row)
-      row.name_author.present? &&
-        row.name_author.match(/sensu(?!.*stricto)/)
-    end
-
-    def provisional?(row)
-      row.name_author&.match?(/\w+\. prov\./)
-    end
-
-    def prov_token(row)
-      row.name_author&.match(/\w+\. prov\./)&.[](0)
-    end
-
-    def code_name?(row)
-      row.name_text_name.match?(/'/)
-    end
-
-    def distance_from_center_to_farthest_corner(row)
-      center = loc_box(row).center
-      distance_to_farthest_corner(center.first, center.last, loc_box(row))
+    # Creates the Observation's export link on first export, or refreshes
+    # last_synced_at on a re-export -- unlike images (never re-sent),
+    # observations can be updated and re-exported.
+    def upsert_export_link(site, obs_id, synced_at)
+      link = ExternalLink.find_by(target_type: "Observation",
+                                  target_id: obs_id, external_site: site,
+                                  relationship: :export)
+      if link
+        link.update!(last_synced_at: synced_at)
+      else
+        ExternalLink.create!(user: User.admin, target_type: "Observation",
+                             target_id: obs_id, external_site: site,
+                             relationship: :export, last_synced_at: synced_at)
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.warn(
+        "MyCoPortal export link failed for Observation #{obs_id}: " \
+        "#{e.message}"
+      )
     end
 
     def loc_box(row)
       Mappable::Box.new(north: row.loc_north, south: row.loc_south,
                         east: row.loc_east, west: row.loc_west)
-    end
-
-    def distance_to_farthest_corner(lat, lng, box)
-      # east and west corners are equidistant from center because
-      # boxes are isoceles trapezoids with bases parallel to the equator
-      # farthest corner belongs to longest base
-      if lat.positive?
-        distance_to_se_corner(lat, lng, box)
-      else
-        distance_to_ne_corner(lat, lng, box)
-      end
-    end
-
-    def distance_to_ne_corner(lat, lng, box)
-      Haversine.distance(lat, lng, box.north, box.east).to_meters.round
-    end
-
-    def distance_to_se_corner(lat, lng, box)
-      Haversine.distance(lat, lng, box.south, box.east).to_meters.round
-    end
-
-    def max_distance_to_any_corner(lat, lng, box)
-      box_corners(box).map do |clat, clng|
-        Haversine.distance(lat, lng, clat, clng).to_meters
-      end.max.round
-    end
-
-    def box_corners(box)
-      [[box.north, box.east], [box.north, box.west],
-       [box.south, box.east], [box.south, box.west]]
     end
 
     def add_gps_hidden!(rows)
