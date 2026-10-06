@@ -1487,6 +1487,35 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_requested(obs_stub)
   end
 
+  # Regression: an import that listed no ids leaves the column nil, and
+  # the id check runs ahead of the URL check it is waiting for. A
+  # project admin's import is the one that arrives this way.
+  def test_url_mode_with_no_id_list_reaches_page_parser
+    @user = users(:dick)
+    inat_import = InatImport.find_or_create_by(user: @user)
+    inat_import.update(
+      state: "Authorizing", inat_url: "place_id=1", inat_ids: nil,
+      import_all: false, import_others: true,
+      inat_username: @user.inat_username, token: "MockCode",
+      importables: nil, imported_count: 0,
+      avg_import_time: InatImport::BASE_AVG_IMPORT_SECONDS,
+      response_errors: "", log: [], last_obs_start: Time.now.utc,
+      ended_at: nil
+    )
+
+    stub_token_requests
+    stub_check_username_match(@user.inat_username)
+    obs_stub = stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+               to_return(status: 200,
+                         body: { total_results: 0, results: [] }.to_json)
+
+    WebMock.reset_executed_requests!
+    InatImportJob.perform_now(inat_import)
+
+    assert_requested(obs_stub)
+    assert_empty(inat_import.reload.response_errors)
+  end
+
   def test_import_canceled
     create_ivars_from_filename("listed_ids") # importing multiple observations
     # override ivar because this test wants to import multiple observations
