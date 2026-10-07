@@ -28,7 +28,7 @@ class Views::Controllers::Names::Show::LifeformPanel < Views::Base
   end
 
   def render_lifeform_terms
-    ul(class: "list-unstyled mb-2") do
+    ul(class: "list-unstyled mb-0") do
       @name.lifeform.strip.split.each do |word|
         li { plain(lifeform_key(word).t) }
       end

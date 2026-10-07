@@ -36,7 +36,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   # Name's state (`first_child` + the visibility predicates on
   # each tab). The view just iterates inside a `<ul>`.
   def render_link_tabs
-    ul(class: "list-unstyled") do
+    ul(class: "list-unstyled mb-0") do
       Tab::Name::ClassificationLinks.new(
         name: @name, children_query: @children_query,
         first_child: @first_child, controller: controller
@@ -54,7 +54,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
     parents = approved.all_parents
     return unless approved.classification.present? && parents.any?
 
-    ul(class: "list-unstyled mb-2") do
+    ul(class: "list-unstyled mb-0") do
       ([approved] + parents).reverse_each do |n|
         render_classification_row(n, approved)
       end
@@ -77,7 +77,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   # + safe_nbsp + safe_nbsp` indent — semantic spacing rather than
   # smuggling layout through `&nbsp;` characters.
   def render_alias_suffix
-    span(class: "ml-4") do
+    span(class: "ml-3") do
       plain("(= ")
       i { trusted_html(@name.text_name.t) }
       plain(")")
