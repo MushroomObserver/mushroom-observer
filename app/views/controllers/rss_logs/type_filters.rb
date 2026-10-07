@@ -98,17 +98,21 @@ module Views::Controllers::RssLogs
     # Raw `menu_content:`, not `menu.section(...)` -- these rows
     # don't fit the link-tuple shape `section` expects.
     #
-    # stop-propagation keeps the menu open on a checkbox click
-    # (Bootstrap's dropdown would otherwise close it).
+    # type-filters: keeps the menu open on a checkbox click, and
+    # disables Apply until a checkbox's state changes.
     def render_dropdown_items
       div(class: "type-filter-menu",
-          data: { controller: "stop-propagation",
-                  action: "click->stop-propagation#stop" }) do
+          data: { controller: "type-filters",
+                  action: "click->type-filters#stop " \
+                          "change->type-filters#checkChanged" }) do
         render_everything_dropdown
         RssLog::ALL_TYPE_TAGS.map(&:to_s).each do |type|
           render_type_checkbox_dropdown(type)
         end
-        div(class: "dropdown-item") { render_submit_button_dropdown }
+        div(class: "dropdown-item disabled",
+            data: { type_filters_target: "submitItem" }) do
+          render_submit_button_dropdown
+        end
         render_save_default_row
       end
     end
@@ -173,7 +177,8 @@ module Views::Controllers::RssLogs
 
     def render_submit_button_dropdown
       Button(type: :submit, name: :apply.ti, variant: :link,
-             class: "text-nowrap p-0")
+             class: "text-nowrap p-0", disabled: true,
+             data: { type_filters_target: "submit" })
     end
 
     def render_save_default_button_dropdown
@@ -200,7 +205,8 @@ module Views::Controllers::RssLogs
                name: "q[types][]", value: type,
                id: "type_#{type}_dropdown_#{@position}",
                checked: type_checked?(type), variant: :strip,
-               label: { class: "dropdown-item filter-checkbox" }
+               label: { class: "dropdown-item filter-checkbox" },
+               data: { type_filters_target: "checkbox" }
              )) { filter_for_type(type) }
     end
 

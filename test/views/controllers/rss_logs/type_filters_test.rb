@@ -167,7 +167,31 @@ module Views::Controllers::RssLogs
     def test_dropdown_menu_has_no_leading_spacer
       html = render_component(nil, ["all"])
 
-      assert_no_html(html, "#log_filter_menu_top .dropdown-item.disabled")
+      assert_html(html, "#log_filter_menu_top .dropdown-item:first-child",
+                  text: :rss_all.t)
+    end
+
+    def test_dropdown_apply_starts_disabled
+      html = render_component(nil, ["all"])
+
+      assert_html(
+        html, "#log_filter_menu_top button[type='submit'][disabled]" \
+              "[data-type-filters-target='submit']"
+      )
+      assert_html(
+        html, "#log_filter_menu_top " \
+              "div[data-type-filters-target='submitItem'].disabled"
+      )
+    end
+
+    def test_dropdown_checkbox_has_type_filters_target
+      html = render_component(nil, ["all"])
+
+      assert_html(
+        html, "#log_filter_menu_top " \
+              "input[type='checkbox'][value='observation']" \
+              "[data-type-filters-target='checkbox']"
+      )
     end
 
     def test_dropdown_renders_everything_row
