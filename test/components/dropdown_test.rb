@@ -26,10 +26,10 @@ class DropdownTest < ComponentTestCase
     end
 
     assert_html(html, "a.dropdown-toggle[id='single_tab_toggle']")
-    assert_html(html, "div.dropdown-menu[id='single_tab_menu']")
+    assert_html(html, ".dropdown-menu[id='single_tab_menu']")
     assert_html(
       html,
-      "div.dropdown-menu a[href='#{routes.project_path(id: @project.id)}']"
+      ".dropdown-menu a[href='#{routes.project_path(id: @project.id)}']"
     )
   end
 
@@ -109,7 +109,7 @@ class DropdownTest < ComponentTestCase
       menu.section(Tab::Project::Summary.new(project: @project))
     end
 
-    assert_html(html, "div.dropdown-menu div.dropdown-divider")
+    assert_html(html, ".dropdown-menu .dropdown-divider")
   end
 
   # `element:` controls the outer wrapper tag -- `:li` by default

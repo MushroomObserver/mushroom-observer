@@ -53,7 +53,7 @@ module Views::Layouts
       assert_html(html, ".sorter > .dropdown")
       assert_html(html, ".dropdown a.dropdown-toggle")
       # Menu carries the `sorts` extra class.
-      assert_html(html, "div.dropdown-menu.sorts")
+      assert_html(html, ".dropdown-menu.sorts")
     end
 
     def test_menu_contains_mobile_only_sort_by_header
@@ -62,7 +62,7 @@ module Views::Layouts
       # `menu_header:` slot — mobile-only row rendered above the
       # section's links.
       only_classes = Components::Column.mobile_only_classes.join(".")
-      assert_html(html, "div.dropdown-menu.sorts > div.#{only_classes}",
+      assert_html(html, ".dropdown-menu.sorts > .#{only_classes}",
                   text: "#{:sort_by_header.l}:")
     end
 

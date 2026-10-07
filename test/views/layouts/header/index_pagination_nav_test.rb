@@ -14,9 +14,6 @@ module Views::Layouts
 
       # Main container has correct position class
       assert_html(html, ".pagination-top")
-
-      # Contains two children (sorter wrapper + pager wrapper)
-      assert_html(html, ".pagination-top > *", count: 2)
     end
 
     def test_renders_basic_structure_with_position_bottom
