@@ -1,51 +1,66 @@
 # frozen_string_literal: true
 
-# Type-filter form for the rss_logs (activity logs) index. Renders
-# a row of checkbox buttons (one per RssLog type) plus an "all"
-# button and an Apply submit.
+# Type-filter row for the rss_logs index: checkbox buttons per
+# RssLog type, plus an "all" button and an Apply submit.
 module Views::Controllers::RssLogs
   class TypeFilters < Views::Base
     prop :query, _Nilable(::Query)
     prop :types, _Array(::String)
     prop :user, _Nilable(::User), default: nil
+    # Suffixes element ids so a :top/:bottom pair of renders doesn't
+    # collide (see Views::FullPageBase::IndexNav#add_type_filters).
+    prop :position, ::Symbol, default: -> { :top }
 
-    # Only the Save-Defaults button needs this (its formmethod="post"
-    # override is a state-changing request); the Apply button's plain
-    # GET is exempt from CSRF checks entirely.
+    # Save-Defaults needs a CSRF token (it's a POST); Apply's GET
+    # doesn't.
     register_value_helper :form_authenticity_token
 
-    # Not a Superform -- a multi-select checkbox filter, not a
-    # single-model-bound field set. Submitting the combined state of
-    # several independently-toggled checkboxes as one q[types][] array
-    # needs a submit, unlike IndexPaginationNav's single-value goto
-    # controls, which each fully specify their own destination and so
-    # reduce to plain links.
-    # rubocop:disable-next MO/NoHandRolledFormTag
+    # Below xl: a stacked Dropdown. At xl+: the original inline
+    # btn-group. Two separate <form>s, not one responsive layout --
+    # only the visible form's submit button is reachable, so only
+    # its checkboxes submit. No JS needed to keep them in sync.
     def view_template
-      form(action: activity_logs_path, method: :get,
-           class: "filter-form", id: "log_filter_form",
-           data: { turbo: "false" }) do
-        render_hidden_fields
-        render_filter_buttons
-      end
+      render_dropdown_filter_form
+      render_bar_filter_form
     end
 
     private
 
+    # No named Bootstrap breakpoint fits the bar -- it needs more
+    # room alongside the pager than even xl (1320px) comfortably
+    # gives it, so this is a custom 1500px cutoff (see
+    # .filter-form-dropdown/.filter-form-bar in _form_elements.scss),
+    # not Components::Column.visibility_classes.
+    def render_dropdown_filter_form
+      # rubocop:disable-next MO/NoHandRolledFormTag
+      form(action: activity_logs_path, method: :get,
+           class: "filter-form filter-form-dropdown",
+           id: "log_filter_form_dropdown_#{@position}",
+           data: { turbo: "false" }) do
+        render_hidden_fields
+        render_dropdown_filter
+      end
+    end
+
+    def render_bar_filter_form
+      # rubocop:disable-next MO/NoHandRolledFormTag
+      form(action: activity_logs_path, method: :get,
+           class: "filter-form filter-form-bar",
+           id: "log_filter_form_bar_#{@position}",
+           data: { turbo: "false" }) do
+        render_hidden_fields
+        render_bar_filter
+      end
+    end
+
     def render_hidden_fields
-      # `formmethod="post"` is the only verb HTML5 allows on a button
-      # override -- Rack::MethodOverride reads `_method` to route the
-      # Save-Defaults POST to Account::Preferences#update (PATCH).
-      # Inert for the Apply button's GET submission: MethodOverride
-      # only inspects `_method` on a POST request.
+      # _method routes Save-Defaults' formmethod="post" override to
+      # Account::Preferences#update; inert for Apply's plain GET.
       input(type: "hidden", name: "_method", value: "patch")
       input(type: "hidden", name: "authenticity_token",
             value: form_authenticity_token)
-      # Only reached by the plain-HTML fallback path (no JS/Turbo) --
-      # sends the user back to the activity log instead of the
-      # account prefs edit page. The Turbo path stays on this page
-      # regardless. `back` is an enum key, not a URL -- see
-      # Account::PreferencesController::BACK_DESTINATIONS.
+      # Non-JS fallback only -- returns to the activity log, not the
+      # account-prefs edit page.
       input(type: "hidden", name: "back", value: "rss_logs")
       return unless @query
 
@@ -54,65 +69,111 @@ module Views::Controllers::RssLogs
       end
     end
 
-    def render_filter_buttons
-      # "Show:" label sits OUTSIDE the .btn-group: BS3 `.btn-group`
-      # floats and inline-blocks its children expecting `.btn`-shaped
-      # elements, and a non-`.btn` span inside breaks the layout (the
-      # span ends up after the group). Sibling-of-group keeps it
-      # inline-aligned without being subject to the group's layout
-      # rules.
-      div(class: class_names("px-3 pb-1 text-nowrap",
-                             Components::Column.mobile_hide_classes)) do
+    # "Show:" sits outside the dropdown, like Header::Sorter's
+    # "Sort by:". The toggle shows the live selection when there's a
+    # single clean word for it, else falls back to "Show:".
+    def render_dropdown_filter
+      div(class: "flex-bar") do
+        render(Components::Navbar::Text.new(class: "mx-0 pr-2")) do
+          :rss_show.t
+        end
+        Dropdown(
+          id: "log_filter_toggle_#{@position}",
+          menu_id: "log_filter_menu_#{@position}",
+          label: dropdown_toggle_label, element: :div,
+          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-0"),
+          toggle_variant: :outline, toggle_class: "font-weight-normal",
+          menu_content: capture { render_dropdown_items }
+        )
+      end
+    end
+
+    def dropdown_toggle_label
+      return :rss_all.t if @types == ["all"]
+      return :"rss_one_#{@types.first}".t if single_known_type?
+
+      :rss_selected.t
+    end
+
+    # `@types` can also be `["none"]` (RssLogsController's sentinel
+    # for "no valid type survived"), which has no `rss_one_*` tag.
+    def single_known_type?
+      @types.size == 1 &&
+        RssLog::ALL_TYPE_TAGS.map(&:to_s).include?(@types.first)
+    end
+
+    # Raw `menu_content:`, not `menu.section(...)` -- these rows
+    # don't fit the link-tuple shape `section` expects.
+    #
+    # type-filters: keeps the menu open on a checkbox click, and
+    # disables Apply until a checkbox's state changes.
+    def render_dropdown_items
+      div(class: "type-filter-menu",
+          data: { controller: "type-filters",
+                  action: "click->type-filters#stop:stop " \
+                          "change->type-filters#checkChanged" }) do
+        render_everything_dropdown
+        RssLog::ALL_TYPE_TAGS.map(&:to_s).each do |type|
+          render_type_checkbox_dropdown(type)
+        end
+        div(class: "dropdown-item disabled",
+            data: { type_filters_target: "submitItem" }) do
+          render_submit_button_dropdown
+        end
+        render_save_default_row
+      end
+    end
+
+    def render_save_default_row
+      return unless show_make_default?
+
+      div(class: "dropdown-item") { render_save_default_button_dropdown }
+    end
+
+    def render_bar_filter
+      div(class: "text-nowrap") do
         render_show_label
         ButtonGroup do
-          render_everything_button
-          render_type_buttons
+          render_everything_bar
+          RssLog::ALL_TYPE_TAGS.map(&:to_s).each do |type|
+            render_type_checkbox_bar(type)
+          end
           render_submit_button
           render_save_default_button
         end
       end
     end
 
-    # Inline label for the whole filter group. Was rendered as a
-    # disabled btn-default to share vertical rhythm with the other
-    # button-styled controls, but that's misleading (looks like a
-    # button you can't press). Plain text with `text-muted` and
-    # margin matches the BS3 caption-style without the affordance.
     def render_show_label
-      span(class: "text-muted mr-2") { :rss_show.t }
+      span(class: "mr-2") { :rss_show.t }
     end
 
-    def render_everything_button
+    def render_everything_bar
       Button(
-        tag: :span,
-        variant: :outline,
-        size: :sm,
+        tag: :span, variant: :outline, size: :sm,
         class: ("active" if @types == ["all"])
       ) { filter_for_everything }
     end
 
-    def render_type_buttons
-      RssLog::ALL_TYPE_TAGS.map(&:to_s).each do |type|
-        render_type_checkbox(type)
+    # Empty checkbox-zone-width spacer, no checkbox -- aligns this
+    # row's label with the checkbox rows' label-zone text.
+    def render_everything_dropdown
+      Button(
+        tag: :span, variant: :strip,
+        class: class_names("dropdown-item d-flex align-items-center",
+                           ("active" if @types == ["all"]))
+      ) do
+        div(class: "checkbox-zone")
+        div(class: "label-zone flex-grow-1") { filter_for_everything }
       end
     end
 
-    # "Apply" reads more naturally than "Submit" for a filter-
-    # narrowing action where there's nothing being created. The
-    # filter buttons use `.btn-outline-default` (subtle, input-
-    # style); the Apply button uses the solid `.btn-default` so it
-    # stands out as the commit action.
+    # Solid button -- the commit action, distinct from the outline
+    # filter buttons beside it.
     def render_submit_button
       Button(type: :submit, name: :apply.ti, size: :sm)
     end
 
-    # A second submit button on the same form as "Apply," targeting a
-    # different action via `formaction`/`formmethod` -- whatever's
-    # checked at the moment of click is what gets saved, the same
-    # values "Apply" would filter by. `data-turbo="true"` opts just
-    # this button into Turbo, overriding the form's own
-    # `data-turbo="false"`, so the response is a flash-only
-    # confirmation with no page navigation.
     def render_save_default_button
       return unless show_make_default?
 
@@ -121,22 +182,39 @@ module Views::Controllers::RssLogs
              formmethod: "post", data: { turbo: "true" })
     end
 
-    # Individual type checkbox styled as a Bootstrap button. Routes
-    # through `ButtonStyleCheckbox` so the markup stays in lockstep
-    # with the rest of MO's button-style radio/checkbox helpers
-    # (BS3/4/5 migration changes one file, not many). The "pressed"
-    # active state is CSS-only via `.filter-checkbox:has(input:checked)`
-    # in `_form_elements.scss`.
-    def render_type_checkbox(type)
+    def render_submit_button_dropdown
+      Button(type: :submit, name: :apply.ti, variant: :link,
+             class: "text-nowrap p-0", disabled: true,
+             data: { type_filters_target: "submit" })
+    end
+
+    def render_save_default_button_dropdown
+      Button(type: :submit, name: :rss_make_default.t, variant: :link,
+             class: "text-nowrap p-0",
+             formaction: account_preferences_path,
+             formmethod: "post", data: { turbo: "true" })
+    end
+
+    # Pressed state is CSS-only via .filter-checkbox:has(:checked).
+    def render_type_checkbox_bar(type)
       render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
                name: "q[types][]", value: type,
-               id: "type_#{type}", checked: type_checked?(type),
+               id: "type_#{type}_#{@position}", checked: type_checked?(type),
                variant: :outline, size: :sm,
-               label: { class: "filter-checkbox my-0" },
-               class: "mt-0 mr-2"
-             )) do
-        filter_for_type(type)
-      end
+               label: { class: "filter-checkbox my-0" }
+             )) { filter_for_type(type) }
+    end
+
+    # Different id than the bar's copy; stacked dropdown-item instead
+    # of a button pill.
+    def render_type_checkbox_dropdown(type)
+      render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
+               name: "q[types][]", value: type,
+               id: "type_#{type}_dropdown_#{@position}",
+               checked: type_checked?(type), variant: :strip,
+               label: { class: "dropdown-item filter-checkbox" },
+               data: { type_filters_target: "checkbox" }
+             )) { filter_for_type(type) }
     end
 
     # "Everything" filter - returns label or link

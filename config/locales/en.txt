@@ -1945,6 +1945,7 @@
   rss_show: "Show:"
   rss_all: Everything
   rss_all_help: Show all object types.
+  rss_selected: Selected
   rss_one_observation: "[:observations.ti]"
   rss_one_name: "[:names.ti]"
   rss_one_location: "[:locations.ti]"

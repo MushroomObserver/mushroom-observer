@@ -6,68 +6,38 @@
 #   - the optional `:project_banner` content_for slot;
 #   - on non-index actions, the page title strip
 #     (`Header::PageTitle` — replaces `_page_title.erb`);
-#   - on index actions (and `maps` show), the index filter / pager
-#     bar (`Header::IndexBar` — replaces `_index_bar.erb`);
-#   - the rss-log type-filter row and project observation-buttons
-#     row, both fed from content_for slots.
+#   - the project observation-buttons row, fed from a content_for
+#     slot.
 #
-# `any_content_filters_applied` is the controller-set ivar that
-# `ApplicationController::Indexes` populates on index actions; we
-# accept it explicitly (the layout passes it) rather than poking
-# `controller.instance_variable_get`. Nil for non-index actions.
+# The index filter/pager bar (`Header::IndexBar`) and the rss-log
+# type-filter row no longer render here -- `Header::IndexBar` moved
+# to `Views::Layouts::Application` (above `:page_flash`, after
+# `TopNav`), and the type-filter row renders inline with the pager
+# via `IndexPaginationNav`'s `:type_filters` slot (see
+# `Views::FullPageBase::IndexNav#add_type_filters`).
 module Views::Layouts
   class Header < Views::Base
-    prop :any_content_filters_applied, _Nilable(_Boolean), default: nil
-
     def view_template
-      maybe_set_filter_help
-
       header(id: "header") do
         render_project_banner
         render(PageTitle.new) if controller.action_name != "index"
-        render(IndexBar.new) if index_bar?
         render_filter_row
       end
     end
 
     private
 
-    def maybe_set_filter_help
-      return unless @any_content_filters_applied
-
-      content_for(:filter_help) do
-        Help(type: :tooltip,
-             label: "(#{:filtered.t})",
-             title: :rss_filtered_mouseover.t,
-             extra_class: "filter-help")
-      end
-    end
-
     def render_project_banner
       banner = content_for(:project_banner)
       trusted_html(banner) if banner.present?
     end
 
-    def index_bar?
-      action = controller.action_name
-      controller_name = controller.controller_name
-      (action == "index" && controller_name != "articles") ||
-        controller_name == "maps"
-    end
-
-    # Matches the ERB exactly: the outer `.row` is always rendered,
-    # even when neither inner content_for is set. Keeps the empty
-    # row in case any CSS / JS keys off `header > .row:last-child`.
+    # Matches the ERB's structure: the outer `.row` is always
+    # rendered, even when the inner content_for isn't set. Keeps the
+    # empty row in case any CSS / JS keys off `header > .row:last-child`.
     def render_filter_row
       Row do
-        render_type_filters if content_for?(:type_filters)
         render_observation_buttons if content_for?(:observation_buttons)
-      end
-    end
-
-    def render_type_filters
-      Column(xs: 12, class: "hidden-print") do
-        trusted_html(content_for(:type_filters))
       end
     end
 
