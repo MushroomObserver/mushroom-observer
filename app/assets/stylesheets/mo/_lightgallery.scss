@@ -8,6 +8,23 @@
   margin-right: auto;
   max-width: breakpoint-min(lg);
   font-size: $font-size-base;
+
+  .badge-id {
+    color: $white;
+    border-color: $white;
+
+    &.badge-xl {
+      font-size: $font-size-lg;
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: $black;
+      background-color: $white;
+      text-decoration: none;
+    }
+  }
 }
 
 // lightgallery-core.scss's own rule builds this from $lg-path-images

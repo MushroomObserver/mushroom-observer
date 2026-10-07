@@ -20,10 +20,11 @@ class ObservationFragmentLightboxTitleTest < ComponentTestCase
     assert_includes(html, 'data-controller="section-update"')
     assert_includes(html, "data-section-update-user-value=\"#{@user.id}\"")
 
-    # Should have observation ID link
+    # Should have observation ID link, styled as a badge
     assert_includes(html, "caption_obs_link_#{@obs.id}")
     assert_includes(html, "/obs/#{@obs.id}")
     assert_includes(html, @obs.id.to_s)
+    assert_includes(html, "badge-id")
 
     # Should have the formatted name -- a bare trailing expression
     # (no `plain`/`trusted_html`) is dead code in Phlex and silently
@@ -37,10 +38,6 @@ class ObservationFragmentLightboxTitleTest < ComponentTestCase
 
     # Should have Observation label (localized)
     assert_includes(html, "Observation:")
-
-    # Should have text-bold link style (not btn btn-primary)
-    assert_includes(html, "text-bold")
-    assert_not_includes(html, "btn btn-primary")
   end
 
   def test_renders_without_identify_mode
@@ -48,10 +45,6 @@ class ObservationFragmentLightboxTitleTest < ComponentTestCase
 
     # Should not have OBSERVATION label
     assert_not_includes(html, "OBSERVATION:")
-
-    # Should have btn btn-primary link style
-    assert_includes(html, "btn btn-primary")
-    assert_not_includes(html, "text-bold")
   end
 
   def test_renders_without_user
