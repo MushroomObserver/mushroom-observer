@@ -78,7 +78,8 @@ module Views::Controllers::RssLogs
         type_str = type.to_s
         assert_html(html, "#log_filter_form_bar_top " \
                           "input[type='checkbox'][name='q[types][]']" \
-                          "[value='#{type_str}'][id='type_#{type_str}_top']")
+                          "[value='#{type_str}'][id='type_#{type_str}_top']" \
+                          "[aria-label='#{:"rss_one_#{type}".t}']")
       end
     end
 
@@ -217,7 +218,8 @@ module Views::Controllers::RssLogs
         assert_html(
           html, "#log_filter_menu_top " \
                 "input[type='checkbox'][name='q[types][]']" \
-                "[value='#{type_str}'][id='type_#{type_str}_dropdown_top']"
+                "[value='#{type_str}'][id='type_#{type_str}_dropdown_top']" \
+                "[aria-label='#{:"rss_one_#{type}".t}']"
         )
       end
     end

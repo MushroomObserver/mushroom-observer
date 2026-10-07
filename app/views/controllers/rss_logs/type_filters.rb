@@ -196,12 +196,18 @@ module Views::Controllers::RssLogs
     end
 
     # Pressed state is CSS-only via .filter-checkbox:has(:checked).
+    #
+    # `aria: { label: }` -- the checkbox-zone's label has no text
+    # (it's just the graphic); the visible text sits in a sibling
+    # `.label-zone` div with no `for=` association, so the input
+    # needs an explicit accessible name.
     def render_type_checkbox_bar(type)
       render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
                name: "q[types][]", value: type,
                id: "type_#{type}_#{@position}", checked: type_checked?(type),
                variant: :outline, size: :sm,
-               label: { class: "filter-checkbox my-0" }
+               label: { class: "filter-checkbox my-0" },
+               aria: { label: :"rss_one_#{type}".t }
              )) { filter_for_type(type) }
     end
 
@@ -213,7 +219,8 @@ module Views::Controllers::RssLogs
                id: "type_#{type}_dropdown_#{@position}",
                checked: type_checked?(type), variant: :strip,
                label: { class: "dropdown-item filter-checkbox" },
-               data: { type_filters_target: "checkbox" }
+               data: { type_filters_target: "checkbox" },
+               aria: { label: :"rss_one_#{type}".t }
              )) { filter_for_type(type) }
     end
 
