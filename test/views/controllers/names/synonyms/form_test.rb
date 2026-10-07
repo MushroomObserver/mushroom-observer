@@ -16,19 +16,22 @@ module Views::Controllers::Names::Synonyms
         current_synonyms: [@name, @synonym1, @synonym2]
       )
 
-      # The label for @synonym1 should contain IN ORDER:
-      # checkbox, link, id badge.
+      # The checkbox wrapper for @synonym1 should contain IN ORDER:
+      # checkbox, link, id badge. Checkbox and label are siblings
+      # inside the wrapper (custom-control markup), not nested.
       doc = Nokogiri::HTML(html)
-      label = doc.css("label").find do |lbl|
-        lbl.at_css("a[href='/names/#{@synonym1.id}']")
+      wrapper = doc.css(".custom-control").find do |div|
+        div.at_css("a[href='/names/#{@synonym1.id}']")
       end
-      assert(label, "Expected a label containing the synonym link")
+      assert(wrapper, "Expected a checkbox wrapper containing the synonym " \
+                      "link")
 
-      types = label.css("input[type='checkbox'], a, button").map(&:name)
+      types = wrapper.css("input[type='checkbox'], a, button").map(&:name)
       assert_equal(%w[input a button], types,
-                   "Label should contain checkbox, then link, then id badge")
-      assert_html(label.to_html, "a[href='/names/#{@synonym1.id}']")
-      assert_html(label.to_html, "button.badge",
+                   "Checkbox wrapper should contain checkbox, then link, " \
+                   "then id badge")
+      assert_html(wrapper.to_html, "a[href='/names/#{@synonym1.id}']")
+      assert_html(wrapper.to_html, "button.badge",
                   text: @synonym1.id.to_s)
     end
 

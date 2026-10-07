@@ -7,23 +7,16 @@ import { get, post, put } from '@rails/request.js'
 // preview from memory, and offering form fields for the eventual Image record
 // creation. But nothing of the image exists on our servers yet.
 
-// On form submit, our JS blocks submission of the observation form, while it
-// first uploads the images, creates image records, processes them, and
-// transfers them. The images at the moment of creation do not have an
-// Observation association yet. If any do not process, we sort the good from the
-// bad and send them back to the JS ajax response, displaying the “good images”
-// as created records (no longer editable) and giving the user a report on the
-// “bad images”, offering a chance to add further images, or remove good
-// images.
+// On form submit, our JS blocks submission while it uploads the images,
+// creating Image records not yet associated with the Observation. Any
+// that fail get reported back; the good ones are kept as created
+// records, and the user can add more images or remove the bad ones.
 
-// If all images are processed without problems, the JS adds the list of created
-// image IDs to the obs form, and programmatically submits the form without any
-// further input from the user. The images are finally attached to the
-// observation after it’s created, along with collection numbers, etc. But note
-// that this create-obs step is all very quick. Even when image uploads have
-// gone smoothly, the previous step above, image upload/process/transfer,
-// accounts for ~75-95% of the time “creating the obs” that the user
-// experiences.
+// Once every image processes cleanly, the JS adds the created image
+// IDs to the form and submits it programmatically -- images attach to
+// the Observation after it's created. This final step is quick; the
+// upload/process/transfer step above is most of the time “creating
+// the observation” takes.
 
 const internalConfig = {
   block_form_submission: true,
@@ -66,6 +59,8 @@ export default class extends Controller {
 
   connect() {
     this.element.dataset.formImages = "connected";
+    window.formImagesConnectCount =
+      (window.formImagesConnectCount || 0) + 1;
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
@@ -76,12 +71,10 @@ export default class extends Controller {
     this.form = this.element;
     this.drop_zone = this.formTarget;
     this.submit_buttons = this.element.querySelectorAll('button[type="submit"]');
-    // Phlex renders `data: { upload_max_size: ... }` as the DOM attribute
-    // `data-upload-max-size`, which reads back as `dataset.uploadMaxSize`
-    // (camelCase) -- NOT `dataset.upload_max_size`. The old underscore key
-    // was always undefined, so every `file_size > this.max_image_size`
-    // check silently passed and no size limit was ever enforced client-side
-    // (issue #4872). Number() so the comparisons are numeric, not string.
+    // Phlex renders `data: { upload_max_size: }` as `dataset.uploadMaxSize`
+    // (camelCase), not `dataset.upload_max_size` -- the old underscore
+    // key was always undefined, so the size-limit check went
+    // silently unenforced. Number() so the comparison is numeric.
     this.max_image_size = Number(this.element.dataset.uploadMaxSize);
 
     this.fileStore = { items: [], index: {} }
@@ -145,6 +138,9 @@ export default class extends Controller {
 
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
+      this.form.dataset.submitEventCount =
+        (Number(this.form.dataset.submitEventCount) || 0) + 1;
+      this.form.dataset.blockFormSubmission = this.block_form_submission;
       if (this.block_form_submission) {
         this.uploadAll();
         return false;
@@ -194,13 +190,11 @@ export default class extends Controller {
   /*********************/
   // Container for the image files.
 
-  // Callback for form-exif event "populated", fired from the
-  // carousel-item. form-exif_controller.js's dispatch explicitly sets
-  // target: itemElement -- without that, event.target would resolve
-  // to the shared <form> (the dispatching controller's own root, an
-  // ancestor of every item, not the item itself), exif_populated
-  // would never be set on any item, and submitWhenExifReady would
-  // always hit its full timeout.
+  // Callback for form-exif's "populated" event, dispatched with an
+  // explicit target: itemElement so event.target resolves to this
+  // item, not the shared ancestor <form> -- otherwise exif_populated
+  // would stay unset, and submitWhenExifReady would always hit its
+  // timeout.
   itemExifPopulated(event) {
     const _item = this.findFileStoreItem(event.target);
     // The item may already be gone (user removed it, or EXIF finished
@@ -278,17 +272,11 @@ export default class extends Controller {
       elem.disabled = true;
     });
 
-    // Lock the rest of the form (locality, date, notes, projects,
-    // naming, thumb-image radios, etc.) for the whole in-flight
-    // window, not just the buttons above. Values are serialized at the
-    // deferred requestSubmit() in submitForm(), not at this click, so
-    // anything still editable during the upload/EXIF wait can silently
-    // race that submit. `inert`, unlike `disabled`, doesn't exclude a
-    // field from form serialization -- it only blocks pointer,
-    // keyboard, and focus interaction (and blurs anything already
-    // focused inside it), which is exactly what's needed here. Doesn't
-    // affect this controller's own JS writes to the form (e.g.
-    // uploadBatch, updateThumbRadio) while inert.
+    // Locks the whole form, not just the buttons -- values serialize
+    // at the deferred requestSubmit(), so anything editable during
+    // upload could race it. `inert` blocks interaction without
+    // excluding fields from serialization (unlike `disabled`), and
+    // doesn't block this controller's own JS writes while inert.
     this.form.inert = true;
     this.form.setAttribute('aria-busy', 'true');
 
@@ -362,19 +350,11 @@ export default class extends Controller {
     return _failed;
   }
 
-  // EXIF extraction (form-exif_controller.js) runs asynchronously per
-  // image, in parallel with the upload queue -- nothing otherwise
-  // guarantees it's finished by the time every image has uploaded, so
-  // GPS/date transferred from a photo's EXIF data could lose the race
-  // and never make it into the submitted observation fields. Poll
-  // briefly rather than submitting mid-extraction.
-  //
-  // Bounded: an image with no EXIF data, or EXIF ExifReader can't
-  // parse, never dispatches "populated" (form-exif_controller.js
-  // swallows that error), so `exif_populated` would otherwise stay
-  // false forever and this would poll indefinitely, permanently
-  // blocking submission. MAX_EXIF_WAIT_ATTEMPTS caps the wait at 3s;
-  // past that it submits anyway, no worse than before this existed.
+  // EXIF extraction runs async per image, parallel with uploads --
+  // nothing guarantees it finishes first, so GPS/date could lose the
+  // race. Poll briefly instead of submitting mid-extraction. Bounded:
+  // an image with no/unparseable EXIF doesn't dispatch "populated",
+  // so MAX_EXIF_WAIT_ATTEMPTS caps the wait at 3s and submits anyway.
   submitWhenExifReady(attempt = 0) {
     if (this.areAllItemsExifPopulated() ||
       attempt >= this.constructor.MAX_EXIF_WAIT_ATTEMPTS) {
@@ -385,21 +365,11 @@ export default class extends Controller {
     }
   }
 
-  // requestSubmit(), deferred to a new task via setTimeout, rather than
-  // form.submit() or a direct requestSubmit() call. submitWhenExifReady
-  // sometimes reaches this synchronously, from inside the ORIGINAL
-  // submit event's own onsubmit handler (see set_bindings), before
-  // that handler has returned. Calling requestSubmit() directly from
-  // there re-enters the browser's submission algorithm while it's
-  // still marked as firing the outer submit -- the spec's reentrancy
-  // guard silently no-ops a same-stack call (no error, no event, no
-  // request), and the outer handler's `return false` then cancels the
-  // original submission too, so nothing submits at all (verified via
-  // a real browser system test). Deferring via setTimeout(0) runs
-  // requestSubmit() on a fresh task, after the browser has fully
-  // finished processing the original submit event, avoiding the
-  // guard -- and, unlike form.submit(), requestSubmit() dispatches a
-  // real submit event, which is what a later Turbo-enabled form needs.
+  // Deferred via setTimeout: submitWhenExifReady sometimes calls this
+  // synchronously from inside the original onsubmit handler -- a
+  // same-stack requestSubmit() re-enters mid-submission and the
+  // spec's reentrancy guard silently no-ops it. requestSubmit(),
+  // unlike form.submit(), dispatches a submit event Turbo needs.
   submitForm() {
     setTimeout(() => this.form.requestSubmit(), 0);
   }
@@ -431,13 +401,10 @@ export default class extends Controller {
     return item;
   }
 
-  // Use requestjs-rails to make fetch request to get the carousel-item template
-  // with the image and its form, as well as the carousel-thumbnail template.
-  // requestjs-rails automatically calls renderStreamMessage on the response, so
-  // it's getting prepended by Turbo. We populate the element with file data
-  // via itemTargetConnected. In order to manipulate the returned element
-  // manually, we would have to use vanilla-JS `fetch` and prepend it to the
-  // carousel ourselves.
+  // requestjs-rails fetches the carousel-item template (image + its
+  // form) and the thumbnail template; it calls renderStreamMessage on
+  // the response, so Turbo prepends it automatically, and
+  // itemTargetConnected populates it with the file data.
   async loadAndDisplayItem(item, i) {
     const _file_size = item.is_file ?
       Math.floor((item.file_size / 1024)) + "kb" : "";
@@ -578,15 +545,11 @@ export default class extends Controller {
     this.removeItem(_item);
   }
 
-  // This is for detaching an image already attached to the observation.
-  // (not a fileStore item), on the obs edit form. It just removes the item
-  // from the carousel and id from "good_images". Has no effect until submit.
-  //
-  // The thumb-image radio for the removed image goes away with the
-  // carousel item. If it was the checked one, no radio is now
-  // checked — the static hidden sidecar with value="" wins on
-  // submit, so the server-side `thumb_image_id` gets cleared. No
-  // explicit JS handling needed.
+  // Detaches an already-attached image (not a fileStore item) on the
+  // edit form -- removes the carousel item and its id from
+  // good_images, no effect until submit. If its thumb radio was the
+  // checked one, nothing stays checked; the hidden sidecar with
+  // value="" wins on submit, clearing thumb_image_id server-side.
   removeAttachedItem(event) {
     const _good_images = this.goodImageIdsTarget.value,
       _good_image_vals = _good_images.split(" "),
@@ -677,14 +640,11 @@ export default class extends Controller {
     return _fd;
   }
 
-  // This essentially submits a "form" for each image. But there can't
-  // currently be a form element, because the image fields are nested inside
-  // the obs form. So we turn the fields into a FormData object with JS.
-  // Upload one image and return whether it succeeded. On success the
-  // returned image is remembered on the item (uploadBatch assembles
-  // good_images from these in selection order) and the item's overlay
-  // swaps to a checkmark. Does not chain to the next item -- runUploads
-  // owns the queue now (#5238).
+  // Image fields nest inside the obs form, so there's no form to
+  // submit -- builds a FormData object by hand. On success, remembers
+  // the image on the item (uploadBatch assembles good_images from
+  // these) and swaps the overlay to a checkmark. Doesn't chain to the
+  // next item -- runUploads owns the queue.
   async uploadItem(item) {
     // It would be nice to do a progress bar, but as of now, upload with
     // readable stream is not implemented yet for fetch in the browser spec.
@@ -717,15 +677,11 @@ export default class extends Controller {
     return false;
   }
 
-  // uploadAll locked the form (`inert`) and disabled the submit/remove
-  // buttons for the whole in-flight window -- normally undone when the
-  // batch fully succeeds (uploadBatch -> submitWhenExifReady) or a fresh
-  // controller connect after a Turbo-swapped-in form. Neither happens on
-  // a failed upload, since the observation form itself was never
-  // submitted: without this, a failed upload left the page permanently
-  // locked with no way for the user to recover. Re-queues the failed
-  // items (uploadAll snapshotted them off fileStore.items) so clicking
-  // the submit button again retries just those.
+  // uploadAll's inert lock is normally undone when the batch
+  // succeeds (uploadBatch -> submitWhenExifReady) or a fresh connect
+  // after a Turbo-swapped form -- neither happens on failure, since
+  // the obs form doesn't submit. Re-queues the failed items
+  // (snapshotted off fileStore.items) so Create retries just those.
   handleUploadFailures(items) {
     // Re-queue the failed items (their successful siblings already added
     // their ids to good_images) so clicking Create again retries only
@@ -780,19 +736,11 @@ export default class extends Controller {
     overlay.querySelector('.upload-status-check')?.classList.remove('d-none');
   }
 
-  // Point the carousel-item's thumb radio (its value, id, and the
-  // wrapping label's `for=`) at the image id from the server.
-  // good_images is assembled separately, in selection order, by
-  // uploadBatch -- so it is not touched here.
-  //
-  // At render time the radio's `value` was `"true"` and its `id`
-  // was `thumb_image_id_<UUID>` (UUID generated client-side per
-  // upload). Once we have a image id from the server, we
-  // switch to `value="<image.id>"` and `id="thumb_image_id_<image.id>"`
-  // so:
-  //   - the submitted `observation[thumb_image_id]` value is real,
-  //   - tests can find the radio by its predictable image-id-based id,
-  //   - the label's `for=` stays in sync with the input's id.
+  // Points the carousel-item's thumb radio (value, id, label's for=)
+  // at the server's image id -- good_images is assembled separately
+  // by uploadBatch. Before this, the radio's value/id were a
+  // placeholder ("true"/a client UUID); switching to the image's id
+  // keeps the submitted thumb_image_id and the label's for= correct.
   updateThumbRadio(item, image) {
     const _radio = item.dom_element.querySelector(
       'input[type="radio"][name="observation[thumb_image_id]"]'

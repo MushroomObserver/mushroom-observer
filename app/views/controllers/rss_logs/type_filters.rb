@@ -90,9 +90,16 @@ module Views::Controllers::RssLogs
 
     def dropdown_toggle_label
       return :rss_all.t if @types == ["all"]
-      return :"rss_one_#{@types.first}".t if @types.size == 1
+      return :"rss_one_#{@types.first}".t if single_known_type?
 
       :rss_selected.t
+    end
+
+    # `@types` can also be `["none"]` (RssLogsController's sentinel
+    # for "no valid type survived"), which has no `rss_one_*` tag.
+    def single_known_type?
+      @types.size == 1 &&
+        RssLog::ALL_TYPE_TAGS.map(&:to_s).include?(@types.first)
     end
 
     # Raw `menu_content:`, not `menu.section(...)` -- these rows
@@ -103,7 +110,7 @@ module Views::Controllers::RssLogs
     def render_dropdown_items
       div(class: "type-filter-menu",
           data: { controller: "type-filters",
-                  action: "click->type-filters#stop " \
+                  action: "click->type-filters#stop:stop " \
                           "change->type-filters#checkChanged" }) do
         render_everything_dropdown
         RssLog::ALL_TYPE_TAGS.map(&:to_s).each do |type|

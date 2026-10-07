@@ -123,15 +123,14 @@ module Views::Layouts
       assert_html(
         html, ".input-group.page-input[data-controller='page-input']"
       )
-      # The label is tied to the input (not a free-floating div) and
-      # sits inside the input-group with it -- see InputGroup::Addon.
+      # The label is a navbar-text sibling of the input-group, not
+      # nested inside it -- see
+      # Header::IndexPaginationNav#render_letter_label.
       letter_input_id =
         Nokogiri::HTML5.fragment(html).at_css("input[name='letter']")["id"]
       assert_html(
         html,
-        ".input-group.page-input " \
-        "label.input-group-text" \
-        "[for='#{letter_input_id}']",
+        "nav.pagination_letters label.navbar-text[for='#{letter_input_id}']",
         text: :by_letter.l
       )
     end

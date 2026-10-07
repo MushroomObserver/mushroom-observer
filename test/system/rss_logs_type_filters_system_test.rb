@@ -17,16 +17,38 @@ class RssLogsTypeFiltersSystemTest < ApplicationSystemTestCase
 
     within("#log_filter_menu_top") do
       assert_apply_disabled
+      id = "type_observation_dropdown_top"
+      initial = checkbox_checked?(id)
 
-      check("type_observation_dropdown_top")
+      toggle_checkbox(id)
+      assert_equal(!initial, checkbox_checked?(id))
       assert_apply_enabled
 
-      uncheck("type_observation_dropdown_top")
+      toggle_checkbox(id)
+      assert_equal(initial, checkbox_checked?(id))
       assert_apply_disabled
     end
   end
 
   private
+
+  # The custom-control input is visually hidden (opacity: 0) behind
+  # its sibling label -- a click risks landing on the wrong target
+  # (Cuprite coordinate-based clicks are unreliable on this markup
+  # shape). Flip the DOM state directly instead.
+  def toggle_checkbox(id)
+    page.execute_script(<<~JS)
+      const box = document.getElementById("#{id}")
+      box.checked = !box.checked
+      box.dispatchEvent(new Event("change", { bubbles: true }))
+    JS
+  end
+
+  # `.checked` is a live property, not a reflected HTML attribute --
+  # a CSS `[checked]` selector only sees the page-load value.
+  def checkbox_checked?(id)
+    page.evaluate_script("document.getElementById('#{id}').checked")
+  end
 
   def assert_apply_disabled
     assert_selector("button[data-type-filters-target='submit'][disabled]")

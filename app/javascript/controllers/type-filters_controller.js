@@ -1,15 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Stops a checkbox click from reaching document, so Bootstrap's
-// dropdown stays open (its own "stay open" exception only covers a
-// bare <input>/<textarea> target). Also disables Apply until a
-// checkbox's checked state differs from page-load.
+// "stop" is a no-op target for the :stop action modifier (keeps
+// Bootstrap's dropdown open on a checkbox click). Disables Apply
+// until a checkbox's checked state differs from page-load.
 export default class extends Controller {
   static targets = ["submit", "submitItem", "checkbox"]
 
-  stop(event) {
-    event.stopPropagation()
-  }
+  stop() {}
 
   checkChanged() {
     const dirty = this.checkboxTargets.some(

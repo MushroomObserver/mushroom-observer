@@ -164,6 +164,14 @@ module Views::Controllers::RssLogs
       assert_html(html, "#log_filter_toggle_top", text: :rss_selected.t)
     end
 
+    # RssLogsController's sentinel for "no valid type survived" --
+    # has no `rss_one_none` tag, so it must not hit that branch.
+    def test_dropdown_toggle_label_none
+      html = render_component(nil, ["none"])
+
+      assert_html(html, "#log_filter_toggle_top", text: :rss_selected.t)
+    end
+
     def test_dropdown_menu_has_no_leading_spacer
       html = render_component(nil, ["all"])
 
