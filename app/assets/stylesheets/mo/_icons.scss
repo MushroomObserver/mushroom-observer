@@ -2,11 +2,6 @@
 // icons
 // --------------------------------------------------
 
-.page-input .form-control {
-  padding-right: 6px;
-  padding-left: 6px;
-}
-
 .toggle {
   @extend .close;
   font-size: inherit;
@@ -109,13 +104,8 @@
   text-decoration: none;
 }
 
-// Icon-to-text gap for Components::IconWithText's visible-label span
-// (Button / Link::Get families). Deliberately em-based, not one of
-// _utilities.scss's rem-based .pl-* scale -- this gap sits right
-// after an icon glyph inline with the label text, so it needs to
-// scale WITH the label text's font-size (e.g. noticeably more gap in
-// a bold .card-title heading than in small body text) rather than
-// stay a fixed absolute size regardless of context.
+// Icon-to-text gap (Components::IconWithText). Em-based, not the rem
+// .pl-* scale, so it scales with the label's font-size.
 .icon-text-gap {
   padding-left: 0.5em !important;
 }
@@ -193,25 +183,10 @@ tbody.collapse.show {
   height: 1.2em;
 }
 
-// True geometric centering for any icon-bearing button, replacing
-// vertical-align: middle -- an inline SVG's "middle" isn't reliably
-// centered against a button's line box the way text is, and the
-// degree of drift varies by button size/font-size (confirmed
-// empirically: near-zero for #top_nav's 1.5em icons, several px for
-// .theater-btn/.input-group-btn's smaller ones), so a vertical-align
-// approach kept needing separate per-context `top:` corrections that
-// never fully generalized. Flex gives true geometric centering with
-// no per-context tuning -- covers .theater-btn, .input-group-btn's
-// goto button, and the pagination prev/next links (.btn-link, so
-// previously outside .btn:not(.btn-link)'s scope entirely) all at once.
-// Bootstrap's `.btn` sets `vertical-align: middle`, which for inline
-// content aligns to half the parent font's x-height above baseline --
-// a point well below the visual center of the surrounding text. A
-// button box taller than that x-height (true of every icon button
-// here) ends up hanging further below the baseline than it rises
-// above the cap line. A length-based value aligns relative to the
-// baseline directly instead, tunable to the button's height rather
-// than inheriting the x-height mismatch.
+// Flex centers the icon reliably across button sizes -- plain
+// vertical-align: middle drifts, and the amount varies by button.
+// The explicit vertical-align corrects Bootstrap's .btn alignment,
+// which still isn't centered once flex lays out the icon.
 .btn:has(.mo-icon) {
   display: inline-flex;
   align-items: center;
