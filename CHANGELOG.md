@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-07 (deploy-2026-10-07-12-00)
+
+- Count skipped observations as progress in the import time estimate (`InatImport`) ([PR5466](https://github.com/MushroomObserver/mushroom-observer/pull/5466), @mo-nathan)
+- Move the iNat writeback into a concern to clear `Metrics/ClassLength` on main ([PR5472](https://github.com/MushroomObserver/mushroom-observer/pull/5472), @mo-nathan)
+- Record `external_links.import_source` as databases hold it ([PR5474](https://github.com/MushroomObserver/mushroom-observer/pull/5474), @mo-nathan)
+- Let a Project admin import their Project from iNaturalist ([PR5473](https://github.com/MushroomObserver/mushroom-observer/pull/5473), @mo-nathan)
+- Keep label scans off the per-IP traffic meter ([PR5471](https://github.com/MushroomObserver/mushroom-observer/pull/5471), @mo-nathan)
+
 ## 2026-10-05 (deploy-2026-10-05-12-07)
 
 - Update rails gems to 7.2.4 ([PR5450](https://github.com/MushroomObserver/mushroom-observer/pull/5450), @JoeCohen)
