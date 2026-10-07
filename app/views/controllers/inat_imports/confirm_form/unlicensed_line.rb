@@ -2,10 +2,10 @@
 
 # Unlicensed-observations count on the iNat Import Confirm page.
 # Rendered by ConfirmForm in one of three modes:
-#   :self_import - user imports own obss; informational line
+#   :self_import - user imports their obss; informational line
 #                  (imported regardless of license)
 #   :skeleton    - import-others with skeletons; informational line
-#                  (imported as placeholders)
+#                  (imported, without the content MO cannot take)
 #   :ignored     - import-others without skeletons; a row inside the Total
 #                  Ignored Observations breakdown
 # The count renders even when blank/zero, so a failed estimate is visible
@@ -29,7 +29,7 @@ class Views::Controllers::InatImports::ConfirmForm::UnlicensedLine <
   private
 
   def render_ignored_row
-    b { append_colon(:inat_import_confirm_unlicensed_obs_caption.l) }
+    b { append_colon(:inat_import_confirm_unlicensed_skipped_caption.l) }
     render_count
     render_note(:inat_import_confirm_unlicensed_others_note)
   end

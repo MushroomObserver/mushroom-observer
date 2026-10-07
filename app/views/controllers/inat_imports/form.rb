@@ -7,11 +7,15 @@ module Views::Controllers::InatImports
   class Form < ::Components::ApplicationForm
     prop :super_importer, _Boolean, default: false
     prop :admin, _Boolean, default: false
+    # Set when a project admin started this from their project's Admin
+    # tab (#5416). What such an import covers is the project's
+    # configuration, so the scope is shown rather than chosen.
+    prop :project_site, _Nilable(::ProjectExternalSite), default: nil
 
     def view_template
       super do
         render_inat_username_field
-        if @super_importer
+        if may_import_others?
           render_import_others_field
           render_create_skeletons_field
         end
@@ -29,6 +33,10 @@ module Views::Controllers::InatImports
     end
 
     private
+
+    def project_admin_import? = @project_site.present?
+
+    def may_import_others? = @super_importer || project_admin_import?
 
     def render_inat_username_field
       text_field(:inat_username,
@@ -55,6 +63,12 @@ module Views::Controllers::InatImports
     end
 
     def render_choose_observations_section
+      return render_project_scope_section if project_admin_import?
+
+      render_method_choices
+    end
+
+    def render_method_choices
       Panel(panel_class: "my-5") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
@@ -69,6 +83,26 @@ module Views::Controllers::InatImports
         end
       end
     end
+
+    # The project's configuration decides what this import covers, so
+    # it is stated rather than offered as a choice. The controller
+    # rebuilds the search on submit; nothing here is read back.
+    #
+    # The search itself is not shown. It carries every target taxon and
+    # place the project names, which iNaturalist's web UI will not
+    # render as a query, and which says nothing an admin can act on.
+    def render_project_scope_section
+      hidden_field(:project_site)
+      Panel(panel_class: "my-5") do |panel|
+        panel.with_heading { plain(:inat_what_to_import.l) }
+        panel.with_body do
+          p { plain(:inat_import_project_scope.l(project: project_title)) }
+          render_recheck_all_field
+        end
+      end
+    end
+
+    def project_title = @project_site.project.title
 
     def render_method_radio(value, label_text)
       radio_field(:choose_method, [value, label_text],
@@ -114,6 +148,8 @@ module Views::Controllers::InatImports
     # Optional target project (#5259): the import files observations
     # into it and reconciles field slips against it.
     def render_project_field
+      return render_fixed_project_field if project_admin_import?
+
       autocompleter_field(
         :inat_project, type: :project,
                        hidden_name: :inat_project_id,
@@ -124,10 +160,26 @@ module Views::Controllers::InatImports
       )
     end
 
+    # The project the admin started from, which is the project the
+    # observations are filed into. Stated, not chosen.
+    def render_fixed_project_field
+      div(class: "mt-3") do
+        strong { append_colon(:inat_project_label.l) }
+        whitespace
+        plain(project_title)
+      end
+    end
+
+    # An admin importing a project brings in other people's
+    # observations, so the licence their import applies to their
+    # material is not the thing to consent to.
     def render_consent_checkbox
-      checkbox_field(:consent,
-                     label: :inat_import_consent,
-                     wrap_class: "mt-3")
+      label = if project_admin_import?
+                :inat_import_consent_project
+              else
+                :inat_import_consent
+              end
+      checkbox_field(:consent, label: label, wrap_class: "mt-3")
     end
 
     def render_details_panel
@@ -144,12 +196,22 @@ module Views::Controllers::InatImports
     def detail_items
       [
         :inat_details_excludes,
-        :inat_details_includes_all,
+        includes_item,
         :inat_details_fungi_only,
         :inat_details_data_fields,
         :inat_details_coordinates,
         :inat_details_location_name
       ]
+    end
+
+    # What an import covers, which for a project is other people's
+    # observations as much as the admin's.
+    def includes_item
+      if project_admin_import?
+        :inat_details_includes_project
+      else
+        :inat_details_includes_all
+      end
     end
   end
 end
