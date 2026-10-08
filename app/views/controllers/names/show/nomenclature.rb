@@ -40,7 +40,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_left_column
     Column(xs: 12, sm: 6) do
-      ul(class: "list-unstyled") do
+      ul(class: "list-unstyled mb-0") do
         render_rank_line
         render_status_line
         render_name_line
@@ -153,7 +153,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_right_column
     Column(xs: 12, sm: 6) do
-      ul(class: "list-unstyled") do
+      ul(class: "list-unstyled mb-0") do
         if @name.icn_id?
           render_icn_id_links
         elsif @name.registrable?
@@ -226,8 +226,9 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     approved, deprecated = @name.sort_synonyms
     misspellings = deprecated.select(&:correct_spelling_id)
     deprecated.reject!(&:correct_spelling_id)
+    return unless approved || deprecated || misspellings
 
-    ul(class: "list-unstyled") do
+    ul(class: "list-unstyled mb-0") do
       render_synonym_group(label_for_approved, approved)
       render_synonym_group(:show_name_deprecated_synonyms.l, deprecated)
       render_synonym_group(:show_name_misspelled_synonyms.l, misspellings)

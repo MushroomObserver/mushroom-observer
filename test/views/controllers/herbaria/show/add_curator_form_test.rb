@@ -17,7 +17,7 @@ module Views::Controllers::Herbaria
       # The autocompleter's dropdown + hidden id field must actually
       # render (regression guard for the TextField#bare_input? bug --
       # label: false used to silently drop both).
-      assert_html(html, "ul.virtual_list")
+      assert_html(html, ".virtual_list")
       assert_html(
         html, "input[name='herbarium_curator[login_id]'][type='hidden']"
       )

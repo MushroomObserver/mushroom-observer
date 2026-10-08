@@ -1,16 +1,22 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap radio button group component.
+  # Bootstrap 4 custom-radio button group component.
   #
   # Each option renders as:
-  #   <div class="radio">
-  #     <label><input type="radio" ...> label text</label>
+  #   <div class="custom-control custom-radio">
+  #     <input type="radio" class="custom-control-input" ...>
+  #     <label class="custom-control-label" for="...">label text</label>
   #   </div>
+  #
+  # Input and label are DOM siblings, not nested -- Bootstrap 4's
+  # custom-control CSS paints the indicator graphic via
+  # `.custom-control-input ~ .custom-control-label`, which only
+  # matches sibling elements.
   #
   # Delegates per-option markup generation to
   # `Superform::Rails::Components::Radios`, using its block form so we can
-  # wrap each option in the Bootstrap `.radio` div and emit HTML-safe label
+  # wrap each option in the custom-control div and emit HTML-safe label
   # text via `trusted_html`. The component works equally with a Superform
   # field or a `FieldProxy` (standalone use outside a form).
   #
@@ -43,6 +49,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class RadioField < Phlex::HTML
     include Phlex::Slotable
     include Phlex::TrustedHtml
+    include Phlex::Rails::Helpers::ClassNames
 
     slot :between
     slot :append
@@ -82,9 +89,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       value_str = choice.value.to_s
       opts = @per_choice_opts[value_str] || {}
       div(class: radio_class) do
-        label(for: option_input_id(value_str)) do
-          render_choice_radio(value_str, opts)
-          whitespace
+        render_choice_radio(value_str, opts)
+        label(class: "custom-control-label", for: option_input_id(value_str)) do
           render_choice_label(choice, opts)
           render_between_slot
         end
@@ -92,8 +98,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # `append` is a sibling of `<label>` inside `.radio` — keeps
-    # links/buttons out of the label so a stray click doesn't
+    # `append` is a sibling of `<label>` inside `.custom-control` —
+    # keeps links/buttons out of the label so a stray click doesn't
     # activate the radio. Accepts either a `Proc`/lambda (invoked in
     # RadioField's Phlex render context — full DSL) or an html_safe
     # `SafeBuffer` (emitted via `trusted_html`).
@@ -123,7 +129,8 @@ class Components::ApplicationForm < Superform::Rails::Form
                index: index_for(value_str),
                checked: option_checked?(value_str),
                disabled: opts[:disabled],
-               **@attributes
+               **@attributes.except(:class),
+               class: class_names("custom-control-input", @attributes[:class])
              ))
     end
 
@@ -179,7 +186,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def radio_class
-      classes = "radio"
+      classes = "custom-control custom-radio"
       if wrapper_options[:wrap_class].present?
         classes += " #{wrapper_options[:wrap_class]}"
       end

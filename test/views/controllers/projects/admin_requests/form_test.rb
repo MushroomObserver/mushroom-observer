@@ -12,20 +12,22 @@ module Views::Controllers::Projects::AdminRequests
     end
 
     def test_renders_form_with_subject_field
-      assert_html(@html, "body", text: :request_subject.l)
+      assert_html(@html, "#project_admin_request_form",
+                  text: :request_subject.l)
       assert_html(@html, "input[name='email[subject]']")
       assert_html(@html, "input[data-autofocus]")
     end
 
     def test_renders_form_with_message_field
-      assert_html(@html, "body", text: :request_message.l)
+      assert_html(@html, "#project_admin_request_form",
+                  text: :request_message.l)
       assert_html(@html, "textarea[name='email[message]']")
       assert_html(@html, "textarea[rows='5']")
     end
 
     def test_renders_submit_button
       assert_html(@html, "button[type='submit']", text: :send.ti)
-      assert_html(@html, ".btn.btn-default")
+      assert_html(@html, ".btn.btn-secondary")
       assert_html(@html, ".center-block.my-3")
     end
 

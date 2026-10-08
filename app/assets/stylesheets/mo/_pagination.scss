@@ -5,6 +5,26 @@
 
 .pagination_numbers, .show_object_nav {
   a {
-    color: $text-color;
+    color: $body-color;
   }
+}
+
+// Disables BS4's default input-group flex-wrap (Header::IndexPaginationNav).
+.page-input {
+  flex-wrap: nowrap;
+
+  // min-width: a floor, not a fixed size -- a wide sibling can
+  // otherwise shrink this below a usable width.
+  .form-control {
+    min-width: 4rem;
+    padding-right: $input-padding-y;
+    padding-left: $input-padding-y;
+  }
+}
+
+// One character, not a page number -- narrower than .page-input's
+// min-width above.
+.pagination_letters .form-control {
+  width: 2rem;
+  min-width: 0;
 }

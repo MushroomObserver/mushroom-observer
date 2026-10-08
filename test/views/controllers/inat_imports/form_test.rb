@@ -4,6 +4,8 @@ require("test_helper")
 
 module Views::Controllers::InatImports
   class FormTest < ComponentTestCase
+    EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
     def setup
       super
       @user = users(:rolf)
@@ -27,9 +29,9 @@ module Views::Controllers::InatImports
     def test_default_form_panels_start_closed
       html = render_form
 
-      # Neither collapse panel is open (no .in class)
-      assert_no_html(html, "[data-type-switch-type='ids'].in")
-      assert_no_html(html, "[data-type-switch-type='url'].in")
+      # Neither collapse panel is open
+      assert_no_html(html, "[data-type-switch-type='ids'].#{EXPANDED}")
+      assert_no_html(html, "[data-type-switch-type='url'].#{EXPANDED}")
     end
 
     def test_ids_method_opens_ids_panel
@@ -37,8 +39,8 @@ module Views::Controllers::InatImports
 
       assert_html(html,
                   "input[type='radio'][value='ids'][checked]")
-      assert_html(html, "[data-type-switch-type='ids'].in")
-      assert_no_html(html, "[data-type-switch-type='url'].in")
+      assert_html(html, "[data-type-switch-type='ids'].#{EXPANDED}")
+      assert_no_html(html, "[data-type-switch-type='url'].#{EXPANDED}")
     end
 
     def test_url_method_opens_url_panel
@@ -46,8 +48,8 @@ module Views::Controllers::InatImports
 
       assert_html(html,
                   "input[type='radio'][value='url'][checked]")
-      assert_html(html, "[data-type-switch-type='url'].in")
-      assert_no_html(html, "[data-type-switch-type='ids'].in")
+      assert_html(html, "[data-type-switch-type='url'].#{EXPANDED}")
+      assert_no_html(html, "[data-type-switch-type='ids'].#{EXPANDED}")
     end
 
     def test_type_switch_controller_wired

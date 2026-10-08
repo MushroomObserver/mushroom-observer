@@ -37,7 +37,7 @@ module Views::Controllers::FieldSlips
     def render_unresolved_projects_modal
       Modal(id: "modal_resolve_projects",
             title: :occurrence_resolve_projects_title.l,
-            dialog_class: "modal-dialog modal-lg",
+            size: :lg,
             auto_open: true,
             user: current_user) do |m|
         m.with_form_content do

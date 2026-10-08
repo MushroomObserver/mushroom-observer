@@ -242,7 +242,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #
   # Options include these:
   # id::            Load the page that includes object with this id.
-  # matrix::        Displaying results as matrix?
+  # grid::          Displaying results as a grid?
   # cache::         Cache the HTML of the results?
   # letters::       Paginating by letter?
   # letter_arg::    Param used to store letter for pagination.
@@ -331,7 +331,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def set_index_view_ivars(query, display_opts)
     @query = query
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
-    @layout = calc_layout_params if display_opts[:matrix]
+    @layout = calc_layout_params if display_opts[:grid]
     @num_results = query.num_results
     @any_content_filters_applied = check_if_preference_filters_applied
     # "No matches" flash for the entire result set — gated on
@@ -371,7 +371,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def num_per_page(display_opts)
-    return @layout["count"] if display_opts[:matrix]
+    return @layout["count"] if display_opts[:grid]
 
     display_opts[:num_per_page] || 50
   end
@@ -387,8 +387,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # NOTE: there are two places where cache args have to be sent to enable
   # efficient caching. Sending `cache: true` here to `show_index_of_objects`
   # allows us to optimize eager-loading, doing it only for records not cached.
-  # (The other place is from the template to the `matrix_box` helper, which
-  # actually caches the HTML.)
+  # (The other place is from the template to the `Grid::Box` render, which
+  # caches the HTML.)
   def find_objects(query, display_opts)
     logger.warn("QUERY starting: #{query.sql.inspect}")
     @timer_start = Time.current
@@ -433,7 +433,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # If caching, only uncached objects need to eager_load the includes
   def objects_with_only_needed_eager_loads(query, include)
-    # When MatrixTable will bypass the cache for the whole request
+    # When Grid will bypass the cache for the whole request
     # (identify mode, project-admin view), every row is going to need
     # the full eager loads anyway — the two-query pre-check shape
     # (paginate simple, re-fetch with includes) is strictly more
@@ -444,13 +444,13 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # cache_store -- so skipping eager-load here for "assumed cached"
     # objects triggers per-object N+1 fallbacks (e.g.
     # NamingConsensus#use_local_namings) for every one of them.
-    unless matrix_caches_in_this_request? && perform_caching?
+    unless grid_caches_in_this_request? && perform_caching?
       return query.paginate(@pagination_data, include: include)
     end
 
     locale = I18n.locale
     # Preload the per-object association the cache pre-check reads
-    # (`MatrixTable.should_cache_object?` consults
+    # (`Grid.should_cache_object?` consults
     # `obj.thumb_image.transferred`). Without this, the pre-check
     # itself fires SELECT-per-row from `objects_simple`, which is
     # explicitly NOT eager-loaded — defeating the optimization.
@@ -458,7 +458,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       @pagination_data, include: cache_precheck_includes(query.model)
     )
 
-    # If temporarily disabling cached matrix boxes: eager load everything
+    # If temporarily disabling cached grid boxes: eager load everything
     # ids_to_eager_load = objects_simple
 
     ids_to_eager_load = uncached_object_ids(objects_simple, locale)
@@ -468,27 +468,27 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     objects_simple.collate_new_instances(objects_eager)
   end
 
-  # Which of `objects` need eager-loading because their `MatrixBox`
+  # Which of `objects` need eager-loading because their `Grid::Box`
   # fragment isn't already cached. One `read_multi` round trip covers
   # every object's cache-key check, instead of one `Rails.cache.exist?`
   # query per object (Solid Cache is DB-backed, so that was one SQL
   # query per row on the index).
   #
-  # Gate: `matrix_caches_in_this_request?` is already guaranteed true
+  # Gate: `grid_caches_in_this_request?` is already guaranteed true
   # by this method's only caller (`objects_with_only_needed_eager_loads`
-  # returns early otherwise); `MatrixTable.should_cache_object?`
+  # returns early otherwise); `Grid.should_cache_object?`
   # (per-object) is false when the object itself isn't cacheable (e.g.
   # an Observation with an untransferred thumb image) -- those always
   # need eager-loading, no cache lookup necessary.
   #
-  # Uses the shared key from `MatrixTable.cache_key_for` so the read
-  # matches what `MatrixTable#render_cached_boxes` writes.
+  # Uses the shared key from `Grid.cache_key_for` so the read
+  # matches what `Grid#render_cached_boxes` writes.
   def uncached_object_ids(objects, locale)
     cacheable, uncacheable = objects.partition do |obj|
-      ::Components::Matrix::Table.should_cache_object?(obj)
+      ::Components::Grid.should_cache_object?(obj)
     end
     keys_by_object = cacheable.index_by do |obj|
-      ::Components::Matrix::Table.cache_key_for(obj, locale)
+      ::Components::Grid.cache_key_for(obj, locale)
     end
     cached_keys = if keys_by_object.empty?
                     []
@@ -504,7 +504,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # Associations the per-object cache pre-check needs to consult
   # without firing a query. Currently only `:thumb_image` (read by
-  # `MatrixTable.should_cache_object?`), and only when the model
+  # `Grid.should_cache_object?`), and only when the model
   # exposes it. Returns nil if there's nothing to preload so the
   # underlying `query.paginate(...)` call receives no `include:` kw.
   def cache_precheck_includes(model)
@@ -514,12 +514,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     [:thumb_image]
   end
 
-  # Overridable hook: does this request render the matrix in the
+  # Overridable hook: does this request render the grid in the
   # cached path? Controllers that always (or sometimes) render
-  # `MatrixTable` in identify mode or project-admin view should
+  # `Grid` in identify mode or project-admin view should
   # override. The default is `true` because the basic obs index
   # without an admin-viewable project uses caching.
-  def matrix_caches_in_this_request?
+  def grid_caches_in_this_request?
     true
   end
 

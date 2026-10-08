@@ -7,22 +7,6 @@ require("test_helper")
 # helpers. The deleted helper test file had no Phlex equivalent;
 # these tests pin the behaviour those helpers used to cover.
 class Views::Layouts::TopNavTest < ComponentTestCase
-  # Subclass with `render_search_row` neutralized — the search-bar /
-  # identify-filter partials resolve through Rails view-paths that
-  # aren't on the test controller's `append_view_path`. We render the
-  # subclass instead of monkey-patching the real class, so the change
-  # doesn't leak across the test process (an earlier version that
-  # `define_method`'d on `Views::Layouts::TopNav` directly silently
-  # broke the search-bar's `<select>` in every test that ran after
-  # this file).
-  class TopNavWithoutSearchRow < Views::Layouts::TopNav
-    private
-
-    def render_search_row
-      nil
-    end
-  end
-
   def setup
     super
     @user = users(:rolf)
@@ -46,7 +30,9 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, "a.btn-success[data-tooltip-target='tip']")
     # Responsive content: the word "Add" appears in a span hidden at
     # xs width and shown at sm and up.
-    assert_html(html, "a.btn-success span.d-none.d-sm-inline",
+    hide_classes = Components::Column.mobile_hide_classes(display: :inline).
+                   join(".")
+    assert_html(html, "a.btn-success span.#{hide_classes}",
                 text: :add.ti)
   end
 
@@ -214,15 +200,16 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     html = render(top_nav(user: @user))
 
     # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
-    # navbar-nav/navbar-right literals.
+    # navbar-nav/ml-auto literals.
+    hide_classes = Components::Column.mobile_hide_classes.join(".")
     assert_html(html,
-                "ul.nav.navbar-nav.navbar-right.d-none.d-sm-block.mr-0")
+                "ul.nav.navbar-nav.ml-auto.#{hide_classes}.mr-0")
   end
 
   private
 
   def top_nav(user:, query: nil, banner: nil)
-    TopNavWithoutSearchRow.new(user: user, query: query, banner: banner)
+    Views::Layouts::TopNav.new(user: user, query: query, banner: banner)
   end
 
   # Override controller_name on the test controller so methods like

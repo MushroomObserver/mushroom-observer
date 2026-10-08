@@ -17,26 +17,26 @@ class PanelTest < ComponentTestCase
       panel.with_footer { "Footer content" }
     end
 
-    assert_includes(html, "panel panel-default")
-    assert_includes(html, "panel-heading")
+    assert_includes(html, "card")
+    assert_includes(html, "card-header")
     assert_includes(html, "Test Heading")
-    assert_html(html, "div.collapse.panel-collapse")
+    assert_html(html, "div.collapse.card-collapse")
     assert_includes(html, "Show details")
-    assert_includes(html, "panel-body")
+    assert_includes(html, "card-body")
     assert_includes(html, "Panel content")
     assert_includes(html, "Collapsing content")
     assert_includes(html, "Footer content")
 
-    # Test that panel-collapse-trigger is nested in span.panel-heading-links
+    # Test that panel-collapse-trigger is nested in span.card-header-links
     assert_nested(
       html,
-      parent_selector: "span.panel-heading-links",
+      parent_selector: "span.card-header-links",
       child_selector: "a.panel-collapse-trigger"
     )
     # Test that other heading links are printed
     assert_nested(
       html,
-      parent_selector: "span.panel-heading-links",
+      parent_selector: "span.card-header-links",
       child_selector: "a.btn",
       text: "Edit"
     )
@@ -46,7 +46,7 @@ class PanelTest < ComponentTestCase
       html,
       text: "Collapsing content",
       parent: "#collapsing_panel",
-      child: ".panel-body"
+      child: ".card-body"
     )
 
     # Test that collapse message is within the trigger button
@@ -65,7 +65,7 @@ class PanelTest < ComponentTestCase
       panel.with_footer { "Footer text" }
     end
 
-    assert_includes(html, "panel-footer")
+    assert_includes(html, "card-footer")
     assert_includes(html, "Footer text")
   end
 
@@ -75,7 +75,7 @@ class PanelTest < ComponentTestCase
       panel.with_body { "Content" }
     end
 
-    assert_includes(html, "panel panel-default custom-class")
+    assert_includes(html, "card custom-class")
   end
 
   def test_panel_with_multiple_bodies
@@ -99,7 +99,7 @@ class PanelTest < ComponentTestCase
       end
     end
 
-    assert_html(html, "div.panel-body.p-0#my_section" \
+    assert_html(html, "div.card-body.p-0#my_section" \
                       "[data-controller='section-update']" \
                       "[data-section-update-user-value='42']",
                 text: "Body content")
@@ -141,48 +141,10 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "Second footer")
     assert_includes(html, "Third footer")
 
-    # Verify all footers are wrapped in panel-footer divs
-    footer_count = html.scan('class="panel-footer"').count
+    # Verify all footers are wrapped in card-footer divs
+    footer_count = html.scan('class="card-footer"').count
     assert_equal(3, footer_count,
-                 "Expected 3 panel-footer divs for 3 footers")
-  end
-
-  def test_panel_with_sizing_enabled
-    html = render_panel(sizing: true) do |panel|
-      panel.with_heading { "Test" }
-      panel.with_thumbnail { "Thumbnail" }
-      panel.with_body { "Body content" }
-    end
-
-    # Test that thumbnail and body are wrapped in panel-sizing div
-    assert_includes(html, "panel-sizing")
-    assert_nested(
-      html,
-      parent_selector: "div.panel-sizing",
-      child_selector: "div.thumbnail-container"
-    )
-    assert_nested(
-      html,
-      parent_selector: "div.panel-sizing",
-      child_selector: "div.panel-body"
-    )
-  end
-
-  def test_panel_without_sizing
-    html = render_panel(sizing: false) do |panel|
-      panel.with_heading { "Test" }
-      panel.with_thumbnail { "Thumbnail" }
-      panel.with_body { "Body content" }
-    end
-
-    # Test that panel-sizing div is NOT present
-    assert_not_includes(
-      html, "panel-sizing",
-      "panel-sizing should not be present when sizing is false"
-    )
-    # But thumbnail and body should still be rendered
-    assert_includes(html, "thumbnail-container")
-    assert_includes(html, "panel-body")
+                 "Expected 3 card-footer divs for 3 footers")
   end
 
   def test_panel_with_interactive_image_thumbnail
@@ -207,32 +169,6 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "image_#{image.id}")
   end
 
-  def test_panel_with_interactive_image_and_sizing
-    user = users(:rolf)
-    obs = observations(:coprinus_comatus_obs)
-    image = obs.thumb_image
-
-    html = render_panel(sizing: true) do |panel|
-      panel.with_heading { "Observation" }
-      panel.with_thumbnail { render_interactive_image(user:, image:) }
-      panel.with_body { "Details" }
-    end
-
-    # Should have panel-sizing wrapper
-    assert_includes(html, "panel-sizing")
-    # Image should be nested in panel-sizing > thumbnail-container
-    assert_nested(
-      html,
-      parent_selector: "div.panel-sizing",
-      child_selector: "div.thumbnail-container"
-    )
-    assert_nested(
-      html,
-      parent_selector: "div.thumbnail-container",
-      child_selector: "img"
-    )
-  end
-
   def test_panel_with_unwrapped_body_for_list_group
     html = render_panel do |panel|
       panel.with_heading { "Comments" }
@@ -243,12 +179,12 @@ class PanelTest < ComponentTestCase
       end
     end
 
-    # List group should be direct child of panel, not wrapped in panel-body
+    # List group should be direct child of panel, not wrapped in card-body
     assert_includes(html, "list-group")
-    # ul.list-group should NOT be inside .panel-body
-    assert_no_html(html, ".panel-body ul.list-group")
-    # ul.list-group should be a (descendant) child of .panel.panel-default
-    assert_html(html, ".panel.panel-default > ul.list-group")
+    # ul.list-group should NOT be inside .card-body
+    assert_no_html(html, ".card-body ul.list-group")
+    # ul.list-group should be a (descendant) child of .card
+    assert_html(html, ".card > ul.list-group")
   end
 
   private

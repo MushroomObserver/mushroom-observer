@@ -1,43 +1,6 @@
 //
-// icons - note that bootstrap 3 has the class
-// .has-feedback { position: relative; }
+// icons
 // --------------------------------------------------
-
-// Overrides Bootstrap's `.navbar-form .has-feedback .form-control-feedback`
-// (same selector -- wins the specificity tie by loading after Bootstrap).
-// Also forces position: absolute, since .mo-icon's own position: relative
-// (below) would otherwise win that tie against the plain
-// .form-control-feedback rule.
-.navbar-form .has-feedback .form-control-feedback {
-  position: absolute;
-  right: initial;
-  // Icon is an SVG sized by .mo-icon, not a glyph Bootstrap can center via
-  // line-height -- center the icon's own box instead. 15px is half the
-  // 30px padding-left below. Not every `.has-search` icon is hidden-xs
-  // (Observations::Identify::Form's isn't), so this left offset has to
-  // hold at every breakpoint -- the padding below can't drop back to 6px
-  // at xs without the icon overlapping typed text.
-  top: 50%;
-  left: 15px;
-  transform: translate(-50%, -50%);
-  background-color: transparent;
-}
-
-.has-search .form-control {
-  padding-right: 12px;
-  padding-left: 30px;
-}
-
-.page-input .form-control-feedback {
-  right: 0;
-  left: initial;
-  background-color: transparent;
-}
-
-.page-input .form-control {
-  padding-right: 6px;
-  padding-left: 6px;
-}
 
 .toggle {
   @extend .close;
@@ -74,7 +37,7 @@
   text-align: center;
   padding: 10px 0;
   top: 1px;
-  color: $input-bg-disabled;
+  color: $input-disabled-bg;
 }
 
 .icon-addon.addon-lg .form-control {
@@ -141,13 +104,8 @@
   text-decoration: none;
 }
 
-// Icon-to-text gap for Components::IconWithText's visible-label span
-// (Button / Link::Get families). Deliberately em-based, not one of
-// _utilities.scss's rem-based .pl-* scale -- this gap sits right
-// after an icon glyph inline with the label text, so it needs to
-// scale WITH that text's own font-size (e.g. noticeably more gap in
-// a bold .panel-title heading than in small body text) rather than
-// stay a fixed absolute size regardless of context.
+// Icon-to-text gap (Components::IconWithText). Em-based, not the rem
+// .pl-* scale, so it scales with the label's font-size.
 .icon-text-gap {
   padding-left: 0.5em !important;
 }
@@ -155,7 +113,7 @@
 // `.stateful-link` is added by `Link::Get` only when it renders an
 // active_icon:/active_content: swap pair. Shows/hides each pair based
 // on an `.active`/`.collapsed` class toggled on the trigger by JS
-// (not yet written -- no real caller uses this yet).
+// (not yet written -- no caller uses this yet).
 .stateful-link,
 .panel-collapse-trigger {
   text-decoration: none;
@@ -192,7 +150,7 @@
 // Bootstrap collapse sets display:block, which breaks
 // table-row-group semantics on <tbody>. Override so
 // collapsed tbody rows render correctly when expanded.
-tbody.collapse.in {
+tbody.collapse.show {
   display: table-row-group;
 }
 
@@ -216,19 +174,7 @@ tbody.collapse.in {
   }
 }
 
-// Baseline correction for icon+text pairs that aren't framed as a
-// .btn: plain Link::Get (.inline-icon-link sets top: 0 instead) and
-// the sidebar heading icons. The `> span >` variants cover
-// Components::Icon's title: wrap (moves tooltip attrs off the <svg>
-// onto a wrapping <span>).
-a:not(.btn):not(.inline-icon-link) > .mo-icon,
-a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
-.list-group-item > .mo-icon,
-.list-group-item > span > .mo-icon {
-  top: 2px;
-}
-
-// A real "filled/bordered" .btn's icon reads small next to the
+// A "filled/bordered" .btn's icon reads small next to the
 // button's bold label text (e.g. the location-map "Show map"
 // toggle). .btn-link buttons look like plain links, not framed
 // buttons, so they're excluded and keep the default 1.12em size.
@@ -237,20 +183,14 @@ a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
   height: 1.2em;
 }
 
-// True geometric centering for any icon-bearing button, replacing
-// vertical-align: middle -- an inline SVG's "middle" isn't reliably
-// centered against a button's line box the way text is, and the
-// degree of drift varies by button size/font-size (confirmed
-// empirically: near-zero for #top_nav's 1.5em icons, several px for
-// .theater-btn/.input-group-btn's smaller ones), so a vertical-align
-// approach kept needing separate per-context `top:` corrections that
-// never fully generalized. Flex gives true geometric centering with
-// no per-context tuning -- covers .theater-btn, .input-group-btn's
-// goto button, and the pagination prev/next links (.btn-link, so
-// previously outside .btn:not(.btn-link)'s scope entirely) all at once.
+// Flex centers the icon reliably across button sizes -- plain
+// vertical-align: middle drifts, and the amount varies by button.
+// The explicit vertical-align corrects Bootstrap's .btn alignment,
+// which still isn't centered once flex lays out the icon.
 .btn:has(.mo-icon) {
   display: inline-flex;
   align-items: center;
+  vertical-align: -0.15em;
 }
 
 .spinner-right {

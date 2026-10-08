@@ -111,8 +111,7 @@ export default class extends Controller {
     return "/" + controller + "/search/new"
   }
 
-  // Bootstrap 3 accordions require css panels,
-  // so we have to make our own accordion functionality.
+  // We implement our own accordion functionality here.
   closeBar(event) {
     // console.log("closeBar")
     if (this.hasBarTarget) {

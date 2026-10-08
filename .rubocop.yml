@@ -18,11 +18,13 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_full_html_assertion
   - ./lib/rubocop/cop/mo/no_hand_rolled_colon_suffix
   - ./lib/rubocop/cop/mo/no_hand_rolled_column_class
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
+  - ./lib/rubocop/cop/mo/no_not_pseudo_selector
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -109,6 +111,18 @@ MO/NoActiveRecordRelationProp:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
+MO/NoFullHtmlAssertion:
+  Description: >-
+    Test assertions must not search/compare against @response.body
+    (directly, or via a local variable aliased to it), or use "body"
+    as an assert_select/assert_html selector -- use a scoped selector
+    instead, so a failure doesn't dump the whole page into the log --
+    see lib/rubocop/cop/mo/no_full_html_assertion.rb and "FORBIDDEN:
+    assertions against rendered HTML body" in .claude/rules/testing.md.
+  Enabled: true
+  Include:
+    - "test/**/*_test.rb"
+
 MO/NoHandRolledColonSuffix:
   Description: >-
     Phlex views/components must not interpolate a trailing colon onto
@@ -166,6 +180,17 @@ MO/NoHandRolledWhitespace:
     # nbsp's definition -- legitimately builds the &nbsp; entity this
     # cop exists to keep everywhere else.
     - "app/components/base.rb"
+
+MO/NoNotPseudoSelector:
+  Description: >-
+    System/integration tests must not put :not(...) inside a Capybara
+    selector string -- unreliable under this suite's Cuprite setup --
+    see .claude/rules/system_test_state_polling.md and
+    lib/rubocop/cop/mo/no_not_pseudo_selector.rb.
+  Enabled: true
+  Include:
+    - "test/system/**/*.rb"
+    - "test/integration/**/*.rb"
 
 MO/NoQuerySubclassMutation:
   Description: >-

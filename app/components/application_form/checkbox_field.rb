@@ -1,20 +1,32 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap checkbox field component.
+  # Bootstrap 4 custom-checkbox field component.
   #
-  # **Boolean mode** (no positional options): renders the canonical Rails
-  # hidden+checkbox pair wrapped in a single `<div class="checkbox"><label>`.
-  # Delegates the input rendering to `Superform::Rails::Components::Checkbox`
-  # (boolean branch), so we inherit the hidden-field convention and
-  # checked-state computation.
+  # Every rendered checkbox -- boolean, array, or block mode -- is a
+  # `<div class="custom-control custom-checkbox">` wrapping an
+  # `<input class="custom-control-input">` and a sibling
+  # `<label class="custom-control-label">`. Sibling order (input, then
+  # label) is load-bearing: the indicator graphic is painted via
+  # `.custom-control-input ~ .custom-control-label` CSS, which only
+  # matches sibling elements, not nested ones.
   #
-  # **Array mode** (options passed): renders a group of checkboxes for a
-  # single multi-valued field via `Superform::Rails::Components::Checkboxes`,
-  # wrapping each option in its own `<div class="checkbox"><label>`.
-  # The caller must back this with a FormObject attribute that's array-typed
-  # (returns `[]` not `nil` when empty) so upstream `Checkbox` picks the
-  # array branch — otherwise it'll fall back to boolean rendering per option.
+  # **Boolean mode** (no positional options, no block): renders Rails'
+  # hidden+checkbox pair. Delegates to
+  # `Superform::Rails::Components::Checkbox` (boolean branch) for the
+  # hidden-field convention and checked-state computation.
+  #
+  # **Array mode** (options passed): renders a group of checkboxes for
+  # a single multi-valued field via
+  # `Superform::Rails::Components::Checkboxes`. The caller must back
+  # this with a FormObject attribute that's array-typed (returns `[]`
+  # not `nil` when empty) so upstream `Checkbox` picks the array
+  # branch -- otherwise it'll fall back to boolean rendering per option.
+  #
+  # **Block mode** (a block, no options): caller drives rendering via
+  # `cb.option(value) { ... }` for one or more checkboxes inside one
+  # `checkbox_field` call -- matrix-style layouts where each call
+  # produces one cell of a larger group.
   class CheckboxField < Superform::Rails::Components::Checkbox
     include Phlex::Slotable
     include FieldWithHelp
@@ -48,19 +60,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       if @options.any?
         render_array_mode
       elsif block
-        # Block mode: caller drives rendering via `cb.option(value)` for
-        # one or more checkboxes inside MO's standard wrapper. Used for
-        # matrix-style layouts where one checkbox_field call produces
-        # exactly one cell of a larger group. `label_for: nil` because the
-        # caller's input id (`field.dom.id + "_" + value`) isn't knowable
-        # here — falling through to DOM nesting keeps label clicks working
-        # (HTML spec: a <label> with no `for=` toggles its first nested
-        # form control).
-        render_boolean_with_wrapper(label_for: nil) { yield(self) }
-      else
-        render_boolean_with_wrapper(label_for: boolean_label_for) do
-          render_boolean_inputs
+        div(class: wrap_class) do
+          yield(self)
+          render_between_slot
+          render_help_in_label_row
+          render_help_after_field
+          render(append_slot) if append_slot
         end
+      else
+        render_boolean_mode
       end
     end
 
@@ -77,7 +85,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     #
     # When `disabled: true` is passed, the hidden sidecar is omitted —
     # disabled inputs aren't submitted, so the sidecar would be dead
-    # markup (and the checkbox itself never toggles).
+    # markup (and the checkbox itself wouldn't toggle).
     def render_boolean_inputs
       unless disabled?
         input(name: field.dom.name, type: :hidden,
@@ -105,6 +113,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       if @attributes.key?(:checked_value)
         attrs[:checked] = field.value.to_s == checked_value.to_s
       end
+      attrs[:class] = class_names("custom-control-input", attrs[:class])
       attrs
     end
 
@@ -112,9 +121,10 @@ class Components::ApplicationForm < Superform::Rails::Form
       @attributes[:disabled] == true
     end
 
-    # Render a single array-mode checkbox (name="…[]"). Intended for use
-    # inside a block passed to `checkbox_field`, when the caller wants
-    # one cell of a larger checkbox matrix.
+    # Render a single block-mode checkbox (name="…[]"), input and a
+    # sibling label. Intended for use inside a block passed to
+    # `checkbox_field`, when the caller wants one cell of a larger
+    # checkbox matrix.
     #
     # `**overrides` lets the caller override any of the input
     # attributes per option — most commonly `checked:` (when the
@@ -123,18 +133,20 @@ class Components::ApplicationForm < Superform::Rails::Form
     # submitted choices without writing them to the DB) and
     # `disabled:` (per-row permission gates).
     def option(value, **overrides)
+      input_id = "#{field.dom.id}_#{value}"
       input(
         type: :checkbox,
-        id: "#{field.dom.id}_#{value}",
+        id: input_id,
         name: "#{field.dom.name}[]",
         value: value.to_s,
         checked: checked_in_array?(value),
-        **@attributes.except(:id, :name, :value, :type, :checked),
+        **@attributes.except(:id, :name, :value, :type, :checked, :class),
+        class: class_names("custom-control-input", @attributes[:class]),
         **overrides
       )
-      return unless block_given?
-
-      trusted_html(yield)
+      label(class: "custom-control-label", for: input_id) do
+        trusted_html(yield) if block_given?
+      end
     end
 
     private
@@ -161,29 +173,27 @@ class Components::ApplicationForm < Superform::Rails::Form
     # upstream picks the boolean branch — which renders all per-option
     # inputs with the bare `dom.id` (duplicate ids) and a hidden 0/1
     # pair per option (wrong for an array submission).
-    #
-    # The shape emitted here mirrors MO's existing block-mode
-    # `option(value)` helper above: one `<input type="checkbox"
-    # id="{field_id}_{index}" name="{field_name}[]" value="{value}">`
-    # per option, wrapped in a `<label for="{id}">` so click-focus and
-    # screen-reader association both work.
     def render_checkbox_option(choice)
       value_str = choice.value.to_s
       input_id = option_input_id(value_str)
-      div(class: option_wrap_class) do
-        label(for: input_id) do
-          input(
-            type: :checkbox,
-            id: input_id,
-            name: "#{field.dom.name}[]",
-            value: value_str,
-            checked: checked_in_array?(choice.value),
-            **@attributes.except(:id, :name, :value, :type, :checked)
-          )
-          whitespace
+      div(class: wrap_class) do
+        input(**option_input_attributes(choice, value_str, input_id))
+        label(class: "custom-control-label", for: input_id) do
           trusted_html(choice.text)
         end
       end
+    end
+
+    def option_input_attributes(choice, value_str, input_id)
+      {
+        type: :checkbox,
+        id: input_id,
+        name: "#{field.dom.name}[]",
+        value: value_str,
+        checked: checked_in_array?(choice.value),
+        **@attributes.except(:id, :name, :value, :type, :checked, :class),
+        class: class_names("custom-control-input", @attributes[:class])
+      }
     end
 
     def option_input_id(value_str)
@@ -202,40 +212,33 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_value.map(&:to_s).include?(value.to_s)
     end
 
-    # --- Boolean mode wrapper ---
+    # --- Boolean mode ---
 
-    # The help trigger renders as a sibling of `<label>`, not nested
-    # inside it -- a click anywhere inside a checkbox's `<label>`
-    # toggles the checkbox itself.
-    def render_boolean_with_wrapper(label_for: checkbox_id, &checkbox_block)
-      div(class: boolean_wrap_class) do
-        label_attrs = label_attributes
-        label_attrs = label_attrs.merge(for: label_for) if label_for
-        label(**label_attrs) { render_boolean_content(&checkbox_block) }
+    # `label_for` can be nil when the caller's id isn't guaranteed
+    # unique on the page (e.g. content that gets cloned elsewhere in
+    # the DOM, like lightGallery's caption snapshot) -- the label then
+    # omits `for=`, and the caller wires click-to-toggle some other
+    # way (e.g. a Stimulus action via `label_data:` targeting the
+    # input directly, rather than id-based `for=` association).
+    def render_boolean_mode
+      div(class: wrap_class) do
+        render_boolean_inputs
+        label(**boolean_label_attributes) do
+          text = label_text
+          trusted_html(text) if text
+          render_between_slot
+        end
         render_help_in_label_row
         render_help_after_field
         render(append_slot) if append_slot
       end
     end
 
-    # MO's default render order is checkbox-then-label
-    def render_boolean_content
-      text = label_text
-      if label_position_before?
-        if text
-          trusted_html(text)
-          whitespace
-        end
-        render_between_slot
-        yield
-      else
-        yield
-        render_between_slot
-        if text
-          whitespace
-          trusted_html(text)
-        end
-      end
+    def boolean_label_attributes
+      attrs = label_attributes
+      attrs[:class] = class_names("custom-control-label", attrs[:class])
+      attrs[:for] = boolean_label_for if boolean_label_for
+      attrs
     end
 
     # Use custom ID if provided, otherwise use Superform's generated ID
@@ -243,39 +246,24 @@ class Components::ApplicationForm < Superform::Rails::Form
       @attributes[:id] || field.dom.id
     end
 
-    # Defaults to an explicit `for="<checkbox_id>"` (unchanged
-    # behavior), but a caller can pass `label_for: nil` when the
-    # checkbox's id isn't guaranteed unique on the page (e.g. content
-    # that gets cloned elsewhere in the DOM, like lightGallery's
-    # caption snapshot) -- an explicit `for=` pointing at a duplicated
-    # id makes browsers' label-click activation ambiguous even though
-    # the checkbox is ALSO nested inside this same label, which is a
-    # sufficient (and unambiguous) association on its own per the
-    # HTML label-activation spec.
+    # Defaults to an explicit `for="<checkbox_id>"` -- a caller can
+    # pass `label_for: nil` to omit it (see `render_boolean_mode`).
     def boolean_label_for
       wrapper_options.fetch(:label_for) { checkbox_id }
     end
 
-    def label_position_before?
-      wrapper_options[:label_position] == :before
-    end
-
     # Checkbox labels read as a clickable sentence next to the checkbox
-    # itself, not a field prompt -- never gets FieldLabelRow's colon.
+    # itself, not a field prompt -- doesn't get FieldLabelRow's colon.
     def label_text
       return if wrapper_options[:label] == false
 
       resolved_label_text
     end
 
-    def boolean_wrap_class
-      classes = "checkbox"
-      classes += " #{wrapper_options[:wrap_class]}" if wrap_class?
-      classes
+    def wrap_class
+      base = "custom-control custom-checkbox"
+      wrap_class? ? "#{base} #{wrapper_options[:wrap_class]}" : base
     end
-
-    # Each per-option label gets its own .checkbox wrapper too
-    alias option_wrap_class boolean_wrap_class
 
     def wrap_class?
       wrapper_options[:wrap_class].present?

@@ -78,7 +78,7 @@ module Observations
     def set_ivars_for_edit
       @external_link = ExternalLink.show_includes.find(params[:id].to_s)
       # The link is strict-loaded with a shallow polymorphic target, so load
-      # the observation with its own matrix-box subtree for the edit card.
+      # the observation with its own grid-box subtree for the edit card.
       @observation = Observation.strict_loading.
                      includes(Observation.matrix_box_includes).
                      find(@external_link.observation.id)

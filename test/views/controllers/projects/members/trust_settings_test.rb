@@ -66,9 +66,9 @@ module Views::Controllers::Projects::Members
         assert_html(html, "input[type='radio'][name='commit']" \
                           "[value='#{value}']")
       end
-      # Each radio is wrapped in `.radio.mb-2` to match the pre-refactor
-      # spacing — locks in `wrapper_options: { wrap_class: "mb-2" }`.
-      assert_html(html, "div.radio.mb-2", count: 3)
+      # Each radio is wrapped in `.custom-control.custom-radio.mb-2` —
+      # locks in `wrapper_options: { wrap_class: "mb-2" }`.
+      assert_html(html, "div.custom-control.custom-radio.mb-2", count: 3)
     end
 
     def test_preselects_radio_for_each_trust_level

@@ -21,7 +21,7 @@ module Views::Controllers::SpeciesLists
       html = render_details
 
       assert_html(html, "#list_details")
-      assert_html(html, ".panel.panel-default")
+      assert_html(html, ".card")
       # date row + download button line up via flex
       assert_html(html, ".d-flex.justify-content-between.align-items-center")
       # The four header labels — `assert_html(text:)` only checks the

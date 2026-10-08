@@ -5,6 +5,8 @@ require("test_helper")
 class ObservationsControllerCreateTest < FunctionalTestCase
   include ActiveJob::TestHelper
 
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   tests ObservationsController
 
   def modified_generic_params(params, user)
@@ -2087,7 +2089,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_flash_warning
-    assert_select("#observation_projects_inner.collapse.in",
+    assert_select("#observation_projects_inner.collapse.#{EXPANDED}",
                   { count: 1 },
                   "the panel holding the explanation must be expanded")
     assert_select("input[name='observation[use_spare_slip]']" \

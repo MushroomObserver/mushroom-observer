@@ -889,11 +889,10 @@ class ImageTest < UnitTestCase
   # The broadcast must not replay a page-specific image_link/votes/
   # extra_classes/identify combination -- it only knows the model, not
   # which page's props a given subscriber originally rendered with (a
-  # matrix-box thumbnail's real image_link, votes: false on the
-  # image-show page, etc). Confirms the fix for the bug where
-  # rebroadcasting the *whole* Interactive component with defaults
-  # would silently swap a thumbnail's link target to the image's own
-  # show page, or make hidden votes reappear.
+  # grid-box thumbnail's image_link, votes: false on the image-show page, etc.)
+  # Confirms the fix for the bug where rebroadcasting the *whole* Interactive
+  # component with defaults would silently swap a thumbnail's link target to
+  # the image's show page, or make hidden votes reappear.
   def test_broadcast_interactive_sizes_omits_link_and_votes_markup
     image = images(:in_situ_image)
     image.update_column(:transferred, false)

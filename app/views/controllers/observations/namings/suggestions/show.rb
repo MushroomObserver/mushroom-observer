@@ -29,8 +29,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     private
 
     def add_chrome
-      add_show_title(@observation, user: @user)
-      add_owner_naming(observation: @observation, user: @user)
+      add_show_title(@observation, user: @user, owner_naming: true)
       add_context_nav(::Tab::Observation::NamingForm.new(
                         observation: @observation
                       ))

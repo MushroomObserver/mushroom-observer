@@ -1011,40 +1011,40 @@
 
   # Rss log messages.
   log_ancient: "[String]"
-  log_approved_by: Approved by [user].
+  log_approved_by: Approved by [user]
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
-  log_consensus_changed: "Consensus changed from: [old]."
-  log_consensus_created: Initial name [name].
+  log_consensus_changed: "Consensus changed from: [old]"
+  log_consensus_created: Initial name [name]
   log_consensus_created_at: "[:log_consensus_created]"
   log_consensus_reached: "Consensus established: [name]"
-  log_deprecated_by: Deprecated by [user].
+  log_deprecated_by: Deprecated by [user]
   log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
-  log_changed_default_description: Default description changed to [name] by [user].
+  log_changed_default_description: Default description changed to [name] by [user]
   log_changed_permissions: "Permissions modified by [user]: [name]"
-  log_name_approved: Approved by [user] over [other].
+  log_name_approved: Approved by [user] over [other]
   log_name_approved_with_comment: "[:log_name_approved] [comment]"
-  log_name_deprecated: Deprecated by [user] in favor of [other].
+  log_name_deprecated: Deprecated by [user] in favor of [other]
   log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
   log_object_accessioned: "[name] accessioned by [user]"
-  log_object_added_by_user: "[Type] added by [user]."
+  log_object_added_by_user: "[Type] added by [user]"
   log_object_added_by_user_with_name: "[Type] added by [user]: [name]"
-  log_object_created_by_user: "[Type] created by [user]."
+  log_object_created_by_user: "[Type] created by [user]"
   log_object_created_by_user_with_name: "[Type] created by [user]: [name]"
   log_naming_proposed_by_user: "Name proposed by [user]: [name]"
-  log_object_destroyed_by_user: "[Type] deleted by [user]."
+  log_object_destroyed_by_user: "[Type] deleted by [user]"
   log_object_destroyed_by_user_with_name: "[Type] deleted by [user]: [name]"
   log_naming_destroyed_by_user: "Proposed name deleted by [user]: [name]"
-  log_object_merged_by_user: "[Type] merged into [that] by [user]."
-  log_object_moved_by_user: "[Type] moved to [to] by [user]."
-  log_object_removed_by_user: "[Type] removed by [user]."
+  log_object_merged_by_user: "[Type] merged into [that] by [user]"
+  log_object_moved_by_user: "[Type] moved to [to] by [user]"
+  log_object_removed_by_user: "[Type] removed by [user]"
   log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]"
-  log_object_removed_no_user: "[Type] removed."
-  log_naming_updated_by_user: "Proposed name updated by [user]: [name]."
-  log_object_updated_by_user: "[Type] updated by [user]."
+  log_object_removed_no_user: "[Type] removed"
+  log_naming_updated_by_user: "Proposed name updated by [user]: [name]"
+  log_object_updated_by_user: "[Type] updated by [user]"
   log_object_updated_by_user_with_name: "[Type] updated by [user]: [name]"
   log_orphan: "[Title]"
   log_published_description: "Description published by [user]: [name]"
-  log_updated_by: Updated by [user].
+  log_updated_by: Updated by [user]
 
   # These should not need any translation.
   log_article_created: "[:log_object_created_by_user(type=:article)]"
@@ -1056,10 +1056,10 @@
   log_collection_number_updated: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
   log_collection_number_updated_at: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
   log_collection_number_removed: "[:log_object_removed_by_user_with_name(type=:collection_number)]"
-  log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
-  log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
-  log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
-  log_comment_updated_at: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+  log_comment_added: "Comment added by [user]:<br>[summary]"
+  log_comment_destroyed: "Comment deleted by [user]:<br>[summary]"
+  log_comment_updated: "Comment updated by [user]:<br>[summary]"
+  log_comment_updated_at: "[:log_comment_updated]"
   log_description_created: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_created_at: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_destroyed: "[:log_object_destroyed_by_user_with_name(type=:description)]"
@@ -1074,12 +1074,12 @@
   log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_updated_at: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
-  log_occurrence_added: "Added to occurrence by [user]."
-  log_occurrence_removed: "Removed from occurrence by [user]."
-  log_occurrence_updated: "Occurrence updated by [user]."
-  log_field_slip_added: "Added to field slip [name] by [user]."
-  log_field_slip_removed: "Removed from field slip [name] by [user]."
-  log_field_slip_updated: "Field slip [name] updated by [user]."
+  log_occurrence_added: "Added to occurrence by [user]"
+  log_occurrence_removed: "Removed from occurrence by [user]"
+  log_occurrence_updated: "Occurrence updated by [user]"
+  log_field_slip_added: "Added to field slip [name] by [user]"
+  log_field_slip_removed: "Removed from field slip [name] by [user]"
+  log_field_slip_updated: "Field slip [name] updated by [user]"
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
@@ -1110,9 +1110,9 @@
   log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
   log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
   log_observation_updated_at: "[:log_object_updated_by_user(type=:observation)]"
-  log_observation_resynced: Resynced from imported source by [user].
-  log_observation_source_deleted: Imported source no longer exists; Mushroom Observer record kept.
-  log_observation_upgraded_from_placeholder: Upgraded from placeholder to full import by [user].
+  log_observation_resynced: Resynced from imported source by [user]
+  log_observation_source_deleted: Imported source no longer exists; Mushroom Observer record kept
+  log_observation_upgraded_from_placeholder: Upgraded from placeholder to full import by [user]
   log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
   log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
   log_project_created: "[:log_object_created_by_user(type=:project)]"
@@ -1231,6 +1231,12 @@
   app_search: Search
   app_search_google: Site (via google)
   app_context_actions: Actions
+
+  # ARIA labels distinguishing multiple <nav> landmarks on one page.
+  app_top_nav_label: Contextual navigation
+  app_sidebar_nav_label: Site navigation
+  app_object_pager_label: Results navigation
+  app_interest_icons_label: Notification actions
 
   # This shows up at the bottom of every page. We recommend something like: \n
   # "Translated into <Language> by _user your-login_"
@@ -1676,13 +1682,14 @@
   list_observations_download_as_csv: Download Observations
 
   # locations/list_place_names (list_locations)
-  list_place_names_known: Known Locations
-  list_place_names_known_order: "(by name)"
   list_place_names_map: Map Locations
   list_place_names_merge: Merge
   list_place_names_parenthetical: Number in parentheses shows Observation count.
-  list_place_names_undef: Undefined Locations
-  list_place_names_undef_order: "(by frequency)"
+  list_place_names_undef: Unmapped Place Names
+  list_place_names_undef_tooltip: Observations with this place name
+  list_place_names_undef_merge_tooltip: Merge with a mapped location
+  list_place_names_undef_define_tooltip: Define this location if no similar location exists
+  list_place_names_undef_help: These are free-text place names typed on Observations that don't match a defined Location. Click "Merge" next to one to merge it into a Location that already exists, or click "Define" to define a new Location from it.
 
   # locations/list_countries
   list_countries: Country List
@@ -1943,8 +1950,9 @@
   rss_title: "[:app_title]"
   rss_filtered_mouseover: "[:app_title] has applied filter(s) based on your preferences."
   rss_show: "Show:"
-  rss_all: Everything
+  rss_all: All
   rss_all_help: Show all object types.
+  rss_selected: Selected
   rss_one_observation: "[:observations.ti]"
   rss_one_name: "[:names.ti]"
   rss_one_location: "[:locations.ti]"
@@ -1953,7 +1961,7 @@
   rss_one_glossary_term: "[:glossary.ti]"
   rss_one_article: "[:news.ti]"
   rss_one_help: Show only [types].
-  rss_make_default: Make This My Default
+  rss_make_default: Set as default
   rss_created_at: "[TYPE] Created"
   rss_destroyed: "[TYPE] Deleted"
 
@@ -2087,6 +2095,8 @@
   show_namings_suggest_names: Name Suggestions
   show_namings_cast: Cast Vote
   show_namings_user: "[:user.ti]"
+  show_namings_proposed_by: "Proposed by [user]."
+  show_namings_vote_on_names: Vote on Names
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation. Select '[:show_namings_propose_new_name]' if you want to suggest another option. See the "How to Use":/info/how_to_use#voting page for more details on how the votes are tallied.
   show_namings_lose_changes: You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
 
@@ -3623,7 +3633,7 @@
   how_describing_species: "*Describing Species* - Click any \"Name\":#name link you see throughout the site. For example, click on 'Names' under 'Indexes' on the left side of the page then click on any of the results, or search for a name in the search bar, or click the 'About &lt;&#110;ame&gt;...' link at the top of any \"Observation\":#observation page. These all take you to a page summarizing everything we know about this taxon. If you are familiar with this species and there is something you would like to add, click '[:show_name_edit_name]' and add your notes. You are encouraged to cite references including field guides and scientific papers. Short quotes from references are fine, but please don't make extensive quotes without obtaining permission from the original author."
   how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it. The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'. The person who creates the project is always a member and an administrator for that project. An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page. Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages. Any User can send requests to the admins for a project. These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species. Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators. When a description is published it will become the official description if no official description exists yet."
   how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/locations/map.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:names.ti]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name. The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location. Note, however, that auto-completion for the '[:where.ti]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map. This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected. When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'. By default it is checked. If you uncheck it, that observation will not appear in any occurrence maps."
-  how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location. These observations will not appear in our \"occurrence maps\":#maps. An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'. Undefined location names will be followed by a link labeled '[:search.ti]'. If you click the link for an undefined location, it will show a list of observations reported for that location. The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'. Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location. Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined. Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location). In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park'). You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users). If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's. This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details. Merging defined locations is restricted since it can cause significant data loss."
+  how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location. These observations will not appear in our \"occurrence maps\":#maps. An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'. Undefined location names will be followed by a link labeled '[:search.ti]'. If you click the link for an undefined location, it will show a list of observations reported for that location. The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'. Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location. Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined. Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all defined locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. From there, click '[:list_place_names_undef]' at the top of the page to see a list of unmapped place names, sorted by the number of observations reported from each one. In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park'). You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users). If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's. This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details. Merging defined locations is restricted since it can cause significant data loss."
   how_creating_species_lists: "*Creating Observation Lists* - To create an \"Observation List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel. Fill out the various fields.\n\nThere are several methods of collecting a set of existing observations into a new list. In the simplest method, first create an empty observation list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'. This will give you the opportunity to add that observation to any observation list you own. (Note, you can add anyone's observations to an observation list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names. For example, you may use the search bar at the top of the page (toggle the '[:search_bar_more_options]' button for the full search form) to request all observations from Michigan. When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel).\n\nLastly, when you are viewing an existing observation list, you may click '[:species_list_show_clone_list]' which will take you to a new observation list form, with all the information of the existing list already filled in."
   how_write_in: "*Write In New Observation* - Historically, the Create Observation List workflow allowed you to enter a set of 'Write-In-Species'. This feature was rarely used and added a lot of complication to the process of creating a new Observation List. The functionality is still available after you create a list by selecting '[:species_list_show_write_in]'. When you go to add the list, each line is checked to see if there is a match in the database. If there is no matching name, you will be asked if you want to add the unknown names to the database. This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names. Each name given in the 'Write-In Species' field will be used to create a completely new \"Observation\":#observation. The other fields in this form are set for all these new observations."
 
@@ -4495,27 +4505,27 @@
   query_editable_by_user: editable by
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
-  query_has_author: has author
-  query_has_citation: has citation
-  query_has_classification: has classification
-  query_has_collection_numbers: has collection numbers
-  query_has_comments: has comments
-  query_has_default_description: has default description
-  query_has_descriptions: has descriptions
-  query_has_field_slips: has field slips
-  query_has_images: has images
-  query_has_name: has name
-  query_has_notes: has notes
-  query_has_occurrence: has occurrence
-  query_has_notes_fields: has notes fields
-  query_has_observations: has observations
+  query_has_author: with author
+  query_has_citation: with citation
+  query_has_classification: with classification
+  query_has_collection_numbers: with collection numbers
+  query_has_comments: with comments
+  query_has_default_description: with default description
+  query_has_descriptions: with descriptions
+  query_has_field_slips: with field slips
+  query_has_images: with images
+  query_has_name: with name
+  query_has_notes: with notes
+  query_has_occurrence: with occurrence
+  query_has_notes_fields: with notes fields
+  query_has_observations: with observations
   query_has_public_lat_lng: public geolocation
-  query_has_sequences: has sequences
-  query_has_species_lists: has observation lists
-  query_has_specimen: has specimen
-  query_has_summary: has summary
-  query_has_synonyms: has synonyms
-  query_has_votes: has votes
+  query_has_sequences: with sequences
+  query_has_species_lists: with observation lists
+  query_has_specimen: with specimen
+  query_has_summary: with summary
+  query_has_synonyms: with synonyms
+  query_has_votes: with votes
   query_initial_det: initial determination
   query_initial_det_has: initial determination has
   query_is_collection_location: is collection location

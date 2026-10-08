@@ -7,7 +7,7 @@
 # When `@icon` is set:
 #   - icon always renders first
 #   - text (`@name`) follows in `span.sr-only` by default, or in
-#     `span.d-none.d-sm-inline` when `@label` is truthy
+#     `span.d-none.d-sm-inline` when `@show_label` is `:responsive`
 #     (visible at sm+ breakpoints, hidden on xs — for nav buttons
 #     that show an icon on mobile and icon+text on wider screens)
 # When only `@name` is set: plain text, no span wrapper.
@@ -19,7 +19,7 @@ module Components::Button::Content
   def button_content
     if @icon
       render_icon_with_text(
-        @icon, @name, show_text: @label,
+        @icon, @name, show_label: @show_label,
                       icon_opts: { class: @icon_class, title: @icon_title },
                       active: { icon: @active_icon, content: @active_content }
       )

@@ -16,7 +16,9 @@
 # `BTN_VARIANTS` maps variant symbols to their Bootstrap CSS class. The base
 # `"btn"` class is added separately by each component's `merged_class`, so
 # `variant: :strip` renders no Bootstrap button framing at all. Omit
-# `variant:` (or pass `nil`) for the standard grey button (`btn btn-default`).
+# `variant:` (or pass `nil`) for the standard grey button (`btn
+# btn-secondary` -- Bootstrap 4 has no `.btn-default`; `.btn-secondary`
+# is its neutral-grey variant, mapped to the theme's `$SECONDARY_COLOR`).
 # `:default` is also accepted as an explicit synonym for nil/omitted —
 # `Components::Link` needs to distinguish "no button framing at all"
 # (nil, a plain link) from "framed as the default button" (`:default`,
@@ -51,7 +53,7 @@ module Components::Button::Styling
   module_function
 
   def btn_class(variant)
-    return "btn-default" if variant.nil? || variant == :default
+    return "btn-secondary" if variant.nil? || variant == :default
     return nil if variant == :strip
 
     css = BTN_VARIANTS[variant]

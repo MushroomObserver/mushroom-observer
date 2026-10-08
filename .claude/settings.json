@@ -91,12 +91,22 @@
           },
           {
             "type": "command",
+            "command": "test -x .claude/hooks/block_cosmetic_class_assertions.sh && exec .claude/hooks/block_cosmetic_class_assertions.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "test -x .claude/hooks/block_raw_component_classes.sh && exec .claude/hooks/block_raw_component_classes.sh || exit 0",
             "timeout": 15
           },
           {
             "type": "command",
             "command": "test -x .claude/hooks/block_banned_words.sh && exec .claude/hooks/block_banned_words.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_long_comment_blocks.sh && exec .claude/hooks/block_long_comment_blocks.sh || exit 0",
             "timeout": 10
           }
         ]

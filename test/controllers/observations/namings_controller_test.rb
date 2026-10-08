@@ -69,7 +69,7 @@ module Observations
 
     def test_propose_naming_turbo_from_identify_ui
       args = propose_naming_setup
-      params = args[:params].merge(context: "matrix_box")
+      params = args[:params].merge(context: "grid_box")
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
@@ -90,9 +90,8 @@ module Observations
       assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       # Check that turbo_stream replace action is in response
-      assert_match(
-        /turbo-stream.*action="replace".*target="box_title_#{obs.id}"/,
-        @response.body
+      assert_select(
+        "turbo-stream[action='replace'][target='box_title_#{obs.id}']"
       )
 
       post_propose_naming_assertions(args)

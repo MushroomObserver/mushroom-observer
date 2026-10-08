@@ -2,11 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 import { delegate, abnegate } from 'jquery-events-to-dom-events'
 
 // Shows/hides panels based on a select or radio group value, using
-// Bootstrap 3 collapse for animated transitions.
+// Bootstrap collapse for animated transitions.
 //
 // Panels are shown when their data-type-switch-type matches the
 // current select/radio value. The server renders panels with the
-// correct Bootstrap collapse classes (collapse + in for open,
+// correct Bootstrap collapse classes (collapse + show for open,
 // collapse alone for closed) so there is no flash on page load.
 // connect() only disables inputs in hidden panels.
 //
@@ -16,7 +16,7 @@ import { delegate, abnegate } from 'jquery-events-to-dom-events'
 //             data-action="type-switch#switch">
 //     <div data-type-switch-target="panel"
 //          data-type-switch-type="user"
-//          class="collapse in">...</div>
+//          class="collapse show">...</div>
 //     <div data-type-switch-target="panel"
 //          data-type-switch-type="location"
 //          class="collapse">...</div>
@@ -44,7 +44,7 @@ export default class extends Controller {
     // Server renders initial collapse state. Only disable inputs in
     // panels that start closed so they aren't submitted.
     this.panelTargets.forEach(panel => {
-      if (!panel.classList.contains('in')) {
+      if (!panel.classList.contains('show')) {
         this.disablePanelInputs(panel)
       }
     })

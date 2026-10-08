@@ -38,6 +38,7 @@ class Components::Link < Components::Base
   include Components::Button::Content
 
   prop :button, _Nilable(_Union(*Components::Button::VARIANTS)), default: nil
+  prop :show_label, _Union(:hidden, :responsive, :always), default: :hidden
 
   DISPATCH = {
     active: :Active,

@@ -8,18 +8,20 @@ require("test_helper")
 # Unlike CheckboxField, this component is standalone (no
 # Field/FieldProxy) and has NO `.checkbox` div wrap.
 class ButtonStyleCheckboxTest < ComponentTestCase
-  def test_renders_label_wrapping_checkbox_input
+  def test_renders_checkbox_zone_and_label_zone_as_siblings
     html = render_checkbox(
       name: "q[types][]", value: "observation", id: "type_observation"
     ) { "Observations" }
 
-    # <label for="type_observation">
-    #   <input type="checkbox" ...>Observations
-    # </label>
-    assert_html(html, "label[for='type_observation'] > input[type='checkbox']" \
+    # <div class="checkbox-zone">
+    #   <input type="checkbox" ...><label for="type_observation" />
+    # </div>
+    # <div class="label-zone">Observations</div>
+    assert_html(html, ".checkbox-zone > input[type='checkbox']" \
                       "[name='q[types][]'][value='observation']" \
                       "[id='type_observation']")
-    assert_includes(html, "Observations")
+    assert_html(html, ".checkbox-zone > label[for='type_observation']")
+    assert_html(html, ".label-zone", text: "Observations")
     # No `.checkbox` div wrap — intentional (this is the filter-button
     # variant, not the vertical-checkbox-list variant).
     assert_no_html(html, ".checkbox")
@@ -37,7 +39,7 @@ class ButtonStyleCheckboxTest < ComponentTestCase
     assert_html(html, "input[type='checkbox']:not([checked])")
   end
 
-  def test_variant_and_size_applied_to_label
+  def test_label_attrs_applied_to_wrapper
     html = render_checkbox(
       name: "n[]", value: "1", id: "x",
       variant: :outline, size: :sm,
@@ -45,8 +47,7 @@ class ButtonStyleCheckboxTest < ComponentTestCase
                data: { action: "click->filter#toggle" } }
     )
 
-    assert_html(html, "label[for='x']")
-    assert_html(html, "label[data-action='click->filter#toggle']")
+    assert_html(html, ".filter-checkbox[data-action='click->filter#toggle']")
   end
 
   def test_input_attrs_passed_through_via_splat
@@ -63,8 +64,8 @@ class ButtonStyleCheckboxTest < ComponentTestCase
   def test_renders_without_block_content
     html = render_checkbox(name: "n[]", value: "1", id: "x")
 
-    # Label exists, contains the input, no extra content.
-    assert_html(html, "label[for='x'] > input[type='checkbox']")
+    assert_html(html, ".checkbox-zone > input[type='checkbox']")
+    assert_html(html, ".label-zone")
   end
 
   # Multiple instances with the same name[] form a multi-select group

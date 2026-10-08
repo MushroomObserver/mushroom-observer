@@ -42,11 +42,11 @@ module Views::Controllers::Observations::Identify
       # Dropdown with dual targets
       assert_html(html, "div.auto_complete.dropdown-menu" \
                          "[data-autocompleter--clade-target='pulldown']")
-      assert_html(html, "ul.virtual_list" \
+      assert_html(html, ".virtual_list" \
                          "[data-autocompleter--clade-target='list']")
 
       # 10 dropdown items
-      assert_html(html, "li.dropdown-item", count: 10)
+      assert_html(html, "a.dropdown-item", count: 10)
 
       # Type select with dual targets and swap actions
       assert_html(html, "select#identify_filter_type" \

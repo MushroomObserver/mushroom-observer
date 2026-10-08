@@ -171,13 +171,12 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_nested(
       html,
       parent_selector: ".auto_complete.dropdown-menu",
-      child_selector: "ul.virtual_list" \
+      child_selector: ".virtual_list" \
                       "[data-autocompleter--herbarium-target='list']"
     )
 
-    # Should have 10 dropdown items with links
-    assert_html(html, "li.dropdown-item", count: 10)
-    assert_html(html, "li.dropdown-item a", count: 10)
+    # Should have 10 dropdown items
+    assert_html(html, "a.dropdown-item", count: 10)
 
     # Should have has_id_indicator (green check icon) -- a wrapping
     # span, not a bare svg (padding on a replaced element like svg
@@ -210,7 +209,7 @@ class AutocompleterFieldTest < ComponentTestCase
 
     # Should still have dropdown structure
     assert_html(html, ".auto_complete.dropdown-menu")
-    assert_html(html, "ul.virtual_list")
+    assert_html(html, ".virtual_list")
   end
 
   def test_textarea_autocompleter_has_newline_separator
@@ -258,8 +257,8 @@ class AutocompleterFieldTest < ComponentTestCase
     )
 
     # Dropdown items should have click action with namespaced controller
-    selector = "li.dropdown-item " \
-               "a[data-action*='click->autocompleter--herbarium#selectRow']"
+    selector = "a.dropdown-item" \
+               "[data-action*='click->autocompleter--herbarium#selectRow']"
     assert_html(html, selector, count: 10)
   end
 
@@ -334,6 +333,46 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_includes(html, "(Login Name)")
     # Has-id indicator should still be present after between content
     assert_html(html, "span.has-id-indicator")
+  end
+
+  # Regression: a plain `help:` string (no block) must reach
+  # AutocompleterField's help slot the same way text_field/
+  # textarea_field/etc. already do via set_help_slot.
+  def test_autocompleter_field_help_string_renders_help_slot
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name")
+    end
+
+    assert_html(form, ".help-block", text: "Pick a name")
+  end
+
+  # Collapsible help renders as a sibling right after .form-group --
+  # when expanded, .form-group's default margin-bottom would read as
+  # a gap between the field and the help describing it. .form-group
+  # tightens to mb-2 and the outer .autocompleter picks up mb-3 to
+  # keep the same overall spacing to the next field.
+  def test_autocompleter_field_collapsible_help_adjusts_margins
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name", help_collapse: true)
+    end
+
+    assert_html(form, "div.autocompleter.mb-3")
+    assert_html(form, "div.form-group.mb-2")
+    assert_html(form, ".collapse .help-block", text: "Pick a name")
+  end
+
+  # Regression guard: with no help configured, neither margin class
+  # should render -- the adjustment is specific to the
+  # collapsible-help case.
+  def test_autocompleter_field_without_help_has_no_margin_classes
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name")
+    end
+
+    assert_no_html(form, "div.autocompleter.mb-3")
+    assert_no_html(form, "div.form-group.mb-2")
   end
 
   private

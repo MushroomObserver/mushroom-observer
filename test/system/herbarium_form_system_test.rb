@@ -8,6 +8,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     visit("/herbaria/new")
+    capture_geocode_errors
     assert_selector("body.herbaria__new")
     create_herbarium_with_new_location
 
@@ -71,6 +72,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     visit("/herbaria/new")
+    capture_geocode_errors
 
     within("#herbarium_form") do
       # Start in normal location mode
@@ -87,25 +89,23 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       assert_selector("[data-type='location_google']", wait: 5)
       assert_selector(".create", visible: :all)
 
-      # Type "burbank" - in location_google mode, this triggers Google geocoding
-      # Google returns "Burbank, Los Angeles Co., California, USA" (with county)
-      # vs our database which has "Burbank, California, USA" (without county)
+      # Wait for the create-mode switch's own geocode of "some new
+      # place" to settle before typing a different name -- otherwise
+      # the two requests race to update the same fields.
+      wait_for_geocode_settled(count: 1)
+
+      # Type "burbank" - in location_google mode, this triggers Google
+      # geocoding. Google returns "Burbank, Los Angeles Co., California,
+      # USA" (with county) vs our database's "Burbank, California, USA".
       fill_in("herbarium_place_name", with: "burbank")
 
-      # Stepwise diagnostic for a live Google Geocoding API roundtrip
-      # (test default ~2s + even 10s have flaked under full-suite
-      # load — see PR #4405 / #4406):
-      #
-      # 1. Hidden ID transitions blank → "-1" once JS has ANY Google
-      #    response. If THIS fails, Google API itself is slow/dead —
-      #    distinct from "JS race lost the field update."
-      # 2. Field text gets the full geocoded string.
-      #
-      # Same order as `create_herbarium_with_new_location` below.
-      assert_field("herbarium_location_id", with: "-1", type: :hidden,
-                                            wait: 15)
-      assert_field("herbarium_place_name",
-                   with: "Burbank, Los Angeles Co., California, USA", wait: 10)
+      with_geocode_errors_on_failure do
+        assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                              wait: 15)
+        assert_field("herbarium_place_name",
+                     with: "Burbank, Los Angeles Co., California, USA",
+                     wait: 10)
+      end
     end
   end
 
@@ -125,7 +125,8 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
 
       # Wait for autocomplete dropdown and select using keyboard
       assert_selector(".auto_complete", wait: 5)
-      assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 5)
+      assert_selector(".auto_complete a.dropdown-item", text: /Burbank/i,
+                                                        wait: 5)
       browser.keyboard.type(:down, :tab)
 
       # Verify location was selected (has-id class and hidden field populated)
@@ -138,6 +139,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
   def create_herbarium_with_new_location
     within("#herbarium_form") do
       assert_selector("#herbarium_place_name")
+      capture_geocode_errors
       fill_in("herbarium_place_name", with: "genohlac gard france")
 
       # Wait for create button to appear, then click via JS
@@ -150,23 +152,23 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # Verify autocompleter switched to location_google mode
       assert_selector("[data-type='location_google']", wait: 5)
 
-      # Trigger geocoding: `ourClick` on the input → `scheduleRefresh`
-      # → `scheduleGoogleRefresh`. Capybara's `.click` doesn't reliably
+      # Wait for that switch's own geocode call to settle before the
+      # input-click workaround below triggers a second one.
+      wait_for_geocode_settled(count: 1)
+
+      # Trigger geocoding: `ourClick` on the input -> `scheduleRefresh`
+      # -> `scheduleGoogleRefresh`. Capybara's `.click` doesn't reliably
       # fire the event to Stimulus after the JS-driven mode swap above,
-      # so dispatch via JS — same pattern as the create-button click.
+      # so dispatch via JS -- same pattern as the create-button click.
       execute_script("arguments[0].click()",
                      find_field("herbarium_place_name"))
 
-      # Stepwise diagnostic for a live Google Geocoding API roundtrip,
-      # same order and reasoning as the mode-switching test above:
-      # 1. Hidden ID transitions blank -> "-1" once JS has ANY Google
-      #    response. If THIS fails, Google API itself is slow/dead --
-      #    distinct from "JS race lost the field update."
-      # 2. Field text gets the full geocoded string.
-      assert_field("herbarium_location_id", with: "-1", type: :hidden,
-                                            wait: 15)
-      assert_field("herbarium_place_name",
-                   with: "Génolhac, Gard, Occitanie, France", wait: 10)
+      with_geocode_errors_on_failure do
+        assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                              wait: 15)
+        assert_field("herbarium_place_name",
+                     with: "Génolhac, Gard, Occitanie, France", wait: 10)
+      end
 
       # Verify hidden fields are populated correctly
       assert_field("location_north", with: "44.3726", type: :hidden)
@@ -178,5 +180,59 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       fill_in("herbarium_code", with: "CEV")
       click_commit
     end
+  end
+
+  # TEMP diagnostic (flakiness investigation): wraps
+  # google.maps.Geocoder#geocode so a rejected promise is recorded,
+  # not just logged -- pulled into the failure message via
+  # with_geocode_errors_on_failure (NoTestConsoleNoise strips stray
+  # console/stdout output otherwise).
+  def capture_geocode_errors
+    execute_script(<<~JS)
+      window.__geocodeErrors = window.__geocodeErrors || [];
+      window.__geocodeSettledCount = window.__geocodeSettledCount || 0;
+      (function patch() {
+        const gm = window.google && window.google.maps;
+        if (!gm || !gm.Geocoder) { setTimeout(patch, 100); return; }
+        if (gm.Geocoder.prototype.__geocodePatched) return;
+        gm.Geocoder.prototype.__geocodePatched = true;
+        const orig = gm.Geocoder.prototype.geocode;
+        gm.Geocoder.prototype.geocode = function(...args) {
+          return orig.apply(this, args).then((result) => {
+            window.__geocodeSettledCount++;
+            return result;
+          }).catch((e) => {
+            window.__geocodeErrors.push(
+              JSON.stringify({ name: e && e.name, message: e && e.message,
+                               code: e && e.code })
+            );
+            window.__geocodeSettledCount++;
+            throw e;
+          });
+        };
+      })();
+    JS
+  end
+
+  # Waits for `count` geocode() calls to settle (success or error).
+  # Lets an implicitly triggered geocode (e.g. from a create-mode
+  # switch) finish before the next one starts, so two requests do
+  # not race to update the same fields.
+  def wait_for_geocode_settled(count:, wait: 10)
+    Timeout.timeout(wait) do
+      loop do
+        settled = evaluate_script("window.__geocodeSettledCount") || 0
+        break if settled >= count
+
+        sleep(0.1)
+      end
+    end
+  end
+
+  def with_geocode_errors_on_failure
+    yield
+  rescue Minitest::Assertion => e
+    errors = evaluate_script("window.__geocodeErrors") || []
+    raise(e.class.new("#{e.message}\n\nCaptured geocode errors: #{errors}"))
   end
 end

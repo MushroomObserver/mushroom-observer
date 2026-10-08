@@ -89,18 +89,18 @@ class RssLogsControllerTest < FunctionalTestCase
     expect = rss_logs(:glossary_term_rss_log)
     login
     get(:index, params: { q: { type: "glossary_term" } })
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
     assert_no_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name}/,
-      css_select(".rss-what").text
+      css_select(".log-what").text
     )
 
     # Without params[:type], it should display all logs
     get(:index)
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
     assert_match(
       /#{rss_logs(:detailed_unknown_obs_rss_log).observation.name.text_name}/,
-      css_select(".rss-what").text
+      css_select(".log-what").text
     )
 
     comments_for_path = comments_path(for_user: rolf.id)
@@ -190,7 +190,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { q: { type: "observation" } })
 
     assert_select(
-      ".source-credit",
+      ".log-source-credit",
       { text: /Imported from iNaturalist/ },
       "RssLog is missing Source credit"
     )
@@ -215,7 +215,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { q: { type: "observation" } })
 
     assert_select(
-      ".source-credit",
+      ".log-source-credit",
       { text: /Imported from iNaturalist/ },
       "RssLog is missing Source credit"
     )

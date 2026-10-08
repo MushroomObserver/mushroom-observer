@@ -23,7 +23,7 @@ class ListFormSystemTest < ApplicationSystemTestCase
     assert_field("list_members", with: /Agaricus campestris/)
     @browser.keyboard.type("Coprinus com")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li a", text: "Coprinus comatus")
+    assert_selector(".auto_complete a.dropdown-item", text: "Coprinus comatus")
     @browser.keyboard.type(:down, :tab)
     assert_field("list_members", with: /Coprinus comatus/)
     assert_field("list_members_id", with: "#{name2.id},#{name1.id}",
@@ -33,7 +33,7 @@ class ListFormSystemTest < ApplicationSystemTestCase
     @browser.keyboard.type(:return)
     @browser.keyboard.type("Stereum hirs")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete ul li a", text: "Stereum hirsutum")
+    assert_selector(".auto_complete a.dropdown-item", text: "Stereum hirsutum")
     @browser.keyboard.type(:down, :tab)
     assert_field("list_members", with: /Stereum hirsutum/)
     assert_field("list_members_id", with: "#{name2.id},#{name1.id},#{name3.id}",

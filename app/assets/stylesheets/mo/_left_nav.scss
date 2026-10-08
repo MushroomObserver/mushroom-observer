@@ -5,6 +5,7 @@
 .sidebar-nav {
   border-width: 1px;
   border-style: solid;
+  border-color: $LEFT_BAR_BORDER_COLOR;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-bottom-left-radius: 5px;
@@ -23,7 +24,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 4px;
+    padding: 0.25rem 0.5rem 0.25rem 0.75rem;
 
     // overflow: hidden above clips the keyboard focus ring at the
     // item's edges. Pull the outline inside so it renders fully.
@@ -31,39 +32,57 @@
       outline-offset: -2px;
     }
 
+    // Bootstrap's `&.active` sets its theme's primary border color --
+    // match the borderless sidebar items instead.
+    &.active {
+      border-color: transparent;
+    }
+
+    // $link-hover-decoration underlines a hovered <a> globally --
+    // these items are themselves <a> tags (Components::ListGroup::
+    // LinkItem puts the class directly on the Link-rendered anchor),
+    // so undo it here.
     &.active,
     &:hover,
     &:focus,
     &:hover a.dropdown-toggle,
     &:focus a.dropdown-toggle,
     a.dropdown-toggle:hover {
-      color: $navbar-inverse-link-hover-color;
-      background-color: $navbar-inverse-link-hover-bg;
+      color: $LEFT_BAR_HOVER_TEXT_COLOR;
+      background-color: $LEFT_BAR_HOVER_BG_COLOR;
+      text-decoration: none;
     }
 
     // These are the headers
     &.disabled,
     &.disabled:hover,
     &.disabled:focus {
-      color: $navbar-inverse-link-disabled-color;
-      background-color: $navbar-inverse-link-disabled-bg;
+      color: $LEFT_BAR_HEADER_TEXT_COLOR;
+      background-color: $LEFT_BAR_HEADER_BG_COLOR;
       cursor: default;
-      padding-left: 5px;
+      padding: 0.25rem 0.5rem;
     }
 
     &#nav_bug_report_link {
-      color: $navbar-inverse-link-disabled-color;
+      color: $LEFT_BAR_HEADER_TEXT_COLOR;
       &:hover,
       &:focus {
-        color: $navbar-inverse-link-color;
+        color: $LEFT_BAR_TEXT_COLOR;
       }
     }
   }
 
   .list-group-item,
   a.dropdown-toggle {
-    color: $navbar-inverse-link-color;
-    background-color: $navbar-inverse-bg;
+    color: $LEFT_BAR_TEXT_COLOR;
+    background-color: $LEFT_BAR_BG_COLOR;
+  }
+
+  // Bootstrap's `.list-group-item + .list-group-item.active` rule
+  // reassigns margin-top/border-top-width -- null both back out.
+  .list-group-item + .list-group-item.active {
+    margin-top: 0;
+    border-top-width: 0;
   }
 }
 
@@ -77,14 +96,14 @@
 }
 
 // The language collapse's rows use the plain (light) list-group
-// palette rather than the sidebar's own dark `$navbar-inverse-*`
-// theme colors — reads as a "panel" island against the dark nav,
-// and stays correct across theme switches since these Bootstrap
-// defaults aren't remapped to any of MO's theme variables the way
-// `$navbar-inverse-bg` is. ID selector wins over `.sidebar-nav
+// palette rather than the sidebar's dark `$LEFT_BAR_*` theme colors
+// — reads as a "panel" island against the dark nav, and stays
+// correct across theme switches since these Bootstrap defaults
+// aren't remapped to any of MO's theme variables the way
+// `$LEFT_BAR_BG_COLOR` is. ID selector wins over `.sidebar-nav
 // .list-group-item`'s specificity without needing `!important`.
 #language_dropdown_collapse .list-group-item {
-  color: $panel-default-text;
+  color: $card-color;
   background-color: $list-group-bg;
 
   // `$list-group-hover-bg` maps to the same theme variable as
@@ -93,7 +112,7 @@
   // darken the base color directly instead.
   &:hover,
   &:focus {
-    color: $panel-default-text;
+    color: $card-color;
     background-color: darken($list-group-bg, 5%);
   }
 }

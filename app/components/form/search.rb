@@ -63,8 +63,10 @@ class Components::Form::Search < Components::ApplicationForm
 
   def view_template
     render_header if dropdown?
-    div(id: "search_#{search_type}_flash") # turbo_stream update target
-    render_form_columns
+    Row(class: "flex-column") do
+      div(id: "search_#{search_type}_flash") # turbo_stream update target
+      render_form_columns
+    end
     render_form_buttons
   end
 
@@ -109,8 +111,8 @@ class Components::Form::Search < Components::ApplicationForm
          collapsed: false,
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
-         button: :link,
-         class: class_names(Components::Navbar::LINK_CLASS, "px-2"),
+         button: :link, size: :lg,
+         class: "p-0",
          data: { search_type_target: "barToggle" })
   end
 

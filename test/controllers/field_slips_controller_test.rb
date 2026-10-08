@@ -692,8 +692,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_show_field_slip_location
     login(@field_slip.user.login)
     get(:edit, params: { id: @field_slip.id })
-    assert_match(@field_slip.location_name,
-                 @response.body)
+    assert_select("input#field_slip_location[value=?]",
+                  @field_slip.location_name)
   end
 
   def test_should_show_text_collector
@@ -708,16 +708,16 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not(field_slip.location == field_slip.project.location.display_name)
     login(field_slip.user.login)
     get(:new, params: { code: "#{field_slip.code}0" })
-    assert_match(field_slip.location_name,
-                 @response.body)
+    assert_select("input#field_slip_location[value=?]",
+                  field_slip.location_name)
   end
 
   def test_should_show_project_location
     login(@field_slip.user.login)
     project = projects(:current_project)
     get(:new, params: { code: "#{project.field_slip_prefix}-1234" })
-    assert_match(project.location.display_name,
-                 @response.body)
+    assert_select("input#field_slip_location[value=?]",
+                  project.location.display_name)
   end
 
   def test_should_edit_user_orphan
@@ -1102,7 +1102,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_unprocessable
     assert_select("form[data-turbo='true']")
     assert_select(
-      "#modal_resolve_projects.modal.fade.in",
+      "#modal_resolve_projects.modal.fade.show",
       { count: 1 },
       "Expected Components::Modal for project-gaps overlay"
     )
@@ -1312,12 +1312,12 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # Components::Modal markup proves the new modal composition
     # rendered, not just that we got a 200.
     assert_select(
-      "#modal_resolve_projects.modal.fade.in",
+      "#modal_resolve_projects.modal.fade.show",
       { count: 1 },
       "Expected Components::Modal for project-gaps overlay"
     )
     assert_select(".modal-dialog.modal-lg")
-    assert_select(".modal-backdrop.fade.in")
+    assert_select(".modal-backdrop.fade.show")
     # Resolve modal's submit buttons (Skip + Add All) are posted under
     # the FormObject's namespace.
     assert_select("[name='occurrence_projects[resolution]']", count: 2)
