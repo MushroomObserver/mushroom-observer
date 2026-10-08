@@ -10,14 +10,18 @@ require("test_helpers/system/cuprite_setup")
 require("test_helpers/system/cuprite_helpers")
 
 # `en.yml` is gitignored, so a branch switch leaves it stale -- same
-# check `script/deploy.sh` runs before a deploy. `reload!` forces a
-# re-read: test_helper above may have already cached the stale file
-# into I18n before the shell script below gets a chance to fix it.
+# check `script/deploy.sh` runs before a deploy. Only reload when it
+# changed: an unconditional reload (in the parent, before parallelize
+# forks) would force every child to re-parse locales from scratch.
+en_yml = Rails.root.join("config/locales/en.yml")
+mtime_before = File.mtime(en_yml) if File.exist?(en_yml)
+
 unless system("script/lang_update_if_needed.sh")
   raise("script/lang_update_if_needed.sh failed")
 end
 
-I18n.reload!
+mtime_after = File.exist?(en_yml) ? File.mtime(en_yml) : nil
+I18n.reload! if mtime_before != mtime_after
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # Maps JS API key whitelists ports in Google Cloud Console --
