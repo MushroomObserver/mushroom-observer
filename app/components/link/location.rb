@@ -56,7 +56,9 @@ class Components::Link::Location < Components::Link::Object
 
   def render_where_link
     a(href: url_for(observations_path(where: @where)),
-      class: "index_observations_at_where_link") do
+      class: "index_observations_at_where_link",
+      title: :list_place_names_undef_tooltip.t,
+      data: { tooltip_target: "tip", placement: "top" }) do
       render_label(@where)
       if @click
         whitespace

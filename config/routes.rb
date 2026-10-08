@@ -513,6 +513,9 @@ MushroomObserver::Application.routes.draw do
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
+  # Undefined Locations: index
+  get("locations/undefined", to: "locations/undefined#index",
+                             as: "undefined_locations")
 
   # ----- Names: a lot of actions  ----------------------------
   namespace :names do
