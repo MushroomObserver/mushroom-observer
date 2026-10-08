@@ -253,6 +253,13 @@ button.badge-id:hover {
   gap: map-get($spacers, 3);
 }
 
+// Trailing observation-count column on the locations list-group --
+// a fixed width so counts line up row to row regardless of digit count.
+.obs-count-col {
+  flex: 0 0 4rem;
+  text-align: right;
+}
+
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual top offset and 1.12em size are tuned for looser
 // contexts -- undone/shrunk here.

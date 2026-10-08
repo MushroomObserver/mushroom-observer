@@ -1,27 +1,21 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Locations
-  # Index page — paginated list of known locations on the left and
-  # unmatched `Observation#where` strings on the right. Used by
+  # Index page — paginated list of known locations. Used by
   # `LocationsController#index` and its filtered_index dispatch.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :locations, _Array(::Location)
     prop :pagination_data, ::PaginationData
-    prop :undef_pages, ::PaginationData
-    # `[Observation, count]` pairs — one per unique unmatched
-    # location string on the current page.
-    prop :undef_data, _Array(_Tuple(::Observation, ::Integer))
     # `{ location_id => observation_count }`, built in the controller.
     prop :observation_counts, _Hash(::Integer, ::Integer),
          default: -> { {} }
-    prop :default_orders, _Boolean, default: false
+
     def view_template
       register_chrome
 
-      Row(class: "mt-3") do
-        Column(md: 7) { render_known(@observation_counts) }
-        Column(md: 5) { render_undefined }
+      Container(width: :text_image, class: "mt-3") do
+        render_locations
       end
     end
 
@@ -44,26 +38,15 @@ module Views::Controllers::Locations
         params[:by_user].present?)
     end
 
-    def render_section_heading(label_key, order_key, css:)
-      div(class: css) do
-        plain(label_key.l)
-        if @default_orders
-          whitespace
-          plain(order_key.l)
+    def render_locations
+      return unless @locations.any?
+
+      PaginatedResults do
+        small(class: "d-block text-right px-3 mb-1") do
+          plain(:list_place_names_parenthetical.l)
         end
+        render_known_list(@observation_counts)
       end
-    end
-
-    def render_known(counts)
-      return unless @pagination_data.any? && @locations.any?
-
-      render_section_heading(:list_place_names_known,
-                             :list_place_names_known_order,
-                             css: "h4 px-3 mb-0")
-      ContentPadded do
-        small { plain(:list_place_names_parenthetical.l) }
-      end
-      PaginatedResults { render_known_list(counts) }
     end
 
     def render_known_list(counts)
@@ -73,40 +56,12 @@ module Views::Controllers::Locations
     end
 
     def render_known_item(list, location, counts)
-      list.item do
-        Link(type: :location, where: location.name.t,
-             location: location, count: counts[location.id].to_i)
-      end
-    end
-
-    def render_undefined
-      return unless @undef_pages.any? && @undef_data.any?
-
-      render_section_heading(:list_place_names_undef,
-                             :list_place_names_undef_order,
-                             css: "h4 px-3")
-      div(id: "locations_undefined") { render_undefined_list }
-    end
-
-    def render_undefined_list
-      ListGroup do |list|
-        @undef_data.each do |obs, count|
-          render_undefined_item(list, obs, count)
+      list.item(class: "d-flex align-items-start") do
+        div(class: "id-badge-col") { IDBadge(object: location, size: :lg) }
+        div(class: "flex-grow-1") do
+          Link(type: :location, where: location.name.t, location: location)
         end
-      end
-    end
-
-    def render_undefined_item(list, obs, count)
-      location_name = obs[:where]
-      list.item do
-        Link(type: :location, where: location_name, count: count)
-        whitespace
-        Link(type: :get, class: "icon-text-gap",
-             name: :list_place_names_merge.l,
-             target: matching_locations_for_observations_path(
-               where: location_name
-             ),
-             icon: :merge, show_label: :hidden)
+        div(class: "obs-count-col") { plain("(#{counts[location.id].to_i})") }
       end
     end
   end
