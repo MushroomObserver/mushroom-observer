@@ -8,8 +8,7 @@ module Views::Controllers::Locations
     prop :locations, _Array(::Location)
     prop :pagination_data, ::PaginationData
     # `{ location_id => observation_count }`, built in the controller.
-    prop :observation_counts, _Hash(::Integer, ::Integer),
-         default: -> { {} }
+    prop :observation_counts, _Hash(::Integer, ::Integer)
 
     def view_template
       register_chrome
