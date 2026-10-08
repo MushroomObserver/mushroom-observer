@@ -9,21 +9,21 @@ require("capybara/cuprite")
 require("test_helpers/system/cuprite_setup")
 require("test_helpers/system/cuprite_helpers")
 
-# `en.yml` is gitignored, so a branch switch leaves it stale against
-# the new `en.txt` -- same check `script/deploy.sh` runs before a
-# deploy. Runs once per process, before `parallelize` forks workers.
+# `en.yml` is gitignored, so a branch switch leaves it stale -- same
+# check `script/deploy.sh` runs before a deploy. `reload!` forces a
+# re-read: test_helper above may have already cached the stale file
+# into I18n before the shell script below gets a chance to fix it.
 unless system("script/lang_update_if_needed.sh")
   raise("script/lang_update_if_needed.sh failed")
 end
 
+I18n.reload!
+
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
-  # System tests use the Maps JavaScript API
-  # (`@googlemaps/js-api-loader`); the key's HTTP-Referer whitelist
-  # in Google Cloud Console gates which ports can call it. Start at
-  # 3001 (not 3000) so a running `bin/rails server` on 3000 doesn't
-  # collide with a worker. Count is the number of whitelisted ports
-  # — bump (and ask Joe to widen the Cloud Console whitelist) when
-  # we want more parallel system-test workers.
+  # Maps JS API key whitelists ports in Google Cloud Console --
+  # start at 3001 (not 3000) so a running `bin/rails server` on
+  # 3000 is left alone. Bump (and widen the whitelist) for more
+  # parallel workers.
   MAPS_API_PORT_FIRST = 3001
   MAPS_API_PORT_COUNT = 3
   parallelize(workers: MAPS_API_PORT_COUNT)
@@ -42,15 +42,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
     # experimental, does it fix pending logins?
     Capybara.reset_sessions!
-    # below is needed for cuprite
-    #
-    # Capybara's :puma server registration logs a startup banner
-    # ("Capybara starting Puma...", version, listen addresses) to
-    # STDOUT unless invoked with Silent: true -- but the registered
-    # proc is called with just (app, port, host), so plain
-    # `Capybara.server = :puma` cannot suppress it. Wrap that
-    # registration and force Silent: true so NoTestConsoleNoise
-    # doesn't flag the first system test on each parallel worker/port.
+    # Capybara registers :puma logging a startup banner unless
+    # Silent: true; the registered proc signature cannot take that
+    # flag directly, so wrap registration and force it, keeping
+    # NoTestConsoleNoise from flagging the first test per worker.
     unless Capybara.servers.names.include?(:puma_silent)
       Capybara.register_server(:puma_silent) do |app, port, host|
         Capybara.servers[:puma].call(app, port, host, Silent: true)
@@ -59,12 +54,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.server = :puma_silent
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
-    # Bind to a Maps-API-whitelisted port starting at
-    # `MAPS_API_PORT_FIRST` (3001). One port per worker so they
-    # don't fight — worker 0 → 3001, worker 1 → 3002, etc. Skipping
-    # 3000 leaves a running `bin/rails server` on 3000 alone so
-    # devs don't need to stop it before `bin/rails test test/system`.
-    # Serial runs leave `TEST_ENV_NUMBER` unset → port 3001.
+    # One Maps-whitelisted port per worker (MAPS_API_PORT_FIRST..+N),
+    # skipping 3000 so a running `bin/rails server` is left alone.
+    # Serial runs leave TEST_ENV_NUMBER unset -> port 3001.
     Capybara.server_port = MAPS_API_PORT_FIRST + ENV["TEST_ENV_NUMBER"].to_i
     # Normalize whitespaces when using `has_text?` and similar matchers,
     # i.e., ignore newlines, trailing spaces, etc.
@@ -86,12 +78,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # default in test_helper = true. some SO threads suggest false
     self.use_transactional_tests = true
 
-    # The Capybara.using_session allows you to manipulate a different browser
-    # session, and thus, multiple independent sessions within a single test
-    # scenario. That’s especially useful for testing real-time features, e.g.,
-    # something with WebSocket. This patch tracks the name of the last session
-    # used. We’re going to use this information to support taking failure
-    # screenshots in multi-session tests.
+    # using_session tracks the last session name for failure
+    # screenshots across multi-session (e.g. WebSocket) tests.
     Capybara.singleton_class.prepend(Module.new do
       attr_accessor :last_used_session
 
