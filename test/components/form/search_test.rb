@@ -83,8 +83,7 @@ class SearchFormTest < ComponentTestCase
   def test_renders_header_when_dropdown_context
     html = render_form(context: :dropdown)
 
-    assert_html(html, ".flex-bar")
-    assert_html(html, "body",
+    assert_html(html, ".flex-bar",
                 text: :search_form_title.t(type: :observations))
     assert_html(html,
                 "a[data-toggle='collapse']" \

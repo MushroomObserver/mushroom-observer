@@ -19,7 +19,8 @@ module GlossaryTerms
                                                          name: term.name))
 
       ESSENTIAL_ATTRIBUTES.each do |attr|
-        assert_select("body", /#{version.send(attr)}/,
+        assert_select("#glossary_term_version_summary",
+                      /#{version.send(attr)}/,
                       "Page is missing glossary term #{attr}")
       end
       assert_select("a[href='#{glossary_term_path(term.id)}']", true,
