@@ -81,8 +81,9 @@ module Naming::Notify
     notification_trackers(taxa).each do |tracker|
       next if tracker.user.no_emails
 
-      NamingTrackerMailer.build(receiver: tracker.user, naming: self).
-        deliver_later
+      NamingTrackerMailer.build(
+        receiver: tracker.user, naming: self, name_tracker: tracker
+      ).deliver_later
       notify_tracker_observer(tracker)
     end
   end
