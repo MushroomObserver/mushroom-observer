@@ -7,15 +7,17 @@ require("test_helper")
 # Unlike RadioField, this component is standalone (no Field/FieldProxy)
 # and has NO `.radio` div wrap.
 class ButtonStyleRadioTest < ComponentTestCase
-  def test_renders_label_wrapping_radio_input
+  def test_renders_radio_zone_and_label_zone_as_siblings
     html = render_radio(
       name: "obs[thumb]", value: "42", id: "thumb_42"
     ) { "Pick this" }
 
-    # <label for="thumb_42"><input type="radio" ...>Pick this</label>
-    assert_html(html, "label[for='thumb_42'] > input[type='radio']" \
+    # <div class="radio-zone"><input type="radio" ...><label for=.../></div>
+    # <div class="label-zone">Pick this</div>
+    assert_html(html, ".radio-zone > input[type='radio']" \
                       "[name='obs[thumb]'][value='42'][id='thumb_42']")
-    assert_includes(html, "Pick this")
+    assert_html(html, ".radio-zone > label[for='thumb_42']")
+    assert_html(html, ".label-zone", text: "Pick this")
     # No `.radio` div wrap — that's intentional.
     assert_no_html(html, ".radio")
   end
@@ -32,15 +34,14 @@ class ButtonStyleRadioTest < ComponentTestCase
     assert_html(html, "input[type='radio']:not([checked])")
   end
 
-  def test_label_attrs_passed_through
+  def test_label_attrs_applied_to_wrapper
     html = render_radio(
       name: "n", value: "1", id: "x",
       label: { class: "thumb_img_btn",
                data: { action: "click->form-images#set" } }
     )
 
-    assert_html(html, "label.thumb_img_btn[for='x']")
-    assert_html(html, "label[data-action='click->form-images#set']")
+    assert_html(html, ".thumb_img_btn[data-action='click->form-images#set']")
   end
 
   def test_input_attrs_passed_through_via_splat
@@ -57,8 +58,8 @@ class ButtonStyleRadioTest < ComponentTestCase
   def test_renders_without_block_content
     html = render_radio(name: "n", value: "1", id: "x")
 
-    # Label exists, contains the input, no extra content.
-    assert_html(html, "label[for='x'] > input[type='radio']")
+    assert_html(html, ".radio-zone > input[type='radio']")
+    assert_html(html, ".label-zone")
   end
 
   private

@@ -132,7 +132,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
              value: value,
              id: "thumb_image_id_#{@img_id}",
              checked: checked,
-             size: :sm,
+             size: :sm, label_wrap: true,
              label: { class: "thumb_img_btn" },
              class: "mr-3"
            )) do

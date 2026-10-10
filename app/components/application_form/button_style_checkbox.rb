@@ -1,21 +1,13 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Bootstrap 3 button-styled checkbox: a `<label class="btn …">`
-  # wrapping an `<input type="checkbox">` plus arbitrary block content
-  # (the visible text/icons). NO `.checkbox` div wrap — that wrap is
-  # for vertical checkbox-list layout; this component is for
-  # checkboxes that look like buttons (BS3's
-  # `.btn-group[data-toggle="buttons"]` pattern, or standalone
-  # button-styled checkboxes scattered across a filter UI).
+  # Two independent click zones: a fixed-width checkbox zone (BS4
+  # custom-checkbox graphic) and a flex-grow label zone (block
+  # content). Fixes touch precision on a single wrapping `<label>`.
   #
-  # Parallel of `ButtonStyleRadio`. Same constructor shape, same
-  # caller ergonomics — just emits `type="checkbox"` and supports
-  # name-array shapes like `q[types][]` for multi-select filters.
-  #
-  # Standalone (no Superform context) — takes raw HTML kwargs rather
-  # than a `Field` / `FieldProxy`, since the call sites (filter UIs,
-  # in-form toolbars) don't always have a form context available.
+  # `label_wrap: true` also wraps the label zone in a `<label
+  # for=id>`, for content with no competing click action (e.g.
+  # Form::UploadGallery::Item's thumbnail picker).
   #
   # @example
   #   render(Components::ApplicationForm::ButtonStyleCheckbox.new(
@@ -27,21 +19,17 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     plain "Observations"
   #   end
   class ButtonStyleCheckbox < Phlex::HTML
-    # Extends `Phlex::HTML` directly (not `Components::Base`), so it
-    # gets no Kit sugar on its own — see `.claude/rules/phlex_reference.md`'s
-    # "Kit sugar doesn't reach app/components/application_form/*" section.
     include ::Components
 
     # @param name [String] HTML name (shared across checkboxes in a group)
     # @param value [String] value submitted when this checkbox is checked
-    # @param id [String] HTML id (matches the label's `for`)
+    # @param id [String] HTML id (matches the checkbox zone's label `for`)
     # @param checked [Boolean] initial checked state
-    # @param variant [Symbol, nil] btn variant; nil for btn-default,
-    #   :strip for a plain label with no btn classes
-    # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
-    # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
-    #   `class:` for identifier classes, `data:`). Do not pass btn
-    #   classes here — use `variant:` and `size:` instead.
+    # @param variant [Symbol, nil] btn variant for the outer wrapper
+    # @param size [Symbol, nil] btn size modifier for the outer wrapper
+    # @param label_wrap [Boolean] also wrap the label zone in a
+    #   `<label for=id>` (default false)
+    # @param label [Hash] extra HTML attrs for the outer wrapper
     # @param input_attrs [Hash] HTML attrs passed through to `<input>`
     def initialize(name:, value:, id:, **opts)
       super()
@@ -51,23 +39,40 @@ class Components::ApplicationForm < Superform::Rails::Form
       @checked = opts.delete(:checked) { false }
       @variant = opts.delete(:variant)
       @size = opts.delete(:size)
-      @label_attrs = opts.delete(:label) || {}
+      @label_wrap = opts.delete(:label_wrap) { false }
+      @wrapper_attrs = opts.delete(:label) || {}
       @input_attrs = opts
     end
 
     def view_template(&block)
-      Button(tag: :label, for: @id, variant: @variant, size: @size,
-             **@label_attrs) do
-        input(**input_attributes)
-        yield if block
+      Button(tag: :span, variant: @variant, size: @size,
+             **mix({ class: "d-flex align-items-center" }, @wrapper_attrs)) do
+        render_checkbox_zone
+        render_label_zone(&block)
       end
     end
 
     private
 
+    def render_checkbox_zone
+      div(class: "custom-control custom-checkbox checkbox-zone") do
+        input(**input_attributes)
+        label(class: "custom-control-label", for: @id)
+      end
+    end
+
+    def render_label_zone(&block)
+      if @label_wrap
+        label(for: @id, class: "label-zone flex-grow-1") { yield if block }
+      else
+        div(class: "label-zone flex-grow-1") { yield if block }
+      end
+    end
+
     def input_attributes
-      { type: :checkbox, name: @name, id: @id, value: @value,
-        checked: @checked, **@input_attrs }
+      mix({ type: :checkbox, name: @name, id: @id, value: @value,
+            checked: @checked, class: "custom-control-input" },
+          @input_attrs)
     end
   end
 end
