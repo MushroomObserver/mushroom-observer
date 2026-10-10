@@ -250,6 +250,13 @@ button.badge-id:hover {
   min-width: 6rem;
 }
 
+// Trailing observation-count column on the locations list-group --
+// a fixed width so counts line up row to row regardless of digit count.
+.obs-count-col {
+  flex: 0 0 4rem;
+  text-align: right;
+}
+
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // vertical-align: middle avoids stretching the line for a text
 // descender the icon doesn't have. mo-icon's usual top offset and

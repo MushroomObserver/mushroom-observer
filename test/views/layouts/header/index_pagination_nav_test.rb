@@ -183,11 +183,13 @@ module Views::Layouts
     def test_renders_nothing_when_pagination_data_nil
       html = render_nav(pagination_data: nil)
 
-      # Should still render the wrapper divs
-      assert_includes(html, "pagination-top")
-      # But no nav elements
-      assert_not_includes(html, "pagination_numbers")
-      assert_not_includes(html, "pagination_letters")
+      assert_equal("", html)
+    end
+
+    def test_renders_nothing_when_single_page_and_no_sorter_or_letters
+      html = render_nav(pagination_data: paginated(5, 1))
+
+      assert_equal("", html)
     end
 
     def test_clamps_page_number_when_below_minimum

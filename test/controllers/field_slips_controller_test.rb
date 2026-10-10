@@ -692,8 +692,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_show_field_slip_location
     login(@field_slip.user.login)
     get(:edit, params: { id: @field_slip.id })
-    assert_match(@field_slip.location_name,
-                 @response.body)
+    assert_select("input#field_slip_location[value=?]",
+                  @field_slip.location_name)
   end
 
   def test_should_show_text_collector
@@ -708,16 +708,16 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_not(field_slip.location == field_slip.project.location.display_name)
     login(field_slip.user.login)
     get(:new, params: { code: "#{field_slip.code}0" })
-    assert_match(field_slip.location_name,
-                 @response.body)
+    assert_select("input#field_slip_location[value=?]",
+                  field_slip.location_name)
   end
 
   def test_should_show_project_location
     login(@field_slip.user.login)
     project = projects(:current_project)
     get(:new, params: { code: "#{project.field_slip_prefix}-1234" })
-    assert_match(project.location.display_name,
-                 @response.body)
+    assert_select("input#field_slip_location[value=?]",
+                  project.location.display_name)
   end
 
   def test_should_edit_user_orphan

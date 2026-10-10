@@ -51,7 +51,7 @@ class FormCheckboxCollapseTest < ComponentTestCase
     )
 
     assert_html(html, ".mt-0 input[type='checkbox']")
-    assert_html(html, "body", text: "Some help text")
+    assert_html(html, ".help-block", text: "Some help text")
   end
 
   def test_input_data_in_attributes_goes_to_input_not_label

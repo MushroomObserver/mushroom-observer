@@ -28,6 +28,9 @@ module Views::Layouts
     prop :request_url, ::String # Full URL w/ query params, for links
 
     def view_template
+      return unless sorter_slot? || need_letter_pagination_links? ||
+                    show_number_pagination?
+
       div(class: "pagination-#{@position} flex-bar mb-2") do
         div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
         div(class: "d-flex") do
@@ -38,6 +41,10 @@ module Views::Layouts
     end
 
     private
+
+    def show_number_pagination?
+      @pagination_data && @pagination_data.num_pages > 1
+    end
 
     def render_letter_pagination_nav
       return unless need_letter_pagination_links?
@@ -51,7 +58,7 @@ module Views::Layouts
     end
 
     def render_number_pagination_nav
-      return unless @pagination_data && @pagination_data.num_pages > 1
+      return unless show_number_pagination?
 
       setup_letter_params
       setup_page_numbers

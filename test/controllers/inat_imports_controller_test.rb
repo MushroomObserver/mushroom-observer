@@ -673,10 +673,13 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_unprocessable
     assert_select("#expected_count")
-    body = @response.body
-    assert_match(:inat_import_confirm_expected_caption.l, body)
+    assert_select("#expected_count_line",
+                  /#{Regexp.escape(:inat_import_confirm_expected_caption.l)}/)
     assert_select("#expected_count", "2")
-    assert_match(:inat_import_confirm_time_estimate_caption.l, body)
+    assert_select(
+      "#estimated_time_line",
+      /#{Regexp.escape(:inat_import_confirm_time_estimate_caption.l)}/
+    )
     assert_select("#estimated_time", "00:00:24")
   end
 
