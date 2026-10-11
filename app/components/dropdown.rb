@@ -62,6 +62,14 @@ class Components::Dropdown < Components::Base
   prop :toggle_size, _Nilable(::Symbol), default: nil
   prop :toggle_class, _Nilable(::String), default: nil
   prop :menu_class, _Nilable(::String), default: nil
+  # Optional raw HTML for the toggle's visible content, overriding
+  # the default `label:`-text span -- SafeBuffer (from `capture { …
+  # }`), for a toggle that needs richer markup than a plain string
+  # (e.g. `Components::SearchTypeTitle`'s bolded current-type word).
+  # `label:` is still required; it becomes the toggle's `aria-label`
+  # when `toggle_content:` is set, since the visible text no longer
+  # speaks for itself.
+  prop :toggle_content, _Nilable(::String), default: nil
   # Optional pre-section content rendered inside the menu `<div>`
   # above the first section. SafeBuffer (from `capture { … }`) so
   # `trusted_html` emits it intact. Used by the sort-bar to inject
@@ -114,8 +122,13 @@ class Components::Dropdown < Components::Base
     a(class: toggle_link_class,
       id: @id, role: "button", href: "#",
       data: { toggle: "dropdown" },
-      aria: { haspopup: "true", expanded: "false" }) do
-      span { plain(@label) }
+      aria: { haspopup: "true", expanded: "false",
+              **(@toggle_content ? { label: @label } : {}) }) do
+      if @toggle_content
+        trusted_html(@toggle_content)
+      else
+        span { plain(@label) }
+      end
     end
   end
 

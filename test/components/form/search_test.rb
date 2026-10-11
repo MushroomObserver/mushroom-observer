@@ -81,8 +81,9 @@ class SearchFormTest < ComponentTestCase
   def test_renders_header_when_dropdown_context
     html = render_form(context: :dropdown)
 
-    assert_html(html, ".flex-bar",
-                text: :search_form_title.t(type: :observations))
+    # SearchTypeTitleTest covers the toggle/menu contract directly;
+    # this just confirms render_header renders it.
+    assert_html(html, "#search_type_toggle", text: :observations.ti)
     assert_html(html,
                 "a[data-toggle='collapse']" \
                 "[href='#search_bar_elements']" \

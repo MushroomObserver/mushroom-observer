@@ -95,7 +95,7 @@ class Components::Form::Search < Components::ApplicationForm
   def render_header
     div(class: "flex-bar w-100") do
       div(class: "font-weight-bold h5 text-larger") do
-        plain(:search_form_title.t(type: search_type.to_s.downcase.to_sym))
+        render(Components::SearchTypeTitle.new(current_type: search_type))
       end
       render_search_bar_toggle
     end

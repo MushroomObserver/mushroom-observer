@@ -3855,9 +3855,6 @@
   search_bar_fewer_options: Simple search
   search_bar_help_title: Search Bar Help
 
-  # Search titles
-  search_form_title: "[:search.ti] [TYPE]"
-
   # Privacy policy
   privacy_title: The Mushroom Observer Privacy Policy
 
