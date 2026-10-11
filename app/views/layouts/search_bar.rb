@@ -79,13 +79,10 @@ class Views::Layouts::SearchBar < Views::Base
          data: { search_type_target: "helpToggle" })
   end
 
-  # Wrapper for the advanced-search form toggle (`#search_nav_form`).
-  # Owns the `formToggle` Stimulus target and the `d-none` visibility
-  # `search-type_controller.js` toggles when the current search-type
-  # has no advanced form. The two `Link`s inside carry only their
-  # responsive (below-md / md-up) classes: a `d-none` on the same
-  # element as `d-md-inline-block` loses to it at the md breakpoint,
-  # per `_utilities.scss`'s source order.
+  # Owns the `formToggle` Stimulus target and its `d-none` availability
+  # toggle -- the `Link`s below carry only responsive classes, since a
+  # static `d-none` here would lose to `d-md-inline-block` at the
+  # breakpoint (later in `_utilities.scss`'s source order).
   def render_form_toggle
     div(class: availability_class(visible: form_visible?),
         data: { search_type_target: "formToggle" }) do

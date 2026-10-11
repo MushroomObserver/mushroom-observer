@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-# Faceted-search page title: "Search <Type>", where `<Type>` is a
-# bolded dropdown toggle listing the other models with a faceted
-# search form (`Views::Layouts::TopNav::SEARCH_FORM_TYPES`). Picking
-# one swaps `#search_nav_form` to that type's form via the same
-# turbo-stream path the bar's type select already uses (see
-# `search-type_controller.js#chooseType`); the `href` is a plain-GET
-# fallback when JS is unavailable.
+# Faceted-search page title: "Search <Type>", a bolded dropdown
+# listing the other models with a faceted search form. Picking one
+# swaps `#search_nav_form` via the same turbo-stream path the bar's
+# type select uses (see `search-type_controller.js#chooseType`).
 class Components::SearchTypeTitle < Components::Base
   prop :current_type, ::Symbol
 
