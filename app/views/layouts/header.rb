@@ -1,19 +1,9 @@
 # frozen_string_literal: true
 
-# The header block immediately below the application top nav. Rendered
-# once per page by the application layout. Composes (in order):
-#
-#   - the optional `:project_banner` content_for slot;
-#   - on non-index actions, the page title strip
-#     (`Header::PageTitle` — replaces `_page_title.erb`);
-#   - the project observation-buttons row, fed from a content_for
-#     slot.
-#
-# The index filter/pager bar (`Header::IndexBar`) and the rss-log
-# type-filter row no longer render here -- `Header::IndexBar` moved
-# to `Views::Layouts::Application` (above `:page_flash`, below
-# `SearchNav`), and the type-filter row renders inline with the
-# pager via `IndexPaginationNav`'s `:type_filters` slot (see
+# The header block below the top nav: project banner, non-index
+# page-title strip, and the observation-buttons row. `Header::IndexBar`
+# moved to `Views::Layouts::Application`; the type-filter row renders
+# via `IndexPaginationNav`'s `:type_filters` slot (see
 # `Views::FullPageBase::IndexNav#add_type_filters`).
 module Views::Layouts
   class Header < Views::Base
@@ -47,13 +37,10 @@ module Views::Layouts
       end
     end
 
-    # Faithfully reproduces the ERB's quirky chain:
-    # `content_for?(:left_columns) || "col-sm-8 col-lg-7"` — the `||`
-    # there is operating on a boolean, so when `:left_columns` IS set
-    # the LHS is `true` and `cols` becomes the literal `true`. Then
-    # `class_names(Components::Column.classes_for(xs: 12), true)`
-    # evaluates to `"col-12"`. Keep the bug for visual parity; fix
-    # in a separate PR if needed.
+    # Matches the title row's left-column width to the content row's.
+    # `cols` is the boolean `content_for?(:left_columns)` when that
+    # slot is set (not its value), and `class_names(..., true)`
+    # resolves to `"col-12"` -- full width, same as the content row.
     def title_cols
       cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
       cols = "" unless content_for?(:interest_icons)

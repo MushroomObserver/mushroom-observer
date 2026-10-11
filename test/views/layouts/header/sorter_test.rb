@@ -8,13 +8,9 @@ module Views::Layouts
       super
       controller.params[:controller] = "names"
       controller.params[:action] = "index"
-      # `ControllerLabels` (included via
-      # `ComponentTestCase::TEST_CONTROLLER_MODULES`) derives
-      # `controller_model_name` from `controller_name`, which defaults
-      # to `"test"` on the test controller. Override directly to the
-      # model name the test queries against — without forcing a
-      # `controller_name` override that would also rename rubric / body
-      # class for an unrelated assertion.
+      # Override `controller_model_name` directly (not via
+      # `controller_name`, which would also rename the body class) so
+      # sort-link classes match the `Name` model being queried.
       controller.define_singleton_method(:controller_model_name) { "Name" }
       @sorts = [
         ["created_at", :sort_by_created_at.t],

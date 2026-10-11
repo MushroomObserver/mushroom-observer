@@ -1,21 +1,10 @@
 # frozen_string_literal: true
 
-# Index-page sort-bar. `<div class="flex-bar sorter">` with a
-# `Sort by:` label + `Components::Dropdown` (`element: :div`, since
-# this isn't a `<ul>`-based nav) whose menu lists every available
-# sort option plus a `Reverse` entry. Stashed in
-# `content_for(:sorter)` by `add_sorter` in the index view. Left-edge
-# padding lives on `Header::IndexPaginationNav`'s `.pagination-*`
-# wrapper (`px-card`), not here -- this is always rendered as that
-# wrapper's leftmost child.
-#
-# `sorts` is `[[order_by_key, label_translation_symbol], ...]`, the
-# shape every `<Foo>Controller#index_sort_options` returns.
-#
-# `link_all: true` skips the "currently active, render as disabled"
-# behavior so every option (including the current one) is a live
-# link — used where the sort is set by URL params rather than by
-# the page's current query state.
+# Rendered via `content_for(:sorter)` (set by `add_sorter` in the
+# index view); left-edge padding lives on `Header::IndexPaginationNav`'s
+# wrapper (`px-card`), not here. `sorts` is `[[order_by_key,
+# label_translation_symbol], ...]`. `link_all: true` makes every option
+# a live link (not "current, disabled") -- for sorts set by URL params.
 module Views::Layouts
   class Header::Sorter < Views::Base
     prop :query, _Nilable(::Query), default: nil

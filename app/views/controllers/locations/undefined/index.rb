@@ -15,8 +15,12 @@ module Views::Controllers::Locations
         register_chrome
 
         Container(width: :text_image) do
-          render_help
-          PaginatedResults { render_list }
+          if @undef_data.any?
+            render_help
+            PaginatedResults { render_list }
+          else
+            render_none
+          end
         end
       end
 
@@ -30,6 +34,10 @@ module Views::Controllers::Locations
           capture { div(class: "small") { plain(:list_place_names_undef.t) } }
         end
         add_pagination(@pagination_data)
+      end
+
+      def render_none
+        ContentPadded(id: "undefined_locations_none") { plain(:none.ti) }
       end
 
       def render_help

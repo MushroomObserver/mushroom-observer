@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-# The default application layout. `Views::FullPageBase#around_template`
-# wraps every action view in this layout when `session[:layout]` is
-# anything other than `"printable"`.
-#
-# Extends `Components::Base` directly, NOT `Views::Base`: the wrap
-# lives on `Views::FullPageBase < Views::Base`, and re-entering it
-# from the layout itself would recurse.
+# The default application layout; `Views::FullPageBase#around_template`
+# wraps every action view in this when `session[:layout]` isn't
+# "printable". Extends `Components::Base`, not `Views::Base`, to avoid
+# recursing back into the wrap.
 module Views::Layouts
   class Application < Components::Base
     register_value_helper :browser
@@ -125,6 +122,24 @@ module Views::Layouts
       end
     end
 
+    # `content_for(:container_class)` (set in `Views::FullPageBase#
+    # around_template`) wraps header + `<main>` so the title bar's
+    # right-aligned content aligns with the content box's edge, not
+    # `#right_side`'s full width.
+    def render_header_and_main(&block)
+      div(class: content_for(:container_class)) do
+        render(Views::Layouts::Header.new)
+        Container(element: :main, id: "content",
+                  class: content_for(:content_padding),
+                  data: { controller: "lightgallery" }) do
+          comment { "MAIN_PAGE_CONTENT" }
+          yield
+          comment { "/MAIN_PAGE_CONTENT" }
+          render(Views::Layouts::TranslatorsCredit.new)
+        end
+      end
+    end
+
     # `Header::IndexBar` lives here, not inside `Header`, so it sits
     # above `:page_flash` instead of below it.
     def render_index_bar
@@ -152,26 +167,6 @@ module Views::Layouts
       end
     end
 
-    # `content_for(:container_class)` -- guaranteed populated by the
-    # time the layout renders, see `Views::FullPageBase#around_template`
-    # -- wraps the header and `<main>` together so the title bar's
-    # right-aligned content (edit icons, a form's submit button) lines
-    # up with the content box's edge below it, not `#right_side`'s
-    # full, sidebar-independent width.
-    def render_header_and_main(&block)
-      div(class: content_for(:container_class)) do
-        render(Views::Layouts::Header.new)
-        Container(element: :main, id: "content",
-                  class: content_for(:content_padding),
-                  data: { controller: "lightgallery" }) do
-          comment { "MAIN_PAGE_CONTENT" }
-          yield
-          comment { "/MAIN_PAGE_CONTENT" }
-          render(Views::Layouts::TranslatorsCredit.new)
-        end
-      end
-    end
-
     def render_gtm_iframe_when_production
       render(Views::Layouts::App::GtmIframe.new) if Rails.env.production?
     end
@@ -193,11 +188,9 @@ module Views::Layouts
     end
 
     # `create` failures fall through to `new`, `update` failures to
-    # `edit`. The body class reflects "the page the user is looking
-    # at" rather than "the verb that brought us here" so test
-    # assertions like `assert_select("body.<thing>__new")` don't need
-    # a separate variant for the re-rendered-after-validation-failure
-    # path.
+    # `edit` -- body class reflects the page shown, not the verb that
+    # got here, so `assert_select("body.<thing>__new")` doesn't need
+    # a separate re-rendered-after-failure variant.
     def controller_action_class
       action = case controller.action_name
                when "create" then "new"
