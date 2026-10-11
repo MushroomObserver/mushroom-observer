@@ -100,6 +100,17 @@ class SearchFormTest < ComponentTestCase
                 "a[data-search-type-target='barToggle'].navbar-link")
   end
 
+  def test_header_renders_responsive_toggle_pair
+    html = render_form(context: :dropdown)
+
+    assert_html(html,
+                "a[data-search-type-target='barToggle'].d-lg-none")
+    assert_html(html,
+                "a[data-search-type-target='barToggle']" \
+                ".btn.btn-outline-default.btn-sm.d-none.d-lg-inline-block",
+                text: :search_bar_fewer_options.l)
+  end
+
   def test_does_not_render_header_when_page_context
     html = render_form(context: :page)
 

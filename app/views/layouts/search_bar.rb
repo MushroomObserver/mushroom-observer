@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Top-nav search bar. When the viewer is logged in, renders the
+# Search bar. When the viewer is logged in, renders the
 # Bootstrap collapse-trigger help toggle, the `PatternSearchForm`,
 # and (off SearchController pages) the form toggle that opens
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
-class Views::Layouts::TopNav::SearchBar < Views::Base
+class Views::Layouts::SearchBar < Views::Base
   BAR_TOGGLE_CLASSES = [Components::Navbar::LINK_CLASS, "px-2"].freeze
 
   # Search types that have a per-type help expander. Mirrors
@@ -37,7 +37,9 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   end
 
   def render_collapse_bar
-    Collapsible(id: "search_bar_elements", expanded: true, class: "w-100",
+    Collapsible(id: "search_bar_elements",
+                expanded: on_search_page? || !advanced_default?,
+                class: "w-100",
                 data: {
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
@@ -58,7 +60,8 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # controller populates with whichever advanced-search form
   # matches the selected search type.
   def render_advanced_form_target
-    Collapsible(id: "search_nav_form", class: "w-100 border-top",
+    Collapsible(id: "search_nav_form", expanded: advanced_default?,
+                class: "w-100 border-top",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end
@@ -76,23 +79,59 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          data: { search_type_target: "helpToggle" })
   end
 
-  # Bootstrap collapse-trigger for the advanced-search form
-  # expander (`#search_nav_form`). Starts hidden via `d-none`
-  # when the current search-type has no advanced form.
+  # Wrapper for the advanced-search form toggle (`#search_nav_form`).
+  # Owns the `formToggle` Stimulus target and the `d-none` visibility
+  # `search-type_controller.js` toggles when the current search-type
+  # has no advanced form. The two `Link`s inside carry only their
+  # responsive (below-lg / lg-up) classes: a `d-none` on the same
+  # element as `d-lg-inline-block` loses to it at the lg breakpoint,
+  # per `_utilities.scss`'s source order.
   def render_form_toggle
+    div(class: availability_class(visible: form_visible?),
+        data: { search_type_target: "formToggle" }) do
+      render_form_toggle_icon
+      render_form_toggle_button
+    end
+  end
+
+  # Icon-only toggle, shown below `lg`.
+  def render_form_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
+         collapsed: !advanced_default?,
          icon: :plus,
          icon_title: :search_bar_more_options.l,
          button: :link,
-         class: bar_toggle_class(visible: form_visible?),
-         data: { search_type_target: "formToggle" })
+         class: class_names(BAR_TOGGLE_CLASSES,
+                            Components::Column.visibility_classes(
+                              hide_at: :lg
+                            )))
+  end
+
+  # Labeled outline-button toggle, shown from `lg` up.
+  def render_form_toggle_button
+    Link(type: :collapse_toggle,
+         target_id: "search_nav_form",
+         collapsed: !advanced_default?,
+         button: :outline, size: :sm,
+         class: class_names(Components::Column.visibility_classes(
+                              hide_at: :xs, show_at: :lg,
+                              display: :"inline-block"
+                            ))) { :search_bar_more_options.l }
   end
 
   def bar_toggle_class(visible:)
     classes = BAR_TOGGLE_CLASSES.dup
     classes << "d-none" unless visible
     classes.join(" ")
+  end
+
+  def availability_class(visible:)
+    visible ? nil : "d-none"
+  end
+
+  def advanced_default?
+    controller.session[:search_view] == "advanced"
   end
 
   def pattern_search_model

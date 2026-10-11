@@ -182,6 +182,7 @@ module Observations
       }
       assert_search_redirected_to(controller: "/observations",
                                   params: validated_params)
+      assert_equal("advanced", session[:search_view])
     end
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa

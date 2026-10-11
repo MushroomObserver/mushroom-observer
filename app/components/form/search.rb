@@ -101,17 +101,43 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  # Bootstrap collapse-trigger button that hides the search-bar elements row
-  # in the top nav.
+  # Collapse-trigger that hides this form and shows the pattern-search
+  # bar instead -- an icon-only link below `lg`, a labeled
+  # outline-button at `lg` and up. Not availability-toggled by JS (see
+  # `Views::Layouts::SearchBar#render_form_toggle` for the toggle that
+  # is), so both carry the `barToggle` Stimulus target directly with
+  # no wrapper.
   def render_search_bar_toggle
+    render_search_bar_toggle_icon
+    render_search_bar_toggle_button
+  end
+
+  def render_search_bar_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",
          collapsed: false,
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
          button: :link,
-         class: class_names(Components::Navbar::LINK_CLASS, "px-2"),
+         class: class_names(Components::Navbar::LINK_CLASS, "px-2",
+                            Components::Column.visibility_classes(
+                              hide_at: :lg
+                            )),
          data: { search_type_target: "barToggle" })
+  end
+
+  def render_search_bar_toggle_button
+    classes = Components::Column.visibility_classes(
+      hide_at: :xs, show_at: :lg, display: :"inline-block"
+    )
+    Link(type: :collapse_toggle,
+         target_id: "search_bar_elements",
+         collapsed: false,
+         button: :outline, size: :sm,
+         class: class_names(classes),
+         data: { search_type_target: "barToggle" }) do
+      :search_bar_fewer_options.l
+    end
   end
 
   # Form layout
