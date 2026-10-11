@@ -68,6 +68,21 @@ class ButtonStyleCheckboxTest < ComponentTestCase
     assert_html(html, ".label-zone")
   end
 
+  def test_label_wrap_true_wraps_label_zone_in_label_for
+    html = render_checkbox(
+      name: "n[]", value: "1", id: "x", label_wrap: true
+    ) { "Click anywhere" }
+
+    assert_html(html, "label.label-zone[for='x']", text: "Click anywhere")
+  end
+
+  def test_label_wrap_default_false_uses_div_not_label
+    html = render_checkbox(name: "n[]", value: "1", id: "x") { "Text" }
+
+    assert_no_html(html, "label.label-zone")
+    assert_html(html, "div.label-zone", text: "Text")
+  end
+
   # Multiple instances with the same name[] form a multi-select group
   # — that's the whole reason this component exists separately from
   # ButtonStyleRadio. Verify the name-array shape is preserved.
