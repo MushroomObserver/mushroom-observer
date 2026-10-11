@@ -28,6 +28,21 @@
     color: $dropdown-link-active-color;
     background-color: $dropdown-link-active-bg;
   }
+
+  // `disabled` has no effect on an `<a>`, and Bootstrap's
+  // `.dropdown-menu > .disabled > a` rule needs the `<li>` wrapper
+  // this flat markup doesn't have -- mirrors it directly instead.
+  &[disabled] {
+    color: $dropdown-link-disabled-color;
+    cursor: not-allowed;
+
+    &:hover,
+    &:focus {
+      color: $dropdown-link-disabled-color;
+      text-decoration: none;
+      background-color: transparent;
+    }
+  }
 }
 
 // Matches BS3's nav-divider mixin: ($line-height-computed / 2) - 1.
