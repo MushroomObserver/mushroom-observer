@@ -83,8 +83,8 @@ class Views::Layouts::SearchBar < Views::Base
   # Owns the `formToggle` Stimulus target and the `d-none` visibility
   # `search-type_controller.js` toggles when the current search-type
   # has no advanced form. The two `Link`s inside carry only their
-  # responsive (below-lg / lg-up) classes: a `d-none` on the same
-  # element as `d-lg-inline-block` loses to it at the lg breakpoint,
+  # responsive (below-md / md-up) classes: a `d-none` on the same
+  # element as `d-md-inline-block` loses to it at the md breakpoint,
   # per `_utilities.scss`'s source order.
   def render_form_toggle
     div(class: availability_class(visible: form_visible?),
@@ -113,7 +113,7 @@ class Views::Layouts::SearchBar < Views::Base
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
          collapsed: !advanced_default?,
-         button: :outline, size: :sm,
+         button: :outline,
          class: class_names(Components::Column.visibility_classes(
                               hide_at: :xs, show_at: :md,
                               display: :"inline-block"

@@ -108,7 +108,7 @@ class SearchFormTest < ComponentTestCase
                 "a[data-search-type-target='barToggle'].d-md-none")
     assert_html(html,
                 "a[data-search-type-target='barToggle']" \
-                ".btn.btn-outline-default.btn-sm.d-none.d-md-inline-block",
+                ".btn.btn-outline-default.d-none.d-md-inline-block",
                 text: :search_bar_fewer_options.l)
   end
 

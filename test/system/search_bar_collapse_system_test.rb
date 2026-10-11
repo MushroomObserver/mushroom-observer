@@ -28,7 +28,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
     assert_selector("[data-search-type='connected']", wait: 5)
 
     # Click the "more options" toggle to expand the advanced form --
-    # an icon-only link below lg, a labeled button at lg and up, both
+    # an icon-only link below md, a labeled button at md and up, both
     # inside a `[data-search-type-target='formToggle']` wrapper.
     # Capybara's `find` only considers the one currently visible.
     click_link(href: "#search_nav_form")

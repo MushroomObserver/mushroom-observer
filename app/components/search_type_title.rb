@@ -30,10 +30,14 @@ class Components::SearchTypeTitle < Components::Base
   private
 
   def type_tuples
-    TYPES.map do |type|
-      [type.ti, { controller: "/#{type}/search", action: :new },
-       { active: type == @current_type,
-         data: { action: "search-type#chooseType", type: type.to_s } }]
-    end
+    TYPES.map { |type| type_tuple(type) }.sort_by(&:first)
+  end
+
+  def type_tuple(type)
+    active = type == @current_type
+    args = { active: active }
+    args[:data] = { action: "search-type#chooseType", type: type.to_s } \
+      unless active
+    [type.ti, { controller: "/#{type}/search", action: :new }, args]
   end
 end

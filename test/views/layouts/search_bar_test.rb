@@ -68,7 +68,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     # Labeled outline-button, shown from md up.
     assert_html(html,
                 "a[data-toggle='collapse'][href='#search_nav_form']" \
-                ".btn.btn-outline-default.btn-sm.d-none.d-md-inline-block",
+                ".btn.btn-outline-default.d-none.d-md-inline-block",
                 text: :search_bar_more_options.l)
   end
 

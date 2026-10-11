@@ -101,12 +101,9 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  # Collapse-trigger that hides this form and shows the pattern-search
-  # bar instead -- an icon-only link below `lg`, a labeled
-  # outline-button at `lg` and up. Not availability-toggled by JS (see
-  # `Views::Layouts::SearchBar#render_form_toggle` for the toggle that
-  # is), so both carry the `barToggle` Stimulus target directly with
-  # no wrapper.
+  # Not availability-toggled by JS (unlike `Views::Layouts::SearchBar#
+  # render_form_toggle`), so both versions carry the `barToggle`
+  # Stimulus target directly, with no wrapper.
   def render_search_bar_toggle
     render_search_bar_toggle_icon
     render_search_bar_toggle_button
@@ -133,7 +130,7 @@ class Components::Form::Search < Components::ApplicationForm
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",
          collapsed: false,
-         button: :outline, size: :sm,
+         button: :outline,
          class: class_names(classes),
          data: { search_type_target: "barToggle" }) do
       :search_bar_fewer_options.l
