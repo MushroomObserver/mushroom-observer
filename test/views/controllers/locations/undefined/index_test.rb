@@ -11,12 +11,20 @@ module Views::Controllers::Locations::Undefined
     end
 
     def test_renders_help_text
-      html = render_index
+      obs = observations(:minimal_unknown_obs)
+      html = render_index(undef_data: [[obs, 1]])
 
       assert_html(html, "#undefined_locations_help",
                   text: :list_place_names_undef_help.l.as_displayed)
       assert_html(html, "#undefined_locations_help",
                   text: :list_place_names_parenthetical.l.as_displayed)
+    end
+
+    def test_renders_none_when_no_undefined_locations
+      html = render_index(undef_data: [])
+
+      assert_html(html, "#undefined_locations_none", text: :none.ti)
+      assert_no_html(html, "#undefined_locations_help")
     end
 
     def test_renders_item_with_location_link_merge_and_define_links
