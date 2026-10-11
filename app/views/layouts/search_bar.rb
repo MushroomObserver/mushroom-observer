@@ -94,7 +94,7 @@ class Views::Layouts::SearchBar < Views::Base
     end
   end
 
-  # Icon-only toggle, shown below `lg`.
+  # Icon-only toggle, shown below `md`.
   def render_form_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
@@ -104,18 +104,18 @@ class Views::Layouts::SearchBar < Views::Base
          button: :link,
          class: class_names(BAR_TOGGLE_CLASSES,
                             Components::Column.visibility_classes(
-                              hide_at: :lg
+                              hide_at: :md
                             )))
   end
 
-  # Labeled outline-button toggle, shown from `lg` up.
+  # Labeled outline-button toggle, shown from `md` up.
   def render_form_toggle_button
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
          collapsed: !advanced_default?,
          button: :outline, size: :sm,
          class: class_names(Components::Column.visibility_classes(
-                              hide_at: :xs, show_at: :lg,
+                              hide_at: :xs, show_at: :md,
                               display: :"inline-block"
                             ))) { :search_bar_more_options.l }
   end

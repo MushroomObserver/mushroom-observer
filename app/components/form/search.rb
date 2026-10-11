@@ -121,14 +121,14 @@ class Components::Form::Search < Components::ApplicationForm
          button: :link,
          class: class_names(Components::Navbar::LINK_CLASS, "px-2",
                             Components::Column.visibility_classes(
-                              hide_at: :lg
+                              hide_at: :md
                             )),
          data: { search_type_target: "barToggle" })
   end
 
   def render_search_bar_toggle_button
     classes = Components::Column.visibility_classes(
-      hide_at: :xs, show_at: :lg, display: :"inline-block"
+      hide_at: :xs, show_at: :md, display: :"inline-block"
     )
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",

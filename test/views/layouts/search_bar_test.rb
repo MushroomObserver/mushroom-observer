@@ -54,21 +54,21 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     # The wrapper (not the links inside) owns the availability toggle
     # -- see Views::Layouts::SearchBar#render_form_toggle.
     assert_no_html(html, "div[data-search-type-target='formToggle'].d-none")
-    # Icon-only link, shown below lg.
+    # Icon-only link, shown below md.
     assert_html(html,
                 "a[data-toggle='collapse']" \
                 "[href='#search_nav_form']" \
                 "[aria-controls='search_nav_form']" \
-                "[aria-expanded='false'].d-lg-none")
+                "[aria-expanded='false'].d-md-none")
     assert_html(html,
                 "a[href='#search_nav_form'] " \
                 "span[aria-label='#{:search_bar_more_options.l}']")
     assert_html(html, "a[href='#search_nav_form'] svg.mo-icon-plus")
     assert_html(html, "a[href='#search_nav_form'].btn.btn-link")
-    # Labeled outline-button, shown from lg up.
+    # Labeled outline-button, shown from md up.
     assert_html(html,
                 "a[data-toggle='collapse'][href='#search_nav_form']" \
-                ".btn.btn-outline-default.btn-sm.d-none.d-lg-inline-block",
+                ".btn.btn-outline-default.btn-sm.d-none.d-md-inline-block",
                 text: :search_bar_more_options.l)
   end
 
