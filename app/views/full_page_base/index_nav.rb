@@ -2,9 +2,11 @@
 
 # Index-page nav mixed into `Views::FullPageBase`.
 #
-# `add_pagination`, `add_sorter`, `add_type_filters` stash their
-# respective Phlex sub-view's HTML into a `content_for` slot that the
-# layout's index-bar reads on every index action.
+# `add_pagination`, `add_sorter`, `add_type_filters` stash what the
+# layout's index-bar needs to render its sub-views on every index
+# action -- `add_pagination`/`add_sorter` via a `content_for` slot,
+# `add_type_filters` via a plain ivar (see the comment on that method
+# for why).
 #
 # `paginated_results` (the body wrapper that emits the result-set
 # `<div>` with the pagination strips woven around the block) lives on
@@ -41,14 +43,15 @@ module Views::FullPageBase::IndexNav
   # Type-filter row above the RssLogs index — checkboxes that drop
   # query types in/out of the result set. Used only by
   # `RssLogsController#index` today.
+  #
+  # Stashes the args, not pre-rendered HTML -- unlike `add_sorter`,
+  # `TypeFilters` renders element ids (form/toggle/checkbox ids) that
+  # must stay unique if both the top and bottom pagination rows
+  # render on the same page. `render_index_pagination` below renders
+  # a fresh `TypeFilters` per position instead of reusing one capture,
+  # so each copy's ids get position-suffixed.
   def add_type_filters(query, types, user: nil)
-    content_for(:type_filters) do
-      capture do
-        render(::Views::Controllers::RssLogs::TypeFilters.new(
-                 query: query, types: types, user: user
-               ))
-      end
-    end
+    @type_filters_args = { query: query, types: types, user: user }
   end
 
   private
@@ -62,6 +65,13 @@ module Views::FullPageBase::IndexNav
            )) do |component|
       if content_for?(:sorter)
         component.with_sorter { trusted_html(content_for(:sorter)) }
+      end
+      if @type_filters_args
+        component.with_type_filters do
+          render(::Views::Controllers::RssLogs::TypeFilters.new(
+                   **@type_filters_args, position: position
+                 ))
+        end
       end
     end
   end

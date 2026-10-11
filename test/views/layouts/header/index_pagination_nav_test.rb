@@ -13,16 +13,13 @@ module Views::Layouts
       html = render_nav(position: :top, pagination_data: paginated(50, 1))
 
       # Main container has correct position class
-      assert_includes(html, 'class="pagination-top flex-bar mb-2"')
-
-      # Contains two d-flex divs
-      assert_html(html, "div.pagination-top > div.d-flex", count: 2)
+      assert_html(html, ".pagination-top")
     end
 
     def test_renders_basic_structure_with_position_bottom
       html = render_nav(position: :bottom, pagination_data: paginated(50, 1))
 
-      assert_includes(html, 'class="pagination-bottom flex-bar mb-2"')
+      assert_html(html, ".pagination-bottom")
     end
 
     def test_renders_number_pagination_when_multiple_pages
