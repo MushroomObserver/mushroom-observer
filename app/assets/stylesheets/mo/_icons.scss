@@ -193,6 +193,11 @@ tbody.collapse.show {
   vertical-align: -0.15em;
 }
 
+span:has(> .mo-icon) {
+  display: inline-flex;
+  align-items: center;
+}
+
 .spinner-right {
   line-height: 1.1 !important;
   animation: spin-r 1s infinite linear;

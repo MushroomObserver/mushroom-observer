@@ -35,7 +35,9 @@ class Views::Layouts::SearchBar < Views::Base
   end
 
   def render_collapse_bar
-    Collapsible(id: "search_bar_elements", expanded: true, class: "w-100",
+    Collapsible(id: "search_bar_elements",
+                expanded: on_search_page? || !advanced_default?,
+                class: "w-100",
                 data: {
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
@@ -56,7 +58,8 @@ class Views::Layouts::SearchBar < Views::Base
   # controller populates with whichever advanced-search form
   # matches the selected search type.
   def render_advanced_form_target
-    Collapsible(id: "search_nav_form", class: "w-100",
+    Collapsible(id: "search_nav_form", expanded: advanced_default?,
+                class: "w-100",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end
@@ -74,23 +77,55 @@ class Views::Layouts::SearchBar < Views::Base
          data: { search_type_target: "helpToggle" })
   end
 
-  # Bootstrap collapse-trigger for the advanced-search form
-  # expander (`#search_nav_form`). Starts hidden via `d-none`
-  # when the current search-type has no advanced form.
+  # Owns the `formToggle` Stimulus target and its `d-none` availability
+  # toggle -- the `Link`s below carry only responsive classes, since a
+  # static `d-none` here would lose to `d-lg-inline-block` at the
+  # breakpoint (later in `_utilities.scss`'s source order).
   def render_form_toggle
+    div(class: availability_class(visible: form_visible?),
+        data: { search_type_target: "formToggle" }) do
+      render_form_toggle_icon
+      render_form_toggle_button
+    end
+  end
+
+  # Icon-only toggle, shown below `lg`.
+  def render_form_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
+         collapsed: !advanced_default?,
          icon: :plus,
          icon_title: :search_bar_more_options.l,
          button: :link, size: :lg,
-         class: toggle_class(visible: form_visible?),
-         data: { search_type_target: "formToggle" })
+         class: class_names("p-0", Components::Column.visibility_classes(
+                                     hide_at: :lg
+                                   )))
+  end
+
+  # Labeled outline-button toggle, shown from `lg` up.
+  def render_form_toggle_button
+    Link(type: :collapse_toggle,
+         target_id: "search_nav_form",
+         collapsed: !advanced_default?,
+         button: :outline,
+         class: class_names(Components::Column.visibility_classes(
+                              hide_at: :xs, show_at: :lg,
+                              display: :"inline-block"
+                            ))) { :search_bar_more_options.l }
   end
 
   def toggle_class(visible:)
     classes = ["p-0"]
     classes << "d-none" unless visible
     classes.join(" ")
+  end
+
+  def availability_class(visible:)
+    visible ? nil : "d-none"
+  end
+
+  def advanced_default?
+    controller.session[:search_view] == "advanced"
   end
 
   def pattern_search_model

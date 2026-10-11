@@ -22,6 +22,21 @@
   border-left: 0.4em solid transparent;
 }
 
+// Bootstrap's `.dropdown-item.disabled`/`:disabled` selectors don't
+// match Components::Dropdown's `disabled="disabled"` attribute-only
+// anchor (no `.disabled` class, no `<button disabled>`).
+.dropdown-item[disabled] {
+  color: $dropdown-link-disabled-color;
+  cursor: not-allowed;
+
+  &:hover,
+  &:focus {
+    color: $dropdown-link-disabled-color;
+    text-decoration: none;
+    background-color: transparent;
+  }
+}
+
 // rss-log type-filter dropdown: a border between every row, and
 // right padding on the label zone -- the flex row of two zones
 // doesn't inherit `.dropdown-item`'s padding at that edge.

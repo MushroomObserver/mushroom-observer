@@ -97,23 +97,45 @@ class Components::Form::Search < Components::ApplicationForm
   def render_header
     div(class: "flex-bar w-100") do
       div(class: "font-weight-bold h5 text-larger") do
-        plain(:search_form_title.t(type: search_type.to_s.downcase.to_sym))
+        render(Components::SearchTypeTitle.new(current_type: search_type))
       end
       render_search_bar_toggle
     end
   end
 
-  # Bootstrap collapse-trigger button that hides the search-bar elements row
-  # in the top nav.
+  # Not availability-toggled by JS (unlike `Views::Layouts::SearchBar#
+  # render_form_toggle`), so both versions carry the `barToggle`
+  # Stimulus target directly, with no wrapper.
   def render_search_bar_toggle
+    render_search_bar_toggle_icon
+    render_search_bar_toggle_button
+  end
+
+  def render_search_bar_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",
          collapsed: false,
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
          button: :link, size: :lg,
-         class: "p-0",
+         class: class_names("p-0", Components::Column.visibility_classes(
+                                     hide_at: :lg
+                                   )),
          data: { search_type_target: "barToggle" })
+  end
+
+  def render_search_bar_toggle_button
+    classes = Components::Column.visibility_classes(
+      hide_at: :xs, show_at: :lg, display: :"inline-block"
+    )
+    Link(type: :collapse_toggle,
+         target_id: "search_bar_elements",
+         collapsed: false,
+         button: :outline,
+         class: class_names(classes),
+         data: { search_type_target: "barToggle" }) do
+      :search_bar_fewer_options.l
+    end
   end
 
   # Form layout

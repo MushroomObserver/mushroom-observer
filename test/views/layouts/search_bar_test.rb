@@ -11,8 +11,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     stub_session(search_type: "observations")
   end
 
-  def stub_session(search_type:)
-    session = { search_type: search_type }
+  def stub_session(search_type:, search_view: nil)
+    session = { search_type: search_type, search_view: search_view }
     controller.define_singleton_method(:session) { session }
   end
 
@@ -47,27 +47,64 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
   def test_form_toggle_visible_when_type_has_form
     html = render_bar(form_types: [:observations])
 
+    # The wrapper (not the links inside) owns the availability toggle
+    # -- see Views::Layouts::SearchBar#render_form_toggle.
+    assert_no_html(html, "div[data-search-type-target='formToggle'].d-none")
+    # Icon-only link, shown below lg.
     assert_html(html,
                 "a[data-toggle='collapse']" \
-                "[data-search-type-target='formToggle']" \
                 "[href='#search_nav_form']" \
                 "[aria-controls='search_nav_form']" \
-                "[aria-expanded='false']")
+                "[aria-expanded='false'].d-lg-none")
     assert_html(html,
-                "a[data-search-type-target='formToggle'] " \
+                "a[href='#search_nav_form'] " \
                 "span[aria-label='#{:search_bar_more_options.l}']")
+    assert_html(html, "a[href='#search_nav_form'] svg.mo-icon-plus")
+    assert_html(html, "a[href='#search_nav_form'].btn.btn-link")
+    # Labeled outline-button, shown from lg up.
     assert_html(html,
-                "a[data-search-type-target='formToggle'] svg.mo-icon-plus")
-    assert_no_html(html,
-                   "a[data-search-type-target='formToggle'].d-none")
+                "a[data-toggle='collapse'][href='#search_nav_form']" \
+                ".btn.btn-outline-default.d-none.d-lg-inline-block",
+                text: :search_bar_more_options.l)
   end
 
   def test_form_toggle_hidden_when_type_has_no_form
     html = render_bar(form_types: [])
 
+    assert_html(html, "div[data-search-type-target='formToggle'].d-none")
+  end
+
+  def test_advanced_view_starts_open_when_session_prefers_advanced
+    stub_session(search_type: "observations", search_view: "advanced")
+    html = render_bar(form_types: [:observations])
+
+    assert_html(html, "#search_nav_form.show")
+    assert_no_html(html, "#search_bar_elements.show")
     assert_html(html,
-                "a[data-toggle='collapse']" \
-                "[data-search-type-target='formToggle'].d-none")
+                "a[href='#search_nav_form'][aria-expanded='true']")
+  end
+
+  def test_pattern_view_starts_open_by_default
+    html = render_bar(form_types: [:observations])
+
+    assert_html(html, "#search_bar_elements.show")
+    assert_no_html(html, "#search_nav_form.show")
+    assert_html(html,
+                "a[href='#search_nav_form'][aria-expanded='false']")
+  end
+
+  # On the search page itself, `on_search_page?` guards both the
+  # form-toggle and the advanced-form target out of the render -- the
+  # pattern bar must stay expanded regardless of the stored
+  # preference, or it would collapse with nothing left to reopen it.
+  def test_bar_stays_expanded_on_search_page_even_when_advanced_preferred
+    stub_session(search_type: "observations", search_view: "advanced")
+    controller.define_singleton_method(:controller_name) { "search" }
+
+    html = render_bar(form_types: [:observations])
+
+    assert_html(html, "#search_bar_elements.show")
+    assert_no_html(html, "[data-search-type-target='formToggle']")
   end
 
   # `session[:search_type]` from a query-backed index can hold a
