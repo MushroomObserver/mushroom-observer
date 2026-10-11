@@ -37,7 +37,7 @@ module Admin
       make_admin
       get(:edit)
       assert_response(:success)
-      assert_includes(@response.body, api_key.key)
+      assert_select("#ip_summary", text: /#{Regexp.escape(api_key.key)}/)
 
       patch(:update, params: { add_bad: "garbage" })
       assert_flash_error
@@ -94,9 +94,10 @@ module Admin
           # Test unfiltered
           get(:edit)
           assert_response(:success)
-          assert_select("turbo-frame##{config[:frame]}")
-          assert_includes(@response.body, config[:prefix1])
-          assert_includes(@response.body, config[:prefix2])
+          assert_select("turbo-frame##{config[:frame]}",
+                        text: /#{Regexp.escape(config[:prefix1])}/)
+          assert_select("turbo-frame##{config[:frame]}",
+                        text: /#{Regexp.escape(config[:prefix2])}/)
 
           # Test filter by prefix (simulating Turbo frame request)
           prefix = config[:prefix1]
@@ -104,10 +105,13 @@ module Admin
           @request.headers["Turbo-Frame"] = config[:frame]
           get(:edit, params: filter)
           assert_response(:success)
-          assert_includes(@response.body, config[:prefix1],
-                          "#{config[:type]}: should show filtered IPs")
-          assert_not_includes(@response.body, config[:prefix2],
-                              "#{config[:type]}: should hide non-matching IPs")
+          assert_select("turbo-frame##{config[:frame]}",
+                        { text: /#{Regexp.escape(config[:prefix1])}/ },
+                        "#{config[:type]}: should show filtered IPs")
+          assert_select("turbo-frame##{config[:frame]}",
+                        { text: /#{Regexp.escape(config[:prefix2])}/,
+                          count: 0 },
+                        "#{config[:type]}: should hide non-matching IPs")
           # Filter value should be preserved in the input field within the
           # turbo_frame response. Input ID matches filter_param.
           input_id = "#{config[:filter_param]}_starts_with"
@@ -156,9 +160,9 @@ module Admin
                   config[:form_key] => { config[:add_param] => new_ip }
                 })
           assert_response(:success)
-          assert_select("turbo-frame##{config[:frame]}")
-          assert_includes(@response.body, new_ip,
-                          "#{config[:type]}: should show added IP")
+          assert_select("turbo-frame##{config[:frame]}",
+                        { text: /#{Regexp.escape(new_ip)}/ },
+                        "#{config[:type]}: should show added IP")
 
           # Test remove returns turbo_frame
           patch(:update, params: { config[:remove_param] => new_ip })
@@ -169,8 +173,7 @@ module Admin
         # Test paging returns turbo_frame (blocked only has pagination)
         get(:edit, params: { page: 2 })
         assert_response(:success)
-        assert_select("turbo-frame#blocked_ips_list")
-        assert_includes(@response.body, "page 2 of")
+        assert_select("turbo-frame#blocked_ips_list", text: /page 2 of/)
       ensure
         File.write(MO.blocked_ips_file, original_blocked)
         File.write(MO.okay_ips_file, original_okay)

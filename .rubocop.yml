@@ -18,6 +18,7 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_full_html_assertion
   - ./lib/rubocop/cop/mo/no_hand_rolled_colon_suffix
   - ./lib/rubocop/cop/mo/no_hand_rolled_column_class
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
@@ -108,6 +109,18 @@ MO/NoActiveRecordRelationProp:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+
+MO/NoFullHtmlAssertion:
+  Description: >-
+    Test assertions must not search/compare against @response.body
+    (directly, or via a local variable aliased to it), or use "body"
+    as an assert_select/assert_html selector -- use a scoped selector
+    instead, so a failure doesn't dump the whole page into the log --
+    see lib/rubocop/cop/mo/no_full_html_assertion.rb and "FORBIDDEN:
+    assertions against rendered HTML body" in .claude/rules/testing.md.
+  Enabled: true
+  Include:
+    - "test/**/*_test.rb"
 
 MO/NoHandRolledColonSuffix:
   Description: >-

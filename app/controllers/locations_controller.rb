@@ -30,6 +30,14 @@ class LocationsController < ApplicationController
     build_index_with_query
   end
 
+  # Browsing all locations defaults to most-recently-modified first; a
+  # filtered/search index (by_user, region, pattern, etc.) doesn't call
+  # this and falls back to `Query::Locations.default_order` (alphabetical)
+  # instead.
+  def unfiltered_index_opts
+    { query_args: { order_by: :updated_at }, display_opts: {} }.freeze
+  end
+
   # Sort options for the index page. Swaps `updated_at` for
   # `rss_log` when the active query orders by rss_log. Read by
   # `add_sorter` in the view. Each key must resolve to
@@ -43,110 +51,6 @@ class LocationsController < ApplicationController
       ["num_views",                          :sort_by_num_views.t],
       ["box_area",                           :sort_by_box_area.t]
     ]
-  end
-
-  private
-
-  # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, _display_opts)
-    # Matching undefined locations is meaningless in a box.
-    # (Undefined locations don't have a box!)
-    return query if query.params[:in_box].present?
-
-    # "By name"/"by frequency" subtitles apply to every filter except
-    # by_editor -- computed from the resolved query, not which subaction
-    # fired, so this covers the unfiltered index too.
-    set_matching_undefined_location_ivars(
-      query, link_all_sorts: !query.params.key?(:by_editor)
-    )
-    query
-  end
-
-  # Paginate the defined locations using the usual helper.
-  #
-  # always_index always comes from @undef_pages here, regardless of
-  # what the query resolved -- single-match auto-redirect for this
-  # index depends on @undef_pages's letter-pagination total, not the
-  # Query layer's opinion. Merged last so it wins over any :always_index
-  # a generic create_query_from_url_params call put in `opts`.
-  def index_display_opts(opts, _query)
-    opts.merge(always_index: @undef_pages&.num_total&.positive?)
-  end
-
-  def set_matching_undefined_location_ivars(query, display_opts)
-    unless (query2 = create_query_for_obs_undefined_where_strings(query))
-      @undef_pages = nil
-      @undef_data = nil
-      return false
-    end
-
-    @undef_location_format = @user.location_format
-    if display_opts[:link_all_sorts]
-      # (This tells it to say "by name" and "by frequency" by the subtitles.
-      # If user has explicitly selected the order, then this is disabled.)
-      @default_orders = true
-    end
-    @undef_pages = letter_pagination_data(:letter2, :page2,
-                                          display_opts[:num_per_page] || 50)
-    @undef_data = query2.paginate(@undef_pages)
-    @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
-    if (letter = params[:letter2].to_s.downcase) != ""
-      @undef_data = @undef_data.select do |obs|
-        obs[:where][0, 1].downcase == letter
-      end
-    end
-    @undef_pages.num_total = @undef_data.length
-    @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
-    # `Observation.location_undefined` already groups by `where`, so
-    # each row in `@undef_data` is the representative observation for
-    # one unique unmatched location string. `Query#paginate` strips
-    # the per-group count during ID rehydration, so look up the per-
-    # `where` count via a single aggregated query, then emit
-    # `[representative_obs, count]` tuples — what the view expects.
-    @undef_data = attach_undef_counts(@undef_data)
-  end
-
-  def attach_undef_counts(observations)
-    # `observations` is the Array returned by paginate; can't pluck.
-    wheres = observations.map { |obs| obs[:where] } # rubocop:disable Rails/Pluck
-    counts = ::Observation.where(where: wheres, location_id: nil).
-             group(:where).count
-    observations.map { |obs| [obs, counts[obs[:where]] || 1] }
-  end
-
-  ##############################################################################
-
-  public # for test!
-
-  # Try to turn this into a query on observations.where instead.
-  # Yes, still a kludge, but a little better than tweaking SQL by hand...
-  def create_query_for_obs_undefined_where_strings(query)
-    args   = query.params.dup.except(:observation_query)
-    # Location params not handled by Observation. (does handle :by_user)
-    # If these are passed, we're not looking for undefined locations.
-    return nil if [:by_editor, :regexp].any? { |key| args[key] }
-
-    # # Select only observations with undefined location.
-    # args[:where] = [args[:where]].flatten.compact
-
-    # "By name" means something different to observation.
-    nosorts = ["name", "box_area", "reverse_name", "reverse_box_area", ""]
-    args[:order_by] = "where" if nosorts.include?(args[:order_by])
-
-    args[:search_where] ||= ""
-    if args[:pattern]
-      args[:search_where] += args[:pattern]
-      args.delete(:pattern)
-    end
-
-    # Create query if okay.  (Still need to tweak select and group clauses.)
-    result = create_query(:Observation, args.merge(location_undefined: true))
-
-    # Also make sure the sql doesn't reference locations anywhere.  This would
-    # presumably be the result of customization of one of the above.
-    result = nil if /\Wlocations\./.match?(result.sql)
-
-    result
   end
 
   ##############################################################################
@@ -289,8 +193,6 @@ class LocationsController < ApplicationController
 
   ##############################################################################
 
-  private
-
   def find_location!
     @location = Location.show_includes.safe_find(params[:id]) ||
                 flash_error_and_goto_index(Location, params[:id])
@@ -311,10 +213,7 @@ class LocationsController < ApplicationController
     render(Views::Controllers::Locations::Index.new(
              query: @query, locations: locations,
              pagination_data: @pagination_data,
-             undef_pages: @undef_pages || ::PaginationData.new,
-             undef_data: @undef_data || [],
-             observation_counts: known_observation_counts(locations),
-             default_orders: @default_orders || false
+             observation_counts: known_observation_counts(locations)
            ))
   end
 

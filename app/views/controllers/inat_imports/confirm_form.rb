@@ -217,15 +217,17 @@ module Views::Controllers::InatImports
     end
 
     def count_expected_line
-      b { plain(:inat_import_confirm_expected_caption.l) }
-      plain(": ")
-      span(id: "expected_count") do
-        url = expected_obs_url
-        count = capped_expected_count.to_s
-        if url
-          render(Components::Link::External.new(content: count, path: url))
-        else
-          plain(count)
+      span(id: "expected_count_line") do
+        b { plain(:inat_import_confirm_expected_caption.l) }
+        plain(": ")
+        span(id: "expected_count") do
+          url = expected_obs_url
+          count = capped_expected_count.to_s
+          if url
+            render(Components::Link::External.new(content: count, path: url))
+          else
+            plain(count)
+          end
         end
       end
     end
@@ -253,9 +255,11 @@ module Views::Controllers::InatImports
     end
 
     def time_estimate_line
-      b { plain(:inat_import_confirm_time_estimate_caption.l) }
-      plain(": ")
-      span(id: "estimated_time") { plain(estimated_time) }
+      span(id: "estimated_time_line") do
+        b { plain(:inat_import_confirm_time_estimate_caption.l) }
+        plain(": ")
+        span(id: "estimated_time") { plain(estimated_time) }
+      end
     end
 
     def estimated_time

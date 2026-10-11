@@ -110,8 +110,8 @@ module Projects
 
       assert_response(:success)
       assert_includes(@project.observations.reload, @matching_obs)
-      assert_includes(@response.body, %(<turbo-stream action="remove"))
-      assert_includes(@response.body, %(<turbo-stream action="update"))
+      assert_select("turbo-stream[action='remove']")
+      assert_select("turbo-stream[action='update']")
     end
 
     def test_exclude_observation_turbo_stream
@@ -122,8 +122,8 @@ module Projects
 
       assert_response(:success)
       assert_includes(@project.excluded_observations.reload, @matching_obs)
-      assert_includes(@response.body, %(<turbo-stream action="remove"))
-      assert_includes(@response.body, %(<turbo-stream action="update"))
+      assert_select("turbo-stream[action='remove']")
+      assert_select("turbo-stream[action='update']")
     end
 
     def test_exclude_observation_not_found

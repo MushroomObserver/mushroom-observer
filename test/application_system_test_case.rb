@@ -9,6 +9,13 @@ require("capybara/cuprite")
 require("test_helpers/system/cuprite_setup")
 require("test_helpers/system/cuprite_helpers")
 
+# `en.yml` is gitignored, so a branch switch leaves it stale against
+# the new `en.txt` -- same check `script/deploy.sh` runs before a
+# deploy. Runs once per process, before `parallelize` forks workers.
+unless system("script/lang_update_if_needed.sh")
+  raise("script/lang_update_if_needed.sh failed")
+end
+
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # System tests use the Maps JavaScript API
   # (`@googlemaps/js-api-loader`); the key's HTTP-Referer whitelist
