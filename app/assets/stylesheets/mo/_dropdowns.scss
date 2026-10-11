@@ -1,0 +1,107 @@
+// dropdown menus
+
+// TEMPORARY, this block only -- stands in for CSS Bootstrap 4 itself
+// provides natively. Delete on merging the BS4 cutover branch, not
+// needed there. Components::Dropdown no longer wraps items in <li>,
+// so BS3's `.dropdown-menu > li > a` selector doesn't match flat
+// .dropdown-item markup -- this replaces it app-wide.
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  color: $dropdown-link-color;
+  text-align: inherit;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+
+  &:hover,
+  &:focus {
+    color: $dropdown-link-hover-color;
+    text-decoration: none;
+    background-color: $dropdown-link-hover-bg;
+  }
+
+  &.active {
+    color: $dropdown-link-active-color;
+    background-color: $dropdown-link-active-bg;
+  }
+}
+
+// Matches BS3's nav-divider mixin: ($line-height-computed / 2) - 1.
+.dropdown-divider {
+  height: 1px;
+  margin: 9px 0;
+  overflow: hidden;
+  background-color: $dropdown-divider-bg;
+}
+
+// Bootstrap's `.dropdown-menu` padding sits on top of each item's
+// padding, so the first and last items end up with more breathing
+// room than the items between them. Scoped to the rss-log type-filter
+// menu only, not every dropdown.
+.dropdown-menu:has(.type-filter-menu) {
+  padding: 0;
+}
+
+// Bigger caret, more gap before it -- Bootstrap's default reads as
+// small and cramped next to a toggle's text.
+.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.4em;
+  vertical-align: 0.155em;
+  content: "";
+  border-top: 0.4em solid;
+  border-right: 0.4em solid transparent;
+  border-bottom: 0;
+  border-left: 0.4em solid transparent;
+}
+
+// rss-log type-filter dropdown: a border between every row, and
+// right padding on the label zone -- the flex row of two zones
+// doesn't inherit `.dropdown-item`'s padding at that edge.
+.type-filter-menu .dropdown-item {
+  padding: 0.5rem;
+}
+
+.type-filter-menu .dropdown-item:not(:last-child) {
+  border-bottom: 1px solid $MENU_BORDER_COLOR;
+}
+
+.type-filter-menu .label-zone {
+  padding-right: 1rem;
+
+  // The link wraps just its text, not the zone's flex-grow width --
+  // block fills it, so a click lands on the link, not the zone's
+  // dead space beside it.
+  a {
+    display: block;
+  }
+}
+
+// Beats the global `.btn-link { font-weight: normal !important; }`
+// (_links_buttons_alerts.scss) via specificity, not source order.
+// Apply/Set-as-default read as plain text here, not links.
+.type-filter-menu .btn-link {
+  font-weight: bold !important;
+  color: $text-color !important;
+}
+
+// Custom 1500px cutoff between the two rss-log type-filter forms --
+// see Views::Controllers::RssLogs::TypeFilters for why this isn't a
+// named Bootstrap breakpoint.
+.filter-form-bar {
+  display: none;
+}
+
+@media (min-width: 1500px) {
+  .filter-form-dropdown {
+    display: none;
+  }
+
+  .filter-form-bar {
+    display: block;
+  }
+}

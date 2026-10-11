@@ -792,16 +792,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#added_images", visible: :visible, wait: 3)
     assert_selector(".carousel-item[data-image-status='upload']",
                     text: /Coprinus_comatus/, wait: 3)
-    # Set the first (last) one as the thumb_image. The visual
-    # "pressed" swap is CSS-only (`:has(input:checked)`), driven by
-    # the radio's checked state — so click the radio directly via
-    # `choose`. The radio's hidden inside a `.btn`-styled label;
-    # `visible: :all` because the radio itself isn't styled visible.
+    # Set the first (last) one as the thumb_image. The radio is
+    # visually hidden (opacity: 0) behind its `.btn`-styled label, so
+    # a coordinate-based click (`choose`) risks landing on the label
+    # instead -- flip the DOM state directly.
     within(first_image_wrapper) do
       thumb_button = find(".thumb_img_btn")
       scroll_to(thumb_button, align: :center)
       radio = thumb_button.find("input[type='radio']", visible: :all)
-      choose(radio[:id], visible: :all)
+      check_radio(radio[:id])
       assert_text(:image_add_default.l)
       assert_no_text(:image_set_default.l)
     end
@@ -1021,7 +1020,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     obs_images = find_by_id("observation_images")
     scroll_to(obs_images, align: :top)
-    choose("thumb_image_id_#{geo.id}", visible: :all)
+    check_radio("thumb_image_id_#{geo.id}")
     sleep(1)
 
     # Move to the next step, Identification
@@ -1922,6 +1921,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
   private :wait_for_exif_geocode_broadcast
+
+  # Sets a radio's checked state directly, bypassing a coordinate
+  # click. Native radio-group exclusivity still applies when `checked`
+  # is set this way, so other radios in the group get unchecked too.
+  def check_radio(id)
+    page.execute_script(<<~JS)
+      const radio = document.getElementById("#{id}")
+      radio.checked = true
+      radio.dispatchEvent(new Event("change", { bubbles: true }))
+    JS
+  end
+  private :check_radio
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)

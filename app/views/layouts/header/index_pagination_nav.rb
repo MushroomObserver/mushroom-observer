@@ -20,6 +20,7 @@ module Views::Layouts
     include Phlex::Slotable
 
     slot :sorter
+    slot :type_filters
 
     prop :pagination_data, _Nilable(::PaginationData)
     prop :position, ::Symbol, default: -> { :top }
@@ -28,11 +29,14 @@ module Views::Layouts
     prop :request_url, ::String # Full URL w/ query params, for links
 
     def view_template
-      return unless sorter_slot? || need_letter_pagination_links? ||
-                    show_number_pagination?
+      return unless sorter_slot? || type_filters_slot? ||
+                    need_letter_pagination_links? || show_number_pagination?
 
-      div(class: "pagination-#{@position} flex-bar mb-2") do
-        div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
+      div(class: "pagination-#{@position} flex-bar px-3 mb-2") do
+        div(class: "d-flex") do
+          render(sorter_slot) if sorter_slot?
+          render(type_filters_slot) if type_filters_slot?
+        end
         div(class: "d-flex") do
           render_letter_pagination_nav
           render_number_pagination_nav

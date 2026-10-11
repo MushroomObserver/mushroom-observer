@@ -40,32 +40,23 @@ module Views::Layouts
       assert_equal("", html)
     end
 
-    def test_renders_outer_ul_with_label_and_dropdown
+    def test_renders_label_and_dropdown
       html = render_sorter(query: query_with(num_results: 5))
 
-      # Outer is a `<ul>`, not a `<div>` — semantically a list of nav
-      # items (label + dropdown).
-      assert_html(html, "ul.flex-bar.sorter")
-      # The label is the first `<li>`.
-      assert_html(html, "ul.sorter > li.navbar-text",
+      assert_html(html, ".sorter .navbar-text",
                   text: "#{:sort_by_header.l}:")
-      # The dropdown is the second `<li>`; Components::Dropdown
-      # renders its outer wrapper as `<li class="dropdown d-inline-block">`
-      # and the Sorter passes `wrapper_class: "navbar-form px-2"` for
-      # navbar spacing.
-      assert_html(html, "ul.sorter > li.dropdown.navbar-form")
-      # Toggle `<a>` carries the btn styling the legacy sort-bar used.
-      assert_html(html, "li.dropdown a.dropdown-toggle.btn.btn-outline-default")
-      # Menu carries the `sorts` extra class.
-      assert_html(html, "ul.dropdown-menu.sorts")
+      assert_html(html, ".sorter .dropdown a.dropdown-toggle")
+      # Menu carries the `sorts` extra class, the scope `assert_sorted_by`
+      # (test/general_extensions.rb) selects within.
+      assert_html(html, ".dropdown-menu.sorts")
     end
 
     def test_menu_contains_mobile_only_sort_by_header
       html = render_sorter(query: query_with(num_results: 5))
 
-      # `menu_header:` slot — mobile-only `<li>` rendered above the
-      # section's links.
-      assert_html(html, "ul.dropdown-menu.sorts > li.d-block.d-sm-none",
+      # `menu_header:` slot -- a mobile-only row (visible only below
+      # the `sm` breakpoint) rendered above the section's links.
+      assert_html(html, ".dropdown-menu.sorts .d-block.d-sm-none",
                   text: "#{:sort_by_header.l}:")
     end
 
