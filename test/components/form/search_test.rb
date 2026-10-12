@@ -81,8 +81,9 @@ class SearchFormTest < ComponentTestCase
   def test_renders_header_when_dropdown_context
     html = render_form(context: :dropdown)
 
-    assert_html(html, ".flex-bar",
-                text: :search_form_title.t(type: :observations))
+    # SearchTypeTitleTest covers the toggle/menu contract directly;
+    # this just confirms render_header renders it.
+    assert_html(html, "#search_type_toggle", text: :observations.ti)
     assert_html(html,
                 "a[data-toggle='collapse']" \
                 "[href='#search_bar_elements']" \
@@ -98,6 +99,17 @@ class SearchFormTest < ComponentTestCase
     # literal.
     assert_html(html,
                 "a[data-search-type-target='barToggle'].navbar-link")
+  end
+
+  def test_header_renders_responsive_toggle_pair
+    html = render_form(context: :dropdown)
+
+    assert_html(html,
+                "a[data-search-type-target='barToggle'].d-md-none")
+    assert_html(html,
+                "a[data-search-type-target='barToggle']" \
+                ".btn.btn-outline-default.d-none.d-md-inline-block",
+                text: :search_bar_fewer_options.l)
   end
 
   def test_does_not_render_header_when_page_context
