@@ -123,10 +123,8 @@ class DropdownTest < ComponentTestCase
     assert_html(html, "li.dropdown")
     assert_no_html(html, "div.dropdown")
 
-    html = render(
-      Components::Dropdown.new(id: "div_toggle", menu_id: "div_menu",
-                               label: "Menu", element: :div)
-    ) do |menu|
+    html = render_dropdown(id: "div_toggle", menu_id: "div_menu",
+                           element: :div) do |menu|
       menu.section(Tab::Project::Summary.new(project: @project))
     end
 
@@ -148,10 +146,26 @@ class DropdownTest < ComponentTestCase
     assert_equal("", html)
   end
 
+  # `toggle_content:` overrides the default `label:`-text span, and
+  # moves `label:` onto the toggle's `aria-label` instead.
+  def test_toggle_content_overrides_default_label_span
+    content = ActiveSupport::SafeBuffer.new("<strong>Observations</strong>")
+    html = render_dropdown(id: "rich_toggle", menu_id: "rich_menu",
+                           label: "Observations",
+                           toggle_content: content) do |menu|
+      menu.section([["Names", "/names/search/new"]])
+    end
+
+    assert_html(html, "a#rich_toggle[aria-label='Observations'] strong",
+                text: "Observations")
+    assert_no_html(html, "a#rich_toggle > span", text: "Observations")
+  end
+
   private
 
-  def render_dropdown(id:, menu_id:, label: "Menu", &block)
-    render(Components::Dropdown.new(id: id, menu_id: menu_id, label: label),
+  def render_dropdown(id:, menu_id:, label: "Menu", **, &block)
+    render(Components::Dropdown.new(id: id, menu_id: menu_id, label: label,
+                                    **),
            &block)
   end
 

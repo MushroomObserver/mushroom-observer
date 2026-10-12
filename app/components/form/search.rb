@@ -1,17 +1,8 @@
 # frozen_string_literal: true
 
-# Superform component for rendering faceted search forms.
-#
-# Uses the Query model (e.g., Query::Observations) directly as the form model.
-# Field layout is determined by FIELD_COLUMNS on the controller.
-# Field types are determined by SearchFieldUI.
-#
-# @example Usage in ERB
-#   <%= render(Components::Form::Search.new(
-#         @search,
-#         search_controller: self,
-#         context: :dropdown
-#       )) %>
+# Superform component for rendering faceted search forms. Uses the
+# Query model directly as the form model; field layout comes from
+# FIELD_COLUMNS on the controller, field types from SearchFieldUI.
 #
 # rubocop:disable-next Metrics/ClassLength
 class Components::Form::Search < Components::ApplicationForm
@@ -34,16 +25,11 @@ class Components::Form::Search < Components::ApplicationForm
   prop :search_controller, _Interface(:search_type)
   prop :context, _Union(:page, :dropdown), default: :page
 
-  # `search_type`/`context` don't need a route helper (every search
-  # controller nests under `namespace :<search_type> do resource
-  # :search, only: [:new, :create] end`, so the action is always
-  # `/<search_type>/search`, built by hand) -- so action/method/id/
-  # class/data all pass straight through as ordinary
-  # Superform::Rails::Form constructor kwargs, no form_tag override
-  # needed. This form is always Turbo-submitted (`turbo: true`,
-  # unconditionally -- Searchable#create always redirects, so there's
-  # no same-URL-200 risk either way), via the base class's `turbo:`
-  # prop so `around_template` sets `data-turbo` correctly.
+  # `search_type`/`context` skip a route helper -- the action is
+  # always `/<search_type>/search`, built by hand. This form is
+  # always Turbo-submitted (`turbo: true` unconditionally, since
+  # Searchable#create always redirects) via the base class's
+  # `turbo:` prop.
   def initialize(model, search_controller:, context: :page, **props)
     type = search_controller.search_type
     data = {
@@ -93,25 +79,48 @@ class Components::Form::Search < Components::ApplicationForm
   # Header (shown in dropdown context only)
 
   def render_header
-    div(class: "flex-bar w-100") do
-      div(class: "font-weight-bold h5 text-larger") do
-        plain(:search_form_title.t(type: search_type.to_s.downcase.to_sym))
+    div(class: "flex-bar w-100 mb-2") do
+      div(class: "font-weight-bold h5 text-larger mb-0") do
+        render(Components::SearchTypeTitle.new(current_type: search_type))
       end
       render_search_bar_toggle
     end
   end
 
-  # Bootstrap collapse-trigger button that hides the search-bar elements row
-  # in the top nav.
+  # Not availability-toggled by JS (unlike `Views::Layouts::SearchBar#
+  # render_form_toggle`), so both versions carry the `barToggle`
+  # Stimulus target directly, with no wrapper.
   def render_search_bar_toggle
+    render_search_bar_toggle_icon
+    render_search_bar_toggle_button
+  end
+
+  def render_search_bar_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",
          collapsed: false,
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
          button: :link,
-         class: class_names(Components::Navbar::LINK_CLASS, "px-2"),
+         class: class_names(Components::Navbar::LINK_CLASS, "px-2",
+                            Components::Column.visibility_classes(
+                              hide_at: :md
+                            )),
          data: { search_type_target: "barToggle" })
+  end
+
+  def render_search_bar_toggle_button
+    classes = Components::Column.visibility_classes(
+      hide_at: :xs, show_at: :md, display: :"inline-block"
+    )
+    Link(type: :collapse_toggle,
+         target_id: "search_bar_elements",
+         collapsed: false,
+         button: :outline,
+         class: class_names(classes),
+         data: { search_type_target: "barToggle" }) do
+      :search_bar_fewer_options.l
+    end
   end
 
   # Form layout
@@ -272,14 +281,10 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   # Query wraps a scalar into a 1-element array, so a bare submitted
-  # id validates fine even though external_sites is Array-typed.
-  #
-  # ExternalSite.select_options queries the DB, so this still hits it
-  # during render, just not on every render -- a deliberate tradeoff,
-  # not an oversight. Threading the options through as a prop instead
-  # would avoid that entirely, but ExternalSite is 2 rows and barely
-  # changes, and select_options memoizes per request (see the comment
-  # there), so this is at most one query per request, not per render.
+  # id validates despite external_sites being Array-typed.
+  # ExternalSite.select_options hits the DB on render -- a deliberate
+  # tradeoff since it's 2 rows and memoizes per request, not worth
+  # threading through as a prop.
   def render_select_external_sites(field_name:)
     options = [["", ""]] + ExternalSite.select_options
     select_field(field_name, options,
@@ -375,17 +380,10 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  # NOTE: `SearchFieldUI` returns `:single_value_autocompleter` for
-  # Class-typed `query_attr` definitions (e.g.
-  # `query_attr(:editable_by_user, User)`). No current search-form
-  # `FIELD_COLUMNS` exposes such a field, and the few existing
-  # Class-typed attrs' names (`for_user`, `by_author`,
-  # `editable_by_user`) don't map to a supported autocompleter `type`
-  # via `AutocompleterPrefill#autocompleter_type` either. The
-  # dispatcher in `render_search_field` would raise
-  # `NoMethodError` if a future FIELD_COLUMNS added one — loud and
-  # actionable. Add `render_single_value_autocompleter` back here
-  # when that day comes.
+  # `SearchFieldUI` can return `:single_value_autocompleter`, but no
+  # current FIELD_COLUMNS field maps to it -- `render_search_field`'s
+  # dispatcher raises `NoMethodError` if a future field does. Add
+  # `render_single_value_autocompleter` back here when that happens.
 
   def render_multiple_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)
@@ -401,7 +399,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  def render_names_fields_for_obs(field_name:) # rubocop:disable Lint/UnusedMethodArgument
+  def render_names_fields_for_obs(**)
     modifiers = [[:include_synonyms, :include_subtaxa],
                  [:include_all_name_proposals, :exclude_consensus]]
     namespace(:names) do |names_ns|
@@ -413,7 +411,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  def render_names_fields_for_names(field_name:) # rubocop:disable Lint/UnusedMethodArgument
+  def render_names_fields_for_names(**)
     modifiers = [[:include_synonyms, :exclude_original_names],
                  [:include_subtaxa, :include_immediate_subtaxa]]
     namespace(:names) do |names_ns|
@@ -425,7 +423,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  def render_region_with_in_box_fields(field_name:) # rubocop:disable Lint/UnusedMethodArgument
+  def render_region_with_in_box_fields(**)
     render(Components::Form::RegionWithBoxFields.new(query: model,
                                                      form_namespace: self))
   end

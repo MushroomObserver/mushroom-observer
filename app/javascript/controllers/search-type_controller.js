@@ -29,6 +29,17 @@ export default class extends Controller {
     abnegate('shown.bs.collapse', this.delegate)
   }
 
+  // Drives the search-type switcher inside the advanced-search form
+  // header (Components::SearchTypeTitle) through the same path the
+  // bar's type <select> uses -- set its value and dispatch a change
+  // event, letting getHelp/getForm (bound to the select's change
+  // action) fetch and swap the new type's form via turbo-stream.
+  chooseType(event) {
+    event.preventDefault()
+    this.selectTarget.value = event.currentTarget.dataset.type
+    this.selectTarget.dispatchEvent(new Event("change", { bubbles: true }))
+  }
+
   async getHelp(event) {
     // event.stopPropagation()
 

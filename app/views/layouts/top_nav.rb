@@ -125,7 +125,7 @@ class Views::Layouts::TopNav < Views::Base
         if controller.controller_name == "identify"
           render(::Views::Controllers::Observations::Identify::FormFilter.new)
         else
-          render(SearchBar.new(
+          render(Views::Layouts::SearchBar.new(
                    search_help_types: SEARCH_HELP_TYPES,
                    search_form_types: SEARCH_FORM_TYPES
                  ))

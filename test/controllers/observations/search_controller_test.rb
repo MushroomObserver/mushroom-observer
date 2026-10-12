@@ -31,6 +31,14 @@ module Observations
       login("rolf")
       get(:new, format: :turbo_stream)
       assert_select("#observations_search_form")
+      # Components::SearchTypeTitle, rendered in Components::Form::
+      # Search#render_header -- only in the dropdown (turbo_stream)
+      # context, not the standalone page.
+      assert_select("#search_type_toggle", text: :observations.ti)
+      assert_select(
+        "#search_type_menu a[href='/names/search/new']" \
+        "[data-action='search-type#chooseType'][data-type='names']"
+      )
     end
 
     def test_new_observations_search_with_advanced_retired_flag
@@ -182,6 +190,7 @@ module Observations
       }
       assert_search_redirected_to(controller: "/observations",
                                   params: validated_params)
+      assert_equal("advanced", session[:search_view])
     end
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa

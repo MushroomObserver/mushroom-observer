@@ -32,6 +32,7 @@ class SearchControllerTest < FunctionalTestCase
 
       assert_equal(model, @request.session[:search_type])
       assert_equal(pattern, @request.session[:pattern])
+      assert_equal("pattern", @request.session[:search_view])
 
       # Increment to keep this unpredictable
       pattern = (pattern.to_i + 9).to_s
