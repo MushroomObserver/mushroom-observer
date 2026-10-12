@@ -193,7 +193,12 @@ tbody.collapse.show {
   vertical-align: -0.15em;
 }
 
-span:has(> .mo-icon) {
+// `:not(.has-id-indicator)` matters: that span's display:none default
+// (conditionally overridden to inline-flex under a `.has-id` ancestor,
+// see _autocomplete.scss) has lower specificity than this selector,
+// so without the exclusion this rule forces it visible on every page
+// load regardless of the `.has-id` state.
+span:not(.has-id-indicator):has(> .mo-icon) {
   display: inline-flex;
   align-items: center;
 }
