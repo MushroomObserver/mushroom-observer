@@ -177,12 +177,14 @@ module Query::Modules::Initialization
     @scopes = @scopes.exclude_non_primary_observations
   end
 
-  # For Observation queries, exclude non-primary members of
-  # multi-observation occurrences at the scope level.
+  # For Observation queries, exclude a non-primary member of an
+  # occurrence when its primary is in the same result set, so an
+  # occurrence is represented once without a member disappearing from
+  # the lists its primary cannot reach (#5486).
   def exclude_non_primary_observations
     return unless model == Observation
 
-    @scopes = @scopes.exclude_non_primary
+    @scopes = @scopes.exclude_non_primary_when_primary_present
   end
 
   ##############################################################################

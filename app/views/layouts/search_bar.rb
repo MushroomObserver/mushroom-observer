@@ -59,7 +59,7 @@ class Views::Layouts::SearchBar < Views::Base
   # matches the selected search type.
   def render_advanced_form_target
     Collapsible(id: "search_nav_form", expanded: advanced_default?,
-                class: "w-100",
+                class: "w-100 border-top",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end
@@ -135,16 +135,9 @@ class Views::Layouts::SearchBar < Views::Base
     )
   end
 
-  # `session[:search_type]` is written either by
-  # `SearchController#pattern` (after it pluralizes the submitted
-  # form value) or by `ApplicationController::Queries` (which
-  # stores `Query#search_type`, already plural from the
-  # controller's module name). The latter stores it for EVERY
-  # query-backed index — including types the select has no option
-  # for (e.g. `:rss_logs` from the Activity Log). An unselectable
-  # value would leave the browser showing the first alphabetical
-  # option ("Comments"), so those fall back to :observations
-  # (#4969).
+  # `session[:search_type]` can hold a type the select has no option
+  # for (e.g. `:rss_logs` from the Activity Log) -- falls back to
+  # :observations rather than showing the first alphabetical option.
   def default_search_type
     type = controller.session[:search_type]&.to_sym
     return type if Components::Form::PatternSearch::TYPE_VALUES.include?(type)

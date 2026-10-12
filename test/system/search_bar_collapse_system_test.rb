@@ -2,13 +2,10 @@
 
 require("application_system_test_case")
 
-# Regression guard for the panel collapse-toggle bug introduced when
-# Panel#render_collapse_icons switched from `link_to("javascript:void(0)")`
-# to `Link::CollapseToggle`. Bootstrap 3 collapse.js skips e.preventDefault()
-# when `data-target` is set, letting Turbo follow the `href="#id"` — which
-# navigated the Turbo frame and made the search form disappear.
-# Fix: Panel now uses Button::CollapseToggle (<button>) so no navigation
-# can occur regardless of Bootstrap's preventDefault behavior.
+# Regression guard: collapse.js skipped e.preventDefault() when
+# data-target was set, so a `Link::CollapseToggle`'s href="#id" let
+# Turbo navigate and made the search form disappear. Panel uses
+# Button::CollapseToggle (<button>) instead, which can't navigate.
 class SearchBarCollapseSystemTest < ApplicationSystemTestCase
   EXPANDED = Components::Collapsible::EXPANDED_CLASS
 

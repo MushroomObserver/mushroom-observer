@@ -62,6 +62,11 @@ class Components::Dropdown < Components::Base
   prop :toggle_size, _Nilable(::Symbol), default: nil
   prop :toggle_class, _Nilable(::String), default: nil
   prop :menu_class, _Nilable(::String), default: nil
+  # Optional raw HTML for the toggle's visible content (SafeBuffer),
+  # overriding the default `label:`-text span. `label:` is still
+  # required -- it becomes the toggle's `aria-label` instead, since
+  # the visible text no longer speaks for itself.
+  prop :toggle_content, _Nilable(::String), default: nil
   # Optional pre-section content rendered inside the menu `<div>`
   # above the first section. SafeBuffer (from `capture { … }`) so
   # `trusted_html` emits it intact. Used by the sort-bar to inject

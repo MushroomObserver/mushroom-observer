@@ -74,6 +74,56 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(Vote::MAXIMUM_VOTE, naming.votes.find_by(user: rolf).value)
   end
 
+  # The observer is the voter on an import of their observations, so the
+  # vote the engine manages is the one they change by hand. Raising it
+  # and watching the next resync put it back was #5480.
+  def test_a_confidence_the_observer_raised_is_kept
+    naming = import_naming(@new, Vote::MIN_POS_VOTE)
+    Observation::NamingConsensus.new(@obs).
+      change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).source_value,
+                 "the source's value stands while the observer's moves")
+
+    sync(fresh)
+
+    assert_equal(Vote::MAXIMUM_VOTE, importer_vote(naming).value,
+                 "the resync should leave the observer's value alone")
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).source_value,
+                 "and should not restate what the source said")
+    assert_equal(@site.id, importer_vote(naming).external_site_id,
+                 "provenance stays: the row did come from iNat")
+  end
+
+  # The source resumes managing a vote the observer puts back where the
+  # source had it -- the two agreeing is read as agreement.
+  def test_a_confidence_returned_to_the_source_value_follows_again
+    naming = import_naming(@old, Vote::NEXT_BEST_VOTE)
+    consensus = Observation::NamingConsensus.new(@obs)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
+    consensus.change_vote(naming, Vote::NEXT_BEST_VOTE, @importer)
+
+    sync(fresh)
+
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Could Be")
+  end
+
+  # The same guard must not freeze a vote the engine has written: it
+  # stamps after writing, and a stamped vote stays under its management.
+  def test_a_vote_the_engine_wrote_still_follows_the_source
+    naming = import_naming(@old, Vote::MAXIMUM_VOTE)
+
+    sync(fresh)
+
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Could Be")
+    assert_equal(@site.id, importer_vote(naming).external_site_id)
+  end
+
+  # The naming is adopted and stamped. Its vote is left where it is:
+  # with no source_value the engine cannot account for the value, and
+  # a row it cannot account for might be a person's (#5480). The
+  # repair fills in the ones the import explains.
   def test_importer_naming_predating_the_marker_is_adopted
     naming = Naming.create!(observation: @obs, user: @importer, name: @new,
                             reasons: { 2 => "import" })
@@ -84,7 +134,9 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     assert_equal(0, outcome.added, "adopted, not duplicated")
     assert_equal(@site.id, naming.reload.external_site_id)
-    assert_equal(@site.id, importer_vote(naming).external_site_id)
+    assert_nil(importer_vote(naming).source_value,
+               "the engine leaves a value it cannot account for")
+    assert_equal(Vote::NEXT_BEST_VOTE, importer_vote(naming).value)
   end
 
   # Naming rejects a second proposal of the same name by the same user,
@@ -228,7 +280,7 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     naming = Naming.create!(observation: @obs, user: @importer, name: name,
                             external_site: @site, reasons: { 2 => "import" })
     Vote.create!(naming: naming, user: @importer, observation: @obs,
-                 value: value, external_site: @site)
+                 value: value, external_site: @site, source_value: value)
     Observation::NamingConsensus.new(@obs).calc_consensus
     naming
   end

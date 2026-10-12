@@ -1,23 +1,9 @@
 # frozen_string_literal: true
 
-# The top-of-page navbar. Composes:
-#
-#   - the left side (mobile nav-toggle button, the page title /
-#     "rubric", and the "+ Add" create-button)
-#   - the right side (search-bar toggle, QR-scanner link, the
-#     `:context_nav` content_for hook for the Actions dropdown,
-#     and either `Views::Layouts::TopNav::UserNav` or
-#     `Views::Layouts::TopNav::Login` depending on
-#     `@user.nil?`)
-#
-# The collapsible search-bar row itself is a sibling, not a child --
-# see `Views::Layouts::SearchNav`.
-#
-# Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
-# `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
-# `nav_create`, `nav_scan_qr_code` + their private helpers) are
-# inlined as private methods on this class — those helpers had no
-# other callers, so the helper modules are deleted in the same PR.
+# The top-of-page navbar: mobile nav-toggle, page rubric, "+ Add"
+# button, search-bar toggle, QR-scanner link, Actions dropdown, user
+# nav. The collapsible search-bar row itself is a sibling, not a
+# child -- see `Views::Layouts::SearchNav`.
 class Views::Layouts::TopNav < Views::Base
   # `content_for?` isn't auto-registered on `Views::Base` (only
   # the value-helper form of `content_for` is). The right-side
@@ -33,37 +19,19 @@ class Views::Layouts::TopNav < Views::Base
   # ancestor (`#main_container`, see `Views::Layouts::Application`).
   prop :banner, _Nilable(::Banner), default: nil
 
-  # `w-100` is load-bearing since `#top_nav` is `display: flex` --
-  # without it this row would shrink to content width instead of
-  # filling the navbar. `container-fluid` is already flex +
-  # `justify-content: space-between` + `align-items: center` as a
-  # descendant of `.navbar` (BS4's `.navbar .container-fluid` rule)
-  # -- no `flex-bar` needed here. `px-card` matches the horizontal
-  # padding cards use, so #top_nav's content lines up with card
-  # content below it. `Views::Layouts::SearchNav::CONTAINER_CLASSES`
-  # holds the same values for the search-bar row's navbar.
+  # `w-100` is load-bearing since #top_nav is `display: flex` --
+  # without it this row shrinks to content width. `container-fluid`
+  # already supplies the flex/justify/align BS4 needs. `px-card`
+  # matches card padding, so content lines up below it. See
+  # `Views::Layouts::SearchNav::CONTAINER_CLASSES` for its match.
   CONTAINER_CLASSES = %w[container-fluid px-card w-100].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
-  # `navbar-expand` (BS4's un-collapsed-navbar recipe, bare/no
-  # breakpoint so it's unconditional) supplies `position: absolute`
-  # on `.navbar-nav .dropdown-menu`. Without it, BS4's default
-  # `.navbar-nav .dropdown-menu { position: static }` applies (meant
-  # for a collapsed/stacked navbar-nav), so an open Actions/user
-  # dropdown pushes #top_nav's height instead of floating over the
-  # page. #top_nav doesn't collapse via BS4's mechanism -- the
-  # offcanvas sidebar is the mobile nav -- so it's always in the
-  # "expanded" state `.navbar-expand` describes. Scoped to this div,
-  # not `#top_nav` itself: `.navbar-expand`'s `flex-flow: row nowrap`
-  # would break the `w-100` two-row stacking CONTAINER_CLASSES relies
-  # on if applied to the outer nav.
-  #
-  # No `justify-content-end` here -- `render_right`'s `<ul>` carries
-  # `Components::Navbar::RIGHT_CLASS` (`ml-auto`), and an auto margin
-  # consumes all leftover main-axis space before `justify-content`
-  # gets to distribute any, so a `justify-content` value on this div
-  # would be inert either way.
+  # `navbar-expand` gives `.navbar-nav .dropdown-menu` the
+  # `position: absolute` it needs to float instead of pushing
+  # #top_nav's height. Scoped to this div, not #top_nav itself, since
+  # its `flex-flow: row nowrap` would break CONTAINER_CLASSES' stacking.
   RIGHT_CLASSES = %w[
     d-flex flex-row align-items-center navbar_right navbar-expand
   ].freeze

@@ -34,6 +34,10 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "a[data-search-type-target='helpToggle'] svg.mo-icon-info")
     assert_no_html(html,
                    "a[data-search-type-target='helpToggle'].d-none")
+    # Rendered via CollapseToggle's button:/size: kwarg, not raw
+    # btn/btn-link strings.
+    assert_html(html,
+                "a[data-search-type-target='helpToggle'].btn.btn-link")
   end
 
   def test_help_toggle_hidden_when_type_has_no_help

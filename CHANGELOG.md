@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-12 (deploy-2026-10-12-20-30)
+
+- Bump simplecov, google-cloud-storage, brakeman, prawn-svg ([PR5484](https://github.com/MushroomObserver/mushroom-observer/pull/5484), @JoeCohen)
+- Dropdown RssLog Type Filter ([PR5481](https://github.com/MushroomObserver/mushroom-observer/pull/5481), @nimmolo)
+- Split "undefined locations" index onto `/locations/undefined` ([PR5482](https://github.com/MushroomObserver/mushroom-observer/pull/5482), @nimmolo)
+- Search Bar UI enhancements! ([PR5485](https://github.com/MushroomObserver/mushroom-observer/pull/5485), @nimmolo)
+- Let the observer hold the confidence they set on an import ([PR5488](https://github.com/MushroomObserver/mushroom-observer/pull/5488), @mo-nathan)
+- Keep a matching observation in its owner's lists ([PR5487](https://github.com/MushroomObserver/mushroom-observer/pull/5487), @mo-nathan)
+
 ## 2026-10-07 (deploy-2026-10-07-12-00)
 
 - Count skipped observations as progress in the import time estimate (`InatImport`) ([PR5466](https://github.com/MushroomObserver/mushroom-observer/pull/5466), @mo-nathan)
