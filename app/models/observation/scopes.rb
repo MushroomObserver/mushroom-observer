@@ -579,6 +579,35 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       )
     }
 
+    # Drop a non-primary member only when its primary is in the same
+    # result set, which is what "avoid double-counting" means. Dropping
+    # it unconditionally hides a member from every list its primary
+    # cannot appear in -- a user's list of their observations, an
+    # advanced search by user, an import's results (#5486).
+    #
+    # The subquery asks the filters about primaries, so it is first
+    # narrowed to the primaries of occurrences that hold a non-primary
+    # member: 1,852 occurrences against 643,000 observations. Asking
+    # the filters about every row instead costs a flat ~260ms whenever
+    # the query reads past a LIMIT -- a deep page, or the unbounded
+    # count an index needs for pagination.
+    scope :exclude_non_primary_when_primary_present, lambda {
+      members = Observation.arel_table.alias("members")
+      contested = Occurrence.joins(
+        Occurrence.arel_table.join(members).
+          on(members[:occurrence_id].eq(Occurrence[:id]).
+             and(members[:id].not_eq(Occurrence[:primary_observation_id]))).
+          join_sources
+      ).distinct.select(:primary_observation_id)
+
+      present = where(id: contested).select(:id)
+      left_outer_joins(:occurrence).where(
+        Observation[:occurrence_id].eq(nil).
+          or(Occurrence[:primary_observation_id].eq(Observation[:id])).
+          or(Occurrence[:primary_observation_id].not_in(present.arel))
+      )
+    }
+
     scope :has_field_slip, lambda { |bool = true|
       if bool
         joins(:occurrence).where.not(occurrences: { field_slip_id: nil })
