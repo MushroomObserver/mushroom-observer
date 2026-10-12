@@ -398,7 +398,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  def render_names_fields_for_obs(field_name:) # rubocop:disable Lint/UnusedMethodArgument
+  def render_names_fields_for_obs(**)
     modifiers = [[:include_synonyms, :include_subtaxa],
                  [:include_all_name_proposals, :exclude_consensus]]
     namespace(:names) do |names_ns|
@@ -410,7 +410,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  def render_names_fields_for_names(field_name:) # rubocop:disable Lint/UnusedMethodArgument
+  def render_names_fields_for_names(**)
     modifiers = [[:include_synonyms, :exclude_original_names],
                  [:include_subtaxa, :include_immediate_subtaxa]]
     namespace(:names) do |names_ns|
@@ -422,7 +422,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  def render_region_with_in_box_fields(field_name:) # rubocop:disable Lint/UnusedMethodArgument
+  def render_region_with_in_box_fields(**)
     render(Components::Form::RegionWithBoxFields.new(query: model,
                                                      form_namespace: self))
   end
