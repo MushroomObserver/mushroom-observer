@@ -13,10 +13,10 @@ class Components::Form::ElevationFields < Components::Base
 
   def view_template
     div(class: "text-center") do
-      render_get_elevation_button
       elevation_input(:high)
       elevation_input(:low)
     end
+    div(class: "text-left mt-3") { render_get_elevation_button }
   end
 
   private
