@@ -222,7 +222,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span, extra_class: "ml-3") do
+      Help(element: :span, class: "ml-3") do
         plain(label_appends_text(appends))
       end
     end

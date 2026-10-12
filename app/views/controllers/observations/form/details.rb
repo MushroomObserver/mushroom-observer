@@ -11,7 +11,6 @@
 # @param location [Location] optional associated location
 # @param default_place_name [String] default place name value
 # @param dubious_where_reasons [Array] location feedback reasons
-# noqa: comment-length -- user-approved exception, kept for YARD @param docs
 class Views::Controllers::Observations::Form::Details < Views::Base
   prop :form, ::Components::ApplicationForm
   prop :observation, Observation
