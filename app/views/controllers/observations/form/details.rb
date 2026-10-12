@@ -96,10 +96,15 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              controller_id: "observation_location_autocompleter",
              data: { map_target: "placeInput", action: exif_action }
            )) do |field|
+      field.with_between { render_location_lead }
       field.with_help do
         render(::Views::Controllers::Observations::Form::LocationHelp.new)
       end
     end
+  end
+
+  def render_location_lead
+    div(class: "mb-2") { trusted_html(:form_observations_where_lead.t) }
   end
 
   # Label with multiple span variants for different autocompleter states
