@@ -116,26 +116,28 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(html, "input[name='_method'][value='patch']", count: 1)
   end
 
-  # `between_class` (FieldWithHelp) mirrors ERB:
-  # inline rows pick "mr-3"; block rows pick "form-between".
-  def test_between_class_block_field_with_help
+  # The help-trigger's span always gets a leading ml-3, for the gap
+  # from the label. An inline field's trailing space before its input
+  # lives on the row (label-row-with-appends) instead, so it doesn't
+  # compound with a later append's leading margin.
+  def test_help_icon_margin_block_field_with_help
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_html(form, "span.form-between")
-    assert_no_html(form, "span.form-between.mr-3")
+    assert_html(form, "span.ml-3")
+    assert_no_html(form, "div.label-row-with-appends.mr-3")
   end
 
-  def test_between_class_inline_field_with_help
+  def test_help_icon_margin_inline_field_with_help
     form = render_form do
       text_field(:name, inline: true, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_html(form, "span.mr-3")
-    assert_no_html(form, "span.form-between")
+    assert_html(form, "span.ml-3")
+    assert_html(form, "div.label-row-with-appends.mr-3")
   end
 
   # Help renders as a sibling after .form-group, not inside it (#4911)

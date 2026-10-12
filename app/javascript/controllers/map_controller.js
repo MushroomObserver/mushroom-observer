@@ -185,16 +185,29 @@ export default class extends GeocodeController {
   }
 
   // A location form reached via "Define this location" prefills the
-  // place name but leaves the bounds at their 90/-90/45/-45 default
-  // until "Find on Map" is clicked -- trigger that on load for a
-  // new location only; an existing one may have hand-adjusted
-  // bounds that a fresh geocode must not silently overwrite.
+  // place name but leaves the N/S/E/W inputs at their 45/-45/90/-90
+  // default (Location#force_valid_lat_lngs!) until "Find on Map" is
+  // clicked -- trigger that on load for a new location only.
+  // hasBoundsAlready guards against overwriting bounds a prior
+  // geocode or a drag already set, in case connect() runs again on
+  // the same form (e.g. a Turbo Drive cache restore).
   announceExistingPlace() {
     if (this.map_type !== "location") return
     if (!document.body.classList.contains("locations__new")) return
     if (!this.hasPlaceInputTarget || !this.placeInputTarget.value) return
+    if (this.hasBoundsAlready()) return
 
     this.showBox()
+  }
+
+  // True once any N/S/E/W input has moved off its default value.
+  hasBoundsAlready() {
+    if (!this.hasNorthInputTarget) return false
+
+    return parseFloat(this.northInputTarget.value) !== 45 ||
+      parseFloat(this.southInputTarget.value) !== -45 ||
+      parseFloat(this.eastInputTarget.value) !== 90 ||
+      parseFloat(this.westInputTarget.value) !== -90
   }
 
   // The Geolocation checkbox is the observation's statement about whether

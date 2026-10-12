@@ -171,20 +171,37 @@ class Components::ApplicationForm < Superform::Rails::Form
     # outer row (see below for what the class does).
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
-      div(class: "#{display} justify-content-between align-items-center " \
-                 "label-row-with-appends") do
+      div(class: class_names(
+        "#{display} justify-content-between align-items-center",
+        "label-row-with-appends", label_row_trailing_class
+      )) do
         render_label_with_appends(label_text, wrap_class: nil)
         render_label_end_slot
       end
     end
 
+    # An inline field (e.g. a select beside its label) needs trailing
+    # space between the appends row and the input that follows it.
+    # Applied once, on the outer row, so it doesn't compound with an
+    # append's leading margin.
+    def label_row_trailing_class
+      return nil unless wrapper_options[:inline]
+      return nil unless respond_to?(:help_slot) && help_slot &&
+                        wrapper_options[:help_collapse]
+
+      "mr-3"
+    end
+
     # d-flex align-items-center is needed since the label and appended
     # content are otherwise just inline siblings with no shared
     # vertical-alignment context. render_label_flex_row passes
-    # wrap_class: nil since it already supplies that class.
+    # wrap_class: nil since it already supplies that class and already
+    # applied label_row_trailing_class to its outer div.
     def render_label_with_appends(label_text,
                                   wrap_class: "label-row-with-appends")
-      div(class: class_names("d-flex", "align-items-center", wrap_class)) do
+      row_class = wrap_class && class_names(wrap_class,
+                                            label_row_trailing_class)
+      div(class: class_names("d-flex", "align-items-center", row_class)) do
         label(for: field.dom.id,
               class: label_class(trailing_margin: false)) do
           render_label_content(label_text)
