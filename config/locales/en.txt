@@ -496,6 +496,8 @@
   none: none
   high: high
   low: low
+  highest: highest
+  lowest: lowest
   less: less
   more: more
   prev: previous
