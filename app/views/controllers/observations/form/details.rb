@@ -11,6 +11,7 @@
 # @param location [Location] optional associated location
 # @param default_place_name [String] default place name value
 # @param dubious_where_reasons [Array] location feedback reasons
+# noqa: comment-length -- user-approved exception, kept for YARD @param docs
 class Views::Controllers::Observations::Form::Details < Views::Base
   prop :form, ::Components::ApplicationForm
   prop :observation, Observation
@@ -82,7 +83,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              # label_colon: false -- location_label already embeds its
              # own colon per span (each state's text differs), so the
              # default auto-appended colon would double up.
-             wrapper_options: { label: location_label, label_colon: false },
+             wrapper_options: { label: location_label, label_colon: false,
+                                help_collapse: true },
              value: @default_place_name || @location&.name,
              hidden_name: :location_id,
              hidden_value: @location&.id,
