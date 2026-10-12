@@ -208,8 +208,7 @@ class Inat
       # This gives up adopting a vote that carries no stamp, which a
       # source row predating the stamp would have. There are none left:
       # all 21,992 observer votes on a source-stamped naming carry the
-      # stamp. `script/unstamp_observer_votes.rb` is how an existing row
-      # moves between the two states.
+      # stamp.
       def held_by_observer?(vote)
         vote.present? && vote.external_site_id != @site.id
       end
