@@ -306,8 +306,12 @@ class Inat
                  reasons: { 2 => used_references_explanation(name) }
                )
 
+      # source_value records what the source said, so a later change
+      # by the observer is visible to the resync as a divergence
+      # rather than needing the stamp to be surrendered (#5480).
       vote = Vote.find_or_initialize_by(naming: naming, user: user)
       vote.update!(observation: @observation, value: value,
+                   source_value: value,
                    external_site: @external_site)
       # An ObservationView is needed even though no one has viewed this obs.
       ObservationView.find_or_create_by(observation: @observation,

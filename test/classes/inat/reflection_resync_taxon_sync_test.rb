@@ -81,15 +81,31 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     naming = import_naming(@new, Vote::MIN_POS_VOTE)
     Observation::NamingConsensus.new(@obs).
       change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
-    assert_nil(importer_vote(naming).external_site_id,
-               "changing a value gives up the stamp")
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).source_value,
+                 "the source's value stands while the observer's moves")
 
     sync(fresh)
 
     assert_equal(Vote::MAXIMUM_VOTE, importer_vote(naming).value,
                  "the resync should leave the observer's value alone")
-    assert_nil(importer_vote(naming).external_site_id,
-               "and should not claim it by stamping it")
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).source_value,
+                 "and should not restate what the source said")
+    assert_equal(@site.id, importer_vote(naming).external_site_id,
+                 "provenance stays: the row did come from iNat")
+  end
+
+  # The source resumes managing a vote the observer puts back where the
+  # source had it -- the two agreeing is read as agreement.
+  def test_a_confidence_returned_to_the_source_value_follows_again
+    naming = import_naming(@old, Vote::NEXT_BEST_VOTE)
+    consensus = Observation::NamingConsensus.new(@obs)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
+    consensus.change_vote(naming, Vote::NEXT_BEST_VOTE, @importer)
+
+    sync(fresh)
+
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Could Be")
   end
 
   # The same guard must not freeze a vote the engine has written: it
@@ -104,11 +120,10 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(@site.id, importer_vote(naming).external_site_id)
   end
 
-  # The naming is adopted and stamped. Its vote is not: an unstamped
-  # vote is a person's, and the engine cannot tell one predating the
-  # stamp from one the observer set (#5480). No such vote is left --
-  # every observer vote on a source-stamped naming carries the stamp --
-  # so this costs nothing in the data and keeps the rule simple.
+  # The naming is adopted and stamped. Its vote is left where it is:
+  # with no source_value the engine cannot account for the value, and
+  # a row it cannot account for might be a person's (#5480). The
+  # repair fills in the ones the import explains.
   def test_importer_naming_predating_the_marker_is_adopted
     naming = Naming.create!(observation: @obs, user: @importer, name: @new,
                             reasons: { 2 => "import" })
@@ -119,8 +134,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     assert_equal(0, outcome.added, "adopted, not duplicated")
     assert_equal(@site.id, naming.reload.external_site_id)
-    assert_nil(importer_vote(naming).external_site_id,
-               "the engine leaves an unstamped vote to its holder")
+    assert_nil(importer_vote(naming).source_value,
+               "the engine leaves a value it cannot account for")
     assert_equal(Vote::NEXT_BEST_VOTE, importer_vote(naming).value)
   end
 
@@ -265,7 +280,7 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     naming = Naming.create!(observation: @obs, user: @importer, name: name,
                             external_site: @site, reasons: { 2 => "import" })
     Vote.create!(naming: naming, user: @importer, observation: @obs,
-                 value: value, external_site: @site)
+                 value: value, external_site: @site, source_value: value)
     Observation::NamingConsensus.new(@obs).calc_consensus
     naming
   end

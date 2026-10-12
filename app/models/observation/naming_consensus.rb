@@ -498,14 +498,6 @@ class Observation
       if vote
         vote.value = value
         vote.favorite = favorite
-        # Whoever set this value holds it now. An iNaturalist import
-        # stamps the vote it creates so its resync can tell those rows
-        # from a person's, and the observer is the voter on an import of
-        # their observations -- so a stamp left in place here let the
-        # nightly resync overwrite the observer's considered value with
-        # iNaturalist's (#5480). Inat::ReflectionResync::TaxonSync puts
-        # the stamp back after its change_vote call.
-        vote.external_site_id = nil
         vote.save
       else
         new_vote = naming.votes.build(
