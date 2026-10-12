@@ -178,16 +178,40 @@ class Inat
         @obs.user
       end
 
-      # The importer's vote on the naming is the source-derived one. A
-      # demotion only lowers: a vote already at or below Could Be stays.
+      # The importer's stamped vote on the naming is the source-derived
+      # one. A demotion only lowers: a vote already at or below Could Be
+      # stays.
       def set_vote(naming, value, demote: false)
         vote = naming.votes.find_by(user: importer)
-        return if demote && (vote.nil? || vote.value <= value)
+        return if skip_vote?(vote, value, demote)
         return mark_vote(vote) if vote && vote.value == value
 
         consensus = Observation::NamingConsensus.new(@obs)
         @reweighted += 1 if consensus.change_vote(naming, value, importer)
         mark_vote(naming.votes.find_by(user: importer))
+      end
+
+      def skip_vote?(vote, value, demote)
+        return true if held_by_observer?(vote)
+
+        demote && (vote.nil? || vote.value <= value)
+      end
+
+      # The importer is the observer on an import of their observations,
+      # so the vote this class manages and the vote they cast by hand are
+      # one row. The stamp is what separates them: the import stamps the
+      # vote it writes, NamingConsensus clears the stamp whenever anyone
+      # changes a value, and this class restores it after writing. So a
+      # stamped vote is the source's to move and an unstamped one is a
+      # person's to keep (#5480).
+      #
+      # This gives up adopting a vote that carries no stamp, which a
+      # source row predating the stamp would have. There are none left:
+      # all 21,992 observer votes on a source-stamped naming carry the
+      # stamp. `script/unstamp_observer_votes.rb` is how an existing row
+      # moves between the two states.
+      def held_by_observer?(vote)
+        vote.present? && vote.external_site_id != @site.id
       end
 
       def mark_vote(vote)

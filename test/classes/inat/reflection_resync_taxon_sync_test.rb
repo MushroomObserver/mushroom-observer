@@ -74,6 +74,41 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(Vote::MAXIMUM_VOTE, naming.votes.find_by(user: rolf).value)
   end
 
+  # The observer is the voter on an import of their observations, so the
+  # vote the engine manages is the one they change by hand. Raising it
+  # and watching the next resync put it back was #5480.
+  def test_a_confidence_the_observer_raised_is_kept
+    naming = import_naming(@new, Vote::MIN_POS_VOTE)
+    Observation::NamingConsensus.new(@obs).
+      change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
+    assert_nil(importer_vote(naming).external_site_id,
+               "changing a value gives up the stamp")
+
+    sync(fresh)
+
+    assert_equal(Vote::MAXIMUM_VOTE, importer_vote(naming).value,
+                 "the resync should leave the observer's value alone")
+    assert_nil(importer_vote(naming).external_site_id,
+               "and should not claim it by stamping it")
+  end
+
+  # The same guard must not freeze a vote the engine has written: it
+  # stamps after writing, and a stamped vote stays under its management.
+  def test_a_vote_the_engine_wrote_still_follows_the_source
+    naming = import_naming(@old, Vote::MAXIMUM_VOTE)
+
+    sync(fresh)
+
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Could Be")
+    assert_equal(@site.id, importer_vote(naming).external_site_id)
+  end
+
+  # The naming is adopted and stamped. Its vote is not: an unstamped
+  # vote is a person's, and the engine cannot tell one predating the
+  # stamp from one the observer set (#5480). No such vote is left --
+  # every observer vote on a source-stamped naming carries the stamp --
+  # so this costs nothing in the data and keeps the rule simple.
   def test_importer_naming_predating_the_marker_is_adopted
     naming = Naming.create!(observation: @obs, user: @importer, name: @new,
                             reasons: { 2 => "import" })
@@ -84,7 +119,9 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     assert_equal(0, outcome.added, "adopted, not duplicated")
     assert_equal(@site.id, naming.reload.external_site_id)
-    assert_equal(@site.id, importer_vote(naming).external_site_id)
+    assert_nil(importer_vote(naming).external_site_id,
+               "the engine leaves an unstamped vote to its holder")
+    assert_equal(Vote::NEXT_BEST_VOTE, importer_vote(naming).value)
   end
 
   # Naming rejects a second proposal of the same name by the same user,
