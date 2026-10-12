@@ -16,7 +16,9 @@ class Components::SearchTypeTitle < Components::Base
       id: "search_type_toggle",
       menu_id: "search_type_menu",
       label: @current_type.ti,
-      toggle_content: capture { strong { plain(@current_type.ti) } },
+      toggle_content: capture do
+        span(class: "font-weight-bold") { plain(@current_type.ti) }
+      end,
       toggle_class: "px-0",
       element: :span
     ) do |menu|
