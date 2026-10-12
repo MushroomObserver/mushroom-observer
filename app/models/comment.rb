@@ -373,11 +373,19 @@ class Comment < AbstractModel
     errors.add(:base, :validate_comment_duplicate)
   end
 
+  # The text comparison happens in Ruby, not SQL. Matching `summary` and
+  # `comment` in the WHERE clause put user text through MySQL collation
+  # derivation, which failed in production with "Illegal mix of
+  # collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb3_general_ci,
+  # COERCIBLE)" on a summary carrying an emoji, and the comparison is
+  # one MySQL cannot index anyway (`comment` is TEXT). The indexed
+  # columns narrow to the handful of rows this user wrote on this target
+  # in the last ten seconds, which is a double submit or nothing.
   def recent_identical_comment?(effective_user)
-    Comment.where(
-      user: effective_user, target_type: target_type,
-      target_id: target_id, summary: summary,
-      comment: comment.to_s
-    ).where(created_at: 10.seconds.ago..).exists?
+    Comment.where(user: effective_user, target_type: target_type,
+                  target_id: target_id).
+      where(created_at: 10.seconds.ago..).
+      pluck(:summary, :comment).
+      any? { |summary, body| summary == self.summary && body == comment.to_s }
   end
 end

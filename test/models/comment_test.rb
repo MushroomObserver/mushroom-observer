@@ -213,6 +213,43 @@ class CommentTest < UnitTestCase
     assert(dup.errors[:base].any?, "Should have base error")
   end
 
+  # A summary carrying a 4-byte character used to reach MySQL as part of
+  # the duplicate guard's WHERE clause and blew up on collation
+  # derivation in production.
+  def test_no_recent_duplicate_comment_with_emoji
+    obs = observations(:minimal_unknown_obs)
+    attrs = { target: obs, summary: "Nailed it \u{1F4AF}",
+              comment: "Body with \u{1F344} too" }
+
+    Comment.create!(attrs.merge(current_user: rolf))
+
+    dup = Comment.new(attrs)
+    dup.current_user = rolf
+    assert_not(dup.valid?, "Identical comment should be invalid")
+
+    different = Comment.new(attrs.merge(summary: "Nailed it \u{1F4A9}"))
+    different.current_user = rolf
+    assert(different.valid?, "A different summary is not a duplicate")
+  end
+
+  # The guard is per user and per target, so another person saying the
+  # same thing on the same observation is not a duplicate.
+  def test_recent_identical_comment_is_scoped_to_its_author_and_target
+    obs = observations(:minimal_unknown_obs)
+    other = observations(:detailed_unknown_obs)
+    attrs = { target: obs, summary: "Same", comment: "Same body" }
+
+    Comment.create!(attrs.merge(current_user: rolf))
+
+    theirs = Comment.new(attrs)
+    theirs.current_user = mary
+    assert(theirs.valid?, "Another user's identical comment is allowed")
+
+    elsewhere = Comment.new(attrs.merge(target: other))
+    elsewhere.current_user = rolf
+    assert(elsewhere.valid?, "The same text on another target is allowed")
+  end
+
   def test_polymorphic_joins
     Comment::ALL_TYPE_TAGS.each do |type_tag|
       assert_true(Comment.joins(type_tag))
