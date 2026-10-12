@@ -107,8 +107,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # readers -- use when a panel heading already names the field.
     # `help_placement: :above` drops the label's bottom margin, since
     # the help block renders directly below it instead.
-    def label_class
-      base = wrapper_options[:label_sr_only] ? "sr-only" : "mr-2"
+    def label_class(trailing_margin: true)
+      base = if wrapper_options[:label_sr_only]
+               "sr-only"
+             else
+               trailing_margin ? "mr-2" : nil
+             end
       help_placement_above? ? class_names(base, "mb-0") : base
     end
 
@@ -139,7 +143,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_label_with_appends(label_text,
                                   wrap_class: "label-row-with-appends")
       div(class: class_names("d-flex", "align-items-center", wrap_class)) do
-        label(for: field.dom.id, class: label_class) do
+        label(for: field.dom.id,
+              class: label_class(trailing_margin: false)) do
           render_label_content(label_text)
         end
         render_help_in_label_row
@@ -158,7 +163,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span) { plain(label_appends_text(appends)) }
+      Help(element: :span, extra_class: "ml-2") do
+        plain(label_appends_text(appends))
+      end
     end
 
     def label_appends_text(appends)

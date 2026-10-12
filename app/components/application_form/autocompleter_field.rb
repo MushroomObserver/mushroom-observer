@@ -160,12 +160,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def input_data_attributes
-      # Use string "true" (not boolean true) so Phlex emits
-      # `data-autocompleter="true"` instead of the boolean shorthand
-      # `data-autocompleter`. Matches ERB `autocompleter_field` helper output.
-      # Functionally equivalent — autocompleter base_controller overwrites this
-      # to `"connected"` on connect — but normalizes the rendered HTML between
-      # the two emission paths.
+      # String "true" (not boolean true) so Phlex emits
+      # data-autocompleter="true", matching ERB output --
+      # base_controller overwrites this to "connected" on connect.
       { target_attr_key => "input", autocompleter: "true" }.merge(extra_data)
     end
 
@@ -177,15 +174,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       )
     end
 
-    # A collapsible help block renders as a sibling right after
-    # .form-group -- when expanded, .form-group's default margin-
-    # bottom (~1rem) reads as a gap between the field and the help
-    # describing it. Tighten .form-group to mb-2 and move the
-    # field-to-field spacing that margin used to provide onto the
-    # outer .autocompleter wrapper instead (mb-3, see view_template).
-    # Plain (non-collapsible) help already handles this correctly via
-    # FieldWrapperRendering#help_present? -- this only covers the
-    # collapsible case, which that check deliberately excludes.
+    # A collapsible help block renders right after .form-group --
+    # expanded, its default margin-bottom reads as a double gap.
+    # mb-2 here moves that spacing onto .autocompleter's mb-3
+    # (view_template); plain help is handled separately, by
+    # FieldWrapperRendering#help_present?.
     def collapse_help_present?
       help_slot && wrapper_options[:help_collapse]
     end
@@ -227,39 +220,25 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
-    # A bare <svg> can't take padding -- on a replaced element like
-    # svg, padding eats into the element's own rendered content area
-    # instead of adding space around it, so the checkmark artwork
-    # itself was rendering smaller than its width/height implied.
-    # The spacing (and the has-id/has-id-indicator show/hide toggle,
-    # see _autocomplete.scss) belongs on a wrapping span instead --
-    # every icon needs a wrap, never printed bare in the page.
-    #
-    # The tooltip lives on that same wrapping span, not on `Icon(...)`
-    # itself -- passing `title:` to Icon does not give a bare svg a
-    # working tooltip on its own.
+    # A bare svg can't take padding (a replaced element's padding
+    # shrinks its content instead of adding space around it), so
+    # spacing and the has-id/has-id-indicator toggle live on the
+    # wrapping span. The tooltip lives there too, not on `Icon(...)`
+    # -- `title:` on Icon doesn't give a bare svg a working tooltip.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
-      span(class: "px-2 has-id-indicator", title: title,
+      span(class: "ml-2 has-id-indicator", title: title,
            data: { target_attr_key => "hasIdIndicator",
                    tooltip_target: "tip", placement: "top" }) do
         Icon(type: :check, class: "text-success")
       end
     end
 
-    # These four are plain `Button`s, not `Link`s -- they never had a
-    # real destination (target: "#" was always a fake href relying on
-    # a Stimulus `:prevent` modifier to stop its own no-op navigation)
-    # and are pure client-side toggles (show/hide a map box, swap in
-    # create fields). `variant: :link, class: "... p-0"` gives
-    # Bootstrap's own .btn-link reset (no bare-<button> browser chrome)
-    # with zero padding, without the padding being baked in as a
-    # site-wide default (see `Components::Button::Styling`).
-    #
-    # `Link::Get` auto-wires a tooltip (data-tooltip-target + title)
-    # whenever `icon:` is present -- plain `Button` doesn't (only
-    # `CRUDBase`, for form-submitting buttons, does that automatically).
-    # Each button below supplies the same tooltip_data shape by hand.
+    # Plain `Button`s, not `Link`s -- client-side toggles with a fake
+    # href + Stimulus :prevent, no destination. `variant: :link,
+    # class: "... p-0"` gives Bootstrap's .btn-link reset with zero
+    # padding; `Button` doesn't auto-wire a tooltip like `Link::Get`
+    # does, so each below supplies tooltip_data by hand.
     def render_find_button
       return unless find_text
 
@@ -267,7 +246,7 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon: :find_on_map, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 find-btn d-none p-0",
+             class: "ml-2 find-btn d-none p-0",
              title: find_text,
              data: { map_target: "showBoxBtn",
                      action: "map#showBox",
@@ -282,7 +261,7 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon: :apply, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 keep-btn d-none p-0",
+             class: "ml-2 keep-btn d-none p-0",
              title: keep_text,
              data: { target_attr_key => "keepBtn",
                      map_target: "lockBoxBtn",
@@ -299,7 +278,7 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon: :edit, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 edit-btn d-none p-0",
+             class: "ml-2 edit-btn d-none p-0",
              title: edit_text,
              data: { target_attr_key => "editBtn",
                      map_target: "editBoxBtn",
@@ -314,7 +293,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
-             class: "ml-3 create-button p-0",
+             class: "ml-2 create-button p-0",
              icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
@@ -334,7 +313,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            target: create_path,
            icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
-           class: "ml-3 create-link",
+           class: "ml-2 create-link",
            data: { target_attr_key => "createBtn" })
     end
 
@@ -399,18 +378,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
-    # Returns the model prefix and leaf-key segments of the field's
-    # `dom.name`. Splits on the LAST `[…]` group so the result is
-    # correct whether `field.key` is a Symbol (model-bound, leaf
-    # only) or a String that already contains the full namespaced
-    # name (e.g. `"list[members]"` from the String-form field
-    # helpers). Examples:
-    #
-    # | dom.name                  | namespace      | leaf      |
-    # | `species_list[place_name]`| `species_list` | `place_name` |
-    # | `list[members]`           | `list`         | `members` |
-    # | `member[notes][Cap]`      | `member[notes]`| `Cap`     |
-    # | `approved_rank` (no `[]`) | `""`           | `approved_rank` |
+    # Returns [namespace, leaf] from the field's `dom.name`, splitting
+    # on the last `[…]` group -- correct whether `field.key` is a
+    # Symbol (leaf only) or a String with the full namespaced name
+    # already in it. E.g. "member[notes][Cap]" -> ["member[notes]",
+    # "Cap"]; "approved_rank" (no brackets) -> ["", "approved_rank"].
     def name_parts
       @name_parts ||= begin
                         name = field.dom.name.to_s
