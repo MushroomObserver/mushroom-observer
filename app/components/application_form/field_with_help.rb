@@ -63,7 +63,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_help_icon
-      span(class: between_class) do
+      span(class: class_names("ml-3", between_class)) do
         Link(type: :collapse_toggle,
              target_id: help_id,
              class: "info-collapse-trigger") { Icon(type: :question) }
