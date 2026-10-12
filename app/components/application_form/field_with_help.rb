@@ -1,24 +1,15 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Shared module for rendering help blocks on form fields.
-  # Default: plain always-visible block below the field.
-  # Pass `help_collapse: true` to render a collapsible well with a
-  # question-mark trigger icon next to the label instead. Pass
-  # `help_well: false` alongside it to drop the well styling (e.g.
-  # when the field already sits inside a panel) while keeping the
+  # Shared module for rendering help blocks on form fields. Default:
+  # plain always-visible block below the field. `help_collapse: true`
+  # renders a collapsible well with a question-mark trigger instead;
+  # add `help_well: false` to drop the well styling but keep the
   # collapsible behavior.
   module FieldWithHelp
-    # Field classes (`DateField`, `TextField`, etc.) extend `Phlex::HTML`
-    # directly rather than living as a direct `Components::*` constant,
-    # so Phlex::Kit's `const_added` hook never fires for them and they
-    # get no Kit-sugar bare methods (`Help(...)`, `Icon(...)`, etc.) on
-    # their own. `include Components` here restores it transitively —
-    # Ruby's module inclusion carries `Components`'s accumulated Kit
-    # instance methods (and its `Phlex::Kit::LazyLoader` fallback) into
-    # every class that includes this module. See
-    # `.claude/rules/phlex_reference.md`'s Kit-syntax section for the
-    # full mechanism.
+    # Field classes extend `Phlex::HTML` directly, so Kit sugar
+    # doesn't fire for them -- this restores it transitively. See
+    # `.claude/rules/phlex_reference.md`'s Kit-syntax section.
     include ::Components
     # `::Components` above only carries Kit-sugar bare methods, not
     # Components::Base's other instance methods -- `append_colon`
@@ -66,7 +57,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       span(class: between_class) do
         Link(type: :collapse_toggle,
              target_id: help_id,
-             class: "info-collapse-trigger") { Icon(type: :question) }
+             class: "info-collapse-trigger") do
+          Icon(type: :question, title: :help.ti)
+        end
       end
     end
 

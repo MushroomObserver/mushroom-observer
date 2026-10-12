@@ -557,6 +557,7 @@
   edit: edit
   enable: enable
   exclude: exclude
+  help: help
   import: import
   index_object: "[TYPE] [:index.ti]"
   # merge one object into another

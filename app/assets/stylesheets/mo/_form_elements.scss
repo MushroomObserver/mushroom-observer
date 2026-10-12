@@ -26,6 +26,17 @@ label {
   margin-bottom: 5px;
 }
 
+// `.form-between` (the help-collapse trigger's spacer wrapper, see
+// FieldWithHelp#between_class) is a plain block, so the row's
+// align-items-center centers its font-metrics-driven line box, not
+// the icon inside it -- unlike `.has-id-indicator`, which is a
+// flex-centered row child. Matching that shrinks `.form-between` to
+// the icon's height and centers it the same way.
+.form-between {
+  display: inline-flex;
+  align-items: center;
+}
+
 // Bootstrap 4 custom-control checkboxes/radios -- input and label are
 // DOM siblings (see Components::ApplicationForm::CheckboxField/
 // RadioField), so this is scoped to `.custom-control-label` rather
