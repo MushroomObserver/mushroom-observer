@@ -12,6 +12,7 @@
 #  field_count::             Looks up total number of entries in a given table.
 #
 class SiteData
+  # rubocop:disable MO/NoLongCommentBlock
   ##############################################################################
   #
   #  :section: Category Definitions
@@ -38,6 +39,7 @@ class SiteData
   #      WHERE user_id = 123 AND s.id = os.species_list_id
   #
   ##############################################################################
+  # rubocop:enable MO/NoLongCommentBlock
 
   SITE_WIDE_FIELDS = [
     :images,

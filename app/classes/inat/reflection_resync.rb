@@ -188,7 +188,7 @@ class Inat
     # fetches iNat unauthenticated, so an obscured observation's
     # public coordinate is blurred and would overwrite the
     # authenticated import's accurate one (#4215 degraded 1,421
-    # reflections this way before this gate).
+    # reflections this way).
     def scalar_attributes(obs, inat_obs)
       attrs = { when: inat_obs.when, notes: notes(obs, inat_obs),
                 gps_hidden: inat_obs.obscured? }
