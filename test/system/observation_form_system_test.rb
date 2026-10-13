@@ -1282,8 +1282,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
 
-    # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
+    # Wait for the browser-side EXIF read (form-exif_controller.js's
+    # ExifReader.load) to finish -- the contention-sensitive step under
+    # a full-file run. transferExifToObsFields runs synchronously right
+    # after this text is set, so observation_lat should already match
+    # by the time this wait clears.
+    assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s)
 
     # Wait for location_containing mode and server response
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -1327,8 +1332,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
 
-    # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
+    # Wait for the browser-side EXIF read (form-exif_controller.js's
+    # ExifReader.load) to finish -- the contention-sensitive step under
+    # a full-file run. transferExifToObsFields runs synchronously right
+    # after this text is set, so the lat/lng fields should already
+    # match by the time this wait clears.
+    assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
+    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s)
     assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
 
     # Wait for location_containing mode
