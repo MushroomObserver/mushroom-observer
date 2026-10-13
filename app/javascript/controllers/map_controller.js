@@ -12,8 +12,8 @@ export default class extends GeocodeController {
   static targets = ["mapDiv", "southInput", "westInput", "northInput",
     "eastInput", "highInput", "lowInput", "placeInput", "locationId",
     "getElevation", "mapClearBtn", "controlWrap", "toggleMapBtn",
-    "latInput", "lngInput", "altInput", "showBoxBtn", "lockBoxBtn",
-    "editBoxBtn", "autocompleter", "geolocationCheck", "geolocationFields"]
+    "latInput", "lngInput", "altInput", "showBoxBtn", "boxLockToggle",
+    "autocompleter", "geolocationCheck", "geolocationFields"]
 
   connect() {
     this.element.dataset.map = "connected"
@@ -245,22 +245,29 @@ export default class extends GeocodeController {
       $(this.geolocationFieldsTarget).collapse('show')
   }
 
-  // Lock rectangle so it's not editable, and show this state in the icon link
+  // Flips the rectangle's lock state, then syncs the toggle to match.
   toggleBoxLock(event) {
-    if (this.rectangle && this.hasLockBoxBtnTarget &&
-      this.hasEditBoxBtnTarget) {
-      if (this.rectangle.getEditable() === true) {
-        this.rectangle.setEditable(false)
-        this.rectangle.setOptions({ clickable: false })
-        this.lockBoxBtnTarget.classList.add("d-none")
-        this.editBoxBtnTarget.classList.remove("d-none")
-      } else {
-        this.rectangle.setEditable(true)
-        this.rectangle.setOptions({ clickable: true })
-        this.lockBoxBtnTarget.classList.remove("d-none")
-        this.editBoxBtnTarget.classList.add("d-none")
-      }
-    }
+    if (!this.rectangle || !this.hasBoxLockToggleTarget) return
+
+    const editable = this.rectangle.getEditable() !== true
+    this.rectangle.setEditable(editable)
+    this.rectangle.setOptions({ clickable: editable })
+    this.syncBoxLockToggle()
+  }
+
+  // Keeps the keep/edit toggle's icon+tooltip in sync with the
+  // rectangle's actual lock state ("Use these bounds" <-> "Edit this
+  // locality" via the "active" class -- see `_icons.scss`'s
+  // `.stateful-link` rule). Called from toggleBoxLock, and from
+  // placeRectangle so a rectangle that draws already locked (e.g. an
+  // observation form's reference box for a matched location) starts
+  // with the matching icon instead of only updating on the next click.
+  syncBoxLockToggle() {
+    if (!this.hasBoxLockToggleTarget || !this.rectangle) return
+
+    this.boxLockToggleTarget.classList.toggle(
+      "active", this.rectangle.getEditable() !== true
+    )
   }
 
   // We don't draw the map for the create obs form on load, to save on API.
@@ -1073,6 +1080,7 @@ export default class extends GeocodeController {
       const _types = ["location", "hybrid"]
       if (_types.includes(this.map_type)) { this.rectangle.setEditable(true) }
       this.rectangle.setVisible(true)
+      this.syncBoxLockToggle()
     })
   }
 

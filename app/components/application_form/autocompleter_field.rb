@@ -202,8 +202,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_label_after
       render_has_id_indicator
       render_find_button if find_text
-      render_keep_box_button if keep_text
-      render_edit_box_button if keep_text
+      render_keep_edit_toggle if keep_text
     end
 
     # Renders all label_end elements (goes in label_end slot)
@@ -262,38 +261,33 @@ class Components::ApplicationForm < Superform::Rails::Form
                      title: find_text })
     end
 
-    def render_keep_box_button
+    # One button, two appearances: "Use these bounds..." (apply icon)
+    # while the rectangle is draggable, swapping to "Edit this
+    # locality" (edit icon) once map#toggleBoxLock locks it -- CSS
+    # keys the swap off the `.active` class toggleBoxLock sets on this
+    # element (`_icons.scss`'s `.stateful-link` rule), so no Stimulus
+    # controller has to coordinate with another one to drive it.
+    # `active_title:` lets tooltip_controller.js swap the tooltip the
+    # same way, from the same `.active` signal -- `Link::Get` wires
+    # this automatically from `active_content:`; plain `Button` doesn't
+    # (see `render_find_button`'s comment), so it's passed by hand.
+    def render_keep_edit_toggle
       return unless keep_text
 
       Button(name: keep_text,
-             icon: :apply, label: false,
+             icon: :apply, active_icon: :edit, active_content: edit_text,
+             label: false,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 keep-btn d-none p-0",
+             class: "ml-3 keep-edit-toggle d-none p-0",
              title: keep_text,
-             data: { target_attr_key => "keepBtn",
-                     map_target: "lockBoxBtn",
+             data: { target_attr_key => "keepOrEditBtn",
+                     map_target: "boxLockToggle",
                      action: "map#toggleBoxLock " \
                              "form-exif#showFields",
                      tooltip_target: "tip", placement: "top",
+                     active_title: edit_text,
                      title: keep_text })
-    end
-
-    def render_edit_box_button
-      return unless keep_text
-
-      Button(name: edit_text,
-             icon: :edit, label: false,
-             icon_class: "text-primary",
-             variant: :link,
-             class: "ml-3 edit-btn d-none p-0",
-             title: edit_text,
-             data: { target_attr_key => "editBtn",
-                     map_target: "editBoxBtn",
-                     action: "map#toggleBoxLock " \
-                             "form-exif#showFields",
-                     tooltip_target: "tip", placement: "top",
-                     title: edit_text })
     end
 
     def render_create_button
@@ -301,7 +295,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
-             class: "ml-3 create-button p-0",
+             class: "ml-3 create-button d-none p-0",
              icon: :plus, label: true,
              icon_class: "text-primary",
              variant: :link,
