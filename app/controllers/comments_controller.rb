@@ -119,18 +119,7 @@ class CommentsController < ApplicationController
   #
   ##############################################################################
 
-  # Form to create comment for an object.
-  # Linked from: show_<object>
-  # Inputs:
-  #   params[:id] (object id)
-  #   params[:type] (object type)
-  #   params[:comment][:summary]
-  #   params[:comment][:comment]
-  # Success:
-  #   Redirects to show_<object>.
-  # Failure:
-  #   Renders add_comment again.
-  #   Outputs: @comment, @object
+  # Form to create a comment for an object; linked from show_<object>.
   def new
     return unless (@target = load_target(params[:type], params[:target])) &&
                   allowed_to_see!(@target)
@@ -162,17 +151,7 @@ class CommentsController < ApplicationController
     refresh_comments_or_redirect_to_show(extra_streams: [prepend_comment_row])
   end
 
-  # Form to edit a comment for an object..
-  # Linked from: show_comment, show_object.
-  # Inputs:
-  #   params[:id]
-  #   params[:comment][:summary]
-  #   params[:comment][:comment]
-  # Success:
-  #   Redirects to show_object.
-  # Failure:
-  #   Renders edit_comment again.
-  #   Outputs: @comment, @object
+  # Form to edit a comment; linked from show_comment, show_object.
   def edit
     return unless (@comment = find_comment!)
 
