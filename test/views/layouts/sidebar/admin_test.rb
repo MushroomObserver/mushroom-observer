@@ -45,11 +45,10 @@ class Views::Layouts::Sidebar
       assert_html(html, ".admin_mode_link")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_heading_has_correct_css_classes
       html = render_component
 
-      # Heading should have the disabled and font-weight-bold classes
-      # rubocop:disable-next MO/NoCosmeticClassAssertion -- classes: pass-through contract (see admin: key assertion above)
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 

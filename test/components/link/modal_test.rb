@@ -13,13 +13,15 @@ class ModalLinkTest < ComponentTestCase
                 text: "Edit")
   end
 
+  # Plain link — no btn classes unless button: is passed.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_no_button_styling_by_default
     html = render_modal
 
-    # Plain link — no btn classes unless button: is passed.
     assert_no_html(html, "a.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_button_kwarg_adds_btn_classes
     html = render_modal(button: :outline)
 
@@ -50,6 +52,7 @@ class ModalLinkTest < ComponentTestCase
     assert_html(html, "a.extra-class[href='/edit']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_size_kwarg_adds_btn_size_class
     html = render_modal(button: :outline, size: :lg)
 

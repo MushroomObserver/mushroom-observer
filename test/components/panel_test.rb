@@ -89,6 +89,7 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "Second body")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_panel_with_body_id_and_data
     html = render_panel do |panel|
       panel.with_heading { "Test" }

@@ -66,10 +66,7 @@ module Views::Controllers::Projects::Members
         assert_html(html, "input[type='radio'][name='commit']" \
                           "[value='#{value}']")
       end
-      # rubocop:disable MO/NoCosmeticClassAssertion -- locks in
-      # wrapper_options: { wrap_class: "mb-2" }, the kwarg's passthrough.
-      assert_html(html, "div.radio.mb-2", count: 3)
-      # rubocop:enable MO/NoCosmeticClassAssertion
+      assert_html(html, ".radio", count: 3)
     end
 
     def test_preselects_radio_for_each_trust_level

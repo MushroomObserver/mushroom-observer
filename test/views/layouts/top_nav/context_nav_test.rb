@@ -56,6 +56,7 @@ class Views::Layouts::TopNav
     # `args[:button] => :destroy` routes through `Button::Delete`
     # with the context-nav opt-outs (`icon: nil`, `btn: nil`) so the
     # destroy renders as plain `[ DESTROY ]`-style text.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_destroy_button_renders_as_plain_text_link
       links = [[nil, @article, { button: :destroy }]]
       html = render_top_bar(links)
@@ -63,10 +64,7 @@ class Views::Layouts::TopNav
       assert_html(html, "form[action='#{routes.article_path(@article)}']")
       assert_html(html, "input[name='_method'][value='delete']")
       assert_no_html(html, "svg.mo-icon")
-      # rubocop:disable MO/NoCosmeticClassAssertion -- confirms the
-      # btn: nil opt-out suppressed button styling, per the comment above.
       assert_no_html(html, ".btn.btn-outline-default")
-      # rubocop:enable MO/NoCosmeticClassAssertion
     end
 
     # `args[:button] => :post` uses Rails' `button_to`.
@@ -108,16 +106,14 @@ class Views::Layouts::TopNav
     # The dropdown menu strips `d-block` from button classes — the
     # pre-Phlex helper did this so button-style links don't get
     # forced to display: block inside the dropdown.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_strips_d_block_class_from_buttons
       links = [["Submit", "/items",
                 { button: :post, size: :lg, class: "d-block" }]]
       html = render_top_bar(links)
 
-      # rubocop:disable MO/NoCosmeticClassAssertion -- verifies the
-      # size: kwarg and the d-block strip, per the comment above.
       assert_html(html, "button.btn-lg")
       assert_no_html(html, "button.d-block")
-      # rubocop:enable MO/NoCosmeticClassAssertion
     end
 
     private

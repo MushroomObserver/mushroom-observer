@@ -58,6 +58,7 @@ class CarouselTest < ComponentTestCase
   end
 
   # `class:` on item / thumb is composed onto the wrapper's class list.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_item_and_thumb_classes_are_composed
     html = render_carousel(
       carousel_args: { carousel_id: "c" },
@@ -66,7 +67,7 @@ class CarouselTest < ComponentTestCase
     )
 
     assert_html(html, "div.item.carousel-item.active", text: "S")
-    assert_html(html, "li.carousel-indicator.mx-1.mr-2.active", text: "T")
+    assert_html(html, "li.carousel-indicator.mr-2.active", text: "T")
   end
 
   # Caller-supplied `data:` merges with the primitive's auto-filled

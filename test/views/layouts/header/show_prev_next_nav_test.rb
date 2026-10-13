@@ -145,22 +145,20 @@ module Views::Layouts
       )
     end
 
+    # Framed as buttons via Link::Get's button:/size: kwargs, not
+    # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
+    # (not :default) removes the background/border while keeping
+    # button padding — plain icon-only nav buttons, not filled
+    # buttons. (:strip would remove padding too.)
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_links_are_styled_as_large_link_buttons
       @query.current_id = @middle_obs.id
 
       html = render_nav(object: @middle_obs, query: @query)
 
-      # Framed as buttons via Link::Get's button:/size: kwargs, not
-      # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
-      # (not :default) removes the background/border while keeping
-      # button padding — plain icon-only nav buttons, not filled
-      # buttons. (:strip would remove padding too.)
-      # rubocop:disable MO/NoCosmeticClassAssertion -- verifying the
-      # button:/size: kwargs produce these classes IS the point.
       assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")
-      # rubocop:enable MO/NoCosmeticClassAssertion
       # navbar-left comes from Components::Navbar::LEFT_CLASS, not a
       # raw literal.
       assert_html(html, "a.prev_object_link.navbar-left")

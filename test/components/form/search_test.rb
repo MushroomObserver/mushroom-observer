@@ -101,6 +101,7 @@ class SearchFormTest < ComponentTestCase
                 "a[data-search-type-target='barToggle'].navbar-link")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_header_renders_responsive_toggle_pair
     html = render_form(context: :dropdown)
 

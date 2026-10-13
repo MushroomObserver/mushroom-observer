@@ -9,6 +9,7 @@ class InputGroupTest < ComponentTestCase
     assert_html(html, "div.input-group", text: "content")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_with_custom_class
     html = render_component(
       Components::InputGroup.new(class: "page-input mx-2")

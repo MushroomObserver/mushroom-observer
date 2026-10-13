@@ -16,6 +16,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     controller.define_singleton_method(:session) { session }
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_help_toggle_visible_when_type_has_help
     html = render_bar(help_types: [:observations])
 
@@ -34,12 +35,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "a[data-search-type-target='helpToggle'] svg.mo-icon-info")
     assert_no_html(html,
                    "a[data-search-type-target='helpToggle'].d-none")
-    # rubocop:disable MO/NoCosmeticClassAssertion -- verifying
-    # CollapseToggle's button:/size: kwarg output IS the point; see
-    # BAR_TOGGLE_CLASSES.
     assert_html(html,
                 "a[data-search-type-target='helpToggle'].btn.btn-link")
-    # rubocop:enable MO/NoCosmeticClassAssertion
   end
 
   def test_help_toggle_hidden_when_type_has_no_help
@@ -50,6 +47,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "[data-search-type-target='helpToggle'].d-none")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_form_toggle_visible_when_type_has_form
     html = render_bar(form_types: [:observations])
 
@@ -66,15 +64,12 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "a[href='#search_nav_form'] " \
                 "span[aria-label='#{:search_bar_more_options.l}']")
     assert_html(html, "a[href='#search_nav_form'] svg.mo-icon-plus")
-    # rubocop:disable MO/NoCosmeticClassAssertion -- verifying the
-    # icon-only vs. labeled outline-button kwarg output IS the point.
+    # Icon-only vs. labeled outline-button.
     assert_html(html, "a[href='#search_nav_form'].btn.btn-link")
-    # Labeled outline-button, shown from md up.
     assert_html(html,
                 "a[data-toggle='collapse'][href='#search_nav_form']" \
                 ".btn.btn-outline-default.d-none.d-md-inline-block",
                 text: :search_bar_more_options.l)
-    # rubocop:enable MO/NoCosmeticClassAssertion
   end
 
   def test_form_toggle_hidden_when_type_has_no_form

@@ -125,41 +125,6 @@ MO/NoCosmeticClassAssertion:
   Include:
     - "test/components/**/*_test.rb"
     - "test/views/**/*_test.rb"
-  Exclude:
-    # Styling-abstraction component tests -- the class output IS the
-    # contract of the unit (see the exception in .claude/rules/testing.md).
-    - "test/components/accordion_test.rb"
-    - "test/components/application_form/checkbox_field_test.rb"
-    - "test/components/application_form/radio_field_test.rb"
-    - "test/components/application_form_test.rb"
-    - "test/components/button/clipboard_test.rb"
-    - "test/components/button/crud_base_test.rb"
-    - "test/components/button/download_test.rb"
-    - "test/components/button/edit_test.rb"
-    - "test/components/button/new_test.rb"
-    - "test/components/button/project_test.rb"
-    - "test/components/button/submit_test.rb"
-    - "test/components/button_group_test.rb"
-    - "test/components/button_test.rb"
-    - "test/components/carousel_test.rb"
-    - "test/components/container_test.rb"
-    - "test/components/dropdown_test.rb"
-    - "test/components/field_slip_scan_state_test.rb"
-    - "test/components/form/checkbox_collapse_test.rb"
-    - "test/components/form/search_test.rb"
-    - "test/components/help/collapse_block_test.rb"
-    - "test/components/help_test.rb"
-    - "test/components/input_group_test.rb"
-    - "test/components/link/get_test.rb"
-    - "test/components/link/modal_test.rb"
-    - "test/components/modal/confirm_test.rb"
-    - "test/components/modal/progress_spinner_test.rb"
-    - "test/components/modal_test.rb"
-    - "test/components/nav_tabs_test.rb"
-    - "test/components/navbar/text_test.rb"
-    - "test/components/navbar_test.rb"
-    - "test/components/panel_test.rb"
-    - "test/components/row_test.rb"
 
 MO/NoFullHtmlAssertion:
   Description: >-

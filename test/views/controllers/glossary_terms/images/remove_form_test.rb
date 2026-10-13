@@ -39,13 +39,13 @@ module Views::Controllers::GlossaryTerms::Images
       end
     end
 
+    # Each per-image .checkbox wrapper gets `my-0` so the default
+    # vertical margin doesn't leave visible gaps inside the MatrixBox
+    # cell.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_each_checkbox_wrap_has_my_0_class
       html = render_form
 
-      # Each per-image .checkbox wrapper gets `my-0` so BS3's default
-      # 10px vertical margin doesn't leave visible gaps inside the
-      # MatrixBox cell. The class IS what this test verifies --
-      # rubocop:disable-next MO/NoCosmeticClassAssertion
       @model.images.each do |image|
         assert_html(html,
                     ".checkbox.my-0 input[name='selected[#{image.id}]']")

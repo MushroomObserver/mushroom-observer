@@ -17,6 +17,7 @@ class NavbarTextTest < ComponentTestCase
     assert_html(html, "li.navbar-text", text: "Sort by:")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_with_custom_class
     html = render_component(
       Components::Navbar::Text.new(class: "mx-0 mt-3")
