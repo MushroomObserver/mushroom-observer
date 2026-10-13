@@ -87,10 +87,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    # Only emit an outer-wrap id when the caller explicitly passes one
-    # (matches ERB `autocompleter_field`). Forms that need a stable
-    # CSS-selector handle (e.g. map outlets) pass `controller_id:`;
-    # forms that don't shouldn't get noise.
+    # Only emit an outer-wrap id when the caller explicitly passes one.
+    # Forms that need a stable CSS-selector handle (e.g. map outlets)
+    # pass `controller_id:`; forms that don't shouldn't get noise.
     def controller_id
       custom_controller_id
     end
@@ -162,10 +161,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def input_data_attributes
       # Use string "true" (not boolean true) so Phlex emits
       # `data-autocompleter="true"` instead of the boolean shorthand
-      # `data-autocompleter`. Matches ERB `autocompleter_field` helper output.
-      # Functionally equivalent — autocompleter base_controller overwrites this
-      # to `"connected"` on connect — but normalizes the rendered HTML between
-      # the two emission paths.
+      # `data-autocompleter`. autocompleter base_controller overwrites
+      # this to `"connected"` on connect regardless.
       { target_attr_key => "input", autocompleter: "true" }.merge(extra_data)
     end
 

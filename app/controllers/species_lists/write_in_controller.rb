@@ -112,11 +112,9 @@ module SpeciesLists
       @place_name = submitted_place_name
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
-      # Member notes parts are derived from the list, not from params;
-      # the reload path didn't populate them explicitly under ERB
-      # (the template called `@species_list.form_notes_parts(@user)`
-      # inline). Set them here so the Phlex view's constructor can
-      # carry them.
+      # Member notes parts are derived from the list, not from
+      # params; the reload path doesn't populate them. Set them here
+      # so the Phlex view's constructor can carry them.
       @member_notes_parts = @species_list.form_notes_parts(@user)
       render_new_view_invalid
     end

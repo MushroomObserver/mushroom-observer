@@ -72,9 +72,9 @@ class ListSearchTest < ComponentTestCase
     project = projects(:bolete_project)
     html = render_for(project, project: project)
 
-    # The initial visible message uses `type: :name` (matching the ERB
-    # partial's literal default). The Stimulus controller swaps it
-    # later with one of the per-`type_tag` strings from `messages_value`.
+    # The initial visible message uses `type: :name`. The Stimulus
+    # controller swaps it later with one of the per-`type_tag` strings
+    # from `messages_value`.
     assert_html(html, "span.status-text[data-search-status-target='message']",
                 text: :search_status_all_names.l(type: :name))
   end

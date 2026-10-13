@@ -293,9 +293,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # Render the index view. Every index controller now renders a Phlex
-  # view; this method must be overridden. (No ERB index templates remain;
-  # the historical `render(action: :index)` default is gone.)
+  # Render the index view. Every index controller renders a Phlex
+  # view; this method must be overridden.
   def render_index_view
     raise(NotImplementedError.new(render_index_view_error_message))
   end

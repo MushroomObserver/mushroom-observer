@@ -22,8 +22,6 @@ require("test_helper")
 #     with false positives. The real-world cases I've seen all
 #     route through one of the blocklisted methods above before
 #     they get here.
-#   - ERB files (`*.erb`). The user explicitly excluded them — this
-#     guard is about cleanly-Phlexified views.
 #   - `Query::Filter.all` — in-memory list of static filter defs,
 #     not a DB query.
 class NoQueriesInPhlexViewsTest < ActiveSupport::TestCase

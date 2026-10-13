@@ -2,8 +2,7 @@
 
 # The project-alias index table. Rendered from
 # `Views::Controllers::Projects::Aliases::Index` and from the
-# turbo_stream re-render in `_target_update.erb` after a CRUD on
-# any one alias.
+# turbo_stream re-render after a CRUD on any one alias.
 #
 # Composes via `Components::Table` in column mode; each column block
 # emits the cell's content via Phlex DSL.

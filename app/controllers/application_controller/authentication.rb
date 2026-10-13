@@ -21,8 +21,9 @@ module ApplicationController::Authentication
   # Request-scoped accessor for the logged-in User. Lives on the
   # controller so the request/session boundary is the only thing
   # that can answer "who's looking at this page" - no model-level
-  # ambient global anywhere. `helper_method` exposes it to ERB;
-  # `Components::Base` registers it as a value helper for Phlex views.
+  # ambient global anywhere. `helper_method` exposes it to the view
+  # context; `Components::Base` registers it as a value helper for
+  # Phlex views.
   def current_user
     @user
   end

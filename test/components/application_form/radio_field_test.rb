@@ -38,8 +38,7 @@ class RadioFieldTest < ComponentTestCase
   end
 
   # Regression: each per-option label carries `for=` pointing at its
-  # input's id (matching ERB radio_with_label, which uses
-  # form.label("#{field}_#{value}")).
+  # input's id.
   def test_radio_field_per_option_label_has_for_attribute
     form = render_form do
       radio_field(:number, [1, "A"], [2, "B"])
@@ -53,8 +52,8 @@ class RadioFieldTest < ComponentTestCase
 
   # Regression: RadioField `between` slot renders after each option's
   # label text inside the `<label>`, wrapped in `<div class="d-inline-block
-  # ml-3">`. Matches ERB `radio_with_label`'s `between:` shape. Applied
-  # uniformly to every option (one slot per RadioField call).
+  # ml-3">`. Applied uniformly to every option (one slot per RadioField
+  # call).
   def test_radio_field_with_between_slot
     form = render_form do
       component = Components::ApplicationForm::RadioField.new(

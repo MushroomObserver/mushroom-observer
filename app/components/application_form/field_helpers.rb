@@ -210,10 +210,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      # Match ERB `password_field_with_label`: default the input value
-      # to "" (prevents Rails from filling the field with the model's
-      # stored password hash when the form re-renders after a
-      # validation error).
+      # Default the input value to "" -- otherwise Rails fills the
+      # field with the model's stored password hash when the form
+      # re-renders after a validation error.
       field_opts[:value] = "" unless field_opts.key?(:value)
 
       f = resolve_field(field_name, value: field_opts[:value])
@@ -273,9 +272,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      # Match ERB `number_field_with_label`: default `min: 1`. Callers
-      # who want a different minimum pass `min: <n>` explicitly; `min:
-      # nil` opts out.
+      # Default `min: 1`. Callers who want a different minimum pass
+      # `min: <n>` explicitly; `min: nil` opts out.
       field_opts[:min] = 1 unless field_opts.key?(:min)
 
       f = resolve_field(field_name, value: field_opts[:value])
@@ -437,9 +435,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
-    # button shows "Updating" while in-flight; anything else shows
-    # "Submitting".
+    # An Update button shows "Updating" while in-flight; anything else
+    # shows "Submitting".
     def default_submits_with(value)
       value == :update.ti ? :updating.ti : :submitting.ti
     end
@@ -461,10 +458,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_help { help_content }
     end
 
-    # Mirrors ERB `auto_label_if_form_is_account_prefs`: when `prefs: true`
-    # is present, resolve the label from the `prefs_<field>` i18n key and
-    # drop the `:prefs` option so it doesn't flow downstream. Used by the
-    # same set of helpers the ERB applies it to: text, textarea, select,
+    # When `prefs: true` is present, resolve the label from the
+    # `prefs_<field>` i18n key and drop the `:prefs` option so it
+    # doesn't flow downstream. Used by text, textarea, select,
     # checkbox, radio, number.
     #
     # Passes the bare Symbol through -- FieldLabelRow#resolved_label_text
@@ -489,10 +485,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # - **Symbol + explicit `value:`** (e.g. `text_field(:foo, value: x)`):
     #   route through `FieldProxy` with the Superform-namespaced name
     #   (`field(:foo).dom.name`) so the explicit `value:` overrides
-    #   whatever `model.foo` would have produced. Matches Rails ERB's
-    #   `f.text_field :foo, value: "override"` semantics, and lets
-    #   forms use Symbol keys for fields whose `name=` belongs in the
-    #   form's namespace but whose value comes from outside the model.
+    #   whatever `model.foo` would have produced, letting forms use
+    #   Symbol keys for fields whose `name=` belongs in the form's
+    #   namespace but whose value comes from outside the model.
     # - **Symbol** (no `value:`): model-bound `Superform::Field`. Value
     #   reads through the field's own `.value` from the form's model
     #   / FormObject.
