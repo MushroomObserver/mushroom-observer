@@ -32,6 +32,34 @@ export default class extends Controller {
       ? element.closest(containerSelector) || false
       : false
     $(element).tooltip({ container })
+
+    if (element.dataset.activeTitle) this.watchActiveTitle(element)
+  }
+
+  tipTargetDisconnected(element) {
+    element.mo_activeTitleObserver?.disconnect()
+  }
+
+  // A stateful-link trigger (active_icon:/active_content:, see
+  // Components::Button::Content) carries data-active-title alongside
+  // the icon/label pair _icons.scss's `.stateful-link` rule swaps on
+  // `.active`/`.collapsed` -- keep Bootstrap's cached tooltip title in
+  // sync with the same class, regardless of what toggles it.
+  watchActiveTitle(element) {
+    // Bootstrap's tooltip() already moved the original title into
+    // data-original-title (and blanked the title attribute) by this
+    // point -- read the base text back from there, not from title.
+    const baseTitle = element.getAttribute("data-original-title")
+    const activeTitle = element.dataset.activeTitle
+    const sync = () => {
+      const active = element.classList.contains("active") ||
+        element.classList.contains("collapsed")
+      element.setAttribute("data-original-title",
+                           active ? activeTitle : baseTitle)
+    }
+    const observer = new MutationObserver(sync)
+    observer.observe(element, { attributes: true, attributeFilter: ["class"] })
+    element.mo_activeTitleObserver = observer
   }
 
   // A Turbo Stream `replace` on a vote button's ancestor swaps the

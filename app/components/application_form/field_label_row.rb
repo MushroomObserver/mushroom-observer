@@ -102,11 +102,10 @@ class Components::ApplicationForm < Superform::Rails::Form
       has_help_icon || has_appends_slot || wrapper_options[:label_appends]
     end
 
-    # `wrapper_options[:label_sr_only] == true` hides the label
-    # visually but keeps the `<label for="…">` association for screen
-    # readers -- use when a panel heading already names the field.
-    # `help_placement: :above` drops the label's bottom margin, since
-    # the help block renders directly below it instead.
+    # `label_sr_only` hides the label visually but keeps the
+    # `<label for="…">` association. `help_placement: :above` drops
+    # the bottom margin. `trailing_margin: false` drops the label's
+    # trailing margin too -- each append supplies a leading margin.
     def label_class(trailing_margin: true)
       base = if wrapper_options[:label_sr_only]
                "sr-only"
@@ -129,20 +128,35 @@ class Components::ApplicationForm < Superform::Rails::Form
     # outer row (see below for what the class does).
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
-      div(class: "#{display} justify-content-between align-items-center " \
-                 "label-row-with-appends") do
+      div(class: class_names(
+        "#{display} justify-content-between align-items-center",
+        "label-row-with-appends", label_row_trailing_class
+      )) do
         render_label_with_appends(label_text, wrap_class: nil)
         render_label_end_slot
       end
     end
 
+    # An inline field (e.g. a select beside its label) needs trailing
+    # space after the appends row. Applied once, on the outer row, so
+    # it doesn't compound with an append's leading margin.
+    def label_row_trailing_class
+      return nil unless wrapper_options[:inline]
+      return nil unless respond_to?(:help_slot) && help_slot &&
+                        wrapper_options[:help_collapse]
+
+      "mr-2"
+    end
+
     # d-flex align-items-center is needed since the label and appended
     # content are otherwise just inline siblings with no shared
     # vertical-alignment context. render_label_flex_row passes
-    # wrap_class: nil since it already supplies that class.
+    # wrap_class: nil since it already applied label_row_trailing_class.
     def render_label_with_appends(label_text,
                                   wrap_class: "label-row-with-appends")
-      div(class: class_names("d-flex", "align-items-center", wrap_class)) do
+      row_class = wrap_class && class_names(wrap_class,
+                                            label_row_trailing_class)
+      div(class: class_names("d-flex", "align-items-center", row_class)) do
         label(for: field.dom.id,
               class: label_class(trailing_margin: false)) do
           render_label_content(label_text)

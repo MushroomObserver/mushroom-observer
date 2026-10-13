@@ -209,8 +209,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_label_after
       render_has_id_indicator
       render_find_button if find_text
-      render_keep_box_button if keep_text
-      render_edit_box_button if keep_text
+      render_keep_edit_toggle if keep_text
     end
 
     # Renders all label_end elements (goes in label_end slot)
@@ -254,38 +253,28 @@ class Components::ApplicationForm < Superform::Rails::Form
                      title: find_text })
     end
 
-    def render_keep_box_button
+    # CSS swaps the icon off the `.active` class map#toggleBoxLock
+    # sets on this element (`_icons.scss`'s `.stateful-link` rule).
+    # `active_title:` swaps the tooltip the same way -- `Link::Get`
+    # wires that from `active_content:` automatically; plain `Button`
+    # doesn't, so it's passed by hand (see `render_find_button`).
+    def render_keep_edit_toggle
       return unless keep_text
 
       Button(name: keep_text,
-             icon: :apply, show_label: :hidden,
+             icon: :apply, active_icon: :edit, active_content: edit_text,
+             show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-2 keep-btn d-none p-0",
+             class: "ml-2 keep-edit-toggle d-none p-0",
              title: keep_text,
-             data: { target_attr_key => "keepBtn",
-                     map_target: "lockBoxBtn",
+             data: { target_attr_key => "keepOrEditBtn",
+                     map_target: "boxLockToggle",
                      action: "map#toggleBoxLock " \
                              "form-exif#showFields",
                      tooltip_target: "tip", placement: "top",
+                     active_title: edit_text,
                      title: keep_text })
-    end
-
-    def render_edit_box_button
-      return unless keep_text
-
-      Button(name: edit_text,
-             icon: :edit, show_label: :hidden,
-             icon_class: "text-primary",
-             variant: :link,
-             class: "ml-2 edit-btn d-none p-0",
-             title: edit_text,
-             data: { target_attr_key => "editBtn",
-                     map_target: "editBoxBtn",
-                     action: "map#toggleBoxLock " \
-                             "form-exif#showFields",
-                     tooltip_target: "tip", placement: "top",
-                     title: edit_text })
     end
 
     def render_create_button
@@ -293,7 +282,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
-             class: "ml-2 create-button p-0",
+             class: "ml-2 create-button d-none p-0",
              icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
@@ -304,6 +293,11 @@ class Components::ApplicationForm < Superform::Rails::Form
                      title: create_text })
     end
 
+    # Unlike render_create_button, this link isn't has-id/offer-create
+    # gated -- it stays visible once rendered, so it needs a separate
+    # target, not createBtn (cssHasIdOrNo and the matches-based
+    # debounce in base_controller.js both toggle createBtnTarget's
+    # d-none, which would otherwise hide this on a blank/no-match form).
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
@@ -314,7 +308,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
            class: "ml-2 create-link",
-           data: { target_attr_key => "createBtn" })
+           data: { target_attr_key => "createLink" })
     end
 
     def render_dropdown
