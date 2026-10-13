@@ -40,17 +40,15 @@ module FieldSlipsController::Show
            ))
   end
 
-  # The question a scanned slip asks is "does this code already have
-  # observations?", not "does a FieldSlip row exist?". With observations,
-  # go to "the" observation — the occurrence's primary — so the flow reads
-  # as *scan the slip, see the observation* without anyone needing to know
-  # what an occurrence is. Without them, go to the observation form to
-  # record one, whether or not a row happens to exist: slips are created
-  # lazily, so an empty slip is indistinguishable from an unused code from
-  # the scanner's side. An empty slip is reachable, not just legacy —
-  # `Occurrence#destroy_if_incomplete!` keeps the occurrence alive when it
-  # has a field slip, so detaching the last observation leaves one behind.
-  # See #4932.
+  # A scanned slip asks "does this code have observations?", not
+  # "does a FieldSlip row exist?". With observations, go to the
+  # occurrence's primary -- scan the slip, see the observation,
+  # with no need to know what an occurrence is. Without them, go to
+  # the observation form regardless of whether a row exists: slips
+  # are created lazily, so an empty slip looks like an unused code.
+  # `Occurrence#destroy_if_incomplete!` keeps the occurrence alive
+  # while it has a field slip, so an empty slip stays reachable, not
+  # just legacy.
   def handle_by_code
     @field_slip = FieldSlip.show_includes.find_by(code: params[:id].upcase)
     obs = @field_slip&.observation
