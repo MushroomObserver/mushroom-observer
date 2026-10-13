@@ -63,7 +63,10 @@ class Views::Layouts::TopNav
       assert_html(html, "form[action='#{routes.article_path(@article)}']")
       assert_html(html, "input[name='_method'][value='delete']")
       assert_no_html(html, "svg.mo-icon")
+      # rubocop:disable MO/NoCosmeticClassAssertion -- confirms the
+      # btn: nil opt-out suppressed button styling, per the comment above.
       assert_no_html(html, ".btn.btn-outline-default")
+      # rubocop:enable MO/NoCosmeticClassAssertion
     end
 
     # `args[:button] => :post` uses Rails' `button_to`.
@@ -110,8 +113,11 @@ class Views::Layouts::TopNav
                 { button: :post, size: :lg, class: "d-block" }]]
       html = render_top_bar(links)
 
+      # rubocop:disable MO/NoCosmeticClassAssertion -- verifies the
+      # size: kwarg and the d-block strip, per the comment above.
       assert_html(html, "button.btn-lg")
       assert_no_html(html, "button.d-block")
+      # rubocop:enable MO/NoCosmeticClassAssertion
     end
 
     private

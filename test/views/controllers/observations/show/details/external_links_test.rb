@@ -2,6 +2,10 @@
 
 require("test_helper")
 
+# rubocop:disable MO/NoCosmeticClassAssertion -- the p-3/border-bottom
+# classes asserted throughout compensate for the parent panel-body's
+# p-0, which IS the behavioral contract these tests verify (see the
+# per-test comments); the production markup has no other hook.
 class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
   ComponentTestCase
   def setup
@@ -200,3 +204,4 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     )
   end
 end
+# rubocop:enable MO/NoCosmeticClassAssertion

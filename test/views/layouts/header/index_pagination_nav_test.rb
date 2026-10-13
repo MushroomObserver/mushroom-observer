@@ -50,8 +50,11 @@ module Views::Layouts
       # :link (not :default) removes the background/border while
       # keeping button padding — plain icon-only nav buttons, not
       # filled buttons. (:strip would remove padding too.)
+      # rubocop:disable MO/NoCosmeticClassAssertion -- verifying the
+      # button:/size: kwargs produce these classes IS the point.
       assert_html(html, "a.prev_page_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_page_link.btn.btn-link.btn-lg")
+      # rubocop:enable MO/NoCosmeticClassAssertion
     end
 
     def test_prev_link_disabled_on_first_page

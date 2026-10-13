@@ -29,7 +29,6 @@ module Views::Controllers::Projects
       project.open_membership = true
       html = render_item(project: project)
 
-      assert_html(html, "span.ml-4")
       assert_includes(html, :open.ti)
     end
 
@@ -38,7 +37,7 @@ module Views::Controllers::Projects
       project.open_membership = false
       html = render_item(project: project)
 
-      assert_no_html(html, "span.ml-4")
+      assert_not_includes(html, :open.ti)
     end
 
     def test_no_manage_section_without_observation_context

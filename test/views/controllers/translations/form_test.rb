@@ -53,7 +53,7 @@ module Views::Controllers::Translations
     # --- Language header ---
 
     def test_renders_language_header
-      assert_html(html, "h4.font-weight-bold", text: "#{@lang.name}:")
+      assert_html(html, "h4", text: "#{@lang.name}:")
     end
 
     # --- Textarea fields ---
@@ -137,7 +137,7 @@ module Views::Controllers::Translations
     end
 
     def test_renders_reload_link
-      assert_html(html, "a#reload_button.btn", text: :reload.ti)
+      assert_html(html, "a#reload_button", text: :reload.ti)
     end
 
     def test_reload_link_has_correct_href

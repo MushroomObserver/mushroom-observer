@@ -6,6 +6,9 @@ require("test_helper")
 # inlined the former `Header::TogglesHelper` / `Header::RubricHelper`
 # helpers. The deleted helper test file had no Phlex equivalent;
 # these tests pin the behaviour those helpers used to cover.
+# rubocop:disable MO/NoCosmeticClassAssertion -- throughout this file,
+# the asserted classes are the behavioral identity of a button variant
+# or a Navbar constant (NAV_CLASS/RIGHT_CLASS), not incidental paint.
 class Views::Layouts::TopNavTest < ComponentTestCase
   # Subclass with `render_search_row` neutralized — the search-bar /
   # identify-filter partials resolve through Rails view-paths that
@@ -255,3 +258,4 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     controller.define_singleton_method(:action_name) { action }
   end
 end
+# rubocop:enable MO/NoCosmeticClassAssertion

@@ -40,8 +40,6 @@ module Views::Controllers::Account::Login
     def test_renders_submit_button
       assert_html(@html,
                   "button[type='submit']", text: :login_login.l)
-      assert_html(@html, ".btn.btn-default")
-      assert_html(@html, ".center-block.my-3")
     end
 
     def test_renders_help_text

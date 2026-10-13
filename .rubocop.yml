@@ -18,6 +18,7 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_cosmetic_class_assertion
   - ./lib/rubocop/cop/mo/no_full_html_assertion
   - ./lib/rubocop/cop/mo/no_hand_rolled_colon_suffix
   - ./lib/rubocop/cop/mo/no_hand_rolled_column_class
@@ -109,6 +110,56 @@ MO/NoActiveRecordRelationProp:
   Include:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
+
+MO/NoCosmeticClassAssertion:
+  Description: >-
+    A test assertion must not pin a cosmetic Bootstrap class (button
+    chrome, a spacing utility, a known paint class) -- assert
+    behavior/contract, not paint, so a Bootstrap upgrade doesn't
+    break tests with no functional change -- see
+    lib/rubocop/cop/mo/no_cosmetic_class_assertion.rb and "Don't pin
+    cosmetic CSS classes" in .claude/rules/testing.md. Scoped to
+    components/views, not test/controllers -- functional tests use
+    assert_select, a different method this cop doesn't check.
+  Enabled: true
+  Include:
+    - "test/components/**/*_test.rb"
+    - "test/views/**/*_test.rb"
+  Exclude:
+    # Styling-abstraction component tests -- the class output IS the
+    # contract of the unit (see the exception in .claude/rules/testing.md).
+    - "test/components/accordion_test.rb"
+    - "test/components/application_form/checkbox_field_test.rb"
+    - "test/components/application_form/radio_field_test.rb"
+    - "test/components/application_form_test.rb"
+    - "test/components/button/clipboard_test.rb"
+    - "test/components/button/crud_base_test.rb"
+    - "test/components/button/download_test.rb"
+    - "test/components/button/edit_test.rb"
+    - "test/components/button/new_test.rb"
+    - "test/components/button/project_test.rb"
+    - "test/components/button/submit_test.rb"
+    - "test/components/button_group_test.rb"
+    - "test/components/button_test.rb"
+    - "test/components/carousel_test.rb"
+    - "test/components/container_test.rb"
+    - "test/components/dropdown_test.rb"
+    - "test/components/field_slip_scan_state_test.rb"
+    - "test/components/form/checkbox_collapse_test.rb"
+    - "test/components/form/search_test.rb"
+    - "test/components/help/collapse_block_test.rb"
+    - "test/components/help_test.rb"
+    - "test/components/input_group_test.rb"
+    - "test/components/link/get_test.rb"
+    - "test/components/link/modal_test.rb"
+    - "test/components/modal/confirm_test.rb"
+    - "test/components/modal/progress_spinner_test.rb"
+    - "test/components/modal_test.rb"
+    - "test/components/nav_tabs_test.rb"
+    - "test/components/navbar/text_test.rb"
+    - "test/components/navbar_test.rb"
+    - "test/components/panel_test.rb"
+    - "test/components/row_test.rb"
 
 MO/NoFullHtmlAssertion:
   Description: >-

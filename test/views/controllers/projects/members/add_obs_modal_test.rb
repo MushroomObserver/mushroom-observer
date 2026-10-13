@@ -31,8 +31,11 @@ module Views::Controllers::Projects::Members
     def test_submit_button_uses_primary_style_without_stacking_default
       html = render_modal(count: 3)
 
+      # rubocop:disable MO/NoCosmeticClassAssertion -- verifying the
+      # btn: kwarg passthrough and no btn-default stacking IS the point.
       assert_html(html, ".modal-footer button.btn.btn-primary")
       assert_no_html(html, "form[data-turbo='true'] button.btn-default")
+      # rubocop:enable MO/NoCosmeticClassAssertion
     end
 
     def test_no_submit_button_when_count_is_zero
