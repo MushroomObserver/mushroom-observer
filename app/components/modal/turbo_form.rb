@@ -60,6 +60,7 @@ class Components::Modal::TurboForm < Components::Base
       "Components::#{model_name}Form".constantize
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Renders the form component for a model; also used by
   # `ApplicationController::ModalUpdater`, which only has a view
   # context, not a `ModalTurboForm` instance.
@@ -69,7 +70,10 @@ class Components::Modal::TurboForm < Components::Base
   # caller's view context, not a Phlex dispatch.
   #
   # @param template [ActionView::Base] the calling view context
+  # @param model [ActiveRecord::Base] the model instance for the form
+  # @param form_locals [Hash] additional params passed to the form
   # @return [String] the rendered HTML
+  # rubocop:enable MO/NoLongCommentBlock
   def self.render_form(template, model:, form_locals: {})
     component_class = form_component_class_for(
       model, controller_path: template.try(:controller_path)
