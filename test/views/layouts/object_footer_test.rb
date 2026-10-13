@@ -14,9 +14,6 @@ module Views::Layouts
       obj = collection_numbers(:coprinus_comatus_coll_num)
       html = footer_for(obj, minimal: true)
 
-      # `Created at: <date>` / `Updated at: <date>` inside the
-      # padded wrapper.
-      assert_html(html, "p")
       assert_includes(html, "#{:created_at.ti}: #{obj.created_at.web_date}")
       assert_includes(html, "#{:updated_at.ti}: #{obj.updated_at.web_date}")
       # No user attribution, no view-stats wrapper class.

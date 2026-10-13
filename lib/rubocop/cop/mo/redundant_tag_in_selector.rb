@@ -25,7 +25,7 @@ module RuboCop
       #   assert_html(html, ".exif_lat")
       #   assert_selector(".has-id-indicator")
       class RedundantTagInSelector < Base
-        MSG = "Superfluous tag in selector (%<match>s) -- if " \
+        MSG = "Superfluous tag, brittle selector (%<match>s) -- if " \
               "\"%<bare>s\" alone would select it, drop the tag. See " \
               ".claude/rules/testing.md."
 

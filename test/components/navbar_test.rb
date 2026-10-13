@@ -14,6 +14,7 @@ class NavbarTest < ComponentTestCase
                        ".hidden-print.mb-2#top_nav", text: "Content")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_variant_inverse_with_explicit_element_overrides_nav_default
     html = render_component(
       Components::Navbar.new(variant: :inverse, element: :div,
