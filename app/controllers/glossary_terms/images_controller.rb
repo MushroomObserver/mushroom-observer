@@ -80,11 +80,20 @@ module GlossaryTerms
 
     ############################################################################
 
-    # Removes (not destroys) one or more images from a glossary_term;
-    # the same shape as Observations::ImagesController. No
-    # permission check -- `GlossaryTerm#can_edit?` returns true for
-    # any logged-in user, and `login_required` runs before this
-    # action.
+    # rubocop:disable MO/NoLongCommentBlock
+    # REMOVE IMAGES. These actions are more or less identical to the ones in
+    # Observations::ImagesController. Each image tile has a button that's a
+    # form used to remove one or more images from a glossary_term (not destroy!)
+    # Linked from: glossary_terms/show
+    # Inputs:
+    #   params[:id]                  (glossary_term)
+    #   params[:selected][image_id]  (value of "yes" means delete)
+    # Outputs: @object
+    # Redirects to glossary_terms/show.
+    # remove_images. No permission check — `GlossaryTerm#can_edit?`
+    # returns true for any logged-in user, and `login_required`
+    # runs before this action.
+    # rubocop:enable MO/NoLongCommentBlock
     def remove
       return unless (@object = find_or_goto_index(GlossaryTerm,
                                                   params[:id].to_s))
