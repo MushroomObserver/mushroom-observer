@@ -57,12 +57,9 @@ module Images
 
     # Two targets: the lightbox caption's copy (`context: :lightbox`)
     # lives under a `lightbox_`-prefixed id, always in the DOM, so
-    # this reaches it whether the lightbox is open or closed.
-    #
-    # `replace`, not `update`: `VoteInterface`'s render output IS the
-    # full `<div id="...">` wrapper, so `update` would nest a
-    # duplicate-id div instead of swapping it. Also swaps out the
-    # lazy `<turbo-frame>` target if it hasn't loaded yet.
+    # this reaches it whether the lightbox is open or closed. Also
+    # swaps out the lazy `<turbo-frame>` target if it hasn't loaded
+    # yet.
     def vote_interface_streams
       [
         turbo_stream.replace("image_vote_#{@image.id}",

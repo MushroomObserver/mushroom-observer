@@ -168,12 +168,32 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Redirects a bad/alternate domain (MO.bad_domains) to MO.domain.
   # Checks an explicit allowlist rather than `HTTP_HOST != MO.domain`,
   # so a config mistake can't loop infinitely. Needed because
   # browsers store cookies per domain -- without this, a
   # fully-specified link (e.g. in a comment) to a bad domain forces
   # a re-login.
+  #
+  # Redirect from www.mo.org to mo.org.
+  #
+  # This would be much easier to check if HTTP_HOST != MO.domain, but if this
+  # breaks we'd get into an infinite loop too easily that way.
+  # I think this is a lot safer.  MO.bad_domains would be something like:
+  #
+  #   MO.bad_domains = [
+  #     'www.mushroomobserver.org',
+  #     'mushroomobserver.com',
+  #   ]
+  #
+  # The importance of this is that browsers are storing different cookies
+  # for the different domains, even though they are all getting routed here.
+  # This is particularly problematic when a fully-specified link in, say,
+  # a comment's body is different.  This results in you having to re-login
+  # when you click on these embedded links.
+  #
+  # rubocop:enable MO/NoLongCommentBlock
   def fix_bad_domains
     if (request.method == "GET") &&
        MO.bad_domains.include?(request.env["HTTP_HOST"])
