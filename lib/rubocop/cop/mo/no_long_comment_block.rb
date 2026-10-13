@@ -43,14 +43,17 @@ module RuboCop
 
         # Lines that read as structured API reference rather than
         # narrative prose: a YARD tag, an RDoc `term::` definition
-        # list entry, an `== Heading`, a `:section:` marker, or a
-        # pure divider line of `#`/`=` characters. A continuation
-        # line (indented, wrapping a tag's description) also counts,
-        # since it belongs to the reference entry above it.
+        # list entry, a `term - description` list entry (the same
+        # shape with an informal dash instead of `::`), an
+        # `== Heading`, a `:section:` marker, or a pure divider line
+        # of `#`/`=` characters. A continuation line (indented,
+        # wrapping an entry's description) also counts, since it
+        # belongs to the reference entry above it.
         REFERENCE_LINE = /
           \A\#(
             \s*@\w+                   # YARD tag: @param, @option, ...
             | \s*\S+::(\s|\z)         # RDoc term:: description
+            | \s*:?\w+\s+-\s+\S       # term - description list entry
             | \s*==+\s                # RDoc heading
             | \s*:section:
             | \s*[\#=]{3,}\s*\z       # divider line
