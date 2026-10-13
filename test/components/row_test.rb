@@ -9,11 +9,12 @@ class RowTest < ComponentTestCase
     assert_html(html, ".row")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_renders_alternate_tag
     html = render_row(element: :ul)
 
     assert_html(html, "ul.row")
-    assert_no_html(html, ".row")
+    assert_no_html(html, "div.row")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion

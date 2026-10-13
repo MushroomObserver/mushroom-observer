@@ -334,6 +334,8 @@ MO/RedundantRenderViewInvalid:
   Enabled: true
   Include:
     - "app/controllers/**/*.rb"
+  Exclude:
+    - "app/controllers/application_controller.rb"
 
 MO/RedundantTagInSelector:
   Description: >-
@@ -348,8 +350,6 @@ MO/RedundantTagInSelector:
   Include:
     - "test/components/**/*_test.rb"
     - "test/views/**/*_test.rb"
-  Exclude:
-    - "app/controllers/application_controller.rb"
 
 MO/SelfStatusOutsideInvalidMethod:
   Description: >-

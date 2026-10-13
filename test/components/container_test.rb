@@ -29,11 +29,12 @@ class ContainerTest < ComponentTestCase
     assert_html(html, ".container-wide")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_renders_alternate_tag
     html = render_container(element: :main, width: :text)
 
     assert_html(html, "main.container-text")
-    assert_no_html(html, ".container-text")
+    assert_no_html(html, "div.container-text")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion

@@ -68,11 +68,12 @@ class CollapsibleTest < ComponentTestCase
     assert_html(html, ".collapse#real[data-foo='bar']")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_kwarg_renders_alternate_tag
     html = render_collapsible(id: "foo", element: :tbody)
 
     assert_html(html, "tbody.collapse#foo")
-    assert_no_html(html, ".collapse")
+    assert_no_html(html, "div.collapse")
   end
 
   def test_yields_content
