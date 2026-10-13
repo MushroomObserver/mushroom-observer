@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Raises project memberships still sitting on the "hidden_gps" trust
 # level they were never asked about, to the "editing" level every
 # enrollment path now grants.
@@ -16,6 +17,7 @@
 # Only rows whose `updated_at` still matches their `created_at` are
 # touched. A member who has been to the trust modal chose what they
 # have, whatever they chose, and is left alone.
+# rubocop:enable MO/NoLongCommentBlock
 
 APPLY = ARGV.delete("--apply")
 abort("Unknown argument(s): #{ARGV.join(" ")}") if ARGV.any?
