@@ -48,10 +48,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       span(class: between_class) { render(between_slot) }
     end
 
-    # Mirrors ERB `forms_helper.rb#check_for_help_block`: an inline
-    # field row uses `mr-3` (since `form-between` is a block-level
-    # spacer that doesn't apply); a block-level field uses
-    # `form-between` (which already supplies its own spacing).
+    # An inline field row uses `mr-3` (since `form-between` is a
+    # block-level spacer that doesn't apply); a block-level field uses
+    # `form-between`, which already supplies that spacing.
     def between_class
       wrapper_options[:inline] ? "mr-3" : "form-between"
     end

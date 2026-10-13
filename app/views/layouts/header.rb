@@ -4,8 +4,7 @@
 # once per page by the application layout. Composes (in order):
 #
 #   - the optional `:project_banner` content_for slot;
-#   - on non-index actions, the page title strip
-#     (`Header::PageTitle` — replaces `_page_title.erb`);
+#   - on non-index actions, the page title strip (`Header::PageTitle`);
 #   - the project observation-buttons row, fed from a content_for
 #     slot.
 #
@@ -32,9 +31,9 @@ module Views::Layouts
       trusted_html(banner) if banner.present?
     end
 
-    # Matches the ERB's structure: the outer `.row` is always
-    # rendered, even when the inner content_for isn't set. Keeps the
-    # empty row in case any CSS / JS keys off `header > .row:last-child`.
+    # The outer `.row` always renders, even when the inner content_for
+    # isn't set -- keeps the empty row in case any CSS / JS keys off
+    # `header > .row:last-child`.
     def render_filter_row
       Row do
         render_observation_buttons if content_for?(:observation_buttons)
@@ -47,7 +46,6 @@ module Views::Layouts
       end
     end
 
-    # Faithfully reproduces the ERB's quirky chain:
     # `content_for?(:left_columns) || "col-sm-8 col-lg-7"` — the `||`
     # there is operating on a boolean, so when `:left_columns` IS set
     # the LHS is `true` and `cols` becomes the literal `true`. Then

@@ -16,8 +16,7 @@ class ProjectsController < ApplicationController
   end
 
   # Overrides `ApplicationController::Indexes#render_index_view` so
-  # `show_index_of_objects` renders the Phlex `Index` class instead
-  # of `projects/index.html.erb` (deleted).
+  # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
     render(Views::Controllers::Projects::Index.new(
              query: @query, pagination_data: @pagination_data,

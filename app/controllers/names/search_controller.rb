@@ -79,8 +79,8 @@ module Names
     ].freeze
 
     # Overrides `Searchable#show` — the turbo_stream branch points
-    # at a now-Phlex help view, and the html branch needs an
-    # explicit Phlex render since the `show.erb` template is gone.
+    # at a Phlex help view, and the html branch needs an explicit
+    # Phlex render.
     def show
       respond_to do |format|
         format.turbo_stream do

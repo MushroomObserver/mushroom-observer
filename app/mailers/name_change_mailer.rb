@@ -58,10 +58,7 @@ class NameChangeMailer < ApplicationMailer
   # both admin and editor/author, reporting "admin" means opting out
   # via the "stop sending" link actually stops these notifications,
   # since they'd otherwise still qualify via the narrower role),
-  # then editor, author, and lastly reviewer. The pre-Phlex ERB
-  # template checked editor/author before admin — a longstanding bug
-  # never caught because ERB mailers had no real test coverage for
-  # this branch; fixed here now that it's testable.
+  # then editor, author, and lastly reviewer.
   def name_email_type(receiver, name_change, desc_change)
     new_name = name_change.new_clone
     old_name = name_change.old_clone

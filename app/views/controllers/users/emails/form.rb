@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Users::Emails
-  # Form for sending a question to another user. Rendered by the
-  # users/emails controller's `new.erb`.
-  # Creates its own FormObject internally from the provided kwargs.
+  # Form for sending a question to another user. Creates a FormObject
+  # internally from the provided kwargs.
   class Form < ::Components::ApplicationForm
     prop :target, ::User
 

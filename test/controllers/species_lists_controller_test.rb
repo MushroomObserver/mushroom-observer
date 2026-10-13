@@ -55,9 +55,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
   private :assert_create_species_list
 
   def assert_edit_species_list
-    # `edit.html.erb` and its child form partial are both Phlex now
-    # (`Views::Controllers::SpeciesLists::Edit` →
-    # `Components::SpeciesListForm`). Phlex views don't appear in
+    # `Views::Controllers::SpeciesLists::Edit` renders
+    # `Components::SpeciesListForm`. Phlex views don't appear in
     # `assert_template`'s rendered-list — use the layout's
     # `<body class="species_lists__edit">` action marker instead.
     assert_select("body.species_lists__edit")

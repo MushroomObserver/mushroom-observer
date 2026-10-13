@@ -66,9 +66,7 @@ module Account
       assert_input_value(:user_has_images, "")
       assert_input_value(:user_has_specimen, "")
       # Phlex's `select_field` marks the empty-value "filter off" option
-      # as selected when `content_filter[:lichen]` is nil (post-conversion).
-      # ERB's pre-conversion output left the option unmarked. Visually
-      # identical (browsers default to first option either way).
+      # as selected when `content_filter[:lichen]` is nil.
       assert_input_value(:user_lichen, "")
       assert_input_value(:user_region, "")
       assert_input_value(:user_clade, "")

@@ -594,8 +594,8 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal(comment_count + 1, obs.comments.size)
   end
 
-  # The `after_create_commit` broadcast renders `_comment.erb`
-  # without a request context — `@user` is nil. The mod-links
+  # The `after_create_commit` broadcast renders without a request
+  # context — `@user` is nil. The mod-links
   # span (`[ edit | destroy ]`) still has to be in the broadcast
   # markup so the comment's author can interact with their just-
   # created comment; client-side CSS (`[data-user-specific]:not(…)`)

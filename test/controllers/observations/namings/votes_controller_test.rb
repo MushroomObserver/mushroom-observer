@@ -126,9 +126,8 @@ module Observations::Namings
       params = params.merge(context: "namings_table")
 
       put(:update, params:, format: :turbo_stream)
-      # `_section_update.erb` deleted; controllers now emit the
-      # two turbo_stream actions inline (panel replace + flash
-      # update).
+      # Controllers emit two turbo_stream actions inline (panel
+      # replace + flash update).
       assert_select("turbo-stream[target='page_flash']")
       assert_select("turbo-stream[target='observation_namings']")
 
@@ -142,9 +141,8 @@ module Observations::Namings
       params = params.merge(context: "matrix_box")
 
       put(:update, params:, format: :turbo_stream)
-      # _update_matrix_box.erb deleted; the controller now renders
-      # the same 7 turbo-stream actions inline. Verify a couple of
-      # the wrapper targets so we know the stream emitted.
+      # The controller renders 7 turbo-stream actions inline. Verify
+      # a couple of the wrapper targets so we know the stream emitted.
       assert_select("turbo-stream[target='observation_what_#{obs.id}']")
       assert_select("turbo-stream[target='box_title_#{obs.id}']")
 

@@ -338,9 +338,7 @@ class ButtonSubclassesTest < ComponentTestCase
   # list controller's named route is `new_download_species_list_path`,
   # which doesn't match the standard `download_<resource>_path`
   # shape that `target: model` would auto-resolve to — callers
-  # therefore pass an explicit path String. (The
-  # `LinkHelper#download_button` helper does the path-resolution
-  # for ERB callers; Phlex callers go through this path directly.)
+  # pass an explicit path String instead.
   def test_download_with_explicit_path
     species_list = species_lists(:first_species_list)
     path = routes.new_download_species_list_path(id: species_list.id)
