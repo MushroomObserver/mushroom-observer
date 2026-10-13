@@ -83,7 +83,7 @@ const INTERNAL_OPTS = {
 // Shared static properties for subclasses (Stimulus doesn't inherit statics)
 export const AUTOCOMPLETER_TARGETS = [
   "input", "select", "pulldown", "list", "hidden", "wrap",
-  "createBtn", "hasIdIndicator", "keepOrEditBtn", "mapWrap",
+  "createBtn", "createLink", "hasIdIndicator", "keepOrEditBtn", "mapWrap",
   "collapseFields"
 ]
 export const AUTOCOMPLETER_OUTLETS = ["map"]

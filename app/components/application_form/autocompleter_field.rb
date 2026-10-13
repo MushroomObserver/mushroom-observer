@@ -306,6 +306,11 @@ class Components::ApplicationForm < Superform::Rails::Form
                      title: create_text })
     end
 
+    # Unlike render_create_button, this link isn't has-id/offer-create
+    # gated -- it stays visible once rendered, so it needs a separate
+    # target, not createBtn (cssHasIdOrNo and the matches-based
+    # debounce in base_controller.js both toggle createBtnTarget's
+    # d-none, which would otherwise hide this on a blank/no-match form).
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
@@ -316,7 +321,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            icon: :plus, label: true,
            icon_class: "text-primary",
            class: "ml-3 create-link",
-           data: { target_attr_key => "createBtn" })
+           data: { target_attr_key => "createLink" })
     end
 
     def render_dropdown
