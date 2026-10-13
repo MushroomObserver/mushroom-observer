@@ -66,13 +66,6 @@ module Components::Localization
   # The one place to change the trailing ":" on label-style text
   # site-wide. Also included into `Components::ApplicationForm`
   # directly, since that class doesn't inherit `Components::Base`.
-  #
-  # `[text, ": "].safe_join`, not `"#{text}: "` -- interpolation
-  # would coerce an html_safe SafeBuffer back to an unsafe String
-  # and get it escaped; `safe_join` preserves the flag and adds a
-  # trailing space with no separate `whitespace` call needed. The
-  # html_safe result renders directly or via `trusted_html(...)`;
-  # `plain(...)` would escape it again.
   def append_colon(text)
     [text, ": "].safe_join
   end
