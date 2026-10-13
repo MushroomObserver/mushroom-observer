@@ -5,6 +5,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Phlex::TrustedHtml
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Three layouts depending on what the label row itself needs:
     #
     # - No label_appends/label_end: bare `<label>` (no wrap div noise).
@@ -18,6 +19,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # and `help` (the field's explanation block) are NOT part of the
     # label row — see FieldWrapperRendering and FieldWithHelp for
     # where they render instead.
+    # rubocop:enable MO/NoLongCommentBlock
     def render_label_row(label_text, inline)
       if label_end_present?
         render_label_flex_row(label_text, inline)
@@ -37,20 +39,14 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Resolves `wrapper_options[:label]` to display text: an explicit
     # String wins as-is, a Symbol is translated via `.t`, otherwise the
-    # field's key, humanized. Shared by every field type that takes a
-    # `label:` option -- previously duplicated near-identically across
-    # text_field.rb, textarea_field.rb, select_field.rb, and
-    # file_field.rb.
+    # field's key, humanized.
     #
-    # Most callers now pass an already-resolved String via `.ti`
-    # (`label: :name.ti`) when they want a title-cased field-prompt
-    # label -- `.ti` title-cases mechanically, so there's no longer a
-    # separate ALL-CAPS twin tag to spell out. Passing a bare lowercase
-    # Symbol (`label: :prefs_no_emails`) still works and goes through
-    # this method's `.t` branch instead: some translations carry real
-    # bold/italic textile markup (e.g. `prefs_no_emails`, "Opt out of
-    # _all_ email from MO.") that needs textile rendering, not
-    # title-casing, to display correctly.
+    # Callers wanting a title-cased field-prompt label pass an
+    # already-resolved String via `.ti` (`label: :name.ti`). A bare
+    # lowercase Symbol (`label: :prefs_no_emails`) goes through the
+    # `.t` branch instead, since some translations carry bold/italic
+    # textile markup that needs rendering, not title-casing (e.g.
+    # "Opt out of _all_ email from MO.").
     def resolved_label_text
       label_option = wrapper_options[:label]
       text = case label_option
@@ -61,21 +57,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       open_label_links_in_new_tab(text)
     end
 
-    # A link inside a label navigates the user away from a form they may
-    # be partway through filling out, in the same tab -- losing whatever
-    # they'd already entered. Force `target="_blank"` (plus
-    # `rel="noopener noreferrer"`) rather than stripping the link: a
-    # translator writing ordinary Textile link syntax into a label
-    # string (a production translation of `donate_who`, Spanish, did
-    # exactly this) has no way to know it lands in a `<label>`, so the
-    # label has to tolerate a link showing up, not reject it.
-    #
-    # Nested links inside a `<label for="...">` are valid HTML, and
-    # browsers give the `<a>` click priority over the label's own
-    # click-to-focus/toggle behavior, so there's no real ambiguity even
-    # for a checkbox/radio label where the label click also toggles the
-    # control -- CheckboxField#label_text calls resolved_label_text
-    # directly and gets this same treatment.
+    # A link inside a label navigates the user away from a
+    # partly-filled form, losing their input, so this forces
+    # `target="_blank"` (plus `rel="noopener noreferrer"`) rather than
+    # stripping the link: a translator writing ordinary Textile link
+    # syntax into a label string (the `donate_who` Spanish translation
+    # did this) has no way to know it lands in a `<label>`. Nested
+    # links inside `<label for="...">` are valid HTML, and browsers
+    # give the `<a>` click priority over the click-to-focus/toggle
+    # behavior -- `CheckboxField#label_text` gets the same treatment
+    # via `resolved_label_text`.
     LINK_TAG_RE = /<a\b([^>]*)>/i
 
     def open_label_links_in_new_tab(text)
