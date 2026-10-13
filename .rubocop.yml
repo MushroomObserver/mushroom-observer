@@ -25,6 +25,7 @@ require:
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
+  - ./lib/rubocop/cop/mo/no_long_comment_block
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -196,6 +197,16 @@ MO/NoHandRolledWhitespace:
     # nbsp's definition -- legitimately builds the &nbsp; entity this
     # cop exists to keep everywhere else.
     - "app/components/base.rb"
+
+MO/NoLongCommentBlock:
+  Description: >-
+    A run of more than Max consecutive full-line comments is
+    narrative that belongs in the commit message or PR description,
+    not the source -- see lib/rubocop/cop/mo/no_long_comment_block.rb
+    and .claude/rules/code_comments.md. Max starts at 15 to land
+    without excluding files; ratchet down in follow-up PRs.
+  Enabled: true
+  Max: 15
 
 MO/NoQuerySubclassMutation:
   Description: >-
