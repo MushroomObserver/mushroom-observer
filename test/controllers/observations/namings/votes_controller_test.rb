@@ -286,6 +286,7 @@ module Observations::Namings
       assert_equal(2, nam2.votes.length)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Now, have Mary delete her vote against Rolf's naming.
     # This NO LONGER has the effect of excluding Rolf's naming
     # from the consensus calculation due to too few votes.
@@ -297,6 +298,7 @@ module Observations::Namings
     # Summing after Mary deletes,
     #   3 gets 2/2=1,   9 gets -3+3+3/4=.75,
     #   3 still keeps it in this voting algorithm, arg.
+    # rubocop:enable MO/NoLongCommentBlock
     def test_cast_vote_mary
       obs  = observations(:coprinus_comatus_obs)
       nam1 = namings(:coprinus_comatus_naming)
