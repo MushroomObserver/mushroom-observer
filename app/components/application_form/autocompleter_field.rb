@@ -209,17 +209,12 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
-    # A bare <svg> can't take padding -- on a replaced element like
-    # svg, padding eats into the element's own rendered content area
-    # instead of adding space around it, so the checkmark artwork
-    # itself was rendering smaller than its width/height implied.
-    # The spacing (and the has-id/has-id-indicator show/hide toggle,
-    # see _autocomplete.scss) belongs on a wrapping span instead --
-    # every icon needs a wrap, never printed bare in the page.
-    #
-    # The tooltip lives on that same wrapping span, not on `Icon(...)`
-    # itself -- passing `title:` to Icon does not give a bare svg a
-    # working tooltip on its own.
+    # A bare <svg> can't take padding -- it eats into the rendered
+    # content area instead of adding space around it, shrinking the
+    # checkmark. Spacing and the show/hide toggle (see
+    # _autocomplete.scss) go on this wrapping span instead. The
+    # tooltip lives here too -- `title:` on Icon alone doesn't give a
+    # bare svg a working tooltip.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
       span(class: "ml-3 has-id-indicator", title: title,
@@ -229,20 +224,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # These four are plain `Button`s, not `Link`s -- they never had a
-    # real destination (target: "#" was always a fake href relying on
-    # a Stimulus `:prevent` modifier to stop its own no-op navigation)
-    # and are pure client-side toggles (show/hide a map box, swap in
-    # create fields). `variant: :link, class: "... p-0"` gives
-    # Bootstrap's own .btn-link reset (no bare-<button> browser chrome)
-    # with zero padding, without the padding being baked in as a
-    # site-wide default (see `Components::Button::Styling`).
+    # These four are plain `Button`s, not `Link`s -- none has a
+    # destination; they're client-side toggles (show/hide a map box,
+    # swap in create fields). `variant: :link, class: "... p-0"`
+    # gives Bootstrap's `.btn-link` reset with zero padding, without
+    # baking that padding in as a site-wide default (see
+    # `Components::Button::Styling`).
     #
-    # `Link::Get` auto-wires a tooltip (data-tooltip-target + title)
-    # whenever `icon:` is present -- plain `Button` doesn't (only
-    # `CRUDBase`, for form-submitting buttons, does that automatically).
-    # Converting away from Link dropped it, so each one adds the same
-    # tooltip_data shape Link::Get used to supply, by hand.
+    # `Link::Get` auto-wires a tooltip when `icon:` is present; plain
+    # `Button` doesn't, so each one builds the same tooltip_data shape
+    # by hand.
     def render_find_button
       return unless find_text
 
@@ -383,6 +374,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Returns the model prefix and leaf-key segments of the field's
     # `dom.name`. Splits on the LAST `[…]` group so the result is
     # correct whether `field.key` is a Symbol (model-bound, leaf
@@ -395,6 +387,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # | `list[members]`           | `list`         | `members` |
     # | `member[notes][Cap]`      | `member[notes]`| `Cap`     |
     # | `approved_rank` (no `[]`) | `""`           | `approved_rank` |
+    # rubocop:enable MO/NoLongCommentBlock
     def name_parts
       @name_parts ||= begin
                         name = field.dom.name.to_s
