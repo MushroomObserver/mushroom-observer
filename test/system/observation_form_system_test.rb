@@ -125,19 +125,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                "Naming should not have reason 2 (was unchecked before submit)")
   end
 
-  # Regression coverage for "click Create 3x, get 3 Observations": on
-  # main prior to #5035, and still on this Turbo-submit branch,
+  # Regression coverage for "click Create 3x, get 3 Observations":
   # form-images_controller.js's `set_bindings` queries
-  # `input[type="submit"]` for the buttons to disable -- but Phlex's
+  # `input[type="submit"]` for the buttons to disable, but Phlex's
   # `Components::Button::Submit` renders a `<button type="submit">`,
-  # never an `<input>`. The selector matches nothing, so none of the
-  # controller's disabling logic (`uploadAll`'s manual `disabled = true`,
-  # the post-upload re-enable) ever touches a real element. Whether
-  # Turbo's own native submitter-disabling covers the gap depends on
-  # whether the submission reached Turbo's listener with the event still
-  # unprevented -- see the controller's `onsubmit` override, which
-  # `preventDefault`s the original click while it defers to a
-  # `requestSubmit()` a tick later.
+  # not an `<input>`, so the selector matches nothing. Whether
+  # Turbo's native submitter-disabling covers the gap depends on the
+  # controller's `onsubmit` override, which `preventDefault`s the
+  # click while deferring to a `requestSubmit()` a tick later.
   def test_submit_button_disables_synchronously_on_click
     login!(katrina)
     visit(new_observation_path)
@@ -600,16 +595,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     visit(new_observation_path)
     assert_selector("body.observations__new")
     # The new-observation form copies gps_hidden from the user's last
-    # observation (`defaults_from_last_observation_created`), with no
-    # recency window (unlike `when`) -- so it may already be checked
-    # here depending on katrina's fixture history (currently true, via
-    # the untrusted_hidden fixture). Force it off regardless: the
-    # uploaded images' GPS needs to survive (Image::Processor.
-    # strip_original_gps would otherwise permanently strip it from the
-    # originals on save). The checkbox lives inside a closed Bootstrap
-    # `.collapse` section (#observation_geolocation) not opened by
-    # anything at this point in the flow, so a real click isn't
-    # possible -- set it via JS.
+    # observation, with no recency window, so it may already be
+    # checked here (currently true via katrina's untrusted_hidden
+    # fixture). Force it off: the uploaded images' GPS needs to
+    # survive, or Image::Processor.strip_original_gps strips it from
+    # the originals on save. The checkbox lives inside a closed
+    # Bootstrap `.collapse` section not opened at this point in the
+    # flow, so a click isn't possible -- set it via JS.
     execute_script("document.getElementById(" \
                    "'observation_gps_hidden').checked = false")
 
@@ -1086,19 +1078,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # This attribute controls whether makeMapClickable() is called
     assert_selector("#observation_form_map[data-editable='true']")
 
-    # Wait for the map controller to actually finish drawing. The
-    # `data-map='connected'` attribute is set in `connect()` BEFORE
-    # the google.maps loader resolves, so it doesn't gate `this.map`.
-    # Wait for `controller.map` to be defined (drawMap to have run)
-    # so the click trigger has a real map to fire on.
+    # Wait for the map controller to finish drawing. The
+    # `data-map='connected'` attribute is set in `connect()` before
+    # the google.maps loader resolves, so wait for `controller.map`
+    # to be defined instead.
     #
-    # 20s, not 10s -- this waits on a real network round-trip to
-    # Google's Maps JS API, not just app-code timing. Flaked with a
-    # 10s budget (Timeout::Error) when running the full file: 16
-    # preceding heavy image-upload/Turbo tests leave the browser under
-    # enough CPU/network contention that the API load + drawMap()
-    # occasionally didn't finish in 10s, even though this test alone
-    # clears the same gate in ~3s.
+    # 20s, not 10s: this waits on a network round-trip to Google's
+    # Maps JS API. Flaked with a 10s budget when running the full
+    # file, where preceding heavy tests leave the browser under
+    # enough contention that the API load didn't finish in time.
     Timeout.timeout(20) do
       loop do
         ready = evaluate_script(<<~JS)
@@ -1373,16 +1361,15 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   # A latitude or longitude of 0 (equator or prime meridian) is a
-  # valid coordinate: the autocompleter swaps into "location_containing"
-  # mode and carries the 0-valued params along, same as any other point.
+  # valid coordinate: the autocompleter swaps into
+  # "location_containing" mode and carries the 0-valued params along.
   #
   # Needs a fixture-independent location containing (0, 0.5): the
-  # only fixture location whose box geographically contains that
-  # point is the global "Earth" catch-all (unknown_location), and
-  # Autocomplete::ForLocationContaining rejects overly-broad boxes as
-  # "vague" (Mappable::BoxMethods#vague?), so a whole-globe box does
-  # not match. Without a small, specific location here, the lookup
-  # finds nothing and falls back to "location_google" instead.
+  # only fixture location whose box contains that point is the
+  # global "Earth" catch-all, and Autocomplete::ForLocationContaining
+  # rejects overly-broad boxes as "vague", so a whole-globe box
+  # doesn't match -- the lookup would otherwise find nothing and fall
+  # back to "location_google".
   def test_zero_latitude_triggers_locality_lookup
     equator_location = Location.create!(
       name: "Null Island Vicinity, Gulf of Guinea",
