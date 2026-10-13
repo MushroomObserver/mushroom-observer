@@ -34,20 +34,10 @@ module ApplicationController::Authentication
   #
   ##############################################################################
 
-  # Filter that should run before everything else.  Establishes whether a User
-  # is logged in or not.
-  #
-  # Stores the currently logged-in User in the "global" <tt>@user</tt> and
-  # in the session.
-  #
-  # It first checks if the User is already logged in, i.e. is stored in the
-  # session.  If not, it checks for an autologin cookie on the User's browser,
-  # and logs them in automatically if so.
-  #
-  # In both cases, it makes sure the User actually exists and is verified.  If
-  # not, the "user" is immediately logged out and the autologin cookie is
-  # destroyed.
-  #
+  # Before-everything filter establishing whether a User is logged
+  # in: checks the session first, then an autologin cookie, and logs
+  # out (destroying the cookie) if the resolved User doesn't exist
+  # or isn't verified.
   def autologin
     # render(plain: "Sorry, we've taken MO down to test something urgent."\
     #               "We'll be back in a few minutes. -Jason", layout: false)
