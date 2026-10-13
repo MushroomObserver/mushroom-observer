@@ -78,10 +78,21 @@ $(cat "$f")"
   *) exit 0 ;;
 esac
 
+# Strip lines between a `rubocop:disable MO/NoLongCommentBlock` and
+# its matching `rubocop:enable` -- the NoLongCommentBlock cleanup
+# sweep uses that pair specifically to preserve a pre-existing,
+# human-written comment verbatim (not to author new prose), so this
+# style rule doesn't apply inside it.
+SCAN_TEXT="$(printf '%s' "$TEXT" | awk '
+  /rubocop:disable MO\/NoLongCommentBlock/ { skip = 1; next }
+  /rubocop:enable MO\/NoLongCommentBlock/ { skip = 0; next }
+  !skip { print }
+')"
+
 # Strip comment lines discussing the rule itself (e.g. this file, or
 # a rules doc quoting the banned words) -- only match live prose/code.
-HITS="$( { printf '%s' "$TEXT" | grep -inE "$WORD_RE" || true
-           printf '%s' "$TEXT" | grep -inE "$OWN_RE" || true; } )"
+HITS="$( { printf '%s' "$SCAN_TEXT" | grep -inE "$WORD_RE" || true
+           printf '%s' "$SCAN_TEXT" | grep -inE "$OWN_RE" || true; } )"
 
 if [ -n "$HITS" ]; then
   cat >&2 <<EOF
