@@ -14,7 +14,7 @@ class Views::Controllers::Observations::Show::NameSuggestionsAlertTest <
     name = names(:fungi)
     html = render(alert_with(names: [[name, 0]]))
 
-    assert_html(html, "div.alert-warning")
+    assert_html(html, ".alert-warning")
     assert_html(html, "a[href='#{routes.name_path(name.id)}']")
     assert_no_html(html, "a[href*='observations?pattern=']")
     assert_includes(html, "(0)")

@@ -30,7 +30,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
 
       assert_html(html, "label[for='email_old_obj']",
                   text: "#{:name.ti}:")
-      assert_html(html, "label[for='email_old_obj'] + p.form-control-static",
+      assert_html(html, "label[for='email_old_obj'] + .form-control-static",
                   text: @old_name.unique_format_name.t.as_displayed)
     end
 
@@ -39,7 +39,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
 
       assert_html(html, "label[for='email_new_obj']",
                   text: "#{:name.ti}:")
-      assert_html(html, "label[for='email_new_obj'] + p.form-control-static",
+      assert_html(html, "label[for='email_new_obj'] + .form-control-static",
                   text: @new_name.unique_format_name.t.as_displayed)
     end
 

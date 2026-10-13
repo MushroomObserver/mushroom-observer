@@ -15,7 +15,7 @@ class AutocompleterFieldTest < ComponentTestCase
       autocompleter_field(:summary, type: :name, label: "Species Name")
     end
 
-    assert_html(form, "div.form-group")
+    assert_html(form, ".form-group")
     assert_includes(form, "Species Name")
     assert_html(form, "[data-controller*='autocompleter']")
   end
@@ -45,7 +45,7 @@ class AutocompleterFieldTest < ComponentTestCase
 
     assert_no_match(/d-flex justify-content-between/, form,
                     "label row must not use d-flex when label_end is empty")
-    assert_html(form, "span.has-id-indicator svg")
+    assert_html(form, ".has-id-indicator svg")
   end
 
   # Regression: an outer .autocompleter must not carry an auto-derived
@@ -72,7 +72,7 @@ class AutocompleterFieldTest < ComponentTestCase
              ))
     end
 
-    assert_html(form, "div.autocompleter#my_autocompleter_id")
+    assert_html(form, ".autocompleter#my_autocompleter_id")
   end
 
   # Regression: create_text: populates the label_end slot, so the
@@ -85,7 +85,7 @@ class AutocompleterFieldTest < ComponentTestCase
              ))
     end
 
-    assert_html(form, "div.d-flex.justify-content-between")
+    assert_html(form, ".d-flex.justify-content-between")
   end
 
   # Regression: the hidden-id input for a String field name must
@@ -103,7 +103,7 @@ class AutocompleterFieldTest < ComponentTestCase
 
     assert_html(form, "textarea[name='list[members]']", text: "alpha")
     assert_html(form,
-                "div.autocompleter[data-controller='autocompleter--name']")
+                ".autocompleter[data-controller='autocompleter--name']")
     assert_html(form,
                 "input[type='hidden'][name='list[members_id]']" \
                 "[id='list_members_id']")
@@ -185,10 +185,10 @@ class AutocompleterFieldTest < ComponentTestCase
     # around it).
     assert_html(
       html,
-      "span.has-id-indicator" \
+      ".has-id-indicator" \
       "[data-autocompleter--herbarium-target='hasIdIndicator']"
     )
-    assert_html(html, "span.has-id-indicator svg.text-success")
+    assert_html(html, ".has-id-indicator svg.text-success")
   end
 
   def test_component_textarea_mode
@@ -336,7 +336,7 @@ class AutocompleterFieldTest < ComponentTestCase
     # Between slot content should appear after label
     assert_includes(html, "(Login Name)")
     # Has-id indicator should still be present after between content
-    assert_html(html, "span.has-id-indicator")
+    assert_html(html, ".has-id-indicator")
   end
 
   private

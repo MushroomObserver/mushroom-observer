@@ -63,7 +63,7 @@ class ListSearchTest < ComponentTestCase
     # doesn't auto-encode Hash / Relation values into `data-*` the way
     # Rails does, so the component calls `.to_json` explicitly).
     assert_html(html,
-                "div.search-status[data-controller='search-status']" \
+                ".search-status[data-controller='search-status']" \
                 "[data-search-status-messages-value*='Enter text to']" \
                 "[data-search-status-matches-value^='[']")
   end
@@ -75,7 +75,7 @@ class ListSearchTest < ComponentTestCase
     # The initial visible message uses `type: :name`. The Stimulus
     # controller swaps it later with one of the per-`type_tag` strings
     # from `messages_value`.
-    assert_html(html, "span.status-text[data-search-status-target='message']",
+    assert_html(html, ".status-text[data-search-status-target='message']",
                 text: :search_status_all_names.l(type: :name))
   end
 

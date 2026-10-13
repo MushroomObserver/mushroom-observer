@@ -36,7 +36,7 @@ class ModalLinkTest < ComponentTestCase
                       "[data-controller='modal-toggle']" \
                       "[data-action='modal-toggle#showModal:prevent']")
     assert_html(html, "a svg.mo-icon-edit")
-    assert_html(html, "a span.sr-only", text: "Edit")
+    assert_html(html, "a .sr-only", text: "Edit")
   end
 
   def test_caller_data_attrs_deep_merge_with_stimulus_attrs

@@ -20,7 +20,7 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "panel panel-default")
     assert_includes(html, "panel-heading")
     assert_includes(html, "Test Heading")
-    assert_html(html, "div.collapse.panel-collapse")
+    assert_html(html, ".collapse.panel-collapse")
     assert_includes(html, "Show details")
     assert_includes(html, "panel-body")
     assert_includes(html, "Panel content")
@@ -100,7 +100,7 @@ class PanelTest < ComponentTestCase
       end
     end
 
-    assert_html(html, "div.panel-body.p-0#my_section" \
+    assert_html(html, ".panel-body.p-0#my_section" \
                       "[data-controller='section-update']" \
                       "[data-section-update-user-value='42']",
                 text: "Body content")

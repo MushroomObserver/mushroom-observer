@@ -194,7 +194,7 @@ module Views::Controllers::Translations
       # Official section contains tag labels and text values
       assert_includes(non_official_html, "#{@tag}:")
       assert_html(non_official_html,
-                  "#translation_official span.underline")
+                  "#translation_official .underline")
       assert_html(non_official_html, "#translation_official p")
     end
 

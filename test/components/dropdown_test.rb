@@ -125,14 +125,14 @@ class DropdownTest < ComponentTestCase
     end
 
     assert_html(html, "li.dropdown")
-    assert_no_html(html, "div.dropdown")
+    assert_no_html(html, ".dropdown")
 
     html = render_dropdown(id: "div_toggle", menu_id: "div_menu",
                            element: :div) do |menu|
       menu.section(Tab::Project::Summary.new(project: @project))
     end
 
-    assert_html(html, "div.dropdown")
+    assert_html(html, ".dropdown")
     assert_no_html(html, "li.dropdown")
   end
 

@@ -50,8 +50,8 @@ class Views::Layouts::Sidebar
 
       # Should have icon before text
       assert_html(html,
-                  "div.list-group-item svg.mo-icon-user")
-      assert_html(html, "div.list-group-item span")
+                  ".list-group-item svg.mo-icon-user")
+      assert_html(html, ".list-group-item span")
     end
 
     private

@@ -17,7 +17,7 @@ module Views::Controllers::Comments
       # `broadcast_remove_to` callbacks target.
       html = render_row
 
-      assert_html(html, "div.list-group-item.comment##{dom_id(@comment)}")
+      assert_html(html, ".list-group-item.comment##{dom_id(@comment)}")
     end
 
     def test_wraps_a_comment_item
@@ -25,7 +25,7 @@ module Views::Controllers::Comments
       # markup must show up INSIDE the wrapper, not as a sibling.
       html = render_row
 
-      assert_html(html, "div##{dom_id(@comment)} > div.row")
+      assert_html(html, "div##{dom_id(@comment)} > .row")
       assert_html(html, "div##{dom_id(@comment)} .comment-summary",
                   text: @comment.summary)
     end

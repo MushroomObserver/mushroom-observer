@@ -83,7 +83,7 @@ module Views::Layouts
 
       assert_no_html(html, "form.page_input")
       assert_html(
-        html, "div.input-group.page-input[data-controller='page-input']",
+        html, ".input-group.page-input[data-controller='page-input']",
         count: 1
       )
       # Input should have current page value
@@ -131,7 +131,7 @@ module Views::Layouts
                   attribute: { autocomplete: "off" })
       assert_no_html(html, "form.page_input")
       assert_html(
-        html, "div.input-group.page-input[data-controller='page-input']"
+        html, ".input-group.page-input[data-controller='page-input']"
       )
     end
 

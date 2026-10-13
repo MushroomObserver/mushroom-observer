@@ -14,8 +14,8 @@ class LocationLinkTest < ComponentTestCase
     assert_html(html, "a.show_location_link_#{burbank.id}")
     # Postal + scientific spans wrap the name so per-user formatting
     # CSS can hide whichever the user didn't pick.
-    assert_html(html, "a span.location-postal", text: burbank.name)
-    assert_html(html, "a span.location-scientific",
+    assert_html(html, "a .location-postal", text: burbank.name)
+    assert_html(html, "a .location-scientific",
                 text: Location.reverse_name(burbank.name))
   end
 
@@ -48,7 +48,7 @@ class LocationLinkTest < ComponentTestCase
     # filtered by `where=`, with a distinct selector class.
     assert_html(html, "a[href='#{routes.observations_path(where: where)}']")
     assert_html(html, "a.index_observations_at_where_link")
-    assert_html(html, "a span.location-postal", text: where)
+    assert_html(html, "a .location-postal", text: where)
   end
 
   def test_query_param_forwarded_on_location_link

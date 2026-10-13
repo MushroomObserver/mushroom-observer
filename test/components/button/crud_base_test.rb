@@ -485,9 +485,9 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button[type='button'][data-toggle='collapse']" \
                       "[data-target='#map_div']")
     assert_html(html, "button.collapsed")
-    assert_html(html, "button span.collapse-toggle-open", text: "Hide Map")
+    assert_html(html, "button .collapse-toggle-open", text: "Hide Map")
     assert_html(html,
-                "button span.collapse-toggle-closed", text: "Open Map")
+                "button .collapse-toggle-closed", text: "Open Map")
   end
 
   def test_collapse_toggle_accepts_extra_class

@@ -29,7 +29,7 @@ module Views::Controllers::Names::Classification::Inherit
       )
 
       # Warning alert with radio options
-      assert_html(html, "div.alert-warning")
+      assert_html(html, ".alert-warning")
       candidates.each do |c|
         assert_html(html, "input[type='radio'][value='#{c.id}']")
       end

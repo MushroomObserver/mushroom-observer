@@ -22,7 +22,7 @@ module Views::Controllers::Comments
       html = render_item
 
       assert_no_html(html, ".list-group-item")
-      assert_html(html, "div.row")
+      assert_html(html, ".row")
     end
 
     def test_renders_summary_and_body

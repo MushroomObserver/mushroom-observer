@@ -60,7 +60,7 @@ module Views::Controllers::Names
       assert_html(html, "textarea[name='name[notes]']")
       assert_includes(html, :form_names_taxonomic_notes.l)
       assert_includes(html, :shared_textile_help.l)
-      assert_html(html, "div.mark")
+      assert_html(html, ".mark")
 
       # No misspelling fields for new form without misspelling param
       assert_not_includes(html, "name[misspelling]")
