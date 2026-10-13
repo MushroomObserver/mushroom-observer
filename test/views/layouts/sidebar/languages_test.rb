@@ -26,7 +26,7 @@ class Views::Layouts::Sidebar
 
       # Current language flag emoji — no image asset (flags are
       # emoji text via LanguageSwitchButton::FLAG_EMOJI, not PNGs).
-      assert_html(html, "##{Languages::TOGGLE_ID} span.lang-flag-emoji",
+      assert_html(html, "##{Languages::TOGGLE_ID} .lang-flag-emoji",
                   text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch(I18n.locale.to_s))
       assert_no_html(html, "img.lang-flag")
 
@@ -60,7 +60,7 @@ class Views::Layouts::Sidebar
     def test_renders_collapsible_language_list
       html = render_component
 
-      assert_html(html, "div.collapse##{Languages::COLLAPSE_ID}")
+      assert_html(html, ".collapse##{Languages::COLLAPSE_ID}")
 
       # The current locale isn't offered as a switch target -- no
       # point linking to the locale you're already in.
@@ -87,7 +87,7 @@ class Views::Layouts::Sidebar
         assert_html(html,
                     "##{Languages::COLLAPSE_ID} form input[type='hidden']" \
                     "[name='user_locale'][value='#{lang.locale}']")
-        assert_html(html, "##{id} span.lang-flag-emoji",
+        assert_html(html, "##{id} .lang-flag-emoji",
                     text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch(lang.locale))
         assert_includes(html, lang.name)
         # CRUDBase's auto-tooltip would just restate the visible

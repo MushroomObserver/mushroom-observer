@@ -24,15 +24,15 @@ class MatrixCarouselTest < ComponentTestCase
   def test_renders_panel_less_carousel_skeleton
     html = render_matrix_carousel
 
-    assert_html(html, "div.carousel.slide[data-ride='false']" \
+    assert_html(html, ".carousel.slide[data-ride='false']" \
                       "[data-interval='false']" \
                       "[id='observation_#{@observation.id}_carousel']")
-    assert_html(html, "div.carousel.slide > div.carousel-inner.bg-light" \
+    assert_html(html, ".carousel.slide > .carousel-inner.bg-light" \
                       "[role='listbox']")
     # No Panel wrapper, no indicator strip — those are contracts
     # specific to the matrix-box context (the box itself owns the
     # surrounding panel; thumbnails are not shown per-box).
-    assert_no_html(html, "div.panel")
+    assert_no_html(html, ".panel")
     assert_no_html(html, "ol.carousel-indicators")
   end
 
@@ -44,7 +44,7 @@ class MatrixCarouselTest < ComponentTestCase
     slide_count = html.scan(/class="item[^"]*"/).size
     assert_equal(@images.length, slide_count)
     # First image's wrapper id ends with the first image's id.
-    assert_html(html, "div.item.active" \
+    assert_html(html, ".item.active" \
                       "[id='carousel_item_#{@images.first.id}']")
   end
 
@@ -57,10 +57,10 @@ class MatrixCarouselTest < ComponentTestCase
     target = @images[1]
     html = render_matrix_carousel(top_img: target)
 
-    assert_html(html, "div.item.active[id='carousel_item_#{target.id}']")
+    assert_html(html, ".item.active[id='carousel_item_#{target.id}']")
     # First image's slide is NOT active.
     assert_no_html(html,
-                   "div.item.active[id='carousel_item_#{@images.first.id}']")
+                   ".item.active[id='carousel_item_#{@images.first.id}']")
   end
 
   # Controls render iff >1 image (primitive's `show_controls` is driven

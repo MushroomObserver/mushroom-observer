@@ -14,11 +14,11 @@ module Views::Controllers::Projects
       html = render_item(project: project)
 
       # No `.list-group-item` wrapper — supplied by the caller.
-      assert_no_html(html, "div.list-group-item")
+      assert_no_html(html, ".list-group-item")
 
       # Title link
       assert_html(html, "a[href*='projects/#{project.id}']")
-      assert_html(html, "span.h4")
+      assert_html(html, ".h4")
 
       # Meta row with user
       assert_includes(html, project.created_at.web_time)

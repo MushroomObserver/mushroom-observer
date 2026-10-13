@@ -12,14 +12,14 @@ module Views::Layouts::App
       message = :observation_resync_failed.t
       html = render_alert(message: message, level: :danger)
 
-      assert_html(html, "div.alert.alert-danger#flash_notices",
+      assert_html(html, ".alert.alert-danger#flash_notices",
                   text: message.as_displayed)
     end
 
     def test_level_drives_alert_class
       html = render_alert(message: "Done", level: :success)
 
-      assert_html(html, "div.alert.alert-success", text: "Done")
+      assert_html(html, ".alert.alert-success", text: "Done")
     end
 
     private

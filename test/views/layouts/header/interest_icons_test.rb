@@ -24,7 +24,7 @@ module Views::Layouts
       assert_html(html, "img.mo-icon[src*='watch3']")
       assert_html(html, "img.mo-icon[src*='ignore3']")
       # No big state-indicator icon (disabled span) in default state.
-      assert_no_html(html, "span.disabled img")
+      assert_no_html(html, ".disabled img")
     end
 
     def test_default_state_links_are_create_posts_with_id_and_state
@@ -53,7 +53,7 @@ module Views::Layouts
 
       html = render_view
 
-      assert_html(html, "span.disabled img.mo-icon[src*='watch2']")
+      assert_html(html, ".disabled img.mo-icon[src*='watch2']")
       assert_html(html, "img.mo-icon[src*='halfopen3']")
       assert_html(html, "img.mo-icon[src*='ignore3']")
     end
@@ -92,7 +92,7 @@ module Views::Layouts
 
       html = render_view
 
-      assert_html(html, "span.disabled img.mo-icon[src*='ignore2']")
+      assert_html(html, ".disabled img.mo-icon[src*='ignore2']")
       assert_html(html, "img.mo-icon[src*='watch3']")
       assert_html(html, "img.mo-icon[src*='halfopen3']")
     end

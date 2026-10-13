@@ -10,7 +10,7 @@ class ListGroupItemTest < ComponentTestCase
     # components).
     html = render_item { "hello" }
 
-    assert_html(html, "div.list-group-item", text: "hello")
+    assert_html(html, ".list-group-item", text: "hello")
   end
 
   def test_ul_list_uses_li_element
@@ -22,7 +22,7 @@ class ListGroupItemTest < ComponentTestCase
   def test_extra_class_appended_to_list_group_item
     html = render_item(class: "comment") { "c" }
 
-    assert_html(html, "div.list-group-item.comment", text: "c")
+    assert_html(html, ".list-group-item.comment", text: "c")
   end
 
   def test_id_set_when_provided
@@ -36,7 +36,7 @@ class ListGroupItemTest < ComponentTestCase
   def test_arbitrary_attributes_forwarded
     html = render_item(data: { role: "row" }) { "x" }
 
-    assert_html(html, "div.list-group-item",
+    assert_html(html, ".list-group-item",
                 attribute: { "data-role" => "row" })
   end
 
@@ -49,7 +49,7 @@ class ListGroupItemTest < ComponentTestCase
     end
 
     assert_html(html,
-                "div#x.list-group-item.comment > div.list-group-item.inner",
+                "div#x.list-group-item.comment > .list-group-item.inner",
                 text: "hi")
   end
 

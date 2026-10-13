@@ -127,7 +127,7 @@ class ApplicationFormTest < ComponentTestCase
                         help_collapse: true)
     end
 
-    assert_html(form, "span.ml-3")
+    assert_html(form, ".ml-3")
     assert_no_html(form, ".label-row-with-appends.mr-3")
   end
 
@@ -138,7 +138,7 @@ class ApplicationFormTest < ComponentTestCase
                         help_collapse: true)
     end
 
-    assert_html(form, "span.ml-3")
+    assert_html(form, ".ml-3")
     assert_html(form, ".label-row-with-appends.mr-3")
   end
 

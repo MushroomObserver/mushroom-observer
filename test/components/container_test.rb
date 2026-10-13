@@ -26,9 +26,10 @@ class ContainerTest < ComponentTestCase
   def test_width_renders_matching_class
     html = render_container(width: :wide)
 
-    assert_html(html, "div.container-wide")
+    assert_html(html, ".container-wide")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_renders_alternate_tag
     html = render_container(element: :main, width: :text)
 
@@ -40,14 +41,14 @@ class ContainerTest < ComponentTestCase
   def test_extra_class_merges_with_width_class
     html = render_container(width: :text, class: "ml-4")
 
-    assert_html(html, "div.container-text.ml-4")
+    assert_html(html, ".container-text.ml-4")
   end
 
   def test_extra_class_alone_with_no_width
     html = render_container(class: "hidden-print")
 
-    assert_html(html, "div.hidden-print")
-    assert_no_html(html, "div.container-full")
+    assert_html(html, ".hidden-print")
+    assert_no_html(html, ".container-full")
   end
 
   def test_other_attrs_pass_through
@@ -61,7 +62,7 @@ class ContainerTest < ComponentTestCase
       render(Components::Container.new(width: :text)) { plain("hello") }
     end)
 
-    assert_html(html, "div.container-text", text: "hello")
+    assert_html(html, ".container-text", text: "hello")
   end
 
   private

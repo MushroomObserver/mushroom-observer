@@ -32,6 +32,7 @@ require:
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
+  - ./lib/rubocop/cop/mo/redundant_tag_in_selector
   - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
   - ./lib/rubocop/cop/mo/status_kwarg_outside_invalid_method
   - ./lib/rubocop/cop/mo/unguarded_params_to_prop
@@ -335,6 +336,20 @@ MO/RedundantRenderViewInvalid:
     - "app/controllers/**/*.rb"
   Exclude:
     - "app/controllers/application_controller.rb"
+
+MO/RedundantTagInSelector:
+  Description: >-
+    A test selector must not qualify a class with a generic wrapper
+    tag (span.thing, div.thing, p.thing) when the class alone already
+    selects the element -- see
+    lib/rubocop/cop/mo/redundant_tag_in_selector.rb and
+    .claude/rules/testing.md. Scoped to components/views, not
+    test/controllers -- functional tests use assert_select, a
+    different method this cop doesn't check.
+  Enabled: true
+  Include:
+    - "test/components/**/*_test.rb"
+    - "test/views/**/*_test.rb"
 
 MO/SelfStatusOutsideInvalidMethod:
   Description: >-

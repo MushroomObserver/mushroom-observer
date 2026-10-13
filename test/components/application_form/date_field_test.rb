@@ -17,9 +17,9 @@ class DateFieldTest < ComponentTestCase
     end
 
     # Wrapper and label
-    assert_html(form, "div.form-group")
+    assert_html(form, ".form-group")
     assert_html(form, "label", text: "Date")
-    assert_html(form, "div.date-selects")
+    assert_html(form, ".date-selects")
 
     # Day select (3i) - rendered first
     assert_html(form, "select#collection_number_when_3i")
@@ -57,7 +57,7 @@ class DateFieldTest < ComponentTestCase
       end
     end
 
-    assert_html(form, "span.help-note", text: "(approximate)")
+    assert_html(form, ".help-note", text: "(approximate)")
   end
 
   # Regression: date_field's inline: propagates to both the outer
@@ -68,8 +68,8 @@ class DateFieldTest < ComponentTestCase
       date_field(:created_at, inline: true, label: "When:")
     end
 
-    assert_html(form, "div.form-group.form-inline")
-    assert_html(form, "div.date-selects.d-inline-block")
+    assert_html(form, ".form-group.form-inline")
+    assert_html(form, ".date-selects.d-inline-block")
   end
 
   # Regression: date_field's label_appends: renders inside the label

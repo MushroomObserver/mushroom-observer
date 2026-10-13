@@ -191,7 +191,7 @@ module Form
 
       html = render_carousel(sibling_images: [sib], exif_data: exif)
 
-      assert_html(html, "#camera_info_#{sib.id} div.reflection_readonly_note")
+      assert_html(html, "#camera_info_#{sib.id} .reflection_readonly_note")
       assert_html(html, "#carousel_item_#{sib.id}[data-geocode*='45.5231']")
     end
 

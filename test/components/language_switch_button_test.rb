@@ -17,7 +17,7 @@ class LanguageSwitchButtonTest < ComponentTestCase
     lang = languages(:french)
     html = render_button(lang)
 
-    assert_html(html, "button span.lang-flag-emoji",
+    assert_html(html, "button .lang-flag-emoji",
                 text: Components::LanguageSwitchButton::FLAG_EMOJI.fetch("fr"))
     assert_includes(html, lang.name)
   end

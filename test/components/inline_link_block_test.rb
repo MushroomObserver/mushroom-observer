@@ -29,7 +29,7 @@ class InlineLinkBlockTest < ComponentTestCase
   def test_single_item_rendered_inside_nowrap_span
     html = render_links(items: ["<b>edit</b>".html_safe])
 
-    assert_html(html, "span.text-nowrap b", text: "edit")
+    assert_html(html, ".text-nowrap b", text: "edit")
   end
 
   def test_leading_separator_is_nbsp
@@ -49,14 +49,14 @@ class InlineLinkBlockTest < ComponentTestCase
   def test_string_items_rendered_as_trusted_html
     html = render_links(items: ["<i>archive</i>".html_safe])
 
-    assert_html(html, "span.text-nowrap i", text: "archive")
+    assert_html(html, ".text-nowrap i", text: "archive")
   end
 
   def test_phlex_component_items_rendered
     button = Components::Button.new(name: "Edit", variant: :strip)
     html = render_links(items: [button])
 
-    assert_html(html, "span.text-nowrap button", text: "Edit")
+    assert_html(html, ".text-nowrap button", text: "Edit")
   end
 
   private
