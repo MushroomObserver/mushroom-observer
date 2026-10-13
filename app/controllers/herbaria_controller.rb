@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Actions
 # -------
 # create (post)
@@ -43,6 +44,7 @@
 # show_herbarium (post)             Herbaria::Curators#create (post)
 # * == legacy action is not redirected
 # See https://tinyurl.com/ynapvpt7
+# rubocop:enable MO/NoLongCommentBlock
 
 # View and modify Herbaria (displayed as "Fungaria")
 class HerbariaController < ApplicationController # rubocop:disable Metrics/ClassLength

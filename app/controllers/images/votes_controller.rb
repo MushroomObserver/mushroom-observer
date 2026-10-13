@@ -6,18 +6,15 @@ module Images
     skip_before_action :login_required, only: [:show]
 
     # Renders just the vote interface for one image, fresh and
-    # uncached -- meant to be fetched via a lazy Turbo Frame so a
-    # viewer's own vote state never gets baked into `Matrix::Box`'s
-    # shared fragment cache (#4895). Anonymous viewers can load this
-    # too (`.require-user` CSS-hides it), matching the overlay copy's
-    # existing render-regardless-of-`@user` behavior.
+    # uncached -- fetched via a lazy Turbo Frame so a viewer's vote
+    # state stays out of `Matrix::Box`'s shared fragment cache.
+    # Anonymous viewers can load this too (`.require-user` CSS-hides
+    # it), matching the overlay copy's render-regardless-of-`@user`
+    # behavior.
     #
-    # Deliberately not `find_or_goto_index` -- that flashes an error
-    # and redirects to the model's index, which is right for a normal
-    # page load but wrong for a frame-only fetch: the frame would try
-    # to swap in a full index page's markup (or just break), and the
-    # flash would linger to surprise the user on their next real
-    # navigation. A plain 404 leaves the frame empty and leaks nothing.
+    # Not `find_or_goto_index`: that flashes and redirects to the
+    # index, wrong for a frame-only fetch -- the frame would try to
+    # swap in a full index page. A plain 404 leaves the frame empty.
     def show
       @image = Image.find_by(id: params[:image_id])
       return head(:not_found) unless @image
@@ -58,28 +55,14 @@ module Images
 
     private
 
-    # Was `render(partial: "images/votes/update")`, the partial just
-    # emitted a single `turbo_stream.update("image_vote_#{id}")`
-    # wrapping `Components::ImageFragment::VoteInterface` — inlined
-    # here. Two targets, not one: the lightbox caption's copy
-    # (`context: :lightbox`) lives under a `lightbox_`-prefixed id
-    # (see `VoteInterface#vote_html_id`) inside the hidden caption
-    # element that's always in the DOM now (#4894), so this update
-    # reaches it whether the lightbox is open or closed.
+    # Two targets: the lightbox caption's copy (`context: :lightbox`)
+    # lives under a `lightbox_`-prefixed id, always in the DOM, so
+    # this reaches it whether the lightbox is open or closed.
     #
-    # `replace`, not `update` -- `VoteInterface`'s own render output
-    # IS the full `<div id="...">` wrapper, so `update` (which swaps
-    # inner content only) would nest a duplicate-id div inside the
-    # original instead of swapping it.
-    #
-    # The target may currently be the lazy `<turbo-frame>` (#4895) --
-    # its content hasn't loaded, or has loaded and the div underneath
-    # shares the same id (Turbo's own `getElementById`-based lookup
-    # returns whichever is first in document order, i.e. the frame,
-    # its ancestor). Either way `replace` swaps the frame for a plain
-    # `VoteInterface` div, same id -- correct: once voted, that
-    # instance has fresh, correct data and no longer needs to be
-    # lazily reloadable.
+    # `replace`, not `update`: `VoteInterface`'s render output IS the
+    # full `<div id="...">` wrapper, so `update` would nest a
+    # duplicate-id div instead of swapping it. Also swaps out the
+    # lazy `<turbo-frame>` target if it hasn't loaded yet.
     def vote_interface_streams
       [
         turbo_stream.replace("image_vote_#{@image.id}",
