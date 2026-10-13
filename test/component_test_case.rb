@@ -242,6 +242,7 @@ class ComponentTestCase < UnitTestCase
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Assert that the subtree rooted at +selector+ is structurally
   # equivalent between two HTML strings.
   #
@@ -269,6 +270,7 @@ class ComponentTestCase < UnitTestCase
   # for inspection and the assertion message names the first mismatch
   # (element name, attribute set, attribute value, text, child count)
   # along with the path from the selector root to the differing node.
+  # rubocop:enable MO/NoLongCommentBlock
   CSRF_INPUT_RE =
     /(<input[^>]*?name="authenticity_token"[^>]*?value=")[^"]+(")/
 
