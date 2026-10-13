@@ -18,18 +18,14 @@ module Mappable
     include Mappable::Collection
     include CoordinateFormat
 
-    # Build a clustered collection directly from a list of mappable
-    # objects (no geographic bucketing — one MapSet per object).
-    # Used by both `Components::Map`'s render path and the controller's
-    # JSON-refetch endpoint
-    # (`ClusteredObservationMap#map_refetch_payload`), so the same
-    # singleton-key / cluster-url shape is produced regardless of how
-    # the collection was reached.
+    # Builds a clustered collection with no geographic bucketing --
+    # one MapSet per object. Shared by `Components::Map`'s render
+    # path and the controller's JSON-refetch endpoint, so both
+    # produce the same singleton-key / cluster-url shape.
     #
     # @param objects [Array<Mappable>] the source objects.
-    # @param query_param [Hash, nil] the current query's q_param —
-    #   added as `?q=…` on every per-marker cluster URL so a click
-    #   from the popup lands inside the same filtered query context.
+    # @param query_param [Hash, nil] the current query's q_param,
+    #   added as `?q=…` so a popup click stays in the same query.
     # @param user [User, nil] the viewer - decides postal/scientific
     #   location-name formatting (nil => postal default).
     def initialize(objects, query_param: nil, user: nil)
