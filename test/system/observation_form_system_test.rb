@@ -1282,13 +1282,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
 
-    # Wait for the browser-side EXIF read (form-exif_controller.js's
-    # ExifReader.load) to finish -- the contention-sensitive step under
-    # a full-file run. transferExifToObsFields runs synchronously right
-    # after this text is set, so observation_lat should already match
-    # by the time this wait clears.
-    assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s)
+    # Uses the same helper as the other EXIF-dependent tests in this
+    # file: it clicks "Use this info" itself when auto-transfer hasn't
+    # already disabled the button, instead of assuming the automatic
+    # transfer always fires.
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
 
     # Wait for location_containing mode and server response
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -1332,14 +1330,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
 
-    # Wait for the browser-side EXIF read (form-exif_controller.js's
-    # ExifReader.load) to finish -- the contention-sensitive step under
-    # a full-file run. transferExifToObsFields runs synchronously right
-    # after this text is set, so the lat/lng fields should already
-    # match by the time this wait clears.
-    assert_selector(".exif_lat", text: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s)
-    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+    # Uses the same helper as the other EXIF-dependent tests in this
+    # file: it clicks "Use this info" itself when auto-transfer hasn't
+    # already disabled the button, instead of assuming the automatic
+    # transfer always fires.
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
 
     # Wait for location_containing mode
     assert_selector("[data-type='location_containing']", wait: 10)

@@ -217,7 +217,14 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
   # Lets an implicitly triggered geocode (e.g. from a create-mode
   # switch) finish before the next one starts, so two requests do
   # not race to update the same fields.
-  def wait_for_geocode_settled(count:, wait: 10)
+  #
+  # 30s default, not 10s -- Google's Geocoding API itself isn't slow
+  # (manual testing clears this in well under a second). 10s flaked
+  # every herbarium test calling this under the full parallel system
+  # suite (101 tests, 3 Chromium workers competing for CPU on one
+  # machine), where the browser process running the request is itself
+  # starved, not the network round-trip.
+  def wait_for_geocode_settled(count:, wait: 30)
     Timeout.timeout(wait) do
       loop do
         settled = evaluate_script("window.__geocodeSettledCount") || 0
