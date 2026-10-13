@@ -294,18 +294,21 @@ class AutocompleterFieldTest < ComponentTestCase
   end
 
   def test_autocompleter_with_keep_text_option
-    # Test keep_text option renders keep and edit buttons
+    # One button, two swapped appearances (keep <-> edit) -- see
+    # map_controller.js#toggleBoxLock.
     comment = Comment.new
     form = TestKeepTextAutocompleterForm.new(comment, action: "/test")
     html = render(form)
 
-    # Should have keep button
-    assert_html(html, "button.keep-btn")
-    assert_html(html, "button[data-map-target='lockBoxBtn']")
-
-    # Should have edit button
-    assert_html(html, "button.edit-btn")
-    assert_html(html, "button[data-map-target='editBoxBtn']")
+    assert_html(html, "button.keep-edit-toggle")
+    assert_html(html, "button[data-map-target='boxLockToggle']")
+    assert_html(html, "button.stateful-link")
+    assert_html(html, "button .active-icon")
+    assert_html(html, "button .active-label", text: "Edit area")
+    # tooltip_controller.js swaps the tooltip off this attribute when
+    # .active toggles -- plain Button doesn't wire it automatically
+    # the way Link::Get does, so it's a required part of the contract.
+    assert_html(html, "button[data-active-title='Edit area']")
   end
 
   def test_autocompleter_with_create_text_option

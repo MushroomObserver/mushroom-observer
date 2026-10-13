@@ -1131,6 +1131,75 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_lng", with: "-122.6765", wait: 5)
   end
 
+  # Verifies the keep/edit toggle's icon and tooltip both swap when
+  # the rectangle locks, and swap back when it unlocks.
+  def test_keep_edit_toggle_swaps_icon_and_tooltip_when_box_locked
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # katrina's last observation's location prefills place_name with an
+    # existing has-id match (see
+    # test_trying_to_create_duplicate_location_just_uses_existing_location),
+    # with bounds (location_hidden_data), so opening the map draws a
+    # rectangle for it without typing/selecting anything.
+    assert_selector("[data-type='location']")
+
+    click_button(:form_observations_open_map.l)
+    assert_selector("#observation_form_map.in", wait: 10)
+    assert_selector("[data-map='connected']", wait: 10)
+    wait_for_map_rectangle
+
+    toggle_selector = "#observation_location_autocompleter .keep-edit-toggle"
+    # On this form the rectangle draws already locked (map_type
+    # "observation" skips the editable: true branch in placeRectangle)
+    # -- the toggle has to start in the "active"/edit appearance to
+    # match, not only pick that up after a click.
+    assert_selector("#{toggle_selector}.active", wait: 5)
+    toggle = find(toggle_selector, visible: :all)
+    assert_not_includes(toggle[:class].split, "d-none",
+                        "keep-edit-toggle should be visible once the " \
+                        "rectangle exists")
+    assert_equal(:form_observations_edit_locality.l,
+                 toggle["data-original-title"])
+
+    toggle.click
+
+    assert_no_selector("#{toggle_selector}.active", wait: 5)
+    assert_equal(:form_observations_use_locality.l,
+                 find(toggle_selector)["data-original-title"])
+
+    # Click again -- locks the box and swaps back to the edit appearance.
+    find(toggle_selector).click
+
+    assert_selector("#{toggle_selector}.active", wait: 5)
+    assert_equal(:form_observations_edit_locality.l,
+                 find(toggle_selector)["data-original-title"])
+  end
+
+  # Verifies the "+ New Locality" create-button stays hidden for an
+  # exact match on an existing location -- it was showing for any
+  # prefilled value since `.create-button { display: none }` tied in
+  # specificity with multiple `.btn`-family rules (`.btn` itself, and
+  # `.btn:has(.mo-icon)` for icon-centering) and lost on source order
+  # either way, regardless of how far the selector was bumped.
+  def test_create_button_hidden_for_existing_matched_location
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    # katrina's last observation's location prefills place_name with an
+    # existing has-id match (see
+    # test_trying_to_create_duplicate_location_just_uses_existing_location).
+    assert_selector("[data-type='location']")
+    assert_selector("[data-autocompleter--location-target='wrap'].has-id",
+                    wait: 5)
+
+    button = find("#observation_location_autocompleter #create_location_btn",
+                  visible: :all)
+    assert_includes(button[:class].split, "d-none")
+  end
+
   # Bug fix: After EXIF sets lat/lng and swaps to location_containing mode,
   # manually entering different coordinates should update the dropdown.
   def test_manual_lat_lng_overrides_exif_location
@@ -1213,8 +1282,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
 
-    # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
+    # Uses the same helper as the other EXIF-dependent tests in this
+    # file: it clicks "Use this info" itself when auto-transfer hasn't
+    # already disabled the button, instead of assuming the automatic
+    # transfer always fires.
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
 
     # Wait for location_containing mode and server response
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -1258,9 +1330,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
 
-    # Verify EXIF was applied
-    assert_field("observation_lat", with: GEOTAGGED_EXIF[:lat].to_s, wait: 20)
-    assert_field("observation_lng", with: GEOTAGGED_EXIF[:lng].to_s)
+    # Uses the same helper as the other EXIF-dependent tests in this
+    # file: it clicks "Use this info" itself when auto-transfer hasn't
+    # already disabled the button, instead of assuming the automatic
+    # transfer always fires.
+    assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
 
     # Wait for location_containing mode
     assert_selector("[data-type='location_containing']", wait: 10)
@@ -1843,6 +1917,28 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
   private :wait_for_map_geocoder_ready
+
+  # Waits for the map controller to have drawn a rectangle (e.g. from
+  # a has-id location's bounds, once the map is opened).
+  def wait_for_map_rectangle
+    Timeout.timeout(10) do
+      loop do
+        ready = evaluate_script(<<~JS)
+          (() => {
+            const f = document.getElementById('observation_form');
+            const c = window.Stimulus.getControllerForElementAndIdentifier(
+              f, 'map'
+            );
+            return !!(c && c.rectangle);
+          })()
+        JS
+        break if ready
+
+        sleep(0.1)
+      end
+    end
+  end
+  private :wait_for_map_rectangle
 
   # Waits for the locality autocompleter to have populated at least
   # one match.

@@ -14,8 +14,7 @@
 // file in mushroom_observer.scss.
 .has-id-indicator .mo-icon,
 .find-btn .mo-icon,
-.keep-btn .mo-icon,
-.edit-btn .mo-icon,
+.keep-edit-toggle .mo-icon,
 .create-button .mo-icon {
   width: 1.3em;
   height: 1.3em;
@@ -37,26 +36,6 @@
     // what the row around it does.
     display: inline-flex;
     align-items: center;
-  }
-}
-
-.keep-btn {
-  display: none;
-}
-.create {
-  .keep-btn {
-    display: inline-block;
-  }
-}
-
-// initially we may not have id, but we also don't offer create
-// until they've typed something
-.create-button {
-  display: none;
-}
-.offer-create {
-  .create-button {
-    display: inline-block;
   }
 }
 

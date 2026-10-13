@@ -91,7 +91,7 @@ module Views::Controllers::Locations
     end
 
     def render_coordinate_section
-      Row(class: "mt-5") do
+      Row(class: "mt-5 vcenter") do
         Column(sm: 8) do
           render(Components::Form::CompassFields.new(
                    form: self, location: model

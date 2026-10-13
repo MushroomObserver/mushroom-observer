@@ -62,8 +62,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{field.dom.id}_help"
     end
 
+    # Trailing space before the row's next sibling (an inline field's
+    # input) lives on the row itself (FieldLabelRow#render_label_with_
+    # appends/#render_label_flex_row), not on this span -- putting it
+    # here would double up with a later append's leading margin.
     def render_help_icon
-      span(class: between_class) do
+      span(class: "ml-3") do
         Link(type: :collapse_toggle,
              target_id: help_id,
              class: "info-collapse-trigger") { Icon(type: :question) }
