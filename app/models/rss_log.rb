@@ -235,6 +235,7 @@ class RssLog < AbstractModel
     str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Add entry to top of notes and save.  Pass in a localization key and a hash
   # of arguments it requires.  Changes +updated_at+ unless <tt>args[:touch]</tt>
   # is false.  (Changing +updated_at+ has the effect of pushing it to the front
@@ -251,6 +252,7 @@ class RssLog < AbstractModel
   #   :time  => Time.now        # Timestamp to use.
   #   :save  => true            # Save changes?
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def add_with_date(tag, user: nil, **args)
     return if already_orphaned?
 
@@ -275,17 +277,14 @@ class RssLog < AbstractModel
     RssLog.record_timestamps = true
   end
 
-  # An orphaned log leads with the destroyed object's title instead of a
-  # timestamped entry (see #orphan), and is meant never to change again.
-  # Prepending a fresh timestamped entry would bury that title and turn the
-  # log back into a "ghost" (all target ids nil, notes newly timestamped)
-  # that script/check_rss_logs then deletes -- destroying the history of a
-  # live object that still points at this log. Refuse the write. See
-  # GitHub issue #4763.
-  #
-  # This is nil-safe (a brand-new log has blank notes) and does not block
-  # #orphan itself: orphan calls add_with_date *before* prepending the
-  # title, so the log still leads with a timestamp at that point.
+  # An orphaned log leads with the destroyed object's title instead
+  # of a timestamped entry (see #orphan), and shouldn't change again.
+  # Prepending a fresh timestamped entry would bury that title and
+  # turn the log back into a "ghost" that script/check_rss_logs then
+  # deletes -- destroying the history of a live object that still
+  # points at this log. Refuse the write. Nil-safe (a brand-new log
+  # has blank notes) and doesn't block #orphan itself, which calls
+  # add_with_date before prepending the title.
   def already_orphaned?
     notes.present? && !notes.match?(/\A\d{14}/)
   end
