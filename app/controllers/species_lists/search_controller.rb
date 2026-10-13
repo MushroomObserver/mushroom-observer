@@ -13,8 +13,8 @@ module SpeciesLists
 
     # Override Searchable#new to render the Phlex view explicitly.
     # `Searchable` is a shared concern used by 6 search controllers
-    # and provides no generic `new` action, so this duplicates
-    # Searchable#new's 3-line setup rather than threading a
+    # that each define their own `new`, so this duplicates the
+    # standard 3-line `new` setup rather than threading a
     # `render_search_new_view`
     # hook through the concern just for one caller.
     def new
