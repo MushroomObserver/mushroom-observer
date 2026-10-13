@@ -192,17 +192,14 @@ module Views::Controllers::Projects::Violations
 
       assert_html(html, "input[type='radio'][disabled]")
 
-      # Create link uses ?where=<suffix> (not display_name=), opens in
-      # a new tab, AND dismisses the parent modal via
-      # data-action="click->modal#hide" — these together let the admin
-      # create the missing Location and see the radio enabled on next
-      # "Add Target Location" click without a page reload. The link
-      # lives INSIDE the disabled radio's `.radio` div (per-row
-      # append), not as a sibling above the radio group.
-      #
-      # `data-action` is used in place of Bootstrap's `data-dismiss`
-      # because the latter's handler chain preventDefaults the click
-      # and suppresses the new tab.
+      # Create link uses ?where=<suffix>, opens in a new tab, and
+      # dismisses the parent modal via data-action="click->modal#hide"
+      # (not Bootstrap's data-dismiss, whose handler chain
+      # preventDefaults the click and suppresses the new tab) -- so
+      # the admin can create the missing Location and see the radio
+      # enabled on the next "Add Target Location" click, with no page
+      # reload. The link lives inside the disabled radio's `.radio`
+      # div, not as a sibling above the radio group.
       create_link = ".radio a[href*='/locations/new?where=']" \
                     "[target='_blank']" \
                     "[rel='noopener noreferrer']" \
