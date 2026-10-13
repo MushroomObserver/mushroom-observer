@@ -59,6 +59,7 @@ class SearchControllerTest < FunctionalTestCase
     assert_redirected_to(herbaria_path)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Regression for the production 500 incident on 2026-05-31. A bot
   # GET'd `/search/pattern` with no `pattern_search` params while
   # `session["return-to"]` was set to a previous `/observations?q=...`
@@ -70,6 +71,7 @@ class SearchControllerTest < FunctionalTestCase
   # to `forward_pattern_search(:"", "")`, which crashed inside
   # `send(:"#{type}_path")` with `NoMethodError: undefined method
   # '_path' for an instance of SearchController`.
+  # rubocop:enable MO/NoLongCommentBlock
   def test_pattern_search_no_params_with_return_to_in_session
     @request.session["return-to"] = observations_path(q: "abc")
 
