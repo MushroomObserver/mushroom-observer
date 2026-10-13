@@ -13,9 +13,9 @@
 #     Stimulus controller's `remove` action.
 #   - In-modal flash + form swap: a `modal_<identifier>_flash` div
 #     inside the body catches validation flash via turbo-stream
-#     updates on submit failure (see `_modal_form_reload.erb`),
-#     while the form section (id `<identifier>_form`) is replaced
-#     with a re-rendered form carrying the model's error state.
+#     updates on submit failure, while the form section (id
+#     `<identifier>_form`) is replaced with a re-rendered form
+#     carrying the model's error state.
 #
 # If you don't need either of those — you just want a Bootstrap
 # modal with arbitrary content — use `Components::Modal` directly.
@@ -61,19 +61,18 @@ class Components::Modal::TurboForm < Components::Base
   end
 
   # Renders the form component for a model. Used here and by
-  # `_modal_form_reload.erb` (which only has a view context, not a
-  # `ModalTurboForm` instance, so it calls this class method).
+  # `ApplicationController::ModalUpdater`, which only has a view
+  # context, not a `ModalTurboForm` instance, so it calls this class
+  # method.
   #
-  # The parameter is the template's `self` — an ActionView context
-  # when called from an ERB partial. Named `template` rather than
-  # `view_context` so the
+  # The parameter is the caller's `self`, an ActionView context.
+  # Named `template` rather than `view_context` so the
   # `no_helpers_in_phlex_views_test` / on-save guard against
   # `view_context.foo` calls inside Phlex view code doesn't trip on
   # this class-method utility, where the value really IS the
   # caller's view context (not a Phlex `view_context` dispatch).
   #
-  # @param template [ActionView::Base] view context from the
-  #   calling ERB template (`self` in the ERB)
+  # @param template [ActionView::Base] the calling view context
   # @param model [ActiveRecord::Base] the model instance for the form
   # @param form_locals [Hash] additional params passed to the form
   # @return [String] the rendered HTML

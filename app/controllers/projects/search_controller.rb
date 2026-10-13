@@ -12,8 +12,7 @@ module Projects
     before_action :login_required
 
     # Override the `Searchable` default so the `new` action renders
-    # the Phlex `Views::Controllers::Projects::Search::New` instead
-    # of `projects/search/new.erb` (deleted).
+    # the Phlex `Views::Controllers::Projects::Search::New`.
     def new
       @context = params[:local] == "false" ? :dropdown : :page
       set_up_form_field_groupings

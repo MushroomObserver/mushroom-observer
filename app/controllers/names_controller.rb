@@ -17,8 +17,7 @@ class NamesController < ApplicationController
 
   # Overrides `ApplicationController::Indexes#render_index_view`
   # to render the Phlex Index view directly with the controller-
-  # populated ivars as explicit props. Replaces the implicit
-  # `render(action: :index)` lookup of `index.html.erb` (deleted).
+  # populated ivars as explicit props.
   def render_index_view
     args = {
       query: @query, pagination_data: @pagination_data,

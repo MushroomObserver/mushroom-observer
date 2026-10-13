@@ -30,7 +30,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
   end
 
   # Wrap the rendered `<form>` in the list-search panel so the panel
-  # sits OUTSIDE the form tag — same shape the ERB partial used.
+  # sits outside the form tag.
   def around_template(&block)
     Panel(
       panel_id: "list_search", panel_class: "mt-3"
@@ -43,8 +43,8 @@ class Components::ListGroup::Search < Components::ApplicationForm
     hidden_field("object_id", value: @object.id)
     hidden_field("object_type", value: @object.class.name)
     # Coerce nil to "" so the `value=""` attribute renders even when
-    # no project context is set — matches Rails' `hidden_field` ERB
-    # output. `AddDispatchController` treats nil and "" identically.
+    # no project context is set. `AddDispatchController` treats nil
+    # and "" identically.
     hidden_field("project", value: @project&.id.to_s)
     render_search_status
   end
@@ -104,9 +104,8 @@ class Components::ListGroup::Search < Components::ApplicationForm
   end
 
   def render_name_autocompleter
-    # The ERB partial applied its layout `mb-2` to the autocompleter's
-    # form-group wrapper — matched here with `wrap_class:` so the
-    # margin sits on `.form-group.dropdown`, not on the `<input>`.
+    # `wrap_class:` puts the `mb-2` margin on `.form-group.dropdown`,
+    # not on the `<input>`.
     autocompleter_field(
       "name", type: :name, label: :search.ti, wrap_class: "mb-2",
               data: {

@@ -130,7 +130,7 @@ class Components::Table < Components::Base
   #   `data: { foo: "bar" }`) forwarded to both the `<th>` and `<td>`
   #   elements for this column
   # @yield [row] block that receives each row and returns cell content
-  # @return [nil] returns nil to prevent ERB output
+  # @return [nil] -- a non-nil return from a builder block is rendered
   def column(header, class: nil, **attributes, &content)
     @columns << {
       header: header,

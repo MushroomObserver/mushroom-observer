@@ -7,8 +7,7 @@ module FieldSlipsController::Index
   end
 
   # Overrides `ApplicationController::Indexes#render_index_view` so
-  # `show_index_of_objects` renders the Phlex `Index` class instead
-  # of `field_slips/index.html.erb` (deleted).
+  # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
     render(Views::Controllers::FieldSlips::Index.new(
              objects: @objects, query: @query, project: @project,

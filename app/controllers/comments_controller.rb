@@ -28,8 +28,7 @@ class CommentsController < ApplicationController
   end
 
   # Overrides `ApplicationController::Indexes#render_index_view` so
-  # `show_index_of_objects` renders the Phlex `Index` class instead
-  # of `comments/index.html.erb` (deleted).
+  # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
     render(Views::Controllers::Comments::Index.new(
              query: @query, pagination_data: @pagination_data,
