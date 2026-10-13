@@ -149,28 +149,14 @@ module CapybaraSessionExtensions
     end
   end
 
-  # expect: nil (presence only, no text check), a bare Symbol tag
-  # (resolved via .t, with **args as its interpolation args), or an
-  # Array of tags for a message built from more than one (each entry
-  # either a bare Symbol or a [Symbol, args_hash] pair).
-  #
-  # Each tag is checked as its OWN substring assertion, not joined
-  # into one combined string -- the two Capybara drivers in play here
-  # (:rack_test for test/integration/capybara, Cuprite for
-  # test/system) disagree on what, if anything, appears between two
-  # adjacent flash <p> blocks (rack_test: nothing at all -- words end
-  # up glued together; Cuprite: a newline). A joined multi-tag string
-  # would need to guess that separator and could never be right for
-  # both drivers at once; checking each tag independently sidesteps
-  # the question entirely.
-  # wait: overrides Capybara's default_max_wait_time (3s, see
-  # ApplicationSystemTestCase) for this assertion only. A Turbo-
-  # submitted form's failure/success flash can take noticeably longer
-  # than 3s to settle on a heavy page (multiple image uploads plus a
-  # full FullPageBase render) -- this isn't a flash-clearing bug, just
-  # real work exceeding the default budget. Pass wait: explicitly at
-  # the call site for a known-slow flow rather than raising the
-  # global default, which would mask genuine hangs elsewhere.
+  # expect: nil, a bare Symbol tag (resolved via .t), or an Array of
+  # tags for a multi-part message. Each tag is checked as a separate
+  # substring assertion, not joined into one string -- the two
+  # Capybara drivers disagree on what appears between adjacent flash
+  # <p> blocks (rack_test: nothing; Cuprite: a newline).
+  # wait: overrides Capybara's default_max_wait_time (3s) for this
+  # assertion only, for a known-slow flow, rather than raising the
+  # global default and masking hangs elsewhere.
   def assert_flash(expect = nil, session: self, wait: nil, **args)
     wait_opts = wait ? { wait: wait } : {}
     session.assert_selector("#flash_notices", **wait_opts)

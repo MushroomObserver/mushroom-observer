@@ -205,6 +205,7 @@ class UserTest < UnitTestCase
            "a fresh reload should see the new membership")
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Bug seen in the wild: myxomop created a username which was just under 80
   # characters long, but which had a few accents, so it was > 80 *bytes* long,
   # and it truncated right in the middle of a utf-8 sequence.  Broke the front
@@ -219,6 +220,7 @@ class UserTest < UnitTestCase
   # And this string is, in fact in the db as a user name, without truncation
   # Test has been revised accordingly.
   # 2017-06-16 JDC
+  # rubocop:enable MO/NoLongCommentBlock
   def test_myxomops_debacle
     # rubocop:disable Layout/LineLength
     name_79_chars_82_bytes = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"

@@ -63,6 +63,7 @@ class ProjectsController < ApplicationController
 
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Form to create a project.
   # Linked from: list_projects
   # Inputs:
@@ -75,6 +76,7 @@ class ProjectsController < ApplicationController
   #   Renders add_project again.
   #   Outputs: @project
   # def add_project
+  # rubocop:enable MO/NoLongCommentBlock
   def new
     image_ivars
     @project = Project.new
@@ -82,6 +84,7 @@ class ProjectsController < ApplicationController
     render_new_view
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Form to edit a project
   # Linked from: show_project
   # Inputs:
@@ -96,6 +99,7 @@ class ProjectsController < ApplicationController
   # def edit_project
   # The Admin tab's Details sub-tab is now the canonical edit URL.
   # Redirect any legacy /projects/:id/edit links there. Issue #4148.
+  # rubocop:enable MO/NoLongCommentBlock
   def edit
     return unless find_project_and_where!
 

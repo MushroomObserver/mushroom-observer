@@ -75,15 +75,12 @@ module Name::Resolve
     end
 
     # Names written entirely in one case -- "russula compacta" off a
-    # field slip, "RUSSULA COMPACTA" off another -- never reach a
-    # lookup, because `parse_name` wants a capitalized genus and
-    # returns nil first. The row is right there: the columns are
-    # case-insensitive, so the string as written matches it. Hand back
-    # what the database actually holds.
-    #
-    # `search_name` first, to keep an author the writer supplied
-    # rather than dropping it and asking them to choose between
-    # authors afterwards. Returns the string unchanged when nothing
+    # field slip, "RUSSULA COMPACTA" off another -- don't reach a
+    # lookup, since `parse_name` wants a capitalized genus and
+    # returns nil first. The columns are case-insensitive, so the
+    # string as written still matches the row; hand back what the
+    # database holds. Checks `search_name` first, to keep an author
+    # the writer supplied. Returns the string unchanged when nothing
     # matches, so the caller can tell whether anything was gained.
     def canonical_name_string(str)
       return str if str.blank?

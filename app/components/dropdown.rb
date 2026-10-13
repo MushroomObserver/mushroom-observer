@@ -193,28 +193,15 @@ class Components::Dropdown < Components::Base
     strip_tooltip_data(kwargs)
   end
 
-  # Tooltip data attrs are meaningful on icon links in the top-nav
-  # but are redundant and noisy inside a dropdown menu — the item
-  # label is already visible, and Bootstrap's tooltip JS can
-  # interfere with dropdown click handling. Also strips a top-level
-  # `title:` (Tab::Base::ALLOWED_HTML_OPTION_KEYS allows one) --
-  # `merge_context_nav_link_args` doesn't exclude it since it's
-  # shared with ContextNav/Profile, which don't have this problem,
-  # but a bare `title=` attribute alone still triggers the browser's
-  # native tooltip even with no Bootstrap JS wiring.
+  # Tooltip data attrs are noisy inside a dropdown menu (the label's
+  # already visible, and Bootstrap's tooltip JS can interfere with
+  # dropdown clicks) -- also strips `title:`, since a bare `title=`
+  # triggers the browser's native tooltip unaided.
   #
-  # Explicit `nil`s rather than just omitting the keys:
-  # Button::Post/Put/Patch/Delete (Button::CRUDBase) compute their
-  # own `data: { tooltip_target: "tip", placement: "top",
-  # title: @name }` internally in `button_html_options`, independent
-  # of anything passed in here -- merely removing the keys from these
-  # kwargs does nothing, since CRUDBase's own defaults were never in
-  # them to begin with. Explicit `nil`s deep_merge over those
-  # defaults and actually suppress them. Must be `nil`, not `false`
-  # -- Phlex omits a `nil` data value's attribute entirely, but
-  # renders `false` as the literal string "false", which is still a
-  # present attribute a presence-only JS check would treat as "has a
-  # tooltip target".
+  # Explicit `nil`s, not omitted keys: Button::CRUDBase always
+  # computes its tooltip data internally, and `nil` is what
+  # deep_merges over and suppresses those defaults -- `false` would
+  # render as the present attribute string "false".
   def strip_tooltip_data(kwargs)
     kwargs = kwargs.except(:title)
     data = (kwargs[:data] || {}).except(:tooltip_target, :title, :placement)

@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Materialize MO<->iNat correspondences as typed ExternalLinks (#4565), from
+# rubocop:disable MO/NoLongCommentBlock
+# Materialize MO<->iNat correspondences as typed ExternalLinks, from
 # the iNat "Mushroom Observer URL" observation field (5005) report.
 #
 # An MO obs may correspond to several iNat obs (iNat-side duplicates of one
@@ -30,6 +31,7 @@
 # Dry run by default; APPLY=1 writes. Idempotent.
 #   bin/rails runner script/materialize_external_links.rb
 #   APPLY=1 bin/rails runner script/materialize_external_links.rb --csv FILE
+# rubocop:enable MO/NoLongCommentBlock
 
 require "csv"
 require "optparse"

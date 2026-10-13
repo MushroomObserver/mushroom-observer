@@ -34,6 +34,7 @@ module ApplicationController::Authentication
   #
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Filter that should run before everything else.  Establishes whether a User
   # is logged in or not.
   #
@@ -48,6 +49,7 @@ module ApplicationController::Authentication
   # not, the "user" is immediately logged out and the autologin cookie is
   # destroyed.
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def autologin
     # render(plain: "Sorry, we've taken MO down to test something urgent."\
     #               "We'll be back in a few minutes. -Jason", layout: false)

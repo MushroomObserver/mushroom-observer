@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Write a QR code for a URL to a standalone image file.
 #
 #   bundle exec ruby script/qr_code.rb <url> [options]
@@ -17,6 +18,7 @@
 # checking what a route resolves to, pointing a phone at a dev server,
 # a one-off code for a sign. No Rails -- rqrcode and chunky_png are the
 # whole dependency list, so it starts instantly.
+# rubocop:enable MO/NoLongCommentBlock
 
 require("fileutils")
 require("rqrcode")

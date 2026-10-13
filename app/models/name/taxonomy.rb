@@ -181,9 +181,10 @@ module Name::Taxonomy
       end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Best-effort classification value for a given Name version row.
   #
-  # Discussion #4163 / issue #4166 — `Name#propagate_classification` and
+  # `Name#propagate_classification` and
   # the audit's pre-Phase-3 `update_all` paths bypass `acts_as_versioned`
   # entirely, so subtaxa version rows often have NULL classification
   # despite the name having had a real classification at the time.
@@ -214,12 +215,13 @@ module Name::Taxonomy
   #       panel rather than guess
   #
   # Only one ancestor step (subtaxon → genus). Genus → family etc. is
-  # left to a richer audit-trail mechanism (#3846, Phase 7).
+  # left to a richer audit-trail mechanism (Phase 7).
   #
   # Inheritance only fires when the version row's classification is
-  # genuinely NULL. An empty string is treated as "deliberately
-  # cleared" — recorded with no value — so the panel hides rather
-  # than backfilling from genus.
+  # NULL. An empty string is treated as "deliberately cleared" --
+  # recorded with no value -- so the panel hides rather than
+  # backfilling from genus.
+  # rubocop:enable MO/NoLongCommentBlock
   def classification_at_version(version_row)
     unless version_row.classification.nil?
       return { value: version_row.classification, source: :recorded }
@@ -261,6 +263,7 @@ module Name::Taxonomy
     candidates.first
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Returns an Array of all Name's in the rank above that contain this Name.
   # If there are multiple names at a given rank, it prefers accepted, non-sensu
   # names, but beyond that it chooses the first one arbitrarily.  It ignores
@@ -282,6 +285,7 @@ module Name::Taxonomy
   # matches from a single set of results. Very time consuming!
   # Bonus for the naming emails query (doesn't work yet, though):
   # Now allows eager loading (interests), plus adding self and "Lichen".
+  # rubocop:enable MO/NoLongCommentBlock
   def parents(all: false, add_self: false, add_lichen: false, includes: [])
     parents = []
     text_names = add_self ? [text_name] : []
@@ -401,18 +405,15 @@ module Name::Taxonomy
     root.propagate_classification if root.rank == "Genus"
   end
 
-  # Copy the classification of a genus to all of its children.  Does not change
-  # updated_at or rss_log or anything.  Just changes the classification field
-  # in the name records (discussion #4163 — was also fanning out to
-  # name_descriptions and observations, both since dropped).
+  # Copy the classification of a genus to all of its children. Does
+  # not change updated_at or rss_log -- just the classification
+  # field in the name records.
   #
   # `update_all` bypasses `acts_as_versioned`, so propagated subtaxa
-  # do *not* get a `name_versions` row for the change. This is
-  # intentional: a genus edit can touch tens of thousands of subtaxa
-  # and creating one version row per subtaxon would dominate the
-  # transaction. Direct edits via `Name#change_classification` (or
-  # the audit's per-Name path) still get versioned. See discussion
-  # #4163's "bulk-update paths" caveat.
+  # don't get a `name_versions` row for the change. Intentional: a
+  # genus edit can touch tens of thousands of subtaxa, and one
+  # version row per subtaxon would dominate the transaction. Direct
+  # edits via `Name#change_classification` still get versioned.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != "Genus"
@@ -588,6 +589,7 @@ module Name::Taxonomy
       matches.first
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Parse the given +classification+ String, validate it, and reformat it so
     # that it is standardized.  Return the reformatted String.  Throws a
     # RuntimeError if there are any errors.
@@ -604,6 +606,7 @@ module Name::Taxonomy
     #   Order: _Agaricales_\r\n
     #   Family: _Agaricaceae_\r\n
     #
+    # rubocop:enable MO/NoLongCommentBlock
     # rubocop:disable-next Metrics/MethodLength
     def validate_classification(rank, text)
       result = text
@@ -663,6 +666,7 @@ module Name::Taxonomy
       result
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Parses the Classification String to eturns an Array of pairs of values.
     #
     #  [["Kingdom", "Fungi"], ["Phylum", "Basidiomycota"],
@@ -683,6 +687,7 @@ module Name::Taxonomy
     #     # name = "Agaricaceae"
     #   end
     #
+    # rubocop:enable MO/NoLongCommentBlock
     def parse_classification(text)
       results = []
       if text

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #  :index
 #   params:
 #   advanced_search:
@@ -14,6 +15,7 @@
 #  :edit,
 #  :update,
 #  :destroy
+# rubocop:enable MO/NoLongCommentBlock
 
 # Locations controller.
 # rubocop:disable-next Metrics/ClassLength

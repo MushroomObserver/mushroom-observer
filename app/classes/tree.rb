@@ -28,6 +28,7 @@ class Tree
     false
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Extends the screwy ActiveRecord join- and include-style "trees" by adding
   # a single table to hang off a given table.  Can only add a single table,
   # but can build more complicated trees with multiple calls:
@@ -65,6 +66,7 @@ class Tree
   # NOTE: If the tree already contains the leaf (hanging off of the desired
   # parent), then this does nothing.  Thus it is safe to add the same leaf
   # multiple times.
+  # rubocop:enable MO/NoLongCommentBlock
   #
   def self.add_leaf(tree, look_for, add_this = nil)
     case tree

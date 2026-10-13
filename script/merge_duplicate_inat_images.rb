@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# One-time repair (#5416), and the precondition for the unique index on
+# rubocop:disable MO/NoLongCommentBlock
+# One-time repair, and the precondition for the unique index on
 # `external_links.import_source` for images.
 #
 # iNat joins one photo to as many observations as its owner likes, so a
@@ -19,6 +20,7 @@
 #   bin/rails runner script/merge_duplicate_inat_images.rb
 # Apply:
 #   bin/rails runner script/merge_duplicate_inat_images.rb --apply
+# rubocop:enable MO/NoLongCommentBlock
 
 APPLY = ARGV.delete("--apply") ? true : false
 if ARGV.any?

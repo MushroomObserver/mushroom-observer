@@ -33,24 +33,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Renders the options.
+    # Accepts Rails-helper-shape `[label, value]` pairs (e.g.
+    # `[["Member", "member"], ["Admin", "admin"]]`), not Superform's
+    # native `[value, label]` -- callers can hand this the same
+    # arrays they'd pass to `select_tag`/`options_for_select`. Flipped
+    # internally to still produce `<option value="value">label</option>`.
     #
-    # IMPORTANT: This wrapper accepts Rails-helper-shape `[label, value]`
-    # pairs (e.g. `[["Member", "member"], ["Admin", "admin"]]`), NOT
-    # Superform's native `[value, label]` shape. Callers can hand
-    # this method the same arrays they'd pass to Rails'
-    # `select_tag` / `options_for_select` — no swap needed.
-    #
-    # The pair is flipped internally so we still produce
-    # `<option value="value">label</option>` markup. (Superform
-    # 0.7's `Choices::Mapper` yields generic `[a, b]` pairs; we
-    # interpret those as `[label, value]` here.)
-    #
-    # Also overrides Superform's `options(*collection)` to use the
+    # Overrides Superform's `options(*collection)` to use the
     # wrapper's `selected:` attribute when `field.value` is nil or an
-    # array (arrays occur with range fields, e.g.
-    # `confidence: [-3.0, -1.0]`). Compares as strings to handle
-    # boolean values (Phlex omits `value="false"`).
+    # array (range fields, e.g. `confidence: [-3.0, -1.0]`), comparing
+    # as strings to handle booleans (Phlex omits `value="false"`).
     def options(*collection)
       map_options(collection).each do |label, value|
         # Coerce nil → "" so `<option value="">` renders (not

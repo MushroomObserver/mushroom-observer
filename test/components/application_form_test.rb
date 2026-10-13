@@ -182,15 +182,13 @@ class ApplicationFormTest < ComponentTestCase
 
   # Regression: SelectRangeField's two select fields sit in separate
   # d-inline-block columns meant to stay on one line (e.g. the
-  # observation search form's Confidence range). Help used to render
-  # nested inside the first field's .form-group; after #4911 it
-  # renders as a sibling instead, and if left inside the first
-  # d-inline-block column, that block-level .help-block forces a
-  # line-break within that column and pushes the second column
-  # ("to" + second select) onto a separate line. Help must render
-  # outside both columns, and both .form-groups need their bottom
-  # margin suppressed explicitly (neither carries a help_slot anymore
-  # for the automatic suppression in FieldWrapperRendering to key off).
+  # observation search form's Confidence range). Help renders as a
+  # sibling of both, not nested in the first field's .form-group --
+  # left inside that d-inline-block column, the block-level
+  # .help-block would force a line-break and push the second column
+  # onto a separate line. Both .form-groups need their bottom margin
+  # suppressed explicitly, since neither carries a help_slot for
+  # FieldWrapperRendering's automatic suppression to key off.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_select_range_field_help_renders_outside_both_columns
     form = render_form do
