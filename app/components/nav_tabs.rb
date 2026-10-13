@@ -78,6 +78,7 @@ class Components::NavTabs < Components::Base
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Register a tab. Four call shapes:
   #
   # **Tab PORO** (preferred):
@@ -109,6 +110,7 @@ class Components::NavTabs < Components::Base
   # component so the same PORO renders correctly in any tab context.
   #
   # @return [nil] -- a non-nil return from a builder block is rendered
+  # rubocop:enable MO/NoLongCommentBlock
   def tab(text_or_link, path = nil, html_options = {}, key: nil)
     @tabs << build_tab(text_or_link, path, html_options, key)
     nil

@@ -60,21 +60,15 @@ class Components::Modal::TurboForm < Components::Base
       "Components::#{model_name}Form".constantize
   end
 
-  # Renders the form component for a model. Used here and by
+  # Renders the form component for a model; also used by
   # `ApplicationController::ModalUpdater`, which only has a view
-  # context, not a `ModalTurboForm` instance, so it calls this class
-  # method.
+  # context, not a `ModalTurboForm` instance.
   #
-  # The parameter is the caller's `self`, an ActionView context.
-  # Named `template` rather than `view_context` so the
-  # `no_helpers_in_phlex_views_test` / on-save guard against
-  # `view_context.foo` calls inside Phlex view code doesn't trip on
-  # this class-method utility, where the value really IS the
-  # caller's view context (not a Phlex `view_context` dispatch).
+  # Named `template`, not `view_context`, so the no-helpers-in-Phlex
+  # on-save guard doesn't trip on this call site, which is the
+  # caller's view context, not a Phlex dispatch.
   #
   # @param template [ActionView::Base] the calling view context
-  # @param model [ActiveRecord::Base] the model instance for the form
-  # @param form_locals [Hash] additional params passed to the form
   # @return [String] the rendered HTML
   def self.render_form(template, model:, form_locals: {})
     component_class = form_component_class_for(
