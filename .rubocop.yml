@@ -203,10 +203,10 @@ MO/NoLongCommentBlock:
     A run of more than Max consecutive full-line comments is
     narrative that belongs in the commit message or PR description,
     not the source -- see lib/rubocop/cop/mo/no_long_comment_block.rb
-    and .claude/rules/code_comments.md. Max starts at 15 to land
-    without excluding files; ratchet down in follow-up PRs.
+    and .claude/rules/code_comments.md. YARD/RDoc reference runs are
+    exempt, so Max is tightened to 10.
   Enabled: true
-  Max: 15
+  Max: 10
 
 MO/NoQuerySubclassMutation:
   Description: >-

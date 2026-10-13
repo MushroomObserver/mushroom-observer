@@ -18,11 +18,17 @@ module RuboCop
       # still proofread and shorten it by hand; the exemption isn't
       # permission to leave it bloated.
       #
-      # @example Max: 15 (project default)
-      #   # bad -- 16+ consecutive comment lines
+      # A run that's mostly YARD tags (@param, @option, @yield,
+      # @return, @raise, @example) or old RDoc markup (a `term::`
+      # definition list, an `== Heading`, a `:section:` marker, a
+      # divider line of `#`/`=`) is exempt too -- structured API
+      # reference, not narrative.
+      #
+      # @example Max: 10 (project default)
+      #   # bad -- 11+ consecutive comment lines
       #   # one
       #   # ...
-      #   # sixteen
+      #   # eleven
       #   def foo; end
       #
       #   # good
@@ -35,11 +41,29 @@ module RuboCop
               "narrative belongs in the commit message or PR " \
               "description."
 
+        # Lines that read as structured API reference rather than
+        # narrative prose: a YARD tag, an RDoc `term::` definition
+        # list entry, an `== Heading`, a `:section:` marker, or a
+        # pure divider line of `#`/`=` characters. A continuation
+        # line (indented, wrapping a tag's description) also counts,
+        # since it belongs to the reference entry above it.
+        REFERENCE_LINE = /
+          \A\#(
+            \s*@\w+                   # YARD tag: @param, @option, ...
+            | \s*\S+::(\s|\z)         # RDoc term:: description
+            | \s*==+\s                # RDoc heading
+            | \s*:section:
+            | \s*[\#=]{3,}\s*\z       # divider line
+            | [ ]{3,}\S               # indented continuation (3+ spaces)
+          )
+        /x
+
         def on_new_investigation
           max = cop_config.fetch("Max", 5)
           each_full_line_comment_run do |run|
             next if run.size <= max
             next if class_or_module_doc?(run)
+            next if yard_or_rdoc_reference?(run)
 
             add_offense(
               offense_range(run),
@@ -88,6 +112,17 @@ module RuboCop
             line = processed_source.lines[line_index + 1].to_s
           end
           line.match?(/\A\s*(class|module)\b/)
+        end
+
+        # At least 3/4 of a run's non-blank lines read as reference
+        # markup -- narrative prose mixed in alongside a @param list
+        # still counts as a long comment worth trimming by hand.
+        def yard_or_rdoc_reference?(run)
+          lines = run.map(&:text).reject { |t| t.strip == "#" }
+          return false if lines.empty?
+
+          matches = lines.count { |t| t.match?(REFERENCE_LINE) }
+          matches >= lines.size * 0.75
         end
 
         def offense_range(run)
