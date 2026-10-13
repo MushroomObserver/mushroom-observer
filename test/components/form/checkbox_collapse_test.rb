@@ -45,6 +45,7 @@ class FormCheckboxCollapseTest < ComponentTestCase
     assert_no_html(html, "input[data-toggle='collapse']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_attributes_forwarded_to_checkbox_field
     html = render_collapse(
       attributes: { wrap_class: "mt-0", help: "Some help text" }

@@ -41,7 +41,7 @@ class Views::Layouts::Sidebar
     def test_heading_has_correct_css_classes
       html = render_component
 
-      # Heading should have the disabled and font-weight-bold classes
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 

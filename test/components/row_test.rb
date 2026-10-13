@@ -16,6 +16,7 @@ class RowTest < ComponentTestCase
     assert_no_html(html, "div.row")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_extra_class_merges_with_row_class
     html = render_row(class: "mt-3 align-items-center")
 

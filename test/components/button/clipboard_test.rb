@@ -13,6 +13,7 @@ class Components::Button::ClipboardTest < ComponentTestCase
     assert_html(html, "button[data-title='Copy this Sequence']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_extra_class_is_appended
     html = render_button(text: "ACGT", name: "Copy", class: "ml-2")
 

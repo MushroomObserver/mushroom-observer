@@ -38,6 +38,7 @@ class DropdownTest < ComponentTestCase
   # form-submits, not as Bootstrap-styled action buttons. Regression
   # guard for the `variant: :strip` default added to
   # `Components::LinkRendering#render_crud_button_or_link`.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_post_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :post)
 
@@ -64,6 +65,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.dropdown-item")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_patch_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :patch)
 
@@ -71,6 +73,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_put_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :put)
 
@@ -78,6 +81,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_destroy_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :destroy)
 

@@ -32,21 +32,23 @@ class HelpTest < ComponentTestCase
                 text: "Help")
   end
 
-  def test_arrow_implies_well_and_adds_arrow_div
+  # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
+  # always a well, with an `arrow-up`/`arrow-down` sibling. A top
+  # margin is added on the up-pointing variant to leave room above
+  # for the arrow tip.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_arrow_up_adds_top_margin_for_arrow_clearance
     html = render_help(element: :div, content: "Help", arrow: :up)
 
-    # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
-    # always a well, with an `arrow-up`/`arrow-down` sibling. `mt-3`
-    # is added on the up-pointing variant to leave room above for the
-    # arrow tip.
     assert_html(html, "div.well.help-block.mt-3", text: "Help")
     assert_html(html, "div.arrow-up.d-none.d-sm-block")
   end
 
-  def test_arrow_down_omits_mt3
+  # Down arrows hang below the well — no leading top margin needed.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_arrow_down_omits_top_margin
     html = render_help(element: :div, content: "Help", arrow: :down)
 
-    # Down arrows hang below the well — no leading `mt-3`.
     assert_no_html(html, "div.mt-3")
     assert_html(html, "div.arrow-down.d-none.d-sm-block")
   end

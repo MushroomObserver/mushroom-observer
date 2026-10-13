@@ -44,7 +44,7 @@ class ButtonCRUDBaseTest < ComponentTestCase
     # Icon should be rendered
     assert_html(html, "svg.mo-icon-remove")
     # Name should be in sr-only span for accessibility
-    assert_html(html, "span.sr-only", text: "Remove")
+    assert_html(html, ".sr-only", text: "Remove")
   end
 
   def test_raises_on_btn_class_in_class_kwarg
@@ -115,7 +115,7 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render_button(Components::Button::Delete, target: herbarium)
 
     assert_html(html, "button svg.mo-icon-delete")
-    assert_html(html, "button span.sr-only")
+    assert_html(html, "button .sr-only")
   end
 
   # Opt out of the default icon by passing `icon: nil`. Used by the
@@ -126,7 +126,7 @@ class ButtonSubclassesTest < ComponentTestCase
                          target: herbarium, icon: nil)
 
     assert_no_html(html, "button svg.mo-icon")
-    assert_no_html(html, "button span.sr-only")
+    assert_no_html(html, "button .sr-only")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
   end
@@ -140,18 +140,9 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button svg.mo-icon-remove")
   end
 
-  # Default renders the standard btn-default frame.
-  def test_delete_default_btn_frame
-    herbarium = herbaria(:nybg_herbarium)
-    html = render_button(Components::Button::Delete, target: herbarium)
-
-    assert_html(html, "button.btn.btn-default")
-    assert_html(html, "input[name='_method'][value='delete']")
-    assert_html(html, ".text-danger")
-  end
-
   # `variant: :outline` produces the outline button frame — the common
   # choice for CRUD index rows.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_delete_outline_variant
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Delete,
@@ -160,8 +151,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button.btn.btn-outline-default")
   end
 
-  # `variant: :strip` is explicit bare — icon-only inline destroys in
-  # dense table cells / list rows.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_delete_strip_variant
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Delete,
@@ -174,8 +164,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button svg.mo-icon-delete")
   end
 
-  # `size: :sm` + `variant: :outline` — the typical index-row
-  # delete button shape.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_delete_size_kwarg
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(
@@ -211,7 +200,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "form")
     assert_html(html, ".edit_herbarium_link_#{herbarium.id}")
     assert_html(html, "a svg.mo-icon-edit")
-    assert_html(html, "a span.sr-only",
+    assert_html(html, "a .sr-only",
                 text: :edit_object.t(type: :herbarium))
     assert_html(html, "a[data-tooltip-target='tip']")
   end
@@ -226,20 +215,13 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a[href='#{path}']",
                 text: :edit_object.t(type: :herbarium))
     assert_no_html(html, "a svg.mo-icon")
-    assert_no_html(html, "a span.sr-only")
+    assert_no_html(html, "a .sr-only")
     assert_no_html(html, "a[data-tooltip-target='tip']")
-  end
-
-  # Default renders the standard btn-default frame.
-  def test_edit_default_btn_frame
-    herbarium = herbaria(:nybg_herbarium)
-    html = render_button(Components::Button::Edit, target: herbarium)
-
-    assert_html(html, "a.btn.btn-default")
   end
 
   # `variant: :outline` produces the outline button frame — the common
   # choice for CRUD index rows.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_edit_outline_variant
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Edit,
@@ -249,6 +231,7 @@ class ButtonSubclassesTest < ComponentTestCase
   end
 
   # `variant: :strip` opt-out — icon-only inline edits in dense table rows.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_edit_strip_variant
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Edit,
@@ -260,6 +243,7 @@ class ButtonSubclassesTest < ComponentTestCase
   end
 
   # Edit with String target + explicit `class:` override.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_edit_with_string_target_and_class
     html = render_button(Components::Button::Edit,
                          target: "/items/42/edit", name: "Edit it",
@@ -267,7 +251,7 @@ class ButtonSubclassesTest < ComponentTestCase
 
     assert_html(html, "a.btn.btn-link[href='/items/42/edit']")
     assert_html(html, "a svg.mo-icon-edit")
-    assert_html(html, "a span.sr-only", text: "Edit it")
+    assert_html(html, "a .sr-only", text: "Edit it")
   end
 
   # String / Hash targets have no recoverable type, so `default_name`
@@ -276,7 +260,7 @@ class ButtonSubclassesTest < ComponentTestCase
   def test_edit_with_string_target_default_name
     html = render_button(Components::Button::Edit, target: "/items/42/edit")
 
-    assert_html(html, "a span.sr-only", text: :edit.ti)
+    assert_html(html, "a .sr-only", text: :edit.ti)
   end
 
   # New: GET + explicit path + icon `:add`. Always pass an explicit
@@ -292,7 +276,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a[href='#{path}']")
     assert_no_html(html, "form")
     assert_html(html, "a svg.mo-icon-add")
-    assert_html(html, "a span.sr-only",
+    assert_html(html, "a .sr-only",
                 text: :new_object.t(type: :herbarium))
     assert_html(html, "a[data-tooltip-target='tip']")
   end
@@ -305,19 +289,12 @@ class ButtonSubclassesTest < ComponentTestCase
 
     assert_html(html, "a[href='#{path}']", text: "New Herbarium")
     assert_no_html(html, "a svg.mo-icon")
-    assert_no_html(html, "a span.sr-only")
+    assert_no_html(html, "a .sr-only")
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
-  # Default renders the standard btn-default frame.
-  def test_new_default_btn_frame
-    html = render_button(Components::Button::New,
-                         target: routes.new_herbarium_path)
-
-    assert_html(html, "a.btn.btn-default")
-  end
-
   # `variant: :outline` produces the outline button frame.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_new_outline_variant
     html = render_button(Components::Button::New,
                          target: routes.new_herbarium_path,
@@ -331,7 +308,7 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render_button(Components::Button::New,
                          target: routes.new_herbarium_path)
 
-    assert_html(html, "a span.sr-only", text: :add.ti)
+    assert_html(html, "a .sr-only", text: :add.ti)
   end
 
   # Download: GET + explicit path + icon `:download`. The species
@@ -347,7 +324,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a[href='#{path}']")
     assert_no_html(html, "form")
     assert_html(html, "a svg.mo-icon-download")
-    assert_html(html, "a span.sr-only")
+    assert_html(html, "a .sr-only")
   end
 
   # Post: form, no `_method` field (POST is default), no confirm,
@@ -378,15 +355,8 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button", text: "Replace")
   end
 
-  # Post defaults to `btn btn-default`.
-  def test_post_default_btn_frame
-    html = render_button(Components::Button::Post,
-                         name: "Submit", target: "/items")
-
-    assert_html(html, "button.btn.btn-default")
-  end
-
   # Explicit `variant:` overrides the default.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_post_variant_override
     html = render_button(
       Components::Button::Post, name: "Submit", target: "/items",
@@ -398,6 +368,7 @@ class ButtonSubclassesTest < ComponentTestCase
   end
 
   # `variant: :strip` suppresses the frame entirely (icon-only inline buttons).
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_post_variant_nil_suppresses_frame
     html = render_button(
       Components::Button::Post, name: "Submit", target: "/items",
@@ -407,15 +378,8 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
-  # Patch defaults to `btn btn-default`.
-  def test_patch_default_btn_frame
-    html = render_button(Components::Button::Patch,
-                         name: "Update", target: "/items/1")
-
-    assert_html(html, "button.btn.btn-default")
-  end
-
   # `variant: :strip` suppresses the frame (icon-only / inline patches).
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_patch_strip_suppresses_frame
     html = render_button(
       Components::Button::Patch, name: "Update", target: "/items/1",
@@ -425,15 +389,8 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
-  # Put defaults to `btn btn-default`.
-  def test_put_default_btn_frame
-    html = render_button(Components::Button::Put,
-                         name: "Replace", target: "/items/1")
-
-    assert_html(html, "button.btn.btn-default")
-  end
-
   # `variant: :strip` suppresses the frame (icon-only / inline puts).
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_put_strip_suppresses_frame
     html = render_button(
       Components::Button::Put, name: "Replace", target: "/items/1",
@@ -444,6 +401,7 @@ class ButtonSubclassesTest < ComponentTestCase
   end
 
   # Patch with `variant:` override: form, `_method=patch`, variant applied.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_patch_with_variant_override
     html = render_button(
       Components::Button::Patch, name: "Update", target: "/items/1",
@@ -464,11 +422,11 @@ class ButtonSubclassesTest < ComponentTestCase
                          name: "View", target: herbarium)
 
     expected_href = routes.herbarium_path(herbarium)
-    assert_html(html, "a.btn.btn-default[href='#{expected_href}']",
-                text: "View")
+    assert_html(html, "a[href='#{expected_href}']", text: "View")
     assert_no_html(html, "form")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_get_button_with_string_target
     html = render_button(
       Components::Button::Get,
@@ -477,11 +435,11 @@ class ButtonSubclassesTest < ComponentTestCase
       variant: :strip
     )
 
-    # `variant: :strip` → no btn classes; still an anchor with the path
     assert_html(html, "a[href*='merge=42']", text: "Merge")
     assert_no_html(html, "a.btn-default")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_get_button_accepts_size
     html = render_button(Components::Button::Get,
                          name: "Edit", target: "/foo", size: :sm)
@@ -501,9 +459,9 @@ class ButtonSubclassesTest < ComponentTestCase
                 "[data-action='modal-toggle#showModal:prevent']" \
                 "[data-modal='modal_trust_settings']" \
                 "[href='/trust/path']")
-    assert_html(html, "a.btn.btn-default", text: "Open Trust Settings")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_modal_toggle_plain_text_style
     html = render_button(
       Components::Button::ModalToggle,

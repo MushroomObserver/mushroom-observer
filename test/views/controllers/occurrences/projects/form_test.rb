@@ -59,7 +59,7 @@ module Views::Controllers::Occurrences::Projects
       # Cancel link points to new_occurrence_path
       assert_html(
         html,
-        "a.btn[href='/occurrences/new" \
+        "a[href='/occurrences/new" \
         "?observation_id=#{@obs1.id}']",
         text: :cancel.ti
       )
@@ -102,7 +102,7 @@ module Views::Controllers::Occurrences::Projects
 
       # Cancel link points to occurrence show page
       assert_html(
-        html, "a.btn[href='/occurrences/#{occ.id}']",
+        html, "a[href='/occurrences/#{occ.id}']",
         text: :cancel.ti
       )
 

@@ -36,6 +36,7 @@ class ContainerTest < ComponentTestCase
     assert_no_html(html, "div.container-text")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_extra_class_merges_with_width_class
     html = render_container(width: :text, class: "ml-4")
 

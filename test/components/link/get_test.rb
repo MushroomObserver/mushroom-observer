@@ -51,6 +51,7 @@ class LinkGetTest < ComponentTestCase
                 "[rel='noopener noreferrer']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_strip_button_variant_renders_plain_link_without_btn_frame
     html = render_link(name: "View", target: @path, button: :strip)
 

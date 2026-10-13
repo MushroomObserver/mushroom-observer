@@ -25,9 +25,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs))
 
-    # Badge row supplies its own padding/border -- the parent
-    # panel-body (rendered by Details, not this view) is `.p-0`.
-    assert_html(html, "div.p-3.border-bottom")
+    assert_html(html, ".obs-links")
     assert_html(
       html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
       text: "iNat"
@@ -95,10 +93,8 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs))
 
-    # Each pane supplies its own padding -- the parent panel-body
-    # (rendered by Details, not this view) is `.p-0`.
-    assert_html(html, "#pane_#{inat_link.id}.collapse.p-3")
-    assert_html(html, "#pane_#{mcp_link.id}.collapse.p-3")
+    assert_html(html, "#pane_#{inat_link.id}.collapse")
+    assert_html(html, "#pane_#{mcp_link.id}.collapse")
     assert_html(
       html,
       "#pane_#{inat_link.id} turbo-frame#external_link_frame_#{inat_link.id}"
@@ -129,7 +125,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites))
 
-    assert_html(html, "div.p-3.border-bottom",
+    assert_html(html, ".obs-links",
                 text: :no_objects.t(type: :external_link).as_displayed)
     assert_no_html(html, "a.badge.badge-id")
     assert_html(html, "a[data-modal='modal_external_link']")
@@ -149,7 +145,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites))
 
-    assert_html(html, "div.obs-links.d-flex.justify-content-between")
+    assert_html(html, ".obs-links.d-flex.justify-content-between")
     assert_html(html, "a.badge.badge-id", text: "iNat")
     assert_html(html, "a[data-modal='modal_external_link']")
   end
@@ -174,7 +170,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites, user: nil))
 
-    assert_html(html, "div.p-3.border-bottom")
+    assert_html(html, ".obs-links")
     assert_no_html(html, "a[data-modal='modal_external_link']")
   end
 
