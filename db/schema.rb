@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_14_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
     t.integer "num_uses", default: 0
     t.integer "user_id", null: false
     t.string "key", limit: 128, null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.datetime "verified", precision: nil
   end
 
@@ -115,14 +115,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.string "name", limit: 100
     t.integer "project_id"
     t.string "base_url", null: false
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "last_successful_sync_at"
     t.string "url_template"
     t.integer "requests_per_minute_limit"
     t.integer "requests_per_day_limit"
     t.bigint "bytes_in_per_hour_limit"
     t.bigint "bytes_in_per_day_limit"
-    t.text "media_hosts"
+    t.text "media_hosts", collation: "utf8mb4_general_ci"
     t.datetime "last_alert_poll_at"
   end
 
@@ -173,7 +173,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "user_id"
     t.datetime "updated_at", precision: nil
     t.string "name", limit: 1024
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
   end
 
   create_table "glossary_terms", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -181,7 +181,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "user_id"
     t.string "name", limit: 1024
     t.integer "thumb_image_id"
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.integer "rss_log_id"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
@@ -189,11 +189,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
   end
 
   create_table "herbaria", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.text "mailing_address"
+    t.text "mailing_address", collation: "utf8mb4_general_ci"
     t.integer "location_id"
     t.string "email", limit: 80, default: "", null: false
     t.string "name", limit: 1024
-    t.text "description"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.string "code", limit: 8
@@ -208,7 +208,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
 
   create_table "herbarium_records", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "herbarium_id", null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.integer "user_id", null: false
@@ -376,11 +376,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "user_id"
     t.integer "license_id"
     t.integer "merge_source_id"
-    t.text "gen_desc"
-    t.text "ecology"
-    t.text "species"
-    t.text "notes"
-    t.text "refs"
+    t.text "gen_desc", collation: "utf8mb4_general_ci"
+    t.text "ecology", collation: "utf8mb4_general_ci"
+    t.text "species", collation: "utf8mb4_general_ci"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.text "refs", collation: "utf8mb4_general_ci"
   end
 
   create_table "location_description_writers", charset: "utf8mb3", force: :cascade do |t|
@@ -401,11 +401,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.string "locale", limit: 8
     t.boolean "public"
     t.integer "license_id"
-    t.text "gen_desc"
-    t.text "ecology"
-    t.text "species"
-    t.text "notes"
-    t.text "refs"
+    t.text "gen_desc", collation: "utf8mb4_general_ci"
+    t.text "ecology", collation: "utf8mb4_general_ci"
+    t.text "species", collation: "utf8mb4_general_ci"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.text "refs", collation: "utf8mb4_general_ci"
     t.boolean "ok_for_export", default: true, null: false
     t.integer "project_id"
   end
@@ -422,7 +422,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.float "high"
     t.float "low"
     t.string "name", limit: 1024
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.string "scientific_name", limit: 1024
     t.decimal "box_area", precision: 21, scale: 10
     t.decimal "center_lat", precision: 15, scale: 10
@@ -445,7 +445,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.float "high"
     t.float "low"
     t.boolean "ok_for_export", default: true, null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.string "name", limit: 1024, null: false
     t.string "scientific_name", limit: 1024, null: false
     t.boolean "locked", default: false, null: false
@@ -482,14 +482,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "user_id"
     t.integer "license_id"
     t.integer "merge_source_id"
-    t.text "gen_desc"
-    t.text "diag_desc"
-    t.text "distribution"
-    t.text "habitat"
-    t.text "look_alikes"
-    t.text "uses"
-    t.text "notes"
-    t.text "refs"
+    t.text "gen_desc", collation: "utf8mb4_general_ci"
+    t.text "diag_desc", collation: "utf8mb4_general_ci"
+    t.text "distribution", collation: "utf8mb4_general_ci"
+    t.text "habitat", collation: "utf8mb4_general_ci"
+    t.text "look_alikes", collation: "utf8mb4_general_ci"
+    t.text "uses", collation: "utf8mb4_general_ci"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.text "refs", collation: "utf8mb4_general_ci"
   end
 
   create_table "name_description_writers", charset: "utf8mb3", force: :cascade do |t|
@@ -514,21 +514,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.string "locale", limit: 8
     t.boolean "public"
     t.integer "license_id"
-    t.text "gen_desc"
-    t.text "diag_desc"
-    t.text "distribution"
-    t.text "habitat"
-    t.text "look_alikes"
-    t.text "uses"
-    t.text "notes"
-    t.text "refs"
+    t.text "gen_desc", collation: "utf8mb4_general_ci"
+    t.text "diag_desc", collation: "utf8mb4_general_ci"
+    t.text "distribution", collation: "utf8mb4_general_ci"
+    t.text "habitat", collation: "utf8mb4_general_ci"
+    t.text "look_alikes", collation: "utf8mb4_general_ci"
+    t.text "uses", collation: "utf8mb4_general_ci"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.text "refs", collation: "utf8mb4_general_ci"
     t.integer "project_id"
   end
 
   create_table "name_trackers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "name_id"
-    t.text "note_template"
+    t.text "note_template", collation: "utf8mb4_general_ci"
     t.datetime "updated_at", precision: nil
     t.boolean "require_specimen", default: false, null: false
     t.boolean "approved", default: true, null: false
@@ -544,14 +544,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.string "display_name", limit: 204
     t.string "sort_name", limit: 241
     t.string "author", limit: 100
-    t.text "citation"
+    t.text "citation", collation: "utf8mb4_general_ci"
     t.boolean "deprecated", default: false, null: false
     t.integer "correct_spelling_id"
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.integer "icn_id"
-    t.text "classification"
+    t.text "classification", collation: "utf8mb4_general_ci"
     t.index ["name_id", "version"], name: "index_name_versions_on_name_id_and_version"
   end
 
@@ -569,12 +569,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.string "search_name", limit: 221
     t.string "display_name", limit: 204
     t.string "sort_name", limit: 241
-    t.text "citation"
+    t.text "citation", collation: "utf8mb4_general_ci"
     t.boolean "deprecated", default: false, null: false
     t.integer "synonym_id"
     t.integer "correct_spelling_id"
-    t.text "notes"
-    t.text "classification"
+    t.text "notes", collation: "utf8mb4_general_ci"
+    t.text "classification", collation: "utf8mb4_general_ci"
     t.boolean "ok_for_export", default: true, null: false
     t.string "author", limit: 100
     t.string "lifeform", limit: 1024, default: " ", null: false
@@ -588,7 +588,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
   create_table "naming_reasons", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "naming_id"
     t.integer "reason"
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
   end
 
   create_table "namings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -598,7 +598,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "name_id"
     t.integer "user_id"
     t.float "vote_cache", default: 0.0
-    t.text "reasons"
+    t.text "reasons", collation: "utf8mb4_general_ci"
     t.integer "external_site_id"
     t.index ["external_site_id"], name: "index_namings_on_external_site_id"
     t.index ["observation_id", "user_id", "name_id"], name: "index_namings_on_obs_user_name", unique: true
@@ -638,7 +638,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.date "when"
     t.integer "user_id"
     t.boolean "specimen", default: false, null: false
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.integer "thumb_image_id"
     t.integer "name_id"
     t.integer "location_id"
@@ -667,7 +667,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "inat_import_id"
     t.datetime "reflected_at"
     t.boolean "placeholder", default: false, null: false
-    t.text "skeleton_omissions"
+    t.text "skeleton_omissions", collation: "utf8mb4_general_ci"
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["created_at", "id"], name: "index_observations_on_created_at_and_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"
@@ -745,7 +745,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "import_limit", default: 10000, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text "alert_recipient_ids"
+    t.text "alert_recipient_ids", collation: "utf8mb4_general_ci"
     t.index ["external_site_id"], name: "index_project_external_sites_on_external_site_id"
     t.index ["project_id", "external_site_id"], name: "index_project_sites_on_project_and_site", unique: true
   end
@@ -796,7 +796,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "admin_group_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
     t.string "title", limit: 100, default: "", null: false
-    t.text "summary"
+    t.text "summary", collation: "utf8mb4_general_ci"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.integer "rss_log_id"
@@ -812,9 +812,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id"
-    t.text "full"
+    t.text "full", collation: "utf8mb4_general_ci"
     t.string "link"
-    t.text "how_helped"
+    t.text "how_helped", collation: "utf8mb4_general_ci"
     t.boolean "mo_mentioned"
     t.boolean "peer_reviewed"
     t.datetime "created_at", precision: nil
@@ -1027,7 +1027,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "user_id"
     t.string "where", limit: 1024
     t.string "title", limit: 100
-    t.text "notes"
+    t.text "notes", collation: "utf8mb4_general_ci"
     t.integer "rss_log_id"
     t.integer "location_id"
   end
@@ -1038,7 +1038,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
   create_table "translation_string_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "translation_string_id"
-    t.text "text"
+    t.text "text", collation: "utf8mb4_general_ci"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.integer "language_id"
@@ -1048,7 +1048,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.integer "version"
     t.integer "language_id", null: false
     t.string "tag", limit: 100
-    t.text "text"
+    t.text "text", collation: "utf8mb4_general_ci"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
     t.index ["language_id", "tag"], name: "index_translation_strings_on_language_id_and_tag"
@@ -1129,7 +1129,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.boolean "email_html", default: true, null: false
     t.datetime "updated_at", precision: nil
     t.boolean "admin"
-    t.text "alert"
+    t.text "alert", collation: "utf8mb4_general_ci"
     t.boolean "email_locations_admin", default: false
     t.boolean "email_names_admin", default: false
     t.integer "thumbnail_size", default: 1
@@ -1143,11 +1143,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_12_130000) do
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
     t.text "notes", collation: "utf8mb4_general_ci"
-    t.text "mailing_address"
+    t.text "mailing_address", collation: "utf8mb4_general_ci"
     t.integer "layout_count"
     t.boolean "view_owner_id", default: false, null: false
     t.string "content_filter"
-    t.text "notes_template"
+    t.text "notes_template", collation: "utf8mb4_general_ci"
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
