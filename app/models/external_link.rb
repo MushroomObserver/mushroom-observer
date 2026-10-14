@@ -27,8 +27,9 @@
 #                  until the external site assigns one (see #5315).
 #
 class ExternalLink < AbstractModel
+  # rubocop:disable MO/NoLongCommentBlock
   # The kind of relationship this link records between the target and the
-  # external site (#4299/#4565). Drives the Show-page credit wording (the
+  # external site. Drives the Show-page credit wording (the
   # site name comes from ExternalSite):
   #   manual        — user linked it on MO    "Manual link to <site>"
   #   remote_manual — user linked it on site  "Manual link from <site>"
@@ -41,6 +42,7 @@ class ExternalLink < AbstractModel
   # `import` marks the external source the target was imported from — at most
   # one per target (enforced below and by a DB unique index on a generated
   # column). Only 0/1 were ever in production, so 2-6 are free to define.
+  # rubocop:enable MO/NoLongCommentBlock
   enum :relationship,
        { manual: 0, import: 1, export: 2, mirror: 3, copy: 4, unknown: 5,
          remote_manual: 6 },

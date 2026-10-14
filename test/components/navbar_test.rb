@@ -3,16 +3,18 @@
 require "test_helper"
 
 class NavbarTest < ComponentTestCase
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_variant_default_renders_nav_landmark
     html = render_component(
       Components::Navbar.new(variant: :default,
                              class: "hidden-print mb-2", id: "top_nav")
     ) { "Content" }
 
-    assert_html(html, "nav.navbar.navbar-flex.navbar-default.p-0" \
+    assert_html(html, "nav.navbar.navbar-flex.navbar-default" \
                        ".hidden-print.mb-2#top_nav", text: "Content")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_variant_inverse_with_explicit_element_overrides_nav_default
     html = render_component(
       Components::Navbar.new(variant: :inverse, element: :div,
@@ -20,7 +22,7 @@ class NavbarTest < ComponentTestCase
                              data_controller: "nav-active")
     ) { "Content" }
 
-    assert_html(html, "div.navbar.navbar-flex.navbar-inverse.p-0" \
+    assert_html(html, "div.navbar.navbar-flex.navbar-inverse" \
                        ".sidebar-nav[data-controller='nav-active']",
                 text: "Content")
   end

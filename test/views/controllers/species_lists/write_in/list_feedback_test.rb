@@ -16,7 +16,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       html = render_feedback(new_names: ["Agaricus foo", "Boletus bar"])
 
       assert_html(html, ".alert-danger#missing_names")
-      assert_html(html, ".alert-danger .font-weight-bold",
+      assert_html(html, ".alert-danger",
                   text: :form_list_feedback_missing_names.t)
       assert_html(html, ".help-block")
       missing_html = Nokogiri::HTML(html).at_css("#missing_names").to_s
@@ -31,7 +31,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       html = render_feedback(deprecated_names: [deprecated])
 
       assert_html(html, ".alert-warning#deprecated_names")
-      assert_html(html, ".alert-warning#deprecated_names .font-weight-bold",
+      assert_html(html, ".alert-warning#deprecated_names",
                   text: :form_species_lists_deprecated.t)
       assert_html(html, ".alert-warning#deprecated_names .help-block")
       deprecated_html = Nokogiri::HTML(html).at_css("#deprecated_names").to_s
@@ -59,7 +59,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       html = render_feedback(multiple_names: { name => [other] })
 
       assert_html(html, ".alert-warning#ambiguous_names")
-      assert_html(html, ".alert-warning#ambiguous_names .font-weight-bold",
+      assert_html(html, ".alert-warning#ambiguous_names",
                   text: :form_species_lists_multiple_names.t)
       ambiguous_html = Nokogiri::HTML(html).at_css("#ambiguous_names").to_s
       assert_includes(ambiguous_html, "comatus")

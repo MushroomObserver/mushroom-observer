@@ -40,7 +40,7 @@ module Views::Controllers::Observations::Identify
                          "[data-autocompleter--region-target='input']")
 
       # Dropdown with dual targets
-      assert_html(html, "div.auto_complete.dropdown-menu" \
+      assert_html(html, ".auto_complete.dropdown-menu" \
                          "[data-autocompleter--clade-target='pulldown']")
       assert_html(html, "ul.virtual_list" \
                          "[data-autocompleter--clade-target='list']")

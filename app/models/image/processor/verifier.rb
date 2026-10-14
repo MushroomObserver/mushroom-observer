@@ -52,16 +52,14 @@ class Image
       private
 
       # The whole stat/upload/confirm/delete sequence holds the image's
-      # row lock, serialized with Image#strip_gps! (and any concurrent
-      # transfer of the same image). strip_gps! rewrites orig/<id>.* in
-      # place; unserialized, it can interleave here so the confirm
-      # compares pre-strip sizes on both ends, deletes the just-stripped
-      # local set, and leaves the server holding the pre-strip original
-      # -- real GPS the user asked to hide, with nothing left on disk for
-      # StaleImageFilesJob to flag. Locking only the confirm/delete step
-      # wouldn't close it: a second transfer that statted the files
-      # pre-strip could still push the pre-strip original after the
-      # stripped one was confirmed and the local copies deleted.
+      # row lock, serialized with Image#strip_gps!. Unserialized,
+      # strip_gps! rewriting orig/<id>.* can interleave here so the
+      # confirm compares pre-strip sizes, deletes the just-stripped
+      # local set, and leaves the server holding the pre-strip
+      # original -- GPS the user asked to hide, with nothing left on
+      # disk to flag it. Locking only confirm/delete wouldn't close
+      # it: a second transfer that statted pre-strip could still push
+      # that original after the stripped one was confirmed.
       def transfer_image(image)
         image.with_lock { locked_transfer_image(image) }
       end
@@ -159,17 +157,16 @@ class Image
         log("Failed to upload #{path} to #{server}: #{e.message}")
       end
 
-      # Checks against a snapshot taken AFTER any upload in this run
-      # (transfer_image re-reads the servers when it uploaded anything), so
-      # a first-time upload is confirmed by an independent `find` on the
-      # server before its local copy is deleted -- not trusted on the
-      # uploader's own say-so. A silently-failed upload shows as still
-      # missing here and is safely left unmarked.
+      # Checks against a snapshot taken AFTER any upload in this run,
+      # so a first-time upload is confirmed by an independent `find`
+      # before its local copy is deleted, not trusted on the
+      # uploader's say-so. A silently-failed upload shows as still
+      # missing and is left unmarked.
       #
-      # `[].all?` is vacuously true -- guard against @image_servers being
-      # empty (development's :mycolab has no :write target, so
-      # ServerData.build excludes it), or every image would be treated as
-      # fully synced and deleted locally with nothing actually transferred.
+      # `[].all?` is vacuously true -- guard against @image_servers
+      # being empty (development's :mycolab has no :write target),
+      # or every image would be treated as fully synced and deleted
+      # locally with nothing transferred.
       def all_synced?(paths, local_sizes, remote_sizes)
         return false if @image_servers.empty?
 

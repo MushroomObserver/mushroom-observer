@@ -44,6 +44,7 @@ class NavTabsTest < ComponentTestCase
     assert_no_html(html, "a.nav-link.active")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_link_class_appended_to_every_tab_link
     html = render_with(link_class: "mt-3") do |tabs|
       tabs.tab("One", "/one", key: "one")

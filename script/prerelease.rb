@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Creates or updates the pre-deploy changelog PR (issue #5155). Run it
+# rubocop:disable MO/NoLongCommentBlock
+# Creates or updates the pre-deploy changelog PR. Run it
 # before a deploy; merge the PR it makes as the last PR, then deploy.
 #
 #   Dry run (default -- prints what the PR would contain):
@@ -34,6 +35,7 @@
 #   deploy.sh replaces it once the release is up
 #
 # Works in a temporary git worktree; the current checkout stays put.
+# rubocop:enable MO/NoLongCommentBlock
 
 require("json")
 require("open3")

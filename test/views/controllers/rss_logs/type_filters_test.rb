@@ -60,7 +60,7 @@ module Views::Controllers::RssLogs
     def test_bar_renders_everything_active_when_all_types
       html = render_component(nil, ["all"])
 
-      assert_html(html, "#log_filter_form_bar_top span.active",
+      assert_html(html, "#log_filter_form_bar_top .active",
                   text: :rss_all.t)
     end
 

@@ -102,7 +102,7 @@ class TableTest < ComponentTestCase
     rows = []
     table = Components::Table.new(rows)
 
-    # column should return nil to prevent ERB output issues
+    # column should return nil -- a non-nil return would be rendered
     result = table.column("Header") { |_row| "content" }
     assert_nil(result)
   end

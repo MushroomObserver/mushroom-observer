@@ -15,8 +15,8 @@ class Components::Form::ElevationFields < Components::Base
     div(class: "text-center") do
       elevation_input(:high)
       elevation_input(:low)
-      render_get_elevation_button
     end
+    div(class: "text-left mt-3") { render_get_elevation_button }
   end
 
   private
@@ -25,7 +25,7 @@ class Components::Form::ElevationFields < Components::Base
     @form.text_field(
       direction,
       value: @location.send(direction)&.to_s,
-      label: :"show_location_#{direction}est",
+      label: direction == :high ? :highest.ti : :lowest.ti,
       addon: "m",
       wrap_class: "text-left",
       data: {

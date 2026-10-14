@@ -42,22 +42,23 @@ class CarouselTest < ComponentTestCase
                { id: "thumb_2", content: "THUMB_TWO" }]
     )
 
-    assert_html(html, "div.carousel.slide[id='test_carousel']" \
+    assert_html(html, ".carousel.slide[id='test_carousel']" \
                       "[data-ride='false'][data-interval='false']")
-    assert_html(html, "div.carousel-inner.bg-light[role='listbox'] " \
-                      "div.item.active[id='slide_1']", text: "SLIDE_ONE")
-    assert_html(html, "div.carousel-inner div.item[id='slide_2']",
+    assert_html(html, ".carousel-inner[role='listbox'] " \
+                      ".item.active[id='slide_1']", text: "SLIDE_ONE")
+    assert_html(html, ".carousel-inner .item[id='slide_2']",
                 text: "SLIDE_TWO")
-    assert_html(html, "ol.carousel-indicators " \
-                      "li.carousel-indicator.active[id='thumb_1']" \
+    assert_html(html, ".carousel-indicators " \
+                      ".carousel-indicator.active[id='thumb_1']" \
                       "[data-target='#test_carousel'][data-slide-to='0']",
                 text: "THUMB_ONE")
-    assert_html(html, "ol.carousel-indicators li.carousel-indicator" \
+    assert_html(html, ".carousel-indicators .carousel-indicator" \
                       "[id='thumb_2'][data-slide-to='1']",
                 text: "THUMB_TWO")
   end
 
   # `class:` on item / thumb is composed onto the wrapper's class list.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_item_and_thumb_classes_are_composed
     html = render_carousel(
       carousel_args: { carousel_id: "c" },
@@ -65,8 +66,8 @@ class CarouselTest < ComponentTestCase
       thumbs: [{ class: "mr-2", content: "T" }]
     )
 
-    assert_html(html, "div.item.carousel-item.active", text: "S")
-    assert_html(html, "li.carousel-indicator.mx-1.mr-2.active", text: "T")
+    assert_html(html, ".item.carousel-item.active", text: "S")
+    assert_html(html, ".carousel-indicator.mr-2.active", text: "T")
   end
 
   # Caller-supplied `data:` merges with the primitive's auto-filled
@@ -79,7 +80,7 @@ class CarouselTest < ComponentTestCase
                  content: "T" }]
     )
 
-    assert_html(html, "li.carousel-indicator[data-target='#c']" \
+    assert_html(html, ".carousel-indicator[data-target='#c']" \
                       "[data-slide-to='0']" \
                       "[data-form-images-target='thumbnail']" \
                       "[data-image-uuid='42']")
@@ -102,10 +103,10 @@ class CarouselTest < ComponentTestCase
       thumbs: [{ content: "t" }]
     )
 
-    assert_html(html, "div.carousel.slide.image-form-carousel")
-    assert_html(html, "div.carousel-inner.bg-light.form-inner" \
+    assert_html(html, ".carousel.slide.image-form-carousel")
+    assert_html(html, ".carousel-inner.form-inner" \
                       "[id='added_images']")
-    assert_html(html, "ol.carousel-indicators.d-none" \
+    assert_html(html, ".carousel-indicators.d-none" \
                       "[id='added_thumbnails']")
   end
 
@@ -120,7 +121,7 @@ class CarouselTest < ComponentTestCase
       slides: [{ content: "s" }]
     )
 
-    assert_html(html, "div.carousel[data-form-images-target='carousel']")
+    assert_html(html, ".carousel[data-form-images-target='carousel']")
   end
 
   # `show_controls: true` (default) renders the prev/next Controls
@@ -132,8 +133,8 @@ class CarouselTest < ComponentTestCase
     html = render_carousel(carousel_args: { carousel_id: "c" },
                            slides: [{ content: "s" }])
 
-    assert_html(html, "div.carousel-inner a.left.carousel-control")
-    assert_html(html, "div.carousel-inner a.right.carousel-control")
+    assert_html(html, ".carousel-inner a.left.carousel-control")
+    assert_html(html, ".carousel-inner a.right.carousel-control")
     assert_no_html(html, ".carousel-control-wrap")
   end
 
@@ -146,8 +147,8 @@ class CarouselTest < ComponentTestCase
       slides: [{ content: "s" }]
     )
 
-    assert_html(html, "div.carousel-inner " \
-                      "div.carousel-control-wrap.row " \
+    assert_html(html, ".carousel-inner " \
+                      ".carousel-control-wrap.row " \
                       "a.left.carousel-control")
   end
 
@@ -174,9 +175,9 @@ class CarouselTest < ComponentTestCase
                { id: "s3", content: "third" }]
     )
 
-    assert_html(html, "div.item.active[id='s2']", text: "second")
-    assert_no_html(html, "div.item.active[id='s1']")
-    assert_no_html(html, "div.item.active[id='s3']")
+    assert_html(html, ".item.active[id='s2']", text: "second")
+    assert_no_html(html, ".item.active[id='s1']")
+    assert_no_html(html, ".item.active[id='s3']")
   end
 
   # `active:` works the same on thumbs.
@@ -188,8 +189,8 @@ class CarouselTest < ComponentTestCase
                { id: "t2", active: true, content: "second" }]
     )
 
-    assert_html(html, "li.carousel-indicator.active[id='t2']")
-    assert_no_html(html, "li.carousel-indicator.active[id='t1']")
+    assert_html(html, ".carousel-indicator.active[id='t2']")
+    assert_no_html(html, ".carousel-indicator.active[id='t1']")
   end
 
   # `show_indicators: false` suppresses the indicator `<ol>` entirely.
@@ -202,7 +203,7 @@ class CarouselTest < ComponentTestCase
       thumbs: [{ content: "ignored" }]
     )
 
-    assert_no_html(html, "ol.carousel-indicators")
+    assert_no_html(html, ".carousel-indicators")
     assert_not_includes(html, "ignored")
   end
 

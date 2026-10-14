@@ -116,73 +116,80 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(html, "input[name='_method'][value='patch']", count: 1)
   end
 
-  # `between_class` (FieldWithHelp) mirrors ERB:
-  # inline rows pick "mr-3"; block rows pick "form-between".
-  def test_between_class_block_field_with_help
+  # The help-trigger's span always gets a leading left margin, for the
+  # gap from the label. An inline field's trailing space before its
+  # input lives on the row (label-row-with-appends) instead, so it
+  # doesn't compound with a later append's leading margin.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_help_icon_margin_block_field_with_help
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_html(form, "span.form-between")
-    assert_no_html(form, "span.form-between.mr-3")
+    assert_html(form, ".ml-3")
+    assert_no_html(form, ".label-row-with-appends.mr-3")
   end
 
-  def test_between_class_inline_field_with_help
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_help_icon_margin_inline_field_with_help
     form = render_form do
       text_field(:name, inline: true, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_html(form, "span.mr-3")
-    assert_no_html(form, "span.form-between")
+    assert_html(form, ".ml-3")
+    assert_html(form, ".label-row-with-appends.mr-3")
   end
 
   # Help renders as a sibling after .form-group, not inside it (#4911)
-  # -- .form-group gets mb-0 so its own bottom margin doesn't double up
-  # with .help-block's own top margin.
+  # -- .form-group's bottom margin is suppressed so it doesn't double
+  # up with .help-block's top margin.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_form_group_has_mb_0_when_field_has_help
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text")
     end
 
-    assert_html(form, "div.form-group.mb-0")
-    assert_html(form, "div.form-group + div.help-block")
+    assert_html(form, ".form-group.mb-0")
+    assert_html(form, ".form-group + .help-block")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_form_group_has_no_mb_0_without_help
     form = render_form do
       text_field(:name, label: "Name:")
     end
 
-    assert_html(form, "div.form-group")
-    assert_no_html(form, "div.form-group.mb-0")
+    assert_html(form, ".form-group")
+    assert_no_html(form, ".form-group.mb-0")
   end
 
   # Regression (Copilot review on #4922): help_collapse: true renders
   # a Collapsible that's hidden by default, not an always-visible
-  # .help-block sibling -- mb-0 must not fire for it, or the gap to
-  # whatever field comes next shrinks with nothing visible to justify it.
+  # .help-block sibling -- the bottom-margin suppression must not fire
+  # for it, or the gap to whatever field comes next shrinks with
+  # nothing visible to justify it.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_form_group_has_no_mb_0_with_collapsed_help
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_no_html(form, "div.form-group.mb-0")
+    assert_no_html(form, ".form-group.mb-0")
   end
 
   # Regression: SelectRangeField's two select fields sit in separate
   # d-inline-block columns meant to stay on one line (e.g. the
-  # observation search form's Confidence range). Help used to render
-  # nested inside the first field's own .form-group; after #4911 it
-  # renders as a sibling instead, and if left inside the first
-  # d-inline-block column, that block-level .help-block forces a
-  # line-break within that column and pushes the second column
-  # ("to" + second select) onto its own line. Help must render outside
-  # both columns, and both .form-groups need mb-0 explicitly (neither
-  # carries its own help_slot anymore for the automatic mb-0 in
-  # FieldWrapperRendering to key off).
+  # observation search form's Confidence range). Help renders as a
+  # sibling of both, not nested in the first field's .form-group --
+  # left inside that d-inline-block column, the block-level
+  # .help-block would force a line-break and push the second column
+  # onto a separate line. Both .form-groups need their bottom margin
+  # suppressed explicitly, since neither carries a help_slot for
+  # FieldWrapperRendering's automatic suppression to key off.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_select_range_field_help_renders_outside_both_columns
     form = render_form do
       render(Components::ApplicationForm::SelectRangeField.new(

@@ -80,7 +80,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     html = render(panel_with(obs: current, siblings: [sibling],
                              occurrence: occurrence))
 
-    assert_html(html, "span.badge-id", text: current.id.to_s)
+    assert_html(html, ".badge-id", text: current.id.to_s)
     assert_html(html, "button.badge-id", text: sibling.id.to_s)
   end
 
@@ -137,8 +137,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                              occurrence: occurrence))
 
     assert_html(html, ".mo-icon-is-primary")
-    assert_no_html(html, "span.icon-text-gap > .mo-icon-is-primary")
-    assert_html(html, "span.icon-text-gap > .mo-icon-read-only")
+    assert_no_html(html, ".icon-text-gap > .mo-icon-is-primary")
+    assert_html(html, ".icon-text-gap > .mo-icon-read-only")
   end
 
   private

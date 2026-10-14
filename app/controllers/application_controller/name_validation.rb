@@ -11,6 +11,7 @@ module ApplicationController::NameValidation
   #
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Goes through list of names entered by user and creates (and saves) any that
   # are not in the database (but only if user has approved them).
   #
@@ -31,6 +32,7 @@ module ApplicationController::NameValidation
   #   Valid name Author = Deprecated name Author
   #   blah blah [comment]
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def construct_approved_names(name_list, approved_names, deprecate: false)
     return unless approved_names
 

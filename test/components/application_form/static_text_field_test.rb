@@ -10,8 +10,8 @@ class StaticTextFieldTest < ComponentTestCase
     @collection_number = collection_numbers(:coprinus_comatus_coll_num)
   end
 
-  # Regression: StaticTextField label should carry `for=` pointing at the
-  # field's dom id (even though there's no input — matches ERB output).
+  # Regression: StaticTextField label should carry `for=` pointing at
+  # the field's dom id, even though there's no input.
   def test_static_field_label_has_for_attribute
     form = render_form do
       static_field(:number, label: "Number:", value: "42")

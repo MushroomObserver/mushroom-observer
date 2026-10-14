@@ -80,7 +80,7 @@ class ButtonStyleCheckboxTest < ComponentTestCase
     html = render_checkbox(name: "n[]", value: "1", id: "x") { "Text" }
 
     assert_no_html(html, "label.label-zone")
-    assert_html(html, "div.label-zone", text: "Text")
+    assert_html(html, ".label-zone", text: "Text")
   end
 
   # Multiple instances with the same name[] form a multi-select group

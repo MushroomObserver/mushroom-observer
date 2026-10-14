@@ -51,19 +51,14 @@ module Query::Modules::Validation
     validation_errors.map { |tag, args| tag.t(**(args || {})) }
   end
 
-  # Pin the `order_by` param against what the model can actually
-  # honor. The `AbstractModel::OrderingScopes#order_by` dispatcher
-  # silently falls back to `all` (effectively `id: :desc`) when the
-  # supplied key has no matching `order_by_<key>` private method on
-  # the model. That silent fallback used to surface as a sort
-  # dropdown whose options did nothing — a typo in a controller's
-  # `index_sort_options` would render correctly but sort wrong.
-  # Now we add a validation error at Query construction so the
-  # mistake is loud.
+  # Validates `order_by` against what the model supports.
+  # `AbstractModel::OrderingScopes#order_by` silently falls back to
+  # `all` when there's no matching `order_by_<key>` method, so an
+  # unvalidated typo would sort wrong with no visible error; this
+  # raises loudly at Query construction instead.
   #
-  # Mirrors the dispatcher's logic exactly: blank → fine (default
-  # order kicks in), `:none` → fine (no-op order), `reverse_X` →
-  # strip prefix then check `order_by_X`.
+  # Mirrors the dispatcher's logic: blank/`:none` → fine, `reverse_X`
+  # → strip prefix, then check `order_by_X`.
   def validate_order_by!
     key = @params[:order_by]
     return if key.blank?
@@ -183,18 +178,6 @@ module Query::Modules::Validation
   def validate_truthy(_param, val)
     ActiveRecord::Type::Boolean.new.cast(val)
   end
-
-  # We don't currently have params for integers, but this would enable them.
-  # def validate_integer(param, val)
-  #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
-  #     val.to_i
-  #   elsif val.blank?
-  #     nil
-  #   else
-  #     @validation_errors <<
-  #       "Value for :#{param} should be an integer, got: #{val.inspect}")
-  #   end
-  # end
 
   def validate_float(param, val)
     if val.is_a?(Numeric) ||

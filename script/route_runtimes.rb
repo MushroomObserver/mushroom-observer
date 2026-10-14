@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Scan (gzipped) production logs and report, per route, the total time spent
 # and the median runtime over a date window. Standalone Ruby — no Rails boot,
 # streams each file line-by-line, so it's light on the server. Still, prefer
@@ -27,6 +28,7 @@
 # logdir = /var/web/mo/log; out = route_runtimes_<start>_to_<end>.csv;
 # top = 30 (rows printed to stdout). Writes the full sorted CSV AND prints a
 # top-N table.
+# rubocop:enable MO/NoLongCommentBlock
 
 require "date"
 require "zlib"

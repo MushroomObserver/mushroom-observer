@@ -22,8 +22,7 @@ class NumberFieldTest < ComponentTestCase
     assert_includes(form, 'type="number"')
   end
 
-  # Regression: Phlex number_field defaults `min: 1`. Matches ERB
-  # number_field_with_label's `opts[:min] ||= 1`.
+  # Regression: Phlex number_field defaults `min: 1`.
   def test_number_field_defaults_min_to_1
     form = render_form do
       number_field(:count, label: "Count")

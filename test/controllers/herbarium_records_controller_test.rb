@@ -531,8 +531,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
          params: params.deep_merge(herbarium_record: { modal: "true" }),
          format: :turbo_stream)
 
-    # _section_update.erb deleted; controllers now render two
-    # turbo_stream actions inline (replace + page_flash update).
+    # Controllers render two turbo_stream actions inline (replace +
+    # page_flash update).
     assert_select("turbo-stream[target='observation_herbarium_records']")
     assert_select("turbo-stream[target='page_flash']")
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)

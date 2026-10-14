@@ -88,17 +88,9 @@ module Views::Controllers::Descriptions
 
     # Wraps `Description#partial_format_name` with a rough-permissions
     # suffix ("(public)", "(restricted)", "(private)"). Returns a
-    # textile-processed SafeBuffer so callers can `trusted_html` it.
-    #
-    # Pre-Phlex this method called Rails' helper `t(result)` on a
-    # free-text string, which always hit `I18n.t` as a missing
-    # translation and wrapped the title in
-    # `<span class="translation_missing">…</span>` with title-cased
-    # fallback ("Eol Project (Restricted)"). That span shipped to
-    # every show-name / show-location page with an alt description.
-    # `String#t` (textile, MO's `app/extensions/string.rb#t`) is what
-    # this method was always meant to call — it does textile
-    # processing without the missing-translation wrapper.
+    # textile-processed SafeBuffer so callers can `trusted_html` it,
+    # via `String#t` (MO's `app/extensions/string.rb#t`), not Rails'
+    # `I18n.t` helper of the same name.
     def description_title(desc)
       result = desc.partial_format_name
       permit = title_permission_label(desc)

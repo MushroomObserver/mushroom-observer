@@ -84,9 +84,9 @@ module Views::Controllers::Comments
       # Keep single-textile-render shape so paragraph break
       # placement matches.
       trusted_html(
-        # rubocop:disable Rails/OutputSafety -- mirrors the legacy
-        # ERB: textile rendering needs raw markup; comment author
-        # input is sanitized upstream.
+        # rubocop:disable Rails/OutputSafety -- textile rendering
+        # needs raw markup; comment author input is sanitized
+        # upstream.
         "#{:comment_show_comment.l}: #{@comment.comment.to_s.html_safe}".tpl
         # rubocop:enable Rails/OutputSafety
       )

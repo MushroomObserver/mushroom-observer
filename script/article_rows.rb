@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Prints MO Article changelog rows (Textile) for the PRs merged in a
 # date range, from the changelog block each PR body carries (see
 # .claude/rules/changelog.md): `article: yes` PRs become rows, using
@@ -16,6 +17,7 @@
 #
 # Rows come out newest first, in the article's table format, with the
 # date cell marked nowrap so the link column cannot squeeze it.
+# rubocop:enable MO/NoLongCommentBlock
 
 require("date")
 require("json")

@@ -15,6 +15,7 @@ module AbstractModel::OrderingScopes
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
   included do
+    # rubocop:disable MO/NoLongCommentBlock
     # Dispatcher for Query's :order_by param. Expects a (method) arg.
     # Example:
     #   create_query(:Observation, order_by: :created_at)
@@ -34,6 +35,7 @@ module AbstractModel::OrderingScopes
     # IMPORTANT: USE THIS SCOPE whenever possible in the app and tests.
     # The private methods called by it do not include the last step that
     # resolves order within grouped results consistently.
+    # rubocop:enable MO/NoLongCommentBlock
     scope :order_by, lambda { |method, viewer: nil|
       return all if method.to_sym == :none
 

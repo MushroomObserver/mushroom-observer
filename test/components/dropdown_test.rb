@@ -38,6 +38,7 @@ class DropdownTest < ComponentTestCase
   # form-submits, not as Bootstrap-styled action buttons. Regression
   # guard for the `variant: :strip` default added to
   # `Components::LinkRendering#render_crud_button_or_link`.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_post_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :post)
 
@@ -64,6 +65,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.dropdown-item")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_patch_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :patch)
 
@@ -71,6 +73,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_put_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :put)
 
@@ -78,6 +81,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_destroy_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :destroy)
 
@@ -115,6 +119,7 @@ class DropdownTest < ComponentTestCase
   # `element:` controls the outer wrapper tag -- `:li` by default
   # (correct inside a `<ul>`-based nav), `:div` for a caller placing
   # the dropdown outside a list (Views::Layouts::Header::Sorter).
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_prop_controls_outer_wrapper
     html = render_dropdown(id: "li_toggle", menu_id: "li_menu") do |menu|
       menu.section(Tab::Project::Summary.new(project: @project))
@@ -128,7 +133,7 @@ class DropdownTest < ComponentTestCase
       menu.section(Tab::Project::Summary.new(project: @project))
     end
 
-    assert_html(html, "div.dropdown")
+    assert_html(html, ".dropdown")
     assert_no_html(html, "li.dropdown")
   end
 

@@ -6,15 +6,16 @@ class InputGroupTest < ComponentTestCase
   def test_renders_input_group_div
     html = render_component(Components::InputGroup.new) { "content" }
 
-    assert_html(html, "div.input-group", text: "content")
+    assert_html(html, ".input-group", text: "content")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_with_custom_class
     html = render_component(
       Components::InputGroup.new(class: "page-input mx-2")
     ) { "content" }
 
-    assert_html(html, "div.input-group.page-input.mx-2", text: "content")
+    assert_html(html, ".input-group.page-input.mx-2", text: "content")
   end
 
   def test_renders_with_data_attributes
@@ -22,7 +23,7 @@ class InputGroupTest < ComponentTestCase
       Components::InputGroup.new(data: { foo: "bar" })
     ) { "content" }
 
-    assert_html(html, "div.input-group",
+    assert_html(html, ".input-group",
                 attribute: { "data-foo" => "bar" })
   end
 end

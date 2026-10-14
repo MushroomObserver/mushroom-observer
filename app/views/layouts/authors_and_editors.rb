@@ -76,6 +76,7 @@ module Views::Layouts
       end
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Render a list of users on one line. Renders nothing if user list
     # empty. Accepts optional block to append content after the list.
     #
@@ -87,6 +88,7 @@ module Views::Layouts
     #   render_user_list(:show_name_description_author, authors) do
     #     a(href: some_path) { plain "(review)" }
     #   end
+    # rubocop:enable MO/NoLongCommentBlock
     def render_user_list(title, users = [])
       return unless users&.any?
 

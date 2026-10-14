@@ -11,19 +11,16 @@ module Projects
   class ViolationsController < ApplicationController
     before_action :login_required
 
-    # `@project.violating_observations` is an AR relation (not a
-    # Query), so it's paginated directly with PaginationData rather
-    # than through build_index_with_query's Query-driven machinery --
-    # see the class doc on PaginationData for this "without Query"
-    # usage. Unlike the array-slicing shown there, the current page
-    # is fetched with LIMIT/OFFSET, so only one page of observations
-    # gets its violation kinds computed.
+    # `@project.violating_observations` is an AR relation, not a
+    # Query, so it's paginated directly with PaginationData rather
+    # than build_index_with_query's Query-driven machinery -- see
+    # PaginationData's class doc. Fetched with LIMIT/OFFSET, so only
+    # the current page's violation kinds get computed.
     #
-    # A Query is built and stored too, apart from the row fetch
-    # above, so prev/next from a violation's obs page stays within
-    # this project's violations instead of falling back to session
-    # leftovers or an unscoped default. See Observation's
-    # project_violations scope.
+    # A Query is built and stored too, so prev/next from a
+    # violation's obs page stays within this project's violations
+    # instead of session leftovers or an unscoped default (see
+    # Observation's project_violations scope).
     def index
       return unless find_project!
 
@@ -44,20 +41,15 @@ module Projects
              ))
     end
 
-    # GET-only turbo-stream endpoint that renders the Add-Target-Location
-    # modal for one obs (#4304). Called by the modal-toggle controller
-    # in always-fresh mode so each open reflects current DB state —
-    # admins frequently create missing suffix Locations in a separate
-    # tab and need the modal's radios to pick those up without
-    # reloading the violations page.
+    # GET-only turbo-stream endpoint rendering the
+    # Add-Target-Location modal for one obs, in always-fresh mode so
+    # each open reflects current DB state.
     #
-    # Uses a narrow `find_by` (Copilot review on PR #4307) rather than
-    # the index action's `violations_includes` scope — this endpoint
-    # renders one obs's suffix radios, so eager-loading the whole
-    # observations list per click would be wasteful on large projects.
-    # Any missing-id / non-admin case returns :not_found rather than
-    # redirecting; the trigger is a turbo-stream fetch, so the
-    # redirect-to-index fallback from `find_project!` doesn't fit.
+    # Uses a narrow `find_by` rather than the index action's
+    # `violations_includes` scope, since eager-loading the whole
+    # list per click would waste work on large projects. A
+    # missing-id/non-admin case returns :not_found, since the
+    # trigger is a turbo-stream fetch.
     def target_location_modal
       project = Project.find_by(id: params[:id])
       obs = Observation.safe_find(params[:obs_id])

@@ -42,14 +42,15 @@ module Views::Layouts
       assert_not_includes(html, "pagination_numbers")
     end
 
+    # Rendered via Link::Get's button:/size: kwargs, not via raw
+    # btn/btn-lg strings — see Components::Navbar::LINK_CLASSES.
+    # :link (not :default) removes the background/border while
+    # keeping button padding — plain icon-only nav buttons, not
+    # filled buttons. (:strip would remove padding too.)
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_page_links_are_styled_as_large_link_buttons
       html = render_nav(pagination_data: paginated(50, 1))
 
-      # Rendered via Link::Get's button:/size: kwargs, not via raw
-      # btn/btn-lg strings — see Components::Navbar::LINK_CLASSES.
-      # :link (not :default) removes the background/border while
-      # keeping button padding — plain icon-only nav buttons, not
-      # filled buttons. (:strip would remove padding too.)
       assert_html(html, "a.prev_page_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_page_link.btn.btn-link.btn-lg")
     end
@@ -82,7 +83,7 @@ module Views::Layouts
 
       assert_no_html(html, "form.page_input")
       assert_html(
-        html, "div.input-group.page-input[data-controller='page-input']",
+        html, ".input-group.page-input[data-controller='page-input']",
         count: 1
       )
       # Input should have current page value
@@ -130,7 +131,7 @@ module Views::Layouts
                   attribute: { autocomplete: "off" })
       assert_no_html(html, "form.page_input")
       assert_html(
-        html, "div.input-group.page-input[data-controller='page-input']"
+        html, ".input-group.page-input[data-controller='page-input']"
       )
     end
 

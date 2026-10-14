@@ -37,7 +37,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   def test_footer_detail_array_renders_resolved_tag
     html = render_detail([:rss_created_at, { type: :observation }])
 
-    assert_html(html, "div.rss-detail.small",
+    assert_html(html, ".rss-detail.small",
                 text: :rss_created_at.t(type: :observation).as_displayed)
   end
 
@@ -49,7 +49,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     user = users(:rolf)
     html = render_detail(user)
 
-    assert_html(html, "div.rss-detail.small")
+    assert_html(html, ".rss-detail.small")
     assert_html(html,
                 "a[href='#{routes.observations_path(by_user: user.id)}']",
                 text: :observations.ti.as_displayed)
@@ -103,7 +103,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     html = render_box(user: @user, object: obs)
 
-    assert_no_html(html, "div.panel-footer.text-center")
+    assert_no_html(html, ".panel-footer.text-center")
   end
 
   private

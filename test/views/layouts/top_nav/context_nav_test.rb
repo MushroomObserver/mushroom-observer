@@ -56,6 +56,7 @@ class Views::Layouts::TopNav
     # `args[:button] => :destroy` routes through `Button::Delete`
     # with the context-nav opt-outs (`icon: nil`, `btn: nil`) so the
     # destroy renders as plain `[ DESTROY ]`-style text.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_destroy_button_renders_as_plain_text_link
       links = [[nil, @article, { button: :destroy }]]
       html = render_top_bar(links)
@@ -105,6 +106,7 @@ class Views::Layouts::TopNav
     # The dropdown menu strips `d-block` from button classes — the
     # pre-Phlex helper did this so button-style links don't get
     # forced to display: block inside the dropdown.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_strips_d_block_class_from_buttons
       links = [["Submit", "/items",
                 { button: :post, size: :lg, class: "d-block" }]]

@@ -27,11 +27,11 @@ class FormCameraInfoTest < ComponentTestCase
     html = render_info(lat: "", lng: "", alt: "")
 
     # Should always render GPS span so JavaScript can populate it
-    assert_html(html, "span.exif_gps")
+    assert_html(html, ".exif_gps")
     # All wrapper spans should have d-none class when values are blank
-    assert_html(html, "span.exif_lat_wrapper.d-none")
-    assert_html(html, "span.exif_lng_wrapper.d-none")
-    assert_html(html, "span.exif_alt_wrapper.d-none")
+    assert_html(html, ".exif_lat_wrapper.d-none")
+    assert_html(html, ".exif_lng_wrapper.d-none")
+    assert_html(html, ".exif_alt_wrapper.d-none")
   end
 
   def test_renders_partial_gps_info
@@ -59,8 +59,8 @@ class FormCameraInfoTest < ComponentTestCase
   def test_hides_file_size_when_absent
     html = render_info(file_name: "IMG_1234.jpg", file_size: nil)
 
-    assert_html(html, "span.file_name", text: "IMG_1234.jpg")
-    assert_no_html(html, "span.file_size")
+    assert_html(html, ".file_name", text: "IMG_1234.jpg")
+    assert_no_html(html, ".file_size")
     assert_not_includes(html, :image_file_size.l)
   end
 
@@ -103,10 +103,10 @@ class FormCameraInfoTest < ComponentTestCase
                        source_url: "https://www.inaturalist.org/observations/9")
 
     assert_includes(html, :image_reflection_info.l)
-    assert_html(html, "div.reflection_readonly_note",
+    assert_html(html, ".reflection_readonly_note",
                 text: :image_reflection_readonly_note.l)
-    assert_html(html, "span.reflection_copyright", text: "(c) Jane")
-    assert_html(html, "span.reflection_license", text: "CC BY-NC")
+    assert_html(html, ".reflection_copyright", text: "(c) Jane")
+    assert_html(html, ".reflection_license", text: "CC BY-NC")
     assert_html(
       html,
       "a.reflection_source_link" \
@@ -143,7 +143,7 @@ class FormCameraInfoTest < ComponentTestCase
     end
 
     assert_html(html, "turbo-frame#camera_info_exif_123 .spinner-right")
-    assert_no_html(html, "span.exif_gps")
+    assert_no_html(html, ".exif_gps")
     assert_no_html(html, "button.use_exif_btn")
   end
 
@@ -151,7 +151,7 @@ class FormCameraInfoTest < ComponentTestCase
     html = render_info(upload: true, lat: "45.5231")
 
     assert_no_html(html, "turbo-frame")
-    assert_html(html, "span.exif_gps")
+    assert_html(html, ".exif_gps")
   end
 
   private
