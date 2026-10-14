@@ -37,6 +37,41 @@
   }
 }
 
+// Reproduces the `.dropdown-item` treatment (display, padding,
+// colors, hover fill) for button_to's <form> wrapper -- a <form>
+// doesn't pick up Bootstrap's `.dropdown-item` rendering the way
+// an <a>/<button> does, so it's spelled out by hand here instead.
+// Same $dropdown-link-* variables Bootstrap's `.dropdown-item`
+// rule uses, so button-shaped and link-shaped items match.
+.dropdown-menu {
+  button.btn-link {
+    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
+  }
+
+  form.button_to {
+    display: block;
+    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.428571429;
+    white-space: nowrap;
+    color: $dropdown-link-color;
+
+    &:hover {
+      color: $dropdown-link-hover-color;
+      background-color: $dropdown-link-hover-bg;
+      text-decoration: none;
+    }
+
+    // Browser-chrome-reset button underneath just tracks the
+    // form's color -- the form has the row's padding and hover
+    // background now, not the button.
+    button[type=submit]:not(.btn):not(.text-danger) {
+      color: inherit;
+    }
+  }
+}
+
 // rss-log type-filter dropdown: a border between every row, and
 // right padding on the label zone -- the flex row of two zones
 // doesn't inherit `.dropdown-item`'s padding at that edge.
