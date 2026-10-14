@@ -88,7 +88,7 @@ root> service mysql restart
 remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=$DB_HOST ping
 remote> vi /var/web/mo/config/database.yml
   production:
-    primary: &primary_production
+    primary:
       adapter:  trilogy
       database: mo_production
       host:     $DB_HOST
@@ -107,10 +107,6 @@ remote> vi /var/web/mo/config/database.yml
       encoding: utf8mb4
       collation: utf8mb4_general_ci
       migrations_paths: db/cache/migrate
-    cable:
-      <<: *primary_production
-      database: cable_production
-      migrations_paths: db/cable_migrate
 
 remote> rake db:version   # (just a simple test)
 
