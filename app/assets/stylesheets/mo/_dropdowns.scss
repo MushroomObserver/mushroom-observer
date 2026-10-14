@@ -45,6 +45,25 @@
   }
 }
 
+// `Components::Button::CRUDBase`'s button-forms get a sitewide
+// `display: inline` + link-colored text (_links_buttons_alerts.scss),
+// for inline-sentence usage -- beat that via specificity (extra
+// classes, not source order) so a button-type dropdown item lays out
+// and colors like every other row.
+.dropdown-item.button_to {
+  display: block;
+  padding: 3px 20px;
+
+  button[type="submit"]:not(.btn):not(.text-danger),
+  input[type="submit"]:not(.btn):not(.text-danger) {
+    color: inherit;
+
+    &:hover {
+      color: inherit;
+    }
+  }
+}
+
 // Matches BS3's nav-divider mixin: ($line-height-computed / 2) - 1.
 .dropdown-divider {
   height: 1px;
