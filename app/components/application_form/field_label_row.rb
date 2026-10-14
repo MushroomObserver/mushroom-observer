@@ -5,11 +5,11 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Phlex::TrustedHtml
 
-    # Three layouts: bare <label> (no appends/end), a d-flex wrap for
-    # label+appends with no end, or d-flex justify-content-between for
-    # label+appends on the left and label_end on the right. `between`
-    # and `help` blocks are not part of this row -- see
-    # FieldWrapperRendering and FieldWithHelp for those.
+    # Three layouts for the label row: bare <label> (no appends/end);
+    # `d-flex` label+appends with no end; or `d-flex
+    # justify-content-between` with label+appends left, label_end right.
+    # `between`/`help` blocks aren't part of this row -- see
+    # FieldWrapperRendering/FieldWithHelp for those.
     def render_label_row(label_text, inline)
       if label_end_present?
         render_label_flex_row(label_text, inline)
@@ -29,9 +29,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Resolves `wrapper_options[:label]` to display text: an explicit
     # String wins as-is, a Symbol is translated via `.t`, otherwise the
-    # field's key, humanized. A bare Symbol still routes through `.t`
-    # (not `.ti`-style title-casing) since some translations carry
-    # textile markup that needs rendering, not casing.
+    # field's key, humanized. Callers wanting title-case pass an
+    # already-resolved String via `.ti`; a bare Symbol routes through
+    # `.t` since some translations carry textile markup to render.
     def resolved_label_text
       label_option = wrapper_options[:label]
       text = case label_option
@@ -42,11 +42,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       open_label_links_in_new_tab(text)
     end
 
-    # A link inside a label would navigate away from a form mid-fill,
-    # so force target="_blank" (+ rel="noopener noreferrer") instead
-    # of stripping it -- a translator's Textile link syntax can land
-    # here unaware it's inside a <label>. Browsers give a nested <a>
-    # click priority over the label's toggle behavior, so this is safe.
+    # A link inside a label would navigate away from a partly-filled
+    # form, so this forces `target="_blank"` (+ `rel="noopener
+    # noreferrer"`) instead of stripping it -- a translator's Textile
+    # link syntax can land here unaware it's inside a `<label>`.
+    # Browsers give the nested `<a>` click priority over the toggle.
     LINK_TAG_RE = /<a\b([^>]*)>/i
 
     def open_label_links_in_new_tab(text)

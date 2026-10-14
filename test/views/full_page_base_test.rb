@@ -78,16 +78,16 @@ class Views::FullPageBaseTest < ComponentTestCase
     stub_session!(layout: "")
     html = render(Page.new)
 
-    assert_html(html, "div.stub-app")
-    assert_no_html(html, "div.stub-printable")
+    assert_html(html, ".stub-app")
+    assert_no_html(html, ".stub-printable")
   end
 
   def test_printable_session_picks_printable_layout
     stub_session!(layout: "printable")
     html = render(Page.new)
 
-    assert_html(html, "div.stub-printable")
-    assert_no_html(html, "div.stub-app")
+    assert_html(html, ".stub-printable")
+    assert_no_html(html, ".stub-app")
     assert(RecordingPrintable::CAPTURED[:invoked])
   end
 
@@ -95,7 +95,7 @@ class Views::FullPageBaseTest < ComponentTestCase
     stub_session!(layout: "BOGUS_LAYOUT")
     html = render(Page.new)
 
-    assert_html(html, "div.stub-app")
+    assert_html(html, ".stub-app")
   end
 
   def test_capture_emits_action_content_inside_layout
@@ -104,7 +104,7 @@ class Views::FullPageBaseTest < ComponentTestCase
 
     # The page's `<div id="page-inner">` is captured, then emitted
     # inside the stub layout's wrapper.
-    assert_html(html, "div.stub-app > div#page-inner", text: "PAGE_INNER")
+    assert_html(html, ".stub-app > div#page-inner", text: "PAGE_INNER")
   end
 
   def test_canonical_url_forwarded_from_controller_ivar

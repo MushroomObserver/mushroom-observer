@@ -19,7 +19,7 @@ class RadioFieldTest < ComponentTestCase
       radio_field(:number, [1, "Option 1"], [2, "Option 2"])
     end
 
-    assert_html(form, "div.custom-control.custom-radio")
+    assert_html(form, ".custom-control.custom-radio")
     assert_html(form, "input[type='radio'][name='collection_number[number]']",
                 count: 2)
     assert_html(form, "input[value='1']")
@@ -28,17 +28,17 @@ class RadioFieldTest < ComponentTestCase
     assert_includes(form, "Option 2")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_radio_field_with_wrap_class
     form = render_form do
       radio_field(:number, [1, "A"], [2, "B"], wrap_class: "ml-4")
     end
 
-    assert_html(form, "div.custom-control.custom-radio.ml-4", count: 2)
+    assert_html(form, ".custom-control.custom-radio.ml-4", count: 2)
   end
 
   # Regression: each per-option label carries `for=` pointing at its
-  # input's id (matching ERB radio_with_label, which uses
-  # form.label("#{field}_#{value}")).
+  # input's id.
   def test_radio_field_per_option_label_has_for_attribute
     form = render_form do
       radio_field(:number, [1, "A"], [2, "B"])
@@ -52,8 +52,8 @@ class RadioFieldTest < ComponentTestCase
 
   # Regression: RadioField `between` slot renders after each option's
   # label text inside the `<label>`, wrapped in `<div class="d-inline-block
-  # ml-3">`. Matches ERB `radio_with_label`'s `between:` shape. Applied
-  # uniformly to every option (one slot per RadioField call).
+  # ml-3">`. Applied uniformly to every option (one slot per RadioField
+  # call).
   def test_radio_field_with_between_slot
     form = render_form do
       component = Components::ApplicationForm::RadioField.new(
@@ -66,12 +66,13 @@ class RadioFieldTest < ComponentTestCase
     end
 
     assert_html(form,
-                "div.custom-control.custom-radio div.d-inline-block.ml-3 " \
-                "span.help-note", count: 2)
+                ".custom-control.custom-radio .d-inline-block .help-note",
+                count: 2)
     assert_includes(form, "(see notes)")
   end
 
   # RadioField standalone tests (via FieldProxy)
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_radio_field_with_field_proxy
     proxy = Components::ApplicationForm::FieldProxy.new(
       "chosen_name", :name_id
@@ -79,7 +80,7 @@ class RadioFieldTest < ComponentTestCase
     html = render_radio_field(proxy, [10, "Alpha"], [20, "Beta"],
                               wrapper_options: { wrap_class: "ml-4" })
 
-    assert_html(html, "div.custom-control.custom-radio.ml-4", count: 2)
+    assert_html(html, ".custom-control.custom-radio.ml-4", count: 2)
     assert_html(html,
                 "input[type='radio'][name='chosen_name[name_id]']",
                 count: 2)
@@ -131,7 +132,7 @@ class RadioFieldTest < ComponentTestCase
     last_radio_end = form.rindex("</div>", form.index("after-radios"))
     assert(last_radio_end,
            "append content should be emitted after the radio group")
-    assert_html(form, "div.after-radios", text: "after the group")
+    assert_html(form, ".after-radios", text: "after the group")
   end
 
   def test_radio_field_symbol_with_value_selects_non_model_attribute
@@ -208,11 +209,10 @@ class RadioFieldTest < ComponentTestCase
 
     # Option 1 keeps the plain text label.
     assert_includes(html, "Plain text label")
-    # Option 2's label content is rendered by the block, inside <label>.
-    assert_html(html, "label[for='target_2'] > strong",
-                text: "Bold part")
-    assert_html(html, "label[for='target_2'] > div.ml-4.text-muted",
-                text: "Help text")
+    # Option 2's label content is rendered by the block as HTML,
+    # not flattened to text, inside <label>.
+    assert_html(html, "label[for='target_2'] > strong", text: "Bold part")
+    assert_html(html, "label[for='target_2'] > div", text: "Help text")
   end
 
   def test_per_choice_append_accepts_proc

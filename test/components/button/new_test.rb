@@ -3,6 +3,7 @@
 require("test_helper")
 
 class ButtonNewTest < ComponentTestCase
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_target_renders_btn_default_framing
     html = render_new(target: routes.new_herbarium_path)
 
@@ -10,6 +11,7 @@ class ButtonNewTest < ComponentTestCase
                 "a.btn.btn-secondary[href='#{routes.new_herbarium_path}']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_variant_overrides_default_framing
     html = render_new(target: routes.new_herbarium_path, variant: :outline)
 
@@ -21,7 +23,7 @@ class ButtonNewTest < ComponentTestCase
     tab = ::Tab::Observation::AddToSpeciesList.new(observation: obs)
     html = render_new(tab: tab)
 
-    assert_html(html, "a.btn[href='#{tab.path}']", text: tab.title.as_displayed)
+    assert_html(html, "a[href='#{tab.path}']", text: tab.title.as_displayed)
   end
 
   private

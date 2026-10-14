@@ -87,10 +87,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    # Only emit an outer-wrap id when the caller explicitly passes one
-    # (matches ERB `autocompleter_field`). Forms that need a stable
-    # CSS-selector handle (e.g. map outlets) pass `controller_id:`;
-    # forms that don't shouldn't get noise.
+    # Only emit an outer-wrap id when the caller explicitly passes one.
+    # Forms that need a stable CSS-selector handle (e.g. map outlets)
+    # pass `controller_id:`; forms that don't shouldn't get noise.
     def controller_id
       custom_controller_id
     end
@@ -160,9 +159,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def input_data_attributes
-      # String "true" (not boolean true) so Phlex emits
-      # data-autocompleter="true", matching ERB output --
-      # base_controller overwrites this to "connected" on connect.
+      # Use string "true" (not boolean true) so Phlex emits
+      # `data-autocompleter="true"` instead of the boolean shorthand
+      # `data-autocompleter`. autocompleter base_controller overwrites
+      # this to `"connected"` on connect regardless.
       { target_attr_key => "input", autocompleter: "true" }.merge(extra_data)
     end
 
@@ -219,11 +219,11 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
-    # A bare svg can't take padding (a replaced element's padding
-    # shrinks its content instead of adding space around it), so
-    # spacing and the has-id/has-id-indicator toggle live on the
-    # wrapping span. The tooltip lives there too, not on `Icon(...)`
-    # -- `title:` on Icon doesn't give a bare svg a working tooltip.
+    # A bare <svg> can't take padding -- shrinks the checkmark instead
+    # of adding space. Spacing and the show/hide toggle
+    # (_autocomplete.scss) live on this wrapping span instead; the
+    # tooltip lives here too since `title:` on Icon alone doesn't
+    # work on a bare svg.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
       span(class: "ml-2 has-id-indicator", title: title,
@@ -233,11 +233,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Plain `Button`s, not `Link`s -- client-side toggles with a fake
-    # href + Stimulus :prevent, no destination. `variant: :link,
-    # class: "... p-0"` gives Bootstrap's .btn-link reset with zero
-    # padding; `Button` doesn't auto-wire a tooltip like `Link::Get`
-    # does, so each below supplies tooltip_data by hand.
+    # Plain `Button`s, not `Link`s -- client-side toggles with no
+    # destination. `variant: :link, class: "... p-0"` gives Bootstrap's
+    # `.btn-link` reset with zero padding. `Link::Get` auto-wires a
+    # tooltip from `icon:`; plain `Button` doesn't, so each one below
+    # builds the same tooltip_data by hand.
     def render_find_button
       return unless find_text
 
@@ -372,11 +372,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
-    # Returns [namespace, leaf] from the field's `dom.name`, splitting
-    # on the last `[…]` group -- correct whether `field.key` is a
-    # Symbol (leaf only) or a String with the full namespaced name
-    # already in it. E.g. "member[notes][Cap]" -> ["member[notes]",
-    # "Cap"]; "approved_rank" (no brackets) -> ["", "approved_rank"].
+    # Model prefix + leaf key from the field's `dom.name`, split on
+    # the LAST `[…]` group -- works whether `field.key` is a Symbol
+    # (leaf only) or a String with the namespaced name already in it.
+    # E.g. "member[notes][Cap]" -> ["member[notes]", "Cap"];
+    # "approved_rank" (no brackets) -> ["", "approved_rank"].
     def name_parts
       @name_parts ||= begin
                         name = field.dom.name.to_s

@@ -218,28 +218,16 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "custom_panel_id")
   end
 
-  # Regression: the visible `.carousel-caption` overlay must NEVER
-  # contain image copyright or notes. Those belong on the lightbox
-  # caption (the hidden `.lightbox-caption` element nested in the
-  # theater-btn, built by `Components::ImageFragment::LightboxCaption`
-  # -- see #4894). Image *original
-  # filename* IS allowed in the carousel-caption (inside the
-  # `.image-info.d-none.d-sm-block` wrapper, hidden on xs and
-  # visible from sm+) when the owner's `keep_filenames` opt-in
-  # condition is met — that's a separate user-facing feature
-  # pinned by `LurkerIntegrationTest#test_show_observation`.
+  # Regression: the visible `.carousel-caption` overlay must not
+  # contain image copyright or notes -- those belong only on the
+  # lightbox caption. Original filename IS allowed there (inside
+  # `.image-info.d-none.d-sm-block`) when the owner's
+  # `keep_filenames` opt-in is set.
   #
-  # The original bug (caught by the grid-box tryout): the abstract
-  # `Components::Carousel::Item#render_carousel_caption` gated the
-  # image-info block on `image_info_html.present?`. That predicate
-  # called `image_info_html`, which called `copyright` / `notes` /
-  # `owner_original_name` — all of which have Phlex side effects
-  # (they write `div(...)` / `render(...)` to the current buffer).
-  # The "present?" check therefore wrote copyright + notes directly
-  # into the `.carousel-caption` buffer, OUTSIDE the
-  # `.image-info.d-none.d-sm-block` wrapper that was supposed to
-  # gate visibility. Net effect: copyright + iNat-import note
-  # overlaid on every slide instead of being scoped to the lightbox.
+  # `copyright`/`notes`/`owner_original_name` have Phlex side
+  # effects, so gating the image-info block on
+  # `image_info_html.present?` wrote copyright + notes directly into
+  # the `.carousel-caption` buffer, outside the visibility wrapper.
   def test_carousel_caption_does_not_leak_copyright_or_notes
     # Fixture has both `notes: "Some Notes"` and
     # `copyright_holder: "Bob Dobbs"` — the exact shape that

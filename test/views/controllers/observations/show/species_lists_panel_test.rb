@@ -95,11 +95,11 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
       id: @obs.id, species_list_id: spl.id, commit: "remove"
     )}']"
     assert_html(html, "#{form_selector} button svg.mo-icon-remove")
-    assert_html(html, "#{form_selector} button span.sr-only",
+    assert_html(html, "#{form_selector} button .sr-only",
                 text: :remove.ti)
     # Must render inside InlineLinkBlock's wrapper span -- that's what
     # supplies the group's spacing from the list link beside it.
-    assert_html(html, "li span.inline-link-block #{form_selector}")
+    assert_html(html, "li .inline-link-block #{form_selector}")
   end
 
   private

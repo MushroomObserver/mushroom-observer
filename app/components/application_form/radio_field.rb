@@ -71,9 +71,8 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_choice(choice)
       end
       # `append_slot` content is emitted once, *after* the entire radio
-      # group. Differs from ERB `radio_with_label`'s per-option `append:`
-      # because the Phlex helper is per-group (one call renders every
-      # option) — append-after-each isn't a coherent concept here.
+      # group -- this helper is per-group (one call renders every
+      # option), so append-after-each isn't a coherent concept here.
       render(append_slot) if append_slot
     end
 
@@ -163,10 +162,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # `between` content is rendered after the label text inside each
-    # option's `<label>`, wrapped in `<div class="d-inline-block ml-3">`
-    # — matching ERB `radio_with_label`'s `between:` shape. Applied
-    # uniformly to every option (one slot per RadioField call). For
-    # per-option metadata, supply different content per call site.
+    # option's `<label>`, wrapped in `<div class="d-inline-block ml-3">`.
+    # Applied uniformly to every option (one slot per RadioField call).
+    # For per-option metadata, supply different content per call site.
     def render_between_slot
       return unless between_slot
 

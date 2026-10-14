@@ -64,6 +64,7 @@ module AbstractModel::Scopes
         where.not(user: ids).distinct
     }
 
+    # rubocop:disable MO/NoLongCommentBlock
     # `created_at`/`updated_at` are versatile, and handle all Queries currently.
     #
     #   Value handling:
@@ -76,6 +77,7 @@ module AbstractModel::Scopes
     # in Ruby. Parsing of user text values like "yesterday"/"la semana pasada"
     # needs to be done upstream in PatternSearch.
     #
+    # rubocop:enable MO/NoLongCommentBlock
     scope :created_at,
           ->(early, late = nil) { datetime_at(early, late, col: :created_at) }
     scope :updated_at,
@@ -426,6 +428,7 @@ module AbstractModel::Scopes
       end
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Returns an array of AR conditions describing what a search is looking for.
     #
     # Each array member ["foo", "fah"] gets joined in a chain of AR "where"
@@ -442,6 +445,7 @@ module AbstractModel::Scopes
     #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
     #   "AND x NOT LIKE '%lost boys%'"
     #
+    # rubocop:enable MO/NoLongCommentBlock
     def search_conditions_good(table_columns, goods)
       conditions = []
       goods.each do |good|

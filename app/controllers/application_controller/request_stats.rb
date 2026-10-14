@@ -22,18 +22,16 @@ module ApplicationController::RequestStats
 
   private
 
-  # A printed QR code's two requests: the lookup, and the `/obs/` page
-  # it redirects to. A fair puts a roomful of people behind one
-  # address, none of them logged in, which is the shape
-  # update_ip_stats.rb blocks a scraper for -- so the scans are left
-  # out of the count. Only out of the count: a blocked address is
-  # still refused these, like any other page.
+  # A printed QR code's two requests (lookup, then the `/obs/`
+  # redirect) are left out of the count: a group foray puts a
+  # roomful of people behind one address, none logged in -- the
+  # same shape `update_ip_stats.rb` blocks a scraper for. A blocked
+  # address still gets refused these, like any other page.
   #
-  # The `/obs/` form alone, tested the way check_for_spider_block tests
-  # it, so the pages MO lets a logged-out visitor read and the pages it
-  # declines to meter stay the same set. `/observations/:id` and a bare
-  # `/:id` are where the crawlers arrive, and they still count: 96,490
-  # requests in one day, against 37 for the busiest reader of `/obs/`.
+  # Only the `/obs/` form itself is exempt -- `/observations/:id`
+  # and a bare `/:id` still count, since that's where crawlers
+  # arrive (96,490 requests in one day, vs. 37 for the busiest human
+  # reader of `/obs/`).
   def label_scan?
     return true if params[:controller] == "projects/best_observations" &&
                    params[:action] == "show"

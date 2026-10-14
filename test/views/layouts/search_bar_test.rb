@@ -16,6 +16,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     controller.define_singleton_method(:session) { session }
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_help_toggle_visible_when_type_has_help
     html = render_bar(help_types: [:observations])
 
@@ -48,6 +49,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "[data-search-type-target='helpToggle'].d-none")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_form_toggle_visible_when_type_has_form
     html = render_bar(form_types: [:observations])
 
@@ -64,6 +66,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "a[href='#search_nav_form'] " \
                 "span[aria-label='#{:search_bar_more_options.l}']")
     assert_html(html, "a[href='#search_nav_form'] svg.mo-icon-plus")
+    # Icon-only vs. labeled outline-button.
     assert_html(html, "a[href='#search_nav_form'].btn.btn-link")
     # Labeled outline-button, shown from lg up.
     assert_html(html,

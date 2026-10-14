@@ -13,8 +13,8 @@ class AccordionTest < ComponentTestCase
       a.with_pane(id: "edit_42") { "EDIT_CONTENT" }
     end
 
-    assert_html(html, "div.border-none.mb-0#notes_42")
-    assert_html(html, "#notes_42 div.border-none.bg-none")
+    assert_html(html, ".border-none#notes_42")
+    assert_html(html, "#notes_42 .border-none.bg-none")
     assert_html(html, "#view_42.collapse.#{EXPANDED}", text: "VIEW_CONTENT")
     assert_html(html, "#edit_42.collapse", text: "EDIT_CONTENT")
     assert_no_html(html, "#edit_42.#{EXPANDED}")
@@ -46,7 +46,7 @@ class AccordionTest < ComponentTestCase
   def test_no_background_so_striped_rows_show_through
     html = render_accordion { |a| a.with_pane(id: "p") { "x" } }
 
-    assert_html(html, "div.bg-none")
+    assert_html(html, ".bg-none")
   end
 
   def test_panes_fade_by_default
@@ -55,6 +55,7 @@ class AccordionTest < ComponentTestCase
     assert_html(html, "#p.fade-not-slide")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_with_pane_class_lands_on_the_pane_alongside_fade_not_slide
     html = render_accordion { |a| a.with_pane(id: "p", class: "p-3") { "x" } }
 
@@ -67,10 +68,11 @@ class AccordionTest < ComponentTestCase
     assert_no_html(html, "#p.fade-not-slide")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_extra_class_merges_onto_inner_wrapper_div
     html = render_accordion(class: "m-0") { |a| a.with_pane(id: "p") { "x" } }
 
-    assert_html(html, "div.border-none.bg-none.m-0")
+    assert_html(html, ".border-none.bg-none.m-0")
   end
 
   def test_extra_data_attrs_merge_onto_inner_wrapper_div

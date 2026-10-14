@@ -119,6 +119,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("fr", sender.locale)
     assert_equal("en", receiver.locale)
 
+    # rubocop:disable MO/NoLongCommentBlock
     # I have no clue how to ensure translations are set any particular way.
     # This stub causes every single translation to be simply:
     #   "locale:mo.tag" (or "Locale:Mo.Tag" for a .ti caller, since .ti
@@ -133,6 +134,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # production code makes (see `stubbed_label`/`stubbed` below) rather
     # than hardcoding the stub's output -- so this test doesn't go stale
     # if a call site's tag or method (.t vs .l vs .ti) ever changes.
+    # rubocop:enable MO/NoLongCommentBlock
     translator = lambda do |*args|
       "#{I18n.locale}:#{args.first}"
     end

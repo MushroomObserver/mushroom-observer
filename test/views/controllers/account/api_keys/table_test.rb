@@ -69,7 +69,7 @@ module Views::Controllers::Account::APIKeys
                   "[data-parent='#notes_#{key.id}']")
       assert_html(html, "a[data-role='edit_api_key'] svg.mo-icon-edit")
       assert_html(html,
-                  "a[data-role='edit_api_key'] span.collapse-toggle-closed",
+                  "a[data-role='edit_api_key'] .collapse-toggle-closed",
                   text: " #{:edit.ti.as_displayed}")
       # Edit pane (inline-edit Form with Save button).
       assert_html(html,
@@ -102,7 +102,7 @@ module Views::Controllers::Account::APIKeys
                   "[aria-controls='new_key_form_container']" \
                   "[aria-expanded='false']")
       assert_html(html,
-                  "a#new_key_button span.collapse-toggle-closed",
+                  "a#new_key_button .collapse-toggle-closed",
                   text: :account_api_keys_create_button.l.as_displayed)
       # Inline create form lives in the hidden pane.
       assert_html(html, "#new_key_form_container #new_api_key_form")

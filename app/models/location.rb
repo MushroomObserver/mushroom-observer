@@ -156,18 +156,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   after_save :award_version_contribution
 
-  # Deliberately NOT overriding `current_user` itself to fall back to
-  # User.admin - AbstractModel's generic contribution/logging hooks
-  # (update_contribution, do_log_update, do_log_destroy) all check
-  # `respond_to?(:current_user)` and prefer it over the record's own
-  # `user_id` when present. A blanket fallback here would misattribute
-  # those (e.g. the destroy step of a merge re-fetches a fresh
-  # instance with no current_user set, so the fallback would credit/
-  # debit the admin instead of falling through to the real owner via
-  # `user_id`, as those generic hooks expect when current_user is nil).
-  # The version-attribution fallback (this model's own long-standing
-  # behavior for scripts/background jobs with no real session) is
-  # applied narrowly in set_version_current_user below instead.
+  # Deliberately not overriding `current_user` to fall back to
+  # User.admin: AbstractModel's generic contribution/logging hooks
+  # check `respond_to?(:current_user)` and prefer it over the
+  # record's `user_id` when present. A blanket fallback here would
+  # misattribute those (e.g. a merge's destroy step re-fetches a
+  # fresh instance with no current_user set, so the fallback would
+  # credit the admin instead of the owner via `user_id`). The
+  # version-attribution fallback is applied narrowly in
+  # set_version_current_user below instead.
   def set_version_current_user
     return unless saved_version_changes?
 
@@ -335,17 +332,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     (official_unknown + :unknown_locations.l.split(/, */)).uniq
   end
 
-  # We always include the English words for "unknown", even when
-  # viewing the site in another language, so that e.g. "Unknown"
-  # (typed by an English-speaking user long ago, or hardcoded
-  # somewhere) still matches regardless of the viewer's locale.
-  #
-  # This is static data (en.txt's `unknown_locations` key: "Unknown,
-  # Earth, World, Worldwide, Anywhere, Everywhere") that's already
-  # loaded in memory by I18n -- the same source :unknown_locations.l
-  # above reads for the current locale, just pinned to :en here
-  # instead. No DB round-trip (Language.official.translation_strings),
-  # so nothing worth caching.
+  # Always includes the English words for "unknown", even in another
+  # locale, so a hardcoded or long-ago-typed "Unknown" still matches.
+  # Static data (en.txt's `unknown_locations` key) already loaded in
+  # memory by I18n, just pinned to :en instead of the current
+  # locale -- no DB round-trip, so nothing worth caching.
   def self.official_unknown
     I18n.t("#{MO.locale_namespace}.unknown_locations", locale: :en).
       split(/, */)
@@ -604,11 +595,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # `approved:` is the value of the `approved_where` form field the
   # user submitted to skip this check after confirming. When non-nil
   # and equal to `place_name`, returns `[]` immediately.
-  #
-  # Centralizes a pattern that lived as 2-3 lines in 4 controllers:
-  #   db_name = Location.user_format(user, place_name)
-  #   Location.dubious_name?(db_name, true)
-  # with an optional "skip if approved" gate around it.
   def self.dubious_reasons_for(user:, place_name:, approved: nil)
     return [] if !approved.nil? && place_name == approved
 

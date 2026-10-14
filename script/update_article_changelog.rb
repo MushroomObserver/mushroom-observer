@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Publishes article_pending.textile (written by the pre-release PR,
-# see script/prerelease.rb and issue #5155) into the MO Article
-# changelog. Run by script/deploy.sh after a pre-release deploy; safe
-# to re-run by hand if that step failed.
+# see script/prerelease.rb) into the MO Article changelog. Run by
+# script/deploy.sh after a pre-release deploy; safe to re-run by hand
+# if that step failed.
 #
 #   Dry run (default -- reports what WOULD change, writes nothing):
 #     bundle exec rails runner script/update_article_changelog.rb
@@ -14,6 +15,7 @@
 # Idempotent: if the article body already contains the first pending
 # row, nothing is written (covers a re-run after a failed deploy step
 # and a deploy with a stale, already-published file).
+# rubocop:enable MO/NoLongCommentBlock
 
 require_relative("release_notes")
 

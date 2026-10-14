@@ -6,7 +6,7 @@ class Components::InputGroup::AddonTest < ComponentTestCase
   def test_renders_default_btn_variant
     html = render_component(Components::InputGroup::Addon.new) { "Go" }
 
-    assert_html(html, "div.input-group-append", text: "Go")
+    assert_html(html, ".input-group-append", text: "Go")
     assert_no_html(html, ".input-group-text")
   end
 
@@ -15,10 +15,11 @@ class Components::InputGroup::AddonTest < ComponentTestCase
       Components::InputGroup::Addon.new(variant: :addon)
     ) { "@" }
 
-    assert_html(html, "div.input-group-append span.input-group-text",
+    assert_html(html, ".input-group-append .input-group-text",
                 text: "@")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_label_variant
     html = render_component(
       Components::InputGroup::Addon.new(
@@ -28,7 +29,7 @@ class Components::InputGroup::AddonTest < ComponentTestCase
 
     assert_html(
       html,
-      "div.input-group-prepend " \
+      ".input-group-prepend " \
       "label.input-group-text.font-weight-normal[for='letter_input']",
       text: "By letter"
     )
@@ -39,7 +40,7 @@ class Components::InputGroup::AddonTest < ComponentTestCase
       Components::InputGroup::Addon.new(position: :prepend)
     ) { "Go" }
 
-    assert_html(html, "div.input-group-prepend", text: "Go")
+    assert_html(html, ".input-group-prepend", text: "Go")
   end
 
   def test_renders_with_custom_class
@@ -47,6 +48,6 @@ class Components::InputGroup::AddonTest < ComponentTestCase
       Components::InputGroup::Addon.new(class: "extra")
     ) { "Go" }
 
-    assert_html(html, "div.input-group-append.extra", text: "Go")
+    assert_html(html, ".input-group-append.extra", text: "Go")
   end
 end

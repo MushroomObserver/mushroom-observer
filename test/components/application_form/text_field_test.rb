@@ -53,10 +53,9 @@ class TextFieldTest < ComponentTestCase
   end
 
   # Regression: `prefs: true` auto-resolves the label from the
-  # `prefs_<field>` i18n key, matching ERB
-  # `auto_label_if_form_is_account_prefs`. Six helpers honor this:
-  # text_field, textarea_field, select_field, checkbox_field,
-  # radio_field, number_field — same set as ERB.
+  # `prefs_<field>` i18n key. Six helpers honor this: text_field,
+  # textarea_field, select_field, checkbox_field, radio_field,
+  # number_field.
   def test_text_field_prefs_auto_resolves_label_from_i18n
     form = render_form do
       text_field(:login, prefs: true)

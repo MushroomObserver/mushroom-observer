@@ -161,30 +161,15 @@ module Views::Controllers::Projects::Violations
     end
 
     def suffix_create_link(suffix)
-      # Needs the link as a returned SafeBuffer string (not buffer
-      # output) so it can be passed as RadioField's `:append`
-      # per-choice option — the link renders inside the disabled
-      # row's `.radio` div and not eagerly at the `suffix_options`
-      # call site above the radio group.
-      #
-      # `capture { ... }` returns Phlex's accumulated output as a
-      # SafeBuffer; the leading space is rendered inside the
-      # block via `plain` so the whole return value stays
-      # html_safe (string-+-SafeBuffer concatenation would demote
-      # to a plain String).
-      #
-      # `where:` (not `display_name:`) is the param
-      # `LocationsController#new` reads to pre-populate the form's
-      # display-name field — the `display_name` accessor only exists
-      # on nested form params (#4304).
-      #
-      # We dismiss the modal via `data-action="click->modal#hide"`
-      # instead of Bootstrap's `data-dismiss="modal"` because
-      # Bootstrap's dismiss handler chain ends up preventing the
-      # link's default `target="_blank"` action, suppressing the new
-      # tab. `modal#hide` calls `$(modal).modal('hide')` without
-      # passing the event, so no preventDefault — the link's new
-      # tab opens *and* the modal closes.
+      # Returns a SafeBuffer, not buffer output, so it can be passed
+      # as RadioField's `:append` per-choice option -- the link
+      # renders inside the disabled row's `.radio` div, not eagerly
+      # at the `suffix_options` call site. `where:` (not
+      # `display_name:`) is the param `LocationsController#new`
+      # reads to pre-populate the display-name field. Dismisses the
+      # modal via `data-action="click->modal#hide"`, not Bootstrap's
+      # `data-dismiss="modal"`, which prevents the link's
+      # `target="_blank"` default and suppresses the new tab.
       capture do
         whitespace
         Button(

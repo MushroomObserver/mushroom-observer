@@ -44,7 +44,7 @@ class FormNotesTest < ComponentTestCase
     assert_includes(html, "Habitat notes:")
     assert_includes(html, "Substrate notes:")
     # Textile help is always rendered at the bottom of the body.
-    assert_html(html, "#test_notes_fields div.help-block")
+    assert_html(html, "#test_notes_fields .help-block")
     # No `above_help` in multi-part mode even if the caller passes
     # one — multi-part users typically know what each field is for.
     # `.help-block` here is used as the IDENTIFIER of the textile-
@@ -52,7 +52,7 @@ class FormNotesTest < ComponentTestCase
     # classes rule, identifier classes that mark a specific
     # element are fair game; pure decoration is not.
     assert_no_html(html,
-                   "#test_notes_fields > div.help-block:first-child")
+                   "#test_notes_fields > .help-block:first-child")
   end
 
   def test_multi_part_textile_help_renders_below_textareas

@@ -180,6 +180,7 @@ module ActiveSupport
       SimpleCov.result
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     ##########################################################################
     #  Transactional fixtures
     ##########################################################################
@@ -211,6 +212,7 @@ module ActiveSupport
     # true. Defaults to false.
     self.use_instantiated_fixtures = false
     ##########################################################################
+    # rubocop:enable MO/NoLongCommentBlock
 
     # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
     # alphabetical order.
@@ -226,11 +228,10 @@ module ActiveSupport
     # assertion only sees tags raised by the test that just ran.
     #
     # Registered as a `setup do` callback rather than `def setup`
-    # so it runs unconditionally — many test classes override
-    # `def setup` without calling `super`, which previously
-    # bypassed these resets and let global state (most notably
-    # I18n.locale and Symbol.missing_tags) leak between tests
-    # within a parallel worker. See #4238.
+    # so it runs unconditionally -- many test classes override
+    # `def setup` without calling `super`, which would otherwise let
+    # global state (I18n.locale, Symbol.missing_tags) leak between
+    # tests within a parallel worker.
     setup do
       # rubocop:disable-next Rails/I18nLocaleAssignment
       I18n.locale = :en if I18n.locale != :en
@@ -246,18 +247,13 @@ module ActiveSupport
       ExternalSite.reset_request_cache
     end
 
-    # Otherwise WebMock accumulates every request made anywhere in this
-    # worker process, so `assert_requested`/`assert_not_requested`
-    # answer "did ANY test make that call?" rather than "did this
-    # one?" -- passing or failing on test order. Clears the request log
-    # only, not stubs a test registered in `setup`.
-    #
-    # A `teardown do` callback rather than the `def teardown` below,
-    # for the same reason `setup do` is used above: several classes
-    # override `def teardown` without calling `super`
-    # (application_system_test_case, image_loader_job_test,
-    # images/originals_controller_test among them), and those are
-    # exactly the WebMock-using tests this needs to cover.
+    # Otherwise WebMock accumulates every request made anywhere in
+    # this worker process, so `assert_requested`/`assert_not_requested`
+    # answer "did any test make that call?" rather than "did this
+    # one?" Clears the request log only, not stubs a test registered
+    # in `setup`. A `teardown do` callback, not `def teardown`, for
+    # the same reason `setup do` is used above: several classes
+    # override `def teardown` without calling `super`.
     teardown { WebMock.reset_executed_requests! }
 
     # Standard teardown to run after every test.  Just makes sure any

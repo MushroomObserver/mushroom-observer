@@ -35,13 +35,20 @@ class Views::Layouts::Sidebar
       assert_html(html, "a[data-nav-active-target='link']")
     end
 
+    def test_heading_has_correct_css_classes
+      html = render_component
+
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
+      assert_html(html, ".list-group-item.disabled.font-weight-bold")
+    end
+
     def test_heading_contains_icon_and_span
       html = render_component
 
       # Should have icon before text
       assert_html(html,
-                  "div.list-group-item svg.mo-icon-user")
-      assert_html(html, "div.list-group-item span")
+                  ".list-group-item svg.mo-icon-user")
+      assert_html(html, ".list-group-item span")
     end
 
     private

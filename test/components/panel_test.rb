@@ -20,7 +20,7 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "card")
     assert_includes(html, "card-header")
     assert_includes(html, "Test Heading")
-    assert_html(html, "div.collapse.card-collapse")
+    assert_html(html, ".collapse.card-collapse")
     assert_includes(html, "Show details")
     assert_includes(html, "card-body")
     assert_includes(html, "Panel content")
@@ -89,6 +89,7 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "Second body")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_panel_with_body_id_and_data
     html = render_panel do |panel|
       panel.with_heading { "Test" }
@@ -99,7 +100,7 @@ class PanelTest < ComponentTestCase
       end
     end
 
-    assert_html(html, "div.card-body.p-0#my_section" \
+    assert_html(html, ".card-body.p-0#my_section" \
                       "[data-controller='section-update']" \
                       "[data-section-update-user-value='42']",
                 text: "Body content")

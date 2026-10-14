@@ -38,10 +38,12 @@ module Views::Layouts
 
       # Root is a labeled <nav> landmark wrapping the button group.
       assert_html(html, "nav[aria-label='#{:app_object_pager_label.l}']")
-      assert_html(html, "nav > div.btn-group.object_pager[role='group']")
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
+      assert_html(html, "nav > .btn-group.object_pager[role='group']")
 
       # Three direct button-group children
-      assert_html(html, "div.btn-group.object_pager > a", count: 3)
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
+      assert_html(html, ".btn-group.object_pager > a", count: 3)
 
       # Prev, index, and next links
       assert_includes(html, "prev_object_link")
@@ -144,6 +146,21 @@ module Views::Layouts
         parent_selector: "a.index_object_link",
         child_selector: "svg.mo-icon-list"
       )
+    end
+
+    # Framed as buttons via Link::Get's button:/size: kwargs, not via
+    # raw btn/btn-lg strings. :link (not :default) removes the
+    # background/border while keeping button padding -- plain
+    # icon-only nav buttons, not filled buttons.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_links_are_styled_as_large_link_buttons
+      @query.current_id = @middle_obs.id
+
+      html = render_nav(object: @middle_obs, query: @query)
+
+      assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")
     end
 
     def test_links_have_tooltips

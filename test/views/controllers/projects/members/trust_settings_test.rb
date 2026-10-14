@@ -56,6 +56,7 @@ module Views::Controllers::Projects::Members
       assert_html(html, ".modal-body > p", text: :trust_settings_help.l)
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_three_radio_options_with_commit_name_and_values
       html = render_form
 
@@ -68,7 +69,7 @@ module Views::Controllers::Projects::Members
       end
       # Each radio is wrapped in `.custom-control.custom-radio.mb-2` —
       # locks in `wrapper_options: { wrap_class: "mb-2" }`.
-      assert_html(html, "div.custom-control.custom-radio.mb-2", count: 3)
+      assert_html(html, ".custom-control.custom-radio.mb-2", count: 3)
     end
 
     def test_preselects_radio_for_each_trust_level

@@ -37,6 +37,13 @@ class Views::Layouts::Sidebar
       assert_html(html, "a[data-nav-active-target='link']")
     end
 
+    def test_heading_has_correct_css_classes
+      html = render_component
+
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
+      assert_html(html, ".list-group-item.disabled.font-weight-bold")
+    end
+
     private
 
     def render_component

@@ -1,8 +1,17 @@
 # frozen_string_literal: true
 
-# The header block below the top nav: project banner, non-index
-# page-title strip, and the observation-buttons row. `Header::IndexBar`
-# moved to `Views::Layouts::Application`; the type-filter row renders
+# The header block immediately below the application top nav. Rendered
+# once per page by the application layout. Composes (in order):
+#
+#   - the optional `:project_banner` content_for slot;
+#   - on non-index actions, the page title strip (`Header::PageTitle`);
+#   - the project observation-buttons row, fed from a content_for
+#     slot.
+#
+# The index filter/pager bar (`Header::IndexBar`) and the rss-log
+# type-filter row no longer render here -- `Header::IndexBar` moved
+# to `Views::Layouts::Application` (above `:page_flash`, after
+# `TopNav`), and the type-filter row renders inline with the pager
 # via `IndexPaginationNav`'s `:type_filters` slot (see
 # `Views::FullPageBase::IndexNav#add_type_filters`).
 module Views::Layouts
@@ -22,9 +31,9 @@ module Views::Layouts
       trusted_html(banner) if banner.present?
     end
 
-    # Matches the ERB's structure: the outer `.row` is always
-    # rendered, even when the inner content_for isn't set. Keeps the
-    # empty row in case any CSS / JS keys off `header > .row:last-child`.
+    # The outer `.row` always renders, even when the inner content_for
+    # isn't set -- keeps the empty row in case any CSS / JS keys off
+    # `header > .row:last-child`.
     def render_filter_row
       Row do
         render_observation_buttons if content_for?(:observation_buttons)
@@ -37,12 +46,12 @@ module Views::Layouts
       end
     end
 
-    # Matches the title row's left-column width to the content row's.
-    # `cols` is the boolean `content_for?(:left_columns)` when that
-    # slot is set (not its value), and `class_names(..., true)`
-    # resolves to `"col-12"` -- full width, same as the content row.
+    # Matches the title row's left-column width to the content row's
+    # `:left_columns` value (set via `content_for(:left_columns, ...)`
+    # in `FullPageBase::LayoutClasses`), falling back to the default
+    # width when no page sets it.
     def title_cols
-      cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
+      cols = content_for(:left_columns) || "col-sm-8 col-lg-7"
       cols = "" unless content_for?(:interest_icons)
       class_names(Components::Column.classes_for(xs: 12), cols)
     end

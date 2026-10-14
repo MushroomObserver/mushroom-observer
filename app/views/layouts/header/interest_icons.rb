@@ -127,23 +127,16 @@ module Views::Layouts
       end
     end
 
-    # `size` is `:big` (state-indicator icon, no button wrapper -- it
-    # needs its own tooltip) or `:small` (clickable variant inside a
+    # `size` is `:big` (state-indicator icon, no button wrapper, so
+    # needs a tooltip here) or `:small` (clickable variant inside a
     # `Button`, which already supplies an equivalent tooltip via
-    # `name:` -- adding a second one on the icon itself doubled up
-    # visibly, one above the button and one below). The filename is
-    # `<kind>2.png` for big, `<kind>3.png` for small — matches the
-    # asset naming pre-conversion.
+    # `name:` -- a second one on the icon doubled up visibly). The
+    # filename is `<kind>2.png` for big, `<kind>3.png` for small.
     #
     # `mo-icon` (see _icons.scss) puts these on the same shared sizing
-    # system as every other icon in the app -- `.interest-eyes
-    # .mo-icon` (_content.scss) sets the actual 1.5em square, matching
-    # #top_nav .top_nav_icon_button .mo-icon's scale, same for the big
-    # indicator and the two small buttons alike. `interest_#{kind}`
-    # (watch/ignore/halfopen) is a stable hook for tests -- asserting
-    # against it instead of the image filename means controller-level
-    # tests don't need to change if this ever moves off .png (e.g. to
-    # the SVG sprite).
+    # system as every other icon in the app. `interest_#{kind}`
+    # (watch/ignore/halfopen) is a stable hook for tests, independent
+    # of the image filename.
     def interest_icon(size, kind, alt_key)
       alt = alt_key.l(object: type.l)
       suffix = size == :big ? "2" : "3"

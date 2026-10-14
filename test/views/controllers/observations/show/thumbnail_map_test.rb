@@ -18,9 +18,9 @@ class Views::Controllers::Observations::Show::ThumbnailMapTest <
                       "[data-map-url='#{routes.map_observation_path(
                         id: @obs.id
                       )}']")
-    assert_html(html, "div.thumbnail-map-container" \
+    assert_html(html, ".thumbnail-map-container" \
                       "[data-thumbnail-map-target='mapContainer']")
-    assert_html(html, "div.thumbnail-map[data-thumbnail-map-target='map']")
+    assert_html(html, ".thumbnail-map[data-thumbnail-map-target='map']")
     assert_html(html, "img#globe_image[data-thumbnail-map-target='globe']")
   end
 

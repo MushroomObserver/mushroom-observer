@@ -20,12 +20,14 @@ class Views::Layouts::Sidebar
       assert_html(html, ".mobile-only")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_logout_button
       html = render_component
 
       # Should have logout button
       assert_includes(html, :app_logout.t)
       assert_html(html, ".logout_link")
+      assert_html(html, ".btn-link")
     end
 
     def test_renders_user_tabs

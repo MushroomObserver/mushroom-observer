@@ -16,7 +16,7 @@ module Views::Controllers::Projects
       assert_html(html, ".col-12#project_banner")
 
       # Banner overlay positioning (only with images)
-      assert_html(html, ".bottom-left.ml-3.mb-3.p-2")
+      assert_html(html, ".bottom-left")
 
       # Title heading structure with overlay styling
       assert_html(html, "h1.h3.banner-image-text")

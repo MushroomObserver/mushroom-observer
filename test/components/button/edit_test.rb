@@ -3,6 +3,7 @@
 require("test_helper")
 
 class ButtonEditTest < ComponentTestCase
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_target_renders_btn_default_framing
     herbarium = herbaria(:nybg_herbarium)
     html = render_edit(target: herbarium)
@@ -11,6 +12,7 @@ class ButtonEditTest < ComponentTestCase
     assert_html(html, "a.btn.btn-secondary[href='#{path}']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_variant_overrides_default_framing
     herbarium = herbaria(:nybg_herbarium)
     html = render_edit(target: herbarium, variant: :outline)
@@ -23,7 +25,7 @@ class ButtonEditTest < ComponentTestCase
     tab = ::Tab::Name::Edit.new(name: name)
     html = render_edit(tab: tab)
 
-    assert_html(html, "a.btn[href='#{routes.edit_name_path(name.id)}']",
+    assert_html(html, "a[href='#{routes.edit_name_path(name.id)}']",
                 text: :show_name_edit_name.l.as_displayed)
   end
 

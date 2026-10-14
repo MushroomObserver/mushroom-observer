@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Validates a url's format -- an http/https scheme with a host -- and
 # optionally that it matches the format of a provided base_url. Does not
 # check that the url is reachable.
@@ -43,6 +44,7 @@
 
 # uri.to_s      #=> "http://foo.com/posts?id=30&limit=5#time=1305298413"
 #
+# rubocop:enable MO/NoLongCommentBlock
 class FormatURL
   attr_reader :url, :base_url, :url_only, :errors
 

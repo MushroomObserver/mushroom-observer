@@ -603,6 +603,7 @@ class String
     insert(start, '<small class="text-nowrap">'.html_safe)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
   #
@@ -619,6 +620,7 @@ class String
   #
   #   string.strip_squeeze == "This type of string."
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def strip_squeeze
     strip.squeeze(" ")
   end

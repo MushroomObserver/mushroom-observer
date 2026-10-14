@@ -21,22 +21,22 @@ class CollapsibleTest < ComponentTestCase
   def test_closed_by_default
     html = render_collapsible(id: "foo")
 
-    assert_html(html, "div.collapse#foo")
-    assert_no_html(html, "div.#{EXPANDED}")
-    assert_no_html(html, "div.card-collapse")
+    assert_html(html, ".collapse#foo")
+    assert_no_html(html, ".#{EXPANDED}")
+    assert_no_html(html, ".card-collapse")
   end
 
   def test_expanded_adds_the_expanded_class
     html = render_collapsible(id: "foo", expanded: true)
 
-    assert_html(html, "div.collapse.#{EXPANDED}#foo")
+    assert_html(html, ".collapse.#{EXPANDED}#foo")
   end
 
   def test_panel_adds_panel_collapse_class
     html = render_collapsible(id: "foo", panel: true)
 
-    assert_html(html, "div.collapse.card-collapse#foo")
-    assert_no_html(html, "div.#{EXPANDED}")
+    assert_html(html, ".collapse.card-collapse#foo")
+    assert_no_html(html, ".#{EXPANDED}")
   end
 
   def test_expanded_panel_with_class
@@ -44,13 +44,13 @@ class CollapsibleTest < ComponentTestCase
                               class: "custom-class")
 
     assert_html(html,
-                "div.collapse.#{EXPANDED}.card-collapse.custom-class#foo")
+                ".collapse.#{EXPANDED}.card-collapse.custom-class#foo")
   end
 
   def test_nil_id_omits_id_attr
     html = render_collapsible
 
-    assert_html(html, "div.collapse")
+    assert_html(html, ".collapse")
     assert_no_html(html, "div[id]")
   end
 
@@ -60,7 +60,7 @@ class CollapsibleTest < ComponentTestCase
     )
 
     assert_html(html,
-                "div.collapse#geo[data-form-exif-target='collapseFields']")
+                ".collapse#geo[data-form-exif-target='collapseFields']")
   end
 
   def test_id_kwarg_always_wins_over_any_other_id_source
@@ -68,9 +68,10 @@ class CollapsibleTest < ComponentTestCase
     # there's no bucket a caller could stash a conflicting id in.
     html = render_collapsible(id: "real", data: { foo: "bar" })
 
-    assert_html(html, "div.collapse#real[data-foo='bar']")
+    assert_html(html, ".collapse#real[data-foo='bar']")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_kwarg_renders_alternate_tag
     html = render_collapsible(id: "foo", element: :tbody)
 
@@ -83,7 +84,7 @@ class CollapsibleTest < ComponentTestCase
       render(Components::Collapsible.new(id: "foo")) { plain("hello") }
     end)
 
-    assert_html(html, "div.collapse#foo", text: "hello")
+    assert_html(html, ".collapse#foo", text: "hello")
   end
 
   private

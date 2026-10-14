@@ -64,7 +64,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # InlineLinkBlock's wrapper margin meaningless).
     html = render_row
 
-    assert_html(html, "a + span.inline-link-block")
+    assert_html(html, "a + .inline-link-block")
   end
 
   def test_no_mod_links_for_non_owner

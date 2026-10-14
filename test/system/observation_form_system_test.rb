@@ -125,7 +125,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   # form-images_controller.js's set_bindings queries
   # input[type="submit"], which matches nothing against Phlex's
-  # <button type="submit">, so this covers Turbo's own native
+  # <button type="submit">, so this covers Turbo's native
   # submitter-disabling instead, via the controller's onsubmit ->
   # requestSubmit() override.
   def test_submit_button_disables_synchronously_on_click
@@ -1054,8 +1054,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # Waits for `controller.map` to be defined, not just
     # `data-map='connected'` (set before the loader resolves). 20s,
-    # not 10s -- waits on Google Maps API's own round-trip, which
-    # flaked at 10s under full-suite CPU/network contention.
+    # not 10s -- waits on Google Maps API round-trip, which flaked at
+    # 10s under full-suite CPU/network contention.
     Timeout.timeout(20) do
       loop do
         ready = evaluate_script(<<~JS)

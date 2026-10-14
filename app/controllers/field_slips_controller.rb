@@ -123,8 +123,7 @@ class FieldSlipsController < ApplicationController
     # The `:new` action populates these; the `:create` validation-
     # failure path and the project-gaps path enter through render_
     # new_phlex without running `:new`, so backfill from params /
-    # the user's recent activity. Same shape as the ERB-era
-    # implicit `render(:new)`, which read the same ivars.
+    # the user's recent activity.
     @species_list ||= params[:species_list]
     @recent_observations ||= recent_observations_for_field_slip
     render(
@@ -142,8 +141,7 @@ class FieldSlipsController < ApplicationController
   def render_edit_view(**render_opts)
     # The `:edit` action populates `@recent_observations`; the
     # `:update` validation-failure and project-gaps re-render
-    # paths skip it, so backfill via the same query the action
-    # uses. Matches ERB-era behavior.
+    # paths skip it, so backfill via the same query the action uses.
     @recent_observations ||= recent_edit_observations
     render(
       Views::Controllers::FieldSlips::Edit.new(

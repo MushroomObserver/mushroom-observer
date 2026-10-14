@@ -72,7 +72,7 @@ class LinkIconTest < ComponentTestCase
     html = render_icon(type: :globe, title: "Tooltip text",
                        wrap_class: "icon-text-gap")
 
-    assert_html(html, "span.icon-text-gap[title='Tooltip text']")
+    assert_html(html, ".icon-text-gap[title='Tooltip text']")
   end
 
   def test_extra_attrs_passed_through
@@ -116,7 +116,7 @@ class LinkIconTest < ComponentTestCase
   def test_wrap_class_wraps_icon_in_span_leaving_svg_unpadded
     html = render_icon(type: :globe, wrap_class: "icon-text-gap")
 
-    assert_html(html, "span.icon-text-gap > svg.mo-icon-globe")
+    assert_html(html, ".icon-text-gap > svg.mo-icon-globe")
     assert_no_html(html, "svg.icon-text-gap")
   end
 

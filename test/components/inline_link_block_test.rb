@@ -29,7 +29,7 @@ class InlineLinkBlockTest < ComponentTestCase
   def test_single_item_rendered_inside_inline_link_block_span
     html = render_links(items: ["<b>edit</b>".html_safe])
 
-    assert_html(html, "span.inline-link-block.ml-3 b", text: "edit")
+    assert_html(html, ".inline-link-block b", text: "edit")
   end
 
   def test_no_separator_characters_between_items
@@ -45,14 +45,14 @@ class InlineLinkBlockTest < ComponentTestCase
   def test_string_items_rendered_as_trusted_html
     html = render_links(items: ["<i>archive</i>".html_safe])
 
-    assert_html(html, "span.inline-link-block i", text: "archive")
+    assert_html(html, ".inline-link-block i", text: "archive")
   end
 
   def test_phlex_component_items_rendered
     button = Components::Button.new(name: "Edit", variant: :strip)
     html = render_links(items: [button])
 
-    assert_html(html, "span.inline-link-block button", text: "Edit")
+    assert_html(html, ".inline-link-block button", text: "Edit")
   end
 
   private

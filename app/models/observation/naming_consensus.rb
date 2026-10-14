@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Observation::NamingConsensus
 #
 # This PORO isolates the code that determines the current state of naming/
@@ -51,8 +52,9 @@
 # number of proposed namings per obs, so 3 namings meant 11 vote lookups).
 # The vote table is the slowest table in the db, so it was extremely slow.
 #
+# rubocop:enable MO/NoLongCommentBlock
 
-# Disable Metrics/ClassLength - genuinely a lot of vote/consensus
+# Disable Metrics/ClassLength - a lot of vote/consensus
 # bookkeeping in one place; hasn't been split up yet.
 # rubocop:disable-next Metrics/ClassLength
 class Observation
@@ -231,6 +233,7 @@ class Observation
       end
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Generate a table the number of User's who cast each level of Vote for a
     # single Naming. (This refreshes the naming.vote_cache while it's at it.)
     # Keyed by the vote level's canonical numeric value (a stable,
@@ -248,6 +251,7 @@ class Observation
     #
     # only executed on VotesController#index
     # Accepts a Naming or MergedNaming. Uses .votes from the object.
+    # rubocop:enable MO/NoLongCommentBlock
     def calc_vote_table(naming)
       table = init_vote_table
       populate_vote_table(table, naming.votes)

@@ -4,6 +4,7 @@
 #  = Extensions to Class
 #
 class Class
+  # rubocop:disable MO/NoLongCommentBlock
   # Convenience method for setting Query subclass attributes.
   # These use a custom attribute type defined in app/types/query_param_type.rb
   #
@@ -30,6 +31,7 @@ class Class
   # `:model_index` redirects to the *looked-up* model's own index instead
   # (matches shortcuts built on `find_or_goto_index` -- e.g.
   # `ObservationsController::Index#by_user` sending a bad id to `/users`).
+  # rubocop:enable MO/NoLongCommentBlock
   def query_attr(attr, accepts, **)
     attribute(attr, :query_param, accepts:, **)
   end

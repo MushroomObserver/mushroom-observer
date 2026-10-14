@@ -126,9 +126,8 @@ module Observations::Namings
       params = params.merge(context: "namings_table")
 
       put(:update, params:, format: :turbo_stream)
-      # `_section_update.erb` deleted; controllers now emit the
-      # two turbo_stream actions inline (panel replace + flash
-      # update).
+      # Controllers emit two turbo_stream actions inline (panel
+      # replace + flash update).
       assert_select("turbo-stream[target='page_flash']")
       assert_select("turbo-stream[target='observation_namings']")
 
@@ -142,9 +141,8 @@ module Observations::Namings
       params = params.merge(context: "grid_box")
 
       put(:update, params:, format: :turbo_stream)
-      # _update_matrix_box.erb deleted; the controller now renders
-      # the same 7 turbo-stream actions inline. Verify a couple of
-      # the wrapper targets so we know the stream emitted.
+      # The controller renders 7 turbo-stream actions inline. Verify
+      # a couple of the wrapper targets so we know the stream emitted.
       assert_select("turbo-stream[target='observation_what_#{obs.id}']")
       assert_select("turbo-stream[target='box_title_#{obs.id}']")
 
@@ -288,6 +286,7 @@ module Observations::Namings
       assert_equal(2, nam2.votes.length)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Now, have Mary delete her vote against Rolf's naming.
     # This NO LONGER has the effect of excluding Rolf's naming
     # from the consensus calculation due to too few votes.
@@ -299,6 +298,7 @@ module Observations::Namings
     # Summing after Mary deletes,
     #   3 gets 2/2=1,   9 gets -3+3+3/4=.75,
     #   3 still keeps it in this voting algorithm, arg.
+    # rubocop:enable MO/NoLongCommentBlock
     def test_cast_vote_mary
       obs  = observations(:coprinus_comatus_obs)
       nam1 = namings(:coprinus_comatus_naming)

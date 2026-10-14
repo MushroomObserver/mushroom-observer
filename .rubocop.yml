@@ -18,12 +18,14 @@ require:
   - ./lib/rubocop/cop/mo/initialize_without_prop
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_active_record_relation_prop
+  - ./lib/rubocop/cop/mo/no_cosmetic_class_assertion
   - ./lib/rubocop/cop/mo/no_full_html_assertion
   - ./lib/rubocop/cop/mo/no_hand_rolled_colon_suffix
   - ./lib/rubocop/cop/mo/no_hand_rolled_column_class
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
+  - ./lib/rubocop/cop/mo/no_long_comment_block
   - ./lib/rubocop/cop/mo/no_not_pseudo_selector
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
@@ -32,6 +34,7 @@ require:
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
   - ./lib/rubocop/cop/mo/redundant_render_view_invalid
+  - ./lib/rubocop/cop/mo/redundant_tag_in_selector
   - ./lib/rubocop/cop/mo/self_status_outside_invalid_method
   - ./lib/rubocop/cop/mo/status_kwarg_outside_invalid_method
   - ./lib/rubocop/cop/mo/unguarded_params_to_prop
@@ -111,6 +114,21 @@ MO/NoActiveRecordRelationProp:
     - "app/components/**/*.rb"
     - "app/views/**/*.rb"
 
+MO/NoCosmeticClassAssertion:
+  Description: >-
+    A test assertion must not pin a cosmetic Bootstrap class (button
+    chrome, a spacing utility, a known paint class) -- assert
+    behavior/contract, not paint, so a Bootstrap upgrade doesn't
+    break tests with no functional change -- see
+    lib/rubocop/cop/mo/no_cosmetic_class_assertion.rb and "Don't pin
+    cosmetic CSS classes" in .claude/rules/testing.md. Scoped to
+    components/views, not test/controllers -- functional tests use
+    assert_select, a different method this cop doesn't check.
+  Enabled: true
+  Include:
+    - "test/components/**/*_test.rb"
+    - "test/views/**/*_test.rb"
+
 MO/NoFullHtmlAssertion:
   Description: >-
     Test assertions must not search/compare against @response.body
@@ -180,6 +198,16 @@ MO/NoHandRolledWhitespace:
     # nbsp's definition -- legitimately builds the &nbsp; entity this
     # cop exists to keep everywhere else.
     - "app/components/base.rb"
+
+MO/NoLongCommentBlock:
+  Description: >-
+    A run of more than Max consecutive full-line comments is
+    narrative that belongs in the commit message or PR description,
+    not the source -- see lib/rubocop/cop/mo/no_long_comment_block.rb
+    and .claude/rules/code_comments.md. YARD/RDoc reference runs are
+    exempt, so Max is tightened to 10.
+  Enabled: true
+  Max: 10
 
 MO/NoNotPseudoSelector:
   Description: >-
@@ -331,6 +359,20 @@ MO/RedundantRenderViewInvalid:
     - "app/controllers/**/*.rb"
   Exclude:
     - "app/controllers/application_controller.rb"
+
+MO/RedundantTagInSelector:
+  Description: >-
+    A test selector must not qualify a class with a generic wrapper
+    tag (span.thing, div.thing, p.thing) when the class alone already
+    selects the element -- see
+    lib/rubocop/cop/mo/redundant_tag_in_selector.rb and
+    .claude/rules/testing.md. Scoped to components/views, not
+    test/controllers -- functional tests use assert_select, a
+    different method this cop doesn't check.
+  Enabled: true
+  Include:
+    - "test/components/**/*_test.rb"
+    - "test/views/**/*_test.rb"
 
 MO/SelfStatusOutsideInvalidMethod:
   Description: >-

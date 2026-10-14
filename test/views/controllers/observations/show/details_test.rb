@@ -22,6 +22,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
   # (own or sibling) or an eligible site to add one, none at all
   # otherwise. ExternalLinksTest covers the component's own content in
   # isolation; this covers Details' wiring.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_external_links_body_for_obs_with_external_link
     obs = observations(:imported_inat_obs)
 
@@ -35,6 +36,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
   # Badges are informational, not gated on being logged in -- an
   # anonymous viewer should still see that the obs was shared on
   # another site.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_external_links_body_for_logged_out_viewer
     obs = observations(:imported_inat_obs)
 
@@ -224,8 +226,9 @@ class Views::Controllers::Observations::Show::DetailsTest <
     )
     # The item must render inside InlineLinkBlock's wrapper span, not
     # loose in the panel -- that's what supplies the group's margin.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html,
-                "#observation_field_slips span.inline-link-block.ml-3 a")
+                "#observation_field_slips .inline-link-block.ml-3 a")
   end
 
   def test_no_field_slip_section_when_no_field_slip_and_cannot_edit

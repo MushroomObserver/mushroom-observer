@@ -25,6 +25,7 @@ module Views::Controllers::Projects::AdminRequests
       assert_html(@html, "textarea[rows='5']")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_submit_button
       assert_html(@html, "button[type='submit']", text: :send.ti)
       assert_html(@html, ".btn.btn-secondary")

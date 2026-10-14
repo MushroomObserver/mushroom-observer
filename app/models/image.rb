@@ -253,22 +253,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  # Turbo Stream broadcasts that keep the image-show page (the only
-  # subscriber -- see broadcast_processed_update) live once background
-  # processing (RotateImageJob/TransferImagesJob) finishes, without a
-  # full page reload. Fires only on the columns processing
-  # flips -- an unrelated Image edit (copyright, notes, vote) never
-  # re-renders anything. (gps_stripped currently only changes
-  # synchronously at upload, before any page could be subscribed --
-  # kept as a trigger so the pages catch up if that ever goes async.)
-  # Gated on transferred becoming TRUE (not any flip): processing
-  # starts by setting transferred false (Image::Processor#
-  # update_image_record_width_height_and_transferred) BEFORE the
-  # renditions are regenerated, so broadcasting there would push a
-  # new-token URL at stale files -- and would duplicate the explicit
-  # end-of-processing broadcast RotateImageJob already sends. The two
-  # files-consistent moments are processing completion (explicit, in
-  # the job) and transfer completion (this callback).
+  # Turbo Stream broadcast keeping the image-show page live once
+  # background processing finishes, without a full reload. Fires
+  # only when `transferred` flips to true, not on any column change:
+  # processing sets `transferred` false before renditions regenerate,
+  # so broadcasting then would push a new-token URL at stale files
+  # and duplicate RotateImageJob's end-of-processing broadcast.
   after_update_commit lambda { |image|
     became_transferred = image.saved_change_to_transferred? &&
                          image.transferred
@@ -277,42 +267,29 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   }
 
-  # Renders for an anonymous viewer -- there's no request-scoped
-  # current_user to reflect here, same limitation Comment's and
-  # InatImport's own broadcasts accept. A call site with heavier
-  # per-user customization (vote highlighting, an admin-only
-  # affordance) catches up on the next real page load, not via this
-  # broadcast.
+  # Renders for an anonymous viewer, same limitation Comment's and
+  # InatImport's broadcasts accept -- per-user customization (vote
+  # highlighting, admin affordances) catches up on the next page load
+  # instead.
   #
-  # The only subscriber is the image-show page
-  # (Views::Controllers::Images::Show::ImagePanel) -- rotate/mirror
-  # only happens there, so only there does a live update make sense.
-  # Index matrix boxes and the obs-show carousel deliberately do NOT
-  # subscribe (cross-tab updates aren't a supported config; those
-  # pages catch up on the next load via the #4808 URL token), which is
-  # also why there is no carousel-slide broadcast here.
+  # The only subscriber is the image-show page -- rotate/mirror only
+  # happens there. Index matrix boxes and the obs-show carousel
+  # deliberately don't subscribe (not a supported config); those
+  # pages catch up on the next load instead.
   def broadcast_processed_update
     broadcast_interactive_sizes
   end
 
-  # One broadcast per size Interactive might be showing on any given
-  # page (see INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits
-  # the re-render to just the image itself (src/data-src) -- the model
-  # has no way to know which page-specific image_link/votes/
-  # extra_classes/identify props a given subscriber originally
-  # rendered with, so replaying the *whole* Interactive with defaults
-  # would silently change those (e.g. a grid-box thumbnail's
-  # image_link falls back to the image's own show page instead of the
-  # parent Observation it was actually pointing at). The link/votes/
-  # overlays stay exactly as the page first rendered them; only the
-  # image source needs to catch up once resized copies exist.
-  #
-  # This is a deliberate tradeoff, not an oversight: carrying every
-  # subscriber's original per-page props through the broadcast (rather
-  # than falling back to media_only) isn't possible without threading
-  # that context through the model layer. Whether media_only is the
-  # right long-term answer (vs. e.g. a per-page prop cache) is still
-  # open.
+  # One broadcast per size Interactive might show on any page (see
+  # INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits the
+  # re-render to just the image source, since the model can't know
+  # which page-specific image_link/votes/props a subscriber
+  # originally rendered with -- replaying the whole Interactive with
+  # defaults would change those (e.g. a grid-box thumbnail's
+  # image_link falling back to the image show page instead of the
+  # parent Observation). Deliberate tradeoff: carrying per-page props
+  # through the broadcast isn't possible without threading that
+  # context through the model layer.
   def broadcast_interactive_sizes
     INTERACTIVE_BROADCAST_SIZES.each do |size|
       html = ApplicationController.renderer.render(
@@ -840,18 +817,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     false
   end
 
-  # Runs Image::Processor synchronously (skipped in test, see
-  # test/models/image/processor_test.rb for direct coverage) to produce a
-  # completed set of local files -- #process also computes the perceptual
-  # hash inline from the just-written small rendition, so there is no
-  # separate dhash job to race the transfer (#4796). Then enqueues
-  # TransferImagesJob (gets those files onto the configured image
-  # server(s) -- see #4791, deliberately decoupled from upload success: a
-  # transfer failure alerts asynchronously instead of failing the upload).
-  # Only after resizing has succeeded: enqueueing earlier would transfer
-  # an image whose upload ultimately failed. GPS stripping already
-  # happened synchronously in #process_image above, before this runs --
-  # see Image::Processor.strip_original_gps for why.
+  # Runs Image::Processor synchronously (skipped in test) to produce
+  # a completed set of local files -- #process also computes the
+  # perceptual hash inline, so no separate dhash job races the
+  # transfer. Then enqueues TransferImagesJob, decoupled from upload
+  # success: a transfer failure alerts asynchronously instead of
+  # failing the upload. Only after resizing succeeds, since
+  # enqueueing earlier would transfer an image whose upload failed.
   def process_and_enqueue_jobs(ext, set_size)
     unless Rails.env.test?
       Image::Processor.new(image: self, ext: ext, set_size: set_size).process
@@ -934,17 +906,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     RotateImageJob.perform_later(id, original_extension, operator)
   end
 
-  # Compute and store the perceptual hash (Image::Dhash) for this image
-  # (#4585/#4673). Derived data, hence update_column — recomputing a hash
-  # is not an edit. dHash is resolution-invariant, so any rendition
-  # serves: hash the small (then medium) local rendition and NEVER the
-  # full-size original — decoding a large original with ImageMagick can
-  # exhaust the host (a routine 25 MP upload froze the site for ~3.5 min,
-  # #4796). Image::Processor#process calls this inline right after it
-  # generates the small rendition, so the local file is present on fresh
-  # uploads and rotations. Batch/backfill callers reach it with no local
-  # rendition (e.g. after the originals are cleaned up), so it falls back
-  # to fetching the transferred small rendition (see local_dhash_source).
+  # Compute and store the perceptual hash (Image::Dhash). Derived
+  # data, hence update_column -- recomputing a hash is not an edit.
+  # Hashes the small (then medium) local rendition, not the
+  # full-size original -- decoding a large original with ImageMagick
+  # can exhaust the host (a routine 25 MP upload froze the site for
+  # ~3.5 min). Batch/backfill callers with no local rendition fall
+  # back to fetching the transferred small rendition (see
+  # local_dhash_source).
   def compute_dhash!
     source = local_dhash_source
     value = if source
@@ -1402,6 +1371,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Returns a hash that groups all the images of a given copyright holder
   # and license type intoa single row.  This lets you change all Rolf's
   # licenses in one stroke.
@@ -1425,6 +1395,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #    "license_id"=>3},
   #   {"license_count"=>1, "copyright_holder"=>"Tim Wheeler", "license_id"=>2}]
   #   map(&:attributes) gives you a hash of your selects with their keys
+  # rubocop:enable MO/NoLongCommentBlock
 
   def self.licenses_for_user_by_type(user)
     display_names = {}

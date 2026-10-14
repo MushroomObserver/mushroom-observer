@@ -8,7 +8,7 @@ module Views::Layouts
       html = render_component
 
       assert_html(html,
-                  "div.text-center.#{Components::Column.mobile_only_classes.
+                  ".text-center.#{Components::Column.mobile_only_classes.
                     join(".")}")
       assert_html(html, "img.logo-trim[alt='MO Logo'][src='/logo-trim.png']")
     end
@@ -29,7 +29,7 @@ module Views::Layouts
     def test_renders_container
       html = render_component
 
-      assert_html(html, "div.container-text")
+      assert_html(html, ".container-text")
     end
 
     def test_renders_html_comments

@@ -135,13 +135,13 @@ class CollapseToggleLinkTest < ComponentTestCase
   def test_open_text_renders_collapse_toggle_open_span
     html = render_it(open_text: "Hide details")
 
-    assert_html(html, "a span.collapse-toggle-open", text: "Hide details")
+    assert_html(html, "a .collapse-toggle-open", text: "Hide details")
   end
 
   def test_closed_text_renders_collapse_toggle_closed_span
     html = render_it(closed_text: "Show details")
 
-    assert_html(html, "a span.collapse-toggle-closed", text: "Show details")
+    assert_html(html, "a .collapse-toggle-closed", text: "Show details")
   end
 
   def test_no_content_kwargs_renders_empty_link

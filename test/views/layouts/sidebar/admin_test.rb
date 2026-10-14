@@ -45,6 +45,13 @@ class Views::Layouts::Sidebar
       assert_html(html, ".admin_mode_link")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_heading_has_correct_css_classes
+      html = render_component
+
+      assert_html(html, ".list-group-item.disabled.font-weight-bold")
+    end
+
     def test_turn_off_button_is_post_request
       html = render_component
 

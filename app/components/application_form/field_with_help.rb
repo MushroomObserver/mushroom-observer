@@ -39,9 +39,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       span(class: between_class) { render(between_slot) }
     end
 
-    # `form-between` is a block-level spacer, so it doesn't work on
-    # an inline field row -- that case gets a trailing margin applied
-    # directly instead. A block-level field uses `form-between`.
+    # An inline field row uses `mr-3` (since `form-between` is a
+    # block-level spacer that doesn't apply); a block-level field uses
+    # `form-between`, which already supplies that spacing.
     def between_class
       wrapper_options[:inline] ? "mr-3" : "form-between"
     end

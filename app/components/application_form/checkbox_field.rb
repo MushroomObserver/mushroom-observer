@@ -72,20 +72,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Replaces the upstream `Superform::Rails::Components::Checkbox`
-    # boolean-mode rendering so the hidden sidecar gets `autocomplete="off"`
-    # (matching Rails' `form.check_box` output — browsers otherwise
-    # repopulate the hidden's "0" on back-button and silently clobber a
-    # checked box).
-    #
-    # `checked_value:` and `unchecked_value:` kwargs mirror Rails'
-    # `form.check_box(field, options, checked, unchecked)` positional
-    # args, so callers can use "yes"/"no" or other non-boolean values
-    # without falling back to bare `input(type: :checkbox)`.
-    #
-    # When `disabled: true` is passed, the hidden sidecar is omitted —
-    # disabled inputs aren't submitted, so the sidecar would be dead
-    # markup (and the checkbox itself wouldn't toggle).
+    # Replaces upstream Checkbox's boolean rendering so the hidden
+    # sidecar gets `autocomplete="off"` -- without it, browsers
+    # repopulate the hidden "0" on back-button and clobber a checked
+    # box. `checked_value:`/`unchecked_value:` mirror Rails' positional
+    # args; `disabled: true` omits the sidecar since it wouldn't submit.
     def render_boolean_inputs
       unless disabled?
         input(name: field.dom.name, type: :hidden,
@@ -122,16 +113,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # Render a single block-mode checkbox (name="…[]"), input and a
-    # sibling label. Intended for use inside a block passed to
-    # `checkbox_field`, when the caller wants one cell of a larger
-    # checkbox matrix.
-    #
-    # `**overrides` lets the caller override any of the input
-    # attributes per option — most commonly `checked:` (when the
-    # caller has external state for checkedness that doesn't match
-    # `model.<assoc>_ids`, e.g. failure-reload showing the user's
-    # submitted choices without writing them to the DB) and
-    # `disabled:` (per-row permission gates).
+    # sibling label -- one cell of a larger checkbox matrix built via
+    # a block passed to `checkbox_field`. `**overrides` lets the
+    # caller override any input attribute per option -- most commonly
+    # `checked:` (external checkedness state not matching
+    # `model.<assoc>_ids`) and `disabled:` (per-row permission gates).
     def option(value, **overrides)
       input_id = "#{field.dom.id}_#{value}"
       input(
@@ -165,14 +151,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       )
     end
 
-    # Emit the array-mode input directly rather than delegating to
-    # upstream's `Superform::Rails::Components::Checkbox`. Upstream's
-    # `Checkbox` decides which of {boolean, collection, array} branch
-    # to render based on `field.parent.is_a?(Superform::Field)`; when
-    # called from this iteration the parent is the form root, so
-    # upstream picks the boolean branch — which renders all per-option
-    # inputs with the bare `dom.id` (duplicate ids) and a hidden 0/1
-    # pair per option (wrong for an array submission).
+    # Emits the array-mode input directly instead of delegating to
+    # upstream's Checkbox: upstream picks its boolean branch when
+    # `field.parent` isn't a `Superform::Field` (true here, parent is
+    # the form root), rendering duplicate bare `dom.id`s and a hidden
+    # 0/1 pair per option -- wrong for an array submission.
     def render_checkbox_option(choice)
       value_str = choice.value.to_s
       input_id = option_input_id(value_str)

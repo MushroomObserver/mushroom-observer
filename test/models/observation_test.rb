@@ -2397,20 +2397,15 @@ class ObservationTest < UnitTestCase
     assert_equal(obs.when.strftime("%Y-%m-%d"), obs.when_str)
   end
 
-  # other_notes reads the canonical "Other" key (line 673) and
-  # other_notes= writes through it (lines 677-678).
+  # other_notes reads the "Other" key and other_notes= writes
+  # through it. The setter only round-trips reliably when notes is
+  # already a populated Hash: on a fresh record, `notes[key] = val`
+  # doesn't persist, since the serialize-coder returns a fresh hash
+  # on each read until something is written through `notes=`.
   #
-  # Note: the setter only round-trips reliably when notes is already
-  # a populated Hash (AR caches the deserialized hash and tracks
-  # mutations). On a fresh record the line `self.notes ||= {}` does
-  # run, but the subsequent `notes[key] = val` mutation doesn't
-  # persist because the serialize-coder returns a fresh hash on each
-  # read until something is written through `notes=`. This test
-  # exercises both code paths for coverage and asserts the
-  # round-trip on the populated path.
-  # Regression: #notes returning a bare Hash instead of NotesHash would
-  # pass every other test silently (they only check hash content), but
-  # would break the Literal-typed props NotesHash exists to enable.
+  # Regression: #notes returning a bare Hash instead of NotesHash
+  # would pass every other test silently, but would break the
+  # Literal-typed props NotesHash exists to enable.
   def test_notes_returns_a_notes_hash
     assert_instance_of(NotesHash, observations(:detailed_unknown_obs).notes)
   end

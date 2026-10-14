@@ -20,15 +20,15 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
   def test_renders_panel_less_carousel_skeleton
     html = render_carousel
 
-    assert_html(html, "div.carousel.slide[data-ride='false']" \
+    assert_html(html, ".carousel.slide[data-ride='false']" \
                       "[data-interval='false']" \
                       "[id='observation_#{@observation.id}_carousel']")
-    assert_html(html, "div.carousel.slide > div.carousel-inner" \
+    assert_html(html, ".carousel.slide > .carousel-inner" \
                       "[role='listbox']")
     # No Panel wrapper, no indicator strip — those are contracts
     # specific to the box context (the box itself owns the
     # surrounding card; thumbnails are not shown per-box).
-    assert_no_html(html, "div.card")
+    assert_no_html(html, ".card")
     assert_no_html(html, "ol.carousel-indicators")
   end
 
@@ -40,7 +40,7 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
     slide_count = html.scan(/class="item[^"]*"/).size
     assert_equal(@images.length, slide_count)
     # First image's wrapper id ends with the first image's id.
-    assert_html(html, "div.item.active" \
+    assert_html(html, ".item.active" \
                       "[id='carousel_item_#{@images.first.id}']")
   end
 
@@ -53,10 +53,10 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
     target = @images[1]
     html = render_carousel(top_img: target)
 
-    assert_html(html, "div.item.active[id='carousel_item_#{target.id}']")
+    assert_html(html, ".item.active[id='carousel_item_#{target.id}']")
     # First image's slide is NOT active.
     assert_no_html(html,
-                   "div.item.active[id='carousel_item_#{@images.first.id}']")
+                   ".item.active[id='carousel_item_#{@images.first.id}']")
   end
 
   # Controls render iff >1 image (primitive's `show_controls` is driven

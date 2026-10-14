@@ -103,7 +103,7 @@ class Components::Grid::Box::FooterTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     html = render_box(user: @user, object: obs)
 
-    assert_no_html(html, "div.card-footer.text-center")
+    assert_no_html(html, ".card-footer.text-center")
   end
 
   private

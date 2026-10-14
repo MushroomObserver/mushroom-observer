@@ -42,6 +42,18 @@ module Views::Layouts
       assert_not_includes(html, "pagination_numbers")
     end
 
+    # Rendered via Link::Get's button:/size: kwargs, not via raw
+    # btn/btn-lg strings. :link (not :default) removes the
+    # background/border while keeping button padding -- plain
+    # icon-only nav buttons, not filled buttons.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_page_links_are_styled_as_large_link_buttons
+      html = render_nav(pagination_data: paginated(50, 1))
+
+      assert_html(html, "a.prev_page_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.next_page_link.btn.btn-link.btn-lg")
+    end
+
     def test_prev_link_disabled_on_first_page
       html = render_nav(pagination_data: paginated(50, 1))
 

@@ -38,6 +38,7 @@ class Components::Grid < Components::Base
   # check, so the version is encoded explicitly here.
   CACHE_VERSION = "v12"
 
+  # rubocop:disable MO/NoLongCommentBlock
   # The cache key Grid::Box fragments are stored under -- shared by
   # the write here and the controller's batched `read_multi`
   # pre-check (`ApplicationController::Indexes#uncached_object_ids`),
@@ -53,6 +54,7 @@ class Components::Grid < Components::Base
   # cached before a rotate would keep serving the pre-rotate URL
   # token. (An `Image` object is its thumb and already keys on that
   # timestamp via `object` -- `try(:thumb_image)` is nil there.)
+  # rubocop:enable MO/NoLongCommentBlock
   def self.cache_key_for(object, locale)
     ["Grid::Box", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end

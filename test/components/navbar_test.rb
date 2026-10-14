@@ -3,6 +3,7 @@
 require "test_helper"
 
 class NavbarTest < ComponentTestCase
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_variant_light_renders_nav_landmark
     html = render_component(
       Components::Navbar.new(variant: :light,
@@ -13,6 +14,7 @@ class NavbarTest < ComponentTestCase
                        ".hidden-print.mb-2#top_nav", text: "Content")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector, MO/NoCosmeticClassAssertion
   def test_variant_dark_with_explicit_element_overrides_nav_default
     html = render_component(
       Components::Navbar.new(variant: :dark, element: :div,
@@ -25,6 +27,7 @@ class NavbarTest < ComponentTestCase
                 text: "Content")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_padding_prop_overrides_default_zero_padding
     html = render_component(
       Components::Navbar.new(variant: :light, id: "top_nav",

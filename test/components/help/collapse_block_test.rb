@@ -10,9 +10,9 @@ class CollapseHelpBlockTest < ComponentTestCase
       Components::Help::CollapseBlock.new(target_id: "help_1")
     ) { "This is help text" }
 
-    assert_html(html, "div.collapse#help_1")
-    assert_html(html, "div.well.help-block")
-    assert_html(html, "div.collapse#help_1", text: "This is help text")
+    assert_html(html, ".collapse#help_1")
+    assert_html(html, ".well.help-block.position-relative")
+    assert_html(html, ".collapse#help_1", text: "This is help text")
   end
 
   def test_renders_without_arrow_when_direction_nil
@@ -20,7 +20,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       Components::Help::CollapseBlock.new(target_id: "help_2")
     ) { "Content" }
 
-    assert_html(html, "div.collapse#help_2")
+    assert_html(html, ".collapse#help_2")
     assert_not_includes(html, "arrow-")
   end
 
@@ -30,16 +30,19 @@ class CollapseHelpBlockTest < ComponentTestCase
                                           direction: "down")
     ) { "Content" }
 
-    assert_html(html, "div.arrow-down.#{HIDE_CLASSES}")
+    assert_html(html, ".arrow-down.#{HIDE_CLASSES}")
+    assert_not_includes(html, "mt-3")
   end
 
+  # A top margin is added for the up arrow's clearance.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_with_arrow_up_when_direction_up
     html = render_component(
       Components::Help::CollapseBlock.new(target_id: "help_4", direction: "up")
     ) { "Content" }
 
-    assert_html(html, "div.arrow-up.#{HIDE_CLASSES}")
-    assert_html(html, "div.well.help-block")
+    assert_html(html, ".arrow-up.#{HIDE_CLASSES}")
+    assert_html(html, ".well.help-block.position-relative.mt-3")
   end
 
   def test_renders_arrow_visible_on_mobile_when_mobile_true
@@ -51,7 +54,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       )
     ) { "Mobile content" }
 
-    assert_html(html, "div.arrow-up")
+    assert_html(html, ".arrow-up")
     assert_not_includes(html, "d-none")
   end
 
@@ -64,7 +67,7 @@ class CollapseHelpBlockTest < ComponentTestCase
       )
     ) { "Desktop content" }
 
-    assert_html(html, "div.arrow-down.#{HIDE_CLASSES}")
+    assert_html(html, ".arrow-down.#{HIDE_CLASSES}")
   end
 
   def test_yields_block_content
@@ -86,7 +89,7 @@ class CollapseHelpBlockTest < ComponentTestCase
         mobile: true
       )
     ) { "Left" }
-    assert_html(html_left, "div.arrow-left")
+    assert_html(html_left, ".arrow-left")
     assert_not_includes(html_left, "d-none")
 
     # Test right arrow without mobile
@@ -97,6 +100,6 @@ class CollapseHelpBlockTest < ComponentTestCase
         mobile: false
       )
     ) { "Right" }
-    assert_html(html_right, "div.arrow-right.#{HIDE_CLASSES}")
+    assert_html(html_right, ".arrow-right.#{HIDE_CLASSES}")
   end
 end

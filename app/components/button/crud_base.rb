@@ -26,28 +26,16 @@ class Components::Button::CRUDBase < Components::Button
   prop :back, _Nilable(_Union(*Components::CRUDPathBuilding::BACK_VALUES)),
        default: nil
 
-  # `options` accepts all Button kwargs (variant:, size:, icon:, and
-  # arbitrary HTML attrs) plus CRUDBase-only keys: confirm:, action:,
-  # back:. `params:` isn't extracted -- it rides through to Button's
-  # `attributes` catch-all and is read back out in button_html_options,
-  # same as any other arbitrary HTML/form attribute.
+  # `options` passes Button's kwargs plus CRUDBase-only keys
+  # (confirm:, action:, back:); `params:` rides the `attributes`
+  # catch-all, read back in button_html_options.
   #
-  # `@method` stays a plain ivar, not a declared prop -- naming a prop
-  # `method` would shadow `Object#method`, and this kwarg is only ever
-  # supplied by CRUDBase's own sibling subclasses (Post/Put/Patch/
-  # Delete), not by arbitrary callers, so the extra validation a prop
-  # would add isn't worth that risk.
+  # `@method` stays a plain ivar, not a prop (would shadow
+  # `Object#method`) -- only CRUDBase's sibling subclasses supply it.
   #
-  # `validate_no_btn_classes!` is called explicitly here rather than
-  # relying on it running via Button's own initializer: when a
-  # subclass declares its own new `prop`s (as this class does),
-  # Literal's generated `super` chain skips the parent's hand-written
-  # `initialize` body entirely (verified empirically) -- prop
-  # *assignment* still resolves correctly across the whole hierarchy,
-  # but any imperative side effect living in that body doesn't run.
-  # `validate_no_btn_classes!` is a plain instance method (from the
-  # included `Button::Styling` concern, independent of Button's
-  # initialize), so calling it directly here works regardless.
+  # `validate_no_btn_classes!` runs explicitly, since a subclass
+  # declaring new `prop`s makes Literal's `super` chain skip
+  # Button's hand-written `initialize` body.
   def initialize(name:, target:, method: :post, **options)
     confirm = options.delete(:confirm)
     action  = options.delete(:action)

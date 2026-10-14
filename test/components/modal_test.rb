@@ -129,6 +129,7 @@ class ModalTest < ComponentTestCase
     assert_html(html, ".modal[aria-labelledby='modal_h_title']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_body_class_appends_to_modal_body
     # `body_class:` adds extra CSS classes to `.modal-body` while
     # keeping the base `modal-body` class. Used by ModalConfirm

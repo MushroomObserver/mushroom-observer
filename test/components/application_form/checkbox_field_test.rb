@@ -37,6 +37,7 @@ class CheckboxFieldTest < ComponentTestCase
     assert_includes(form, 'type="checkbox"')
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_checkbox_field_with_label_false_still_renders_wrapper
     form = render_form do
       checkbox_field(:placeholder, label: false,
@@ -44,20 +45,21 @@ class CheckboxFieldTest < ComponentTestCase
     end
 
     # Should still have the custom-control wrapper and label element
-    assert_html(form, "div.custom-control.custom-checkbox.m-0")
+    assert_html(form, ".custom-control.custom-checkbox.m-0")
     assert_html(form, "label.p-0")
     assert_includes(form, 'type="checkbox"')
     # But should NOT have label text
     assert_not_includes(form, "Placeholder")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_checkbox_field_applies_wrap_class_to_wrapper
     form = render_form do
       checkbox_field(:placeholder, label: "Test", wrap_class: "mt-3")
     end
 
     # wrap_class should be on wrapper div, not the input
-    assert_html(form, "div.custom-control.custom-checkbox.mt-3")
+    assert_html(form, ".custom-control.custom-checkbox.mt-3")
   end
 
   # Unlike text_field/select_field/etc's colon-suffixed prompt label

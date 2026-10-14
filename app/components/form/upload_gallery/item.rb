@@ -112,17 +112,16 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
     div(class: "top-left p-card") { button_to_set_thumb_img }
   end
 
-  # Real `observation[thumb_image_id]` radio — browser-native radio
-  # group across carousel items submits the checked value directly,
-  # no Stimulus round-trip via a separate hidden field. A static
-  # hidden default with the same name (see
-  # `ObservationFormUpload#render_thumb_image_id_field`) ensures the
-  # param is always submitted (so removing the current thumb image
-  # without picking another one clears the model field).
+  # A browser-native `observation[thumb_image_id]` radio group across
+  # carousel items submits the checked value directly, no Stimulus
+  # round-trip. A static hidden default with the same name (see
+  # `ObservationFormUpload#render_thumb_image_id_field`) keeps the
+  # param submitted, so removing the thumb image without picking
+  # another clears the model field.
   #
-  # The visual "pressed" state on the selected button is CSS-only
+  # The "pressed" state on the selected button is CSS-only
   # (`.thumb_img_btn:has(input[type="radio"]:checked)` in
-  # `_carousel.scss`) — no JS to toggle `.active`.
+  # `_carousel.scss`) -- no JS toggles `.active`.
   def button_to_set_thumb_img
     value = @img_instance&.id || "true"
     checked = @obs_thumb_id&.== @img_instance&.id

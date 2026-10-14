@@ -132,18 +132,15 @@ class GridTest < ComponentTestCase
     end
   end
 
-  # cache_key_for folds in the thumb image record so a cache read/write
-  # tracks the thumb's updated_at -- reprocessing bumps it, and the
-  # cached HTML embeds a URL token derived from it (#4808). Nothing
-  # touches an RssLog when its thumb finishes processing, so the thumb
-  # must appear in the key itself.
+  # cache_key_for folds in the thumb image record so a read/write
+  # tracks its updated_at, since nothing touches an RssLog when its
+  # thumb finishes processing.
   #
-  # With cache_versioning on (the Rails default), an AR object's
-  # updated_at moves the cache *version*, not the *key* string --
-  # ActiveSupport::Cache::Store#read/#write compare both, so a stale
-  # version is a miss even though the key itself is unchanged. Assert
-  # that behavior directly via a read/write round-trip, not by
-  # inspecting the private normalize_key string.
+  # With cache_versioning on, an AR object's updated_at moves the
+  # cache *version*, not the *key* string -- read/write compare
+  # both, so a stale version misses even though the key is
+  # unchanged. Assert that via a round-trip, not the private
+  # normalize_key string.
   def test_cache_key_for_includes_the_thumb_image_record
     obs = observations(:coprinus_comatus_obs)
 

@@ -17,29 +17,31 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   # ---- nav_create (+ Add button) -------------------------------------
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_nav_create_button_renders_for_creatable_controller
     html = render(top_nav(user: @user))
 
-    # `.btn-success` IS contract here (this rule's exception:
-    # the create button's "green" styling is part of its identity).
-    assert_html(html, "a.btn-success[href='#{routes.new_observation_path}']")
+    assert_html(html,
+                ".new_object_button[href='#{routes.new_observation_path}']")
+    # variant: :success is an explicit choice, not an incidental default.
+    assert_html(html, ".new_object_button.btn-success")
     # aria-label and title are the localized "New Observation" string
     full_label = "#{:new.ti} #{:observation.ti}"
-    assert_html(html, "a.btn-success[aria-label='#{full_label}']")
-    assert_html(html, "a.btn-success[title='#{full_label}']")
-    assert_html(html, "a.btn-success[data-tooltip-target='tip']")
+    assert_html(html, ".new_object_button[aria-label='#{full_label}']")
+    assert_html(html, ".new_object_button[title='#{full_label}']")
+    assert_html(html, ".new_object_button[data-tooltip-target='tip']")
     # Responsive content: the word "Add" appears in a span hidden at
     # xs width and shown at sm and up.
     hide_classes = Components::Column.mobile_hide_classes(display: :inline).
                    join(".")
-    assert_html(html, "a.btn-success span.#{hide_classes}",
+    assert_html(html, ".new_object_button .#{hide_classes}",
                 text: :add.ti)
   end
 
   def test_nav_create_hidden_when_user_absent
     html = render(top_nav(user: nil))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   def test_nav_create_hidden_for_non_creatable_controller
@@ -50,7 +52,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     html = render(top_nav(user: @user))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   def test_nav_create_hidden_when_controller_has_no_new_action
@@ -58,7 +60,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     html = render(top_nav(user: @user))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   # A "+ Add" button pointing at :new from the :new page itself (or a
@@ -69,7 +71,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     html = render(top_nav(user: @user))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   def test_nav_create_hidden_on_create_action
@@ -77,17 +79,17 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     html = render(top_nav(user: @user))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   # Contrast with the above: other pages on the same (creatable)
   # controller still show the button.
   def test_nav_create_shown_on_index_and_show_actions
     define_singleton_action_name!("index")
-    assert_html(render(top_nav(user: @user)), "a.btn-success")
+    assert_html(render(top_nav(user: @user)), ".new_object_button")
 
     define_singleton_action_name!("show")
-    assert_html(render(top_nav(user: @user)), "a.btn-success")
+    assert_html(render(top_nav(user: @user)), ".new_object_button")
   end
 
   # ---- nav_rubric ----------------------------------------------------
@@ -196,6 +198,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, "a.dropdown-toggle", text: @user.login)
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_right_nav_list_uses_navbar_constants
     html = render(top_nav(user: @user))
 

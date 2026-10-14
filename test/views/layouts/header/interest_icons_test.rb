@@ -16,10 +16,11 @@ module Views::Layouts
 
     # ---- container ---------------------------------------------------
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_toolbar_container
       html = render_view
 
-      assert_html(html, "div.btn-toolbar.interest-eyes[role='toolbar']")
+      assert_html(html, ".btn-toolbar.interest-eyes[role='toolbar']")
     end
 
     # ---- default state (no interest set) ---------------------------
@@ -31,7 +32,7 @@ module Views::Layouts
       assert_html(html, "img.mo-icon[src*='watch3']")
       assert_html(html, "img.mo-icon[src*='ignore3']")
       # No big state-indicator icon (disabled span) in default state.
-      assert_no_html(html, "span.disabled img")
+      assert_no_html(html, ".disabled img")
     end
 
     def test_default_state_links_are_create_posts_with_id_and_state
@@ -60,7 +61,7 @@ module Views::Layouts
 
       html = render_view
 
-      assert_html(html, "span.disabled img.mo-icon[src*='watch2']")
+      assert_html(html, ".disabled img.mo-icon[src*='watch2']")
       assert_html(html, "img.mo-icon[src*='halfopen3']")
       assert_html(html, "img.mo-icon[src*='ignore3']")
     end
@@ -94,7 +95,7 @@ module Views::Layouts
 
       html = render_view
 
-      assert_html(html, "span.disabled img.mo-icon[src*='ignore2']")
+      assert_html(html, ".disabled img.mo-icon[src*='ignore2']")
       assert_html(html, "img.mo-icon[src*='watch3']")
       assert_html(html, "img.mo-icon[src*='halfopen3']")
     end
@@ -125,7 +126,7 @@ module Views::Layouts
     def test_default_state_each_link_is_its_own_form
       html = render_view
 
-      assert_html(html, "div.interest-eyes > form", count: 2)
+      assert_html(html, ".interest-eyes > form", count: 2)
     end
 
     def test_watching_state_each_link_is_its_own_form
@@ -133,16 +134,16 @@ module Views::Layouts
       html = render_view
 
       # icon_item (big watch, a <span>, no form) + two form-backed buttons.
-      assert_html(html, "div.interest-eyes > *", count: 3)
-      assert_html(html, "div.interest-eyes > form", count: 2)
+      assert_html(html, ".interest-eyes > *", count: 3)
+      assert_html(html, ".interest-eyes > form", count: 2)
     end
 
     def test_ignoring_state_each_link_is_its_own_form
       ::Interest.create!(user: @viewer, target: @obs, state: false)
       html = render_view
 
-      assert_html(html, "div.interest-eyes > *", count: 3)
-      assert_html(html, "div.interest-eyes > form", count: 2)
+      assert_html(html, ".interest-eyes > *", count: 3)
+      assert_html(html, ".interest-eyes > form", count: 2)
     end
 
     # ---- kind class -> image mapping --------------------------------

@@ -93,6 +93,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     #
@@ -107,6 +108,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # from max:
     # - "Promising" to "I'd Call It That": vote_cache > 1.0 AND <= 3.0
     # - "Not Likely" to "Promising": vote_cache >= -2.0 AND <= 2.0
+    # rubocop:enable MO/NoLongCommentBlock
     scope :confidence, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)
 
@@ -580,17 +582,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
 
     # Drop a non-primary member only when its primary is in the same
-    # result set, which is what "avoid double-counting" means. Dropping
-    # it unconditionally hides a member from every list its primary
-    # cannot appear in -- a user's list of their observations, an
-    # advanced search by user, an import's results (#5486).
-    #
-    # The subquery asks the filters about primaries, so it is first
-    # narrowed to the primaries of occurrences that hold a non-primary
-    # member: 1,852 occurrences against 643,000 observations. Asking
-    # the filters about every row instead costs a flat ~260ms whenever
-    # the query reads past a LIMIT -- a deep page, or the unbounded
-    # count an index needs for pagination.
+    # result set -- dropping it unconditionally hides a member from
+    # every list its primary can't appear in (a user's observations
+    # list, an advanced search by user, an import's results). The
+    # subquery is first narrowed to primaries of occurrences holding
+    # a non-primary member (~1,852 occurrences vs. 643,000
+    # observations); asking the filters about every row instead
+    # costs a flat ~260ms whenever the query reads past a LIMIT.
     scope :exclude_non_primary_when_primary_present, lambda {
       members = Observation.arel_table.alias("members")
       contested = Occurrence.joins(
@@ -823,19 +821,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # ----- helpers for the project_violations scope -----
     #
-    # Each helper runs a separate query plucking the ids of
-    # observations violating one constraint kind. project_violation_ids
-    # merges the four id sets in Ruby, rather than combining four
-    # relations into one query with Relation#or. Relation#or dedups
-    # the two sides' where clauses by comparing Arel nodes with ==,
-    # and for two predicates that are structurally similar but
-    # semantically different (see project_target_location_violation_ids)
-    # that == is wrong, so Relation#or can silently drop one of them.
-    #
-    # Public so Project#count_violations can take just the Set's size,
-    # skipping the includes/order_by/distinct project_violations adds
-    # for display -- a count doesn't need the observations sorted or
-    # their name/location eager-loaded.
+    # Each helper plucks the ids violating one constraint kind;
+    # project_violation_ids merges the four id sets in Ruby rather
+    # than one query with Relation#or, since Relation#or dedups
+    # where clauses by comparing Arel nodes with ==, which is wrong
+    # for structurally similar but semantically different predicates
+    # (see project_target_location_violation_ids). Public so
+    # Project#count_violations can take just the Set's size.
     def project_violation_ids(project)
       ids = Set.new
       ids.merge(project_date_violation_ids(project))

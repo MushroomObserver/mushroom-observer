@@ -15,28 +15,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   ##############################################################################
   #
-  #  :section: Filterable Indexes
-  #
-  #  These methods help to assemble filtered index results (from the query) and
-  #  render the interface for the index pagination with info returned by Query.
-  #
-  #  Every param a controller's Query subclass recognizes (its query_attr
-  #  names and their param_alias shortcuts) is a live top-level index
-  #  filter -- no per-controller method or allowlist required. Unlike the
-  #  old subaction dispatch, recognized params combine: `?by_user=X&
-  #  has_notes=true` filters by both, instead of only the first one a
-  #  controller happened to list.
-  #
-  #  `:pattern` gets first priority when both recognized and present,
-  #  since it goes through `PatternSearch`'s keyword parsing instead of
-  #  the generic per-attr resolution. `:by`/`:q`/`:id` (`sorted_index`)
-  #  apply only when no other recognized param is present.
+  #  :section: Filterable Indexes -- see
+  #  .claude/rules/index_filter_params.md for the dispatch mechanism.
   #
   ##############################################################################
-  #
-  # Assemble query and display_args: a pattern search, any other
-  # recognized filter param, :by/:q/:id, or the unfiltered index -- in
-  # that priority order.
+  # Pattern search, else any other recognized filter param, else
+  # :by/:q/:id, else the unfiltered index -- in that priority order.
   def build_index_with_query
     query, display_opts = index_query_and_display_opts
     return nil if performed? || query.blank?
@@ -293,9 +277,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # Render the index view. Every index controller now renders a Phlex
-  # view; this method must be overridden. (No ERB index templates remain;
-  # the historical `render(action: :index)` default is gone.)
+  # Render the index view. Every index controller renders a Phlex
+  # view; this method must be overridden.
   def render_index_view
     raise(NotImplementedError.new(render_index_view_error_message))
   end
@@ -433,17 +416,14 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # If caching, only uncached objects need to eager_load the includes
   def objects_with_only_needed_eager_loads(query, include)
-    # When Grid will bypass the cache for the whole request
-    # (identify mode, project-admin view), every row is going to need
-    # the full eager loads anyway — the two-query pre-check shape
-    # (paginate simple, re-fetch with includes) is strictly more
-    # work than just paginating with the includes the first time.
-    #
-    # Same story when `perform_caching` is off (the dev default):
-    # low_level_cache then always executes its block, ignoring
-    # cache_store -- so skipping eager-load here for "assumed cached"
-    # objects triggers per-object N+1 fallbacks (e.g.
-    # NamingConsensus#use_local_namings) for every one of them.
+    # When Grid will bypass the cache for the whole request (identify
+    # mode, project-admin view), every row needs the full eager loads
+    # anyway -- the two-query pre-check shape is strictly more work
+    # than just paginating with the includes up front. Same story
+    # when `perform_caching` is off (the dev default): low_level_cache
+    # then always executes its block, so skipping eager-load here
+    # triggers per-object N+1 fallbacks (e.g.
+    # NamingConsensus#use_local_namings) for every object.
     unless grid_caches_in_this_request? && perform_caching?
       return query.paginate(@pagination_data, include: include)
     end
@@ -468,6 +448,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     objects_simple.collate_new_instances(objects_eager)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Which of `objects` need eager-loading because their `Grid::Box`
   # fragment isn't already cached. One `read_multi` round trip covers
   # every object's cache-key check, instead of one `Rails.cache.exist?`
@@ -483,6 +464,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #
   # Uses the shared key from `Grid.cache_key_for` so the read
   # matches what `Grid#render_cached_boxes` writes.
+  # rubocop:enable MO/NoLongCommentBlock
   def uncached_object_ids(objects, locale)
     cacheable, uncacheable = objects.partition do |obj|
       ::Components::Grid.should_cache_object?(obj)

@@ -133,6 +133,7 @@ MushroomObserver::Application.configure do
   # Uncomment if queue tables are in a separate db. MO's are in the main db.
   # config.solid_queue.connects_to = { database: { writing: :queue } }
 
+  # rubocop:disable MO/NoLongCommentBlock
   # New 7.1 logging uses BroadcastLogger. Not using TaggedLogging yet.
   # Enable this to format dev logs like the production logs.
   # loggers = [
@@ -145,6 +146,7 @@ MushroomObserver::Application.configure do
   # config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
   # config.logger = ActiveSupport::Logger.new($stdout)
 
+  # rubocop:enable MO/NoLongCommentBlock
   # Silence Solid Queue polling in the logs
   ENV["SOLID_QUEUE_LOG_ON"] = "false" # used by a temporary hack below
   config.solid_queue.logger = false

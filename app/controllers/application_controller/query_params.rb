@@ -4,20 +4,16 @@
 #  create_query_from_url_params:: Build a Query from raw request params.
 #
 module ApplicationController::QueryParams
-  # Builds a Query for `model_symbol` from raw request params. Resolves
-  # `param_alias:` params into their query_attr (`?project=123` ->
-  # `projects: [123]`) and permits only params the Query subclass
-  # recognizes.
+  # Builds a Query for `model_symbol` from raw request params.
+  # Resolves `param_alias:` params into their query_attr
+  # (`?project=123` -> `projects: [123]`) and permits only params
+  # the Query subclass recognizes. A bad record-backed id flashes
+  # and redirects, returning nil.
   #
-  # A bad record-backed id flashes and redirects (see
-  # `resolve_record_backed_value`); returns nil in that case.
-  #
-  # `always_index` forces true for a resolved record-backed attr unless
-  # it opts out with `always_index: false`; a scalar attr is the
-  # opposite, forcing only when explicitly declared `true` (see
-  # `QueryParamType#always_index`).
-  #
-  # Returns `[query, display_opts]`, or nil on a bad id.
+  # `always_index` forces true for a resolved record-backed attr
+  # unless it opts out; a scalar attr is the opposite, forcing only
+  # when explicitly declared `true` (see
+  # `QueryParamType#always_index`). Returns `[query, display_opts]`.
   def create_query_from_url_params(model_symbol, raw_params)
     klass = "Query::#{model_symbol.to_s.pluralize}".constantize
     permitted = raw_params.permit(*klass.permit_filters).

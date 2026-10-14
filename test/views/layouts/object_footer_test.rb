@@ -339,7 +339,7 @@ module Views::Layouts
 
       html = footer_for(obs, user: users(:rolf))
 
-      assert_html(html, "span.source-credit")
+      assert_html(html, ".source-credit")
     end
 
     def test_source_credit_hidden_for_website_source
@@ -348,7 +348,7 @@ module Views::Layouts
 
       html = footer_for(obs, user: users(:rolf))
 
-      assert_no_html(html, "span.source-credit")
+      assert_no_html(html, ".source-credit")
     end
 
     # Import-linked observations (e.g. iNat imports) have their own
@@ -361,7 +361,7 @@ module Views::Layouts
 
       html = footer_for(obs, user: users(:rolf))
 
-      assert_no_html(html, "span.source-credit")
+      assert_no_html(html, ".source-credit")
     end
 
     # TestObject has no concept of "source" at all -- confirms the
@@ -372,7 +372,7 @@ module Views::Layouts
 
       html = footer_for(obj)
 
-      assert_no_html(html, "span.source-credit")
+      assert_no_html(html, ".source-credit")
     end
 
     private

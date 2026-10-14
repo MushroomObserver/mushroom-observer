@@ -75,6 +75,7 @@ module FlashExtensions
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Assert that an error was rendered or is pending.
   #
   # expect: nil (no flash), an Integer (flash level only), a bare
@@ -98,6 +99,7 @@ module FlashExtensions
   # to encode here. Leave both nil/omitted for every other call -- the
   # vast majority of flash_notice/flash_warning/flash_error sites need
   # nothing beyond expect/**args.
+  # rubocop:enable MO/NoLongCommentBlock
   def assert_flash(expect, on_fail: "", object_error_type: nil,
                    object_error_attribute: nil, **args)
     validate_object_error_kwargs(expect, object_error_type,

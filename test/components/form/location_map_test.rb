@@ -7,10 +7,10 @@ class FormLocationMapTest < ComponentTestCase
     html = render_component(Components::Form::LocationMap.new)
 
     # Map div structure
-    assert_html(html, "div.form-map.collapse")
+    assert_html(html, ".form-map.collapse")
 
     # Default location type and format
-    assert_html(html, "div.form-map",
+    assert_html(html, ".form-map",
                 attribute: { "data-map-type" => "location",
                              "data-location-format" => "postal" })
 
@@ -19,9 +19,9 @@ class FormLocationMapTest < ComponentTestCase
     assert_html(html, "div[role='group']")
     assert_html(html, "button[data-toggle='collapse']")
     assert_html(html, "button svg.mo-icon-globe")
-    assert_html(html, "span.collapse-toggle-open",
+    assert_html(html, ".collapse-toggle-open",
                 text: :form_observations_hide_map.l.as_displayed)
-    assert_html(html, "span.collapse-toggle-closed",
+    assert_html(html, ".collapse-toggle-closed",
                 text: :form_observations_open_map.l.as_displayed)
     assert_html(html, "button.map-clear[type='button']",
                 attribute: { "data-map-target" => "mapClearBtn" })
@@ -49,7 +49,7 @@ class FormLocationMapTest < ComponentTestCase
       Components::Form::LocationMap.new(map_type: "observation")
     )
 
-    assert_html(html, "div.form-map",
+    assert_html(html, ".form-map",
                 attribute: { "data-map-type" => "observation" })
   end
 
@@ -61,7 +61,7 @@ class FormLocationMapTest < ComponentTestCase
       Components::Form::LocationMap.new(user: user)
     )
 
-    assert_html(html, "div.form-map",
+    assert_html(html, ".form-map",
                 attribute: { "data-location-format" => "scientific" })
   end
 end
