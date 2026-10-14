@@ -52,6 +52,7 @@
 // and colors like every other row.
 .dropdown-item.button_to {
   display: block;
+  padding: 3px 20px;
 
   button[type="submit"]:not(.btn):not(.text-danger),
   input[type="submit"]:not(.btn):not(.text-danger) {
