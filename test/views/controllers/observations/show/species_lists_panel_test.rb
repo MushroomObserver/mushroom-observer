@@ -99,7 +99,8 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
                 text: :remove.ti)
     # Must render inside InlineLinkBlock's wrapper span -- that's what
     # supplies the group's spacing from the list link beside it.
-    assert_html(html, "li .inline-link-block #{form_selector}")
+    # rubocop:disable-next MO/RedundantTagInSelector
+    assert_html(html, "li span.inline-link-block #{form_selector}")
   end
 
   private

@@ -65,8 +65,9 @@ module Views::Layouts
       # Must render inside InlineLinkBlock's wrapper span -- that's
       # what gives it the same spacing/size as the edit/delete icons
       # beside it, instead of the sprite's larger default size.
+      # rubocop:disable-next MO/RedundantTagInSelector
       assert_html(html,
-                  ".object_edit .inline-link-block.ml-3 " \
+                  ".object_edit span.inline-link-block.ml-3 " \
                   ".mo-icon-read-only")
     end
 
