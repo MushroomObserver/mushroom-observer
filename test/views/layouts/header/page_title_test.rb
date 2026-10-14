@@ -50,6 +50,7 @@ module Views::Layouts
     # small gap (`ml-3`); the actions slot (edit/destroy icons) is
     # pushed flush right (`ml-auto`) instead -- distinct slots for
     # distinct positions, not one slot guessing from content.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_cta_sits_after_title_actions_sit_flush_right
       html = render_page_title("show")
 
@@ -83,6 +84,7 @@ module Views::Layouts
     # `new`/`create` pages have no object yet, so `add_id_badge`/
     # `add_edit_icons` don't run -- no empty, margined wrapper div
     # should be left behind for any of the three slots.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_id_badge_and_edit_icons_wrappers_absent_when_unset
       html = render_page_title_title_only("new")
 

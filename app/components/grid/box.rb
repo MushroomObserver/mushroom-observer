@@ -76,15 +76,12 @@ class Components::Grid::Box < Components::Base
     ) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
       # rotate/mirror only happens on the image-show page, so only
-      # that page (Views::Controllers::Images::Show::ImagePanel)
-      # live-updates. A grid page
-      # with dozens of boxes would otherwise open a websocket
-      # subscription (plus a solid_cable MAX(id) query) per thumbnail
-      # for an event that can't happen from this page; it catches up
-      # on the next load via the #4808 cache-busting URL token.
-      # `h-100`: fills the row's stretched height (BS4's `.row`
-      # defaults to `align-items: stretch`, so `<li>` siblings already
-      # match height -- this makes the card fill its `<li>` too).
+      # that page live-updates. A grid page with dozens of boxes
+      # would otherwise open a websocket subscription per thumbnail
+      # for an event that can't happen here; it catches up on the
+      # next load via the cache-busting URL token.
+      # `h-100` fills the row's stretched height (BS4's `.row`
+      # defaults to `align-items: stretch`).
       Panel(panel_class: "h-100") do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)

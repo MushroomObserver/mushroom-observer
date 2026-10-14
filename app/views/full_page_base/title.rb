@@ -94,17 +94,12 @@ module Views::FullPageBase::Title
   private
 
   # `Header::PageTitle` places this HTML twice -- next to the object
-  # name on desktop, and again in the mobile-only top row alongside
-  # the edit/interest/pager icons. `Components::IDBadge` emits no
-  # HTML `id` attribute, so the duplication carries no id-collision
-  # risk. No `extra_class:` here -- each placement site supplies the
-  # spacing that context needs.
-  #
-  # `size: :xl` -- neither placement nests the badge inside a `.h3`
-  # (or other heading) anymore, so its size can't ride on an ancestor
-  # heading's font-size the way `:sm`/`:md`/`:lg` are meant to; `:xl`
-  # is the one size in `Components::IDBadge::SIZE_CLASSES` that isn't
-  # scaled down from its context.
+  # name on desktop, and again in the mobile-only top row. No
+  # `extra_class:` here -- each placement site supplies the spacing
+  # that context needs. `size: :xl`: neither placement nests the
+  # badge inside a heading anymore, so it can't ride on an ancestor's
+  # font-size the way `:sm`/`:md`/`:lg` are meant to; `:xl` is the
+  # one size in `Components::IDBadge::SIZE_CLASSES` not scaled down.
   def add_id_badge(object)
     content_for(:id_badge) do
       capture do

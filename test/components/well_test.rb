@@ -3,12 +3,14 @@
 require("test_helper")
 
 class WellTest < ComponentTestCase
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_default_is_a_plain_well_div
     html = render_well
 
     assert_html(html, "div.well")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_renders_alternate_tag
     html = render_well(element: :span)
 
@@ -19,13 +21,13 @@ class WellTest < ComponentTestCase
   def test_extra_class_merges_with_well_class
     html = render_well(class: "help-block position-relative")
 
-    assert_html(html, "div.well.help-block.position-relative")
+    assert_html(html, ".well.help-block.position-relative")
   end
 
   def test_other_attrs_pass_through
     html = render_well(id: "main_well", data: { controller: "foo" })
 
-    assert_html(html, "div.well#main_well[data-controller='foo']")
+    assert_html(html, ".well#main_well[data-controller='foo']")
   end
 
   def test_yields_content
@@ -33,7 +35,7 @@ class WellTest < ComponentTestCase
       render(Components::Well.new) { plain("hello") }
     end)
 
-    assert_html(html, "div.well", text: "hello")
+    assert_html(html, ".well", text: "hello")
   end
 
   private
