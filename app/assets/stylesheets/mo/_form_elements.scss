@@ -114,12 +114,19 @@ $btn-active-variants: (
   @include button-active-state;
 }
 
-// ButtonStyleCheckbox/ButtonStyleRadio's two-zone split: a fixed
-// width for the custom-control graphic, the rest to the label zone.
-// Centers the graphic in both axes via flexbox, not offset math --
-// BS4's `top`/`left: -1.5rem` offsets assume the graphic sits in
-// padding reserved by a label that also wraps text, which isn't this
-// shape (text lives in a separate sibling `.label-zone`).
+// TEMPORARY, through .custom-radio below -- all of this stands in
+// for Bootstrap 4's .custom-control/.custom-checkbox/.custom-radio
+// CSS (BS3 has none) and the BS3 label-spacing collisions it
+// creates. Delete this whole block on the BS4 cutover merge. Scoped
+// to what ButtonStyleCheckbox/ButtonStyleRadio need: checked/
+// unchecked/focus, no indeterminate.
+//
+// Two-zone split: a fixed width for the custom-control graphic, the
+// rest to the label zone. Centers the graphic in both axes via
+// flexbox, not offset math -- BS4's `top`/`left: -1.5rem` offsets
+// assume the graphic sits in padding reserved by a label that also
+// wraps text, which isn't this shape (text lives in a separate
+// sibling `.label-zone`).
 //
 // Sizes below are literal px, not rem -- BS3's scaffolding sets
 // `html { font-size: 10px }` on purpose (so BS3's internal rem math
@@ -133,11 +140,12 @@ $btn-active-variants: (
   justify-content: center;
 }
 
-// TEMPORARY, through .custom-radio below -- stands in for Bootstrap
-// 4's .custom-control/.custom-checkbox/.custom-radio CSS (BS3 has
-// none). Delete on the BS4 cutover merge. Scoped to what
-// ButtonStyleCheckbox/ButtonStyleRadio need: checked/unchecked/
-// focus, no indeterminate.
+// `label-zone` is a `<label>` when `label_wrap: true` -- also needs
+// the BS3 `label { margin-bottom: 5px }` override below.
+label.label-zone {
+  margin-bottom: 0;
+}
+
 .custom-control {
   position: relative;
   display: block;
@@ -151,7 +159,7 @@ $btn-active-variants: (
   opacity: 0;
 }
 
-.custom-control-label {
+label.custom-control-label {
   position: relative;
   display: block;
   width: 16px;

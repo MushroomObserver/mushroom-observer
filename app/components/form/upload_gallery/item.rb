@@ -133,8 +133,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
              id: "thumb_image_id_#{@img_id}",
              checked: checked,
              size: :sm, label_wrap: true,
-             label: { class: "thumb_img_btn" },
-             class: "mr-3"
+             label: { class: "thumb_img_btn mr-3" }
            )) do
       span(class: "set_thumb_img_text") { :image_set_default.l }
       span(class: "is_thumb_img_text") { :image_add_default.l }
