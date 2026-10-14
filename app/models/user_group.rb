@@ -78,18 +78,12 @@ class UserGroup < AbstractModel
   end
 
   # Request-scoped memo for the 3 meta-group lookups below --
-  # `Thread.current[...]`, not a class ivar or `Rails.cache`, so it's
-  # isolated per request/thread (matches `Textile`'s name-lookup
-  # cache, `app/classes/textile.rb`) rather than reintroducing the
-  # cross-request state this class just got rid of. Even with the
-  # unique index on `name`, these turn out to be called many times
+  # `Thread.current[...]`, not a class ivar or `Rails.cache`, so
+  # it's isolated per request/thread. These get called many times
   # in a single request (once per description in a name/location's
-  # reader/writer/admin-group listing -- see
-  # `Description::DetailsAndAltsPanel`), so it's worth memoizing
-  # within that one request. Reset once per real request via
-  # `ApplicationController#reset_user_group_cache`, and once per
-  # unit test (`test_helper.rb`'s `setup`) for tests that call these
-  # methods directly without going through a full request.
+  # reader/writer/admin-group listing), so memoizing is worth it.
+  # Reset via `ApplicationController#reset_user_group_cache` per
+  # request, and `test_helper.rb`'s `setup` per unit test.
   THREAD_KEYS = {
     all_users: :mo_user_group_all_users,
     reviewers: :mo_user_group_reviewers,

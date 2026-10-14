@@ -93,6 +93,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_includes(html, "custom-class")
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # NOTE: Testing custom block content requires Phlex DSL context
   # This test is commented out as it requires the block to be evaluated
   # in the component's Phlex context, not the test context
@@ -108,6 +109,7 @@ class MatrixBoxTest < ComponentTestCase
   #   assert_includes(html, "test-class")
   #   assert_includes(html, "Custom content")
   # end
+  # rubocop:enable MO/NoLongCommentBlock
 
   # Test HTML structure and nesting
   def test_wraps_panel_in_list_item

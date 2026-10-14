@@ -200,20 +200,11 @@ class Inat
         demote && (vote.nil? || vote.value <= value)
       end
 
-      # The importer is the observer on an import of their observations,
-      # so the vote this class manages and the vote they cast by hand are
-      # one row. What separates them is source_value, the value this
-      # class or the import last wrote: the row is the source's while it
-      # still holds that value, and a person moving it says so by
-      # leaving the two apart (#5480).
-      #
-      # A null source_value is a row the source cannot account for --
-      # every vote predating the column, until the #5480 repair fills in
-      # the ones the import explains. Those are left to their holder,
-      # which freezes a value rather than risking moving a person's.
-      #
-      # An observer who sets the value back to the source's is read as
-      # agreeing with it, and the row resumes following the source.
+      # source_value is the value this class (or the import) last
+      # wrote; the row stays source-owned while vote.value still
+      # matches it. A null source_value (a pre-#5480 row) is left to
+      # its holder rather than risked. Setting the value back to
+      # source_value re-syncs the row to the source.
       def moved_by_a_person?(vote)
         return false if vote.nil?
 

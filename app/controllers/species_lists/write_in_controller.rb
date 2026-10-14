@@ -64,6 +64,7 @@ module SpeciesLists
       @member_specimen = false
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Validate list of names, and if successful, create observations.
     # Parameters involved in name list validation:
     #   params[:list][:members]               String user typed in big text area
@@ -77,6 +78,7 @@ module SpeciesLists
     #       val: id of name user has chosen (via radio boxes in feedback)
     # Bullet:
     # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
+    # rubocop:enable MO/NoLongCommentBlock
     def process_write_in_list
       redirected = false
 

@@ -81,6 +81,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(field_component)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Checkbox field with label and Bootstrap checkbox wrapper.
     #
     # Three call styles:
@@ -101,6 +102,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param options [Hash] all field and wrapper options
     # Wrapper options: :label, :prefs, :class_name
     # @yield [field_component] Optional block — see `Field#checkbox`.
+    # rubocop:enable MO/NoLongCommentBlock
     def checkbox_field(field_name, *choices, **options, &block)
       options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
@@ -227,6 +229,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(field_component)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Hidden field. Two modes based on the type of the first argument:
     #
     # **Symbol** (the common case) — the field is a model / FormObject
@@ -252,6 +255,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param field_name [Symbol, String] model attribute name (Symbol)
     #   or full raw HTML `name` (String)
     # @param options [Hash] HTML attributes (`value:`, `data:`, etc.)
+    # rubocop:enable MO/NoLongCommentBlock
     def hidden_field(field_name, **options)
       # Default `autocomplete="off"` to match Rails' `hidden_field` /
       # `hidden_field_tag` (browsers otherwise repopulate hidden fields
@@ -458,24 +462,20 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_help { help_content }
     end
 
-    # When `prefs: true` is present, resolve the label from the
-    # `prefs_<field>` i18n key and drop the `:prefs` option so it
-    # doesn't flow downstream. Used by text, textarea, select,
-    # checkbox, radio, number.
+    # When `prefs: true`, resolves the label from the `prefs_<field>`
+    # i18n key and drops `:prefs` so it doesn't flow downstream.
     #
-    # Passes the bare Symbol through -- FieldLabelRow#resolved_label_text
-    # resolves it via `.t`, which is what makes this safe even though
-    # `field_name` is a runtime value (the actual `prefs_<field>` key
-    # isn't known statically here): `.t` renders any real textile markup
-    # correctly (e.g. `prefs_no_emails`, "Opt out of _all_ email from
-    # MO.") instead of leaving literal asterisks/underscores, with no
-    # per-key auditing needed.
+    # Passes the bare Symbol through -- `FieldLabelRow#
+    # resolved_label_text` resolves it via `.t`, which renders any
+    # textile markup in the translation (asterisks, underscores)
+    # instead of leaving it literal, with no per-key auditing needed.
     def auto_label_for_prefs(field_name, options)
       return options if options[:prefs].blank?
 
       options.merge(label: :"prefs_#{field_name}").except(:prefs)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Resolve a field name to a field object the factory methods can
     # call (`.text`, `.textarea`, `.checkbox`, etc.). Three paths:
     #
@@ -495,6 +495,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Lets the `*_field` helpers handle bound and non-bound fields
     # through a single dispatch shape — the same precedent
     # `hidden_field` established.
+    # rubocop:enable MO/NoLongCommentBlock
     def resolve_field(field_name, value: nil)
       if field_name.is_a?(String)
         FieldProxy.new(nil, field_name, value)

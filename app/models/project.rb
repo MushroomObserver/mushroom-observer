@@ -965,17 +965,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Observations excluding non-primary members of multi-obs occurrences.
   #
-  # The underlying `exclude_non_primary` scope adds a LEFT OUTER JOIN on
-  # `occurrences` with an `(occurrence_id IS NULL OR primary = id)` OR
-  # predicate, which the planner can't serve from the
-  # `(project_id, observation_id)` index. On big projects the dedup
-  # scan runs to 0.3-1.7s and is invoked separately by every show-page
-  # widget (tab counts, checklist, location count, constraint
-  # violations). Pluck the visible IDs once per Project instance and
-  # have every downstream query use a flat PK lookup. Mutators that
-  # add/remove/exclude observations call
-  # `invalidate_visible_observations_cache!` so the memo stays
-  # consistent within a single Project instance.
+  # The underlying `exclude_non_primary` scope's LEFT OUTER JOIN/OR
+  # predicate can't be served from the `(project_id, observation_id)`
+  # index, so on big projects the dedup scan runs 0.3-1.7s -- and
+  # every show-page widget invokes it separately. Pluck the visible
+  # IDs once per Project instance and let every downstream query use
+  # a flat PK lookup. Mutators call
+  # `invalidate_visible_observations_cache!` to keep the memo
+  # consistent.
   def visible_observations
     Observation.where(id: visible_observation_ids)
   end
@@ -1075,17 +1072,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Memoized: project's target_names with synonyms + sub-taxa expanded
-  # into a Set of name_ids, matching the candidate_observations rule.
-  # Used by violates_target_name? as a per-obs membership test.
-  # Reads name ids via project_target_names.pluck, not the
-  # target_names association -- target_names may already be loaded
-  # (callers like TargetNamesController#add_names check it before
-  # add_target_name/remove_target_name run) on a strict_loading
-  # Project, and resetting or reloading it here to pick up the change
-  # would make a later access of that same association raise
-  # ActiveRecord::StrictLoadingViolationError instead of reusing its
-  # existing load. pluck queries project_target_names directly and
-  # doesn't touch target_names' loaded state.
+  # into a Set of name_ids, for violates_target_name?'s per-obs
+  # membership test. Reads via project_target_names.pluck, not the
+  # target_names association -- that association may already be
+  # loaded on a strict_loading Project, and resetting/reloading it
+  # here to pick up the change would make a later access raise
+  # ActiveRecord::StrictLoadingViolationError instead of reusing it.
   def expanded_target_name_id_set
     @expanded_target_name_id_set ||=
       expanded_target_name_ids(project_target_names.pluck(:name_id)).to_set

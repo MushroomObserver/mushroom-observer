@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Generates one CHANGELOG.md section per production deploy (issue
-# #5155): a dated heading for a deploy-* tag with a flat list of every
+# rubocop:disable MO/NoLongCommentBlock
+# Generates one CHANGELOG.md section per production deploy: a dated
+# heading for a deploy-* tag with a flat list of every
 # PR merged since the previous deploy tag. A PR belongs to a deploy
 # when its merge commit is reachable from that deploy's tag but not
 # from the previous one -- true for merge, squash and rebase merges
@@ -27,6 +28,7 @@
 # These CLI modes are for backfills and regeneration. The live flow
 # runs through script/prerelease.rb, which drives this class's
 # pending API to build the next deploy's section before the deploy.
+# rubocop:enable MO/NoLongCommentBlock
 
 require("date")
 require("json")

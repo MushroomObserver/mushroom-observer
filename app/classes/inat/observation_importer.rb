@@ -110,17 +110,12 @@ class Inat
         @inat_obs[:license_code].blank?
     end
 
-    # The real duplicate check: any typed iNat ExternalLink for this iNat
-    # obs (import / mirror / copy / remote_manual / manual) means it already
-    # corresponds to an MO observation, so importing it would create a
-    # duplicate. With #4565's materialization the link set is complete, so
-    # this MO-side check is what actually stops a duplicate — the iNat-side
-    # `without_field` filter only trims how many observations iNat sends
-    # back (and it's skipped entirely for explicit id lists and recheck_all
-    # runs). The import ExternalLink's unique index (one import per target)
-    # is still what prevents a duplicate if two imports race each other;
-    # this check just keeps that race from surfacing as a noisy
-    # RecordNotUnique exception.
+    # What stops a duplicate: any typed iNat ExternalLink for this obs
+    # already corresponds to an MO observation. The iNat-side
+    # `without_field` filter only trims how much iNat sends back, and
+    # is skipped for explicit id lists and recheck_all runs. The
+    # import ExternalLink's unique index is the backstop if two
+    # imports race each other.
     def already_linked?
       return false unless ExternalLink.exists?(
         target_type: "Observation",

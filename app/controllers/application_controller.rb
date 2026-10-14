@@ -168,10 +168,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
+  # Redirects a bad/alternate domain (MO.bad_domains) to MO.domain.
+  # Checks an explicit allowlist rather than `HTTP_HOST != MO.domain`,
+  # so a config mistake can't loop infinitely. Needed because
+  # browsers store cookies per domain -- without this, a
+  # fully-specified link (e.g. in a comment) to a bad domain forces
+  # a re-login.
+  #
   # Redirect from www.mo.org to mo.org.
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this
-  # ever were to break we'd get into an infinite loop too easily that way.
+  # breaks we'd get into an infinite loop too easily that way.
   # I think this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
@@ -185,6 +193,7 @@ class ApplicationController < ActionController::Base
   # a comment's body is different.  This results in you having to re-login
   # when you click on these embedded links.
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def fix_bad_domains
     if (request.method == "GET") &&
        MO.bad_domains.include?(request.env["HTTP_HOST"])
@@ -321,18 +330,13 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # Turbo requires a non-2xx status on a failed form submission's
-  # re-render; a 200 there is a silent no-op under Turbo instead of a
-  # redisplay. Dispatches to the including controller's own
-  # `render_new_view`/`render_edit_view` (status: :ok default) --
-  # every controller with `new`/`edit`/`create`/`update` actions
-  # defines those two, so this pair needs no per-controller override.
-  # Doesn't pass status: into render_new_view/render_edit_view --
-  # several not-yet-converted controllers (ArticlesController,
+  # Turbo requires a non-2xx status on a failed form re-render; a
+  # 200 there is a silent no-op instead of a redisplay. Dispatches
+  # to the including controller's `render_new_view`/`render_edit_view`
+  # with no status: kwarg, since some controllers (ArticlesController,
   # LocationsController, PublicationsController) still define a
-  # zero-arg render_new_view/render_edit_view, which would raise
-  # ArgumentError on a forced status: kwarg. Setting status after
-  # render works regardless of the subclass method's signature.
+  # zero-arg version that would raise ArgumentError on one. Setting
+  # status after render works regardless of the subclass signature.
   def render_new_view_invalid(**)
     render_new_view(**)
     self.status = :unprocessable_content

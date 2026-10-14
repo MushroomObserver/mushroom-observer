@@ -64,20 +64,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Replaces the upstream `Superform::Rails::Components::Checkbox`
-    # boolean-mode rendering so the hidden sidecar gets `autocomplete="off"`
-    # (matching Rails' `form.check_box` output — browsers otherwise
-    # repopulate the hidden's "0" on back-button and silently clobber a
-    # checked box).
-    #
-    # `checked_value:` and `unchecked_value:` kwargs mirror Rails'
-    # `form.check_box(field, options, checked, unchecked)` positional
-    # args, so callers can use "yes"/"no" or other non-boolean values
-    # without falling back to bare `input(type: :checkbox)`.
-    #
-    # When `disabled: true` is passed, the hidden sidecar is omitted —
-    # disabled inputs aren't submitted, so the sidecar would be dead
-    # markup (and the checkbox itself never toggles).
+    # Replaces upstream `Superform::Rails::Components::Checkbox`'s
+    # boolean-mode rendering so the hidden sidecar gets
+    # `autocomplete="off"` (matches Rails' `form.check_box`) -- without
+    # it, browsers repopulate the hidden "0" on back-button and
+    # clobber a checked box. `checked_value:`/`unchecked_value:`
+    # mirror Rails' checked/unchecked positional args, for values
+    # like "yes"/"no". `disabled: true` omits the sidecar, since
+    # disabled inputs aren't submitted.
     def render_boolean_inputs
       unless disabled?
         input(name: field.dom.name, type: :hidden,
@@ -153,20 +147,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       )
     end
 
-    # Emit the array-mode input directly rather than delegating to
-    # upstream's `Superform::Rails::Components::Checkbox`. Upstream's
-    # `Checkbox` decides which of {boolean, collection, array} branch
-    # to render based on `field.parent.is_a?(Superform::Field)`; when
-    # called from this iteration the parent is the form root, so
-    # upstream picks the boolean branch — which renders all per-option
-    # inputs with the bare `dom.id` (duplicate ids) and a hidden 0/1
-    # pair per option (wrong for an array submission).
-    #
-    # The shape emitted here mirrors MO's existing block-mode
-    # `option(value)` helper above: one `<input type="checkbox"
-    # id="{field_id}_{index}" name="{field_name}[]" value="{value}">`
-    # per option, wrapped in a `<label for="{id}">` so click-focus and
-    # screen-reader association both work.
+    # Emits the array-mode input directly instead of delegating to
+    # upstream's `Superform::Rails::Components::Checkbox`: upstream
+    # picks its boolean branch when `field.parent` isn't a
+    # `Superform::Field` (true here, since the parent is the form
+    # root), which renders duplicate bare `dom.id`s and a hidden 0/1
+    # pair per option — wrong for an array submission.
     def render_checkbox_option(choice)
       value_str = choice.value.to_s
       input_id = option_input_id(value_str)

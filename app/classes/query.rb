@@ -376,21 +376,14 @@ class Query
   end
   delegate :recognized_params, to: :class
 
-  # The `params.permit(*filters)`-compatible filter list for this Query
-  # subclass's recognized_params -- the allowlist
+  # The `params.permit(*filters)`-compatible allowlist that
   # ApplicationController::Indexes#build_index_with_query and
-  # ApplicationController::QueryParams#create_query_from_url_params use
-  # to decide which top-level URL params are live index filters.
-  # A scalar attr (or param_alias) permits as a bare symbol; an
-  # Array-typed attr permits both as a bare symbol (its scalar URL
-  # form, wrapped into an array by
-  # QueryParams#resolve_scalar_query_param) and via `attr: []`; a
-  # Hash-typed attr --
-  # including a subquery hash like `location_query: { subquery: :Location }`
-  # -- permits via `attr: {}`, Rails' "allow this key with any nested
-  # content" filter. Validating what's inside an Array/Hash value is
-  # Query's own job (`clean_and_validate_params`), not strong params' --
-  # this only gates which top-level keys reach `create_query`.
+  # QueryParams#create_query_from_url_params use to decide which
+  # top-level URL params are live index filters. A scalar attr
+  # permits as a bare symbol; an Array attr permits both that and
+  # `attr: []`; a Hash attr (including a subquery hash) permits via
+  # `attr: {}`. Validating what's inside an Array/Hash value is
+  # Query's job (`clean_and_validate_params`), not strong params'.
   def self.permit_filters
     containers = {}
     scalars = []
@@ -427,17 +420,13 @@ class Query
     [:string, :boolean].include?(accepts.keys.first)
   end
 
-  # Resolves any `param_alias:`-registered param key present in `params`
-  # (e.g. `project: 123`, the URL shortcut) into its target query_attr
-  # (`projects: [123]`) -- wrapping the value in an Array when the target
-  # attr itself accepts an Array. The alias wins over an already-present
-  # value under the target attr name: a singular alias represents a more
-  # specific, more recently-expressed choice (e.g. a "sort by date" link
-  # clicked while a broader saved query already carries its own
-  # `order_by`), so it overwrites rather than yields. Pure param-shape
-  # translation: does not verify a record-backed value exists -- see
-  # ApplicationController::QueryParams#create_query_from_url_params,
-  # which needs controller/flash context this class method doesn't have.
+  # Resolves any `param_alias:`-registered param key (e.g. `project:
+  # 123`) into its target query_attr (`projects: [123]`), wrapping
+  # the value in an Array when the target attr accepts one. The
+  # alias wins over an already-present value under the target attr,
+  # as the more specific, more recently-expressed choice. Pure
+  # param-shape translation -- doesn't verify a record-backed value
+  # exists; see QueryParams#create_query_from_url_params for that.
   def self.resolve_param_aliases(params)
     aliases = param_aliases
     return params if aliases.empty?
@@ -518,18 +507,13 @@ class Query
 
   # The query's filter attrs, for use as flat top-level URL params on
   # a link to this model's index page (`?project=123`, not
-  # `?q[projects][]=123`). Unlike q_param, deliberately excludes
-  # :model -- the target index action infers its model from the
-  # controller (see ApplicationController::Indexes), so a link built
-  # from this only works for a query whose model matches the target
-  # controller. A link that crosses models (e.g. forwarding an
-  # RssLog query to an Observation's show page) still needs q_param,
-  # not this.
-  # Excludes :controller/:action/:id/:format defensively -- merged
-  # directly onto a Rails route-helper args hash by Tab classes
-  # (`args.merge(@index_filter)`), and a future query_attr sharing
-  # one of those names would silently clobber the routing key it's
-  # merged over instead of raising.
+  # `?q[projects][]=123`). Excludes :model -- the target action
+  # infers its model from the controller, so this only works for a
+  # query whose model matches it; a link crossing models still needs
+  # q_param. Excludes :controller/:action/:id/:format too, since Tab
+  # classes merge this directly onto a route-helper args hash
+  # (`args.merge(@index_filter)`), and a clashing query_attr would
+  # silently clobber the routing key instead of raising.
   def index_filter
     shrink_multi_value_filters(
       collapse_names_to_this_name(
@@ -578,27 +562,16 @@ class Query
   private :shrink_multi_value_filters, :collapse_names_to_this_name,
           :collapsible_to_this_name?
 
-  # Merges an already-resolved `q` param value into a path's
-  # existing query string (preserving other params, e.g. `flow=next`).
-  # A plain utility, not tied to any Query instance -- shared by two
-  # callers that source the value differently:
-  # `ApplicationController::Queries#add_q_param` resolves
-  # `q_param_value` from ambient session/request state before calling
-  # this; `Tab::Base#with_q_param` has no such ambient state (a Tab is
-  # a plain PORO, not a controller/view), so its callers resolve the
-  # value themselves and pass it into the Tab's constructor instead.
+  # Merges an already-resolved `q` param value into a path's existing
+  # query string (preserving other params, e.g. `flow=next`). A
+  # plain utility shared by `ApplicationController::Queries#add_q_param`
+  # and `Tab::Base#with_q_param`, which resolve `q_param_value`
+  # differently.
   #
-  # `q_param_value` can be a String (the alphabetized-id form --
-  # `?q=ABCDE`) or a Hash (the model+params form `Query#q_param`
-  # itself returns -- `?q[model]=Observation&q[locations][]=1`). Uses
-  # `Hash#to_query`, not `Rack::Utils.build_query` -- Rack stringifies
-  # a nested Hash value as a literal Ruby `inspect` rep, while
-  # `to_query` recurses correctly into nested hashes and arrays.
-  # Caught by the related_records integration tests exercising
-  # `Tab::Location::ObservationsAt`: a newly-created query's `q_param`
-  # is a Hash, and the resulting URL was an unparseable literal Ruby
-  # Hash rep encoded with `+` for whitespace before this used
-  # `to_query`.
+  # `q_param_value` can be a String (`?q=ABCDE`) or a Hash
+  # (`?q[model]=Observation&q[locations][]=1`). Uses `Hash#to_query`,
+  # not `Rack::Utils.build_query` -- Rack stringifies a nested Hash as
+  # a literal Ruby `inspect` rep, while `to_query` recurses correctly.
   def self.merge_q_param_into_url(path, q_param_value)
     return path if q_param_value.blank?
 
@@ -631,17 +604,14 @@ class Query
   end
   private_class_method :merge_query_params_into_url
 
-  # Serialize the query params, adding the model, for saving to a QueryRecord.
-  # We use this column of QueryRecord to identify an existing query record that
-  # matches current params, and sometimes to recompose a query from the string.
-  # That's why the keys are sorted here before being serialized via `to_json` -
-  # when matching, strings must match exactly.
+  # Serializes the query params plus model, for QueryRecord's
+  # `description` column -- used both to match an existing query
+  # record and to recompose a query from the string. Keys are sorted
+  # first so matching compares identical strings.
   #
-  # NOTE: QueryRecord[:description] is not a Rails-serialized column; we call
-  # `to_json` here to serializate it ourselves. Using SQL to compare serialized
-  # strings is more efficient than making it a Rails-serialized column and using
-  # Ruby to compare hashes (in whatever order), because in a serialized column
-  # you can't use SQL on the column value, you have to compare parsed instances.
+  # `description` is a plain string column, not Rails-serialized, so
+  # SQL can compare serialized strings directly instead of needing
+  # Ruby to parse and compare hashes.
   def serialize
     attributes.compact.sort.to_h.merge(model: model.name).to_json
   end

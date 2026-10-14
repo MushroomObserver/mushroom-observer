@@ -97,17 +97,13 @@ class HelpTest < ComponentTestCase
     assert_html(html, ".collapse > .well")
   end
 
-  # ----- element: :span (the old "help-note" flavor's replacement) -----
+  # ----- element: :span (the "help-note" flavor) -----
   #
-  # `Components::Help` used to have a second "note" flavor
-  # (`Help::Note`, `.help-note` class, `:span` default element)
-  # alongside this one (`Help::Block`, `.help-block`). Merged into one
-  # dispatcher, but the two CSS classes stay genuinely distinct:
-  # `.help-block` is Bootstrap's own class and hardcodes
-  # `display: block`, so reusing it for `element: :span` content would
-  # force that content onto its own line regardless of the `<span>`
-  # tag. `render_plain` picks `.help-note` for `:span` and
-  # `.help-block` for everything else to keep the inline shape inline.
+  # `.help-block` is Bootstrap's class and hardcodes `display: block`,
+  # so reusing it for `element: :span` content would force a
+  # line-break regardless of the `<span>` tag. `render_plain` picks
+  # `.help-note` for `:span` and `.help-block` for everything else to
+  # keep the inline shape inline.
 
   # rubocop:disable-next MO/RedundantTagInSelector
   def test_span_element_renders_help_note_class
