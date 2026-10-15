@@ -117,9 +117,9 @@ class Components::Panel < Components::Base
     if title
       classes = classes.presence || "h4 card-title"
       div(class: "card-header") do
-        div(class: classes) do
+        div(class: class_names(classes, "d-flex justify-content-between " \
+                                        "align-items-center")) do
           span(&content)
-          whitespace
           render_heading_links if heading_links_slot? || @collapsible
         end
       end
@@ -132,7 +132,7 @@ class Components::Panel < Components::Base
 
   # May contain passed-in links, a collapse trigger, or both
   def render_heading_links
-    span(class: "card-header-links float-right") do
+    span(class: "card-header-links inline-flex-center") do
       render(heading_links_slot) if heading_links_slot?
       render_collapse_icons if @collapsible
     end
@@ -142,13 +142,14 @@ class Components::Panel < Components::Base
     Link(type: :collapse_toggle,
          target_id: @collapse_id || "",
          collapsed: !@expanded,
-         class: "panel-collapse-trigger ml-3",
+         class: "panel-collapse-trigger ml-3 inline-flex-center",
          data: collapse_toggle_data,
          aria: collapse_aria) do
       render_collapse_message
 
-      Icon(type: :chevron_down, title: :open.ti, class: "active-icon")
-      Icon(type: :chevron_up, title: :close.ti)
+      Icon(type: :chevron_down, title: :open.ti, class: "active-icon",
+           center_tooltip: true)
+      Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
     end
   end
 

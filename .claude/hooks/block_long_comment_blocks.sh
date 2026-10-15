@@ -4,6 +4,9 @@
 # more than MAX_LINES consecutive comment lines anywhere -- not just
 # in what this edit touched. Personal style rule (terse comments),
 # corrected repeatedly across sessions. See .claude/rules/code_comments.md.
+# Exempt: a comment block sitting directly above a class/module
+# declaration (a docstring) -- same exemption the real
+# MO/NoLongCommentBlock RuboCop cop grants.
 set -euo pipefail
 
 MAX_LINES=5
@@ -26,42 +29,51 @@ esac
 
 [ -f "$FILE" ] || exit 0
 
+CLASS_RE='^[[:space:]]*(class|module)[[:space:]]'
+
+mapfile -t LINES < "$FILE"
+TOTAL=${#LINES[@]}
+
 RUN=0
-MAX_RUN=0
-BLOCK=""
-MAX_BLOCK=""
 START_LINE=0
-MAX_START_LINE=0
-LINE_NO=0
-while IFS= read -r line; do
-  LINE_NO=$((LINE_NO + 1))
+VIOLATION_RUN=0
+VIOLATION_START=0
+VIOLATION_END=0
+
+i=0
+while [ "$i" -lt "$TOTAL" ]; do
+  line="${LINES[$i]}"
   if printf '%s' "$line" | grep -qE "$COMMENT_RE"; then
-    [ "$RUN" -eq 0 ] && START_LINE=$LINE_NO
+    [ "$RUN" -eq 0 ] && START_LINE=$((i + 1))
     RUN=$((RUN + 1))
-    BLOCK="$BLOCK
-$line"
   else
-    if [ "$RUN" -gt "$MAX_RUN" ]; then
-      MAX_RUN=$RUN
-      MAX_BLOCK="$BLOCK"
-      MAX_START_LINE=$START_LINE
+    if [ "$RUN" -gt "$MAX_LINES" ] &&
+       ! printf '%s' "$line" | grep -qE "$CLASS_RE"; then
+      VIOLATION_RUN=$RUN
+      VIOLATION_START=$START_LINE
+      VIOLATION_END=$i
+      break
     fi
     RUN=0
-    BLOCK=""
   fi
-done < "$FILE"
-if [ "$RUN" -gt "$MAX_RUN" ]; then
-  MAX_RUN=$RUN
-  MAX_BLOCK="$BLOCK"
-  MAX_START_LINE=$START_LINE
+  i=$((i + 1))
+done
+
+# A long comment block that runs to the end of the file (nothing
+# after it to exempt against) is never a docstring.
+if [ "$VIOLATION_RUN" -eq 0 ] && [ "$RUN" -gt "$MAX_LINES" ]; then
+  VIOLATION_RUN=$RUN
+  VIOLATION_START=$START_LINE
+  VIOLATION_END=$TOTAL
 fi
 
-if [ "$MAX_RUN" -gt "$MAX_LINES" ]; then
+if [ "$VIOLATION_RUN" -gt 0 ]; then
+  BLOCK=$(sed -n "${VIOLATION_START},${VIOLATION_END}p" "$FILE")
   cat >&2 <<EOF
-🚫 BLOCKED: $FILE has a comment block of $MAX_RUN consecutive lines
-(max $MAX_LINES), starting at line $MAX_START_LINE.
+🚫 BLOCKED: $FILE has a comment block of $VIOLATION_RUN consecutive lines
+(max $MAX_LINES), starting at line $VIOLATION_START.
 
-$MAX_BLOCK
+$BLOCK
 
 Cut to the single load-bearing fact. Narrative belongs in the commit
 message or PR description, not the comment. Applies even if this

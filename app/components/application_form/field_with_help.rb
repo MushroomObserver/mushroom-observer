@@ -43,7 +43,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # block-level spacer that doesn't apply); a block-level field uses
     # `form-between`, which already supplies that spacing.
     def between_class
-      wrapper_options[:inline] ? "mr-3" : "form-between"
+      wrapper_options[:inline] ? "mr-3" : "form-between inline-flex-center"
     end
 
     private
@@ -54,15 +54,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Trailing space before the row's next sibling (an inline field's
     # input) lives on the row itself (FieldLabelRow#render_label_with_
-    # appends/#render_label_flex_row), not on this span -- putting it
-    # here would double up with a later append's leading margin.
+    # appends/#render_label_flex_row), not here -- putting it here
+    # would double up with a later append's leading margin.
     def render_help_icon
-      span(class: "ml-2") do
-        Link(type: :collapse_toggle,
-             target_id: help_id,
-             class: "info-collapse-trigger") do
-          Icon(type: :question, title: :help.ti)
-        end
+      Link(type: :collapse_toggle,
+           target_id: help_id,
+           class: "info-collapse-trigger ml-2 inline-flex-center") do
+        Icon(type: :question, title: :help.ti, center_tooltip: true)
       end
     end
 

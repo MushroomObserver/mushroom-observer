@@ -26,18 +26,6 @@ label {
   margin-bottom: 5px;
 }
 
-// `.form-between` (the help-collapse trigger's spacer wrapper, see
-// FieldWithHelp#between_class) wraps the `.info-collapse-trigger`
-// link, which wraps Icon's title-tooltip span, which wraps the svg
-// -- three levels deep, vs. `.has-id-indicator`'s one. Flexing just
-// the outer level blockifies the `<a>` per CSS's flex-item rules,
-// and a block element doesn't center its inline content -- each
-// level needs its flex centering applied, not just the outer one.
-.form-between,
-.info-collapse-trigger {
-  display: inline-flex;
-  align-items: center;
-}
 
 // Bootstrap 4 custom-control checkboxes/radios -- input and label are
 // DOM siblings (see Components::ApplicationForm::CheckboxField/

@@ -99,7 +99,7 @@ module Views::Controllers::Observations::Identify
     def render_search_icon
       render(Components::InputGroup::Addon.new(
                variant: :addon, position: :prepend
-             )) { Icon(type: :search, title: :search.ti) }
+             )) { Icon(type: :search, title: :search.ti, center_tooltip: true) }
     end
 
     def render_hidden_field

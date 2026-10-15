@@ -10,8 +10,9 @@ class Components::Help::CollapseInfoTrigger < Components::Base
   def view_template
     Link(type: :collapse_toggle,
          target_id: @target_id,
-         class: class_names("info-collapse-trigger", @extra_class)) do
-      Icon(type: :question, title: :help.ti)
+         class: class_names("info-collapse-trigger inline-flex-center",
+                            @extra_class)) do
+      Icon(type: :question, title: :help.ti, center_tooltip: true)
     end
   end
 end

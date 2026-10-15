@@ -114,9 +114,10 @@ module Views::Controllers::Projects::Locations
       Link(type: :collapse_toggle,
            target_id: collapse_id,
            collapsed: true,
-           class: "panel-collapse-trigger") do
-        Icon(type: :chevron_down, title: :open.ti, class: "active-icon")
-        Icon(type: :chevron_up, title: :close.ti)
+           class: "panel-collapse-trigger inline-flex-center") do
+        Icon(type: :chevron_down, title: :open.ti, class: "active-icon",
+             center_tooltip: true)
+        Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
       end
     end
 

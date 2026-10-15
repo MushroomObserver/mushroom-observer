@@ -193,23 +193,14 @@ tbody.collapse.show {
   vertical-align: -0.15em;
 }
 
-// `:not(.has-id-indicator)` matters: that span's display:none default
-// (conditionally overridden to inline-flex under a `.has-id` ancestor,
-// see _autocomplete.scss) has lower specificity than this selector,
-// so without the exclusion this rule forces it visible on every page
-// load regardless of the `.has-id` state.
-span:not(.has-id-indicator):has(> .mo-icon) {
-  display: inline-flex;
-  align-items: center;
-}
-
-// Icon wraps its svg in a bare <span> whenever `title:` or
-// `wrap_class:` is given (see app/components/icon.rb) -- that span's
-// line-box is taller than the svg inside it, inflating any .btn
-// sized to its content (e.g. #top_nav's search toggle vs. the
-// QR-scan button, which has no title: and so no wrapping span).
-// Same flex-collapse fix as .btn:has(.mo-icon) above.
-span:has(> .mo-icon) {
+// Centers an inline icon-bearing element vertically against its
+// siblings in a flex row -- a plain span or link doesn't do this by
+// default. Icon's `center_tooltip:` prop adds this to the title-
+// tooltip span it generates; apply it directly to a link/span
+// wrapping an icon elsewhere (e.g. `.info-collapse-trigger`,
+// `.panel-collapse-trigger`) instead of writing a new selector per
+// case.
+.inline-flex-center {
   display: inline-flex;
   align-items: center;
 }
