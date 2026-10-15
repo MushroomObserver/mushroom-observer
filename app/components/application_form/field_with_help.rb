@@ -69,7 +69,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       span(class: "ml-3") do
         Link(type: :collapse_toggle,
              target_id: help_id,
-             class: "info-collapse-trigger") { Icon(type: :question) }
+             class: "info-collapse-trigger") do
+          Icon(type: :question, title: :help.ti)
+        end
       end
     end
 
