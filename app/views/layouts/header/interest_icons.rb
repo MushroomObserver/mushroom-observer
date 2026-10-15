@@ -30,12 +30,7 @@ module Views::Layouts
     prop :object, ::AbstractModel
 
     def view_template
-      # `.flex-bar` supplies the horizontal layout -- BS3's
-      # `.btn-toolbar` (bootstrap-sass) is float/clearfix-based, not
-      # flex; only BS4 rewrites it to `display: flex`. `.btn-toolbar`
-      # is kept for its BS margin-between-children rule and for the
-      # `role="toolbar"` semantics, not for layout.
-      div(class: "btn-toolbar flex-bar interest-eyes h4 my-0 ml-2 ml-sm-0",
+      div(class: "btn-toolbar interest-eyes h4 my-0 ml-2 ml-sm-0",
           role: "toolbar",
           aria: { label: :app_interest_icons_label.l }) do
         render_icons if @user
