@@ -33,6 +33,36 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_selector(".print_label_observation_#{@obs.id}")
   end
 
+  # `obs-show-layout` (app/javascript/controllers/
+  # obs-show-layout_controller.js) moves the Details panel across the
+  # 992px breakpoint: first in the right column on desktop, right
+  # after the carousel on mobile. Every other panel keeps the same
+  # relative order at both widths, so only Details needs a position
+  # check here.
+  def test_details_panel_relocates_across_breakpoint
+    rolf = users("rolf")
+    login!(rolf)
+    visit(observation_path(@obs))
+    assert_selector("body.observations__show")
+
+    # Checks the position of the `details` target wrapper itself,
+    # not `#observation_details` -- Details' own internal markup
+    # (how many layers Panel nests its content in) isn't this test's
+    # concern, only where the Stimulus controller puts the wrapper.
+    details = "[data-obs-show-layout-target='details']"
+
+    # Cuprite's default system-test window is 1200x800 (>= 992px).
+    assert_selector("[data-obs-show-layout-target='rightColumn'] > " \
+                     "#{details}:first-child")
+
+    page.current_window.resize_to(500, 800)
+    assert_selector("[data-obs-show-layout-target='carousel'] + #{details}")
+
+    page.current_window.resize_to(1200, 800)
+    assert_selector("[data-obs-show-layout-target='rightColumn'] > " \
+                     "#{details}:first-child")
+  end
+
   def test_add_and_edit_collection_numbers
     rolf = users("rolf")
     login!(rolf)

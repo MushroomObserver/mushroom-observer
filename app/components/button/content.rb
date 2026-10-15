@@ -6,10 +6,13 @@
 #
 # When `@icon` is set:
 #   - icon always renders first
-#   - text (`@name`) follows in `span.sr-only` by default, or in
+#   - text (`@name`) follows in `span.sr-only` by default; in
 #     `span.d-none.d-sm-inline` when `@show_label` is `:responsive`
 #     (visible at sm+ breakpoints, hidden on xs — for nav buttons
-#     that show an icon on mobile and icon+text on wider screens)
+#     that show an icon on mobile and icon+text on wider screens);
+#     or visible at every breakpoint when `@show_label` is `:always`
+#     (a full-width heading with no space pressure to hide the text
+#     behind)
 # When only `@name` is set: plain text, no span wrapper.
 module Components::Button::Content
   include Components::IconWithText
@@ -28,12 +31,9 @@ module Components::Button::Content
     end
   end
 
-  # `.stateful-link` is what `_icons.scss`'s active/collapsed swap
-  # rule keys off -- only add it when there's actually a swap pair to
-  # show/hide, so a plain (non-stateful) Button/Link's markup is
-  # unaffected. Shared here (both `Components::Button#merged_class`
-  # and `Components::Link::Get#merged_class` call it) rather than
-  # duplicated.
+  # `.stateful-link` keys `_icons.scss`'s active/collapsed swap rule --
+  # only added when a swap pair exists, shared by Button's and
+  # Link::Get's `merged_class`.
   def stateful_class
     "stateful-link" if @active_icon && @active_content
   end

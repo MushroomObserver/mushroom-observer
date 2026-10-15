@@ -13,14 +13,11 @@
 #     request: request
 #   )) %>
 class Views::Layouts::Sidebar < Views::Base
-  # The Bootstrap modifier classes the nested partials (`Admin`,
-  # `Login`, `Section`, `User`, etc.) read via the `classes:` prop
-  # and apply on top of `list-group-item` via
-  # `Components::ListGroup::Item` / `LinkItem` — neither key
-  # includes the `list-group-item` prefix itself, since both
-  # components compose it automatically. `Sidebar::ContextNav`
-  # reuses the same set for its mobile rendering into the offcanvas
-  # sidebar.
+  # Modifier classes the nested partials (`Admin`, `Login`, `Section`,
+  # `User`, etc.) read via `classes:`, layered onto `list-group-item`
+  # by `Components::ListGroup::Item`/`LinkItem` -- neither key
+  # includes that prefix itself. `Sidebar::ContextNav` reuses this
+  # same set for its mobile offcanvas rendering.
   CSS_CLASSES = {
     heading: "disabled font-weight-bold",
     admin: "list-group-item-danger",

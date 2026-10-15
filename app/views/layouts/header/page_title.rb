@@ -39,15 +39,11 @@ module Views::Layouts
 
     private
 
-    # Only visible below `md` (`d-md-none`) -- the `md`+ layout keeps
-    # these same four pieces in their desktop positions instead (see
-    # `render_left_column`/`render_right_column`). `.col-12` keeps
-    # Bootstrap's default column padding rather than `px-card` --
-    # `.row`'s negative margin is sized to cancel that default
-    # padding, returning the column to the true edge of `#header`.
-    # `px-card` goes on the nested div instead, so its inset is added
-    # on top of that true edge rather than replacing (and
-    # under-shooting) the padding the negative margin depends on.
+    # Only visible below `md` -- the `md`+ layout keeps these pieces
+    # in their desktop positions (`render_left_column`/
+    # `render_right_column`). `.col-12` keeps Bootstrap's default
+    # padding so `.row`'s negative margin cancels it; `px-card` goes
+    # on the nested div instead.
     def render_mobile_top_row
       div(class: "col-12 d-md-none") do
         div(class: "d-flex flex-wrap justify-content-between " \
