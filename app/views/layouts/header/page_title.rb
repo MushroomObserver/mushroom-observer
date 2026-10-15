@@ -14,7 +14,7 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-between pl-3"
+      "show_title_nav d-flex justify-content-between px-3"
 
     def view_template
       Row(id: "title_bar", class: "d-flex align-items-center") do
