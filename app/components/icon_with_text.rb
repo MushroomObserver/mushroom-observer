@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 # Shared "icon + optional text" rendering — the icon glyph plus a
-# text `<span>` whose visibility depends on `show_text:`: falsy is
-# `.sr-only` (hidden, default), `true` is hidden on `xs`/visible at
-# `sm`+, and `:always` is visible at every breakpoint (for a
-# full-width heading with no space pressure to hide behind). Included
-# by `Components::Button::Content`, in turn included by both
-# `Components::Button` and `Components::Link` (the `Link::Get` family)
-# -- so both get the optional active-icon/active-label swap below for
-# free.
+# text `<span>` whose visibility depends on `show_label:`: `:hidden`
+# is `.sr-only` (default), `:responsive` is hidden on `xs`, visible
+# at `sm`+ (for a cramped inline control that can spare the label
+# only once there's room), `:always` is visible at every breakpoint
+# (for a full-width heading with no space pressure to hide behind).
+# Included by `Components::Button::Content`, in turn included
+# by both `Components::Button` and `Components::Link` (the `Link::Get`
+# family) -- so both get the optional active-icon/active-label swap
+# below for free.
 #
 # `render_icon_with_text` renders icon-then-text by default; passing
 # `active_icon:`/`active_content:` additionally renders a second
@@ -22,7 +23,7 @@ module Components::IconWithText
   # to scale with the surrounding font-size (a `.panel-title` heading's
   # bold type needs visibly more gap than small body text), which only
   # an em-based value does. See `_icons.scss` for the rule.
-  TEXT_VISIBLE_CLASSES = "d-none d-sm-inline icon-text-gap"
+  RESPONSIVE_TEXT_CLASSES = "d-none d-sm-inline icon-text-gap"
   ALWAYS_VISIBLE_TEXT_CLASSES = "icon-text-gap"
 
   private
@@ -37,31 +38,32 @@ module Components::IconWithText
                                 title: title))
   end
 
-  def render_icon_text(content, show_text:, extra_class: nil)
+  def render_icon_text(content, show_label:, extra_class: nil)
     return unless content
 
-    classes = class_names(text_visibility_class(show_text), extra_class)
+    classes = class_names(text_visibility_class(show_label), extra_class)
     span(class: classes) { trusted_or_plain(content) }
   end
 
-  def text_visibility_class(show_text)
-    return ALWAYS_VISIBLE_TEXT_CLASSES if show_text == :always
-    return TEXT_VISIBLE_CLASSES if show_text
-
-    "sr-only"
+  def text_visibility_class(show_label)
+    case show_label
+    when :always then ALWAYS_VISIBLE_TEXT_CLASSES
+    when :responsive then RESPONSIVE_TEXT_CLASSES
+    else "sr-only"
+    end
   end
 
-  def render_icon_with_text(icon, content, show_text:, icon_opts: {},
+  def render_icon_with_text(icon, content, show_label:, icon_opts: {},
                             active: {})
     render_icon_glyph(icon, html_class: icon_opts[:class],
                             title: icon_opts[:title])
-    render_icon_text(content, show_text: show_text)
+    render_icon_text(content, show_label: show_label)
     return unless active[:icon] && active[:content]
 
     render_icon_glyph(active[:icon],
                       html_class: class_names(icon_opts[:class],
                                               "active-icon"))
-    render_icon_text(active[:content], show_text: show_text,
+    render_icon_text(active[:content], show_label: show_label,
                                        extra_class: "active-label")
   end
 

@@ -238,7 +238,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless find_text
 
       Button(name: find_text,
-             icon: :find_on_map, label: false,
+             icon: :find_on_map, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 find-btn d-none p-0",
@@ -264,7 +264,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       Button(name: keep_text,
              icon: :apply, active_icon: :edit, active_content: edit_text,
-             label: false,
+             show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
              class: "ml-3 keep-edit-toggle d-none p-0",
@@ -284,7 +284,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
              class: "ml-3 create-button d-none p-0",
-             icon: :plus, label: true,
+             icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
              title: create_text,
@@ -306,7 +306,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            modal_id: create,
            name: create_text,
            target: create_path,
-           icon: :plus, label: true,
+           icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
            class: "ml-3 create-link",
            data: { target_attr_key => "createLink" })
