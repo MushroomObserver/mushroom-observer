@@ -35,6 +35,7 @@ class Views::Layouts::SearchBar < Views::Base
   def render_collapse_bar
     Collapsible(id: "search_bar_elements",
                 expanded: on_search_page? || !advanced_default?,
+                class: "w-100",
                 data: {
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
@@ -56,6 +57,7 @@ class Views::Layouts::SearchBar < Views::Base
   # matches the selected search type.
   def render_advanced_form_target
     Collapsible(id: "search_nav_form", expanded: advanced_default?,
+                class: "w-100",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end

@@ -42,17 +42,15 @@ class Components::Form::Search < Components::ApplicationForm
     super(model, search_controller:, context:, turbo: true,
                  action: "/#{type}/search", method: :post,
                  id: "#{type}_search_form",
-                 class: "faceted-search-form pb-4",
+                 class: "faceted-search-form pb-4 w-100",
                  data:,
                  **props)
   end
 
   def view_template
     render_header if dropdown?
-    Row(class: "flex-column") do
-      div(id: "search_#{search_type}_flash") # turbo_stream update target
-      render_form_columns
-    end
+    div(id: "search_#{search_type}_flash") # turbo_stream update target
+    render_form_columns
     render_form_buttons
   end
 
@@ -81,7 +79,7 @@ class Components::Form::Search < Components::ApplicationForm
   # Header (shown in dropdown context only)
 
   def render_header
-    div(class: "flex-bar px-3 my-2") do
+    div(class: "flex-bar px-card mb-2") do
       div(class: "font-weight-bold h5 text-larger my-0") do
         render(Components::SearchTypeTitle.new(current_type: search_type))
       end

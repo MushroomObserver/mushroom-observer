@@ -1,17 +1,8 @@
 # frozen_string_literal: true
 
 # The collapsible search-bar row -- a sibling of `TopNav`, rendered
-# directly below it (`Views::Layouts::Application#render_right_side`).
-# Holds either `SearchBar` (the pattern-search form + type select) or,
-# on identify pages, `FormFilter`. Toggled open/closed by the
-# magnifying-glass button `TopNav` renders (`target_id: "search_nav"`
-# -- an id reference, so it works regardless of where `#search_nav`
-# physically renders).
-#
-# The navbar wrapper itself is the collapse target, not a div nested
-# inside it -- a collapsed inner div still leaves the navbar's
-# padding and border visible as an empty bar. Collapsing the whole
-# navbar makes it disappear (`display: none`) entirely.
+# directly below it. Collapses as the navbar element itself, not a
+# nested div, so its border/padding disappear with its content.
 class Views::Layouts::SearchNav < Views::Base
   # Controllers / actions where the search-help dropdown is available.
   SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
@@ -22,21 +13,9 @@ class Views::Layouts::SearchNav < Views::Base
     :projects, :herbaria, :species_lists
   ].freeze
 
-  # Same rationale as `TopNav::CONTAINER_CLASSES` (`px-card` matches
-  # card padding, so this row's content lines up with card content
-  # below it) -- duplicated rather than shared, since the two navbars
-  # are independent components now.
-  CONTAINER_CLASSES = %w[container-fluid px-card w-100].freeze
-
   def view_template
-    # `element: :div`, not the `Navbar` default `:nav` -- this is a
-    # search toolbar, not a second navigation landmark (matches
-    # `Sidebar`'s styling-only `Navbar` usage). `variant: :light`
-    # still gets the full `.navbar-light` treatment (border, link
-    # colors) from `mo/_top_nav.scss`, which is class-scoped, not
-    # only `#top_nav`-scoped. `border-top-0` drops just the top
-    # border, so it doesn't double up against `#top_nav`'s bottom
-    # border sitting directly above it.
+    # `element: :div`, not the `Navbar` default `:nav` -- a search
+    # toolbar, not a second navigation landmark.
     Navbar(variant: :light, element: :div,
            class: collapse_classes, id: "search_nav",
            padding: "py-2 px-0",
@@ -49,11 +28,7 @@ class Views::Layouts::SearchNav < Views::Base
              # search forms (#4492).
              search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
              search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-           }) do
-      div(class: class_names(CONTAINER_CLASSES)) do
-        render_search_row
-      end
-    end
+           }) { render_search_row }
   end
 
   private
