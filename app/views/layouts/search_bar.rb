@@ -28,28 +28,25 @@ class Views::Layouts::SearchBar < Views::Base
   private
 
   def render_logged_in
-    div(class: "w-100", id: "search_nav_elements") do
-      render_collapse_bar
-      render_advanced_form_target unless on_search_page?
-    end
+    render_collapse_bar
+    render_advanced_form_target unless on_search_page?
   end
 
   def render_collapse_bar
     Collapsible(id: "search_bar_elements",
                 expanded: on_search_page? || !advanced_default?,
-                class: "w-100",
                 data: {
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
                 }) do
-      div(class: "flex-bar w-100 gap-2") do
+      div(class: "flex-bar px-3 gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
         render_form_toggle unless on_search_page?
       end
       # Per-type help fragment is fetched into here by the
       # search-type Stimulus controller; empty on initial paint.
-      Collapsible(id: "search_bar_help", class: "w-100",
+      Collapsible(id: "search_bar_help",
                   data: { search_type_target: "help" })
     end
   end
@@ -59,7 +56,6 @@ class Views::Layouts::SearchBar < Views::Base
   # matches the selected search type.
   def render_advanced_form_target
     Collapsible(id: "search_nav_form", expanded: advanced_default?,
-                class: "w-100 border-top",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end
