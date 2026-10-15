@@ -426,12 +426,3 @@ form[inert] {
     display: none;
   }
 }
-
-// Both borders are the same translucent rgba color, so overlapping
-// them composites into a darker line instead of merging. Suppress
-// the empty carousel's border instead, so only #observation_details
-// paints a border there.
-.observation_images_details_inner:has(#observation_images .carousel-inner:empty)
-  #observation_images {
-  border-top-width: 0 !important;
-}
