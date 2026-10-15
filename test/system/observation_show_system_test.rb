@@ -43,22 +43,22 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
+    # Checks the position of the `details` target wrapper itself,
+    # not `#observation_details` -- Details' own internal markup
+    # (how many layers Panel nests its content in) isn't this test's
+    # concern, only where the Stimulus controller puts the wrapper.
+    details = "[data-obs-show-layout-target='details']"
+
     # Cuprite's default system-test window is 1200x800 (>= 992px).
-    assert_selector(
-      "[data-obs-show-layout-target='rightColumn'] > " \
-      "#observation_details:first-child"
-    )
+    assert_selector("[data-obs-show-layout-target='rightColumn'] > " \
+                     "#{details}:first-child")
 
     page.current_window.resize_to(500, 800)
-    assert_selector(
-      "[data-obs-show-layout-target='carousel'] + #observation_details"
-    )
+    assert_selector("[data-obs-show-layout-target='carousel'] + #{details}")
 
     page.current_window.resize_to(1200, 800)
-    assert_selector(
-      "[data-obs-show-layout-target='rightColumn'] > " \
-      "#observation_details:first-child"
-    )
+    assert_selector("[data-obs-show-layout-target='rightColumn'] > " \
+                     "#{details}:first-child")
   end
 
   def test_add_and_edit_collection_numbers
