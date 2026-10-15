@@ -7,7 +7,7 @@
 class Components::SearchTypeTitle < Components::Base
   prop :current_type, ::Symbol
 
-  TYPES = ::Views::Layouts::TopNav::SEARCH_FORM_TYPES
+  TYPES = ::Views::Layouts::SearchNav::SEARCH_FORM_TYPES
 
   def view_template
     plain(:search.ti)

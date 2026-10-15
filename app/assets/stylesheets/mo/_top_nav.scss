@@ -9,6 +9,17 @@
   }
 }
 
+// `.mb-2`'s margin (Bootstrap spacing utilities are `!important`,
+// hence the `!important` here too) only supplies a gap while
+// `#search_nav` is collapsed and invisible. Open or mid-animation,
+// the two navbars sit flush against each other with no margin
+// between them, matching how the two rows looked before they were
+// split into separate navbars.
+#top_nav:has(+ #search_nav.in),
+#top_nav:has(+ #search_nav.collapsing) {
+  margin-bottom: 0 !important;
+}
+
 // Plain single-row flex-bar alias: a horizontal bar of items with
 // space distributed between them (sorter, search bar, pagination,
 // interest icons, prev/next nav, etc). Unrelated to the `.navbar`
@@ -19,40 +30,40 @@
   @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
-// BS3→BS4 navbar bridge. Only fires where BOTH classes coexist - that's
-// exactly the app's two real `.navbar` landmarks (#top_nav,
-// .sidebar-nav), since the `.flex-bar` callers above never carry
-// `.navbar` and are untouched by this rule.
+// BS3→BS4 navbar bridge. Only fires where BOTH classes coexist - the
+// app's two `.navbar` landmarks (#top_nav, .sidebar-nav) are the only
+// elements with both classes; `#search_nav` doesn't carry
+// `.navbar-flex` (a single-row landmark has nothing to flex-wrap, and
+// `.navbar-flex` ends up fighting `.collapse`'s `display: none` by
+// specificity if it does), and the `.flex-bar` callers above don't
+// carry `.navbar` either -- both are untouched by this rule.
 //
 // `display/flex-wrap/align-items/justify-content` are copied verbatim
-// from Bootstrap 4.6's own `.navbar` rule. In row direction (the
-// default - BS4 does NOT use flex-direction: column), each of our
-// direct children is already full width (top_nav's two rows are
+// from Bootstrap 4.6's `.navbar` rule. In row direction (the default
+// - BS4 does NOT use flex-direction: column), each landmark's one
+// direct child is already full width (#top_nav's row is
 // `.container-fluid`; the sidebar's `.list-group` gets an explicit
-// `w-100` at its call site for the same reason) - a full-width child
-// forces the next one onto its own wrapped line, reproducing today's
-// stacked-rows look exactly. align-items/justify-content only affect
-// space *within* a line or *between* lines; with one full-width child
-// per line there's never free space for either to redistribute, so
-// both are no-ops today.
+// `w-100` at its call site for the same reason) - align-items/
+// justify-content only affect space *within* a line or *between*
+// lines, and with one full-width child there's no free space for
+// either to redistribute, so both are no-ops today.
 //
 // `padding` IS copied from BS4 (`.5rem 1rem`), unlike the properties
-// above - it's a real value change, not a no-op, on both landmarks
-// today. `Components::Navbar#base_class` bakes a `p-0` utility class
+// above - that value would land on both landmarks today.
+// `Components::Navbar#base_class` bakes a `p-0` utility class
 // (`!important`, so it reliably beats this rule's two-class
 // specificity regardless of source order) onto every `variant:`
 // caller automatically, rather than leaving it out and risking it
 // silently reappearing whenever this rule's properties eventually get
 // folded into `.navbar` itself, or relying on each caller to
-// remember its own override.
+// remember an override.
 //
 // `min-height` / `margin-bottom` are explicitly zeroed below, but
-// both are already no-ops today: #top_nav's own `.mb-2` utility
-// (`!important`) already beats `.navbar`'s margin-bottom, and both
-// landmarks' real content always exceeds $navbar-height. Set here
-// anyway so BS4's actual (zero) values hold once `.navbar`'s own
-// rule stops needing this bridge, rather than leaving them to
-// whatever BS3 happened to set.
+// both are already no-ops today: #top_nav's `.mb-2` utility
+// (`!important`) already beats `.navbar`'s margin-bottom, and each
+// landmark's content always exceeds $navbar-height. Set here anyway
+// so BS4's zero values hold once `.navbar`'s rule no longer needs
+// this bridge, rather than leaving them to whatever BS3 set.
 .navbar.navbar-flex {
   display: flex;
   flex-wrap: wrap;
@@ -122,12 +133,18 @@
     h4 {
       font-size: 14px;
     }
-    .navbar-form {
-      padding-right: 0;
-    }
     #sorter button {
       max-width: 60px;
       overflow: hidden;
+    }
+  }
+
+  // The search toggle's wrapper (#top_nav) and the pattern-search
+  // form itself (#search_nav, since the search-bar row moved to its
+  // own navbar) both carry `Components::Navbar::FORM_CLASS`.
+  #top_nav, #search_nav {
+    .navbar-form {
+      padding-right: 0;
     }
   }
 

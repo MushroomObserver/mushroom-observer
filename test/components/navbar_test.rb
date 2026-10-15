@@ -27,6 +27,16 @@ class NavbarTest < ComponentTestCase
                 text: "Content")
   end
 
+  def test_flex_false_omits_bridge_class
+    html = render_component(
+      Components::Navbar.new(variant: :default, element: :div,
+                             flex: false, id: "search_nav")
+    ) { "Content" }
+
+    assert_html(html, ".navbar.navbar-default#search_nav", text: "Content")
+    assert_no_html(html, ".navbar-flex")
+  end
+
   def test_link_class_constant
     assert_equal("navbar-link", Components::Navbar::LINK_CLASS)
   end
