@@ -113,7 +113,7 @@ class Components::Button < Components::Base
   prop :icon_title, _Nilable(String), default: nil
   prop :active_icon, _Nilable(_Union(*ICONS)), default: nil
   prop :active_content, _Nilable(String), default: nil
-  prop :label, _Nilable(_Boolean), default: nil
+  prop :label, _Nilable(_Union(_Boolean, :always)), default: nil
   prop :tag, _Union(*ALLOWED_TAGS), default: :button
   prop :type, _Union(String, Symbol), default: :button
   prop :attributes, _Hash(Symbol, _Any?), :**

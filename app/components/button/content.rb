@@ -6,10 +6,12 @@
 #
 # When `@icon` is set:
 #   - icon always renders first
-#   - text (`@name`) follows in `span.sr-only` by default, or in
-#     `span.d-none.d-sm-inline` when `@label` is truthy
-#     (visible at sm+ breakpoints, hidden on xs — for nav buttons
-#     that show an icon on mobile and icon+text on wider screens)
+#   - text (`@name`) follows in `span.sr-only` by default; in
+#     `span.d-none.d-sm-inline` when `@label` is `true` (visible at
+#     sm+ breakpoints, hidden on xs — for nav buttons that show an
+#     icon on mobile and icon+text on wider screens); or visible at
+#     every breakpoint when `@label` is `:always` (a full-width
+#     heading with no space pressure to hide the text behind)
 # When only `@name` is set: plain text, no span wrapper.
 module Components::Button::Content
   include Components::IconWithText

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 # Shared "icon + optional text" rendering — the icon glyph plus a
-# text `<span>` that's `.sr-only` (hidden, default) or visible (at
-# `sm+`) when `show_text:` is truthy. Included by
-# `Components::Button::Content`, in turn included by both
+# text `<span>` whose visibility depends on `show_text:`: falsy is
+# `.sr-only` (hidden, default), `true` is hidden on `xs`/visible at
+# `sm`+, and `:always` is visible at every breakpoint (for a
+# full-width heading with no space pressure to hide behind). Included
+# by `Components::Button::Content`, in turn included by both
 # `Components::Button` and `Components::Link` (the `Link::Get` family)
 # -- so both get the optional active-icon/active-label swap below for
 # free.
@@ -21,6 +23,7 @@ module Components::IconWithText
   # bold type needs visibly more gap than small body text), which only
   # an em-based value does. See `_icons.scss` for the rule.
   TEXT_VISIBLE_CLASSES = "d-none d-sm-inline icon-text-gap"
+  ALWAYS_VISIBLE_TEXT_CLASSES = "icon-text-gap"
 
   private
 
@@ -37,9 +40,15 @@ module Components::IconWithText
   def render_icon_text(content, show_text:, extra_class: nil)
     return unless content
 
-    classes = class_names(show_text ? TEXT_VISIBLE_CLASSES : "sr-only",
-                          extra_class)
+    classes = class_names(text_visibility_class(show_text), extra_class)
     span(class: classes) { trusted_or_plain(content) }
+  end
+
+  def text_visibility_class(show_text)
+    return ALWAYS_VISIBLE_TEXT_CLASSES if show_text == :always
+    return TEXT_VISIBLE_CLASSES if show_text
+
+    "sr-only"
   end
 
   def render_icon_with_text(icon, content, show_text:, icon_opts: {},

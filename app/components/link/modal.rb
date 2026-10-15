@@ -13,7 +13,7 @@ class Components::Link::Modal < Components::Link
   prop :path, String
   prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
   prop :icon_class, _Nilable(String), default: nil
-  prop :label, _Nilable(_Boolean), default: nil
+  prop :label, _Nilable(_Union(_Boolean, :always)), default: nil
   prop :size, _Nilable(_Union(*Components::Button::SIZES)), default: nil
   prop :attributes, _Hash(Symbol, _Any?), :**
 

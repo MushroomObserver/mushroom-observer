@@ -50,7 +50,7 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
          tab: ::Tab::Observation::AddToProject.new(
            observation: @obs, q_param: q_param
          ),
-         label: true)
+         label: :always)
   end
 
   def render_list

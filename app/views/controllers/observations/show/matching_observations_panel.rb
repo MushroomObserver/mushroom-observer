@@ -41,7 +41,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   def add_matching_observations_link
     Link(type: :get,
          tab: ::Tab::Observation::AddMatchingObservations.new(obs: @obs),
-         label: true)
+         label: :always)
   end
 
   # position-relative anchors each row's tooltip (see
