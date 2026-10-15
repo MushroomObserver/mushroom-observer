@@ -17,10 +17,6 @@ class Views::Layouts::SearchNav < Views::Base
     :projects, :herbaria, :species_lists
   ].freeze
 
-  # Same rationale as `TopNav::CONTAINER_CLASSES` -- duplicated rather
-  # than shared, since the two navbars are independent components now.
-  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
-
   def view_template
     # `flex: false` -- see `Components::Navbar`. `border-top-0` keeps
     # this element's border from doubling up with #top_nav's bottom
@@ -37,9 +33,7 @@ class Views::Layouts::SearchNav < Views::Base
              # search forms (#4492).
              search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
              search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-           }) do
-      div(class: class_names(CONTAINER_CLASSES)) { render_search_row }
-    end
+           }) { render_search_row }
   end
 
   private

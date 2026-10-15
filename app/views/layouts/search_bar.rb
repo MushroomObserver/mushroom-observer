@@ -30,10 +30,8 @@ class Views::Layouts::SearchBar < Views::Base
   private
 
   def render_logged_in
-    div(class: "w-100", id: "search_nav_elements") do
-      render_collapse_bar
-      render_advanced_form_target unless on_search_page?
-    end
+    render_collapse_bar
+    render_advanced_form_target unless on_search_page?
   end
 
   def render_collapse_bar
@@ -43,7 +41,7 @@ class Views::Layouts::SearchBar < Views::Base
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
                 }) do
-      div(class: "flex-bar w-100 gap-2") do
+      div(class: "flex-bar px-3 gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
         render_form_toggle unless on_search_page?

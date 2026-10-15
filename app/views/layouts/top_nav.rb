@@ -38,8 +38,6 @@ class Views::Layouts::TopNav < Views::Base
   # would shrink to content width instead of filling the navbar.
   # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
   # between` + `align-items-center` alias.
-  # `Views::Layouts::SearchNav::CONTAINER_CLASSES` holds the same
-  # values for the search-bar row's navbar.
   CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
