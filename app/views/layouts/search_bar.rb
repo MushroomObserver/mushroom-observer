@@ -9,11 +9,11 @@ class Views::Layouts::SearchBar < Views::Base
   BAR_TOGGLE_CLASSES = [Components::Navbar::LINK_CLASS, "px-2"].freeze
 
   # Search types that have a per-type help expander. Mirrors
-  # `Views::Layouts::TopNav::SEARCH_HELP_TYPES`; passed through
+  # `Views::Layouts::SearchNav::SEARCH_HELP_TYPES`; passed through
   # so the bar can decide which toggle starts visible.
   prop :search_help_types, _Array(Symbol)
   # Search types whose advanced-search form is reachable via the
-  # form-toggle. Mirrors `Views::Layouts::TopNav::SEARCH_FORM_TYPES`.
+  # form-toggle. Mirrors `Views::Layouts::SearchNav::SEARCH_FORM_TYPES`.
   prop :search_form_types, _Array(Symbol)
 
   def view_template
@@ -39,7 +39,6 @@ class Views::Layouts::SearchBar < Views::Base
   def render_collapse_bar
     Collapsible(id: "search_bar_elements",
                 expanded: on_search_page? || !advanced_default?,
-                class: "w-100",
                 data: {
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
@@ -51,7 +50,7 @@ class Views::Layouts::SearchBar < Views::Base
       end
       # Per-type help fragment is fetched into here by the
       # search-type Stimulus controller; empty on initial paint.
-      Collapsible(id: "search_bar_help", class: "w-100",
+      Collapsible(id: "search_bar_help",
                   data: { search_type_target: "help" })
     end
   end
@@ -61,7 +60,6 @@ class Views::Layouts::SearchBar < Views::Base
   # matches the selected search type.
   def render_advanced_form_target
     Collapsible(id: "search_nav_form", expanded: advanced_default?,
-                class: "w-100 border-top",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end

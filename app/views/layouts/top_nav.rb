@@ -9,7 +9,9 @@
 #     and either `Views::Layouts::TopNav::UserNav` or
 #     `Views::Layouts::TopNav::Login` depending on
 #     `@user.nil?`)
-#   - the collapsible search-bar row
+#
+# The collapsible search-bar row itself is a sibling, not a child --
+# see `Views::Layouts::SearchNav`.
 #
 # Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
 # `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
@@ -31,19 +33,13 @@ class Views::Layouts::TopNav < Views::Base
   # ancestor (`#main_container`, see `Views::Layouts::Application`).
   prop :banner, _Nilable(::Banner), default: nil
 
-  # Controllers / actions where the search-help dropdown is available
-  SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
-  SEARCH_FORM_TYPES = [
-    :names, :observations, :locations,
-    :projects, :herbaria, :species_lists
-  ].freeze
-
-  # Container classes shared by the top-nav row and the search-nav
-  # row. `w-100` is load-bearing since #top_nav is now `display: flex`
-  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it these two
-  # rows would share one line instead of each getting its own.
+  # `w-100` is load-bearing since #top_nav is `display: flex`
+  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it this row
+  # would shrink to content width instead of filling the navbar.
   # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
   # between` + `align-items-center` alias.
+  # `Views::Layouts::SearchNav::CONTAINER_CLASSES` holds the same
+  # values for the search-bar row's navbar.
   CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
@@ -72,7 +68,6 @@ class Views::Layouts::TopNav < Views::Base
   def view_template
     Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav") do
       render_top_row
-      render_search_row
     end
   end
 
@@ -105,33 +100,6 @@ class Views::Layouts::TopNav < Views::Base
     end
     render(Login.new) if @user.nil?
     render_show_banner_button
-  end
-
-  def render_search_row
-    div(class: class_names(CONTAINER_CLASSES)) do
-      Collapsible(id: "search_nav", class: "w-100",
-                  data: {
-                    controller: "search-type",
-                    # Stimulus Array values must be JSON. Rails' tag
-                    # helper JSON-encodes arrays automatically; Phlex
-                    # space-joins them ("a b"), which breaks
-                    # JSON.parse in the controller and silently
-                    # disables the help/advanced-search forms (#4492).
-                    search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
-                    search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-                  }) do
-        # Identify pages get their own filter bar; everything else
-        # gets the pattern-search bar.
-        if controller.controller_name == "identify"
-          render(::Views::Controllers::Observations::Identify::FormFilter.new)
-        else
-          render(Views::Layouts::SearchBar.new(
-                   search_help_types: SEARCH_HELP_TYPES,
-                   search_form_types: SEARCH_FORM_TYPES
-                 ))
-        end
-      end
-    end
   end
 
   # The hamburger that opens the offcanvas sidebar on mobile /

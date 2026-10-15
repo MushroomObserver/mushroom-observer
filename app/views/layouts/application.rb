@@ -122,12 +122,7 @@ module Views::Layouts
 
     def render_right_side(content_classes, banner:, &block)
       Column(id: "right_side", xs: 12, md: 10) do
-        render(Views::Layouts::TopNav.new(user: current_user,
-                                          query: current_query,
-                                          banner: banner))
-        render_index_bar
-        render(Views::Layouts::App::PageFlash.new)
-        render(Views::Layouts::Header.new)
+        render_nav_chrome(banner: banner)
         Container(element: :main, id: "content", class: content_classes,
                   data: { controller: "lightgallery" }) do
           comment { "MAIN_PAGE_CONTENT" }
@@ -136,6 +131,20 @@ module Views::Layouts
           render(Views::Layouts::TranslatorsCredit.new)
         end
       end
+    end
+
+    # The page chrome above `#content`: the top nav, the collapsible
+    # search-bar row (a sibling, not a child -- see
+    # `Views::Layouts::SearchNav`), the index bar, and the flash/
+    # header row.
+    def render_nav_chrome(banner:)
+      render(Views::Layouts::TopNav.new(user: current_user,
+                                        query: current_query,
+                                        banner: banner))
+      render(Views::Layouts::SearchNav.new)
+      render_index_bar
+      render(Views::Layouts::App::PageFlash.new)
+      render(Views::Layouts::Header.new)
     end
 
     # `Header::IndexBar` lives here, not inside `Header`, so it sits
