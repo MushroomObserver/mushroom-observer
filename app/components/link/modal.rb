@@ -13,20 +13,19 @@ class Components::Link::Modal < Components::Link
   prop :path, String
   prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
   prop :icon_class, _Nilable(String), default: nil
-  prop :label, _Nilable(_Boolean), default: nil
   prop :size, _Nilable(_Union(*Components::Button::SIZES)), default: nil
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def initialize(modal_id:, name:, target:, **opts)
     icon       = opts.delete(:icon)
     icon_class = opts.delete(:icon_class)
-    label      = opts.delete(:label)
+    show_label = opts.delete(:show_label) || :hidden
     size       = opts.delete(:size)
     button     = opts.delete(:button)
     validate_no_btn_classes!(opts[:class])
     super(modal_id: modal_id, name: name, path: target, icon: icon,
-          icon_class: icon_class, label: label, size: size, button: button,
-          **opts)
+          icon_class: icon_class, show_label: show_label, size: size,
+          button: button, **opts)
   end
 
   def view_template
@@ -46,7 +45,7 @@ class Components::Link::Modal < Components::Link
   end
 
   def icon_link_args
-    { icon: @icon, icon_class: @icon_class, label: @label,
+    { icon: @icon, icon_class: @icon_class, show_label: @show_label,
       class: merged_class }.
       merge(@attributes.except(:class)).
       deep_merge(data: modal_data)
