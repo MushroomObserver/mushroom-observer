@@ -426,3 +426,8 @@ form[inert] {
     display: none;
   }
 }
+
+// Collapses the double border when the carousel between them is empty.
+#observation_details {
+  margin-top: -1px;
+}
