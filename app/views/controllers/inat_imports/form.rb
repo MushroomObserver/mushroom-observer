@@ -69,7 +69,7 @@ module Views::Controllers::InatImports
     end
 
     def render_method_choices
-      Panel(panel_class: "my-5") do |panel|
+      Panel(panel_class: "my-4") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           div(data: { controller: "type-switch" }) do
@@ -93,7 +93,7 @@ module Views::Controllers::InatImports
     # render as a query, and which says nothing an admin can act on.
     def render_project_scope_section
       hidden_field(:project_site)
-      Panel(panel_class: "my-5") do |panel|
+      Panel(panel_class: "my-4") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           p { plain(:inat_import_project_scope.l(project: project_title)) }
@@ -106,7 +106,7 @@ module Views::Controllers::InatImports
 
     def render_method_radio(value, label_text)
       radio_field(:choose_method, [value, label_text],
-                  wrap_class: "mt-0 mb-3",
+                  wrap_class: "mb-2",
                   data: { action: "change->type-switch#switch" })
     end
 
