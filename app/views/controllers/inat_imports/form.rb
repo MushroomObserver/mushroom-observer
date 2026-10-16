@@ -73,10 +73,10 @@ module Views::Controllers::InatImports
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           div(data: { controller: "collapse-switch" }) do
-            render_method_radio("all", :inat_import_all.l)
-            render_method_radio("ids", :inat_import_list.l)
+            render_radio_for_value("all", :inat_import_all.l)
+            render_radio_for_value("ids", :inat_import_list.l)
             render_ids_panel
-            render_method_radio("url", :inat_url_label.l)
+            render_radio_for_value("url", :inat_url_label.l)
             render_url_panel
             render_recheck_all_field
           end
@@ -104,7 +104,7 @@ module Views::Controllers::InatImports
 
     def project_title = @project_site.project.title
 
-    def render_method_radio(value, label_text)
+    def render_radio_for_value(value, label_text)
       render(Components::Form::RadioCollapse.new(
                form: self, field: :choose_method, value: value,
                label: label_text, attributes: { wrap_class: "mb-2" }
