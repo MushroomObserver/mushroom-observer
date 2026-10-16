@@ -27,8 +27,7 @@ class MatrixCarouselTest < ComponentTestCase
     assert_html(html, ".carousel.slide[data-ride='false']" \
                       "[data-interval='false']" \
                       "[id='observation_#{@observation.id}_carousel']")
-    assert_html(html, ".carousel.slide > .carousel-inner.bg-light" \
-                      "[role='listbox']")
+    assert_html(html, ".carousel.slide > .carousel-inner[role='listbox']")
     # No Panel wrapper, no indicator strip — those are contracts
     # specific to the matrix-box context (the box itself owns the
     # surrounding panel; thumbnails are not shown per-box).

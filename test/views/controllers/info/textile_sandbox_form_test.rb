@@ -77,6 +77,10 @@ module Views::Controllers::Info
       assert_html(html, "button[type='submit']", count: 2)
     end
 
+    # The <li> tags are the contract under test here -- this test
+    # verifies textile list syntax converts to list markup instead
+    # of staying escaped.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_textile_renders_as_html
       html = render_form(code: "# Woof\n# Bark\n# Meow",
                          show_result: true,
@@ -93,6 +97,10 @@ module Views::Controllers::Info
       assert_not_includes(html, "&lt;")
     end
 
+    # The escaped `&lt;li&gt;` text is the contract under test here --
+    # this test verifies HTML gets escaped once, not that an li
+    # selector matches.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_form_with_html_codes_result
       html = render_form(code: "# Woof\n# Bark\n# Meow",
                          show_result: true,

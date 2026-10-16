@@ -67,9 +67,8 @@ module Views::Controllers::Projects::Aliases
       html = render_form(model: project_alias)
 
       # Error display
-      assert_html(html, "#error_explanation")
-      assert_html(html, "#error_explanation h2", text: "error")
-      assert_html(html, "#error_explanation ul li")
+      assert_html(html, "#error_explanation", text: "error")
+      assert_html(html, "#error_explanation", text: "Name can't be blank")
     end
 
     private

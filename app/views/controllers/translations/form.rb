@@ -101,7 +101,7 @@ module Views::Controllers::Translations
     # --- Language header ---
 
     def render_language_header
-      h4(class: "font-weight-bold mt-3") do
+      h4(id: "translation_language_header", class: "font-weight-bold mt-3") do
         append_colon(@lang.name)
       end
     end

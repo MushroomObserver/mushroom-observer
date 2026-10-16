@@ -3,15 +3,23 @@
 module RuboCop
   module Cop
     module MO
-      # A test assertion must not pin a cosmetic Bootstrap class --
-      # button chrome (`.btn`, `.btn-default`, `.btn-outline-*`,
-      # `.btn-sm`/`-lg`/`-xs`), a spacing utility (`.mt-3`, `.px-2`,
-      # `.m-0`, `.ml-auto`, `.mx-n2`), or a known paint class
-      # (`.font-weight-*`, `.text-muted`). A component test asserts
-      # behavior/contract, not paint -- a Bootstrap upgrade or a
-      # designer's tweak renames these, and every test pinning the
-      # old name breaks for no functional reason. See "Don't pin
-      # cosmetic CSS classes" in .claude/rules/testing.md.
+      # A test assertion must not pin a cosmetic Bootstrap class:
+      # button chrome (`.btn`, `.btn-outline-*`, `.btn-sm`/`-lg`),
+      # spacing (`.mt-3`, `.px-2`, `.m-0`, `.ml-auto`, `.mx-n2`),
+      # color/paint (`.text-*` except `.text-nowrap`, which is layout
+      # behavior; `.bg-*`; `.border-*` incl. bare `.border`;
+      # `.rounded*`; `.shadow*`), type styling
+      # (`.font-weight-*`, `.font-italic`), alignment (`.align-*`,
+      # `.float-*`), or a plain layout/styling class
+      # (`.list-unstyled`, `.hanging-indent`, `.tight-list`, bare
+      # `.badge`) -- nor a bare `li` or heading (`h1`-`h6`) tag
+      # selector, which couples the assertion to markup structure
+      # instead of behavior. Which heading level a section uses is
+      # not this codebase's contract. A component test asserts
+      # behavior/contract, not paint or structure -- a Bootstrap
+      # upgrade or a markup refactor changes these, and every test
+      # pinning the old shape breaks for no functional reason. See
+      # "Don't pin cosmetic CSS classes" in .claude/rules/testing.md.
       #
       # A styling-abstraction component (Panel/Modal/CrudButton/Well,
       # where the class output is the thing under test) is an
@@ -38,12 +46,30 @@ module RuboCop
 
         # `.d-none`/`[hidden]` are visibility state, not paint -- the
         # pattern below doesn't match them (no `d-` prefix, no `btn`/
-        # `font-weight`/`text-muted` token), so they're fair game.
+        # `font`/`text`/`bg`/`border`/`rounded`/`shadow`/`align`/
+        # `float` token), so they're fair game. `.text-nowrap` is the
+        # same kind of exception -- it's layout behavior (the element
+        # can't wrap across a line break), not paint. `.badge-id` is
+        # also exempt (the negative lookahead excludes any hyphenated
+        # `badge-*` class) -- it's MO's IDBadge hook, not bare
+        # Bootstrap `.badge` chrome.
         CLASS_PATTERN = /
           \.btn(-[a-z]+)?\b
           | \.[mp][tblrxy]?-(n?\d+|auto)\b
-          | \.font-weight-[a-z]+\b
-          | \.text-muted\b
+          | \.font-(weight-[a-z]+|italic)\b
+          | \.text-(?!nowrap\b)[a-z]+\b
+          | \.bg-[a-z]+\b
+          | \.border(-[a-z0-9]+)?\b
+          | \.rounded(-[a-z0-9]+)?\b
+          | \.shadow(-[a-z]+)?\b
+          | \.align-[a-z-]+\b
+          | \.float-[a-z]+\b
+          | \.list-unstyled\b
+          | \.hanging-indent\b
+          | \.tight-list\b
+          | \.badge\b(?!-)
+          | \bli\b
+          | \bh[1-6]\b
         /x
 
         def on_send(node)

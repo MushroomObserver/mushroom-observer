@@ -96,6 +96,8 @@ class ButtonSubclassesTest < ComponentTestCase
                 "form[action='#{routes.herbarium_path(herbarium)}']")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".destroy_herbarium_link_#{herbarium.id}")
+    # .text-danger IS the Delete button's contract (CrudButton variant)
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, ".text-danger")
     assert_html(html, "[data-turbo-confirm]")
   end
@@ -128,6 +130,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button svg.mo-icon")
     assert_no_html(html, "button .sr-only")
     assert_html(html, "input[name='_method'][value='delete']")
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, ".text-danger")
   end
 
@@ -179,6 +182,7 @@ class ButtonSubclassesTest < ComponentTestCase
   # no identifier class is built, but delete-action defaults
   # (text-danger, confirm, icon) still apply. `default_name` falls
   # back to `:destroy.ti` since there's no type to interpolate.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_delete_with_string_target
     html = render_button(Components::Button::Delete,
                          target: "/items/42", name: "Destroy")
