@@ -30,8 +30,8 @@ module Views::Controllers::Account::Login
     private
 
     def render_create_account_section
-      div do
-        div(class: "h3") { trusted_html(:login_create_account_caption.tp) }
+      div(class: "mb-3") do
+        h4 { trusted_html(:login_create_account_caption.tp) }
         trusted_html(:login_no_account.tp)
         plain(" (")
         trusted_html(:login_explain_login_requirement.t)
@@ -40,8 +40,8 @@ module Views::Controllers::Account::Login
     end
 
     def render_why_section
-      div do
-        div(class: "h3") { trusted_html(:login_why.t) }
+      div(class: "mb-3") do
+        h4 { trusted_html(:login_why.t) }
         div { trusted_html(:login_spiders_bad1.t) }
         br
         div { trusted_html(:login_spiders_bad2.t) }
@@ -51,10 +51,8 @@ module Views::Controllers::Account::Login
     end
 
     def render_data_without_login_section
-      div do
-        div(class: "h3") do
-          trusted_html(:login_data_without_login_caption.tp)
-        end
+      div(class: "mb-3") do
+        h4 { trusted_html(:login_data_without_login_caption.tp) }
         div do
           trusted_html(:login_images_without_login.tp)
           whitespace
