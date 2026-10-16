@@ -10,8 +10,8 @@ module Views::Controllers::Names::Trackers
 
     def view_template
       super do
-        render_submit_buttons
         render_tracker_fields
+        render_submit_buttons
       end
     end
 
@@ -30,20 +30,43 @@ module Views::Controllers::Names::Trackers
     end
 
     def render_tracker_fields
-      checkbox_field(:note_template_enabled,
-                     label: :email_tracking_note,
-                     wrap_class: "mt-5")
+      render_note_template_checkbox
+      render_note_template_fields
+    end
 
-      Help(class: "mt-2 mb-5",
-           content: :email_tracking_note_help.t)
+    def render_note_template_checkbox
+      render(Components::Form::CheckboxCollapse.new(
+               form: self,
+               field: :note_template_enabled,
+               target_id: "note_template_fields",
+               label: :email_tracking_note,
+               expanded: note_template_enabled?,
+               attributes: {
+                 wrap_class: "mb-3",
+                 help: :email_tracking_note_help.t,
+                 help_collapse: true
+               }
+             ))
+    end
 
-      textarea_field(:note_template,
-                     rows: 16,
-                     cols: 80,
-                     value: @note_template,
-                     data: { autofocus: true },
-                     id: "name_tracker_note_template")
-      br
+    def render_note_template_fields
+      Collapsible(id: "note_template_fields",
+                  expanded: note_template_enabled?) do
+        textarea_field(:note_template,
+                       rows: 16,
+                       cols: 80,
+                       value: @note_template,
+                       data: { autofocus: true },
+                       id: "name_tracker_note_template")
+      end
+    end
+
+    # A new tracker gets a default template filled in for convenience,
+    # but that's not consent to send it -- only an explicitly-enabled
+    # (persisted, or just-submitted-and-reloaded) tracker starts
+    # checked/expanded.
+    def note_template_enabled?
+      model.note_template_enabled == true
     end
 
     def form_action

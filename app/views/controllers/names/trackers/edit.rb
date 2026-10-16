@@ -14,7 +14,7 @@ class Views::Controllers::Names::Trackers::Edit < Views::FullPageBase
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 
-    div(class: "mt-5 mb-5") { trusted_html(help_blurb) }
+    div(class: "mb-3") { trusted_html(help_blurb) }
 
     render(Views::Controllers::Names::Trackers::Form.new(
              @name_tracker, note_template: @note_template, turbo: true
