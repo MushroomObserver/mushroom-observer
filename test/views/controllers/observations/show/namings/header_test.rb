@@ -38,17 +38,17 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # propose icon show on mobile.
     html = render_header
 
-    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 2)
-    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 1)
+    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 1)
+    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 2)
   end
 
   def test_name_column_is_block_on_xs
-    # First column (panel-title column) is `d-block` not
+    # First column (card-title column) is `d-block` not
     # `d-none` — visible on `xs` so the panel always shows its
     # title.
     html = render_header
 
-    assert_html(html, ".col.col-sm-4.d-block")
+    assert_html(html, ".col.col-sm-5.d-block")
   end
 
   def test_rows_align_items_end_for_bottom_label_alignment
@@ -70,7 +70,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # — there the footer-buttons row owns the propose CTA.
     html = render_header
 
-    assert_html(html, ".col-xs-2.col-sm-1 .float-right.d-sm-none")
+    assert_html(html, ".col-2.col-sm-1 .float-right.d-sm-none")
     assert_html(html, "a[data-modal='modal_obs_#{@obs.id}_naming']")
     assert_html(html, "a[data-controller='modal-toggle']")
   end

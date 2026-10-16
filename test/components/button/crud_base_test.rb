@@ -140,6 +140,17 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button svg.mo-icon-remove")
   end
 
+  # Default renders the standard btn-secondary frame.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_delete_default_btn_frame
+    herbarium = herbaria(:nybg_herbarium)
+    html = render_button(Components::Button::Delete, target: herbarium)
+
+    assert_html(html, "button.btn.btn-secondary")
+    assert_html(html, "input[name='_method'][value='delete']")
+    assert_html(html, ".text-danger")
+  end
+
   # `variant: :outline` produces the outline button frame — the common
   # choice for CRUD index rows.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -219,6 +230,15 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
+  # Default renders the standard btn-secondary frame.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_edit_default_btn_frame
+    herbarium = herbaria(:nybg_herbarium)
+    html = render_button(Components::Button::Edit, target: herbarium)
+
+    assert_html(html, "a.btn.btn-secondary")
+  end
+
   # `variant: :outline` produces the outline button frame — the common
   # choice for CRUD index rows.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -293,6 +313,15 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
+  # Default renders the standard btn-secondary frame.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_new_default_btn_frame
+    html = render_button(Components::Button::New,
+                         target: routes.new_herbarium_path)
+
+    assert_html(html, "a.btn.btn-secondary")
+  end
+
   # `variant: :outline` produces the outline button frame.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_new_outline_variant
@@ -355,6 +384,15 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button", text: "Replace")
   end
 
+  # Post defaults to `btn btn-secondary`.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_post_default_btn_frame
+    html = render_button(Components::Button::Post,
+                         name: "Submit", target: "/items")
+
+    assert_html(html, "button.btn.btn-secondary")
+  end
+
   # Explicit `variant:` overrides the default.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_post_variant_override
@@ -364,7 +402,7 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_html(html, "button.btn.btn-primary")
-    assert_no_html(html, "button.btn-default")
+    assert_no_html(html, "button.btn-secondary")
   end
 
   # `variant: :strip` suppresses the frame entirely (icon-only inline buttons).
@@ -378,6 +416,15 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # Patch defaults to `btn btn-secondary`.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_patch_default_btn_frame
+    html = render_button(Components::Button::Patch,
+                         name: "Update", target: "/items/1")
+
+    assert_html(html, "button.btn.btn-secondary")
+  end
+
   # `variant: :strip` suppresses the frame (icon-only / inline patches).
   # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_patch_strip_suppresses_frame
@@ -387,6 +434,15 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_no_html(html, "button.btn")
+  end
+
+  # Put defaults to `btn btn-secondary`.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_put_default_btn_frame
+    html = render_button(Components::Button::Put,
+                         name: "Replace", target: "/items/1")
+
+    assert_html(html, "button.btn.btn-secondary")
   end
 
   # `variant: :strip` suppresses the frame (icon-only / inline puts).
@@ -411,18 +467,20 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "form[action='/items/1']")
     assert_html(html, "input[name='_method'][value='patch']")
     assert_html(html, "button.btn.btn-primary", text: "Update")
-    assert_no_html(html, "button.btn-default")
+    assert_no_html(html, "button.btn-secondary")
   end
 
   # --- Button::Get --------------------------------------------------
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_get_button_renders_anchor_with_btn_default
     herbarium = herbaria(:nybg_herbarium)
     html = render_button(Components::Button::Get,
                          name: "View", target: herbarium)
 
     expected_href = routes.herbarium_path(herbarium)
-    assert_html(html, "a[href='#{expected_href}']", text: "View")
+    assert_html(html, "a.btn.btn-secondary[href='#{expected_href}']",
+                text: "View")
     assert_no_html(html, "form")
   end
 
@@ -436,7 +494,7 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_html(html, "a[href*='merge=42']", text: "Merge")
-    assert_no_html(html, "a.btn-default")
+    assert_no_html(html, "a.btn-secondary")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -449,6 +507,7 @@ class ButtonSubclassesTest < ComponentTestCase
 
   # --- Button::ModalToggle ------------------------------------------
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_modal_toggle_renders_anchor_with_stimulus_data
     html = render_button(Components::Button::ModalToggle,
                          name: "Open Trust Settings",
@@ -459,6 +518,7 @@ class ButtonSubclassesTest < ComponentTestCase
                 "[data-action='modal-toggle#showModal:prevent']" \
                 "[data-modal='modal_trust_settings']" \
                 "[href='/trust/path']")
+    assert_html(html, "a.btn.btn-secondary", text: "Open Trust Settings")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -472,7 +532,7 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_html(html, "a[data-controller='modal-toggle'][href='/edit/path']")
-    assert_no_html(html, "a.btn-default")
+    assert_no_html(html, "a.btn-secondary")
   end
 
   # --- Button::CollapseToggle -------------------------------------------

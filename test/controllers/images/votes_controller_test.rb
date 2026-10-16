@@ -78,7 +78,7 @@ module Images
 
     # #4895: renders the vote interface fresh, uncached, for one
     # image -- the endpoint a lazy Turbo Frame fetches instead of
-    # rendering vote state inline inside Matrix::Box's shared
+    # rendering vote state inline inside Grid::Box's shared
     # fragment-cached HTML.
     def test_show_renders_vote_interface
       image = images(:in_situ_image)

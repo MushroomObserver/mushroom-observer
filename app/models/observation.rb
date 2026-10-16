@@ -273,11 +273,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
-  # Eager-load tree every `Components::Matrix::Box` render reaches
-  # into. Shared by observations#index, field_slips show/index,
+  # Eager-load tree every `Components::Grid::Box` render of an
+  # observation reaches into -- image, collector_user, location, name,
+  # namings (+ votes), occurrence (+ observations), projects, rss_log,
+  # user. Shared by observations#index, field_slips show/index,
   # collection_numbers#show, herbarium_records#show, rss_logs#index,
-  # sequences#new/edit, projects/updates#index, and the identify
-  # queue.
+  # sequences#new/edit, projects/updates#index, and the identify queue.
   #
   # The /obs/ form is the shareable one: logged-out visitors get a
   # 403 on /:id and /observations/:id (the spider block allows only

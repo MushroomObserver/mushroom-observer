@@ -28,7 +28,7 @@ module Views::Controllers::GlossaryTerms
 
     def render_locked_checkbox
       checkbox_field(:locked, label: :edit_glossary_term_locked,
-                              wrap_class: "mt-3")
+                              wrap_class: "mb-3")
     end
 
     def render_name_field

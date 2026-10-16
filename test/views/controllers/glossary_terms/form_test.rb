@@ -24,8 +24,11 @@ module Views::Controllers::GlossaryTerms
                   "textarea[name='glossary_term[description]'][rows='16']")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_submit_button
       assert_html(@html, "button[type='submit']", text: :save.ti)
+      assert_html(@html, ".btn.btn-secondary")
+      assert_html(@html, ".center-block.my-3")
     end
 
     def test_form_has_correct_attributes_for_new_record

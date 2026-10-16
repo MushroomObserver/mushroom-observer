@@ -31,12 +31,9 @@ module Components::Button::Content
     end
   end
 
-  # `.stateful-link` is what `_icons.scss`'s active/collapsed swap
-  # rule keys off -- only add it when there's actually a swap pair to
-  # show/hide, so a plain (non-stateful) Button/Link's markup is
-  # unaffected. Shared here (both `Components::Button#merged_class`
-  # and `Components::Link::Get#merged_class` call it) rather than
-  # duplicated.
+  # `.stateful-link` keys `_icons.scss`'s active/collapsed swap rule --
+  # only added when a swap pair exists, shared by Button's and
+  # Link::Get's `merged_class`.
   def stateful_class
     "stateful-link" if @active_icon && @active_content
   end

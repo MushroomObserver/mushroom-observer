@@ -1,87 +1,16 @@
 // dropdown menus
 
-// TEMPORARY, this block only -- stands in for CSS Bootstrap 4 itself
-// provides natively. Delete on merging the BS4 cutover branch, not
-// needed there. Components::Dropdown no longer wraps items in <li>,
-// so BS3's `.dropdown-menu > li > a` selector doesn't match flat
-// .dropdown-item markup -- this replaces it app-wide.
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 3px 20px;
-  clear: both;
-  font-weight: normal;
-  color: $dropdown-link-color;
-  text-align: inherit;
-  white-space: nowrap;
-  background-color: transparent;
-  border: 0;
-
-  &:hover,
-  &:focus {
-    color: $dropdown-link-hover-color;
-    text-decoration: none;
-    background-color: $dropdown-link-hover-bg;
-  }
-
-  &.active {
-    color: $dropdown-link-active-color;
-    background-color: $dropdown-link-active-bg;
-  }
-
-  // `disabled` has no effect on an `<a>`, and Bootstrap's
-  // `.dropdown-menu > .disabled > a` rule needs the `<li>` wrapper
-  // this flat markup doesn't have -- mirrors it directly instead.
-  &[disabled] {
-    color: $dropdown-link-disabled-color;
-    cursor: not-allowed;
-
-    &:hover,
-    &:focus {
-      color: $dropdown-link-disabled-color;
-      text-decoration: none;
-      background-color: transparent;
-    }
-  }
-}
-
-// `Components::Button::CRUDBase`'s button-forms get a sitewide
-// `display: inline` + link-colored text (_links_buttons_alerts.scss),
-// for inline-sentence usage -- beat that via specificity (extra
-// classes, not source order) so a button-type dropdown item lays out
-// and colors like every other row.
-.dropdown-item.button_to {
-  display: block;
-  padding: 3px 20px;
-
-  button[type="submit"]:not(.btn):not(.text-danger),
-  input[type="submit"]:not(.btn):not(.text-danger) {
-    color: inherit;
-
-    &:hover {
-      color: inherit;
-    }
-  }
-}
-
-// Matches BS3's nav-divider mixin: ($line-height-computed / 2) - 1.
-.dropdown-divider {
-  height: 1px;
-  margin: 9px 0;
-  overflow: hidden;
-  background-color: $dropdown-divider-bg;
-}
-
-// Bootstrap's `.dropdown-menu` padding sits on top of each item's
-// padding, so the first and last items end up with more breathing
-// room than the items between them. Scoped to the rss-log type-filter
-// menu only, not every dropdown.
+// Bootstrap's `.dropdown-menu` padding (`$dropdown-padding-y` top and
+// bottom) sits on top of each item's padding, so the first and last
+// items end up with more breathing room than the items between them.
+// Scoped to the rss-log type-filter menu only, not every dropdown.
 .dropdown-menu:has(.type-filter-menu) {
   padding: 0;
 }
 
-// Bigger caret, more gap before it -- Bootstrap's default reads as
-// small and cramped next to a toggle's text.
+// Bigger caret, more gap before it -- Bootstrap's default (0.3em
+// border, 0.255em margin) reads as small and cramped next to a
+// toggle's text.
 .dropdown-toggle::after {
   display: inline-block;
   margin-left: 0.4em;
@@ -91,6 +20,56 @@
   border-right: 0.4em solid transparent;
   border-bottom: 0;
   border-left: 0.4em solid transparent;
+}
+
+// Bootstrap's `.dropdown-item.disabled`/`:disabled` selectors don't
+// match Components::Dropdown's `disabled="disabled"` attribute-only
+// anchor (no `.disabled` class, no `<button disabled>`).
+.dropdown-item[disabled] {
+  color: $dropdown-link-disabled-color;
+  cursor: not-allowed;
+
+  &:hover,
+  &:focus {
+    color: $dropdown-link-disabled-color;
+    text-decoration: none;
+    background-color: transparent;
+  }
+}
+
+// Reproduces the `.dropdown-item` treatment (display, padding,
+// colors, hover fill) for button_to's <form> wrapper -- a <form>
+// doesn't pick up Bootstrap's `.dropdown-item` rendering the way
+// an <a>/<button> does, so it's spelled out by hand here instead.
+// Same $dropdown-link-* variables Bootstrap's `.dropdown-item`
+// rule uses, so button-shaped and link-shaped items match.
+.dropdown-menu {
+  button.btn-link {
+    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
+  }
+
+  form.button_to {
+    display: block;
+    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.428571429;
+    white-space: nowrap;
+    color: $dropdown-link-color;
+
+    &:hover {
+      color: $dropdown-link-hover-color;
+      background-color: $dropdown-link-hover-bg;
+      text-decoration: none;
+    }
+
+    // Browser-chrome-reset button underneath just tracks the
+    // form's color -- the form has the row's padding and hover
+    // background now, not the button.
+    button[type=submit]:not(.btn):not(.text-danger) {
+      color: inherit;
+    }
+  }
 }
 
 // rss-log type-filter dropdown: a border between every row, and
@@ -120,7 +99,7 @@
 // Apply/Set-as-default read as plain text here, not links.
 .type-filter-menu .btn-link {
   font-weight: bold !important;
-  color: $text-color !important;
+  color: $body-color !important;
 }
 
 // Custom 1500px cutoff between the two rss-log type-filter forms --

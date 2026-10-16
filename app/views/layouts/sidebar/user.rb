@@ -39,7 +39,7 @@ class Views::Layouts::Sidebar
     # user-nav dropdown renders).
     def render_logout_button
       tab = Tab::UserNav::Logout.new
-      modifier = class_names(@classes[:indent], @classes[:mobile_only])
+      modifier = @classes[:mobile_only]
       render(Components::ListGroup::LinkItem.new(class: modifier)) do
         |css_class|
         Button(
@@ -64,7 +64,7 @@ class Views::Layouts::Sidebar
       title, url, html_options = link
       html_options ||= {}
       extra_class = html_options.delete(:class)
-      modifier = class_names(@classes[:indent], @classes[:mobile_only])
+      modifier = @classes[:mobile_only]
 
       render(Components::ListGroup::LinkItem.new(class: modifier)) do
         |css_class|
@@ -81,7 +81,7 @@ class Views::Layouts::Sidebar
     # user-nav dropdown renders).
     def render_admin_button
       tab = Tab::UserNav::AdminMode.new(in_admin_mode: false)
-      modifier = class_names(@classes[:indent], @classes[:mobile_only])
+      modifier = @classes[:mobile_only]
       render(Components::ListGroup::LinkItem.new(class: modifier)) do
         |css_class|
         Button(

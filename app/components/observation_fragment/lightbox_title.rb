@@ -35,7 +35,7 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
   def title_attributes
     {
       id: "observation_what_#{@obs.id}",
-      class: "obs-what",
+      class: "obs-what mb-2",
       data: {
         controller: "section-update",
         section_update_user_value: @user&.id
@@ -48,19 +48,8 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
   end
 
   def render_link
-    if @identify
-      a(href: url_for(@obs.show_link_args),
-        class: "text-bold mr-3",
-        id: "caption_obs_link_#{@obs.id}") { @obs.id }
-    else
-      Button(
-        type: :get,
-        name: @obs.id.to_s,
-        target: url_for(@obs.show_link_args),
-        variant: :primary,
-        id: "caption_obs_link_#{@obs.id}",
-        class: "mr-3"
-      )
-    end
+    a(href: url_for(@obs.show_link_args),
+      class: "badge badge-id badge-xl mr-3",
+      id: "caption_obs_link_#{@obs.id}") { @obs.id }
   end
 end

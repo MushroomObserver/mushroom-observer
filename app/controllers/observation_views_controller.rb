@@ -75,7 +75,7 @@ class ObservationViewsController < ApplicationController
         type: :lightbox_caption,
         user: @user, obs: @obs, identify: true,
         observation_view: @observation_view,
-        # Same thumb image the matrix-box theater button opens the
+        # Same thumb image the grid-box theater button opens the
         # lightbox on -- without it, LightboxCaption's @image is nil,
         # so the original/EXIF links break (empty /images//original)
         # and the vote section (gated on @image) silently disappears

@@ -51,16 +51,24 @@ module Views::Layouts
       edit_href = routes.edit_observation_path(@obs.id)
       destroy_action = routes.observation_path(@obs.id)
 
-      assert_html(html, ".object_edit .inline-icon-link", count: 2)
+      assert_html(html, ".object_edit .inline-icon-link", count: 3)
       assert_html(html, ".object_edit a[href='#{edit_href}']")
       assert_html(html, ".object_edit form[action='#{destroy_action}']")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_reflection_shows_read_only_status_icon
       @obs.update_column(:reflected_at, Time.zone.now)
       html = render_icons(user: @owner)
 
       assert_html(html, ".object_edit .mo-icon-read-only")
+      # Must render inside InlineLinkBlock's wrapper span -- that's
+      # what gives it the same spacing/size as the edit/delete icons
+      # beside it, instead of the sprite's larger default size.
+      # rubocop:disable-next MO/RedundantTagInSelector
+      assert_html(html,
+                  ".object_edit span.inline-link-block.ml-3 " \
+                  ".mo-icon-read-only")
     end
 
     def test_non_reflection_has_no_read_only_status_icon

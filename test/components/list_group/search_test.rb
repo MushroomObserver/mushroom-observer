@@ -15,7 +15,7 @@ class ListSearchTest < ComponentTestCase
     html = render_for(project, project: project)
 
     # Panel wrap (matches `panel_id: "list_search"`).
-    assert_html(html, "div#list_search.panel")
+    assert_html(html, "div#list_search.card")
     # Form posts to AddDispatchController with explicit POST verb
     # (no PATCH/PUT here — controller uses GET-of-redirect).
     assert_html(html, "form#list_search_form[action='/add_dispatch']" \

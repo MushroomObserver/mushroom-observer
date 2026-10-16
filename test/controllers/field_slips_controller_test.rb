@@ -1102,7 +1102,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_unprocessable
     assert_select("form[data-turbo='true']")
     assert_select(
-      "#modal_resolve_projects.modal.fade.in",
+      "#modal_resolve_projects.modal.fade.show",
       { count: 1 },
       "Expected Components::Modal for project-gaps overlay"
     )
@@ -1312,12 +1312,12 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # Components::Modal markup proves the new modal composition
     # rendered, not just that we got a 200.
     assert_select(
-      "#modal_resolve_projects.modal.fade.in",
+      "#modal_resolve_projects.modal.fade.show",
       { count: 1 },
       "Expected Components::Modal for project-gaps overlay"
     )
     assert_select(".modal-dialog.modal-lg")
-    assert_select(".modal-backdrop.fade.in")
+    assert_select(".modal-backdrop.fade.show")
     # Resolve modal's submit buttons (Skip + Add All) are posted under
     # the FormObject's namespace.
     assert_select("[name='occurrence_projects[resolution]']", count: 2)

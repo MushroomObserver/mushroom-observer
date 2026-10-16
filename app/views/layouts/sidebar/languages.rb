@@ -46,7 +46,7 @@ class Views::Layouts::Sidebar
     # by this view outside of any iteration.
     def render_toggle
       render(Components::ListGroup::LinkItem.new(
-               class: "pl-3 panel-collapse-trigger"
+               class: "pl-3 panel-collapse-trigger inline-flex-center"
              )) do |css_class|
         Link(type: :collapse_toggle, target_id: COLLAPSE_ID,
              id: TOGGLE_ID, class: css_class) do
@@ -56,16 +56,14 @@ class Views::Layouts::Sidebar
           end
           whitespace
           Icon(type: :chevron_down, title: :open.ti,
-               class: "active-icon")
-          Icon(type: :chevron_up, title: :close.ti)
+               class: "active-icon", center_tooltip: true)
+          Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
         end
       end
     end
 
     def render_language_row(lang)
-      render(
-        Components::ListGroup::LinkItem.new(class: "indent")
-      ) do |css_class|
+      render(Components::ListGroup::LinkItem.new) do |css_class|
         LanguageSwitchButton(
           language: lang,
           id: "lang_drop_#{lang.locale}_link",

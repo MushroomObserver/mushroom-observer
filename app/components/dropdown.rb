@@ -79,6 +79,11 @@ class Components::Dropdown < Components::Base
   # block (`Dropdown(..., menu_content: ...) { }`); the empty-menu
   # guard below also checks this, not just registered sections.
   prop :menu_content, _Nilable(::String), default: nil
+  # Optional raw HTML for the toggle's visible content (SafeBuffer),
+  # overriding the default `label:`-text span. `label:` is still
+  # required -- it becomes the toggle's `aria-label` instead, since
+  # the visible text no longer speaks for itself.
+  prop :toggle_content, _Nilable(::String), default: nil
 
   def initialize(...)
     super

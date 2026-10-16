@@ -35,6 +35,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
                 "a[data-search-type-target='helpToggle'] svg.mo-icon-info")
     assert_no_html(html,
                    "a[data-search-type-target='helpToggle'].d-none")
+    # Rendered via CollapseToggle's button:/size: kwarg, not raw
+    # btn/btn-link strings.
     assert_html(html,
                 "a[data-search-type-target='helpToggle'].btn.btn-link")
   end
@@ -54,21 +56,22 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     # The wrapper (not the links inside) owns the availability toggle
     # -- see Views::Layouts::SearchBar#render_form_toggle.
     assert_no_html(html, "div[data-search-type-target='formToggle'].d-none")
-    # Icon-only link, shown below md.
+    # Icon-only link, shown below lg.
     assert_html(html,
                 "a[data-toggle='collapse']" \
                 "[href='#search_nav_form']" \
                 "[aria-controls='search_nav_form']" \
-                "[aria-expanded='false'].d-md-none")
+                "[aria-expanded='false'].d-lg-none")
     assert_html(html,
                 "a[href='#search_nav_form'] " \
                 "span[aria-label='#{:search_bar_more_options.l}']")
     assert_html(html, "a[href='#search_nav_form'] svg.mo-icon-plus")
     # Icon-only vs. labeled outline-button.
     assert_html(html, "a[href='#search_nav_form'].btn.btn-link")
+    # Labeled outline-button, shown from lg up.
     assert_html(html,
                 "a[data-toggle='collapse'][href='#search_nav_form']" \
-                ".btn.btn-outline-default.d-none.d-md-inline-block",
+                ".btn.btn-outline-default.d-none.d-lg-inline-block",
                 text: :search_bar_more_options.l)
   end
 
@@ -82,8 +85,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     stub_session(search_type: "observations", search_view: "advanced")
     html = render_bar(form_types: [:observations])
 
-    assert_html(html, "#search_nav_form.in")
-    assert_no_html(html, "#search_bar_elements.in")
+    assert_html(html, "#search_nav_form.show")
+    assert_no_html(html, "#search_bar_elements.show")
     assert_html(html,
                 "a[href='#search_nav_form'][aria-expanded='true']")
   end
@@ -91,8 +94,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
   def test_pattern_view_starts_open_by_default
     html = render_bar(form_types: [:observations])
 
-    assert_html(html, "#search_bar_elements.in")
-    assert_no_html(html, "#search_nav_form.in")
+    assert_html(html, "#search_bar_elements.show")
+    assert_no_html(html, "#search_nav_form.show")
     assert_html(html,
                 "a[href='#search_nav_form'][aria-expanded='false']")
   end
@@ -107,7 +110,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
 
     html = render_bar(form_types: [:observations])
 
-    assert_html(html, "#search_bar_elements.in")
+    assert_html(html, "#search_bar_elements.show")
     assert_no_html(html, "[data-search-type-target='formToggle']")
   end
 

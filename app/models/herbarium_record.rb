@@ -94,7 +94,7 @@ class HerbariumRecord < AbstractModel
   }
 
   # Eager-loads the show / edit page (HR record + its herbarium,
-  # user, the obs panel's matrix-box tree, and the
+  # user, the obs panel's grid-box tree, and the
   # `observation_herbarium_records` join — with `:observation`
   # preloaded on the join so `observations.delete(obs)` doesn't
   # lazy-load the row's `:observation` during cascade).
@@ -105,7 +105,7 @@ class HerbariumRecord < AbstractModel
   end
 
   # Index variant — herbarium + observations.name suffice for the
-  # row label; full matrix-box tree isn't needed. Picked up by
+  # row label; full grid-box tree isn't needed. Picked up by
   # `ApplicationController::Indexes#default_index_includes_for_model`.
   def self.index_includes_tree
     [:user, { herbarium: :curators }, { observations: :name }]

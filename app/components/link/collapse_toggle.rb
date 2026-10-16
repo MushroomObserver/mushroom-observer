@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Bootstrap 3 collapse-trigger `<a>`. Renders an `href="#target_id"`
+# Bootstrap collapse-trigger `<a>`. Renders an `href="#target_id"`
 # link with `data-toggle="collapse"` and the matching ARIA attrs.
 # The default `collapsed: true` adds the `.collapsed` class (Bootstrap uses
 # this to flip chevron icons via CSS when the pane is hidden). Pass
@@ -16,14 +16,7 @@
 # the standalone create page without), pass `fallback_href:`. The
 # component uses that URL as `href` and adds `data-target` explicitly
 # so Bootstrap still finds the collapse pane (Bootstrap reads
-# `data-target` before `href`). It also wires up the
-# `collapse-fallback` Stimulus controller to prevent the default
-# navigation -- Bootstrap 3's collapse data-API only does that itself
-# when `data-target` is absent, so with `fallback_href:` (which
-# requires `data-target`) it doesn't. This is a Bootstrap 3
-# workaround; re-check whether it's still needed when MO migrates to
-# Bootstrap 4/5 (issue #3797) -- collapse.js's data-API may behave
-# differently there.
+# `data-target` before `href`).
 #
 # Pass `button:` for Bootstrap button styling (e.g. `:link`,
 # `:outline`) and `size:` for size modifiers (e.g. `:xs`, `:sm`).
@@ -102,20 +95,7 @@ class Components::Link::CollapseToggle < Components::Link
     extra_data = @attributes[:data] || {}
     return extra_data unless @fallback_href
 
-    # Bootstrap's collapse data-API only prevents the default
-    # navigation when data-target is absent; fallback_href needs
-    # data-target present so collapse.js can find the pane, so the
-    # navigation has to be prevented explicitly instead. See
-    # app/javascript/controllers/collapse-fallback_controller.js --
-    # no :prevent action modifier here, the controller itself decides
-    # whether to call preventDefault() (it skips it for a
-    # data-turbo-frame trigger, letting Turbo handle that case).
-    extra_data.merge(target: "##{@target_id}",
-                     controller: [extra_data[:controller],
-                                  "collapse-fallback"].compact.join(" "),
-                     action: [extra_data[:action],
-                              "click->collapse-fallback#intercept"].
-                             compact.join(" "))
+    extra_data.merge(target: "##{@target_id}")
   end
 
   def size_class

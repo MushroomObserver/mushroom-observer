@@ -125,31 +125,19 @@ class CarouselTest < ComponentTestCase
   end
 
   # `show_controls: true` (default) renders the prev/next Controls
-  # subcomponent at the bottom of `.carousel-inner`. The
-  # `controls_wrap_class` prop, when set, wraps Controls in a `Row`
-  # with that class -- `Row` auto-prepends "row" (Form::UploadGallery
-  # passes just `"carousel-control-wrap"`).
-  def test_controls_render_inline_by_default
+  # subcomponent as siblings of `.carousel-inner`, matching Bootstrap
+  # 4's carousel markup (no wrapping element around the two buttons):
+  # https://getbootstrap.com/docs/4.6/components/carousel/
+  def test_controls_render_as_carousel_siblings
     html = render_carousel(carousel_args: { carousel_id: "c" },
                            slides: [{ content: "s" }])
 
-    assert_html(html, ".carousel-inner a.left.carousel-control")
-    assert_html(html, ".carousel-inner a.right.carousel-control")
-    assert_no_html(html, ".carousel-control-wrap")
-  end
-
-  def test_controls_can_be_wrapped_in_a_named_div
-    html = render_carousel(
-      carousel_args: {
-        carousel_id: "c",
-        controls_wrap_class: "carousel-control-wrap"
-      },
-      slides: [{ content: "s" }]
-    )
-
-    assert_html(html, ".carousel-inner " \
-                      ".carousel-control-wrap.row " \
-                      "a.left.carousel-control")
+    assert_html(html, ".carousel " \
+                      "button.carousel-control-prev[type='button']" \
+                      "[data-target='#c'][data-slide='prev']")
+    assert_html(html, ".carousel " \
+                      "button.carousel-control-next[type='button']" \
+                      "[data-target='#c'][data-slide='next']")
   end
 
   # `show_controls: false` suppresses the prev/next strip entirely
@@ -160,12 +148,13 @@ class CarouselTest < ComponentTestCase
       slides: [{ content: "s" }]
     )
 
-    assert_no_html(html, "a.carousel-control")
+    assert_no_html(html, ".carousel-control-prev")
+    assert_no_html(html, ".carousel-control-next")
   end
 
   # Default: first registered slide gets `.active`. Explicit
   # `active: true` on any other slide shifts the active state to it
-  # (and the first slide stops being active). `Matrix::Carousel` uses
+  # (and the first slide stops being active). `Grid::Box::Carousel` uses
   # this for its `top_img` semantics.
   def test_explicit_active_kwarg_overrides_default_first_active
     html = render_carousel(
@@ -194,7 +183,7 @@ class CarouselTest < ComponentTestCase
   end
 
   # `show_indicators: false` suppresses the indicator `<ol>` entirely.
-  # Registered thumbs are silently dropped (the matrix-box carousel
+  # Registered thumbs are silently dropped (the grid-box carousel
   # uses this — no thumbnail strip per-box).
   def test_show_indicators_false_suppresses_indicator_strip
     html = render_carousel(

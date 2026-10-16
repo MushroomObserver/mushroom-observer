@@ -16,32 +16,34 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_html(html, "#observation_details")
   end
 
-  # "Shared with" badges: a second .panel-body (zero-padding -- its
+  # "Shared with" badges: a second .card-body (zero-padding -- its
   # children, the badge row and the accordion, supply their own
   # padding/border individually) when the obs has any external_link
   # (own or sibling) or an eligible site to add one, none at all
   # otherwise. ExternalLinksTest covers the component's own content in
   # isolation; this covers Details' wiring.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_external_links_body_for_obs_with_external_link
     obs = observations(:imported_inat_obs)
 
     html = render(panel_with(obs))
 
     assert_html(html, "#observation_details > " \
-                      "#observation_external_links" \
+                      ".card-body.p-0#observation_external_links" \
                       "[data-controller='section-update']")
   end
 
   # Badges are informational, not gated on being logged in -- an
   # anonymous viewer should still see that the obs was shared on
   # another site.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_external_links_body_for_logged_out_viewer
     obs = observations(:imported_inat_obs)
 
     html = render(panel_with(obs, nil))
 
     assert_html(html, "#observation_details > " \
-                      "#observation_external_links")
+                      ".card-body.p-0#observation_external_links")
   end
 
   def test_does_not_render_external_links_body_when_nothing_to_show
@@ -70,7 +72,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
 
   # With nothing to show yet (only an eligible site to add one to),
   # the external-links body renders AFTER when/where/who, as the last
-  # panel-body -- not leading the panel with an empty-looking "+".
+  # card-body -- not leading the panel with an empty-looking "+".
   def test_renders_external_links_body_last_when_no_links_yet
     obs = observations(:detailed_unknown_obs)
     assert_empty(obs.external_links)
@@ -80,7 +82,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     html = render(panel_with(obs, sites: sites))
 
     bodies = Nokogiri::HTML5.fragment(html).css(
-      "#observation_details > .panel-body"
+      "#observation_details > .card-body"
     )
     assert_equal("observation_external_links", bodies.last["id"])
   end
@@ -222,6 +224,11 @@ class Views::Controllers::Observations::Show::DetailsTest <
       ".attach_observation_to_field_slip_link_#{obs.id}" \
       "[href='#{routes.edit_observation_field_slip_path(obs.id)}']"
     )
+    # The item must render inside InlineLinkBlock's wrapper span, not
+    # loose in the panel -- that's what supplies the group's margin.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion, MO/RedundantTagInSelector
+    assert_html(html,
+                "#observation_field_slips span.inline-link-block.ml-3 a")
   end
 
   def test_no_field_slip_section_when_no_field_slip_and_cannot_edit

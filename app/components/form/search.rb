@@ -42,7 +42,7 @@ class Components::Form::Search < Components::ApplicationForm
     super(model, search_controller:, context:, turbo: true,
                  action: "/#{type}/search", method: :post,
                  id: "#{type}_search_form",
-                 class: "faceted-search-form pb-4",
+                 class: "faceted-search-form pb-4 w-100",
                  data:,
                  **props)
   end
@@ -79,7 +79,7 @@ class Components::Form::Search < Components::ApplicationForm
   # Header (shown in dropdown context only)
 
   def render_header
-    div(class: "flex-bar px-3 my-2") do
+    div(class: "flex-bar px-card mb-2") do
       div(class: "font-weight-bold h5 text-larger my-0") do
         render(Components::SearchTypeTitle.new(current_type: search_type))
       end
@@ -101,17 +101,16 @@ class Components::Form::Search < Components::ApplicationForm
          collapsed: false,
          icon: :minus,
          icon_title: :search_bar_fewer_options.l,
-         button: :link,
-         class: class_names(Components::Navbar::LINK_CLASS, "px-2",
-                            Components::Column.visibility_classes(
-                              hide_at: :md
-                            )),
+         button: :link, size: :lg,
+         class: class_names("p-0", Components::Column.visibility_classes(
+                                     hide_at: :lg
+                                   )),
          data: { search_type_target: "barToggle" })
   end
 
   def render_search_bar_toggle_button
     classes = Components::Column.visibility_classes(
-      hide_at: :xs, show_at: :md, display: :"inline-block"
+      hide_at: :xs, show_at: :lg, display: :"inline-block"
     )
     Link(type: :collapse_toggle,
          target_id: "search_bar_elements",
@@ -360,12 +359,10 @@ class Components::Form::Search < Components::ApplicationForm
     fill_confidence_range(range, sorted)
   end
 
-  # If first is blank, fill with min (range from min to value).
-  # If second is blank, keep as single value - scope handles the
-  # appropriate range. Single value behavior:
-  # - 0.0: Exact match
-  # - Positive: Range from (next_lower, value]
-  # - Negative: Range from [value, next_higher)
+  # Blank first fills with min (range from min to value); blank second
+  # keeps a single value for the scope to interpret: 0.0 is exact
+  # match, positive is (next_lower, value], negative is
+  # [value, next_higher).
   def fill_confidence_range(original, sorted)
     return [sorted.first, sorted.last] if sorted.size > 1
 

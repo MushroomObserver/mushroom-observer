@@ -20,7 +20,7 @@ module Observations
 
       get(:index)
       assert_no_flash
-      assert_select(".matrix-box", obs_count)
+      assert_select(".grid-box", obs_count)
       assert_response(:success)
       assert_select("form#identify_filter[data-turbo='true']")
 
@@ -38,7 +38,7 @@ module Observations
       get(:index,
           params: { identify_filter: { type: :clade, term: "Agaricales" } })
       assert_no_flash
-      assert_select(".matrix-box", aga_obs.count)
+      assert_select(".grid-box", aga_obs.count)
 
       bol_obs = Observation.needs_naming(mary).clade("Boletus")
       query = Query.lookup_and_save(
@@ -70,7 +70,7 @@ module Observations
           params: { identify_filter: { type: :region,
                                        term: "California, USA" } })
       assert_no_flash
-      assert_select(".matrix-box", cal_obs_count)
+      assert_select(".grid-box", cal_obs_count)
 
       # mark five observations as reviewed and check the new obs_count
       # On the site, this happens via JS, so directly update the obs_view
@@ -94,7 +94,7 @@ module Observations
           params: { identify_filter: { type: :region,
                                        term: "California, USA" } })
       assert_no_flash
-      assert_select(".matrix-box", cal_obs_count - 5)
+      assert_select(".grid-box", cal_obs_count - 5)
 
       # Vote on the first unconfident naming and check the new obs_count
       # On the site, this happens via JS, so we'll do it directly
@@ -115,13 +115,13 @@ module Observations
           params: { identify_filter: { type: :region,
                                        term: "California, USA" } })
       assert_no_flash
-      assert_select(".matrix-box", cal_obs_count - 6)
+      assert_select(".grid-box", cal_obs_count - 6)
 
       # clear the query and be sure we get everything,
       # ...minus the ones marked reviewed and the one voted on
       get(:index, params: { commit: :clear.ti })
       assert_no_flash
-      assert_select(".matrix-box", obs_count - 6)
+      assert_select(".grid-box", obs_count - 6)
     end
 
     # A scalar `?identify_filter=x` used to crash. FormFilter renders

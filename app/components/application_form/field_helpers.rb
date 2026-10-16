@@ -384,6 +384,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         **field_opts
       )
 
+      set_help_slot(field_component, wrapper_opts[:help])
       yield(field_component) if block_given?
 
       render(field_component)
@@ -416,7 +417,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                                               submits_with: submits_with,
                                               disable_with: disable_with)
       if as == :button
-        extra_class = "center-block my-3" if center
+        extra_class = "center-block my-2" if center
         # `options[:name]` is the HTML name= attribute on the button, NOT
         # the display text — keep it separate so it doesn't clobber `name:
         # value` (the label) in Button::Submit.
@@ -437,6 +438,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # Renders `submit(...)` into the page title bar's CTA slot
+    # (`Header::PageTitle#render_title_bar_cta`) instead of inline in
+    # the form. `form:` associates the button with this `<form>` by
+    # id, since the title bar sits outside the form in the DOM.
+    def title_bar_submit(*, **)
+      html = capture { submit(*, form: @attributes[:id], **) }
+      content_for(:title_bar_cta, html)
+    end
+
     private
 
     # An Update button shows "Updating" while in-flight; anything else
@@ -448,7 +458,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def submit_merged_options(options, **opts)
       classes = ["btn", btn_class(opts[:variant]),
                  size_class(opts[:size]),
-                 ("center-block my-3" if opts[:center]),
+                 ("center-block my-2" if opts[:center]),
                  options[:class]].compact
       data = { turbo_submits_with: opts[:submits_with],
                disable_with: opts[:disable_with] }.merge(options[:data] || {})

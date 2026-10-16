@@ -1,23 +1,9 @@
 # frozen_string_literal: true
 
-# The top-of-page navbar. Composes:
-#
-#   - the left side (mobile nav-toggle button, the page title /
-#     "rubric", and the "+ Add" create-button)
-#   - the right side (search-bar toggle, QR-scanner link, the
-#     `:context_nav` content_for hook for the Actions dropdown,
-#     and either `Views::Layouts::TopNav::UserNav` or
-#     `Views::Layouts::TopNav::Login` depending on
-#     `@user.nil?`)
-#
-# The collapsible search-bar row itself is a sibling, not a child --
-# see `Views::Layouts::SearchNav`.
-#
-# Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
-# `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
-# `nav_create`, `nav_scan_qr_code` + their private helpers) are
-# inlined as private methods on this class — those helpers had no
-# other callers, so the helper modules are deleted in the same PR.
+# The top-of-page navbar: mobile nav-toggle, page rubric, "+ Add"
+# button, search-bar toggle, QR-scanner link, Actions dropdown, user
+# nav. The collapsible search-bar row itself is a sibling, not a
+# child -- see `Views::Layouts::SearchNav`.
 class Views::Layouts::TopNav < Views::Base
   # `content_for?` isn't auto-registered on `Views::Base` (only
   # the value-helper form of `content_for` is). The right-side
@@ -33,17 +19,21 @@ class Views::Layouts::TopNav < Views::Base
   # ancestor (`#main_container`, see `Views::Layouts::Application`).
   prop :banner, _Nilable(::Banner), default: nil
 
-  # `w-100` is load-bearing since #top_nav is `display: flex`
-  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it this row
-  # would shrink to content width instead of filling the navbar.
-  # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
-  # between` + `align-items-center` alias.
-  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
+  # `w-100` is load-bearing since #top_nav is `display: flex` --
+  # without it this row shrinks to content width. `container-fluid`
+  # already supplies the flex/justify/align BS4 needs. `px-card`
+  # matches card padding, so content lines up below it. See
+  # `Views::Layouts::SearchNav::CONTAINER_CLASSES` for its match.
+  CONTAINER_CLASSES = %w[container-fluid px-card w-100].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
+  # `navbar-expand` gives `.navbar-nav .dropdown-menu` the
+  # `position: absolute` it needs to float instead of pushing
+  # #top_nav's height. Scoped to this div, not #top_nav itself, since
+  # its `flex-flow: row nowrap` would break CONTAINER_CLASSES' stacking.
   RIGHT_CLASSES = %w[
-    d-flex flex-row align-items-center justify-content-end navbar_right
+    d-flex flex-row align-items-center navbar_right navbar-expand
   ].freeze
 
   # Controllers whose index pages are linkable from the rubric.
@@ -64,7 +54,8 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav",
+    Navbar(variant: :light, class: "hidden-print mb-2", id: "top_nav",
+           padding: "py-2 px-0",
            aria: { label: :app_top_nav_label.l }) do
       render_top_row
     end
@@ -79,34 +70,19 @@ class Views::Layouts::TopNav < Views::Base
     end
   end
 
+  # LEFT SIDE ##############################################################
   def render_left
     render_left_nav_toggle
-    h4(class: "font-weight-bold mr-2", id: "rubric") { render_rubric }
-    div(class: "mr-3 mr-sm-4 mr-lg-5") { render_nav_create }
-  end
-
-  def render_right
-    render_search_nav_toggle
-    render_nav_scan_qr_code
-    ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
-                          Components::Navbar::RIGHT_CLASS, "mr-0",
-                          Components::Column.mobile_hide_classes)) do
-      # `content_for(:context_nav)` (no-block) returns the previously
-      # stashed SafeBuffer; `trusted_html` emits it into Phlex's
-      # buffer (a no-op `content_for` call would only read it).
-      trusted_html(content_for(:context_nav)) if content_for?(:context_nav)
-      render(UserNav.new(user: @user)) if @user
-    end
-    render(Login.new) if @user.nil?
-    render_show_banner_button
+    h4(class: "font-weight-bold mb-0 mr-2", id: "rubric") { render_rubric }
+    div(class: "mr-3 mr-lg-4") { render_nav_create }
   end
 
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: class_names("pr-3 pr-sm-4",
+    div(class: class_names("pr-2",
                            Components::Column.visibility_classes(
-                             show_at: :xs, hide_at: :md
+                             show_at: :xs, hide_at: :lg
                            ))) do
       Button(
         variant: :outline,
@@ -119,21 +95,6 @@ class Views::Layouts::TopNav < Views::Base
         img(src: asset_path("mo_icon_bg.svg"),
             width: "30px", alt: :menu.ti, title: :menu.ti)
       end
-    end
-  end
-
-  # The magnifying-glass that toggles the collapsible search-bar
-  # row below the top nav.
-  def render_search_nav_toggle
-    div(class: class_names(Components::Navbar::FORM_CLASS,
-                           "px-2 px-sm-3")) do
-      Button(
-        type: :collapse_toggle,
-        target_id: "search_nav",
-        variant: :outline, size: :sm,
-        class: "top_nav_button top_nav_icon_button",
-        aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
     end
   end
 
@@ -217,7 +178,7 @@ class Views::Layouts::TopNav < Views::Base
                       action: :new),
       name: :add.ti, show_label: :responsive,
       variant: :success, size: :sm,
-      class: "ml-1 mr-0 mx-sm-3 top_nav_button new_object_button",
+      class: "mx-sm-3 top_nav_button new_object_button",
       title: full_label,
       aria: { label: full_label },
       data: { tooltip_target: "tip", placement: :bottom } }
@@ -226,6 +187,38 @@ class Views::Layouts::TopNav < Views::Base
   def nav_create_label
     obj_name = controller.controller_model_name.underscore.to_sym.ti
     [:new.ti, obj_name].safe_join(" ")
+  end
+
+  # RIGHT SIDE #############################################################
+  def render_right
+    div(class: "btn-toolbar") do
+      render_search_nav_toggle
+      render_nav_scan_qr_code
+    end
+    ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
+                          Components::Navbar::RIGHT_CLASS, "mr-0",
+                          Components::Column.mobile_hide_classes)) do
+      # `content_for(:context_nav)` (no-block) returns the previously
+      # stashed SafeBuffer; `trusted_html` emits it into Phlex's
+      # buffer (a no-op `content_for` call would only read it).
+      trusted_html(content_for(:context_nav)) if content_for?(:context_nav)
+      render(UserNav.new(user: @user)) if @user
+    end
+    render(Login.new) if @user.nil?
+    render_show_banner_button
+  end
+
+  # The magnifying-glass that toggles the collapsible search-bar
+  # row below the top nav. Shares a `.btn-toolbar` wrap with
+  # `render_nav_scan_qr_code` (see `render_right`).
+  def render_search_nav_toggle
+    Button(
+      type: :collapse_toggle,
+      target_id: "search_nav",
+      variant: :outline, size: :sm,
+      class: "px-2 top_nav_button top_nav_icon_button",
+      aria: { expanded: "false", controls: "search_nav" }
+    ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
   end
 
   # QR-scanner link, only for the Observations / FieldSlips
@@ -242,7 +235,7 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "mx-0 mx-sm-2 top_nav_button top_nav_icon_button",
+      class: "mx-2 ml-md-4 top_nav_button top_nav_icon_button",
       data: { placement: :bottom }
     )
   end

@@ -89,9 +89,9 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       assert_selector("[data-type='location_google']", wait: 5)
       assert_selector(".create", visible: :all)
 
-      # Wait for the create-mode switch's own geocode of "some new
-      # place" to settle before typing a different name -- otherwise
-      # the two requests race to update the same fields.
+      # "some new place" is a deliberately unmatched string, so its
+      # geocode can settle as a rejection with no "-1" to wait on --
+      # wait for settle either way before typing a different name.
       wait_for_geocode_settled(count: 1)
 
       # Type "burbank" - in location_google mode, this triggers Google
@@ -125,7 +125,8 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
 
       # Wait for autocomplete dropdown and select using keyboard
       assert_selector(".auto_complete", wait: 5)
-      assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 5)
+      assert_selector(".auto_complete a.dropdown-item", text: /Burbank/i,
+                                                        wait: 5)
       browser.keyboard.type(:down, :tab)
 
       # Verify location was selected (has-id class and hidden field populated)
@@ -151,7 +152,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # Verify autocompleter switched to location_google mode
       assert_selector("[data-type='location_google']", wait: 5)
 
-      # Wait for that switch's own geocode call to settle before the
+      # Wait for that switch's geocode call to settle before the
       # input-click workaround below triggers a second one.
       wait_for_geocode_settled(count: 1)
 
@@ -213,16 +214,11 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     JS
   end
 
-  # Waits for `count` geocode() calls to settle (success or error).
-  # Lets an implicitly triggered geocode (e.g. from a create-mode
-  # switch) finish before the next one starts, so two requests don't
-  # race to update the same fields.
-  #
-  # 30s default, not 10s: Google's Geocoding API isn't slow, but 10s
-  # flaked every herbarium test calling this under the full parallel
-  # system suite (101 tests, 3 Chromium workers competing for CPU on
-  # one machine), where the browser process is starved, not the
-  # network round-trip.
+  # Waits for `count` geocode() calls to settle (success or error), so
+  # an implicitly triggered geocode finishes before the next one
+  # starts. 30s, not 10s -- 10s flaked every herbarium test calling
+  # this under the full parallel system suite (101 tests, 3 Chromium
+  # workers), where the browser process is CPU-starved, not the API.
   def wait_for_geocode_settled(count:, wait: 30)
     Timeout.timeout(wait) do
       loop do

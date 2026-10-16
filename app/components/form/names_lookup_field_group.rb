@@ -88,7 +88,8 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
 
   def collapse_class
     # Show expanded if lookup has a value OR any modifier has a value
-    "in" if lookup_has_value? || modifiers_have_values?
+    Components::Collapsible::EXPANDED_CLASS \
+      if lookup_has_value? || modifiers_have_values?
   end
 
   def lookup_has_value?
