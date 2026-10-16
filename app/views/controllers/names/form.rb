@@ -44,7 +44,8 @@ module Views::Controllers::Names
     end
 
     def render_admin_locked_checkbox
-      checkbox_field(:locked, label: :form_names_locked, wrap_class: "mt-3")
+      checkbox_field(:locked, label: :form_names_locked,
+                              wrap_class: "mt-3 mb-3")
     end
 
     def render_editable_fields
@@ -166,7 +167,8 @@ module Views::Controllers::Names
       div(class: "my-4 mx-0") do
         checkbox_field(:misspelling,
                        label: :form_names_misspelling,
-                       checked: @misspelling)
+                       checked: @misspelling,
+                       wrap_class: "mb-3")
 
         autocompleter_field(
           :correct_spelling,
