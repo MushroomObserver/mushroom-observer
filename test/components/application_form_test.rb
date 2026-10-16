@@ -142,41 +142,28 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, ".label-row-with-appends.mr-3")
   end
 
-  # Help renders as a sibling after .form-group, not inside it (#4911)
-  # -- .form-group's bottom margin is suppressed so it doesn't double
-  # up with .help-block's top margin.
+  # Help nests inside .form-group, as part of the same unit, so its
+  # own default bottom margin provides spacing to the next field --
+  # no suppression needed.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
-  def test_form_group_has_mb_0_when_field_has_help
+  def test_help_nests_inside_form_group
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text")
     end
 
-    assert_html(form, ".form-group.mb-0")
-    assert_html(form, ".form-group + .help-block")
-  end
-
-  # rubocop:disable-next MO/NoCosmeticClassAssertion
-  def test_form_group_has_no_mb_0_without_help
-    form = render_form do
-      text_field(:name, label: "Name:")
-    end
-
-    assert_html(form, ".form-group")
+    assert_html(form, ".form-group > .help-block", text: "Help text")
     assert_no_html(form, ".form-group.mb-0")
   end
 
-  # Regression (Copilot review on #4922): help_collapse: true renders
-  # a Collapsible that's hidden by default, not an always-visible
-  # .help-block sibling -- the bottom-margin suppression must not fire
-  # for it, or the gap to whatever field comes next shrinks with
-  # nothing visible to justify it.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
-  def test_form_group_has_no_mb_0_with_collapsed_help
+  def test_collapsed_help_nests_inside_form_group
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
+    assert_html(form, ".form-group .collapse .help-block",
+                text: "Help text")
     assert_no_html(form, ".form-group.mb-0")
   end
 
