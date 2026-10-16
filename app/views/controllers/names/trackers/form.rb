@@ -43,8 +43,7 @@ module Views::Controllers::Names::Trackers
                expanded: note_template_enabled?,
                attributes: {
                  wrap_class: "mb-3",
-                 help: :email_tracking_note_help.t,
-                 help_collapse: true
+                 help: :email_tracking_note_help.t
                }
              ))
     end
