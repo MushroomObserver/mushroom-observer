@@ -94,7 +94,8 @@ module Views::Controllers::Projects
 
     def render_open_membership
       checkbox_field(:open_membership,
-                     label: :form_projects_open_membership)
+                     label: :form_projects_open_membership,
+                     wrap_class: "mb-3")
     end
 
     def render_title
@@ -148,10 +149,12 @@ module Views::Controllers::Projects
     # `name="project[dates_any]"` without trying to bind through
     # Superform's `field(...)`.
     def render_dates_any_radios
-      radio_field("project[dates_any]",
-                  ["false", range_label],
-                  ["true", any_label],
-                  value: @dates_any)
+      div(class: "mb-3") do
+        radio_field("project[dates_any]",
+                    ["false", range_label],
+                    ["true", any_label],
+                    value: @dates_any)
+      end
     end
 
     def range_label
