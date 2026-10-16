@@ -72,7 +72,7 @@ module Views::Controllers::InatImports
       Panel(panel_class: "my-4") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
-          div(data: { controller: "type-switch" }) do
+          div(data: { controller: "collapse-switch" }) do
             render_method_radio("all", :inat_import_all.l)
             render_method_radio("ids", :inat_import_list.l)
             render_ids_panel
@@ -105,15 +105,16 @@ module Views::Controllers::InatImports
     def project_title = @project_site.project.title
 
     def render_method_radio(value, label_text)
-      radio_field(:choose_method, [value, label_text],
-                  wrap_class: "mb-2",
-                  data: { action: "change->type-switch#switch" })
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: :choose_method, value: value,
+               label: label_text, attributes: { wrap_class: "mb-2" }
+             ))
     end
 
     def render_ids_panel
       Collapsible(expanded: current_method == "ids",
-                  data: { type_switch_target: "panel",
-                          type_switch_type: "ids" }) do
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: "ids" }) do
         textarea_field(:inat_ids, label: false,
                                   wrap_class: "ml-4",
                                   help: :inat_import_list_help.t)
@@ -122,8 +123,8 @@ module Views::Controllers::InatImports
 
     def render_url_panel
       Collapsible(expanded: current_method == "url",
-                  data: { type_switch_target: "panel",
-                          type_switch_type: "url" }) do
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: "url" }) do
         textarea_field(:inat_url, label: false,
                                   wrap_class: "ml-4",
                                   rows: 4,

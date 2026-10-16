@@ -1,40 +1,19 @@
 import { Controller } from "@hotwired/stimulus"
 import { delegate, abnegate } from 'jquery-events-to-dom-events'
 
-// Shows/hides panels based on a select or radio group value, using
-// Bootstrap collapse for animated transitions.
-//
-// Panels are shown when their data-type-switch-type matches the
-// current select/radio value. The server renders panels with the
-// correct Bootstrap collapse classes (collapse + show for open,
-// collapse alone for closed) so there is no flash on page load.
-// connect() only disables inputs in hidden panels.
-//
-// Usage with select:
-//   <div data-controller="type-switch">
-//     <select data-type-switch-target="select"
-//             data-action="type-switch#switch">
-//     <div data-type-switch-target="panel"
-//          data-type-switch-type="user"
-//          class="collapse show">...</div>
-//     <div data-type-switch-target="panel"
-//          data-type-switch-type="location"
-//          class="collapse">...</div>
-//
-// Usage with radio:
-//   <div data-controller="type-switch">
-//     <input type="radio" value="all"
-//            data-action="change->type-switch#switch">
-//     <input type="radio" value="ids"
-//            data-action="change->type-switch#switch">
-//     <div data-type-switch-target="panel"
-//          data-type-switch-type="ids"
-//          class="collapse">...</div>
-//
-// https://github.com/leastbad/jquery-events-to-dom-events
-// delegate/abnegate bridge jQuery events (shown.bs.collapse etc.)
-// to native DOM events (prefixed $) for use in data-action.
-// If moving to BS5, remove this import and use native events directly.
+// Shows/hides panels based on a select or radio group's value, via
+// Bootstrap collapse -- a panel shows when its
+// data-collapse-switch-type matches the current value, others
+// collapse. Initial state renders server-side (no flash); hidden
+// panels' inputs are disabled on connect so they don't submit.
+
+// Wrapper: data-controller="collapse-switch". Select or each radio:
+// data-action="[change->]collapse-switch#switch" (select also needs
+// data-collapse-switch-target="select"). Each panel:
+// data-collapse-switch-target="panel" plus data-collapse-switch-type.
+
+// jquery-events-to-dom-events bridges jQuery's bs.collapse events
+// for data-action; drop it if this moves to BS5.
 export default class extends Controller {
   static targets = ["select", "panel"]
 
@@ -58,7 +37,7 @@ export default class extends Controller {
   switch() {
     const selectedValue = this.getSelectedValue()
     this.panelTargets.forEach(panel => {
-      const panelType = panel.dataset.typeSwitchType
+      const panelType = panel.dataset.collapseSwitchType
       if (panelType === selectedValue) {
         this.enablePanelInputs(panel)
         $(panel).collapse('show')
