@@ -4,31 +4,31 @@ import { delegate, abnegate } from 'jquery-events-to-dom-events'
 // Shows/hides panels based on a select or radio group value, using
 // Bootstrap 3 collapse for animated transitions.
 //
-// Panels are shown when their data-type-switch-type matches the
+// Panels are shown when their data-collapse-switch-type matches the
 // current select/radio value. The server renders panels with the
 // correct Bootstrap collapse classes (collapse + in for open,
 // collapse alone for closed) so there is no flash on page load.
 // connect() only disables inputs in hidden panels.
 //
 // Usage with select:
-//   <div data-controller="type-switch">
-//     <select data-type-switch-target="select"
-//             data-action="type-switch#switch">
-//     <div data-type-switch-target="panel"
-//          data-type-switch-type="user"
+//   <div data-controller="collapse-switch">
+//     <select data-collapse-switch-target="select"
+//             data-action="collapse-switch#switch">
+//     <div data-collapse-switch-target="panel"
+//          data-collapse-switch-type="user"
 //          class="collapse in">...</div>
-//     <div data-type-switch-target="panel"
-//          data-type-switch-type="location"
+//     <div data-collapse-switch-target="panel"
+//          data-collapse-switch-type="location"
 //          class="collapse">...</div>
 //
 // Usage with radio:
-//   <div data-controller="type-switch">
+//   <div data-controller="collapse-switch">
 //     <input type="radio" value="all"
-//            data-action="change->type-switch#switch">
+//            data-action="change->collapse-switch#switch">
 //     <input type="radio" value="ids"
-//            data-action="change->type-switch#switch">
-//     <div data-type-switch-target="panel"
-//          data-type-switch-type="ids"
+//            data-action="change->collapse-switch#switch">
+//     <div data-collapse-switch-target="panel"
+//          data-collapse-switch-type="ids"
 //          class="collapse">...</div>
 //
 // https://github.com/leastbad/jquery-events-to-dom-events
@@ -58,7 +58,7 @@ export default class extends Controller {
   switch() {
     const selectedValue = this.getSelectedValue()
     this.panelTargets.forEach(panel => {
-      const panelType = panel.dataset.typeSwitchType
+      const panelType = panel.dataset.collapseSwitchType
       if (panelType === selectedValue) {
         this.enablePanelInputs(panel)
         $(panel).collapse('show')

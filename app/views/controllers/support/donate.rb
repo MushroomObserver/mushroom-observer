@@ -12,8 +12,10 @@ module Views::Controllers::Support
                         admin: in_admin_mode?
                       ))
 
-      trusted_html(:donate_thanks.tp)
-      trusted_html(:donate_explanation.tp)
+      div(class: "mb-3") do
+        trusted_html(:donate_thanks.tp)
+        trusted_html(:donate_explanation.tp)
+      end
       render(Form.new(
                @donation,
                action: url_for(controller: "/support", action: :confirm),

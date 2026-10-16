@@ -24,16 +24,16 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "select[name='project_alias[target_type]']")
 
       # Type-switch controller
-      assert_html(html, "[data-controller~='type-switch']")
-      assert_html(html, "select[data-type-switch-target='select']")
+      assert_html(html, "[data-controller~='collapse-switch']")
+      assert_html(html, "select[data-collapse-switch-target='select']")
 
       # Both autocompleter panels present
-      panel = "[data-type-switch-target='panel']"
-      assert_html(html, "#{panel}[data-type-switch-type='user']")
-      assert_html(html, "#{panel}[data-type-switch-type='location']")
+      panel = "[data-collapse-switch-target='panel']"
+      assert_html(html, "#{panel}[data-collapse-switch-type='user']")
+      assert_html(html, "#{panel}[data-collapse-switch-type='location']")
 
       # User panel hidden by default, location panel visible
-      assert_no_html(html, "[data-type-switch-type='user'].in")
+      assert_no_html(html, "[data-collapse-switch-type='user'].in")
     end
 
     def test_edit_form_with_user_target
@@ -45,7 +45,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='RS']")
 
       # Location panel hidden when editing user target
-      assert_no_html(html, "[data-type-switch-type='location'].in")
+      assert_no_html(html, "[data-collapse-switch-type='location'].in")
     end
 
     def test_edit_form_with_location_target
@@ -57,7 +57,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='Walk 1']")
 
       # User panel hidden when editing location target
-      assert_no_html(html, "[data-type-switch-type='user'].in")
+      assert_no_html(html, "[data-collapse-switch-type='user'].in")
     end
 
     def test_form_with_errors
