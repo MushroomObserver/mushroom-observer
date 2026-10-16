@@ -13,6 +13,10 @@
 # - a run wrapped in its own rubocop:disable/:enable pair for this
 #   cop (or `all`) -- RuboCop's engine honors that regardless of what
 #   the cop itself checks, so the hook must too
+# JS has no such cop to mirror, so it's out of scope here -- a Stimulus
+# controller's own usage-example doc comment (e.g. "Usage with select:"
+# plus an indented HTML snippet) reads as narrative under the Ruby-
+# tuned reference heuristic and would get wrongly mangled.
 set -euo pipefail
 
 MAX_LINES=10
@@ -29,7 +33,6 @@ FILE="$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // ""')"
 case "$FILE" in
   .claude/*|*/.claude/*) exit 0 ;;
   *.rb|*.rake|*.scss) COMMENT_RE='^[[:space:]]*#' ;;
-  *.js) COMMENT_RE='^[[:space:]]*//' ;;
   *) exit 0 ;;
 esac
 
