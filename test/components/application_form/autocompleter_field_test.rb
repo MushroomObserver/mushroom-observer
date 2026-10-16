@@ -350,34 +350,17 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(form, ".help-block", text: "Pick a name")
   end
 
-  # Collapsible help renders as a sibling right after .form-group --
-  # when expanded, .form-group's default margin-bottom would read as
-  # a gap between the field and the help describing it. .form-group
-  # tightens to mb-2 and the outer .autocompleter picks up mb-3 to
-  # keep the same overall spacing to the next field.
-  # rubocop:disable-next MO/NoCosmeticClassAssertion
-  def test_autocompleter_field_collapsible_help_adjusts_margins
+  # Collapsible help nests inside .form-group, same as plain help --
+  # no separate margin-class adjustment needed since there's no
+  # external sibling to double up with.
+  def test_autocompleter_field_collapsible_help_nests_in_form_group
     form = render_comment_form do
       autocompleter_field(:summary, type: :name, label: "Name",
                                     help: "Pick a name", help_collapse: true)
     end
 
-    assert_html(form, ".autocompleter.mb-3")
-    assert_html(form, ".form-group.mb-2")
-    assert_html(form, ".collapse .help-block", text: "Pick a name")
-  end
-
-  # Regression guard: with no help configured, neither margin class
-  # should render -- the adjustment is specific to the
-  # collapsible-help case.
-  # rubocop:disable-next MO/NoCosmeticClassAssertion
-  def test_autocompleter_field_without_help_has_no_margin_classes
-    form = render_comment_form do
-      autocompleter_field(:summary, type: :name, label: "Name")
-    end
-
-    assert_no_html(form, ".autocompleter.mb-3")
-    assert_no_html(form, ".form-group.mb-2")
+    assert_html(form, ".form-group .collapse .help-block",
+                text: "Pick a name")
   end
 
   private

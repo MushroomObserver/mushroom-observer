@@ -73,7 +73,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def view_template
       div(
         id: controller_id,
-        class: class_names("autocompleter", collapse_help_present? && "mb-3"),
+        class: "autocompleter",
         data: controller_data
       ) do
         render_input_field do
@@ -169,18 +169,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def autocompleter_wrapper_options
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
-        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown",
-                                collapse_help_present? && "mb-2")
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
       )
-    end
-
-    # A collapsible help block renders right after .form-group --
-    # expanded, its default margin-bottom reads as a double gap.
-    # mb-2 here moves that spacing onto .autocompleter's mb-3
-    # (view_template); plain help is handled separately, by
-    # FieldWrapperRendering#help_present?.
-    def collapse_help_present?
-      help_slot && wrapper_options[:help_collapse]
     end
 
     def add_slots_to_field(field_component, &block)
