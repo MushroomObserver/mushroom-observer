@@ -417,7 +417,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                                               submits_with: submits_with,
                                               disable_with: disable_with)
       if as == :button
-        extra_class = "center-block my-3" if center
+        extra_class = "center-block my-2" if center
         # `options[:name]` is the HTML name= attribute on the button, NOT
         # the display text — keep it separate so it doesn't clobber `name:
         # value` (the label) in Button::Submit.
@@ -458,7 +458,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def submit_merged_options(options, **opts)
       classes = ["btn", btn_class(opts[:variant]),
                  size_class(opts[:size]),
-                 ("center-block my-3" if opts[:center]),
+                 ("center-block my-2" if opts[:center]),
                  options[:class]].compact
       data = { turbo_submits_with: opts[:submits_with],
                disable_with: opts[:disable_with] }.merge(options[:data] || {})

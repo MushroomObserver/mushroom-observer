@@ -4,6 +4,12 @@
 // These are not meant as overrides, just to facilitate update.
 // --------------------------------------------------
 
+.center-block {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+}
+
 .min-w-100 {
   min-width: 100% !important;
 }

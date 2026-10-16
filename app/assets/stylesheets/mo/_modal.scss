@@ -11,10 +11,20 @@
   font-weight: $font-weight-bold;
 }
 
+// Bootstrap sets align-items: flex-start, pinning .close to the
+// header's top edge regardless of .modal-title's height -- center
+// instead, so a taller close glyph still lines up with the title.
+.modal-header {
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+
 // Bootstrap's default .close opacity (0.5) makes the X hard to see in
 // dark themes like Amanita. Use the theme's danger color for a clear
 // dismiss button visible regardless of theme background.
 .modal-header .close {
+  font-size: 2rem;
+  line-height: 0.5;
   opacity: 0.8;
   color: $danger;
   text-shadow: none;
