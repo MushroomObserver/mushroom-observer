@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-16 (deploy-2026-10-16-01-00)
+
+- Fix location/map zoom/geocode/UI bugs; regularize form-label spacing ([PR5492](https://github.com/MushroomObserver/mushroom-observer/pull/5492), @nimmolo)
+- Remove stale ERB-era references from comments across the codebase ([PR5496](https://github.com/MushroomObserver/mushroom-observer/pull/5496), @nimmolo)
+- Add `MO/NoCosmeticClassAssertion` cop; fix all 170 existing violations ([PR5497](https://github.com/MushroomObserver/mushroom-observer/pull/5497), @nimmolo)
+- Add `MO/RedundantTagInSelector` cop; fix all 328 existing violations ([PR5498](https://github.com/MushroomObserver/mushroom-observer/pull/5498), @nimmolo)
+- Add `MO/NoLongCommentBlock` cop and fix all violations ([PR5500](https://github.com/MushroomObserver/mushroom-observer/pull/5500), @nimmolo)
+- Fix user-nav dropdown CRUD buttons, thumbnail-picker spacing, carousel arrows ([PR5501](https://github.com/MushroomObserver/mushroom-observer/pull/5501), @nimmolo)
+- Extract `Views::Layouts::SearchNav` from `TopNav` ([PR5507](https://github.com/MushroomObserver/mushroom-observer/pull/5507), @nimmolo)
+- Tighten up obs show page's sections ([PR5508](https://github.com/MushroomObserver/mushroom-observer/pull/5508), @nimmolo)
+- Port cutover's `en.txt` wording changes to `main` ([PR5509](https://github.com/MushroomObserver/mushroom-observer/pull/5509), @nimmolo)
+
 ## 2026-10-12 (deploy-2026-10-12-20-30)
 
 - Bump simplecov, google-cloud-storage, brakeman, prawn-svg ([PR5484](https://github.com/MushroomObserver/mushroom-observer/pull/5484), @JoeCohen)
