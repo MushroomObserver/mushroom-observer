@@ -68,7 +68,8 @@ module Views::Controllers::Projects::Aliases
 
       # Error display
       assert_html(html, "#error_explanation", text: "error")
-      assert_html(html, "#error_explanation", text: "Name can't be blank")
+      assert_html(html, "#error_explanation",
+                  text: "Name can’t be blank")
     end
 
     private
