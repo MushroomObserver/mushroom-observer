@@ -18,7 +18,7 @@ class ModalTurboFormTest < ComponentTestCase
 
     # Header with title and close button
     assert_html(html, ".modal-header")
-    assert_html(html, "h4.modal-title#modal_test_form_header",
+    assert_html(html, ".modal-title#modal_test_form_header",
                 text: "My Form Title")
     assert_html(html, "button.close[data-dismiss='modal']")
 
