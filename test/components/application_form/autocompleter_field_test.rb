@@ -339,6 +339,19 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(html, ".has-id-indicator")
   end
 
+  # Collapsible help nests inside .form-group, same as plain help --
+  # no separate margin-class adjustment needed since there's no
+  # external sibling to double up with.
+  def test_autocompleter_field_collapsible_help_nests_in_form_group
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name", help_collapse: true)
+    end
+
+    assert_html(form, ".form-group .collapse .help-block",
+                text: "Pick a name")
+  end
+
   private
 
   def render_with_component
