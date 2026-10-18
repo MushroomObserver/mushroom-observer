@@ -97,10 +97,6 @@ module Views::Controllers::Info
       assert_not_includes(html, "&lt;")
     end
 
-    # The escaped `&lt;li&gt;` text is the contract under test here --
-    # this test verifies HTML gets escaped once, not that an li
-    # selector matches.
-    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_form_with_html_codes_result
       html = render_form(code: "# Woof\n# Bark\n# Meow",
                          show_result: true,
