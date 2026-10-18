@@ -68,15 +68,48 @@ module RuboCop
           | \.hanging-indent\b
           | \.tight-list\b
           | \.badge\b(?!-)
-          | \bli\b
-          | \bh[1-6]\b
         /x
 
+        # Bare-tag tokens need checking against the CSS selector
+        # argument specifically, not the whole call -- unlike
+        # CLASS_PATTERN's dotted tokens, `li`/`h1`-`h6` are common
+        # substrings of id values (`#h1`), attribute values
+        # (`a[title='View li details']`), and plain assertion text
+        # (`assert_includes`/`assert_not_includes` don't take a
+        # selector). The lookbehind/lookahead further requires a
+        # selector-boundary position so `#h1`/`.h1`-style id/class
+        # references don't match even within the selector argument.
+        TAG_PATTERN = /
+          (?<![#.\[a-z0-9-])\b(?:li|h[1-6])\b(?![a-z0-9-])
+        /xi
+
+        SELECTOR_ARG_INDEX = {
+          assert_html: 1, assert_no_html: 1,
+          assert_selector: 0, assert_no_selector: 0
+        }.freeze
+
         def on_send(node)
-          match = CLASS_PATTERN.match(node.source)
+          match = CLASS_PATTERN.match(node.source) || tag_match(node)
           return unless match
 
           add_offense(node, message: format(MSG, match: match[0]))
+        end
+
+        private
+
+        def tag_match(node)
+          index = SELECTOR_ARG_INDEX[node.method_name]
+          return unless index
+
+          selector_arg = node.arguments[index]
+          return unless selector_arg
+
+          # Strip attribute-selector brackets first -- their quoted
+          # values (`[title='View li details']`) are free text, not
+          # a tag-selector position, regardless of what word they
+          # contain.
+          stripped = selector_arg.source.gsub(/\[[^\]]*\]/, "")
+          TAG_PATTERN.match(stripped)
         end
       end
     end
