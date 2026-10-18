@@ -14,7 +14,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # it's the only piece of the heading row that's visible.
     html = render_header
 
-    assert_html(html, ".panel-title",
+    assert_html(html, ".card-title",
                 text: :show_namings_proposed_names.t)
   end
 
