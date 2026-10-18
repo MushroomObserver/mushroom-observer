@@ -46,7 +46,7 @@ module Views::Controllers::Observations::Identify
                          "[data-autocompleter--clade-target='list']")
 
       # 10 dropdown items
-      assert_html(html, "li.dropdown-item", count: 10)
+      assert_html(html, ".dropdown-item", count: 10)
 
       # Type select with dual targets and swap actions
       assert_html(html, "select#identify_filter_type" \

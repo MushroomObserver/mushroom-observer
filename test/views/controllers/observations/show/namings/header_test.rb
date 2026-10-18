@@ -9,21 +9,21 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     @obs = observations(:coprinus_comatus_obs)
   end
 
-  def test_renders_panel_title_in_h4
-    # The leftmost label-column carries the panel's actual title
-    # in an h4 — on `xs` it's the only piece of the heading row
-    # that's visible.
+  def test_renders_panel_title
+    # The leftmost label-column carries the panel's title — on `xs`
+    # it's the only piece of the heading row that's visible.
     html = render_header
 
-    assert_html(html, "h4",
+    assert_html(html, ".panel-title",
                 text: :show_namings_proposed_names.t)
   end
 
   def test_renders_four_column_labels
     html = render_header
 
-    # All four column-label `<small>`s are present. (The h4 in
-    # the first column already covers `proposed_names`.) Use
+    # All four column-label `<small>`s are present. (The panel
+    # title in the first column already covers `proposed_names`.)
+    # Use
     # `assert_includes` rather than `assert_html(text:)` because
     # the latter matches the first `<small>` and asserts its
     # text — useless when there are multiple `<small>`s.
@@ -51,6 +51,9 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     assert_html(html, ".col.col-sm-4.d-block")
   end
 
+  # `align-items-end` is this header's alignment contract (see
+  # comment below), not incidental paint.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_rows_align_items_end_for_bottom_label_alignment
     # The inner row of label columns is `d-flex align-items-end`
     # so the one-line labels bottom-align with "Community Vote"
@@ -63,6 +66,10 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     assert_html(html, ".row.d-flex.align-items-end", count: 2)
   end
 
+  # `float-right` positions the button against the modal column's
+  # other content -- the layout contract this test pins, not
+  # incidental paint.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_propose_naming_modal_link_in_mobile_column
     # Right-gutter column carries the propose-naming icon button
     # via ModalLink (data-modal points at the propose-naming

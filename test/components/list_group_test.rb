@@ -76,6 +76,8 @@ class ListGroupTest < ComponentTestCase
     assert_html(html, ".list-group.list-group-flush")
   end
 
+  # The container/item tag switch (ul -> li) is the contract here.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_ul_element_switches_items_to_li
     html = render_list(element: :ul) do |list|
       list.item { "one" }

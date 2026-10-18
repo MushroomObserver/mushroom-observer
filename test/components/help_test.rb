@@ -60,13 +60,13 @@ class HelpTest < ComponentTestCase
 
   def test_id_and_extra_attrs_passed_through
     html = render_help(element: :div, content: "Help",
-                       id: "h1", data: { x: "v" })
+                       id: "custom-help-id", data: { x: "v" })
 
     # id and arbitrary data-* asserted independently so renaming
     # the wrapper element or reshuffling attribute order doesn't
     # mass-fail this test.
     assert_html(html, ".help-block", text: "Help")
-    assert_html(html, "#h1")
+    assert_html(html, "#custom-help-id")
     assert_html(html, "[data-x='v']")
   end
 

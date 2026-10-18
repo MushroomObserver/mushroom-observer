@@ -49,7 +49,6 @@ class Views::Controllers::Observations::Show::DetailsTest <
 
     html = render(panel_with(@obs))
 
-    assert_no_html(html, ".border-bottom")
     assert_no_html(html, "#observation_external_links")
   end
 

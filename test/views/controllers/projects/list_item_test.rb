@@ -18,7 +18,6 @@ module Views::Controllers::Projects
 
       # Title link
       assert_html(html, "a[href*='projects/#{project.id}']")
-      assert_html(html, ".h4")
 
       # Meta row with user
       assert_includes(html, project.created_at.web_time)

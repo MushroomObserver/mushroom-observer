@@ -9,6 +9,8 @@ class NavbarTextTest < ComponentTestCase
     assert_html(html, ".navbar-text", text: "Page")
   end
 
+  # `element:` controls the wrapper tag -- the tag is the contract.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_custom_element
     html = render_component(Components::Navbar::Text.new(element: :li)) do
       "Sort by:"

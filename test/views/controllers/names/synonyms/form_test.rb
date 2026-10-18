@@ -28,7 +28,7 @@ module Views::Controllers::Names::Synonyms
       assert_equal(%w[input a button], types,
                    "Label should contain checkbox, then link, then id badge")
       assert_html(label.to_html, "a[href='/names/#{@synonym1.id}']")
-      assert_html(label.to_html, "button.badge",
+      assert_html(label.to_html, "button.badge-id",
                   text: @synonym1.id.to_s)
     end
 
