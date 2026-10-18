@@ -53,7 +53,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     )
     assert_html(html,
                 "a[href='#{routes.permanent_observation_path(sibling.id)}']")
-    assert_html(html, "li:first-child",
+    assert_html(html, "#current_observation_row:first-child",
                 text: "(#{:show_observation_this_observation.l})")
   end
 

@@ -187,6 +187,9 @@ class AutocompleterFieldTest < ComponentTestCase
       ".has-id-indicator" \
       "[data-autocompleter--herbarium-target='hasIdIndicator']"
     )
+    # Color is the status signal here (already-known match), not
+    # decoration -- same spirit as the .d-none visibility exemption.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, ".has-id-indicator svg.text-success")
   end
 

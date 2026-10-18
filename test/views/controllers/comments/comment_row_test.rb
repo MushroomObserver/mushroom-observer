@@ -45,7 +45,9 @@ module Views::Controllers::Comments
       # heading flows through to the inner CommentItem.
       html = render_row(show_name: true)
 
-      assert_html(html, "h4 a[href*='#{@comment.target.id}']")
+      assert_html(html,
+                  "#comment_target_heading_#{@comment.id} " \
+                  "a[href*='#{@comment.target.id}']")
     end
 
     private

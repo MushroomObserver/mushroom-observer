@@ -23,8 +23,7 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
     assert_html(html, ".carousel.slide[data-ride='false']" \
                       "[data-interval='false']" \
                       "[id='observation_#{@observation.id}_carousel']")
-    assert_html(html, ".carousel.slide > .carousel-inner" \
-                      "[role='listbox']")
+    assert_html(html, ".carousel.slide > .carousel-inner[role='listbox']")
     # No Panel wrapper, no indicator strip — those are contracts
     # specific to the box context (the box itself owns the
     # surrounding card; thumbnails are not shown per-box).

@@ -67,9 +67,8 @@ module Views::Controllers::GlossaryTerms::Images
     def test_renders_matrix_with_one_box_per_image
       html = render_form
 
-      # Grid renders a `.row.list-unstyled` wrap; each
-      # Grid::Box contains the image preview + checkbox for one image.
-      assert_html(html, ".row.list-unstyled")
+      # Each Grid::Box contains the image preview + checkbox for one
+      # image.
       assert_equal(@model.images.count, html.scan("grid-box").count,
                    "expected one .grid-box per image")
     end

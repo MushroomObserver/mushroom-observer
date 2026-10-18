@@ -112,7 +112,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     # On the index page with no filtering query, the rubric is plain
     # text — no link.
-    assert_html(html, "h4#rubric")
+    assert_html(html, "#rubric")
     assert_no_html(html, "#rubric a")
   end
 

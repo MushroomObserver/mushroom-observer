@@ -15,7 +15,7 @@ class ModalTest < ComponentTestCase
     assert_html(html, ".modal-content")
 
     # Default chrome
-    assert_html(html, ".modal-header > h4.modal-title#modal_thing_title",
+    assert_html(html, ".modal-header > .modal-title#modal_thing_title",
                 text: "Pick a thing")
     assert_html(html, ".modal-header > button.close[data-dismiss='modal']")
     # .modal-header is a flex row (justify-content: space-between) --
@@ -68,7 +68,7 @@ class ModalTest < ComponentTestCase
 
     assert_includes(html, "class=\"modal fade modal-form\"")
     assert_html(html, ".modal[data-identifier='x'][data-foo='bar']")
-    assert_html(html, "h4.modal-title#modal_x_header")
+    assert_html(html, ".modal-title#modal_x_header")
     assert_html(html, ".modal-body#modal_x_body")
     assert_html(html, ".modal[aria-labelledby='modal_x_header']")
   end

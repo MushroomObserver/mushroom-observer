@@ -19,7 +19,6 @@ class InlineCRUDLinksTest < ComponentTestCase
 
     html = render_links(target: cn, observation: @obs, user: stranger)
 
-    assert_no_html(html, ".inline-link-block")
     assert_equal("", html.strip)
   end
 

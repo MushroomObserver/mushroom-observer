@@ -27,10 +27,10 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     assert_html(html, ".obs-links")
     assert_html(
-      html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
+      html, "a.badge-id[href='#{routes.external_link_path(link.id)}']",
       text: "iNat"
     )
-    assert_no_html(html, "a.badge.badge-id", text: "MCP")
+    assert_no_html(html, "a.badge-id", text: "MCP")
   end
 
   def test_renders_both_badges
@@ -42,12 +42,12 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     assert_html(
       html,
-      "a.badge.badge-id[href='#{routes.external_link_path(inat_link.id)}']",
+      "a.badge-id[href='#{routes.external_link_path(inat_link.id)}']",
       text: "iNat"
     )
     assert_html(
       html,
-      "a.badge.badge-id[href='#{routes.external_link_path(mcp_link.id)}']",
+      "a.badge-id[href='#{routes.external_link_path(mcp_link.id)}']",
       text: "MCP"
     )
   end
@@ -65,7 +65,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     html = render(panel_with(obs))
 
     assert_html(
-      html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
+      html, "a.badge-id[href='#{routes.external_link_path(link.id)}']",
       text: "MCP"
     )
   end
@@ -144,7 +144,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     assert_html(html, ".obs-links",
                 text: :no_objects.t(type: :external_link).as_displayed)
-    assert_no_html(html, "a.badge.badge-id")
+    assert_no_html(html, "a.badge-id")
     assert_html(html, "a[data-modal='modal_external_link']")
     # No flex/justify-content-between shell with no badges to space
     # against -- the add link sits right after the caption inline,
@@ -163,7 +163,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     html = render(panel_with(obs, sites: sites))
 
     assert_html(html, ".obs-links.d-flex.justify-content-between")
-    assert_html(html, "a.badge.badge-id", text: "iNat")
+    assert_html(html, "a.badge-id", text: "iNat")
     assert_html(html, "a[data-modal='modal_external_link']")
   end
 
@@ -200,7 +200,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     html = render(panel_with(obs, siblings: [sibling]))
 
     assert_html(
-      html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
+      html, "a.badge-id[href='#{routes.external_link_path(link.id)}']",
       text: "iNat"
     )
   end

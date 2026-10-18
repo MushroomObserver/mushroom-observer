@@ -22,7 +22,9 @@ module Views::Controllers::SpeciesLists
 
       assert_html(html, "#list_details")
       assert_html(html, ".card")
-      # date row + download button line up via flex
+      # date row + download button line up via flex -- this row's
+      # alignment contract, not incidental paint.
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
       assert_html(html, ".d-flex.justify-content-between.align-items-center")
       # The four header labels — `assert_html(text:)` only checks the
       # first matching element, so use plain text assertions for the

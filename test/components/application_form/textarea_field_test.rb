@@ -43,6 +43,8 @@ class TextareaFieldTest < ComponentTestCase
     )
 
     html = render(component)
+    # monospace: true adding .text-monospace IS the contract here.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, "textarea.form-control.text-monospace")
   end
 

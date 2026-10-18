@@ -31,7 +31,7 @@ module Views::Controllers::Names::Synonyms
                    "Checkbox wrapper should contain checkbox, then link, " \
                    "then id badge")
       assert_html(wrapper.to_html, "a[href='/names/#{@synonym1.id}']")
-      assert_html(wrapper.to_html, "button.badge",
+      assert_html(wrapper.to_html, "button.badge-id",
                   text: @synonym1.id.to_s)
     end
 
