@@ -71,7 +71,7 @@ class Views::Controllers::Names::Show::NomenclatureTest < ComponentTestCase
 
     html = render_nomenclature(name: name)
 
-    assert_html(html, "li.hanging-indent", text: :accepted.ti.as_displayed)
+    assert_html(html, "#name_status", text: :accepted.ti.as_displayed)
   end
 
   def test_status_line_shows_deprecated_for_deprecated_name
@@ -80,7 +80,33 @@ class Views::Controllers::Names::Show::NomenclatureTest < ComponentTestCase
 
     html = render_nomenclature(name: name)
 
-    assert_html(html, "li.hanging-indent", text: :deprecated.ti.as_displayed)
+    assert_html(html, "#name_status", text: :deprecated.ti.as_displayed)
+  end
+
+  # A name with no approved, deprecated, or misspelled synonyms skips
+  # the synonyms block instead of rendering an empty <ul>.
+  def test_synonyms_block_skipped_when_no_synonyms
+    name = Name.new(rank: Name.ranks[:Genus], text_name: "Testia",
+                    search_name: "Testia", sort_name: "Testia",
+                    display_name: "**__Testia__**", user: @user)
+    name.save(validate: false)
+    assert_empty(name.sort_synonyms.flatten)
+
+    html = render_nomenclature(name: name.reload)
+
+    assert_no_html(html, "#name_synonyms")
+  end
+
+  # peltigera has petigera as a misspelled synonym (see the
+  # misspelling-correct-link tests above) -- the synonyms block
+  # renders for it.
+  def test_synonyms_block_renders_when_synonyms_present
+    name = names(:peltigera)
+    assert_not_empty(name.sort_synonyms.flatten)
+
+    html = render_nomenclature(name: name)
+
+    assert_html(html, "#name_synonyms")
   end
 
   def routes

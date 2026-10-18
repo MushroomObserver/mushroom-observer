@@ -13,7 +13,7 @@ class Views::Controllers::Observations::Show::ThumbnailMapTest <
   def test_renders_thumbnail_map
     html = render(map_with(@obs, @user))
 
-    assert_html(html, "li#observation_thumbnail_map" \
+    assert_html(html, "#observation_thumbnail_map" \
                       "[data-controller='thumbnail-map']" \
                       "[data-map-url='#{routes.map_observation_path(
                         id: @obs.id

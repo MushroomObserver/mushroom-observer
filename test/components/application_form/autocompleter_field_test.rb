@@ -176,8 +176,8 @@ class AutocompleterFieldTest < ComponentTestCase
     )
 
     # Should have 10 dropdown items with links
-    assert_html(html, "li.dropdown-item", count: 10)
-    assert_html(html, "li.dropdown-item a", count: 10)
+    assert_html(html, ".dropdown-item", count: 10)
+    assert_html(html, ".dropdown-item a", count: 10)
 
     # Should have has_id_indicator (green check icon) -- a wrapping
     # span, not a bare svg (padding on a replaced element like svg
@@ -188,6 +188,9 @@ class AutocompleterFieldTest < ComponentTestCase
       ".has-id-indicator" \
       "[data-autocompleter--herbarium-target='hasIdIndicator']"
     )
+    # Color is the status signal here (already-known match), not
+    # decoration -- same spirit as the .d-none visibility exemption.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, ".has-id-indicator svg.text-success")
   end
 

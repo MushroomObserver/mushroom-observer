@@ -87,7 +87,7 @@ module Views::Controllers::Comments
     # still needs to render the row. The rescues swallow nil-target
     # / missing-method errors and substitute a "deleted" placeholder.
     def render_target_heading
-      h4(class: "mt-0") do
+      h4(id: "comment_target_heading_#{@comment.id}", class: "mt-0") do
         target_name_link
         whitespace
         target_type
