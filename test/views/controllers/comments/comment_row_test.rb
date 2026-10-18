@@ -46,7 +46,8 @@ module Views::Controllers::Comments
       html = render_row(show_name: true)
 
       assert_html(html,
-                  "#comment_target_heading a[href*='#{@comment.target.id}']")
+                  "#comment_target_heading_#{@comment.id} " \
+                  "a[href*='#{@comment.target.id}']")
     end
 
     private
