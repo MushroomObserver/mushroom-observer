@@ -62,6 +62,12 @@ module Views::Controllers::Projects
                   "input[type='radio']" \
                   "[name='project[dates_any]'][value='true']")
 
+      # Radio labels
+      assert_html(html, "label[for='project_dates_any_false']",
+                  text: :form_projects_enforce_date_range.t)
+      assert_html(html, "label[for='project_dates_any_true']",
+                  text: :form_projects_accept_any_dates.t)
+
       # "Any" selected by default
       assert_html(html,
                   "input[type='radio']" \

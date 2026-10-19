@@ -168,19 +168,9 @@ module Views::Controllers::Projects
     # Superform's `field(...)`.
     def render_dates_any_radios
       radio_field("project[dates_any]",
-                  ["false", range_label],
-                  ["true", any_label],
+                  ["false", :form_projects_enforce_date_range.t],
+                  ["true", :form_projects_accept_any_dates.t],
                   value: @dates_any)
-    end
-
-    def range_label
-      "#{:form_projects_range.t} " \
-        "(#{:form_projects_use_date_range.t})"
-    end
-
-    def any_label
-      "#{:form_projects_any.t} " \
-        "(#{:form_projects_ignore_date_range.t})"
     end
 
     def render_upload_fields
