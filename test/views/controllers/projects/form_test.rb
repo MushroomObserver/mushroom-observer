@@ -26,6 +26,19 @@ module Views::Controllers::Projects
       assert_html(html, "input[name='project[field_slip_prefix]']")
       assert_html(html, "input[name='project[place_name]']")
 
+      # Summary help is collapsed behind a help-trigger icon, not
+      # always visible.
+      assert_includes(html, :shared_textile_help.l)
+      assert_html(html,
+                  "a.info-collapse-trigger[href='#project_summary_help']")
+
+      # Same treatment for the Date Range section's explanatory text
+      # -- it has no single field, so the trigger sits beside the
+      # "Date Range" section title instead of a field label.
+      assert_includes(html, :form_projects_dates_explain.t)
+      assert_html(html,
+                  "a.info-collapse-trigger[href='#project_dates_help']")
+
       # Date fields — assert both IDs and name attributes
       # Year is a text input (1i), month (2i) and day (3i) are selects
       assert_html(html,

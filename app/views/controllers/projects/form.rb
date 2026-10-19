@@ -105,9 +105,9 @@ module Views::Controllers::Projects
 
     def render_summary
       textarea_field(:summary, rows: 5,
-                               label: :summary.ti) do |f|
-        f.with_help { :shared_textile_help.l }
-      end
+                               label: :summary.ti,
+                               help: :shared_textile_help.l,
+                               help_collapse: true)
     end
 
     def render_field_slip_prefix
@@ -130,8 +130,14 @@ module Views::Controllers::Projects
 
     def render_dates_section
       div do
-        p { "*#{:form_projects_date_range.t}*".t }
-        p { :form_projects_dates_explain.t }
+        p do
+          trusted_html("*#{:form_projects_date_range.t}*".t)
+          whitespace
+          render_dates_help_trigger
+        end
+      end
+      Collapsible(id: "project_dates_help") do
+        Help(well: true) { :form_projects_dates_explain.t }
       end
       Container(width: :text, class: "ml-4") do
         date_field(:start_date,
@@ -140,6 +146,19 @@ module Views::Controllers::Projects
         date_field(:end_date,
                    label: :form_projects_end_date)
         render_dates_any_radios
+      end
+    end
+
+    # Mirrors FieldWithHelp#render_help_icon's shape -- this section
+    # has no single field to attach help: to, so the trigger is
+    # built by hand instead of going through a field helper.
+    def render_dates_help_trigger
+      span(class: "ml-3") do
+        Link(type: :collapse_toggle,
+             target_id: "project_dates_help",
+             class: "info-collapse-trigger") do
+          Icon(type: :question, title: :help.ti)
+        end
       end
     end
 
