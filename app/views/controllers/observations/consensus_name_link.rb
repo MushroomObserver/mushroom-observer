@@ -103,11 +103,11 @@ module Views::Controllers::Observations
     end
 
     # The "(Site ID)" decoration that differentiates a consensus
-    # name from an adjacent owner-preferred name. `obs-site-id-flag`
+    # name from an adjacent owner-preferred name. `consensus-naming-flag`
     # is the contract class for tests; `small text-nowrap` is
     # cosmetic.
     def render_site_id_flag
-      span(class: "small text-nowrap obs-site-id-flag") do
+      small(class: "text-nowrap consensus-naming-flag") do
         plain("(#{:show_observation_site_id.t})")
       end
     end

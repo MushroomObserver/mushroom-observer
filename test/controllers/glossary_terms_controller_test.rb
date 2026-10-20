@@ -156,7 +156,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     make_admin
     get(:show, params: { id: term.id })
 
-    assert_select("form input[value='delete']", { count: 1 },
+    assert_select(".show_title_nav form input[value='delete']", { count: 1 },
                   "Page is missing a way for admin to destroy glossary term")
   end
 
