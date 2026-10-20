@@ -111,12 +111,15 @@ ul.tight-list {
 .h3.page-title {
   font-size: 22px;
 
-  .badge-id {
-    font-size: 66% !important
-  }
-
   small {
     @extend .ml-3;
     color: $text-color;
+  }
+}
+
+.object_edit {
+  .inline-link-block {
+    // 0.25rem -- main has no $spacers map; matches .ml-1 (_utilities.scss).
+    margin-top: 0.25rem;
   }
 }
