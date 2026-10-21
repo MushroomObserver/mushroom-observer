@@ -79,8 +79,8 @@ class Components::Form::Search < Components::ApplicationForm
   # Header (shown in dropdown context only)
 
   def render_header
-    div(class: "flex-bar w-100 mb-2") do
-      div(class: "font-weight-bold h5 text-larger mb-0") do
+    div(class: "flex-bar px-3 my-2") do
+      div(class: "font-weight-bold h5 text-larger my-0") do
         render(Components::SearchTypeTitle.new(current_type: search_type))
       end
       render_search_bar_toggle

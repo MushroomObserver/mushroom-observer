@@ -24,7 +24,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       html = render(panel_with(obs, obs.user, has_sibling_records: true))
 
       assert_includes(html, "#{:herbarium_records.ti}:")
-      assert_no_html(html, "li")
+      assert_no_html(html, "#herbarium_records_list")
     end
 
     # Empty + can-edit path with NO sibling records: the generic
@@ -36,7 +36,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       html = render(panel_with(obs, obs.user))
 
       assert_includes(html, :no_objects.t(type: :herbarium_record))
-      assert_no_html(html, "li")
+      assert_no_html(html, "#herbarium_records_list")
     end
 
     def test_readonly_list_when_viewer_cannot_add

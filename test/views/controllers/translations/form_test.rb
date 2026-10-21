@@ -53,7 +53,8 @@ module Views::Controllers::Translations
     # --- Language header ---
 
     def test_renders_language_header
-      assert_html(html, "h4", text: "#{@lang.name}:")
+      assert_html(html, "#translation_language_header",
+                  text: "#{@lang.name}:")
     end
 
     # --- Textarea fields ---
@@ -184,7 +185,7 @@ module Views::Controllers::Translations
 
       assert_html(non_official_html, "#translation_official")
       assert_html(non_official_html,
-                  "#translation_official h4",
+                  "#translation_official",
                   text: "#{Language.official.name}:")
     end
 

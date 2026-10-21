@@ -121,9 +121,9 @@ class ColumnTest < ComponentTestCase
   end
 
   def test_extra_class_merges_with_width_classes
-    html = render_column(sm: 6, class: "text-center")
+    html = render_column(sm: 6, class: "caller-supplied-marker")
 
-    assert_html(html, ".col-sm-6.text-center")
+    assert_html(html, ".col-sm-6.caller-supplied-marker")
   end
 
   def test_element_override

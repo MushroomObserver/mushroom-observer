@@ -34,7 +34,8 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(:lookup).autocompleter(
       type: :name,
       textarea: true,
-      wrapper_options: { label: :names.ti },
+      wrapper_options: { label: :names.ti,
+                         help_collapse: true, help_well: false },
       value: prefilled_lookup_value,
       hidden_value: prefilled_lookup_ids
     )
@@ -44,7 +45,8 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
   end
 
   def field_help
-    :form_search_terms_multiple.l
+    [:"#{@query.type_tag}_term_names".l,
+     :form_search_terms_multiple.l].join(" ")
   end
 
   def prefilled_lookup_value

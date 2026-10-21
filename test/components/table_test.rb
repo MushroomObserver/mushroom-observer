@@ -136,11 +136,11 @@ class TableTest < ComponentTestCase
     rows = [TestRow.new(name: "Alice")]
 
     html = render_table(rows) do |t|
-      t.column("Name", class: "text-right", &:name)
+      t.column("Name", class: "caller-supplied-marker", &:name)
     end
 
-    assert_html(html, "thead th.text-right", text: "Name")
-    assert_html(html, "tbody td.text-right", text: "Alice")
+    assert_html(html, "thead th.caller-supplied-marker", text: "Name")
+    assert_html(html, "tbody td.caller-supplied-marker", text: "Alice")
   end
 
   def test_per_column_arbitrary_attrs_forwarded_to_th_and_td

@@ -40,12 +40,14 @@ class LinkIconTest < ComponentTestCase
   # trigger mispositions once the page scrolls (bootstrap-sass's
   # tooltip.js skips $element.offset() for SVG elements).
   def test_title_adds_tooltip_and_accessible_name
-    html = render_icon(type: :edit, title: :edit.ti, class: "text-primary")
+    html = render_icon(type: :edit, title: :edit.ti,
+                       class: "caller-supplied-marker")
 
     assert_html(html,
                 "span[title='#{:edit.ti}'][data-tooltip-target='tip']" \
                 "[aria-label='#{:edit.ti}']")
-    assert_html(html, "span > svg.mo-icon.mo-icon-edit.text-primary")
+    assert_html(html,
+                "span > svg.mo-icon.mo-icon-edit.caller-supplied-marker")
     assert_no_html(html, "svg[title]")
     # No <title> child -- browsers render it as a second, native
     # tooltip alongside the Bootstrap one. aria-label carries the
@@ -89,14 +91,14 @@ class LinkIconTest < ComponentTestCase
 
   def test_padding_class_combined_with_other_classes_raises
     assert_raises(ArgumentError) do
-      render_icon(type: :globe, class: "text-primary px-2")
+      render_icon(type: :globe, class: "caller-supplied-marker px-2")
     end
   end
 
   def test_non_padding_class_does_not_raise
-    html = render_icon(type: :globe, class: "text-primary")
+    html = render_icon(type: :globe, class: "caller-supplied-marker")
 
-    assert_html(html, "svg.mo-icon-globe.text-primary")
+    assert_html(html, "svg.mo-icon-globe.caller-supplied-marker")
   end
 
   def test_named_padding_class_raises

@@ -13,6 +13,9 @@ class ListGroupItemTest < ComponentTestCase
     assert_html(html, ".list-group-item", text: "hello")
   end
 
+  # `element:` controls the wrapper tag -- the tag itself is the
+  # contract under test here.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_ul_list_uses_li_element
     html = render_item(element: :li) { "inside" }
 

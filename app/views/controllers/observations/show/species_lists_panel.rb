@@ -54,7 +54,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
          tab: ::Tab::Observation::AddToSpeciesList.new(
            observation: @obs, q_param: q_param
          ),
-         label: true)
+         show_label: :always)
   end
 
   def render_list

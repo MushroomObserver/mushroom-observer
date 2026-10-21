@@ -75,7 +75,7 @@ module Views::Controllers::Locations
              target: matching_locations_for_observations_path(
                where: location_name
              ),
-             icon: :merge, label: false,
+             icon: :merge, show_label: :hidden,
              title: :list_place_names_undef_merge_tooltip.t,
              data: { title: :list_place_names_undef_merge_tooltip.t })
       end
@@ -84,7 +84,7 @@ module Views::Controllers::Locations
         Link(type: :get, class: "icon-text-gap",
              name: :list_observations_location_define.t,
              target: new_location_path(where: location_name),
-             icon: :map, label: false,
+             icon: :map, show_label: :hidden,
              title: :list_place_names_undef_define_tooltip.t,
              data: { title: :list_place_names_undef_define_tooltip.t })
       end

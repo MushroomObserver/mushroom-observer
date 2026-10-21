@@ -166,7 +166,8 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "small mt-3") do
       Link(type: :get, target: occurrence_path(occ),
-           name: :matrix_box_occurrence.l, icon: :matrix, label: true,
+           name: :matrix_box_occurrence.l, icon: :matrix,
+           show_label: :responsive,
            class: "occurrence-link")
     end
   end

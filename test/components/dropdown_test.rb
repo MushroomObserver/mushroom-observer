@@ -119,7 +119,8 @@ class DropdownTest < ComponentTestCase
   # `element:` controls the outer wrapper tag -- `:li` by default
   # (correct inside a `<ul>`-based nav), `:div` for a caller placing
   # the dropdown outside a list (Views::Layouts::Header::Sorter).
-  # rubocop:disable-next MO/RedundantTagInSelector
+  # The tag itself is the contract under test here.
+  # rubocop:disable-next MO/RedundantTagInSelector, MO/NoCosmeticClassAssertion
   def test_element_prop_controls_outer_wrapper
     html = render_dropdown(id: "li_toggle", menu_id: "li_menu") do |menu|
       menu.section(Tab::Project::Summary.new(project: @project))

@@ -12,7 +12,7 @@ class NavTabsTest < ComponentTestCase
     # Outer structure: <ul class="nav nav-tabs"> with one <li class="nav-item">
     # per tab, each containing an <a class="nav-link">.
     assert_html(html, "ul.nav.nav-tabs")
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 2)
+    assert_html(html, "ul.nav-tabs > .nav-item", count: 2)
     assert_html(html, "a.nav-link[href='/summary']", text: "Summary")
     assert_html(html, "a.nav-link[href='/details']", text: "Details")
   end
@@ -110,7 +110,7 @@ class NavTabsTest < ComponentTestCase
     html = render_with(current: "members", tabs: collection)
 
     # Collection contributed 4 tabs; the one keyed "members" is active.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 4)
+    assert_html(html, "ul.nav-tabs > .nav-item", count: 4)
     assert_html(html, "a.nav-link.active.members_link")
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.aliases_link")
@@ -127,7 +127,7 @@ class NavTabsTest < ComponentTestCase
     end
 
     # Collection's 4 tabs + 1 ad-hoc = 5 total, in declaration order.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 5)
+    assert_html(html, "ul.nav-tabs > .nav-item", count: 5)
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.members_link")
     assert_html(html, "a.nav-link.aliases_link")

@@ -11,8 +11,10 @@ class AccordionTest < ComponentTestCase
       a.with_pane(id: "edit_42") { "EDIT_CONTENT" }
     end
 
+    # rubocop:disable MO/NoCosmeticClassAssertion
     assert_html(html, ".border-none#notes_42")
     assert_html(html, "#notes_42 .panel.border-none.bg-none")
+    # rubocop:enable MO/NoCosmeticClassAssertion
     assert_html(html, "#view_42.collapse.in", text: "VIEW_CONTENT")
     assert_html(html, "#edit_42.collapse", text: "EDIT_CONTENT")
     assert_no_html(html, "#edit_42.in")
@@ -27,6 +29,7 @@ class AccordionTest < ComponentTestCase
     assert_no_html(html, "#view_42 *")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_no_background_so_striped_rows_show_through
     html = render_accordion { |a| a.with_pane(id: "p") { "x" } }
 

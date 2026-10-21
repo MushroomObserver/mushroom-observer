@@ -17,6 +17,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                        :button, :button_data, :button_text, :button_href,
                        :button_variant, :button_size, :button_target,
                        :button_rel, :button_title, :button_icon, :addon,
+                       :addon_position,
                        :monospace, :label_class, :label_data, :label_aria,
                        :label_position, :width, :label_sr_only,
                        :label_for].freeze
@@ -384,6 +385,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         **field_opts
       )
 
+      set_help_slot(field_component, wrapper_opts[:help])
       yield(field_component) if block_given?
 
       render(field_component)

@@ -41,12 +41,15 @@ class IDBadgeTest < ComponentTestCase
     assert_html(html, "button", text: obs.id.to_s)
   end
 
+  # IDBadge's base `badge badge-id` classes are its styling contract
+  # (a styling-abstraction component) -- this test verifies
+  # caller-supplied extra_class joins them rather than clobbering
+  # them.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_extra_class_overrides_default_spacing
     obs = observations(:minimal_unknown_obs)
     html = render_badge(object: obs, size: :md, extra_class: "custom-class")
 
-    # Caller-supplied extra_class joins the base `badge badge-id`
-    # classes.
     assert_html(html, "button.badge.badge-id.custom-class")
   end
 

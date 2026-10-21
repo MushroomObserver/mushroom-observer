@@ -176,8 +176,8 @@ class AutocompleterFieldTest < ComponentTestCase
     )
 
     # Should have 10 dropdown items with links
-    assert_html(html, "li.dropdown-item", count: 10)
-    assert_html(html, "li.dropdown-item a", count: 10)
+    assert_html(html, ".dropdown-item", count: 10)
+    assert_html(html, ".dropdown-item a", count: 10)
 
     # Should have has_id_indicator (green check icon) -- a wrapping
     # span, not a bare svg (padding on a replaced element like svg
@@ -188,6 +188,9 @@ class AutocompleterFieldTest < ComponentTestCase
       ".has-id-indicator" \
       "[data-autocompleter--herbarium-target='hasIdIndicator']"
     )
+    # Color is the status signal here (already-known match), not
+    # decoration -- same spirit as the .d-none visibility exemption.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, ".has-id-indicator svg.text-success")
   end
 
@@ -337,6 +340,19 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_includes(html, "(Login Name)")
     # Has-id indicator should still be present after between content
     assert_html(html, ".has-id-indicator")
+  end
+
+  # Collapsible help nests inside .form-group, same as plain help --
+  # no separate margin-class adjustment needed since there's no
+  # external sibling to double up with.
+  def test_autocompleter_field_collapsible_help_nests_in_form_group
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name", help_collapse: true)
+    end
+
+    assert_html(form, ".form-group .collapse .help-block",
+                text: "Pick a name")
   end
 
   private
