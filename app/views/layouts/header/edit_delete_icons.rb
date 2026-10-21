@@ -38,7 +38,7 @@ module Views::Layouts
 
     def render_reflection_icon
       Icon(type: :read_only, title: :show_observation_reflection_read_only.l,
-           wrap_class: "mr-2")
+           wrap_class: "mr-2", center_tooltip: true)
     end
 
     # A read-only reflection keeps its edit icon: Edit opens a linked

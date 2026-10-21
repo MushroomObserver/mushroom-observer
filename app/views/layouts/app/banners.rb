@@ -61,7 +61,7 @@ module Views::Layouts::App
                 version: banner.version },
         aria: { label: :close.ti }
       ) do
-        Icon(type: :chevron_up, title: :close.ti)
+        Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
       end
       div(class: "banner-message") { trusted_html(banner.message.t) }
     end

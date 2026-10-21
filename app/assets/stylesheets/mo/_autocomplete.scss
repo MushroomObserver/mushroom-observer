@@ -23,9 +23,9 @@
 // autocompleter state (do we have a match?) is no longer handled
 // here -- `.has-id-indicator` carries `d-none` by default, same as
 // find-btn/keep-edit-toggle/create-button, and the autocompleter
-// controller's cssHasIdOrNo toggles it the same way. Visible state
-// falls through to _icons.scss's `span:has(> .mo-icon)` rule for
-// the inline-flex centering, same as any other icon-bearing span.
+// controller's cssHasIdOrNo toggles it the same way. Its span also
+// carries `.inline-flex-center` (see _icons.scss) directly for the
+// icon centering, rather than relying on an implicit selector.
 
 .dropdown-menu.auto_complete {
   // position: absolute;
