@@ -124,10 +124,28 @@ ul.tight-list {
   }
 }
 
-@media screen and (min-width: $screen-md-min) {
+@media screen and (min-width: $screen-sm-min) {
   .object_edit {
     .inline-link-block {
       margin-top: 0.75rem;
     }
+  }
+}
+
+// #title_bar's two column wrappers (.title_bar_left_col,
+// .title_bar_right_col) are BS3 float columns, so their stacking
+// order below `md` just follows source order -- left col first,
+// then right col. Between sm and md that pairing reads awkwardly;
+// flex-ify the row and reorder the right column above the left
+// column for just that range, leaving source order (and md+'s
+// side-by-side layout) untouched outside it.
+@media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+  #title_bar {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .title_bar_right_col {
+    order: -1;
   }
 }
