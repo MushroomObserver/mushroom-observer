@@ -109,17 +109,23 @@ ul.tight-list {
 }
 
 .h3.page-title {
-  font-size: 22px;
+  font-size: 18px;
 
   small {
     @extend .ml-3;
     color: $text-color;
   }
+
+  // 992px -- cutover's BS4 "lg" breakpoint; main's $screen-lg
+  // (1200px) is a different value, so this is hardcoded rather than
+  // reusing that variable.
+  @media screen and (min-width: 992px) {
+    font-size: 22px;
+  }
 }
 
 .object_edit {
   .inline-link-block {
-    // 0.25rem -- main has no $spacers map; matches .ml-1 (_utilities.scss).
-    margin-top: 0.25rem;
+    margin-top: 0.75rem;
   }
 }

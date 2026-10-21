@@ -27,7 +27,8 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-start align-items-center px-3"
+      "show_title_nav d-flex justify-content-start align-items-start " \
+      "px-3 py-2"
 
     def view_template
       Row(id: "title_bar", class: "mb-2") do
@@ -111,7 +112,7 @@ module Views::Layouts
       div(class: class_names(content_for(:right_columns),
                              "hidden-print text-right d-none d-md-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
-                   "align-items-start pr-3") do
+                   "align-items-start pr-3 py-2") do
           trusted_html(content_for(:interest_icons))
           trusted_html(content_for(:prev_next_object))
         end

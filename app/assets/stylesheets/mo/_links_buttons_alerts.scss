@@ -258,8 +258,10 @@ button.badge-id:hover {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  // 1rem -- main has no $spacers map; matches .ml-3 (_utilities.scss).
-  gap: 1rem;
+  // em, not rem -- scales with the surrounding context's font-size
+  // (a title-bar heading vs. small body text), same reasoning as
+  // .icon-text-gap in _icons.scss.
+  gap: 0.75em;
 }
 
 // Trailing observation-count column on the locations list-group --
