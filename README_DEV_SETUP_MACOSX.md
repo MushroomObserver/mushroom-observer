@@ -262,6 +262,11 @@ Mac users must uncomment/comment the relevant/irrelevant lines in `config/databa
 ```yml
 shared:
   adapter: trilogy
+  # Declared rather than left to the adapter's default, and matching the
+  # collation of the columns. #4625 moves those to utf8mb4_0900_ai_ci and
+  # takes this with them.
+  encoding: utf8mb4
+  collation: utf8mb4_general_ci
   # Default (works for MacOS X), uncomment this line
   socket: /tmp/mysql.sock
   # For Ubuntu/Debian, comment out this line
