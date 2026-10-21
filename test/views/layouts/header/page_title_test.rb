@@ -28,11 +28,11 @@ module Views::Layouts
       html = render_page_title("show")
 
       # Mobile top row: one visibility-gated copy of each piece.
-      assert_html(html, ".col-12.d-md-none .badge-id")
-      assert_html(html, ".col-12.d-md-none .cta-marker")
-      assert_html(html, ".col-12.d-md-none .edit-icons-marker")
-      assert_html(html, ".col-12.d-md-none .interest-icons-marker")
-      assert_html(html, ".col-12.d-md-none .pager-marker")
+      assert_html(html, ".col-xs-12.d-md-none .badge-id")
+      assert_html(html, ".col-xs-12.d-md-none .cta-marker")
+      assert_html(html, ".col-xs-12.d-md-none .edit-icons-marker")
+      assert_html(html, ".col-xs-12.d-md-none .interest-icons-marker")
+      assert_html(html, ".col-xs-12.d-md-none .pager-marker")
 
       # Desktop positions: same pieces, gated the other way.
       assert_html(html, ".d-none.d-md-block .badge-id")
@@ -75,10 +75,10 @@ module Views::Layouts
       assert_no_html(html, ".interest-icons-marker")
       assert_no_html(html, ".pager-marker")
       # Badge, CTA, and edit icons still appear at both positions.
-      assert_html(html, ".col-12.d-md-none .badge-id")
+      assert_html(html, ".col-xs-12.d-md-none .badge-id")
       assert_html(html, ".d-none.d-md-block .badge-id")
-      assert_html(html, ".col-12.d-md-none .cta-marker")
-      assert_html(html, ".col-12.d-md-none .edit-icons-marker")
+      assert_html(html, ".col-xs-12.d-md-none .cta-marker")
+      assert_html(html, ".col-xs-12.d-md-none .edit-icons-marker")
     end
 
     # `new`/`create` pages have no object yet, so `add_id_badge`/

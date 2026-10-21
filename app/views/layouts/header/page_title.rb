@@ -42,18 +42,16 @@ module Views::Layouts
 
     # Only visible below `md` -- the `md`+ layout keeps these pieces
     # in their desktop positions (`render_left_column`/
-    # `render_right_column`). `.col-12` keeps Bootstrap's default
+    # `render_right_column`). `xs: 12` keeps Bootstrap's default
     # padding so `.row`'s negative margin cancels it; `px-3` goes
     # on the nested div instead.
     def render_mobile_top_row
-      div(class: "col-12 d-md-none") do
+      Column(xs: 12, hide_at: :md) do
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-3 mb-2") do
-          div(class: "d-md-none") { trusted_html(content_for(:id_badge)) }
+          trusted_html(content_for(:id_badge))
           trusted_html(content_for(:title_bar_cta))
-          div(class: "d-md-none") do
-            trusted_html(content_for(:title_bar_actions))
-          end
+          trusted_html(content_for(:title_bar_actions))
           render_mobile_object_nav if show_right_column?
         end
       end
