@@ -82,7 +82,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "d-none d-md-block mr-3 mt-sm-1") do
+      div(class: "d-none d-md-block mr-4 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end

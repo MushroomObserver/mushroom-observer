@@ -88,7 +88,7 @@ module Views::Layouts
     def test_id_badge_and_edit_icons_wrappers_absent_when_unset
       html = render_page_title_title_only("new")
 
-      assert_no_html(html, ".show_title_nav .mr-3")
+      assert_no_html(html, ".show_title_nav .mr-4")
       assert_no_html(html, ".show_title_nav .ml-3")
       assert_no_html(html, ".show_title_nav .ml-auto")
       assert_html(html, "#title .title-marker")
