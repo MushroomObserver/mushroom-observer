@@ -124,8 +124,10 @@ ul.tight-list {
   }
 }
 
-.object_edit {
-  .inline-link-block {
-    margin-top: 0.75rem;
+@media screen and (min-width: $screen-md-min) {
+  .object_edit {
+    .inline-link-block {
+      margin-top: 0.75rem;
+    }
   }
 }
