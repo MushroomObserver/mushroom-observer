@@ -97,7 +97,7 @@ remote> vi /var/web/mo/config/database.yml
       encoding: utf8mb4
       collation: utf8mb4_general_ci
       pool:     10
-    cache: &cache_production
+    cache:
       adapter:  trilogy
       database: cache_production
       host:     $DB_HOST
