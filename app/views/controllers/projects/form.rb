@@ -107,7 +107,8 @@ module Views::Controllers::Projects
       textarea_field(:summary, rows: 5,
                                label: :summary.ti,
                                help: :shared_textile_help.l,
-                               help_collapse: true)
+                               help_collapse: true,
+                               help_well: false)
     end
 
     def render_field_slip_prefix
@@ -129,48 +130,50 @@ module Views::Controllers::Projects
     end
 
     def render_dates_section
-      div do
-        p do
-          trusted_html("*#{:form_projects_date_range.t}*".t)
-          whitespace
-          render_dates_help_trigger
-        end
-      end
-      Collapsible(id: "project_dates_help") do
-        Help(well: true) { :form_projects_dates_explain.t }
-      end
-      Container(width: :text, class: "ml-4") do
-        date_field(:start_date,
-                   label: :form_projects_start_date,
-                   wrap_class: "mb-2")
-        date_field(:end_date,
-                   label: :form_projects_end_date)
-        render_dates_any_radios
-      end
-    end
-
-    # Mirrors FieldWithHelp#render_help_icon's shape -- this section
-    # has no single field to attach help: to, so the trigger is
-    # built by hand instead of going through a field helper.
-    def render_dates_help_trigger
-      span(class: "ml-3") do
-        Link(type: :collapse_toggle,
-             target_id: "project_dates_help",
-             class: "info-collapse-trigger") do
-          Icon(type: :question, title: :help.ti)
+      div(class: "form-group") do
+        p { "*#{:form_projects_date_range.t}*".t }
+        p { :form_projects_dates_explain.t }
+        div(data: { controller: "collapse-switch" }) do
+          render_dates_any_radios
+          render_dates_fields
         end
       end
     end
 
     # `dates_any` is UI state passed in from the controller, not a Project
-    # attribute, so we use the String form of `radio_field` to emit
-    # `name="project[dates_any]"` without trying to bind through
-    # Superform's `field(...)`.
+    # attribute, so we use the String form of `radio_field` (via
+    # RadioCollapse) to emit `name="project[dates_any]"` without
+    # trying to bind through Superform's `field(...)`. "Accept any
+    # dates" is the default, so it's listed first.
     def render_dates_any_radios
-      radio_field("project[dates_any]",
-                  ["false", :form_projects_enforce_date_range.t],
-                  ["true", :form_projects_accept_any_dates.t],
-                  value: @dates_any)
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: "project[dates_any]", value: "true",
+               label: :form_projects_accept_any_dates.t,
+               attributes: { value: @dates_any }
+             ))
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: "project[dates_any]", value: "false",
+               label: :form_projects_enforce_date_range.t,
+               attributes: { value: @dates_any }
+             ))
+    end
+
+    # Collapsed unless "Enforce date range" (dates_any: false) is
+    # selected -- collapse-switch disables+clears these fields while
+    # hidden so a stale date doesn't submit alongside "Accept any
+    # dates".
+    def render_dates_fields
+      Collapsible(expanded: !@dates_any,
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: "false" }) do
+        div(class: "form-inline ml-4") do
+          date_field(:start_date,
+                     label: :form_projects_start_date,
+                     wrap_class: "mr-4")
+          date_field(:end_date,
+                     label: :form_projects_end_date)
+        end
+      end
     end
 
     def render_upload_fields
