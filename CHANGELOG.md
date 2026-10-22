@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-22 (deploy-2026-10-22-07-06)
+
+- Rename `type-switch` controller to `collapse-switch`; add `RadioCollapse`; fix Support form ([PR5514](https://github.com/MushroomObserver/mushroom-observer/pull/5514), @nimmolo)
+- Skip empty synonyms block on name show page; broaden `MO/NoCosmeticClassAssertion` ([PR5515](https://github.com/MushroomObserver/mushroom-observer/pull/5515), @nimmolo)
+- Nest field help inside `.form-group` instead of rendering it as a sibling ([PR5516](https://github.com/MushroomObserver/mushroom-observer/pull/5516), @nimmolo)
+- Bump rubocop-rails from 2.37.0 to 2.38.0 ([PR5445](https://github.com/MushroomObserver/mushroom-observer/pull/5445), @app/dependabot)
+- Bump rubocop-minitest from 0.40.0 to 0.41.0 ([PR5502](https://github.com/MushroomObserver/mushroom-observer/pull/5502), @app/dependabot)
+- Bump rubocop from 1.90.0 to 1.92.0 ([PR5503](https://github.com/MushroomObserver/mushroom-observer/pull/5503), @app/dependabot)
+- Bump trilogy from 2.13.0 to 2.13.1 ([PR5504](https://github.com/MushroomObserver/mushroom-observer/pull/5504), @app/dependabot)
+- Convert the remaining TEXT columns to utf8mb4 ([PR5506](https://github.com/MushroomObserver/mushroom-observer/pull/5506), @mo-nathan)
+- Bump bullet from 8.2.0 to 8.3.0 ([PR5505](https://github.com/MushroomObserver/mushroom-observer/pull/5505), @app/dependabot)
+- Fix autocompleter `.has-id-indicator` showing before a match ([PR5526](https://github.com/MushroomObserver/mushroom-observer/pull/5526), @nimmolo)
+- Collapse some help texts on the Name and Project forms, reorg project date inputs ([PR5518](https://github.com/MushroomObserver/mushroom-observer/pull/5518), @nimmolo)
+
 ## 2026-10-16 (deploy-2026-10-16-01-00)
 
 - Fix location/map zoom/geocode/UI bugs; regularize form-label spacing ([PR5492](https://github.com/MushroomObserver/mushroom-observer/pull/5492), @nimmolo)
