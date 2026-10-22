@@ -48,11 +48,9 @@ module Views::Layouts
       div(class: "col-12 d-md-none") do
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-card mb-2") do
-          div(class: "d-md-none") { trusted_html(content_for(:id_badge)) }
+          trusted_html(content_for(:id_badge))
           trusted_html(content_for(:title_bar_cta))
-          div(class: "d-md-none") do
-            trusted_html(content_for(:title_bar_actions))
-          end
+          trusted_html(content_for(:title_bar_actions))
           render_mobile_object_nav if show_right_column?
         end
       end
@@ -64,7 +62,8 @@ module Views::Layouts
     end
 
     def render_left_column
-      div(class: content_for(:left_columns).to_s) do
+      div(class: class_names(content_for(:left_columns),
+                             "title_bar_left_col")) do
         div(class: SHOW_TITLE_CLASSES) do
           render_id_badge
           h1(class: "h3 page-title mt-1 mb-2", id: "title") do
@@ -109,7 +108,8 @@ module Views::Layouts
 
     def render_right_column
       div(class: class_names(content_for(:right_columns),
-                             "hidden-print text-right d-none d-md-block")) do
+                             "title_bar_right_col hidden-print " \
+                             "text-right d-none d-md-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
                    "align-items-start pr-3") do
           trusted_html(content_for(:interest_icons))
