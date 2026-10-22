@@ -116,30 +116,28 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(html, "input[name='_method'][value='patch']", count: 1)
   end
 
-  # The help-trigger's span always gets a leading ml-2, for the gap
-  # from the label. An inline field's trailing space before its input
-  # lives on the row (label-row-with-appends) instead, so it doesn't
-  # compound with a later append's leading margin.
-  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  # The help trigger always renders, for the gap from the label. An
+  # inline field's trailing space before its input lives on the row
+  # (label-row-with-appends) instead, so it doesn't compound with a
+  # later append's leading margin.
   def test_help_icon_margin_block_field_with_help
     form = render_form do
       text_field(:name, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_html(form, ".ml-2")
-    assert_no_html(form, ".label-row-with-appends.mr-2")
+    assert_html(form, "a.info-collapse-trigger")
+    assert_no_html(form, ".label-row-with-appends.inline-trailing-space")
   end
 
-  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_help_icon_margin_inline_field_with_help
     form = render_form do
       text_field(:name, inline: true, label: "Name:", help: "Help text",
                         help_collapse: true)
     end
 
-    assert_html(form, ".ml-2")
-    assert_html(form, ".label-row-with-appends.mr-2")
+    assert_html(form, "a.info-collapse-trigger")
+    assert_html(form, ".label-row-with-appends.inline-trailing-space")
   end
 
   # Help nests inside .form-group, as part of the same unit, so its

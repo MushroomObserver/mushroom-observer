@@ -140,12 +140,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     # An inline field (e.g. a select beside its label) needs trailing
     # space after the appends row. Applied once, on the outer row, so
     # it doesn't compound with an append's leading margin.
+    # `inline-trailing-space` is a stable hook for tests to key off,
+    # independent of whichever margin utility supplies the space.
     def label_row_trailing_class
       return nil unless wrapper_options[:inline]
       return nil unless respond_to?(:help_slot) && help_slot &&
                         wrapper_options[:help_collapse]
 
-      "mr-3"
+      class_names("mr-3", "inline-trailing-space")
     end
 
     # d-flex align-items-center is needed since the label and appended
