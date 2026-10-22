@@ -6,22 +6,24 @@
 # `MatchingObservationsPanel`, namings partial, comments partial,
 # `Views::Layouts::ObjectFooter`) into a two-column layout.
 #
-# Renders `add_show_title` + owner-naming line + pager / interest /
-# edit icons (logged-in only) into the page chrome, then one `.row`:
-# the wide left column (carousel, namings, comments) and the narrow
-# right column (details + the rest). The two columns keep the same
-# relative order on mobile (Bootstrap stacks the whole left column,
-# then the whole right column), except Details, which belongs right
-# after the carousel on mobile instead of first in the right column —
-# the `obs-show-layout` Stimulus controller (`app/javascript/
-# controllers/obs-show-layout_controller.js`) relocates that one
-# element across the `md` breakpoint; everything else needs no JS.
+# Renders `add_show_title` (with the owner-naming line) + pager /
+# interest / edit icons (logged-in only) into the page chrome, then
+# one `.row`: the wide left column (carousel, namings, comments) and
+# the narrow right column (details + the rest). The two columns keep
+# the same relative order on mobile (Bootstrap stacks the whole left
+# column, then the whole right column), except Details, which
+# belongs right after the carousel on mobile instead of first in the
+# right column — the `obs-show-layout` Stimulus controller
+# (`app/javascript/controllers/obs-show-layout_controller.js`)
+# relocates that one element across the `md` breakpoint; everything
+# else needs no JS.
 #
 # `owner_naming_line` is now `Observations::OwnerNamingLine`;
 # `link_to_display_name_brief_authors` is now
 # `Observations::DisplayNameBriefAuthorsLink`. The PORO callsites
-# are inside `add_owner_naming` (`title_helper.rb`) and the
-# obs-title chain in `observations_helper.rb`.
+# are inside `add_show_title`'s `owner_naming:` handling
+# (`title_helper.rb`) and the obs-title chain in
+# `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::FullPageBase
     prop :observation, ::Observation
@@ -55,8 +57,7 @@ module Views::Controllers::Observations
     private
 
     def add_chrome
-      add_show_title(@observation, user: @user)
-      add_owner_naming(observation: @observation, user: @user)
+      add_show_title(@observation, user: @user, owner_naming: true)
       if @user
         add_pager_for(@observation)
         add_interest_icons(@user, @observation)
