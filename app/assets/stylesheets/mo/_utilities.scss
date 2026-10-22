@@ -388,6 +388,10 @@
   margin-right: 3rem !important;
 }
 
+.mr-auto {
+  margin-right: auto !important;
+}
+
 .ml-0 {
   margin-left: 0 !important;
 }
@@ -410,6 +414,10 @@
 
 .ml-5 {
   margin-left: 3rem !important;
+}
+
+.ml-auto {
+  margin-left: auto !important;
 }
 
 .p-0 {
@@ -873,6 +881,14 @@
 
   .float-sm-none {
     float: none !important;
+  }
+
+  .mt-sm-1 {
+    margin-top: 0.25em !important;
+  }
+
+  .mt-sm-2 {
+    margin-top: 0.5em !important;
   }
 
   .mt-sm-3 {

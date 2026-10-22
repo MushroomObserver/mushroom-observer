@@ -251,6 +251,21 @@ class ApplicationFormTest < ComponentTestCase
                                      "application_form")
   end
 
+  # Renders into the page title bar's CTA slot instead of inline --
+  # Header::PageTitle#render_title_bar_cta reads it back out.
+  def test_title_bar_submit_renders_into_title_bar_cta_slot
+    form = TestFormClass.new(@collection_number, action: "/test_form_path")
+    form.field_block = proc { title_bar_submit("Save Changes") }
+
+    render(form)
+
+    assert(form.content_for?(:title_bar_cta))
+    cta_html = form.content_for(:title_bar_cta)
+    assert_includes(cta_html, "Save Changes")
+    assert_includes(cta_html,
+                    "form=\"#{form.derive_form_id(@collection_number)}\"")
+  end
+
   private
 
   # Allocates a form of `klass` without calling `initialize` (avoids
