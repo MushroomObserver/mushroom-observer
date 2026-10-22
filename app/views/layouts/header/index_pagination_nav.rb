@@ -184,7 +184,7 @@ module Views::Layouts
         Link(
           type: :get, name: :goto.ti, target: href, button: :outline,
           class: "px-2", data: { page_input_target: "goToLink" }
-        ) { Icon(type: :goto, title: tooltip) }
+        ) { Icon(type: :goto, title: tooltip, center_tooltip: true) }
       end
     end
 

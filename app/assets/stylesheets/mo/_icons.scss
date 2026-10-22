@@ -253,13 +253,7 @@ a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
   align-items: center;
 }
 
-// Icon wraps its svg in a bare <span> whenever `title:` or
-// `wrap_class:` is given (see app/components/icon.rb) -- that span's
-// line-box is taller than the svg inside it, inflating any .btn
-// sized to its content (e.g. #top_nav's search toggle vs. the
-// QR-scan button, which has no title: and so no wrapping span).
-// Same flex-collapse fix as .btn:has(.mo-icon) above.
-span:has(> .mo-icon) {
+.inline-flex-center {
   display: inline-flex;
   align-items: center;
 }

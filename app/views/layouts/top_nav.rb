@@ -133,7 +133,10 @@ class Views::Layouts::TopNav < Views::Base
         variant: :outline, size: :sm,
         class: "top_nav_button top_nav_icon_button",
         aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :search.ti, data: { placement: :bottom }) }
+      ) do
+        Icon(type: :search, title: :search.ti, center_tooltip: true,
+             data: { placement: :bottom })
+      end
     end
   end
 
@@ -260,7 +263,7 @@ class Views::Layouts::TopNav < Views::Base
       data: { banner_target: "showButton" }
     ) do
       Icon(type: :interests, title: :banner_show_tooltip.t,
-           data: { placement: :bottom })
+           center_tooltip: true, data: { placement: :bottom })
     end
   end
 end
