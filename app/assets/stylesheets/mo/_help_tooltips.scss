@@ -40,31 +40,31 @@
 .arrow-up {
   width: 0;
   height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-bottom: 12px solid rgba(203, 203, 203, 0.9);
+  border-left: 0.75rem solid transparent;
+  border-right: 0.75rem solid transparent;
+  border-bottom: 0.75rem solid rgba(203, 203, 203, 0.9);
   position: absolute;
-  left: 16px;
-  top: -15px;
-  margin-top: 3px;
-  margin-left: 1px;
+  left: 1rem;
+  top: -0.9375rem;
+  margin-top: 0.1875rem;
+  margin-left: 0.0625rem;
 }
 
 .arrow-left {
   width: 0;
   height: 0;
-  border-top: 15px solid transparent;
-  border-bottom: 15px solid transparent;
-  border-right: 15px solid rgba(203, 203, 203, 0.9);
+  border-top: 0.9375rem solid transparent;
+  border-bottom: 0.9375rem solid transparent;
+  border-right: 0.9375rem solid rgba(203, 203, 203, 0.9);
   position: absolute;
-  left: -16px;
-  top: 15px;
-  margin-left: 1px;
+  left: -1rem;
+  top: 0.9375rem;
+  margin-left: 0.0625rem;
 }
 
 .spacer {
-  height: 30px;
-  width: 1px;
+  height: 1.875rem;
+  width: 0.0625rem;
 }
 
 // don't bold the labels on image date and geotag helper boxes
