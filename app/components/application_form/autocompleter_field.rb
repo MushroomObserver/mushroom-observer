@@ -216,7 +216,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     # work on a bare svg.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
-      span(class: "ml-2 has-id-indicator", title: title,
+      span(class: "ml-2 has-id-indicator d-none inline-flex-center",
+           title: title,
            data: { target_attr_key => "hasIdIndicator",
                    tooltip_target: "tip", placement: "top" }) do
         Icon(type: :check, class: "text-success")
