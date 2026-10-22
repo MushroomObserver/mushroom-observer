@@ -42,7 +42,8 @@ module Views::Layouts
       ::Components::Icon.new(
         type: :read_only,
         title: :show_observation_reflection_read_only.l,
-        wrap_class: ::Components::InlineLinkBlock.item_class
+        wrap_class: ::Components::InlineLinkBlock.item_class,
+        center_tooltip: true
       )
     end
 

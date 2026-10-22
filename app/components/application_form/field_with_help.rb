@@ -70,7 +70,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         Link(type: :collapse_toggle,
              target_id: help_id,
              class: "info-collapse-trigger") do
-          Icon(type: :question, title: :help.ti)
+          Icon(type: :question, title: :help.ti, center_tooltip: true)
         end
       end
     end
