@@ -9,16 +9,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   # when the field already sits inside a panel) while keeping the
   # collapsible behavior.
   module FieldWithHelp
-    # Field classes (`DateField`, `TextField`, etc.) extend `Phlex::HTML`
-    # directly rather than living as a direct `Components::*` constant,
-    # so Phlex::Kit's `const_added` hook never fires for them and they
-    # get no Kit-sugar bare methods (`Help(...)`, `Icon(...)`, etc.) on
-    # their own. `include Components` here restores it transitively —
-    # Ruby's module inclusion carries `Components`'s accumulated Kit
-    # instance methods (and its `Phlex::Kit::LazyLoader` fallback) into
-    # every class that includes this module. See
-    # `.claude/rules/phlex_reference.md`'s Kit-syntax section for the
-    # full mechanism.
+    # Field classes extend `Phlex::HTML` directly, so Kit sugar
+    # doesn't fire for them -- this restores it transitively. See
+    # `.claude/rules/phlex_reference.md`'s Kit-syntax section.
     include ::Components
     # `::Components` above only carries Kit-sugar bare methods, not
     # Components::Base's other instance methods -- `append_colon`
@@ -52,7 +45,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # block-level spacer that doesn't apply); a block-level field uses
     # `form-between`, which already supplies that spacing.
     def between_class
-      wrapper_options[:inline] ? "mr-3" : "form-between"
+      wrapper_options[:inline] ? "mr-3" : "form-between inline-flex-center"
     end
 
     private
@@ -63,15 +56,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Trailing space before the row's next sibling (an inline field's
     # input) lives on the row itself (FieldLabelRow#render_label_with_
-    # appends/#render_label_flex_row), not on this span -- putting it
-    # here would double up with a later append's leading margin.
+    # appends/#render_label_flex_row), not here -- putting it here
+    # would double up with a later append's leading margin.
     def render_help_icon
-      span(class: "ml-3") do
-        Link(type: :collapse_toggle,
-             target_id: help_id,
-             class: "info-collapse-trigger") do
-          Icon(type: :question, title: :help.ti, center_tooltip: true)
-        end
+      Link(type: :collapse_toggle,
+           target_id: help_id,
+           class: "info-collapse-trigger ml-2 inline-flex-center") do
+        Icon(type: :question, title: :help.ti, center_tooltip: true)
       end
     end
 

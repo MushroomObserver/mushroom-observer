@@ -209,15 +209,14 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
-    # A bare <svg> can't take padding -- it eats into the rendered
-    # content area instead of adding space around it, shrinking the
-    # checkmark. Spacing and the show/hide toggle (see
-    # _autocomplete.scss) go on this wrapping span instead. The
-    # tooltip lives here too -- `title:` on Icon alone doesn't give a
-    # bare svg a working tooltip.
+    # A bare <svg> can't take padding -- shrinks the checkmark instead
+    # of adding space. Spacing and the show/hide toggle
+    # (_autocomplete.scss) live on this wrapping span instead; the
+    # tooltip lives here too since `title:` on Icon alone doesn't
+    # work on a bare svg.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
-      span(class: "ml-3 has-id-indicator d-none inline-flex-center",
+      span(class: "ml-2 has-id-indicator d-none inline-flex-center",
            title: title,
            data: { target_attr_key => "hasIdIndicator",
                    tooltip_target: "tip", placement: "top" }) do
@@ -225,16 +224,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # These four are plain `Button`s, not `Link`s -- none has a
-    # destination; they're client-side toggles (show/hide a map box,
-    # swap in create fields). `variant: :link, class: "... p-0"`
-    # gives Bootstrap's `.btn-link` reset with zero padding, without
-    # baking that padding in as a site-wide default (see
-    # `Components::Button::Styling`).
-    #
-    # `Link::Get` auto-wires a tooltip when `icon:` is present; plain
-    # `Button` doesn't, so each one builds the same tooltip_data shape
-    # by hand.
+    # Plain `Button`s, not `Link`s -- client-side toggles with no
+    # destination. `variant: :link, class: "... p-0"` gives Bootstrap's
+    # `.btn-link` reset with zero padding. `Link::Get` auto-wires a
+    # tooltip from `icon:`; plain `Button` doesn't, so each one below
+    # builds the same tooltip_data by hand.
     def render_find_button
       return unless find_text
 
@@ -242,7 +236,7 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon: :find_on_map, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 find-btn d-none p-0",
+             class: "ml-2 find-btn d-none p-0",
              title: find_text,
              data: { map_target: "showBoxBtn",
                      action: "map#showBox",
@@ -268,7 +262,7 @@ class Components::ApplicationForm < Superform::Rails::Form
              show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 keep-edit-toggle d-none p-0",
+             class: "ml-2 keep-edit-toggle d-none p-0",
              title: keep_text,
              data: { target_attr_key => "keepOrEditBtn",
                      map_target: "boxLockToggle",
@@ -284,7 +278,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
-             class: "ml-3 create-button d-none p-0",
+             class: "ml-2 create-button d-none p-0",
              icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
@@ -309,7 +303,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            target: create_path,
            icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
-           class: "ml-3 create-link",
+           class: "ml-2 create-link",
            data: { target_attr_key => "createLink" })
     end
 

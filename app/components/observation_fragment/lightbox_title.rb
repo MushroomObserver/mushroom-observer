@@ -35,7 +35,7 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
   def title_attributes
     {
       id: "observation_what_#{@obs.id}",
-      class: "obs-what",
+      class: "obs-what mb-2",
       data: {
         controller: "section-update",
         section_update_user_value: @user&.id
