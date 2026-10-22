@@ -93,7 +93,7 @@ svg.placeholder {
 // `.btn-group-xs > .btn` sizing never applies -- padding/font-size
 // are custom instead.
 .vote-btn-group {
-  font-size: 1.1rem;
+  font-size: 0.75rem; // 12px at the 16px root -- see issue #5527
 
   > form.button_to,
   > .image-vote {
