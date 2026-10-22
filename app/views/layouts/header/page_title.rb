@@ -82,7 +82,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "d-none d-sm-block mr-4 mt-sm-1") do
+      div(class: "id_badge_wrap d-none d-sm-block mr-4 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end
@@ -94,7 +94,7 @@ module Views::Layouts
     def render_title_bar_cta
       return unless content_for?(:title_bar_cta)
 
-      div(class: "d-none d-sm-block ml-3") do
+      div(class: "title_bar_cta_wrap d-none d-sm-block ml-3") do
         trusted_html(content_for(:title_bar_cta))
       end
     end
@@ -102,7 +102,7 @@ module Views::Layouts
     def render_title_bar_actions
       return unless content_for?(:title_bar_actions)
 
-      div(class: "d-none d-sm-block ml-auto") do
+      div(class: "title_bar_actions_wrap d-none d-sm-block ml-auto") do
         trusted_html(content_for(:title_bar_actions))
       end
     end
