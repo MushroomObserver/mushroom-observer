@@ -110,7 +110,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       base = if wrapper_options[:label_sr_only]
                "sr-only"
              else
-               trailing_margin ? "mr-2" : nil
+               trailing_margin ? "mr-3" : nil
              end
       help_placement_above? ? class_names(base, "mb-0") : base
     end
@@ -145,7 +145,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return nil unless respond_to?(:help_slot) && help_slot &&
                         wrapper_options[:help_collapse]
 
-      "mr-2"
+      "mr-3"
     end
 
     # d-flex align-items-center is needed since the label and appended
@@ -177,7 +177,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span, class: "ml-2") do
+      Help(element: :span, class: "ml-3") do
         plain(label_appends_text(appends))
       end
     end

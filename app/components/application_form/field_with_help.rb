@@ -59,7 +59,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_help_icon
       Link(type: :collapse_toggle,
            target_id: help_id,
-           class: "info-collapse-trigger ml-2 inline-flex-center") do
+           class: "info-collapse-trigger ml-3 inline-flex-center") do
         Icon(type: :question, title: :help.ti, center_tooltip: true)
       end
     end
