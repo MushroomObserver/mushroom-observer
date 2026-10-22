@@ -106,9 +106,10 @@ module Views::Controllers::Projects
 
     def render_summary
       textarea_field(:summary, rows: 5,
-                               label: :summary.ti) do |f|
-        f.with_help { :shared_textile_help.l }
-      end
+                               label: :summary.ti,
+                               help: :shared_textile_help.l,
+                               help_collapse: true,
+                               help_well: false)
     end
 
     def render_field_slip_prefix
@@ -130,41 +131,50 @@ module Views::Controllers::Projects
     end
 
     def render_dates_section
-      div do
+      div(class: "form-group") do
         p { "*#{:form_projects_date_range.t}*".t }
         p { :form_projects_dates_explain.t }
-      end
-      Container(width: :text, class: "ml-4") do
-        date_field(:start_date,
-                   label: :form_projects_start_date,
-                   wrap_class: "mb-2")
-        date_field(:end_date,
-                   label: :form_projects_end_date)
-        render_dates_any_radios
+        div(data: { controller: "collapse-switch" }) do
+          render_dates_any_radios
+          render_dates_fields
+        end
       end
     end
 
     # `dates_any` is UI state passed in from the controller, not a Project
-    # attribute, so we use the String form of `radio_field` to emit
-    # `name="project[dates_any]"` without trying to bind through
-    # Superform's `field(...)`.
+    # attribute, so we use the String form of `radio_field` (via
+    # RadioCollapse) to emit `name="project[dates_any]"` without
+    # trying to bind through Superform's `field(...)`. "Accept any
+    # dates" is the default, so it's listed first.
     def render_dates_any_radios
-      div(class: "mb-3") do
-        radio_field("project[dates_any]",
-                    ["false", range_label],
-                    ["true", any_label],
-                    value: @dates_any)
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: "project[dates_any]", value: "true",
+               label: :form_projects_accept_any_dates.t,
+               attributes: { value: @dates_any }
+             ))
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: "project[dates_any]", value: "false",
+               label: :form_projects_enforce_date_range.t,
+               attributes: { value: @dates_any }
+             ))
+    end
+
+    # Collapsed unless "Enforce date range" (dates_any: false) is
+    # selected -- collapse-switch disables+clears these fields while
+    # hidden so a stale date doesn't submit alongside "Accept any
+    # dates".
+    def render_dates_fields
+      Collapsible(expanded: !@dates_any,
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: "false" }) do
+        div(class: "form-inline ml-4") do
+          date_field(:start_date,
+                     label: :form_projects_start_date,
+                     wrap_class: "mr-4")
+          date_field(:end_date,
+                     label: :form_projects_end_date)
+        end
       end
-    end
-
-    def range_label
-      "#{:form_projects_range.t} " \
-        "(#{:form_projects_use_date_range.t})"
-    end
-
-    def any_label
-      "#{:form_projects_any.t} " \
-        "(#{:form_projects_ignore_date_range.t})"
     end
 
     def render_upload_fields
