@@ -116,8 +116,8 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(html, "input[name='_method'][value='patch']", count: 1)
   end
 
-  # The help-trigger's span always gets a leading left margin, for the
-  # gap from the label. An inline field's trailing space before its
+  # The help trigger always gets a leading left margin, for the gap
+  # from the label. An inline field's trailing space before its
   # input lives on the row (label-row-with-appends) instead, so it
   # doesn't compound with a later append's leading margin.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -127,8 +127,8 @@ class ApplicationFormTest < ComponentTestCase
                         help_collapse: true)
     end
 
-    assert_html(form, ".ml-3")
-    assert_no_html(form, ".label-row-with-appends.mr-3")
+    assert_html(form, ".ml-2")
+    assert_no_html(form, ".label-row-with-appends.mr-2")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -138,8 +138,8 @@ class ApplicationFormTest < ComponentTestCase
                         help_collapse: true)
     end
 
-    assert_html(form, ".ml-3")
-    assert_html(form, ".label-row-with-appends.mr-3")
+    assert_html(form, ".ml-2")
+    assert_html(form, ".label-row-with-appends.mr-2")
   end
 
   # Help nests inside .form-group, as part of the same unit, so its

@@ -428,6 +428,12 @@
   padding: 1rem !important;
 }
 
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- see .px-card below for the full explanation.
+.p-card {
+  padding: 0.75rem !important;
+}
+
 .p-4 {
   padding: 1.5rem !important;
 }
