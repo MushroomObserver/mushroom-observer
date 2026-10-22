@@ -37,7 +37,7 @@ module Admin
       make_admin
       get(:edit)
       assert_response(:success)
-      assert_select("#ip_summary", text: /#{Regexp.escape(api_key.key)}/)
+      assert_select_text_includes("#ip_summary", api_key.key)
 
       patch(:update, params: { add_bad: "garbage" })
       assert_flash_error
@@ -94,10 +94,10 @@ module Admin
           # Test unfiltered
           get(:edit)
           assert_response(:success)
-          assert_select("turbo-frame##{config[:frame]}",
-                        text: /#{Regexp.escape(config[:prefix1])}/)
-          assert_select("turbo-frame##{config[:frame]}",
-                        text: /#{Regexp.escape(config[:prefix2])}/)
+          assert_select_text_includes("turbo-frame##{config[:frame]}",
+                                      config[:prefix1])
+          assert_select_text_includes("turbo-frame##{config[:frame]}",
+                                      config[:prefix2])
 
           # Test filter by prefix (simulating Turbo frame request)
           prefix = config[:prefix1]
@@ -105,13 +105,15 @@ module Admin
           @request.headers["Turbo-Frame"] = config[:frame]
           get(:edit, params: filter)
           assert_response(:success)
-          assert_select("turbo-frame##{config[:frame]}",
-                        { text: /#{Regexp.escape(config[:prefix1])}/ },
-                        "#{config[:type]}: should show filtered IPs")
-          assert_select("turbo-frame##{config[:frame]}",
-                        { text: /#{Regexp.escape(config[:prefix2])}/,
-                          count: 0 },
-                        "#{config[:type]}: should hide non-matching IPs")
+          assert_select_text_includes(
+            "turbo-frame##{config[:frame]}", config[:prefix1],
+            msg: "#{config[:type]}: should show filtered IPs"
+          )
+          hide_msg = "#{config[:type]}: should hide non-matching IPs"
+          assert_select_text_includes(
+            "turbo-frame##{config[:frame]}", config[:prefix2],
+            count: 0, msg: hide_msg
+          )
           # Filter value should be preserved in the input field within the
           # turbo_frame response. Input ID matches filter_param.
           input_id = "#{config[:filter_param]}_starts_with"
@@ -160,9 +162,10 @@ module Admin
                   config[:form_key] => { config[:add_param] => new_ip }
                 })
           assert_response(:success)
-          assert_select("turbo-frame##{config[:frame]}",
-                        { text: /#{Regexp.escape(new_ip)}/ },
-                        "#{config[:type]}: should show added IP")
+          assert_select_text_includes(
+            "turbo-frame##{config[:frame]}", new_ip,
+            msg: "#{config[:type]}: should show added IP"
+          )
 
           # Test remove returns turbo_frame
           patch(:update, params: { config[:remove_param] => new_ip })

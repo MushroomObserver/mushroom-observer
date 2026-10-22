@@ -107,11 +107,9 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_response(:success)
-    assert_select(
-      "form button", { text: /#{Regexp.escape(:show_project_join.l)}/,
-                       count: 1 },
-      "Join button should be present for non-member on open project"
-    )
+    msg = "Join button should be present for non-member on open project"
+    assert_select_text_includes("form button", :show_project_join.l,
+                                count: 1, msg: msg)
   end
 
   def test_show_project_without_banner
