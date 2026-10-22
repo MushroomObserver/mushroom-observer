@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Page-title strip below the top nav, rendered on non-index actions.
-# Two columns on `md`+:
+# Two columns on `sm`+:
 #
 #   - left: the id badge, `<h1 id="title">` (consensus title from
 #     content_for(:title), including, on obs show, the owner-naming
@@ -11,7 +11,7 @@
 #   - right (show-only, non-project): interest-icons strip and the
 #     prev/index/next pager.
 #
-# Below `md`, those two columns collapse to `d-none` and a third
+# Below `sm`, those two columns collapse to `d-none` and a third
 # piece, `render_mobile_top_row`, takes over: the id badge, CTA,
 # actions, and interest-icons/pager all on one line, with the object
 # name/owner-naming (the unchanged left-column `<h1>`) on a separate
@@ -39,13 +39,13 @@ module Views::Layouts
 
     private
 
-    # Only visible below `md` -- the `md`+ layout keeps these pieces
+    # Only visible below `sm` -- the `sm`+ layout keeps these pieces
     # in their desktop positions (`render_left_column`/
     # `render_right_column`). `.col-12` keeps Bootstrap's default
     # padding so `.row`'s negative margin cancels it; `px-card` goes
     # on the nested div instead.
     def render_mobile_top_row
-      div(class: "col-12 d-md-none") do
+      div(class: "col-12 d-sm-none") do
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-card mb-2") do
           trusted_html(content_for(:id_badge))
@@ -81,7 +81,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "d-none d-md-block mr-3 mt-sm-1") do
+      div(class: "id_badge_wrap d-none d-sm-block mr-4 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end
@@ -93,7 +93,7 @@ module Views::Layouts
     def render_title_bar_cta
       return unless content_for?(:title_bar_cta)
 
-      div(class: "d-none d-md-block ml-3") do
+      div(class: "title_bar_cta_wrap d-none d-sm-block ml-3") do
         trusted_html(content_for(:title_bar_cta))
       end
     end
@@ -101,7 +101,7 @@ module Views::Layouts
     def render_title_bar_actions
       return unless content_for?(:title_bar_actions)
 
-      div(class: "d-none d-md-block ml-auto") do
+      div(class: "title_bar_actions_wrap d-none d-sm-block ml-auto") do
         trusted_html(content_for(:title_bar_actions))
       end
     end
@@ -109,7 +109,7 @@ module Views::Layouts
     def render_right_column
       div(class: class_names(content_for(:right_columns),
                              "title_bar_right_col hidden-print " \
-                             "text-right d-none d-md-block")) do
+                             "text-right d-none d-sm-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
                    "align-items-start pr-3") do
           trusted_html(content_for(:interest_icons))
