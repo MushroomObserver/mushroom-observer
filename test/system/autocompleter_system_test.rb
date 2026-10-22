@@ -317,6 +317,23 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #  Test that the green checkmark appears when values are selected
   # ---------------------------------------------------------------
 
+  # Regression: the checkmark must stay hidden on a freshly loaded,
+  # blank field -- it should only appear once the field has a
+  # matched id, not by default.
+  def test_blank_autocompleter_hides_checkmark
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_by_users")
+    autocompleter = field.ancestor(".autocompleter")
+
+    within(autocompleter) do
+      assert_no_selector(".has-id-indicator", visible: :visible)
+    end
+  end
+
   def test_multi_value_autocompleter_shows_checkmark_after_selections
     login!(@roy)
 
