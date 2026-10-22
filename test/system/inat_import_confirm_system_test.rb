@@ -13,6 +13,10 @@ class InatImportConfirmSystemTest < ApplicationSystemTestCase
 
   def test_new_form_submission_reaches_confirm_page
     user = users(:rolf)
+    # rubocop:disable-next MO/NoRegexpEscape -- URL-matcher pattern;
+    # escaping keeps API_BASE's dots from matching any character
+    # (a URI Template can't match iNat's unencoded query values --
+    # see inat_stub_helpers.rb#inat_api_matcher).
     stub_request(:get, %r{#{Regexp.escape(API_BASE)}/observations}o).
       to_return(status: 200, body: { total_results: 3 }.to_json)
 

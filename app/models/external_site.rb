@@ -161,9 +161,12 @@ class ExternalSite < AbstractModel
     # -1 limit: {id} is usually the last token, and split drops trailing
     # empty strings by default -- losing the empty string after it means
     # losing the capture group meant to go there.
+    # rubocop:disable MO/NoRegexpEscape -- builds an anchored capture
+    # pattern from the escaped template pieces, not a substring check.
     pattern = template.split("{id}", -1).
               map { |part| Regexp.escape(part) }.join("(.+)")
     /\A#{pattern}\z/.match(url)&.captures&.first
+    # rubocop:enable MO/NoRegexpEscape
   end
   private :id_from_url_unchecked
 
