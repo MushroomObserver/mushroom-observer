@@ -125,14 +125,7 @@ ul.tight-list {
 }
 
 #owner_naming.h5 {
-  font-size: 16px; // matches cutover's flat size below its lg breakpoint
-
-  // 992px -- cutover's BS4 "lg" breakpoint; main's $screen-lg
-  // (1200px) is a different value, so this is hardcoded rather than
-  // reusing that variable.
-  @media screen and (min-width: 992px) {
-    font-size: 17.5px; // matches cutover's $h5-font-size (1.25 * base)
-  }
+  font-size: $font-size-base;
 }
 
 @media screen and (min-width: $screen-sm-min) {
