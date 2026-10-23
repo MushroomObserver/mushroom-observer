@@ -28,6 +28,13 @@
   @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
+// Space between the interest-icon buttons -- em, not rem, so it
+// scales with the surrounding context's font-size (same reasoning
+// as .inline-link-block in _links_buttons_alerts.scss).
+.interest-eyes {
+  gap: 0.5em;
+}
+
 .navbar-light, #top_nav {
   border-width: 1px;
   border-style: solid;

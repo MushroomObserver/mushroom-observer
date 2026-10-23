@@ -250,7 +250,10 @@ button.badge-id:hover {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  gap: map-get($spacers, 3);
+  // em, not rem -- scales with the surrounding context's font-size
+  // (a title-bar heading vs. small body text), same reasoning as
+  // .icon-text-gap in _icons.scss.
+  gap: 0.75em;
 }
 
 // Trailing observation-count column on the locations list-group --
