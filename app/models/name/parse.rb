@@ -318,10 +318,14 @@ module Name::Parse
 
     if result.author.present?
       # Add "clade" or "group" before author
+      # rubocop:disable MO/NoRegexpEscape -- captures the escaped
+      # author at the end of the string to re-insert it after the
+      # group-type prefix, not a substring check.
       author = Regexp.escape(result.author)
       result.search_name.sub!(/(#{author})$/, "#{group_type} \\1")
       result.sort_name.sub!(/(#{author})$/, " #{group_type}  \\1")
       result.display_name.sub!(/(#{author})$/, "#{group_type} \\1")
+      # rubocop:enable MO/NoRegexpEscape
     else
       # Append "group" at end
       result.search_name +=  " #{group_type}"

@@ -222,9 +222,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # there's no banner for this project
     assert_page_title(:species_lists.ti)
     spl = project.species_lists.first
-    assert_select(
-      "a[href*='species_lists/#{spl.id}?project=#{project.id}']",
-      text: /#{Regexp.escape(spl.title)}/
+    assert_select_text_includes(
+      "a[href*='species_lists/#{spl.id}?project=#{project.id}']", spl.title
     )
   end
 
@@ -295,8 +294,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = spl.projects[0]
 
     get(:show, params: { id: spl.id, project: project.id })
-    assert_select("#project_banner",
-                  text: /#{Regexp.escape(project.title)}/)
+    assert_select_text_includes("#project_banner", project.title)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
     assert_select(
@@ -336,22 +334,19 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_arrays_equal([], spl.projects)
 
-    proj1_re = /#{Regexp.escape(proj1.title)}/
-    proj2_re = /#{Regexp.escape(proj2.title)}/
-
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re, count: 0)
-    assert_select("#list_details", text: proj2_re, count: 0)
+    assert_select_text_includes("#list_details", proj1.title, count: 0)
+    assert_select_text_includes("#list_details", proj2.title, count: 0)
 
     proj1.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re)
-    assert_select("#list_details", text: proj2_re, count: 0)
+    assert_select_text_includes("#list_details", proj1.title)
+    assert_select_text_includes("#list_details", proj2.title, count: 0)
 
     proj2.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re)
-    assert_select("#list_details", text: proj2_re)
+    assert_select_text_includes("#list_details", proj1.title)
+    assert_select_text_includes("#list_details", proj2.title)
   end
 
   def test_show_species_list_edit_links

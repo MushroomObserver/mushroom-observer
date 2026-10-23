@@ -198,7 +198,10 @@ class MapTest < ComponentTestCase
     caption, = parse_first_set(render_map_json(obs))
 
     assert_includes(caption, "map-popup-header")
-    # "2 Observations" — count first, label after.
+    # "2 Observations" — count first, label after, with whatever
+    # whitespace the template renders between them.
+    # rubocop:disable-next MO/NoRegexpEscape -- variable-whitespace
+    # pattern around the escaped label, not a plain substring check.
     assert_match(/2\s+#{Regexp.escape(:observations.ti.to_s)}/, caption)
     assert_includes(caption, "map-popup-btn")
     assert_includes(caption, :show_all.t)

@@ -185,8 +185,12 @@ class Inat
     def notes_slip_code(observation)
       return nil if @prefix.blank?
 
+      # rubocop:disable MO/NoRegexpEscape -- word-boundary pattern with
+      # a numeric suffix around the escaped prefix, not a substring
+      # check.
       observation.notes.to_s[/\b#{Regexp.escape(@prefix)}-\d{1,6}\b/i]&.
         upcase
+      # rubocop:enable MO/NoRegexpEscape
     end
 
     def ensure_member(observation)

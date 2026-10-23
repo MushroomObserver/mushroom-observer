@@ -264,9 +264,8 @@ class CommentsControllerTest < FunctionalTestCase
     get(:new, params: { target: project.id, type: :Project },
               format: :turbo_stream)
 
-    assert_select(
-      "h4.modal-title#modal_comment_header",
-      text: /#{Regexp.escape(project.unique_format_name)}/
+    assert_select_text_includes(
+      "h4.modal-title#modal_comment_header", project.unique_format_name
     )
   end
 
