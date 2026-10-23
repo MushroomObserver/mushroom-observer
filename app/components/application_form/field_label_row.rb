@@ -136,12 +136,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # `help_placement: :above` drops the label's bottom margin, since
     # the help block renders directly below it instead.
     # `trailing_margin: false` (render_label_with_appends) drops the
-    # mr-2 too -- each append supplies a leading ml-2 instead.
+    # mr-3 too -- each append supplies a leading ml-3 instead.
     def label_class(trailing_margin: true)
       base = if wrapper_options[:label_sr_only]
                "sr-only"
              else
-               trailing_margin ? "mr-2" : nil
+               trailing_margin ? "mr-3" : nil
              end
       help_placement_above? ? class_names(base, "mb-0") : base
     end
@@ -182,7 +182,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return nil unless respond_to?(:help_slot) && help_slot &&
                         wrapper_options[:help_collapse]
 
-      class_names("mr-2", "inline-trailing-space")
+      class_names("mr-3", "inline-trailing-space")
     end
 
     # d-flex align-items-center is needed since the label and appended
@@ -215,7 +215,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span, class: "ml-2") do
+      Help(element: :span, class: "ml-3") do
         plain(label_appends_text(appends))
       end
     end
