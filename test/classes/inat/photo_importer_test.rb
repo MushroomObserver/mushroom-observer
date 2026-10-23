@@ -158,7 +158,7 @@ class Inat::PhotoImporterTest < UnitTestCase
     end
 
     assert_match(/Failed to import image 377/, err.message)
-    assert_match(/#{Regexp.escape(error.to_s)}/, err.message)
+    assert_includes(err.message, error.to_s)
     assert_equal(1, calls, "a non-download error is not retried")
   end
 

@@ -29,6 +29,7 @@ require:
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
+  - ./lib/rubocop/cop/mo/no_regexp_escape
   - ./lib/rubocop/cop/mo/no_render_phlex_method_name
   - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
   - ./lib/rubocop/cop/mo/prefer_kit_syntax
@@ -309,6 +310,25 @@ MO/NoRawLinkOrButtonTo:
     # is .btn-family styling/variants, which doesn't fit a badge.
     # Genuinely a different primitive, not a bypass of Button.
     - "app/components/id_badge.rb"
+
+MO/NoRegexpEscape:
+  Description: >-
+    In a test assertion, Regexp.escape is almost always a symptom of
+    building a regex just to express "contains this literal
+    substring" -- use String#include?/== (or assert_includes against
+    pre-extracted, .as_displayed text) instead -- see
+    lib/rubocop/cop/mo/no_regexp_escape.rb. Scoped to test/ --
+    production code building a regex with anchors or capture groups
+    around an escaped piece is the normal, correct use of
+    Regexp.escape/.quote, not the pattern this cop targets. Every
+    legitimate non-literal-pattern test call site is inline-disabled
+    at the call site itself, not file-excluded here -- a file-level
+    Exclude would give the whole file blanket immunity to any FUTURE
+    Regexp.escape call added anywhere else in it, not just the one
+    reviewed site.
+  Enabled: true
+  Include:
+    - "test/**/*.rb"
 
 MO/NoRenderPhlexMethodName:
   Description: >-
