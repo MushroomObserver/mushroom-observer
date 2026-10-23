@@ -72,12 +72,6 @@
       background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
     }
   }
-
-  .navbar_right {
-    >ul.navbar-right>li {
-      @extend .ml-4;
-    }
-  }
 }
 
 // If sorter is on the right:
