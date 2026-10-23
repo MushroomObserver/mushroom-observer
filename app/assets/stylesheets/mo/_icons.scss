@@ -140,9 +140,14 @@ tbody.collapse.in {
 // .btn: plain Link::Get (.inline-icon-link sets top: 0 instead) and
 // the sidebar heading icons. The `> span >` variants cover
 // Components::Icon's title: wrap (moves tooltip attrs off the <svg>
-// onto a wrapping <span>).
-a:not(.btn):not(.inline-icon-link) > .mo-icon,
-a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
+// onto a wrapping <span>). Excludes `.info-collapse-trigger` (and any
+// other `.inline-flex-center` trigger) -- those are icon-only, flex-
+// centered against their row's siblings, not paired with adjacent
+// text, so this baseline nudge only pushes them out of alignment.
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > .mo-icon,
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > span > .mo-icon,
 .list-group-item > .mo-icon,
 .list-group-item > span > .mo-icon {
   top: 2px;
