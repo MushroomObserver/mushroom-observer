@@ -12,9 +12,8 @@
 // `.mb-2`'s margin (Bootstrap spacing utilities are `!important`,
 // hence the `!important` here too) only supplies a gap while
 // `#search_nav` is collapsed and invisible. Open or mid-animation,
-// the two navbars sit flush against each other with no margin
-// between them, matching how the two rows looked before they were
-// split into separate navbars.
+// `#search_nav` carries the same `.mb-2` class, so stacking both
+// would double the space between the two navbars.
 #top_nav:has(+ #search_nav.in),
 #top_nav:has(+ #search_nav.collapsing) {
   margin-bottom: 0 !important;
