@@ -44,6 +44,8 @@ module Name::Format
 
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
+  # rubocop:disable MO/NoRegexpEscape -- anchored/capture-group
+  # patterns around the escaped author, not a substring check.
   def display_name_brief_authors(user = nil)
     if rank == "Group"
       # Xxx yyy group author
@@ -57,10 +59,13 @@ module Name::Format
                              "\\1 #{brief_author}")
     end
   end
+  # rubocop:enable MO/NoRegexpEscape
 
   # display_name less author
   # This depends on display_name having markup around name proper
   # Otherwise, it might delete author if that were part of the name proper
+  # rubocop:disable MO/NoRegexpEscape -- anchored/capture-group
+  # patterns around the escaped author, not a substring check.
   def display_name_without_authors(user = nil)
     if rank == "Group"
       # Remove author and preceding space at end
@@ -71,6 +76,7 @@ module Name::Format
         strip_squeeze
     end
   end
+  # rubocop:enable MO/NoRegexpEscape
 
   # Tack id on to end of +text_name+.
   def unique_text_name(user = nil)
