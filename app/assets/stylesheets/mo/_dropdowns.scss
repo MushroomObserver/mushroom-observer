@@ -97,7 +97,7 @@
 // right padding on the label zone -- the flex row of two zones
 // doesn't inherit `.dropdown-item`'s padding at that edge.
 .type-filter-menu .dropdown-item {
-  padding: 0.5rem;
+  padding: 0.3125rem; // 5px at the 16px root -- see issue #5527
 }
 
 .type-filter-menu .dropdown-item:not(:last-child) {
@@ -105,7 +105,7 @@
 }
 
 .type-filter-menu .label-zone {
-  padding-right: 1rem;
+  padding-right: 0.625rem; // 10px at the 16px root -- see issue #5527
 
   // The link wraps just its text, not the zone's flex-grow width --
   // block fills it, so a click lands on the link, not the zone's

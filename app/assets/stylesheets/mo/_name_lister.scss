@@ -56,7 +56,7 @@ div.scroller {
 }
 
 .checklist .panel-body {
-  columns: 24rem auto;
+  columns: 15rem auto; // 240px at the 16px root -- see issue #5527
 }
 
 .checklist-target-name {
