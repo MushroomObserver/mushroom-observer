@@ -116,12 +116,6 @@
       background-color: $navbar-default-link-hover-bg !important;
     }
   }
-
-  .navbar_right {
-    >ul.navbar-right>li {
-      @extend .ml-4;
-    }
-  }
 }
 
 // If sorter is on the right:
