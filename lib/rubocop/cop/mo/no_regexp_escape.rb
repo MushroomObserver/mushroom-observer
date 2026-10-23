@@ -30,15 +30,18 @@ module RuboCop
       #   assert_includes(css_select(sel).text.as_displayed,
       #                   label.as_displayed)
       class NoRegexpEscape < Base
-        MSG = "Regexp.escape usually means a plain substring/equality " \
-              "check would do -- use String#include?/== (or " \
+        MSG = "Regexp.escape/.quote usually means a plain substring/" \
+              "equality check would do -- use String#include?/== (or " \
               "assert_includes against pre-extracted, .as_displayed " \
               "text) instead of building a regex just to express " \
               "\"contains\". If this site needs a non-literal pattern " \
               "around the escaped piece, silence with an inline " \
               "rubocop:disable/:enable explaining why."
 
-        RESTRICT_ON_SEND = [:escape].freeze
+        # `Regexp.quote` is a documented exact alias of `Regexp.escape`
+        # -- restricting on only one name would let the other sidestep
+        # the cop.
+        RESTRICT_ON_SEND = [:escape, :quote].freeze
 
         def on_send(node)
           receiver = node.receiver
