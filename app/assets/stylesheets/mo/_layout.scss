@@ -7,7 +7,11 @@
 // --------------------------------------------------
 // Fixed width at every breakpoint -- not a Bootstrap grid column
 // (`col-*`/`Components::Column`) sized as a fraction of the row.
-$sidebar-max-width: 9.9rem;
+// Matches main's $sidebar-max-width (app/assets/stylesheets/mo/
+// _layout.scss) so the sidebar occupies the same pixel width on both
+// branches -- both roots are 16px (see _elements.scss on main), so
+// the rem values need to agree numerically too.
+$sidebar-max-width: 18rem;
 
 // Mobile-first: .sidebar-offcanvas starts off-screen, slid in via
 // .row-offcanvas-*.active. The min-width(lg) block below undoes the
