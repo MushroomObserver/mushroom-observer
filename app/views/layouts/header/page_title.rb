@@ -28,7 +28,7 @@ module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
       "show_title_nav d-flex justify-content-start align-items-start " \
-      "px-3 py-2"
+      "px-card py-2"
 
     def view_template
       Row(id: "title_bar", class: "mb-2") do
@@ -43,12 +43,12 @@ module Views::Layouts
     # Only visible below `sm` -- the `sm`+ layout keeps these pieces
     # in their desktop positions (`render_left_column`/
     # `render_right_column`). `xs: 12` keeps Bootstrap's default
-    # padding so `.row`'s negative margin cancels it; `px-3` goes
+    # padding so `.row`'s negative margin cancels it; `px-card` goes
     # on the nested div instead.
     def render_mobile_top_row
       Column(xs: 12, hide_at: :sm) do
         div(class: "d-flex flex-wrap justify-content-between " \
-                   "align-items-center px-3 mb-2") do
+                   "align-items-center px-card mb-2") do
           trusted_html(content_for(:id_badge))
           trusted_html(content_for(:title_bar_cta))
           trusted_html(content_for(:title_bar_actions))
