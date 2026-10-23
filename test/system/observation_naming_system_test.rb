@@ -158,7 +158,10 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       # namings (NAMING_RECOGNIZED_BY_SIGHT default).
       assert_selector("#naming_reasons_4_notes", visible: false)
       find_by_id("naming_reasons_4_check").click
-      assert_selector("#naming_reasons_4_notes.in", wait: 4)
+      assert_selector(
+        "#naming_reasons_4_notes.#{Components::Collapsible::EXPANDED_CLASS}",
+        wait: 4
+      )
     end
     within("#modal_obs_#{obs.id}_naming_#{nam.id}") do
       find(:css, ".close").click

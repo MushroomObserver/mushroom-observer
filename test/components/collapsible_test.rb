@@ -6,11 +6,11 @@ require("test_helper")
 class CollapsibleTest < ComponentTestCase
   def test_collapse_classes_class_method_matches_instance_rendering
     assert_equal("collapse", Components::Collapsible.collapse_classes)
-    assert_equal("collapse in",
+    assert_equal("collapse #{EXPANDED}",
                  Components::Collapsible.collapse_classes(expanded: true))
     assert_equal("collapse panel-collapse",
                  Components::Collapsible.collapse_classes(panel: true))
-    assert_equal("collapse in panel-collapse custom-class",
+    assert_equal("collapse #{EXPANDED} panel-collapse custom-class",
                  Components::Collapsible.collapse_classes(
                    expanded: true, panel: true, html_class: "custom-class"
                  ))
@@ -20,28 +20,29 @@ class CollapsibleTest < ComponentTestCase
     html = render_collapsible(id: "foo")
 
     assert_html(html, ".collapse#foo")
-    assert_no_html(html, ".in")
+    assert_no_html(html, ".#{EXPANDED}")
     assert_no_html(html, ".panel-collapse")
   end
 
-  def test_expanded_adds_in_class
+  def test_expanded_adds_the_expanded_class
     html = render_collapsible(id: "foo", expanded: true)
 
-    assert_html(html, ".collapse.in#foo")
+    assert_html(html, ".collapse.#{EXPANDED}#foo")
   end
 
   def test_panel_adds_panel_collapse_class
     html = render_collapsible(id: "foo", panel: true)
 
     assert_html(html, ".collapse.panel-collapse#foo")
-    assert_no_html(html, ".in")
+    assert_no_html(html, ".#{EXPANDED}")
   end
 
   def test_expanded_panel_with_class
     html = render_collapsible(id: "foo", expanded: true, panel: true,
                               class: "custom-class")
 
-    assert_html(html, ".collapse.in.panel-collapse.custom-class#foo")
+    assert_html(html,
+                ".collapse.#{EXPANDED}.panel-collapse.custom-class#foo")
   end
 
   def test_nil_id_omits_id_attr

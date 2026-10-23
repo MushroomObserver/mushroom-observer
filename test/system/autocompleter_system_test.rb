@@ -137,7 +137,10 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Expand the Location panel to reveal the region field
     find("[aria-controls='observations_location']").click
-    assert_selector("#observations_location.in", wait: 3)
+    assert_selector(
+      "#observations_location.#{Components::Collapsible::EXPANDED_CLASS}",
+      wait: 3
+    )
 
     # Region autocompleter should show matches as user types
     # (no trailing space required - that was a bug we fixed)

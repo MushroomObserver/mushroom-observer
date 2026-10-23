@@ -15,9 +15,9 @@ class AccordionTest < ComponentTestCase
     assert_html(html, ".border-none#notes_42")
     assert_html(html, "#notes_42 .panel.border-none.bg-none")
     # rubocop:enable MO/NoCosmeticClassAssertion
-    assert_html(html, "#view_42.collapse.in", text: "VIEW_CONTENT")
+    assert_html(html, "#view_42.collapse.#{EXPANDED}", text: "VIEW_CONTENT")
     assert_html(html, "#edit_42.collapse", text: "EDIT_CONTENT")
-    assert_no_html(html, "#edit_42.in")
+    assert_no_html(html, "#edit_42.#{EXPANDED}")
   end
 
   def test_renders_pane_with_no_inner_block
@@ -25,7 +25,7 @@ class AccordionTest < ComponentTestCase
       a.with_pane(id: "view_42", expanded: true)
     end
 
-    assert_html(html, "#view_42.collapse.in")
+    assert_html(html, "#view_42.collapse.#{EXPANDED}")
     assert_no_html(html, "#view_42 *")
   end
 
