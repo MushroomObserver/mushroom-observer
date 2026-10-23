@@ -3,16 +3,20 @@
 module RuboCop
   module Cop
     module MO
-      # `Regexp.escape` is almost always a symptom of building a
-      # throwaway regex just to express "this text contains that
-      # literal substring" -- a plain `String#include?`/`==` says the
-      # same thing directly, can't silently under-escape a forgotten
-      # call site, and skips the regex compile entirely. For text
-      # pulled from a Nokogiri selector in a test, extract it first
-      # and compare with `assert_includes(extracted, value.as_displayed)`
-      # instead of interpolating an escaped value into a `text:` regex.
+      # In a test assertion, `Regexp.escape` is almost always a
+      # symptom of building a throwaway regex just to express "this
+      # text contains that literal substring" -- a plain
+      # `String#include?`/`==` says the same thing directly, can't
+      # silently under-escape a forgotten call site, and skips the
+      # regex compile entirely. For text pulled from a Nokogiri
+      # selector, extract it first and compare with
+      # `assert_includes(extracted, value.as_displayed)` instead of
+      # interpolating an escaped value into a `text:` regex. Scoped
+      # to `test/` (see .rubocop.yml) -- production code building a
+      # regex with anchors or capture groups around an escaped piece
+      # is the normal, correct use of `Regexp.escape`/`.quote`.
       #
-      # A handful of sites need a non-literal pattern (anchors,
+      # A handful of test sites need a non-literal pattern (anchors,
       # wildcards, alternation, variable whitespace) around an
       # escaped literal piece -- those are the legitimate exception;
       # silence them with an inline `rubocop:disable`/`:enable` pair

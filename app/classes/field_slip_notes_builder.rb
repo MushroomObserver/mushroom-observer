@@ -19,11 +19,8 @@ class FieldSlipNotesBuilder
   # "did we generate this?", which is exactly what matching our own shape
   # end to end answers. Flagged by CodeQL as
   # rb/incomplete-url-substring-sanitization.
-  # rubocop:disable MO/NoRegexpEscape -- anchored parsing pattern
-  # around the escaped URL constant, not a substring check.
   INAT_LINK_RE =
     /\A"iNat .+":#{Regexp.escape(INAT_OBSERVATION_URL)}(.+)\z/
-  # rubocop:enable MO/NoRegexpEscape
 
   # Whether a value is already in the stored form above. Guards against
   # wrapping a link inside another link when an already-saved observation
