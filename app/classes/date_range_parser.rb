@@ -152,8 +152,11 @@ class DateRangeParser
   end
 
   def parse_date_word!(val, english, tag, unit, num)
+    # rubocop:disable MO/NoRegexpEscape -- builds a parsing pattern
+    # (escaped translation with N -> \d+), not a substring check.
     translation = Regexp.escape(:"search_value_#{tag}".l).
                   sub(/\bN\b/, '\d+')
+    # rubocop:enable MO/NoRegexpEscape
     # This bit of cleverness runs until there's nothing in line 1 to `sub!`
     1 while val.to_s.sub!(/(^|-)(#{english}|#{translation})(-|$)/) do |word|
       first = word.sub!(/-$/, "")

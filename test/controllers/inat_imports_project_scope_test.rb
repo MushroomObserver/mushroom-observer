@@ -60,11 +60,6 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     @project.target_names.each_with_index.map { |_n, i| 9001 + i }.join(",")
   end
 
-  # A translation read as a pattern, so its punctuation stays literal.
-  def matching(tag, **args)
-    Regexp.new(Regexp.escape(tag.l(**args)))
-  end
-
   # ---- the form a project admin is given -------------------------------
 
   def test_the_scoped_form_states_the_search_rather_than_offering_it
@@ -77,8 +72,9 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     assert_select("input[name='inat_import[project_site]'][value=?]",
                   site.id.to_s)
     assert_select("input[name='inat_import[choose_method]']", count: 0)
-    assert_select("p", text: matching(:inat_import_project_scope,
-                                      project: @project.title))
+    assert_select_text_includes(
+      "p", :inat_import_project_scope.l(project: @project.title)
+    )
   end
 
   # The search itself carries every target taxon and place the project
@@ -105,8 +101,8 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     login(@admin.login)
     get(:new, params: { project_site: project_site.id })
 
-    assert_select("label", text: matching(:inat_import_consent_project))
-    assert_select("label", text: matching(:inat_import_consent), count: 0)
+    assert_select_text_includes("label", :inat_import_consent_project.l)
+    assert_select_text_includes("label", :inat_import_consent.l, count: 0)
   end
 
   # The project is where the observations are filed, which the admin
@@ -209,8 +205,9 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     login(@admin.login)
     get(:new, params: { project_site: project_site.id })
 
-    assert_select("li", text: matching(:inat_details_includes_project))
-    assert_select("li", text: matching(:inat_details_includes_all), count: 0)
+    assert_select_text_includes("li", :inat_details_includes_project.l)
+    assert_select_text_includes("li", :inat_details_includes_all.l,
+                                count: 0)
   end
 
   # The field says mandatory and is kept so: a project admin

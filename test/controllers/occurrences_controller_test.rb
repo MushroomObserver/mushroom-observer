@@ -344,8 +344,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     get(:show, params: { id: occ.id })
     assert_response(:success)
     # Observation name is rendered inside a Grid::Box title link.
-    assert_select(".grid-box",
-                  text: /#{Regexp.escape(@obs1.format_name.t.html_to_ascii)}/)
+    assert_select_text_includes(".grid-box",
+                                @obs1.format_name.t.html_to_ascii)
   end
 
   def test_show_missing_occurrence
@@ -360,10 +360,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     get(:show, params: { id: occ.id })
     assert_response(:success)
-    assert_select(
-      ".alert-warning",
-      text: /#{Regexp.escape(:show_occurrence_location_differs.l)}/
-    )
+    assert_select_text_includes(".alert-warning",
+                                :show_occurrence_location_differs.l)
   end
 
   # ---------- edit action ----------

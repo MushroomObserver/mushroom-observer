@@ -53,7 +53,10 @@ module Inat::ImportAudit
     end
 
     def snapshot_field(text, label)
+      # rubocop:disable MO/NoRegexpEscape -- extracts a capture group
+      # after the escaped label, not a substring check.
       match = text[/^#{Regexp.escape(label)}:\s*(.+)$/, 1]
+      # rubocop:enable MO/NoRegexpEscape
       match&.strip.presence
     end
   end
