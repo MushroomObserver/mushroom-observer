@@ -118,9 +118,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_mod_links(naming)
-    div(class: "text-nowrap") do
-      InlineCRUDLinks(target: naming, user: @user)
-    end
+    InlineCRUDLinks(target: naming, user: @user)
   end
 
   # ---- proposer cell --------------------------------------------
