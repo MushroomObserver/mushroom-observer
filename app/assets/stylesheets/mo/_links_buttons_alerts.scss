@@ -273,7 +273,7 @@ button.badge-id:hover {
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual top offset and 1.12em size are tuned for looser
-// contexts -- undone/shrunk here.
+// contexts -- undone/shrunk here. `top: 1px`, not 0, for BS3.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -286,7 +286,7 @@ button.badge-id:hover {
   }
 
   .mo-icon {
-    top: 0;
+    top: 1px;
     width: 1em;
     height: 1em;
   }
