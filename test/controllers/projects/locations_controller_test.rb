@@ -10,8 +10,7 @@ module Projects
       get(:index, params: { project_id: eol_project.id })
 
       loc = eol_project.locations.first
-      assert_select("#locations_table",
-                    text: /#{Regexp.escape(loc.display_name)}/)
+      assert_select_text_includes("#locations_table", loc.display_name)
       assert_response(:success)
     end
 
@@ -21,8 +20,7 @@ module Projects
       get(:index, params: { project_id: eol_project.id })
 
       loc = eol_project.locations.first
-      assert_select("#locations_table",
-                    text: /#{Regexp.escape(loc.display_name)}/)
+      assert_select_text_includes("#locations_table", loc.display_name)
       assert_response(:success)
     end
 
@@ -34,8 +32,7 @@ module Projects
       assert_response(:success)
       target = locations(:burbank)
       # Target location name should appear even with no obs
-      assert_select("#locations_table",
-                    text: /#{Regexp.escape(target.display_name)}/)
+      assert_select_text_includes("#locations_table", target.display_name)
     end
 
     def test_index_without_target_locations
