@@ -8,7 +8,7 @@
 .dropdown-item {
   display: block;
   width: 100%;
-  padding: 3px 20px;
+  padding: 3px 1rem;
   clear: both;
   font-weight: normal;
   color: $dropdown-link-color;
@@ -52,7 +52,7 @@
 // and colors like every other row.
 .dropdown-item.button_to {
   display: block;
-  padding: 3px 20px;
+  padding: 3px 1rem;
 
   button[type="submit"]:not(.btn):not(.text-danger),
   input[type="submit"]:not(.btn):not(.text-danger) {
