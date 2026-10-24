@@ -112,7 +112,7 @@ module Views::Layouts
                              "title_bar_right_col hidden-print " \
                              "text-right d-none d-sm-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
-                   "align-items-start pr-3") do
+                   "align-items-start px-card") do
           trusted_html(content_for(:interest_icons))
           trusted_html(content_for(:prev_next_object))
         end
