@@ -43,6 +43,16 @@
   // z-index: 100;
 }
 
+// BS3's native `.open > .dropdown-menu { display: block; }` is a
+// direct-child selector -- the autocompleter's .dropdown-menu sits
+// inside .input-group (for position:relative scoped to the field
+// alone, not the whole form-group+help-text), one level deeper than
+// that rule reaches. Same specificity, same display:block, just a
+// descendant combinator so it still matches at that depth.
+.dropdown.open .dropdown-menu.auto_complete {
+  display: block;
+}
+
 // Scroll-content wrapper for the autocompleter's virtualized row
 // pool -- see base_controller.js's ROW_HEIGHT/scroll math. Not a
 // list (flat dropdown markup puts .dropdown-item rows directly
