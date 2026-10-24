@@ -102,8 +102,20 @@ class StringExtensionsTest < UnitTestCase
 
   def test_small_author
     str = "<b><i>Abeliella xanthoconium</i></b> Lehman-Haupt nom. prov."
-    expected = "<b><i>Abeliella xanthoconium</i></b>" \
-               '<small class="text-nowrap"> Lehman-Haupt nom. prov.</small>'
+    # The space between the name and the author stays outside the
+    # nowrap span -- a normal, breakable wrap point between the two,
+    # rather than an unbreakable leading space inside the span (see
+    # `small_author`'s comment for why that matters for line-wrapping
+    # on narrow viewports).
+    expected = "<b><i>Abeliella xanthoconium</i></b> " \
+               '<small class="text-nowrap">Lehman-Haupt nom. prov.</small>'
+    assert_equal(expected, str.dup.small_author)
+  end
+
+  def test_small_author_collapses_multiple_spaces_before_author
+    str = "<b><i>Abeliella xanthoconium</i></b>  Lehman-Haupt nom. prov."
+    expected = "<b><i>Abeliella xanthoconium</i></b>  " \
+               '<small class="text-nowrap">Lehman-Haupt nom. prov.</small>'
     assert_equal(expected, str.dup.small_author)
   end
 

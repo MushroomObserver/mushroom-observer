@@ -204,7 +204,7 @@ class ImageFragmentLightboxCaptionTest < ComponentTestCase
   # in-page vote section when both are live in the DOM.
   #
   # The vote section is a lazy-loading Turbo Frame, not rendered
-  # inline -- `Matrix::Box`'s fragment cache has no user component
+  # inline -- `Grid::Box`'s fragment cache has no user component
   # in its key, so rendering VoteInterface directly here would bake
   # one viewer's vote state into the shared HTML for everyone.
   def test_renders_lightbox_vote_section

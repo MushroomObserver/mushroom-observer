@@ -1,56 +1,62 @@
 # frozen_string_literal: true
 
-# Matrix table component for displaying grids of matrix boxes.
-#
-# Renders a responsive grid layout with Stimulus controller for dynamic
-# resizing. Can render a collection of objects or accept a block for
-# custom content.
+# Responsive grid layout for displaying a collection of Grid::Box
+# items. Renders as a `<ul>` with Bootstrap 4's `row-cols-*`
+# utilities (see ROW_COLS_CLASSES) -- can render a collection of
+# objects or accept a block for custom content.
 #
 # @example With block
-#   render(MatrixTable.new) do |table|
-#     table.render(MatrixBox.new(id: 1) { "Content" })
-#     table.render(MatrixBox.new(id: 2) { "Content" })
+#   render(Grid.new) do |grid|
+#     grid.render(Grid::Box.new(id: 1) { "Content" })
+#     grid.render(Grid::Box.new(id: 2) { "Content" })
 #   end
 #
 # @example With collection of objects
-#   render(MatrixTable.new(objects: @observations, user: @user))
+#   render(Grid.new(objects: @observations, user: @user))
 #
 # @example With caching enabled
-#   render(MatrixTable.new(
+#   render(Grid.new(
 #     objects: @observations,
 #     user: @user,
 #     cached: true
 #   ))
 #
 # @example With identify mode enabled
-#   render(MatrixTable.new(
+#   render(Grid.new(
 #     objects: @observations,
 #     user: @user,
 #     identify: true
 #   ))
-class Components::Matrix::Table < Components::Base
-  # Bump when the rendered MatrixBox HTML changes. The invalidation
-  # lever for cached `MatrixBox` fragments -- both the write site
-  # (`render_cached_boxes`) and the controller's pre-check
-  # (`ApplicationController::Indexes#uncached_object_ids`) read this
-  # through `cache_key_for`, since Phlex's automatic digest doesn't
-  # survive into the controller's check.
-  # v2: image URLs in the fragment carry a cache-busting
-  # ?<updated_at> token -- fragments cached under v1 are stale.
-  CACHE_VERSION = "v2"
-
-  # The cache key MatrixBox fragments are stored under, used by both
-  # the write here and the controller's batched `read_multi`
+class Components::Grid < Components::Base
+  # Bump when the rendered Grid::Box HTML changes (or any
+  # observable behavior the cached fragment captures). This is the
+  # invalidation lever for cached `Grid::Box` fragments — both the
+  # write site (`render_cached_boxes`) and the controller's
   # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
-  # -- one method keeps both ends agreeing on the key shape.
+  # read this through `cache_key_for`. Phlex's automatic class +
+  # method + line digest doesn't survive into the controller's
+  # check, so the version is encoded explicitly here.
+  CACHE_VERSION = "v12"
+
+  # rubocop:disable MO/NoLongCommentBlock
+  # The cache key Grid::Box fragments are stored under -- shared by
+  # the write here and the controller's batched `read_multi`
+  # pre-check (`ApplicationController::Indexes#uncached_object_ids`),
+  # so both agree on the key shape.
   #
-  # Folds in the thumb image record so the key tracks its
-  # updated_at. `object` alone isn't enough: `Verifier#
-  # mark_transferred` touch_all's related Observations on transfer,
-  # but RssLogs are not touched, so a box cached before a rotate
-  # would serve the stale URL token indefinitely.
+  # Folds in the thumb image record so the key tracks the thumb's
+  # updated_at (cache_versioning is off in MO, so an AR object in the
+  # key array expands via cache_key, embedding that timestamp). The
+  # rendered HTML embeds the thumb's URL tokened on the same
+  # timestamp, so the fragment must bust when it changes. `object`
+  # alone isn't enough: Verifier#mark_transferred touch_all's related
+  # Observations on a transfer, but not RssLogs, so an RssLog box
+  # cached before a rotate would keep serving the pre-rotate URL
+  # token. (An `Image` object is its thumb and already keys on that
+  # timestamp via `object` -- `try(:thumb_image)` is nil there.)
+  # rubocop:enable MO/NoLongCommentBlock
   def self.cache_key_for(object, locale)
-    ["MatrixBox", CACHE_VERSION, locale, object, object.try(:thumb_image)]
+    ["Grid::Box", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end
 
   # Per-object predicate the render path uses to decide whether to
@@ -60,8 +66,8 @@ class Components::Matrix::Table < Components::Base
   # Objects with an untransferred thumb_image are skipped — the
   # rendered HTML embeds the image URL, which would be wrong (and
   # wrongly cached) until the transfer completes. An `Image` object
-  # itself (images/index) has no `thumb_image` to defer to -- it IS
-  # the thumb -- so check its own `transferred` directly instead of
+  # (images/index) has no `thumb_image` to defer to -- it IS
+  # the thumb -- so check its `transferred` directly instead of
   # falling through the `respond_to?` guard to an unconditional true.
   def self.should_cache_object?(object)
     return object.transferred != false if object.is_a?(::Image)
@@ -70,30 +76,31 @@ class Components::Matrix::Table < Components::Base
     object.thumb_image&.transferred != false
   end
 
-  # Properties
   prop :objects, _Nilable(Array), default: nil
   prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
   prop :identify, _Boolean, default: false
-  # Project context — passed through to each MatrixBox so a project admin
+  # Project context — passed through to each Grid::Box so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
+
+  # BS4's `row-cols-{bp}-{n}` utilities size every direct child of
+  # the row equally, so `Components::Grid::Box` doesn't need a
+  # per-breakpoint width class -- just the bare `.col` default (see
+  # its `columns` prop).
+  ROW_COLS_CLASSES = "row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4"
 
   def view_template(&block)
     Row(
       element: :ul,
-      class: "list-unstyled mt-3",
-      data: {
-        controller: "matrix-table",
-        action: "resize@window->matrix-table#rearrange"
-      }
+      class: class_names(ROW_COLS_CLASSES, "grid-row list-unstyled mt-2")
     ) do
       if block
         yield
       elsif @cached && @objects
         render_cached_boxes
       elsif @objects
-        render_matrix_boxes
+        render_boxes
       end
     end
 
@@ -120,9 +127,9 @@ class Components::Matrix::Table < Components::Base
         # batched wrapper rather than Rails.cache directly.
         low_level_cache(
           self.class.cache_key_for(object, I18n.locale)
-        ) { render(Components::Matrix::Box.new(user: @user, object: object)) }
+        ) { render(Components::Grid::Box.new(user: @user, object: object)) }
       else
-        render(Components::Matrix::Box.new(
+        render(Components::Grid::Box.new(
                  user: @user, object: object,
                  identify: @identify, project: @project
                ))
@@ -140,8 +147,8 @@ class Components::Matrix::Table < Components::Base
 
   # Skip the batched store (and its upfront read_multi) entirely when
   # caching is off -- `low_level_cache` (phlex-rails) already yields
-  # unconditionally in that case and never touches `cache_store`, so
-  # building it here would be a pure-waste DB round trip.
+  # unconditionally in that case and doesn't touch `cache_store`, so
+  # building it here would be a wasted DB round trip.
   def build_batched_store
     return unless Rails.application.config.action_controller.perform_caching
 
@@ -153,7 +160,7 @@ class Components::Matrix::Table < Components::Base
       map { |object| self.class.cache_key_for(object, I18n.locale) }
   end
 
-  # Mirrors the controller's `matrix_caches_in_this_request?` AND
+  # Mirrors the controller's `grid_caches_in_this_request?` AND
   # `should_cache_object?` gates. Project admins see the admin-only
   # Exclude button; identify mode renders the vote selector. Both
   # diverge from the cached non-admin / non-identify markup, so the
@@ -167,9 +174,9 @@ class Components::Matrix::Table < Components::Base
     @project&.is_admin?(@user)
   end
 
-  def render_matrix_boxes
+  def render_boxes
     @objects.each do |object|
-      render(Components::Matrix::Box.new(
+      render(Components::Grid::Box.new(
                user: @user, object: object,
                identify: @identify, project: @project
              ))

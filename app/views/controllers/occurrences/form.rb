@@ -87,8 +87,7 @@ module Views::Controllers::Occurrences
         element: :ul,
         class: "list-unstyled mt-3",
         data: {
-          controller: "matrix-table occurrence-form",
-          action: "resize@window->matrix-table#rearrange",
+          controller: "occurrence-form",
           "occurrence-form-fallback-value": "source"
         }
       ) do
@@ -141,16 +140,11 @@ module Views::Controllers::Occurrences
       end
     end
 
+    # Delegates to Grid for its row-cols-* grid classes
+    # instead of hand-rolling an equivalent Row -- Grid::Box's
+    # `columns:` default assumes it's rendered inside one of those.
     def render_matrix_ul(&block)
-      Row(
-        element: :ul,
-        class: "list-unstyled mt-3",
-        data: {
-          controller: "matrix-table",
-          action: "resize@window->matrix-table#rearrange"
-        },
-        &block
-      )
+      Grid(&block)
     end
 
     # Primary-obs inline edit section (edit mode only). Fields ride
@@ -196,8 +190,8 @@ module Views::Controllers::Occurrences
     # ---------- Shared per-row rendering ----------
 
     def render_obs_box(obs, &block)
-      render(Components::Matrix::Box.new(user: @user, object: obs,
-                                         votes: false)) do
+      render(Components::Grid::Box.new(user: @user, object: obs,
+                                       votes: false)) do
         if block
           yield
         else

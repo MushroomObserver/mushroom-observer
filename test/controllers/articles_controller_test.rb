@@ -85,9 +85,9 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:show, params: { id: article.id })
     assert_response(:success)
     # Phlex `Articles::Show` pins the article body in
-    # `#article_body .panel-body` (was `assert_template(:show)` + a
+    # `#article_body .card-body` (was `assert_template(:show)` + a
     # `/#{article.body}/ =~ @response.body` regex on the rendered HTML).
-    assert_select_text_includes("#article_body .panel-body", article.body,
+    assert_select_text_includes("#article_body .card-body", article.body,
                                 count: 1)
 
     # Prove privileged user gets extra links

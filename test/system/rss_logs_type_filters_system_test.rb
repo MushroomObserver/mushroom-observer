@@ -13,10 +13,7 @@ class RssLogsTypeFiltersSystemTest < ApplicationSystemTestCase
     assert_selector("body.rss_logs__index")
 
     find_by_id("log_filter_toggle_top").click
-    # BS3's dropdown JS toggles `.open` on the toggle's parent, not
-    # `.show` on the menu itself -- `.open > .dropdown-menu` CSS is
-    # what makes the menu visible.
-    assert_selector("#log_filter_menu_top", visible: true)
+    assert_selector("#log_filter_menu_top.show")
 
     within("#log_filter_menu_top") do
       assert_apply_disabled

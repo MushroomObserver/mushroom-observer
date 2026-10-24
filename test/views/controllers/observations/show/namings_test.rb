@@ -16,7 +16,7 @@ class Views::Controllers::Observations::Show::NamingsTest <
     html = render_namings
 
     assert_html(html,
-                "#observation_namings.panel.panel-default.namings-table")
+                "#observation_namings.card.namings-table")
   end
 
   def test_panel_carries_section_update_stimulus_root
@@ -32,23 +32,23 @@ class Views::Controllers::Observations::Show::NamingsTest <
   end
 
   def test_renders_header_in_heading_slot
-    # Heading is `title: false` (no `.panel-title` wrapper) — the
+    # Heading is `title: false` (no `.card-title` wrapper) — the
     # header view supplies its own h4. Check that the header's
-    # propose-modal anchor lives inside the panel-heading.
+    # propose-modal anchor lives inside the card-header.
     html = render_namings
 
-    assert_html(html, ".panel-heading.namings-table-header " \
+    assert_html(html, ".card-header.namings-table-header " \
                       "a[data-modal='modal_obs_#{@obs.id}_naming']")
   end
 
   def test_renders_rows_in_unwrapped_body
     # Body is `wrapper: false` so the list-group sits flush
-    # against the panel-heading without the default `.panel-body`
+    # against the card-header without the default `.card-body`
     # padding.
     html = render_namings
 
     assert_html(html,
-                ".panel > #namings_table_rows.list-group.list-group-flush")
+                ".card > #namings_table_rows.list-group.list-group-flush")
   end
 
   def test_renders_footer_buttons_first_footer
@@ -56,8 +56,8 @@ class Views::Controllers::Observations::Show::NamingsTest <
     # buttons plus the consensus-help blurb.
     html = render_namings
 
-    assert_html(html, ".panel-footer .card-text.small")
-    assert_html(html, ".panel-footer " \
+    assert_html(html, ".card-footer .card-text.small")
+    assert_html(html, ".card-footer " \
                       "a[data-modal='modal_obs_#{@obs.id}_naming']")
   end
 
@@ -66,8 +66,8 @@ class Views::Controllers::Observations::Show::NamingsTest <
     # itself in `d-none d-sm-block` so it doesn't show on `xs`.
     html = render_namings
 
-    assert_html(html, ".panel-footer.d-none.d-sm-block .vote-icon-yours")
-    assert_html(html, ".panel-footer.d-none.d-sm-block .vote-icon-consensus")
+    assert_html(html, ".card-footer.d-none.d-sm-block .vote-icon-yours")
+    assert_html(html, ".card-footer.d-none.d-sm-block .vote-icon-consensus")
   end
 
   private

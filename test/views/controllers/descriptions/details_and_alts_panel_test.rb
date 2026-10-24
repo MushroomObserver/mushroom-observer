@@ -21,7 +21,7 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
 
     html = render(new_panel(description: desc))
 
-    assert_html(html, "#description_details_and_alts .panel-heading")
+    assert_html(html, "#description_details_and_alts .card-header")
   end
 
   def test_renders_footer_only_when_review_is_true
@@ -30,9 +30,9 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
     with_review = render(new_panel(description: desc, review: true))
     without = render(new_panel(description: desc, review: false))
 
-    # The Bootstrap panel-footer slot exists only when `review: true`.
-    assert_html(with_review, ".panel-footer")
-    assert_no_html(without, ".panel-footer")
+    # The Bootstrap card-footer slot exists only when `review: true`.
+    assert_html(with_review, ".card-footer")
+    assert_no_html(without, ".card-footer")
   end
 
   def test_renders_parent_link
@@ -55,7 +55,7 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
     # `DescriptionModLinks` renders an icon-link with the edit class
     # when the viewer can write.
     assert_html(html,
-                ".panel-heading-links .edit_name_description_link_#{desc.id}")
+                ".card-header-links .edit_name_description_link_#{desc.id}")
   end
 
   def test_omits_edit_icon_for_anonymous_viewer
@@ -65,7 +65,7 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
 
     assert_no_html(
       html,
-      ".panel-heading-links .edit_name_description_link_#{desc.id}"
+      ".card-header-links .edit_name_description_link_#{desc.id}"
     )
   end
 
@@ -118,7 +118,7 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
 
     # `reviewers-only` block carries the unvetted/vetted/inaccurate
     # `Button::Put` row.
-    assert_html(html, ".panel-footer .reviewers-only")
+    assert_html(html, ".card-footer .reviewers-only")
   end
 
   def test_omits_review_ui_for_location_description

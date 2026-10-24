@@ -1,16 +1,10 @@
 # frozen_string_literal: true
 
-# Stashed in `content_for(:sorter)` by `add_sorter` in the index
-# view. Left-edge padding lives on `Header::IndexPaginationNav`'s
-# wrapper (`px-3`), not here.
-#
-# `sorts` is `[[order_by_key, label_translation_symbol], ...]`, the
-# shape every `<Foo>Controller#index_sort_options` returns.
-#
-# `link_all: true` skips the "currently active, render as disabled"
-# behavior so every option (including the current one) is a live
-# link — used where the sort is set by URL params rather than by
-# the page's current query state.
+# Rendered via `content_for(:sorter)` (set by `add_sorter` in the
+# index view); left-edge padding lives on `Header::IndexPaginationNav`'s
+# wrapper (`px-card`), not here. `sorts` is `[[order_by_key,
+# label_translation_symbol], ...]`. `link_all: true` makes every option
+# a live link (not "current, disabled") -- for sorts set by URL params.
 module Views::Layouts
   class Header::Sorter < Views::Base
     prop :query, _Nilable(::Query), default: nil
@@ -24,7 +18,7 @@ module Views::Layouts
 
       div(class: "flex-bar sorter") do
         render(Components::Navbar::Text.new(
-                 class: class_names("mx-0",
+                 class: class_names("mx-0 pr-2",
                                     Components::Column.mobile_hide_classes)
                )) do
           append_colon(:sort_by_header.l)
@@ -34,8 +28,8 @@ module Views::Layouts
           menu_id: "sort_nav_menu",
           label: toggle_title.to_s,
           element: :div,
-          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-2"),
-          toggle_variant: :outline, toggle_size: :sm,
+          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-0"),
+          toggle_variant: :outline,
           toggle_class: "font-weight-normal",
           menu_class: "sorts",
           menu_header: mobile_header_html

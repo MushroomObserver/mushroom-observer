@@ -11,9 +11,9 @@
 # - `Views::Controllers::Observations::Show::Namings::Row` — the
 #   "Your vote" column of the namings sub-panel on the obs show
 #   page. Context: `"namings_table"`.
-# - `Components::Matrix::Box` (`#render_identify_ui`) — the
-#   vote-or-propose UI rendered inside a matrix box on index
-#   pages. Context: `"matrix_box"`.
+# - `Components::Grid::Box` (`#render_identify_ui`) — the
+#   vote-or-propose UI rendered inside a grid box on index
+#   pages. Context: `"grid_box"`.
 #
 module Views::Controllers::Observations::Namings::Votes
   class Form < ::Components::ApplicationForm
@@ -32,9 +32,9 @@ module Views::Controllers::Observations::Namings::Votes
     #   used by the controller's `case params[:context]` to decide
     #   which Turbo Stream response to send back. No `else` branch
     #   there, so a value other than these two silently renders
-    #   nothing; both real callers (Show::Namings::Row, Matrix::Box)
+    #   nothing; both real callers (Show::Namings::Row, Grid::Box)
     #   always supply one explicitly.
-    prop :context, _Union("namings_table", "matrix_box")
+    prop :context, _Union("namings_table", "grid_box")
 
     def initialize(naming:, user:, context:, vote: nil)
       # Pass the actual Vote (existing or fresh) so Superform picks

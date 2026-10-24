@@ -12,78 +12,34 @@
 // `.mb-2`'s margin (Bootstrap spacing utilities are `!important`,
 // hence the `!important` here too) only supplies a gap while
 // `#search_nav` is collapsed and invisible. Open or mid-animation,
-// the two navbars sit flush against each other with no margin
-// between them, matching how the two rows looked before they were
-// split into separate navbars.
-#top_nav:has(+ #search_nav.in),
+// `#search_nav`'s vertical padding already supplies that gap, so
+// stacking both would double the space between the two navbars.
+#top_nav:has(+ #search_nav.show),
 #top_nav:has(+ #search_nav.collapsing) {
   margin-bottom: 0 !important;
 }
 
 // Plain single-row flex-bar alias: a horizontal bar of items with
 // space distributed between them (sorter, search bar, pagination,
-// interest icons, prev/next nav, etc). Unrelated to the `.navbar`
-// landmark bridge below despite the historical shared name - renamed
-// away from `.navbar-flex` specifically so the two don't read as the
-// same concept.
+// interest icons, prev/next nav, etc). Unrelated to `.navbar` -
+// Bootstrap 4's `.navbar` is natively flex, so there's no bridge
+// class here for the two to be confused with.
 .flex-bar {
   @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
-// Space between the interest-icon buttons -- em, not rem, so it
-// scales with the surrounding context's font-size (same reasoning
-// as .inline-link-block in _links_buttons_alerts.scss).
-.interest-eyes {
-  gap: 0.5em;
+// Space between the interest-icon buttons -- margin, not flex `gap`,
+// since Safari leaks `gap` past the first/last item here. em, not
+// rem, so it scales with the surrounding context's font-size (same
+// reasoning as .inline-link-block in _links_buttons_alerts.scss).
+.interest-eyes > :not(:first-child) {
+  margin-left: 0.5em;
 }
 
-// BS3→BS4 navbar bridge. Only fires where BOTH classes coexist - the
-// app's two `.navbar` landmarks (#top_nav, .sidebar-nav) are the only
-// elements with both classes; `#search_nav` doesn't carry
-// `.navbar-flex` (a single-row landmark has nothing to flex-wrap, and
-// `.navbar-flex` ends up fighting `.collapse`'s `display: none` by
-// specificity if it does), and the `.flex-bar` callers above don't
-// carry `.navbar` either -- both are untouched by this rule.
-//
-// `display/flex-wrap/align-items/justify-content` are copied verbatim
-// from Bootstrap 4.6's `.navbar` rule. In row direction (the default
-// - BS4 does NOT use flex-direction: column), each landmark's one
-// direct child is already full width (#top_nav's row is
-// `.container-fluid`; the sidebar's `.list-group` gets an explicit
-// `w-100` at its call site for the same reason) - align-items/
-// justify-content only affect space *within* a line or *between*
-// lines, and with one full-width child there's no free space for
-// either to redistribute, so both are no-ops today.
-//
-// `padding` IS copied from BS4 (`.5rem 1rem`), unlike the properties
-// above - that value would land on both landmarks today.
-// `Components::Navbar#base_class` bakes a `p-0` utility class
-// (`!important`, so it reliably beats this rule's two-class
-// specificity regardless of source order) onto every `variant:`
-// caller automatically, rather than leaving it out and risking it
-// silently reappearing whenever this rule's properties eventually get
-// folded into `.navbar` itself, or relying on each caller to
-// remember an override.
-//
-// `min-height` / `margin-bottom` are explicitly zeroed below, but
-// both are already no-ops today: #top_nav's `.mb-2` utility
-// (`!important`) already beats `.navbar`'s margin-bottom, and each
-// landmark's content always exceeds $navbar-height. Set here anyway
-// so BS4's zero values hold once `.navbar`'s rule no longer needs
-// this bridge, rather than leaving them to whatever BS3 set.
-.navbar.navbar-flex {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  padding: .5rem 1rem;
-  min-height: 0;
-  margin-bottom: 0;
-}
-
-.navbar-default, #top_nav {
+.navbar-light, #top_nav {
   border-width: 1px;
   border-style: solid;
+  border-color: $TOP_BAR_BORDER_COLOR;
   border-radius: 0;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
@@ -92,12 +48,12 @@
 
   a:not(.clear-button, .btn, .dropdown-item),
   a:visited:not(.clear-button, .btn, .dropdown-item) {
-    color: $navbar-default-color;
-    background-color: $navbar-default-link-active-bg;
+    color: $TOP_BAR_TEXT_COLOR;
+    background-color: $TOP_BAR_LINK_BG_COLOR;
 
     &:hover {
-      color: $navbar-default-link-hover-color;
-      background-color: $navbar-default-link-hover-bg;
+      color: $TOP_BAR_LINK_HOVER_TEXT_COLOR;
+      background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
     }
   }
 
@@ -106,27 +62,21 @@
   }
 
   .dropdown > a {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
+    color: $TOP_BAR_TEXT_COLOR !important;
+    background-color: $TOP_BAR_BG_COLOR !important;
     padding-left: 8px;
     padding-right: 8px;
     font-weight: bold !important;
 
     &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
-    }
-  }
-
-  .navbar_right {
-    >ul.navbar-right>li {
-      @extend .ml-4;
+      color: $TOP_BAR_LINK_HOVER_TEXT_COLOR !important;
+      background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
     }
   }
 }
 
 // If sorter is on the right:
-// @media screen and (min-width: $screen-sm-min) {
+// @media screen and (min-width: breakpoint-min(md)) {
 //   .sorter {
 //     .dropdown-menu {
 //       right: 0;
@@ -135,20 +85,32 @@
 //   }
 // }
 
-@media screen and (max-width: $screen-sm-max) {
+// Mobile-first three-step scale: 14px below md, 16px from md, the
+// standard h4 size ($h4-font-size, 21px) from lg.
+#top_nav h4 {
+  font-size: $font-size-base;
+}
+
+@media screen and (min-width: breakpoint-min(md)) {
+  #top_nav h4 {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (min-width: breakpoint-min(lg)) {
+  #top_nav h4 {
+    font-size: $h4-font-size;
+  }
+}
+
+@media screen and (max-width: breakpoint-max(md)) {
   #top_nav {
-    h4 {
-      font-size: 14px;
-    }
     #sorter button {
       max-width: 60px;
       overflow: hidden;
     }
   }
 
-  // The search toggle's wrapper (#top_nav) and the pattern-search
-  // form itself (#search_nav, since the search-bar row moved to its
-  // own navbar) both carry `Components::Navbar::FORM_CLASS`.
   #top_nav, #search_nav {
     .navbar-form {
       padding-right: 0;
@@ -172,7 +134,7 @@
 // (`btn-success`, see #3930) keeps its solid green styling on
 // phones too — losing it here would re-create the unclear-CTA
 // problem that motivated the redesign.
-@media screen and (max-width: $screen-xs-min) {
+@media screen and (max-width: breakpoint-max(sm)) {
   #top_nav {
     .top_nav_button {
       padding-left: 0.5rem;
@@ -206,5 +168,15 @@
 
 #index_bar {
   @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
-  border-bottom-color: $navbar-default-border;
+  border-bottom-color: $TOP_BAR_BORDER_COLOR;
+}
+
+// Flex items default to min-width: auto (the content's width), which
+// stops them shrinking below that even with flex-grow/w-auto set --
+// without this the input group and select push the row wider than
+// the viewport on narrow screens instead of sharing it.
+#pattern_search_form {
+  .input-group, select {
+    min-width: 0;
+  }
 }

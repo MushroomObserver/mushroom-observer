@@ -30,12 +30,7 @@ module Views::Layouts
     prop :object, ::AbstractModel
 
     def view_template
-      # `.flex-bar` supplies the horizontal layout -- BS3's
-      # `.btn-toolbar` (bootstrap-sass) is float/clearfix-based, not
-      # flex; only BS4 rewrites it to `display: flex`. `.btn-toolbar`
-      # is kept for its BS margin-between-children rule and for the
-      # `role="toolbar"` semantics, not for layout.
-      div(class: "btn-toolbar flex-bar interest-eyes h4 my-0 ml-2 ml-sm-0",
+      div(class: "btn-toolbar interest-eyes h4 my-0 ml-2 ml-sm-0",
           role: "toolbar",
           aria: { label: :app_interest_icons_label.l }) do
         render_icons if @user
@@ -73,14 +68,10 @@ module Views::Layouts
       create_item(-1, "ignore", :interest_ignore_help)
     end
 
-    # Inert state indicator, not a control -- `tag: :span` + `.disabled`
-    # (not `Button(type: :post/...)`, which are form-submitting
-    # controls) gives it a `.btn` box like the two clickable buttons
-    # beside it, so it doesn't render as a bare, oversized, unpadded
-    # image alongside them. `variant: :outline` (bordered), not
-    # `:link` (borderless, same as the two clickable buttons) -- the
-    # border is what visually marks this one as "your current state",
-    # not clickable.
+    # Inert indicator, not a control -- `tag: :span` + `.disabled`
+    # gives it a `.btn` box like the clickable buttons beside it.
+    # `variant: :outline` (not `:link`) so the border marks this as
+    # "current state," not clickable.
     def icon_item(size, kind, alt_key)
       Button(tag: :span, variant: :outline, class: "disabled px-1") do
         interest_icon(size, kind, alt_key)
@@ -113,15 +104,11 @@ module Views::Layouts
                                                           params:)
     end
 
-    # `variant: :link` (Bootstrap's own `.btn-link` reset), not
-    # `:strip` -- a fully bare `<button>` falls back to raw browser/OS
-    # form-control chrome (shows up as a blue background in some
-    # browsers) with nothing in MO's CSS to reset it. `.btn-link`
-    # already zeroes background/border/box-shadow.
+    # `variant: :link` (`.btn-link`), not `:strip` -- a bare `<button>`
+    # falls back to raw browser form-control chrome with nothing in
+    # MO's CSS to reset it.
     #
-    # `placement: "bottom"` overrides `CRUDBase`'s own hardcoded
-    # `"top"` (deep_merge lets `data:` win) -- the tooltip's the
-    # button's job now, not the icon's (see `interest_icon`).
+    # `placement: "bottom"` overrides `CRUDBase`'s hardcoded `"top"`.
     def interest_button(method, path, kind:, alt_key:, params:)
       Button(type: method, target: path, name: alt_key.l(object: type.l),
              variant: :link, class: "px-1", params:,
@@ -132,16 +119,10 @@ module Views::Layouts
       end
     end
 
-    # `size` is `:big` (state-indicator icon, no button wrapper, so
-    # needs a tooltip here) or `:small` (clickable variant inside a
-    # `Button`, which already supplies an equivalent tooltip via
-    # `name:` -- a second one on the icon doubled up visibly). The
-    # filename is `<kind>2.png` for big, `<kind>3.png` for small.
-    #
-    # `mo-icon` (see _icons.scss) puts these on the same shared sizing
-    # system as every other icon in the app. `interest_#{kind}`
-    # (watch/ignore/halfopen) is a stable hook for tests, independent
-    # of the image filename.
+    # `:big` (no button wrapper) needs a tooltip here; `:small`
+    # already gets one from the enclosing `Button`'s `name:`.
+    # `interest_#{kind}` is a stable test hook independent of the
+    # `<kind>2/3.png` filename.
     def interest_icon(size, kind, alt_key)
       alt = alt_key.l(object: type.l)
       suffix = size == :big ? "2" : "3"

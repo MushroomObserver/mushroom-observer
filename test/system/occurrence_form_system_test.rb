@@ -24,7 +24,8 @@ class OccurrenceFormSystemTest < ApplicationSystemTestCase
     # fields with the same name so its Add All submission goes through
     # the same controller param path (#4284).
     checkboxes = all(
-      "input[name='occurrence[observation_ids][]'][type='checkbox']"
+      "input[name='occurrence[observation_ids][]'][type='checkbox']",
+      visible: :all
     )
     assert(checkboxes.any?, "Expected recent observation checkboxes")
     checkboxes.first.check

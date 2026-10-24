@@ -34,8 +34,7 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(:lookup).autocompleter(
       type: :name,
       textarea: true,
-      wrapper_options: { label: :names.ti,
-                         help_collapse: true, help_well: false },
+      wrapper_options: { label: :names.ti, help_collapse: true },
       value: prefilled_lookup_value,
       hidden_value: prefilled_lookup_ids
     )
@@ -90,7 +89,8 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
 
   def collapse_class
     # Show expanded if lookup has a value OR any modifier has a value
-    "in" if lookup_has_value? || modifiers_have_values?
+    Components::Collapsible::EXPANDED_CLASS \
+      if lookup_has_value? || modifiers_have_values?
   end
 
   def lookup_has_value?

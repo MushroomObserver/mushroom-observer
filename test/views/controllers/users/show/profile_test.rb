@@ -47,12 +47,12 @@ module Views::Controllers::Users
 
       def test_life_list_footer_skipped_when_num_taxa_zero
         # `render_footer` short-circuits on `num_taxa.zero?`, so the
-        # life-list block + its surrounding `.panel-footer` don't fire.
+        # life-list block + its surrounding `.card-footer` don't fire.
         html = render_profile(life_list: stub_life_list(species: 0,
                                                         higher: 0))
 
         # The "Life list:" label only renders inside the footer block.
-        assert_no_html(html, ".panel-footer")
+        assert_no_html(html, ".card-footer")
       end
 
       private

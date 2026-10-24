@@ -94,7 +94,8 @@ module Views::Controllers::Projects
 
     def render_open_membership
       checkbox_field(:open_membership,
-                     label: :form_projects_open_membership)
+                     label: :form_projects_open_membership,
+                     wrap_class: "mb-3")
     end
 
     def render_title

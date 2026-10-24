@@ -3,7 +3,7 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Shared input-group decoration for TextField + SelectField. The
   # field renders inside `<div class="input-group">` and a trailing
-  # `<span class="input-group-btn">` holds either a `<button>` or an
+  # `<div class="input-group-append">` holds either a `<button>` or an
   # `<a>` styled as a button — caller picks via `:button_href` (link
   # if present, button otherwise).
   #
@@ -18,9 +18,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   :button_icon     glyph symbol from `Components::Icon::GLYPHS`,
   #                    rendered after the text via `Components::Icon`
   #   :addon           text content for a plain (non-button) addon
-  #   :addon_position  :prepend or :append (default) -- BS3's addon
-  #                    span carries no prepend/append class of its
-  #                    own, so position is just DOM order here
+  #   :addon_position  :prepend or :append (default) -- a unit suffix
+  #                    ("º", "m") appends; a currency symbol ("$")
+  #                    prepends
   module InputGroupAddon
     def render_input_group_button(&block)
       InputGroup do
@@ -32,16 +32,17 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_input_group_addon(&block)
       position = wrapper_options.fetch(:addon_position, :append)
       InputGroup do
-        render_addon if position == :prepend
+        render_addon(position) if position == :prepend
         yield
-        render_addon if position == :append
+        render_addon(position) if position == :append
       end
     end
 
     private
 
-    def render_addon
-      render(Components::InputGroup::Addon.new(variant: :addon)) do
+    def render_addon(position)
+      render(Components::InputGroup::Addon.new(variant: :addon,
+                                               position: position)) do
         wrapper_options[:addon]
       end
     end

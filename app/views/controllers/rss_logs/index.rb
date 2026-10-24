@@ -14,9 +14,9 @@ module Views::Controllers::RssLogs
       register_chrome
 
       PaginatedResults do
-        render(::Components::Matrix::Table.new(
-                 objects: @rss_logs, user: current_user, cached: true
-               ))
+        Grid(
+          objects: @rss_logs, user: current_user, cached: true
+        )
       end
     end
 

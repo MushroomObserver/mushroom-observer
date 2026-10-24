@@ -27,8 +27,7 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-start align-items-start " \
-      "px-3 py-2"
+      "show_title_nav d-flex justify-content-start align-items-start px-card"
 
     def view_template
       Row(id: "title_bar", class: "mb-2") do
@@ -42,13 +41,13 @@ module Views::Layouts
 
     # Only visible below `sm` -- the `sm`+ layout keeps these pieces
     # in their desktop positions (`render_left_column`/
-    # `render_right_column`). `xs: 12` keeps Bootstrap's default
-    # padding so `.row`'s negative margin cancels it; `px-3` goes
+    # `render_right_column`). `.col-12` keeps Bootstrap's default
+    # padding so `.row`'s negative margin cancels it; `px-card` goes
     # on the nested div instead.
     def render_mobile_top_row
-      Column(xs: 12, hide_at: :sm) do
+      div(class: "col-12 d-sm-none") do
         div(class: "d-flex flex-wrap justify-content-between " \
-                   "align-items-center px-3 mb-2") do
+                   "align-items-center px-card mb-2") do
           trusted_html(content_for(:id_badge))
           trusted_html(content_for(:title_bar_cta))
           trusted_html(content_for(:title_bar_actions))
@@ -82,7 +81,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "d-none d-sm-block mr-4 mt-sm-1") do
+      div(class: "id_badge_wrap d-none d-sm-block mr-3 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end
@@ -94,7 +93,7 @@ module Views::Layouts
     def render_title_bar_cta
       return unless content_for?(:title_bar_cta)
 
-      div(class: "d-none d-sm-block ml-3") do
+      div(class: "title_bar_cta_wrap d-none d-sm-block ml-3") do
         trusted_html(content_for(:title_bar_cta))
       end
     end
@@ -102,7 +101,7 @@ module Views::Layouts
     def render_title_bar_actions
       return unless content_for?(:title_bar_actions)
 
-      div(class: "d-none d-sm-block ml-auto") do
+      div(class: "title_bar_actions_wrap d-none d-sm-block ml-auto") do
         trusted_html(content_for(:title_bar_actions))
       end
     end
@@ -112,7 +111,7 @@ module Views::Layouts
                              "title_bar_right_col hidden-print " \
                              "text-right d-none d-sm-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
-                   "align-items-start pr-3 py-2") do
+                   "align-items-start px-card") do
           trusted_html(content_for(:interest_icons))
           trusted_html(content_for(:prev_next_object))
         end
@@ -127,8 +126,8 @@ module Views::Layouts
       controller.action_name == "show" && !on_project_page?
     end
 
-    # Projects render a title inside ProjectBanner — skip ours to
-    # avoid stacking two titles.
+    # Projects render their own title inside ProjectBanner — skip
+    # ours to avoid stacking two titles.
     def on_project_page?
       return false unless content_for?(:project_banner)
 

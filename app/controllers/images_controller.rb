@@ -84,7 +84,7 @@ class ImagesController < ApplicationController
   # apparently with no rhyme or reason. -JPH 20100204
   def index_display_opts(opts, query)
     opts = {
-      matrix: true,
+      grid: true,
       include: [:user, { observations: :name }, :license, :profile_users,
                 :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
     }.merge(opts)

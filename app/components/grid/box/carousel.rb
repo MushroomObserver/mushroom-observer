@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Per-matrix-box mini-carousel — the planned image-set rendering for the
-# observations index. Wraps the `Components::Carousel` primitive with
-# matrix-box-appropriate chrome: no Panel, no thumbnail strip
+# Per-box mini-carousel — the planned image-set rendering for the
+# observations grid. Wraps the `Components::Carousel` primitive with
+# box-appropriate chrome: no Panel, no thumbnail strip
 # (`show_indicators: false`), the active slide chosen via `top_img`
 # rather than the default "first slide active" (so a box returning to
 # a previously-viewed slide can highlight it).
@@ -18,20 +18,20 @@
 # can be browsed in isolation via a dev test route.
 #
 # @example
-#   render Components::Matrix::Carousel.new(
+#   render Components::Grid::Box::Carousel.new(
 #     user: @user,
 #     object: observation,
 #     images: observation.images,
 #     top_img: observation.thumb_image || observation.images.first
 #   )
-class Components::Matrix::Carousel < Components::Base
+class Components::Grid::Box::Carousel < Components::Base
   prop :images, _Array(::Image) do |value|
     value.respond_to?(:to_a) ? value.to_a : value
   end
   prop :user, _Nilable(::User)
   prop :object, _Nilable(::AbstractModel), default: nil
   # The slide that should render as `.active`. Defaults to
-  # `images.first` (which makes Matrix::Carousel behave like every
+  # `images.first` (which makes Grid::Box::Carousel behave like every
   # other carousel — first slide active).
   prop :top_img, _Nilable(::Image), default: nil
   prop :carousel_id, _Nilable(::String), default: nil
@@ -42,7 +42,7 @@ class Components::Matrix::Carousel < Components::Base
 
     # Must stay `render(Components::Carousel.new(...))`, not bare
     # `Carousel(...)` Kit syntax -- this component class is itself
-    # named `Carousel` (Components::Matrix::Carousel), so Kit's
+    # named `Carousel` (Components::Grid::Box::Carousel), so Kit's
     # constant lookup would recurse into itself instead of resolving
     # Components::Carousel (see commit 33fdc952e5 for the same bug
     # with a view class named `Table`).
@@ -71,7 +71,7 @@ class Components::Matrix::Carousel < Components::Base
     @images.each do |image|
       carousel.item(id: "carousel_item_#{image.id}",
                     active: image == active_image) do
-        render(Components::Matrix::Carousel::Item.new(
+        render(Components::Grid::Box::Carousel::Item.new(
                  user: @user, image: image, object: @object
                ))
       end

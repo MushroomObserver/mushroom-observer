@@ -21,7 +21,7 @@ module Views::Controllers::SpeciesLists
       html = render_details
 
       assert_html(html, "#list_details")
-      assert_html(html, ".panel.panel-default")
+      assert_html(html, ".card")
       # date row + download button line up via flex -- this row's
       # alignment contract, not incidental paint.
       # rubocop:disable-next MO/NoCosmeticClassAssertion

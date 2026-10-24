@@ -1,5 +1,9 @@
 // form elements and inputs
 
+label {
+  font-weight: $font-weight-bold;
+}
+
 // FieldLabelRow's row shape for a label with appended content (a
 // help-collapse question-mark icon, or an autocompleter's
 // has-id-indicator/find/keep/edit icons) -- see
@@ -22,9 +26,13 @@
   margin-bottom: 5px;
 }
 
-.checkbox,
-.radio {
-  label {
+
+// Bootstrap 4 custom-control checkboxes/radios -- input and label are
+// DOM siblings (see Components::ApplicationForm::CheckboxField/
+// RadioField), so this is scoped to `.custom-control-label` rather
+// than a bare `label` selector.
+.custom-control {
+  .custom-control-label {
     font-weight: $btn-font-weight;
 
     .badge-id {
@@ -55,30 +63,33 @@
 
 // Theme- AND variant-aware "pressed" styles for button-styled
 // radios/checkboxes that drive their active state via
-// `:has(input:checked)` rather than the BS3 `.active` class.
+// `:has(input:checked)`.
 //
 // Each `.btn-{variant}` exposes its active-state colors as CSS
-// custom properties (computed via BS3's `darken()` logic, matching
-// what `button-variant` generates internally for `.active`). The
+// custom properties (base color/bg/border per variant, darkened the
+// same way BS4's `button-variant` mixin darkens `.active`). The
 // `button-active-state` mixin then references those custom
 // properties — variant-agnostic. Whichever `.btn-{variant}` class
-// the element has, the right colors apply automatically. Dark
-// themes get dark pressed colors for free, since the source vars
-// are theme-mapped (`$BUTTON_*` → `$btn-default-*` etc. in
-// `_map_theme_vars_to_bootstrap_vars.scss`).
+// the element has, the right colors apply automatically. Text color
+// per variant comes from `color-yiq()` against that variant's
+// background, not a hardcoded white, so a light variant background
+// (e.g. a pale warning color) still gets readable dark text.
 //
-// Sass `@extend .btn-default.active` won't work — compound
+// Sass `@extend .btn-secondary.active` won't work — compound
 // selectors are no longer extendable.
 $btn-active-variants: (
-  default: ($btn-default-color, $btn-default-bg, $btn-default-border),
-  primary: ($btn-primary-color, $btn-primary-bg, $btn-primary-border),
-  success: ($btn-success-color, $btn-success-bg, $btn-success-border),
-  info: ($btn-info-color, $btn-info-bg, $btn-info-border),
-  warning: ($btn-warning-color, $btn-warning-bg, $btn-warning-border),
-  danger: ($btn-danger-color, $btn-danger-bg, $btn-danger-border),
+  secondary: ($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, $BUTTON_BORDER_COLOR),
+  primary: (color-yiq($primary), $primary, darken($primary, 5%)),
+  // .btn-success uses $btn-success-bg (a darker green), not $success
+  // -- see mo/_map_theme_to_bootstrap4.scss.
+  success: (color-yiq($btn-success-bg), $btn-success-bg,
+            darken($btn-success-bg, 5%)),
+  info: (color-yiq($info), $info, darken($info, 5%)),
+  warning: (color-yiq($warning), $warning, darken($warning, 5%)),
+  danger: (color-yiq($danger), $danger, darken($danger, 5%)),
   // MO's `.btn-outline-default` (see `_links_buttons_alerts.scss`)
-  // — uses input vars rather than the BS3 button vars.
-  outline-default: ($input-color, $input-bg, $input-border)
+  // — uses input vars rather than the button vars.
+  outline-default: ($input-color, $input-bg, $input-border-color)
 );
 
 @each $variant, $colors in $btn-active-variants {
@@ -114,105 +125,11 @@ $btn-active-variants: (
   @include button-active-state;
 }
 
-// TEMPORARY, through .custom-radio below -- all of this stands in
-// for Bootstrap 4's .custom-control/.custom-checkbox/.custom-radio
-// CSS (BS3 has none) and the BS3 label-spacing collisions it
-// creates. Delete this whole block on the BS4 cutover merge. Scoped
-// to what ButtonStyleCheckbox/ButtonStyleRadio need: checked/
-// unchecked/focus, no indeterminate.
-//
-// Two-zone split: a fixed width for the custom-control graphic, the
-// rest to the label zone. Centers the graphic in both axes via
-// flexbox, not offset math -- BS4's `top`/`left: -1.5rem` offsets
-// assume the graphic sits in padding reserved by a label that also
-// wraps text, which isn't this shape (text lives in a separate
-// sibling `.label-zone`).
-//
-// Sizes below are literal px, not rem -- BS3's scaffolding sets
-// `html { font-size: 10px }` on purpose (so BS3's internal rem math
-// is a clean 10px grid), so `1rem` here would be 10px, not the ~16px
-// a checkbox needs to read clearly.
+// ButtonStyleCheckbox/ButtonStyleRadio's two-zone split: a fixed
+// width for the custom-control graphic, the rest to the label zone.
 .checkbox-zone,
 .radio-zone {
-  display: flex;
-  flex: 0 0 24px;
-  align-items: center;
-  justify-content: center;
-}
-
-// `label-zone` is a `<label>` when `label_wrap: true` -- also needs
-// the BS3 `label { margin-bottom: 5px }` override below.
-label.label-zone {
-  margin-bottom: 0;
-}
-
-.custom-control {
-  position: relative;
-  display: block;
-}
-
-.custom-control-input {
-  position: absolute;
-  z-index: -1;
-  width: 16px;
-  height: 16px;
-  opacity: 0;
-}
-
-label.custom-control-label {
-  position: relative;
-  display: block;
-  width: 16px;
-  height: 16px;
-  margin-bottom: 0;
-  cursor: pointer;
-
-  &::before,
-  &::after {
-    position: absolute;
-    inset: 0;
-    display: block;
-    content: "";
-  }
-
-  &::before {
-    background-color: $input-bg;
-    border: 1px solid $input-border;
-  }
-
-  &::after {
-    background: 50% / 50% 50% no-repeat;
-  }
-}
-
-// Not `$component-active-bg` -- that maps to `$MENU_HOVER_BG_COLOR`
-// (see _map_theme_vars_to_bootstrap_vars.scss), the same pale color
-// as a dropdown row's hover background, so a checked box was close
-// to invisible on most themes. `$link-color` reads clearly checked
-// on every theme, and matches the link text beside it in the row.
-.custom-control-input:checked ~ .custom-control-label::before {
-  background-color: $link-color;
-  border-color: $link-color;
-}
-
-.custom-control-input:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 0.2rem rgba($link-color, 0.25);
-}
-
-.custom-checkbox .custom-control-label::before {
-  border-radius: $border-radius-base;
-}
-
-.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
-}
-
-.custom-radio .custom-control-label::before {
-  border-radius: 50%;
-}
-
-.custom-radio .custom-control-input:checked ~ .custom-control-label::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  flex: 0 0 1.5rem;
 }
 
 // Remove browser default gradients on select elements
@@ -230,7 +147,7 @@ select.form-control {
 input.has-error,
 textarea.has-error,
 select.has-error {
-  border-color: $alert-danger-border !important;
+  border-color: $danger !important;
 }
 
 // got this trick from:
@@ -276,7 +193,7 @@ a.filter-only {
 }
 
 .btn.text-danger {
-  color: $brand-danger !important;
+  color: $danger !important;
 }
 
 .name-radio {
@@ -290,7 +207,7 @@ form {
     padding-top: 1rem;
     padding-bottom: 1rem;
 
-    .panel-title {
+    .card-title {
       padding-bottom: 1.5rem;
     }
   }
@@ -458,20 +375,19 @@ form {
   }
 }
 
-.panel-body {
-  .row:last-child .form-group,
+.card-body {
   > .autocompleter:last-child .form-group.dropdown:last-child,
   // Help now renders as a sibling after .form-group (#4911), so an
   // autocompleter with help text has .help-block, not .form-group, as
-  // its actual last child.
+  // its last child.
   > .autocompleter:last-child .help-block:last-child,
   > .form-group:last-child
   {
     margin-bottom: 0.25rem;
   }
 
-  + .panel-collapse {
-    .panel-body {
+  + .card-collapse {
+    .card-body {
       padding-top: 0 !important;
     }
   }
