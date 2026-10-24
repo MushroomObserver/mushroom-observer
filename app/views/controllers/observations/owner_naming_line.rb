@@ -31,7 +31,7 @@ module Views::Controllers::Observations
                class: "obs_owner_naming_link_#{owner_name.id}"
              ))
       whitespace
-      small(class: "owner-naming-flag") do
+      small(class: "text-nowrap owner-naming-flag") do
         "(#{:show_observation_owner_id.l})"
       end
     end
