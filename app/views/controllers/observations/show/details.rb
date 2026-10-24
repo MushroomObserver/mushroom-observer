@@ -93,10 +93,10 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def inline_tab_item(tab_class)
     tab = tab_class.new(observation: @obs)
-    Link(type: :get, tab: tab,
-         class: Components::InlineLinkBlock.item_class(
-           tab.html_options[:class]
-         ))
+    Components::Link.new(
+      type: :get, tab: tab,
+      class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
+    )
   end
 
   # Matches the gate `Observations::FieldSlipsController` enforces.
