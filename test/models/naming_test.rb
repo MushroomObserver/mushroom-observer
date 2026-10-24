@@ -206,6 +206,32 @@ class NamingTest < UnitTestCase
     end
   end
 
+  def test_create_emails_tracker_link_targets_tracked_name
+    NameTracker.all.map(&:destroy)
+    genus = names(:agaricus)
+    NameTracker.create!(user: katrina, name: genus)
+    katrina.update!(email_html: false)
+    expected = MO.http_domain +
+               Rails.application.routes.url_helpers.
+               edit_tracker_of_name_path(genus.id)
+
+    perform_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
+      Naming.create(
+        observation: observations(:coprinus_comatus_obs),
+        name: names(:agaricus_campestris),
+        vote_cache: 0,
+        user: dick
+      )
+    end
+
+    mail = ActionMailer::Base.deliveries.find { |m| m.to == [katrina.email] }
+    assert_not_nil(mail, "Genus tracker should get a naming notification")
+    assert_includes(
+      mail.body.to_s, expected,
+      "Disable-tracking link should edit the tracker on the tracked genus"
+    )
+  end
+
   def test_reason_default
     assert(Naming::Reason.new({}, 1).default?)
     assert_not(Naming::Reason.new({}, 2).default?)
