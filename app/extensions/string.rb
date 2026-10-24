@@ -31,6 +31,7 @@
 #  ---
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
+#  strip_textile_emphasis:: Remove Textile bold/italic markers.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.
 #  is_ascii_character?:: Does string start with ASCII character?
@@ -622,6 +623,12 @@ class String
   # This gets rid of them both. Turns all newlines into single spaces.
   def wring_out_textile
     gsub("\r\n", " ").squeeze(" ")
+  end
+
+  # A name copied from a rendered page keeps its display_name markup,
+  # e.g. "**__Amanita__** Pers."
+  def strip_textile_emphasis
+    gsub(/\*\*|__/, "")
   end
 
   # Generate a string of random characters of length +len+.  By default it
