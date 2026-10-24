@@ -31,7 +31,7 @@ module Views::Layouts
       "px-card"
 
     def view_template
-      Row(id: "title_bar", class: "mb-2") do
+      Row(id: "title_bar", class: "mb-1") do
         render_mobile_top_row unless suppress_title?
         render_left_column unless suppress_title?
         render_right_column if show_right_column?
