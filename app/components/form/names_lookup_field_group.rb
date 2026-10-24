@@ -74,9 +74,10 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     ids.join("\n")
   end
 
-  # Override to use display_name for names (includes formatting)
+  # search_name keeps the author, which singles out the stored id where
+  # text_name could match homonyms. Must be plain: the textarea resubmits it.
   def prefill_via_id(val, _type)
-    Name.find(val.to_i).display_name(current_user)
+    Name.find(val.to_i).search_name
   rescue ActiveRecord::RecordNotFound
     val
   end

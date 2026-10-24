@@ -85,6 +85,23 @@ module Observations
       assert_equal(:observations, session[:search_type])
     end
 
+    # A name stored by id (e.g. a project checklist link) prefills as
+    # plain text, and resubmitting that text matches the same Name.
+    def test_names_lookup_id_prefills_plain_resubmittable_name
+      name = names(:coprinus_comatus)
+      login
+      @controller.find_or_create_query(:Observation,
+                                       names: { lookup: [name.id] })
+      get(:new)
+      assert_select("textarea#query_observations_names_lookup",
+                    text: name.search_name)
+
+      post(:create, params: { query_observations: {
+             names: { lookup: name.search_name }
+           } })
+      assert_no_flash
+    end
+
     # Test that multiple users in by_users are properly prefilled
     def test_new_observations_search_form_prefilled_with_multiple_users
       user1 = users(:rolf)
