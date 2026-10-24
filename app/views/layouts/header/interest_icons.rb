@@ -82,7 +82,7 @@ module Views::Layouts
     # border is what visually marks this one as "your current state",
     # not clickable.
     def icon_item(size, kind, alt_key)
-      Button(tag: :span, variant: :outline, class: "disabled px-1") do
+      Button(tag: :span, variant: :outline, class: "disabled p-0") do
         interest_icon(size, kind, alt_key)
       end
     end
@@ -124,7 +124,7 @@ module Views::Layouts
     # button's job now, not the icon's (see `interest_icon`).
     def interest_button(method, path, kind:, alt_key:, params:)
       Button(type: method, target: path, name: alt_key.l(object: type.l),
-             variant: :link, class: "px-1", params:,
+             variant: :link, class: "p-0", params:,
              form: { class: "interest-link" },
              data: { turbo_stream: "true", placement: "bottom",
                      tooltip_container: TOOLTIP_CONTAINER }) do
