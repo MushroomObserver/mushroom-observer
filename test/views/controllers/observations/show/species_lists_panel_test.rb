@@ -97,10 +97,9 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     assert_html(html, "#{form_selector} button svg.mo-icon-remove")
     assert_html(html, "#{form_selector} button .sr-only",
                 text: :remove.ti)
-    # Must render inside InlineLinkBlock's wrapper span -- that's what
+    # Must render inside InlineLinkBlock's wrapper -- that's what
     # supplies the group's spacing from the list link beside it.
-    # rubocop:disable-next MO/RedundantTagInSelector, MO/NoCosmeticClassAssertion
-    assert_html(html, "li span.inline-link-block #{form_selector}")
+    assert_html(html, ".inline-link-block #{form_selector}")
   end
 
   private

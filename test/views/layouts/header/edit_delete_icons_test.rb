@@ -62,12 +62,13 @@ module Views::Layouts
       html = render_icons(user: @owner)
 
       assert_html(html, ".object_edit .mo-icon-read-only")
-      # Must render inside InlineLinkBlock's wrapper span -- that's
-      # what gives it the same spacing/size as the edit/delete icons
-      # beside it, instead of the sprite's larger default size.
-      # rubocop:disable-next MO/RedundantTagInSelector
+      # Must render inside InlineLinkBlock's wrapper -- that's what
+      # gives it the same spacing/size as the edit/delete icons beside
+      # it, instead of the sprite's larger default size. The ml-3 here
+      # (vs. other InlineLinkBlock callers' default ml-2) confirms the
+      # title bar's margin_class: "ml-3" override took effect.
       assert_html(html,
-                  ".object_edit span.inline-link-block.ml-3 " \
+                  ".object_edit .inline-link-block.ml-3 " \
                   ".mo-icon-read-only")
     end
 

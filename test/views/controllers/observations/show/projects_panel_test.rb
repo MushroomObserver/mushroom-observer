@@ -59,10 +59,9 @@ class Views::Controllers::Observations::Show::ProjectsPanelTest <
       id: obs.id, project_id: project.id, commit: "remove"
     )}']"
     assert_html(member_html, "#{form_selector} button svg.mo-icon-remove")
-    # Must render inside InlineLinkBlock's wrapper span -- that's what
+    # Must render inside InlineLinkBlock's wrapper -- that's what
     # supplies the group's spacing from the project link beside it.
-    # rubocop:disable-next MO/RedundantTagInSelector, MO/NoCosmeticClassAssertion
-    assert_html(member_html, "li span.inline-link-block #{form_selector}")
+    assert_html(member_html, ".inline-link-block #{form_selector}")
 
     non_member_html = render(panel_with(obs, users(:rolf)))
     assert_no_html(non_member_html, form_selector)
