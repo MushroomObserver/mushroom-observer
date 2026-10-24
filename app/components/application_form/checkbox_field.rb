@@ -254,8 +254,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       resolved_label_text
     end
 
+    # `d-flex align-items-center` centers the help-collapse trigger
+    # (a sibling of <label>, not nested in it) against the checkbox +
+    # label text -- plain inline flow has no shared vertical-alignment
+    # context between them, same reasoning as FieldLabelRow.
     def boolean_wrap_class
-      classes = "checkbox"
+      classes = "checkbox d-flex align-items-center"
       classes += " #{wrapper_options[:wrap_class]}" if wrap_class?
       classes
     end

@@ -44,85 +44,6 @@
   font-size: inherit;
 }
 
-// old classes, replace
-
-.icon-addon {
-  position: relative;
-  display: block;
-}
-
-.icon-addon:after,
-.icon-addon:before {
-  display: table;
-  content: " ";
-}
-
-.icon-addon:after {
-  clear: both;
-}
-
-.icon-addon.addon-md .mo-icon,
-.icon-addon .mo-icon,
-.icon-addon.addon-md .fa,
-.icon-addon .fa {
-  position: absolute;
-  z-index: 10;
-  left: 10px;
-  font-size: 14px;
-  width: 20px;
-  margin-left: -2.5px;
-  text-align: center;
-  padding: 10px 0;
-  top: 1px;
-  color: $input-bg-disabled;
-}
-
-.icon-addon.addon-lg .form-control {
-  line-height: 1.33;
-  font-size: 18px;
-  padding: 10px 16px 10px 40px;
-}
-
-.icon-addon.addon-sm .form-control {
-  padding: 5px 10px 5px 28px;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.icon-addon.addon-lg .fa,
-.icon-addon.addon-lg .mo-icon {
-  font-size: 18px;
-  margin-left: 0;
-  left: 11px;
-  top: 4px;
-}
-
-.icon-addon.addon-md .form-control,
-.icon-addon .form-control {
-  padding-left: 30px;
-  float: left;
-  font-weight: normal;
-}
-
-.icon-addon.addon-sm .fa,
-.icon-addon.addon-sm .mo-icon {
-  margin-left: 0;
-  font-size: 12px;
-  left: 5px;
-  top: 1px
-}
-
-.icon-addon .form-control:focus + .mo-icon,
-.icon-addon:hover .mo-icon,
-.icon-addon .form-control:focus + .fa,
-.icon-addon:hover .fa {
-  color: $input-color;
-}
-
-.input-group .icon-addon .form-control {
-  border-radius: 0;
-}
-
 // Flag emoji render noticeably smaller than the `.lang-flag` PNGs
 // they replaced (~2/3 the linear size, roughly half the visual
 // area) — bump back up. `line-height: 1` keeps the taller glyph from
@@ -200,8 +121,7 @@ tbody.collapse.in {
   // SVG icon (see Components::Icon) sized relative to the
   // surrounding font-size, same scale factor the old font-glyph's
   // font-size: 112% used, so existing font-size-based overrides
-  // throughout this file (.icon-addon's size variants, etc.) keep
-  // working unchanged.
+  // throughout this file keep working unchanged.
   display: inline-block;
   position: relative;
   width: 1.12em;
@@ -220,9 +140,14 @@ tbody.collapse.in {
 // .btn: plain Link::Get (.inline-icon-link sets top: 0 instead) and
 // the sidebar heading icons. The `> span >` variants cover
 // Components::Icon's title: wrap (moves tooltip attrs off the <svg>
-// onto a wrapping <span>).
-a:not(.btn):not(.inline-icon-link) > .mo-icon,
-a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
+// onto a wrapping <span>). Excludes `.info-collapse-trigger` (and any
+// other `.inline-flex-center` trigger) -- those are icon-only, flex-
+// centered against their row's siblings, not paired with adjacent
+// text, so this baseline nudge only pushes them out of alignment.
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > .mo-icon,
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > span > .mo-icon,
 .list-group-item > .mo-icon,
 .list-group-item > span > .mo-icon {
   top: 2px;

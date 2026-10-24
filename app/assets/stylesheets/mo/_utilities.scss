@@ -436,6 +436,12 @@
   padding: 1rem !important;
 }
 
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- see .px-card below for the full explanation.
+.p-card {
+  padding: 0.75rem !important;
+}
+
 .p-4 {
   padding: 1.5rem !important;
 }
@@ -522,6 +528,30 @@
 .px-3 {
   padding-left: 1rem !important;
   padding-right: 1rem !important;
+}
+
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- the padding a card's body uses, applied here to
+// non-card chrome (nav bars, page-title strip) that wants to sit
+// flush with card content elsewhere on the page. See #5527.
+.px-card {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+// A Bootstrap 4 `.row` grid utility -- bootstrap-sass (BS3) has no
+// equivalent, so this hand-writes the mechanism: zero the row's
+// negative gutter margin, and zero the padding on its direct column
+// children. See #5527.
+.no-gutters {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
 }
 
 .pl-0 {
@@ -870,6 +900,10 @@
     margin-left: 0.5em !important;
   }
 
+  .ml-sm-0 {
+    margin-left: 0 !important;
+  }
+
   .ml-sm-2 {
     margin-left: 0.5em !important;
   }
@@ -886,6 +920,11 @@
   .px-sm-0 {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .px-sm-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 
   .px-sm-3 {

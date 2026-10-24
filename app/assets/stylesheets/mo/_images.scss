@@ -93,7 +93,7 @@ svg.placeholder {
 // `.btn-group-xs > .btn` sizing never applies -- padding/font-size
 // are custom instead.
 .vote-btn-group {
-  font-size: 1.1rem;
+  font-size: 0.75rem; // 12px at the 16px root -- see issue #5527
 
   > form.button_to,
   > .image-vote {
@@ -148,14 +148,14 @@ svg.placeholder {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  max-width: 200px;
-  height: 7px;
+  max-width: 12.5rem;
+  height: 0.4375rem;
   margin-bottom: 0;
   background-color: rgba($white, 0.5);
 
   .progress-bar {
-    font-size: 12px;
-    line-height: 5px;
+    font-size: 0.75rem;
+    line-height: 0.3125rem;
     color: $white;
     background-color: $white;
   }

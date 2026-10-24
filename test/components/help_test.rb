@@ -7,32 +7,32 @@ class HelpTest < ComponentTestCase
   def test_plain_block_with_string
     html = render_help(element: :p, content: "Help text")
 
-    # Default plain shape: a `help-block`-classed element.
-    assert_html(html, "p.help-block", text: "Help text")
+    # Default plain shape: a `help-block form-text`-classed element.
+    assert_html(html, "p.help-block.form-text", text: "Help text")
   end
 
   def test_plain_block_with_block_content
     html = render_help(element: :div) { "From block" }
 
     # Block-form content takes precedence over `content:`.
-    assert_html(html, ".help-block", text: "From block")
+    assert_html(html, ".help-block.form-text", text: "From block")
   end
 
   # rubocop:disable-next MO/RedundantTagInSelector
   def test_content_only_uses_default_div_element
     html = render_help(content: "Help text")
 
-    assert_html(html, "div.help-block", text: "Help text")
+    assert_html(html, "div.help-block.form-text", text: "Help text")
   end
 
-  # The `well:` flavour wraps content in a Bootstrap well; the
-  # element kwarg is intentionally ignored for the well shape --
-  # it always renders as a div regardless of the `:p` passed in.
+  # The `well:` flavour wraps content in a Well; the element kwarg
+  # is intentionally ignored for the well shape -- it always renders
+  # as a div regardless of the `:p` passed in.
   # rubocop:disable-next MO/RedundantTagInSelector
   def test_well_wraps_in_bootstrap_well
     html = render_help(element: :p, content: "Help", well: true)
 
-    assert_html(html, "div.well.well-sm.help-block.position-relative",
+    assert_html(html, "div.well.help-block.position-relative",
                 text: "Help")
   end
 
@@ -43,19 +43,21 @@ class HelpTest < ComponentTestCase
     html = render_help(element: :div, content: "Help", arrow: :up)
 
     assert_html(html, ".well.help-block", text: "Help")
-    assert_html(html, ".arrow-up")
+    hide_classes = Components::Column.mobile_hide_classes.join(".")
+    assert_html(html, ".arrow-up.#{hide_classes}")
   end
 
   def test_arrow_down_renders_arrow_down_sibling
     html = render_help(element: :div, content: "Help", arrow: :down)
 
-    assert_html(html, ".arrow-down")
+    hide_classes = Components::Column.mobile_hide_classes.join(".")
+    assert_html(html, ".arrow-down.#{hide_classes}")
   end
 
   def test_extra_class_appended_to_plain_block
     html = render_help(element: :p, content: "Help", class: "extra-thing")
 
-    assert_html(html, ".help-block.extra-thing", text: "Help")
+    assert_html(html, ".help-block.form-text.extra-thing", text: "Help")
   end
 
   def test_id_and_extra_attrs_passed_through

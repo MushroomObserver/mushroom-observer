@@ -42,7 +42,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
     @img_id = @img_id.id if @img_id.is_a?(::Image)
     @data = build_render_data(@img_instance, @img_id)
 
-    Row do
+    Row(class: "no-gutters") do
       render_image_column
       render_form_column
       render_control_buttons
@@ -109,7 +109,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   end
 
   def render_thumbnail_button
-    div(class: "top-left p-4") { button_to_set_thumb_img }
+    div(class: "top-left p-card") { button_to_set_thumb_img }
   end
 
   # A browser-native `observation[thumb_image_id]` radio group across
@@ -140,7 +140,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   end
 
   def render_remove_button
-    div(class: "top-right p-4") do
+    div(class: "top-right p-card") do
       remove_image_button(@img_instance&.id)
     end
   end

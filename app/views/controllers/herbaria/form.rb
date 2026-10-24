@@ -31,7 +31,6 @@ module Views::Controllers::Herbaria
       hidden_field(:back, value: @back) if @back
       render_name_field
       render_personal_user_field
-      submit(submit_text, center: true)
       render_code_field
       render_location_section
       render_contact_fields
@@ -105,7 +104,8 @@ module Views::Controllers::Herbaria
         :personal,
         label: :create_herbarium_personal,
         help: personal_checkbox_help,
-        help_collapse: true
+        help_collapse: true,
+        wrap_class: "mb-3"
       )
     end
 

@@ -44,7 +44,8 @@ module Views::Controllers::Names
     end
 
     def render_admin_locked_checkbox
-      checkbox_field(:locked, label: :form_names_locked, wrap_class: "mt-3")
+      checkbox_field(:locked, label: :form_names_locked,
+                              wrap_class: "mt-3 mb-3")
     end
 
     def render_editable_fields
@@ -57,14 +58,17 @@ module Views::Controllers::Names
     end
 
     def render_icn_id_field
-      div(class: "form-inline my-3") do
-        text_field(:icn_id,
-                   label: :form_names_icn_id,
-                   inline: true,
-                   size: 8) do |f|
-          f.with_append do
-            Help(element: :p, content: :form_names_identifier_help.l)
-          end
+      text_field(:icn_id,
+                 label: :form_names_icn_id,
+                 inline: true,
+                 size: 8,
+                 wrap_class: "my-3") do |f|
+        f.with_append do
+          # w-100 wraps this to a new line within the .form-inline
+          # flex row, instead of flowing beside the input and
+          # overflowing the container.
+          Help(element: :p, class: "w-100",
+               content: :form_names_identifier_help.l)
         end
       end
     end
@@ -156,7 +160,8 @@ module Views::Controllers::Names
       div(class: "my-4 mx-0") do
         checkbox_field(:misspelling,
                        label: :form_names_misspelling,
-                       checked: @misspelling)
+                       checked: @misspelling,
+                       wrap_class: "mb-3")
 
         autocompleter_field(
           :correct_spelling,

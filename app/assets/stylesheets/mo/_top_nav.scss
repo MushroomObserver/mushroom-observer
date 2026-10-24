@@ -12,9 +12,8 @@
 // `.mb-2`'s margin (Bootstrap spacing utilities are `!important`,
 // hence the `!important` here too) only supplies a gap while
 // `#search_nav` is collapsed and invisible. Open or mid-animation,
-// the two navbars sit flush against each other with no margin
-// between them, matching how the two rows looked before they were
-// split into separate navbars.
+// `#search_nav` carries the same `.mb-2` class, so stacking both
+// would double the space between the two navbars.
 #top_nav:has(+ #search_nav.in),
 #top_nav:has(+ #search_nav.collapsing) {
   margin-bottom: 0 !important;
@@ -30,11 +29,12 @@
   @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
-// Space between the interest-icon buttons -- em, not rem, so it
-// scales with the surrounding context's font-size (same reasoning
-// as .inline-link-block in _links_buttons_alerts.scss).
-.interest-eyes {
-  gap: 0.5em;
+// Space between the interest-icon buttons -- margin, not flex `gap`,
+// since Safari leaks `gap` past the first/last item here. em, not
+// rem, so it scales with the surrounding context's font-size (same
+// reasoning as .inline-link-block in _links_buttons_alerts.scss).
+.interest-eyes > :not(:first-child) {
+  margin-left: 0.5em;
 }
 
 // BS3→BS4 navbar bridge. Only fires where BOTH classes coexist - the
@@ -117,12 +117,6 @@
       background-color: $navbar-default-link-hover-bg !important;
     }
   }
-
-  .navbar_right {
-    >ul.navbar-right>li {
-      @extend .ml-4;
-    }
-  }
 }
 
 // If sorter is on the right:
@@ -175,8 +169,9 @@
 @media screen and (max-width: $screen-xs-min) {
   #top_nav {
     .top_nav_button {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
+      // 5px at the 16px root -- see issue #5527
+      padding-left: 0.3125rem;
+      padding-right: 0.3125rem;
     }
     .top_nav_button:not(.btn-success) {
       border-color: transparent;

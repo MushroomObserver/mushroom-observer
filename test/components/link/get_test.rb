@@ -23,11 +23,11 @@ class LinkGetTest < ComponentTestCase
     assert_html(html, "a .sr-only", text: :edit.ti)
   end
 
-  def test_show_label_responsive_hides_text_on_xs_shows_from_sm
+  def test_show_label_responsive_hides_text_on_xs_shows_from_md
     html = render_link(name: :edit.ti, target: @path, icon: :edit,
                        show_label: :responsive)
 
-    assert_html(html, "a .d-none.d-sm-inline", text: :edit.ti)
+    assert_html(html, "a .d-none.d-md-inline", text: :edit.ti)
     assert_no_html(html, "a .sr-only")
   end
 

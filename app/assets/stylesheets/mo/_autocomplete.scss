@@ -2,20 +2,22 @@
 // autocompletion
 // --------------------------------------------------
 
-// Label-row icons (has-id-indicator, find/keep/edit/create) read too
-// small at the default 1.12em next to the bold field label beside
-// them. Vertical alignment is the label row's job now (FieldLabelRow's
-// d-flex align-items-center), not a per-icon `top:` guess.
+// Label-row icons (has-id-indicator, find/keep/edit/create,
+// info-collapse-trigger) read too small at the default 1.12em next
+// to the bold field label beside them. Vertical alignment is the
+// label row's job now (FieldLabelRow's d-flex align-items-center),
+// not a per-icon `top:` guess.
 // `.has-id-indicator` is a wrapping span, not the icon itself (a bare
 // svg can't take padding -- see autocompleter_field.rb), so this is
-// a descendant selector like the other three, and its 2-class
-// specificity beats the base `.mo-icon` rule in _icons.scss on its
-// own merits, regardless of _icons.scss being @import-ed after this
-// file in mushroom_observer.scss.
+// a descendant selector like the others, and its 2-class specificity
+// beats the base `.mo-icon` rule in _icons.scss regardless of
+// _icons.scss being @import-ed after this file in
+// mushroom_observer.scss.
 .has-id-indicator .mo-icon,
 .find-btn .mo-icon,
 .keep-edit-toggle .mo-icon,
-.create-button .mo-icon {
+.create-button .mo-icon,
+.info-collapse-trigger .mo-icon {
   width: 1.3em;
   height: 1.3em;
 }
