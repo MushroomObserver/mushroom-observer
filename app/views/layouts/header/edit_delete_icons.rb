@@ -24,7 +24,7 @@ module Views::Layouts
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      div(class: "h5 my-1 d-flex align-items-center object_edit") do
+      div(class: "h4 my-1 d-flex align-items-center object_edit") do
         InlineLinkBlock(items: [reflection_item, edit_item,
                                 delete_item].compact)
       end
