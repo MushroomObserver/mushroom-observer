@@ -19,7 +19,7 @@ class Components::Modal::ProgressSpinner < Components::Base
     Modal(
       id: MODAL_ID,
       header: false,
-      dialog_class: "modal-dialog modal-sm",
+      size: :sm,
       body_class: "text-center",
       body_id: BODY_ID,
       title_id: CAPTION_ID,
