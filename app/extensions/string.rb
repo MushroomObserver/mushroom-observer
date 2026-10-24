@@ -31,7 +31,7 @@
 #  ---
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
-#  strip_textile_emphasis:: Remove Textile bold/italic markers.
+#  strip_textile_for_names:: Remove the Textile markup Names use.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.
 #  is_ascii_character?:: Does string start with ASCII character?
@@ -625,9 +625,9 @@ class String
     gsub("\r\n", " ").squeeze(" ")
   end
 
-  # A name copied from a rendered page keeps its display_name markup,
-  # e.g. "**__Amanita__** Pers."
-  def strip_textile_emphasis
+  # Remove whatever Textile markup Name display strings carry, so a name
+  # copied from a rendered page parses: "**__Amanita__** Pers."
+  def strip_textile_for_names
     gsub(/\*\*|__/, "")
   end
 

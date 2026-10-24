@@ -26,10 +26,10 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(false, "0".to_boolean)
   end
 
-  def test_strip_textile_emphasis
+  def test_strip_textile_for_names
     assert_equal("Amanita Pers.",
-                 "**__Amanita__** Pers.".strip_textile_emphasis)
-    assert_equal("Amanita", "Amanita".strip_textile_emphasis)
+                 "**__Amanita__** Pers.".strip_textile_for_names)
+    assert_equal("Amanita", "Amanita".strip_textile_for_names)
   end
 
   def test_random_no_seed_string
