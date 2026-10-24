@@ -2,10 +2,11 @@
 
 # Shared "icon + optional text" rendering — the icon glyph plus a
 # text `<span>` whose visibility depends on `show_label:`: `:hidden`
-# is `.sr-only` (default), `:responsive` is hidden on `xs`, visible
-# at `sm`+ (for a cramped inline control that can spare the label
-# only once there's room), `:always` is visible at every breakpoint
-# (for a full-width heading with no space pressure to hide behind).
+# is `.sr-only` (default), `:responsive` is hidden below `md`,
+# visible at `md`+ (for a cramped inline control that can spare the
+# label only once there's room), `:always` is visible at every
+# breakpoint (for a full-width heading with no space pressure to
+# hide behind).
 # Included by `Components::Button::Content`, in turn included
 # by both `Components::Button` and `Components::Link` (the `Link::Get`
 # family) -- so both get the optional active-icon/active-label swap

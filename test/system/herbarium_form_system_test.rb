@@ -143,7 +143,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       fill_in("herbarium_place_name", with: "genohlac gard france")
 
       # Wait for create button to appear, then click via JS
-      # (button text is hidden on small viewports via d-none d-sm-inline,
+      # (button text is hidden on small viewports via d-none d-md-inline,
       # so Cuprite can't click it directly)
       assert_selector(".create-button", visible: :all, wait: 5)
       btn = find(".create-button", visible: :all)
