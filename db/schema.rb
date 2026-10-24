@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_14_140000) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -96,7 +96,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_14_140000) do
     t.index ["import_source"], name: "index_external_links_on_import_source", unique: true
     t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
     t.index ["target_type", "target_id", "external_site_id", "external_id"], name: "index_external_links_on_target_and_site_and_extid", unique: true
-    t.index ["target_type", "target_id"], name: "index_external_links_on_target"
   end
 
   create_table "external_site_usages", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
