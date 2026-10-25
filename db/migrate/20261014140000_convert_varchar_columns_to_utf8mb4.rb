@@ -14,10 +14,18 @@
 #                     varchar against a 65,535 limit
 #   sort order        unchanged: over 71k names.text_name values, no
 #                     row changes position
-#   speed             observations.where, varchar(1024) over 643k
-#                     rows, in 56ms with ALGORITHM=INPLACE and
-#                     LOCK=NONE accepted -- widening is metadata,
-#                     since the stored bytes are already valid utf8mb4
+#   speed             metadata only where MySQL accepts INPLACE, a
+#                     full table-and-index rebuild (COPY) where it
+#                     refuses. Two things force COPY: a varchar whose
+#                     length prefix widens from one byte to two
+#                     (limit 64 through 85, where three times the
+#                     limit still fits in 255 bytes but four times
+#                     does not), and any index covering the column,
+#                     whose key length changes. Eight of these
+#                     columns sit in that band, eleven are indexed,
+#                     and the other 61 are metadata -- among them
+#                     observations.where, varchar(1024) and
+#                     unindexed, in 32ms over 668k rows
 #
 # Narrowing is the slow direction, so `down` is not the mirror of
 # `up` in cost: it has to read every value to confirm it still fits,
@@ -37,9 +45,10 @@
 # columns are dropped and rebuilt around the conversion, which also
 # rewrites their ':' literals as utf8mb4 -- the churn PR #5474
 # pinned to utf8mb3 in schema.rb, now legitimately the other way.
-# Dropping them first also keeps the operand conversion cheap: with
-# the generated columns in place it took 18s rather than milliseconds,
-# because every stored value had to be recomputed.
+# Dropping them first also keeps the operand conversion cheaper: with
+# the generated columns in place it took 18s against the 14s the
+# rebuild costs on its own, because every stored value had to be
+# recomputed as well.
 class ConvertVarcharColumnsToUtf8mb4 < ActiveRecord::Migration[7.2]
   IMPORT_TARGET =
     "(CASE WHEN relationship = 1 " \

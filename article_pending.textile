@@ -1,3 +1,2 @@
-|{white-space:nowrap}. 2026-10-22 | Fix a search field's checkmark showing before a match is selected | "PR#5526":https://github.com/MushroomObserver/mushroom-observer/pull/5526 |
-|{white-space:nowrap}. 2026-10-22 | Collapse form help text; reword Project date-range options | "PR#5518":https://github.com/MushroomObserver/mushroom-observer/pull/5518 |
-|{white-space:nowrap}. 2026-10-21 | Allow emoji anywhere text is entered | "PR#5506":https://github.com/MushroomObserver/mushroom-observer/pull/5506 |
+|{white-space:nowrap}. 2026-10-24 | Fix Name search failing after More Options from a Project | "PR#5533":https://github.com/MushroomObserver/mushroom-observer/pull/5533 |
+|{white-space:nowrap}. 2026-10-22 | Improve spacing and alignment in the page title bar | "PR#5520":https://github.com/MushroomObserver/mushroom-observer/pull/5520 |

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-25 (deploy-2026-10-25-08-00)
+
+- Backport title-bar owner-naming/id-badge redesign + `InlineLinkBlock` spacing from `nimmo-5348-bs4-cutover` ([PR5520](https://github.com/MushroomObserver/mushroom-observer/pull/5520), @nimmolo)
+- Promote five iNat scripts out of `script/run-once` ([PR5523](https://github.com/MushroomObserver/mushroom-observer/pull/5523), @mo-nathan)
+- Add `MO/NoRegexpEscape` cop; fix test assertions using it for substring checks ([PR5534](https://github.com/MushroomObserver/mushroom-observer/pull/5534), @nimmolo)
+- Scope `MO/NoRegexpEscape` to `test/`, drop production inline disables ([PR5535](https://github.com/MushroomObserver/mushroom-observer/pull/5535), @nimmolo)
+- Drop redundant `external_links` index and record what a migration costs ([PR5528](https://github.com/MushroomObserver/mushroom-observer/pull/5528), @mo-nathan)
+- Prefill names search with plain names; ignore name markup in `Lookup::Names` ([PR5533](https://github.com/MushroomObserver/mushroom-observer/pull/5533), @mo-nathan)
+
 ## 2026-10-22 (deploy-2026-10-22-07-06)
 
 - Rename `type-switch` controller to `collapse-switch`; add `RadioCollapse`; fix Support form ([PR5514](https://github.com/MushroomObserver/mushroom-observer/pull/5514), @nimmolo)

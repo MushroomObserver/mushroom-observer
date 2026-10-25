@@ -170,7 +170,7 @@ class SearchFormTest < ComponentTestCase
     # The text input should show the name
     lookup_input = doc.at_css("#query_observations_names_lookup")
     assert(lookup_input, "Should have names lookup input")
-    assert_equal(agaricus.display_name, lookup_input["value"],
+    assert_equal(agaricus.search_name, lookup_input["value"],
                  "Lookup input should be prefilled with name")
 
     # The hidden ID field should have the ID
