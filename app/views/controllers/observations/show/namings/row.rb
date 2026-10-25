@@ -28,7 +28,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   }.freeze
 
   def view_template
-    Row(class: "align-items-center naming-row",
+    Row(class: "d-flex align-items-center naming-row",
         id: "observation_naming_#{primary.id}") do
       Column(col: true, sm: 11) do
         render_main_columns
@@ -93,7 +93,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_main_columns
     render_mobile_label_row
-    Row(class: "align-items-center naming-columns") do
+    Row(class: "d-flex align-items-center naming-columns") do
       Column(**COLUMN_WIDTHS[:name]) { render_name_cell }
       Column(**COLUMN_WIDTHS[:proposer], class: "d-none d-sm-block") do
         render_proposer_cell
