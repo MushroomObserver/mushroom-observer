@@ -28,28 +28,42 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
 
   # Always at least the propose-naming button; the suggest-names
   # button only renders when the user is allowed to use it. Both
-  # `d-block` (stacked, no `<br>` needed) with `mb-2` each.
+  # flow inline (wrapping if too narrow) at `sm`+, where propose is
+  # visible -- see `render_buttons_spacer`.
   def render_buttons
-    render_propose_button
-    return unless suggest_namings_enabled?
-
-    render_suggest_button
+    div(class: "d-flex flex-wrap") do
+      render_propose_button
+      render_buttons_spacer if suggest_namings_enabled?
+      render_suggest_button if suggest_namings_enabled?
+    end
   end
 
   # Text-button variant of the propose-naming link (icon-only
-  # variant lives in the panel `Header` for mobile).
+  # variant lives in the panel `Header` for mobile). The responsive
+  # visibility lives on the wrapping div, not the button itself --
+  # `d-block`/`d-sm-block` on a `.btn` stretches it full-width.
   def render_propose_button
-    Button(
-      type: :modal,
-      name: :show_namings_propose_new_name.t,
-      target: new_observation_naming_path(
-        observation_id: @obs.id,
-        context: "namings_table"
-      ),
-      modal_id: "obs_#{@obs.id}_naming",
-      size: :sm,
-      class: "d-none d-sm-block mb-2 propose-naming-link"
-    )
+    div(class: "d-none d-sm-block mb-2") do
+      Button(
+        type: :modal,
+        name: :show_namings_propose_new_name.t,
+        target: new_observation_naming_path(
+          observation_id: @obs.id,
+          context: "namings_table"
+        ),
+        modal_id: "obs_#{@obs.id}_naming",
+        size: :sm,
+        class: "propose-naming-link"
+      )
+    end
+  end
+
+  # `.spacer` (`mo/_utilities.scss`) instead of a margin on either
+  # button -- see its comment there. `d-none d-sm-inline-block`
+  # mirrors Propose's visibility, so there's no stray gap before
+  # Suggest when Propose is hidden.
+  def render_buttons_spacer
+    span(class: "spacer d-none d-sm-inline-block")
   end
 
   # Gating: a thumb image must exist (so
