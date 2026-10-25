@@ -1,3 +1,15 @@
+// The name cell's rendered name/author/mod-links each need to stay
+// intact as a unit, but wrap freely between each other when the row
+// is too narrow to fit all three -- `small_author` already wraps the
+// author in `.text-nowrap`, and `.inline-link-block` is nowrap on its
+// own, so only the italic/bold name portion needs it here.
+.naming-row a {
+  b,
+  i {
+    white-space: nowrap;
+  }
+}
+
 // Namings is not a <table>, but has table-like layout properties
 .namings-table {
   .row {
