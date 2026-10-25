@@ -25,6 +25,18 @@
       text-decoration: none;
     }
   }
+
+  .btn-outline-default {
+    color: $white;
+    background-color: transparent;
+    border-color: $white;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: $black;
+    }
+  }
 }
 
 // lightgallery-core.scss's own rule builds this from $lg-path-images

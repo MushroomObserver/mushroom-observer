@@ -56,7 +56,8 @@ class Components::ImageFragment::LightboxCaption < Components::Base
   end
 
   def render_identify_ui
-    div(class: "obs-identify mb-3", id: "observation_identify_#{@obs.id}") do
+    div(class: "obs-identify mb-3 d-flex align-items-center",
+        id: "observation_identify_#{@obs.id}") do
       render_propose_naming_modal
       render_reviewed_toggle if @observation_view
     end
@@ -70,8 +71,8 @@ class Components::ImageFragment::LightboxCaption < Components::Base
         observation_id: @obs.id, context: "lightgallery"
       ),
       modal_id: "obs_#{@obs.id}_naming",
-      variant: :primary,
-      class: "d-inline-block propose-naming-link"
+      variant: :outline,
+      class: "propose-naming-link"
     )
   end
 
