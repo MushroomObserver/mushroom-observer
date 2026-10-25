@@ -22,6 +22,11 @@ class PrereleaseDeployTimeTest < UnitTestCase
     end
   end
 
+  # Unfrozen clock: by the time the report is built, now has moved on.
+  def test_now_is_not_reported_as_past
+    assert_no_match(/in the past/, PrereleaseDeployTime.new(now: true).report)
+  end
+
   def test_at_overrides_the_pr_time
     travel_to(NOW) do
       at = DeployTime.parse("08:00 tomorrow", local_zone: "Europe/London")

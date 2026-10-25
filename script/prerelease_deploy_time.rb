@@ -50,7 +50,7 @@ class PrereleaseDeployTime
 
     line = "Deploy time: #{@time.strftime("%Y-%m-%d %H:%M")} UTC " \
            "(from #{@source})"
-    line += " -- in the past" if @time < Time.now.utc
+    line += " -- in the past" if @source != "--now" && @time < Time.now.utc
     @source.start_with?("PR #") ? "#{line}\n#{RESET_HINT}" : line
   end
 
