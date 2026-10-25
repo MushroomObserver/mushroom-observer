@@ -209,6 +209,15 @@
   gap: 1rem !important;
 }
 
+// A fixed-width gap between flex items, for a flex-wrap row where a
+// margin on either sibling would travel with it onto a wrapped
+// line and indent it -- the spacer itself stays small enough to
+// remain on the first line instead.
+.spacer {
+  display: inline-block;
+  width: 1rem;
+}
+
 // Bootstrap 5's row/column gutter mechanism, backported: --bs-gutter-x
 // and --bs-gutter-y read via calc() by .row's margin and every
 // column's padding, so a .gx-*/.gy-*/.g-* class can override one
