@@ -9,8 +9,7 @@ class NamesLookupFieldGroupTest < ComponentTestCase
     @query = Query.lookup(:Observation)
   end
 
-  # Indirectly covers line 80 by asserting autocompleter value uses display_name
-  def test_autocompleter_value_uses_display_names
+  def test_autocompleter_value_uses_plain_search_names
     @query.names = { lookup: [@name.id] }
 
     value_seen = nil
@@ -29,7 +28,7 @@ class NamesLookupFieldGroupTest < ComponentTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(value_seen, @name.display_name)
+    assert_equal(@name.search_name, value_seen)
   end
 
   # Indirectly covers line 80 rescue by asserting unknown ID passes through
@@ -210,7 +209,7 @@ class NamesLookupFieldGroupTest < ComponentTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(value_seen, @name.display_name)
+    assert_includes(value_seen, @name.search_name)
   end
 
   def test_autocompleter_value_with_multiple_names
@@ -233,8 +232,8 @@ class NamesLookupFieldGroupTest < ComponentTestCase
 
     component.stub(:render, nil) { render_component(component) }
 
-    assert_includes(value_seen, @name.display_name)
-    assert_includes(value_seen, name2.display_name)
+    assert_includes(value_seen, @name.search_name)
+    assert_includes(value_seen, name2.search_name)
   end
 
   def test_autocompleter_hidden_value_is_ids_joined_by_newlines
