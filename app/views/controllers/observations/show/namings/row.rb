@@ -14,6 +14,19 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   prop :user, ::User
   prop :consensus, ::Observation::NamingConsensus
 
+  # Shared by `render_main_columns` and `render_mobile_label_row` --
+  # they need matching `xs:` widths to keep each mobile label above
+  # its value (two separate `.row`s don't share column tracks
+  # otherwise). No `xs:` for `proposer`: that column is hidden below
+  # `sm` (see `render_mobile_proposer_prefix`), and `xs:` for the
+  # other three sums to 12 without it.
+  COLUMN_WIDTHS = {
+    name: { xs: 5, sm: 4 },
+    proposer: { sm: 3 },
+    votes: { xs: 3, sm: 2 },
+    your_vote: { xs: 4, sm: 3 }
+  }.freeze
+
   def view_template
     Row(class: "align-items-center naming-row",
         id: "observation_naming_#{primary.id}") do
@@ -79,16 +92,50 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # ---- top-level layout pieces ----------------------------------
 
   def render_main_columns
-    Row(class: "align-items-center") do
-      Column(col: true, sm: 4) { render_name_cell }
-      Column(col: true, sm: 3) { render_proposer_cell }
-      Column(col: true, sm: 2) { render_vote_tally_cell }
-      Column(col: true, sm: 3) { render_your_vote_cell }
+    render_mobile_label_row
+    Row(class: "align-items-center naming-columns") do
+      Column(**COLUMN_WIDTHS[:name]) { render_name_cell }
+      Column(**COLUMN_WIDTHS[:proposer], class: "d-none d-sm-block") do
+        render_proposer_cell
+      end
+      Column(**COLUMN_WIDTHS[:votes]) { render_vote_tally_cell }
+      Column(**COLUMN_WIDTHS[:your_vote]) { render_your_vote_cell }
+    end
+  end
+
+  # Mobile column-header substitute -- a separate row, not each cell
+  # printing a label, so `align-items-end` can bottom-align every
+  # label (matches `Show::Namings::Header`'s row). The value row
+  # uses `align-items-center` instead, for its content.
+  def render_mobile_label_row
+    Row(class: "d-flex d-sm-none align-items-end naming-columns") do
+      Column(xs: COLUMN_WIDTHS[:name][:xs])
+      Column(xs: COLUMN_WIDTHS[:votes][:xs]) do
+        render_mobile_label(:votes.ti)
+      end
+      Column(xs: COLUMN_WIDTHS[:your_vote][:xs]) do
+        render_mobile_label(:show_namings_your_vote.t)
+      end
     end
   end
 
   def render_reasons_row
-    div(class: "naming-reasons small mt-1") { render_reasons }
+    div(class: "naming-reasons small mt-1") do
+      render_mobile_proposer_prefix
+      render_reasons
+    end
+  end
+
+  # Omitted for a MergedNaming with multiple proposers, where
+  # `@naming.user` is nil.
+  def render_mobile_proposer_prefix
+    proposer = @naming.user
+    return unless proposer
+
+    span(class: "d-inline d-sm-none") do
+      plain(:show_namings_proposed_by.t(user: proposer.unique_text_name))
+      whitespace
+    end
   end
 
   def render_eyes_column
@@ -120,13 +167,9 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   # ---- proposer cell --------------------------------------------
 
-  # Two branches: a MergedNaming with multiple proposers links to
-  # the occurrence's "matching observations" page; everything else
-  # renders the single proposer as a UserLink. Both prefix a
-  # mobile-only "User: " label so the row reads cleanly when the
-  # column headers are hidden on `xs`.
+  # Hidden below `sm` -- `render_mobile_proposer_prefix` covers
+  # mobile instead.
   def render_proposer_cell
-    render_mobile_label(:show_namings_user.t)
     if merged_with_multiple_proposers?
       render_matching_observations_link
     else
@@ -160,11 +203,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   # ---- vote tally cell ------------------------------------------
 
-  # "Consensus" column on `sm+`. Mobile-prefixes a "Consensus: "
-  # small-text label so the row stays readable when the column
-  # headers are hidden.
   def render_vote_tally_cell
-    render_mobile_label(:show_namings_consensus.t)
     span { render_vote_tally_inner }
   end
 
@@ -210,11 +249,9 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   # ---- your-vote cell -------------------------------------------
 
-  # Mobile label + the actual Votes::Form. Pass the form `primary`
-  # (not the MergedNaming) so the form binds to a real Naming
-  # record and routes correctly.
+  # `primary`, not the MergedNaming, so the form binds to a Naming
+  # record.
   def render_your_vote_cell
-    render_mobile_label(:show_namings_your_vote.t, block: true)
     render(::Views::Controllers::Observations::Namings::Votes::Form.new(
              naming: primary, user: @user, vote: user_vote,
              context: "namings_table"
@@ -295,16 +332,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   # ---- shared bits ----------------------------------------------
 
-  # Column-header replacement for `xs` viewports — the original
-  # column labels are hidden on small screens, so each cell
-  # prefixes its content with a tiny label that says what the
-  # value means.
-  def render_mobile_label(text, block: false)
-    display = block ? :"inline-block" : :inline
-    vis = Components::Column.visibility_classes(
-      show_at: :xs, hide_at: :sm, display: display
-    )
-    vis << "mr-4" unless block
-    small(class: class_names(vis)) { append_colon(text) }
+  def render_mobile_label(text)
+    small { append_colon(text) }
   end
 end
