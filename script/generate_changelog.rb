@@ -46,7 +46,7 @@ class ChangelogGenerator
   # A stacked PR can be merged into its parent branch long before the
   # parent reaches main; the PR pool reaches back this far before the
   # earliest deploy tag a run looks at.
-  POOL_LOOKBACK_DAYS = 365
+  POOL_LOOKBACK_DAYS = 90
   # The gh search bounds are calendar days, but a deploy tag's local
   # date can trail the UTC merge date of a PR deployed seconds before
   # it (a PR merged 00:03 UTC, tagged 20:04 the prior day local). Pad
