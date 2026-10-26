@@ -27,10 +27,10 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_form_column
-      span(class: "text-larger mb-3") do
+      div(class: "text-larger mb-3") do
         trusted_html(:observation.ti)
         whitespace
-        plain("##{@observation.id}")
+        IDBadge(object: @observation, size: :lg)
       end
       render(Form.new(@herbarium_record, observation: @observation,
                                          turbo: true))
