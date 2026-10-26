@@ -7,8 +7,6 @@ require("application_system_test_case")
 # Turbo navigate and made the search form disappear. Panel uses
 # Button::CollapseToggle (<button>) instead, which can't navigate.
 class SearchBarCollapseSystemTest < ApplicationSystemTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   # Test the full collapse-toggle lifecycle inside the top-nav turbo
   # search form:
   #   1. Switch top nav to the faceted observations search form.

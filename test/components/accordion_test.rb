@@ -5,8 +5,6 @@ require("test_helper")
 # Tests for Components::Accordion — the multi-pane collapse component
 # where only one pane is visible at a time.
 class AccordionTest < ComponentTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   def test_renders_accordion_shell_with_two_panes
     html = render_accordion do |a|
       a.with_pane(id: "view_42", expanded: true) { "VIEW_CONTENT" }

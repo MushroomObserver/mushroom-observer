@@ -4,8 +4,6 @@ require("test_helper")
 
 module Views::Controllers::Admin::BlockedIps
   class ManagerTest < ComponentTestCase
-    EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
     def setup
       super
       IpStats.reset!

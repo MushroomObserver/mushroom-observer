@@ -3,8 +3,6 @@
 require "test_helper"
 
 class SearchFormTest < ComponentTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   def setup
     super
     @query = Query::Observations.new

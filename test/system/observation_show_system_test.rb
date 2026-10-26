@@ -3,8 +3,6 @@
 require("application_system_test_case")
 
 class ObservationShowSystemTest < ApplicationSystemTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   setup do
     @obs = observations(:peltigera_obs)
   end

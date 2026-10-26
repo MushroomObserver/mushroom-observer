@@ -3,8 +3,6 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   include ActiveJob::TestHelper
 
   def test_create_minimal_observation

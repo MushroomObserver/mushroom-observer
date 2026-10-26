@@ -4,8 +4,6 @@ require("test_helper")
 
 # Unit tests for Components::Collapsible.
 class CollapsibleTest < ComponentTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   def test_collapse_classes_class_method_matches_instance_rendering
     assert_equal("collapse", Components::Collapsible.collapse_classes)
     assert_equal("collapse #{EXPANDED}",

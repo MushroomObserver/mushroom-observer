@@ -6,8 +6,6 @@ require("application_system_test_case")
 # component. Uses the account API keys page as the fixture, which
 # renders an Accordion for each key's inline notes editor.
 class AccordionSystemTest < ApplicationSystemTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   def setup
     super
     @mary = users("mary")

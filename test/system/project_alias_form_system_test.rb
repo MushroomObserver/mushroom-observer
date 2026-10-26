@@ -3,8 +3,6 @@
 require("application_system_test_case")
 
 class ProjectAliasFormSystemTest < ApplicationSystemTestCase
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   def test_collapse_switch_shows_correct_autocompleter
     rolf = users(:rolf)
     project = projects(:eol_project)

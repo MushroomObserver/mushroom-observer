@@ -5,8 +5,6 @@ require("test_helper")
 class ObservationsControllerCreateTest < FunctionalTestCase
   include ActiveJob::TestHelper
 
-  EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
   tests ObservationsController
 
   def modified_generic_params(params, user)

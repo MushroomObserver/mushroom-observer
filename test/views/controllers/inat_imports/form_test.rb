@@ -4,8 +4,6 @@ require("test_helper")
 
 module Views::Controllers::InatImports
   class FormTest < ComponentTestCase
-    EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
     def setup
       super
       @user = users(:rolf)

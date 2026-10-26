@@ -6,8 +6,6 @@ module Views::Controllers::Observations::Namings
   # ReasonsFields is tested through the namings Form since it
   # requires a Superform namespace.
   class ReasonsFieldsTest < ComponentTestCase
-    EXPANDED = Components::Collapsible::EXPANDED_CLASS
-
     def setup
       super
       @naming = Naming.new
