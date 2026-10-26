@@ -82,7 +82,7 @@ class Components::Matrix::Table < Components::Base
   def view_template(&block)
     Row(
       element: :ul,
-      class: "list-unstyled mt-3",
+      class: "list-unstyled",
       data: {
         controller: "matrix-table",
         action: "resize@window->matrix-table#rearrange"
