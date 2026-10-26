@@ -9,7 +9,7 @@ module Views::Controllers::GlossaryTerms
         prop :glossary_term, ::GlossaryTerm
 
         def view_template
-          div(id: "glossary_term_version_summary") do
+          ContentPadded(id: "glossary_term_version_summary") do
             p(class: "mt-3") do
               b { trusted_html(append_colon(:glossary_term_name.t)) }
               trusted_html(@glossary_term.name.t)
