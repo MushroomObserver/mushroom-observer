@@ -64,8 +64,13 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # `w-100` forces a flex break: an `inline: true` field's form-group
+    # is itself a flex container (Bootstrap 4's `.form-inline
+    # .form-group` rule), so without it the help block becomes a flex
+    # item squeezed beside the label/control instead of wrapping to a
+    # new line.
     def render_collapsed_help_text
-      Collapsible(id: help_id) do
+      Collapsible(id: help_id, class: "w-100") do
         Help(well: wrapper_options.fetch(:help_well, false)) do
           render(help_slot)
         end
@@ -79,7 +84,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # this module without FieldLabelRow.
     def render_plain_help_text
       above = respond_to?(:help_placement_above?) && help_placement_above?
-      extra_class = "mt-0" if above
+      extra_class = class_names("w-100", ("mt-0" if above))
       Help(id: help_id, class: extra_class) { render(help_slot) }
     end
   end

@@ -30,12 +30,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def wrapper_class
-      form_group_class("form-group", inline?, wrapper_options[:wrap_class])
+      form_group_class("form-group", wrapper_options[:wrap_class])
     end
 
-    def form_group_class(base, inline, wrap_class)
+    def form_group_class(base, wrap_class)
       classes = base
-      classes += " form-inline" if inline && base == "form-group"
       classes += " #{wrap_class}" if wrap_class.present?
       classes
     end
@@ -48,7 +47,18 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
+    # `.form-inline .form-group` is a descendant selector -- needs an
+    # ancestor div, not merged classes, to match. `mb-3` replaces the
+    # margin-bottom that rule would have zeroed.
     def render_with_wrapper(&block)
+      if inline?
+        div(class: "form-inline mb-3") { render_form_group(&block) }
+      else
+        render_form_group(&block)
+      end
+    end
+
+    def render_form_group(&block)
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
         render_between_block
