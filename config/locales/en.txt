@@ -2748,6 +2748,7 @@
   field_slips_one_per_page: One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page.
 
   bad_dispatch_code: Unable to interpret Field Slip code, [code]
+  add_dispatch_already_in: "Observation #[id] is already in [name]."
 
   # Project Aliases
   project_alias_created: Project Alias was successfully created.
