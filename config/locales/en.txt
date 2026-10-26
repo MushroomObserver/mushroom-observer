@@ -4641,6 +4641,7 @@
   sort_by_location: "[:location.ti]"
   sort_by_login: "[:login_name.ti]"
   sort_by_name: "[:name.ti]"
+  sort_by_name_and_number: Name & Number
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_posted: Date Posted
