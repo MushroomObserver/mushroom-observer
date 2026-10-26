@@ -45,16 +45,27 @@ module Views::Controllers::Herbaria
     def render_table
       Table(@objects,
             variant: :striped, identifier: "herbarium",
-            class: "w-100 mt-3") { |t| build_table_columns(t) }
+            class: "w-100") { |t| build_table_columns(t) }
     end
 
     def build_table_columns(table)
+      build_count_columns(table)
+      table.column(:herbarium.ti) { |h| render_name_cell(h) }
+      table.column(user_header) { |h| render_user_cell(h) }
+      table.column(:herbarium_index_mo_id.t, class: "text-right") do |h|
+        render_id_badge(h)
+      end
+    end
+
+    def build_count_columns(table)
       table.column(:herbarium_code.t) { |h| plain(h.code.to_s) }
       table.column(:herbarium_index_records.t) do |h|
         plain(h.herbarium_records.length)
       end
-      table.column(:herbarium.ti) { |h| render_name_cell(h) }
-      table.column(user_header) { |h| render_user_cell(h) }
+    end
+
+    def render_id_badge(herbarium)
+      IDBadge(object: herbarium, size: :lg, extra_class: nil)
     end
 
     def user_header
