@@ -438,7 +438,7 @@
 // Matches cutover's $card-spacer-x (BS4's named spacer key, not a
 // numbered step) -- see .px-card below for the full explanation.
 .p-card {
-  padding: 0.75rem !important;
+  padding: $card-spacer-x !important;
 }
 
 .p-4 {
@@ -534,8 +534,8 @@
 // non-card chrome (nav bars, page-title strip) that wants to sit
 // flush with card content elsewhere on the page. See #5527.
 .px-card {
-  padding-left: 0.75rem !important;
-  padding-right: 0.75rem !important;
+  padding-left: $card-spacer-x !important;
+  padding-right: $card-spacer-x !important;
 }
 
 // A Bootstrap 4 `.row` grid utility -- bootstrap-sass (BS3) has no
