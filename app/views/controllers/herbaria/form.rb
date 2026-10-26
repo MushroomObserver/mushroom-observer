@@ -152,6 +152,7 @@ module Views::Controllers::Herbaria
         create_text: :form_observations_create_locality.l,
         map_outlet: "#herbarium_form",
         hidden_name: :location_id,
+        hidden_value: model.location_id,
         hidden_data: { map_target: "locationId" },
         data: { map_target: "placeInput" }
       ) do |f|

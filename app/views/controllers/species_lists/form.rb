@@ -86,7 +86,9 @@ module Views::Controllers::SpeciesLists
              ))
       autocompleter_field(:place_name, type: :location,
                                        value: model.place_name(current_user),
-                                       label: :where.ti)
+                                       label: :where.ti,
+                                       hidden_name: :location_id,
+                                       hidden_value: model.location_id)
     end
 
     def render_project_checkboxes
