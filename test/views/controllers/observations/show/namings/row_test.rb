@@ -32,10 +32,10 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # mobile prefix on the reasons row covers it there instead.
     html = render_row
 
-    assert_html(html, ".col.col-sm-11 .col-5.col-sm-4")
+    assert_html(html, ".col.col-sm-11 .col-xs-5.col-sm-4")
     assert_html(html, ".col.col-sm-11 .col-sm-3.d-none.d-sm-block")
-    assert_html(html, ".col.col-sm-11 .col-3.col-sm-2")
-    assert_html(html, ".col.col-sm-11 .col-4.col-sm-3")
+    assert_html(html, ".col.col-sm-11 .col-xs-3.col-sm-2")
+    assert_html(html, ".col.col-sm-11 .col-xs-4.col-sm-3")
     assert_html(html, ".col-sm-1.d-none.d-sm-block")
   end
 

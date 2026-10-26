@@ -18,8 +18,8 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
     # since the buttons column is empty there. Both inside the
     # leftmost col-sm-11 so the right gutter aligns with the
     # eyes-column above.
-    assert_html(html, ".col-sm-11 > .row > .col-12.col-md-4")
-    assert_html(html, ".col-sm-11 > .row > .col-12.col-md-8")
+    assert_html(html, ".col-sm-11 > .row > .col-xs-12.col-md-4")
+    assert_html(html, ".col-sm-11 > .row > .col-xs-12.col-md-8")
   end
 
   def test_renders_propose_naming_modal_link_without_icon
