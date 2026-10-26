@@ -501,9 +501,7 @@ export default class extends Controller {
   showOrHideCarouselControls() {
     const _items = this.carouselTarget.querySelectorAll('.carousel-item'),
       _indicontrols = this.carouselTarget.querySelector('#added_thumbnails'),
-      _controls = this.carouselTarget.querySelectorAll(
-        '.carousel-control-prev, .carousel-control-next'
-      ),
+      _controls = this.carouselTarget.querySelectorAll('.carousel-control'),
       _count = _items.length;
 
     if (_count > 1) {

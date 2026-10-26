@@ -34,7 +34,8 @@ class Components::Carousel::Controls < Components::Base
     Button(variant: :strip,
            icon: icon_type,
            name: label.l,
-           class: class_names("carousel-control-#{direction}",
+           class: class_names("carousel-control",
+                              "carousel-control-#{direction}",
                               ("d-none" if @hidden)),
            data: { target: "##{@carousel_id}", slide: direction.to_s })
   end
