@@ -46,6 +46,8 @@ module Views::Layouts
     # padding so `.row`'s negative margin cancels it; `px-card` goes
     # on the nested div instead.
     def render_mobile_top_row
+      return unless mobile_top_row_content?
+
       Column(xs: 12, hide_at: :sm) do
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-card mb-2") do
@@ -55,6 +57,14 @@ module Views::Layouts
           render_mobile_object_nav if show_right_column?
         end
       end
+    end
+
+    # An unconditional wrapper here left an empty row on pages with
+    # none of these pieces (e.g. `new`) -- same bug `render_id_badge`
+    # already guards against, one level up.
+    def mobile_top_row_content?
+      content_for?(:id_badge) || content_for?(:title_bar_cta) ||
+        content_for?(:title_bar_actions) || show_right_column?
     end
 
     def render_mobile_object_nav
