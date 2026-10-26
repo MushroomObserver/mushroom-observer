@@ -498,11 +498,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                           obs.user.preferred_herbarium.autocomplete_name }
     }
 
-    # Prove that query params are added to form action.
+    # Prove the observation is carried as a hidden form field.
     login(obs.user.login)
     get(:new, params:)
     assert_select(
-      "form[action*='records?observation_id=#{obs.id}']"
+      "input[name='observation_id'][value='#{obs.id}']"
     )
     assert_session_query_record_is_correct
 

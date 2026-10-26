@@ -75,6 +75,7 @@ class HerbariumRecordsController < ApplicationController
 
   def new
     set_ivars_for_new
+    return unless @observation
 
     @back_object = @observation
     @herbarium_record = default_herbarium_record
@@ -87,6 +88,7 @@ class HerbariumRecordsController < ApplicationController
 
   def create
     set_ivars_for_new
+    return unless @observation
 
     @back_object = @observation
     create_herbarium_record # response handled here
