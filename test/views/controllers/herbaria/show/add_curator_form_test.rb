@@ -14,15 +14,12 @@ module Views::Controllers::Herbaria
         "form[action='#{routes.herbaria_curators_path(id: herbarium.id)}']"
       )
       assert_html(html, "input[name='herbarium_curator[login]'][type='text']")
-      # The autocompleter's dropdown + hidden id field must actually
-      # render (regression guard for the TextField#bare_input? bug --
-      # label: false used to silently drop both).
+      # The autocompleter's dropdown + hidden id field must render.
       assert_html(html, ".virtual_list")
       assert_html(
         html, "input[name='herbarium_curator[login_id]'][type='hidden']"
       )
-      assert_html(html, "button[type='submit']",
-                  text: :show_herbarium_add_curator.t)
+      assert_html(html, "button[type='submit']", text: :add.ti.as_displayed)
     end
   end
 end

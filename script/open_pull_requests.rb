@@ -25,6 +25,7 @@ class OpenPullRequests
   TITLE_WIDTH = 50
   NO_LABEL = "no review label"
   MERGE_STATE_UNKNOWN = "merge state unknown - rerun"
+  CI_FAILING = "CI failing"
 
   QUERY = <<~GRAPHQL
     query($owner: String!, $name: String!) {
@@ -190,8 +191,10 @@ class OpenPullRequests
     return [pull.label_problem] if pull.type == UNCLEAR_TYPE
 
     [(MERGE_STATE_UNKNOWN if pull.mergeable == "UNKNOWN"),
-     *type_holds(pull)].compact
+     (CI_FAILING if failing_ci?(pull.ci)), *type_holds(pull)].compact
   end
+
+  def failing_ci?(state) = %w[FAILURE ERROR].include?(state)
 
   def type_holds(pull)
     case pull.type
@@ -258,7 +261,7 @@ class OpenPullRequests
   def ci_note(state)
     case state
     when "SUCCESS" then "CI ok"
-    when "FAILURE", "ERROR" then "CI failing"
+    when "FAILURE", "ERROR" then CI_FAILING
     when "PENDING", "EXPECTED" then "CI running"
     end
   end

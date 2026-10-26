@@ -16,7 +16,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_includes(html, "grid-box")
     assert_includes(html, "box_#{obs.id}")
     # Should include the thumbnail image with the correct CSS class
-    assert_includes(html, "image_#{obs.thumb_image_id}")
+    assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
 
   # Grid boxes deliberately do NOT subscribe to
@@ -90,7 +90,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     )
     html = render(component)
 
-    assert_includes(html, "custom-class")
+    assert_html(html, ".grid-box.custom-class")
   end
 
   # rubocop:disable MO/NoLongCommentBlock
@@ -200,7 +200,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     html = render(component)
 
     # Should include location in where section
-    assert_includes(html, obs.where)
+    assert_html(html, ".log-where", text: obs.where)
   end
 
   def test_rss_log_renders_footer
@@ -212,7 +212,6 @@ class Components::Grid::BoxTest < ComponentTestCase
     html = render(component)
 
     # RssLogs should have log-footer
-    assert_includes(html, "log-footer")
     assert_nested(
       html,
       parent_selector: "div.card",
@@ -328,7 +327,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_includes(html, "Imported from iNaturalist")
+    assert_html(html, ".log-source-credit", text: "Imported from iNaturalist")
     # link_url is the rendered href (stored override or derived); import
     # links may have a NULL url column, so assert against link_url.
     expected_url = obs.import_link.link_url

@@ -31,13 +31,18 @@ module Views::Controllers::CollectionNumbers
 
     # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
-      Table(@objects, class: "table-striped mt-3",
+      Table(@objects, class: "table-striped",
                       show_headers: false) do |t|
+        t.column("") { |cn| render_id_badge(cn) }
         t.column("") { |cn| render_edit_link(cn) }
         t.column("") { |cn| render_format_name_link(cn) }
         t.column("") { |cn| render_observation_links(cn) }
         t.column("") { |cn| render_delete_button(cn) }
       end
+    end
+
+    def render_id_badge(collection_number)
+      IDBadge(object: collection_number, size: :lg, extra_class: nil)
     end
 
     def render_edit_link(collection_number)

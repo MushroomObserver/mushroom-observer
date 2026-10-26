@@ -1570,6 +1570,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # The iNat login an imported collector string names, else nil. An
+  # import's free-text collector comes from an iNat collector field or,
+  # failing that, the iNat login (`Inat::Obs#collector`); MO does not
+  # record which, so a login-shaped string is taken as a login.
+  def inat_collector_login
+    return unless reflection? && collector_user_id.nil?
+
+    collector if collector.to_s.match?(Inat::Constants::LOGIN_PATTERN)
+  end
+
   # True when no collector identity is recorded and the observation came
   # from a field slip — a foray recorder entered it but the collector was
   # not captured here (it is written on the physical slip). The show page

@@ -2694,6 +2694,23 @@ class ObservationTest < UnitTestCase
     assert_not(obs.collector_unrecorded?)
   end
 
+  def test_inat_collector_login
+    obs = observations(:minimal_unknown_obs)
+    obs.assign_attributes(collector: "outdoor_dad", collector_user_id: nil,
+                          reflected_at: Time.zone.now)
+    assert_equal("outdoor_dad", obs.inat_collector_login)
+
+    obs.collector = "Jane Forager"
+    assert_nil(obs.inat_collector_login, "names are not logins")
+
+    obs.assign_attributes(collector: "outdoor_dad", reflected_at: nil)
+    assert_nil(obs.inat_collector_login, "only imports carry iNat logins")
+
+    obs.assign_attributes(reflected_at: Time.zone.now,
+                          collector_user_id: rolf.id)
+    assert_nil(obs.inat_collector_login, "a linked MO user wins")
+  end
+
   def test_build_observation_skips_collector_default
     obs = Observation.build_observation(
       locations(:burbank), names(:fungi), {}, Time.zone.now, mary

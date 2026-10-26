@@ -15,11 +15,13 @@ module Views::Controllers::Herbaria
       add_edit_icons(@herbarium, current_user)
       add_pager_for(@herbarium)
       add_context_nav(::Tab::Herbarium::Show.new(q_param: q_param))
+      column_classes(map ? :eight_four : :twelve)
       container_class(:wide)
 
       render_mcp_block if @herbarium.mcp_searchable?
       Row { render_body_columns }
-      render_timestamps
+      render(::Views::Layouts::ObjectFooter.new(obj: @herbarium,
+                                                minimal: true))
     end
 
     private
@@ -38,9 +40,7 @@ module Views::Controllers::Herbaria
     # --- Left + right columns --------------------------------------
 
     def render_body_columns
-      Column(xs: 12, sm: map ? 8 : 12) do
-        render_left_column
-      end
+      div(class: content_for(:left_columns)) { render_left_column }
       render_right_column if map
     end
 
@@ -52,7 +52,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_records_link
-      div(class: "mt-3") do
+      div(class: "p-card") do
         Link(
           type: :get,
           name: :show_herbarium_herbarium_record_count.t(
@@ -65,7 +65,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_curator_section
-      div(class: "mt-3") do
+      div(class: "p-card") do
         render(CuratorTable.new(herbarium: @herbarium)) \
           if @herbarium.curators.present?
         if curator_or_admin?
@@ -87,14 +87,14 @@ module Views::Controllers::Herbaria
     end
 
     def render_notes
-      div(class: "mt-3") do
+      div(class: "p-card") do
         div(class: "font-weight-bold") { trusted_html(append_colon(:notes.ti)) }
         trusted_html(@herbarium.description.tpl)
       end
     end
 
     def render_mailing_address
-      div(class: "mt-3") do
+      div(class: "p-card") do
         div(class: "font-weight-bold") do
           trusted_html(append_colon(:herbarium_mailing_address.t))
         end
@@ -103,22 +103,13 @@ module Views::Controllers::Herbaria
     end
 
     def render_right_column
-      Column(xs: 12, sm: 4, class: "mt-3", style: "max-width:320px") do
+      div(class: class_names(content_for(:right_columns), "mt-3")) do
         div(class: "mb-3") do
           Map(objects: [@herbarium.location])
         end
         p(id: "herbarium_location") do
           plain("#{:location.ti}: #{@herbarium.location.text_name}")
         end
-      end
-    end
-
-    def render_timestamps
-      div(class: "mt-3", style: "max-width:#{map ? 930 : 600}px") do
-        plain("#{:created_at.ti}: #{@herbarium.created_at.web_date}")
-        br
-        plain("#{:updated_at.ti}: #{@herbarium.updated_at.web_date}")
-        br
       end
     end
   end

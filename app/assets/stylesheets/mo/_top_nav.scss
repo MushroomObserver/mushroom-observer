@@ -28,6 +28,13 @@
   @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
+// The field_slips index filter form (rendered into the pagination
+// row's sorter slot) is taller than the pagination controls beside
+// it -- align both sides to their bottom edge instead of centering.
+.pagination-top.flex-bar:has(.form-inline) {
+  align-items: flex-end !important;
+}
+
 // Space between the interest-icon buttons -- margin, not flex `gap`,
 // since Safari leaks `gap` past the first/last item here. em, not
 // rem, so it scales with the surrounding context's font-size (same

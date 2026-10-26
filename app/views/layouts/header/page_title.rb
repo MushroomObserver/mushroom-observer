@@ -56,6 +56,14 @@ module Views::Layouts
       end
     end
 
+    # An unconditional wrapper here left an empty row on pages with
+    # none of these pieces (e.g. `new`) -- same bug `render_id_badge`
+    # already guards against, one level up.
+    def mobile_top_row_content?
+      content_for?(:id_badge) || content_for?(:title_bar_cta) ||
+        content_for?(:title_bar_actions) || show_right_column?
+    end
+
     def render_mobile_object_nav
       trusted_html(content_for(:interest_icons))
       trusted_html(content_for(:prev_next_object))
@@ -112,7 +120,7 @@ module Views::Layouts
                              "text-right d-none d-sm-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
                    "align-items-start px-card") do
-          trusted_html(content_for(:interest_icons))
+          div { trusted_html(content_for(:interest_icons)) }
           trusted_html(content_for(:prev_next_object))
         end
       end

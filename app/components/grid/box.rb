@@ -238,10 +238,16 @@ class Components::Grid::Box < Components::Base
       span(class: "nowrap-ellipsis") do
         span(class: "log-when") { @data[:when] }
         plain(": ")
-        Link(type: :user,
-             user: @data[:who],
-             attributes: { class: "log-who" })
+        render_who
       end
+    end
+  end
+
+  def render_who
+    if @data[:who_obs]
+      render(Components::Grid::Box::Who.new(obs: @data[:who_obs]))
+    else
+      span(class: "log-who") { Link(type: :user, user: @data[:who]) }
     end
   end
 

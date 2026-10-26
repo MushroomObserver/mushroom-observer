@@ -121,7 +121,19 @@ module Views::Controllers::Projects
       autocompleter_field(:place_name, type: :location,
                                        label: :where.ti,
                                        value: @raw_place_name ||
-                                              model.place_name(current_user))
+                                              model.place_name(current_user),
+                                       hidden_name: :location_id,
+                                       hidden_value: location_hidden_value)
+    end
+
+    # `@raw_place_name` is set only on a failed-validation resubmit,
+    # when the typed text didn't resolve to a Location -- the hidden
+    # id must stay blank in that case rather than pointing at the
+    # model's previous (and now stale) location.
+    def location_hidden_value
+      return nil if @raw_place_name.present?
+
+      model.location_id
     end
 
     def render_approved_where_hidden

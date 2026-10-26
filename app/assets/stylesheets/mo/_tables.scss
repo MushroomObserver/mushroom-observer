@@ -33,6 +33,27 @@ thead tr {
   }
 }
 
+// Lines a table's first/last column up with the card-style padding
+// (.px-card, mo/_utilities.scss) used elsewhere on the page, instead
+// of the content touching the table's edge.
+.table {
+  > thead > tr > th:first-child,
+  > tbody > tr > th:first-child,
+  > tbody > tr > td:first-child,
+  > tfoot > tr > th:first-child,
+  > tfoot > tr > td:first-child {
+    padding-left: $card-spacer-x !important;
+  }
+
+  > thead > tr > th:last-child,
+  > tbody > tr > th:last-child,
+  > tbody > tr > td:last-child,
+  > tfoot > tr > th:last-child,
+  > tfoot > tr > td:last-child {
+    padding-right: $card-spacer-x !important;
+  }
+}
+
 .table-curators,
 .table-description-permissions,
 .table-herbarium,
