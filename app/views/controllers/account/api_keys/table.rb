@@ -41,7 +41,7 @@ module Views::Controllers::Account::APIKeys
       render(Components::Table.new(
                sorted_keys,
                id: "account_api_keys_table",
-               class: "table-striped"
+               class: "table-striped align-middle"
              )) do |t|
         register_table_columns(t)
         t.footer { render_new_form_panel }
@@ -104,7 +104,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_notes_accordion(key)
-      Accordion(id: "notes_#{key.id}") do |accordion|
+      Accordion(id: "notes_#{key.id}", class: "m-0") do |accordion|
         accordion.with_pane(id: "view_notes_#{key.id}_container",
                             expanded: true) { render_view_notes(key) }
         accordion.with_pane(id: "edit_notes_#{key.id}_container") do
