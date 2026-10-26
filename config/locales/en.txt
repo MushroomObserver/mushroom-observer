@@ -2043,6 +2043,7 @@
   show_name_create_draft: Create New Draft for
   show_name_no_descriptions: There are no descriptions for this name yet.
   show_name_description_author: "[:description.ti] author"
+  show_description_author_request: Request Authorship Credit
   show_name_description_authors: "[:description.ti] authors"
   show_name_description_editor: "[:description.ti] editor"
   show_name_description_editors: "[:description.ti] editors"
