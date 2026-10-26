@@ -30,12 +30,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def wrapper_class
-      form_group_class("form-group", inline?, wrapper_options[:wrap_class])
+      form_group_class("form-group", wrapper_options[:wrap_class])
     end
 
-    def form_group_class(base, inline, wrap_class)
+    def form_group_class(base, wrap_class)
       classes = base
-      classes += " form-inline" if inline && base == "form-group"
       classes += " #{wrap_class}" if wrap_class.present?
       classes
     end
@@ -48,7 +47,23 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
+    # `inline?` wraps the form-group in a `.form-inline` ancestor div,
+    # so Bootstrap 3's `.form-inline .form-group` descendant selector
+    # matches as designed -- putting both classes on the form-group
+    # div itself matches nothing, since that selector needs two
+    # distinct elements. `.form-inline .form-group` zeroes the inner
+    # form-group's margin-bottom (correct for sibling fields sharing
+    # one line), so the wrapping div carries `mb-3` to supply the
+    # spacing before the next field.
     def render_with_wrapper(&block)
+      if inline?
+        div(class: "form-inline mb-3") { render_form_group(&block) }
+      else
+        render_form_group(&block)
+      end
+    end
+
+    def render_form_group(&block)
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
         render_between_block

@@ -24,7 +24,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       if label_end_present?
         render_label_flex_row(label_text, inline)
       elsif label_appends_present?
-        render_label_with_appends(label_text)
+        render_label_with_appends(label_text, inline: inline)
       else
         label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
@@ -191,10 +191,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # wrap_class: nil since it already supplies that class and already
     # applied label_row_trailing_class to its outer div.
     def render_label_with_appends(label_text,
-                                  wrap_class: "label-row-with-appends")
+                                  wrap_class: "label-row-with-appends",
+                                  inline: false)
       row_class = wrap_class && class_names(wrap_class,
                                             label_row_trailing_class)
-      div(class: class_names("d-flex", "align-items-center", row_class)) do
+      display = inline ? "d-inline-flex" : "d-flex"
+      div(class: class_names(display, "align-items-center", row_class)) do
         label(for: field.dom.id,
               class: label_class(trailing_margin: false)) do
           render_label_content(label_text)
