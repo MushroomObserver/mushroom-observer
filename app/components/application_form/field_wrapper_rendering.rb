@@ -17,6 +17,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # it. Guarded with `respond_to?`, the same pattern FieldLabelRow
   # already uses for `label_end_slot`.
   module FieldWrapperRendering
+    include Phlex::Rails::Helpers::ClassNames
+
     attr_reader :wrapper_options
 
     private
@@ -30,13 +32,24 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def wrapper_class
-      form_group_class("form-group", wrapper_options[:wrap_class])
+      wrap_class = inline? ? nil : wrapper_options[:wrap_class]
+      form_group_class("form-group", wrap_class)
     end
 
     def form_group_class(base, wrap_class)
       classes = base
       classes += " #{wrap_class}" if wrap_class.present?
       classes
+    end
+
+    # `.form-inline .form-group` already zeroes the inner div's
+    # margin-bottom, so `wrap_class` (if given) lands on this ancestor
+    # div instead -- the default `mb-3` fits a single standalone
+    # inline field; a group of fields sharing one block of spacing
+    # (e.g. Names::Form's locked fields) passes `wrap_class: "mb-0"`
+    # per field and puts the mb-3 on the group's outer wrapper.
+    def inline_wrapper_class
+      wrapper_options[:wrap_class] || "mb-3"
     end
 
     def prepend_present?
@@ -51,13 +64,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # so Bootstrap 3's `.form-inline .form-group` descendant selector
     # matches as designed -- putting both classes on the form-group
     # div itself matches nothing, since that selector needs two
-    # distinct elements. `.form-inline .form-group` zeroes the inner
-    # form-group's margin-bottom (correct for sibling fields sharing
-    # one line), so the wrapping div carries `mb-3` to supply the
-    # spacing before the next field.
+    # distinct elements.
     def render_with_wrapper(&block)
       if inline?
-        div(class: "form-inline mb-3") { render_form_group(&block) }
+        div(class: class_names("form-inline", inline_wrapper_class)) do
+          render_form_group(&block)
+        end
       else
         render_form_group(&block)
       end
