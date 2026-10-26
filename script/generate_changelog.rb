@@ -32,7 +32,7 @@
 
 require("date")
 require("json")
-require("open3")
+require_relative("github_cli")
 
 # Builds and inserts one deploy's CHANGELOG.md section.
 class ChangelogGenerator
@@ -337,11 +337,7 @@ class ChangelogGenerator
     positions
   end
 
-  def run_cmd(*cmd)
-    out, err, status = Open3.capture3(*cmd)
-    abort("`#{cmd.join(" ")}` failed:\n#{err}") unless status.success?
-    out
-  end
+  def run_cmd(*cmd) = GithubCLI.run(*cmd)
 end
 
 ChangelogGenerator.new(ARGV).run if $PROGRAM_NAME == __FILE__

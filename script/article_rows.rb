@@ -21,7 +21,7 @@
 
 require("date")
 require("json")
-require("open3")
+require_relative("github_cli")
 
 # Turns merged PRs' changelog blocks into Textile article rows.
 class ArticleRows
@@ -162,11 +162,7 @@ class ArticleRows
     pulls
   end
 
-  def run_cmd(*cmd)
-    out, err, status = Open3.capture3(*cmd)
-    abort("`#{cmd.join(" ")}` failed:\n#{err}") unless status.success?
-    out
-  end
+  def run_cmd(*cmd) = GithubCLI.run(*cmd)
 end
 
 ArticleRows.new(ARGV).run if $PROGRAM_NAME == __FILE__
