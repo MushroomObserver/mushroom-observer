@@ -284,3 +284,15 @@
   transition: height 0s, opacity 0.3s;
   opacity: 0;
 }
+
+// Bootstrap's spacer-map utility generator only emits .p-card/.m-card
+// for a custom map key like "card" -- not the directional .pl-*/.pr-*
+// siblings a numeric key gets. .table's first/last-child rule
+// (mo/_tables.scss) needs those directly.
+.pl-card {
+  padding-left: $card-spacer-x !important;
+}
+
+.pr-card {
+  padding-right: $card-spacer-x !important;
+}
