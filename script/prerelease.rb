@@ -10,13 +10,15 @@
 #   Apply (pushes the changelog-pending branch, creates/updates the PR):
 #     script/prerelease.rb --apply
 #
-# Deploy-tag time (the tag is stamped in UTC):
-#   default            the next 8am Eastern (today's if it hasn't
-#                      passed, else tomorrow's) -- 12:00 or 13:00 UTC
-#                      depending on daylight saving
+# Deploy-tag time (the tag is stamped in UTC), the first that applies:
 #   --now              the current date and time
-#   --at DATETIME      an explicit "YYYY-MM-DD" (8am Eastern) or
-#                      "YYYY-MM-DD HH:MM" (UTC)
+#   --at TIME          e.g. 8pm, "08:00 tomorrow", "monday 9am UTC"; in
+#                      this machine's time zone unless one is given (see
+#                      script/deploy_time.rb for what it reads)
+#   the open PR        the time in the changelog PR's tag, so a re-run
+#                      during a deploy keeps it
+#   otherwise          --apply asks for one; a dry run shows the time as
+#                      ??-??
 #
 # What it does:
 # - mints the upcoming deploy tag name (deploy-YYYY-MM-DD-HH-MM) for
@@ -45,22 +47,26 @@ require_relative("generate_changelog")
 require_relative("article_rows")
 require_relative("open_pull_requests")
 require_relative("release_notes")
+require_relative("prerelease_deploy_time")
 
 # Builds the changelog-pending branch and PR for the next deploy.
 class Prerelease
   BRANCH = "changelog-pending"
   ARTICLE_FILE = ReleaseNotes::PENDING_FILE
   BANNER_ADMIN_URL = "https://mushroomobserver.org/admin/banners"
-  USAGE = "Usage: script/prerelease.rb [--apply] " \
-          "[--now | --at 'YYYY-MM-DD[ HH:MM]']"
+  USAGE = "Usage: script/prerelease.rb [--apply] [--now | --at TIME]"
 
   def initialize(argv)
     args = argv.dup
     @apply = args.delete("--apply") ? true : false
     @now = args.delete("--now") ? true : false
-    @at = extract_at(args)
-    abort("--now and --at are mutually exclusive.\n#{USAGE}") if @now && @at
+    @at_text = extract_at(args)
+    abort("--now and --at are mutually exclusive.\n#{USAGE}") if
+      @now && @at_text
     abort("Unknown arguments: #{args.join(" ")}\n#{USAGE}") if args.any?
+    @at = PrereleaseDeployTime.parse(@at_text) do |error|
+      abort("#{error}\n#{USAGE}")
+    end
   end
 
   def run
@@ -69,6 +75,7 @@ class Prerelease
     # Before collect_pending, which aborts when nothing has merged -- the
     # open PRs matter most then.
     puts(OpenPullRequests.fetch.report, "")
+    @pending_pr = find_pending_pr
     generator = ChangelogGenerator.new([])
     collect_pending(generator)
     puts(OpenPullRequests.urgent_merges_report(@pulls))
@@ -77,8 +84,8 @@ class Prerelease
 
   private
 
-  # Pulls `--at VALUE` (and its value) out of args, returning the
-  # parsed UTC Time or nil.
+  # Pulls `--at VALUE` (and its value) out of args, returning the value
+  # or nil.
   def extract_at(args)
     i = args.index("--at")
     return nil unless i
@@ -87,42 +94,26 @@ class Prerelease
     abort("--at needs a value.\n#{USAGE}") unless value
     args.delete_at(i + 1)
     args.delete_at(i)
-    parse_at(value)
+    value
   end
 
-  # A bare date means that day's scheduled deploy time; a date+time is
-  # taken as UTC.
-  def parse_at(value)
-    case value
-    when /\A(\d{4})-(\d{2})-(\d{2})\z/
-      ReleaseNotes.deploy_time_on(
-        Date.new(*(1..3).map { |n| ::Regexp.last_match(n).to_i })
-      )
-    when /\A(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})\z/
-      Time.utc(*(1..5).map { |n| ::Regexp.last_match(n).to_i })
-    else
-      abort("Bad --at value: #{value.inspect}. Use YYYY-MM-DD or " \
-            "'YYYY-MM-DD HH:MM'.\n#{USAGE}")
-    end
-  end
-
-  # deploy.sh stamps tags with the server's UTC clock, so all of these
-  # are UTC -- a developer's local clock could otherwise mint a name
-  # that sorts before the newest deployed tag.
-  def deploy_time
-    return Time.now.utc if @now
-    return @at if @at
-
-    ReleaseNotes.next_deploy_time
+  def resolve_deploy_time
+    choice = PrereleaseDeployTime.new(
+      now: @now, at: @at, at_text: @at_text, pending_pr: @pending_pr,
+      apply: @apply
+    )
+    @deploy_time = choice.time
+    @tag = choice.tag
+    puts(choice.report, "")
   end
 
   def collect_pending(generator)
-    @tag = deploy_time.strftime("deploy-%Y-%m-%d-%H-%M")
     warn("Collecting merged PRs from GitHub (several queries; ~10-20s)...")
     @prev, @pulls = generator.pending_pulls(exclude_branch: BRANCH)
     abort("No PRs merged since #{@prev}; nothing to prepare.") if
       @pulls.empty?
     warn("Found #{@pulls.size} PR(s) merged since #{@prev}.\n\n")
+    resolve_deploy_time
 
     fresh_section = generator.pending_section(@tag, @pulls)
     @rows, @skipped, @blockless = ArticleRows.new.rows_for(@pulls)
@@ -233,7 +224,7 @@ class Prerelease
   def pr_number(line) = line[/PR#?(\d+)/, 1]
 
   def preview
-    puts("Pending deploy: #{@tag}")
+    puts(pending_deploy_line)
     puts
     puts("=== CHANGELOG.md section " \
          "(#{@pulls.size} PR(s) since #{@prev}) ===")
@@ -248,6 +239,13 @@ class Prerelease
     puts
     preview_blockless
     puts("Dry run - nothing written. To apply: script/prerelease.rb --apply")
+  end
+
+  def pending_deploy_line
+    return "No pending deploy" unless @pending_pr
+
+    tag = @pending_pr["title"][/deploy-[0-9-]+/] || @pending_pr["title"]
+    "Pending deploy: #{tag} (PR ##{@pending_pr["number"]})"
   end
 
   def preview_blockless
@@ -266,7 +264,7 @@ class Prerelease
     push_branch(generator)
     upsert_pr
     puts("", "Replace the banner's first line at #{BANNER_ADMIN_URL} with:",
-         "", "#{ReleaseNotes.pending_banner_line(deploy_time)}<br/>")
+         "", "#{ReleaseNotes.pending_banner_line(@deploy_time)}<br/>")
   end
 
   def push_branch(generator)
@@ -307,7 +305,7 @@ class Prerelease
   end
 
   def submit_pr(body_path)
-    if (number = existing_pr)
+    if (number = @pending_pr&.fetch("number"))
       run_cmd("gh", "pr", "edit", number.to_s, "--title", title,
               "--body-file", body_path)
       warn("Updated PR ##{number} (#{BRANCH}).")
@@ -322,16 +320,11 @@ class Prerelease
     "Changelog for `#{@tag}`"
   end
 
-  def existing_pr
+  # The open changelog PR's number and title, or nil.
+  def find_pending_pr
     out = run_cmd("gh", "pr", "list", "--head", BRANCH, "--state", "open",
-                  "--json", "number")
-    JSON.parse(out).first&.fetch("number")
-  end
-
-  def body_file
-    path = File.join(Dir.tmpdir, "prerelease_pr_body.md")
-    File.write(path, pr_body)
-    path
+                  "--json", "number,title")
+    JSON.parse(out).first
   end
 
   def pr_body

@@ -246,7 +246,7 @@ class ChangelogGenerator
   end
 
   def build_section(tag, prs)
-    lines = ["## #{tag[TAG_PATTERN, 1]} (#{tag})", ""]
+    lines = ["## #{tag[/\Adeploy-(\d{4}-\d{2}-\d{2})-/, 1]} (#{tag})", ""]
     lines += if prs.empty?
                ["(no merged PRs -- asset-only or config deploy)"]
              else
