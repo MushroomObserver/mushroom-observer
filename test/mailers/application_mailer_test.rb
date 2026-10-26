@@ -44,6 +44,18 @@ class ApplicationMailerTest < UnitTestCase
     ActionMailer::Base.delivery_method = :test
   end
 
+  def test_every_mailer_picks_a_gmail_account
+    Rails.autoloaders.main.eager_load_dir(Rails.root.join("app/mailers").to_s)
+    accounts = [:news_delivery, :webmaster_delivery]
+
+    ApplicationMailer.descendants.each do |mailer|
+      filters = mailer._process_action_callbacks.map(&:filter)
+      assert(filters.intersect?(accounts),
+             "#{mailer} sends with neither news_delivery nor " \
+             "webmaster_delivery, so it falls back to the default account")
+    end
+  end
+
   def test_valid_email_address
     assert_true(ApplicationMailer.valid_email_address?("joe@schmo.com"))
     assert_false(ApplicationMailer.valid_email_address?("joe.schmo.com"))

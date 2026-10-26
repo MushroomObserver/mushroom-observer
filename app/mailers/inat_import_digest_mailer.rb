@@ -6,6 +6,8 @@
 # imported naming — the batching that keeps a large import from flooding
 # the mail queue. See #4757.
 class InatImportDigestMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(receiver:, namings:, total_observations: nil)
     setup_user(receiver)
     total = total_observations || namings.map(&:observation_id).uniq.size
