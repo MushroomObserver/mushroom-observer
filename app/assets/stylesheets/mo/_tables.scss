@@ -24,15 +24,15 @@ thead tr {
 }
 
 // Lines a table's first/last column up with the card-style padding
-// (.px-card, mo/_utilities.scss) used elsewhere on the page, instead
-// of the content touching the table's edge.
+// (.pl-card/.pr-card, mo/_utilities.scss) used elsewhere on the
+// page, instead of the content touching the table's edge.
 .table {
   > thead > tr > th:first-child,
   > tbody > tr > th:first-child,
   > tbody > tr > td:first-child,
   > tfoot > tr > th:first-child,
   > tfoot > tr > td:first-child {
-    padding-left: $card-spacer-x !important;
+    @extend .pl-card;
   }
 
   > thead > tr > th:last-child,
@@ -40,23 +40,7 @@ thead tr {
   > tbody > tr > td:last-child,
   > tfoot > tr > th:last-child,
   > tfoot > tr > td:last-child {
-    padding-right: $card-spacer-x !important;
-  }
-}
-
-.table-curators,
-.table-description-permissions,
-.table-herbarium,
-.table-license-updater,
-.table-location-help,
-.table-manage-species-lists,
-.table-project-members,
-.table-review-donations,
-.table-upload-report,
-.table-visual-model {
-  th, td {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    @extend .pr-card;
   }
 }
 

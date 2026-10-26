@@ -52,7 +52,7 @@ module Views::Controllers::Herbaria
       build_count_columns(table)
       table.column(:herbarium.ti) { |h| render_name_cell(h) }
       table.column(user_header) { |h| render_user_cell(h) }
-      table.column(:herbarium_index_mo_id.t, class: "text-right") do |h|
+      table.column(:mo_id.ti, class: "text-right") do |h|
         render_id_badge(h)
       end
     end
