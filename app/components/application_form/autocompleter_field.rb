@@ -169,7 +169,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def autocompleter_wrapper_options
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
-        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown"),
+        wrap_append_in_input_group: true
       )
     end
 

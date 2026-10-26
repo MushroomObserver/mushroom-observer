@@ -16,7 +16,7 @@
 #   ) { ... }
 class Components::ContentPadded < Components::Base
   # HTML attrs forwarded verbatim to the `<div>`. `class:` is
-  # composed with the default `"p-3"`.
+  # composed with the default `"p-card"`.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)

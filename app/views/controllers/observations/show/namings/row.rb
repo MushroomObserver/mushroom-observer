@@ -27,7 +27,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   }.freeze
 
   def view_template
-    Row(class: "align-items-center naming-row",
+    Row(class: "d-flex align-items-center naming-row",
         id: "observation_naming_#{primary.id}") do
       Column(col: true, sm: 11) do
         render_main_columns
@@ -149,10 +149,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_name_link(naming)
     a(href: url_for(name_path(id: naming.name))) do
-      trusted_html(
-        naming.display_name_brief_authors(@user).
-          t.break_name.small_author
-      )
+      trusted_html(naming.display_name_brief_authors(@user).t.small_author)
     end
   end
 

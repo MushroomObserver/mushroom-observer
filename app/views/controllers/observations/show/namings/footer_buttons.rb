@@ -39,7 +39,9 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   end
 
   # Text-button variant of the propose-naming link (icon-only
-  # variant lives in the panel `Header` for mobile).
+  # variant lives in the panel `Header` for mobile). The responsive
+  # visibility lives on the wrapping div, not the button itself --
+  # `d-block`/`d-sm-block` on a `.btn` stretches it full-width.
   def render_propose_button
     div(class: "d-none d-sm-block mb-2") do
       Button(

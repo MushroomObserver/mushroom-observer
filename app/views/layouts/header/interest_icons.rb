@@ -73,7 +73,7 @@ module Views::Layouts
     # `variant: :outline` (not `:link`) so the border marks this as
     # "current state," not clickable.
     def icon_item(size, kind, alt_key)
-      Button(tag: :span, variant: :outline, class: "disabled px-1") do
+      Button(tag: :span, variant: :outline, class: "disabled px-0") do
         interest_icon(size, kind, alt_key)
       end
     end
@@ -111,7 +111,7 @@ module Views::Layouts
     # `placement: "bottom"` overrides `CRUDBase`'s hardcoded `"top"`.
     def interest_button(method, path, kind:, alt_key:, params:)
       Button(type: method, target: path, name: alt_key.l(object: type.l),
-             variant: :link, class: "px-1", params:,
+             variant: :link, class: "px-0", params:,
              form: { class: "interest-link" },
              data: { turbo_stream: "true", placement: "bottom",
                      tooltip_container: TOOLTIP_CONTAINER }) do

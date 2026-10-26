@@ -61,7 +61,7 @@ module Observations
       get(:show, params: { id: link.id })
 
       assert_response(:success)
-      assert_select("turbo-frame#external_link_frame_#{link.id}")
+      label = :show_observation_on_site.t(site: "iNaturalist").as_displayed
       assert_select(
         "turbo-frame#external_link_frame_#{link.id} strong",
         text: "#{:show_observation_on_site.t(site: "iNaturalist")}:"

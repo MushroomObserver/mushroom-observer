@@ -137,8 +137,9 @@
 @media screen and (max-width: breakpoint-max(sm)) {
   #top_nav {
     .top_nav_button {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
+      // 5px at the 16px root -- see issue #5527
+      padding-left: 0.3125rem;
+      padding-right: 0.3125rem;
     }
     .top_nav_button:not(.btn-success) {
       border-color: transparent;

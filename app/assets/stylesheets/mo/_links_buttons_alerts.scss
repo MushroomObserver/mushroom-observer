@@ -239,7 +239,7 @@ button.badge-id:hover {
 // Floors badge-id column width so digit-count variance doesn't drift
 // the title column's left edge row to row.
 .id-badge-col {
-  min-width: 6rem;
+  min-width: 3.75rem; // 60px at the 16px root -- see issue #5527
 }
 
 // Wrapper for a group of inline mod/add links (Components::
@@ -259,13 +259,13 @@ button.badge-id:hover {
 // Trailing observation-count column on the locations list-group --
 // a fixed width so counts line up row to row regardless of digit count.
 .obs-count-col {
-  flex: 0 0 4rem;
+  flex: 0 0 2.5rem; // 40px at the 16px root -- see issue #5527
   text-align: right;
 }
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual top offset and 1.12em size are tuned for looser
-// contexts -- undone/shrunk here.
+// contexts -- undone/shrunk here. `top: 1px`, not 0, for BS3.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -278,7 +278,7 @@ button.badge-id:hover {
   }
 
   .mo-icon {
-    top: 0;
+    top: 1px;
     width: 1em;
     height: 1em;
   }

@@ -25,9 +25,9 @@ class HelpTest < ComponentTestCase
     assert_html(html, "div.help-block.form-text", text: "Help text")
   end
 
-  # The `well:` flavour wraps content in a Bootstrap well; the
-  # element kwarg is intentionally ignored for the well shape --
-  # it always renders as a div regardless of the `:p` passed in.
+  # The `well:` flavour wraps content in a Well; the element kwarg
+  # is intentionally ignored for the well shape -- it always renders
+  # as a div regardless of the `:p` passed in.
   # rubocop:disable-next MO/RedundantTagInSelector
   def test_well_wraps_in_bootstrap_well
     html = render_help(element: :p, content: "Help", well: true)
