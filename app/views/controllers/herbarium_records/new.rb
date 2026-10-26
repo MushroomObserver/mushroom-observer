@@ -30,7 +30,7 @@ module Views::Controllers::HerbariumRecords
       div(class: "text-larger mb-3") do
         trusted_html(:observation.ti)
         whitespace
-        IDBadge(object: @observation, size: :lg)
+        IDBadge(object: @observation, size: :lg, extra_class: "ml-2")
       end
       render(Form.new(@herbarium_record, observation: @observation,
                                          turbo: true))
