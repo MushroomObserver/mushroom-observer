@@ -105,7 +105,7 @@ module Views::Controllers::Names
     end
 
     def render_locked_fields
-      div(class: "mt-3 mb-3") do
+      div(class: "mb-3") do
         render_locked_rank_field
         render_locked_status_field
         render_locked_text_name_field
