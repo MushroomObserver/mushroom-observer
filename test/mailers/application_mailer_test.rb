@@ -12,6 +12,38 @@ class ApplicationMailerTest < UnitTestCase
     super
   end
 
+  # Development's :file delivery. A mailer with a Gmail account
+  # (news_delivery) used to replace the file settings, losing the mail.
+  def test_file_delivery_writes_mail_for_gmail_account_mailers
+    Dir.mktmpdir do |dir|
+      ActionMailer::Base.delivery_method = :file
+      ActionMailer::Base.file_settings = { location: dir }
+      ActionMailer::Base.raise_delivery_errors = true
+
+      UserQuestionMailer.build(
+        sender: rolf, receiver: mary, subject: "subject", message: "body"
+      ).deliver_now
+
+      assert_path_exists(File.join(dir, mary.email))
+    ensure
+      ActionMailer::Base.delivery_method = :test
+    end
+  end
+
+  def test_smtp_delivery_uses_the_gmail_account
+    news = { address: "smtp.example.com", port: 587 }
+    ActionMailer::Base.delivery_method = :smtp
+    Rails.application.credentials.stub(:gmail_smtp_settings_news, news) do
+      mail = UserQuestionMailer.build(
+        sender: rolf, receiver: mary, subject: "subject", message: "body"
+      ).message
+
+      assert_equal(news, mail.delivery_method.settings)
+    end
+  ensure
+    ActionMailer::Base.delivery_method = :test
+  end
+
   def test_valid_email_address
     assert_true(ApplicationMailer.valid_email_address?("joe@schmo.com"))
     assert_false(ApplicationMailer.valid_email_address?("joe.schmo.com"))
