@@ -304,6 +304,8 @@
   news: news
   notification: notification
   notifications: notifications
+  label: label
+  mo_id: MO ID
   # generic object
   object: object
   objects: objects
@@ -2457,7 +2459,6 @@
   herbarium_index_list_all_herbaria: List All Fungaria
   herbarium_index_nonpersonal_herbaria: List Institutional Fungaria
   herbarium_index_records: Records
-  herbarium_index_mo_id: MO ID
   herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into. This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium. If you do not have permission to perform the merge, it will send a request to the admins. ("+Cancel merge.+":[url])
 
   # herbaria/filtered
