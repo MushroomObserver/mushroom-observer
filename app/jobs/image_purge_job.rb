@@ -61,8 +61,7 @@ class ImagePurgeJob < ApplicationJob
     end
   end
 
-  # Also before the images go: the plan finds these through them. The
-  # observations stay as ordinary ones, without images or notes.
+  # The observations stay as ordinary ones, with the facts but no notes.
   def clear_native_notes
     @plan.native_observations.pluck(:id).each_slice(BATCH_SIZE) do |slice|
       count = Observation.where(id: slice).count do |obs|

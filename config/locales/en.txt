@@ -1950,7 +1950,7 @@
   profile_inat_link: Link iNaturalist account
   profile_inat_opt_out: "Do not import images or notes from my iNaturalist observations into MO (from here on; images already on MO stay)"
   profile_delete_images: Delete my images
-  profile_delete_images_help: "Delete the images you uploaded to MO and the images of your iNaturalist photos that anyone imported. Your observations stay, without those images and without their notes. The next page shows what would be deleted before anything is."
+  profile_delete_images_help: "Delete the images you uploaded to MO and the images of your iNaturalist photos that anyone imported. Your observations stay, without those images, and all of them lose their notes. The next page shows what would be deleted before anything is."
   profile_delete_images_button: Delete my images...
   profile_image_purge_running: "Deleting your images: [deleted] of [count] deleted so far. Reload to update."
   inat_account_linked: "Linked iNaturalist account [login]."
@@ -1961,7 +1961,7 @@
   # image_purges/new
   image_purge_title: "Delete images: [holder]"
   image_purge_inat_holder: "iNaturalist user [login]"
-  image_purge_explanation: "Deleting removes these images from MO. Observations stay, with their date, location, collector and names. The holder's observations uploaded to MO, and imported observations left with no images, also lose their notes. Other people's observations just lose the images, and their owners get an email listing what was removed. Copies taken before now are out of MO's reach."
+  image_purge_explanation: "Deleting removes these images from MO. Observations stay, with their date, location, collector and names. All of the holder's observations uploaded to MO lose their notes, as do imported observations left with no images. Other people's observations just lose the images, and their owners get an email listing what was removed. Copies taken before now are out of MO's reach."
   image_purge_image_count: "Images to delete: [count]"
   image_purge_observation_count: "Observations uploaded to MO that lose their notes: [count]"
   image_purge_placeholder_count: "Imported observations that keep only their date, location, collector and names: [count]"

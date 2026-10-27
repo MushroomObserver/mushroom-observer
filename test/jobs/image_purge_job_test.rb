@@ -91,6 +91,10 @@ class ImagePurgeJobTest < ActiveJob::TestCase
   def build_world
     @native_obs = observations(:minimal_unknown_obs) # mary's, not imported
     @native_obs.update_columns(notes: { Other: "Under an oak" })
+    # mary's, showing none of the deleted images
+    @imageless_obs = Observation.where(user: @mary).
+                     where.missing(:observation_images).first
+    @imageless_obs.update_columns(notes: { Other: "Smelled of anise" })
     @others_obs = observations(:coprinus_comatus_obs) # rolf's
     @reflection = observations(:imported_inat_obs) # dick's import
     @native_image = image(@mary, @mary.legal_name, [@native_obs, @others_obs])
@@ -146,6 +150,8 @@ class ImagePurgeJobTest < ActiveJob::TestCase
                  "mary's observation uploaded to MO loses its notes")
     assert_not(@native_obs.placeholder?,
                "An observation uploaded to MO is not a placeholder")
+    assert_equal(Observation.no_notes, @imageless_obs.reload.notes,
+                 "All of mary's observations uploaded to MO lose their notes")
     assert(Observation.exists?(@others_obs.id), "rolf's observation stays")
     assert_not_includes(@others_obs.reload.images.map(&:id), @native_image.id)
     @reflection.reload

@@ -8,9 +8,11 @@
 # holder is that iNat user ("(c) <iNat name or login>, ..."). Imported
 # images an MO user holds that are someone else's photos stay.
 #
+# Notes, like images, are content the holder could hold copyright in, so
+# every MO-native observation of the MO user loses its notes and keeps
+# the facts (date, location, collector, names).
+#
 # Observations that lose images:
-#   - the MO user's MO-native observations keep everything else, and
-#     lose their notes;
 #   - an imported observation left with no images becomes a placeholder,
 #     as for an unlicensed iNat observation, and its notes are cleared;
 #   - any other observation just loses the images.
@@ -31,7 +33,7 @@ class ImagePurge::Plan
   def native_observations
     return Observation.none unless @target_user
 
-    Observation.where(user: @target_user, id: affected_observation_ids).
+    Observation.where(user: @target_user).
       where.not(id: imported_observation_ids)
   end
 
