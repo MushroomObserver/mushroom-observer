@@ -6,6 +6,8 @@
 # swap on iNat landing on a watched name would be surprising, but it is
 # the case that would otherwise flood an inbox.
 class ProjectAlertMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(receiver:, alerts:)
     setup_user(receiver)
     subject = subject_for(alerts)
