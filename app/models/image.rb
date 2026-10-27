@@ -1288,10 +1288,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Log destruction in associated observations, glossary terms, etc.
-  def log_destroy
+  # touch: false logs without moving the objects up the activity feed, so
+  # it skips objects with no log: a new one would start at the top.
+  def log_destroy(touch: true)
     (glossary_terms + observations).each do |object|
+      next unless touch || object.rss_log
+
       object.log(:log_image_destroyed, user: current_user, name: log_name,
-                                       touch: true)
+                                       touch: touch)
     end
   end
 

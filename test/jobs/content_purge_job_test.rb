@@ -7,6 +7,7 @@ require("test_helper")
 # imported.
 class ContentPurgeJobTest < ActiveJob::TestCase
   INAT_NAME = "Mary Newbie"
+  OLD = Time.zone.parse("2020-01-02 03:04:05")
 
   def setup
     super
@@ -46,6 +47,7 @@ class ContentPurgeJobTest < ActiveJob::TestCase
 
     assert_purge_counts(purge.reload, expected)
     assert_records_after_purge
+    assert_dates_unchanged
     assert_notices
   end
 
@@ -112,6 +114,22 @@ class ContentPurgeJobTest < ActiveJob::TestCase
     @kept_image = image(@mary, "(c) someone else, some rights reserved " \
                                "(CC BY)", [])
     import_link(@kept_image, "901")
+    backdate
+  end
+
+  # Old dates, a log on rolf's observation and none on mary's, and the
+  # deleted image as rolf's thumbnail: the purge moves none of them.
+  def backdate
+    @others_obs.update_columns(thumb_image_id: @native_image.id)
+    @native_obs.update_columns(rss_log_id: nil)
+    RssLog.where(observation: @native_obs).delete_all
+    log = RssLog.create!(observation: @others_obs)
+    @others_obs.update_columns(rss_log_id: log.id)
+    log.update_columns(updated_at: OLD)
+    @dated = [@native_obs, @imageless_obs, @others_obs, @reflection]
+    @dated.each do |obs|
+      obs.update_columns(updated_at: OLD, log_updated_at: OLD)
+    end
   end
 
   def image(user, holder, observations)
@@ -164,6 +182,21 @@ class ContentPurgeJobTest < ActiveJob::TestCase
     assert_equal(Observation.no_notes, @reflection.notes)
     assert(Image.exists?(@kept_image.id),
            "Someone else's photo that mary imported stays")
+  end
+
+  def assert_dates_unchanged
+    @dated.each do |obs|
+      obs.reload
+      assert_equal(OLD, obs.updated_at, "Observation ##{obs.id} moved")
+      assert_equal(OLD, obs.log_updated_at)
+    end
+    log = @others_obs.rss_log.reload
+    assert_equal(OLD, log.updated_at, "The log keeps its place")
+    assert_match(:log_image_destroyed.to_s, log.notes)
+    assert_not_equal(@native_image.id, @others_obs.thumb_image_id,
+                     "rolf's observation shows another image or none")
+    assert_nil(@native_obs.rss_log_id,
+               "No log is started just to record the deletion")
   end
 
   def assert_notices
