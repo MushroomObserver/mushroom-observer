@@ -1266,6 +1266,49 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  # Linking an iNat account from the profile (Account::InatLinksController)
+  # comes back through the same callback.
+  def test_authorization_response_links_the_inat_account
+    login("rolf")
+    state = "#{InatImportsController::AccountLinking::LINK_STATE_PREFIX}abc"
+    session[:inat_link_state] = state
+
+    Inat::AuthorizedLogin.stub(:call, "Rolf_On_iNat") do
+      get(:authorization_response, params: { code: "code", state: state })
+    end
+
+    assert_equal("rolf_on_inat", users(:rolf).reload.inat_username)
+    assert_nil(session[:inat_link_state], "A link state is used once")
+    assert_redirected_to(edit_account_profile_path)
+    assert_flash_success
+  end
+
+  def test_authorization_response_refuses_an_unknown_link_state
+    login("rolf")
+    session[:inat_link_state] = "link-expected"
+
+    Inat::AuthorizedLogin.stub(:call, ->(_) { flunk("must not link") }) do
+      get(:authorization_response,
+          params: { code: "code", state: "link-forged" })
+    end
+
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  def test_authorization_response_reports_a_failed_link
+    login("rolf")
+    session[:inat_link_state] = "link-abc"
+    failure = ->(_) { raise(RestClient::Unauthorized.new) }
+
+    Inat::AuthorizedLogin.stub(:call, failure) do
+      get(:authorization_response, params: { code: "code", state: "link-abc" })
+    end
+
+    assert_redirected_to(edit_account_profile_path)
+    assert_flash_error
+  end
+
   def test_ordinary_user_can_import_all
     user = users(:mary)
     params = { inat_username: user.inat_username, all: 1,

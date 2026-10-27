@@ -17,6 +17,7 @@ module Tab::Sidebar
       assert_equal(
         [Tab::Sidebar::Admin::Jobs,
          Tab::Sidebar::Admin::BlockedIps,
+         Tab::Sidebar::Admin::ExcludedInatUsers,
          Tab::Sidebar::Admin::SwitchUsers,
          Tab::Sidebar::Admin::Users,
          Tab::Sidebar::Admin::Banners,

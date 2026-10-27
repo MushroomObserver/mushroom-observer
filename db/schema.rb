@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -76,6 +76,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
     t.boolean "reviewed", default: true, null: false
     t.integer "user_id"
     t.boolean "recurring", default: false
+  end
+
+  create_table "excluded_inat_users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "inat_login", limit: 40, null: false
+    t.bigint "inat_user_id"
+    t.integer "user_id"
+    t.text "reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inat_login"], name: "index_excluded_inat_users_on_inat_login", unique: true
+    t.index ["inat_user_id"], name: "index_excluded_inat_users_on_inat_user_id"
   end
 
   create_table "external_links", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -219,6 +230,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
     t.bigint "last_verified_image_id", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "image_purges", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "target_user_id"
+    t.string "inat_login", limit: 40
+    t.integer "state", default: 0, null: false
+    t.integer "image_count", default: 0, null: false
+    t.integer "deleted_image_count", default: 0, null: false
+    t.integer "deleted_observation_count", default: 0, null: false
+    t.integer "placeholder_count", default: 0, null: false
+    t.text "error"
+    t.datetime "notified_at"
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inat_login"], name: "index_image_purges_on_inat_login"
+    t.index ["target_user_id"], name: "index_image_purges_on_target_user_id"
   end
 
   create_table "image_votes", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -1152,6 +1181,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
     t.integer "label_format", default: 1
+    t.boolean "inat_import_opt_out", default: false, null: false
     t.index ["inat_username"], name: "index_users_on_inat_username"
     t.index ["login"], name: "login_index"
     t.index ["name"], name: "index_users_on_name"

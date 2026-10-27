@@ -903,6 +903,52 @@ class InatImportJobTest < ActiveJob::TestCase
                  "A reused photo should not be counted as not imported")
   end
 
+  # A user who opted out on their profile, importing their iNat obs: the
+  # facts come in as a placeholder, with no images and no notes.
+  def test_job_imports_opted_out_users_obs_as_placeholder
+    create_ivars_from_filename("donadinia_PNW01")
+    @user.update!(inat_import_opt_out: true)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
+    assert(obs.placeholder?, "An opted-out user's obs should be a placeholder")
+    assert_empty(obs.images, "No photo of an opted-out user is imported")
+    photos = @parsed_results.first[:observation_photos]
+    assert_equal(photos.size, obs.skeleton_omissions["images"],
+                 "Every photo should be listed as not imported")
+    inat_obs = Inat::Obs.new(JSON.generate(@parsed_results.first))
+    assert_equal(inat_obs.skeleton_notes, obs.notes,
+                 "The notes should be only the snapshot")
+    assert_includes(@inat_import.reload.response_errors,
+                    :inat_user_opted_out.l(login: @inat_import.inat_username),
+                    "The importer should be told the user opted out")
+  end
+
+  # An excluded iNat user's obs, imported by someone else without
+  # placeholders: skipped, and the importer is told why.
+  def test_job_skips_excluded_inat_users_obs_for_others_import
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    @inat_import.update(import_others: true, create_skeletons: false)
+    inat_user = @parsed_results.first[:user]
+    excluded = ExcludedInatUser.create!(inat_login: inat_user[:login])
+    stub_inat_interactions
+
+    assert_no_difference("Observation.count") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_includes(@inat_import.reload.response_errors,
+                    :inat_user_opted_out.l(login: inat_user[:login]))
+    assert_equal(inat_user[:id], excluded.reload.inat_user_id,
+                 "The first sighting should record the iNat user's id")
+  end
+
   # A skeleton that fails to import is reported like any other failure.
   def test_job_reports_failed_skeleton_import
     create_skeleton_ivars(collector: "Skeleton Test Collector")
