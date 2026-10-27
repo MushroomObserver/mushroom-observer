@@ -66,6 +66,17 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# `en.yml` is gitignored, so a branch switch leaves it stale against
+# the new `en.txt` -- the same check `script/deploy.sh` runs before a
+# deploy. Skipped on CI: the workflow
+# already runs `rake lang:update` once, earlier in the job; a second
+# run later crashes against CI's fixture-only Language table (no row
+# flagged official). Runs once per process, before `parallelize`
+# forks workers.
+if ENV["CI"] != "true" && !system("script/lang_update_if_needed.sh")
+  raise("script/lang_update_if_needed.sh failed")
+end
+
 # MiniExiftool caches its tag list in a pstore file on first use,
 # printing two lines to $stderr while generating it -- invisible on a
 # dev machine where the cache already exists from a prior run, but
