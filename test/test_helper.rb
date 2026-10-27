@@ -67,8 +67,8 @@ require_relative("../config/environment")
 require("rails/test_help")
 
 # `en.yml` is gitignored, so a branch switch leaves it stale against
-# the new `en.txt` -- same check `script/deploy.sh` and
-# `application_system_test_case.rb` run. Skipped on CI: the workflow
+# the new `en.txt` -- the same check `script/deploy.sh` runs before a
+# deploy. Skipped on CI: the workflow
 # already runs `rake lang:update` once, earlier in the job; a second
 # run later crashes against CI's fixture-only Language table (no row
 # flagged official). Runs once per process, before `parallelize`
