@@ -279,7 +279,18 @@ class InatImportJob < ApplicationJob
   # any observations are built, so collector resolution (match_inat) can
   # link the importing user's obs during their first import.
   def record_authorized_login
+    remove_exclusion
     user.update(inat_username: @authorized_login)
     log("Updated user inat_username")
+  end
+
+  # The import form's licensing consent outweighs an admin's exclusion
+  # of the same iNat login, so the exclusion ends here instead of moving
+  # to the user's profile (see ClaimsExcludedInatLogin).
+  def remove_exclusion
+    return if ExcludedInatUser.where(inat_login: @authorized_login).
+              destroy_all.empty?
+
+    log("Removed #{@authorized_login} from the excluded iNat users")
   end
 end

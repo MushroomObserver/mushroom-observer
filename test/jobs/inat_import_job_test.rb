@@ -949,6 +949,30 @@ class InatImportJobTest < ActiveJob::TestCase
                  "The first sighting should record the iNat user's id")
   end
 
+  # An excluded iNat user who imports the obs they posted, consenting to
+  # the licensing on the import form, comes off the list, and the import
+  # brings in their photos.
+  def test_importing_as_the_excluded_user_removes_the_exclusion
+    create_ivars_from_filename("donadinia_PNW01")
+    login = @parsed_results.first[:user][:login]
+    @user.update_columns(inat_username: nil)
+    ExcludedInatUser.create!(inat_login: login)
+    stub_inat_interactions(login: login)
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_not(ExcludedInatUser.exists?(inat_login: login),
+               "Importing as that iNat user should end the exclusion")
+    @user.reload
+    assert_equal(login, @user.inat_username)
+    assert_not(@user.inat_import_opt_out,
+               "The exclusion should not move to the user's profile")
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
+    assert_not(obs.placeholder?)
+    assert_not_empty(obs.images)
+  end
+
   # A skeleton that fails to import is reported like any other failure.
   def test_job_reports_failed_skeleton_import
     create_skeleton_ivars(collector: "Skeleton Test Collector")
