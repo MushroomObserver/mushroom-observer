@@ -68,9 +68,12 @@ require("rails/test_help")
 
 # `en.yml` is gitignored, so a branch switch leaves it stale against
 # the new `en.txt` -- same check `script/deploy.sh` and
-# `application_system_test_case.rb` run. Runs once per process,
-# before `parallelize` forks workers.
-unless system("script/lang_update_if_needed.sh")
+# `application_system_test_case.rb` run. Skipped on CI: the workflow
+# already runs `rake lang:update` once, earlier in the job; a second
+# run later crashes against CI's fixture-only Language table (no row
+# flagged official). Runs once per process, before `parallelize`
+# forks workers.
+if ENV["CI"] != "true" && !system("script/lang_update_if_needed.sh")
   raise("script/lang_update_if_needed.sh failed")
 end
 
