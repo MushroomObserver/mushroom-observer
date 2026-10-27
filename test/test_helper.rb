@@ -66,6 +66,14 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# `en.yml` is gitignored, so a branch switch leaves it stale against
+# the new `en.txt` -- same check `script/deploy.sh` and
+# `application_system_test_case.rb` run. Runs once per process,
+# before `parallelize` forks workers.
+unless system("script/lang_update_if_needed.sh")
+  raise("script/lang_update_if_needed.sh failed")
+end
+
 # MiniExiftool caches its tag list in a pstore file on first use,
 # printing two lines to $stderr while generating it -- invisible on a
 # dev machine where the cache already exists from a prior run, but
