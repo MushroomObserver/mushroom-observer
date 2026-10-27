@@ -47,6 +47,17 @@ class MatrixBoxTest < ComponentTestCase
 
     assert_html(html, "#box_#{image.id}.matrix-box")
     assert_html(html, "img.image_#{image.id}")
+    # format_name, not unique_format_name -- the IDBadge beside it
+    # already shows the id.
+    assert_html(html, ".rss-name", text: image.format_name.t.as_displayed)
+  end
+
+  def test_renders_image_object_without_subjects
+    image = Image.create(user: @user)
+    component = Components::Matrix::Box.new(user: @user, object: image)
+    html = render(component)
+
+    assert_html(html, ".rss-name", text: :image.ti)
   end
 
   def test_renders_user_object
