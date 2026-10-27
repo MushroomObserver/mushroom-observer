@@ -203,6 +203,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   # NEW
   #
   def test_new_herbarium_record
+    get(:new)
+    get(:new, params: { observation_id: "bogus" })
+
     obs_id = observations(:unknown_with_no_naming).id
     get(:new, params: { observation_id: obs_id })
     assert_response(:redirect)
