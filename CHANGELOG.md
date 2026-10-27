@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-27 (deploy-2026-10-27-08-00)
+
+- Infer the `prerelease.rb` deploy time and hold PRs with failing CI ([PR5540](https://github.com/MushroomObserver/mushroom-observer/pull/5540), @mo-nathan)
+- Name the collector in Observation matrix boxes ([PR5539](https://github.com/MushroomObserver/mushroom-observer/pull/5539), @mo-nathan)
+- Add an existing Field Slip's Observation from a Project or list's Add box ([PR5542](https://github.com/MushroomObserver/mushroom-observer/pull/5542), @mo-nathan)
+
 ## 2026-10-25 (deploy-2026-10-25-08-00)
 
 - Backport title-bar owner-naming/id-badge redesign + `InlineLinkBlock` spacing from `nimmo-5348-bs4-cutover` ([PR5520](https://github.com/MushroomObserver/mushroom-observer/pull/5520), @nimmolo)
