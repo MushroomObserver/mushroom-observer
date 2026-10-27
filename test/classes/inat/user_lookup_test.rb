@@ -20,4 +20,19 @@ class Inat::UserLookupTest < UnitTestCase
     stub_request(:get, "#{API_BASE}/users/someone").to_return(status: 500)
     assert_nil(Inat::UserLookup.call("someone"))
   end
+
+  def test_gives_up_on_a_slow_inat
+    stub_request(:get, "#{API_BASE}/users/someone").to_timeout
+    requests = []
+    execute = RestClient::Request.method(:execute)
+    spy = lambda do |**options|
+      requests << options
+      execute.call(**options)
+    end
+
+    RestClient::Request.stub(:execute, spy) do
+      assert_nil(Inat::UserLookup.call("someone"))
+    end
+    assert_equal(Inat::UserLookup::TIMEOUT, requests.first[:timeout])
+  end
 end
