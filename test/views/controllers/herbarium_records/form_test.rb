@@ -12,6 +12,9 @@ module Views::Controllers::HerbariumRecords
     def test_new_record_form
       html = render_form(model: HerbariumRecord.new)
 
+      assert_html(
+        html, "input[name='observation_id'][value='#{@observation.id}']"
+      )
       assert_html(html, "input[name='herbarium_record[herbarium_name]']")
       assert_html(html, "input[data-autocompleter--herbarium-target='input']")
       assert_html(html, "input[name='herbarium_record[initial_det]']")
@@ -25,6 +28,7 @@ module Views::Controllers::HerbariumRecords
       record = herbarium_records(:interesting_unknown)
       html = render_form(model: record)
 
+      assert_html(html, "input[name='observation_id']", count: 0)
       assert_html(html, "button[type='submit']", text: :save.ti)
     end
 

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Action template for `HerbariumRecordsController#new`. Wraps
-# the existing `Form` Phlex component with page chrome + the
-# observation header + a side-column MatrixBox preview.
+# the existing `Form` Phlex component with page chrome + a
+# side-column MatrixBox preview.
 module Views::Controllers::HerbariumRecords
   class New < Views::FullPageBase
     prop :herbarium_record, ::HerbariumRecord
@@ -27,11 +27,6 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_form_column
-      div(class: "text-larger mb-3") do
-        trusted_html(:observation.ti)
-        whitespace
-        IDBadge(object: @observation, size: :lg, extra_class: "ml-2")
-      end
       render(Form.new(@herbarium_record, observation: @observation,
                                          turbo: true))
     end

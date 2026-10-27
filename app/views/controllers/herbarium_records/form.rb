@@ -15,6 +15,7 @@ module Views::Controllers::HerbariumRecords
 
     def view_template
       render_multiple_observations_warning if model.observations.size > 1
+      render_observation_field unless model.persisted?
       render_herbarium_name_field
       render_initial_det_field
       render_accession_number_field
@@ -33,6 +34,11 @@ module Views::Controllers::HerbariumRecords
         level: :warning,
         class: "multiple-observations-warning"
       )
+    end
+
+    def render_observation_field
+      read_only_field("observation_id", value: @observation.id,
+                                        label: :observation.ti, inline: true)
     end
 
     def render_herbarium_name_field
@@ -83,7 +89,6 @@ module Views::Controllers::HerbariumRecords
         url_for(
           controller: "herbarium_records",
           action: :create,
-          observation_id: @observation.id,
           only_path: true
         )
       end
