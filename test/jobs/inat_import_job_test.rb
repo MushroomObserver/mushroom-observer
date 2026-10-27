@@ -937,7 +937,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @inat_import.update(import_others: true, create_skeletons: false)
     inat_user = @parsed_results.first[:user]
     excluded = ExcludedInatUser.create!(inat_login: inat_user[:login])
-    stub_inat_interactions
+    stub_inat_interactions(login: "dick_on_inat")
 
     assert_no_difference("Observation.count") do
       InatImportJob.perform_now(@inat_import)
@@ -1449,14 +1449,15 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Persisted username should be normalized to lowercase")
   end
 
+  # The entered username is someone else's; the authorized login is the
+  # super importer's, and that is what gets recorded.
   def test_super_importer_anothers_observation
     @user = users(:dick)
-    inat_username = @user.inat_username
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
 
     create_ivars_from_filename("calostoma_lutescens")
-    stub_inat_interactions
+    stub_inat_interactions(login: "dick_on_inat")
 
     assert_difference(
       "Observation.count", 1,
@@ -1466,8 +1467,9 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
-    assert_equal(inat_username, @user.reload.inat_username,
-                 "SuperImporter's inat_username should not change")
+    assert_equal("dick_on_inat", @user.reload.inat_username,
+                 "A SuperImporter's inat_username is the login they " \
+                 "authorized as, not the one entered")
   end
 
   def test_super_importer_all_inat_fungal_observations
