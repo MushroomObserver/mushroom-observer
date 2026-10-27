@@ -3,7 +3,7 @@
 require("test_helper")
 
 module Admin::ExcludedInatUsers
-  class ImagePurgesControllerTest < FunctionalTestCase
+  class ContentPurgesControllerTest < FunctionalTestCase
     include ActiveJob::TestHelper
 
     def setup
@@ -18,19 +18,19 @@ module Admin::ExcludedInatUsers
       end
 
       assert_response(:success)
-      assert_select("#image_purge_counts li",
-                    text: :image_purge_image_count.l(count: 0))
+      assert_select("#content_purge_counts li",
+                    text: :content_purge_image_count.l(count: 0))
     end
 
     def test_create
       Inat::UserLookup.stub(:call, nil) do
-        assert_enqueued_with(job: ImagePurgeJob) do
+        assert_enqueued_with(job: ContentPurgeJob) do
           post(:create, params: { excluded_inat_user_id: @entry.id })
         end
       end
 
-      purge = ImagePurge.find_by(inat_login: "listed")
-      assert_not_nil(purge, "Cannot find the ImagePurge")
+      purge = ContentPurge.find_by(inat_login: "listed")
+      assert_not_nil(purge, "Cannot find the ContentPurge")
       assert_equal(users(:rolf), purge.user)
       assert_redirected_to(admin_excluded_inat_users_path)
     end

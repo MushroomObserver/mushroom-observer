@@ -5,7 +5,7 @@ require("test_helper")
 # Deleting an MO user's images (#5521). Besides mary's fixture images,
 # she uploaded one more image to MO and has one iNat photo that dick
 # imported.
-class ImagePurgeJobTest < ActiveJob::TestCase
+class ContentPurgeJobTest < ActiveJob::TestCase
   INAT_NAME = "Mary Newbie"
 
   def setup
@@ -17,7 +17,7 @@ class ImagePurgeJobTest < ActiveJob::TestCase
   end
 
   def test_plan
-    plan = ImagePurge::Plan.new(target_user: @mary)
+    plan = ContentPurge::Plan.new(target_user: @mary)
 
     with_inat_name do
       images = plan.images.to_a
@@ -32,12 +32,12 @@ class ImagePurgeJobTest < ActiveJob::TestCase
   end
 
   def test_purge
-    purge = ImagePurge.create!(user: @mary, target_user: @mary)
+    purge = ContentPurge.create!(user: @mary, target_user: @mary)
     expected = with_inat_name { expected_counts }
 
     with_inat_name do
       perform_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
-        ImagePurgeJob.perform_now(purge)
+        ContentPurgeJob.perform_now(purge)
       end
     end
 
@@ -48,15 +48,15 @@ class ImagePurgeJobTest < ActiveJob::TestCase
 
   # A run cut short is finished by running again; nobody is emailed twice.
   def test_rerun_finishes_without_emailing_again
-    purge = ImagePurge.create!(user: @mary, target_user: @mary,
-                               notified_at: Time.zone.now)
+    purge = ContentPurge.create!(user: @mary, target_user: @mary,
+                                 notified_at: Time.zone.now)
     expected = with_inat_name { expected_counts }
 
-    with_inat_name { ImagePurgeJob.perform_now(purge) }
-    with_inat_name { ImagePurgeJob.perform_now(purge) }
+    with_inat_name { ContentPurgeJob.perform_now(purge) }
+    with_inat_name { ContentPurgeJob.perform_now(purge) }
 
     mailers = enqueued_jobs.map { |job| job[:args].first }
-    assert_not_includes(mailers, "ImagePurgeMailer",
+    assert_not_includes(mailers, "ContentPurgeMailer",
                         "The purge emails went out with the first run")
     assert_not(Image.exists?(@inat_image.id))
     assert_equal(expected[:images], purge.reload.deleted_image_count)
@@ -64,9 +64,9 @@ class ImagePurgeJobTest < ActiveJob::TestCase
 
   # An excluded iNat user has no MO account: only their imported photos.
   def test_purge_for_an_excluded_inat_login
-    purge = ImagePurge.create!(user: users(:rolf), inat_login: "mary_on_inat")
+    purge = ContentPurge.create!(user: users(:rolf), inat_login: "mary_on_inat")
 
-    with_inat_name { ImagePurgeJob.perform_now(purge) }
+    with_inat_name { ContentPurgeJob.perform_now(purge) }
 
     assert(purge.reload.done?)
     assert_equal(1, purge.deleted_image_count)
@@ -76,10 +76,10 @@ class ImagePurgeJobTest < ActiveJob::TestCase
   end
 
   def test_failure_is_recorded
-    purge = ImagePurge.create!(user: @mary, target_user: @mary)
+    purge = ContentPurge.create!(user: @mary, target_user: @mary)
 
-    ImagePurge::Plan.stub(:new, ->(**) { raise("boom") }) do
-      ImagePurgeJob.perform_now(purge)
+    ContentPurge::Plan.stub(:new, ->(**) { raise("boom") }) do
+      ContentPurgeJob.perform_now(purge)
     end
 
     assert(purge.reload.failed?)
@@ -129,7 +129,7 @@ class ImagePurgeJobTest < ActiveJob::TestCase
   end
 
   def expected_counts
-    plan = ImagePurge::Plan.new(target_user: @mary)
+    plan = ContentPurge::Plan.new(target_user: @mary)
     { images: plan.image_count,
       notes_cleared: plan.native_observations.count { |o| o.notes.present? } }
   end
@@ -171,7 +171,7 @@ class ImagePurgeJobTest < ActiveJob::TestCase
     assert_includes(mail_text(mails, :dick), @reflection.import_link.link_url,
                     "An iNat photo links to its iNat observation")
     assert_includes(mail_text(mails, :dick), projects(:bolete_project).title)
-    assert_includes(mail_text(mails, :rolf), :image_purge_email_no_source.l,
+    assert_includes(mail_text(mails, :rolf), :content_purge_email_no_source.l,
                     "A photo uploaded to MO has nothing to link to")
   end
 

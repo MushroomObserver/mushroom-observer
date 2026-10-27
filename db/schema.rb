@@ -56,6 +56,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.index ["target_id", "target_type"], name: "target_index"
   end
 
+  create_table "content_purges", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "target_user_id"
+    t.string "inat_login", limit: 40
+    t.integer "state", default: 0, null: false
+    t.integer "image_count", default: 0, null: false
+    t.integer "deleted_image_count", default: 0, null: false
+    t.integer "cleared_notes_count", default: 0, null: false
+    t.integer "placeholder_count", default: 0, null: false
+    t.text "error"
+    t.datetime "notified_at"
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inat_login"], name: "index_content_purges_on_inat_login"
+    t.index ["target_user_id"], name: "index_content_purges_on_target_user_id"
+  end
+
   create_table "copyright_changes", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "user_id", null: false
     t.datetime "updated_at", precision: nil, null: false
@@ -230,24 +248,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.bigint "last_verified_image_id", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "image_purges", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "target_user_id"
-    t.string "inat_login", limit: 40
-    t.integer "state", default: 0, null: false
-    t.integer "image_count", default: 0, null: false
-    t.integer "deleted_image_count", default: 0, null: false
-    t.integer "cleared_notes_count", default: 0, null: false
-    t.integer "placeholder_count", default: 0, null: false
-    t.text "error"
-    t.datetime "notified_at"
-    t.datetime "ended_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["inat_login"], name: "index_image_purges_on_inat_login"
-    t.index ["target_user_id"], name: "index_image_purges_on_target_user_id"
   end
 
   create_table "image_votes", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|

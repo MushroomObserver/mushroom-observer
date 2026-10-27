@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-class AddImageOptOuts < ActiveRecord::Migration[7.2]
+class AddContentOptOuts < ActiveRecord::Migration[7.2]
   def change
     add_column(:users, :inat_import_opt_out, :boolean,
                default: false, null: false)
     create_excluded_inat_users
-    create_image_purges
+    create_content_purges
   end
 
   private
@@ -22,8 +22,8 @@ class AddImageOptOuts < ActiveRecord::Migration[7.2]
     end
   end
 
-  def create_image_purges
-    create_table(:image_purges) do |t|
+  def create_content_purges
+    create_table(:content_purges) do |t|
       t.integer(:user_id)
       t.integer(:target_user_id)
       t.string(:inat_login, limit: 40)

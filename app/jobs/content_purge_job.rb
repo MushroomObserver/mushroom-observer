@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# Runs an ImagePurge (#5521); ImagePurge::Plan says what goes. Deletes
+# Runs a ContentPurge (#5521); ContentPurge::Plan says what goes. Deletes
 # database rows only: the files on the image server and in archive
 # storage stay.
 #
 # The plan is read from the database each run, so a run cut short (a
 # worker restart) is finished by running again. The emails go out once,
 # before anything is deleted.
-class ImagePurgeJob < ApplicationJob
+class ContentPurgeJob < ApplicationJob
   queue_as :default
 
   BATCH_SIZE = 100
@@ -19,7 +19,7 @@ class ImagePurgeJob < ApplicationJob
     run
   rescue StandardError => e
     purge.update(state: :failed, error: e.message, ended_at: Time.zone.now)
-    log("ImagePurge #{purge.id} failed: #{e.class}: #{e.message}")
+    log("ContentPurge #{purge.id} failed: #{e.class}: #{e.message}")
   end
 
   private
@@ -40,10 +40,10 @@ class ImagePurgeJob < ApplicationJob
   end
 
   def notify
-    ImagePurge::Notices.new(@plan, target_user: @purge.target_user).
+    ContentPurge::Notices.new(@plan, target_user: @purge.target_user).
       by_receiver.each do |receiver, entries|
-        ImagePurgeMailer.build(receiver: receiver, purge: @purge,
-                               entries: entries.map(&:to_h)).deliver_later
+        ContentPurgeMailer.build(receiver: receiver, purge: @purge,
+                                 entries: entries.map(&:to_h)).deliver_later
       end
     @purge.update!(notified_at: Time.zone.now)
   end

@@ -6,7 +6,7 @@ module Views::Controllers::Admin::ExcludedInatUsers
   class Index < Views::FullPageBase
     prop :excluded, ::ExcludedInatUser
     prop :entries, _Array(::ExcludedInatUser)
-    prop :purges, _Hash(String, ::ImagePurge)
+    prop :purges, _Hash(String, ::ContentPurge)
 
     def view_template
       add_page_title(:excluded_inat_users_title.l)

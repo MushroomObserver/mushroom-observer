@@ -13,7 +13,7 @@ module Views::Controllers::Account::Profile
     prop :copyright_year, Integer
     prop :licenses, _Array(Array)
     prop :upload_license_id, _Nilable(Integer)
-    prop :purge, _Nilable(::ImagePurge), default: nil
+    prop :purge, _Nilable(::ContentPurge), default: nil
 
     def view_template
       container_class(:full)

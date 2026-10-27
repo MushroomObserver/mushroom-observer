@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-# One run of ImagePurgeJob (#5521): deleting the images an MO user holds
+# One run of ContentPurgeJob (#5521): deleting the content an MO user holds
 # or an excluded iNat user's photos imported by anyone. The record is the
 # job's progress, and while it is in flight it refuses a second purge of
 # the same target.
 #
 #  user::                      Who started it.
-#  target_user::               The MO user whose images go, or
+#  target_user::               The MO user whose content goes, or
 #  inat_login::                the excluded iNat user's.
 #  image_count::               Images the purge found.
 #  deleted_image_count::       Images destroyed so far.
 #  cleared_notes_count::       The target's MO-native observations whose
 #                              notes were cleared.
 #  placeholder_count::         Imported observations left as placeholders.
-class ImagePurge < ApplicationRecord
+class ContentPurge < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :target_user, class_name: "User", optional: true
 
@@ -34,7 +34,7 @@ class ImagePurge < ApplicationRecord
   end
 
   def plan
-    ImagePurge::Plan.new(target_user: target_user, inat_login: inat_login)
+    ContentPurge::Plan.new(target_user: target_user, inat_login: inat_login)
   end
 
   private
@@ -42,6 +42,6 @@ class ImagePurge < ApplicationRecord
   def one_target
     return if target_user_id.present? ^ inat_login.present?
 
-    errors.add(:base, :image_purge_one_target)
+    errors.add(:base, :content_purge_one_target)
   end
 end

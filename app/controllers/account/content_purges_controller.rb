@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module Account
-  # Deleting the images the user holds, from the profile's Danger Zone.
-  class ImagePurgesController < ApplicationController
-    include ImagePurgeActions
+  # Deleting the content the user holds, from the profile's Danger Zone.
+  class ContentPurgesController < ApplicationController
+    include ContentPurgeActions
 
     before_action :login_required
 
@@ -13,7 +13,7 @@ module Account
 
     def purge_holder = @user.login
 
-    def purge_path = account_image_purge_path
+    def purge_path = account_content_purge_path
 
     def return_path = edit_account_profile_path
   end

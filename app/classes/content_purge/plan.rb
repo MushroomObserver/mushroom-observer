@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# What an ImagePurge removes (#5521), as relations rather than id lists:
+# What a ContentPurge removes (#5521), as relations rather than id lists:
 # the largest holder has ~140k images.
 #
 # Images: for an MO user, the images they uploaded to MO; for anyone
@@ -16,7 +16,7 @@
 #   - an imported observation left with no images becomes a placeholder,
 #     as for an unlicensed iNat observation, and its notes are cleared;
 #   - any other observation just loses the images.
-class ImagePurge::Plan
+class ContentPurge::Plan
   def initialize(target_user: nil, inat_login: nil)
     @target_user = target_user
     @inat_login = target_user ? target_user.inat_username : inat_login

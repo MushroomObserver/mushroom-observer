@@ -44,7 +44,7 @@ module Admin
 
     # The latest purge of each listed login, by login.
     def purges_for(entries)
-      ImagePurge.where(inat_login: entries.map(&:inat_login)).order(:id).
+      ContentPurge.where(inat_login: entries.map(&:inat_login)).order(:id).
         index_by(&:inat_login)
     end
 

@@ -6,7 +6,7 @@
 module Views::Controllers::Account::Profile
   class Edit::DangerZone < Views::Base
     prop :user, ::User
-    prop :purge, _Nilable(::ImagePurge)
+    prop :purge, _Nilable(::ContentPurge)
 
     def view_template
       Panel(panel_class: "panel-danger mt-4",
@@ -37,17 +37,17 @@ module Views::Controllers::Account::Profile
     end
 
     def render_delete
-      h4(class: "mt-4") { plain(:profile_delete_images.l) }
+      h4(class: "mt-4") { plain(:profile_delete_content.l) }
       return render_purge_status if @purge
 
-      p { plain(:profile_delete_images_help.l) }
-      Button(type: :get, name: :profile_delete_images_button.l,
-             target: new_account_image_purge_path, variant: :danger)
+      p { plain(:profile_delete_content_help.l) }
+      Button(type: :get, name: :profile_delete_content_button.l,
+             target: new_account_content_purge_path, variant: :danger)
     end
 
     def render_purge_status
-      p(id: "profile_image_purge_status") do
-        plain(:profile_image_purge_running.l(
+      p(id: "profile_content_purge_status") do
+        plain(:profile_content_purge_running.l(
                 deleted: @purge.deleted_image_count,
                 count: @purge.image_count
               ))

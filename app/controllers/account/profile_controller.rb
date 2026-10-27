@@ -49,7 +49,7 @@ module Account
                copyright_year: @copyright_year,
                licenses: @licenses,
                upload_license_id: @upload_license_id,
-               purge: ImagePurge.in_progress_for(target_user: @user)
+               purge: ContentPurge.in_progress_for(target_user: @user)
              ), status: status, **render_opts)
     end
 

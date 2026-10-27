@@ -2,7 +2,7 @@
 
 # The images removed from the receiver's content by an image purge, each
 # with what showed it and where the photo can still be seen.
-class Views::Mailers::ImagePurgeMailer < Views::Mailers::Base
+class Views::Mailers::ContentPurgeMailer < Views::Mailers::Base
   prop :subject, ::String
   prop :receiver, ::User
   prop :entries, ::Array
@@ -30,9 +30,9 @@ class Views::Mailers::ImagePurgeMailer < Views::Mailers::Base
     end
 
     def render_source(url)
-      return plain(:image_purge_email_no_source.l) unless url
+      return plain(:content_purge_email_no_source.l) unless url
 
-      plain(:image_purge_email_source.l)
+      plain(:content_purge_email_source.l)
       whitespace
       a(href: url) { url }
     end
@@ -57,16 +57,16 @@ class Views::Mailers::ImagePurgeMailer < Views::Mailers::Base
     end
 
     def source_line(url)
-      return :image_purge_email_no_source.l unless url
+      return :content_purge_email_no_source.l unless url
 
-      "#{:image_purge_email_source.l} #{url}"
+      "#{:content_purge_email_source.l} #{url}"
     end
   end
 
   private
 
   def intro
-    :email_image_purge_intro.l(holder: @holder, count: @entries.size)
+    :email_content_purge_intro.l(holder: @holder, count: @entries.size)
   end
 
   def entry_label(entry)

@@ -7,7 +7,7 @@ module Admin
     def test_index_lists_the_entries
       entry = ExcludedInatUser.create!(inat_login: "listed", reason: "Asked",
                                        user: users(:rolf))
-      ImagePurge.create!(inat_login: "listed", image_count: 9)
+      ContentPurge.create!(inat_login: "listed", image_count: 9)
       other = ExcludedInatUser.create!(inat_login: "other", inat_user_id: 5)
       make_admin("rolf")
 
@@ -16,11 +16,11 @@ module Admin
       assert_response(:success)
       assert_select("#excluded_inat_users a[href$='/people/listed']")
       assert_select("#excluded_inat_users td",
-                    text: :image_purge_progress.l(deleted: 0, count: 9))
+                    text: :content_purge_progress.l(deleted: 0, count: 9))
       assert_select("form[action='#{admin_excluded_inat_user_path(entry)}']")
       assert_select("#excluded_inat_users td", text: /other \(5\)/)
-      assert_select("#excluded_inat_users a[href='" \
-                    "#{new_admin_excluded_inat_user_image_purge_path(other)}']")
+      purge_path = new_admin_excluded_inat_user_content_purge_path(other)
+      assert_select("#excluded_inat_users a[href='#{purge_path}']")
     end
 
     def test_index_needs_admin_mode

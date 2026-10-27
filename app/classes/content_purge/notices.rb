@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# Who else loses an image in an ImagePurge, and what (#5521): the owners
+# Who else loses an image in an ContentPurge, and what (#5521): the owners
 # of observations, glossary terms and projects that show one of the
 # purged images, apart from the purge's target. Visual groups have no
 # owner, so nobody is told about them.
-class ImagePurge::Notices
+class ContentPurge::Notices
   INAT_PHOTO_URL = "#{Inat::Constants::SITE}/photos/".freeze
 
   # content: [[label, url], ...] the receiver owns that showed the image.

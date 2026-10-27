@@ -40,13 +40,13 @@ module Account
                     "a[href='#{new_account_inat_link_path}']")
       assert_select("#inat_opt_out_form", count: 0)
       assert_select("#profile_danger_zone " \
-                    "a[href='#{new_account_image_purge_path}']")
+                    "a[href='#{new_account_content_purge_path}']")
     end
 
     def test_danger_zone_with_inat_account_and_purge_running
       rolf.update!(inat_username: "rolf_on_inat", inat_import_opt_out: true)
-      ImagePurge.create!(user: rolf, target_user: rolf, image_count: 9,
-                         deleted_image_count: 4)
+      ContentPurge.create!(user: rolf, target_user: rolf, image_count: 9,
+                           deleted_image_count: 4)
       login("rolf")
 
       get(:edit)
@@ -54,9 +54,10 @@ module Account
       assert_select("form#inat_opt_out_form" \
                     "[action='#{account_inat_opt_out_path}'] " \
                     "input[name='user[inat_import_opt_out]'][checked]")
-      assert_select("#profile_image_purge_status",
-                    text: :profile_image_purge_running.l(deleted: 4, count: 9))
-      assert_select("a[href='#{new_account_image_purge_path}']", count: 0)
+      assert_select("#profile_content_purge_status",
+                    text: :profile_content_purge_running.l(deleted: 4,
+                                                           count: 9))
+      assert_select("a[href='#{new_account_content_purge_path}']", count: 0)
     end
 
     # Submitting with no meaningful changes shows "no changes" flash.

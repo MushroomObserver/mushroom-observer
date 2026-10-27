@@ -6,7 +6,7 @@ module Views::Controllers::Admin::ExcludedInatUsers
     INAT_PEOPLE_URL = "#{Inat::Constants::SITE}/people/".freeze
 
     prop :entries, _Array(::ExcludedInatUser)
-    prop :purges, _Hash(String, ::ImagePurge)
+    prop :purges, _Hash(String, ::ContentPurge)
 
     # `render(::Components::Table...)`, not Kit `Table(...)`: this class
     # is itself named Table.
@@ -45,13 +45,15 @@ module Views::Controllers::Admin::ExcludedInatUsers
     def render_images(entry)
       purge = @purges[entry.inat_login]
       if purge && (purge.pending? || purge.running?)
-        return plain(:image_purge_progress.l(deleted: purge.deleted_image_count,
-                                             count: purge.image_count))
+        return plain(:content_purge_progress.l(
+                       deleted: purge.deleted_image_count,
+                       count: purge.image_count
+                     ))
       end
 
-      Button(type: :get, name: :excluded_inat_user_delete_images.l,
+      Button(type: :get, name: :excluded_inat_user_delete_content.l,
              variant: :danger, size: :sm,
-             target: new_admin_excluded_inat_user_image_purge_path(entry))
+             target: new_admin_excluded_inat_user_content_purge_path(entry))
     end
 
     def render_remove(entry)
