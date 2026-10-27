@@ -1,2 +1,2 @@
-|{white-space:nowrap}. 2026-10-24 | Fix Name search failing after More Options from a Project | "PR#5533":https://github.com/MushroomObserver/mushroom-observer/pull/5533 |
-|{white-space:nowrap}. 2026-10-22 | Improve spacing and alignment in the page title bar | "PR#5520":https://github.com/MushroomObserver/mushroom-observer/pull/5520 |
+|{white-space:nowrap}. 2026-10-26 | Add an existing Field Slip's Observation from the Add box | "PR#5542":https://github.com/MushroomObserver/mushroom-observer/pull/5542 |
+|{white-space:nowrap}. 2026-10-26 | Show the collector, not the importer, on Observation lists | "PR#5539":https://github.com/MushroomObserver/mushroom-observer/pull/5539 |
