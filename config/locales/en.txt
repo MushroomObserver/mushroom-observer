@@ -1948,7 +1948,7 @@
   profile_inat_linked: "Your iNaturalist account: [login]"
   profile_inat_link_help: "To keep your iNaturalist observations from being imported, first link your iNaturalist account, so MO can recognize them."
   profile_inat_link: Link iNaturalist account
-  profile_inat_opt_out: "Do not import images or notes from my iNaturalist observations into MO (from here on; images already on MO stay)"
+  profile_inat_opt_out: "Do not import images or notes from my iNaturalist observations into MO"
   profile_delete_images: Delete my images
   profile_delete_images_help: "Delete the images you uploaded to MO and the images of your iNaturalist photos that anyone imported. Your observations stay, without those images, and all of them lose their notes. The next page shows what would be deleted before anything is."
   profile_delete_images_button: Delete my images...
