@@ -29,8 +29,8 @@ class Views::Mailers::AuthorMailer < Views::Mailers::Base
   def links
     type = @object.type_tag
     [[:author_request_add_author.t,
-      "#{MO.http_domain}/descriptions/authors/#{@object.id}" \
-      "?type=#{type}&add=#{@sender.id}"],
+      "#{MO.http_domain}/descriptions/authors" \
+      "?id=#{@object.id}&type=#{type}&add=#{@sender.id}"],
      [:email_links_show_user.t, "#{MO.http_domain}/users/#{@sender.id}"],
      [:email_links_latest_changes.t, MO.http_domain]]
   end
