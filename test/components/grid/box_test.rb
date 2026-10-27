@@ -50,6 +50,17 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_includes(html, "grid-box")
     assert_includes(html, "box_#{image.id}")
     assert_includes(html, "image_#{image.id}")
+    # format_name, not unique_format_name -- the IDBadge beside it
+    # already shows the id.
+    assert_html(html, ".log-name", text: image.format_name.t.as_displayed)
+  end
+
+  def test_renders_image_object_without_subjects
+    image = Image.create(user: @user)
+    component = Components::Grid::Box.new(user: @user, object: image)
+    html = render(component)
+
+    assert_html(html, ".log-name", text: :image.ti)
   end
 
   def test_renders_user_object

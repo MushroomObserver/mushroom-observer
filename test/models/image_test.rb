@@ -135,6 +135,21 @@ class ImageTest < UnitTestCase
     assert_equal(license_one,   changes[1].license)
   end
 
+  def test_format_name_with_subjects
+    img = images(:in_situ_image)
+    assert_not_empty(img.all_subjects)
+
+    assert_equal("#{img.title_subjects} #{:image.l}", img.format_name)
+  end
+
+  def test_format_name_without_subjects
+    img = Image.create(user: rolf)
+    assert_empty(img.all_subjects)
+
+    assert_equal(:image.ti, img.format_name)
+    assert_equal("#{:image.ti} (#{img.id})", img.unique_format_name)
+  end
+
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Rolf
     img = images(:commercial_inquiry_image)

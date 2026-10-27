@@ -266,6 +266,7 @@
   identification: identification
   image: image
   images: images
+  image_title_with_subject: "[subject] image"
   ignore: ignore
   info: info
   information: information
