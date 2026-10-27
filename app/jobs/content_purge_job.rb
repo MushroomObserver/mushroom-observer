@@ -64,12 +64,9 @@ class ContentPurgeJob < ApplicationJob
   # The observations stay as ordinary ones, with the facts but no notes.
   def clear_native_notes
     @plan.native_observations.pluck(:id).each_slice(BATCH_SIZE) do |slice|
-      count = Observation.where(id: slice).count do |obs|
-        next false if obs.notes.blank?
-
-        obs.update_columns(notes: Observation.no_notes,
-                           updated_at: Time.zone.now)
-      end
+      count = Observation.where(id: slice).
+              update_all(notes: Observation.no_notes,
+                         updated_at: Time.zone.now)
       @purge.increment!(:cleared_notes_count, count)
     end
   end

@@ -9,8 +9,8 @@
 # images an MO user holds that are someone else's photos stay.
 #
 # Notes, like images, are content the holder could hold copyright in, so
-# every MO-native observation of the MO user loses its notes and keeps
-# the facts (date, location, collector, names).
+# every MO-native observation of the MO user that has notes loses them
+# and keeps the facts (date, location, collector, names).
 #
 # Observations that lose images:
 #   - an imported observation left with no images becomes a placeholder,
@@ -33,7 +33,7 @@ class ContentPurge::Plan
   def native_observations
     return Observation.none unless @target_user
 
-    Observation.where(user: @target_user).
+    Observation.where(user: @target_user).has_notes.
       where.not(id: imported_observation_ids)
   end
 

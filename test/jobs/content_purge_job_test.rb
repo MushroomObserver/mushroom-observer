@@ -27,6 +27,9 @@ class ContentPurgeJobTest < ActiveJob::TestCase
                           "Someone else's photo mary imported is not hers")
       assert_includes(plan.native_observations, @native_obs)
       assert_not_includes(plan.native_observations, @others_obs)
+      assert_not_includes(plan.native_observations, @noteless_obs,
+                          "Nothing to clear on an observation " \
+                          "with no notes")
       assert_equal([@reflection], plan.placeholder_observations.to_a)
     end
   end
@@ -95,6 +98,7 @@ class ContentPurgeJobTest < ActiveJob::TestCase
     @imageless_obs = Observation.where(user: @mary).
                      where.missing(:observation_images).first
     @imageless_obs.update_columns(notes: { Other: "Smelled of anise" })
+    @noteless_obs = Observation.where(user: @mary).has_notes(false).first
     @others_obs = observations(:coprinus_comatus_obs) # rolf's
     @reflection = observations(:imported_inat_obs) # dick's import
     @native_image = image(@mary, @mary.legal_name, [@native_obs, @others_obs])
@@ -131,7 +135,7 @@ class ContentPurgeJobTest < ActiveJob::TestCase
   def expected_counts
     plan = ContentPurge::Plan.new(target_user: @mary)
     { images: plan.image_count,
-      notes_cleared: plan.native_observations.count { |o| o.notes.present? } }
+      notes_cleared: plan.native_observation_count }
   end
 
   def assert_purge_counts(purge, expected)
