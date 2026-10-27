@@ -239,7 +239,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.integer "state", default: 0, null: false
     t.integer "image_count", default: 0, null: false
     t.integer "deleted_image_count", default: 0, null: false
-    t.integer "deleted_observation_count", default: 0, null: false
+    t.integer "cleared_notes_count", default: 0, null: false
     t.integer "placeholder_count", default: 0, null: false
     t.text "error"
     t.datetime "notified_at"

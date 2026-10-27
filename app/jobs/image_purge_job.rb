@@ -28,7 +28,7 @@ class ImagePurgeJob < ApplicationJob
     start
     notify unless @purge.notified_at
     convert_placeholders
-    destroy_native_observations
+    clear_native_notes
     destroy_images
     @purge.update!(state: :done, ended_at: Time.zone.now)
   end
@@ -61,13 +61,17 @@ class ImagePurgeJob < ApplicationJob
     end
   end
 
-  def destroy_native_observations
+  # Also before the images go: the plan finds these through them. The
+  # observations stay as ordinary ones, without images or notes.
+  def clear_native_notes
     @plan.native_observations.pluck(:id).each_slice(BATCH_SIZE) do |slice|
-      count = Observation.where(id: slice).strict_loading(false).count do |obs|
-        obs.current_user = @actor
-        obs.destroy
+      count = Observation.where(id: slice).count do |obs|
+        next false if obs.notes.blank?
+
+        obs.update_columns(notes: Observation.no_notes,
+                           updated_at: Time.zone.now)
       end
-      @purge.increment!(:deleted_observation_count, count)
+      @purge.increment!(:cleared_notes_count, count)
     end
   end
 

@@ -10,7 +10,8 @@
 #  inat_login::                the excluded iNat user's.
 #  image_count::               Images the purge found.
 #  deleted_image_count::       Images destroyed so far.
-#  deleted_observation_count:: The target's MO-native observations deleted.
+#  cleared_notes_count::       The target's MO-native observations whose
+#                              notes were cleared.
 #  placeholder_count::         Imported observations left as placeholders.
 class ImagePurge < ApplicationRecord
   belongs_to :user, optional: true

@@ -90,6 +90,7 @@ class ImagePurgeJobTest < ActiveJob::TestCase
 
   def build_world
     @native_obs = observations(:minimal_unknown_obs) # mary's, not imported
+    @native_obs.update_columns(notes: { Other: "Under an oak" })
     @others_obs = observations(:coprinus_comatus_obs) # rolf's
     @reflection = observations(:imported_inat_obs) # dick's import
     @native_image = image(@mary, @mary.legal_name, [@native_obs, @others_obs])
@@ -126,21 +127,25 @@ class ImagePurgeJobTest < ActiveJob::TestCase
   def expected_counts
     plan = ImagePurge::Plan.new(target_user: @mary)
     { images: plan.image_count,
-      observations: plan.native_observation_count }
+      notes_cleared: plan.native_observations.count { |o| o.notes.present? } }
   end
 
   def assert_purge_counts(purge, expected)
     assert(purge.done?, "Purge failed: #{purge.error}")
     assert_equal(expected[:images], purge.image_count)
     assert_equal(expected[:images], purge.deleted_image_count)
-    assert_equal(expected[:observations], purge.deleted_observation_count)
+    assert_equal(expected[:notes_cleared], purge.cleared_notes_count)
     assert_equal(1, purge.placeholder_count)
     assert_not_nil(purge.notified_at)
   end
 
   def assert_records_after_purge
-    assert_not(Observation.exists?(@native_obs.id),
-               "mary's observation uploaded to MO is deleted")
+    @native_obs.reload
+    assert_empty(@native_obs.images, "mary's observation loses the images")
+    assert_equal(Observation.no_notes, @native_obs.notes,
+                 "mary's observation uploaded to MO loses its notes")
+    assert_not(@native_obs.placeholder?,
+               "An observation uploaded to MO is not a placeholder")
     assert(Observation.exists?(@others_obs.id), "rolf's observation stays")
     assert_not_includes(@others_obs.reload.images.map(&:id), @native_image.id)
     @reflection.reload

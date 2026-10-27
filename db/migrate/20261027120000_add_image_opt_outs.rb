@@ -39,7 +39,7 @@ class AddImageOptOuts < ActiveRecord::Migration[7.2]
   end
 
   def purge_counts(table)
-    [:image_count, :deleted_image_count, :deleted_observation_count,
+    [:image_count, :deleted_image_count, :cleared_notes_count,
      :placeholder_count].each do |column|
       table.integer(column, default: 0, null: false)
     end

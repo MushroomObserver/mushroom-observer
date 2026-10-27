@@ -9,7 +9,8 @@
 # images an MO user holds that are someone else's photos stay.
 #
 # Observations that lose images:
-#   - the MO user's MO-native observations are deleted;
+#   - the MO user's MO-native observations keep everything else, and
+#     lose their notes;
 #   - an imported observation left with no images becomes a placeholder,
 #     as for an unlicensed iNat observation, and its notes are cleared;
 #   - any other observation just loses the images.
