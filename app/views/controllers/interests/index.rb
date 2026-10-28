@@ -60,7 +60,6 @@ module Views::Controllers::Interests
       capture do
         strong do
           trusted_html(append_colon(summary_prefix(item).t))
-          whitespace
           render_summary_link(item)
         end
         render_pending_notice(item)
