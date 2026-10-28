@@ -104,13 +104,14 @@ module Views::Controllers::Interests
 
     def render_toggle_button(item)
       icon = item.state ? :hide : :show
+      label = item.state ? :ignore.ti : :watch.ti
       tooltip = if item.state
                   :list_interests_mute_tooltip.l
                 else
                   :list_interests_resume_tooltip.l
                 end
-      Button(type: :patch, name: tooltip, icon: icon, variant: :outline,
-             show_label: :responsive,
+      Button(type: :patch, name: label, icon: icon, variant: :outline,
+             show_label: :responsive, data: { title: tooltip },
              target: interest_path(item.target_id),
              params: { type: item.target_type,
                        state: item.state ? -1 : 1 })
