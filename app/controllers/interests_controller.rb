@@ -73,8 +73,9 @@ class InterestsController < ApplicationController
   end
 
   def interest_types(interests)
-    types = interests.map(&:target_type).uniq
-    types.sort_by { |t| [TYPE_FILTER_ORDER.index(t) || types.size, t] }
+    interests.map(&:target_type).uniq.sort_by do |t|
+      [TYPE_FILTER_ORDER.index(t) || TYPE_FILTER_ORDER.size, t]
+    end
   end
 
   def filter_interests_by_type(interests, type)
