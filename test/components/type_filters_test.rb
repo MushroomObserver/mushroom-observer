@@ -321,13 +321,13 @@ module Components
     def test_single_dropdown_toggle_label_all
       html = render_single(["all"])
 
-      assert_html(html, "#type_filter_toggle_top", text: :rss_all.l)
+      assert_html(html, "#type_filter_toggle_type_top", text: :rss_all.l)
     end
 
     def test_single_dropdown_toggle_label_selected_type
       html = render_single(["Observation"])
 
-      assert_html(html, "#type_filter_toggle_top", text: "Observations")
+      assert_html(html, "#type_filter_toggle_type_top", text: "Observations")
     end
 
     def test_single_dropdown_active_item_has_no_link
@@ -346,8 +346,8 @@ module Components
     def test_single_position_suffixes_toggle_id
       html = render_single(["all"], position: :bottom)
 
-      assert_html(html, "#type_filter_toggle_bottom")
-      assert_no_html(html, "#type_filter_toggle_top")
+      assert_html(html, "#type_filter_toggle_type_bottom")
+      assert_no_html(html, "#type_filter_toggle_type_top")
     end
 
     private
