@@ -59,8 +59,8 @@ module Views::Controllers::Interests
     def summary_cell(item)
       capture do
         strong do
-          trusted_html(append_colon(summary_prefix(item).t))
-          render_summary_link(item)
+          plain(append_colon(summary_prefix(item)))
+          render_object_link(item)
         end
         render_pending_notice(item)
       end
@@ -76,32 +76,19 @@ module Views::Controllers::Interests
       "#{state} #{item.target_type.underscore.to_sym.l}"
     end
 
-    def render_summary_link(item)
-      title = summary_title(item)
-      Link(type: :get, name: title.t.strip_html,
-           target: summary_target(item)) do
-        trusted_html(title.t)
-      end
+    # NameTracker has no show page -- link to the name tracker editor
+    # instead of Components::Link::Object's default show_link_args.
+    def render_object_link(item)
+      return render_name_tracker_link(item) if item.target_type == "NameTracker"
+
+      Link(type: :object, object: item.target,
+           name: item.target_format_name.t)
     end
 
-    # Was Interest#summary -- moved here (#4901) since its only
-    # caller was this render. NameTracker#summary_title (the
-    # target.summary_title branch) stays on the model: NameTracker's
-    # full #summary (prefix + title) has a second, non-render caller
-    # (InterestsController#find_relevant_interests sorts by
-    # target.text_name, an alias of summary, for NameTracker targets).
-    def summary_title(item)
-      return item.target.summary_title if item.target_type == "NameTracker"
-
-      item.target ? item.target_format_name : "--"
-    end
-
-    def summary_target(item)
-      target = item.target
-      if item.target_type == "NameTracker"
-        new_tracker_of_name_path(target.name_id)
-      else
-        target.show_link_args
+    def render_name_tracker_link(item)
+      Link(type: :get, name: item.target.summary_title.t,
+           target: new_tracker_of_name_path(item.target.name_id)) do
+        trusted_html(item.target.summary_title.t)
       end
     end
 
