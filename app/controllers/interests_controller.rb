@@ -21,6 +21,13 @@ class InterestsController < ApplicationController
   before_action :login_required
   before_action :store_location, only: [:index]
 
+  # Display order for the type-filter pills -- not alphabetical, the
+  # most-common target types come first. Anything not listed here
+  # (LocationDescription, NameDescription, NameTracker) sorts after,
+  # alphabetically.
+  TYPE_FILTER_ORDER = %w[Name Observation Project SpeciesList
+                         Location].freeze
+
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
   # Inputs: params[:page], params[:type]
@@ -66,7 +73,8 @@ class InterestsController < ApplicationController
   end
 
   def interest_types(interests)
-    interests.map(&:target_type).uniq.sort
+    types = interests.map(&:target_type).uniq
+    types.sort_by { |t| [TYPE_FILTER_ORDER.index(t) || types.size, t] }
   end
 
   def filter_interests_by_type(interests, type)
