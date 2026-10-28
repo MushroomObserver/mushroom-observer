@@ -7,11 +7,13 @@ module Views::Controllers::Interests
     prop :interests, _Array(::Interest)
     prop :types, _Array(::String)
     prop :selected_type, _Nilable(::String), default: nil
+    prop :states, _Array(::String)
+    prop :selected_state, _Nilable(::String), default: nil
     prop :pagination_data, ::PaginationData
 
     def view_template
       add_page_title(:list_interests_title.l)
-      add_type_filters(**type_filter_args) if show_type_filter?
+      register_filters
       add_pagination(@pagination_data)
       container_class(:wide)
 
@@ -27,6 +29,11 @@ module Views::Controllers::Interests
 
     private
 
+    def register_filters
+      add_type_filters(**type_filter_args) if show_type_filter?
+      add_type_filters(**state_filter_args) if show_state_filter?
+    end
+
     def render_intro
       ContentPadded { p(class: "mb-3") { plain(:list_interests_intro.l) } }
     end
@@ -35,14 +42,31 @@ module Views::Controllers::Interests
       @selected_type || (@types.length > 1 && @pagination_data.num_total > 1)
     end
 
+    def show_state_filter?
+      @selected_state || (@states.length > 1 && @pagination_data.num_total > 1)
+    end
+
     def type_filter_args
       {
         types: [@selected_type.presence || "all"], multiple: false,
-        filterable_types: @types.map(&:to_sym),
+        filterable_types: @types.map(&:to_sym), show_intro: true, key: :type,
         type_label: ->(type) { type.to_s.underscore.pluralize.to_sym.ti },
         path_for: lambda do |type|
-          url = type ? interests_path(type: type) : interests_path
-          add_q_param(url)
+          params = { type: type, state: @selected_state.presence }.compact
+          add_q_param(interests_path(**params))
+        end
+      }
+    end
+
+    def state_filter_args
+      {
+        types: [@selected_state.presence || "all"], multiple: false,
+        filterable_types: @states.map(&:to_sym),
+        show_intro: !show_type_filter?, key: :state,
+        type_label: ->(state) { state.to_s.underscore.to_sym.ti },
+        path_for: lambda do |state|
+          params = { type: @selected_type.presence, state: state }.compact
+          add_q_param(interests_path(**params))
         end
       }
     end

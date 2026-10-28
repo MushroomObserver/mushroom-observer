@@ -41,17 +41,15 @@ module Views::FullPageBase::IndexNav
   end
 
   # Type-filter row for an index page -- kwargs forwarded as-is to
-  # `Components::TypeFilters.new` (see that class for `multiple:`/
-  # `filterable_types:`/etc.).
+  # `Components::TypeFilters.new`. Callable more than once to stack
+  # filters side by side (e.g. Interests' type + state filters).
   #
-  # Stashes the args, not pre-rendered HTML -- unlike `add_sorter`,
-  # `TypeFilters` renders element ids (form/toggle/checkbox ids) that
-  # must stay unique if both the top and bottom pagination rows
-  # render on the same page. `render_index_pagination` below renders
-  # a fresh `TypeFilters` per position instead of reusing one capture,
-  # so each copy's ids get position-suffixed.
+  # Stashes the args, not pre-rendered HTML -- `TypeFilters` renders
+  # element ids that must stay unique per :top/:bottom position, so
+  # `render_index_pagination` below builds a fresh instance each time
+  # instead of reusing one capture.
   def add_type_filters(**args)
-    @type_filters_args = args
+    (@type_filters_args ||= []) << args
   end
 
   private
@@ -68,9 +66,9 @@ module Views::FullPageBase::IndexNav
       end
       if @type_filters_args
         component.with_type_filters do
-          render(::Components::TypeFilters.new(
-                   **@type_filters_args, position: position
-                 ))
+          @type_filters_args.each do |args|
+            render(::Components::TypeFilters.new(**args, position: position))
+          end
         end
       end
     end

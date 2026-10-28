@@ -28,20 +28,29 @@ class InterestsController < ApplicationController
   TYPE_FILTER_ORDER = %w[Name Observation Project SpeciesList
                          Location].freeze
 
+  # Display order for the state-filter pills.
+  STATE_FILTER_ORDER = %w[Watching Ignoring].freeze
+
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
-  # Inputs: params[:page], params[:type]
-  # Outputs: @interests, @types, @pagination_data, @selected_type
+  # Inputs: params[:page], params[:type], params[:state]
+  # Outputs: @interests, @types, @pagination_data, @selected_type,
+  #          @states, @selected_state
   def index
     @interests = find_relevant_interests
     @types = interest_types(@interests)
     @selected_type = params[:type].to_s
     @interests = filter_interests_by_type(@interests, @selected_type) \
       if @selected_type.present?
+    @states = interest_states(@interests)
+    @selected_state = params[:state].to_s
+    @interests = filter_interests_by_state(@interests, @selected_state) \
+      if @selected_state.present?
     @pagination_data = paginate_interests!
     render(Views::Controllers::Interests::Index.new(
              interests: @interests.to_a, types: @types.map(&:to_s),
              selected_type: @selected_type.presence,
+             states: @states, selected_state: @selected_state.presence,
              pagination_data: @pagination_data
            ))
   end
@@ -80,6 +89,16 @@ class InterestsController < ApplicationController
 
   def filter_interests_by_type(interests, type)
     interests.select { |i| i.target_type.to_s == type.to_s }
+  end
+
+  def interest_states(interests)
+    present = interests.map { |i| i.state ? "Watching" : "Ignoring" }.uniq
+    STATE_FILTER_ORDER & present
+  end
+
+  def filter_interests_by_state(interests, state)
+    watching = (state == "Watching")
+    interests.select { |i| i.state == watching }
   end
 
   def paginate_interests!

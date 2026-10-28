@@ -66,13 +66,37 @@ module Views::Controllers::Interests
                   text: interest.target.summary.t.as_displayed)
     end
 
+    # When `selected_state:` is set, the state-filter strip renders
+    # alongside the type filter.
+    def test_state_filter_renders_with_active_and_inactive_items
+      html = render_index(
+        types: ["Observation"], selected_type: nil,
+        states: %w[Watching Ignoring], selected_state: "Watching"
+      )
+
+      assert_html(html, "a[href*='state=Ignoring']")
+      assert_no_html(html, "a[href*='state=Watching']")
+    end
+
+    def test_state_filter_hidden_when_single_state_present
+      html = render_index(
+        types: ["Observation"], selected_type: nil,
+        states: ["Watching"], selected_state: nil
+      )
+
+      assert_no_html(html, "a[href*='state=']")
+    end
+
     private
 
-    def render_index(types:, selected_type:, interests: [])
+    def render_index(types:, selected_type:, interests: [],
+                     states: [], selected_state: nil)
       render(Index.new(
                interests: interests,
                types: types,
                selected_type: selected_type,
+               states: states,
+               selected_state: selected_state,
                pagination_data: PaginationData.new
              ))
     end
