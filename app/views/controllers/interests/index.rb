@@ -16,7 +16,11 @@ module Views::Controllers::Interests
 
       render_type_filter if show_type_filter?
       PaginatedResults do
-        render_interests_table if @interests.any?(&:target)
+        if @interests.any?(&:target)
+          render_interests_table
+        else
+          ContentPadded { p { plain(:list_interests_none.l) } }
+        end
       end
     end
 

@@ -2931,6 +2931,7 @@
 
   # interests/index
   list_interests_title: Your Notification Requests
+  list_interests_none: No interests.
   list_interests_turn_on: Change to Watch
   list_interests_turn_off: Change to Ignore
   list_name_tracker_pending_approval: "(Observer notification pending approval.)"
