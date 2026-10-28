@@ -7,11 +7,13 @@ module Views::Controllers::Interests
     prop :interests, _Array(::Interest)
     prop :types, _Array(::String)
     prop :selected_type, _Nilable(::String), default: nil
+    prop :states, _Array(::String)
+    prop :selected_state, _Nilable(::String), default: nil
     prop :pagination_data, ::PaginationData
 
     def view_template
       add_page_title(:list_interests_title.l)
-      add_type_filters(**type_filter_args) if show_type_filter?
+      register_filters
       add_pagination(@pagination_data)
       container_class(:wide)
 
@@ -27,6 +29,11 @@ module Views::Controllers::Interests
 
     private
 
+    def register_filters
+      add_type_filters(**type_filter_args) if show_type_filter?
+      add_type_filters(**state_filter_args) if show_state_filter?
+    end
+
     def render_intro
       ContentPadded { p(class: "mb-3") { plain(:list_interests_intro.l) } }
     end
@@ -35,14 +42,31 @@ module Views::Controllers::Interests
       @selected_type || (@types.length > 1 && @pagination_data.num_total > 1)
     end
 
+    def show_state_filter?
+      @selected_state || (@states.length > 1 && @pagination_data.num_total > 1)
+    end
+
     def type_filter_args
       {
         types: [@selected_type.presence || "all"], multiple: false,
-        filterable_types: @types.map(&:to_sym),
+        filterable_types: @types.map(&:to_sym), show_intro: true, key: :type,
         type_label: ->(type) { type.to_s.underscore.pluralize.to_sym.ti },
         path_for: lambda do |type|
-          url = type ? interests_path(type: type) : interests_path
-          add_q_param(url)
+          params = { type: type, state: @selected_state.presence }.compact
+          add_q_param(interests_path(**params))
+        end
+      }
+    end
+
+    def state_filter_args
+      {
+        types: [@selected_state.presence || "all"], multiple: false,
+        filterable_types: @states.map(&:to_sym),
+        show_intro: !show_type_filter?, key: :state,
+        type_label: ->(state) { state.to_s.underscore.to_sym.ti },
+        path_for: lambda do |state|
+          params = { type: @selected_type.presence, state: state }.compact
+          add_q_param(interests_path(**params))
         end
       }
     end
@@ -58,39 +82,38 @@ module Views::Controllers::Interests
 
     def summary_cell(item)
       capture do
-        strong { render_summary_link(item) }
+        strong do
+          plain(append_colon(summary_prefix(item)))
+          render_object_link(item)
+        end
         render_pending_notice(item)
       end
     end
 
-    def render_summary_link(item)
-      Link(type: :get, name: item_summary(item).t.strip_html,
-           target: summary_target(item)) do
-        trusted_html(item_summary(item).t)
-      end
-    end
-
-    def summary_target(item)
-      target = item.target
-      if item.target_type == "NameTracker"
-        new_tracker_of_name_path(target.name_id)
-      else
-        target.show_link_args
-      end
-    end
-
-    # Was Interest#summary -- moved here (#4901) since its only
-    # caller was this render. NameTracker#summary (the target.summary
-    # branch) stays on the model unchanged: it has a second, non-render
-    # caller (InterestsController#find_relevant_interests sorts by
-    # target.text_name, an alias of summary, for NameTracker targets).
-    def item_summary(item)
-      return item.target.summary if item.target_type == "NameTracker"
+    # Inert lead-in text ("Watching Observation") -- not part of the
+    # link, only the title after it is. No colon here -- append_colon
+    # adds it at the render site above.
+    def summary_prefix(item)
+      return item.target.summary_prefix if item.target_type == "NameTracker"
 
       state = item.state ? :watching.ti : :ignoring.ti
-      type_label = append_colon(item.target_type.underscore.to_sym.l)
-      target = item.target ? item.target_format_name : "--"
-      "#{state} #{type_label}#{target}"
+      "#{state} #{item.target_type.underscore.to_sym.l}"
+    end
+
+    # NameTracker has no show page -- link to the name tracker editor
+    # instead of Components::Link::Object's default show_link_args.
+    def render_object_link(item)
+      return render_name_tracker_link(item) if item.target_type == "NameTracker"
+
+      Link(type: :object, object: item.target,
+           name: item.target_format_name.t)
+    end
+
+    def render_name_tracker_link(item)
+      Link(type: :get, name: item.target.summary_title.t,
+           target: new_tracker_of_name_path(item.target.name_id)) do
+        trusted_html(item.target.summary_title.t)
+      end
     end
 
     def actions_cell(item)

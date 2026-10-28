@@ -34,6 +34,14 @@ class Components::TypeFilters < Components::Base
   # type_label: (Symbol) -> String : path_for: (Symbol | nil) -> String
   prop :type_label, _Nilable(Proc), default: nil
   prop :path_for, _Nilable(Proc), default: nil
+  # Whether to render the "Show:" lead-in -- false when a second
+  # filter sits beside this one in the same row and the first filter
+  # already carries it (see Interests::Index#view_template).
+  prop :show_intro, _Boolean, default: true
+  # Disambiguates element ids when two `multiple: false` filters
+  # render at the same `position:` (e.g. a type filter and a state
+  # filter both at :top).
+  prop :key, ::Symbol, default: -> { :type }
 
   # Save-Defaults needs a CSRF token (it's a POST); Apply's GET
   # doesn't.
@@ -63,12 +71,14 @@ class Components::TypeFilters < Components::Base
   def render_single_select_dropdown
     div(class: "filter-form-dropdown") do
       div(class: "flex-bar") do
-        render(Components::Navbar::Text.new(class: "mx-0 pr-2")) do
-          :rss_show.t
+        if @show_intro
+          render(Components::Navbar::Text.new(class: "mx-0 pr-2")) do
+            :rss_show.t
+          end
         end
         Dropdown(
-          id: "type_filter_toggle_#{@position}",
-          menu_id: "type_filter_menu_#{@position}",
+          id: "type_filter_toggle_#{@key}_#{@position}",
+          menu_id: "type_filter_menu_#{@key}_#{@position}",
           label: single_select_toggle_label, element: :div,
           wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-0"),
           toggle_variant: :outline, toggle_class: "font-weight-normal",
@@ -103,7 +113,7 @@ class Components::TypeFilters < Components::Base
   def render_single_select_bar
     div(class: "filter-form-bar") do
       div(class: "text-nowrap") do
-        render_show_label
+        render_show_label if @show_intro
         ButtonGroup do
           render_type_filter_bar(nil)
           @filterable_types.each { |type| render_type_filter_bar(type) }
