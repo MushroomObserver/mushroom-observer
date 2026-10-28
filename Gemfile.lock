@@ -298,7 +298,7 @@ GEM
     mini_magick (5.4.0)
       logger
     mini_mime (1.1.5)
-    mini_racer (0.22.1)
+    mini_racer (0.22.2)
       libv8-node (~> 24.12.0.1)
     minitest (5.27.0)
     minitest-reporters (1.8.0)
