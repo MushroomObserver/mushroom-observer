@@ -58,16 +58,43 @@ module Views::Controllers::Interests
 
     def summary_cell(item)
       capture do
-        strong { render_summary_link(item) }
+        strong do
+          trusted_html(append_colon(summary_prefix(item).t))
+          whitespace
+          render_summary_link(item)
+        end
         render_pending_notice(item)
       end
     end
 
+    # Inert lead-in text ("Watching Observation") -- not part of the
+    # link, only the title after it is. No colon here -- append_colon
+    # adds it at the render site above.
+    def summary_prefix(item)
+      return item.target.summary_prefix if item.target_type == "NameTracker"
+
+      state = item.state ? :watching.ti : :ignoring.ti
+      "#{state} #{item.target_type.underscore.to_sym.l}"
+    end
+
     def render_summary_link(item)
-      Link(type: :get, name: item_summary(item).t.strip_html,
+      title = summary_title(item)
+      Link(type: :get, name: title.t.strip_html,
            target: summary_target(item)) do
-        trusted_html(item_summary(item).t)
+        trusted_html(title.t)
       end
+    end
+
+    # Was Interest#summary -- moved here (#4901) since its only
+    # caller was this render. NameTracker#summary_title (the
+    # target.summary_title branch) stays on the model: NameTracker's
+    # full #summary (prefix + title) has a second, non-render caller
+    # (InterestsController#find_relevant_interests sorts by
+    # target.text_name, an alias of summary, for NameTracker targets).
+    def summary_title(item)
+      return item.target.summary_title if item.target_type == "NameTracker"
+
+      item.target ? item.target_format_name : "--"
     end
 
     def summary_target(item)
@@ -77,20 +104,6 @@ module Views::Controllers::Interests
       else
         target.show_link_args
       end
-    end
-
-    # Was Interest#summary -- moved here (#4901) since its only
-    # caller was this render. NameTracker#summary (the target.summary
-    # branch) stays on the model unchanged: it has a second, non-render
-    # caller (InterestsController#find_relevant_interests sorts by
-    # target.text_name, an alias of summary, for NameTracker targets).
-    def item_summary(item)
-      return item.target.summary if item.target_type == "NameTracker"
-
-      state = item.state ? :watching.ti : :ignoring.ti
-      type_label = append_colon(item.target_type.underscore.to_sym.l)
-      target = item.target ? item.target_format_name : "--"
-      "#{state} #{type_label}#{target}"
     end
 
     def actions_cell(item)
