@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Interests
-  # Interests / subscriptions page — type filter pills + paginated
-  # table of objects the current user is subscribed to.
+  # Interests / subscriptions page — type filter + paginated table
+  # of objects the current user is subscribed to.
   class Index < Views::FullPageBase
     prop :interests, _Array(::Interest)
     prop :types, _Array(::String)
@@ -11,10 +11,11 @@ module Views::Controllers::Interests
 
     def view_template
       add_page_title(:list_interests_title.l)
+      add_type_filters(**type_filter_args) if show_type_filter?
       add_pagination(@pagination_data)
       container_class(:wide)
 
-      render_type_filter if show_type_filter?
+      render_intro
       PaginatedResults do
         if @interests.any?(&:target)
           render_interests_table
@@ -26,49 +27,55 @@ module Views::Controllers::Interests
 
     private
 
+    def render_intro
+      ContentPadded { p(class: "mb-3") { plain(:list_interests_intro.l) } }
+    end
+
     def show_type_filter?
       @selected_type || (@types.length > 1 && @pagination_data.num_total > 1)
     end
 
-    def render_type_filter
-      ButtonGroup(class: class_names(
-        "pb-1 text-nowrap mt-5",
-        Components::Column.mobile_hide_classes(display: :"inline-block")
-      )) do
-        Button(
-          name: :rss_show.l, tag: :span, size: :sm,
-          class: "disabled"
-        )
-        render_filter_pill(nil, :rss_all.l, interests_path)
-        @types.each do |type|
-          label = type.underscore.pluralize.to_sym.ti
-          render_filter_pill(type, label, interests_path(type: type))
+    def type_filter_args
+      {
+        types: [@selected_type.presence || "all"], multiple: false,
+        filterable_types: @types.map(&:to_sym),
+        type_label: ->(type) { type.to_s.underscore.pluralize.to_sym.ti },
+        path_for: lambda do |type|
+          url = type ? interests_path(type: type) : interests_path
+          add_q_param(url)
         end
-      end
-    end
-
-    def render_filter_pill(type, label, url)
-      active = (type.to_s == @selected_type.to_s)
-      Button(
-        tag: :span, size: :sm, class: ("active" if active)
-      ) do
-        if active
-          plain(label)
-        else
-          Link(type: :get, name: label,
-               target: add_q_param(url)) { plain(label) }
-        end
-      end
+      }
     end
 
     def render_interests_table
       rows = @interests.select(&:target)
-      Table(rows, class: "table-striped",
-                  show_headers: false) do |t|
-        t.column("summary") do |item|
-          capture { strong { trusted_html(item_summary(item).t) } }
-        end
+      Table(rows, class: "table-striped table-align-middle",
+                  identifier: "interests", show_headers: false) do |t|
+        t.column("summary") { |item| summary_cell(item) }
         t.column("actions") { |item| actions_cell(item) }
+      end
+    end
+
+    def summary_cell(item)
+      capture do
+        strong { render_summary_link(item) }
+        render_pending_notice(item)
+      end
+    end
+
+    def render_summary_link(item)
+      Link(type: :get, name: item_summary(item).t.strip_html,
+           target: summary_target(item)) do
+        trusted_html(item_summary(item).t)
+      end
+    end
+
+    def summary_target(item)
+      target = item.target
+      if item.target_type == "NameTracker"
+        new_tracker_of_name_path(target.name_id)
+      else
+        target.show_link_args
       end
     end
 
@@ -88,42 +95,33 @@ module Views::Controllers::Interests
 
     def actions_cell(item)
       capture do
-        render_show_link(item)
-        plain(" | ")
-        render_toggle_link(item)
-        plain(" | ")
-        render_destroy_link(item)
-        render_pending_notice(item)
+        ButtonGroup do
+          render_toggle_button(item)
+          render_destroy_button(item)
+        end
       end
     end
 
-    def render_destroy_link(item)
-      Link(type: :get, name: :destroy.ti,
-           target: set_interest_path(type: item.target_type,
-                                     id: item.target_id, state: 0))
+    def render_toggle_button(item)
+      icon = item.state ? :hide : :show
+      label = item.state ? :ignore.ti : :watch.ti
+      tooltip = if item.state
+                  :list_interests_mute_tooltip.l
+                else
+                  :list_interests_resume_tooltip.l
+                end
+      Button(type: :patch, name: label, icon: icon, variant: :outline,
+             show_label: :responsive, data: { title: tooltip },
+             target: interest_path(item.target_id),
+             params: { type: item.target_type,
+                       state: item.state ? -1 : 1 })
     end
 
-    def render_show_link(item)
-      target = item.target
-      label = :show_object.l(type: target.type_tag)
-      if item.target_type == "NameTracker"
-        Link(type: :get, name: label,
-             target: new_tracker_of_name_path(target.name_id))
-      else
-        Link(type: :get, name: label, target: target.show_link_args)
-      end
-    end
-
-    def render_toggle_link(item)
-      label = if item.state
-                :list_interests_turn_off.l
-              else
-                :list_interests_turn_on.l
-              end
-      Link(type: :get, name: label,
-           target: set_interest_path(type: item.target_type,
-                                     id: item.target_id,
-                                     state: item.state ? -1 : 1))
+    def render_destroy_button(item)
+      Button(type: :delete, name: :delete.ti, icon: :delete,
+             variant: :outline, show_label: :responsive,
+             target: interest_path(item.target_id),
+             params: { type: item.target_type })
     end
 
     def render_pending_notice(item)

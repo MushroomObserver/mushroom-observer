@@ -7,8 +7,8 @@
 # When `@icon` is set:
 #   - icon always renders first
 #   - text (`@name`) follows in `span.sr-only` by default; in
-#     `span.d-none.d-sm-inline` when `@show_label` is `:responsive`
-#     (visible at sm+ breakpoints, hidden on xs — for nav buttons
+#     `span.d-none.d-md-inline` when `@show_label` is `:responsive`
+#     (visible at md+ breakpoints, hidden below — for nav buttons
 #     that show an icon on mobile and icon+text on wider screens);
 #     or visible at every breakpoint when `@show_label` is `:always`
 #     (a full-width heading with no space pressure to hide the text

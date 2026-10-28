@@ -2,7 +2,7 @@
 
 require("application_system_test_case")
 
-# The dropdown Apply button (RssLogs::TypeFilters) starts disabled
+# The dropdown Apply button (Components::TypeFilters) starts disabled
 # and only enables once a checkbox's checked state differs from how
 # the page loaded -- Stimulus (`type-filters` controller) + Bootstrap
 # CSS behavior a controller/component test can't exercise.

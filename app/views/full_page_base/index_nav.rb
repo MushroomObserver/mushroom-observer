@@ -40,9 +40,9 @@ module Views::FullPageBase::IndexNav
     end
   end
 
-  # Type-filter row above the RssLogs index — checkboxes that drop
-  # query types in/out of the result set. Used only by
-  # `RssLogsController#index` today.
+  # Type-filter row for an index page -- kwargs forwarded as-is to
+  # `Components::TypeFilters.new` (see that class for `multiple:`/
+  # `filterable_types:`/etc.).
   #
   # Stashes the args, not pre-rendered HTML -- unlike `add_sorter`,
   # `TypeFilters` renders element ids (form/toggle/checkbox ids) that
@@ -50,8 +50,8 @@ module Views::FullPageBase::IndexNav
   # render on the same page. `render_index_pagination` below renders
   # a fresh `TypeFilters` per position instead of reusing one capture,
   # so each copy's ids get position-suffixed.
-  def add_type_filters(query, types, user: nil)
-    @type_filters_args = { query: query, types: types, user: user }
+  def add_type_filters(**args)
+    @type_filters_args = args
   end
 
   private
@@ -68,7 +68,7 @@ module Views::FullPageBase::IndexNav
       end
       if @type_filters_args
         component.with_type_filters do
-          render(::Views::Controllers::RssLogs::TypeFilters.new(
+          render(::Components::TypeFilters.new(
                    **@type_filters_args, position: position
                  ))
         end
