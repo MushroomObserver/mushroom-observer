@@ -99,7 +99,7 @@ module Views::Controllers::Interests
     end
 
     def render_toggle_button(item)
-      icon = item.state ? :ignore : :watch
+      icon = item.state ? :hide : :show
       tooltip = if item.state
                   :list_interests_mute_tooltip.l
                 else
