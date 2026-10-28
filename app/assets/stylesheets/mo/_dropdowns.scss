@@ -102,9 +102,9 @@
   color: $body-color !important;
 }
 
-// Custom 1500px cutoff between the two rss-log type-filter forms --
-// see Views::Controllers::RssLogs::TypeFilters for why this isn't a
-// named Bootstrap breakpoint.
+// Custom 1500px cutoff between the two type-filter forms -- see
+// Components::TypeFilters for why this isn't a named Bootstrap
+// breakpoint.
 .filter-form-bar {
   display: none;
 }

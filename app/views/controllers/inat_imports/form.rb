@@ -107,7 +107,8 @@ module Views::Controllers::InatImports
     def render_radio_for_value(value, label_text)
       render(Components::Form::RadioCollapse.new(
                form: self, field: :choose_method, value: value,
-               label: label_text, attributes: { wrap_class: "mb-2" }
+               label: label_text,
+               attributes: { wrap_class: "mt-0 mb-2" }
              ))
     end
 

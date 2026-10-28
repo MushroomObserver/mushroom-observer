@@ -54,6 +54,19 @@ thead tr {
   }
 }
 
+// Actions column (the button group) only needs its content's width
+// -- shrink-to-fit it so the summary column gets all the extra row
+// width, instead of the two splitting it evenly. The toggle button's
+// label varies in width ("Mute notifications" vs "Resume
+// notifications"), which stretches the shrink-to-fit column to the
+// widest row -- right-align keeps the Delete button flush against
+// the row's trailing edge on every row instead of drifting with it.
+.table-interests > tbody > tr > td:last-child {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
 .table-naming-votes {
   background: none;
   width: 100%;

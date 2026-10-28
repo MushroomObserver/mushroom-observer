@@ -24,7 +24,10 @@ module Views::Controllers::RssLogs
 
     def register_chrome
       add_index_title(@query)
-      add_type_filters(@query, @types, user: current_user)
+      add_type_filters(
+        types: @types, multiple: true, filterable_types: RssLog::ALL_TYPE_TAGS,
+        query: @query, user: current_user
+      )
       add_pagination(@pagination_data)
       container_class(:full)
     end
