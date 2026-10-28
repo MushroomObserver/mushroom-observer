@@ -267,8 +267,6 @@
   image: image
   images: images
   image_title_with_subject: "[subject] image"
-  ignore: ignore
-  watch: watch
   info: info
   information: information
   interests: interests
@@ -584,7 +582,8 @@
   send: send
   show: show
   hide: hide
-  # submit a form
+  watch: watch
+  ignore: ignore
   submit: submit
   submitting: submitting
   sync_now: sync now
