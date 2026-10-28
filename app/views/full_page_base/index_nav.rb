@@ -66,8 +66,9 @@ module Views::FullPageBase::IndexNav
       end
       if @type_filters_args
         component.with_type_filters do
-          @type_filters_args.each do |args|
-            render(::Components::TypeFilters.new(**args, position: position))
+          @type_filters_args.each do |filter_args|
+            render(::Components::TypeFilters.new(**filter_args,
+                                                  position: position))
           end
         end
       end
