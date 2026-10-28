@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Interests
-  # Interests / subscriptions page — type filter pills + paginated
-  # table of objects the current user is subscribed to.
+  # Interests / subscriptions page — type filter + paginated table
+  # of objects the current user is subscribed to.
   class Index < Views::FullPageBase
     prop :interests, _Array(::Interest)
     prop :types, _Array(::String)
@@ -17,7 +17,11 @@ module Views::Controllers::Interests
 
       render_intro
       PaginatedResults do
-        render_interests_table if @interests.any?(&:target)
+        if @interests.any?(&:target)
+          render_interests_table
+        else
+          ContentPadded { p { plain(:list_interests_none.l) } }
+        end
       end
     end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Type-filter row for an index page -- "Show:" plus one pill per
+# Type-filter row for an index page -- "Show:" plus one filter per
 # `filterable_types:` entry, highlighting the active selection.
 #
 # `multiple: true` -- checkboxes in a `<form>` (dropdown below the
@@ -8,14 +8,14 @@
 # Activity Logs: several types at once, round-trips through
 # `Query#types`.
 #
-# `multiple: false` -- plain link pills, one type at a time, no
+# `multiple: false` -- plain filter links, one type at a time, no
 # form. Interests: no multi-select concept, so the caller supplies
 # `type_label:`/`path_for:` procs instead of a Query.
 class Components::TypeFilters < Components::Base
   prop :multiple, _Boolean
-  # The universe of types to render a pill/checkbox for, in display
-  # order -- not necessarily every `ALL_TYPE_TAGS` value (Interests
-  # only lists types the user has interests in).
+  # The universe of types to render a filter/checkbox for, in
+  # display order -- not necessarily every `ALL_TYPE_TAGS` value
+  # (Interests only lists types the user has interests in).
   prop :filterable_types, _Array(Symbol)
   # Current selection: `["all"]`, or one-or-more type-tag strings.
   prop :types, _Array(::String)
@@ -85,43 +85,51 @@ class Components::TypeFilters < Components::Base
   end
 
   def render_single_select_dropdown_items
-    render_single_dropdown_item(nil, :rss_all.l, @path_for.call(nil))
-    @filterable_types.each do |type|
-      render_single_dropdown_item(type, @type_label.call(type),
-                                  @path_for.call(type))
-    end
+    render_type_filter_dropdown(nil)
+    @filterable_types.each { |type| render_type_filter_dropdown(type) }
   end
 
-  def render_single_dropdown_item(type, label, url)
-    if @types == [type.to_s.presence || "all"]
-      div(class: "dropdown-item active") { plain(label) }
+  def render_type_filter_dropdown(type)
+    if type_filter_active?(type)
+      div(class: "dropdown-item active") { plain(type_filter_label(type)) }
     else
-      Link(type: :get, name: label, target: url,
-           class: "dropdown-item") { plain(label) }
+      Link(type: :get, name: type_filter_label(type),
+           target: @path_for.call(type), class: "dropdown-item") do
+        plain(type_filter_label(type))
+      end
     end
   end
 
   def render_single_select_bar
     div(class: "filter-form-bar") do
-      ButtonGroup(class: "text-nowrap") do
-        Button(name: :rss_show.l, tag: :span, size: :sm, class: "disabled")
-        render_single_pill(nil, :rss_all.l, @path_for.call(nil))
-        @filterable_types.each do |type|
-          render_single_pill(type, @type_label.call(type),
-                             @path_for.call(type))
+      div(class: "text-nowrap") do
+        render_show_label
+        ButtonGroup do
+          render_type_filter_bar(nil)
+          @filterable_types.each { |type| render_type_filter_bar(type) }
         end
       end
     end
   end
 
-  def render_single_pill(type, label, url)
-    active = (@types == [type.to_s.presence || "all"])
-    Button(tag: :span, size: :sm, class: ("active" if active)) do
+  def render_type_filter_bar(type)
+    active = type_filter_active?(type)
+    Button(tag: :span, variant: :outline, size: :sm,
+           class: ("active" if active)) do
       if active
-        plain(label)
+        plain(type_filter_label(type))
       else
-        Link(type: :get, name: label, target: url) { plain(label) }
+        Link(type: :get, name: type_filter_label(type),
+             target: @path_for.call(type)) { plain(type_filter_label(type)) }
       end
     end
+  end
+
+  def type_filter_active?(type)
+    @types == [type.to_s.presence || "all"]
+  end
+
+  def type_filter_label(type)
+    type ? @type_label.call(type) : :rss_all.l
   end
 end

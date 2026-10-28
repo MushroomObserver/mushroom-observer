@@ -295,15 +295,15 @@ module Components
       assert_html(html, ".filter-form-bar .active", text: :rss_all.l)
     end
 
-    def test_single_bar_active_pill_has_no_link
-      html = render_single(["observation"])
+    def test_single_bar_active_item_has_no_link
+      html = render_single(["Observation"])
 
       assert_html(html, ".filter-form-bar .active", text: "Observations")
       assert_no_html(html, ".filter-form-bar a[href*='type=observation']")
     end
 
-    def test_single_bar_inactive_pill_links_to_type
-      html = render_single(["observation"])
+    def test_single_bar_inactive_item_links_to_type
+      html = render_single(["Observation"])
 
       assert_html(html, ".filter-form-bar a[href*='type=name']",
                   text: "Names")
@@ -325,20 +325,20 @@ module Components
     end
 
     def test_single_dropdown_toggle_label_selected_type
-      html = render_single(["observation"])
+      html = render_single(["Observation"])
 
       assert_html(html, "#type_filter_toggle_top", text: "Observations")
     end
 
     def test_single_dropdown_active_item_has_no_link
-      html = render_single(["observation"])
+      html = render_single(["Observation"])
 
       assert_html(html, ".dropdown-item.active", text: "Observations")
       assert_no_html(html, ".dropdown-item a[href*='type=observation']")
     end
 
     def test_single_dropdown_inactive_item_links_to_type
-      html = render_single(["observation"])
+      html = render_single(["Observation"])
 
       assert_html(html, "a.dropdown-item[href*='type=name']", text: "Names")
     end

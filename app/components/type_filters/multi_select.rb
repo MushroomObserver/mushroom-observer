@@ -190,7 +190,7 @@ module Components::TypeFilters::MultiSelect
   end
 
   # Different id than the bar's copy; stacked dropdown-item instead
-  # of a button pill.
+  # of a bar button.
   def render_type_checkbox_dropdown(type)
     render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
              name: "q[types][]", value: type,
