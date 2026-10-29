@@ -10,6 +10,10 @@ drop database if exists mo_test;
 create database mo_test
   DEFAULT CHARACTER SET utf8
   DEFAULT COLLATE utf8_general_ci;
+drop database if exists cache_test;
+create database cache_test
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
 drop database if exists mo_tmp;
 create database mo_tmp;
 use mo_tmp;
@@ -36,5 +40,9 @@ drop database mo_tmp;
 grant all privileges on mo_development.* to 'mo'@'localhost' with grant option;
 grant all privileges on cache_development.* to 'mo'@'localhost' with grant option;
 grant all privileges on mo_test.* to 'mo'@'localhost' with grant option;
+grant all privileges on cache_test.* to 'mo'@'localhost' with grant option;
 grant all privileges on `mo_test-%`.* to 'mo'@'localhost';
+# Per-worker parallel-test cache dbs (cache_test-0, cache_test-1, ...) --
+# a distinct prefix from mo_test-%, needs its own wildcard grant (#4807).
+grant all privileges on `cache_test-%`.* to 'mo'@'localhost';
 grant create on *.* to 'mo'@'localhost';

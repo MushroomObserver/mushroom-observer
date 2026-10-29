@@ -379,15 +379,24 @@ class Name < AbstractModel
 
   before_validation :normalize_author_characters!
 
+  # `message:` is a Proc, not a `.t` call -- I18n only invokes it at
+  # translate time, not when this class body loads. A plain `.t` call
+  # here would bake in whatever the DB/cache-backed translation
+  # backend resolved at that instant (see #4807), which can be empty
+  # this early in boot.
   validates :author, allow_blank: true,
                      # Contains only: letters, space, parens, hyphen,
                      # period, comma, ampersand, square brackets, single quote
-                     format: { with: /\A[\p{Alpha} ()-.,&\[\]']*\z/,
-                               message: :validate_name_author_characters.t }
+                     format: {
+                       with: /\A[\p{Alpha} ()-.,&\[\]']*\z/,
+                       message: ->(*) { :validate_name_author_characters.t }
+                     }
   validates :author, allow_blank: true,
                      # Ends only in letter, period plus any spaces
-                     format: { with: /[\p{Alpha}.]( *)\z/,
-                               message: :validate_name_author_ending.t }
+                     format: {
+                       with: /[\p{Alpha}.]( *)\z/,
+                       message: ->(*) { :validate_name_author_ending.t }
+                     }
   validate  :author_length
   validate  :citation_start
   validates :icn_id, numericality: { allow_nil: true,

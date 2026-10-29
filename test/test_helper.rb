@@ -191,6 +191,18 @@ module ActiveSupport
       # Configure SimpleCov for this worker with unique command name
       # This allows SimpleCov to merge results from multiple parallel workers
       SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
+
+      # Clear connection pools after fork -- same fix as
+      # config/puma.rb's on_worker_boot. A forked worker inherits the
+      # parent's Trilogy handle; without this, queries against it
+      # raise Trilogy::SynchronizationError or hang.
+      ActiveRecord::Base.connection_handler.clear_all_connections!
+
+      # Reset I18n's memoized available-locales set after fork -- same
+      # stale-parent-state issue as above. Computed before fixtures
+      # load `languages`, it sticks for every worker and raises
+      # I18n::InvalidLocale on non-English locales.
+      I18n.config.clear_available_locales_set
     end
 
     parallelize_teardown do |_worker|

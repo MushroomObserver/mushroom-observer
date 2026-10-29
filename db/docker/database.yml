@@ -23,17 +23,42 @@ development:
     port: 3306
     migrations_paths: "db/cache/migrate"
 
+# Multi-db (primary/cache) like development, not a flat db:, so Solid
+# Cache (#4807's I18n backend) has a real solid_cache_entries table in
+# test instead of raising when it's actually touched -- see
+# config/environments/test.rb's solid_cache.connects_to.
+<%
+  worker_suffix = ENV["TEST_ENV_NUMBER"].to_s.empty? ? "" : "-#{ENV["TEST_ENV_NUMBER"]}"
+  test_db = ENV["MO_TEST_DATABASE"] || "mo_test#{worker_suffix}"
+  # "cache_<env>", matching cache_development -- not <primary>_cache.
+  # MO_TEST_DATABASE is a full manual override with no tied cache-naming
+  # convention, so just suffix it in that one case.
+  cache_test_db = ENV["MO_TEST_DATABASE"] ? "#{test_db}_cache" :
+                  "cache_test#{worker_suffix}"
+%>
 test:
-  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
-  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-  username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-  port: 3306
+  primary:
+    database: "<%= test_db %>"
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    # Must exceed Solid Queue's thread need -- see
+    # test/jobs/queue_config_test.rb and db/ubuntu/database.yml (the
+    # template CI copies, which already had this).
+    pool: 10
+  cache:
+    database: "<%= cache_test_db %>"
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    migrations_paths: "db/cache/migrate"
 
 # Same TCP/env-var shape as development/test above -- the app container
 # reaches MySQL over the network under this address either way,
 # whether that's the host, a Kamal accessory container, or a managed
-# service (#5345's own decision, not this file's).
+# service (#5345's decision, not this file's).
 production:
   primary:
     database: <%= ENV.fetch("DATABASE_NAME", "mo_production") %>
@@ -41,14 +66,8 @@ production:
     username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
     password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
     port: 3306
-    # Independent of RAILS_MAX_THREADS (Puma's web-thread count) --
-    # this image also runs as the worker role (bin/jobs), whose
-    # thread need doesn't shrink just because the web role's Puma
-    # runs single-threaded. Must exceed Solid Queue's own thread need
-    # (config/queue.yml's largest single worker pool, plus 2 for that
-    # worker's own thread and heartbeat) -- see
-    # test/jobs/queue_config_test.rb and config/database.yml's own
-    # comment on this same pool setting.
+    # Must exceed Solid Queue's thread need -- the worker role
+    # (bin/jobs) too, not just Puma -- see queue_config_test.rb.
     pool: <%= ENV.fetch("DATABASE_POOL", 10) %>
   cache:
     database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
