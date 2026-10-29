@@ -183,7 +183,8 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     assert_no_html(form, ".d-inline-block .help-block")
-    assert_html(form, ".d-inline-block .form-group.mb-0", count: 2)
+    # inline fields put wrap_class on .form-inline, not .form-group.
+    assert_html(form, ".d-inline-block .form-inline.mb-0", count: 2)
 
     # .help-block is a sibling of the div wrapping both columns, not
     # nested inside either one.
