@@ -51,7 +51,7 @@ class LocationDescription < Description
   require("acts_as_versioned")
 
   include Description::Scopes
-  include Interesting
+  include Interested
 
   # Do not change the integer associated with a value
   enum :source_type,
@@ -172,10 +172,11 @@ class LocationDescription < Description
     sender = @current_user
     recipients = []
 
+    prefs = Location::ROLE_PREFS
     collect_role_recipients(
-      [[admins, :email_locations_admin],
-       [authors, :email_locations_author],
-       [editors, :email_locations_editor]],
+      [[admins, prefs[:admin]],
+       [authors, prefs[:author]],
+       [editors, prefs[:editor]]],
       recipients
     )
 

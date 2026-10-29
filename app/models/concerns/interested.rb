@@ -4,7 +4,7 @@
 # callback, which emails admins/authors/editors/etc. plus Interest
 # watchers about a change. Included by Location, LocationDescription,
 # Name, NameDescription, and Observation.
-module Interesting
+module Interested
   # Pushes each user from every `[users, pref]` pair onto `recipients`
   # if that user has opted into `pref`. `users` may be a single User
   # (or nil), a flat list (e.g. `authors`), or a list of lists (e.g.

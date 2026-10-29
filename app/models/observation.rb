@@ -160,7 +160,7 @@
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   include HasPlaceName
-  include Interesting
+  include Interested
 
   # Transient flag: when set, the before_create default that copies the
   # entering user into `collector` is skipped. Field-slip-originated

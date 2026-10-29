@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 module Name::Notify
+  # Shared with NameDescription#notify_users, which gets each role's
+  # user list a different way (admins/authors/etc. directly, vs. this
+  # module's descriptions.map(&:role) aggregate) but notifies on the
+  # same preference flags.
+  ROLE_PREFS = { admin: :email_names_admin, author: :email_names_author,
+                 editor: :email_names_editor,
+                 reviewer: :email_names_reviewer }.freeze
+
   attr_writer :skip_notify
 
   def skip_notify
@@ -45,10 +53,10 @@ module Name::Notify
   def name_change_recipients
     recipients = []
     collect_role_recipients(
-      [[descriptions.map(&:admins), :email_names_admin],
-       [descriptions.map(&:authors), :email_names_author],
-       [descriptions.map(&:editors), :email_names_editor],
-       [descriptions.map(&:reviewer), :email_names_reviewer]],
+      [[descriptions.map(&:admins), ROLE_PREFS[:admin]],
+       [descriptions.map(&:authors), ROLE_PREFS[:author]],
+       [descriptions.map(&:editors), ROLE_PREFS[:editor]],
+       [descriptions.map(&:reviewer), ROLE_PREFS[:reviewer]]],
       recipients
     )
     notify_interested(recipients)

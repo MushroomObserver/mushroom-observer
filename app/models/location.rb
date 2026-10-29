@@ -89,7 +89,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require("acts_as_versioned")
 
   include Scopes
-  include Interesting
+  include Interested
+
+  # Shared with LocationDescription#notify_users, which gets each
+  # role's user list a different way (admins/authors/etc. directly,
+  # vs. this file's descriptions.map(&:role) aggregate) but notifies
+  # on the same preference flags.
+  ROLE_PREFS = { admin: :email_locations_admin,
+                 author: :email_locations_author,
+                 editor: :email_locations_editor }.freeze
 
   belongs_to :description, class_name: "LocationDescription", # (main one)
                            optional: true
@@ -916,9 +924,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def notification_recipients
     recipients = []
     collect_role_recipients(
-      [[descriptions.map(&:admins), :email_locations_admin],
-       [descriptions.map(&:authors), :email_locations_author],
-       [descriptions.map(&:editors), :email_locations_editor]],
+      [[descriptions.map(&:admins), ROLE_PREFS[:admin]],
+       [descriptions.map(&:authors), ROLE_PREFS[:author]],
+       [descriptions.map(&:editors), ROLE_PREFS[:editor]]],
       recipients
     )
     Interest.update_recipients!(interests, recipients)

@@ -65,7 +65,7 @@ class NameDescription < Description
   require("acts_as_versioned")
 
   include Description::Scopes
-  include Interesting
+  include Interested
 
   # Do not change the integer associated with a value
   enum :review_status, { unreviewed: 1, unvetted: 2, vetted: 3, inaccurate: 4 }
@@ -302,11 +302,12 @@ class NameDescription < Description
       recipients = []
 
       reviewer ||= @old_reviewer
+      prefs = Name::Notify::ROLE_PREFS
       collect_role_recipients(
-        [[admins, :email_names_admin],
-         [authors, :email_names_author],
-         [editors, :email_names_editor],
-         [reviewer, :email_names_reviewer]],
+        [[admins, prefs[:admin]],
+         [authors, prefs[:author]],
+         [editors, prefs[:editor]],
+         [reviewer, prefs[:reviewer]]],
         recipients
       )
 
