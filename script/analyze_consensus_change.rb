@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #  USAGE::
 #
 #    rails runner script/analyze_consensus_change.rb [options]
@@ -23,6 +24,7 @@
 #    --limit N    Only process the first N observations
 #    --update     Update vote_cache for observations where name won't change
 #    --output F   Write list of would-change observations to file F
+# rubocop:enable MO/NoLongCommentBlock
 
 BASE_URL = "https://mushroomobserver.org"
 

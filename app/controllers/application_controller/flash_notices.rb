@@ -38,6 +38,7 @@ module ApplicationController::FlashNotices
     turbo_stream.update(target) { flash_notices_html }
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   ##############################################################################
   #
   #  :section: Error handling
@@ -70,6 +71,7 @@ module ApplicationController::FlashNotices
   #  If you don't change a flash field it automatically gets cleared.
   #
   ##############################################################################
+  # rubocop:enable MO/NoLongCommentBlock
 
   # Are there any errors pending?  Returns true or false.
   def flash_notices?

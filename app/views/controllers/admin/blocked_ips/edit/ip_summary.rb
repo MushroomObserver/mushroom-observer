@@ -64,11 +64,10 @@ module Views::Controllers::Admin::BlockedIps
       end
 
       def render_user_cell(ip)
-        # Original ERB's `elsif browser.bot?` was reading the admin's
-        # request UA, not the per-IP UA — `IpStats` doesn't log a
-        # User-Agent per request, so we can't actually classify. By
-        # admin convention, an IP with no `:user` is treated as a bot
-        # (most anonymous traffic is crawlers).
+        # `IpStats` doesn't log a User-Agent per request, so there's
+        # no way to classify by browser. By admin convention, an IP
+        # with no `:user` is treated as a bot (most anonymous traffic
+        # is crawlers).
         if (user_id = @stats[ip][:user])
           render_user_line(user_id)
         elsif !@stats[ip][:api_key]

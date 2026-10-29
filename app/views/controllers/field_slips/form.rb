@@ -180,7 +180,7 @@ module Views::Controllers::FieldSlips
       end
     end
 
-    # --- Submit buttons (matching ERB layout) ---
+    # --- Submit buttons ---
 
     def render_submit_quick_create
       submit(:field_slip_quick_create_obs.t, class: "mb-5")

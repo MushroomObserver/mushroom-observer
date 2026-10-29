@@ -14,8 +14,6 @@ module Views::Controllers::Names
 
     def view_template
       super do
-        submit(button_text, center: true)
-
         render_approved_rank_field
         render_admin_locked_checkbox if in_admin_mode?
 
@@ -89,21 +87,17 @@ module Views::Controllers::Names
                      label: :form_names_text_name,
                      value: @name_string,
                      rows: 1,
-                     data: { autofocus: true }) do |f|
-        f.with_append do
-          Help(element: :p, content: :form_names_text_name_help.l)
-        end
-      end
+                     help: :form_names_text_name_help.l,
+                     help_collapse: true,
+                     data: { autofocus: true })
     end
 
     def render_author_field
       textarea_field(:author,
                      label: :authority.ti,
-                     rows: 2) do |f|
-        f.with_append do
-          Help(element: :p, content: :form_names_author_help.l)
-        end
-      end
+                     rows: 2,
+                     help: :form_names_author_help.l,
+                     help_collapse: true)
     end
 
     def render_locked_fields
@@ -152,13 +146,10 @@ module Views::Controllers::Names
     def render_citation_field
       textarea_field(:citation,
                      label: :citation.ti,
-                     rows: 3) do |f|
-        f.with_append do
-          Help(element: :p,
-               content: [:form_names_citation_help.l,
-                         :form_names_citation_textilize_note.l].safe_join)
-        end
-      end
+                     rows: 3,
+                     help: [:form_names_citation_help.l,
+                            :form_names_citation_textilize_note.l].safe_join,
+                     help_collapse: true)
     end
 
     def render_misspelling_fields

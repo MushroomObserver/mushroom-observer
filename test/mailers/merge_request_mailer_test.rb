@@ -15,8 +15,8 @@ class MergeRequestMailerTest < MailerTestCase
     assert_equal(user.email, mail.reply_to.first)
     assert_text_mail(mail)
     body = mail.body.to_s
-    assert_match(/#{Regexp.escape(name1.real_search_name)}/, body)
-    assert_match(/#{Regexp.escape(name2.real_search_name)}/, body)
+    assert_includes(body, name1.real_search_name.as_displayed)
+    assert_includes(body, name2.real_search_name.as_displayed)
     assert_includes(body, "please merge")
     assert_includes(body, user.login)
   end
@@ -30,8 +30,8 @@ class MergeRequestMailerTest < MailerTestCase
                       notes: "loc merge")
 
     body = mail.body.to_s
-    assert_match(/#{Regexp.escape(loc1.name)}/, body)
-    assert_match(/#{Regexp.escape(loc2.name)}/, body)
+    assert_includes(body, loc1.name.as_displayed)
+    assert_includes(body, loc2.name.as_displayed)
     assert_includes(body, "loc merge")
   end
 
@@ -44,8 +44,8 @@ class MergeRequestMailerTest < MailerTestCase
                       notes: "herb merge")
 
     body = mail.body.to_s
-    assert_match(/#{Regexp.escape(herb1.name)}/, body)
-    assert_match(/#{Regexp.escape(herb2.name)}/, body)
+    assert_includes(body, herb1.name.as_displayed)
+    assert_includes(body, herb2.name.as_displayed)
     assert_includes(body, "herb merge")
   end
 
@@ -76,7 +76,7 @@ class MergeRequestMailerTest < MailerTestCase
     end
 
     expected_label = I18n.with_locale(MO.default_locale) { :location.ti }
-    assert_match(/#{Regexp.escape(expected_label)}/, mail.body.to_s)
+    assert_includes(mail.body.to_s, expected_label.as_displayed)
   end
 
   private

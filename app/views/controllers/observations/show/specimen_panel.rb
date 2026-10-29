@@ -13,6 +13,11 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
+    # Omit instead of collapse for placeholders
+    # The "No specimen available" heading can mislead,
+    # since the iNat obs may have specimen info.
+    return if @obs.placeholder? && !specimen_records?
+
     Panel(panel_id: "observation_specimen",
           collapsible: true,
           collapse_target: "#observation_specimen_body",

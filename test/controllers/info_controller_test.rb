@@ -90,7 +90,8 @@ class InfoControllerTest < FunctionalTestCase
     assert_select("title").text.include?(:show_site_stats_title.l)
     assert_select("#title", { text: :show_site_stats_title.l },
                   "Displayed title should be #{:show_site_stats_title.l}")
-    assert_match(/#{:site_stats_contributing_users.l}/, @response.body,
-                 "Page is missing #{:site_stats_contributing_users.l}")
+    assert_select("#site_stats_table",
+                  /#{:site_stats_contributing_users.l}/,
+                  "Page is missing #{:site_stats_contributing_users.l}")
   end
 end

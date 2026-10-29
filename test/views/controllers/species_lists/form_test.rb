@@ -3,8 +3,7 @@
 require("test_helper")
 
 # Tests for Views::Controllers::SpeciesLists::Form — the Phlex
-# Superform that replaces app/views/controllers/species_lists/_form.html.erb
-# plus the species_lists/form/_fields_for_project.erb sub-partial.
+# Superform for species lists, plus its project-fields sub-view.
 # Covers each field and the conditional rendering branches (clone_id
 # present/absent, projects empty/populated, owner vs non-owner
 # disable rules).
@@ -86,14 +85,10 @@ module Views::Controllers::SpeciesLists
       assert_html(html, "[name='species_list[place_name]']")
     end
 
-    def test_renders_submit_buttons_top_and_bottom
+    def test_renders_submit_button
       html = render_form(species_list: SpeciesList.new, button: :create)
 
-      # `submit(button.l, center: true)` is called twice — one above
-      # the fields and one below. Locks in the count so a future
-      # refactor doesn't silently drop one.
-      assert_html(html, "button[type='submit']", text: "Create",
-                                                 count: 2)
+      assert_html(html, "button[type='submit']", text: "Create")
     end
 
     def test_renders_project_checkboxes_when_projects_provided

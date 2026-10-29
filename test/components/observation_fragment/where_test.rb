@@ -31,7 +31,7 @@ class ObservationFragmentWhereTest < ComponentTestCase
 
     html = render_where(obs)
 
-    assert_html(html, "li.obs-where a")
+    assert_html(html, ".obs-where a")
   end
 
   def test_renders_plain_text_when_logged_out
@@ -40,7 +40,7 @@ class ObservationFragmentWhereTest < ComponentTestCase
     html = render_where(obs, user: nil)
 
     assert_includes(where_text(html), obs.where)
-    assert_no_html(html, "li.obs-where a")
+    assert_no_html(html, ".obs-where a")
   end
 
   def test_renders_vague_location_notice

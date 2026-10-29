@@ -16,12 +16,17 @@ module Views::Controllers::CollectionNumbers
 
     def view_template
       render_multiple_observations_warning if show_warning?
+      render_observation_field unless model.persisted?
       render_name_field
       render_number_field
       submit(submit_text, center: true)
     end
 
     private
+
+    def render_observation_field
+      hidden_field("observation_id", value: @observation.id)
+    end
 
     def render_multiple_observations_warning
       Alert(
@@ -68,7 +73,6 @@ module Views::Controllers::CollectionNumbers
         url_for(
           controller: "collection_numbers",
           action: :create,
-          observation_id: @observation.id,
           only_path: true
         )
       end

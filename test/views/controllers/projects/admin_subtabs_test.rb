@@ -41,6 +41,25 @@ module Views::Controllers::Projects
       )
     end
 
+    # The External Sites sub-tab is a site admin's, so it appears only
+    # in admin mode (#5416).
+    def test_external_sites_subtab_is_for_a_site_admin
+      project = projects(:eol_project)
+      html = render_subtabs(project: project, current_subtab: "details")
+
+      assert_no_html(html,
+                     "a[href='/projects/#{project.id}/external_sites']")
+
+      stub_admin_mode!
+      html = render_subtabs(project: project,
+                            current_subtab: "external_sites")
+
+      assert_html(
+        html,
+        "a.nav-link.active[href='/projects/#{project.id}/external_sites']"
+      )
+    end
+
     def test_aliases_active_when_current
       project = projects(:eol_project)
       html = render_subtabs(project: project, current_subtab: "aliases")

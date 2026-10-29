@@ -48,16 +48,11 @@ module RuboCop
 
         # Literal type-builder methods (`prop`, `_Nilable`, `_Union`,
         # etc.) only exist on a class whose ancestry runs through
-        # `Phlex::HTML` -- MO's own hierarchy roots are
-        # `Components::*`/`Views::*` (both ultimately `Phlex::HTML`
-        # subclasses), so checking the literal superclass name against
-        # those prefixes is a cheap, reliable proxy for "this class
-        # can actually use props" without needing to load the app.
-        # This is a static, lexical check (RuboCop has no runtime
-        # class table) -- a class that renames its superclass to
-        # something outside these prefixes while still ultimately
-        # being Phlex-based would be missed, but that's not a pattern
-        # this codebase uses.
+        # `Phlex::HTML` -- MO's hierarchy roots are
+        # `Components::*`/`Views::*`, so checking the literal
+        # superclass name against those prefixes is a cheap, static
+        # proxy for "this class can use props" (RuboCop has no
+        # runtime class table to check ancestry directly).
         PHLEX_SUPERCLASS_PREFIXES = ["Components::", "Views::"].freeze
         PHLEX_SUPERCLASSES = ["Phlex::HTML", "Phlex::SGML"].freeze
 

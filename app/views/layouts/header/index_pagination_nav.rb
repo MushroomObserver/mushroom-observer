@@ -20,6 +20,7 @@ module Views::Layouts
     include Phlex::Slotable
 
     slot :sorter
+    slot :type_filters
 
     prop :pagination_data, _Nilable(::PaginationData)
     prop :position, ::Symbol, default: -> { :top }
@@ -28,8 +29,14 @@ module Views::Layouts
     prop :request_url, ::String # Full URL w/ query params, for links
 
     def view_template
-      div(class: "pagination-#{@position} flex-bar mb-2") do
-        div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
+      return unless sorter_slot? || type_filters_slot? ||
+                    need_letter_pagination_links? || show_number_pagination?
+
+      div(class: "pagination-#{@position} flex-bar px-3 mb-2") do
+        div(class: "d-flex") do
+          render(sorter_slot) if sorter_slot?
+          render(type_filters_slot) if type_filters_slot?
+        end
         div(class: "d-flex") do
           render_letter_pagination_nav
           render_number_pagination_nav
@@ -38,6 +45,10 @@ module Views::Layouts
     end
 
     private
+
+    def show_number_pagination?
+      @pagination_data && @pagination_data.num_pages > 1
+    end
 
     def render_letter_pagination_nav
       return unless need_letter_pagination_links?
@@ -51,7 +62,7 @@ module Views::Layouts
     end
 
     def render_number_pagination_nav
-      return unless @pagination_data && @pagination_data.num_pages > 1
+      return unless show_number_pagination?
 
       setup_letter_params
       setup_page_numbers
@@ -152,6 +163,11 @@ module Views::Layouts
         type: :text, name: :page, value: this_page,
         class: "form-control text-right",
         size: max_page.digits.count,
+        # This `name` is reused identically across every index page,
+        # so Chrome accumulates a large saved-value history under it
+        # and offers to autofill/suggest from that history as soon as
+        # the field is focused -- suppress it.
+        autocomplete: "off",
         data: { page_input_target: "numberInput",
                 action: "page-input#sanitizeNumber" }
       }
@@ -168,7 +184,7 @@ module Views::Layouts
         Link(
           type: :get, name: :goto.ti, target: href, button: :outline,
           class: "px-2", data: { page_input_target: "goToLink" }
-        ) { Icon(type: :goto, title: tooltip) }
+        ) { Icon(type: :goto, title: tooltip, center_tooltip: true) }
       end
     end
 
@@ -196,6 +212,8 @@ module Views::Layouts
           type: :text, name: :letter, value: this_letter,
           class: "form-control text-right",
           size: 1, placeholder: "—",
+          # Same reused-name autofill exposure as the page input above.
+          autocomplete: "off",
           data: { page_input_target: "letterInput",
                   action: "page-input#sanitizeLetter" }
         )

@@ -6,6 +6,7 @@ module Observations::Images
 
     layout false
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Uploading images for an observation is a multi-stage thing.
     # First, each selected image with its EXIF data is read and displayed in
     # the create obs form, where the user can reconcile dates and locations
@@ -21,6 +22,7 @@ module Observations::Images
     # owns inline — needed for the turbo_stream insertion path because
     # there's no primitive context there.)
     # was multi_image_template
+    # rubocop:enable MO/NoLongCommentBlock
     def new
       @licenses = License.available_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now,

@@ -51,6 +51,9 @@
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?
 #  notes::                  Arbitrary text supplied by User and serialized.
+#  placeholder::            Minimal counterpart ("skeleton") of unlicensed
+#                           iNat obs.
+#  skeleton_omissions::     What the MO skeleton omitted from the iNat obs
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
@@ -270,24 +273,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
-  # Eager-load tree every `Components::Matrix::Box` render of an
-  # observation reaches into — image with vote/license/project/user
-  # for `can_edit?`, collector_user (lightbox caption's who line),
-  # location, name, namings (+ votes for
-  # `Observation::NamingConsensus`), occurrence (+ observations for
-  # the multi-obs occurrence link), projects, rss_log, user.
-  # Shared by observations#index, field_slips show/index,
+  # Eager-load tree every `Components::Matrix::Box` render reaches
+  # into. Shared by observations#index, field_slips show/index,
   # collection_numbers#show, herbarium_records#show, rss_logs#index,
   # sequences#new/edit, projects/updates#index, and the identify
-  # queue (extends with `:observation_views`, `{ name: :synonym }`,
-  # `{ namings: :name }`).
+  # queue.
   #
-  # Swap the `thumb_image:` hash for the matrix_box_carousels
-  # alternative below when the carousel feature lands.
-  # The /obs/ form is the shareable one: logged-out visitors get a 403
-  # on the /:id and /observations/:id forms (the spider block in
-  # ApplicationController::Indexes#check_for_spider_block allows only
-  # this form), so every URL that leaves the site must use it (#5357).
+  # The /obs/ form is the shareable one: logged-out visitors get a
+  # 403 on /:id and /observations/:id (the spider block allows only
+  # this form), so every URL that leaves the site must use it.
   def self.show_url(id)
     "#{MO.http_domain}/obs/#{id}"
   end
@@ -385,6 +379,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # reconcile and the CollectorNotesSeeder backfill.
   COLLECTOR_USER_MARKUP = /_user\s+(.+?)_(?=\W|\z)/
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Resolve a raw collector string to normalized column attributes:
   # { collector: <display string or nil>, collector_user_id: <id or nil> }.
   # Resolution order (first hit wins):
@@ -400,6 +395,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # user's unique_text_name so the column stays consistent with the FK.
   # This is the EXACT resolver used on every save; the migration layers a
   # fuzzy owner-name match on top of a free-text result.
+  # rubocop:enable MO/NoLongCommentBlock
   def self.resolve_collector(raw, owner: nil, existing: nil, match_inat: false)
     string = raw.to_s.strip
     return { collector: nil, collector_user_id: nil } if string.blank?
@@ -724,6 +720,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #  :section: Notes
   #
   ##############################################################################
+  # rubocop:disable MO/NoLongCommentBlock
   #
   # Notes are arbitrary text supplied by the User.
   # They are read and written as a serialized Hash.
@@ -773,8 +770,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   # Notes are exported as shown, except that the intial "Notes:" caption is
   # omitted, and any markup is stripped from the keys.
+  # rubocop:enable MO/NoLongCommentBlock
 
   serialize :notes, coder: YAML
+  serialize :skeleton_omissions, coder: JSON
 
   # value of observation.notes if there are no notes
   def self.no_notes
@@ -850,17 +849,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     "observation_notes_"
   end
 
-  # value of notes part
-  #   notes: { Other: abc }
-  #   observation.notes_part_value("Other") #=> "abc"
-  #   observation.notes_part_value(:Other)  #=> "abc"
-  #
-  # Falls back to a case-insensitive match on the stored key.
-  # `notes_orphaned_parts` dedups case-insensitively, so a template
-  # heading legitimately owns a stored key differing only in case (a
-  # user with "odor/taste" in their template and a field slip's stored
-  # :"Odor/Taste"). Without the fallback that part renders blank and
-  # the stored value is silently dropped.
+  # Value of notes part. Falls back to a case-insensitive match on
+  # the stored key, since `notes_orphaned_parts` dedups
+  # case-insensitively -- a template heading can legitimately own a
+  # stored key differing only in case (e.g. "odor/taste" in a
+  # template vs. a field slip's stored :"Odor/Taste"). Without the
+  # fallback that part renders blank and the value is dropped.
   def notes_part_value(part)
     return "" if notes.blank?
 
@@ -886,6 +880,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   delegate :notes_normalized_key, to: :Observation
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.
   #   notes_template fields
@@ -898,10 +893,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
   #
   # `extra` holds headings a caller wants shown whether or not this
-  # observation has values for them yet — the field-slip headings on the
-  # observation form (#4932). They sit after the template and orphaned
-  # parts, and drop out entirely when an earlier part already claims the
-  # same heading, so one the user configured keeps its own position.
+  # observation has values for them yet -- the field-slip headings on
+  # the observation form. They sit after the template and orphaned
+  # parts, and drop out when an earlier part already claims the same
+  # heading, so one the user configured keeps its position.
+  # rubocop:enable MO/NoLongCommentBlock
   def form_notes_parts(user, extra: [])
     parts = user.notes_template_parts
     parts += notes_orphaned_parts(user) if notes.present?
@@ -1341,16 +1337,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # When an observation moves to a different occurrence, fix up both
-  # sides. Old occurrence: repoint the primary if it was this
-  # observation, destroy the occurrence if it emptied or dropped below
-  # 2 members, and refresh its has_specimen cache. Must run after save
-  # -- before it, this observation still counts as a member of the old
-  # occurrence, so the primary could be "reassigned" right back to the
-  # departing record. New occurrence: refresh its has_specimen cache
-  # too -- update_occurrence_specimen_cache only fires when `specimen`
-  # itself changed, not when the membership did. Detaching
-  # (occurrence -> nil) is excluded; those flows (dissolve, field slip
-  # sync, occurrence edit) do their own cleanup.
+  # sides: the old occurrence's primary/has_specimen (after save, so
+  # this observation no longer counts as a member when repointing
+  # the primary), and the new occurrence's has_specimen (which
+  # update_occurrence_specimen_cache doesn't refresh on a membership
+  # change alone). Detaching (occurrence -> nil) is excluded; those
+  # flows handle cleanup separately.
   def cleanup_abandoned_occurrence
     old_id, new_id = saved_change_to_occurrence_id
     return unless old_id && new_id
@@ -1575,6 +1567,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       false
     end
+  end
+
+  # The iNat login an imported collector string names, else nil. An
+  # import's free-text collector comes from an iNat collector field or,
+  # failing that, the iNat login (`Inat::Obs#collector`); MO does not
+  # record which, so a login-shaped string is taken as a login.
+  def inat_collector_login
+    return unless reflection? && collector_user_id.nil?
+
+    collector if collector.to_s.match?(Inat::Constants::LOGIN_PATTERN)
   end
 
   # True when no collector identity is recorded and the observation came

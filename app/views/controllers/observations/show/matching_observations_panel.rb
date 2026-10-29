@@ -41,14 +41,16 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   def add_matching_observations_link
     Link(type: :get,
          tab: ::Tab::Observation::AddMatchingObservations.new(obs: @obs),
-         label: true)
+         show_label: :always)
   end
 
   # position-relative anchors each row's tooltip (see
   # render_status_icons) instead of it drifting elsewhere on the page.
   def render_body
     ul(class: "tight-list pl-0 mb-0") do
-      li(class: "position-relative") { render_member_row(@obs, link: false) }
+      li(id: "current_observation_row", class: "position-relative") do
+        render_member_row(@obs, link: false)
+      end
       @siblings.each do |sibling|
         li(class: "position-relative") do
           render_member_row(sibling, link: true)

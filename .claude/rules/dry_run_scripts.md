@@ -51,6 +51,57 @@ semantics: absent → dry run; the task's `desc` documents `APPLY=1`.
 — an exported APPLY silently arms every later task in the shell that
 honors the same variable.
 
+## When a constraint depends on a repair
+
+Adding a unique index (or a NOT NULL, or a foreign key) to data that
+does not satisfy it yet needs the repair to run first. MO keeps the
+repair in a script, not the migration: a repair that destroys records,
+moves references between them, or wants a human to read its dry run is
+a production operation, and a migration gives you no dry run, no
+ID-level report to review, and runs on every developer's machine and
+inside the deploy.
+
+What the migration does instead is **refuse to run until the repair
+has happened**, naming the command:
+
+```ruby
+def up
+  refuse_until_repaired
+  add_index(...)
+end
+
+def refuse_until_repaired
+  duplicates = MigrationExternalLink.where(...).group(...).having(...).count
+  return if duplicates.empty?
+
+  raise("#{duplicates.size} rows still violate this. Run the repair " \
+        "first: bin/rails runner script/whatever.rb --apply")
+end
+```
+
+That gives the guarantee a repair-inside-the-migration would: after
+`db:migrate` succeeds, the database satisfies the constraint. A
+developer who has not run the repair gets told which script to run
+rather than a duplicate-key error, and the script is in the repo, so
+nothing has to be fetched from anywhere.
+
+Two details:
+
+- **Do not use application models in a migration**, for the check or
+  anything else. They keep changing after the migration is written.
+  Define a minimal class inside the migration
+  (`class MigrationExternalLink < ActiveRecord::Base; self.table_name =
+  "external_links"; end`) so it keeps meaning what it meant.
+- **Say in the migration's comment what the repair was**, since the
+  two are separated. See
+  `db/migrate/20260930120000_one_import_link_per_remote_record.rb` and
+  `script/merge_duplicate_inat_images.rb` for the worked pair.
+
+A small, safe, model-free data change (normalising a string column,
+say) can still sit in the migration as ~16 of MO's migrations do. The
+test is whether the change is destructive and whether anyone would want
+to read what it did before it did it.
+
 ## Scope
 
 This covers the dry-run/apply toggle only. The rest of the backfill

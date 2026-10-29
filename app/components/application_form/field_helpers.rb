@@ -17,6 +17,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                        :button, :button_data, :button_text, :button_href,
                        :button_variant, :button_size, :button_target,
                        :button_rel, :button_title, :button_icon, :addon,
+                       :addon_position,
                        :monospace, :label_class, :label_data, :label_aria,
                        :label_position, :width, :label_sr_only,
                        :label_for].freeze
@@ -81,6 +82,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(field_component)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Checkbox field with label and Bootstrap checkbox wrapper.
     #
     # Three call styles:
@@ -101,6 +103,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param options [Hash] all field and wrapper options
     # Wrapper options: :label, :prefs, :class_name
     # @yield [field_component] Optional block — see `Field#checkbox`.
+    # rubocop:enable MO/NoLongCommentBlock
     def checkbox_field(field_name, *choices, **options, &block)
       options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
@@ -210,10 +213,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      # Match ERB `password_field_with_label`: default the input value
-      # to "" (prevents Rails from filling the field with the model's
-      # stored password hash when the form re-renders after a
-      # validation error).
+      # Default the input value to "" -- otherwise Rails fills the
+      # field with the model's stored password hash when the form
+      # re-renders after a validation error.
       field_opts[:value] = "" unless field_opts.key?(:value)
 
       f = resolve_field(field_name, value: field_opts[:value])
@@ -228,6 +230,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(field_component)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Hidden field. Two modes based on the type of the first argument:
     #
     # **Symbol** (the common case) — the field is a model / FormObject
@@ -253,6 +256,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param field_name [Symbol, String] model attribute name (Symbol)
     #   or full raw HTML `name` (String)
     # @param options [Hash] HTML attributes (`value:`, `data:`, etc.)
+    # rubocop:enable MO/NoLongCommentBlock
     def hidden_field(field_name, **options)
       # Default `autocomplete="off"` to match Rails' `hidden_field` /
       # `hidden_field_tag` (browsers otherwise repopulate hidden fields
@@ -273,9 +277,8 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)
 
-      # Match ERB `number_field_with_label`: default `min: 1`. Callers
-      # who want a different minimum pass `min: <n>` explicitly; `min:
-      # nil` opts out.
+      # Default `min: 1`. Callers who want a different minimum pass
+      # `min: <n>` explicitly; `min: nil` opts out.
       field_opts[:min] = 1 unless field_opts.key?(:min)
 
       f = resolve_field(field_name, value: field_opts[:value])
@@ -382,6 +385,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         **field_opts
       )
 
+      set_help_slot(field_component, wrapper_opts[:help])
       yield(field_component) if block_given?
 
       render(field_component)
@@ -435,11 +439,19 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # Renders `submit(...)` into the page title bar's CTA slot
+    # (`Header::PageTitle#render_title_bar_cta`) instead of inline in
+    # the form. `form:` associates the button with this `<form>` by
+    # id, since the title bar sits outside the form in the DOM.
+    def title_bar_submit(*, **)
+      html = capture { submit(*, form: @attributes[:id], **) }
+      content_for(:title_bar_cta, html)
+    end
+
     private
 
-    # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
-    # button shows "Updating" while in-flight; anything else shows
-    # "Submitting".
+    # An Update button shows "Updating" while in-flight; anything else
+    # shows "Submitting".
     def default_submits_with(value)
       value == :update.ti ? :updating.ti : :submitting.ti
     end
@@ -461,25 +473,20 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_help { help_content }
     end
 
-    # Mirrors ERB `auto_label_if_form_is_account_prefs`: when `prefs: true`
-    # is present, resolve the label from the `prefs_<field>` i18n key and
-    # drop the `:prefs` option so it doesn't flow downstream. Used by the
-    # same set of helpers the ERB applies it to: text, textarea, select,
-    # checkbox, radio, number.
+    # When `prefs: true`, resolves the label from the `prefs_<field>`
+    # i18n key and drops `:prefs` so it doesn't flow downstream.
     #
-    # Passes the bare Symbol through -- FieldLabelRow#resolved_label_text
-    # resolves it via `.t`, which is what makes this safe even though
-    # `field_name` is a runtime value (the actual `prefs_<field>` key
-    # isn't known statically here): `.t` renders any real textile markup
-    # correctly (e.g. `prefs_no_emails`, "Opt out of _all_ email from
-    # MO.") instead of leaving literal asterisks/underscores, with no
-    # per-key auditing needed.
+    # Passes the bare Symbol through -- `FieldLabelRow#
+    # resolved_label_text` resolves it via `.t`, which renders any
+    # textile markup in the translation (asterisks, underscores)
+    # instead of leaving it literal, with no per-key auditing needed.
     def auto_label_for_prefs(field_name, options)
       return options if options[:prefs].blank?
 
       options.merge(label: :"prefs_#{field_name}").except(:prefs)
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Resolve a field name to a field object the factory methods can
     # call (`.text`, `.textarea`, `.checkbox`, etc.). Three paths:
     #
@@ -489,10 +496,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # - **Symbol + explicit `value:`** (e.g. `text_field(:foo, value: x)`):
     #   route through `FieldProxy` with the Superform-namespaced name
     #   (`field(:foo).dom.name`) so the explicit `value:` overrides
-    #   whatever `model.foo` would have produced. Matches Rails ERB's
-    #   `f.text_field :foo, value: "override"` semantics, and lets
-    #   forms use Symbol keys for fields whose `name=` belongs in the
-    #   form's namespace but whose value comes from outside the model.
+    #   whatever `model.foo` would have produced, letting forms use
+    #   Symbol keys for fields whose `name=` belongs in the form's
+    #   namespace but whose value comes from outside the model.
     # - **Symbol** (no `value:`): model-bound `Superform::Field`. Value
     #   reads through the field's own `.value` from the form's model
     #   / FormObject.
@@ -500,6 +506,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Lets the `*_field` helpers handle bound and non-bound fields
     # through a single dispatch shape — the same precedent
     # `hidden_field` established.
+    # rubocop:enable MO/NoLongCommentBlock
     def resolve_field(field_name, value: nil)
       if field_name.is_a?(String)
         FieldProxy.new(nil, field_name, value)

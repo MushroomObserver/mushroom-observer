@@ -62,6 +62,7 @@ module Views::Controllers::Observations::ExternalLinks
         Link(type: :external, link: link)
         if @obs.reflection?
           render_read_only_note
+          render_placeholder_notes if placeholder_source?(link)
         else
           whitespace
           InlineCRUDLinks(target: link, observation: @obs, user: @user)
@@ -75,6 +76,14 @@ module Views::Controllers::Observations::ExternalLinks
       div(class: "reflection-read-only-note text-muted small mt-1") do
         plain(:observation_reflection_read_only_note.l)
       end
+    end
+
+    def placeholder_source?(link)
+      @obs.placeholder? && link.import? && @obs.skeleton_omissions.present?
+    end
+
+    def render_placeholder_notes
+      render(PlaceholderNotes.new(omissions: @obs.skeleton_omissions))
     end
 
     # "Sync now" -- one occurrence-wide button (#4215): enqueues a

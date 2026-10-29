@@ -41,8 +41,7 @@ module Views::Controllers::Account::Profile
       # Reuse link
       assert_html(html, "a[href='/account/profile/images']")
 
-      # Two submit buttons
-      assert_html(html, "button[type='submit']", count: 2)
+      assert_html(html, "button[type='submit']")
     end
 
     # User with a profile image: upload section uses "Upload new

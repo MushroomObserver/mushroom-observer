@@ -393,6 +393,7 @@ module ControllerExtensions
     assert_response(:unprocessable_content, msg)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Assert that a response body is same as contents of a given file.
   #   get(:action, params)
   #   assert_response_equal_file("#{path}/file")
@@ -411,6 +412,7 @@ module ControllerExtensions
   #     str.strip_squeeze.downcase
   #   end
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def assert_response_equal_file(*files, &block)
     body = @response.body_parts.join("\n")
     body = fix_encoding(body, files) if encoding_included?(files)

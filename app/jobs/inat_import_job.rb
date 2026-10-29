@@ -61,8 +61,10 @@ class InatImportJob < ApplicationJob
   # continuations inherit all three from the job that enqueued them.
   def prepare_first_job
     authenticate
+    @authorized_login = fetch_inat_logged_in_user
+    log("inat_logged_in_user: #{@authorized_login}")
     ensure_not_importing_others
-    update_user_inat_username
+    record_authorized_login
   end
 
   def authenticate
@@ -80,14 +82,11 @@ class InatImportJob < ApplicationJob
   # unless they are super importers.
   def ensure_not_importing_others
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
-
-    inat_logged_in_user = fetch_inat_logged_in_user
-    log("inat_logged_in_user: #{inat_logged_in_user}")
     # casecmp: records saved before inat_username was normalized to
     # lowercase can still hold the login with different case.
-    return if inat_logged_in_user.to_s.casecmp?(inat_username.to_s)
+    return if @authorized_login.to_s.casecmp?(inat_username.to_s)
 
-    wrong_inat_user_error(inat_logged_in_user)
+    wrong_inat_user_error(@authorized_login)
   end
 
   def super_importer?
@@ -113,7 +112,9 @@ class InatImportJob < ApplicationJob
                          ignored_not_importable_count: 0,
                          ignored_date_missing_count: 0,
                          ignored_already_imported_count: 0,
-                         ignored_unlicensed_count: 0)
+                         ignored_unlicensed_count: 0,
+                         unlicensed_inat_ids: [],
+                         skeleton_imported_count: 0)
       return log("No observations requested") unless observations_requested?
     end
 
@@ -167,8 +168,10 @@ class InatImportJob < ApplicationJob
       inat_import.inat_url.present?
   end
 
+  # `inat_ids` is nil on an import that listed none, and this runs
+  # before the URL check that such an import is waiting for.
   def inat_id_list
-    inat_import.inat_ids.delete(" ")
+    inat_import.inat_ids.to_s.delete(" ")
   end
 
   # Import the next page of iNat API results,
@@ -221,22 +224,12 @@ class InatImportJob < ApplicationJob
       ::Inat::ObservationImporter.new(inat_import, user, self)
   end
 
+  # Photos skipped for lacking an iNat license are listed on the status
+  # page (InatImport#unlicensed_image_events), not reported as errors.
   def log_unlicensed_summary
+    return if inat_import.import_others
+
     unlicensed_obs = observation_importer.unlicensed_obs_count
-    skipped_images = observation_importer.skipped_images_count
-
-    if inat_import.import_others
-      if skipped_images.positive?
-        inat_import.add_response_error(
-          :inat_skipped_images_summary.t(count: skipped_images)
-        )
-      end
-    else
-      log_own_unlicensed_summary(unlicensed_obs)
-    end
-  end
-
-  def log_own_unlicensed_summary(unlicensed_obs)
     return unless unlicensed_obs.positive?
 
     inat_import.add_response_error(
@@ -281,18 +274,23 @@ class InatImportJob < ApplicationJob
     log("Import digest failed: #{e.class}: #{e.message}")
   end
 
-  # A convenience to let a user create/update their iNat username simply
-  # by entering it in the import form. Runs after ensure_not_importing_others
-  # has proven the logged-in iNat account matches the entered username, and
-  # BEFORE any observations are built, so collector resolution (match_inat)
-  # can link the importing user's own obs during their first import.
-  def update_user_inat_username
-    # Don't update a SuperImporter's inat_username because
-    # InatImport.inat_username could be someone else's inat_username
-    # (they also skip the own-obs verification above).
-    return if super_importer?
-
-    user.update(inat_username: inat_username)
+  # The iNat login the user just authorized as -- for super importers
+  # too, whose entered username is not checked against it. Runs BEFORE
+  # any observations are built, so collector resolution (match_inat) can
+  # link the importing user's obs during their first import.
+  def record_authorized_login
+    remove_exclusion
+    user.update(inat_username: @authorized_login)
     log("Updated user inat_username")
+  end
+
+  # The import form's licensing consent outweighs an admin's exclusion
+  # of the same iNat login, so the exclusion ends here instead of moving
+  # to the user's profile (see ClaimsExcludedInatLogin).
+  def remove_exclusion
+    return if ExcludedInatUser.where(inat_login: @authorized_login).
+              destroy_all.empty?
+
+    log("Removed #{@authorized_login} from the excluded iNat users")
   end
 end

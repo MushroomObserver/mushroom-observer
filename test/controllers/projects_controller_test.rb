@@ -107,11 +107,9 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_response(:success)
-    assert_select(
-      "form button", { text: /#{Regexp.escape(:show_project_join.l)}/,
-                       count: 1 },
-      "Join button should be present for non-member on open project"
-    )
+    msg = "Join button should be present for non-member on open project"
+    assert_select_text_includes("form button", :show_project_join.l,
+                                count: 1, msg: msg)
   end
 
   def test_show_project_without_banner
@@ -659,21 +657,16 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("input[name='project[place_name]'][value=?]", where)
   end
 
-  # Regression (#2248): a dubious place_name used to reload a blank
-  # form with just a flash warning and no way to confirm the name --
-  # looping forever on any resubmission of the same name. Now it
-  # reloads with the entered title/place_name intact and an
-  # approved_where hidden field, matching every other model with this
-  # confirm flow.
+  # A dubious place_name reloads with the entered title/place_name
+  # intact and an approved_where hidden field, matching every other
+  # model with this confirm flow.
+  #
   # Also covers ProjectsController::Creation#cleanup_failed_project_creation
-  # as a Turbo re-render path: it's a separate call site from #create's
-  # own early guard clauses (title/date checks), only reached once
-  # creation has actually started (the members/admin UserGroups get
-  # created) and then fails on the location lookup. It needs
-  # render_new_view_invalid (422 + the form still carrying
-  # data-turbo="true"), not a plain 200 -- a same-URL 200 re-render on
-  # a Turbo-submitted form hangs the browser (see
-  # .claude/rules/turbo_submit_forms.md).
+  # as a Turbo re-render path: a separate call site from #create's
+  # early guard clauses, reached once creation has started (member/
+  # admin UserGroups created) and then fails on the location lookup.
+  # Needs render_new_view_invalid (422 + data-turbo="true"), not a
+  # plain 200 (see .claude/rules/turbo_submit_forms.md).
   def test_create_project_dubious_place_name_preserves_entries_and_confirms
     where = "Old Rd, Ohio, USA"
     title = "Dubious Location Project"
@@ -870,5 +863,74 @@ class ProjectsControllerTest < FunctionalTestCase
         put(:update, params: params)
       end
     end
+  end
+
+  def test_index_sort_options_includes_recent_observation
+    assert_includes(ProjectsController.new.index_sort_options,
+                    ["recent_observation", :sort_by_recent_observation.l])
+  end
+
+  # --- iNaturalist alert subscriptions ---------------------------------
+  #
+  # A site admin says a project may be alerted on; each of its admins
+  # says whether to be emailed, on the same form as everything else
+  # (#5416).
+
+  def alerting_project_site(project)
+    ProjectExternalSite.create!(
+      project: project, external_site: external_sites(:inaturalist),
+      use_constraints: true, alerting: true
+    )
+  end
+
+  def update_params_for(project, **extra)
+    params = build_params(project.title, project.summary.to_s)
+    params[:id] = project.id
+    params.merge(extra)
+  end
+
+  def test_saving_the_project_subscribes_the_admin
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    login(admin.login)
+
+    put(:update, params: update_params_for(
+      project, alert_subscriptions: { site.id.to_s => "1" }
+    ))
+
+    assert(site.reload.alerts?(admin),
+           "Saving with the box ticked should subscribe the admin")
+  end
+
+  # An unticked box submits the hidden "0".
+  def test_saving_the_project_unsubscribes_the_admin
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    site.alerts_for(admin, true)
+    login(admin.login)
+
+    put(:update, params: update_params_for(
+      project, alert_subscriptions: { site.id.to_s => "0" }
+    ))
+
+    assert_not(site.reload.alerts?(admin),
+               "Saving with the box unticked should unsubscribe the admin")
+  end
+
+  # Saving the form from a page that never showed the checkbox leaves
+  # whoever is subscribed alone.
+  def test_saving_without_the_checkbox_changes_nothing
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    site.alerts_for(admin, true)
+    login(admin.login)
+
+    put(:update, params: update_params_for(project))
+
+    assert(site.reload.alerts?(admin),
+           "A form with no subscription field should not unsubscribe")
   end
 end

@@ -53,7 +53,8 @@ module Views::Controllers::Translations
     # --- Language header ---
 
     def test_renders_language_header
-      assert_html(html, "h4.font-weight-bold", text: "#{@lang.name}:")
+      assert_html(html, "#translation_language_header",
+                  text: "#{@lang.name}:")
     end
 
     # --- Textarea fields ---
@@ -129,7 +130,7 @@ module Views::Controllers::Translations
     end
 
     def test_renders_reload_link
-      assert_html(html, "a#reload_button.btn", text: :reload.ti)
+      assert_html(html, "a#reload_button", text: :reload.ti)
     end
 
     def test_reload_link_has_correct_href
@@ -176,7 +177,7 @@ module Views::Controllers::Translations
 
       assert_html(non_official_html, "#translation_official")
       assert_html(non_official_html,
-                  "#translation_official h4",
+                  "#translation_official",
                   text: "#{Language.official.name}:")
     end
 
@@ -186,7 +187,7 @@ module Views::Controllers::Translations
       # Official section contains tag labels and text values
       assert_includes(non_official_html, "#{@tag}:")
       assert_html(non_official_html,
-                  "#translation_official span.underline")
+                  "#translation_official .underline")
       assert_html(non_official_html, "#translation_official p")
     end
 

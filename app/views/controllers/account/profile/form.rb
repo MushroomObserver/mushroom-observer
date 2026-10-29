@@ -27,7 +27,6 @@ module Views::Controllers::Account::Profile
 
     def view_template
       super do
-        submit(:update.ti, center: true)
         render_name_field
         render_place_name_field
         render_notes_field

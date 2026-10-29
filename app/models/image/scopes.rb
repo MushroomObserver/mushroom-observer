@@ -98,6 +98,7 @@ module Image::Scopes
         where(species_list_observations: { species_list_id: ids })
     }
 
+    # rubocop:disable MO/NoLongCommentBlock
     # FOR FUTURE REFERENCE
     # A search of all Image SEARCHABLE_FIELDS, concatenated.
     # scope :search_content,
@@ -110,6 +111,7 @@ module Image::Scopes
     #              includes(:images).map(&:images).flatten.uniq
     #   search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
     # }
+    # rubocop:enable MO/NoLongCommentBlock
 
     # Excludes images without observations! The join is chained before
     # exact_match_or so an id match is scoped by it too -- otherwise a

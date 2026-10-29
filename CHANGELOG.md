@@ -1,5 +1,121 @@
 # Changelog
 
+## 2026-10-29 (deploy-2026-10-29-12-00)
+
+- Fix `Image#format_name` blank-title fallback; check `lang:update` for all tests ([PR5557](https://github.com/MushroomObserver/mushroom-observer/pull/5557), @nimmolo)
+- Write development mail to `tmp/mails` for mailers with a Gmail account ([PR5545](https://github.com/MushroomObserver/mushroom-observer/pull/5545), @mo-nathan)
+- Retry `MailDeliveryJob` after temporary SMTP failures ([PR5546](https://github.com/MushroomObserver/mushroom-observer/pull/5546), @mo-nathan)
+- Link non-authors to the Description authorship request form ([PR5547](https://github.com/MushroomObserver/mushroom-observer/pull/5547), @mo-nathan)
+- Only `I18n.reload!` when `lang_update_if_needed.sh` changed `en.yml` ([PR5558](https://github.com/MushroomObserver/mushroom-observer/pull/5558), @nimmolo)
+- Find prerelease PRs from commits, and retry GitHub timeouts ([PR5548](https://github.com/MushroomObserver/mushroom-observer/pull/5548), @mo-nathan)
+- Report what changed when the placeholder resync test fails ([PR5552](https://github.com/MushroomObserver/mushroom-observer/pull/5552), @mo-nathan)
+- Bump fastimage from 2.4.1 to 2.4.3 ([PR5559](https://github.com/MushroomObserver/mushroom-observer/pull/5559), @app/dependabot)
+- Bump mini_racer from 0.22.1 to 0.22.2 ([PR5560](https://github.com/MushroomObserver/mushroom-observer/pull/5560), @app/dependabot)
+- Bump rubocop from 1.92.0 to 1.92.1 ([PR5561](https://github.com/MushroomObserver/mushroom-observer/pull/5561), @app/dependabot)
+- Bump image_processing from 2.1.0 to 2.2.0 ([PR5562](https://github.com/MushroomObserver/mushroom-observer/pull/5562), @app/dependabot)
+- Bump bullet from 8.3.0 to 8.3.1 ([PR5563](https://github.com/MushroomObserver/mushroom-observer/pull/5563), @app/dependabot)
+- Update Interests index and reuse `Components::TypeFilters` ([PR5564](https://github.com/MushroomObserver/mushroom-observer/pull/5564), @nimmolo)
+- Bump crass from 1.0.7 to 1.0.8 ([PR5565](https://github.com/MushroomObserver/mushroom-observer/pull/5565), @app/dependabot)
+- Render publication references once; explain their Textile in the help ([PR5556](https://github.com/MushroomObserver/mushroom-observer/pull/5556), @mo-nathan)
+- Let MO and iNat users opt out of iNat imports and delete their content ([PR5555](https://github.com/MushroomObserver/mushroom-observer/pull/5555), @mo-nathan)
+
+## 2026-10-27 (deploy-2026-10-27-08-00)
+
+- Infer the `prerelease.rb` deploy time and hold PRs with failing CI ([PR5540](https://github.com/MushroomObserver/mushroom-observer/pull/5540), @mo-nathan)
+- Name the collector in Observation matrix boxes ([PR5539](https://github.com/MushroomObserver/mushroom-observer/pull/5539), @mo-nathan)
+- Add an existing Field Slip's Observation from a Project or list's Add box ([PR5542](https://github.com/MushroomObserver/mushroom-observer/pull/5542), @mo-nathan)
+
+## 2026-10-25 (deploy-2026-10-25-08-00)
+
+- Backport title-bar owner-naming/id-badge redesign + `InlineLinkBlock` spacing from `nimmo-5348-bs4-cutover` ([PR5520](https://github.com/MushroomObserver/mushroom-observer/pull/5520), @nimmolo)
+- Promote five iNat scripts out of `script/run-once` ([PR5523](https://github.com/MushroomObserver/mushroom-observer/pull/5523), @mo-nathan)
+- Add `MO/NoRegexpEscape` cop; fix test assertions using it for substring checks ([PR5534](https://github.com/MushroomObserver/mushroom-observer/pull/5534), @nimmolo)
+- Scope `MO/NoRegexpEscape` to `test/`, drop production inline disables ([PR5535](https://github.com/MushroomObserver/mushroom-observer/pull/5535), @nimmolo)
+- Drop redundant `external_links` index and record what a migration costs ([PR5528](https://github.com/MushroomObserver/mushroom-observer/pull/5528), @mo-nathan)
+- Prefill names search with plain names; ignore name markup in `Lookup::Names` ([PR5533](https://github.com/MushroomObserver/mushroom-observer/pull/5533), @mo-nathan)
+
+## 2026-10-22 (deploy-2026-10-22-07-06)
+
+- Rename `type-switch` controller to `collapse-switch`; add `RadioCollapse`; fix Support form ([PR5514](https://github.com/MushroomObserver/mushroom-observer/pull/5514), @nimmolo)
+- Skip empty synonyms block on name show page; broaden `MO/NoCosmeticClassAssertion` ([PR5515](https://github.com/MushroomObserver/mushroom-observer/pull/5515), @nimmolo)
+- Nest field help inside `.form-group` instead of rendering it as a sibling ([PR5516](https://github.com/MushroomObserver/mushroom-observer/pull/5516), @nimmolo)
+- Bump rubocop-rails from 2.37.0 to 2.38.0 ([PR5445](https://github.com/MushroomObserver/mushroom-observer/pull/5445), @app/dependabot)
+- Bump rubocop-minitest from 0.40.0 to 0.41.0 ([PR5502](https://github.com/MushroomObserver/mushroom-observer/pull/5502), @app/dependabot)
+- Bump rubocop from 1.90.0 to 1.92.0 ([PR5503](https://github.com/MushroomObserver/mushroom-observer/pull/5503), @app/dependabot)
+- Bump trilogy from 2.13.0 to 2.13.1 ([PR5504](https://github.com/MushroomObserver/mushroom-observer/pull/5504), @app/dependabot)
+- Convert the remaining TEXT columns to utf8mb4 ([PR5506](https://github.com/MushroomObserver/mushroom-observer/pull/5506), @mo-nathan)
+- Bump bullet from 8.2.0 to 8.3.0 ([PR5505](https://github.com/MushroomObserver/mushroom-observer/pull/5505), @app/dependabot)
+- Fix autocompleter `.has-id-indicator` showing before a match ([PR5526](https://github.com/MushroomObserver/mushroom-observer/pull/5526), @nimmolo)
+- Collapse some help texts on the Name and Project forms, reorg project date inputs ([PR5518](https://github.com/MushroomObserver/mushroom-observer/pull/5518), @nimmolo)
+
+## 2026-10-16 (deploy-2026-10-16-01-00)
+
+- Fix location/map zoom/geocode/UI bugs; regularize form-label spacing ([PR5492](https://github.com/MushroomObserver/mushroom-observer/pull/5492), @nimmolo)
+- Remove stale ERB-era references from comments across the codebase ([PR5496](https://github.com/MushroomObserver/mushroom-observer/pull/5496), @nimmolo)
+- Add `MO/NoCosmeticClassAssertion` cop; fix all 170 existing violations ([PR5497](https://github.com/MushroomObserver/mushroom-observer/pull/5497), @nimmolo)
+- Add `MO/RedundantTagInSelector` cop; fix all 328 existing violations ([PR5498](https://github.com/MushroomObserver/mushroom-observer/pull/5498), @nimmolo)
+- Add `MO/NoLongCommentBlock` cop and fix all violations ([PR5500](https://github.com/MushroomObserver/mushroom-observer/pull/5500), @nimmolo)
+- Fix user-nav dropdown CRUD buttons, thumbnail-picker spacing, carousel arrows ([PR5501](https://github.com/MushroomObserver/mushroom-observer/pull/5501), @nimmolo)
+- Extract `Views::Layouts::SearchNav` from `TopNav` ([PR5507](https://github.com/MushroomObserver/mushroom-observer/pull/5507), @nimmolo)
+- Tighten up obs show page's sections ([PR5508](https://github.com/MushroomObserver/mushroom-observer/pull/5508), @nimmolo)
+- Port cutover's `en.txt` wording changes to `main` ([PR5509](https://github.com/MushroomObserver/mushroom-observer/pull/5509), @nimmolo)
+
+## 2026-10-12 (deploy-2026-10-12-20-30)
+
+- Bump simplecov, google-cloud-storage, brakeman, prawn-svg ([PR5484](https://github.com/MushroomObserver/mushroom-observer/pull/5484), @JoeCohen)
+- Dropdown RssLog Type Filter ([PR5481](https://github.com/MushroomObserver/mushroom-observer/pull/5481), @nimmolo)
+- Split "undefined locations" index onto `/locations/undefined` ([PR5482](https://github.com/MushroomObserver/mushroom-observer/pull/5482), @nimmolo)
+- Search Bar UI enhancements! ([PR5485](https://github.com/MushroomObserver/mushroom-observer/pull/5485), @nimmolo)
+- Let the observer hold the confidence they set on an import ([PR5488](https://github.com/MushroomObserver/mushroom-observer/pull/5488), @mo-nathan)
+- Keep a matching observation in its owner's lists ([PR5487](https://github.com/MushroomObserver/mushroom-observer/pull/5487), @mo-nathan)
+
+## 2026-10-07 (deploy-2026-10-07-12-00)
+
+- Count skipped observations as progress in the import time estimate (`InatImport`) ([PR5466](https://github.com/MushroomObserver/mushroom-observer/pull/5466), @mo-nathan)
+- Move the iNat writeback into a concern to clear `Metrics/ClassLength` on main ([PR5472](https://github.com/MushroomObserver/mushroom-observer/pull/5472), @mo-nathan)
+- Record `external_links.import_source` as databases hold it ([PR5474](https://github.com/MushroomObserver/mushroom-observer/pull/5474), @mo-nathan)
+- Let a Project admin import their Project from iNaturalist ([PR5473](https://github.com/MushroomObserver/mushroom-observer/pull/5473), @mo-nathan)
+- Keep label scans off the per-IP traffic meter ([PR5471](https://github.com/MushroomObserver/mushroom-observer/pull/5471), @mo-nathan)
+
+## 2026-10-05 (deploy-2026-10-05-12-07)
+
+- Update rails gems to 7.2.4 ([PR5450](https://github.com/MushroomObserver/mushroom-observer/pull/5450), @JoeCohen)
+- Move/delete duplicate top submit buttons on 13 forms ([PR5451](https://github.com/MushroomObserver/mushroom-observer/pull/5451), @nimmolo)
+- Reusable, collapsible project/species-list checkbox panels ([PR5453](https://github.com/MushroomObserver/mushroom-observer/pull/5453), @nimmolo)
+- Skip `no_test_console_noise.rb` leak reporting when a test already failed ([PR5460](https://github.com/MushroomObserver/mushroom-observer/pull/5460), @nimmolo)
+- Make `Dockerfile` multi-stage, add a `production` target (#5345 prep) ([PR5355](https://github.com/MushroomObserver/mushroom-observer/pull/5355), @nimmolo)
+- Allow one MO record per remote record, and reuse an imported photo ([PR5449](https://github.com/MushroomObserver/mushroom-observer/pull/5449), @mo-nathan)
+- Point a label QR code at a project, not at one observation (`Project::BestObservation`) ([PR5454](https://github.com/MushroomObserver/mushroom-observer/pull/5454), @mo-nathan)
+- Stop an iNaturalist timeout from crashing an import (`Inat::PageParser`) ([PR5465](https://github.com/MushroomObserver/mushroom-observer/pull/5465), @mo-nathan)
+- Revised skeleton imports ([PR5419](https://github.com/MushroomObserver/mushroom-observer/pull/5419), @JoeCohen)
+- Tell a project's admins what iNaturalist just identified (`InatAlertCycleJob`) ([PR5443](https://github.com/MushroomObserver/mushroom-observer/pull/5443), @mo-nathan)
+
+## 2026-09-29 (deploy-2026-09-29-12-00)
+
+- Give a project a page for external sites (`ProjectExternalSite`) ([PR5426](https://github.com/MushroomObserver/mushroom-observer/pull/5426), @mo-nathan)
+
+## 2026-09-28 (deploy-2026-09-28-12-00)
+
+- Record and report what MO exchanges with each external site (`ExternalSiteUsage`) ([PR5420](https://github.com/MushroomObserver/mushroom-observer/pull/5420), @mo-nathan)
+- Single-quote `gh` titles containing backticks ([PR5413](https://github.com/MushroomObserver/mushroom-observer/pull/5413), @mo-nathan)
+- Fix misleading edit tooltip on read-only reflection `Observation`s ([PR5421](https://github.com/MushroomObserver/mushroom-observer/pull/5421), @nimmolo)
+
+## 2026-09-26 (deploy-2026-09-26-12-00)
+
+- Bump arel_extensions to 2.5.0 ([PR5406](https://github.com/MushroomObserver/mushroom-observer/pull/5406), @JoeCohen)
+- Bump simplecov to 1.3.0 ([PR5407](https://github.com/MushroomObserver/mushroom-observer/pull/5407), @JoeCohen)
+- Bump rubyzip from 3.6.0 to 3.7.0 ([PR5408](https://github.com/MushroomObserver/mushroom-observer/pull/5408), @JoeCohen)
+- Create Obs: Fix `CheckboxField` help-icon trigger independently toggling collapsed fields ([PR5400](https://github.com/MushroomObserver/mushroom-observer/pull/5400), @nimmolo)
+- Send "Sync now" engine alerts to `#alerts` ([PR5399](https://github.com/MushroomObserver/mushroom-observer/pull/5399), @mo-nathan)
+- Fix stale pagination goto-page tooltip and disable browser autofill ([PR5411](https://github.com/MushroomObserver/mushroom-observer/pull/5411), @nimmolo)
+- Unresolved provisional not counted as vote evidence in new import ([PR5414](https://github.com/MushroomObserver/mushroom-observer/pull/5414), @JoeCohen)
+
+## 2026-09-21 (deploy-2026-09-21-12-00)
+
+- Resync a reflection's images from its iNaturalist photos (`#4215`) ([PR5385](https://github.com/MushroomObserver/mushroom-observer/pull/5385), @mo-nathan)
+- Add `review:` labels, an open-PR merge report, and release banner updates ([PR5384](https://github.com/MushroomObserver/mushroom-observer/pull/5384), @mo-nathan)
+- Bump `rubyzip`, `sprockets`, `image_processing`, `cuprite`, `mission_control-jobs` ([PR5396](https://github.com/MushroomObserver/mushroom-observer/pull/5396), @mo-nathan)
+
 ## 2026-09-18 (deploy-2026-09-18-12-00)
 
 - Serve the `/api-docs` and `/stats` directory URLs from nginx ([PR5378](https://github.com/MushroomObserver/mushroom-observer/pull/5378), @mo-nathan)

@@ -45,7 +45,7 @@ module Observations
     def start_sync(observation, reflections)
       Rails.cache.write(guard_key(reflections), true,
                         expires_in: SYNC_GUARD_PERIOD)
-      InatObservationResyncJob.perform_later(observation)
+      InatObservationResyncJob.perform_later(observation, @user)
     end
 
     # Keyed on the sorted reflection ids, not the clicked member, so

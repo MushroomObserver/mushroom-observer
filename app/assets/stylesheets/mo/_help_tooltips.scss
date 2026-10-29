@@ -25,6 +25,17 @@ $help-block-max-width: 600px;
   // max-width: $help-block-max-width;
 }
 
+// A help block leading a panel body (e.g. a checkbox panel's intro
+// text) shouldn't carry its default top margin under the panel
+// heading. Scoped to :first-child rather than the caller forcing
+// margin-top: 0 unconditionally, since some panels put other content
+// (a constraint alert, say) before the help block. `.card-body` is
+// Panel's Bootstrap-4-branch class name for the same slot.
+.panel-body > .help-block:first-child,
+.card-body > .help-block:first-child {
+  margin-top: 0;
+}
+
 .tooltip-inner {
   word-wrap: break-word;
 }

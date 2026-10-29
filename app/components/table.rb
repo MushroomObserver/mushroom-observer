@@ -119,6 +119,7 @@ class Components::Table < Components::Base
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Define a column. In column mode, the block is called for each
   # row to produce the cell content. In row / body mode, the block
   # is ignored — only the `header` and per-column attrs are used,
@@ -130,7 +131,8 @@ class Components::Table < Components::Base
   #   `data: { foo: "bar" }`) forwarded to both the `<th>` and `<td>`
   #   elements for this column
   # @yield [row] block that receives each row and returns cell content
-  # @return [nil] returns nil to prevent ERB output
+  # @return [nil] -- a non-nil return from a builder block is rendered
+  # rubocop:enable MO/NoLongCommentBlock
   def column(header, class: nil, **attributes, &content)
     @columns << {
       header: header,
@@ -168,6 +170,7 @@ class Components::Table < Components::Base
     nil
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Register a section heading row — a single `<th>` with
   # `colspan` = number of columns, rendered inside the `<thead>`
   # instead of the standard per-column header row. Use for tables
@@ -184,6 +187,7 @@ class Components::Table < Components::Base
   #   heading `<th>` (`class:`, `data:`, etc.)
   # @yield block that renders the heading cell content
   # @return [nil]
+  # rubocop:enable MO/NoLongCommentBlock
   def heading(**attributes, &block)
     @heading_block = block
     @heading_attrs = attributes

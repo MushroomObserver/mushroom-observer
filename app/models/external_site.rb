@@ -10,6 +10,24 @@
 #  project::       Project which talks about the website and whose members
 #                  may edit external_links to this site for any observation.
 #
+#  == Rate limits
+#
+#  A site's published limits, and the hosts it serves media from, are
+#  attributes rather than constants in Ruby, so that adding a source is a
+#  row rather than a code change (#5416). Nil means "no published limit",
+#  which is different from a limit of zero.
+#
+#  requests_per_minute_limit::    what the site asks for, not what it
+#                                 enforces, where those differ
+#  requests_per_day_limit::
+#  bytes_in_per_hour_limit::
+#  bytes_in_per_day_limit::
+#  media_hosts::                  comma-separated hostnames serving the
+#                                 site's media
+#
+#  media_host_list::              those hosts as an Array
+#  ExternalSite.serving_media::   the site serving a given host, or nil
+#
 class ExternalSite < AbstractModel
   INATURALIST_NAME = "iNaturalist"
   MYCOPORTAL_NAME = "MyCoPortal"
@@ -17,6 +35,10 @@ class ExternalSite < AbstractModel
   belongs_to :project
   has_many   :external_links
   has_many   :observations, through: :external_links
+  # No `dependent:` on purpose: usage history outlives the site row it
+  # describes, and CheckForBrokenReferencesJob reports the orphan rather
+  # than deleting it (see its Checks entry).
+  has_many   :external_site_usages
 
   validates :name, presence: true, length: { maximum: 100 },
                    uniqueness: { case_sensitive: false }
@@ -75,6 +97,33 @@ class ExternalSite < AbstractModel
   # by indexed unique name.
   def self.mycoportal
     find_by!(name: MYCOPORTAL_NAME)
+  end
+
+  # Which site, if any, serves media from this host. MO downloads by URL
+  # from places that belong to no site, so nil is an ordinary answer.
+  def self.serving_media(host)
+    return nil if host.blank?
+
+    wanted = host.to_s.downcase
+    where.not(media_hosts: [nil, ""]).find do |site|
+      site.media_host_list.include?(wanted)
+    end
+  end
+
+  def media_host_list
+    media_hosts.to_s.split(",").map { |host| host.strip.downcase }.
+      reject(&:empty?)
+  end
+
+  # What MO holds that points at this site, by what the link targets.
+  # One grouped count rather than a query per type.
+  LinkCounts = Data.define(:total, :observations, :images)
+
+  def link_counts
+    by_type = external_links.group(:target_type).count
+    LinkCounts.new(total: by_type.values.sum,
+                   observations: by_type["Observation"].to_i,
+                   images: by_type["Image"].to_i)
   end
 
   # URL of the per-record page on this site for the given external_id

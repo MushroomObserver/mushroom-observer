@@ -37,25 +37,18 @@ module Views::Controllers::SpeciesLists
     prop :submitted_project_ids, _Nilable(_Array(Integer)),
          default: nil, &TO_ID_ARRAY
 
-    # Override Superform's default
-    # `helpers.url_for(action: resource_action)` so the form action
-    # is derived from the model directly via explicit path helpers.
-    # Two reasons:
-    # - The pre-Phlex view passed `species_lists_path` /
-    #   `species_list_path` explicitly. Same URL, but Superform's
-    #   url_for default also tacks on whatever query params are on
-    #   the current request (`q=...`, `set_source=...`), which the
-    #   pre-refactor form did not.
-    # - Component tests render without a routing context, so the
-    #   url_for default raises `No route matches {action: "create"}`.
-    #   Explicit path helpers work standalone.
+    # Explicit path helpers instead of Superform's default
+    # `helpers.url_for(action: resource_action)`: that default also
+    # tacks on whatever query params are on the current request
+    # (`q=...`, `set_source=...`), and raises `No route matches
+    # {action: "create"}` in a component test with no routing
+    # context.
     def form_action
       model.persisted? ? species_list_path(model) : species_lists_path
     end
 
     def view_template
       super do
-        submit(@button.ti, center: true)
         render_hidden_fields
         render_visible_fields
         render_project_checkboxes if @projects.any?
@@ -68,15 +61,11 @@ module Views::Controllers::SpeciesLists
     # `approved_where` carries the place_name the user already saw
     # the dubious-reasons feedback for; the controller skips
     # re-validation when `species_list[approved_where] ==
-    # place_name`. Pre-Phlex this was a top-level URL query param
-    # on the form action; as a hidden field inside the form it
-    # stays under the model's namespace. The Symbol
-    # `:approved_where` routes through Superform's `field()` so the
-    # name comes out as `species_list[approved_where]`. The
-    # controller's `permitted_species_list_args` does NOT include
-    # `:approved_where`, so strong-params drops it on
-    # mass-assignment (it's a transient flow-control flag, not a
-    # model attribute).
+    # place_name`. The Symbol routes through Superform's `field()`,
+    # so the name comes out as `species_list[approved_where]`.
+    # `permitted_species_list_args` excludes it, so strong-params
+    # drops it on mass-assignment -- it's a flow-control flag, not a
+    # model attribute.
     def render_hidden_fields
       hidden_field("clone_id", value: @clone_id) if @clone_id
       hidden_field(:approved_where, value: model.place_name(current_user))
@@ -101,55 +90,29 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_project_checkboxes
-      div(class: "form-group") do
-        label(for: "project") { append_colon(:projects.ti) }
-        Help(
-          content: :form_species_lists_project_help.t
+      render(
+        Components::Form::CheckboxPanel.new(
+          form: self,
+          type: :project,
+          form_object_name: "species_list",
+          objects: @projects,
+          checked_ids: checked_project_ids,
+          disabled_ids: disabled_project_ids,
+          help_text: :form_species_lists_project_help.t
         )
-        div(class: "form-group") do
-          # Sentinel: ensures `species_list[project_ids]` is always
-          # present in params even when every checkbox is unchecked
-          # (Rack drops keys with empty arrays). The controller's
-          # `compact_blank` strips this empty value.
-          input(type: "hidden", name: "species_list[project_ids][]",
-                value: "", autocomplete: "off")
-          @projects.each { |project| render_project_checkbox(project) }
-        end
-      end
+      )
     end
 
-    # One block-mode `checkbox_field(:project_ids)` per project so
-    # each gets its own `<div class="checkbox"><label>` wrapper and
-    # can carry its own `disabled:` flag. `cb.option(project.id)`
-    # emits `<input type="checkbox" name="species_list[project_ids][]"
-    # value="<id>" checked? disabled?>` — Superform's array-mode
-    # pattern. Checkedness is computed against `model.project_ids`
-    # (the has_many-through reader returning the current attached id
-    # array), so we no longer need `@project_checks`.
-    def render_project_checkbox(project)
-      checkbox_field(:project_ids,
-                     label: false,
-                     disabled: cannot_modify_project?(project)) do |cb|
-        cb.option(project.id, checked: project_checked?(project.id)) do
-          whitespace
-          plain(project.title)
-        end
-      end
+    def checked_project_ids
+      @submitted_project_ids || model.project_ids
     end
 
-    def project_checked?(project_id)
-      if @submitted_project_ids
-        @submitted_project_ids.include?(project_id)
-      else
-        model.project_ids.include?(project_id)
-      end
-    end
+    # The species list's owner can always toggle membership;
+    # non-owners can only toggle projects they're already members of.
+    def disabled_project_ids
+      return [] if model.user_id == @user.id
 
-    # Mirrors the pre-refactor disable condition: the species
-    # list's owner can always toggle membership, but non-owners can
-    # only toggle projects they're already members of.
-    def cannot_modify_project?(project)
-      model.user_id != @user.id && !project.member?(@user)
+      @projects.reject { |project| project.member?(@user) }.map(&:id)
     end
   end
 end

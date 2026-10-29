@@ -176,7 +176,7 @@ class ExternalLinkTest < UnitTestCase
     site = external_sites(:mycoportal)
     link = ExternalLink.new(
       user: mary, observation: obs, external_site: site,
-      relationship: :import, external_id: "999"
+      relationship: :import, external_id: "987654322"
     )
     assert_not(link.valid?, "A second import link per target is invalid")
     assert_not_empty(link.errors[:relationship])
@@ -274,5 +274,78 @@ class ExternalLinkTest < UnitTestCase
 
     link.external_id = "9" * 64
     assert(link.valid?, "external_id of 64 chars should be valid")
+  end
+
+  # #5416: two imports racing -- a user importing their iNaturalist
+  # observations while a project import covers the same ground -- would
+  # otherwise each build an MO observation for the one remote record.
+  def test_one_import_link_per_remote_observation
+    site = external_sites(:inaturalist)
+    first = ExternalLink.create!(
+      user: rolf, target: observations(:coprinus_comatus_obs),
+      external_site: site, external_id: "987654321",
+      relationship: :import
+    )
+    second = ExternalLink.new(
+      user: mary, target: observations(:agaricus_campestris_obs),
+      external_site: site, external_id: "987654321",
+      relationship: :import
+    )
+
+    assert(first.valid?)
+    assert_not(second.valid?)
+    assert(second.errors.of_kind?(
+             :base, :validate_one_import_per_remote_record
+           ))
+  end
+
+  # An iNat user can attach one photo to two observations, which is how
+  # 207 photo ids came to be claimed by two MO images. Those were
+  # merged (script/merge_duplicate_inat_images.rb), and
+  # `Inat::PhotoImporter` reuses the image it already holds, so one MO
+  # image per remote photo holds from here.
+  def test_one_import_link_per_remote_photo
+    site = external_sites(:inaturalist)
+    ExternalLink.create!(user: rolf, target: images(:in_situ_image),
+                         external_site: site, external_id: "987654322",
+                         relationship: :import)
+    second = ExternalLink.new(user: rolf, target: images(:turned_over_image),
+                              external_site: site, external_id: "987654322",
+                              relationship: :import)
+
+    assert_not(second.valid?)
+  end
+
+  # An observation id and a photo id are numbers from different
+  # namespaces, so one of each may share a value.
+  def test_an_observation_and_a_photo_may_share_an_id
+    site = external_sites(:inaturalist)
+    ExternalLink.create!(user: rolf, target: images(:in_situ_image),
+                         external_site: site, external_id: "987654323",
+                         relationship: :import)
+    observation_link = ExternalLink.new(
+      user: rolf, target: observations(:agaricus_campestris_obs),
+      external_site: site, external_id: "987654323", relationship: :import
+    )
+
+    assert(observation_link.valid?)
+  end
+
+  # A manual link to an observation MO imported elsewhere is still fine
+  # -- one import, any number of other relationships.
+  def test_a_manual_link_to_an_imported_remote_observation
+    site = external_sites(:inaturalist)
+    ExternalLink.create!(
+      user: rolf, target: observations(:coprinus_comatus_obs),
+      external_site: site, external_id: "987654321",
+      relationship: :import
+    )
+    manual = ExternalLink.new(
+      user: mary, target: observations(:agaricus_campestris_obs),
+      external_site: site, external_id: "987654321",
+      relationship: :manual
+    )
+
+    assert(manual.valid?)
   end
 end

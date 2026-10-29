@@ -81,49 +81,49 @@ class ColumnTest < ComponentTestCase
   def test_single_breakpoint
     html = render_column(sm: 6)
 
-    assert_html(html, "div.col-sm-6")
+    assert_html(html, ".col-sm-6")
   end
 
   def test_multiple_breakpoints
     html = render_column(xs: 12, sm: 6, md: 4, lg: 3)
 
-    assert_html(html, "div.col-xs-12.col-sm-6.col-md-4.col-lg-3")
+    assert_html(html, ".col-xs-12.col-sm-6.col-md-4.col-lg-3")
   end
 
   def test_offset_xs
     html = render_column(xs: 4, offset_xs: 4)
 
-    assert_html(html, "div.col-xs-4.col-xs-offset-4")
+    assert_html(html, ".col-xs-4.col-xs-offset-4")
   end
 
   def test_col_flag_adds_bare_col_class
     html = render_column(col: true, sm: 4)
 
-    assert_html(html, "div.col.col-sm-4")
+    assert_html(html, ".col.col-sm-4")
   end
 
   def test_hide_at_and_show_at_pair
     html = render_column(sm: 6, hide_at: :xs, show_at: :sm)
 
-    assert_html(html, "div.col-sm-6.d-none.d-sm-block")
+    assert_html(html, ".col-sm-6.d-none.d-sm-block")
   end
 
   def test_show_at_xs_hide_at_sm
     html = render_column(show_at: :xs, hide_at: :sm)
 
-    assert_html(html, "div.d-block.d-sm-none")
+    assert_html(html, ".d-block.d-sm-none")
   end
 
   def test_hide_at_alone
     html = render_column(md: 6, hide_at: :md)
 
-    assert_html(html, "div.col-md-6.d-md-none")
+    assert_html(html, ".col-md-6.d-md-none")
   end
 
   def test_extra_class_merges_with_width_classes
-    html = render_column(sm: 6, class: "text-center")
+    html = render_column(sm: 6, class: "caller-supplied-marker")
 
-    assert_html(html, "div.col-sm-6.text-center")
+    assert_html(html, ".col-sm-6.caller-supplied-marker")
   end
 
   def test_element_override
@@ -136,7 +136,7 @@ class ColumnTest < ComponentTestCase
   def test_other_attributes_pass_through
     html = render_column(sm: 6, id: "foo", data: { turbo: "true" })
 
-    assert_html(html, "div.col-sm-6#foo[data-turbo='true']")
+    assert_html(html, ".col-sm-6#foo[data-turbo='true']")
   end
 
   def test_yields_block_content

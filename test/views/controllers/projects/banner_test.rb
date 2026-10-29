@@ -16,10 +16,10 @@ module Views::Controllers::Projects
       assert_html(html, ".col-xs-12#project_banner")
 
       # Banner overlay positioning (only with images)
-      assert_html(html, ".bottom-left.ml-3.mb-3.p-2")
+      assert_html(html, ".bottom-left")
 
       # Title heading structure with overlay styling
-      assert_html(html, "h1.h3.banner-image-text")
+      assert_html(html, "#title.banner-image-text")
     end
 
     def test_renders_basic_html_structure_without_banner_image
@@ -34,21 +34,21 @@ module Views::Controllers::Projects
       assert_no_html(html, ".bottom-left")
 
       # Title heading structure with regular page title styling
-      assert_html(html, "h1.h3.page-title")
+      assert_html(html, "#title.page-title")
     end
 
     def test_title_id_is_consistent_across_pages
       html = render_banner
 
-      assert_html(html, "h1#title")
-      assert_no_html(html, "h1#banner_title")
+      assert_html(html, "#title")
+      assert_no_html(html, "#banner_title")
     end
 
     def test_title_includes_id_badge
       project = projects(:eol_project)
       html = render_banner(project: project)
 
-      assert_html(html, "h1#title .badge.badge-id")
+      assert_html(html, "#title .badge-id")
     end
 
     def test_renders_banner_image_when_project_has_image

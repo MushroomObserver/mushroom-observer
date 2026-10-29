@@ -26,8 +26,7 @@ module Views::Controllers::Admin::Donations
       html = render_form
 
       assert_html(html, "button[type='submit']",
-                  text: :review_donations_update.l,
-                  count: 2)
+                  text: :review_donations_update.l)
     end
 
     def test_renders_checkboxes_for_each_donation

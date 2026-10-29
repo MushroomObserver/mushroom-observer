@@ -26,12 +26,16 @@ class InatImportsController < ApplicationController
   include Validators
   include Estimators
   include FormBuilders
+  include ImportOptions
+  include ProjectScope
   include PreviousImports
+  include AccountLinking
   include Inat::Constants
 
   before_action :login_required
   before_action :flatten_confirm_params, only: :create
   before_action :flatten_new_form_params, only: :create
+  before_action :apply_project_scope, only: [:new, :create]
 
   def index
     admin = in_admin_mode? == true
@@ -115,6 +119,7 @@ class InatImportsController < ApplicationController
   def authorization_response
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
+    return link_inat_account(auth_code) if linking_inat_account?
 
     inat_import = InatImport.find_by(id: string_param(:state), user: @user)
     return not_authorized unless inat_import
@@ -149,11 +154,7 @@ class InatImportsController < ApplicationController
     # status.
     return render_new_view_invalid if @expected == false
 
-    @unlicensed_obs = if import_others?
-                        fetch_unlicensed_others_count
-                      else
-                        fetch_unlicensed_obs_count
-                      end
+    @unlicensed_obs = fetch_unlicensed_count
     @inat_import = InatImport.new(user: @user)
     warn_about_listed_previous_imports
     @confirm_form = build_confirm_form
@@ -238,7 +239,6 @@ class InatImportsController < ApplicationController
   def url_normalizer(url, keep_taxon_id: false)
     Inat::URLNormalizer.new(
       url,
-      superimporter: InatImport.super_importer?(@user),
       import_others: import_others?,
       keep_taxon_id: keep_taxon_id
     )
@@ -276,7 +276,8 @@ class InatImportsController < ApplicationController
   # A new persistent record per import, so each import's results are kept.
   def init_ivars
     @inat_import = InatImport.create!(
-      new_import_scope_attrs.merge(new_import_bookkeeping_attrs)
+      new_import_scope_attrs.merge(new_import_option_attrs).
+        merge(new_import_bookkeeping_attrs)
     )
   end
 
@@ -289,9 +290,6 @@ class InatImportsController < ApplicationController
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
       original_inat_url: params[:original_inat_url].presence,
-      import_others: import_others?,
-      recheck_all: recheck_all?,
-      writeback: writeback_policy,
       project_id: chosen_project_id
     }
   end
@@ -323,31 +321,6 @@ class InatImportsController < ApplicationController
   # `project_valid?`, which also fills in the id for a typed title.
   def chosen_project_id
     params[:inat_project_id].presence
-  end
-
-  # Returns whether this import covers other users' observations.
-  # Always false for regular users; determined by checkbox for superimporters.
-  def import_others?
-    return false unless InatImport.super_importer?(@user)
-
-    params[:import_others] == "1"
-  end
-
-  # Whether an import-all / URL run should re-check observations already
-  # carrying iNat's "Mushroom Observer URL" field (#4565 orphan reimport).
-  # Explicit id lists always re-check regardless of this flag.
-  def recheck_all?
-    params[:recheck_all] == "1"
-  end
-
-  # Admins can toggle the iNat write-back per import via a form checkbox
-  # (checked = skip, unchecked = force it on). Everyone else gets `default`
-  # so the importer applies its environment default (skip in development,
-  # write back in production).
-  def writeback_policy
-    return :default unless in_admin_mode?
-
-    params[:skip_inat_writeback] == "1" ? :skip : :force
   end
 
   # Pass the new record's id through the OAuth `state` param; iNat echoes it

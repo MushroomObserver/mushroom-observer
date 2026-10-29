@@ -47,9 +47,14 @@ class CheckForBrokenReferencesJob
       [CopyrightChange,              :license,              :alert],
       [CopyrightChange,              :user,                 :alert],
       [Donation,                     :user,                 :alert],
+      [ExcludedInatUser,             :user,                 :nil],
       [ExternalLink,                 :external_site,        :alert],
       [ExternalLink,                 :user,                 :alert],
       [ExternalSite,                 :project,              :alert],
+      # :alert, not :delete -- the usage history is kept deliberately for
+      # reporting (#5416), so orphaned accounting rows are for a human to
+      # look at rather than something to clean up silently.
+      [ExternalSiteUsage,            :external_site,        :alert],
       [FieldSlip,                    :project,              :nil],
       [FieldSlip,                    :user,                 :alert],
       # An extract describes one image; without it there is nothing left
@@ -75,6 +80,8 @@ class CheckForBrokenReferencesJob
       [Image,                        :user,                 :alert],
       [InatImport,                   :project,              :nil],
       [InatImport,                   :user,                 :alert],
+      [ContentPurge,                   :target_user,          :nil],
+      [ContentPurge,                   :user,                 :nil],
       [ImageVote,                    :image,                :delete],
       [ImageVote,                    :user,                 :delete],
       [Interest,                     :user,                 :delete],
@@ -157,6 +164,10 @@ class CheckForBrokenReferencesJob
       [Project,                      :user,                 :alert],
       [Project,                      :user_group,           :alert],
       [ProjectAlias,                 :project,              :alert],
+      [ProjectExternalSite,          :external_site,        :alert],
+      [ProjectExternalSite,          :project,              :delete],
+      [ProjectExternalSiteAlert,     :external_site,        :alert],
+      [ProjectExternalSiteAlert,     :project,              :delete],
       [ProjectExcludedObservation,   :observation,          :delete],
       [ProjectExcludedObservation,   :project,              :delete],
       [ProjectImage,                 :image,                :delete],

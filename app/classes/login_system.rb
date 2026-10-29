@@ -16,6 +16,7 @@ module LoginSystem
     true
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # overwrite this method if you only want to protect certain actions
   # of the controller
   # example:
@@ -28,6 +29,7 @@ module LoginSystem
   #       return true
   #    end
   #  end
+  # rubocop:enable MO/NoLongCommentBlock
   def protect?(_action)
     true
   end

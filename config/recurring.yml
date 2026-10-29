@@ -12,6 +12,14 @@
 #     command: "DeletedStuff.clear_all"
 #     schedule: every day at 9am
 production:
+  # The alert half of the iNat cycle (#5416). Ten minutes is the agreed
+  # cadence: one query serves every alerting project, so the cost is a
+  # page of results, not a page per project. On the :alerts queue with a
+  # worker of its own (config/queue.yml), so the offsets the maintenance
+  # jobs below care about do not apply.
+  inat_alert_cycle:
+    class: InatAlertCycleJob
+    schedule: every 10 minutes
   recover_stuck_inat_imports:
     class: InatImportRecoveryJob
     # schedule must match InatImport::STUCK_THRESHOLD

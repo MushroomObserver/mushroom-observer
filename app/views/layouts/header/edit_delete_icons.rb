@@ -11,7 +11,7 @@
 # has no permissions -- so the parent flex layout in `Views::Layouts::
 # Header::PageTitle` is consistent regardless of permission state.
 #
-# Rendered into `content_for(:edit_icons)` by
+# Rendered into `content_for(:title_bar_actions)` by
 # `Views::FullPageBase::Icons#add_edit_icons`.
 #
 # `Location` has a stricter destroy gate (model `destroyable?` + the
@@ -25,8 +25,8 @@ module Views::Layouts
 
     def view_template
       div(class: "h4 my-0 d-flex align-items-center object_edit") do
-        render_reflection_icon if reflection?
-        InlineLinkBlock(items: [edit_item, delete_item].compact)
+        InlineLinkBlock(items: [reflection_item, edit_item,
+                                delete_item].compact)
       end
     end
 
@@ -36,18 +36,26 @@ module Views::Layouts
       @object.is_a?(::Observation) && @object.reflection?
     end
 
-    def render_reflection_icon
-      Icon(type: :read_only, title: :show_observation_reflection_read_only.l,
-           wrap_class: "mr-2")
+    def reflection_item
+      return nil unless reflection?
+
+      ::Components::Icon.new(
+        type: :read_only,
+        title: :show_observation_reflection_read_only.l,
+        wrap_class: ::Components::InlineLinkBlock.item_class,
+        center_tooltip: true
+      )
     end
 
     # A read-only reflection keeps its edit icon: Edit opens a linked
-    # companion observation for the changes.
+    # companion observation for the changes, so its tooltip says that
+    # instead of the generic "Edit Observation".
     def edit_item
       return nil unless can_edit_object?
 
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
+        name: (:edit_reflection_tooltip.l if reflection?),
         class: ::Components::InlineLinkBlock.item_class
       )
     end

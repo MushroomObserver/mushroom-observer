@@ -53,7 +53,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
       ["date",                               :sort_by_date.t],
       ["user",                               :sort_by_user.t],
       ["created_at",                         :sort_by_created_at.t],
-      [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t]
+      [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
+      ["recent_observation",                 :sort_by_recent_observation.t]
     ]
   end
 

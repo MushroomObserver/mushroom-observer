@@ -83,16 +83,18 @@ class MapTest < ComponentTestCase
   def test_renders_nothing_to_map_when_no_mappable_objects
     # Empty objects
     html = render_map(objects: [])
-    assert_html(html, "body", text: :runtime_map_nothing_to_map.t)
+    assert_html(html, "#map_nothing_to_map",
+                text: :runtime_map_nothing_to_map.t)
 
     # Unknown location (no coordinates)
     unknown = Location.new(name: "Earth")
     html = render_map(objects: [unknown])
-    assert_html(html, "body", text: :runtime_map_nothing_to_map.t)
+    assert_html(html, "#map_nothing_to_map",
+                text: :runtime_map_nothing_to_map.t)
 
     # Custom message
     html = render_map(objects: [], nothing_to_map: "Custom message")
-    assert_html(html, "body", text: "Custom message")
+    assert_html(html, "#map_nothing_to_map", text: "Custom message")
   end
 
   def test_renders_with_observation
@@ -196,7 +198,10 @@ class MapTest < ComponentTestCase
     caption, = parse_first_set(render_map_json(obs))
 
     assert_includes(caption, "map-popup-header")
-    # "2 Observations" — count first, label after.
+    # "2 Observations" — count first, label after, with whatever
+    # whitespace the template renders between them.
+    # rubocop:disable-next MO/NoRegexpEscape -- variable-whitespace
+    # pattern around the escaped label, not a plain substring check.
     assert_match(/2\s+#{Regexp.escape(:observations.ti.to_s)}/, caption)
     assert_includes(caption, "map-popup-btn")
     assert_includes(caption, :show_all.t)

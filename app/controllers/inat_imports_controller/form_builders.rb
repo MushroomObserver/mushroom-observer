@@ -4,7 +4,8 @@ module InatImportsController::FormBuilders
   # Params carried verbatim from the new form through the confirm page.
   PASSTHROUGH_PARAM_KEYS = [
     :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
-    :recheck_all, :skip_inat_writeback, :inat_project, :inat_project_id
+    :recheck_all, :skip_inat_writeback, :inat_project, :inat_project_id,
+    :project_site
   ].freeze
 
   # Params that are literally "1" when checked/selected, absent or any
@@ -18,7 +19,8 @@ module InatImportsController::FormBuilders
     FormObject::InatImportConfirm.new(
       **PASSTHROUGH_PARAM_KEYS.index_with { |key| params[key] },
       import_all: params[:all],
-      import_others: (import_others? ? "1" : nil)
+      import_others: ("1" if import_others?),
+      create_skeletons: ("1" if create_skeletons?)
     )
   end
 
@@ -28,6 +30,7 @@ module InatImportsController::FormBuilders
         form: build_new_form,
         super_importer: InatImport.super_importer?(@user),
         admin: in_admin_mode?,
+        project_site: scoped_project_site,
         has_prior_imports: InatImport.exists?(user: @user)
       ),
       status: status, **render_opts
@@ -46,15 +49,36 @@ module InatImportsController::FormBuilders
       inat_ids: params[:inat_ids],
       inat_url: reload_inat_url,
       choose_method: params[:choose_method] || derive_choose_method,
-      skip_inat_writeback: initial_skip_writeback,
-      inat_project: params[:inat_project],
-      inat_project_id: params[:inat_project_id],
-      **checkbox_flag_params
+      **project_form_params,
+      **checkbox_flag_params, **defaulted_checkbox_params
     )
+  end
+
+  def project_form_params
+    { inat_project: params[:inat_project],
+      inat_project_id: params[:inat_project_id],
+      project_site: params[:project_site] }
   end
 
   def checkbox_flag_params
     CHECKBOX_FLAG_PARAMS.index_with { |key| "1" if params[key] == "1" }
+  end
+
+  # Checkboxes whose fresh-form state is not simply unchecked.
+  def defaulted_checkbox_params
+    { skip_inat_writeback: initial_skip_writeback,
+      create_skeletons: initial_create_skeletons,
+      import_others: initial_import_others }
+  end
+
+  # A project admin's import covers the project's observations,
+  # whoever made them, so it arrives turned on (#5416). On reload the
+  # checkbox's hidden "0" field keeps the key, so honor its value.
+  def initial_import_others
+    return ("1" if params[:import_others] == "1") if
+      params.key?(:import_others)
+
+    ("1" if project_admin_import?)
   end
 
   # `normalize_inat_url_param!` overwrites params[:inat_url] in place
@@ -78,7 +102,7 @@ module InatImportsController::FormBuilders
   # box to mirror the default that will apply if the admin doesn't
   # touch it: skip in development, write back in production. On reload
   # (after a POST), the key is always present -- CheckboxField's hidden
-  # "0" sidecar means an unchecked box still submits the key, just with
+  # "0" field means an unchecked box still submits the key, just with
   # value "0" -- so honor the submitted state instead.
   def initial_skip_writeback
     return ("1" if Rails.env.development?) unless
@@ -87,13 +111,21 @@ module InatImportsController::FormBuilders
     ("1" if params[:skip_inat_writeback] == "1")
   end
 
+  # Pre-checked on the fresh form (no :create_skeletons key); on reload
+  # the checkbox's hidden "0" field keeps the key, so honor its value.
+  def initial_create_skeletons
+    return "1" unless params.key?(:create_skeletons)
+
+    ("1" if params[:create_skeletons] == "1")
+  end
+
   # Superform namespaces hidden fields under the model key.
   # Flatten them to top-level so the rest of the controller works unchanged.
   def flatten_confirm_params
     confirm = params[:inat_import_confirm]
     return unless confirm
 
-    (PASSTHROUGH_PARAM_KEYS + [:import_others]).each do |key|
+    (PASSTHROUGH_PARAM_KEYS + [:import_others, :create_skeletons]).each do |key|
       merge_form_param(confirm, key)
     end
     params[:all] ||= confirm[:import_all]
@@ -110,7 +142,7 @@ module InatImportsController::FormBuilders
     return unless new_form
 
     keys = PASSTHROUGH_PARAM_KEYS - [:original_inat_url] +
-           [:import_others, :choose_method]
+           [:import_others, :create_skeletons, :choose_method]
     keys.each { |key| merge_form_param(new_form, key) }
     params[:all] = "1" if params[:choose_method] == "all"
     params[:all] ||= new_form[:all]

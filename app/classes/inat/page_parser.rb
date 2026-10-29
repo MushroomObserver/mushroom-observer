@@ -52,10 +52,26 @@ class Inat
     end
 
     def response_bad?(response)
-      response.is_a?(::RestClient::RequestFailed) ||
+      # nil when the request got no response: a timeout carries none, so
+      # the rescues below hand back a nil `e.response`.
+      response.nil? ||
+        response.is_a?(::RestClient::RequestFailed) ||
         response.instance_of?(::RestClient::Response) && response.code != 200 ||
         # RestClient was happy, but the user wasn't authorized
         response.is_a?(Hash) && response[:status] == 401
+    end
+
+    # A timeout carries no response and so no status code, and "null"
+    # tells the reader nothing. Name the failure instead, and say the
+    # import stopped early: a page that failed to arrive is otherwise
+    # indistinguishable from the last page, so the status page is the
+    # only place the user learns there is more to fetch.
+    def request_error(error, query_args)
+      if error.response
+        return { error: error.http_code, query: query_args.to_json }.to_json
+      end
+
+      :inat_import_request_failed.l(message: error.message)
     end
 
     def next_request(**args)
@@ -66,8 +82,7 @@ class Inat
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, query: query_args.to_json }.to_json
-      @import.add_response_error(error)
+      @import.add_response_error(request_error(e, query_args))
       e.response
     end
 
@@ -83,8 +98,7 @@ class Inat
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, query: query_args.to_json }.to_json
-      @import.add_response_error(error)
+      @import.add_response_error(request_error(e, query_args))
       e.response
     end
 
@@ -123,22 +137,29 @@ class Inat
       BASE_FILTER_PARAMS
     end
 
-    # When importing own observations: scope by user_login, no licensed filter.
-    # When importing others' (superimporter): default to
-    # licensed:true unless stored URL specifies a `licensed`
-    # value. This only trims how many observations iNat sends back — it
-    # doesn't guarantee anything.
-    # ObservationImporter#unlicensed_other? is
-    # the check that actually stops an unlicensed obs from another user
-    # from being imported, the same way already_linked? is what actually
-    # stops a duplicate, not the without_field fetch filter (see that
-    # comment for the parallel).
+    # When importing own observations: scope by user_login, no license filter.
+    # When importing others' (superimporter) without skeletons: add
+    # LICENSED_FILTER. This only trims how many observations iNat sends
+    # back; ObservationImporter#unlicensed_other? is the check that stops an
+    # unlicensed obs from another user from being imported, as
+    # already_linked? (not the without_field filter) stops a duplicate.
     def add_ownership_filter(query_args)
       if @import.import_others
-        query_args[:licensed] = true unless query_args.key?(:licensed)
+        # With skeletons on, unlicensed obss are imported (as skeletons),
+        # so the query must not drop them.
+        add_license_filter(query_args) unless @import.create_skeletons
       else
         query_args[:user_login] = @import.inat_username
       end
+    end
+
+    # A `license=` filter in the stored URL is kept, since it is already
+    # narrower. A URL's `licensed=true` still gets LICENSED_FILTER, since it
+    # matches obss with an empty license.
+    def add_license_filter(query_args)
+      return if query_args.key?(:license)
+
+      query_args.merge!(LICENSED_FILTER)
     end
   end
 end

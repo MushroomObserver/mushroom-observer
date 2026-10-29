@@ -195,8 +195,7 @@ module Observations
     # lightbox / matrix-box context: swap the obs's title in both
     # places (it now reflects the new naming), close out the
     # naming modal + the AJAX-progress modal, and clear the
-    # identify-this-obs strip. Inlined from
-    # `_update_matrix_box.erb`.
+    # identify-this-obs strip.
     def render_update_matrix_box_streams
       obs_id = @observation.id
       render(turbo_stream: [

@@ -56,7 +56,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_status_line
-    li(class: "hanging-indent") do
+    li(id: "name_status", class: "hanging-indent") do
       trusted_html(append_colon(:status.ti))
       plain(name_deprecation_status)
       if @name.is_misspelling?
@@ -226,8 +226,9 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     approved, deprecated = @name.sort_synonyms
     misspellings = deprecated.select(&:correct_spelling_id)
     deprecated.reject!(&:correct_spelling_id)
+    return if approved.blank? && deprecated.blank? && misspellings.blank?
 
-    ul(class: "list-unstyled") do
+    ul(id: "name_synonyms", class: "list-unstyled") do
       render_synonym_group(label_for_approved, approved)
       render_synonym_group(:show_name_deprecated_synonyms.l, deprecated)
       render_synonym_group(:show_name_misspelled_synonyms.l, misspellings)

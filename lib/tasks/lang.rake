@@ -36,19 +36,16 @@ def perform_action(lang, action)
   end
 end
 
-# Each Language's export/import/update/strip/check work is independent
-# (own instance variables, own "#{locale}.yml"/"#{locale}.txt" files).
-# The class-level state this call path touches --
-# Language.verbose/safe_mode/locales_dir -- is set once by the :setup
-# prerequisite chain before this runs and never written to during it,
-# so concurrent reads are safe. (Language.for_locale has its own
-# memoized cache, but nothing reachable from here calls it.) See
-# ConcurrentEachWithConnection for why this parallelizes in-process.
+# Each Language's export/import/update/strip/check work is
+# independent (separate instance variables, separate
+# "#{locale}.yml"/"#{locale}.txt" files). The class-level state this
+# touches -- Language.verbose/safe_mode/locales_dir -- is set once by
+# the :setup prerequisite chain and not written to during the run, so
+# concurrent reads are safe. See ConcurrentEachWithConnection for why
+# this parallelizes in-process.
 #
-# Built lazily (not a top-level constant): rake files are evaluated
+# Built lazily, not a top-level constant: rake files are evaluated
 # before :environment, so Zeitwerk can't resolve the constant yet.
-# Not memoized -- the wrapper only holds `pool_size`; the real thread
-# pool is built fresh inside every #call, so caching it saves nothing.
 def lang_task_pool
   ConcurrentEachWithConnection.new(pool_size: 4)
 end

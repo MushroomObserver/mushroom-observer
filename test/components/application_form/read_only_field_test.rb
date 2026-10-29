@@ -11,7 +11,7 @@ class ReadOnlyFieldTest < ComponentTestCase
   end
 
   # Regression: ReadOnlyField label should carry `for=` pointing at the
-  # hidden input's id, matching the ERB `form.label(field, ...)` output.
+  # hidden input's id.
   def test_read_only_field_label_has_for_attribute
     form = render_form do
       read_only_field(:number, label: "Number:", value: "42")

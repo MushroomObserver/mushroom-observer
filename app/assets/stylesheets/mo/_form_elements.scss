@@ -27,13 +27,17 @@
   label {
     font-weight: $btn-font-weight;
 
-    // Because it's within the label, it doesn't get the label's margin.
-    .form-between {
-      margin-left: 1rem;
-    }
     .badge-id {
       font-size: 90% !important
     }
+  }
+
+  // A checkbox's help-collapse trigger (`.form-between`) renders as a
+  // label sibling, not nested inside it, so a click on it doesn't
+  // bubble into a `data-toggle="collapse"` the label itself carries.
+  // It doesn't inherit the label's margin from that position either.
+  > .form-between {
+    margin-left: 1rem;
   }
 
   // When the row has a sibling button-link next to the label (e.g.
@@ -104,9 +108,111 @@ $btn-active-variants: (
 // Button-styled filter checkboxes (rss-log type filters etc.):
 // CSS-only "pressed" state via `:has()` matching the inner checked
 // input — no JS to toggle `.active`. Same pattern as
-// `.thumb_img_btn` in `_carousel.scss`.
-.filter-checkbox:has(input[type="checkbox"]:checked) {
+// `.thumb_img_btn` in `_carousel.scss`. Not for `.dropdown-item`
+// rows — those show state via the checked box alone, no background.
+.filter-checkbox:not(.dropdown-item):has(input[type="checkbox"]:checked) {
   @include button-active-state;
+}
+
+// TEMPORARY, through .custom-radio below -- all of this stands in
+// for Bootstrap 4's .custom-control/.custom-checkbox/.custom-radio
+// CSS (BS3 has none) and the BS3 label-spacing collisions it
+// creates. Delete this whole block on the BS4 cutover merge. Scoped
+// to what ButtonStyleCheckbox/ButtonStyleRadio need: checked/
+// unchecked/focus, no indeterminate.
+//
+// Two-zone split: a fixed width for the custom-control graphic, the
+// rest to the label zone. Centers the graphic in both axes via
+// flexbox, not offset math -- BS4's `top`/`left: -1.5rem` offsets
+// assume the graphic sits in padding reserved by a label that also
+// wraps text, which isn't this shape (text lives in a separate
+// sibling `.label-zone`).
+//
+// Sizes below are literal px, not rem -- BS3's scaffolding sets
+// `html { font-size: 10px }` on purpose (so BS3's internal rem math
+// is a clean 10px grid), so `1rem` here would be 10px, not the ~16px
+// a checkbox needs to read clearly.
+.checkbox-zone,
+.radio-zone {
+  display: flex;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+// `label-zone` is a `<label>` when `label_wrap: true` -- also needs
+// the BS3 `label { margin-bottom: 5px }` override below.
+label.label-zone {
+  margin-bottom: 0;
+}
+
+.custom-control {
+  position: relative;
+  display: block;
+}
+
+.custom-control-input {
+  position: absolute;
+  z-index: -1;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+}
+
+label.custom-control-label {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 0;
+  cursor: pointer;
+
+  &::before,
+  &::after {
+    position: absolute;
+    inset: 0;
+    display: block;
+    content: "";
+  }
+
+  &::before {
+    background-color: $input-bg;
+    border: 1px solid $input-border;
+  }
+
+  &::after {
+    background: 50% / 50% 50% no-repeat;
+  }
+}
+
+// Not `$component-active-bg` -- that maps to `$MENU_HOVER_BG_COLOR`
+// (see _map_theme_vars_to_bootstrap_vars.scss), the same pale color
+// as a dropdown row's hover background, so a checked box was close
+// to invisible on most themes. `$link-color` reads clearly checked
+// on every theme, and matches the link text beside it in the row.
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: $link-color;
+  border-color: $link-color;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow: 0 0 0 0.2rem rgba($link-color, 0.25);
+}
+
+.custom-checkbox .custom-control-label::before {
+  border-radius: $border-radius-base;
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
+}
+
+.custom-radio .custom-control-label::before {
+  border-radius: 50%;
+}
+
+.custom-radio .custom-control-input:checked ~ .custom-control-label::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
 }
 
 // Remove browser default gradients on select elements
@@ -254,9 +360,82 @@ form {
   .collapse-toggle-closed { display: inline; }
 }
 
+// `::before`/`::after` are sticky, zero-height-in-flow overlays (negative
+// margin cancels the height so they don't push the checkboxes down) that
+// stay pinned to the scroll container's visible top/bottom edge, fading
+// into $PANEL_BG_COLOR to hint the list continues past the visible rows.
+// Uses the theme-level color constant, not the Bootstrap-mapped
+// $panel-bg/$card-bg, so this rule compiles unchanged on either
+// Bootstrap version.
 .overflow-scroll-checklist {
-  max-height: 30rem;
+  position: relative;
+  max-height: 15rem;
   overflow-y: auto;
+  // Keep the thumb visible once a scrollbar exists, instead of only
+  // on hover. No scrollbar renders when the list fits without
+  // scrolling -- `overflow-y: auto` stays conditional on overflow.
+  // Full (not `thin`) width by default -- a thin scrollbar is hard to
+  // see; narrowed down to `thin` for touch devices below, where a
+  // full-width one would be oversized. Firefox + modern Chromium/Edge.
+  scrollbar-color: $PANEL_BORDER_COLOR transparent;
+
+  // Safari / older Chromium -- same reasoning, WebKit-prefixed API.
+  &::-webkit-scrollbar-thumb {
+    background: $PANEL_BORDER_COLOR;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  // hover/pointer media is this file's standard touch-device signal
+  // (see the take-photo-field rule below) -- narrow the scrollbar
+  // only where screen space is tight.
+  @media (hover: none) and (pointer: coarse) {
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      width: 0.5rem;
+    }
+  }
+
+  // Background-painted gradients sit behind the checkbox rows, not
+  // over them, so they can't dim content that's packed with no
+  // background gap to show through -- these need to be elements,
+  // painted above the rows via z-index.
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    position: sticky;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &::before {
+    top: 0;
+    height: 1.5rem;
+    margin-bottom: -1.5rem;
+    border-top: 1px solid $PANEL_BORDER_COLOR;
+    background: linear-gradient(to bottom, $PANEL_BG_COLOR, transparent);
+  }
+
+  &::after {
+    bottom: 0;
+    height: 3rem;
+    margin-top: -3rem;
+    border-bottom: 1px solid $PANEL_BORDER_COLOR;
+    background: linear-gradient(to top, $PANEL_BG_COLOR, transparent);
+  }
+
+  // Set by the overflow-fade Stimulus controller once scrolled to
+  // that edge -- nothing left in that direction, so no fade.
+  &.at-top::before,
+  &.at-bottom::after {
+    display: none;
+  }
 }
 
 // The containing form uses `form-inline`, which turns .form-group into

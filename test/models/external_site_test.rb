@@ -145,4 +145,54 @@ class ExternalSiteTest < UnitTestCase
     site.update!(project: nil)
     assert_not(site.member?(users(:mary)))
   end
+
+  def test_media_host_list_parses_and_normalizes
+    site = external_sites(:inaturalist)
+    site.update!(media_hosts: " Static.iNaturalist.org , example.net ,")
+
+    assert_equal(["static.inaturalist.org", "example.net"],
+                 site.media_host_list)
+  end
+
+  def test_media_host_list_of_a_site_with_none
+    assert_empty(external_sites(:mycoportal).media_host_list)
+  end
+
+  def test_serving_media_finds_the_site_claiming_a_host
+    assert_equal(external_sites(:inaturalist),
+                 ExternalSite.serving_media("static.inaturalist.org"))
+    assert_equal(external_sites(:inaturalist),
+                 ExternalSite.serving_media("STATIC.INATURALIST.ORG"))
+  end
+
+  # MO downloads by URL from places belonging to no site, so nil is an
+  # ordinary answer rather than an error.
+  def test_serving_media_returns_nil_for_an_unclaimed_host
+    assert_nil(ExternalSite.serving_media("example.org"))
+    assert_nil(ExternalSite.serving_media(""))
+    assert_nil(ExternalSite.serving_media(nil))
+  end
+
+  # What MO holds pointing at a site, for the usage report and the admin
+  # view it is a sketch of.
+  def test_link_counts_split_by_target_type
+    site = external_sites(:inaturalist)
+    counts = site.link_counts
+
+    assert_equal(site.external_links.count, counts.total)
+    assert_equal(site.external_links.where(target_type: "Observation").count,
+                 counts.observations)
+    assert_equal(site.external_links.where(target_type: "Image").count,
+                 counts.images)
+    assert_operator(counts.total, :>=, counts.observations + counts.images)
+  end
+
+  # The point of holding these as data: a second source is a row, not a
+  # code change.
+  def test_another_site_can_claim_media_hosts
+    other = external_sites(:mycoportal)
+    other.update!(media_hosts: "images.mycoportal.org")
+
+    assert_equal(other, ExternalSite.serving_media("images.mycoportal.org"))
+  end
 end

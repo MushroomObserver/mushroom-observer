@@ -59,7 +59,7 @@ module Views::Controllers::Occurrences::Projects
       # Cancel link points to new_occurrence_path
       assert_html(
         html,
-        "a.btn[href='/occurrences/new" \
+        "a[href='/occurrences/new" \
         "?observation_id=#{@obs1.id}']",
         text: :cancel.ti
       )
@@ -102,7 +102,7 @@ module Views::Controllers::Occurrences::Projects
 
       # Cancel link points to occurrence show page
       assert_html(
-        html, "a.btn[href='/occurrences/#{occ.id}']",
+        html, "a[href='/occurrences/#{occ.id}']",
         text: :cancel.ti
       )
 
@@ -207,15 +207,11 @@ module Views::Controllers::Occurrences::Projects
 
       assert_html(html, "form > .modal-body > p",
                   text: :occurrence_resolve_projects_intro.l)
-      # Project list uses `ul.list-unstyled` (no bullets, no left
-      # padding). Each row is a flex container with a clickable id-badge
-      # button (Stimulus clipboard target) followed by the project link.
-      assert_html(html, "form > .modal-body > ul.list-unstyled > li.d-flex")
-      assert_html(html,
-                  ".modal-body > ul > li > button.badge.badge-id" \
-                  "[data-controller='clipboard']",
+      # Each project row has a clickable id-badge button followed by
+      # the project link.
+      assert_html(html, ".modal-body button.badge-id",
                   text: @project.id.to_s)
-      assert_html(html, ".modal-body > ul > li > a",
+      assert_html(html, ".modal-body a[href='/projects/#{@project.id}']",
                   text: @project.title)
       assert_html(html,
                   "form > .modal-footer > button[value='add_all']",

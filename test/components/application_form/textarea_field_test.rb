@@ -31,9 +31,9 @@ class TextareaFieldTest < ComponentTestCase
   end
 
   # Regression: TextareaField applies `text-monospace` when instantiated
-  # directly with `wrapper_options[:monospace]` — not just via the helper.
-  # Matches ERB `text_area_with_label`'s `:monospace` semantics so direct
-  # component callers (e.g. FieldProxy-backed textareas) get parity.
+  # directly with `wrapper_options[:monospace]` — not just via the
+  # helper, so direct component callers (e.g. FieldProxy-backed
+  # textareas) get parity.
   def test_textarea_field_monospace_at_component_level
     form = Components::ApplicationForm.new(@collection_number,
                                            action: "/test_form_path")
@@ -43,6 +43,8 @@ class TextareaFieldTest < ComponentTestCase
     )
 
     html = render(component)
+    # monospace: true adding .text-monospace IS the contract here.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     assert_html(html, "textarea.form-control.text-monospace")
   end
 

@@ -33,7 +33,6 @@ module Views::Controllers::Descriptions::Permissions
     end
 
     def view_template
-      submit(:submit.ti, center: true)
       render_permissions_table
       submit(:submit.ti, center: true)
     end

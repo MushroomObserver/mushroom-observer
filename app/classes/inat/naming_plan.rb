@@ -24,9 +24,8 @@ class Inat
     end
 
     # The lead's confidence vote from the source's signals.
-    # `provisional_evidence:` is whether the source carries a provisional
-    # name at all -- it counts even when it can't be resolved to an MO
-    # name.
+    # `provisional_evidence:` is whether the source's provisional name
+    # resolves to an MO name; a placeholder like "-" is no evidence.
     def self.lead_vote_for(quality_grade:, sequence_evidence:,
                            provisional_evidence:)
       return Vote::MAXIMUM_VOTE if sequence_evidence

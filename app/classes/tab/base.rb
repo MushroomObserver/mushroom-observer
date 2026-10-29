@@ -126,22 +126,15 @@ class Tab::Base
     [title, path, html_options]
   end
 
-  # Append a `q=<value>` query param to a path string. Pass the
-  # caller-side `q_param` (already resolved — Tab POROs are
-  # request-agnostic, so the caller is responsible for asking the
-  # request context what `q_param` is). When `q_param_value` is nil
-  # or blank, the original path returns unchanged.
+  # Appends a `q=<value>` query param to a path string. The caller
+  # resolves `q_param_value` first -- Tab POROs are request-agnostic,
+  # so they can't ask the request what it is. Nil/blank leaves the
+  # path unchanged.
   #
-  # Use from a Tab PORO's `#path` method when the tab's URL needs to
-  # carry the current Query through (e.g. "back to filtered index"
-  # links on a show page).
-  #
-  # The actual merge is `Query.merge_q_param_into_url` -- see there
-  # for the String/Hash value shapes and why it uses `Hash#to_query`.
-  # Shared with `ApplicationController::Queries#add_q_param`, which
-  # resolves `q_param_value` from ambient session/request state before
-  # calling it; a Tab has no such state, so its callers resolve the
-  # value and pass it in here instead.
+  # Use from a Tab's `#path` to carry the current Query through (e.g.
+  # "back to filtered index" links). Shared with
+  # `ApplicationController::Queries#add_q_param`, which resolves the
+  # value from ambient session state instead.
   def with_q_param(path, q_param_value)
     Query.merge_q_param_into_url(path, q_param_value)
   end
@@ -154,18 +147,14 @@ class Tab::Base
   end
 
   # Stable key NavTabs matches against `current:` to decide `.active`.
-  # Defaults to `alt_title` when set (the same short identifier used
-  # for the selector class) — this aligns with the existing MO
-  # convention of `active_project_tab` / `current_subtab` carrying
-  # short forms like "details", "members", "aliases", etc. Falls back
-  # to the demodulized class name underscored when `alt_title` is nil.
+  # Defaults to `alt_title`, matching the MO convention of
+  # `active_project_tab` / `current_subtab` carrying short forms like
+  # "details"/"members".
   #
-  # Override per subclass when the consuming view's current-tab
-  # semantic differs from `alt_title`. Example: `Tab::Project::Summary`
-  # has `alt_title: "summary"` (for the selector class) but its
-  # `nav_key: "projects"` (because the project banner's `current_tab`
-  # is derived from the controller_name, which is "projects" on the
-  # project show page).
+  # Override per subclass when the view's current-tab semantic
+  # differs: `Tab::Project::Summary` has `alt_title: "summary"` but
+  # `nav_key: "projects"`, since the banner derives `current_tab`
+  # from controller_name.
   def nav_key
     alt_title || self.class.name.demodulize.underscore
   end

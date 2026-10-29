@@ -11,6 +11,7 @@ module Views::Controllers::Sequences
     prop :back, _Nilable(String), default: nil
 
     def view_template
+      render_observation_field unless model.persisted?
       render_locus_field
       render_locus_help
       render_bases_field
@@ -21,6 +22,10 @@ module Views::Controllers::Sequences
     end
 
     private
+
+    def render_observation_field
+      hidden_field("observation_id", value: observation.id)
+    end
 
     def render_locus_field
       textarea_field(:locus,
@@ -110,7 +115,6 @@ module Views::Controllers::Sequences
         url_for(
           controller: "sequences",
           action: :create,
-          observation_id: observation.id,
           only_path: true
         )
       end

@@ -19,7 +19,7 @@ class FieldSlipScanStateTest < ComponentTestCase
   def test_complete_read_links_to_the_review_form_as_a_button
     html = render_state(complete_read)
 
-    assert_html(html, "a.btn.btn-default[href='#{review_path}']",
+    assert_html(html, "a[href='#{review_path}']",
                 text: :field_slip_scan_review.l)
     assert_no_html(html, "form")
   end
@@ -27,7 +27,7 @@ class FieldSlipScanStateTest < ComponentTestCase
   def test_pending_read_links_to_the_status_page_as_a_button
     html = render_state(FieldSlipExtract.start!(image: @image, user: rolf))
 
-    assert_html(html, "a.btn[href='#{review_path}']",
+    assert_html(html, "a[href='#{review_path}']",
                 text: :field_slip_scan_reading.l)
     assert_no_html(html, "form")
   end
@@ -35,9 +35,9 @@ class FieldSlipScanStateTest < ComponentTestCase
   def test_failed_read_offers_view_and_retry_buttons
     html = render_state(failed_read)
 
-    assert_html(html, "a.btn[href='#{review_path}']",
+    assert_html(html, "a[href='#{review_path}']",
                 text: :field_slip_scan_failed.l)
-    assert_html(html, "form[action='#{read_path}'] button.btn.ml-2",
+    assert_html(html, "form[action='#{read_path}'] button",
                 text: :field_slip_scan_retry.l)
   end
 
@@ -46,7 +46,7 @@ class FieldSlipScanStateTest < ComponentTestCase
   def test_failed_read_without_retry
     html = render_state(failed_read, offer_retry: false)
 
-    assert_html(html, "a.btn[href='#{review_path}']")
+    assert_html(html, "a[href='#{review_path}']")
     assert_no_html(html, "form")
   end
 

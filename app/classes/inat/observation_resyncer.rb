@@ -31,8 +31,19 @@ class Inat
     # here for callers and tests that reference the occurrence path.
     Result = ReflectionResync::Result
 
-    def initialize(observation, fetcher: ObsFetcher.new,
-                   applier: ReflectionResync.new)
+    # Engine messages from this occurrence's resyncs (ambiguous locus
+    # pairings, iNat values MO can't resolve, photos that failed to
+    # import). InatObservationResyncJob routes them to #alerts, the same
+    # as the scheduled batch does -- a "Sync now" that declines to act
+    # needs a human either way, and the flash can't say so: it is one
+    # aggregate line for the whole occurrence, shown to whoever pressed
+    # the button rather than to whoever can act on it.
+    delegate :alerts, to: :@applier
+
+    # requested_by: the MO user who pressed "Sync now" (see
+    # ReflectionResync#initialize).
+    def initialize(observation, fetcher: ObsFetcher.new, requested_by: nil,
+                   applier: ReflectionResync.new(requested_by: requested_by))
       @observation = observation
       @fetcher = fetcher
       @applier = applier

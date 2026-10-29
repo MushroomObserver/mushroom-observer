@@ -37,7 +37,6 @@ module Views::Controllers::Descriptions
 
     def view_template
       Container(width: :text) do
-        submit(submit_button_text.ti, center: true)
         render_source_fields
         render_permissions_fields
         render_license_field

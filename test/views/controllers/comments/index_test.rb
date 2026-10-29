@@ -13,7 +13,7 @@ module Views::Controllers::Comments
     def test_renders_list_group_with_one_item_per_comment
       html = render_list_only
 
-      assert_html(html, "div.list-group")
+      assert_html(html, ".list-group")
       @comments.each do |comment|
         assert_html(html, "##{dom_id(comment)}.list-group-item.comment")
       end

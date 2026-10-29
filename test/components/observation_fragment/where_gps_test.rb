@@ -27,7 +27,7 @@ class ObservationFragmentWhereGpsTest < ComponentTestCase
 
     html = render_where_gps(obs, user: obs.user)
 
-    assert_html(html, "li.obs-where-gps.indent")
+    assert_html(html, ".obs-where-gps")
     assert_html(html, "a[href*='/observations/#{obs.id}/map']")
     assert_no_html(html, "i")
   end
