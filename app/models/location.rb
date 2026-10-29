@@ -89,6 +89,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require("acts_as_versioned")
 
   include Scopes
+  include Interesting
 
   belongs_to :description, class_name: "LocationDescription", # (main one)
                            optional: true
@@ -777,7 +778,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
     sender = current_user
     recipients = notification_recipients
-    send_location_change_emails(sender, recipients)
+    send_location_change_emails(sender,
+                                finalize_recipients!(recipients, sender))
   end
 
   # Must run before save: once VersionedByCurrentUser's after_save hook
@@ -912,27 +914,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def notification_recipients
-    recipients = collect_description_subscribers
-    collect_interested_users(recipients)
-    recipients.reject!(&:no_emails)
-    recipients
-  end
-
-  def collect_description_subscribers
     recipients = []
-    { admins: :email_locations_admin,
-      authors: :email_locations_author,
-      editors: :email_locations_editor }.each do |role, pref|
-      descriptions.map(&role).each do |user_list|
-        user_list.each do |user|
-          recipients.push(user) if user.public_send(pref)
-        end
-      end
-    end
-    recipients
-  end
-
-  def collect_interested_users(recipients)
+    collect_role_recipients(
+      [[descriptions.map(&:admins), :email_locations_admin],
+       [descriptions.map(&:authors), :email_locations_author],
+       [descriptions.map(&:editors), :email_locations_editor]],
+      recipients
+    )
     Interest.update_recipients!(interests, recipients)
   end
 
@@ -940,7 +928,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def send_location_change_emails(sender, recipients)
     old_loc_ver = saved_changes? ? version - 1 : version
     desc = description
-    (recipients.uniq - [sender]).each do |receiver|
+    recipients.each do |receiver|
       LocationChangeMailer.build(
         sender:, receiver:, location: self, old_loc_ver:,
         new_loc_ver: version, description: desc,

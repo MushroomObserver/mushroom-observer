@@ -65,6 +65,7 @@ class NameDescription < Description
   require("acts_as_versioned")
 
   include Description::Scopes
+  include Interesting
 
   # Do not change the integer associated with a value
   enum :review_status, { unreviewed: 1, unvetted: 2, vetted: 3, inaccurate: 4 }
@@ -300,33 +301,20 @@ class NameDescription < Description
       sender = @current_user || User.admin
       recipients = []
 
-      # Tell admins of the change.
-      admins.each do |user|
-        recipients.push(user) if user.email_names_admin
-      end
-
-      # Tell authors of the change.
-      authors.each do |user|
-        recipients.push(user) if user.email_names_author
-      end
-
-      # Tell editors of the change.
-      editors.each do |user|
-        recipients.push(user) if user.email_names_editor
-      end
-
-      # Tell reviewer of the change.
       reviewer ||= @old_reviewer
-      recipients.push(reviewer) if reviewer&.email_names_reviewer
+      collect_role_recipients(
+        [[admins, :email_names_admin],
+         [authors, :email_names_author],
+         [editors, :email_names_editor],
+         [reviewer, :email_names_reviewer]],
+        recipients
+      )
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
       Interest.update_recipients!(name.interests, recipients)
 
-      # Remove users who have opted out of all emails.
-      recipients.reject!(&:no_emails)
-
-      send_name_change_emails(sender, recipients)
+      send_name_change_emails(sender, finalize_recipients!(recipients, sender))
     end
 
     # No longer need this.
@@ -342,7 +330,7 @@ class NameDescription < Description
     old_desc_ver = saved_version_changes? ? version - 1 : version
     review = saved_change_to_review_status? ? review_status : "no_change"
 
-    (recipients.uniq - [sender]).each do |recipient|
+    recipients.each do |recipient|
       NameChangeMailer.build(
         sender:, receiver: recipient, name: n,
         old_name_ver: n.version, new_name_ver: n.version,

@@ -282,6 +282,7 @@ class Name < AbstractModel
   include Resolve
   include PropagateGenericClassifications
   include Notify
+  include Interesting
   include Spelling
   include Merge
   include Lifeform

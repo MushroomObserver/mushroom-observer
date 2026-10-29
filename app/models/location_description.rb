@@ -51,6 +51,7 @@ class LocationDescription < Description
   require("acts_as_versioned")
 
   include Description::Scopes
+  include Interesting
 
   # Do not change the integer associated with a value
   enum :source_type,
@@ -171,29 +172,19 @@ class LocationDescription < Description
     sender = @current_user
     recipients = []
 
-    # Tell admins of the change.
-    admins.each do |user|
-      recipients.push(user) if user.email_locations_admin
-    end
-
-    # Tell authors of the change.
-    authors.each do |user|
-      recipients.push(user) if user.email_locations_author
-    end
-
-    # Tell editors of the change.
-    editors.each do |user|
-      recipients.push(user) if user.email_locations_editor
-    end
+    collect_role_recipients(
+      [[admins, :email_locations_admin],
+       [authors, :email_locations_author],
+       [editors, :email_locations_editor]],
+      recipients
+    )
 
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
     Interest.update_recipients!(location.interests, recipients)
 
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    send_location_change_emails(sender, recipients)
+    send_location_change_emails(sender,
+                                finalize_recipients!(recipients, sender))
   end
 
   private
@@ -204,7 +195,7 @@ class LocationDescription < Description
     loc = location
     old_desc_ver = saved_changes? ? version - 1 : version
 
-    (recipients.uniq - [sender]).each do |receiver|
+    recipients.each do |receiver|
       LocationChangeMailer.build(
         sender:, receiver:, location: loc, old_loc_ver: loc.version,
         new_loc_ver: loc.version, description: self, old_desc_ver:,
