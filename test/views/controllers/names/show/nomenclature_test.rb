@@ -109,6 +109,18 @@ class Views::Controllers::Names::Show::NomenclatureTest < ComponentTestCase
     assert_html(html, "#name_synonyms")
   end
 
+  # Code names (informal provisional names) have no ICN registration,
+  # so the right column's registration/search links should be omitted.
+  def test_code_name_omits_right_column
+    name = names(:coprinus_comatus)
+    name.text_name = "Coprinus sp. 'IN34'"
+
+    html = render_nomenclature(name: name)
+
+    assert_no_html(html, "a[href*='indexfungorum']")
+    assert_no_html(html, "a[href*='mycobank']")
+  end
+
   def routes
     Rails.application.routes.url_helpers
   end
