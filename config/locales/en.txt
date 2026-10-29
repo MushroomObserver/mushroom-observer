@@ -1950,7 +1950,7 @@
   profile_inat_link: Link iNaturalist account
   profile_inat_opt_out: "Do not import images or notes from observations I posted to iNaturalist"
   profile_delete_content: Delete my content
-  profile_delete_content_help: "Delete your content from MO: the images you uploaded to MO, the images of your iNaturalist photos that anyone imported, and the notes on records of observations made by you. Public records of observations made by you stay, without those images, and all of them lose their notes. The next page shows what would be deleted before anything is."
+  profile_delete_content_help: "Delete your content from MO: the images you uploaded to MO, the images of your iNaturalist photos that anyone imported, and the notes on records of observations made by you. Public records of observations made by you stay, without those images, and all of them lose their notes. The next page shows what would be deleted before anything is deleted."
   profile_delete_content_button: Delete my content...
   profile_content_purge_running: "Deleting your content: [deleted] of [count] images deleted so far. Reload to update."
   inat_account_linked: "Linked iNaturalist account [login]."

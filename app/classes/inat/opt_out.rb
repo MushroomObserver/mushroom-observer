@@ -14,5 +14,18 @@ class Inat
         ExcludedInatUser.matching(login: login, id: inat_user.to_h[:id]).
           present?
     end
+
+    # Every opted-out login, for iNat's `not_user_id` filter.
+    def self.logins
+      (User.where(inat_import_opt_out: true).where.not(inat_username: nil).
+        pluck(:inat_username) + ExcludedInatUser.pluck(:inat_login)).uniq
+    end
+
+    # iNat API args leaving out opted-out observers; none when there are
+    # none, since an empty `not_user_id` would be sent to iNat as is.
+    def self.filter_args
+      logins = self.logins
+      logins.empty? ? {} : { not_user_id: logins.join(",") }
+    end
   end
 end

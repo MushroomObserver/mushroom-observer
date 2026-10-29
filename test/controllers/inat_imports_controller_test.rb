@@ -974,6 +974,20 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_confirm_leaves_opted_out_observers_out_of_expected_count
+    ExcludedInatUser.create!(inat_login: "excluded_on_inat")
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("not_user_id" => "excluded_on_inat")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    post_import_others_confirm(create_skeletons: "0")
+
+    assert_select("#expected_count", "0",
+                  "Without skeletons, opted-out observers are not expected")
+  end
+
   # One of 3 obss has an empty license: iNat's license-code filter leaves
   # it out, and so does its `licensed=false` filter.
   def test_confirm_counts_empty_license_obs_as_unlicensed
