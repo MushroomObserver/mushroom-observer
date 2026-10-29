@@ -127,21 +127,22 @@ class Inat
     # panel. String keys, since Observation#skeleton_omissions is a JSON
     # column. imported_photo_ids: iNat photo ids the skeleton already has
     # an MO image of (see Inat::PhotoImporter.imported_photo_ids).
-    def skeleton_omissions(imported_photo_ids: [])
+    # opted_out: the observer opted out of MO, so every photo is left out.
+    def skeleton_omissions(imported_photo_ids: [], opted_out: false)
       { "login" => self[:user][:login],
-        "images" => unlicensed_photo_count(imported_photo_ids),
+        "images" => omitted_photo_count(imported_photo_ids, opted_out),
         "obs_fields" => without_mo_url_field(inat_obs_fields).size,
         "description" => cleaned_description.present?,
         "sequences" => sequences.present? }
     end
 
-    def unlicensed_photo_count(imported_photo_ids)
+    def omitted_photo_count(imported_photo_ids, opted_out)
       Array(self[:observation_photos]).count do |obs_photo|
-        obs_photo.dig(:photo, :license_code).blank? &&
-          imported_photo_ids.exclude?(obs_photo[:photo_id].to_s)
+        opted_out || (obs_photo.dig(:photo, :license_code).blank? &&
+          imported_photo_ids.exclude?(obs_photo[:photo_id].to_s))
       end
     end
-    private :unlicensed_photo_count
+    private :omitted_photo_count
 
     # Observation form requires a "normalized" key (no spaces) for Notes parts
     def snapshot_key

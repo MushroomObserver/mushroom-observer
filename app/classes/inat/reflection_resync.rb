@@ -109,9 +109,10 @@ class Inat
     end
 
     # A placeholder becomes a full reflection when the user requesting the
-    # sync is the iNat observer
+    # sync is the iNat observer, unless they have opted out of MO
     def upgrade_placeholder?(obs, inat_obs)
-      obs.placeholder? && requested_by_inat_owner?(inat_obs)
+      obs.placeholder? && requested_by_inat_owner?(inat_obs) &&
+        !Inat::OptOut.opted_out?(inat_obs[:user])
     end
 
     # The MO owner is unchanged.
@@ -213,7 +214,8 @@ class Inat
       inat_obs.skeleton_omissions(
         imported_photo_ids: PhotoImporter.imported_photo_ids(
           obs, self.class.inat_link(obs).external_site
-        )
+        ),
+        opted_out: Inat::OptOut.opted_out?(inat_obs[:user])
       )
     end
 

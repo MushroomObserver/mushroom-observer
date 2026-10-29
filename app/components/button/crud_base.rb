@@ -81,10 +81,7 @@ class Components::Button::CRUDBase < Components::Button
     form_data[:turbo_confirm] = @confirm if @confirm
 
     button_data = { tooltip_target: "tip", placement: "top", title: @name }
-    if @confirm
-      button_data[:turbo_confirm_title] = @confirm
-      button_data[:turbo_confirm_button] = @name
-    end
+    button_data[:turbo_confirm_button] = @name if @confirm
 
     opts = {
       method: @method,
