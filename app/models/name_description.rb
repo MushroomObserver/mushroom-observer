@@ -321,13 +321,7 @@ class NameDescription < Description
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
-      name.interests.each do |interest|
-        if interest.state
-          recipients.push(interest.user)
-        else
-          recipients.delete(interest.user)
-        end
-      end
+      Interest.update_recipients!(name.interests, recipients)
 
       # Remove users who have opted out of all emails.
       recipients.reject!(&:no_emails)

@@ -7,7 +7,7 @@ module Views::Controllers::Interests
     prop :interests, _Array(::Interest)
     prop :types, _Array(::String)
     prop :selected_type, _Nilable(::String), default: nil
-    prop :states, _Array(::String)
+    prop :states, _Array(::Symbol)
     prop :selected_state, _Nilable(::String), default: nil
     prop :pagination_data, ::PaginationData
     prop :query, ::Query
@@ -63,9 +63,9 @@ module Views::Controllers::Interests
     def state_filter_args
       {
         types: [@selected_state.presence || "all"], multiple: false,
-        filterable_types: @states.map(&:to_sym),
+        filterable_types: @states,
         show_intro: !show_type_filter?, key: :state,
-        type_label: ->(state) { state.to_s.underscore.to_sym.ti },
+        type_label: ->(state) { state.ti },
         path_for: lambda do |state|
           params = { type: @selected_type.presence, state: state }.compact
           add_q_param(interests_path(**params))
@@ -98,7 +98,7 @@ module Views::Controllers::Interests
     def summary_prefix(item)
       return item.target.summary_prefix if item.target_type == "NameTracker"
 
-      state = item.state ? :watching.ti : :ignoring.ti
+      state = item.watching? ? :watching.ti : :ignoring.ti
       "#{state} #{item.target_type.underscore.to_sym.l}"
     end
 
@@ -128,9 +128,9 @@ module Views::Controllers::Interests
     end
 
     def render_toggle_button(item)
-      icon = item.state ? :hide : :show
-      label = item.state ? :ignore.ti : :watch.ti
-      tooltip = if item.state
+      icon = item.watching? ? :hide : :show
+      label = item.watching? ? :ignore.ti : :watch.ti
+      tooltip = if item.watching?
                   :list_interests_mute_tooltip.l
                 else
                   :list_interests_resume_tooltip.l
@@ -139,7 +139,7 @@ module Views::Controllers::Interests
              show_label: :responsive, data: { title: tooltip },
              target: interest_path(item.target_id),
              params: { type: item.target_type,
-                       state: item.state ? -1 : 1 })
+                       state: item.watching? ? -1 : 1 })
     end
 
     def render_destroy_button(item)

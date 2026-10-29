@@ -24,10 +24,10 @@ class Query::InterestsTest < UnitTestCase
   end
 
   def test_interests_state
-    all_watching = Interest.state(true).order_by(:target_type)
-    assert_query(all_watching, :Interest, state: true)
+    all_watching = Interest.state(:watching).order_by(:target_type)
+    assert_query(all_watching, :Interest, state: :watching)
 
-    assert_query([], :Interest, state: false)
+    assert_query([], :Interest, state: :ignoring)
   end
 
   def test_interests_id_in_set

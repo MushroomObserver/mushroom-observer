@@ -29,7 +29,7 @@ class InterestsController < ApplicationController
                          Location].freeze
 
   # Display order for the state-filter pills.
-  STATE_FILTER_ORDER = %w[Watching Ignoring].freeze
+  STATE_FILTER_ORDER = [:watching, :ignoring].freeze
 
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
@@ -40,7 +40,7 @@ class InterestsController < ApplicationController
     @types = available_types
     @selected_type = params[:type].presence
     @states = available_states(@selected_type)
-    @selected_state = params[:state].presence
+    @selected_state = params[:state].presence&.downcase
     @query = build_interests_query(@selected_type, @selected_state)
     @pagination_data = number_pagination_data(:page, 100)
     @interests = paginate_interests!
@@ -79,7 +79,7 @@ class InterestsController < ApplicationController
   def state_param(state)
     return nil if state.blank?
 
-    state == "Watching"
+    state.to_sym
   end
 
   def available_types
@@ -91,9 +91,7 @@ class InterestsController < ApplicationController
   def available_states(type)
     interests = Interest.for_user(@user)
     interests = interests.types(type) if type.present?
-    present = interests.distinct.pluck(:state).map do |watching|
-      watching ? "Watching" : "Ignoring"
-    end
+    present = interests.distinct.pluck(:state).map(&:to_sym)
     STATE_FILTER_ORDER & present
   end
 
@@ -155,11 +153,11 @@ class InterestsController < ApplicationController
     if @state.zero?
       name = @target ? @target.unique_text_name : "--"
       destroy_interest_plus_tracker_and_flash_notice(name)
-    elsif @interest.state == true && @state.positive?
+    elsif @interest.watching? && @state.positive?
       flash_notice(
         :set_interest_already_on.l(name: @target.unique_text_name)
       )
-    elsif @interest.state == false && @state.negative?
+    elsif @interest.ignoring? && @state.negative?
       flash_notice(
         :set_interest_already_off.l(name: @target.unique_text_name)
       )
@@ -275,7 +273,7 @@ class InterestsController < ApplicationController
       flash_notice(:set_interest_failure.l(name: name))
     else
       @target.destroy if @interest.target_type == "NameTracker"
-      if @interest.state
+      if @interest.watching?
         flash_notice(:set_interest_success_was_on.l(name: name))
       else
         flash_notice(:set_interest_success_was_off.l(name: name))

@@ -103,13 +103,7 @@ module Name::Notify
   # Send to people who have registered interest.
   # Also remove everyone who has explicitly said they are NOT interested.
   def notify_interested(recipients)
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
+    Interest.update_recipients!(interests, recipients)
   end
 
   # True if classification was the only versioned column to change in

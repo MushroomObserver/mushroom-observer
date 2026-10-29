@@ -71,17 +71,17 @@ module Views::Controllers::Interests
     def test_state_filter_renders_with_active_and_inactive_items
       html = render_index(
         types: ["Observation"], selected_type: nil,
-        states: %w[Watching Ignoring], selected_state: "Watching"
+        states: [:watching, :ignoring], selected_state: "watching"
       )
 
-      assert_html(html, "a[href*='state=Ignoring']")
-      assert_no_html(html, "a[href*='state=Watching']")
+      assert_html(html, "a[href*='state=ignoring']")
+      assert_no_html(html, "a[href*='state=watching']")
     end
 
     def test_state_filter_hidden_when_single_state_present
       html = render_index(
         types: ["Observation"], selected_type: nil,
-        states: ["Watching"], selected_state: nil
+        states: [:watching], selected_state: nil
       )
 
       assert_no_html(html, "a[href*='state=']")

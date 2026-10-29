@@ -8,7 +8,7 @@ class Query::Interests < Query
   # request params -- Interests are private.
   query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
   query_attr(:types, [{ string: Interest::ALL_TYPE_TAGS }])
-  query_attr(:state, :boolean)
+  query_attr(:state, { string: Interest::ALL_STATE_TAGS })
 
   def self.default_order
     :target_type

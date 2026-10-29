@@ -27,7 +27,7 @@
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
 #  target::         Object in question.
-#  state::          Either true (watching) or false (ignoring).
+#  state::          Enum: "watching" or "ignoring".
 #
 #  == Class methods
 #
@@ -53,6 +53,10 @@ class Interest < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
+  # Backed by the existing boolean column -- Rails' enum macro maps
+  # directly onto raw true/false values, so no migration is needed.
+  enum :state, { ignoring: false, watching: true }
+
   # Maintain this Array of all models (targets) which take interests.
   ALL_TYPES = [
     Location, LocationDescription, Name, NameDescription, NameTracker,
@@ -61,6 +65,10 @@ class Interest < AbstractModel
 
   # Returns Array of all valid +target_type+ values (Symbols).
   ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
+
+  # Returns Array of all valid +state+ values (Symbols), for
+  # `Query::Interests`.
+  ALL_STATE_TAGS = states.keys.map(&:to_sym).freeze
 
   # Allow explicit joining for all polymorphic associations,
   # e.g. `Interest.joins(:location).where(target_id: 29513)`,
@@ -78,7 +86,7 @@ class Interest < AbstractModel
   # ("Observation") without translation -- same pattern as
   # Comment.types.
   scope :types, ->(types) { where(target_type: types) }
-  scope :state, ->(watching) { where(state: watching) }
+  scope :state, ->(tag) { where(state: tag) }
 
   validates :target_type, inclusion: { in: ALL_TYPES.map(&:to_s) }
 
@@ -91,6 +99,20 @@ class Interest < AbstractModel
 
     # find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
     where(target_type: obj.class.to_s, target_id: obj.id)
+  end
+
+  # Mutates `recipients` in place: pushes each watcher's user, deletes
+  # each ignorer's user -- even if present for another reason (e.g.
+  # the target's owner). Returns `recipients`.
+  def self.update_recipients!(interests, recipients)
+    interests.each do |interest|
+      if interest.watching?
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
+      end
+    end
+    recipients
   end
 
   # `user` (this Interest's owner) is the only one who ever sees this,

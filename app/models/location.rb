@@ -933,13 +933,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def collect_interested_users(recipients)
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
+    Interest.update_recipients!(interests, recipients)
   end
 
   # Calculate versions now while saved_changes? is still accurate.

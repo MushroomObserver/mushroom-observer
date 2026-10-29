@@ -58,7 +58,7 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(2, rolfs_interests.length)
     assert_equal(coprinus_comatus_tracker, rolfs_interests.first.target)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(true, rolfs_interests.second.state)
+    assert_predicate(rolfs_interests.second, :watching?)
 
     # Succeed: Turn same observation interest off.
     login("rolf")
@@ -70,7 +70,7 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(false, rolfs_interests.second.state)
+    assert_predicate(rolfs_interests.second, :ignoring?)
 
     # Succeed: Turn a name interest off from no interest.
     login("rolf")
@@ -81,9 +81,9 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(3, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(false, rolfs_interests.second.state)
+    assert_predicate(rolfs_interests.second, :ignoring?)
     assert_equal(peltigera, rolfs_interests.last.target)
-    assert_equal(false, rolfs_interests.last.state)
+    assert_predicate(rolfs_interests.last, :ignoring?)
 
     # Succeed: Delete interest in existing object that rolf hasn't expressed
     # interest in yet.
@@ -103,7 +103,7 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(peltigera, rolfs_interests.last.target)
-    assert_equal(false, rolfs_interests.last.state)
+    assert_predicate(rolfs_interests.last, :ignoring?)
 
     # Succeed: Delete last non-name-tracker interest.
     login("rolf")
@@ -185,7 +185,7 @@ class InterestsControllerTest < FunctionalTestCase
          params: { type: "Observation", id: obs.id, state: 1 })
     interest = Interest.find_by(target: obs, user: rolf)
     assert(interest, "Expected a new Interest")
-    assert_equal(true, interest.state)
+    assert_predicate(interest, :watching?)
   end
 
   def test_create_interest_bad_target
@@ -207,7 +207,7 @@ class InterestsControllerTest < FunctionalTestCase
                   as: :turbo_stream)
     interest = Interest.find_by(target: obs, user: rolf)
     assert(interest, "Expected a new Interest")
-    assert_equal(true, interest.state)
+    assert_predicate(interest, :watching?)
   end
 
   def test_update_interest
@@ -216,7 +216,7 @@ class InterestsControllerTest < FunctionalTestCase
     Interest.create(target: obs, user: rolf, state: true)
     patch(:update,
           params: { type: "Observation", id: obs.id, state: -1 })
-    assert_equal(false, Interest.find_by(target: obs, user: rolf).state)
+    assert_predicate(Interest.find_by(target: obs, user: rolf), :ignoring?)
   end
 
   def test_update_creates_interest_when_missing
@@ -226,7 +226,7 @@ class InterestsControllerTest < FunctionalTestCase
           params: { type: "Observation", id: obs.id, state: 1 })
     interest = Interest.find_by(target: obs, user: rolf)
     assert(interest, "Update should create the interest if missing")
-    assert_equal(true, interest.state)
+    assert_predicate(interest, :watching?)
   end
 
   def test_update_no_op_when_state_zero_and_no_interest
@@ -244,7 +244,7 @@ class InterestsControllerTest < FunctionalTestCase
     Interest.create(target: obs, user: rolf, state: true)
     patch(:update, params: { type: "Observation", id: obs.id, state: -1 },
                    as: :turbo_stream)
-    assert_equal(false, Interest.find_by(target: obs, user: rolf).state)
+    assert_predicate(Interest.find_by(target: obs, user: rolf), :ignoring?)
   end
 
   def test_destroy_interest

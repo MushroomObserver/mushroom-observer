@@ -640,17 +640,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||=
-      begin
-        i = Interest.where(
-          user_id: id, target_type: object.class.name, target_id: object.id
-        ).pick(:state)
-        case i
-        when true
-          :watching
-        when false
-          :ignoring
-        end
-      end
+      Interest.where(
+        user_id: id, target_type: object.class.name, target_id: object.id
+      ).pick(:state)&.to_sym
   end
 
   # Has this user expressed positive interest in a given object?
