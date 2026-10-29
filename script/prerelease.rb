@@ -359,11 +359,7 @@ class Prerelease
       "To promote one, add a row to `#{ARTICLE_FILE}` in this PR.\n\n"
   end
 
-  def run_cmd(*cmd)
-    out, err, status = Open3.capture3(*cmd)
-    abort("`#{cmd.join(" ")}` failed:\n#{err}") unless status.success?
-    out
-  end
+  def run_cmd(*cmd) = GithubCLI.run(*cmd)
 end
 
 Prerelease.new(ARGV).run if $PROGRAM_NAME == __FILE__
