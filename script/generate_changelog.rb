@@ -8,8 +8,8 @@
 # when its merge commit is reachable from that deploy's tag but not
 # from the previous one -- true for merge, squash and rebase merges
 # alike, and for a stacked PR in the deploy where its parent landed.
-# PR numbers, titles and authors come from one gh CLI call (run it
-# wherever gh is authenticated).
+# PR numbers, titles and authors come from GitHub's GraphQL API through
+# the gh CLI (run it wherever gh is authenticated).
 #
 #   Dry run (default -- prints the section(s), writes nothing):
 #     script/generate_changelog.rb              # most recent deploy tag
@@ -30,9 +30,8 @@
 # pending API to build the next deploy's section before the deploy.
 # rubocop:enable MO/NoLongCommentBlock
 
-require("date")
 require("json")
-require("open3")
+require_relative("github_cli")
 
 # Builds and inserts one deploy's CHANGELOG.md section.
 class ChangelogGenerator
@@ -43,18 +42,13 @@ class ChangelogGenerator
   HEADER = <<~MD
     # Changelog
   MD
-  # A stacked PR can be merged into its parent branch long before the
-  # parent reaches main; the PR pool reaches back this far before the
-  # earliest deploy tag a run looks at.
-  POOL_LOOKBACK_DAYS = 365
-  # The gh search bounds are calendar days, but a deploy tag's local
-  # date can trail the UTC merge date of a PR deployed seconds before
-  # it (a PR merged 00:03 UTC, tagged 20:04 the prior day local). Pad
-  # the pool's upper bound so those PRs still fall inside a window; the
-  # rev-list intersection drops anything not in the range.
-  POOL_LOOKAHEAD_DAYS = 2
-  # GitHub search returns at most this many results per query.
-  SEARCH_CAP = 1000
+  # Commits per "which PR was this merged as" request, and PRs per
+  # details request; both keep each GraphQL response small.
+  COMMIT_BATCH = 100
+  PULL_BATCH = 50
+  PULL_FIELDS = "number title url body mergedAt headRefName " \
+                "author { login __typename } mergeCommit { oid } " \
+                "labels(first: 30) { nodes { name } }"
 
   def initialize(argv)
     @apply = false
@@ -79,8 +73,6 @@ class ChangelogGenerator
     tags = deploy_tags
     abort("No deploy-* tags found.") if tags.empty?
 
-    @pool_from = tags.last
-    @pool_to = "origin/main"
     pulls = merged_prs(tags.last, "origin/main")
     pulls = pulls.reject { |pr| pr["headRefName"] == exclude_branch }
     [tags.last, pulls]
@@ -140,8 +132,6 @@ class ChangelogGenerator
     index = tag_index(tags, target)
     abort("#{target} is the earliest deploy tag; no range.") if index.zero?
 
-    @pool_from = tags[index - 1]
-    @pool_to = target
     section = build_section(target, merged_prs(tags[index - 1], target))
     @apply ? apply(section, target) : puts(section)
     dry_run_notice unless @apply
@@ -152,8 +142,6 @@ class ChangelogGenerator
     targets = tags[(index + 1)..]
     abort("No deploy tags after #{@since}.") if targets.empty?
 
-    @pool_from = @since
-    @pool_to = targets.last
     targets.each_with_index do |target, i|
       warn("[#{i + 1}/#{targets.size}] #{target}")
       generate(tags[index + i], target)
@@ -181,68 +169,68 @@ class ChangelogGenerator
       grep(TAG_PATTERN).sort
   end
 
-  # PRs whose merge commit is in prev..target, in commit order.
+  # PRs whose merge commit is in prev..target, in commit order. Each
+  # commit in the range asks GitHub which PR it was merged as, which
+  # covers merge, squash and rebase merges and stacked PRs alike; a
+  # branch commit names its PR too, but isn't that PR's merge commit.
   # Changelog PRs are bookkeeping about this file and are left out of
   # every section (#5155), the same way the pre-release PR leaves
   # itself out of the section it creates.
   def merged_prs(prev_tag, target_tag)
-    order = run_cmd("git", "rev-list", "--reverse",
-                    "#{prev_tag}..#{target_tag}").
-            split("\n").each_with_index.to_h
-    pr_pool.select { |pull| order.key?(merge_sha(pull)) }.
-      reject { |pull| changelog_pr?(pull) }.
-      sort_by { |pull| order[merge_sha(pull)] }
+    commits = run_cmd("git", "rev-list", "--reverse",
+                      "#{prev_tag}..#{target_tag}").split("\n")
+    numbers = commits.each_slice(COMMIT_BATCH).
+              flat_map { |batch| numbers_merged_as(batch) }.uniq
+    pulls_by_number(numbers).reject { |pull| changelog_pr?(pull) }
+  end
+
+  # Numbers of the PRs merged as these commits, in the commits' order.
+  def numbers_merged_as(commits)
+    fields = commits.each_with_index.map do |sha, i|
+      "c#{i}: object(oid: \"#{sha}\") { ... on Commit { oid " \
+        "associatedPullRequests(first: 5) { nodes { number " \
+        "mergeCommit { oid } } } } }"
+    end
+    repository(fields).values.compact.flat_map do |commit|
+      commit.dig("associatedPullRequests", "nodes").
+        select { |pull| pull.dig("mergeCommit", "oid") == commit["oid"] }.
+        map { |pull| pull["number"] }
+    end
+  end
+
+  # Full details, in the order given, shaped like `gh pr list --json`.
+  def pulls_by_number(numbers)
+    numbers.each_slice(PULL_BATCH).flat_map do |batch|
+      fields = batch.map do |n|
+        "pr#{n}: pullRequest(number: #{n}) { #{PULL_FIELDS} }"
+      end
+      repository(fields).values.map { |pull| gh_shaped(pull) }
+    end
+  end
+
+  # gh shows a bot author as "app/<login>"; CHANGELOG.md's existing
+  # lines do too.
+  def gh_shaped(pull)
+    author = pull["author"]
+    if author&.fetch("__typename") == "Bot"
+      author = { "login" => "app/#{author["login"]}" }
+    end
+    pull.merge("labels" => pull.dig("labels", "nodes").to_a,
+               "author" => author)
+  end
+
+  def repository(fields)
+    query = "query($owner: String!, $name: String!) { repository(" \
+            "owner: $owner, name: $name) { #{fields.join(" ")} } }"
+    JSON.parse(
+      run_cmd("gh", "api", "graphql", "-F", "owner={owner}",
+              "-F", "name={repo}", "-f", "query=#{query}")
+    ).dig("data", "repository")
   end
 
   def changelog_pr?(pull)
     pull["headRefName"] == "changelog-pending" ||
       pull["title"].to_s.start_with?("Changelog for ")
-  end
-
-  def merge_sha(pull)
-    pull.dig("mergeCommit", "oid")
-  end
-
-  # Every merged PR from POOL_LOOKBACK_DAYS before the run's earliest
-  # tag onward, fetched once. Month by month: GitHub's search returns
-  # at most 1000 results, ordered by creation, so a single query drops
-  # old PRs that merged recently.
-  def pr_pool
-    @pr_pool ||= pool_months.flat_map { |from, to| merged_in(from, to) }
-  end
-
-  def merged_in(from, to)
-    pulls = JSON.parse(
-      run_cmd("gh", "pr", "list", "--state", "merged",
-              "--limit", SEARCH_CAP.to_s,
-              "--search", "merged:#{from}..#{to}",
-              "--json",
-              "number,title,author,url,mergeCommit,mergedAt,body," \
-              "headRefName,labels")
-    )
-    if pulls.size >= SEARCH_CAP
-      abort("#{pulls.size} PRs merged in #{from}..#{to} hits GitHub's " \
-            "search cap; shorten the window in pool_months.")
-    end
-    pulls
-  end
-
-  # Month windows from the lookback before the run's earliest tag to
-  # its newest tag's date (nothing merged later can be in range).
-  def pool_months
-    from = tag_date(@pool_from) - POOL_LOOKBACK_DAYS
-    last = tag_date(@pool_to) + POOL_LOOKAHEAD_DAYS
-    months = []
-    while from <= last
-      to = [from.next_month - 1, last].min
-      months << [from.iso8601, to.iso8601]
-      from = to + 1
-    end
-    months
-  end
-
-  def tag_date(tag)
-    Date.parse(run_cmd("git", "log", "-1", "--format=%cs", tag).strip)
   end
 
   def build_section(tag, prs)
@@ -337,11 +325,7 @@ class ChangelogGenerator
     positions
   end
 
-  def run_cmd(*cmd)
-    out, err, status = Open3.capture3(*cmd)
-    abort("`#{cmd.join(" ")}` failed:\n#{err}") unless status.success?
-    out
-  end
+  def run_cmd(*cmd) = GithubCLI.run(*cmd)
 end
 
 ChangelogGenerator.new(ARGV).run if $PROGRAM_NAME == __FILE__
