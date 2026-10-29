@@ -1466,7 +1466,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Get list of users interested in this observation (for email notifications).
   def interested_users
-    interests.select(&:state).filter_map(&:user).uniq
+    interests.select(&:watching?).filter_map(&:user).uniq
   end
 
   # Send email notifications upon change to consensus.
