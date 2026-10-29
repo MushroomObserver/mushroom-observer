@@ -15,6 +15,9 @@
 # https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
 require("rails")
 
+# DELETE ME: Delete next line, which is a test of a PR
+puts "DEPRECATION WARNING: throwaway test warning for CI check"
+
 # SimpleCov runs by default in parallel mode
 require("simplecov")
 require("simplecov-lcov")
