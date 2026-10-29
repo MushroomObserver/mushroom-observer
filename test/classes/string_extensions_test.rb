@@ -64,6 +64,16 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("malformatted", "malformatted<; HTML".truncate_html(20))
   end
 
+  def test_strip_links
+    html = 'A &amp; <a href="/x">B</a>'
+    assert_equal("A &amp; B", html.strip_links)
+    assert_not(html.strip_links.html_safe?)
+
+    stripped = html.html_safe.strip_links # rubocop:disable Rails/OutputSafety
+    assert_equal("A &amp; B", stripped)
+    assert(stripped.html_safe?, "Safe HTML should stay safe")
+  end
+
   def test_iconv
     assert_equal("áëìøũ", "áëìøũ".iconv("utf-8").encode("utf-8"))
     assert_equal("áëìøu", "áëìøũ".iconv("iso8859-1").encode("utf-8"))
