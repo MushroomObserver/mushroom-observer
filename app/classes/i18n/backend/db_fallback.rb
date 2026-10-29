@@ -55,18 +55,11 @@ class I18n::Backend::DbFallback
   private
 
   # Falls back to the official (English) locale's text when this locale
-  # has no override of its own -- matches the fallback merge
-  # Language::Exporter has always baked into every locale's regenerated
-  # files (see Language#localization_strings/merge_localization_strings_into).
-  #
-  # One query, not two: a naive `language.translation_strings.find_by`
-  # then `official_language.translation_strings.find_by` on a miss
-  # costs 2 round trips for most non-English tags (most tags aren't
-  # overridden per-locale), materially adding to cache warm-up load
-  # for non-English requests. Fetching both candidate rows in a single
-  # `language_id IN (...)` query (uses the same [language_id, tag]
-  # index either way) and picking the locale-specific one in Ruby
-  # keeps it at one query regardless.
+  # has no override -- matches the fallback merge
+  # Language::Exporter bakes into every locale's regenerated files.
+  # Fetches both candidate rows in one `language_id IN (...)` query
+  # instead of two separate `find_by` round trips, since most tags
+  # aren't overridden per-locale.
   def text_for(locale, tag)
     language = Language.for_locale(locale)
     return nil unless language
@@ -83,18 +76,11 @@ class I18n::Backend::DbFallback
     str&.text
   end
 
-  # Memoized on this DbFallback instance (one per process, built once
-  # at boot -- see config/initializers/i18n_backend.rb) rather than on
-  # Language itself: most non-English lookups hit this fallback on a
-  # cold cache, so an unmemoized query here is an avoidable repeat on
-  # every one of them. `||=` already skips memoizing nil, same
-  # reasoning as Language.for_locale -- if this fires before the
-  # `languages` table is populated, it keeps retrying instead of
-  # caching the miss forever. Deliberately NOT added to Language.official
-  # itself: that would hand every caller (tests included) the same
-  # cached AR instance across requests/tests, and a stale cached
-  # association (e.g. translation_strings) surviving a rolled-back test
-  # transaction is exactly the kind of bug that memoization risks.
+  # Memoized here, on this per-process DbFallback instance, rather
+  # than on Language.official itself -- memoizing there would hand
+  # every caller (tests included) the same cached AR instance across
+  # requests/tests, risking a stale cached association surviving a
+  # rolled-back test transaction.
   def official_language
     @official_language ||= Language.official
   end

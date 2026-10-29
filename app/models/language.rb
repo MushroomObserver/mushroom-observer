@@ -49,20 +49,10 @@ class Language < AbstractModel
   end
 
   # Lookup a Language record by its locale string, memoized per
-  # process. Languages don't change at runtime, so callers (e.g.
-  # `Views::Layouts::TranslatorsCredit` on every page render) avoid a
-  # per-request `find_by(locale: …)` query.
-  #
-  # Only successful lookups are memoized -- NOT nil results (#4807).
-  # I18n::Backend::DbFallback now calls this from Symbol#t/#l, which
-  # can fire very early (even at class-body-level `.t` calls during
-  # model loading) -- if the `languages` table is momentarily empty at
-  # that point (e.g. a test worker's fixtures haven't loaded yet), a
-  # cached nil would permanently poison every later lookup for that
-  # locale for the rest of the process, even after the row exists.
-  # A genuinely unknown locale re-queries every call instead of caching
-  # forever -- fine since I18n.enforce_available_locales already
-  # rejects unknown locales before this is ever reached in practice.
+  # process -- languages don't change at runtime. Only successful
+  # lookups are memoized, not nil: a lookup this early (e.g. a test
+  # worker's fixtures not loaded yet) could cache a nil that outlasts
+  # the row's creation.
   def self.for_locale(locale)
     @for_locale_cache ||= {}
     key = locale.to_s
