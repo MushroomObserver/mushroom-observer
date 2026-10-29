@@ -23,13 +23,11 @@ development:
     database: cache_development
     migrations_paths: "db/cache/migrate"
 
-<%
-  worker_suffix = ENV["TEST_ENV_NUMBER"].to_s.empty? ? "" : "-#{ENV["TEST_ENV_NUMBER"]}"
-  test_db = ENV["MO_TEST_DATABASE"] || "mo_test#{worker_suffix}"
-%>
+# TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc. for parallel
+# testing; MO_TEST_DATABASE overrides for manual testing.
 test:
   <<: *connection
-  database: "<%= test_db %>"
+  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? ? 'mo_test' : 'mo_test-' + ENV['TEST_ENV_NUMBER']) %>"
 
 # Reached over the network either way -- host, a Kamal accessory
 # container, or a managed service (#5345's decision).
