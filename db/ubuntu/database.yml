@@ -49,11 +49,15 @@ development:
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
 #
-# Parallel testing: TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc.
-# MO_TEST_DATABASE can override for manual testing.
+# TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc. for parallel
+# testing; MO_TEST_DATABASE overrides for manual testing.
+<%
+  worker_suffix = ENV["TEST_ENV_NUMBER"].to_s.empty? ? "" : "-#{ENV["TEST_ENV_NUMBER"]}"
+  test_db = ENV["MO_TEST_DATABASE"] || "mo_test#{worker_suffix}"
+%>
 test:
   <<: *credentials
-  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
+  database: "<%= test_db %>"
   # Must exceed Solid Queue's thread need -- see queue_config_test.rb.
   pool: 10
 
