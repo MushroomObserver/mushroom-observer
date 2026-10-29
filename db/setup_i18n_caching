@@ -8,9 +8,9 @@
 #
 # Prerequisite: config/database.yml's development: AND test: blocks
 # must both be multi-db (primary:/cache: sub-keys), matching
-# db/macos/database.yml (or db/vagrant/database.yml, db/docker/
+# db/macos/database.yml (or db/ubuntu/database.yml, db/docker/
 # database.yml) -- `db:create:cache`/`db:schema:load:cache` are Rails'
-# own auto-namespaced per-database tasks, they don't exist without that
+# auto-namespaced per-database tasks, they don't exist without that
 # structure. This script does NOT edit config/database.yml itself --
 # it's gitignored/local and often hand-tuned (e.g. a previously-bumped
 # connection pool size), so blindly rewriting it risks silently
@@ -25,7 +25,7 @@
 # if root needs a password (or isn't reachable non-interactively),
 # it prints the exact statements to run yourself and continues (the
 # later db:create:cache/schema:load:cache steps fail with a clear
-# error of their own if the grants are genuinely still missing).
+# error if the grants are still missing).
 set -euo pipefail
 
 echo "Applying cache_test / \`cache_test-%\` MySQL grants (as root," \
@@ -47,7 +47,7 @@ fi
 
 if [ ! -f config/database.yml ]; then
   echo "config/database.yml not found. Copy from db/macos/database.yml," \
-       "db/vagrant/database.yml, or db/docker/database.yml first."
+       "db/ubuntu/database.yml, or db/docker/database.yml first."
   exit 1
 fi
 
@@ -55,7 +55,7 @@ echo "Fixing ar_internal_metadata's environment stamp (prophylactic --" \
      "restoring a production checkpoint via db/download_checkpoint" \
      "stamps mo_development as 'production', which falsely trips" \
      "ActiveRecord's protected-environment check on any later" \
-     "destructive db task, e.g. this script's own steps below)..."
+     "destructive db task, e.g. this script's steps below)..."
 RAILS_ENV=development bin/rails db:environment:set
 RAILS_ENV=test bin/rails db:environment:set
 
@@ -74,7 +74,7 @@ run_cache_db_setup() {
       echo "config/database.yml's ${env_label}: block doesn't have a" \
            "multi-db primary:/cache: shape yet. Add a cache: sub-block" \
            "to ${env_label}: -- see db/macos/database.yml (or" \
-           "db/vagrant/database.yml, db/docker/database.yml)'s" \
+           "db/ubuntu/database.yml, db/docker/database.yml)'s" \
            "${env_label}: block for the exact shape to copy."
       echo ""
     fi
