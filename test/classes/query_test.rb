@@ -1490,6 +1490,26 @@ class QueryTest < UnitTestCase
     assert_equal({ by_user: rolf.id }, query.index_filter)
   end
 
+  def test_index_filter_except_option
+    params = { by_users: [rolf.id], this_name: ["Coprinus comatus"] }
+    query = Query.lookup(:Observation, **params)
+
+    # Excludes an aliased attr by its pre-alias name, leaving the rest.
+    assert_equal({ this_name: "Coprinus comatus" },
+                 query.index_filter(except: [:by_users]))
+  end
+
+  def test_index_filter_except_option_regardless_of_alias_shrinking
+    # :types has a singular param_alias (:type); except: must exclude
+    # it whether shrink_multi_value_filters would render the result
+    # key as :types (multiple values) or :type (one value).
+    multi = Query.lookup(:RssLog, types: %w[observation name])
+    single = Query.lookup(:RssLog, types: ["observation"])
+
+    assert_equal({}, multi.index_filter(except: [:types]))
+    assert_equal({}, single.index_filter(except: [:types]))
+  end
+
   def test_merge_q_param_into_url
     assert_equal(
       "/observations", Query.merge_q_param_into_url("/observations", nil)

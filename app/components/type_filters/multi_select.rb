@@ -43,8 +43,16 @@ module Components::TypeFilters::MultiSelect
     input(type: "hidden", name: "back", value: "rss_logs")
     return unless @query
 
-    query_params_except_types.each do |key, value|
-      input(type: "hidden", name: key, value: value)
+    # `name:` must be a String -- Phlex dasherizes a bare Symbol value
+    # the same way it would a `data:`/`aria:` hash key, which would
+    # turn `id_in_set` into `id-in-set`.
+    @query.index_filter(except: [:types]).each do |key, value|
+      name = key.to_s
+      if value.is_a?(Array)
+        value.each { |v| input(type: "hidden", name: "#{name}[]", value: v) }
+      else
+        input(type: "hidden", name: name, value: value)
+      end
     end
   end
 
@@ -230,19 +238,6 @@ module Components::TypeFilters::MultiSelect
 
   def show_make_default?
     @user && @user.default_rss_type.to_s.split.sort != @types
-  end
-
-  def query_params_except_types
-    return {} unless @query
-
-    q = q_param(@query).except(:types)
-    # Convert { q: { model: "RssLog" } }.to_query to key/value pairs
-    query_string = { q: q }.to_query
-    pairs = query_string.split("&")
-    pairs.to_h do |pair|
-      key, value = pair.split("=", 2).map { |str| CGI.unescape(str) }
-      [key, value]
-    end
   end
 
   def query_params_with_types(types)

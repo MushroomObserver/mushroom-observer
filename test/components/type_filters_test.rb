@@ -50,6 +50,44 @@ module Components
       )
     end
 
+    def test_renders_hidden_fields_for_other_active_query_filters
+      log = rss_logs(:minimal_unknown_obs_rss_log)
+      query = Query.lookup(:RssLog, types: ["observation"],
+                                    id_in_set: [log.id])
+      html = render_multi(query, ["observation"])
+
+      # :types must not round-trip as a hidden field -- the visible
+      # checkboxes/links already control it.
+      assert_no_html(html, "#log_filter_form_dropdown_top " \
+                           "input[name='types']")
+      assert_no_html(html, "#log_filter_form_dropdown_top " \
+                           "input[name='type']")
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='id_in_set'][value='#{log.id}']"
+      )
+    end
+
+    def test_renders_hidden_fields_for_multi_value_query_filter
+      log1 = rss_logs(:minimal_unknown_obs_rss_log)
+      log2 = rss_logs(:detailed_unknown_obs_rss_log)
+      query = Query.lookup(:RssLog, types: ["observation"],
+                                    id_in_set: [log1.id, log2.id])
+      html = render_multi(query, ["observation"])
+
+      # A multi-value filter stays an Array after index_filter -- each
+      # value needs a separate "[]"-named hidden input so params
+      # round-trip as an array instead of overwriting each other.
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='id_in_set[]'][value='#{log1.id}']"
+      )
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='id_in_set[]'][value='#{log2.id}']"
+      )
+    end
+
     # ---- Bar (xl+) ----
 
     def test_bar_renders_show_label
