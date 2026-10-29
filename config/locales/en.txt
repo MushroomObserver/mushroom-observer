@@ -1943,6 +1943,46 @@
   profile_image_reuse: "(Reuse another photo.)"
   image_copyright_holder: Copyright holder and license for this image
   image_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+  profile_danger_zone: Danger Zone
+  profile_danger_zone_intro: "Either choice below narrows how the wider mycology community can use your content. MO can remove what is on MO; it cannot reach copies that other sites or people have already taken."
+  profile_inat_imports: Imports from iNaturalist
+  profile_inat_linked: "Your iNaturalist account: [login]"
+  profile_inat_link_help: "To keep the images and notes of observations you posted to iNaturalist from being imported, first link your iNaturalist account, so MO can recognize them."
+  profile_inat_link: Link iNaturalist account
+  profile_inat_opt_out: "Do not import images or notes from observations I posted to iNaturalist"
+  profile_delete_content: Delete my content
+  profile_delete_content_help: "Delete your content from MO: the images you uploaded to MO, the images of your iNaturalist photos that anyone imported, and the notes on records of observations made by you. Public records of observations made by you stay, without those images, and all of them lose their notes. The next page shows what would be deleted before anything is deleted."
+  profile_delete_content_button: Delete my content...
+  profile_content_purge_running: "Deleting your content: [deleted] of [count] images deleted so far. Reload to update."
+  inat_account_linked: "Linked iNaturalist account [login]."
+  inat_account_link_failed: "Could not link your iNaturalist account: [error]"
+  inat_opt_out_on: "Images and notes from observations you posted to iNaturalist will not be imported."
+  inat_opt_out_off: "Images and notes from observations you posted to iNaturalist can be imported again."
+
+  # content_purges/new
+  content_purge_title: "Delete content: [holder]"
+  content_purge_inat_holder: "iNaturalist user [login]"
+  content_purge_explanation: "Deleting removes these images and notes from MO. Public records of observations stay, with their date, location, collector and names. Records of observations the holder made on MO lose their notes, as do imported records left with no images. Other records that showed the images just lose them, and the people who created those records get an email listing what was removed. Copies taken before now are out of MO's reach."
+  content_purge_image_count: "Images to delete: [count]"
+  content_purge_observation_count: "Observations uploaded to MO that lose their notes: [count]"
+  content_purge_placeholder_count: "Imported observations that keep only their date, location, collector and names: [count]"
+  content_purge_confirm: Delete Content
+  content_purge_confirm_message: "This will permanently delete [images] images, and the notes of [observations] observations, from MO that may not be represented on any other platform."
+  content_purge_started: "Deleting content. This runs in the background and can take a while for many images."
+  content_purge_in_progress: "This content is already being deleted."
+  content_purge_progress: "Deleting: [deleted] of [count]"
+  content_purge_one_target: "must delete the content of one MO user or one iNaturalist user"
+
+  # admin/excluded_inat_users
+  excluded_inat_users_title: Excluded iNat Users
+  excluded_inat_users_help: "iNaturalist users without an MO account who have opted out of having their data included on MO. Imports bring in only the facts of observations they posted: no images and no notes. Someone with an MO account opts out on their profile instead."
+  excluded_inat_user_login: iNaturalist login
+  excluded_inat_user_reason: Reason (optional)
+  excluded_inat_user_added_by: Added
+  excluded_inat_user_delete_content: Delete content already on MO...
+  excluded_inat_user_added: "Excluded iNaturalist user [login]."
+  excluded_inat_user_removed: "Removed [login] from the excluded iNaturalist users."
+  excluded_inat_user_has_account: "belongs to an MO user, who opts out on their profile"
 
   # account/reverify
   reverify_link: Reverify
@@ -2400,7 +2440,7 @@
   # publication/index
   publication_index: Publication List
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/admin/emails/webmaster_questions/new.
-  publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
+  publication_full_help: "When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author. The reference is formatted with <a href=\"/info/textile_sandbox/new\" target=\"_new\">Textile</a>, not HTML. Unlike other MO fields, text between underscores is shown in italics without a link to the Name: put a Name between underscores (&#95;Lactarius fragilis&#95;) and the journal or book title between double question marks (&#63;&#63;Journal Name&#63;&#63;). Type & and other characters as they are."
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
   publication_citation: "We encourage you to cite Mushroom Observer this way:\n\nWilson, N., Hollinger, J., et al. 2006-present. Mushroom Observer. https://mushroomobserver.org\n\nHowever, your publisher may restrict how or whether websites can be cited. If you need a published reference the best current citation we are aware of is:"
 
@@ -2974,6 +3014,7 @@
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
+  inat_user_opted_out: "iNaturalist user [login] has opted out of having their data included on Mushroom Observer, so observations they posted are imported without images or notes, or skipped."
 
   inat_leading_id: Leading ID as of
   inat_corrected_spelling: (corrected spelling)
@@ -3502,6 +3543,7 @@
   email_subject_name_change: "[name] Has Been Changed"
   email_subject_name_proposal: "[:observation.ti] #[id] May Be [name]"
   email_subject_inat_import_digest: "[count] new iNaturalist [:observations] matching your interests"
+  email_subject_content_purge: "[count] images removed from records you created on Mushroom Observer"
   email_subject_project_alert: "[count] new iNaturalist [:observations] for your [:projects]"
   email_subject_project_alert_one: "[count] new iNaturalist [:observation] for your [:projects]"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
@@ -3582,6 +3624,9 @@
   email_project_alert_row: "[name], observed [date], in [projects]:"
   email_project_alert_row_undated: "[name], date unknown, in [projects]:"
   email_inat_import_digest_truncated: "This email shows the first [shown] of [count] matching [:observations]."
+  email_content_purge_intro: "h2. *Images Removed*\n\nThe holder of these [count] images, [holder], asked for their images to be removed from Mushroom Observer. They were shown on the records below, which you created. Everything else on those records stays."
+  content_purge_email_source: "Still on iNaturalist:"
+  content_purge_email_no_source: "Uploaded to MO, so MO has no other copy to link to."
   email_name_tracker_body: "Dear [user],\n\nWe have approved your request to have MO send automated research request emails to observers whenever someone posts an observation of [name].\n\nYou can see your name-tracking notifications here: [link].\n\nPlease do not hesitate to let us know if there is any other ways MO can help support your research.\n\nBest wishes,\n-MO Admins"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking. You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."

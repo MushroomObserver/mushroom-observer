@@ -290,6 +290,9 @@ MushroomObserver::Application.routes.draw do
                                  as: "profile_update_image")
     put("profile/images(/:id)", to: "profile/images#detach",
                                 as: "profile_remove_image")
+    resource :inat_link, only: [:new]
+    resource :inat_opt_out, only: [:update]
+    resource :content_purge, only: [:new, :create]
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -318,6 +321,10 @@ MushroomObserver::Application.routes.draw do
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
+    resources :excluded_inat_users, only: [:index, :create, :destroy] do
+      resource :content_purge, only: [:new, :create],
+                               controller: "excluded_inat_users/content_purges"
+    end
     namespace :emails do
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"

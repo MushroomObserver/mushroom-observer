@@ -172,6 +172,22 @@ class Inat::ObservationResyncerTest < UnitTestCase
                "An upgraded reflection should no longer record omissions")
   end
 
+  # An observer who opted out of MO keeps a placeholder even when they
+  # ask for the sync.
+  def test_placeholder_stays_for_an_opted_out_inat_observer
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+    requester = users(:rolf)
+    requester.update_columns(inat_username: raw[:user][:login],
+                             inat_import_opt_out: true)
+
+    resync(found: { @id => raw }, requested_by: requester)
+
+    @obs.reload
+    assert(@obs.placeholder?, "An opted-out observer should not upgrade it")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
+  end
+
   def test_second_resync_with_same_data_is_unchanged
     assert_equal(:synced, resync(found: { @id => @raw }).first.status)
     # Reload as the background job would (fresh GlobalID deserialization);

@@ -48,7 +48,8 @@ module Account
                copyright_holder: @copyright_holder,
                copyright_year: @copyright_year,
                licenses: @licenses,
-               upload_license_id: @upload_license_id
+               upload_license_id: @upload_license_id,
+               purge: ContentPurge.in_progress_for(target_user: @user)
              ), status: status, **render_opts)
     end
 

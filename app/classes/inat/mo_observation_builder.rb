@@ -19,6 +19,8 @@ class Inat
       @user = user
       @import_others = inat_import&.import_others || false
       @skeleton = skeleton
+      # The observer opted out of MO, so no photo is imported either.
+      @opted_out = Inat::OptOut.opted_out?(inat_obs[:user])
       @external_site = external_site || ExternalSite.inaturalist
       @inat_import = inat_import
       @skipped_images = 0
@@ -84,7 +86,8 @@ class Inat
                                                          @external_site)
       @observation.update!(
         skeleton_omissions:
-          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids)
+          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids,
+                                      opted_out: @opted_out)
       )
     end
 
