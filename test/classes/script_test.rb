@@ -108,4 +108,44 @@ class ScriptTest < UnitTestCase
     errors = File.read(tmpfile.path)
     assert(status, "Something went wrong with #{script}:\n#{errors}")
   end
+
+  # A Solid Queue worker logs no "Started" lines: each job is a separate
+  # bundle, and a bundle holding several of the strings prints once.
+  def test_extract_log_prints_each_job_once
+    output = run_extract_log(<<~LOG, "first failure\nsecond failure\n")
+      I, [2026-10-28T17:00:00.000000 #42]  INFO -- : Performing MailJob (Job ID: a) from SolidQueue(default)
+      E, [2026-10-28T17:00:01.000000 #42] ERROR -- : first failure
+      E, [2026-10-28T17:00:02.000000 #42] ERROR -- : second failure
+      I, [2026-10-28T17:00:03.000000 #42]  INFO -- : Performing MailJob (Job ID: b) from SolidQueue(default)
+      I, [2026-10-28T17:00:04.000000 #42]  INFO -- : unrelated job line
+    LOG
+
+    assert_equal(1, output.scan("first failure").size,
+                 "A bundle should print once, not once per string it holds")
+    assert_not_includes(output, "unrelated job line",
+                        "The next job should start a new bundle")
+  end
+
+  def test_extract_log_truncates_output
+    jobs = Array.new(3000) do |i|
+      "I, [2026-10-28T17:00:00.000000 #42]  INFO -- : Performing MailJob " \
+        "(Job ID: #{i}) from SolidQueue(default)\n" \
+        "E, [2026-10-28T17:00:01.000000 #42] ERROR -- : boom\n#{"x" * 500}\n"
+    end
+    output = run_extract_log(jobs.join, "boom\n")
+
+    assert_operator(output.bytesize, :<, 1_100_000)
+    assert_includes(output.lines.last, "Output truncated")
+  end
+
+  def run_extract_log(log_text, input)
+    log = Tempfile.new("extract_log")
+    log.write(log_text)
+    log.close
+    output, = Open3.capture2({ "EXTRACT_LOG_FILE" => log.path },
+                             script_file("extract_log"), stdin_data: input)
+    output
+  ensure
+    log&.unlink
+  end
 end
