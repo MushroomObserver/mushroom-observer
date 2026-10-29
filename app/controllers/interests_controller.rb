@@ -35,39 +35,72 @@ class InterestsController < ApplicationController
   # Linked from: left-hand panel
   # Inputs: params[:page], params[:type], params[:state]
   # Outputs: @interests, @types, @pagination_data, @selected_type,
-  #          @states, @selected_state
+  #          @states, @selected_state, @query
   def index
-    @interests = find_relevant_interests
-    @types = interest_types(@interests)
-    @selected_type = params[:type].to_s
-    @interests = filter_interests_by_type(@interests, @selected_type) \
-      if @selected_type.present?
-    @states = interest_states(@interests)
-    @selected_state = params[:state].to_s
-    @interests = filter_interests_by_state(@interests, @selected_state) \
-      if @selected_state.present?
-    @pagination_data = paginate_interests!
+    @types = available_types
+    @selected_type = params[:type].presence
+    @states = available_states(@selected_type)
+    @selected_state = params[:state].presence
+    @query = build_interests_query(@selected_type, @selected_state)
+    @pagination_data = number_pagination_data(:page, 100)
+    @interests = paginate_interests!
     render(Views::Controllers::Interests::Index.new(
-             interests: @interests.to_a, types: @types.map(&:to_s),
-             selected_type: @selected_type.presence,
-             states: @states, selected_state: @selected_state.presence,
-             pagination_data: @pagination_data
+             interests: @interests, types: @types,
+             selected_type: @selected_type,
+             states: @states, selected_state: @selected_state,
+             pagination_data: @pagination_data, query: @query
            ))
   end
 
   private
 
-  def find_relevant_interests
-    interests = Interest.for_user(@user).includes(:target)
-    eager_load_targets(interests)
-    interests.sort do |a, b|
-      result = a.target_type <=> b.target_type
-      if result.zero?
-        result = (a.target ? a.target.text_name : "") <=>
-                 (b.target ? b.target.text_name : "")
-      end
-      result
+  # `by_users` is forced to the current user's id here -- Interests
+  # are private, so the controller does not read it from a request
+  # param. `.compact` drops the `types`/`state` keys entirely when
+  # unfiltered, rather than passing explicit `nil` values, since a
+  # declared (but nil) enum attr fails `Query` validation.
+  # `find_or_create_query` (not `create_query`) because the filter
+  # caption needs a saved `QueryRecord` -- `FilterCaption` reads
+  # `query.record.id`.
+  def build_interests_query(type, state)
+    find_or_create_query(
+      :Interest,
+      { by_users: [@user.id], types: type_tag(type),
+        state: state_param(state) }.compact
+    )
+  end
+
+  def type_tag(type)
+    return nil if type.blank?
+
+    type.underscore.to_sym
+  end
+
+  def state_param(state)
+    return nil if state.blank?
+
+    state == "Watching"
+  end
+
+  def available_types
+    Interest.for_user(@user).distinct.pluck(:target_type).sort_by do |t|
+      [TYPE_FILTER_ORDER.index(t) || TYPE_FILTER_ORDER.size, t]
     end
+  end
+
+  def available_states(type)
+    interests = Interest.for_user(@user)
+    interests = interests.types(type) if type.present?
+    present = interests.distinct.pluck(:state).map do |watching|
+      watching ? "Watching" : "Ignoring"
+    end
+    STATE_FILTER_ORDER & present
+  end
+
+  def paginate_interests!
+    interests = @query.paginate(@pagination_data, include: { target: [:name] })
+    eager_load_targets(interests)
+    interests
   end
 
   def eager_load_targets(interests)
@@ -79,33 +112,6 @@ class InterestsController < ApplicationController
         associations: { target: [:name] }
       )
     end
-  end
-
-  def interest_types(interests)
-    interests.map(&:target_type).uniq.sort_by do |t|
-      [TYPE_FILTER_ORDER.index(t) || TYPE_FILTER_ORDER.size, t]
-    end
-  end
-
-  def filter_interests_by_type(interests, type)
-    interests.select { |i| i.target_type.to_s == type.to_s }
-  end
-
-  def interest_states(interests)
-    present = interests.map { |i| i.state ? "Watching" : "Ignoring" }.uniq
-    STATE_FILTER_ORDER & present
-  end
-
-  def filter_interests_by_state(interests, state)
-    watching = (state == "Watching")
-    interests.select { |i| i.state == watching }
-  end
-
-  def paginate_interests!
-    pagination_data = number_pagination_data(:page, 100)
-    pagination_data.num_total = @interests.length
-    @interests = @interests[pagination_data.from..pagination_data.to]
-    pagination_data
   end
 
   public

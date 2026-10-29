@@ -73,6 +73,12 @@ class Interest < AbstractModel
   end
 
   scope :for_user, ->(user) { where(user: user) }
+  # MySQL's default collation is case-insensitive, so lowercase tags
+  # (:observation) match the capitalized target_type column values
+  # ("Observation") without translation -- same pattern as
+  # Comment.types.
+  scope :types, ->(types) { where(target_type: types) }
+  scope :state, ->(watching) { where(state: watching) }
 
   validates :target_type, inclusion: { in: ALL_TYPES.map(&:to_s) }
 

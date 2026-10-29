@@ -112,9 +112,8 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(1, Interest.where(user_id: rolf.id).length)
   end
 
-  # `find_relevant_interests` sorts by `target_type` then `text_name`;
-  # this hits the secondary tiebreak path when two interests share a
-  # target_type.
+  # The index orders by `target_type`; this exercises two interests
+  # sharing a target_type.
   def test_index_sorts_within_target_type
     login("rolf")
     Interest.create(target: names(:agaricus_campestris),
@@ -124,8 +123,6 @@ class InterestsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # Hits `filter_interests_by_type` (only invoked when `type` param
-  # present).
   # Covers `Views::Controllers::Interests::Index#render_pending_notice`
   # — the unapproved name-tracker branch (target_type=NameTracker,
   # note_template present, approved=false). No fixture matches all
@@ -151,8 +148,6 @@ class InterestsControllerTest < FunctionalTestCase
     assert_select("body.interests__index")
   end
 
-  # Hits `filter_interests_by_state` (only invoked when `state` param
-  # present).
   def test_index_filtered_by_state
     login("rolf")
     Interest.create(target: observations(:minimal_unknown_obs),

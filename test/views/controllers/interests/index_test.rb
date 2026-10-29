@@ -97,7 +97,8 @@ module Views::Controllers::Interests
                selected_type: selected_type,
                states: states,
                selected_state: selected_state,
-               pagination_data: PaginationData.new
+               pagination_data: PaginationData.new,
+               query: Query.lookup(:Interest, by_users: [users(:rolf).id])
              ))
     end
   end

@@ -10,9 +10,11 @@ module Views::Controllers::Interests
     prop :states, _Array(::String)
     prop :selected_state, _Nilable(::String), default: nil
     prop :pagination_data, ::PaginationData
+    prop :query, ::Query
 
     def view_template
       add_page_title(:list_interests_title.l)
+      add_query_filters(@query)
       register_filters
       add_pagination(@pagination_data)
       container_class(:wide)
