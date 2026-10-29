@@ -16,6 +16,17 @@
 # do -- not committed (tmp/ is gitignored), not shared across checkouts.
 set -euo pipefail
 
+# This script has two callers: deploy.sh (RAILS_ENV=production, the
+# DB this should sync) and test_helper.rb (RAILS_ENV=test, set just
+# before the call -- the opposite of what should get synced). Force
+# development here unless this really is the production deploy, so
+# `rake lang:update` always targets the environment with real
+# Language/translation data, regardless of which env the caller set
+# for its own unrelated purposes.
+if [ "${RAILS_ENV:-}" != "production" ]; then
+  export RAILS_ENV=development
+fi
+
 if [ ! -f config/locales/en.txt ]; then
   echo "config/locales/en.txt not found -- running lang:update to be safe"
   exec rake lang:update
