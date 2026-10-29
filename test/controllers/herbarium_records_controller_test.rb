@@ -30,7 +30,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_page_title(:herbarium_records.ti)
     # In results, expect 1 row per herbarium_record
-    assert_select("#results tr", HerbariumRecord.count,
+    assert_select("#results tbody tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
   end
 
@@ -56,7 +56,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_page_title(:herbarium_records.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # In results, expect 1 row per herbarium_record
-    assert_select("#results tr", 2)
+    assert_select("#results tbody tr", 2)
   end
 
   def test_index_herbarium_id_with_multiple_records
@@ -69,7 +69,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_herbaria.l}: #{herbarium.name}")
 
     # In results, expect 1 row per herbarium_record
-    assert_select("#results tr",
+    assert_select("#results tbody tr",
                   HerbariumRecord.where(herbarium: herbarium).count)
   end
 
@@ -103,7 +103,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_page_title(:herbarium_records.ti)
     assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
     #  "Fungarium Records attached to '#{obs.unique_text_name}'")
-    assert_select("#results tr", obs.herbarium_records.size)
+    assert_select("#results tbody tr", obs.herbarium_records.size)
   end
 
   def test_index_observation_id_with_no_herbarium_records

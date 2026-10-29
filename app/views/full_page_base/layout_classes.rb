@@ -76,7 +76,7 @@ module Views::FullPageBase::LayoutClasses
   # `content_padding(:panels)` call.
   def default_content_has
     return :panels if action_name.in?(%w[index show])
-    return :panels if self.class.name.end_with?("::Search::New")
+    return :panels if self.class.name&.end_with?("::Search::New")
 
     :no_panels
   end
