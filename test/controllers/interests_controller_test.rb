@@ -151,6 +151,18 @@ class InterestsControllerTest < FunctionalTestCase
     assert_select("body.interests__index")
   end
 
+  # Hits `filter_interests_by_state` (only invoked when `state` param
+  # present).
+  def test_index_filtered_by_state
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: false)
+    get(:index, params: { state: "Ignoring" })
+    assert_select("body.interests__index")
+  end
+
   # set_interest's "already on" / "already off" branches.
   def test_set_interest_already_on
     login("rolf")

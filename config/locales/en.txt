@@ -267,7 +267,6 @@
   image: image
   images: images
   image_title_with_subject: "[subject] image"
-  ignore: ignore
   info: info
   information: information
   interests: interests
@@ -583,7 +582,8 @@
   send: send
   show: show
   hide: hide
-  # submit a form
+  watch: watch
+  ignore: ignore
   submit: submit
   submitting: submitting
   sync_now: sync now
@@ -2927,8 +2927,10 @@
 
   # interests/index
   list_interests_title: Your Notification Requests
-  list_interests_turn_on: Change to Watch
-  list_interests_turn_off: Change to Ignore
+  list_interests_intro: "You'll be emailed about changes to each item below. Ignore to pause notifications, or delete to stop watching entirely."
+  list_interests_none: No interests.
+  list_interests_mute_tooltip: Mute notifications
+  list_interests_resume_tooltip: Resume notifications
   list_name_tracker_pending_approval: "(Observer notification pending approval.)"
 
   # location/list_merge_options
