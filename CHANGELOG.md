@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-10-29 (deploy-2026-10-29-12-00)
+
+- Fix `Image#format_name` blank-title fallback; check `lang:update` for all tests ([PR5557](https://github.com/MushroomObserver/mushroom-observer/pull/5557), @nimmolo)
+- Write development mail to `tmp/mails` for mailers with a Gmail account ([PR5545](https://github.com/MushroomObserver/mushroom-observer/pull/5545), @mo-nathan)
+- Retry `MailDeliveryJob` after temporary SMTP failures ([PR5546](https://github.com/MushroomObserver/mushroom-observer/pull/5546), @mo-nathan)
+- Link non-authors to the Description authorship request form ([PR5547](https://github.com/MushroomObserver/mushroom-observer/pull/5547), @mo-nathan)
+- Only `I18n.reload!` when `lang_update_if_needed.sh` changed `en.yml` ([PR5558](https://github.com/MushroomObserver/mushroom-observer/pull/5558), @nimmolo)
+- Find prerelease PRs from commits, and retry GitHub timeouts ([PR5548](https://github.com/MushroomObserver/mushroom-observer/pull/5548), @mo-nathan)
+- Report what changed when the placeholder resync test fails ([PR5552](https://github.com/MushroomObserver/mushroom-observer/pull/5552), @mo-nathan)
+- Bump fastimage from 2.4.1 to 2.4.3 ([PR5559](https://github.com/MushroomObserver/mushroom-observer/pull/5559), @app/dependabot)
+- Bump mini_racer from 0.22.1 to 0.22.2 ([PR5560](https://github.com/MushroomObserver/mushroom-observer/pull/5560), @app/dependabot)
+- Bump rubocop from 1.92.0 to 1.92.1 ([PR5561](https://github.com/MushroomObserver/mushroom-observer/pull/5561), @app/dependabot)
+- Bump image_processing from 2.1.0 to 2.2.0 ([PR5562](https://github.com/MushroomObserver/mushroom-observer/pull/5562), @app/dependabot)
+- Bump bullet from 8.3.0 to 8.3.1 ([PR5563](https://github.com/MushroomObserver/mushroom-observer/pull/5563), @app/dependabot)
+- Update Interests index and reuse `Components::TypeFilters` ([PR5564](https://github.com/MushroomObserver/mushroom-observer/pull/5564), @nimmolo)
+- Bump crass from 1.0.7 to 1.0.8 ([PR5565](https://github.com/MushroomObserver/mushroom-observer/pull/5565), @app/dependabot)
+- Render publication references once; explain their Textile in the help ([PR5556](https://github.com/MushroomObserver/mushroom-observer/pull/5556), @mo-nathan)
+- Let MO and iNat users opt out of iNat imports and delete their content ([PR5555](https://github.com/MushroomObserver/mushroom-observer/pull/5555), @mo-nathan)
+
 ## 2026-10-27 (deploy-2026-10-27-08-00)
 
 - Infer the `prerelease.rb` deploy time and hold PRs with failing CI ([PR5540](https://github.com/MushroomObserver/mushroom-observer/pull/5540), @mo-nathan)
