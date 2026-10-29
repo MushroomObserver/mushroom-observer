@@ -4,6 +4,8 @@
 # lost an image when the photo's holder had their images removed from MO
 # (#5521). entries: ContentPurge::Notices::Entry#to_h, one per image.
 class ContentPurgeMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(receiver:, purge:, entries:)
     setup_user(receiver)
     subject = :email_subject_content_purge.l(count: entries.size)
