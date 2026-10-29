@@ -66,6 +66,25 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# `en.yml` is gitignored, so a branch switch leaves it stale against
+# the new `en.txt` -- the same check `script/deploy.sh` runs before a
+# deploy. Only reload when it changed: an unconditional reload (before
+# parallelize forks) would force every child to re-parse locales from
+# scratch. Skipped on CI: the workflow already runs `rake lang:update`
+# once, earlier in the job; a second run later crashes against CI's
+# fixture-only Language table (no row flagged official).
+if ENV["CI"] != "true"
+  en_yml = Rails.root.join("config/locales/en.yml")
+  mtime_before = File.mtime(en_yml) if File.exist?(en_yml)
+
+  unless system("script/lang_update_if_needed.sh")
+    raise("script/lang_update_if_needed.sh failed")
+  end
+
+  mtime_after = File.exist?(en_yml) ? File.mtime(en_yml) : nil
+  I18n.reload! if mtime_before != mtime_after
+end
+
 # MiniExiftool caches its tag list in a pstore file on first use,
 # printing two lines to $stderr while generating it -- invisible on a
 # dev machine where the cache already exists from a prior run, but
@@ -180,28 +199,9 @@ module ActiveSupport
       SimpleCov.result
     end
 
-    # rubocop:disable MO/NoLongCommentBlock
-    ##########################################################################
-    #  Transactional fixtures
-    ##########################################################################
-    # Transactional fixtures accelerate your tests by wrapping each
-    # test method in a transaction that's rolled back on completion.
-    # This ensures that the test database remains unchanged so your
-    # fixtures don't have to be reloaded between every test method.
-    # Fewer database queries means faster tests.
-    #
-    # Read Mike Clark's excellent walkthrough at
-    #   http://clarkware.com/cgi/blosxom/2005/10/24#Rails10FastTesting
-    #
-    # Every Active Record database supports transactions except MyISAM
-    # tables in MySQL.  Turn off transactional fixtures in this case;
-    # however, if you don't care one way or the other, switching from
-    # MyISAM to InnoDB tables is recommended.
-    #
-    # The only drawback to using transactional fixtures is when you
-    # actually need to test transactions.  Since your test is
-    # bracketed by a transaction, any transactions started in your
-    # code will be automatically rolled back. Defaults to true.
+    # Wraps each test in a transaction rolled back on completion, so
+    # fixtures don't reload between tests. MyISAM tables in MySQL
+    # don't support this -- InnoDB is recommended if that matters.
     self.use_transactional_tests = true
 
     # Instantiated fixtures are slow, but give you @david where
@@ -212,8 +212,6 @@ module ActiveSupport
     # true. Defaults to false.
     self.use_instantiated_fixtures = false
     ##########################################################################
-    # rubocop:enable MO/NoLongCommentBlock
-
     # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
     # alphabetical order.
     #

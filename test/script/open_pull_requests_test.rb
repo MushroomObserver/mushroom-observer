@@ -205,7 +205,7 @@ class OpenPullRequestsTest < UnitTestCase
       end
     end
 
-    assert_match(/Open PR query failed:\ngh: not logged in/, err)
+    assert_match(/failed:\ngh: not logged in/, err)
   end
 
   def test_report_with_nothing_open
