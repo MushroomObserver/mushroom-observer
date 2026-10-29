@@ -11,7 +11,7 @@
 # GitHub and writes nothing.
 
 require("json")
-require("open3")
+require_relative("github_cli")
 require("time")
 
 # Classifies open PRs as mergeable now or still waiting.
@@ -105,11 +105,10 @@ class OpenPullRequests
   end
 
   def self.query_pulls
-    out, err, status = Open3.capture3(
+    out = GithubCLI.run(
       "gh", "api", "graphql", "-F", "owner={owner}", "-F", "name={repo}",
       "-f", "query=#{QUERY}"
     )
-    abort("Open PR query failed:\n#{err}") unless status.success?
     JSON.parse(out).dig("data", "repository", "pullRequests")
   end
 

@@ -28,7 +28,9 @@ class Components::Matrix::Box
                 nil
               end,
         who: @object.user,
-        name: @object.unique_format_name.t,
+        # format_name, not unique_format_name -- the badge already
+        # shows the id.
+        name: @object.format_name.t,
         what: @object,
         where: nil,
         location: nil,

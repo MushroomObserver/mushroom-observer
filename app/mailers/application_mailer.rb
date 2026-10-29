@@ -25,17 +25,22 @@ class ApplicationMailer < ActionMailer::Base
   private
 
   def webmaster_delivery
-    return if message.to.blank?
-
-    mail.delivery_method.settings =
-      Rails.application.credentials.gmail_smtp_settings_webmaster
+    use_gmail_account(:gmail_smtp_settings_webmaster)
   end
 
   def news_delivery
+    use_gmail_account(:gmail_smtp_settings_news)
+  end
+
+  # Only for SMTP: the settings are an SMTP account, and swapping them in
+  # under development's :file delivery drops its location, so the mail
+  # is silently lost instead of written to tmp/mails.
+  def use_gmail_account(credentials_key)
     return if message.to.blank?
+    return unless mail.delivery_method.is_a?(Mail::SMTP)
 
     mail.delivery_method.settings =
-      Rails.application.credentials.gmail_smtp_settings_news
+      Rails.application.credentials.public_send(credentials_key)
   end
 
   def setup_user(user)

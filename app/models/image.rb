@@ -343,15 +343,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name(_user = nil)
-    # format_name returns the joined subject titles, or "" when there are
-    # none — never the bare :image.l ("image") string — so the id always
-    # renders in the "(id)" form here.
     [format_name, "(#{id || "?"})"].safe_join(" ")
   end
 
   # Do the same without the ID, for new page titles that generate an ID UI
   def format_name(_user = nil)
-    title_subjects || :image.l
+    title = title_subjects
+    return :image.ti if title.blank?
+
+    :image_title_with_subject.l(subject: title)
   end
 
   # How this image is refered to in the rss logs.
