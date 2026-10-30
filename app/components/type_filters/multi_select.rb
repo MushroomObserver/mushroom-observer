@@ -43,11 +43,11 @@ module Components::TypeFilters::MultiSelect
     input(type: "hidden", name: "back", value: "rss_logs")
     return unless @query
 
-    # `name:` must be a String -- Phlex dasherizes a bare Symbol value
-    # the same way it would a `data:`/`aria:` hash key, which would
-    # turn `id_in_set` into `id-in-set`.
+    # Nested under q[...] like the type checkboxes -- query_from_q_param
+    # reconstructs the whole query from params[:q], so a flat name here
+    # would go unread.
     @query.index_filter(except: [:types]).each do |key, value|
-      name = key.to_s
+      name = "q[#{key}]"
       if value.is_a?(Array)
         value.each { |v| input(type: "hidden", name: "#{name}[]", value: v) }
       else

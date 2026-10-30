@@ -59,12 +59,12 @@ module Components
       # :types must not round-trip as a hidden field -- the visible
       # checkboxes/links already control it.
       assert_no_html(html, "#log_filter_form_dropdown_top " \
-                           "input[name='types']")
+                           "input[name='q[types]']")
       assert_no_html(html, "#log_filter_form_dropdown_top " \
-                           "input[name='type']")
+                           "input[name='q[type]']")
       assert_html(
         html, "#log_filter_form_dropdown_top " \
-              "input[type='hidden'][name='id_in_set'][value='#{log.id}']"
+              "input[type='hidden'][name='q[id_in_set]'][value='#{log.id}']"
       )
     end
 
@@ -80,11 +80,11 @@ module Components
       # round-trip as an array instead of overwriting each other.
       assert_html(
         html, "#log_filter_form_dropdown_top " \
-              "input[type='hidden'][name='id_in_set[]'][value='#{log1.id}']"
+              "input[type='hidden'][name='q[id_in_set][]'][value='#{log1.id}']"
       )
       assert_html(
         html, "#log_filter_form_dropdown_top " \
-              "input[type='hidden'][name='id_in_set[]'][value='#{log2.id}']"
+              "input[type='hidden'][name='q[id_in_set][]'][value='#{log2.id}']"
       )
     end
 

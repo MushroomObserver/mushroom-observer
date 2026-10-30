@@ -277,6 +277,25 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_includes(types, "name")
   end
 
+  # Regression: Components::TypeFilters::MultiSelect's hidden fields
+  # carry other active query filters (id_in_set) forward alongside
+  # the submitted type checkboxes -- simulates what unchecking "name"
+  # submits (q[types][]=observation, with id_in_set carried as a
+  # hidden q[id_in_set] field). Neither filter may be dropped.
+  def test_type_filter_form_preserves_other_active_filters
+    login
+    kept = rss_logs(:minimal_unknown_obs_rss_log)
+    excluded = rss_logs(:name_rss_log)
+
+    get(:index, params: {
+          q: { model: "RssLog", id_in_set: [kept.id, excluded.id],
+               type: "observation" }
+        })
+
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal([kept.id], objects.map(&:id))
+  end
+
   # `:type` used to redirect a bookmarked top-level param onto a `q[]`
   # URL. It's a plain query_attr alias now (Query::RssLogs) -- top-level
   # params are a first-class URL form, so it renders directly instead.
