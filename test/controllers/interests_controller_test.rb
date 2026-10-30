@@ -193,6 +193,40 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(["Observation"], objects.map(&:target_type).uniq)
   end
 
+  # A hand-crafted URL could submit type as an Array -- must not
+  # silently drop the filter (create_query_from_url_params's permit
+  # step would otherwise fail validation and ignore it entirely).
+  def test_index_array_type_param_takes_first_value
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: true)
+    get(:index, params: { type: %w[Observation Name] })
+    assert_response(:success)
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(["Observation"], objects.map(&:target_type).uniq)
+    assert_no_flash
+  end
+
+  # An empty type= must degrade to "no filter", not a validation
+  # error flash -- matches the old type_tag's explicit blank guard.
+  def test_index_empty_type_param_is_unfiltered
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: true)
+    get(:index)
+    baseline = @controller.instance_variable_get(:@objects).size
+
+    get(:index, params: { type: "" })
+    assert_response(:success)
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(baseline, objects.size)
+    assert_no_flash
+  end
+
   def test_index_filtered_by_state
     login("rolf")
     Interest.create(target: observations(:minimal_unknown_obs),
@@ -203,6 +237,24 @@ class InterestsControllerTest < FunctionalTestCase
     assert_select("body.interests__index")
     objects = @controller.instance_variable_get(:@objects)
     assert(objects.all?(&:ignoring?))
+  end
+
+  # An empty state= must degrade to "no filter", not a validation
+  # error flash.
+  def test_index_empty_state_param_is_unfiltered
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: false)
+    get(:index)
+    baseline = @controller.instance_variable_get(:@objects).size
+
+    get(:index, params: { state: "" })
+    assert_response(:success)
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(baseline, objects.size)
+    assert_no_flash
   end
 
   # set_interest's "already on" / "already off" branches.

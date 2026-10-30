@@ -50,14 +50,23 @@ class InterestsController < ApplicationController
   # user's id on every dispatch branch, not read from a request
   # param. `type`/`state` also need normalizing to the lowercase tag
   # form `Query::Interests` expects -- the structural-enum validator
-  # does no case folding.
+  # does no case folding. Stripping the originals first (rather than
+  # just not forcing a replacement) means a blank or malformed value
+  # degrades to "no filter" instead of a validation error.
   def create_query_from_url_params(model_symbol, raw_params)
-    forced = { by_users: [@user.id] }
-    forced[:type] = raw_params[:type].to_s.underscore if
-      raw_params[:type].present?
-    forced[:state] = raw_params[:state].to_s.underscore if
-      raw_params[:state].present?
-    super(model_symbol, raw_params.merge(forced))
+    forced = { by_users: [@user.id],
+               type: normalized_type_or_state(raw_params[:type]),
+               state: normalized_type_or_state(raw_params[:state]) }
+    super(model_symbol,
+         raw_params.except(:type, :state).merge(forced.compact))
+  end
+
+  # `type`/`state` are single-select -- a hand-crafted URL could
+  # submit an empty string or an Array; take the first value and
+  # drop anything that doesn't normalize to a non-blank tag.
+  def normalized_type_or_state(value)
+    value = value.first if value.is_a?(Array)
+    value.to_s.underscore.presence
   end
 
   # `by_users` is always present (forced above), so it must not by
