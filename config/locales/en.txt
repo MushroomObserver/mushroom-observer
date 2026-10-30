@@ -4601,6 +4601,7 @@
   query_region: "[:region]"
   query_sizes: sizes
   query_sources: sources
+  query_state: state
   query_summary_has: summary has
   query_text_name_has: name has
   query_title_has: title has
