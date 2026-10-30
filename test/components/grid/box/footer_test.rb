@@ -45,6 +45,20 @@ class Components::Grid::Box::FooterTest < ComponentTestCase
     assert_equal("", render_detail([nil, nil]))
   end
 
+  # resolve_rss_detail's rescue: outside production, a broken tag
+  # degrades to an empty detail instead of a 500. Symbol instances
+  # can't take a singleton method (`TypeError: can't define
+  # singleton`), so this duck-types a plain object in place of the
+  # tag Symbol -- resolve_rss_detail just calls `tag.t(...)`.
+  def test_footer_detail_array_with_broken_tag_is_rescued
+    tag = Object.new
+    tag.define_singleton_method(:t) { |*| raise(StandardError.new("broken")) }
+
+    html = render_detail([tag, {}])
+
+    assert_html(html, ".log-detail", text: "")
+  end
+
   def test_footer_detail_user_renders_user_info
     user = users(:rolf)
     html = render_detail(user)
