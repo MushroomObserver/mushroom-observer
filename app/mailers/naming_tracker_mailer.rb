@@ -4,7 +4,7 @@
 class NamingTrackerMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
-  def build(receiver:, naming:)
+  def build(receiver:, naming:, name_tracker:)
     setup_user(receiver)
     search_name = naming.name.real_search_name(receiver)
     name = "#{naming.observation_id}: #{search_name}"
@@ -13,6 +13,6 @@ class NamingTrackerMailer < ApplicationMailer
     debug_log(:naming_for_tracker, nil, receiver, naming:, observation:)
     mo_mail(subject, to: receiver,
                      view_params: { subject:, receiver:, observation:,
-                                    naming: })
+                                    naming:, name_tracker: })
   end
 end
