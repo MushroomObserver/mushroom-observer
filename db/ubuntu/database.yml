@@ -39,6 +39,8 @@ development:
   primary:
     <<: *credentials
     database: mo_development
+    # Must exceed Solid Queue's thread need -- see queue_config_test.rb.
+    pool: 10
   cache:
     <<: *credentials
     database: cache_development
