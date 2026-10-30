@@ -96,20 +96,7 @@ class InterestsController < ApplicationController
   end
 
   def paginate_interests!
-    interests = @query.paginate(@pagination_data, include: { target: [:name] })
-    eager_load_targets(interests)
-    interests
-  end
-
-  def eager_load_targets(interests)
-    # Props to this blog for teaching how to eager-load polymorphic relations!
-    # https://thepaulo.medium.com/eager-loading-polymorphic-associations-in-ruby-on-rails-155a356c39d7
-    %w[NameTracker Observation].each do |type|
-      ActiveRecord::Associations::Preloader.new(
-        records: interests.select { |i| i.target_type == type },
-        associations: { target: [:name] }
-      )
-    end
+    @query.paginate(@pagination_data, include: { target: [:name] })
   end
 
   public
