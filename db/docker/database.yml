@@ -18,6 +18,8 @@ development:
   primary:
     <<: *connection
     database: <%= ENV.fetch("DATABASE_NAME", "mo_development") %>
+    # Must exceed Solid Queue's thread need -- see test/jobs/queue_config_test.rb.
+    pool: 10
   cache:
     <<: *connection
     database: cache_development
