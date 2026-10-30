@@ -56,13 +56,13 @@ module Naming::Notify
 
   private
 
-  # The name plus its ancestor taxa (and Lichen, for lichens) — the chain
-  # subscribers are matched along.
+  # The name and its synonyms, then the approved name's ancestor taxa (and
+  # Lichen, for lichens) — the chain subscribers are matched along. Most
+  # specific first, so a user's closest tracker is the one they hear from.
   def notification_taxa
-    taxa = name.approved_name.all_parents
-    taxa.push(name)
+    taxa = name.synonyms + name.approved_name.all_parents
     taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
-    taxa
+    taxa.uniq
   end
 
   # NameTrackers to notify along the taxon chain: not the namer, specimen
@@ -71,8 +71,9 @@ module Naming::Notify
     seen = Set.new
     taxa.flat_map do |taxon|
       NameTracker.where(name: taxon).includes(:user).select do |tracker|
-        tracker.user_id != user_id && seen.add?(tracker.user_id) &&
-          (!tracker.require_specimen || observation&.specimen)
+        tracker.user_id != user_id &&
+          (!tracker.require_specimen || observation&.specimen) &&
+          seen.add?(tracker.user_id)
       end
     end
   end
