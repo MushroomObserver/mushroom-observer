@@ -30,6 +30,7 @@ module Views::Controllers::Observations
       add_edit_title(@observation, user: @user)
       add_context_nav(Tab::Observation::FormEdit.new(observation: @observation))
       container_class(:wide)
+      content_padding(:panels)
 
       render(Form.new(
                @observation,

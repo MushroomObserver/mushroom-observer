@@ -13,18 +13,14 @@
 #     request: request
 #   )) %>
 class Views::Layouts::Sidebar < Views::Base
-  # The Bootstrap modifier classes the nested partials (`Admin`,
-  # `Login`, `Section`, `User`, etc.) read via the `classes:` prop
-  # and apply on top of `list-group-item` via
-  # `Components::ListGroup::Item` / `LinkItem` — neither key
-  # includes the `list-group-item` prefix itself, since both
-  # components compose it automatically. `Sidebar::ContextNav`
-  # reuses the same set for its mobile rendering into the offcanvas
-  # sidebar.
+  # Modifier classes the nested partials (`Admin`, `Login`, `Section`,
+  # `User`, etc.) read via `classes:`, layered onto `list-group-item`
+  # by `Components::ListGroup::Item`/`LinkItem` -- neither key
+  # includes that prefix itself. `Sidebar::ContextNav` reuses this
+  # same set for its mobile offcanvas rendering.
   CSS_CLASSES = {
     heading: "disabled font-weight-bold",
-    admin: "list-group-item-danger indent",
-    indent: "indent",
+    admin: "list-group-item-danger",
     mobile_only: Components::Column.mobile_only_classes.join(" ").freeze
   }.freeze
 
@@ -40,18 +36,19 @@ class Views::Layouts::Sidebar < Views::Base
   prop :languages, _Array(Language)
 
   def view_template
-    Column(element: :nav, id: "sidebar", xs: 8, sm: 2,
-           class: "sidebar-offcanvas hidden-print",
-           aria: { label: :app_sidebar_nav_label.l }) do
+    # Fixed width (mo/_layout.scss's `$sidebar-max-width`), not a
+    # Bootstrap grid column -- no `col-*` sizing here.
+    nav(id: "sidebar", class: "sidebar-offcanvas hidden-print",
+        aria: { label: :app_sidebar_nav_label.l }) do
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo
-        Navbar(variant: :inverse, element: :div, class: "sidebar-nav",
+        Navbar(variant: :dark, element: :div, class: "sidebar-nav",
                data_controller: "nav-active") do
-          # `w-100`: `.navbar.navbar-flex`'s BS4 bridge rule makes this
-          # element's parent `display: flex`; without an explicit
-          # width this direct child would shrink to content size
-          # instead of staying full width.
+          # `w-100`: this element's parent is `.navbar`, which BS4
+          # makes `display: flex`; without an explicit width this
+          # direct child would shrink to content size instead of
+          # staying full width.
           div(class: "list-group w-100") do
             render_top_section
             render_context_nav_mobile if @user
@@ -73,7 +70,10 @@ class Views::Layouts::Sidebar < Views::Base
   def render_logo
     a(id: "logo_link", href: logo_href) do
       img(
-        class: "logo-trim img-responsive py-3",
+        # `img-fluid` sets max-width: 100%, height: auto. `w-100`
+        # fills the sidebar's fixed width, since `img-fluid` alone
+        # only caps at 100% without growing to reach it.
+        class: "logo-trim img-fluid w-100 py-3",
         alt: "Mushroom Observer Logo",
         src: "/logo-trim.png"
       )

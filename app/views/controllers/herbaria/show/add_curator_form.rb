@@ -19,12 +19,11 @@ module Views::Controllers::Herbaria
 
       def view_template
         super do
-          div(class: "form-inline mt-3") do
-            autocompleter_field(:login, type: :user, label: false)
-            label(for: "herbarium_curator_login") do
-              Button(type: :submit, name: :show_herbarium_add_curator.t,
-                     html_name: "commit")
-            end
+          div(class: "my-3") do
+            autocompleter_field(:login, type: :user,
+                                        label: :show_herbarium_add_curator.t,
+                                        size: 40)
+            submit(:add.ti)
           end
         end
       end

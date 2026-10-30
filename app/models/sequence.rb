@@ -71,7 +71,7 @@ class Sequence < AbstractModel
   }
 
   # Eager-loads the show/edit page (sequence + its user + the obs
-  # the sequence belongs to, rendered as a MatrixBox).
+  # the sequence belongs to, rendered as a Grid::Box).
   def self.show_includes_tree
     [:user, { observation: Observation.matrix_box_includes }]
   end
@@ -118,12 +118,12 @@ class Sequence < AbstractModel
   #
   ##############################################################################
 
-  # used in views and by MatrixBoxPresenter to show orphaned obects
+  # used in views and by Grid::BoxPresenter to show orphaned obects
   def format_name(_user = nil)
     locus.truncate(locus_width, separator: " ")
   end
 
-  # used in views and by MatrixBoxPresenter to show unorphaned obects
+  # used in views and by Grid::BoxPresenter to show unorphaned obects
   def unique_format_name(_user = nil)
     format_name + " (Sequence #{id || "?"})"
   end

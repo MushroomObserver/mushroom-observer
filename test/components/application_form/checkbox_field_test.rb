@@ -44,7 +44,8 @@ class CheckboxFieldTest < ComponentTestCase
                                    wrap_class: "m-0", label_class: "p-0")
     end
 
-    assert_html(form, ".checkbox.m-0")
+    # Should still have the custom-control wrapper and label element
+    assert_html(form, ".custom-control.custom-checkbox.m-0")
     assert_html(form, "label.p-0")
     assert_includes(form, 'type="checkbox"')
     # But should NOT have label text
@@ -57,7 +58,8 @@ class CheckboxFieldTest < ComponentTestCase
       checkbox_field(:placeholder, label: "Test", wrap_class: "mt-3")
     end
 
-    assert_html(form, ".checkbox.mt-3")
+    # wrap_class should be on wrapper div, not the input
+    assert_html(form, ".custom-control.custom-checkbox.mt-3")
   end
 
   # Unlike text_field/select_field/etc's colon-suffixed prompt label

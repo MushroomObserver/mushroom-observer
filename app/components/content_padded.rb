@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Minimal padded-content wrapper: emits `<div class="p-3 ...">`
+# Minimal padded-content wrapper: emits `<div class="p-card ...">`
 # around the block. All keyword args are forwarded to the
 # underlying `<div>`; `class:` is composed with the default
-# `"p-3"`.
+# `"p-card"`.
 #
 # @example
 #   ContentPadded(id: "details") do
@@ -16,10 +16,10 @@
 #   ) { ... }
 class Components::ContentPadded < Components::Base
   # HTML attrs forwarded verbatim to the `<div>`. `class:` is
-  # composed with the default `"p-3"`.
+  # composed with the default `"p-card"`.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    div(**mix({ class: "p-3" }, @attributes), &block)
+    div(**mix({ class: "p-card" }, @attributes), &block)
   end
 end

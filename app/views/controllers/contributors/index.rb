@@ -3,7 +3,7 @@
 module Views::Controllers::Contributors
   # Paginated contributors index. Page chrome (title, sorter,
   # context-nav, pagination) + a one-row collapsible Legend +
-  # a MatrixTable of user matrix-boxes.
+  # a Grid of user boxes.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
@@ -18,14 +18,14 @@ module Views::Controllers::Contributors
 
       render_legend_row
       PaginatedResults do
-        render(::Components::Matrix::Table.new(objects: @objects))
+        Grid(objects: @objects)
       end
     end
 
     private
 
     def render_legend_row
-      Row(class: "my-3") do
+      Row do
         Column(md: 8, lg: 6) { render(Legend.new) }
       end
     end

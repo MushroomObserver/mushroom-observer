@@ -9,7 +9,7 @@ module Views::Controllers::Projects
       project = projects(:eol_project)
       html = render_subtabs(project: project, current_subtab: "details")
 
-      # Wrapping row + col-xs-12 ensures the sub-tabs claim a full row
+      # Wrapping row + col-12 ensures the sub-tabs claim a full row
       # so the next element doesn't float alongside them.
       assert_html(html, ".row #project_admin_subtabs")
       assert_html(html, "ul.nav.nav-tabs")

@@ -27,13 +27,13 @@ module Views::Controllers::Projects::Members
     end
 
     # Submit button uses `variant: :primary`. Verify it renders with
-    # the primary style and no btn-default stacking.
+    # the primary style and no btn-secondary stacking.
     # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_submit_button_uses_primary_style_without_stacking_default
       html = render_modal(count: 3)
 
       assert_html(html, ".modal-footer button.btn.btn-primary")
-      assert_no_html(html, "form[data-turbo='true'] button.btn-default")
+      assert_no_html(html, "form[data-turbo='true'] button.btn-secondary")
     end
 
     def test_no_submit_button_when_count_is_zero

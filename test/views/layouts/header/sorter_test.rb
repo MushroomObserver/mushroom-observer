@@ -8,13 +8,9 @@ module Views::Layouts
       super
       controller.params[:controller] = "names"
       controller.params[:action] = "index"
-      # `ControllerLabels` (included via
-      # `ComponentTestCase::TEST_CONTROLLER_MODULES`) derives
-      # `controller_model_name` from `controller_name`, which defaults
-      # to `"test"` on the test controller. Override directly to the
-      # model name the test queries against — without forcing a
-      # `controller_name` override that would also rename rubric / body
-      # class for an unrelated assertion.
+      # Override `controller_model_name` directly (not via
+      # `controller_name`, which would also rename the body class) so
+      # sort-link classes match the `Name` model being queried.
       controller.define_singleton_method(:controller_model_name) { "Name" }
       @sorts = [
         ["created_at", :sort_by_created_at.t],
@@ -40,23 +36,29 @@ module Views::Layouts
       assert_equal("", html)
     end
 
-    def test_renders_label_and_dropdown
+    def test_renders_outer_element_with_label_and_dropdown
       html = render_sorter(query: query_with(num_results: 5))
 
-      assert_html(html, ".sorter .navbar-text",
+      assert_html(html, ".sorter")
+      # The label is the first child.
+      assert_html(html, ".sorter > .navbar-text",
                   text: "#{:sort_by_header.l}:")
-      assert_html(html, ".sorter .dropdown a.dropdown-toggle")
-      # Menu carries the `sorts` extra class, the scope `assert_sorted_by`
-      # (test/general_extensions.rb) selects within.
+      # The dropdown is the second child; Components::Dropdown is
+      # passed `element: :div` (its default outer wrapper is `<li>`,
+      # correct only inside a `<ul>`-based nav).
+      assert_html(html, ".sorter > .dropdown")
+      assert_html(html, ".dropdown a.dropdown-toggle")
+      # Menu carries the `sorts` extra class.
       assert_html(html, ".dropdown-menu.sorts")
     end
 
     def test_menu_contains_mobile_only_sort_by_header
       html = render_sorter(query: query_with(num_results: 5))
 
-      # `menu_header:` slot -- a mobile-only row (visible only below
-      # the `sm` breakpoint) rendered above the section's links.
-      assert_html(html, ".dropdown-menu.sorts .d-block.d-sm-none",
+      # `menu_header:` slot — mobile-only row rendered above the
+      # section's links.
+      only_classes = Components::Column.mobile_only_classes.join(".")
+      assert_html(html, ".dropdown-menu.sorts > .#{only_classes}",
                   text: "#{:sort_by_header.l}:")
     end
 

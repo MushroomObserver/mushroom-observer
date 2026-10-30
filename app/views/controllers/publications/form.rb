@@ -24,10 +24,9 @@ module Views::Controllers::Publications
     end
 
     def render_full_field
-      textarea_field(:full, rows: 10, label: :publication_full,
-                            wrap_class: "mt-3") do |f|
+      textarea_field(:full, rows: 10, label: :publication_full) do |f|
         f.with_between do
-          Help(element: :span, content: :publication_full_help.t)
+          Help(content: :publication_full_help.t)
         end
       end
     end
@@ -37,7 +36,8 @@ module Views::Controllers::Publications
     end
 
     def render_peer_reviewed_field
-      checkbox_field(:peer_reviewed, label: :publication_peer_reviewed)
+      checkbox_field(:peer_reviewed, label: :publication_peer_reviewed,
+                                     wrap_class: "mb-3")
     end
 
     def render_how_helped_field
@@ -46,7 +46,8 @@ module Views::Controllers::Publications
     end
 
     def render_mo_mentioned_field
-      checkbox_field(:mo_mentioned, label: :publication_mo_mentioned)
+      checkbox_field(:mo_mentioned, label: :publication_mo_mentioned,
+                                    wrap_class: "mb-3")
     end
 
     def submit_text

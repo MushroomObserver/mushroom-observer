@@ -34,7 +34,7 @@ class Views::Layouts::Sidebar
       assert_html(html, ".change_site_banner_link")
       assert_html(html, ".licenses_link")
 
-      # Should have admin class on links (not indent)
+      # Should have admin class on links
       assert_html(html, ".list-group-item.admin")
 
       # Should have nav-active data attributes for active link tracking

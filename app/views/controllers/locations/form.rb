@@ -107,7 +107,7 @@ module Views::Controllers::Locations
 
     def render_locked_checkbox
       checkbox_field(:locked, label: :form_locations_locked,
-                              wrap_class: "mt-3")
+                              wrap_class: "mb-3")
     end
 
     def render_notes_field
@@ -121,7 +121,7 @@ module Views::Controllers::Locations
 
     def render_hidden_checkbox
       checkbox_field(:hidden, label: :form_locations_hidden,
-                              wrap_class: "mt-3 mr-3",
+                              wrap_class: "mb-3 mr-3",
                               help: :form_locations_hidden_doc.t,
                               help_collapse: true)
     end

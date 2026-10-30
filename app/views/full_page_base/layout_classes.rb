@@ -46,22 +46,40 @@ module Views::FullPageBase::LayoutClasses
     column_classes
   end
 
-  # ----- Vertical padding inside the main container ----------------
+  # ----- Horizontal padding inside the main container ---------------
 
   def content_padding(content_has = nil)
-    content_has ||= action_name.in?(%w[index show]) ? :panels : :no_panels
+    content_has ||= default_content_has
+    # `content_for?` treats a blank captured value as unset, so the
+    # :panels branch (an intentionally empty class string) can't rely
+    # on it to tell `default_content_padding` this slot was already
+    # explicitly set -- track that separately.
+    @content_padding_set = true
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "p-3" : "p-0"
+      content_has == :no_panels ? "px-card" : ""
     end
   end
 
   def default_content_padding
-    return if content_for?(:content_padding)
+    return if @content_padding_set
 
     content_padding
   end
 
   private
+
+  # `index`/`show` actions default to `:panels` since their content
+  # is conventionally wrapped in cards/panels already. Every
+  # `*::Search::New` view is also always `Components::Form::Search`,
+  # entirely panel-wrapped, despite the `new` action name --
+  # recognized here so none of those views needs an explicit
+  # `content_padding(:panels)` call.
+  def default_content_has
+    return :panels if action_name.in?(%w[index show])
+    return :panels if self.class.name&.end_with?("::Search::New")
+
+    :no_panels
+  end
 
   # The single source of truth for these left/right column-class
   # pairs -- falls back to the `:twelve` (untouched, no-split) pair

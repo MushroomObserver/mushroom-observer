@@ -20,14 +20,14 @@ class ObservationsController
              ))
     end
 
-    # `Components::Matrix::Table` bypasses the fragment cache when
+    # `Components::Grid` bypasses the fragment cache when
     # rendering for a project admin (the admin-only Exclude button
     # changes the markup). When the obs index is scoped to a project
     # AND the current user is an admin of it, the controller's
     # cache pre-check must agree — otherwise it would skip eager-
     # loading rows it thinks are cache hits and then render uncached
     # boxes → N+1.
-    def matrix_caches_in_this_request?
+    def grid_caches_in_this_request?
       !@project&.is_admin?(@user)
     end
 
@@ -109,10 +109,10 @@ class ObservationsController
     end
 
     def index_display_opts(opts, query)
-      # We always want cached matrix boxes for observations if possible.
+      # We always want cached grid boxes for observations if possible.
       # cache: true  will batch load the includes only for fragments not cached.
       opts = {
-        matrix: true, cache: true,
+        grid: true, cache: true,
         include: observation_index_includes
       }.merge(opts)
 
@@ -129,7 +129,7 @@ class ObservationsController
     end
 
     # Reuses `Observation.matrix_box_includes` — the canonical tree
-    # shared by every matrix-box render (field_slips show/index,
+    # shared by every grid-box render (field_slips show/index,
     # collection_numbers show).
     def observation_index_includes
       Observation.matrix_box_includes

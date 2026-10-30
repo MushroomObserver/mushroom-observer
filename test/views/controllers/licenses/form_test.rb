@@ -30,8 +30,11 @@ module Views::Controllers::Licenses
                   "input[name='license[deprecated]'][type='checkbox']")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_submit_button
       assert_html(@html, "button[type='submit']", text: :submit.ti)
+      assert_html(@html, ".btn.btn-secondary")
+      assert_html(@html, ".center-block.my-2")
     end
 
     def test_form_has_correct_attributes_for_new_record

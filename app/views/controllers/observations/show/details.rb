@@ -70,30 +70,33 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { trusted_html(append_colon(:field_slip.ti)) }
-      render_field_slip_link_or_attach
-      render_field_slip_scan_link if can_scan_field_slip?
+      Link(type: :object, object: @obs.field_slip) if @obs.field_slip
+      InlineLinkBlock(items: field_slip_action_items)
     end
   end
 
-  def render_field_slip_link_or_attach
-    if @obs.field_slip
-      Link(type: :object, object: @obs.field_slip)
-    elsif can_attach_field_slip?
-      render_inline_tab(::Tab::Observation::AttachFieldSlip)
-    end
+  def field_slip_action_items
+    [attach_item, scan_item].compact
   end
 
-  def render_field_slip_scan_link
-    whitespace
-    render_inline_tab(::Tab::Observation::FieldSlipScan)
+  def attach_item
+    return if @obs.field_slip || !can_attach_field_slip?
+
+    inline_tab_item(::Tab::Observation::AttachFieldSlip)
   end
 
-  def render_inline_tab(tab_class)
+  def scan_item
+    return unless can_scan_field_slip?
+
+    inline_tab_item(::Tab::Observation::FieldSlipScan)
+  end
+
+  def inline_tab_item(tab_class)
     tab = tab_class.new(observation: @obs)
-    Link(type: :get, tab: tab,
-         class: Components::InlineLinkBlock.item_class(
-           tab.html_options[:class]
-         ))
+    Components::Link.new(
+      type: :get, tab: tab,
+      class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
+    )
   end
 
   # Matches the gate `Observations::FieldSlipsController` enforces.

@@ -14,6 +14,8 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
                      "type this test selects -- pick a fixture where " \
                      "it doesn't, so the assertion below proves a change")
     visit("/activity_logs")
+    # No JS/CSS driver here, so both the bar and dropdown copies of
+    # the filter are present in the markup -- scope to one.
     within("#log_filter_form_bar_top") do
       click_link("Glossary")
     end
@@ -27,12 +29,9 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
       click_button(:rss_make_default.l)
     end
 
-    # No JS driver here, so the button's formaction/formmethod submit
-    # via a plain (non-Turbo) POST -- goes through the route table,
-    # Rack::MethodOverride, and CSRF checks, unlike a controller test
-    # calling the action directly. A successful PATCH saves the
-    # preference and, via back: "rss_logs", redirects here instead
-    # of the account prefs edit page.
+    # No JS driver, so formaction/formmethod submits via a plain
+    # POST through routes/CSRF, not a direct controller-action call.
+    # back: "rss_logs" redirects here after saving the preference.
     assert_match("Activity Log", page.title)
     new_default = user.reload.default_rss_type
     assert_equal("glossary_term", new_default)

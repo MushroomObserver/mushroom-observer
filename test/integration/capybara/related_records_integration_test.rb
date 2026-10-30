@@ -22,7 +22,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     # Be sure we're not getting the "within_locations" scope.
     assert_no_selector("#filters", text: :within_locations.l)
 
-    results = find_all("#results .matrix-box")
+    results = find_all("#results .grid-box")
     assert_equal(Observation.locations(location).size, results.size)
     assert_selector("a", text: :show_objects.t(type: :location))
     click_on(:show_objects.t(type: :location), match: :first)
@@ -57,7 +57,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     page.find_by_id("filters").assert_text(location.display_name)
 
     # Verify we got the observations for this location
-    results = find_all("#results .matrix-box")
+    results = find_all("#results .grid-box")
     assert_equal(Observation.locations(location).size, results.size)
   end
 end

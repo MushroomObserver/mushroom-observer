@@ -58,8 +58,14 @@ module Views::Controllers::Account::APIKeys
                   "[href='#edit_notes_#{key.id}_container']" \
                   "[aria-controls='edit_notes_#{key.id}_container']" \
                   "[aria-expanded='false']")
+      # data-parent lives on the accordion panes, not the trigger --
+      # Bootstrap's collapse.js reads it off the collapse target that
+      # was clicked into, not the element that was clicked.
       assert_html(html,
-                  "a[data-role='edit_api_key']" \
+                  "#view_notes_#{key.id}_container" \
+                  "[data-parent='#notes_#{key.id}']")
+      assert_html(html,
+                  "#edit_notes_#{key.id}_container" \
                   "[data-parent='#notes_#{key.id}']")
       assert_html(html, "a[data-role='edit_api_key'] svg.mo-icon-edit")
       assert_html(html,

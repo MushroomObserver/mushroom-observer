@@ -26,11 +26,11 @@ module Views::Controllers::Contributors
       ].freeze
 
       def view_template
-        Panel(panel_class: "collapse",
-              panel_id: "contribution_legend") do |panel|
+        Panel(panel_id: "contribution_legend", panel_class: "mb-2",
+              collapse_target: "#contribution_legend_body") do |panel|
           panel.with_heading { render_heading }
           panel.with_heading_links { render_toggle_button }
-          panel.with_body { render_body }
+          panel.with_body(collapse: true) { render_body }
         end
       end
 
@@ -42,7 +42,7 @@ module Views::Controllers::Contributors
 
       def render_toggle_button
         Link(type: :collapse_toggle,
-             target_id: "contribution_legend",
+             target_id: "contribution_legend_body",
              icon: :info_circle,
              button: :link,
              size: :xs)

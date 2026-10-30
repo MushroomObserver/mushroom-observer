@@ -12,8 +12,8 @@
 # Bootstrap's own `.container`/`.container-fluid` mechanism (Bootstrap's
 # is a multi-breakpoint staircase of exact widths, not a single cap) --
 # see `app/assets/stylesheets/mo/_layout.scss`. Centralizing the mapping
-# here means a future Bootstrap 3->4 container-class migration (#3797)
-# only touches WIDTH_CLASSES, not every call site.
+# here means a future container-class change only touches
+# WIDTH_CLASSES, not every call site.
 #
 # @example Basic (a <div>)
 #   Container(width: :text) { render_fields }

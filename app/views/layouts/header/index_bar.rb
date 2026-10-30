@@ -17,14 +17,10 @@ module Views::Layouts
     def view_template
       return unless content_for?(:filters) || content_for?(:filter_help)
 
-      Row do
-        Column(xs: 12) do
-          div(id: "index_bar", class: "mb-2") do
-            div(class: "px-3 mt-2 mb-3") do
-              render_filters
-              render_filter_help
-            end
-          end
+      div(id: "index_bar", class: "mb-2") do
+        div(class: "px-card mb-2") do
+          render_filters
+          render_filter_help
         end
       end
     end

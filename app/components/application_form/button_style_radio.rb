@@ -65,7 +65,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_label_zone(&block)
       if @label_wrap
-        label(for: @id, class: "label-zone flex-grow-1") { yield if block }
+        label(for: @id, class: "label-zone flex-grow-1 mb-0") do
+          yield if block
+        end
       else
         div(class: "label-zone flex-grow-1") { yield if block }
       end

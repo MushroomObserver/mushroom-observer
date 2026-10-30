@@ -135,7 +135,12 @@ See `.claude/rules/phlex_reference.md` for Phlex coding conventions.
 See `.claude/rules/testing.md` for test structure and component test patterns.
 See `.claude/rules/system_test_state_polling.md` for when to poll a
 Stimulus controller's state (via `evaluate_script`) instead of
-waiting on a DOM selector in a system test.
+waiting on a DOM selector in a system test — also the hard rule
+against `:not()` in any Capybara selector string.
+See `.claude/rules/system_test_flakiness.md` — system tests must be
+CI-ready with zero flake tolerance; fix flakiness via incremental
+DOM-change assertions or stubbing, not a longer wait, and don't
+leave it as "pre-existing" or "likely flaky."
 See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
 ("remove X from all models," "convert every Y") — don't self-limit
 scope below what the sweep already declared.

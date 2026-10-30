@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
 # The collapsible search-bar row -- a sibling of `TopNav`, rendered
-# directly below it (`Views::Layouts::Application#render_right_side`).
-# Holds either `SearchBar` (the pattern-search form + type select) or,
-# on identify pages, `FormFilter`. Toggled open/closed by the
-# magnifying-glass button `TopNav` renders (`target_id: "search_nav"`
-# -- an id reference, so it works regardless of where `#search_nav`
-# physically renders).
+# directly below it. Collapses as the navbar element itself, not a
+# nested div, so its border/padding disappear with its content.
 class Views::Layouts::SearchNav < Views::Base
   # Controllers / actions where the search-help dropdown is available.
   SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
@@ -18,12 +14,11 @@ class Views::Layouts::SearchNav < Views::Base
   ].freeze
 
   def view_template
-    # `flex: false` -- see `Components::Navbar`. `border-top-0` keeps
-    # this element's border from doubling up with #top_nav's bottom
-    # border sitting above it.
-    Navbar(variant: :default, element: :div, flex: false, id: "search_nav",
-           class: class_names("border-top-0", "hidden-print",
-                              collapse_classes),
+    # `element: :div`, not the `Navbar` default `:nav` -- a search
+    # toolbar, not a second navigation landmark.
+    Navbar(variant: :light, element: :div,
+           class: collapse_classes, id: "search_nav",
+           padding: "py-2 px-0",
            data: {
              controller: "search-type",
              # Stimulus Array values must be JSON. Rails' tag helper
@@ -39,7 +34,9 @@ class Views::Layouts::SearchNav < Views::Base
   private
 
   def collapse_classes
-    Components::Collapsible.collapse_classes
+    Components::Collapsible.collapse_classes(
+      html_class: "hidden-print mb-2 border-top-0"
+    )
   end
 
   # Identify pages get a dedicated filter bar; everything else gets

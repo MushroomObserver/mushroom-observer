@@ -77,15 +77,15 @@ class LinkIconTest < ComponentTestCase
     assert_html(html, ".icon-text-gap[title='Tooltip text']")
   end
 
-  def test_center_tooltip_adds_inline_flex_center_to_title_span
-    html = render_icon(type: :globe, title: "Tooltip text",
-                       center_tooltip: true)
+  def test_center_tooltip_true_by_default
+    html = render_icon(type: :globe, title: "Tooltip text")
 
     assert_html(html, ".inline-flex-center[title='Tooltip text']")
   end
 
-  def test_center_tooltip_false_by_default
-    html = render_icon(type: :globe, title: "Tooltip text")
+  def test_center_tooltip_false_opts_out
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       center_tooltip: false)
 
     assert_no_html(html, ".inline-flex-center")
   end

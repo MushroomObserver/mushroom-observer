@@ -27,6 +27,7 @@ class CollectionNumbersController < ApplicationController
   # view. Each key must resolve to `CollectionNumber.order_by_<key>`.
   def index_sort_options
     [
+      ["name_and_number", :sort_by_name_and_number.l],
       ["name",       :sort_by_name.l],
       ["number",     :sort_by_number.l],
       ["created_at", :sort_by_created_at.l],
@@ -153,7 +154,7 @@ class CollectionNumbersController < ApplicationController
 
   # Uses `CollectionNumber.show_includes` so the show / edit views
   # don't re-query when iterating `@collection_number.observations`
-  # (the MatrixTable / MatrixBox render walks down through
+  # (the Grid / Grid::Box render walks down through
   # `Observation::NamingConsensus` into votes + naming.name).
   def find_collection_number_for_show
     CollectionNumber.show_includes.find_by(id: params[:id]) ||

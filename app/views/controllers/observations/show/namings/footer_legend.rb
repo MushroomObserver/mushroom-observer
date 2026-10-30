@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Second panel-footer row of the namings sub-panel: the eye-icon
+# Second card-footer row of the namings sub-panel: the eye-icon
 # legend that explains what the favorite-eye and consensus-eye
 # icons mean. Two columns, both centered in the leftmost 11
-# columns of the panel-footer grid (the rightmost column matches
+# columns of the card-footer grid (the rightmost column matches
 # the eye gutter in the row body above).
 #
 # and inlines `vote_legend_yours` / `vote_legend_consensus` + their

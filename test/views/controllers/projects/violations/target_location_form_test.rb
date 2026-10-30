@@ -192,15 +192,15 @@ module Views::Controllers::Projects::Violations
 
       assert_html(html, "input[type='radio'][disabled]")
 
-      # Create link uses ?where=<suffix>, opens in a new tab, and
-      # dismisses the parent modal via data-action="click->modal#hide"
-      # (not Bootstrap's data-dismiss, whose handler chain
-      # preventDefaults the click and suppresses the new tab) -- so
-      # the admin can create the missing Location and see the radio
-      # enabled on the next "Add Target Location" click, with no page
-      # reload. The link lives inside the disabled radio's `.radio`
+      # Create link uses ?where=<suffix> (not display_name=), opens in
+      # a new tab, AND dismisses the parent modal via
+      # data-action="click->modal#hide" (not Bootstrap's data-dismiss,
+      # whose handler chain preventDefaults the click and suppresses
+      # the new tab) — so the admin can create the missing Location
+      # and see the radio enabled on the next click, no page reload.
+      # The link lives inside the disabled radio's `.custom-control`
       # div, not as a sibling above the radio group.
-      create_link = ".radio a[href*='/locations/new?where=']" \
+      create_link = ".custom-control a[href*='/locations/new?where=']" \
                     "[target='_blank']" \
                     "[rel='noopener noreferrer']" \
                     "[data-action='click->modal#hide']"
@@ -222,7 +222,7 @@ module Views::Controllers::Projects::Violations
 
       encoded = "Unique+County+X42%2C+California%2C+USA"
       assert_html(html,
-                  ".radio a[href='/locations/new?where=#{encoded}']" \
+                  ".custom-control a[href='/locations/new?where=#{encoded}']" \
                   "[target='_blank']")
     end
 

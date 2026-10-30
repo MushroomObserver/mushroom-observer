@@ -7,7 +7,7 @@
 # sorter, pagination), flashes the no-matches error when the query
 # returned nothing, optionally renders the alternate-spellings alert
 # (pattern-search-with-zero-results path), and renders the paginated
-# `Components::Matrix::Table` grid of Observation thumbnails.
+# `Components::Grid` grid of Observation thumbnails.
 #
 # `ObservationsController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with
@@ -76,12 +76,12 @@ module Views::Controllers::Observations
     end
 
     def render_matrix
-      render(Components::Matrix::Table.new(
-               objects: @objects,
-               user: @user,
-               cached: true,
-               project: @project
-             ))
+      Grid(
+        objects: @objects,
+        user: @user,
+        cached: true,
+        project: @project
+      )
     end
   end
 end

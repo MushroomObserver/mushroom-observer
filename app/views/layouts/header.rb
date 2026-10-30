@@ -31,12 +31,11 @@ module Views::Layouts
       trusted_html(banner) if banner.present?
     end
 
-    # The outer `.row` always renders, even when the inner content_for
-    # isn't set -- keeps the empty row in case any CSS / JS keys off
-    # `header > .row:last-child`.
     def render_filter_row
+      return unless content_for?(:observation_buttons)
+
       Row do
-        render_observation_buttons if content_for?(:observation_buttons)
+        render_observation_buttons
       end
     end
 
@@ -46,14 +45,12 @@ module Views::Layouts
       end
     end
 
-    # `content_for?(:left_columns) || "col-sm-8 col-lg-7"` — the `||`
-    # there is operating on a boolean, so when `:left_columns` IS set
-    # the LHS is `true` and `cols` becomes the literal `true`. Then
-    # `class_names(Components::Column.classes_for(xs: 12), true)`
-    # evaluates to `"col-xs-12"`. Keep the bug for visual parity; fix
-    # in a separate PR if needed.
+    # Matches the title row's left-column width to the content row's
+    # `:left_columns` value (set via `content_for(:left_columns, ...)`
+    # in `FullPageBase::LayoutClasses`), falling back to the default
+    # width when no page sets it.
     def title_cols
-      cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
+      cols = content_for(:left_columns) || "col-sm-8 col-lg-7"
       cols = "" unless content_for?(:interest_icons)
       class_names(Components::Column.classes_for(xs: 12), cols)
     end

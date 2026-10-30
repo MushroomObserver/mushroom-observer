@@ -21,8 +21,9 @@ module Views::Controllers::Observations
     def view_template
       Link(type: :get, name: @name.text_name,
            target: name_path(id: @name.id), **@attributes) do
-        trusted_html(@name.display_name_brief_authors(@user).
-                     t.small_author)
+        trusted_html(
+          @name.display_name_brief_authors(@user).t.small_author
+        )
       end
     end
   end

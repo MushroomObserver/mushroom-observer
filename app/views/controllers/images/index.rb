@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Images
-  # Paginated images index — chrome + `Components::Matrix::Table` of
+  # Paginated images index — chrome + `Components::Grid` of
   # one image per row.
   class Index < Views::FullPageBase
     prop :query, ::Query
@@ -18,9 +18,9 @@ module Views::Controllers::Images
       add_pagination(@pagination_data)
 
       PaginatedResults do
-        render(::Components::Matrix::Table.new(
-                 objects: @objects, user: current_user
-               ))
+        Grid(
+          objects: @objects, user: current_user
+        )
       end
     end
   end

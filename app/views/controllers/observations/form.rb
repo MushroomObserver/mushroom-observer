@@ -150,14 +150,13 @@ module Views::Controllers::Observations
     end
 
     def render_upload_body(panel)
-      panel.with_body(collapse: true, classes: "border-bottom",
-                      id: "observation_upload") do
+      panel.with_body(collapse: true, id: "observation_upload") do
         render(Upload.new(form: self, good_images: @good_images))
       end
     end
 
     def render_images_body(panel)
-      panel.with_body(collapse: true, classes: "p-0",
+      panel.with_body(collapse: true, classes: "p-0 border-top",
                       id: "observation_images") do
         render(Components::Form::UploadGallery.new(
                  images: @good_images,

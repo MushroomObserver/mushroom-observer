@@ -81,13 +81,9 @@ class ObservationViewsControllerTest < FunctionalTestCase
     assert_equal(false, ov.reviewed)
   end
 
-  # `minimal_unknown_obs` has no images -- `lightbox_caption_stream`
-  # deliberately skips the whole lightbox stream for imageless
-  # observations (there's no `.theater-btn`/caption element anywhere
-  # in the DOM to target; `render_lightbox_link` already no-ops
-  # without an image on the normal show/matrix-box render path
-  # either). Use an obs with a thumb image so the caption-rendering
-  # path under test actually runs.
+  # Use an obs with a thumb image -- lightbox_caption_stream skips
+  # the whole stream for imageless observations (no caption element
+  # exists to target).
   def test_update_turbo_stream_renders_caption_components
     login("mary")
     obs = observations(:coprinus_comatus_obs)
@@ -107,9 +103,13 @@ class ObservationViewsControllerTest < FunctionalTestCase
     assert_select("turbo-stream[action='update']" \
                   "[target='lightbox_caption_#{obs.thumb_image.id}']")
 
-    # Verify the toggle checkboxes are rendered in the turbo streams
-    assert_select("input[type='checkbox'][id='caption_reviewed_#{obs.id}']")
-    assert_select("input[type='checkbox'][id='box_reviewed_#{obs.id}']")
+    # Verify the toggle checkboxes are rendered in the turbo streams.
+    # "_lb" suffix: MarkAsReviewedToggle#checkbox_id keeps the id
+    # distinct from lightGallery's clone of the lightbox caption.
+    assert_select(
+      "input[type='checkbox'][id='caption_reviewed_#{obs.id}_lb']"
+    )
+    assert_select("input[type='checkbox'][id='box_reviewed_#{obs.id}_lb']")
 
     # Verify lightbox caption is rendered with the identify UI
     assert_select("div#observation_identify_#{obs.id}")
