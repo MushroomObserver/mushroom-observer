@@ -302,6 +302,12 @@ module AbstractModel::OrderingScopes
       order(arel_table[:summary].asc)
     end
 
+    def order_by_target_type
+      return all unless column_names.include?("target_type")
+
+      order(arel_table[:target_type].asc)
+    end
+
     def order_by_thumbnail_quality
       return all unless self == Observation
 

@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 module Name::Notify
+  # Shared with NameDescription#notify_users, which gets each role's
+  # user list a different way (admins/authors/etc. directly, vs. this
+  # module's descriptions.map(&:role) aggregate) but notifies on the
+  # same preference flags.
+  ROLE_PREFS = { admin: :email_names_admin, author: :email_names_author,
+                 editor: :email_names_editor,
+                 reviewer: :email_names_reviewer }.freeze
+
   attr_writer :skip_notify
 
   def skip_notify
@@ -37,18 +45,22 @@ module Name::Notify
     return if classification_only_change?
 
     sender = @current_user
+    send_name_change_emails(sender,
+                            finalize_recipients!(name_change_recipients,
+                                                 sender))
+  end
+
+  def name_change_recipients
     recipients = []
-
-    notify_admins(recipients)
-    notify_authors(recipients)
-    notify_editors(recipients)
-    notify_reviewers(recipients)
+    collect_role_recipients(
+      [[descriptions.map(&:admins), ROLE_PREFS[:admin]],
+       [descriptions.map(&:authors), ROLE_PREFS[:author]],
+       [descriptions.map(&:editors), ROLE_PREFS[:editor]],
+       [descriptions.map(&:reviewer), ROLE_PREFS[:reviewer]]],
+      recipients
+    )
     notify_interested(recipients)
-
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    send_name_change_emails(sender, recipients)
+    recipients
   end
 
   def send_name_change_emails(sender, recipients)
@@ -56,7 +68,7 @@ module Name::Notify
     # Calculate versions now while saved_changes? is still accurate.
     old_name_ver = saved_changes? ? version - 1 : version
 
-    (recipients.uniq - [sender]).each do |recipient|
+    recipients.each do |recipient|
       NameChangeMailer.build(
         sender:, receiver: recipient, name: self,
         old_name_ver:, new_name_ver: version,
@@ -66,50 +78,10 @@ module Name::Notify
     end
   end
 
-  # Tell admins of the change.
-  def notify_admins(recipients)
-    descriptions.map(&:admins).each do |user_list|
-      user_list.each do |user|
-        recipients.push(user) if user.email_names_admin
-      end
-    end
-  end
-
-  # Tell authors of the change.
-  def notify_authors(recipients)
-    descriptions.map(&:authors).each do |user_list|
-      user_list.each do |user|
-        recipients.push(user) if user.email_names_author
-      end
-    end
-  end
-
-  # Tell editors of the change.
-  def notify_editors(recipients)
-    descriptions.map(&:editors).each do |user_list|
-      user_list.each do |user|
-        recipients.push(user) if user.email_names_editor
-      end
-    end
-  end
-
-  # Tell reviewers of the change.
-  def notify_reviewers(recipients)
-    descriptions.map(&:reviewer).each do |user|
-      recipients.push(user) if user&.email_names_reviewer
-    end
-  end
-
   # Send to people who have registered interest.
   # Also remove everyone who has explicitly said they are NOT interested.
   def notify_interested(recipients)
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
+    Interest.update_recipients!(interests, recipients)
   end
 
   # True if classification was the only versioned column to change in

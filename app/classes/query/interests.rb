@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+
+class Query::Interests < Query
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [Interest])
+  # Forced to the current user by InterestsController, not read from
+  # request params -- Interests are private.
+  query_attr(:by_users, [User], param_alias: :by_user)
+  query_attr(:types, [{ string: Interest::ALL_TYPE_TAGS }], param_alias: :type)
+  query_attr(:state, { string: Interest::ALL_STATE_TAGS })
+
+  def self.default_order
+    :target_type
+  end
+end

@@ -8,9 +8,8 @@
 
 shared:
   adapter: trilogy
-  # Declared rather than left to the adapter's default, and matching the
-  # collation of the columns. #4625 moves those to utf8mb4_0900_ai_ci and
-  # takes this with them.
+  # Matches most tables -- Issue #4625 (converting all tables to
+  # utf8mb4_0900_ai_ci) is still open; only a few are there yet.
   encoding: utf8mb4
   collation: utf8mb4_general_ci
   # Default (works for MacOS X)
@@ -29,15 +28,18 @@ shared:
   variables:
     sql_mode: TRADITIONAL
 
+# Every role/env connects with the same user.
+credentials: &credentials
+  username: mo
+  password: mo
+
 development:
   primary:
+    <<: *credentials
     database: mo_development
-    username: mo
-    password: mo
   cache:
+    <<: *credentials
     database: cache_development
-    username: mo
-    password: mo
     host: localhost
     migrations_paths: "db/cache/migrate"
 
@@ -45,13 +47,13 @@ development:
 # re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
 test:
+  <<: *credentials
   # Support worker-specific databases in parallel testing
   # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
   database: <%= ENV.fetch("MO_TEST_DATABASE", "mo_test") %>
-  username: mo
-  password: mo
+  # Must exceed Solid Queue's thread need -- see test/jobs/queue_config_test.rb.
+  pool: 10
 
 production:
+  <<: *credentials
   database: mo_development
-  username: mo
-  password: mo
