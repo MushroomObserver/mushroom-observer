@@ -50,6 +50,57 @@ module Components
       )
     end
 
+    # query_from_q_param_hash refuses to resolve params[:q] without a
+    # :model key -- index_filter excludes :model by design, so
+    # render_hidden_fields has to add it back explicitly.
+    def test_renders_model_hidden_field
+      query = Query.lookup(:RssLog, types: ["observation"])
+      html = render_multi(query, ["observation"])
+
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='q[model]'][value='RssLog']"
+      )
+    end
+
+    def test_renders_hidden_fields_for_other_active_query_filters
+      log = rss_logs(:minimal_unknown_obs_rss_log)
+      query = Query.lookup(:RssLog, types: ["observation"],
+                                    id_in_set: [log.id])
+      html = render_multi(query, ["observation"])
+
+      # :types must not round-trip as a hidden field -- the visible
+      # checkboxes/links already control it.
+      assert_no_html(html, "#log_filter_form_dropdown_top " \
+                           "input[name='q[types]']")
+      assert_no_html(html, "#log_filter_form_dropdown_top " \
+                           "input[name='q[type]']")
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='q[id_in_set]'][value='#{log.id}']"
+      )
+    end
+
+    def test_renders_hidden_fields_for_multi_value_query_filter
+      log1 = rss_logs(:minimal_unknown_obs_rss_log)
+      log2 = rss_logs(:detailed_unknown_obs_rss_log)
+      query = Query.lookup(:RssLog, types: ["observation"],
+                                    id_in_set: [log1.id, log2.id])
+      html = render_multi(query, ["observation"])
+
+      # A multi-value filter stays an Array after index_filter -- each
+      # value needs a separate "[]"-named hidden input so params
+      # round-trip as an array instead of overwriting each other.
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='q[id_in_set][]'][value='#{log1.id}']"
+      )
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='q[id_in_set][]'][value='#{log2.id}']"
+      )
+    end
+
     # ---- Bar (xl+) ----
 
     def test_bar_renders_show_label
