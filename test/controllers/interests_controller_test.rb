@@ -193,6 +193,19 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(["Observation"], objects.map(&:target_type).uniq)
   end
 
+  # The generic index dispatch's "no matches" flash already covers
+  # this -- the intro text and table must not also render when there's
+  # nothing to show (rolf has no Location interest in fixtures).
+  def test_index_no_matches_shows_flash_only
+    login("rolf")
+    get(:index, params: { type: "Location" })
+    assert_flash_error
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(0, objects.count)
+    assert_select("p", text: :list_interests_intro.l.as_displayed, count: 0)
+    assert_select("table", count: 0)
+  end
+
   # A hand-crafted URL could submit type as an Array -- must not
   # silently drop the filter (create_query_from_url_params's permit
   # step would otherwise fail validation and ignore it entirely).
