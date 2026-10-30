@@ -121,6 +121,13 @@ class Interest < AbstractModel
     target.unique_format_name(user)
   end
 
+  # `user` for target_format_name above; `target: [:name]` covers the
+  # two target types whose display needs it (Observation, NameTracker
+  # -- both belong_to :name; polymorphic eager-loading skips the rest).
+  def self.index_includes_tree
+    [:user, { target: [:name] }]
+  end
+
   ##############################################################################
 
   protected

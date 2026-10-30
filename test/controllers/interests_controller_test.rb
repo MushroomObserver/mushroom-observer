@@ -15,6 +15,30 @@ class InterestsControllerTest < FunctionalTestCase
     assert_select("body.interests__index")
   end
 
+  # Interest has no show page -- a single-result index must not
+  # redirect to one, unlike most Query-backed indexes.
+  def test_index_single_result_does_not_redirect
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    get(:index)
+    assert_response(:success)
+    assert_select("body.interests__index")
+  end
+
+  # Regression: by_users is forced server-side on every dispatch
+  # branch (including the generic create_query_from_url_params path)
+  # -- a request-supplied by_user must not leak another user's
+  # Interests.
+  def test_index_by_user_param_cannot_leak_other_users_interests
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: mary, state: true)
+    get(:index, params: { by_user: mary.id })
+    objects = @controller.instance_variable_get(:@objects)
+    assert_empty(objects.select { |i| i.user_id == mary.id })
+  end
+
   def test_set_interest_another_user
     login("rolf")
     get(:set_interest,
@@ -146,6 +170,8 @@ class InterestsControllerTest < FunctionalTestCase
                     user: rolf, state: true)
     get(:index, params: { type: "Observation" })
     assert_select("body.interests__index")
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(["Observation"], objects.map(&:target_type).uniq)
   end
 
   def test_index_filtered_by_state
@@ -156,6 +182,8 @@ class InterestsControllerTest < FunctionalTestCase
                     user: rolf, state: false)
     get(:index, params: { state: "Ignoring" })
     assert_select("body.interests__index")
+    objects = @controller.instance_variable_get(:@objects)
+    assert(objects.all?(&:ignoring?))
   end
 
   # set_interest's "already on" / "already off" branches.

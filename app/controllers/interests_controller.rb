@@ -23,29 +23,21 @@ class InterestsController < ApplicationController
 
   # Display order for the type-filter pills -- not alphabetical, the
   # most-common target types come first. Anything not listed here
-  # (LocationDescription, NameDescription, NameTracker) sorts after,
-  # alphabetically.
-  TYPE_FILTER_ORDER = %w[Name Observation Project SpeciesList
-                         Location].freeze
+  # (location_description, name_description, name_tracker) sorts
+  # after, alphabetically.
+  TYPE_FILTER_ORDER = %w[name observation project species_list
+                         location].freeze
 
   # Display order for the state-filter pills.
   STATE_FILTER_ORDER = [:watching, :ignoring].freeze
 
-  # Show list of objects user has expressed interest in.
-  # Linked from: left-hand panel
-  # Inputs: params[:page], params[:type], params[:state]
-  # Outputs: @interests, @types, @pagination_data, @selected_type,
-  #          @states, @selected_state, @query
   def index
-    @types = available_types
-    @selected_type = params[:type].presence
-    @states = available_states(@selected_type)
-    @selected_state = params[:state].presence&.downcase
-    @query = build_interests_query(@selected_type, @selected_state)
-    @pagination_data = number_pagination_data(:page, 100)
-    @interests = paginate_interests!
+    build_index_with_query
+  end
+
+  def render_index_view
     render(Views::Controllers::Interests::Index.new(
-             interests: @interests, types: @types,
+             interests: @objects, types: @types,
              selected_type: @selected_type,
              states: @states, selected_state: @selected_state,
              pagination_data: @pagination_data, query: @query
@@ -54,38 +46,62 @@ class InterestsController < ApplicationController
 
   private
 
-  # `by_users` is forced to the current user's id here -- Interests
-  # are private, so the controller does not read it from a request
-  # param. `.compact` drops the `types`/`state` keys entirely when
-  # unfiltered, rather than passing explicit `nil` values, since a
-  # declared (but nil) enum attr fails `Query` validation.
-  # `find_or_create_query` (not `create_query`) because the filter
-  # caption needs a saved `QueryRecord` -- `FilterCaption` reads
-  # `query.record.id`.
-  def build_interests_query(type, state)
-    find_or_create_query(
-      :Interest,
-      { by_users: [@user.id], types: type_tag(type),
-        state: state_param(state) }.compact
-    )
+  # Interests are private -- `by_users` is forced to the current
+  # user's id on every dispatch branch, not read from a request
+  # param. `type`/`state` also need normalizing to the lowercase tag
+  # form `Query::Interests` expects -- the structural-enum validator
+  # does no case folding.
+  def create_query_from_url_params(model_symbol, raw_params)
+    forced = { by_users: [@user.id] }
+    forced[:type] = raw_params[:type].to_s.underscore if
+      raw_params[:type].present?
+    forced[:state] = raw_params[:state].to_s.underscore if
+      raw_params[:state].present?
+    super(model_symbol, raw_params.merge(forced))
   end
 
-  def type_tag(type)
-    return nil if type.blank?
-
-    type.underscore.to_sym
+  # `by_users` is always present (forced above), so it must not by
+  # itself count as "a filter is active" -- otherwise every request
+  # would route through create_query_from_url_params, which has no
+  # find_or_create_query session-merge step `sorted_index` relies on.
+  def other_filter_param_present?
+    filter_params = controller_query_class.recognized_params -
+                    INDEX_BASIC_PARAMS - [:pattern, :by_users, :by_user]
+    filter_params.any? { |p| params[p].present? }
   end
 
-  def state_param(state)
-    return nil if state.blank?
+  def unfiltered_index_opts
+    super.deep_merge(query_args: { by_users: [@user.id] })
+  end
 
-    state.to_sym
+  def sorted_index_opts
+    super.deep_merge(query_args: { by_users: [@user.id] })
+  end
+
+  # `opts` wins where it sets something unique (e.g. a pattern-search
+  # redirect flag); `always_index: true` must win regardless, since
+  # Interest has no show page to redirect a single result to.
+  def index_display_opts(opts, _query)
+    opts.merge(num_per_page: 100, always_index: true,
+               include: Interest.index_includes_tree)
+  end
+
+  # Hook runs before template displayed. Must return query. Derives
+  # the filter-pill ivars from the resolved query instead of raw
+  # params, matching whichever dispatch branch built it. `state` is a
+  # scalar attr (not array-wrapped like `types`), so it comes back as
+  # a bare Symbol, not an Array.
+  def filtered_index_final_hook(query, _display_opts)
+    @selected_type = query.params[:types]&.first&.to_s
+    @types = available_types
+    @selected_state = query.params[:state]&.to_s
+    @states = available_states(@selected_type)
+    query
   end
 
   def available_types
-    Interest.for_user(@user).distinct.pluck(:target_type).sort_by do |t|
-      [TYPE_FILTER_ORDER.index(t) || TYPE_FILTER_ORDER.size, t]
-    end
+    Interest.for_user(@user).distinct.pluck(:target_type).map(&:underscore).
+      sort_by { |t| [TYPE_FILTER_ORDER.index(t) || TYPE_FILTER_ORDER.size, t] }
   end
 
   def available_states(type)
@@ -93,10 +109,6 @@ class InterestsController < ApplicationController
     interests = interests.types(type) if type.present?
     present = interests.distinct.pluck(:state).map(&:to_sym)
     STATE_FILTER_ORDER & present
-  end
-
-  def paginate_interests!
-    @query.paginate(@pagination_data, include: { target: [:name] })
   end
 
   public
