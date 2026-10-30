@@ -88,18 +88,6 @@ class NameTracker < AbstractModel
     name ? name.display_name(user) : "?"
   end
 
-  # Returns hash of options to pass into link_to to link to edit action:
-  #
-  #   link_to("edit", name_tracker.link_params)
-  #
-  def link_params
-    result = {}
-    result[:controller] = :name
-    result[:action] = :email_tracking
-    result[:id] = name_id
-    result
-  end
-
   ##############################################################################
 
   protected
