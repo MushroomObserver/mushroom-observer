@@ -45,11 +45,7 @@ class Inat
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
       @observation = nil
-      return skipped if unimportable?
-      return skipped if date_missing?
-      return skipped if unlicensed_other?
-      return skipped if already_linked?
-      return skipped if crosslinked_to_live_mo_obs?
+      return skipped if skip?
 
       builder = create_mo_observation
       return unless @observation
@@ -60,6 +56,12 @@ class Inat
     end
 
     private
+
+    # Each check logs and counts the skip it finds, so the order matters.
+    def skip?
+      unimportable? || date_missing? || opted_out_other? ||
+        unlicensed_other? || already_linked? || crosslinked_to_live_mo_obs?
+    end
 
     # The per-obs clock measures the gap since the last observation this
     # run finished with, and a skip is one of those. Leaving it running
@@ -105,7 +107,33 @@ class Inat
       true
     end
 
+    # An observer who opted out of MO (Inat::OptOut) is imported the way an
+    # unlicensed observation of another user is: skipped from an
+    # import-others run unless it creates skeletons, a skeleton otherwise --
+    # including from the observer themself.
+    def opted_out_other?
+      @opted_out = Inat::OptOut.opted_out?(@inat_obs[:user])
+      return false unless @opted_out
+
+      report_opted_out
+      return false unless inat_import.import_others
+      return false if inat_import.create_skeletons
+
+      log("Skipped #{@inat_obs[:id]} observer opted out")
+      true
+    end
+
+    # Once per observer per import.
+    def report_opted_out
+      message = :inat_user_opted_out.l(login: @inat_obs[:user].to_h[:login])
+      return if inat_import.response_errors.to_s.include?(message)
+
+      inat_import.add_response_error(message)
+    end
+
     def skeleton?
+      return true if @opted_out
+
       inat_import.import_others && inat_import.create_skeletons &&
         @inat_obs[:license_code].blank?
     end

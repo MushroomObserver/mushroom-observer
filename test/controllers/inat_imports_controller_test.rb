@@ -974,6 +974,20 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_confirm_leaves_opted_out_observers_out_of_expected_count
+    ExcludedInatUser.create!(inat_login: "excluded_on_inat")
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("not_user_id" => "excluded_on_inat")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    post_import_others_confirm(create_skeletons: "0")
+
+    assert_select("#expected_count", "0",
+                  "Without skeletons, opted-out observers are not expected")
+  end
+
   # One of 3 obss has an empty license: iNat's license-code filter leaves
   # it out, and so does its `licensed=false` filter.
   def test_confirm_counts_empty_license_obs_as_unlicensed
@@ -1263,6 +1277,49 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:authorization_response, params: authorization_denial_callback_params)
 
     assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  # Linking an iNat account from the profile (Account::InatLinksController)
+  # comes back through the same callback.
+  def test_authorization_response_links_the_inat_account
+    login("rolf")
+    state = "#{InatImportsController::AccountLinking::LINK_STATE_PREFIX}abc"
+    session[:inat_link_state] = state
+
+    Inat::AuthorizedLogin.stub(:call, "Rolf_On_iNat") do
+      get(:authorization_response, params: { code: "code", state: state })
+    end
+
+    assert_equal("rolf_on_inat", users(:rolf).reload.inat_username)
+    assert_nil(session[:inat_link_state], "A link state is used once")
+    assert_redirected_to(edit_account_profile_path)
+    assert_flash_success
+  end
+
+  def test_authorization_response_refuses_an_unknown_link_state
+    login("rolf")
+    session[:inat_link_state] = "link-expected"
+
+    Inat::AuthorizedLogin.stub(:call, ->(_) { flunk("must not link") }) do
+      get(:authorization_response,
+          params: { code: "code", state: "link-forged" })
+    end
+
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  def test_authorization_response_reports_a_failed_link
+    login("rolf")
+    session[:inat_link_state] = "link-abc"
+    failure = ->(_) { raise(RestClient::Unauthorized.new) }
+
+    Inat::AuthorizedLogin.stub(:call, failure) do
+      get(:authorization_response, params: { code: "code", state: "link-abc" })
+    end
+
+    assert_redirected_to(edit_account_profile_path)
     assert_flash_error
   end
 
