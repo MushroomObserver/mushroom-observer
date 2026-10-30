@@ -1,2 +1,6 @@
-|{white-space:nowrap}. 2026-10-26 | Add an existing Field Slip's Observation from the Add box | "PR#5542":https://github.com/MushroomObserver/mushroom-observer/pull/5542 |
-|{white-space:nowrap}. 2026-10-26 | Show the collector, not the importer, on Observation lists | "PR#5539":https://github.com/MushroomObserver/mushroom-observer/pull/5539 |
+|{white-space:nowrap}. 2026-10-29 | Let Users delete their content and opt out of iNat imports | "PR#5555":https://github.com/MushroomObserver/mushroom-observer/pull/5555 |
+|{white-space:nowrap}. 2026-10-29 | Fix stray HTML and &amp; in Publication references | "PR#5556":https://github.com/MushroomObserver/mushroom-observer/pull/5556 |
+|{white-space:nowrap}. 2026-10-29 | Redesign the Interests page's notification and delete controls | "PR#5564":https://github.com/MushroomObserver/mushroom-observer/pull/5564 |
+|{white-space:nowrap}. 2026-10-27 | Fix the link for requesting credit on a Description | "PR#5547":https://github.com/MushroomObserver/mushroom-observer/pull/5547 |
+|{white-space:nowrap}. 2026-10-27 | Retry emails that fail to send for temporary reasons | "PR#5546":https://github.com/MushroomObserver/mushroom-observer/pull/5546 |
+|{white-space:nowrap}. 2026-10-27 | Fix untitled images showing a blank title instead of "Image" | "PR#5557":https://github.com/MushroomObserver/mushroom-observer/pull/5557 |

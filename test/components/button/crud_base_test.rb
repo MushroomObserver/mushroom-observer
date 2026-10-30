@@ -66,13 +66,13 @@ class ButtonCRUDBaseTest < ComponentTestCase
     assert_html(html, ".patch_herbarium_link_#{herbarium.id}")
   end
 
-  def test_button_with_confirm_shows_title_and_button_name
+  def test_button_with_confirm_shows_message_and_button_name
     html = render_crud_base(name: "Remove", target: "/items/1/remove",
                             method: :patch, confirm: "Remove this item?")
 
-    # confirm becomes both the turbo-confirm trigger and the dialog title
-    assert_html(html, "[data-turbo-confirm]")
-    assert_html(html, "[data-turbo-confirm-title]")
+    # The dialog's body shows confirm; its heading stays "Are you sure?".
+    assert_html(html, "[data-turbo-confirm='Remove this item?']")
+    assert_no_html(html, "[data-turbo-confirm-title]")
     assert_html(html, "[data-turbo-confirm-button='Remove']")
   end
 
@@ -372,7 +372,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button", text: "Create")
   end
 
-  # Put + confirm: form action, `_method=put`, turbo-confirm title
+  # Put + confirm: form action, `_method=put`, turbo-confirm message
   # and button data, body text.
   def test_put_with_confirm
     html = render_button(
@@ -383,7 +383,6 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "form[action='/items/1']")
     assert_html(html, "input[name='_method'][value='put']")
     assert_html(html, "[data-turbo-confirm='Sure?']")
-    assert_html(html, "[data-turbo-confirm-title='Sure?']")
     assert_html(html, "[data-turbo-confirm-button='Replace']")
     assert_html(html, "button", text: "Replace")
   end

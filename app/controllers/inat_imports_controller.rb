@@ -29,6 +29,7 @@ class InatImportsController < ApplicationController
   include ImportOptions
   include ProjectScope
   include PreviousImports
+  include AccountLinking
   include Inat::Constants
 
   before_action :login_required
@@ -118,6 +119,7 @@ class InatImportsController < ApplicationController
   def authorization_response
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
+    return link_inat_account(auth_code) if linking_inat_account?
 
     inat_import = InatImport.find_by(id: string_param(:state), user: @user)
     return not_authorized unless inat_import
