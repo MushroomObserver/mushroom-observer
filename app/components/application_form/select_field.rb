@@ -93,8 +93,6 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_select_field(&options_block)
       if wrapper_options[:button]
         render_input_group_button { render_select(&options_block) }
-      elsif wrapper_options[:addon]
-        render_input_group_addon { render_select(&options_block) }
       else
         render_select(&options_block)
       end
