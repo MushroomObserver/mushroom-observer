@@ -66,7 +66,10 @@ class ParallelTestConfigService
       return nil
     end
 
-    database_config = YAML.load_file(config_path)
+    # aliases: true -- config/database.yml merges shared credentials
+    # via YAML anchors (`<<: *credentials`); Psych's safe-load default
+    # rejects alias nodes.
+    database_config = YAML.load_file(config_path, aliases: true)
     test_config = database_config["test"]
 
     unless test_config

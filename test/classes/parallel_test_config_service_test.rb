@@ -112,6 +112,29 @@ class ParallelTestConfigServiceTest < UnitTestCase
     end
   end
 
+  # Regression: config/database.yml uses a YAML anchor/merge key to
+  # share credentials across environments (`<<: *credentials`).
+  # `YAML.dump`-built fixtures (create_database_yml) don't produce an
+  # alias node, so this is the only coverage for that shape.
+  def test_setup_config_files_with_yaml_anchors
+    config_path = @rails_root.join("config")
+    FileUtils.mkdir_p(config_path)
+    File.write(config_path.join("database.yml"), <<~YAML)
+      credentials: &credentials
+        username: anchored_user
+        password: anchored_pass
+      test:
+        <<: *credentials
+    YAML
+
+    result = @service.setup_config_files
+
+    assert(result, "setup_config_files should return true")
+    content = File.read(@rails_root.join("config/mysql-test-0.cnf"))
+    assert_match(/user=anchored_user/, content)
+    assert_match(/password=anchored_pass/, content)
+  end
+
   # Test: Set up config files with default credentials when not specified
   def test_setup_config_files_default_credentials
     create_database_yml({})

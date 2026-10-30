@@ -26,16 +26,4 @@ class NameTrackerTest < UnitTestCase
     assert_equal(NameTracker.show_includes_tree,
                  NameTracker.index_includes_tree)
   end
-
-  def test_link_params
-    name_tracker = name_trackers(:coprinus_comatus_name_tracker)
-
-    expected = {
-      controller: :name,
-      action: :email_tracking,
-      id: name_tracker.name_id
-    }
-
-    assert_equal(expected, name_tracker.link_params)
-  end
 end

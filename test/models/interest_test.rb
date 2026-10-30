@@ -61,6 +61,29 @@ class InterestTest < UnitTestCase
                     :validate_interest_user_missing.t)
   end
 
+  def test_validate_target_type_not_in_all_types
+    interest = Interest.new(
+      user: rolf,
+      target: observations(:minimal_unknown_obs),
+      state: true
+    )
+    interest.target_type = "Comment"
+
+    assert_not(interest.save)
+    assert_includes(interest.errors[:target_type], "is not included " \
+                                                    "in the list")
+  end
+
+  def test_types_scope
+    expects = [interests(:detailed_unknown_obs_interest)]
+    assert_obj_arrays_equal(expects, Interest.types(:observation))
+  end
+
+  def test_state_scope
+    assert_obj_arrays_equal(Interest.where(state: true), Interest.state(true))
+    assert_obj_arrays_equal(Interest.where(state: false), Interest.state(false))
+  end
+
   def test_validate_target_type_too_long
     interest = Interest.new(
       user: rolf,

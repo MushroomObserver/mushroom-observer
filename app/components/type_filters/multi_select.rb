@@ -43,8 +43,21 @@ module Components::TypeFilters::MultiSelect
     input(type: "hidden", name: "back", value: "rss_logs")
     return unless @query
 
-    query_params_except_types.each do |key, value|
-      input(type: "hidden", name: key, value: value)
+    # query_from_q_param_hash requires a :model key to resolve
+    # params[:q] -- index_filter excludes it (it's meant for merging
+    # onto route-helper args, where the model is already implied), so
+    # it needs adding back explicitly here.
+    input(type: "hidden", name: "q[model]", value: @query.model.name)
+    # Nested under q[...] like the type checkboxes -- query_from_q_param
+    # reconstructs the whole query from params[:q], so a flat name here
+    # would go unread.
+    @query.index_filter(except: [:types]).each do |key, value|
+      name = "q[#{key}]"
+      if value.is_a?(Array)
+        value.each { |v| input(type: "hidden", name: "#{name}[]", value: v) }
+      else
+        input(type: "hidden", name: name, value: value)
+      end
     end
   end
 
@@ -230,19 +243,6 @@ module Components::TypeFilters::MultiSelect
 
   def show_make_default?
     @user && @user.default_rss_type.to_s.split.sort != @types
-  end
-
-  def query_params_except_types
-    return {} unless @query
-
-    q = q_param(@query).except(:types)
-    # Convert { q: { model: "RssLog" } }.to_query to key/value pairs
-    query_string = { q: q }.to_query
-    pairs = query_string.split("&")
-    pairs.to_h do |pair|
-      key, value = pair.split("=", 2).map { |str| CGI.unescape(str) }
-      [key, value]
-    end
   end
 
   def query_params_with_types(types)

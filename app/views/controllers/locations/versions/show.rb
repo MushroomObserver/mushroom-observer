@@ -12,9 +12,6 @@ module Views::Controllers::Locations
       def view_template
         register_chrome
         Row { render_columns }
-        render(Views::Controllers::Versions::Previous.new(
-                 obj: @location, versions: @versions.to_a
-               ))
         render(::Views::Layouts::ObjectFooter.new(
                  user: current_user, obj: @location, versions: @versions.to_a
                ))
@@ -29,6 +26,7 @@ module Views::Controllers::Locations
         add_context_nav(
           ::Tab::Location::VersionActions.new(location: @location)
         )
+        container_class(:full)
         column_classes(:seven_five)
       end
 
@@ -44,6 +42,9 @@ module Views::Controllers::Locations
                  ))
           render(Views::Controllers::Locations::Show::Notes.new(
                    location: @location
+                 ))
+          render(Views::Controllers::Versions::Previous.new(
+                   obj: @location, versions: @versions.to_a
                  ))
         end
       end

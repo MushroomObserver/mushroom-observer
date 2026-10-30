@@ -107,7 +107,7 @@ module Names
                                       name_id: name_id,
                                       note_template: @note_template,
                                       approved: false)
-      @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
+      @interest = Interest.new(user: @user, target: @name_tracker, state: true)
       flash_notice(
         :email_tracking_now_tracking.t(name: @name.display_name(@user))
       )

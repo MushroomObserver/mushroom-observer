@@ -56,13 +56,25 @@ module Views::Layouts
                              :any_name, :name_proposed, :this_name,
                              :other_names].freeze
 
+    # Params forced server-side rather than chosen by the viewer,
+    # keyed by model -- captioning them would just repeat "by users:
+    # you" on every load. `Query::Interests#by_users` is forced to the
+    # current user's id (Interests are private), not read from a URL
+    # param.
+    MODEL_HIDDEN_PARAMS = { Interest => [:by_users] }.freeze
+
     prop :query, ::Query
 
     # Whether `query` has any filter params to caption, beyond the
     # sort order -- used by `Views::FullPageBase#add_query_filters` to
     # decide whether to render the index bar.
     def self.filters_present?(query)
-      query.params.except(:order_by).compact_blank.present?
+      caption_params(query).present?
+    end
+
+    def self.caption_params(query)
+      hidden = MODEL_HIDDEN_PARAMS[query.model] || []
+      query.params.except(:order_by, *hidden).compact_blank
     end
 
     def view_template
@@ -123,8 +135,8 @@ module Views::Layouts
     def render_caption_param_text(truncate:)
       if self.class.filters_present?(@query)
         wrap_tag = truncate ? :span : :div
-        render_params_joined(@query.params, truncate: truncate,
-                                            wrap_tag: wrap_tag)
+        render_params_joined(self.class.caption_params(@query),
+                             truncate: truncate, wrap_tag: wrap_tag)
       else
         plain(:all.ti)
       end

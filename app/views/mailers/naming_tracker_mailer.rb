@@ -9,6 +9,7 @@ class Views::Mailers::NamingTrackerMailer < Views::Mailers::Base
   prop :receiver, ::User
   prop :observation, ::Observation
   prop :naming, ::Naming
+  prop :name_tracker, ::NameTracker
 
   class Html < self
     def view_template
@@ -48,6 +49,10 @@ class Views::Mailers::NamingTrackerMailer < Views::Mailers::Base
   def name_url = "#{MO.http_domain}/names/#{@naming.name_id}"
   def observer_url = "#{MO.http_domain}/users/#{@observation.user_id}"
   def identifier_url = "#{MO.http_domain}/users/#{@naming.user_id}"
+
+  def disable_tracking_url
+    edit_tracker_of_name_url(@name_tracker.name_id, host: MO.http_domain)
+  end
 
   def intro
     base = :email_naming_for_tracker_intro.tp(obs: "xxx", name: "yyy")
@@ -96,8 +101,7 @@ class Views::Mailers::NamingTrackerMailer < Views::Mailers::Base
     [[:email_links_show_object.t(type: :observation), observation_url],
      [:email_links_show_observer.t, observer_url],
      *identifier_link,
-     [:email_links_disable_tracking.t(type: :name),
-      "#{MO.http_domain}/name/email_tracking/#{@naming.name_id}"],
+     [:email_links_disable_tracking.t(type: :name), disable_tracking_url],
      [:email_links_your_interests.t, "#{MO.http_domain}/interests"],
      [:email_links_latest_changes.t, MO.http_domain]]
   end

@@ -94,6 +94,28 @@ tbody.collapse.show {
   }
 }
 
+// Baseline correction for icon+text pairs that aren't framed as a
+// .btn: plain Link::Get (.inline-icon-link sets top: 0 instead), a
+// form.button_to button (Components::Button::CRUDBase's strip
+// variant -- no .btn class), and the sidebar heading icons. The
+// `> span >` variants cover Components::Icon's title: wrap (moves
+// tooltip attrs off the <svg> onto a wrapping <span>). Excludes
+// `.info-collapse-trigger` (and any other `.inline-flex-center`
+// trigger) -- those are icon-only, flex-centered against their row's
+// siblings, not paired with adjacent text, so this baseline nudge
+// only pushes them out of alignment.
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > .mo-icon,
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > span > .mo-icon,
+form.button_to button:not(.btn):not(.inline-flex-center) > .mo-icon,
+form.button_to button:not(.btn):not(.inline-flex-center)
+  > span > .mo-icon,
+.list-group-item > .mo-icon,
+.list-group-item > span > .mo-icon {
+  top: 2px;
+}
+
 // A "filled/bordered" .btn's icon reads small next to the
 // button's bold label text (e.g. the location-map "Show map"
 // toggle). .btn-link buttons look like plain links, not framed

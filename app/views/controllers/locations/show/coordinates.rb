@@ -60,20 +60,20 @@ module Views::Controllers::Locations
           render_north
           render_east_west
           render_south
-          hr(class: "my-4")
+          hr(class: "my-3")
           render_elevation
         end
       end
 
       def render_north
-        div(class: "text-center my-4") do
+        div(class: "text-center mb-3") do
           b { append_colon(:north.ti) }
           plain("#{@location.north}°")
         end
       end
 
       def render_south
-        div(class: "text-center my-4") do
+        div(class: "text-center mt-3") do
           b { append_colon(:south.ti) }
           plain("#{@location.south}°")
         end
@@ -97,7 +97,7 @@ module Views::Controllers::Locations
       end
 
       def render_elevation
-        div(class: "text-center my-4") do
+        div(class: "text-center mt-3") do
           render_elevation_line(:high, :show_location_highest)
           render_elevation_line(:low, :show_location_lowest)
         end
