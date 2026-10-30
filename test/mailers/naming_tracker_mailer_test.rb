@@ -3,10 +3,6 @@
 require("test_helper")
 
 class NamingTrackerMailerTest < MailerTestCase
-  def routes
-    Rails.application.routes.url_helpers
-  end
-
   def mary_tracker
     name_trackers(:agaricus_campestris_name_tracker_with_note)
   end
