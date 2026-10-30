@@ -182,8 +182,7 @@ export default class BaseAutocompleterController extends Controller {
         this.WRAP_CLASS + "\"");
     }
 
-    this.default_action =
-      this.listTarget?.children[0]?.children[0]?.dataset.action;
+    this.default_action = this.listTarget?.children[0]?.dataset.action;
     this.prepareInputElement();
   }
 
@@ -674,12 +673,11 @@ export default class BaseAutocompleterController extends Controller {
 
   getRowHeight() {
     const div = document.createElement('div'),
-      ul = this.listTarget.cloneNode(false),
-      li = this.listTarget.children[0].cloneNode(true),
-      a = li.children[0];
+      list = this.listTarget.cloneNode(false),
+      a = this.listTarget.children[0].cloneNode(true);
 
-    Object.keys(ul.dataset).forEach(dataKey => {
-      delete ul.dataset[dataKey];
+    Object.keys(list.dataset).forEach(dataKey => {
+      delete list.dataset[dataKey];
     });
     Object.keys(a.dataset).forEach(dataKey => {
       delete a.dataset[dataKey];
@@ -687,8 +685,8 @@ export default class BaseAutocompleterController extends Controller {
 
     div.classList.add('test');
     a.innerHTML = 'test';
-    ul.appendChild(li);
-    div.appendChild(ul);
+    list.appendChild(a);
+    div.appendChild(list);
     document.body.appendChild(div);
     this.temp_row = div;
     this.setRowHeight();
@@ -736,8 +734,7 @@ export default class BaseAutocompleterController extends Controller {
   updateRows(rows) {
     let i, text;
     for (i = 0; i < this.PULLDOWN_SIZE; i++) {
-      let row = rows.item(i),
-        link = row.children[0];
+      let link = rows.item(i);
       text = link.innerHTML;
       if (i === 0) link.setAttribute('href', "#");
       if (i + this.scroll_offset < this.matches.length) {

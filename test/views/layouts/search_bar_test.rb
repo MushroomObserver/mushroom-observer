@@ -82,8 +82,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
     stub_session(search_type: "observations", search_view: "advanced")
     html = render_bar(form_types: [:observations])
 
-    assert_html(html, "#search_nav_form.in")
-    assert_no_html(html, "#search_bar_elements.in")
+    assert_html(html, "#search_nav_form.#{EXPANDED}")
+    assert_no_html(html, "#search_bar_elements.#{EXPANDED}")
     assert_html(html,
                 "a[href='#search_nav_form'][aria-expanded='true']")
   end
@@ -91,8 +91,8 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
   def test_pattern_view_starts_open_by_default
     html = render_bar(form_types: [:observations])
 
-    assert_html(html, "#search_bar_elements.in")
-    assert_no_html(html, "#search_nav_form.in")
+    assert_html(html, "#search_bar_elements.#{EXPANDED}")
+    assert_no_html(html, "#search_nav_form.#{EXPANDED}")
     assert_html(html,
                 "a[href='#search_nav_form'][aria-expanded='false']")
   end
@@ -107,7 +107,7 @@ class Views::Layouts::SearchBarTest < ComponentTestCase
 
     html = render_bar(form_types: [:observations])
 
-    assert_html(html, "#search_bar_elements.in")
+    assert_html(html, "#search_bar_elements.#{EXPANDED}")
     assert_no_html(html, "[data-search-type-target='formToggle']")
   end
 

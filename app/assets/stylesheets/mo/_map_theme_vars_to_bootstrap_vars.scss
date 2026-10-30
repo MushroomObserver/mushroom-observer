@@ -96,6 +96,9 @@ $screen-lg-min:                             1320px;
 $screen-md-max:                             1319px;
 
 $grid-gutter-width:                         24px;
+// Matches cutover's $card-spacer-x -- BS3 has no such variable, so
+// this is an addition, not a theme override.
+$card-spacer-x:                             0.75rem;
 $navbar-height:                             40px;
 $navbar-margin-bottom:                      13px;
 $navbar-border-radius:                      0;

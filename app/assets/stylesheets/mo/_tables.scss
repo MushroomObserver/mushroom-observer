@@ -7,26 +7,11 @@ thead tr {
   background-color: $list-group-disabled-bg;
 }
 
-.table-curators,
-.table-description-permissions,
-.table-herbarium,
-.table-interests,
-.table-license-updater,
-.table-location-help,
-.table-manage-species-lists,
-.table-project-members,
-.table-review-donations,
-.table-upload-report,
-.table-visual-model {
-  th, td {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-  }
-}
-
 // Combine with `.table` on the same <table> element to cascade
 // vertical-align: middle onto every cell -- overrides Bootstrap 3's
-// `th, td { vertical-align: top }` default.
+// `th, td { vertical-align: top }` default. `.align-middle`
+// (mo/_utilities.scss) already covers the plain per-cell case, so
+// this class is only for the table-wide cascade.
 .table-align-middle.table {
   > thead > tr > th,
   > thead > tr > td,
@@ -35,6 +20,27 @@ thead tr {
   > tfoot > tr > th,
   > tfoot > tr > td {
     vertical-align: middle !important;
+  }
+}
+
+// Lines a table's first/last column up with the card-style padding
+// (.pl-card/.pr-card, mo/_utilities.scss) used elsewhere on the
+// page, instead of the content touching the table's edge.
+.table {
+  > thead > tr > th:first-child,
+  > tbody > tr > th:first-child,
+  > tbody > tr > td:first-child,
+  > tfoot > tr > th:first-child,
+  > tfoot > tr > td:first-child {
+    @extend .pl-card;
+  }
+
+  > thead > tr > th:last-child,
+  > tbody > tr > th:last-child,
+  > tbody > tr > td:last-child,
+  > tfoot > tr > th:last-child,
+  > tfoot > tr > td:last-child {
+    @extend .pr-card;
   }
 }
 
@@ -72,12 +78,13 @@ thead tr {
 
       > th,
       > td {
-        padding: 0.25rem 0;
+        // 2.5px at the 16px root -- see issue #5527
+        padding: 0.15625rem 0;
         text-align: center;
         vertical-align: middle;
 
         &:first-child {
-          padding: 0.25rem 0.5em;
+          padding: 0.15625rem 0.5em;
           text-align: left;
         }
       }
@@ -105,30 +112,6 @@ thead tr {
 
   td {
     padding: 0.1em 1em;
-  }
-}
-
-.table-herbarium {
-  table-layout: fixed;
-
-  th:nth-child(1),
-  td:nth-child(1),
-  th:nth-child(2),
-  td:nth-child(2) {
-    width: 7.5rem;
-    text-align: center;
-  }
-
-  th:nth-child(1),
-  td:nth-child(1) {
-    text-align: center;
-  }
-
-  td:nth-child(3),
-  td:nth-child(4) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 

@@ -8,6 +8,35 @@
   margin-right: auto;
   max-width: $screen-md-min;
   font-size: $font-size-base;
+
+  .badge-id {
+    color: $white;
+    border-color: $white;
+
+    &.badge-xl {
+      font-size: $font-size-large;
+    }
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: $black;
+      background-color: $white;
+      text-decoration: none;
+    }
+  }
+
+  .btn-outline-default {
+    color: $white;
+    background-color: transparent;
+    border-color: $white;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: $black;
+    }
+  }
 }
 
 // lightgallery-core.scss's own rule builds this from $lg-path-images

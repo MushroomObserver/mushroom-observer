@@ -104,7 +104,7 @@ ul.tight-list {
 }
 
 .panel-title {
-  font-size: 13px;
+  font-size: $font-size-base;
   font-weight: bold;
 }
 
@@ -112,7 +112,7 @@ ul.tight-list {
   font-size: 18px;
 
   small {
-    @extend .ml-3;
+    @extend .ml-2;
     color: $text-color;
   }
 
@@ -124,10 +124,21 @@ ul.tight-list {
   }
 }
 
+#owner_naming.h5 {
+  font-size: $font-size-base;
+
+  // 992px -- cutover's BS4 "lg" breakpoint; main's $screen-lg
+  // (1200px) is a different value, so this is hardcoded rather than
+  // reusing that variable.
+  @media screen and (min-width: 992px) {
+    font-size: $font-size-large;
+  }
+}
+
 @media screen and (min-width: $screen-sm-min) {
   .object_edit {
     .inline-link-block {
-      margin-top: 0.75rem;
+      margin-top: 0.25rem;
     }
   }
 }

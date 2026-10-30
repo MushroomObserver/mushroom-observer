@@ -41,7 +41,7 @@ class Views::Layouts::SearchBar < Views::Base
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
                 }) do
-      div(class: "flex-bar px-3 gap-2") do
+      div(class: "flex-bar px-card gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
         render_form_toggle unless on_search_page?

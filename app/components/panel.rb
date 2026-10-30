@@ -136,7 +136,7 @@ class Components::Panel < Components::Base
     Link(type: :collapse_toggle,
          target_id: @collapse_id || "",
          collapsed: !@expanded,
-         class: "panel-collapse-trigger ml-3",
+         class: "panel-collapse-trigger ml-3 inline-flex-center",
          data: collapse_toggle_data,
          aria: collapse_aria) do
       render_collapse_message

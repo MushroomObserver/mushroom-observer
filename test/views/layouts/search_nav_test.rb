@@ -20,7 +20,8 @@ class Views::Layouts::SearchNavTest < ComponentTestCase
     html = render(Views::Layouts::SearchNav.new)
 
     assert_html(html, "div#search_nav.collapse")
-    assert_no_html(html, "#search_nav.in")
+    assert_no_html(html,
+                   "#search_nav.#{Components::Collapsible::EXPANDED_CLASS}")
     assert_html(html, "form#pattern_search_form")
     assert_no_html(html, "form#identify_filter")
   end

@@ -22,19 +22,20 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # the row to update.
     html = render_row
 
-    assert_html(html, ".row.naming-row" \
-                      "#observation_naming_#{@naming.id}")
+    assert_html(html, ".naming-row#observation_naming_#{@naming.id}")
   end
 
   def test_renders_four_main_column_cells_plus_eyes_column
     # Layout pin: name / proposer / vote-tally / your-vote columns
     # sit inside the `col-sm-11`; the eyes icon column is the
-    # narrow `col-sm-1`.
+    # narrow `col-sm-1`. Proposer is hidden below `sm` -- the
+    # mobile prefix on the reasons row covers it there instead.
     html = render_row
 
-    assert_html(html, ".col.col-sm-11 > .row > .col.col-sm-4")
-    assert_html(html, ".col.col-sm-11 > .row > .col.col-sm-3", count: 2)
-    assert_html(html, ".col.col-sm-11 > .row > .col.col-sm-2")
+    assert_html(html, ".col.col-sm-11 .col-xs-5.col-sm-4")
+    assert_html(html, ".col.col-sm-11 .col-sm-3.d-none.d-sm-block")
+    assert_html(html, ".col.col-sm-11 .col-xs-3.col-sm-2")
+    assert_html(html, ".col.col-sm-11 .col-xs-4.col-sm-3")
     assert_html(html, ".col-sm-1.d-none.d-sm-block")
   end
 
@@ -51,13 +52,23 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # destroy) appears next to the name link.
     html = render_row
 
-    assert_html(html, ".text-nowrap")
+    assert_html(html, ".inline-link-block")
     assert_html(html, "a.edit_naming_link_#{@naming.id}")
+  end
+
+  def test_mod_links_render_as_a_direct_sibling_of_the_name_link
+    # No wrapping block-level element between the name link and the
+    # mod-links group -- they must sit inline, on the same line, not
+    # nested in a div (which would push them onto a new line and make
+    # InlineLinkBlock's wrapper margin meaningless).
+    html = render_row
+
+    assert_html(html, "a + .inline-link-block")
   end
 
   def test_no_mod_links_for_non_owner
     # Non-owner viewer → InlineModLinks renders nothing, so the
-    # wrapper `.text-nowrap` is also absent.
+    # wrapper `.inline-link-block` is also absent.
     other_user = users(:mary)
     controller.instance_variable_set(:@user, other_user)
     html = render_row(user: other_user)
@@ -69,13 +80,21 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
 
   def test_renders_proposer_user_link
     # Selector class flows through from `Components::Link::User`:
-    # `user_link_<id>`. Mobile label "User:" prefixed so the cell
-    # is readable when column headers are hidden on `xs`.
+    # `user_link_<id>`. The proposer cell is hidden below `sm`; the
+    # "Proposed by <user>." prefix (tested below) carries this
+    # information on mobile instead.
     html = render_row
 
     assert_html(html, "a.user_link_#{@user.id}")
-    assert_html(html, "small.d-inline.d-sm-none",
-                text: "#{:show_namings_user.t}: ")
+  end
+
+  def test_renders_mobile_proposer_prefix
+    html = render_row
+
+    assert_html(html, ".d-inline.d-sm-none",
+                text: :show_namings_proposed_by.t(
+                  user: @user.unique_text_name
+                ))
   end
 
   # ---- vote tally cell -----------------------------------------------
@@ -101,8 +120,8 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
 
     assert_html(html, "a.vote-percent")
     assert_html(html, "a[data-modal='modal_naming_votes_#{@naming.id}']")
-    # vote-number span carries the count for JS / tests targeting
-    # it (it gets updated in place after a vote turbo_stream).
+    # vote-number carries the count for JS / tests targeting it (it
+    # gets updated in place after a vote turbo_stream).
     assert_html(html, ".vote-number")
   end
 
@@ -167,12 +186,11 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
   # ---- reasons row ---------------------------------------------------
 
   def test_reasons_row_renders
-    # The reasons live in a small-styled row under the four main
-    # columns. Always rendered (empty when no reasons used), so
-    # one assertion exercises the layout.
+    # Always rendered (empty when no reasons used), so one assertion
+    # exercises the layout.
     html = render_row
 
-    assert_html(html, ".naming-reasons.small")
+    assert_html(html, ".naming-reasons")
   end
 
   # ---- MergedNaming paths --------------------------------------------
@@ -200,6 +218,12 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
 
     assert_html(html, "a.user_link_#{@user.id}")
     assert_includes(html, @user.login)
+    # `@naming.user` resolves for this MergedNaming shape, so the
+    # mobile "Proposed by <user>." prefix renders too.
+    assert_html(html, ".d-inline.d-sm-none",
+                text: :show_namings_proposed_by.t(
+                  user: @user.unique_text_name
+                ))
   end
 
   def test_merged_naming_with_multiple_proposers_renders_matching_obs_link
@@ -218,6 +242,9 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
       html, "a[href='#{routes.occurrence_path(@obs.occurrence)}']",
       text: :show_observation_matching_observations.l
     )
+    # `@naming.user` is nil for this MergedNaming shape, so the
+    # mobile "Proposed by <user>." prefix doesn't render.
+    assert_no_html(html, ".d-inline.d-sm-none")
   end
 
   def test_merged_naming_renders_grouped_reasons_with_source_labels

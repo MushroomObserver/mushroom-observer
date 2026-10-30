@@ -81,7 +81,8 @@ module Views::Controllers::Projects
 
       # Date fields are collapsed by default (Accept any dates selected).
       assert_html(html, "[data-collapse-switch-type='false'].collapse")
-      assert_no_html(html, "[data-collapse-switch-type='false'].collapse.in")
+      assert_no_html(html,
+                     "[data-collapse-switch-type='false'].collapse.#{EXPANDED}")
 
       # No upload fields without upload_params
       assert_no_html(html, "input[type='file']")
@@ -111,7 +112,8 @@ module Views::Controllers::Projects
         "[value='true'][checked]"
       )
       # "Enforce date range" selected -- date fields are expanded.
-      assert_html(html, "[data-collapse-switch-type='false'].collapse.in")
+      assert_html(html,
+                  "[data-collapse-switch-type='false'].collapse.#{EXPANDED}")
     end
 
     def test_with_upload_params

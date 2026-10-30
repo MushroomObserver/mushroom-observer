@@ -5,7 +5,7 @@
 
 // layout: sidebar offcanvas and right_side
 // --------------------------------------------------
-$sidebar-max-width: 18rem;
+$sidebar-max-width: 11.25rem; // 180px at the 16px root -- see issue #5527
 
 .sidebar-offcanvas {
   max-width: $sidebar-max-width;

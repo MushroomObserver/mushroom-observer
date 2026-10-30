@@ -341,6 +341,26 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     end
   end
 
+  def test_create_collection_number_with_modal
+    obs = observations(:strobilurus_diminutivus_obs)
+    user = obs.user
+    params = {
+      observation_id: obs.id,
+      collection_number: {
+        name: user.login,
+        number: "1234",
+        modal: "true"
+      }
+    }
+    login(user.login)
+    assert_difference("CollectionNumber.count", 1) do
+      post(:create, params: params, format: :turbo_stream)
+    end
+    assert_select(
+      "turbo-stream[action='replace'][target='observation_collection_numbers']"
+    )
+  end
+
   def test_create_collection_number_turbo_validation_error
     obs = observations(:strobilurus_diminutivus_obs)
     login(obs.user.login)

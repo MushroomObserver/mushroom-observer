@@ -23,8 +23,7 @@ class Views::Layouts::Sidebar < Views::Base
   # sidebar.
   CSS_CLASSES = {
     heading: "disabled font-weight-bold",
-    admin: "list-group-item-danger indent",
-    indent: "indent",
+    admin: "list-group-item-danger",
     mobile_only: Components::Column.mobile_only_classes.join(" ").freeze
   }.freeze
 

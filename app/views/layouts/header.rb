@@ -31,12 +31,11 @@ module Views::Layouts
       trusted_html(banner) if banner.present?
     end
 
-    # The outer `.row` always renders, even when the inner content_for
-    # isn't set -- keeps the empty row in case any CSS / JS keys off
-    # `header > .row:last-child`.
     def render_filter_row
+      return unless content_for?(:observation_buttons)
+
       Row do
-        render_observation_buttons if content_for?(:observation_buttons)
+        render_observation_buttons
       end
     end
 

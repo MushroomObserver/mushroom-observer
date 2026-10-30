@@ -14,6 +14,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow
+    include FieldWrapperRendering
 
     slot :help
 
@@ -29,34 +30,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      inline = @wrapper_options[:inline] || false
-      wrap_class = @wrapper_options[:wrap_class]
-
-      div(class: form_group_class("form-group", inline, wrap_class)) do
-        render_label(label_text, inline) if show_label?
+      render_with_wrapper do
         p(class: "form-control-static") { display_text }
       end
     end
 
     private
 
-    def show_label?
-      wrapper_options[:label] != false
-    end
-
     def display_text
       @wrapper_options[:value] || @wrapper_options[:text] || ""
-    end
-
-    def form_group_class(base, inline, wrap_class)
-      classes = base
-      classes += " form-inline" if inline && base == "form-group"
-      classes += " #{wrap_class}" if wrap_class.present?
-      classes
-    end
-
-    def render_label(text, _inline)
-      label(for: field.dom.id, class: "mr-3") { text } if text
     end
   end
 end

@@ -14,7 +14,7 @@ module Views::Controllers::Articles
                target: article_path(@article), class: "text-larger")
         end
         div { render_byline }
-        trusted_html(truncate(strip_tags(@article.body), length: 80).tpl)
+        trusted_html(truncate(strip_tags(@article.body.tpl), length: 80))
       end
 
       private

@@ -101,8 +101,8 @@ module Views::Controllers::Admin::BlockedIps
         "[href='#blocked_ips_body']"
       )
 
-      # Body is expanded by default (has "in" class)
-      assert_html(html, ".panel-collapse.collapse.in")
+      # Body is expanded by default.
+      assert_html(html, ".panel-collapse.collapse.#{EXPANDED}")
     end
 
     private

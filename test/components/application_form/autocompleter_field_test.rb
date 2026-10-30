@@ -171,13 +171,12 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_nested(
       html,
       parent_selector: ".auto_complete.dropdown-menu",
-      child_selector: "ul.virtual_list" \
+      child_selector: ".virtual_list" \
                       "[data-autocompleter--herbarium-target='list']"
     )
 
-    # Should have 10 dropdown items with links
-    assert_html(html, ".dropdown-item", count: 10)
-    assert_html(html, ".dropdown-item a", count: 10)
+    # Should have 10 dropdown item links
+    assert_html(html, "a.dropdown-item", count: 10)
 
     # Should have has_id_indicator (green check icon) -- a wrapping
     # span, not a bare svg (padding on a replaced element like svg
@@ -213,7 +212,7 @@ class AutocompleterFieldTest < ComponentTestCase
 
     # Should still have dropdown structure
     assert_html(html, ".auto_complete.dropdown-menu")
-    assert_html(html, "ul.virtual_list")
+    assert_html(html, ".virtual_list")
   end
 
   def test_textarea_autocompleter_has_newline_separator
@@ -261,8 +260,8 @@ class AutocompleterFieldTest < ComponentTestCase
     )
 
     # Dropdown items should have click action with namespaced controller
-    selector = "li.dropdown-item " \
-               "a[data-action*='click->autocompleter--herbarium#selectRow']"
+    selector = "a.dropdown-item" \
+               "[data-action*='click->autocompleter--herbarium#selectRow']"
     assert_html(html, selector, count: 10)
   end
 

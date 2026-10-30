@@ -130,6 +130,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/rubocop_on_save.sh && exec .claude/hooks/rubocop_on_save.sh || exit 0",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_long_comment_blocks.sh && exec .claude/hooks/block_long_comment_blocks.sh || exit 0",
+            "timeout": 10
           }
         ]
       }

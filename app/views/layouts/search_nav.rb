@@ -22,8 +22,7 @@ class Views::Layouts::SearchNav < Views::Base
     # this element's border from doubling up with #top_nav's bottom
     # border sitting above it.
     Navbar(variant: :default, element: :div, flex: false, id: "search_nav",
-           class: class_names("border-top-0", "hidden-print",
-                              collapse_classes),
+           class: collapse_classes, padding: "py-2 px-0",
            data: {
              controller: "search-type",
              # Stimulus Array values must be JSON. Rails' tag helper
@@ -39,7 +38,9 @@ class Views::Layouts::SearchNav < Views::Base
   private
 
   def collapse_classes
-    Components::Collapsible.collapse_classes
+    Components::Collapsible.collapse_classes(
+      html_class: "hidden-print mb-2 border-top-0"
+    )
   end
 
   # Identify pages get a dedicated filter bar; everything else gets
