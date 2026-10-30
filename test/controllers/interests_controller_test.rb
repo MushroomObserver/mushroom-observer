@@ -39,6 +39,25 @@ class InterestsControllerTest < FunctionalTestCase
     assert_empty(objects.select { |i| i.user_id == mary.id })
   end
 
+  # Regression: a bookmarked/forwarded ?q= param carrying someone
+  # else's by_users must not leak their Interests, through either
+  # the sorted_index (find_or_create_query) branch or the
+  # create_query_from_url_params branch (when combined with type).
+  def test_index_bookmarked_q_param_cannot_leak_other_users_interests
+    login("rolf")
+    mary_interest = Interest.create(target: observations(:minimal_unknown_obs),
+                                    user: mary, state: true)
+    malicious_q = { model: "Interest", by_users: [mary.id] }
+
+    get(:index, params: { q: malicious_q })
+    objects = @controller.instance_variable_get(:@objects)
+    assert_empty(objects.select { |i| i.id == mary_interest.id })
+
+    get(:index, params: { q: malicious_q, type: "Observation" })
+    objects = @controller.instance_variable_get(:@objects)
+    assert_empty(objects.select { |i| i.id == mary_interest.id })
+  end
+
   def test_set_interest_another_user
     login("rolf")
     get(:set_interest,
