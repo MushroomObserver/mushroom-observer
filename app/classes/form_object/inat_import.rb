@@ -15,4 +15,5 @@ class FormObject::InatImport < FormObject::Base
   attribute :choose_method, :string
   attribute :inat_project, :string
   attribute :inat_project_id, :string
+  attribute :project_site, :string
 end

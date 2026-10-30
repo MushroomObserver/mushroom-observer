@@ -673,10 +673,13 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_unprocessable
     assert_select("#expected_count")
-    body = @response.body
-    assert_match(:inat_import_confirm_expected_caption.l, body)
+    assert_select_text_includes(
+      "#expected_count_line", :inat_import_confirm_expected_caption.l
+    )
     assert_select("#expected_count", "2")
-    assert_match(:inat_import_confirm_time_estimate_caption.l, body)
+    assert_select_text_includes(
+      "#estimated_time_line", :inat_import_confirm_time_estimate_caption.l
+    )
     assert_select("#estimated_time", "00:00:24")
   end
 
@@ -971,6 +974,20 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_confirm_leaves_opted_out_observers_out_of_expected_count
+    ExcludedInatUser.create!(inat_login: "excluded_on_inat")
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("not_user_id" => "excluded_on_inat")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    post_import_others_confirm(create_skeletons: "0")
+
+    assert_select("#expected_count", "0",
+                  "Without skeletons, opted-out observers are not expected")
+  end
+
   # One of 3 obss has an empty license: iNat's license-code filter leaves
   # it out, and so does its `licensed=false` filter.
   def test_confirm_counts_empty_license_obs_as_unlicensed
@@ -1260,6 +1277,49 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:authorization_response, params: authorization_denial_callback_params)
 
     assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  # Linking an iNat account from the profile (Account::InatLinksController)
+  # comes back through the same callback.
+  def test_authorization_response_links_the_inat_account
+    login("rolf")
+    state = "#{InatImportsController::AccountLinking::LINK_STATE_PREFIX}abc"
+    session[:inat_link_state] = state
+
+    Inat::AuthorizedLogin.stub(:call, "Rolf_On_iNat") do
+      get(:authorization_response, params: { code: "code", state: state })
+    end
+
+    assert_equal("rolf_on_inat", users(:rolf).reload.inat_username)
+    assert_nil(session[:inat_link_state], "A link state is used once")
+    assert_redirected_to(edit_account_profile_path)
+    assert_flash_success
+  end
+
+  def test_authorization_response_refuses_an_unknown_link_state
+    login("rolf")
+    session[:inat_link_state] = "link-expected"
+
+    Inat::AuthorizedLogin.stub(:call, ->(_) { flunk("must not link") }) do
+      get(:authorization_response,
+          params: { code: "code", state: "link-forged" })
+    end
+
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  def test_authorization_response_reports_a_failed_link
+    login("rolf")
+    session[:inat_link_state] = "link-abc"
+    failure = ->(_) { raise(RestClient::Unauthorized.new) }
+
+    Inat::AuthorizedLogin.stub(:call, failure) do
+      get(:authorization_response, params: { code: "code", state: "link-abc" })
+    end
+
+    assert_redirected_to(edit_account_profile_path)
     assert_flash_error
   end
 
@@ -1564,6 +1624,44 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash(:inat_list_xor_all,
                  on_fail: "URL + Import All should flash XOR error")
     assert_form_action(action: :create)
+  end
+
+  # iNat shows a project's page, not a search for its observations, so
+  # that address is the one a user has to hand. MO resolves it to the
+  # search it means rather than refusing it.
+  def test_create_with_a_project_page_url_imports_the_project
+    stub_request(:get, %r{api\.inaturalist\.org/v1/projects/fundis-ne}).
+      to_return(status: 200,
+                body: { results: [{ "id" => 102_213,
+                                    "title" => "FUNDIS NE" }] }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_url: "https://www.inaturalist.org/projects/" \
+                             "fundis-ne?tab=observations",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_unprocessable
+    assert_select("#requested_count a[href*=?]", "project_id=102213")
+  end
+
+  def test_create_with_an_unknown_project_page_url_rejected
+    stub_request(:get, %r{api\.inaturalist\.org/v1/projects}).
+      to_return(status: 200, body: { results: [] }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_url: "https://www.inaturalist.org/projects/nope",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash(
+      :project_site_inat_project_unknown,
+      project: "nope",
+      on_fail: "A project page naming no iNat project should say so"
+    )
+    assert_unprocessable
   end
 
   def test_create_invalid_url_rejected

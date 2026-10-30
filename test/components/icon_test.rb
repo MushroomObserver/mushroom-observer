@@ -40,12 +40,14 @@ class LinkIconTest < ComponentTestCase
   # trigger mispositions once the page scrolls (bootstrap-sass's
   # tooltip.js skips $element.offset() for SVG elements).
   def test_title_adds_tooltip_and_accessible_name
-    html = render_icon(type: :edit, title: :edit.ti, class: "text-primary")
+    html = render_icon(type: :edit, title: :edit.ti,
+                       class: "caller-supplied-marker")
 
     assert_html(html,
                 "span[title='#{:edit.ti}'][data-tooltip-target='tip']" \
                 "[aria-label='#{:edit.ti}']")
-    assert_html(html, "span > svg.mo-icon.mo-icon-edit.text-primary")
+    assert_html(html,
+                "span > svg.mo-icon.mo-icon-edit.caller-supplied-marker")
     assert_no_html(html, "svg[title]")
     # No <title> child -- browsers render it as a second, native
     # tooltip alongside the Bootstrap one. aria-label carries the
@@ -72,7 +74,20 @@ class LinkIconTest < ComponentTestCase
     html = render_icon(type: :globe, title: "Tooltip text",
                        wrap_class: "icon-text-gap")
 
-    assert_html(html, "span.icon-text-gap[title='Tooltip text']")
+    assert_html(html, ".icon-text-gap[title='Tooltip text']")
+  end
+
+  def test_center_tooltip_adds_inline_flex_center_to_title_span
+    html = render_icon(type: :globe, title: "Tooltip text",
+                       center_tooltip: true)
+
+    assert_html(html, ".inline-flex-center[title='Tooltip text']")
+  end
+
+  def test_center_tooltip_false_by_default
+    html = render_icon(type: :globe, title: "Tooltip text")
+
+    assert_no_html(html, ".inline-flex-center")
   end
 
   def test_extra_attrs_passed_through
@@ -89,14 +104,14 @@ class LinkIconTest < ComponentTestCase
 
   def test_padding_class_combined_with_other_classes_raises
     assert_raises(ArgumentError) do
-      render_icon(type: :globe, class: "text-primary px-2")
+      render_icon(type: :globe, class: "caller-supplied-marker px-2")
     end
   end
 
   def test_non_padding_class_does_not_raise
-    html = render_icon(type: :globe, class: "text-primary")
+    html = render_icon(type: :globe, class: "caller-supplied-marker")
 
-    assert_html(html, "svg.mo-icon-globe.text-primary")
+    assert_html(html, "svg.mo-icon-globe.caller-supplied-marker")
   end
 
   def test_named_padding_class_raises
@@ -116,7 +131,7 @@ class LinkIconTest < ComponentTestCase
   def test_wrap_class_wraps_icon_in_span_leaving_svg_unpadded
     html = render_icon(type: :globe, wrap_class: "icon-text-gap")
 
-    assert_html(html, "span.icon-text-gap > svg.mo-icon-globe")
+    assert_html(html, ".icon-text-gap > svg.mo-icon-globe")
     assert_no_html(html, "svg.icon-text-gap")
   end
 

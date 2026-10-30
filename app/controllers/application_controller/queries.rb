@@ -113,23 +113,15 @@ module ApplicationController::Queries
       query.params.any? { |arg, val| new_args[arg] != val }
   end
 
-  # Turn old query into a new query for given model — re-use the
-  # old query as-is when its model matches; otherwise try to bridge
-  # via a subquery (e.g. an Observation query landing on the Images
-  # index becomes an Image query with `observation_query: {...}`).
-  # Returns nil only when no bridge is defined for the
-  # filter→target pair (see `RELATED_QUERIES` in
-  # `Query::Modules::Subqueries`).
-  #
-  # Bug fix for #4360: previously this method returned nil for any
-  # model mismatch, causing the caller to fall back to the
-  # unfiltered index. So a URL like
-  # `/images?q[model]=Observation&q[pattern]=Foo` (which is a
-  # legitimate cross-model search produced by MO's search links)
-  # silently rendered the full Image index — a >60s response that
-  # could trigger downtime alerts. The bridge below resolves to a
-  # proper Image query that returns 0 hits when no Observations
-  # match.
+  # Turn old query into a new query for given model -- re-use the
+  # old query as-is when its model matches; otherwise bridge via a
+  # subquery (e.g. an Observation query landing on the Images index
+  # becomes an Image query with `observation_query: {...}`). Returns
+  # nil only when no bridge is defined for the filter->target pair
+  # (see `RELATED_QUERIES` in `Query::Modules::Subqueries`) -- the
+  # caller then falls back to the unfiltered index, which for a
+  # cross-model search link is wrong (and, unbridged, was slow
+  # enough to trigger downtime alerts).
   def find_new_query_for_model(model, old_query)
     return nil unless old_query
     return old_query if old_query_correct_for_model(model, old_query)
@@ -190,13 +182,9 @@ module ApplicationController::Queries
 
   ##############################################################################
   #
-  #  :section: Query parameters and session[:query_record]
-  #
-  #  The general idea is that the user executes a search or requests an index,
-  #  then clicks on a result.  This takes the user to a show_object page.
-  #  This page "knows" about the search or index via session[:query_record].
-  #  When the user then clicks on "prev" or "next", it can then step through
-  #  the query results.
+  #  :section: Query parameters and session[:query_record] -- lets a
+  #  show_object page step through the search/index results that led
+  #  to it, via "prev"/"next".
   #
   ##############################################################################
 
@@ -326,17 +314,12 @@ module ApplicationController::Queries
 
   # Same as q_param, but returns the flat filter hash (no :model) --
   # see Query#index_filter. Unlike q_param, `model` is required: the
-  # ambient `current_query` fallback in resolve_query_param can be
-  # leftover state from browsing a different model (e.g. the last
-  # search was Observations, then the user navigates to a Name edit
-  # page with no query set for it). q_param stays safe in that case
-  # because it tags the mismatched query with :model for the
-  # receiving page to reconcile or ignore, but a flat index_filter
-  # hash carries no such tag, so returning it unchecked could apply
-  # an unrelated model's filter attrs to this page's index link
-  # whenever the attribute names happen to coincide. Returns nil
-  # (no filter) rather than the ambient query's filters when the
-  # models don't match.
+  # ambient `current_query` fallback can be leftover state from a
+  # different model (e.g. last search was Observations, now viewing
+  # a Name edit page). q_param tags a mismatched query with :model
+  # for the receiving page to reconcile, but a flat index_filter hash
+  # carries no tag, so an unchecked mismatch could apply an unrelated
+  # model's filter attrs. Returns nil when the models don't match.
   def index_filter(model, query = nil)
     resolved = resolve_query_param(query)
     return nil unless resolved && resolved.model.name.to_sym == model.to_sym
@@ -375,22 +358,16 @@ module ApplicationController::Queries
     end
   end
 
-  # This is the common code for all the 'prev/next_object' actions.  Pass in
-  # the current object and direction (:prev or :next), and it looks up the
-  # query, grabs the next object, and redirects to the appropriate
-  # 'show_object' action.
+  # Common code for the 'prev/next_object' actions: looks up the
+  # query, grabs the next object, and redirects to 'show_object'.
   #
   #   def next_image
   #     redirect_to_next_object(:next, Image, params[:id].to_s)
   #   end
   #
-  # Returns truthy on both branches so callers chaining `... and return`
-  # don't silently fall through when the object isn't found (the
-  # not-found path internally redirects to the index via
-  # `find_or_goto_index`; before this change it then returned nil
-  # because of the implicit-return guard, which combined with the
-  # caller's `and return` walked control into `show`'s body without
-  # `@object` set).
+  # Returns truthy on both branches so a caller chaining
+  # `... and return` doesn't fall through into `show`'s body with
+  # `@object` unset when the object isn't found.
   def redirect_to_next_object(method, model, id)
     return true unless (object = find_or_goto_index(model, id))
 

@@ -15,7 +15,7 @@ class AutocompleterFieldTest < ComponentTestCase
       autocompleter_field(:summary, type: :name, label: "Species Name")
     end
 
-    assert_html(form, "div.form-group")
+    assert_html(form, ".form-group")
     assert_includes(form, "Species Name")
     assert_html(form, "[data-controller*='autocompleter']")
   end
@@ -45,7 +45,7 @@ class AutocompleterFieldTest < ComponentTestCase
 
     assert_no_match(/d-flex justify-content-between/, form,
                     "label row must not use d-flex when label_end is empty")
-    assert_html(form, "span.has-id-indicator svg")
+    assert_html(form, ".has-id-indicator svg")
   end
 
   # Regression: an outer .autocompleter must not carry an auto-derived
@@ -72,7 +72,7 @@ class AutocompleterFieldTest < ComponentTestCase
              ))
     end
 
-    assert_html(form, "div.autocompleter#my_autocompleter_id")
+    assert_html(form, ".autocompleter#my_autocompleter_id")
   end
 
   # Regression: create_text: populates the label_end slot, so the
@@ -85,7 +85,7 @@ class AutocompleterFieldTest < ComponentTestCase
              ))
     end
 
-    assert_html(form, "div.d-flex.justify-content-between")
+    assert_html(form, ".d-flex.justify-content-between")
   end
 
   # Regression: the hidden-id input for a String field name must
@@ -103,7 +103,7 @@ class AutocompleterFieldTest < ComponentTestCase
 
     assert_html(form, "textarea[name='list[members]']", text: "alpha")
     assert_html(form,
-                "div.autocompleter[data-controller='autocompleter--name']")
+                ".autocompleter[data-controller='autocompleter--name']")
     assert_html(form,
                 "input[type='hidden'][name='list[members_id]']" \
                 "[id='list_members_id']")
@@ -176,8 +176,8 @@ class AutocompleterFieldTest < ComponentTestCase
     )
 
     # Should have 10 dropdown items with links
-    assert_html(html, "li.dropdown-item", count: 10)
-    assert_html(html, "li.dropdown-item a", count: 10)
+    assert_html(html, ".dropdown-item", count: 10)
+    assert_html(html, ".dropdown-item a", count: 10)
 
     # Should have has_id_indicator (green check icon) -- a wrapping
     # span, not a bare svg (padding on a replaced element like svg
@@ -185,10 +185,13 @@ class AutocompleterFieldTest < ComponentTestCase
     # around it).
     assert_html(
       html,
-      "span.has-id-indicator" \
+      ".has-id-indicator" \
       "[data-autocompleter--herbarium-target='hasIdIndicator']"
     )
-    assert_html(html, "span.has-id-indicator svg.text-success")
+    # Color is the status signal here (already-known match), not
+    # decoration -- same spirit as the .d-none visibility exemption.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    assert_html(html, ".has-id-indicator svg.text-success")
   end
 
   def test_component_textarea_mode
@@ -294,18 +297,21 @@ class AutocompleterFieldTest < ComponentTestCase
   end
 
   def test_autocompleter_with_keep_text_option
-    # Test keep_text option renders keep and edit buttons
+    # One button, two swapped appearances (keep <-> edit) -- see
+    # map_controller.js#toggleBoxLock.
     comment = Comment.new
     form = TestKeepTextAutocompleterForm.new(comment, action: "/test")
     html = render(form)
 
-    # Should have keep button
-    assert_html(html, "button.keep-btn")
-    assert_html(html, "button[data-map-target='lockBoxBtn']")
-
-    # Should have edit button
-    assert_html(html, "button.edit-btn")
-    assert_html(html, "button[data-map-target='editBoxBtn']")
+    assert_html(html, "button.keep-edit-toggle")
+    assert_html(html, "button[data-map-target='boxLockToggle']")
+    assert_html(html, "button.stateful-link")
+    assert_html(html, "button .active-icon")
+    assert_html(html, "button .active-label", text: "Edit area")
+    # tooltip_controller.js swaps the tooltip off this attribute when
+    # .active toggles -- plain Button doesn't wire it automatically
+    # the way Link::Get does, so it's a required part of the contract.
+    assert_html(html, "button[data-active-title='Edit area']")
   end
 
   def test_autocompleter_with_create_text_option
@@ -333,7 +339,20 @@ class AutocompleterFieldTest < ComponentTestCase
     # Between slot content should appear after label
     assert_includes(html, "(Login Name)")
     # Has-id indicator should still be present after between content
-    assert_html(html, "span.has-id-indicator")
+    assert_html(html, ".has-id-indicator")
+  end
+
+  # Collapsible help nests inside .form-group, same as plain help --
+  # no separate margin-class adjustment needed since there's no
+  # external sibling to double up with.
+  def test_autocompleter_field_collapsible_help_nests_in_form_group
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name", help_collapse: true)
+    end
+
+    assert_html(form, ".form-group .collapse .help-block",
+                text: "Pick a name")
   end
 
   private

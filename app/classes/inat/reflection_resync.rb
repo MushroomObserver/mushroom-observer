@@ -109,9 +109,10 @@ class Inat
     end
 
     # A placeholder becomes a full reflection when the user requesting the
-    # sync is the iNat observer
+    # sync is the iNat observer, unless they have opted out of MO
     def upgrade_placeholder?(obs, inat_obs)
-      obs.placeholder? && requested_by_inat_owner?(inat_obs)
+      obs.placeholder? && requested_by_inat_owner?(inat_obs) &&
+        !Inat::OptOut.opted_out?(inat_obs[:user])
     end
 
     # The MO owner is unchanged.
@@ -180,18 +181,15 @@ class Inat
       obs.log(:log_observation_resynced, user: User.admin)
     end
 
-    # The source-owned scalar fields, straight off the fresh iNat data.
-    # `where` is only set when no Location resolves: a present Location
-    # drives `where` from its own name via a callback, so assigning
-    # `where` too would flip it back and forth and never converge.
-    # Date, notes and the obscured flag always mirror the source; specimen
-    # is MO-owned (see git history) and left alone. Coordinates sync only
-    # when iNat is NOT obscuring the location -- the resync fetches iNat
-    # unauthenticated (Inat::ApiToken is per-user; both the scheduled batch
-    # and "Sync now" run as no user), so an obscured observation yields
-    # only iNat's blurred public coordinate, which would overwrite the
-    # authenticated import's accurate one. The first run degraded 1,421
-    # reflections that way (#4215) before this gate was added.
+    # The source-owned scalar fields. `where` is excluded: a resolved
+    # Location drives `where` via a callback, so assigning it too
+    # would fight that callback. Date/notes/obscured always mirror
+    # the source; specimen is MO-owned and left alone. Coordinates
+    # sync only when iNat isn't obscuring the location -- the resync
+    # fetches iNat unauthenticated, so an obscured observation's
+    # public coordinate is blurred and would overwrite the
+    # authenticated import's accurate one (#4215 degraded 1,421
+    # reflections this way).
     def scalar_attributes(obs, inat_obs)
       attrs = { when: inat_obs.when, notes: notes(obs, inat_obs),
                 gps_hidden: inat_obs.obscured? }
@@ -216,7 +214,8 @@ class Inat
       inat_obs.skeleton_omissions(
         imported_photo_ids: PhotoImporter.imported_photo_ids(
           obs, self.class.inat_link(obs).external_site
-        )
+        ),
+        opted_out: Inat::OptOut.opted_out?(inat_obs[:user])
       )
     end
 

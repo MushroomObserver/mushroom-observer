@@ -7,9 +7,9 @@
 #
 # `around_template` wraps the action's content in the application or
 # printable layout. The action's `view_template` runs first (via
-# `capture`), populating `content_for` slots as a side effect — that
-# matches Rails' ERB layout/template ordering, where the layout reads
-# `content_for(:container_class)` etc. after the template has set them.
+# `capture`), populating `content_for` slots as a side effect, so the
+# layout can read `content_for(:container_class)` etc. after the
+# template has set them.
 #
 # Per-concern modules under `Views::FullPageBase::*` host the
 # `add_*` setters that action views call to populate those slots

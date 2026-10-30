@@ -94,18 +94,16 @@ module ProjectsController::Creation
     end
   end
 
-  # Rebuilds @project from what was actually submitted (project_params
+  # Rebuilds @project from what was submitted (project_params
   # includes :place_name) rather than a blank Project.new, so a
-  # dubious-location reload shows the user's entered title/summary/etc
-  # back instead of an empty form (the literal #2248 complaint).
+  # dubious-location reload shows the user's entered title/summary
+  # back instead of an empty form.
   #
-  # Project#place_name= only ever resolves-or-clears +location+ (see
-  # app/models/project.rb) -- it has no free-text fallback the way
-  # Observation/SpeciesList's place_name does, so the just-submitted,
-  # still-unresolved text can't be read back off @project itself.
-  # @raw_place_name carries it explicitly for the visible autocompleter
-  # and the approved_where hidden field (see Views::Controllers::
-  # Projects::Form).
+  # `Project#place_name=` only resolves-or-clears `location` -- no
+  # free-text fallback like Observation/SpeciesList's place_name --
+  # so the unresolved submitted text can't be read back off
+  # @project. `@raw_place_name` carries it for the autocompleter and
+  # the approved_where hidden field (Views::Controllers::Projects::Form).
   def cleanup_failed_project_creation(user_group, admin_group, where)
     admin_group&.destroy
     user_group&.destroy

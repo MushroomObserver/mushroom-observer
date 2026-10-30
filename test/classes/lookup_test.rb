@@ -210,6 +210,14 @@ class LookupTest < UnitTestCase
     assert_equal(["¡not a name!"], lookup.unmatched)
   end
 
+  def test_lookup_names_ignores_textile_markup
+    name = names(:coprinus_comatus)
+    lookup = Lookup::Names.new([name.display_name])
+
+    assert_equal([name.id], lookup.ids)
+    assert_empty(lookup.unmatched)
+  end
+
   # Expansion (synonyms/subtaxa) adds names beyond the literal matches --
   # unmatched must reflect only the original resolution, not that growth.
   def test_lookup_names_unmatched_unaffected_by_subtaxa_expansion

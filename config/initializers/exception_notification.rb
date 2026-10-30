@@ -1,21 +1,13 @@
 # frozen_string_literal: true
 
-# Real-time exception alerts to Slack (#alerts) via the exception_notification
-# gem. Complements -- does not replace -- script/parse_log's cron email digest.
-#
-# Needs the Slack incoming-webhook URL. In production it lives in the
-# production credentials (edit on the server, where the prod key is):
-#   RAILS_ENV=production bin/rails credentials:edit
-#     slack_alerts_webhook_url: https://hooks.slack.com/services/T.../B.../...
-#
-# Active in production; also activatable anywhere except tests with
-# NOTIFY_EXCEPTIONS=1. Since the credential is production-only, a local
-# pre-deploy check passes the webhook via env var instead:
-#   NOTIFY_EXCEPTIONS=1 SLACK_ALERTS_WEBHOOK_URL=<url> bin/rails alerts:test
-# (see lib/tasks/alerts.rake).
-#
-# This middleware reports web-request exceptions; background-job (SolidQueue /
-# ActiveJob) failures are reported from ApplicationJob via the same notifier.
+# Exception alerts to Slack (#alerts) via the exception_notification
+# gem, complementing script/parse_log's cron email digest. Needs the
+# Slack incoming-webhook URL from production credentials; active in
+# production, or anywhere except tests with NOTIFY_EXCEPTIONS=1
+# (local pre-deploy check passes the webhook via
+# SLACK_ALERTS_WEBHOOK_URL instead -- see lib/tasks/alerts.rake).
+# This middleware reports web-request exceptions; background-job
+# failures are reported from ApplicationJob via the same notifier.
 webhook = ENV["SLACK_ALERTS_WEBHOOK_URL"].presence ||
           Rails.application.credentials.slack_alerts_webhook_url
 enabled = webhook.present? && !Rails.env.test? &&

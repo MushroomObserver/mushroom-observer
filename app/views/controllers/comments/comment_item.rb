@@ -27,6 +27,7 @@ module Views::Controllers::Comments
     prop :editable, _Boolean, default: false
     prop :show_name, _Boolean, default: false
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Renders the inner content of a `.list-group-item.comment`
     # row. The wrapper itself is owned by the consumer:
     #
@@ -44,6 +45,7 @@ module Views::Controllers::Comments
     # CommentsController turbo_stream response. If wired here, a
     # second-window Action Cable broadcast could close a modal
     # the viewing user has open, losing in-progress form input.
+    # rubocop:enable MO/NoLongCommentBlock
     def view_template
       Row do
         render_main_column
@@ -85,7 +87,7 @@ module Views::Controllers::Comments
     # still needs to render the row. The rescues swallow nil-target
     # / missing-method errors and substitute a "deleted" placeholder.
     def render_target_heading
-      h4(class: "mt-0") do
+      h4(id: "comment_target_heading_#{@comment.id}", class: "mt-0") do
         target_name_link
         whitespace
         target_type
@@ -128,6 +130,7 @@ module Views::Controllers::Comments
       end
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Two render contexts, two permission strategies:
     #
     # - Normal request — `@user` is the current viewer.
@@ -140,6 +143,7 @@ module Views::Controllers::Comments
     #   `_user_specific_css.rb`) to hide it for everyone
     #   except the comment's author on the receiving end. Admins
     #   bypass the CSS so they still see mod links.
+    # rubocop:enable MO/NoLongCommentBlock
     def render_mod_links_span
       span(class: "text-nowrap",
            data: { user_specific: @comment.user.id }) do

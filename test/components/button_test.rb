@@ -7,32 +7,34 @@ class ButtonTest < ComponentTestCase
     html = render_button(name: "Click me")
 
     assert_html(html, "button[type='button']", text: "Click me")
-    assert_html(html, "button.btn.btn-default")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_custom_variant
     html = render_button(name: "Danger", variant: :danger)
 
-    assert_html(html, "button.btn.btn-danger")
+    assert_html(html, ".btn-danger")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_strip_variant_drops_frame
     html = render_button(name: "Bare", variant: :strip, class: "p-0")
 
-    assert_no_html(html, "button.btn")
+    assert_no_html(html, ".btn")
   end
 
-  def test_extra_class_merged
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_size_class_applied
     html = render_button(name: "Sized", size: :sm)
 
-    assert_html(html, "button.btn.btn-default.btn-sm")
+    assert_html(html, ".btn-sm")
   end
 
   def test_icon_only_with_sr_only_name
     html = render_button(name: "Remove", icon: :x, variant: :strip,
                          class: "p-0")
 
-    assert_html(html, "button span.sr-only", text: "Remove")
+    assert_html(html, "button .sr-only", text: "Remove")
     assert_html(html, "button svg.mo-icon-x")
   end
 
@@ -42,8 +44,8 @@ class ButtonTest < ComponentTestCase
 
     assert_html(html, "button.stateful-link svg.mo-icon-tracking")
     assert_html(html, "button.stateful-link svg.mo-icon-check.active-icon")
-    assert_html(html, "button span.sr-only", text: "Subscribe")
-    assert_html(html, "button span.sr-only.active-label", text: "Subscribed")
+    assert_html(html, "button .sr-only", text: "Subscribe")
+    assert_html(html, "button .sr-only.active-label", text: "Subscribed")
   end
 
   def test_icon_without_active_pair_omits_stateful_link_class
@@ -73,17 +75,18 @@ class ButtonTest < ComponentTestCase
     assert_html(html, "button#my_button")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_tag_a_renders_link
     html = render_button(name: "Go", tag: :a, href: "/path", variant: :primary)
 
-    assert_html(html, "a.btn.btn-primary[href='/path']", text: "Go")
+    assert_html(html, ".btn-primary[href='/path']", text: "Go")
     assert_no_html(html, "button")
   end
 
   def test_block_content_renders_inside_button
     html = render(ButtonWithBlock.new)
 
-    assert_html(html, "button span.block-sentinel", text: "from block")
+    assert_html(html, "button .block-sentinel", text: "from block")
   end
 
   private
@@ -274,9 +277,9 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     assert_html(html, "button[type='button'][data-toggle='collapse']" \
                       "[data-target='#map_div']")
     assert_html(html, "button.collapsed")
-    assert_html(html, "button span.collapse-toggle-open", text: "Hide map")
+    assert_html(html, "button .collapse-toggle-open", text: "Hide map")
     assert_html(html,
-                "button span.collapse-toggle-closed", text: "Open map")
+                "button .collapse-toggle-closed", text: "Open map")
   end
 
   # Regression: the map-toggle button's icon rendered flush against its
@@ -288,8 +291,8 @@ class Components::ButtonDispatcherTest < ComponentTestCase
                            open_text: "Hide map", closed_text: "Show map",
                            icon: :globe, collapsed: true)
 
-    assert_html(html, "button span.collapse-toggle-open.icon-text-gap")
-    assert_html(html, "button span.collapse-toggle-closed.icon-text-gap")
+    assert_html(html, "button .collapse-toggle-open.icon-text-gap")
+    assert_html(html, "button .collapse-toggle-closed.icon-text-gap")
   end
 
   def test_type_collapse_toggle_without_icon_has_no_text_gap
@@ -302,13 +305,14 @@ class Components::ButtonDispatcherTest < ComponentTestCase
 
   # ---- type: :project --------------------------------------------------
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_type_project_dispatches_to_project_with_lg_size
     path = routes.checklist_path(project_id: @project.id)
     html = render_dispatch(type: :project, name: "View checklist",
                            target: path)
 
     assert_html(html, "a[href='#{path}']", text: "View checklist")
-    assert_html(html, "a.btn-lg")
+    assert_html(html, ".btn-lg")
   end
 
   # ---- unknown type: raises ArgumentError ------------------------------
@@ -339,6 +343,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     assert_html(html, "button[type='submit']", text: :destroy.ti)
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_variant_passes_through_mutation_dispatch
     html = render_dispatch(type: :delete, target: @herbarium,
                            variant: :danger)
@@ -346,6 +351,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     assert_html(html, "button[type='submit'].btn-danger")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_size_passes_through_get_dispatch
     path = routes.herbarium_path(id: @herbarium.id)
     html = render_dispatch(type: :get, name: "Show", target: path, size: :sm)
@@ -360,8 +366,8 @@ class Components::ButtonDispatcherTest < ComponentTestCase
                     path: routes.herbarium_path(id: @herbarium.id)
                   ))
 
-    assert_html(html, "a span.block-sentinel", text: "from block")
-    assert_no_html(html, "a span.sr-only")
+    assert_html(html, "a .block-sentinel", text: "from block")
+    assert_no_html(html, "a .sr-only")
   end
 
   class GetWithBlock < Components::Base

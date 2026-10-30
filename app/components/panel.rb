@@ -141,8 +141,9 @@ class Components::Panel < Components::Base
          aria: collapse_aria) do
       render_collapse_message
 
-      Icon(type: :chevron_down, title: :open.ti, class: "active-icon")
-      Icon(type: :chevron_up, title: :close.ti)
+      Icon(type: :chevron_down, title: :open.ti, class: "active-icon",
+           center_tooltip: true)
+      Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
     end
   end
 

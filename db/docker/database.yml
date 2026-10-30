@@ -1,54 +1,46 @@
 shared:
   adapter: trilogy
+  # Matches most tables -- Issue #4625 (converting all tables to
+  # utf8mb4_0900_ai_ci) is still open; only a few are there yet.
+  encoding: utf8mb4
+  collation: utf8mb4_general_ci
   variables:
     sql_mode: TRADITIONAL
 
-development:
-  primary:
-    database: <%= ENV.fetch("DATABASE_NAME", "mo_development") %>
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
-  cache:
-    database: cache_development
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
-    migrations_paths: "db/cache/migrate"
-
-test:
-  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
+# Every role connects over the same TCP address.
+connection: &connection
   host: <%= ENV.fetch("DATABASE_HOST", "db") %>
   username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
   port: 3306
 
-# Same TCP/env-var shape as development/test above -- the app container
-# reaches MySQL over the network under this address either way,
-# whether that's the host, a Kamal accessory container, or a managed
-# service (#5345's own decision, not this file's).
+development:
+  primary:
+    <<: *connection
+    database: <%= ENV.fetch("DATABASE_NAME", "mo_development") %>
+  cache:
+    <<: *connection
+    database: cache_development
+    migrations_paths: "db/cache/migrate"
+
+# TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc. for parallel
+# testing; MO_TEST_DATABASE overrides for manual testing.
+test:
+  <<: *connection
+  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? ? 'mo_test' : 'mo_test-' + ENV['TEST_ENV_NUMBER']) %>"
+  # Must exceed Solid Queue's thread need -- see test/jobs/queue_config_test.rb.
+  pool: 10
+
+# Reached over the network either way -- host, a Kamal accessory
+# container, or a managed service (#5345's decision).
 production:
   primary:
+    <<: *connection
     database: <%= ENV.fetch("DATABASE_NAME", "mo_production") %>
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
-    # Independent of RAILS_MAX_THREADS (Puma's web-thread count) --
-    # this image also runs as the worker role (bin/jobs), whose
-    # thread need doesn't shrink just because the web role's Puma
-    # runs single-threaded. Must exceed Solid Queue's own thread need
-    # (config/queue.yml's largest single worker pool, plus 2 for that
-    # worker's own thread and heartbeat) -- see
-    # test/jobs/queue_config_test.rb and config/database.yml's own
-    # comment on this same pool setting.
+    # Must exceed Solid Queue's thread need -- the worker role
+    # (bin/jobs) too, not just Puma -- see queue_config_test.rb.
     pool: <%= ENV.fetch("DATABASE_POOL", 10) %>
   cache:
+    <<: *connection
     database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
     migrations_paths: "db/cache/migrate"

@@ -14,11 +14,10 @@ module Views::Controllers::Projects
       html = render_item(project: project)
 
       # No `.list-group-item` wrapper — supplied by the caller.
-      assert_no_html(html, "div.list-group-item")
+      assert_no_html(html, ".list-group-item")
 
       # Title link
       assert_html(html, "a[href*='projects/#{project.id}']")
-      assert_html(html, "span.h4")
 
       # Meta row with user
       assert_includes(html, project.created_at.web_time)
@@ -29,7 +28,6 @@ module Views::Controllers::Projects
       project.open_membership = true
       html = render_item(project: project)
 
-      assert_html(html, "span.ml-4")
       assert_includes(html, :open.ti)
     end
 
@@ -38,7 +36,7 @@ module Views::Controllers::Projects
       project.open_membership = false
       html = render_item(project: project)
 
-      assert_no_html(html, "span.ml-4")
+      assert_not_includes(html, :open.ti)
     end
 
     def test_no_manage_section_without_observation_context

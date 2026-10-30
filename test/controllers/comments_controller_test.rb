@@ -264,9 +264,8 @@ class CommentsControllerTest < FunctionalTestCase
     get(:new, params: { target: project.id, type: :Project },
               format: :turbo_stream)
 
-    assert_select(
-      "h4.modal-title#modal_comment_header",
-      text: /#{Regexp.escape(project.unique_format_name)}/
+    assert_select_text_includes(
+      "h4.modal-title#modal_comment_header", project.unique_format_name
     )
   end
 
@@ -487,16 +486,14 @@ class CommentsControllerTest < FunctionalTestCase
   end
 
   # The synchronous response has to insert the new row itself -- the
-  # `Comment` model's own `after_create_commit` broadcast is async
-  # and isn't guaranteed to reach the submitter's own tab before (or
-  # ever, if the connection drops) the modal closes (#4833). It uses
-  # the custom `prepend_once` action, not the built-in `prepend`:
-  # `after_create_commit` dispatches its own broadcast before this
-  # response is even built, so a plain `prepend` here would routinely
-  # race a duplicate insert of the same row. `prepend_once` is a
-  # client-side no-op if the row's id is already in the DOM (see
-  # `config/initializers/turbo_stream_actions.rb`), so whichever of
-  # the two arrives second doesn't duplicate it.
+  # `Comment` model's `after_create_commit` broadcast is async and
+  # isn't guaranteed to reach the submitter's tab before the modal
+  # closes, or if the connection drops. It uses the custom
+  # `prepend_once` action, not the built-in `prepend`, since
+  # `after_create_commit` dispatches a broadcast before this
+  # response is built, so a plain `prepend` would routinely race a
+  # duplicate insert. `prepend_once` is a client-side no-op if the
+  # row's id is already in the DOM.
   def test_create_comment_turbo_stream_prepends_row_once
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id,
@@ -594,8 +591,8 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal(comment_count + 1, obs.comments.size)
   end
 
-  # The `after_create_commit` broadcast renders `_comment.erb`
-  # without a request context — `@user` is nil. The mod-links
+  # The `after_create_commit` broadcast renders without a request
+  # context — `@user` is nil. The mod-links
   # span (`[ edit | destroy ]`) still has to be in the broadcast
   # markup so the comment's author can interact with their just-
   # created comment; client-side CSS (`[data-user-specific]:not(…)`)

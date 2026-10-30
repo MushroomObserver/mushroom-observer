@@ -289,6 +289,20 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_page_title(:locations.ti)
+    assert_equal("updated_at", @controller.instance_variable_get(:@query).
+                               params[:order_by])
+  end
+
+  # A filtered/search index falls back to `Query::Locations.
+  # default_order` (alphabetical) instead of the unfiltered browse
+  # index's `updated_at` default.
+  def test_index_by_user_defaults_to_alphabetical_order
+    login
+    get(:index, params: { by_user: rolf.id })
+
+    query = @controller.instance_variable_get(:@query)
+    assert_nil(query.params[:order_by])
+    assert_equal(:name, query.default_order)
   end
 
   # Render the index against a query whose `order_by` is already
@@ -537,72 +551,6 @@ class LocationsControllerTest < FunctionalTestCase
 
     assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(locations_path)
-  end
-
-  def test_index_undefined_locations_letter_filter
-    # Create observations with undefined locations starting with different
-    # letters to test the letter2 filter
-    Observation.create!(
-      user: rolf,
-      when: Time.zone.today,
-      where: "Albuquerque, New Mexico, USA",
-      name: names(:agaricus_campestris)
-    )
-    Observation.create!(
-      user: rolf,
-      when: Time.zone.today,
-      where: "Boulder, Colorado, USA",
-      name: names(:agaricus_campestris)
-    )
-
-    login
-    # First verify that undefined locations appear without letter filter
-    get(:index)
-    assert_select("body.locations__index")
-    # Check that @undef_data is set (the letter filter applies to this)
-    assert(assigns(:undef_data).present?, "Should have undefined locations")
-
-    # Now request with letter2=a should filter to only "A" locations
-    get(:index, params: { letter2: "a" })
-    assert_select("body.locations__index")
-    # The letter filter is applied, verify the data is filtered
-    undef_data = assigns(:undef_data)
-    skip if undef_data.blank?
-
-    # `undef_data` is an Array of `[obs, count]` tuples, not a Hash —
-    # `each_key` isn't available; cop false-positives on the
-    # destructured block.
-    undef_data.each do |obs, _count| # rubocop:disable Style/HashEachMethods
-      assert_match(/^A/i, obs[:where], "Filtered results should start with A")
-    end
-  end
-
-  # `@undef_data` is grouped by `where` and reported as
-  # `[representative_observation, count]` tuples — duplicate `where`
-  # strings on a page collapse into one row carrying the group size.
-  def test_index_undef_data_groups_duplicates_with_count
-    # Two observations sharing the same unmatched `where` should
-    # appear as a single row whose count is 2.
-    where_str = "Duplicate Place, Imaginary, Country"
-    2.times do
-      Observation.create!(
-        user: rolf, when: Time.zone.today,
-        where: where_str, name: names(:agaricus_campestris)
-      )
-    end
-
-    login
-    get(:index)
-    assert_response(:success)
-
-    undef_data = assigns(:undef_data)
-    pair = undef_data.find { |obs, _count| obs[:where] == where_str }
-    assert(pair, "Duplicate `where` row should be present in @undef_data")
-    obs, count = pair
-    assert_equal(2, count,
-                 "Both observations sharing #{where_str.inspect} " \
-                 "should be folded into one row with count 2")
-    assert_equal(where_str, obs[:where])
   end
 
   ##############################################################################

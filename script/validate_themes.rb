@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Theme Validation Script
 # Ensures all themes define all required variables and identifies
 # orphaned variables
@@ -12,6 +13,7 @@
 # Exit codes:
 #   0 - All themes are valid
 #   1 - Missing or orphaned variables found
+# rubocop:enable MO/NoLongCommentBlock
 
 require "fileutils"
 

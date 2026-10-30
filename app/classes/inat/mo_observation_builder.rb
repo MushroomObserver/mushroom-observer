@@ -19,6 +19,8 @@ class Inat
       @user = user
       @import_others = inat_import&.import_others || false
       @skeleton = skeleton
+      # The observer opted out of MO, so no photo is imported either.
+      @opted_out = Inat::OptOut.opted_out?(inat_obs[:user])
       @external_site = external_site || ExternalSite.inaturalist
       @inat_import = inat_import
       @skipped_images = 0
@@ -84,7 +86,8 @@ class Inat
                                                          @external_site)
       @observation.update!(
         skeleton_omissions:
-          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids)
+          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids,
+                                      opted_out: @opted_out)
       )
     end
 
@@ -306,8 +309,12 @@ class Inat
                  reasons: { 2 => used_references_explanation(name) }
                )
 
+      # source_value records what the source said, so a later change
+      # by the observer is visible to the resync as a divergence
+      # rather than needing the stamp to be surrendered (#5480).
       vote = Vote.find_or_initialize_by(naming: naming, user: user)
       vote.update!(observation: @observation, value: value,
+                   source_value: value,
                    external_site: @external_site)
       # An ObservationView is needed even though no one has viewed this obs.
       ObservationView.find_or_create_by(observation: @observation,

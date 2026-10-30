@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Actions
 # -------
 # create (post)
@@ -43,6 +44,7 @@
 # show_herbarium (post)             Herbaria::Curators#create (post)
 # * == legacy action is not redirected
 # See https://tinyurl.com/ynapvpt7
+# rubocop:enable MO/NoLongCommentBlock
 
 # View and modify Herbaria (displayed as "Fungaria")
 class HerbariaController < ApplicationController # rubocop:disable Metrics/ClassLength
@@ -497,8 +499,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   # — closes the herbarium-create modal, flashes the success notice
   # into the obs form's `page_flash`, updates the obs form's
   # herbarium-name + herbarium-id inputs to the newly-saved herbarium,
-  # and removes the "Create herbarium" button. Inlined from the
-  # deleted `herbaria/_update_observation.erb` partial.
+  # and removes the "Create herbarium" button.
   def update_observation_after_herbarium_save_streams
     [
       turbo_stream.close_modal("modal_herbarium"),

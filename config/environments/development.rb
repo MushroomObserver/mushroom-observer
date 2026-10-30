@@ -30,9 +30,12 @@ MushroomObserver::Application.configure do
   # Code appended to ids to make "sync_id".  Must start with letter.
   config.server_code = "XX"
 
-  # Tell ActionMailer not to deliver emails to the real world.
-  # The :file delivery method accumulates sent emails in the
-  # ../mail directory.  (This is a feature I added. -JPH 20080213)
+  # Tell ActionMailer not to deliver emails to the real world. The
+  # :file delivery method writes each one to tmp/mails/<address>,
+  # appending when that address is mailed again, and nothing prunes
+  # them. (The comment here used to say ../mail, describing a
+  # hand-rolled version of this from 2008 -- Rails' own :file method
+  # replaced it and uses tmp/mails.)
   config.action_mailer.delivery_method = :file
 
   # Don't care if the mailer can't send.
@@ -130,6 +133,7 @@ MushroomObserver::Application.configure do
   # Uncomment if queue tables are in a separate db. MO's are in the main db.
   # config.solid_queue.connects_to = { database: { writing: :queue } }
 
+  # rubocop:disable MO/NoLongCommentBlock
   # New 7.1 logging uses BroadcastLogger. Not using TaggedLogging yet.
   # Enable this to format dev logs like the production logs.
   # loggers = [
@@ -142,6 +146,7 @@ MushroomObserver::Application.configure do
   # config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
   # config.logger = ActiveSupport::Logger.new($stdout)
 
+  # rubocop:enable MO/NoLongCommentBlock
   # Silence Solid Queue polling in the logs
   ENV["SOLID_QUEUE_LOG_ON"] = "false" # used by a temporary hack below
   config.solid_queue.logger = false

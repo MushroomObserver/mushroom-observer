@@ -107,8 +107,7 @@ module Account
     # The turbo_stream branches in create/update/destroy/activate go
     # through `render_update_table_and_flash`, which emits two
     # `turbo_stream` actions — the table replace and the page-flash
-    # update. The legacy ERB partial these replaced (`_update_table_and_flash`)
-    # is gone in #4503, so cover the Ruby paths explicitly.
+    # update. Cover the Ruby paths explicitly.
     def test_create_via_turbo_stream
       login("mary")
 

@@ -28,8 +28,7 @@ class CommentsController < ApplicationController
   end
 
   # Overrides `ApplicationController::Indexes#render_index_view` so
-  # `show_index_of_objects` renders the Phlex `Index` class instead
-  # of `comments/index.html.erb` (deleted).
+  # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
     render(Views::Controllers::Comments::Index.new(
              query: @query, pagination_data: @pagination_data,
@@ -120,6 +119,7 @@ class CommentsController < ApplicationController
   #
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Form to create comment for an object.
   # Linked from: show_<object>
   # Inputs:
@@ -132,6 +132,7 @@ class CommentsController < ApplicationController
   # Failure:
   #   Renders add_comment again.
   #   Outputs: @comment, @object
+  # rubocop:enable MO/NoLongCommentBlock
   def new
     return unless (@target = load_target(params[:type], params[:target])) &&
                   allowed_to_see!(@target)
@@ -163,6 +164,7 @@ class CommentsController < ApplicationController
     refresh_comments_or_redirect_to_show(extra_streams: [prepend_comment_row])
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Form to edit a comment for an object..
   # Linked from: show_comment, show_object.
   # Inputs:
@@ -174,6 +176,7 @@ class CommentsController < ApplicationController
   # Failure:
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
+  # rubocop:enable MO/NoLongCommentBlock
   def edit
     return unless (@comment = find_comment!)
 

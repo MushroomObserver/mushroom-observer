@@ -21,63 +21,103 @@ class InterestsController < ApplicationController
   before_action :login_required
   before_action :store_location, only: [:index]
 
-  # Show list of objects user has expressed interest in.
-  # Linked from: left-hand panel
-  # Inputs: params[:page], params[:type]
-  # Outputs: @interests, @types, @pagination_data, @selected_type
+  # Display order for the type-filter pills -- not alphabetical, the
+  # most-common target types come first. Anything not listed here
+  # (location_description, name_description, name_tracker) sorts
+  # after, alphabetically.
+  TYPE_FILTER_ORDER = %w[name observation project species_list
+                         location].freeze
+
+  # Display order for the state-filter pills.
+  STATE_FILTER_ORDER = [:watching, :ignoring].freeze
+
   def index
-    @interests = find_relevant_interests
-    @types = interest_types(@interests)
-    @selected_type = params[:type].to_s
-    @interests = filter_interests_by_type(@interests, @selected_type) \
-      if @selected_type.present?
-    @pagination_data = paginate_interests!
+    build_index_with_query
+  end
+
+  def render_index_view
     render(Views::Controllers::Interests::Index.new(
-             interests: @interests.to_a, types: @types.map(&:to_s),
-             selected_type: @selected_type.presence,
-             pagination_data: @pagination_data
+             interests: @objects, types: @types,
+             selected_type: @selected_type,
+             states: @states, selected_state: @selected_state,
+             pagination_data: @pagination_data, query: @query
            ))
   end
 
   private
 
-  def find_relevant_interests
-    interests = Interest.for_user(@user).includes(:target)
-    eager_load_targets(interests)
-    interests.sort do |a, b|
-      result = a.target_type <=> b.target_type
-      if result.zero?
-        result = (a.target ? a.target.text_name : "") <=>
-                 (b.target ? b.target.text_name : "")
-      end
-      result
-    end
+  # Interests are private -- `by_users` is forced to the current
+  # user's id on every dispatch branch, not read from a request
+  # param. `type`/`state` also need normalizing to the lowercase tag
+  # form `Query::Interests` expects -- the structural-enum validator
+  # does no case folding. Stripping the originals first (rather than
+  # just not forcing a replacement) means a blank or malformed value
+  # degrades to "no filter" instead of a validation error.
+  def create_query_from_url_params(model_symbol, raw_params)
+    forced = { by_users: [@user.id],
+               type: normalized_type_or_state(raw_params[:type]),
+               state: normalized_type_or_state(raw_params[:state]) }
+    super(model_symbol,
+         raw_params.except(:type, :state).merge(forced.compact))
   end
 
-  def eager_load_targets(interests)
-    # Props to this blog for teaching how to eager-load polymorphic relations!
-    # https://thepaulo.medium.com/eager-loading-polymorphic-associations-in-ruby-on-rails-155a356c39d7
-    %w[NameTracker Observation].each do |type|
-      ActiveRecord::Associations::Preloader.new(
-        records: interests.select { |i| i.target_type == type },
-        associations: { target: [:name] }
-      )
-    end
+  # `type`/`state` are single-select -- a hand-crafted URL could
+  # submit an empty string or an Array; take the first value and
+  # drop anything that doesn't normalize to a non-blank tag.
+  def normalized_type_or_state(value)
+    value = value.first if value.is_a?(Array)
+    value.to_s.underscore.presence
   end
 
-  def interest_types(interests)
-    interests.map(&:target_type).uniq.sort
+  # `by_users` is always present (forced above), so it must not by
+  # itself count as "a filter is active" -- otherwise every request
+  # would route through create_query_from_url_params, which has no
+  # find_or_create_query session-merge step `sorted_index` relies on.
+  def other_filter_param_present?
+    filter_params = controller_query_class.recognized_params -
+                    INDEX_BASIC_PARAMS - [:pattern, :by_users, :by_user]
+    filter_params.any? { |p| params[p].present? }
   end
 
-  def filter_interests_by_type(interests, type)
-    interests.select { |i| i.target_type.to_s == type.to_s }
+  def unfiltered_index_opts
+    super.deep_merge(query_args: { by_users: [@user.id] })
   end
 
-  def paginate_interests!
-    pagination_data = number_pagination_data(:page, 100)
-    pagination_data.num_total = @interests.length
-    @interests = @interests[pagination_data.from..pagination_data.to]
-    pagination_data
+  def sorted_index_opts
+    super.deep_merge(query_args: { by_users: [@user.id] })
+  end
+
+  # `opts` wins where it sets something unique (e.g. a pattern-search
+  # redirect flag); `always_index: true` must win regardless, since
+  # Interest has no show page to redirect a single result to.
+  def index_display_opts(opts, _query)
+    opts.merge(num_per_page: 100, always_index: true,
+               include: Interest.index_includes_tree)
+  end
+
+  # Hook runs before template displayed. Must return query. Derives
+  # the filter-pill ivars from the resolved query instead of raw
+  # params, matching whichever dispatch branch built it. `state` is a
+  # scalar attr (not array-wrapped like `types`), so it comes back as
+  # a bare Symbol, not an Array.
+  def filtered_index_final_hook(query, _display_opts)
+    @selected_type = query.params[:types]&.first&.to_s
+    @types = available_types
+    @selected_state = query.params[:state]&.to_s
+    @states = available_states(@selected_type)
+    query
+  end
+
+  def available_types
+    Interest.for_user(@user).distinct.pluck(:target_type).map(&:underscore).
+      sort_by { |t| [TYPE_FILTER_ORDER.index(t) || TYPE_FILTER_ORDER.size, t] }
+  end
+
+  def available_states(type)
+    interests = Interest.for_user(@user)
+    interests = interests.types(type) if type.present?
+    present = interests.distinct.pluck(:state).map(&:to_sym)
+    STATE_FILTER_ORDER & present
   end
 
   public
@@ -121,11 +161,11 @@ class InterestsController < ApplicationController
     if @state.zero?
       name = @target ? @target.unique_text_name : "--"
       destroy_interest_plus_tracker_and_flash_notice(name)
-    elsif @interest.state == true && @state.positive?
+    elsif @interest.watching? && @state.positive?
       flash_notice(
         :set_interest_already_on.l(name: @target.unique_text_name)
       )
-    elsif @interest.state == false && @state.negative?
+    elsif @interest.ignoring? && @state.negative?
       flash_notice(
         :set_interest_already_off.l(name: @target.unique_text_name)
       )
@@ -241,7 +281,7 @@ class InterestsController < ApplicationController
       flash_notice(:set_interest_failure.l(name: name))
     else
       @target.destroy if @interest.target_type == "NameTracker"
-      if @interest.state
+      if @interest.watching?
         flash_notice(:set_interest_success_was_on.l(name: name))
       else
         flash_notice(:set_interest_success_was_off.l(name: name))

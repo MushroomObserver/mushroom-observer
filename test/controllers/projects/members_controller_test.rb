@@ -659,8 +659,8 @@ module Projects
       get(:index, params: { project_id: eol_project.id })
 
       member = eol_project.project_members.first
-      assert_select("table.table-project-members",
-                    text: /#{Regexp.escape(member.user.name)}/)
+      assert_select_text_includes("table.table-project-members",
+                                  member.user.name)
       assert_response(:success)
     end
   end

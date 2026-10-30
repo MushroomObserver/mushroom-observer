@@ -9,8 +9,8 @@ class Query::Locations < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Location])
-  query_attr(:by_users, [User], param_alias: :by_user)
-  query_attr(:by_editor, [User], param_alias: :by_editor)
+  query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
+  query_attr(:by_editor, [User], param_alias: :by_editor, always_index: false)
   query_attr(:projects, [Project], param_alias: :project,
                                    redirect_to: :model_index)
   query_attr(:in_box, { north: :float, south: :float,

@@ -116,8 +116,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
                      "Test requires the source's omissions to change")
     # Bring everything else in line with the source first.
     resync(found: { @id => @raw })
-    assert_equal(:unchanged, resync(found: { @id => @raw }).first.status,
-                 "Test requires a placeholder already in sync")
+    before = sync_state(@obs)
+    status = resync(found: { @id => @raw }).first.status
+    assert_equal(:unchanged, status,
+                 "Test requires a placeholder already in sync; changed: " \
+                 "#{sync_state_diff(before, sync_state(@obs)).inspect}")
 
     result = resync(found: { @id => raw }).first
 
@@ -167,6 +170,22 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "The upgrade should be logged against the requester")
     assert_nil(@obs.skeleton_omissions,
                "An upgraded reflection should no longer record omissions")
+  end
+
+  # An observer who opted out of MO keeps a placeholder even when they
+  # ask for the sync.
+  def test_placeholder_stays_for_an_opted_out_inat_observer
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+    requester = users(:rolf)
+    requester.update_columns(inat_username: raw[:user][:login],
+                             inat_import_opt_out: true)
+
+    resync(found: { @id => raw }, requested_by: requester)
+
+    @obs.reload
+    assert(@obs.placeholder?, "An opted-out observer should not upgrade it")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
   end
 
   def test_second_resync_with_same_data_is_unchanged
@@ -411,6 +430,33 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # What a resync can change, so a failure that should have been a no-op
+  # says which part moved.
+  def sync_state(obs)
+    obs = Observation.find(obs.id)
+    { attributes: obs.attributes.except("updated_at"),
+      namings: obs.namings.order(:id).
+               pluck(:id, :name_id, :user_id, :external_site_id),
+      votes: Vote.where(observation_id: obs.id).order(:id).
+             pluck(:id, :naming_id, :user_id, :value, :source_value, :favorite),
+      images: obs.images.order(:id).pluck(:id, :license_id,
+                                          :copyright_holder) }
+  end
+
+  def sync_state_diff(before, after)
+    before.each_with_object({}) do |(key, old), diff|
+      new = after[key]
+      next if old == new
+
+      diff[key] = if old.is_a?(Hash)
+                    old.keys.reject { |k| old[k] == new[k] }.
+                      index_with { |k| [old[k], new[k]] }
+                  else
+                    { before: old, after: new }
+                  end
+    end
   end
 
   # The calostoma raw plus the content a skeleton leaves out: a

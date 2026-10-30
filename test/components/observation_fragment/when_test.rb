@@ -7,7 +7,7 @@ class ObservationFragmentWhenTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     html = render(Components::ObservationFragment::When.new(obs: obs))
 
-    assert_html(html, "li.obs-when.hanging-indent",
+    assert_html(html, ".obs-when",
                 text: "#{:when.ti}: #{obs.when.web_date}")
   end
 end

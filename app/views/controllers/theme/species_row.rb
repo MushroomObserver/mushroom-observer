@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Theme
+  # rubocop:disable MO/NoLongCommentBlock
   # One row of a theme page's SPECIES constant.
   #
   # `textile_method` is `:tp` (textile-paragraph) or `:t` (textile-
@@ -13,6 +14,7 @@ module Views::Controllers::Theme
   # `list_line` is the wrapping `<span>` CSS class, or `nil` for raw.
   # `raw_link_label`: if true, use `name` as-is instead of wrapping
   # in textile bold+italic markers (`**__name__**`).
+  # rubocop:enable MO/NoLongCommentBlock
   SpeciesRow = Data.define(:textile_method, :key, :name, :image_id,
                            :list_line, :raw_link_label) do
     def self.[](textile_method, key, name, image_id, opts = {})

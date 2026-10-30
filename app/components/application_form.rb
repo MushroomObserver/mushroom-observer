@@ -144,6 +144,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   # `trusted_html(:foo.t)` instead of `raw(:foo.t) # rubocop:disable
   # Rails/OutputSafety`.
   include Phlex::TrustedHtml
+  # Same reasoning as `Phlex::TrustedHtml` above -- `content_for`/
+  # `content_for?` for `title_bar_submit` (`FieldHelpers`).
+  include Phlex::Rails::Helpers::ContentFor
   include FieldHelpers
   include UploadHelpers
 
@@ -179,6 +182,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     model_class_form_id(model)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # For `Views::Controllers::*` classes, mirror the full controller
   # path in the id so it telegraphs where the form lives in the
   # directory tree. Each path segment is singularized; the class
@@ -193,6 +197,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     → admin_blocked_ip_manager
   #   Views::Controllers::Names::Synonyms::Approve::Form
   #     → name_synonym_approve_form
+  # rubocop:enable MO/NoLongCommentBlock
   def views_controller_form_id
     segments = views_controller_segments
     return nil unless segments
@@ -266,21 +271,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
   private
 
-  # A subclass that declares its own `prop` gets a Literal-generated
-  # `initialize` that never calls `super` -- it dead-ends before
-  # reaching any hand-written `initialize` up the chain, including
-  # this class's. `after_initialize` is the hook Literal calls
-  # unconditionally, right after prop assignment, regardless of how
-  # many prop-declaring subclasses sit in between (resolved via
-  # ordinary `respond_to?` + method dispatch, not baked into the
-  # generated code) -- see
+  # A prop-declaring subclass's Literal-generated `initialize`
+  # doesn't call `super`, so `Superform::Rails::Form#initialize` is
+  # permanently unreachable from it. `after_initialize` -- the hook
+  # Literal calls unconditionally after prop assignment -- replicates
+  # that body by hand. See
   # .claude/local/application_form_literal_props_superform_integration.md
-  # for the full mechanism writeup.
-  #
-  # This replicates `Superform::Rails::Form#initialize`'s own body
-  # (`@namespace = Namespace.root(...)` etc.) by hand, since that
-  # method is now permanently unreachable via `super` from any
-  # prop-declaring subclass.
+  # for the full mechanism.
   def after_initialize
     @action = @attributes.delete(:action)
     @method = @attributes.delete(:method)

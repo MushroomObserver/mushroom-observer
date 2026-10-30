@@ -17,8 +17,7 @@ class NamesController < ApplicationController
 
   # Overrides `ApplicationController::Indexes#render_index_view`
   # to render the Phlex Index view directly with the controller-
-  # populated ivars as explicit props. Replaces the implicit
-  # `render(action: :index)` lookup of `index.html.erb` (deleted).
+  # populated ivars as explicit props.
   def render_index_view
     args = {
       query: @query, pagination_data: @pagination_data,
@@ -150,23 +149,20 @@ class NamesController < ApplicationController
 
   private
 
-  # Neither #show, #edit, nor the common (non-merge) #update path
-  # reads `@name.namings`/`@name.observations` directly — #show
-  # renders curated `Query`/`Name::Observations` results instead, and
-  # a plain attribute edit touches neither. For a name with many
-  # thousands of observations (e.g. a genus), eager-loading both
-  # turns a sub-second page load into several seconds for no benefit,
-  # so this uses the lighter `show_includes` scope. The two callers
-  # that genuinely need them fetch a fresh, fully-loaded copy right
-  # before doing so instead of paying for it on every request:
-  # `merge_names` (`Name::Merge#move_namings`/`#move_observations`)
-  # and `email_name_change_content` (just needs `.count`, not the
-  # full preload — see there).
+  # Neither #show/#edit nor the common #update path reads
+  # `@name.namings`/`@name.observations` directly, so this uses the
+  # lighter `show_includes` scope -- eager-loading both turns a
+  # sub-second page load into several seconds for a name with many
+  # thousands of observations (e.g. a genus), for no benefit here.
+  # The two callers that need them (`merge_names`,
+  # `email_name_change_content`) fetch a fresh, fully-loaded copy
+  # right before doing so instead of paying for it on every request.
   def find_name!
     @name = Name.show_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Possible sources of extra db lookups in partials
 
   # carousel:
@@ -195,6 +191,7 @@ class NamesController < ApplicationController
   #          ))
   # projects:
   #   @projects
+  # rubocop:enable MO/NoLongCommentBlock
 
   def init_related_query_ivars
     @versions = @name.versions.to_a
@@ -521,6 +518,7 @@ class NamesController < ApplicationController
                  ))
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Update the misspelling status.
   #
   # @name::             Name whose status we're changing.
@@ -537,6 +535,7 @@ class NamesController < ApplicationController
   #
   # Returns true if changes were made and saved (via mark_misspelled).
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def update_correct_spelling # rubocop:disable Naming/PredicateMethod
     return false unless editable_in_session?
 

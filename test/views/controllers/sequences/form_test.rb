@@ -12,6 +12,10 @@ module Views::Controllers::Sequences
     def test_new_form
       html = render_form(model: Sequence.new(observation: @observation))
 
+      assert_html(
+        html, "input[name='observation_id'][value='#{@observation.id}']"
+      )
+
       # Form fields
       assert_html(html, "textarea[name='sequence[locus]']")
       assert_html(html, "textarea[name='sequence[bases]']")
@@ -37,6 +41,7 @@ module Views::Controllers::Sequences
       sequence = sequences(:local_sequence)
       html = render_form(model: sequence)
 
+      assert_html(html, "input[name='observation_id']", count: 0)
       assert_html(html, "button[type='submit']", text: :update.ti)
     end
 

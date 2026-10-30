@@ -288,6 +288,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   before_create :crypt_password
 
   include NormalizesInatUsername
+  include ClaimsExcludedInatLogin
 
   before_update :update_image_copyright_holder
   before_update :expire_caches_of_associated_observations
@@ -640,17 +641,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||=
-      begin
-        i = Interest.where(
-          user_id: id, target_type: object.class.name, target_id: object.id
-        ).pick(:state)
-        case i
-        when true
-          :watching
-        when false
-          :ignoring
-        end
-      end
+      Interest.where(
+        user_id: id, target_type: object.class.name, target_id: object.id
+      ).pick(:state)&.to_sym
   end
 
   # Has this user expressed positive interest in a given object?
@@ -906,6 +899,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # This is intended to comply with Apple's requirement that we allow users
   # to delete their account.  We do not want to let users remove everything,
   # though, like for example, their comments within comment threads on other
@@ -920,8 +914,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # interests, descriptions, projects, etc. -- so the account can be
   # re-enabled, and merely clear the personal data, block the account,
   # and anonymize the login. A genuinely empty account (no references at
-  # all) is still fully erased. (#4767 -- the old version hard-deleted
-  # namings/votes/logs and a raft of other content; see git history.)
+  # all) is still fully erased.
+  # rubocop:enable MO/NoLongCommentBlock
   def disable_and_anonymize_account
     disable_account
     inactivate_user
@@ -943,35 +937,26 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     save
   end
 
-  # Everything on MO is CC-licensed and worth retaining, so a self-delete
-  # keeps the user's observations -- and their namings, votes, logs, and
-  # images -- in place under the now-disabled, anonymized account rather
-  # than destroying scientific records. This anonymizes the last
-  # identifying field disable_account leaves, the login, to
-  # "inactive_user_<id>" (name is already blank, so login is all that's
-  # displayed). Observation is a REFERENCE_MODEL again, so the retained
-  # observations keep no_references_left? from erasing the account.
-  #
-  # Formerly delete_observations, which -- via a has_many delete_all with
-  # no :dependent -- NULLed user_id on the observations and hard-deleted
-  # their namings/votes/logs, leaving them ownerless and stripped (#4767).
+  # A self-delete keeps the user's observations, namings, votes,
+  # logs, and images in place under the now-disabled, anonymized
+  # account rather than destroying scientific records. Anonymizes
+  # the last identifying field disable_account leaves, the login, to
+  # "inactive_user_<id>". Observation is a REFERENCE_MODEL, so the
+  # retained observations keep no_references_left? from erasing the
+  # account.
   def inactivate_user
     update_column(:login, "inactive_user_#{id}")
   end
 
   # The personal herbarium's name and email are frozen at creation
-  # (create_personal_herbarium) and embed the user's original identity,
-  # so anonymizing the User row alone leaves them as a PII leak (#4793).
-  # Regenerate the name from the now-anonymized identity and reset the
-  # contact email to the site webmaster address. Called after
-  # inactivate_user so the regenerated name picks up the new login, and
-  # before erase_user so it runs whether or not the account is fully
-  # erased -- erase detaches the herbarium (personal_user_id = 0) rather
-  # than deleting it, so the PII would otherwise survive there too.
-  # update_all (not update) so the scrub covers every matching row --
-  # there is no DB uniqueness constraint on personal_user_id -- and
-  # can't be silently blocked by a validation, matching how erase_user's
-  # blank_out_public_references clears these same rows.
+  # and embed the user's original identity, so anonymizing the User
+  # row alone leaves them as a PII leak. Regenerates the name from
+  # the now-anonymized identity and resets the email to the site
+  # webmaster address. Runs after inactivate_user (so the name picks
+  # up the new login) and before erase_user (which detaches rather
+  # than deletes the herbarium, so the PII would otherwise survive
+  # there). `update_all`, not `update`, so no validation can
+  # silently block the scrub.
   def anonymize_personal_herbarium
     Herbarium.where(personal_user_id: id).update_all(
       name: :user_personal_herbarium.l(name: unique_text_name),

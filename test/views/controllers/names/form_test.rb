@@ -43,24 +43,28 @@ module Views::Controllers::Names
       assert_includes(html, :accepted.ti)
       assert_includes(html, :deprecated.ti)
 
-      # Text name and author fields
+      # Text name and author fields -- help text is collapsed behind
+      # a help-trigger icon, not always visible.
       assert_html(html, "textarea[name='name[text_name]'][data-autofocus]")
       assert_includes(html, :form_names_text_name.l)
       assert_includes(html, :form_names_text_name_help.l)
+      assert_html(html, "a.info-collapse-trigger[href='#name_text_name_help']")
       assert_html(html, "textarea[name='name[author]']")
       assert_includes(html, :authority.ti)
       assert_includes(html, :form_names_author_help.l)
+      assert_html(html, "a.info-collapse-trigger[href='#name_author_help']")
 
-      # Citation field
+      # Citation field -- same collapsed-help treatment.
       assert_html(html, "textarea[name='name[citation]']")
       assert_includes(html, :citation.ti)
       assert_includes(html, :form_names_citation_help.l)
+      assert_html(html, "a.info-collapse-trigger[href='#name_citation_help']")
 
       # Notes field with between content
       assert_html(html, "textarea[name='name[notes]']")
       assert_includes(html, :form_names_taxonomic_notes.l)
       assert_includes(html, :shared_textile_help.l)
-      assert_html(html, "div.mark")
+      assert_html(html, ".mark")
 
       # No misspelling fields for new form without misspelling param
       assert_not_includes(html, "name[misspelling]")

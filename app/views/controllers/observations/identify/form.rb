@@ -95,7 +95,8 @@ module Views::Controllers::Observations::Identify
     def render_search_icon
       Icon(type: :search,
            title: :search.ti,
-           class: "form-control-feedback")
+           class: "form-control-feedback",
+           center_tooltip: true)
     end
 
     def render_hidden_field

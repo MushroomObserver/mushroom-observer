@@ -15,11 +15,16 @@ module InatImportsController::ImportOptions
   end
 
   # Does this import cover other users' observations?
-  # Always false for regular users; determined by checkbox for superimporters.
+  # Off for an ordinary user; a checkbox for whoever may turn it on --
+  # a superimporter, or an admin importing their project (#5416).
   def import_others?
-    return false unless InatImport.super_importer?(@user)
+    return false unless may_import_others?
 
     params[:import_others] == "1"
+  end
+
+  def may_import_others?
+    InatImport.super_importer?(@user) || project_admin_import?
   end
 
   # Import other users' unlicensed observations as placeholder skeletons?

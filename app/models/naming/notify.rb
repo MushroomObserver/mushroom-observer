@@ -108,7 +108,7 @@ module Naming::Notify
 
     users = observation_interest_users(obs)
     taxa.each do |taxon|
-      taxon.interests.each { |i| users.push(i.user) if i.state }
+      taxon.interests.each { |i| users.push(i.user) if i.watching? }
     end
     users.uniq
   end
@@ -116,10 +116,7 @@ module Naming::Notify
   def observation_interest_users(obs)
     users = []
     users.push(obs.user) if obs.user&.email_observations_naming
-    obs.interests.each do |i|
-      i.state ? users.push(i.user) : users.delete(i.user)
-    end
-    users
+    Interest.update_recipients!(obs.interests, users)
   end
 
   def notify_interested(taxa)

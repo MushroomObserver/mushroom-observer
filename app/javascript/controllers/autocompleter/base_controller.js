@@ -83,7 +83,7 @@ const INTERNAL_OPTS = {
 // Shared static properties for subclasses (Stimulus doesn't inherit statics)
 export const AUTOCOMPLETER_TARGETS = [
   "input", "select", "pulldown", "list", "hidden", "wrap",
-  "createBtn", "hasIdIndicator", "keepBtn", "editBtn", "mapWrap",
+  "createBtn", "createLink", "hasIdIndicator", "keepOrEditBtn", "mapWrap",
   "collapseFields"
 ]
 export const AUTOCOMPLETER_OUTLETS = ["map"]
@@ -273,8 +273,8 @@ export default class BaseAutocompleterController extends Controller {
     // Re-prepare inputs
     this.prepareInputElement();
     this.prepareHiddenInput();
-    if (!this.hasEditBtnTarget ||
-      this.editBtnTarget?.classList?.contains('d-none')) {
+    if (!this.hasKeepOrEditBtnTarget ||
+      !this.keepOrEditBtnTarget?.classList?.contains('active')) {
       this.clearHiddenId();
     }
     this.constrainedSelectionUI(location);
@@ -934,17 +934,30 @@ export default class BaseAutocompleterController extends Controller {
     if (hidden_id && !isNaN(hidden_id) && hidden_id != 0) {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
-      if (this.hasKeepBtnTarget) {
-        this.keepBtnTarget.classList.remove("d-none");
+      if (this.hasHasIdIndicatorTarget) {
+        this.hasIdIndicatorTarget.classList.remove("d-none");
+      }
+      if (this.hasKeepOrEditBtnTarget) {
+        this.keepOrEditBtnTarget.classList.remove("d-none");
+      }
+      if (this.hasCreateBtnTarget) {
+        this.createBtnTarget.classList.add("d-none");
       }
     } else {
       this.wrapTarget.classList.remove('has-id');
-      if (this.inputTarget.value &&
-        !this.wrapTarget.classList.contains('create')) {
+      const offerCreate = this.inputTarget.value &&
+        !this.wrapTarget.classList.contains('create');
+      if (offerCreate) {
         this.wrapTarget.classList.add('offer-create');
       }
-      if (this.hasKeepBtnTarget) {
-        this.keepBtnTarget.classList.add("d-none");
+      if (this.hasHasIdIndicatorTarget) {
+        this.hasIdIndicatorTarget.classList.add("d-none");
+      }
+      if (this.hasKeepOrEditBtnTarget) {
+        this.keepOrEditBtnTarget.classList.add("d-none");
+      }
+      if (this.hasCreateBtnTarget) {
+        this.createBtnTarget.classList.toggle("d-none", !offerCreate);
       }
     }
     if (this.hasMapWrapTarget) {
@@ -992,8 +1005,8 @@ export default class BaseAutocompleterController extends Controller {
         this.verbose("autocompleter:hidden_data: ")
         this.verbose(JSON.stringify(hidden_data));
         this.cssHasIdOrNo(hidden_id);
-        if (this.hasKeepBtnTarget) {
-          this.keepBtnTarget.classList.remove('active');
+        if (this.hasKeepOrEditBtnTarget) {
+          this.keepOrEditBtnTarget.classList.remove('active');
         }
         // See the comment in drawPulldown().
         if (!this.silentRedraw) {

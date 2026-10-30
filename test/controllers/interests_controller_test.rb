@@ -15,6 +15,49 @@ class InterestsControllerTest < FunctionalTestCase
     assert_select("body.interests__index")
   end
 
+  # Interest has no show page -- a single-result index must not
+  # redirect to one, unlike most Query-backed indexes.
+  def test_index_single_result_does_not_redirect
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    get(:index)
+    assert_response(:success)
+    assert_select("body.interests__index")
+  end
+
+  # Regression: by_users is forced server-side on every dispatch
+  # branch (including the generic create_query_from_url_params path)
+  # -- a request-supplied by_user must not leak another user's
+  # Interests.
+  def test_index_by_user_param_cannot_leak_other_users_interests
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: mary, state: true)
+    get(:index, params: { by_user: mary.id })
+    objects = @controller.instance_variable_get(:@objects)
+    assert_empty(objects.select { |i| i.user_id == mary.id })
+  end
+
+  # Regression: a bookmarked/forwarded ?q= param carrying someone
+  # else's by_users must not leak their Interests, through either
+  # the sorted_index (find_or_create_query) branch or the
+  # create_query_from_url_params branch (when combined with type).
+  def test_index_bookmarked_q_param_cannot_leak_other_users_interests
+    login("rolf")
+    mary_interest = Interest.create(target: observations(:minimal_unknown_obs),
+                                    user: mary, state: true)
+    malicious_q = { model: "Interest", by_users: [mary.id] }
+
+    get(:index, params: { q: malicious_q })
+    objects = @controller.instance_variable_get(:@objects)
+    assert_empty(objects.select { |i| i.id == mary_interest.id })
+
+    get(:index, params: { q: malicious_q, type: "Observation" })
+    objects = @controller.instance_variable_get(:@objects)
+    assert_empty(objects.select { |i| i.id == mary_interest.id })
+  end
+
   def test_set_interest_another_user
     login("rolf")
     get(:set_interest,
@@ -58,7 +101,7 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(2, rolfs_interests.length)
     assert_equal(coprinus_comatus_tracker, rolfs_interests.first.target)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(true, rolfs_interests.second.state)
+    assert_predicate(rolfs_interests.second, :watching?)
 
     # Succeed: Turn same observation interest off.
     login("rolf")
@@ -70,7 +113,7 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(false, rolfs_interests.second.state)
+    assert_predicate(rolfs_interests.second, :ignoring?)
 
     # Succeed: Turn a name interest off from no interest.
     login("rolf")
@@ -81,9 +124,9 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(3, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(false, rolfs_interests.second.state)
+    assert_predicate(rolfs_interests.second, :ignoring?)
     assert_equal(peltigera, rolfs_interests.last.target)
-    assert_equal(false, rolfs_interests.last.state)
+    assert_predicate(rolfs_interests.last, :ignoring?)
 
     # Succeed: Delete interest in existing object that rolf hasn't expressed
     # interest in yet.
@@ -103,7 +146,7 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(peltigera, rolfs_interests.last.target)
-    assert_equal(false, rolfs_interests.last.state)
+    assert_predicate(rolfs_interests.last, :ignoring?)
 
     # Succeed: Delete last non-name-tracker interest.
     login("rolf")
@@ -112,9 +155,8 @@ class InterestsControllerTest < FunctionalTestCase
     assert_equal(1, Interest.where(user_id: rolf.id).length)
   end
 
-  # `find_relevant_interests` sorts by `target_type` then `text_name`;
-  # this hits the secondary tiebreak path when two interests share a
-  # target_type.
+  # The index orders by `target_type`; this exercises two interests
+  # sharing a target_type.
   def test_index_sorts_within_target_type
     login("rolf")
     Interest.create(target: names(:agaricus_campestris),
@@ -124,8 +166,6 @@ class InterestsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # Hits `filter_interests_by_type` (only invoked when `type` param
-  # present).
   # Covers `Views::Controllers::Interests::Index#render_pending_notice`
   # — the unapproved name-tracker branch (target_type=NameTracker,
   # note_template present, approved=false). No fixture matches all
@@ -149,6 +189,72 @@ class InterestsControllerTest < FunctionalTestCase
                     user: rolf, state: true)
     get(:index, params: { type: "Observation" })
     assert_select("body.interests__index")
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(["Observation"], objects.map(&:target_type).uniq)
+  end
+
+  # A hand-crafted URL could submit type as an Array -- must not
+  # silently drop the filter (create_query_from_url_params's permit
+  # step would otherwise fail validation and ignore it entirely).
+  def test_index_array_type_param_takes_first_value
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: true)
+    get(:index, params: { type: %w[Observation Name] })
+    assert_response(:success)
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(["Observation"], objects.map(&:target_type).uniq)
+    assert_no_flash
+  end
+
+  # An empty type= must degrade to "no filter", not a validation
+  # error flash -- matches the old type_tag's explicit blank guard.
+  def test_index_empty_type_param_is_unfiltered
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: true)
+    get(:index)
+    baseline = @controller.instance_variable_get(:@objects).size
+
+    get(:index, params: { type: "" })
+    assert_response(:success)
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(baseline, objects.size)
+    assert_no_flash
+  end
+
+  def test_index_filtered_by_state
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: false)
+    get(:index, params: { state: "Ignoring" })
+    assert_select("body.interests__index")
+    objects = @controller.instance_variable_get(:@objects)
+    assert(objects.all?(&:ignoring?))
+  end
+
+  # An empty state= must degrade to "no filter", not a validation
+  # error flash.
+  def test_index_empty_state_param_is_unfiltered
+    login("rolf")
+    Interest.create(target: observations(:minimal_unknown_obs),
+                    user: rolf, state: true)
+    Interest.create(target: names(:agaricus_campestris),
+                    user: rolf, state: false)
+    get(:index)
+    baseline = @controller.instance_variable_get(:@objects).size
+
+    get(:index, params: { state: "" })
+    assert_response(:success)
+    objects = @controller.instance_variable_get(:@objects)
+    assert_equal(baseline, objects.size)
+    assert_no_flash
   end
 
   # set_interest's "already on" / "already off" branches.
@@ -178,7 +284,7 @@ class InterestsControllerTest < FunctionalTestCase
          params: { type: "Observation", id: obs.id, state: 1 })
     interest = Interest.find_by(target: obs, user: rolf)
     assert(interest, "Expected a new Interest")
-    assert_equal(true, interest.state)
+    assert_predicate(interest, :watching?)
   end
 
   def test_create_interest_bad_target
@@ -200,7 +306,7 @@ class InterestsControllerTest < FunctionalTestCase
                   as: :turbo_stream)
     interest = Interest.find_by(target: obs, user: rolf)
     assert(interest, "Expected a new Interest")
-    assert_equal(true, interest.state)
+    assert_predicate(interest, :watching?)
   end
 
   def test_update_interest
@@ -209,7 +315,7 @@ class InterestsControllerTest < FunctionalTestCase
     Interest.create(target: obs, user: rolf, state: true)
     patch(:update,
           params: { type: "Observation", id: obs.id, state: -1 })
-    assert_equal(false, Interest.find_by(target: obs, user: rolf).state)
+    assert_predicate(Interest.find_by(target: obs, user: rolf), :ignoring?)
   end
 
   def test_update_creates_interest_when_missing
@@ -219,7 +325,7 @@ class InterestsControllerTest < FunctionalTestCase
           params: { type: "Observation", id: obs.id, state: 1 })
     interest = Interest.find_by(target: obs, user: rolf)
     assert(interest, "Update should create the interest if missing")
-    assert_equal(true, interest.state)
+    assert_predicate(interest, :watching?)
   end
 
   def test_update_no_op_when_state_zero_and_no_interest
@@ -237,7 +343,7 @@ class InterestsControllerTest < FunctionalTestCase
     Interest.create(target: obs, user: rolf, state: true)
     patch(:update, params: { type: "Observation", id: obs.id, state: -1 },
                    as: :turbo_stream)
-    assert_equal(false, Interest.find_by(target: obs, user: rolf).state)
+    assert_predicate(Interest.find_by(target: obs, user: rolf), :ignoring?)
   end
 
   def test_destroy_interest

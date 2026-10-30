@@ -14,8 +14,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # Overrides `ApplicationController::Indexes#render_index_view` so
-  # `show_index_of_objects` renders the Phlex `Index` class instead
-  # of `herbarium_records/index.html.erb` (deleted).
+  # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
     render(Views::Controllers::HerbariumRecords::Index.new(
              query: @query, pagination_data: @pagination_data,
@@ -76,6 +75,7 @@ class HerbariumRecordsController < ApplicationController
 
   def new
     set_ivars_for_new
+    return unless @observation
 
     @back_object = @observation
     @herbarium_record = default_herbarium_record
@@ -88,6 +88,7 @@ class HerbariumRecordsController < ApplicationController
 
   def create
     set_ivars_for_new
+    return unless @observation
 
     @back_object = @observation
     create_herbarium_record # response handled here

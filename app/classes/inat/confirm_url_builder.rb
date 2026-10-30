@@ -75,9 +75,11 @@ class Inat::ConfirmURLBuilder
   end
 
   # Same rule as PageParser#add_license_filter, so the link shows what
-  # the import fetches.
+  # the import fetches, less the opted-out observers it skips.
   def add_license_filter(args)
     return unless import_others? && !create_skeletons?
+
+    args.merge!(Inat::OptOut.filter_args.stringify_keys)
     return if args.key?("license")
 
     args.merge!(LICENSED_FILTER.stringify_keys)

@@ -11,6 +11,7 @@ module Name::Create
                fill_in_authors: true)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Look up Name's with a given name.  By default tries to weed out deprecated
   # Name's, but if that results in an empty set, then it returns the
   # deprecated ones. Returns an Array of zero or more Name instances.
@@ -25,6 +26,7 @@ module Name::Create
   #
   #  names = Name.find_names('Letharia vulpina')
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def find_names(user, in_str, rank = nil, ignore_deprecated: false,
                  fill_in_authors: false)
     return [] unless (parse = parse_name(in_str))
@@ -62,6 +64,7 @@ module Name::Create
     name.award_version_contribution(user.id) if first_version_for_user
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Parses a String, creates a Name for it and all its ancestors (if any don't
   # already exist), returns it in an Array (genus first, then species, etc.  If
   # there is ambiguity at any level (due to different authors), then +nil+ is
@@ -75,6 +78,7 @@ module Name::Create
   #     name.save if name and name.new_record?
   #   end
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def find_or_create_name_and_parents(user, in_str)
     return [] unless (parsed_name = parse_name(in_str))
 
@@ -135,6 +139,7 @@ module Name::Create
     result.to_a
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Look up a Name, creating it as necessary. Requires +rank+ and +text_name+
   # at least, supplying defaults for +search_name+, +display_name+, and
   # +sort_name+, and leaving +author+ blank by default.  Requires an
@@ -146,6 +151,7 @@ module Name::Create
   # Used by +make_species+, +make_genus+, and
   # +find_or_create_name_and_parents+.
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def make_name(params)
     result = nil
     search_name = params[:search_name]

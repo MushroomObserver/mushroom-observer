@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Sets the first line of the site banner once a deploy is up. Run by
 # script/deploy.sh; safe to re-run by hand.
 #
@@ -16,6 +17,7 @@
 # Saves a new Banner version, as the admin banner page does, so the banner
 # reappears for visitors who dismissed the previous one. A banner whose
 # first line already says this is left alone.
+# rubocop:enable MO/NoLongCommentBlock
 
 require_relative("release_notes")
 

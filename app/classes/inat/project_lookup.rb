@@ -28,19 +28,30 @@ class Inat
     PROJECT_ID_PARAM = /[?&]project_id=(\d+)/
     SLUG = /\A[a-z0-9][a-z0-9-]*\z/i
 
+    # A project's page rather than an observation search: the id or
+    # slug is in the path, so there is nothing to search until it is
+    # resolved. iNat's UI shows this address, so it is the one an admin
+    # has to hand.
+    def self.project_page?(input)
+      text = input.to_s
+      text.include?("://") && text.match?(PROJECT_URL_PATH)
+    end
+
     def initialize(input)
       @input = input.to_s.strip
     end
 
     # The project, or nil when nothing single answers to the input.
-    # `error` then holds the tag saying why.
-    attr_reader :error
+    # `error` then holds the tag saying why, and `token` the id or slug
+    # that was tried -- which is what to name in a message, since the
+    # input it came out of may be a whole URL.
+    attr_reader :error, :token
 
     def resolve
       return nil if @input.blank?
 
-      token = extract_token
-      project = token ? fetch(token) : nil
+      @token = extract_token
+      project = @token ? fetch(@token) : nil
       project ||= search(@input)
       @error ||= :project_site_inat_project_unknown unless project
       project

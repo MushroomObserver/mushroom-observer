@@ -33,11 +33,12 @@ class Views::Layouts::TopNav
     def test_renders_bootstrap_dropdown_structure
       html = render_top_bar(simple_links)
 
-      assert_html(html, "li.dropdown.d-inline-block")
+      assert_html(html, ".dropdown")
       assert_html(html, "a.dropdown-toggle#context_nav_toggle")
-      assert_html(html, "ul.dropdown-menu#context_nav")
-      # Each link tuple becomes one <li> inside the dropdown menu
-      assert_html(html, "ul.dropdown-menu li", count: simple_links.length)
+      assert_html(html, ".dropdown-menu#context_nav")
+      # Each link tuple becomes one item inside the dropdown menu
+      assert_html(html, ".dropdown-menu .dropdown-item",
+                  count: simple_links.length)
     end
 
     # The dropdown's toggle shows the localized "Actions" label.
@@ -55,6 +56,7 @@ class Views::Layouts::TopNav
     # `args[:button] => :destroy` routes through `Button::Delete`
     # with the context-nav opt-outs (`icon: nil`, `btn: nil`) so the
     # destroy renders as plain `[ DESTROY ]`-style text.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_destroy_button_renders_as_plain_text_link
       links = [[nil, @article, { button: :destroy }]]
       html = render_top_bar(links)
@@ -104,6 +106,7 @@ class Views::Layouts::TopNav
     # The dropdown menu strips `d-block` from button classes — the
     # pre-Phlex helper did this so button-style links don't get
     # forced to display: block inside the dropdown.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_strips_d_block_class_from_buttons
       links = [["Submit", "/items",
                 { button: :post, size: :lg, class: "d-block" }]]

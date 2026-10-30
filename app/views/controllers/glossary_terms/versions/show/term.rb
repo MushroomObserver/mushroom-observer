@@ -9,19 +9,21 @@ module Views::Controllers::GlossaryTerms
         prop :glossary_term, ::GlossaryTerm
 
         def view_template
-          p(class: "mt-3") do
-            b { trusted_html(append_colon(:glossary_term_name.t)) }
-            trusted_html(@glossary_term.name.t)
-          end
+          div(id: "glossary_term_version_summary") do
+            p(class: "mt-3") do
+              b { trusted_html(append_colon(:glossary_term_name.t)) }
+              trusted_html(@glossary_term.name.t)
+            end
 
-          p(class: "mt-3") do
-            trusted_html(
-              "*#{:glossary_term_description.t}:* " \
-              "#{@glossary_term.description}".tpl
-            )
-          end
+            p(class: "mt-3") do
+              trusted_html(
+                "*#{:glossary_term_description.t}:* " \
+                "#{@glossary_term.description}".tpl
+              )
+            end
 
-          render_thumbnail
+            render_thumbnail
+          end
         end
 
         private

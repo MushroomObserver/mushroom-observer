@@ -49,7 +49,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Show first Observation from Your Observations search.
     click_link(first_obs.text_name)
     # Destroy it.
-    click_button(class: "destroy_observation_link_#{first_obs.id}")
+    within(".show_title_nav") do
+      click_button(class: "destroy_observation_link_#{first_obs.id}")
+    end
 
     # MO should show next Observation.
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
@@ -117,6 +119,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("fr", sender.locale)
     assert_equal("en", receiver.locale)
 
+    # rubocop:disable MO/NoLongCommentBlock
     # I have no clue how to ensure translations are set any particular way.
     # This stub causes every single translation to be simply:
     #   "locale:mo.tag" (or "Locale:Mo.Tag" for a .ti caller, since .ti
@@ -131,6 +134,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # production code makes (see `stubbed_label`/`stubbed` below) rather
     # than hardcoding the stub's output -- so this test doesn't go stale
     # if a call site's tag or method (.t vs .l vs .ti) ever changes.
+    # rubocop:enable MO/NoLongCommentBlock
     translator = lambda do |*args|
       "#{I18n.locale}:#{args.first}"
     end
@@ -199,7 +203,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
+    assert_selector(".badge-id", text: obs.id.to_s)
+    assert_selector("#title", text: obs.name.search_name,
+                              normalize_ws: true)
   end
 
   # Tests of show_name_helper module

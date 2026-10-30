@@ -7,6 +7,7 @@ module ObservationsController::EditAndUpdate
   include ObservationsController::Validators
   include ::Locationable
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Form to edit an existing observation.
   # Linked from: left panel
   #
@@ -25,6 +26,7 @@ module ObservationsController::EditAndUpdate
   #   @new_image                        blank image object
   #   @good_images                      list of images already attached
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def edit
     return unless editable_or_redirect?(companion: true)
 

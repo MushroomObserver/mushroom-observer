@@ -253,6 +253,11 @@ a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
   align-items: center;
 }
 
+.inline-flex-center {
+  display: inline-flex;
+  align-items: center;
+}
+
 .spinner-right {
   line-height: 1.1 !important;
   animation: spin-r 1s infinite linear;

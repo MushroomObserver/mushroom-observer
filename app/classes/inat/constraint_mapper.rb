@@ -39,6 +39,15 @@ class Inat
 
     attr_reader :unresolved_names, :unresolved_locations
 
+    # The iNat taxa the project's target names resolve to. Empty when
+    # none of them do -- which is different from the search's
+    # fungi-wide fallback, and why the alert cycle reads this rather
+    # than `params`.
+    def target_taxon_ids
+      @target_taxon_ids ||=
+        @project.target_names.filter_map { |name| taxon_id_for(name) }
+    end
+
     # iNat params for everything the project constrains. Empty when it
     # constrains nothing.
     def params
@@ -53,7 +62,7 @@ class Inat
     # Target names when they resolve, and the fungi-and-slime-moulds
     # filter MO applies to every import otherwise.
     def taxon_id_param
-      ids = @project.target_names.filter_map { |name| taxon_id_for(name) }
+      ids = target_taxon_ids
       ids.any? ? ids.join(",") : IMPORTABLE_TAXON_IDS_ARG
     end
 

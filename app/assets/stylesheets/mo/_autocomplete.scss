@@ -14,51 +14,18 @@
 // file in mushroom_observer.scss.
 .has-id-indicator .mo-icon,
 .find-btn .mo-icon,
-.keep-btn .mo-icon,
-.edit-btn .mo-icon,
+.keep-edit-toggle .mo-icon,
 .create-button .mo-icon {
   width: 1.3em;
   height: 1.3em;
 }
 
-// autocompleter state - do we have a match?
-.has-id-indicator {
-  display: none;
-}
-.has-id {
-  .has-id-indicator {
-    // inline-flex + align-items: center, not inline-block -- the
-    // icon inside is shorter than the span's own content-driven
-    // height (an inline-block SVG taller than the surrounding text's
-    // line-height expands its line box), so even a parent row with
-    // its own align-items: center has nothing left to center against
-    // once this span already fills the row's full height. Centering
-    // the icon within its OWN wrapper first fixes that regardless of
-    // what the row around it does.
-    display: inline-flex;
-    align-items: center;
-  }
-}
-
-.keep-btn {
-  display: none;
-}
-.create {
-  .keep-btn {
-    display: inline-block;
-  }
-}
-
-// initially we may not have id, but we also don't offer create
-// until they've typed something
-.create-button {
-  display: none;
-}
-.offer-create {
-  .create-button {
-    display: inline-block;
-  }
-}
+// autocompleter state (do we have a match?) is no longer handled
+// here -- `.has-id-indicator` carries `d-none` by default, same as
+// find-btn/keep-edit-toggle/create-button, and the autocompleter
+// controller's cssHasIdOrNo toggles it the same way. Its span also
+// carries `.inline-flex-center` (see _icons.scss) directly for the
+// icon centering, rather than relying on an implicit selector.
 
 .dropdown-menu.auto_complete {
   // position: absolute;

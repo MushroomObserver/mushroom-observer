@@ -73,7 +73,7 @@ class InteractiveImageTest < ComponentTestCase
   def test_theater_button_has_data_sub_html_selector_with_image_links
     html = render_image
 
-    assert_html(html, "div.theater-btn[data-sub-html='.lightbox-caption']")
+    assert_html(html, ".theater-btn[data-sub-html='.lightbox-caption']")
 
     caption = Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption")
     assert_equal("lightbox_caption_#{@image.id}", caption["id"])

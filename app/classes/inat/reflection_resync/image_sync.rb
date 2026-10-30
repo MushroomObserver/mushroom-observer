@@ -16,7 +16,8 @@ class Inat
     #     observation the importer made) keeps the license it was imported
     #     with;
     #   - a new photo is imported by Inat::PhotoImporter, under the same
-    #     rules as the importer;
+    #     rules as the importer, so nothing new comes from an observer who
+    #     opted out of MO (Inat::OptOut);
     #   - the thumbnail follows iNat's first photo, unless it points at an
     #     image that isn't one of this observation's iNat photos.
     #
@@ -63,13 +64,18 @@ class Inat
         @photos = inat_obs[:observation_photos].to_a.
                   sort_by { |photo| photo[:position].to_i }.
                   map { |photo| Inat::ObsPhoto.new(photo) }
-        @importer = Inat::PhotoImporter.new(
-          observation: obs, user: obs.user, owner: owner?(inat_obs),
-          external_site: @site
-        )
+        @importer = photo_importer(inat_obs)
         @added = @removed = @updated = 0
         @thumbnail_changed = false
         @alerts = []
+      end
+
+      def photo_importer(inat_obs)
+        Inat::PhotoImporter.new(
+          observation: @obs, user: @obs.user, owner: owner?(inat_obs),
+          opted_out: Inat::OptOut.opted_out?(inat_obs[:user]),
+          external_site: @site
+        )
       end
 
       def owner?(inat_obs)

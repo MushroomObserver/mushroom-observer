@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Admin::Emails::MergeRequests
-  # Form for submitting a merge request email to admins. Rendered by
-  # the admin/emails/merge_requests controller's `new.erb`. Allows
-  # users to request merging two objects (e.g., names or locations).
+  # Form for submitting a merge request email to admins. Allows users
+  # to request merging two objects (e.g., names or locations).
   class Form < ::Components::ApplicationForm
     prop :old_obj, _Union(::Herbarium, ::Location, ::Name)
     prop :new_obj, _Union(::Herbarium, ::Location, ::Name)

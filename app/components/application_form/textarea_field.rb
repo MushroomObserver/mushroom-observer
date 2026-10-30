@@ -36,9 +36,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     private
 
     # `wrapper_options[:monospace] == true` appends `text-monospace` to
-    # the textarea's class chain. Matches the ERB `text_area_with_label`
-    # helper's `:monospace` option so callers (and direct component
-    # instantiators) get the same emission either way.
+    # the textarea's class chain.
     def textarea_class
       mono = "text-monospace" if wrapper_options[:monospace]
       class_names(attributes[:class], "form-control", mono)

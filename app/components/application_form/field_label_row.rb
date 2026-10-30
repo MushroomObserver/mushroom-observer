@@ -5,6 +5,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Phlex::TrustedHtml
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Three layouts depending on what the label row itself needs:
     #
     # - No label_appends/label_end: bare `<label>` (no wrap div noise).
@@ -18,6 +19,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # and `help` (the field's explanation block) are NOT part of the
     # label row — see FieldWrapperRendering and FieldWithHelp for
     # where they render instead.
+    # rubocop:enable MO/NoLongCommentBlock
     def render_label_row(label_text, inline)
       if label_end_present?
         render_label_flex_row(label_text, inline)
@@ -37,20 +39,14 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Resolves `wrapper_options[:label]` to display text: an explicit
     # String wins as-is, a Symbol is translated via `.t`, otherwise the
-    # field's key, humanized. Shared by every field type that takes a
-    # `label:` option -- previously duplicated near-identically across
-    # text_field.rb, textarea_field.rb, select_field.rb, and
-    # file_field.rb.
+    # field's key, humanized.
     #
-    # Most callers now pass an already-resolved String via `.ti`
-    # (`label: :name.ti`) when they want a title-cased field-prompt
-    # label -- `.ti` title-cases mechanically, so there's no longer a
-    # separate ALL-CAPS twin tag to spell out. Passing a bare lowercase
-    # Symbol (`label: :prefs_no_emails`) still works and goes through
-    # this method's `.t` branch instead: some translations carry real
-    # bold/italic textile markup (e.g. `prefs_no_emails`, "Opt out of
-    # _all_ email from MO.") that needs textile rendering, not
-    # title-casing, to display correctly.
+    # Callers wanting a title-cased field-prompt label pass an
+    # already-resolved String via `.ti` (`label: :name.ti`). A bare
+    # lowercase Symbol (`label: :prefs_no_emails`) goes through the
+    # `.t` branch instead, since some translations carry bold/italic
+    # textile markup that needs rendering, not title-casing (e.g.
+    # "Opt out of _all_ email from MO.").
     def resolved_label_text
       label_option = wrapper_options[:label]
       text = case label_option
@@ -61,21 +57,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       open_label_links_in_new_tab(text)
     end
 
-    # A link inside a label navigates the user away from a form they may
-    # be partway through filling out, in the same tab -- losing whatever
-    # they'd already entered. Force `target="_blank"` (plus
-    # `rel="noopener noreferrer"`) rather than stripping the link: a
-    # translator writing ordinary Textile link syntax into a label
-    # string (a production translation of `donate_who`, Spanish, did
-    # exactly this) has no way to know it lands in a `<label>`, so the
-    # label has to tolerate a link showing up, not reject it.
-    #
-    # Nested links inside a `<label for="...">` are valid HTML, and
-    # browsers give the `<a>` click priority over the label's own
-    # click-to-focus/toggle behavior, so there's no real ambiguity even
-    # for a checkbox/radio label where the label click also toggles the
-    # control -- CheckboxField#label_text calls resolved_label_text
-    # directly and gets this same treatment.
+    # A link inside a label navigates the user away from a
+    # partly-filled form, losing their input, so this forces
+    # `target="_blank"` (plus `rel="noopener noreferrer"`) rather than
+    # stripping the link: a translator writing ordinary Textile link
+    # syntax into a label string (the `donate_who` Spanish translation
+    # did this) has no way to know it lands in a `<label>`. Nested
+    # links inside `<label for="...">` are valid HTML, and browsers
+    # give the `<a>` click priority over the click-to-focus/toggle
+    # behavior -- `CheckboxField#label_text` gets the same treatment
+    # via `resolved_label_text`.
     LINK_TAG_RE = /<a\b([^>]*)>/i
 
     def open_label_links_in_new_tab(text)
@@ -140,18 +131,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # `wrapper_options[:label_sr_only] == true` hides the label
-    # visually (Bootstrap's `sr-only`) but keeps the `<label for="…">`
-    # association for screen readers. Use when the field's visible
-    # label would be redundant — e.g. when a panel heading already
-    # names the only field in the panel.
-    #
-    # help_placement: :above drops the label's default bottom margin --
-    # the help block renders immediately below it (see
-    # FieldWithHelp#render_plain_help_text's matching mt-0), so the
-    # usual label/field gap would otherwise double up between the
-    # label and the help text instead.
-    def label_class
-      base = wrapper_options[:label_sr_only] ? "sr-only" : "mr-3"
+    # visually but keeps the `<label for="…">` association for screen
+    # readers -- use when a panel heading already names the field.
+    # `help_placement: :above` drops the label's bottom margin, since
+    # the help block renders directly below it instead.
+    # `trailing_margin: false` (render_label_with_appends) drops the
+    # mr-3 too -- each append supplies a leading ml-3 instead.
+    def label_class(trailing_margin: true)
+      base = if wrapper_options[:label_sr_only]
+               "sr-only"
+             else
+               trailing_margin ? "mr-3" : nil
+             end
       help_placement_above? ? class_names(base, "mb-0") : base
     end
 
@@ -171,33 +162,39 @@ class Components::ApplicationForm < Superform::Rails::Form
     # outer row (see below for what the class does).
     def render_label_flex_row(label_text, inline)
       display = inline ? "d-inline-flex" : "d-flex"
-      div(class: "#{display} justify-content-between align-items-center " \
-                 "label-row-with-appends") do
+      div(class: class_names(
+        "#{display} justify-content-between align-items-center",
+        "label-row-with-appends", label_row_trailing_class
+      )) do
         render_label_with_appends(label_text, wrap_class: nil)
         render_label_end_slot
       end
     end
 
-    # d-flex align-items-center -- without it, the label text and any
-    # appended content (autocompleter's has-id-indicator icon, find/
-    # keep/edit buttons) are just inline siblings with no shared
-    # vertical-alignment context, each subject to baseline/em-sizing
-    # quirks (an SVG icon's default vertical-align: baseline doesn't
-    # sit on the text baseline the way a rendered glyph does -- see
-    # autocompleter_field.rb).
-    #
-    # wrap_class defaults to label-row-with-appends -- Bootstrap's
-    # label carries margin-bottom: 5px with no top margin, which
-    # throws off align-items-center centering against append content
-    # with no margin (see _autocomplete.scss). Inside .autocompleter,
-    # the label's margin is zeroed and the same bottom spacing moves
-    # to this row wrapper instead. render_label_flex_row passes
-    # wrap_class: nil so the class lands once, on whichever div is the
-    # outer row.
+    # An inline field (e.g. a select beside its label) needs trailing
+    # space between the appends row and the input that follows it.
+    # Applied once, on the outer row, so it doesn't compound with an
+    # append's leading margin.
+    def label_row_trailing_class
+      return nil unless wrapper_options[:inline]
+      return nil unless respond_to?(:help_slot) && help_slot &&
+                        wrapper_options[:help_collapse]
+
+      "mr-3"
+    end
+
+    # d-flex align-items-center is needed since the label and appended
+    # content are otherwise just inline siblings with no shared
+    # vertical-alignment context. render_label_flex_row passes
+    # wrap_class: nil since it already supplies that class and already
+    # applied label_row_trailing_class to its outer div.
     def render_label_with_appends(label_text,
                                   wrap_class: "label-row-with-appends")
-      div(class: class_names("d-flex", "align-items-center", wrap_class)) do
-        label(for: field.dom.id, class: label_class) do
+      row_class = wrap_class && class_names(wrap_class,
+                                            label_row_trailing_class)
+      div(class: class_names("d-flex", "align-items-center", row_class)) do
+        label(for: field.dom.id,
+              class: label_class(trailing_margin: false)) do
           render_label_content(label_text)
         end
         render_help_in_label_row
@@ -216,7 +213,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span) { plain(label_appends_text(appends)) }
+      Help(element: :span, class: "ml-3") do
+        plain(label_appends_text(appends))
+      end
     end
 
     def label_appends_text(appends)

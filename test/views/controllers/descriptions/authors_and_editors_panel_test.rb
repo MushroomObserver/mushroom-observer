@@ -9,8 +9,7 @@ class Views::Controllers::Descriptions::AuthorsAndEditorsPanelTest <
 
     html = render(new_panel(description: desc))
 
-    # Wraps `Views::Layouts::AuthorsAndEditors` in `.text-center`.
-    assert_html(html, ".text-center")
+    assert_html(html, "#authors_and_editors_panel")
   end
 
   def test_renders_license_badge_when_license_present

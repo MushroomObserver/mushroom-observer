@@ -24,8 +24,7 @@ class Inat::CandidateCountTest < UnitTestCase
   end
 
   def candidates_for(**args)
-    Inat::CandidateCount.for(project: @project,
-                             project_site: project_site(**args))
+    Inat::CandidateCount.for(project_site: project_site(**args))
   end
 
   # Neither shape set means every fungus on iNat, which is not a number
@@ -110,8 +109,7 @@ class Inat::CandidateCountTest < UnitTestCase
     site = ProjectExternalSite.new(project: project, external_site: @site,
                                    use_constraints: true)
 
-    candidates = Inat::CandidateCount.for(project: project,
-                                          project_site: site)
+    candidates = Inat::CandidateCount.for(project_site: site)
 
     assert_equal(project.target_names.map(&:text_name),
                  candidates.unresolved_names)

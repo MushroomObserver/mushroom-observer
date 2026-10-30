@@ -6,9 +6,11 @@ class NavbarTextTest < ComponentTestCase
   def test_renders_default_div_wrapper
     html = render_component(Components::Navbar::Text.new) { "Page" }
 
-    assert_html(html, "div.navbar-text", text: "Page")
+    assert_html(html, ".navbar-text", text: "Page")
   end
 
+  # `element:` controls the wrapper tag -- the tag is the contract.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_custom_element
     html = render_component(Components::Navbar::Text.new(element: :li)) do
       "Sort by:"
@@ -17,12 +19,13 @@ class NavbarTextTest < ComponentTestCase
     assert_html(html, "li.navbar-text", text: "Sort by:")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_with_custom_class
     html = render_component(
       Components::Navbar::Text.new(class: "mx-0 mt-3")
     ) { "Page" }
 
-    assert_html(html, "div.navbar-text.mx-0.mt-3", text: "Page")
+    assert_html(html, ".navbar-text.mx-0.mt-3", text: "Page")
   end
 
   def test_renders_with_data_attributes
@@ -30,7 +33,7 @@ class NavbarTextTest < ComponentTestCase
       Components::Navbar::Text.new(data: { foo: "bar" })
     ) { "Page" }
 
-    assert_html(html, "div.navbar-text",
+    assert_html(html, ".navbar-text",
                 attribute: { "data-foo" => "bar" })
   end
 end

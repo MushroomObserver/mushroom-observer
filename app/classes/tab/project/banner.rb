@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # The tab strip rendered in the project banner (Summary, Observations,
-# Names, Locations, Species Lists, Updates, Admin). Order matters and
-# matches the pre-conversion ERB / Phlex view exactly:
+# Names, Locations, Species Lists, Updates, Admin). Order matters:
 #
 #   Summary  →  [Observations if obs.any?]
 #            →  Species Lists (always when obs.any?; only when

@@ -66,19 +66,90 @@ class InatImportTest < ActiveSupport::TestCase
   def test_estimated_remaining_time_extrapolates_from_progress
     import = inat_imports(:rolf_inat_import)
     import.update!(state: "Importing", total_importables: 20,
-                   imported_count: 5, started_at: 10.seconds.ago,
+                   imported_count: 5, avg_import_time: 2,
+                   started_at: 10.seconds.ago, ended_at: nil)
+
+    # 15 left at the 2 s/obs this run is importing at.
+    assert_equal(30, import.estimated_remaining_time,
+                 "ETA should extrapolate from the observed import rate")
+  end
+
+  # A re-run skips what it already holds. Those are observations the run
+  # is done with, so they shrink the queue; before, imported_count stayed
+  # at 0 through the whole page and the estimate held its opening guess.
+  def test_estimated_remaining_time_counts_skipped_observations
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 0, ignored_already_imported_count: 10,
+                   avg_import_time: 2, started_at: 10.seconds.ago,
                    ended_at: nil)
 
-    # ~5 obs in ~10s ≈ 2 s/obs; 15 remaining ≈ 30s.
-    assert_in_delta(30, import.estimated_remaining_time, 4,
-                    "ETA should extrapolate from the observed rate")
+    assert_equal(20, import.estimated_remaining_time,
+                 "Skipped observations should shrink the queue")
+    assert_operator(import.estimated_remaining_time, :<,
+                    import.total_expected_time,
+                    "A run that has skipped half its page should not still " \
+                    "report its opening estimate")
+  end
+
+  # Skips are an ExternalLink lookup; imports are a round trip with
+  # photos. Pricing the observations still to come at the blended rate
+  # of a page that was mostly skips says a minute of work takes seconds.
+  def test_estimated_remaining_time_prices_the_rest_at_the_import_rate
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 1, ignored_already_imported_count: 10,
+                   avg_import_time: 5, started_at: 10.seconds.ago,
+                   ended_at: nil)
+
+    # 9 left at 5 s/import. Dividing elapsed by everything processed
+    # would price them at under a second each.
+    assert_equal(45, import.estimated_remaining_time,
+                 "Only imports should set the pace for what is left")
+  end
+
+  # Both kinds shrink the queue even though only one sets the rate.
+  def test_estimated_remaining_time_mixes_imported_and_skipped
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 2, ignored_already_imported_count: 6,
+                   ignored_unlicensed_count: 2, avg_import_time: 3,
+                   started_at: 10.seconds.ago, ended_at: nil)
+
+    assert_equal(30, import.estimated_remaining_time,
+                 "10 of 20 processed leaves 10 at the import rate")
+  end
+
+  # Before the first import there is no measured rate to use.
+  def test_estimated_remaining_time_falls_back_to_the_up_front_rate
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 0, ignored_already_imported_count: 10,
+                   avg_import_time: nil, started_at: 10.seconds.ago,
+                   ended_at: nil)
+
+    assert_equal(10 * import.initial_avg_import_seconds,
+                 import.estimated_remaining_time,
+                 "With nothing imported yet, use the up-front average")
+  end
+
+  # More observations skipped than the estimate expected leaves nothing to
+  # do, not a negative amount of time.
+  def test_estimated_remaining_time_does_not_go_negative
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 5,
+                   imported_count: 2, ignored_already_imported_count: 8,
+                   started_at: 10.seconds.ago, ended_at: nil)
+
+    assert_equal(0, import.estimated_remaining_time,
+                 "Processing past the estimated total should report 0 left")
   end
 
   def test_estimated_remaining_time_before_any_imported
     import = inat_imports(:rolf_inat_import)
     import.update!(state: "Importing", total_importables: 10,
-                   imported_count: 0, started_at: Time.zone.now,
-                   ended_at: nil)
+                   imported_count: 0, ignored_already_imported_count: 0,
+                   started_at: Time.zone.now, ended_at: nil)
 
     assert_equal(import.total_expected_time, import.estimated_remaining_time,
                  "Before any obs imported, fall back to the up-front estimate")
@@ -116,14 +187,16 @@ class InatImportTest < ActiveSupport::TestCase
   def test_extrapolated_remaining_time_uses_capped_total
     import = inat_imports(:rolf_inat_import)
     import.update!(total_importables: InatImport::MAX_IMPORTABLE + 50,
-                   imported_count: 5)
-    import.define_singleton_method(:elapsed_time) { 10.0 }
+                   imported_count: 5, avg_import_time: 2,
+                   ignored_not_importable_count: 0,
+                   ignored_date_missing_count: 0,
+                   ignored_already_imported_count: 0,
+                   ignored_unlicensed_count: 0)
 
     remaining = InatImport::MAX_IMPORTABLE - 5
-    expected = (remaining * 10.0 / 5).round
 
     assert_equal(
-      expected, import.send(:extrapolated_remaining_time),
+      remaining * 2, import.send(:extrapolated_remaining_time),
       "Extrapolation should use the capped total, not the raw " \
       "(uncapped) total_importables"
     )
