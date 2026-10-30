@@ -105,17 +105,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # (and its CSS is already scoped to .input-group, not every
     # form-group), so this reuses it rather than adding a new rule.
     def render_append_in_input_group
-      InputGroup(**input_group_attributes) do
+      InputGroup do
         yield
         render(append_slot)
-      end
-    end
-
-    def input_group_attributes
-      if wrapper_options[:input_group_class].present?
-        { class: wrapper_options[:input_group_class] }
-      else
-        {}
       end
     end
   end
