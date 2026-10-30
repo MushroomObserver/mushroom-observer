@@ -279,9 +279,13 @@ class RssLogsControllerTest < FunctionalTestCase
 
   # Regression: Components::TypeFilters::MultiSelect's hidden fields
   # carry other active query filters (id_in_set) forward alongside
-  # the submitted type checkboxes -- simulates what unchecking "name"
-  # submits (q[types][]=observation, with id_in_set carried as a
-  # hidden q[id_in_set] field). Neither filter may be dropped.
+  # the submitted type checkboxes, and the whole q[...] hash needs a
+  # :model key or query_from_q_param_hash refuses to resolve it
+  # (index_filter excludes :model by design -- render_hidden_fields
+  # adds it back by hand). Renders the form, reads its rendered
+  # hidden fields (no hand-built params), simulates unchecking
+  # "name", and resubmits -- the round trip through the rendered
+  # markup, not an assumed shape.
   def test_type_filter_form_preserves_other_active_filters
     login
     kept = rss_logs(:minimal_unknown_obs_rss_log)
@@ -289,9 +293,21 @@ class RssLogsControllerTest < FunctionalTestCase
 
     get(:index, params: {
           q: { model: "RssLog", id_in_set: [kept.id, excluded.id],
-               type: "observation" }
+               types: %w[observation name] }
         })
+    assert_response(:success)
 
+    fields = css_select("#log_filter_form_bar_top " \
+                        "input[type='hidden'], " \
+                        "#log_filter_form_bar_top " \
+                        "input[type='checkbox'][checked]")
+    pairs = fields.map { |f| [f["name"], f["value"]] }.
+            reject { |k, v| k == "q[types][]" && v == "name" }
+    query_string = pairs.map do |k, v|
+      "#{CGI.escape(k)}=#{CGI.escape(v.to_s)}"
+    end.join("&")
+
+    get(:index, params: Rack::Utils.parse_nested_query(query_string))
     objects = @controller.instance_variable_get(:@objects)
     assert_equal([kept.id], objects.map(&:id))
   end

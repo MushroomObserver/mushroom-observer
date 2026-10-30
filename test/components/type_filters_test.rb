@@ -50,6 +50,19 @@ module Components
       )
     end
 
+    # query_from_q_param_hash refuses to resolve params[:q] without a
+    # :model key -- index_filter excludes :model by design, so
+    # render_hidden_fields has to add it back explicitly.
+    def test_renders_model_hidden_field
+      query = Query.lookup(:RssLog, types: ["observation"])
+      html = render_multi(query, ["observation"])
+
+      assert_html(
+        html, "#log_filter_form_dropdown_top " \
+              "input[type='hidden'][name='q[model]'][value='RssLog']"
+      )
+    end
+
     def test_renders_hidden_fields_for_other_active_query_filters
       log = rss_logs(:minimal_unknown_obs_rss_log)
       query = Query.lookup(:RssLog, types: ["observation"],

@@ -43,6 +43,11 @@ module Components::TypeFilters::MultiSelect
     input(type: "hidden", name: "back", value: "rss_logs")
     return unless @query
 
+    # query_from_q_param_hash requires a :model key to resolve
+    # params[:q] -- index_filter excludes it (it's meant for merging
+    # onto route-helper args, where the model is already implied), so
+    # it needs adding back explicitly here.
+    input(type: "hidden", name: "q[model]", value: @query.model.name)
     # Nested under q[...] like the type checkboxes -- query_from_q_param
     # reconstructs the whole query from params[:q], so a flat name here
     # would go unread.
