@@ -23,7 +23,7 @@ module Views::Controllers::Versions
         panel_id: "#{@obj.type_tag}_versions"
       ) do |panel|
         panel.with_heading { :versions.ti }
-        panel.with_body(classes: "p-0") { render_table }
+        panel.with_body(wrapper: false) { render_table }
       end
     end
 
