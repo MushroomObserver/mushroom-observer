@@ -28,6 +28,8 @@ development:
 test:
   <<: *connection
   database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? ? 'mo_test' : 'mo_test-' + ENV['TEST_ENV_NUMBER']) %>"
+  # Must exceed Solid Queue's thread need -- see test/jobs/queue_config_test.rb.
+  pool: 10
 
 # Reached over the network either way -- host, a Kamal accessory
 # container, or a managed service (#5345's decision).
