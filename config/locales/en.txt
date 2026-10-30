@@ -2968,7 +2968,6 @@
   # interests/index
   list_interests_title: Your Notification Requests
   list_interests_intro: "You'll be emailed about changes to each item below. Ignore to pause notifications, or delete to stop watching entirely."
-  list_interests_none: No interests.
   list_interests_mute_tooltip: Mute notifications
   list_interests_resume_tooltip: Resume notifications
   list_name_tracker_pending_approval: "(Observer notification pending approval.)"

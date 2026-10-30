@@ -19,17 +19,17 @@ module Views::Controllers::Interests
       add_pagination(@pagination_data)
       container_class(:wide)
 
-      render_intro
+      render_intro if any_interests?
       PaginatedResults do
-        if @interests.any?(&:target)
-          render_interests_table
-        else
-          ContentPadded { p { plain(:list_interests_none.l) } }
-        end
+        render_interests_table if any_interests?
       end
     end
 
     private
+
+    def any_interests?
+      @interests.any?(&:target)
+    end
 
     def register_filters
       add_type_filters(**type_filter_args) if show_type_filter?
