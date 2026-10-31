@@ -128,6 +128,36 @@ module Observations
       assert_not_includes(get_last_flash.to_s, "<script>")
     end
 
+    # The sorter dropdown's links carry the chosen order via the q[]
+    # round trip (`Views::Layouts::Header::Sorter#sort_tuple`), not a
+    # flat `by` param -- confirms the edit page picks it up.
+    def test_edit_applies_sort_order_from_q_param
+      obs = observations(:coprinus_comatus_obs)
+      login("rolf")
+
+      get(:edit, params: {
+            id: obs.id,
+            q: { model: "Project", order_by: "created_at" }
+          })
+
+      assert_response(:success)
+      assert_equal("created_at", assigns(:all_projects).params[:order_by])
+    end
+
+    def test_edit_invalid_sort_order_falls_back_to_default_order
+      obs = observations(:coprinus_comatus_obs)
+      login("rolf")
+
+      get(:edit, params: {
+            id: obs.id,
+            q: { model: "Project", order_by: "totally_bogus_sort_key" }
+          })
+
+      assert_response(:success)
+      all_projects = assigns(:all_projects)
+      assert_equal("title", all_projects.params[:order_by])
+    end
+
     def test_edit_renders_add_and_remove_forms
       member_proj = projects(:eol_project)
       other_proj = projects(:bolete_project)

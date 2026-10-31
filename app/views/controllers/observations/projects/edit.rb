@@ -2,13 +2,15 @@
 
 # Action template for `Observations::ProjectsController#edit` — the
 # "manage projects for this observation" page. Mirrors
-# `Observations::SpeciesLists::Edit`. Renders two
-# `Components::ListGroup`s of `Projects::ListItem` rows: projects the
-# observation already belongs to (REMOVE button on each) and the
-# user's other projects (ADD button on each).
+# `Observations::SpeciesLists::Edit`, sharing
+# `Components::ObservationListManager` for the two-section layout.
+# Rows are `Projects::ListItem`: projects the observation already
+# belongs to (REMOVE button on each) and the user's other projects
+# (ADD button on each).
 module Views::Controllers::Observations::Projects
   class Edit < Views::FullPageBase
     prop :observation, ::Observation
+    prop :all_projects, ::Query::Projects
     prop :obs_projects, _Array(::Project)
     prop :other_projects, _Array(::Project)
 
@@ -18,41 +20,27 @@ module Views::Controllers::Observations::Projects
           name: viewer_aware_unique_format_name(@observation)
         )
       )
+      add_sorter(@all_projects, ::ProjectsController.sort_options)
       add_context_nav(
         Tab::Observation::ListActions.new(observation: @observation)
       )
+      add_pagination(nil)
       container_class(:wide)
       content_padding(:panels)
 
-      div(class: "p-3") { render_sections }
+      PaginatedResults { render_manager }
     end
 
     private
 
-    def render_sections
-      render_section(
-        heading: :project_manage_belongs_to.l,
-        projects: @obs_projects, remove: true
-      )
-      render_section(
-        heading: :project_manage_doesnt_contain.l,
-        projects: @other_projects, add: true
-      )
-    end
-
-    # No-op when the source array is empty.
-    def render_section(heading:, projects:, remove: false, add: false)
-      return if projects.empty?
-
-      h5(class: "mt-3") { trusted_html(append_colon(heading)) }
-      ListGroup do |list|
-        projects.each do |project|
-          list.item(
-            class: "d-flex justify-content-between align-items-start"
-          ) do
-            render_item(project: project, remove: remove, add: add)
-          end
-        end
+    def render_manager
+      ObservationListManager(
+        belongs_to_heading: :project_manage_belongs_to.l,
+        belongs_to_items: @obs_projects,
+        not_contains_heading: :project_manage_doesnt_contain.l,
+        not_contains_items: @other_projects
+      ) do |project, remove, add|
+        render_item(project: project, remove: remove, add: add)
       end
     end
 
