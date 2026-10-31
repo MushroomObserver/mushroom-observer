@@ -166,8 +166,8 @@ module Names
       params = { "id" => desc.id.to_s }
       login
       get(:show, params: params)
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
     end
 
     def test_next_description
@@ -201,7 +201,7 @@ module Names
       login
       get(:show, params: { id: desc.id })
       assert_no_flash
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
     end
 
     # This is a bit confusing: create and edit draft are handled here,
@@ -305,8 +305,8 @@ module Names
       draft = name_descriptions(:draft_coprinus_comatus)
       login(draft.user.login)
       get(:show, params: { id: draft.id })
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
     end
 
     # Ensure that an admin can see a draft they don't own,
@@ -316,8 +316,8 @@ module Names
       assert_not_equal(draft.user, mary)
       login(mary.login)
       get(:show, params: { id: draft.id })
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
 
       # Admin should see all description_change_links buttons
       did = draft.id
@@ -338,8 +338,8 @@ module Names
       assert_not_equal(draft.user, katrina)
       login(katrina.login)
       get(:show, params: { id: draft.id })
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
     end
 
     # Ensure that a non-member cannot see a draft

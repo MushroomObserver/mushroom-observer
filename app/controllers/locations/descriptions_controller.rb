@@ -73,7 +73,7 @@ module Locations
 
       render(Views::Controllers::Locations::Descriptions::Show.new(
                description: @description, user: @user,
-               versions: @versions, projects: @projects
+               versions: @versions, incoming_project: @incoming_project
              ))
     end
 
@@ -93,7 +93,7 @@ module Locations
     def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
-      @projects = users_projects_which_dont_have_desc_of_this(@location)
+      @incoming_project = Project.find_by(id: params[:project])
       @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end

@@ -27,6 +27,41 @@
 // carries `.inline-flex-center` (see _icons.scss) directly for the
 // icon centering, rather than relying on an implicit selector.
 
+// An autocompleter used as one item in a `.flex-bar` row (label +
+// field + submit button all on one line, e.g.
+// Components::Description::NewDraftForm) needs the internal nesting
+// (.autocompleter > .form-group > the visible input) to be flex too,
+// growing to fill the row. Without this, `.autocompleter`'s box is
+// taller than the visible input inside it (room reserved for the
+// dropdown), so the row's `align-items: center` centers the oversized
+// box, not the visible input, and the input doesn't stretch to fill
+// the row's available width. Scoped under `.flex-bar` so it doesn't
+// change the stacked label-row layout every other autocompleter uses.
+.flex-bar {
+  .autocompleter {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .autocompleter .form-group {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    // Bootstrap's default .form-group margin-bottom (for vertical
+    // spacing between stacked fields) pads the bottom of the box
+    // `.autocompleter`'s align-items: center then centers -- without
+    // zeroing it, the visible input sits higher than the row's other
+    // items even though the boxes are all centered.
+    margin-bottom: 0;
+  }
+
+  .autocompleter .form-control {
+    flex: 1;
+    width: auto;
+  }
+}
+
 .dropdown-menu.auto_complete {
   // position: absolute;
   // color: $dropdown-link-color;

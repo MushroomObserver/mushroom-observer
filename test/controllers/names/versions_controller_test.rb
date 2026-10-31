@@ -41,13 +41,9 @@ module Names
         assert_match(/Versions/, elements.first.text)
       end
 
-      # Check that the version table panel body renders with table content
-      assert_select("#name_versions .panel-body") do |elements|
-        assert_equal(1, elements.size, "Should find version table panel body")
-        # Should contain a table
-        assert_select(elements.first, "table.table-hover") do |table|
-          assert_equal(1, table.size, "Should find versions table")
-        end
+      # Check that the versions table itself renders
+      assert_select("#name_versions table.table-versions") do |elements|
+        assert_equal(1, elements.size, "Should find versions table")
       end
     end
 
