@@ -15,7 +15,9 @@ module Views::Controllers::Descriptions
     def view_template
       Panel(panel_id: "other_descriptions") do |panel|
         panel.with_heading { panel_title }
+        panel.with_heading_links { render_create_link }
         panel.with_body { render_body }
+        panel.with_footer { render_new_draft_form }
       end
     end
 
@@ -33,11 +35,22 @@ module Views::Controllers::Descriptions
       :show_description_list_title.t(type: parent_type)
     end
 
+    def render_create_link
+      name, target, opts = ::Tab::Description::Create.new(
+        parent: parent
+      ).to_a
+      Link(type: :get, name: name, target: target,
+           **(opts || {}))
+    end
+
     def render_body
       render(List.new(
                user: @user, object: parent, type: parent_type,
                current: @description, empty_text: alts_empty_text
              ))
+    end
+
+    def render_new_draft_form
       render(Components::Description::NewDraftForm.new(
                target: parent, project: @incoming_project
              ))

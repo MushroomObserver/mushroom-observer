@@ -5,11 +5,17 @@
 # `Views::Controllers::Descriptions::OtherDescriptionsPanel` so it
 # has independent test coverage.
 #
-# The autocompleter's `append` slot renders its content below the
-# field (built for a map section, not an inline addon), so the
-# submit button is a plain flex-row sibling instead -- same pattern
-# as the top-nav search bar and the identify filter
-# (`Observations::Identify::Form`), not an input-group addon.
+# Hand-built flex row, label included, same shape as the top-nav
+# search bar and the identify filter (`Observations::Identify::Form`)
+# -- not an input-group addon (the autocompleter's `append` slot
+# renders below the field, built for a map section), and not
+# Bootstrap's `.form-inline` either: that class only un-stacks a
+# `.form-group`'s label/input when the form-group is a normal
+# block-flow child of the form, and a flex row's `.flex-bar`
+# (`display: flex`) turns the form-group into a flex item instead,
+# which overrides that cascade -- confirmed live (label stayed
+# stacked above the input, submit button pushed to the far end by
+# `.flex-bar`'s `justify-content: space-between`).
 #
 # The autocompleter's hidden field is explicitly keyed "project"
 # (bare, no model namespace) to match
@@ -36,6 +42,7 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
   def view_template
     super do
       div(class: "flex-bar gap-2") do
+        render_label
         render_project_field
         submit(:create.ti, variant: :outline, size: :sm)
       end
@@ -44,11 +51,21 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
 
   private
 
+  def render_label
+    label(for: project_field_id, class: "mb-0 text-nowrap") do
+      plain(append_colon(:show_description_new_draft_label.l))
+    end
+  end
+
+  def project_field_id
+    "project_display"
+  end
+
   def render_project_field
     autocompleter_field(
-      "project_display", type: :project, label: false, inline: true,
-                         value: @project&.title,
-                         hidden_name: "project", hidden_value: @project&.id
+      project_field_id, type: :user_project, label: false,
+                        value: @project&.title,
+                        hidden_name: "project", hidden_value: @project&.id
     )
   end
 

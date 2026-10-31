@@ -21,6 +21,7 @@ export { default as NameController } from "./name_controller";
 export { default as LocationController } from "./location_controller";
 export { default as HerbariumController } from "./herbarium_controller";
 export { default as ProjectController } from "./project_controller";
+export { default as UserProjectController } from "./user_project_controller";
 export { default as SpeciesListController } from "./species_list_controller";
 export { default as CladeController } from "./clade_controller";
 export { default as RegionController } from "./region_controller";

@@ -33,6 +33,20 @@ class Views::Controllers::Descriptions::OtherDescriptionsPanelTest <
     assert_no_html(html, "a.description_link_#{desc.id}")
   end
 
+  def test_renders_create_description_link_in_heading
+    desc = name_descriptions(:peltigera_user_desc)
+
+    html = render(new_panel(description: desc))
+
+    # `Tab::Description::Create` -- the plain (non-project) new-
+    # description link, no `project` param.
+    assert_html(
+      html,
+      "#other_descriptions .panel-heading-links a[href='" \
+      "#{routes.new_name_description_path(name_id: desc.parent.id)}']"
+    )
+  end
+
   def test_renders_new_draft_form
     desc = name_descriptions(:peltigera_user_desc)
 

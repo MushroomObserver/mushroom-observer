@@ -11,8 +11,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [
-      :name, :user, :location, :herbarium, :project, :species_list,
-      :clade, :region
+      :name, :user, :location, :herbarium, :project, :user_project,
+      :species_list, :clade, :region
     ].freeze
 
     slot :append

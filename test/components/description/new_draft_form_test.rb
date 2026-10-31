@@ -36,6 +36,12 @@ class Components::Description::NewDraftFormTest < ComponentTestCase
     assert_html(html, "button[type='submit']")
   end
 
+  def test_renders_project_label
+    html = render_form(target: locations(:albion))
+
+    assert_html(html, "label", text: :show_description_new_draft_label.t)
+  end
+
   # The hidden field has to be the bare top-level "project" param
   # (not namespaced, not "project_id") to match
   # Locations::DescriptionsController#new /
