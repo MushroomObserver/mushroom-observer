@@ -31,20 +31,34 @@ strings = ARGV.length > 0 ? ARGV : readlines
 # rubocop:enable Style/NumericPredicate
 # rubocop:enable Style/ZeroLengthPredicate
 
-bundles = {} # accumulates de-interlaced lines for each request
+# parse_log mails this output; a burst of errors once made it 21 GB.
+MAX_OUTPUT_BYTES = 1_000_000
+# A Solid Queue worker never logs "Started", so each job starts a bundle;
+# otherwise the worker's whole day becomes one bundle.
+BUNDLE_START = /: (Started [A-Z]{3,}|Performing \S+ \(Job ID)/
+
+bundles = {} # accumulates de-interlaced lines for each request or job
 found = {}   # strings we have found
 pid = nil    # pid of last line
+pattern = Regexp.union(strings)
+printed = 0  # bytes of output so far
 
-def print_match(bundle, strings, found)
-  strings.each do |string|
-    if bundle.join.include?(string)
-      found[string] = true
-      puts(bundle.map { |line| line.sub(/^[A-Z], \[[^\[\]]*\]  /, "") }.join)
-    end
+# Prints a bundle once, however many of the strings it contains.
+print_match = lambda do |bundle|
+  text = bundle.join
+  next unless text.match?(pattern)
+
+  strings.each { |string| found[string] = true if text.include?(string) }
+  output = bundle.map { |line| line.sub(/^[A-Z], \[[^\[\]]*\]  /, "") }.join
+  printed += output.bytesize
+  if printed > MAX_OUTPUT_BYTES
+    puts("Output truncated at #{MAX_OUTPUT_BYTES} bytes.")
+    exit(1)
   end
+  puts(output)
 end
 
-file = "#{app_root}/log/production.log"
+file = ENV.fetch("EXTRACT_LOG_FILE", "#{app_root}/log/production.log")
 unless File.exist?(file)
   warn "Error: Log file not found: #{file}"
   exit(1)
@@ -54,17 +68,15 @@ File.foreach(file) do |line|
   line.scrub! # remove non-utf8 characters
   match = line.match(/#(\d+)/)
   pid = match[1] if match
-  if line.match?(/: Started [A-Z]{3,}/)
+  if line.match?(BUNDLE_START)
     bundle = bundles[pid]
-    print_match(bundle, strings, found) if bundle
+    print_match.call(bundle) if bundle
     bundles[pid] = []
   end
   bundles[pid] ||= []
   bundles[pid] << line
 end
-bundles.each_value do |bundle|
-  print_match(bundle, strings, found)
-end
+bundles.each_value { |bundle| print_match.call(bundle) }
 
 strings.each do |str|
   puts "Unable to find: #{str}\n" unless found[str]
