@@ -309,12 +309,15 @@ class Inat
       end
     end
 
-    # The MO text_name for an iNat provisional species name
+    # The MO text_name for an iNat provisional species name. None when the
+    # Observation Taxon is provisional: it outranks the field (#2892).
     def provisional_name
-      return nil if inat_prov_name.blank?
+      return nil if inat_prov_name.blank? || provisional_taxon?
 
       inat_prov_name
     end
+
+    def provisional_taxon? = @obs_taxon[:provisional] == true
 
     # The value of the iNat "Species Name Override" observation field, or nil.
     # When present it outranks the provisional name and the Observation Taxon
@@ -327,8 +330,7 @@ class Inat
     end
 
     # derive a provisional name from some specific Observation Fields
-    # NOTE: iNat does not allow provisional names as identifications.
-    # Also, iNat allows only 1 obs field with a given :name per obs,
+    # NOTE: iNat allows only 1 obs field with a given :name per obs,
     # so there can be only 1 Provisional Species Name per obs.
     # NOTE: Edge case -- obs also has Provisional Genus Name, etc.
     # NOTE: I assume iNat users will add only 1 provisional name per obs.

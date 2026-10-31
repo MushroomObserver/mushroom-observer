@@ -15,4 +15,12 @@ class Inat::TaxonTest < UnitTestCase
     assert_nil(taxon.full_name_string)
     assert_not(taxon.importable?, "a nil taxon is not importable")
   end
+
+  # iNat has provisional taxa named with a space inside the quotes.
+  def test_full_name_string_tidies_a_provisional_taxon_name
+    taxon = Inat::Taxon.new({ name: "Hohenbuehelia sp. ' tac491'",
+                              rank: "species", provisional: true })
+
+    assert_equal("Hohenbuehelia sp. 'tac491'", taxon.full_name_string)
+  end
 end
