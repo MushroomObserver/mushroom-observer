@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 # Action template for `Observations::SpeciesListsController#edit` —
-# the "manage species lists for this observation" page.
-# Renders two `Components::ListGroup`s of
-# `SpeciesLists::Listing` rows: lists the observation already
+# the "manage species lists for this observation" page. Mirrors
+# `Observations::Projects::Edit`, sharing
+# `Components::ObservationListManager` for the two-section layout.
+# Rows are `SpeciesLists::Listing`: lists the observation already
 # belongs to (REMOVE button on each) and lists it doesn't (ADD
 # button on each).
 module Views::Controllers::Observations::SpeciesLists
@@ -29,44 +30,23 @@ module Views::Controllers::Observations::SpeciesLists
       add_context_nav(
         Tab::Observation::ListActions.new(observation: @observation)
       )
+      add_pagination(nil)
       container_class(:wide)
       content_padding(:panels)
 
-      div(class: "flex-bar mb-2") { content_for(:sorter) }
-
-      # Inline `<div class="p-3">` instead of calling the
-      # `content_padded` helper — only used here, so the helper
-      # registration isn't worth carrying on `Views::Base`.
-      div(class: "p-3") { render_sections }
+      PaginatedResults { render_manager }
     end
 
     private
 
-    def render_sections
-      render_section(
-        heading: :species_list_manage_belongs_to.l,
-        lists: @obs_lists, remove: true
-      )
-      render_section(
-        heading: :species_list_manage_doesnt_contain.l,
-        lists: @other_lists, add: true
-      )
-    end
-
-    # Skip the heading + the list-group entirely when the source
-    # No-op when the array is empty.
-    def render_section(heading:, lists:, remove: false, add: false)
-      return if lists.empty?
-
-      h5(class: "mt-3") { append_colon(heading) }
-      ListGroup do |list|
-        lists.each do |sl|
-          list.item(
-            class: "d-flex justify-content-between align-items-start"
-          ) do
-            render_listing(species_list: sl, remove: remove, add: add)
-          end
-        end
+    def render_manager
+      ObservationListManager(
+        belongs_to_heading: :species_list_manage_belongs_to.l,
+        belongs_to_items: @obs_lists,
+        not_contains_heading: :species_list_manage_doesnt_contain.l,
+        not_contains_items: @other_lists
+      ) do |species_list, remove, add|
+        render_listing(species_list: species_list, remove: remove, add: add)
       end
     end
 
