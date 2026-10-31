@@ -7,9 +7,9 @@
 #     `desc_title` (the partial format name with a rough-permissions
 #     suffix).
 #   - Per-type `VersionActions` context-nav.
-#   - The shared past-versions table.
-#   - The same `DetailsAndAltsPanel` and `ObjectFooter` the regular
-#     description show page uses.
+#   - The same two-column layout the regular description show page
+#     uses: `DetailsPanel` on the left, the past-versions table and
+#     `OtherDescriptionsPanel` on the right.
 #
 # Subclasses provide:
 #
@@ -24,27 +24,38 @@ module Views::Controllers::Descriptions::Versions
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
     prop :versions, _Array(_Interface(:user_id))
-    prop :projects, _Nilable(_Array(::Project)), default: nil
 
     def view_template
       add_page_title(page_title_key.t(num: @description.version,
                                       name: desc_title))
       add_context_nav(version_actions)
+      container_class(:wide)
+      column_classes(:six_even)
       pre_render_setup
 
-      render(Views::Controllers::Versions::Previous.new(
-               obj: @description, versions: @versions
-             ))
-      render(Views::Controllers::Descriptions::DetailsAndAltsPanel.new(
-               description: @description, user: @user,
-               versions: @versions, projects: @projects
-             ))
+      Row { render_columns }
       render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end
 
     private
+
+    def render_columns
+      div(class: content_for(:left_columns)) do
+        render(Views::Controllers::Descriptions::DetailsPanel.new(
+                 description: @description, user: @user
+               ))
+      end
+      div(class: content_for(:right_columns)) do
+        render(Views::Controllers::Versions::Previous.new(
+                 obj: @description, versions: @versions
+               ))
+        render(Views::Controllers::Descriptions::OtherDescriptionsPanel.new(
+                 description: @description, user: @user
+               ))
+      end
+    end
 
     # Subclass extension points -----------------------------------
 
@@ -69,8 +80,8 @@ module Views::Controllers::Descriptions::Versions
 
     # Textile-processed partial title with rough-permissions suffix
     # ("(default)" / "(public)" / "(restricted)" / "(private)").
-    # Mirrors `DetailsAndAltsPanel#description_title` — the same
-    # logic as the alt-descriptions list.
+    # Mirrors `DetailsPanel#description_title` — the same logic as
+    # the alt-descriptions list.
     def desc_title
       @desc_title ||=
         begin

@@ -32,7 +32,7 @@ module Locations
       login
       get(:show, params: { id: desc.id })
       # show now renders via Phlex
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
 
       # Unhappy paths
       # Prove they flash an error and redirect to the appropriate page

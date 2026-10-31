@@ -2034,6 +2034,7 @@
   show_description_adjust_permissions: Adjust Permissions
   show_description_read_permissions: View
   show_description_write_permissions: Edit
+  show_description_list_title: Descriptions of this [type]
   show_description_clone_help: Create your own description based on this description.
   show_description_merge_help: Merge this description into another, then remove this one.
   show_description_move_help: Move this description to a different [parent].

@@ -68,14 +68,6 @@ module Descriptions
       end
     end
 
-    def users_projects_which_dont_have_desc_of_this(parent)
-      return [] unless @user
-
-      @user&.projects_member&.select do |project|
-        parent.descriptions.none? { |d| d.belongs_to_project?(project) }
-      end
-    end
-
     ############################################################################
     #
     #  :section Helpers for Create/Edit

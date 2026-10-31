@@ -67,8 +67,8 @@ class Views::Controllers::Descriptions::Versions::ShowTest <
   # i18n key) via `desc_title`, then echoed back through
   # `add_page_title`. The page-title is buffered on `content_for(
   # :title)`, but the rendered output also embeds it in the
-  # `DetailsAndAltsPanel` body. Render the view and assert the
-  # permission label shows up in the rendered HTML.
+  # `DetailsPanel` body. Render the view and assert the permission
+  # label shows up in the rendered HTML.
 
   def test_default_label_for_parent_default_description
     desc = make_default_description_for_parent
