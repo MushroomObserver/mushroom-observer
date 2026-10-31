@@ -63,7 +63,8 @@ class Inat
         Inat::NamingPlan.lead_vote_for(
           quality_grade: @inat_obs[:quality_grade],
           sequence_evidence: sequence_evidence?,
-          provisional_evidence: !provisional.nil?
+          provisional_evidence: !provisional.nil? ||
+                                @inat_obs.provisional_taxon?
         )
       end
 
@@ -77,7 +78,7 @@ class Inat
       def parsed_name(str, label)
         return nil if str.blank?
 
-        parsed = Name.parse_name(str)
+        parsed = parse(str)
         if parsed.nil? || parsed.text_name.blank?
           return alert("#{label} #{str.inspect} does not parse as a name")
         end
@@ -87,6 +88,8 @@ class Inat
           create_name(name: parsed.search_name, rank: parsed.rank) ||
           alert("#{label} #{str.inspect} could not be created as an MO name")
       end
+
+      def parse(str) = Inat::NameString.parse(str, taxon: @inat_obs[:taxon])
 
       def create_name(name:, rank:)
         Name.create_with_trusted_rank(User.admin, name, rank)
