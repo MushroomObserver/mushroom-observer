@@ -52,8 +52,8 @@ class Inat
     private_class_method :requote
 
     def self.parse_with_taxon_rank(str, taxon)
-      return nil unless taxon && Inat::Taxon::INFRASPECIFIC_RANKS.
-                        include?(taxon[:rank])
+      ranks = Inat::Taxon::INFRASPECIFIC_RANKS
+      return nil unless taxon && ranks.include?(taxon[:rank])
       return nil unless str.squeeze(" ").casecmp?(taxon[:name].to_s)
 
       Name.parse_name(Inat::Taxon.new(taxon).full_name_string)
