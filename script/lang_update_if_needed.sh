@@ -14,6 +14,11 @@
 # Cache file lives in tmp/ (not /tmp) so it survives alongside the
 # checkout it was computed for, the same way Rails' own tmp/ artifacts
 # do -- not committed (tmp/ is gitignored), not shared across checkouts.
+#
+# The cached value includes the branch name, not just en.txt's content
+# hash: two branches can independently converge to byte-identical
+# en.txt, and a cache write on one would otherwise "validate" a switch
+# to the other, whose en.yml was never actually regenerated for it.
 set -euo pipefail
 
 # This script has two callers: deploy.sh (RAILS_ENV=production, the
@@ -33,7 +38,8 @@ if [ ! -f config/locales/en.txt ]; then
 fi
 
 CACHE_FILE="tmp/lang_update_synced_hash"
-CURRENT_HASH="$(git hash-object config/locales/en.txt)"
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")"
+CURRENT_HASH="$(git hash-object config/locales/en.txt)-$CURRENT_BRANCH"
 CACHED_HASH="$(cat "$CACHE_FILE" 2>/dev/null || true)"
 
 if [ "$CURRENT_HASH" = "$CACHED_HASH" ]; then
