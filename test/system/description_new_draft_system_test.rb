@@ -22,13 +22,18 @@ class DescriptionNewDraftSystemTest < ApplicationSystemTestCase
     visit(new_name_description_path(name_id: name.id))
     assert_selector("body.descriptions__new")
 
-    # Before picking: the picker is present, and the main form is
-    # still in its default (unlocked) state -- a source-type
-    # dropdown, not yet committed to a project.
-    assert_field("project")
+    # Before choosing "Yes": the main form is in its default
+    # (unlocked) state -- a source-type dropdown, not yet committed
+    # to a project -- and the project picker is hidden behind the
+    # radio toggle.
+    assert_no_field("project")
     within("#name_description_form") do
       assert_selector("select[name='description[source_type]']")
     end
+
+    # "Yes" reveals the picker, collapses the main form.
+    choose("is_project_draft_yes")
+    assert_field("project")
 
     # Pick the project via the autocompleter.
     find_field("project").click
@@ -38,8 +43,8 @@ class DescriptionNewDraftSystemTest < ApplicationSystemTestCase
     @browser.keyboard.type(:down, :tab)
     assert_field("project", with: project.title)
 
-    # Scoped: the main form below also has a "Create" submit button.
-    within("#new_draft_form") { click_button("Create") }
+    # Scoped: the main form below also has a submit button.
+    within("#new_draft_form") { click_button("Create Draft") }
 
     # After picking: the main form is locked to the chosen project
     # (no more dropdown, the project name shown as plain text), and

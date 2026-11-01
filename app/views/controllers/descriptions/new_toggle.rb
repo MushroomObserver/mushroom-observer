@@ -78,7 +78,7 @@ module Views::Controllers::Descriptions
       )
       Components::ApplicationForm::RadioField.new(
         proxy, ["no", :nope.ti], ["yes", :yep.ti],
-        wrapper_options: { inline: true },
+        wrapper_options: { wrap_class: "d-inline-block mr-3" },
         data: { action: "change->collapse-switch#switch" }
       )
     end
