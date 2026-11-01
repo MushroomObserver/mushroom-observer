@@ -1,24 +1,10 @@
 #!/usr/bin/env bash
-# Claude Code PreToolUse hook.
-# Fires before `Bash` calls containing `rails test` (any form: `bin/rails
-# test`, `bundle exec rails test`, `rails test:...`). Ensures
-# config/locales/en.yml reflects the current config/locales/en.txt before
-# the test run, so a stale compiled locale cache never causes a spurious
-# Symbol.missing_tags teardown failure (test/test_helper.rb) that the
-# assistant then has to spend a turn diagnosing.
-#
-# Cheap check, same git-diff spirit as post_checkout_lang_db.sh /
-# post_rebase_lang_db.sh: compares en.txt's current git blob hash against
-# the hash recorded the last time this hook successfully ran
-# `bin/rails lang:update`. Only pays the real lang:update cost (it
-# exports every locale, not just en.txt) when en.txt has actually
-# changed since -- the common case (repeated test runs against the same
-# checkout) is a single `git hash-object` call plus a cache-file read.
-#
-# Non-blocking: prints a one-line summary; a failure prints a notice so
-# the human can rerun manually. Never blocks the test command itself.
-#
-# Reads JSON on stdin from Claude Code; only inspects `tool_input.command`.
+# Claude Code PreToolUse hook. Fires before a `rails test` Bash call.
+# Regenerates en.yml from en.txt first if stale, so a Symbol.missing_tags
+# teardown failure doesn't cost the assistant a turn diagnosing it.
+# Cache key is en.txt's git blob hash + branch name (see
+# script/lang_update_if_needed.sh for why branch is part of the key).
+# Non-blocking: never blocks the test command itself, just reports.
 set -uo pipefail
 
 INPUT="$(cat)"
@@ -40,10 +26,12 @@ if [ ! -f config/locales/en.txt ]; then
 fi
 
 CACHE_FILE="/tmp/mo_lang_update_synced_hash"
-CURRENT_HASH="$(git hash-object config/locales/en.txt 2>/dev/null || true)"
-if [ -z "$CURRENT_HASH" ]; then
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")"
+FILE_HASH="$(git hash-object config/locales/en.txt 2>/dev/null || true)"
+if [ -z "$FILE_HASH" ]; then
   exit 0
 fi
+CURRENT_HASH="$FILE_HASH-$CURRENT_BRANCH"
 
 CACHED_HASH="$(cat "$CACHE_FILE" 2>/dev/null || true)"
 
