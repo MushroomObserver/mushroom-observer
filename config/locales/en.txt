@@ -246,17 +246,8 @@
   ended: ended
   error: error
   errors: errors
-  errors_prohibited_save: prohibited this [type] from being saved
   external_link: external link
-  external_links_help: How external links work
   external_links: external links
-  external_link_relationship_import: Imported from [site]
-  external_link_relationship_export: Exported to [site]
-  external_link_relationship_copy: Copied by [site]
-  external_link_relationship_mirror: Mirrored on [site]
-  external_link_relationship_manual: Manual link to [site]
-  external_link_relationship_remote_manual: Linked from [site]
-  external_link_relationship_unknown: Linked to [site]
   external_site: external site
   external_id: external id
   relationship: relationship
@@ -266,7 +257,6 @@
   identification: identification
   image: image
   images: images
-  image_title_with_subject: "[subject] image"
   info: info
   information: information
   interests: interests
@@ -1167,6 +1157,16 @@
   observation_last_synced: Last synced
   observation_never_synced: Not yet synced
 
+  # ExternalLink relationship descriptions (Components::Link::External)
+  external_links_help: How external links work
+  external_link_relationship_import: Imported from [site]
+  external_link_relationship_export: Exported to [site]
+  external_link_relationship_copy: Copied by [site]
+  external_link_relationship_mirror: Mirrored on [site]
+  external_link_relationship_manual: Manual link to [site]
+  external_link_relationship_remote_manual: Linked from [site]
+  external_link_relationship_unknown: Linked to [site]
+
   ##############################################################################
 
   # APPLICATION LAYOUT -- this stuff appears on every single page
@@ -1611,6 +1611,8 @@
   form_synonyms_missing_names: The following names could not be found.
   form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names. If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
+  image_title_with_subject: "[subject] image"
+
   # images/new
   image_set_default: Set as default thumbnail
   image_add_default: Default thumbnail
@@ -2034,6 +2036,9 @@
   show_description_adjust_permissions: Adjust Permissions
   show_description_read_permissions: View
   show_description_write_permissions: Edit
+  show_description_list_title: Descriptions of this [type]
+  show_description_new_draft_toggle: Is this for a Project?
+  show_description_new_draft_submit: Create Draft
   show_description_clone_help: Create your own description based on this description.
   show_description_merge_help: Merge this description into another, then remove this one.
   show_description_move_help: Move this description to a different [parent].
@@ -2081,7 +2086,6 @@
   show_name_propagate_lifeform: Propagate to Subtaxa
   show_name_notes: "[:form_names_taxonomic_notes]"
   show_name_descriptions: "[:descriptions.ti]"
-  show_name_create_draft: Create New Draft for
   show_name_no_descriptions: There are no descriptions for this name yet.
   show_name_description_author: "[:description.ti] author"
   show_description_author_request: Request Authorship Credit
@@ -3984,6 +3988,8 @@
   kick_out_message: "We have noticed a lot of server-intensive traffic from this IP address ([ip]). There may be better ways of doing what you are trying to do. Please contact the webmaster ([email]) so that we can talk about it. So that we can best help you, please:\n- include a copy of this message;\n- tell how you generally use Mushroom Observer;\n- tell us what you were doing when you received this message."
 
   unsuccessful_contributor_warning: Thanks for wanting to contribute to the Mushroom Observer. This type of contribution can only be made by users who have provided at least one observation to the system.
+
+  errors_prohibited_save: prohibited this [type] from being saved
 
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."

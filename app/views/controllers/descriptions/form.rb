@@ -36,15 +36,13 @@ module Views::Controllers::Descriptions
     end
 
     def view_template
-      Container(width: :text) do
-        render_source_fields
-        render_permissions_fields
-        render_license_field
-        render_description_header
-        render_note_fields
-        submit(submit_button_text.ti, center: true)
-        render_merge_fields if @merge
-      end
+      render_source_fields
+      render_permissions_fields
+      render_license_field
+      render_description_header
+      render_note_fields
+      submit(submit_button_text.ti, center: true)
+      render_merge_fields if @merge
     end
 
     private
@@ -56,8 +54,10 @@ module Views::Controllers::Descriptions
         label(for: "description_source") do
           append_colon(:form_description_source.l)
         end
-        render_source_type_field
-        render_source_name_field
+        div(class: "ml-3") do
+          render_source_type_field
+          render_source_name_field
+        end
         hidden_field(:project_id)
         render_source_help if need_source_help?
       end
@@ -131,7 +131,7 @@ module Views::Controllers::Descriptions
 
     def render_description_header
       if name_description?
-        p { b { :description.ti } }
+        p(class: "mb-0") { b { :description.ti } }
         Help(content: :shared_textile_help.l, id: "textilize_note")
       else
         hr
@@ -140,8 +140,9 @@ module Views::Controllers::Descriptions
 
     def render_note_fields
       model.class.all_note_fields.each do |field|
-        textarea_field(field, label: field_label(field), rows: 10) do
-          Help(content: field_help(field))
+        textarea_field(field, label: field_label(field), rows: 10,
+                              help_placement: :above) do |f|
+          f.with_help { trusted_html(field_help(field)) }
         end
       end
       return if name_description?

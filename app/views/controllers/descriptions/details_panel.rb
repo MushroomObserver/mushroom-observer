@@ -1,53 +1,40 @@
 # frozen_string_literal: true
 
-# Top panel on every name / location description show page (and on
-# the version-history show pages too). Renders the description's
-# core metadata in the left column, the parent's alt-description
-# list + per-project draft links in the right column, and (on the
-# regular show — not on versions) an export-status + review-status
+# Left-column panel on every name / location description show page
+# (and on the version-history show pages too): the description's
+# core metadata (title, parent link, permissions), plus (on the
+# regular show -- not on versions) an export-status + review-status
 # footer.
 #
 # The heading-links icon strip is extracted to
 # `Components::Description::ModLinks` (sibling-in-spirit to
-# `Components::InlineCRUDLinks`). The "Version: N / Previous Version" line
-# is `Components::Description::PreviousVersion`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::LicenseBadge`.
+# `Components::InlineCRUDLinks`). The parent's other descriptions +
+# new-draft UI live in the separate `OtherDescriptionsPanel`, not
+# here -- they're a different concept from this description's
+# detail, not part of "Detail" (#5527 review).
 module Views::Controllers::Descriptions
-  class DetailsAndAltsPanel < Views::Base
+  class DetailsPanel < Views::Base
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Array(_Interface(:user_id))
-    prop :projects, _Nilable(_Array(::Project)), default: nil
     # Show pages pass `review: true`; versions pages omit it.
     prop :review, _Boolean, default: false
 
     def view_template
-      Panel(panel_id: "description_details_and_alts") do |panel|
+      Panel(panel_id: "description_details") do |panel|
         panel.with_heading { :show_observation_details.l }
         panel.with_heading_links do
           render(Components::Description::ModLinks.new(
                    description: @description, user: @user
                  ))
         end
-        panel.with_body { render_two_columns }
+        panel.with_body { render_details }
         panel.with_footer { render_export_and_review } if @review
       end
     end
 
     private
 
-    # -- body: two columns ------------------------------------------
-
-    def render_two_columns
-      Row do
-        Column(xs: 12, md: 6) { render_details_column }
-        Column(xs: 12, md: 6) { render_alts_column }
-      end
-    end
-
-    # -- details column ---------------------------------------------
-
-    def render_details_column
+    def render_details
       render_title_row
       br
       render_parent_row
@@ -55,10 +42,6 @@ module Views::Controllers::Descriptions
       plain("#{:show_description_read_permissions.l}: #{read_perm}")
       br
       plain("#{:show_description_write_permissions.l}: #{write_perm}")
-      br
-      render(Components::Description::PreviousVersion.new(
-               obj: @description, versions: @versions
-             ))
     end
 
     def render_title_row
@@ -77,7 +60,7 @@ module Views::Controllers::Descriptions
     # Else branch (`:private.l`) is unreachable — the controller
     # bounces non-readers via
     # `user_has_permission_to_see_description?` before this view
-    # ever renders.
+    # renders.
     def read_perm
       if @description.reader_groups.include?(::UserGroup.all_users)
         :public.l
@@ -93,55 +76,6 @@ module Views::Controllers::Descriptions
         :restricted.l
       else
         :private.l
-      end
-    end
-
-    # -- alt-descriptions column ------------------------------------
-
-    def render_alts_column
-      object = @description.parent
-      type = object.type_tag
-
-      b { plain(:show_name_descriptions.l) }
-      plain(": ")
-      render(create_icon_link(object))
-      div(class: "ml-3") do
-        render(List.new(
-                 user: @user, object: object, type: type,
-                 current: @description,
-                 empty_text: alts_empty_text(type)
-               ))
-      end
-      render_project_drafts(object) if @projects.present?
-    end
-
-    def create_icon_link(object)
-      name, target, opts = ::Tab::Description::Create.new(
-        parent: object
-      ).to_a
-      Components::Link.new(type: :get, name: name, target: target,
-                           **(opts || {}))
-    end
-
-    def alts_empty_text(type)
-      show_no_descriptions_as_string(type)
-    end
-
-    # "Create New Draft For: <project1> <project2> ..."
-    def render_project_drafts(object)
-      p do
-        trusted_html(append_colon(:show_name_create_draft.l))
-        br
-        @projects.each do |project|
-          span(class: "ml-3") do
-            tab = ::Tab::Description::NewForProject.new(
-              parent: object, project: project
-            )
-            content, path, opts = tab.to_a
-            a(href: path, **(opts || {})) { trusted_html(content) }
-          end
-          br
-        end
       end
     end
 

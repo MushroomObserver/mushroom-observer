@@ -72,8 +72,7 @@ module Locations
       return if performed?
 
       render(Views::Controllers::Locations::Descriptions::Show.new(
-               description: @description, user: @user,
-               versions: @versions, projects: @projects
+               description: @description, user: @user, versions: @versions
              ))
     end
 
@@ -93,7 +92,6 @@ module Locations
     def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
-      @projects = users_projects_which_dont_have_desc_of_this(@location)
       @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
@@ -182,9 +180,13 @@ module Locations
     end
 
     def render_new_view(status: :ok, **render_opts)
+      project_chosen = @description.project.present?
+      set_project_ivar
+
       render(Views::Controllers::Locations::Descriptions::New.new(
                location: @location, description: @description,
-               user: @user, licenses: @licenses
+               user: @user, licenses: @licenses, project: @project,
+               project_chosen: project_chosen
              ), status: status, **render_opts)
     end
 

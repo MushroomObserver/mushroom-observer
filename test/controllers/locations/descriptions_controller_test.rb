@@ -32,7 +32,7 @@ module Locations
       login
       get(:show, params: { id: desc.id })
       # show now renders via Phlex
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
 
       # Unhappy paths
       # Prove they flash an error and redirect to the appropriate page
@@ -387,12 +387,61 @@ module Locations
       project = projects(:eol_project)
 
       login("mary") # project admin
-      get(:new, params: { location_id: loc.id, project: project.id })
+      get(:new, params: { location_id: loc.id, project_id: project.id })
 
       assert_select("form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
+    end
+
+    # `NewDraftForm` (project autocompleter + submit) renders above
+    # the main form on `new` -- but not when `?project_id=` is
+    # already given: that's a confirmed choice, the main form is
+    # already locked to it, nothing left to pick.
+    def test_new_description_hides_draft_form_when_project_chosen
+      loc = locations(:nybg_location)
+      project = projects(:eol_project)
+
+      login("mary") # project admin
+      get(:new, params: { location_id: loc.id, project_id: project.id })
+
+      assert_select("input[name='project']", count: 0)
+    end
+
+    # A bare `?project=` isn't a confirmed choice, just a suggestion
+    # -- `NewDraftForm` renders, prefilled, without locking the main
+    # form to it.
+    def test_new_description_prefills_draft_form_from_flat_project_param
+      loc = locations(:nybg_location)
+      project = projects(:eol_project)
+
+      login("mary")
+      get(:new, params: { location_id: loc.id, project: project.id })
+
+      assert_select("input[name='project'][value=?]", project.title)
+      assert_select("input[name='project_id'][value=?]", project.id.to_s)
+      desc = assigns(:description)
+      assert_not_equal("project", desc.source_type)
+    end
+
+    # Same suggestion-only behavior, but derived from the ambient
+    # query the user arrived with (e.g. an index filtered to one
+    # project) instead of a direct flat param.
+    def test_new_description_prefills_draft_form_from_ambient_query_project
+      loc = locations(:nybg_location)
+      project = projects(:eol_project)
+
+      login("mary")
+      get(:new, params: {
+            location_id: loc.id,
+            q: { model: "Location", projects: [project.id] }
+          })
+
+      assert_select("input[name='project'][value=?]", project.title)
+      assert_select("input[name='project_id'][value=?]", project.id.to_s)
+      desc = assigns(:description)
+      assert_not_equal("project", desc.source_type)
     end
 
     # Cover create with project when not a member
@@ -401,7 +450,7 @@ module Locations
       project = projects(:eol_project)
 
       login("dick") # not a member
-      get(:new, params: { location_id: loc.id, project: project.id })
+      get(:new, params: { location_id: loc.id, project_id: project.id })
 
       assert_flash_error
       assert_redirected_to(project_path(project.id))

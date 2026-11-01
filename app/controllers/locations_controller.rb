@@ -84,7 +84,6 @@ class LocationsController < ApplicationController
     # Save two lookups in comments_for_object
     @comments = @location.comments&.sort_by(&:created_at)&.reverse
     @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
-    init_projects_ivar
     render_show_view
   end
 
@@ -205,8 +204,7 @@ class LocationsController < ApplicationController
              location: @location,
              description: @description,
              versions: @versions,
-             comments: @comments.to_a,
-             projects: @projects
+             comments: @comments.to_a
            ))
   end
 
@@ -277,13 +275,6 @@ class LocationsController < ApplicationController
     else
       flash_error(:runtime_object_not_found.t(type: :description,
                                               id: desc_id))
-    end
-  end
-
-  def init_projects_ivar
-    # Get a list of projects the user can create drafts for.
-    @projects = @user&.projects_member&.select do |project|
-      @location.descriptions.none? { |d| d.belongs_to_project?(project) }
     end
   end
 
