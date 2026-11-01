@@ -3,14 +3,12 @@
 # "Descriptions" panel on the Location show page. Renders the
 # `Views::Controllers::Descriptions::List` inside a
 # `Components::Panel`; the panel heading carries a "create new
-# description" icon-link. When the caller passes a `projects:`
-# array, appends a "create draft for project" row at the bottom.
+# description" icon-link.
 module Views::Controllers::Locations
   class Show
     class AltDescriptionsPanel < Views::Base
       prop :user, _Nilable(::User), default: nil
       prop :object, ::Location
-      prop :projects, _Nilable(_Array(::Project)), default: nil
       # Forwarded to `Descriptions::List#current` (typed there as
       # `_Nilable(::Description)`). The currently-shown description
       # of the parent Location, used to suppress its self-link in
@@ -38,22 +36,6 @@ module Views::Controllers::Locations
                  current: @current,
                  empty_text: show_no_descriptions_as_string(@object.type_tag)
                ))
-        render_projects_list if @projects.present?
-      end
-
-      def render_projects_list
-        p do
-          trusted_html(append_colon(:show_name_create_draft.l))
-          @projects.each do |project|
-            br
-            tab = Tab::Description::NewForProject.new(
-              parent: @object, project: project
-            ).to_a
-            a(href: tab[1], class: class_names("ml-3", tab[2][:class])) do
-              plain(tab[0])
-            end
-          end
-        end
       end
     end
   end

@@ -68,14 +68,6 @@ module Descriptions
       end
     end
 
-    def users_projects_which_dont_have_desc_of_this(parent)
-      return [] unless @user
-
-      @user&.projects_member&.select do |project|
-        parent.descriptions.none? { |d| d.belongs_to_project?(project) }
-      end
-    end
-
     ############################################################################
     #
     #  :section Helpers for Create/Edit
@@ -86,9 +78,11 @@ module Descriptions
     def initialize_description_source
       @description.license = @user.license
 
-      # Creating a draft.
-      if params[:project].present?
-        project = Project.find(params[:project])
+      # Creating a draft -- `project_id` is a confirmed choice (from
+      # `NewDraftForm`'s submission), unlike the bare `project` param
+      # `set_project_ivar` reads elsewhere as a suggestion only.
+      if params[:project_id].present?
+        project = Project.find(params[:project_id])
         if @user.in_group?(project.user_group)
           @description.source_type  = "project"
           @description.source_name  = project.title
