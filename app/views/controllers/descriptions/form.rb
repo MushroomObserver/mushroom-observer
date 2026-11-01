@@ -36,15 +36,13 @@ module Views::Controllers::Descriptions
     end
 
     def view_template
-      Container(width: :text) do
-        render_source_fields
-        render_permissions_fields
-        render_license_field
-        render_description_header
-        render_note_fields
-        submit(submit_button_text.ti, center: true)
-        render_merge_fields if @merge
-      end
+      render_source_fields
+      render_permissions_fields
+      render_license_field
+      render_description_header
+      render_note_fields
+      submit(submit_button_text.ti, center: true)
+      render_merge_fields if @merge
     end
 
     private
