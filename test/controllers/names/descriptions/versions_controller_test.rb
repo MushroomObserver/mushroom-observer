@@ -22,7 +22,7 @@ module Names::Descriptions
       assert_response(:success)
       assert_select("html > head > title", count: 1)
       assert_select("body.versions__show")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
     end
   end
 end

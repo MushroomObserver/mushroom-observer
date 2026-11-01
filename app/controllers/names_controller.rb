@@ -122,7 +122,6 @@ class NamesController < ApplicationController
     # Tell robots the proper URL to use to index this content.
     @canonical_url = "#{MO.http_domain}/names/#{@name.id}"
 
-    init_projects_ivar
     init_related_query_ivars
     @has_name_tracker = if @user
                           NameTracker.where(name_id: @name.id,
@@ -141,7 +140,7 @@ class NamesController < ApplicationController
              subtaxa_query: @subtaxa_query,
              children_query: @children_query,
              first_child: @first_child,
-             projects: @projects, versions: @versions
+             versions: @versions
            ))
   end
 
@@ -189,8 +188,6 @@ class NamesController < ApplicationController
   #   render(Views::Controllers::Descriptions::List.new(
   #            user: @user, object: @name, type: :name
   #          ))
-  # projects:
-  #   @projects
   # rubocop:enable MO/NoLongCommentBlock
 
   def init_related_query_ivars
@@ -255,13 +252,6 @@ class NamesController < ApplicationController
 
     # Save a lookup in comments_for_object
     @comments = @name.comments&.sort_by(&:created_at)&.reverse
-  end
-
-  def init_projects_ivar
-    # Get a list of projects the user can create drafts for.
-    @projects = @user&.projects_member&.select do |project|
-      @name.descriptions.none? { |d| d.belongs_to_project?(project) }
-    end
   end
 
   public
