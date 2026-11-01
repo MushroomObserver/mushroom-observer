@@ -28,9 +28,9 @@ class Views::Controllers::Descriptions::NewToggleTest < ComponentTestCase
 
     assert_html(html, "input[value='no'][checked]")
     assert_html(html,
-                "[data-collapse-switch-type='no'].collapse.in")
+                "[data-collapse-switch-type='no'].collapse.show")
     assert_html(html, "[data-collapse-switch-type='yes'].collapse")
-    assert_no_html(html, "[data-collapse-switch-type='yes'].collapse.in")
+    assert_no_html(html, "[data-collapse-switch-type='yes'].collapse.show")
   end
 
   def test_radios_wired_to_collapse_switch
