@@ -1,26 +1,28 @@
 shared:
   adapter: trilogy
-  # Declared rather than left to the adapter's default, and
-  # matching the collation of the columns (#4625 moves those
-  # to utf8mb4_0900_ai_ci, and this with them).
+  # Matches most tables -- Issue #4625 (converting all tables to
+  # utf8mb4_0900_ai_ci) is still open; only a few are there yet.
   encoding: utf8mb4
   collation: utf8mb4_general_ci
   variables:
     sql_mode: TRADITIONAL
 
+# Every role connects over the same TCP address.
+connection: &connection
+  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+  port: 3306
+
 development:
   primary:
+    <<: *connection
     database: <%= ENV.fetch("DATABASE_NAME", "mo_development") %>
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
+    # Must exceed Solid Queue's thread need -- see test/jobs/queue_config_test.rb.
+    pool: 10
   cache:
+    <<: *connection
     database: cache_development
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
     migrations_paths: "db/cache/migrate"
 
 # Multi-db (primary/cache) like development, not a flat db:, so Solid
@@ -38,41 +40,27 @@ development:
 %>
 test:
   primary:
+    <<: *connection
     database: "<%= test_db %>"
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
     # Must exceed Solid Queue's thread need -- see
     # test/jobs/queue_config_test.rb and db/ubuntu/database.yml (the
     # template CI copies, which already had this).
     pool: 10
   cache:
+    <<: *connection
     database: "<%= cache_test_db %>"
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
     migrations_paths: "db/cache/migrate"
 
-# Same TCP/env-var shape as development/test above -- the app container
-# reaches MySQL over the network under this address either way,
-# whether that's the host, a Kamal accessory container, or a managed
-# service (#5345's decision, not this file's).
+# Reached over the network either way -- host, a Kamal accessory
+# container, or a managed service (#5345's decision).
 production:
   primary:
+    <<: *connection
     database: <%= ENV.fetch("DATABASE_NAME", "mo_production") %>
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
     # Must exceed Solid Queue's thread need -- the worker role
     # (bin/jobs) too, not just Puma -- see queue_config_test.rb.
     pool: <%= ENV.fetch("DATABASE_POOL", 10) %>
   cache:
+    <<: *connection
     database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
-    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
-    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
-    port: 3306
     migrations_paths: "db/cache/migrate"

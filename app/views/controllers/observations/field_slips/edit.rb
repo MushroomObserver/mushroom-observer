@@ -19,9 +19,7 @@ module Views::Controllers::Observations::FieldSlips
         Tab::Observation::ListActions.new(observation: @observation)
       )
 
-      div(class: "p-3") do
-        render(Form.new(observation: @observation, field_code: @field_code))
-      end
+      render(Form.new(observation: @observation, field_code: @field_code))
     end
   end
 end

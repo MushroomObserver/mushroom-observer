@@ -220,6 +220,18 @@ module ApplicationController::Queries
     query
   end
 
+  # Extracts just the order_by choice carried by an incoming `q[...]`
+  # round trip (what `Sorter`'s links send) without inheriting any
+  # of that query's other filters -- for actions that always force
+  # a base filter (e.g. `editable_by_user:`) and only let the sort
+  # choice vary from the URL.
+  def sort_order_from_params(model, default = nil)
+    q = query_from_q_param
+    return default unless q && q.model.name.to_sym == model.to_sym
+
+    q.params[:order_by] || default
+  end
+
   # Opposite is `q_param` below
   def query_from_q_param
     # The first condition is for backwards compatibility with old q params.

@@ -511,13 +511,14 @@ class Query
   # infers its model from the controller, so this only works for a
   # query whose model matches it; a link crossing models still needs
   # q_param. Excludes :controller/:action/:id/:format too, since Tab
-  # classes merge this directly onto a route-helper args hash
-  # (`args.merge(@index_filter)`), and a clashing query_attr would
-  # silently clobber the routing key instead of raising.
-  def index_filter
+  # classes merge this directly onto a route-helper args hash, and a
+  # clashing query_attr would silently clobber the routing key.
+  # `except:` names pre-alias attrs, applied before
+  # `shrink_multi_value_filters` renames them.
+  def index_filter(except: [])
     shrink_multi_value_filters(
       collapse_names_to_this_name(
-        params.except(:controller, :action, :id, :format)
+        params.except(:controller, :action, :id, :format, *except)
       )
     )
   end

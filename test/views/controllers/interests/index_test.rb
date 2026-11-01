@@ -9,6 +9,17 @@ module Views::Controllers::Interests
       controller.instance_variable_set(:@user, users(:rolf))
     end
 
+    # The generic index dispatch already flashes "no matches" when
+    # @objects is empty -- the view's intro/empty-state text would
+    # just repeat that, so neither should render.
+    def test_no_interests_renders_no_intro_or_table
+      html = render_index(types: ["Observation"], selected_type: nil,
+                          interests: [])
+
+      assert_no_html(html, "table")
+      assert_no_html(html, "p", text: :list_interests_intro.l.as_displayed)
+    end
+
     # When `selected_type:` is set, the filter pill strip renders.
     # The active pill is a plain `<span>` (no link); inactive pills
     # wrap a `link_to` inside a `<span>`.
@@ -71,17 +82,17 @@ module Views::Controllers::Interests
     def test_state_filter_renders_with_active_and_inactive_items
       html = render_index(
         types: ["Observation"], selected_type: nil,
-        states: %w[Watching Ignoring], selected_state: "Watching"
+        states: [:watching, :ignoring], selected_state: "watching"
       )
 
-      assert_html(html, "a[href*='state=Ignoring']")
-      assert_no_html(html, "a[href*='state=Watching']")
+      assert_html(html, "a[href*='state=ignoring']")
+      assert_no_html(html, "a[href*='state=watching']")
     end
 
     def test_state_filter_hidden_when_single_state_present
       html = render_index(
         types: ["Observation"], selected_type: nil,
-        states: ["Watching"], selected_state: nil
+        states: [:watching], selected_state: nil
       )
 
       assert_no_html(html, "a[href*='state=']")
@@ -97,7 +108,8 @@ module Views::Controllers::Interests
                selected_type: selected_type,
                states: states,
                selected_state: selected_state,
-               pagination_data: PaginationData.new
+               pagination_data: PaginationData.new,
+               query: Query.lookup(:Interest, by_users: [users(:rolf).id])
              ))
     end
   end

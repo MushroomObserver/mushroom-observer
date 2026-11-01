@@ -10,9 +10,8 @@
 
 shared:
   adapter: trilogy
-  # Declared rather than left to the adapter's default, and matching the
-  # collation of the columns. #4625 moves those to utf8mb4_0900_ai_ci and
-  # takes this with them.
+  # Matches most tables -- Issue #4625 (converting all tables to
+  # utf8mb4_0900_ai_ci) is still open; only a few are there yet.
   encoding: utf8mb4
   collation: utf8mb4_general_ci
   # Default (works for MacOS X)
@@ -31,15 +30,20 @@ shared:
   variables:
     sql_mode: TRADITIONAL
 
+# Every role/env connects with the same user.
+credentials: &credentials
+  username: mo
+  password: mo
+
 development:
   primary:
+    <<: *credentials
     database: mo_development
-    username: mo
-    password: mo
+    # Must exceed Solid Queue's thread need -- see queue_config_test.rb.
+    pool: 10
   cache:
+    <<: *credentials
     database: cache_development
-    username: mo
-    password: mo
     host: localhost
     migrations_paths: "db/cache/migrate"
 
@@ -65,21 +69,18 @@ development:
 %>
 test:
   primary:
+    <<: *credentials
     database: "<%= test_db %>"
-    username: mo
-    password: mo
-    # Must exceed Solid Queue's own estimated thread need -- see
+    # Must exceed Solid Queue's thread need -- see
     # test/jobs/queue_config_test.rb and the comment on the equivalent
     # setting in config/database.yml (not checked in; this file is what CI
     # copies to config/database.yml for test runs).
     pool: 10
   cache:
+    <<: *credentials
     database: "<%= cache_test_db %>"
-    username: mo
-    password: mo
     migrations_paths: "db/cache/migrate"
 
 production:
+  <<: *credentials
   database: mo_development
-  username: mo
-  password: mo

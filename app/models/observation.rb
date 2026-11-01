@@ -160,6 +160,7 @@
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   include HasPlaceName
+  include Interested
 
   # Transient flag: when set, the before_create default that copies the
   # entering user into `collector` is skipped. Field-slip-originated
@@ -1437,12 +1438,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return if changes.empty?
 
     sender = user
-    recipients = interested_users - [sender]
+    recipients = finalize_recipients!(interested_users, sender)
     note = changes.join(",")
 
     recipients.each do |receiver|
-      next if receiver.no_emails
-
       ObservationChangeMailer.build(
         sender:, receiver:, observation: self, note:, time: updated_at
       ).deliver_later
@@ -1452,12 +1451,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Send immediate destroy notification (can't batch - obs is being deleted).
   def send_observation_destroyed_emails
     sender = user
-    recipients = interested_users - [sender]
+    recipients = finalize_recipients!(interested_users, sender)
     note = unique_format_name(current_user)
 
     recipients.each do |receiver|
-      next if receiver.no_emails
-
       ObservationChangeMailer.build(
         sender:, receiver:, observation: nil, note:, time: Time.zone.now
       ).deliver_later
@@ -1466,7 +1463,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Get list of users interested in this observation (for email notifications).
   def interested_users
-    interests.select(&:state).filter_map(&:user).uniq
+    interests.select(&:watching?).filter_map(&:user).uniq
   end
 
   # Send email notifications upon change to consensus.
@@ -1491,19 +1488,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
+    Interest.update_recipients!(interests, recipients)
 
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |receiver|
+    finalize_recipients!(recipients, sender).each do |receiver|
       ConsensusChangeMailer.build(
         sender:, receiver:, observation: self, old_name:, new_name:
       ).deliver_later

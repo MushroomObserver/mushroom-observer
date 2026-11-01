@@ -27,6 +27,30 @@
 // carries `.inline-flex-center` (see _icons.scss) directly for the
 // icon centering, rather than relying on an implicit selector.
 
+// An autocompleter used as one item in a `.flex-bar` row (field +
+// submit button on one line, e.g. Components::Description::
+// NewDraftForm) needs its box to grow and fill the row -- its label
+// row (if any) and visible input still stack normally inside it, so
+// `.form-group` itself stays a plain block, not a flex container.
+// Scoped under `.flex-bar` so it doesn't change the stacked
+// label-row layout every other autocompleter uses.
+.flex-bar {
+  .autocompleter {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .autocompleter .form-group {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  .autocompleter .form-control {
+    width: 100%;
+  }
+}
+
 .dropdown-menu.auto_complete {
   // position: absolute;
   // color: $dropdown-link-color;

@@ -11,6 +11,10 @@
 # (via `render`) when a code path is easier to reach with a
 # fabricated ObjectChange than through the full versioning pipeline.
 class MailerTestCase < ComponentTestCase
+  def routes
+    Rails.application.routes.url_helpers
+  end
+
   def assert_html_mail(mail)
     assert_match(/<html>/, mail.body.to_s)
   end
