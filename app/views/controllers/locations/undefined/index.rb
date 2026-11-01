@@ -65,7 +65,7 @@ module Views::Controllers::Locations
             whitespace
             render_define_link(location_name)
           end
-          div(class: "obs-count-col") { plain("(#{count})") }
+          div(class: "obs-count-col") { CountBadge(count: count) }
         end
       end
 

@@ -294,6 +294,7 @@
   news: news
   notification: notification
   notifications: notifications
+  mo_id: MO ID
   # generic object
   object: object
   objects: objects
@@ -341,6 +342,8 @@
   theme: theme
   translation: translation
   translations: translations
+  type: type
+  types: types
   url: url
   user: user
   users: users
@@ -503,6 +506,7 @@
   goto: go
   goto_page_tooltip: Go to page [number]
   goto_letter_tooltip: Go to letter [letter]
+  count_badge_tooltip: "[type] count"
   menu: menu
   area: area
 
@@ -1691,7 +1695,7 @@
   # locations/list_place_names (list_locations)
   list_place_names_map: Map Locations
   list_place_names_merge: Merge
-  list_place_names_parenthetical: Number in parentheses shows Observation count.
+  list_place_names_parenthetical: Number shows Observation count.
   list_place_names_undef: Unmapped Place Names
   list_place_names_undef_tooltip: Observations with this place name
   list_place_names_undef_merge_tooltip: Merge with a mapped location
@@ -4697,6 +4701,7 @@
   sort_by_name: "[:name.ti]"
   sort_by_num_views: Popularity
   sort_by_number: Number
+  sort_by_observations: "#Observations"
   sort_by_posted: Date Posted
   sort_by_recent_observation: Recent Observations
   sort_by_records: "#Records"

@@ -245,6 +245,14 @@ module AbstractModel::OrderingScopes
       order(arel_table[:observation_id].desc)
     end
 
+    def order_by_observations
+      return all unless self == Location
+
+      # outer_join needed to show locations with no observations
+      left_outer_joins(:observations).group(Location[:id]).distinct.
+        order(Observation[:id].count.desc)
+    end
+
     def order_by_original_name
       return all unless self == Image
 
