@@ -67,7 +67,7 @@ module Observations
     def set_project_ivars
       @all_projects = Query.lookup(
         :Project, members: @user,
-                  order_by: sort_order_from_params(:Project, :title)
+                  order_by: sort_order_from_params(:Project, :name)
       )
       member_ids = @observation.project_ids.to_set
       @obs_projects, @other_projects =

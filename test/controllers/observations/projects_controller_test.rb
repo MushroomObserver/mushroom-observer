@@ -155,7 +155,7 @@ module Observations
 
       assert_response(:success)
       all_projects = assigns(:all_projects)
-      assert_equal("title", all_projects.params[:order_by])
+      assert_equal("name", all_projects.params[:order_by])
     end
 
     def test_edit_renders_add_and_remove_forms
