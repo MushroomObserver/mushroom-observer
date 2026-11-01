@@ -63,8 +63,11 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
     end
   end
 
-  private
-
+  # Public so the `new` description views can decide whether to
+  # render a separator between this and the main form below it --
+  # Phlex calls this unqualified internally regardless of visibility,
+  # but an external caller needs it public to check first.
+  #
   # Already committed (arrived with a confirmed project, which
   # locked the main form to it) -- nothing left to pick. Otherwise,
   # admins can draft for any project; everyone else needs at least
@@ -74,6 +77,8 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
 
     in_admin_mode? || current_user&.projects_member&.any?
   end
+
+  private
 
   def render_label
     label(for: "project", class: "mb-0 text-nowrap") do

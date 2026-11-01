@@ -17,10 +17,11 @@ module Views::Controllers::Locations::Descriptions
                         description: @description
                       ))
 
-      render(Components::Description::NewDraftForm.new(
-               target: @location, project: @project,
-               project_chosen: @project_chosen
-             ))
+      draft_form = Components::Description::NewDraftForm.new(
+        target: @location, project: @project, project_chosen: @project_chosen
+      )
+      render(draft_form)
+      hr if draft_form.render?
       render(Views::Controllers::Descriptions::Form.new(
                @description, licenses: @licenses, user: @user, turbo: true
              ))
