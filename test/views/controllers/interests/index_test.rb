@@ -9,6 +9,17 @@ module Views::Controllers::Interests
       controller.instance_variable_set(:@user, users(:rolf))
     end
 
+    # The generic index dispatch already flashes "no matches" when
+    # @objects is empty -- the view's intro/empty-state text would
+    # just repeat that, so neither should render.
+    def test_no_interests_renders_no_intro_or_table
+      html = render_index(types: ["Observation"], selected_type: nil,
+                          interests: [])
+
+      assert_no_html(html, "table")
+      assert_no_html(html, "p", text: :list_interests_intro.l.as_displayed)
+    end
+
     # When `selected_type:` is set, the filter pill strip renders.
     # The active pill is a plain `<span>` (no link); inactive pills
     # wrap a `link_to` inside a `<span>`.
