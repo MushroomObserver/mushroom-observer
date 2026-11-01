@@ -39,13 +39,18 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Left column --------------------------------------------------
 
   def render_left_column
-    Column(xs: 12, sm: 6) do
+    Column(xs: 12, sm: left_column_width) do
       ul(class: "list-unstyled") do
         render_rank_line
         render_status_line
         render_name_line
       end
     end
+  end
+
+  # Code names omit the right column, so fill the row.
+  def left_column_width
+    @name.code_name? ? 12 : 6
   end
 
   def render_rank_line
