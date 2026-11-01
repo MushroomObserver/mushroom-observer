@@ -13,8 +13,8 @@ module Views::Controllers::Names::Descriptions
 
     def view_template
       add_page_title(:create_name_description_title.t(
-                       name: @name.display_name(@user)
-                     ))
+        name: @name.display_name(@user)
+      ).small_author)
       add_context_nav(::Tab::NameDescription::FormNew.new(
                         description: @description
                       ))

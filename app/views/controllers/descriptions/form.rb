@@ -133,7 +133,7 @@ module Views::Controllers::Descriptions
 
     def render_description_header
       if name_description?
-        p { b { :description.ti } }
+        p(class: "mb-0") { b { :description.ti } }
         Help(content: :shared_textile_help.l, id: "textilize_note")
       else
         hr

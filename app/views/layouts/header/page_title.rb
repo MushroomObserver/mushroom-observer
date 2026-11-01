@@ -24,6 +24,12 @@
 # (interest-icons + pager) is a `<nav>` landmark -- neither holds only
 # navigation content. The `<nav>` landmark in this strip is supplied
 # by `Views::Layouts::Header::ShowPrevNextNav`, around the pager alone.
+#
+# `#title_bar` carries the same `content_for(:container_class)` width
+# cap (`container-text`, `container-wide`, ...) as `#content` below it
+# (`Views::Layouts::Application#content_classes_for_main`), so a
+# narrow-width page's title lines up with its body instead of
+# spanning the full column.
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
@@ -31,7 +37,8 @@ module Views::Layouts
       "px-3 py-2"
 
     def view_template
-      Row(id: "title_bar", class: "mb-2") do
+      Row(id: "title_bar",
+          class: class_names("mb-2", content_for(:container_class))) do
         render_mobile_top_row unless suppress_title?
         render_left_column unless suppress_title?
         render_right_column if show_right_column?
