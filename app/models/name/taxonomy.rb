@@ -77,6 +77,7 @@ module Name::Taxonomy
     rank == "Group" ||
       rank == "Domain" ||
       unpublished? ||
+      code_name? ||
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
       /"/ =~ text_name && rank >= "Class" ||

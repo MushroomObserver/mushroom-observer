@@ -667,6 +667,9 @@ class Name::TaxonomyTest < UnitTestCase
     name = Name.new(text_name: "Agricales", author: "sensu lato")
     assert(name.unregistrable?, "Names s.l. should be unregistrable")
 
+    name = names(:code_name)
+    assert(name.unregistrable?, "Code names should be unregistrable")
+
     name = Name.new(text_name: "Eukaryota", rank: "Domain")
     assert(name.unregistrable?, "Domains should be unregistrable")
 
